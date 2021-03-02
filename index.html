@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Kryptoknights front-end</title>
+        
+        <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script language="javascript" type="text/javascript" src="node_modules/web3/dist/web3.min.js"></script>
+        <script language="javascript" type="text/javascript" src="build/ABI.js"></script>
+    </head>
+    <body style="background-color:#222222;">
+        <script>
+            function startApp() {
+              var kryptoknightsAddress = "0xe52345d94d92F7968f82184Ba99e1560663E6b1C";
+              kryptoKnights = new web3js.eth.Contract(kryptoKnightsABI, kryptoknightsAddress);
+
+              getKnightDetails();
+            }
+            window.addEventListener('load', function() {
+
+              let web3 = new Web3(Web3.givenProvider || "ws://localhost:7545");
+                  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+                if (typeof web3 !== 'undefined') {
+                  // Use Mist/MetaMask's provider
+                  web3js = new Web3(web3.currentProvider);
+                } else {
+                  // Handle the case where the user doesn't have web3. Probably
+                  // show them a message telling them to install Metamask in
+                  // order to use our app.
+                  window.alert("METAMASK NOT CONNECTED");
+                }
+
+                // Now you can start your app & access web3js freely:
+                startApp()
+
+              })
+
+      async function getKnightDetails() {
+        var knightName = await kryptoKnights.methods.getName().call()
+        window.alert(knightName);
+      }
+        </script>
+    </body>
+</html>
