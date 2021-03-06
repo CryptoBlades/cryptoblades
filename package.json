@@ -8,14 +8,17 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^2.3.0",
-    "web3": "^1.3.4"
+    "dotenv": "^8.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "truffle": "^5.2.2",
+    "truffle-export-abi": "^1.0.1"
+  },
   "scripts": {
-    "start": "",
-    "build": "",
-    "test": "",
-    "eject": ""
+    "build": "truffle compile",
+    "test": "truffle test",
+    "extract-abi": "truffle-export-abi",
+    "deploy": "truffle migrate --reset"
   },
   "keywords": [],
   "author": "",

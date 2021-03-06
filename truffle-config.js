@@ -18,6 +18,8 @@
  *
  */
 
+require('dotenv').config();
+
 // const HDWalletProvider = require('@truffle/hdwallet-provider');
 // const infuraKey = "fj4jll3k.....";
 //
@@ -43,9 +45,9 @@ module.exports = {
     // options below to some value.
     //
     development: {
-     host: "127.0.0.1",     // Localhost (default: none)
-     port: 7545,            // Standard Ethereum port (default: none)
-     network_id: "*",       // Any network (default: none)
+      host: process.env.ETH_DEV_RPC_HOST || '127.0.0.1',     // Localhost (default: none)
+      port: process.env.ETH_DEV_RPC_PORT || 7545,            // Standard Ethereum port (default: none)
+      network_id: process.env.ETH_DEV_RPC_NETWORK_ID || '*',       // Any network (default: none)
     },
     // Another network with more advanced options...
     // advanced: {
