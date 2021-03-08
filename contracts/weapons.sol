@@ -1,12 +1,12 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./util.sol";
 
-contract Weapons is ERC721Full, Util {
+contract Weapons is ERC721, Util {
 
-    constructor () public ERC721Full("Kryptoknight weapon", "KNW") {
+    constructor () public ERC721("Kryptoknight weapon", "KNW") {
     }
 
     struct Weapon {

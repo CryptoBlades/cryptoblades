@@ -7,11 +7,11 @@
     "test": "test"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^2.3.0",
+    "@openzeppelin/contracts": "^3.4.1",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
-    "truffle": "^5.2.2",
+    "truffle": "^5.2.3",
     "truffle-export-abi": "^1.0.1"
   },
   "scripts": {

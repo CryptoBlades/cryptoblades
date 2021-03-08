@@ -5,9 +5,9 @@ contract Util {
 
     function random(uint min, uint max) internal returns (uint) {
         uint diff = max-min;
-        uint random = uint(keccak256(now, msg.sender, nonce)) % diff;
-        random += min;
+        uint randomVar = uint(keccak256(now, msg.sender, nonce)) % diff;
+        randomVar += min;
         nonce++;
-        return random;
+        return randomVar;
     }
 }
