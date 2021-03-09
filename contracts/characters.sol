@@ -2,37 +2,38 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./util.sol";
+import "./data.sol";
 
-contract Characters is ERC721, Util {
+contract Characters is ERC721, Data {
   
-    constructor () public ERC721("Kryptoknight", "KNT") {
+    address main;
+
+    constructor (address source) public ERC721("Kryptoknight", "KNT") {
+        main = source;
     }
 
     struct Character {
         uint32 xp; // can calculate level from xp
-        uint64 staminaTimestamp; // Time.now-stamp = available stamina, in seconds
+        uint64 staminaTimestamp; // standard timestamp in seconds-resolution marking regen start from 0
         uint64 appearance; // placeholder; cat ears, cup size and shit. PIMP MY KNIGHT
     }
     
-    uint256 public mintCharacterFee = 500;
-    uint256 public rerollTraitFee = 500;
-    uint256 public rerollCosmeticsFee = 500;
-    uint256 public refillStaminaFee = 1000;
-
-    uint maxStamina = 200;
-    uint timePerStamina = 5 minutes;
-    
     Character[] public tokens;
+
+    modifier restricted() {
+        require(main == msg.sender);
+        _;
+    }
 
     modifier isCharacterOwner(uint256 characterID) {
         require(ownerOf(characterID) == msg.sender);
         _;
     }
 
-    function mint() public returns (uint256) {
+    function mint() public restricted returns (uint256) {
         uint64 appearance = 0;
-        uint256 tokenID = tokens.push(Character(0, 0, 0));
+        uint256 tokenID = tokens.length;
+        tokens.push(Character(0, 0, 0));
         _mint(msg.sender, tokenID);
         return tokenID;
     }
@@ -50,6 +51,26 @@ contract Characters is ERC721, Util {
             }
         }
         return xp;
+    }
+
+    function getXp(uint256 id) public returns (uint32) {
+        return tokens[id].xp;
+    }
+
+    function setXp(uint256 id, uint32 xp) public restricted {
+        tokens[id].xp = xp;
+    }
+
+    function getAppearance(uint256 id) public returns (uint64) {
+        return tokens[id].appearance;
+    }
+
+    function getStaminaTimestamp(uint256 id) public returns (uint64) {
+        return tokens[id].staminaTimestamp;
+    }
+
+    function setStaminaTimestamp(uint256 id, uint64 timestamp) public restricted {
+        tokens[id].staminaTimestamp = timestamp;
     }
 
 }

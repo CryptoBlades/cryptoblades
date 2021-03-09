@@ -3,17 +3,16 @@ pragma solidity ^0.6.0;
 import "./ownable.sol";
 import "./characters.sol";
 import "./weapons.sol";
-import "./util.sol";
+import "./data.sol";
 
-contract Kryptonites is Ownable, Util {
+contract Kryptoknights is Data {
     
     Characters characters;
     Weapons weapons;
     
-    
-    constructor() internal Ownable() {
-        characters = new Characters();
-        weapons = new Weapons();
+    constructor() internal /*Ownable()*/ {
+        characters = new Characters(address(this));
+        weapons = new Weapons(address(this));
     }
     
     event FightOutcome(uint256 character, uint16 target, uint16 outcome);
@@ -36,38 +35,27 @@ contract Kryptonites is Ownable, Util {
         return [uint16(0),0,0,0];
     }
     
-    function mintCharacter() external payable requiredPay(uint256(characters.mintCharacterFee)) {
+    function mintCharacter() public payable requiredPay(mintCharacterFee) {
         uint256 tokenID = characters.mint();
         emit NewCharacter(tokenID);
     }
     
-    function mintWeapon() external payable requiredPay(uint256(weapons.mintWeaponFee)) {
+    function mintWeapon() public payable requiredPay(mintWeaponFee) {
         uint256 tokenID = weapons.mint();
         emit NewWeapon(tokenID);
     }
     
-    function fillStamina(uint256 character) external payable isCharacterOwner(character) requiredPay(uint256(characters.refillStaminaFee)) {
-        characters.tokens.staminaTimestamp = now - (characters.timePerStamina * characters.maxStamina);
+    function fillStamina(uint256 character) public payable isCharacterOwner(character) requiredPay(refillStaminaFee) {
+        characters.setStaminaTimestamp(character, characters.getStaminaTimestamp(character) - getStaminaMaxWait());
     }
     
-    function reforgeWeapon(uint256 reforgeID, uint256 burnID) external payable requiredPay(uint256(weapons.reforgeWeaponFee)) {
-        Weapons.Weapon storage reforging = weapons.tokens[reforgeID];
-        Weapons.Weapon storage burning = weapons.tokens[burnID];
-        uint8 forgeWeaponStar = weapons.getStars(weapon1.properties);
-        uint8 burnWeaponStar = weapons.getStars(weapon2.properties);
-        
-        uint8 level = weapons.getLevel(reforging.stats);
-        uint16 xpToLevel = weapons.getRequiredXpForLevel(level);
+    function reforgeWeapon(uint256 reforgeID, uint256 burnID) public payable requiredPay(reforgeWeaponFee) {
+
+        uint8 burnWeaponStar = weapons.getStars(burnID);
         uint16 xpGain = (burnWeaponStar - 1) * 8 + 16;
+        weapons.gainXp(reforgeID, xpGain);
 
-        reforging.xp += xpGain;
-        int32 delta = xpToLevel-xpGain;
-
-        if(delta <= 0) {
-            reforging.xp = uint16(-delta);
-            weapons.levelUp(reforgeID);
-        }
-        weapons.transferFrom(weapons.ownerOf(burnID), 0x0, burnID);
+        weapons.transferFrom(weapons.ownerOf(burnID), address(0x0), burnID);
     }
     
     modifier isWeaponOwner(uint256 weapon) {
@@ -82,8 +70,8 @@ contract Kryptonites is Ownable, Util {
   
     modifier isTargetValid(uint256 character, uint16 target) {
         bool foundMatch = false;
-        uint16[4] targets = getTargets(character);
-        for(int i = 0; i < targets.length; i++) {
+        uint16[4] memory targets = getTargets(character);
+        for(uint16 i = 0; i < targets.length; i++) {
             if(targets[i] == target) {
                 foundMatch = true;
             }
