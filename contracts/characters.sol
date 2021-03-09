@@ -53,7 +53,7 @@ contract Characters is ERC721, Data {
         return xp;
     }
 
-    function getXp(uint256 id) public returns (uint32) {
+    function getXp(uint256 id) public view returns (uint32) {
         return tokens[id].xp;
     }
 
@@ -61,11 +61,11 @@ contract Characters is ERC721, Data {
         tokens[id].xp = xp;
     }
 
-    function getAppearance(uint256 id) public returns (uint64) {
+    function getAppearance(uint256 id) public view returns (uint64) {
         return tokens[id].appearance;
     }
 
-    function getStaminaTimestamp(uint256 id) public returns (uint64) {
+    function getStaminaTimestamp(uint256 id) public view returns (uint64) {
         return tokens[id].staminaTimestamp;
     }
 

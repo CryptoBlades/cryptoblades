@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "./ownable.sol";
+//import "./ownable.sol";
 import "./characters.sol";
 import "./weapons.sol";
 import "./data.sol";
@@ -10,7 +10,7 @@ contract Kryptoknights is Data {
     Characters characters;
     Weapons weapons;
     
-    constructor() internal /*Ownable()*/ {
+    constructor() public /*Ownable()*/ {
         characters = new Characters(address(this));
         weapons = new Weapons(address(this));
     }

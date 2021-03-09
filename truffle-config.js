@@ -48,6 +48,7 @@ module.exports = {
       host: process.env.ETH_DEV_RPC_HOST || '127.0.0.1',     // Localhost (default: none)
       port: process.env.ETH_DEV_RPC_PORT || 7545,            // Standard Ethereum port (default: none)
       network_id: process.env.ETH_DEV_RPC_NETWORK_ID || '*',       // Any network (default: none)
+      gas: 67219750 // required for deploy, otherwise it throws weird require-errors on constructor
     },
     // Another network with more advanced options...
     // advanced: {
@@ -88,11 +89,12 @@ module.exports = {
       //docker: false,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: {          // See the solidity docs for advice about optimization and evmVersion
        optimizer: {
-         enabled: false,
+         enabled: true,
          runs: 200
        },
        //evmVersion: "byzantium"
       }
     }
-  }
+  },
+  //plugins: ["truffle-contract-size"]
 };
