@@ -1,8 +1,22 @@
-import Vue from 'vue'
-import App from './App.vue'
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import Web3 from 'web3';
 
-Vue.config.productionTip = false
+import { createContracts } from './contracts';
+import router from './router';
+
+import App from './App.vue';
+
+const web3 = new Web3(Web3.givenProvider || process.env.VUE_APP_WEB3_FALLBACK_PROVIDER);
+
+Vue.config.productionTip = false;
+
+Vue.use(VueRouter);
 
 new Vue({
   render: h => h(App),
-}).$mount('#app')
+  router,
+  provide: {
+    ...createContracts(web3)
+  }
+}).$mount('#app');
