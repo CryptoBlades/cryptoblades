@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "./data.sol";
 
 contract Weapons is ERC721, Data {
