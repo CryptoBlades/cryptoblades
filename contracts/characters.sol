@@ -21,12 +21,12 @@ contract Characters is ERC721, Data {
     Character[] public tokens;
 
     modifier restricted() {
-        require(main == msg.sender);
+        require(main == msg.sender, "Can only be called by main file");
         _;
     }
 
     modifier isCharacterOwner(uint256 characterID) {
-        require(ownerOf(characterID) == msg.sender);
+        require(ownerOf(characterID) == msg.sender, "Not the character owner");
         _;
     }
 

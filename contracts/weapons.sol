@@ -21,11 +21,11 @@ contract Weapons is ERC721, Data {
     Weapon[] public tokens;
 
     modifier restricted() {
-        require(main == msg.sender);
+        require(main == msg.sender, "Can only be called by main file");
         _;
     }
     modifier isWeaponOwner(uint256 weaponID) {
-        require(ownerOf(weaponID) == msg.sender);
+        require(ownerOf(weaponID) == msg.sender, "Not the weapon owner");
         _;
     }
     

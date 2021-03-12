@@ -59,12 +59,12 @@ contract Kryptoknights is Data {
     }
     
     modifier isWeaponOwner(uint256 weapon) {
-        require(weapons.ownerOf(weapon) == msg.sender);
+        require(weapons.ownerOf(weapon) == msg.sender, "Not the weapon owner");
         _;
     }
   
     modifier isCharacterOwner(uint256 character) {
-        require(characters.ownerOf(character) == msg.sender);
+        require(characters.ownerOf(character) == msg.sender, "Not the character owner");
         _;
     }
   
@@ -76,12 +76,12 @@ contract Kryptoknights is Data {
                 foundMatch = true;
             }
         }
-        require(foundMatch);
+        require(foundMatch, "Target invalid");
         _;
     }
     
     modifier requiredPay(uint256 amount) {
-        require(msg.value == amount);
+        require(msg.value == amount, "Incorrect payment");
         _;
     }
     
