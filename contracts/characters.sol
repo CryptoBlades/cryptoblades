@@ -5,7 +5,7 @@ import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "./data.sol";
 
 contract Characters is ERC721, Data {
-  
+
     address main;
 
     constructor (address source) public ERC721("Kryptoknight", "KNT") {
@@ -17,7 +17,7 @@ contract Characters is ERC721, Data {
         uint64 staminaTimestamp; // standard timestamp in seconds-resolution marking regen start from 0
         uint64 appearance; // placeholder; cat ears, cup size and shit. PIMP MY KNIGHT
     }
-    
+
     Character[] public tokens;
 
     modifier restricted() {
