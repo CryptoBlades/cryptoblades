@@ -2,9 +2,9 @@ pragma solidity ^0.6.0;
 
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "./data.sol";
+import "./util.sol";
 
-contract Weapons is ERC721, Data {
+contract Weapons is ERC721, Util {
 
     address main;
 
@@ -12,160 +12,159 @@ contract Weapons is ERC721, Data {
         main = source;
     }
 
+    /*
+        visual numbers start at 0, increment values by 1
+        levels: 1-128
+        stars: 1-5 (1,2,3: primary only, 4: one secondary, 5: two secondaries)
+        traits: 0-3 [0(fire) > 1(earth) > 2(lightning) > 3(water) > repeat]
+        stats: STR(fire), DEX(earth), CHA(lightning), INT(water), PWR(traitless)
+        base stat rolls: 1*(1-50), 2*(45-75), 3*(70-100), 4*(50-100), 5*(66-100, main is 68-100)
+        burns: add level & main stat, and 50% chance to increase secondaries
+        power: each point contributes .25% to fight power
+        cosmetics: TBD
+    */
+
     struct Weapon {
-        uint24 properties; // right to left: 3b stars, 7b blade, 7b crossguard, 7b hilt (combined parts for uniques)
-        uint24 stats; // right to left: 3b trait, 7b stat1/level, 7b stat2, 7b stat3
-        uint16 xp; // gained since last level, not total
+        uint8 stars; // only the last 3 bits are used. TODO a good filler for the rest? (tiers?)
+        uint8 typeseed; // left to right: 2b trait, 6b stat pattern (0-59: 5x4x3)
+        uint8 level; // separate from stat1 because stat1 will have a pre-roll
+        // cosmetics, todo
+        uint8 blade;
+        uint8 crossguard;
+        uint8 hilt;
+        // stats (each point refers to .25% improvement)
+        uint16 stat1;
+        uint16 stat2;
+        uint16 stat3;
     }
 
     Weapon[] public tokens;
+    
+    event NewWeapon(uint256 weapon);
 
     modifier restricted() {
         require(main == msg.sender, "Can only be called by main file");
         _;
     }
-    modifier isWeaponOwner(uint256 weaponID) {
-        require(ownerOf(weaponID) == msg.sender, "Not the weapon owner");
-        _;
+
+    function get(uint256 id) public view returns (uint8, uint8, uint8, uint8, uint8, uint8, uint16, uint16, uint16) {
+        Weapon memory w = tokens[id];
+        return (w.stars, w.typeseed, w.level, w.blade, w.crossguard, w.hilt, w.stat1, w.stat2, w.stat3);
     }
-    
-    function mint() public restricted returns (uint256) {
-        uint64 appearance = 0;
+
+    function mint(address minter, uint8 maxStar) public restricted returns (uint256) {
         uint256 tokenID = tokens.length;
-        tokens.push(Weapon(0,0,0));
-        _mint(msg.sender, tokenID);
+
+        uint8 stars = 0;
+        if(maxStar > 0) {
+            stars = uint8(randomSafeMinMax(0,maxStar));
+        }
+
+        uint8 typeseed = uint8(randomSafeMinMax(0,255));
+
+        // each point refers to .25%
+        // so 1 * 4 is 1%
+        uint16 minRoll = 1 * 4;
+        uint16 maxRoll = 50 * 4;
+        uint8 statCount = 1;
+        if(stars == 1) { // 2 star
+            minRoll = 45 * 4;
+            maxRoll = 75 * 4;
+        }
+        else if(stars == 2) { // 3 star
+            minRoll = 70 * 4;
+            maxRoll = 100 * 4;
+        }
+        else if(stars == 3) { // 4 star
+            minRoll = 50 * 4;
+            maxRoll = 100 * 4;
+            statCount = 2;
+        }
+        else if(stars > 3) { // 5 star and above
+            minRoll = 67 * 4;
+            maxRoll = 100 * 4;
+            statCount = 3;
+        }
+
+        uint16 stat1 = uint16(randomSafeMinMax(minRoll, maxRoll));
+        uint16 stat2 = 0;
+        uint16 stat3 = 0;
+        if(statCount > 1) {
+            stat2 = uint16(randomSafeMinMax(minRoll, maxRoll));
+        }
+        if(statCount > 2) {
+            stat3 = uint16(randomSafeMinMax(minRoll, maxRoll));
+        }
+
+        uint8 blade = uint8(randomSafeMinMax(0, 255));
+        uint8 crossguard = uint8(randomSafeMinMax(0, 255));
+        uint8 hilt = uint8(randomSafeMinMax(0, 255));
+
+        tokens.push(Weapon(stars, typeseed, 0 /*level*/, blade, crossguard, hilt, stat1, stat2, stat3));
+
+        _mint(minter, tokenID);
+        emit NewWeapon(tokenID);
         return tokenID;
     }
 
     function getStars(uint256 id) public view returns (uint8) {
-        return getStarsFromProperties(tokens[id].properties);
+        return tokens[id].stars;
     }
 
-    function getStarsFromProperties(uint24 properties) public pure returns (uint8) {
-        return (uint8)(properties & 0x7);
+    function getTypeseed(uint256 id) public view returns (uint8) {
+        return tokens[id].typeseed;
     }
 
-    function getBladeFromProperties(uint24 properties) external pure returns (uint8) {
-        return (uint8)((properties >> 3) & 0x7F);
+    function getTraitFromTypeseed(uint8 typeseed) public pure returns (uint8) {
+        return typeseed & 0x3;
     }
 
-    function getCrossguardFromProperties(uint24 properties) external pure returns (uint8) {
-        return (uint8)((properties >> 10) & 0x7F);
-    }
-
-    function getHiltFromProperties(uint24 properties) external pure returns (uint8) {
-        return (uint8)((properties >> 17) & 0x7F);
-    }
-
-    function getUniqueFromProperties(uint24 properties) external pure returns (uint24) {
-        return (uint24)((properties >> 3) & 0x1FFFFF);
-    }
-
-    function getXp(uint256 id) public view returns (uint16) {
-        return tokens[id].xp;
-    }
-
-    function setXp(uint256 id, uint16 xp) public restricted {
-        tokens[id].xp = xp;
+    function getStatPatternFromTypeseed(uint8 typeseed) public pure returns (uint8) {
+        return (typeseed >> 2) & 0x3F;
     }
 
     function getTrait(uint256 id) public view returns (uint8) {
-        return getTraitFromStats(tokens[id].stats);
-    }
-
-    function getTraitFromStats(uint24 stats) public pure returns (uint8) {
-        return (uint8)(stats & 0x7);
+        return getTraitFromTypeseed(getTypeseed(id));
     }
 
     function getLevel(uint256 id) public view returns (uint8) {
-        return getLevelFromStats(tokens[id].stats);
+        return tokens[id].level;
     }
 
-    function getLevelFromStats(uint24 stats) public pure returns (uint8) {
-        return (uint8)((stats >> 3) & 0x7);
+    function getStat1(uint256 id) public view returns (uint16) {
+        return tokens[id].stat1;
     }
 
-    function getStat2(uint256 id) public view returns (uint8) {
-        return getStat2FromStats(tokens[id].stats);
+    function getStat2(uint256 id) public view returns (uint16) {
+        return tokens[id].stat2;
     }
 
-    function getStat2FromStats(uint24 stats) public pure returns (uint8) {
-        return (uint8)((stats >> 10) & 0x7);
+    function getStat3(uint256 id) public view returns (uint16) {
+        return tokens[id].stat3;
     }
 
-    function getStat3(uint256 id) public view returns (uint8) {
-        return getStat3FromStats(tokens[id].stats);
-    }
-
-    function getStat3FromStats(uint24 stats) public pure returns (uint8) {
-        return (uint8)((stats >> 17) & 0x7);
-    }
-
-    function getRequiredXpForLevel(uint8 level) public pure returns (uint16) {
-        uint16 xp = 16;
-        for(uint16 i = 1; i < level; i++) {
-            if (xp <= 112)
-            {
-                xp += xp / 10;
-            }
-            else
-            {
-                xp += (i-14) + 1;
-            }
-        }
-        return xp;
-    }
-
-    function gainXp(uint256 id, uint32 xp) public restricted returns (uint8) {
-        
-        uint8 level = getLevel(id);
-        uint32 newXp = uint32(getXp(id)) + xp;
-        uint16 xpToLevel = getRequiredXpForLevel(level);
-
-        while (xpToLevel <= newXp) {
-            newXp - xpToLevel;
-            levelUp(id);
-            level++;
-            getRequiredXpForLevel(level);
-        }
-        setXp(id, uint16(newXp));
+    function getPowerMultiplier10k(uint256 id) public view returns (uint32) {
+        // returned number is a multiplier that needs dividing by 10000 on use
+        // 10000 = 100% = x1.0 and 1 = 0.01% = x0.0001
+        // this function does not account for traits
+        Weapon memory wep = tokens[id];
+        uint16 power = wep.stat1 * 25 + wep.stat2 * 25 + wep.stat3 * 25;
+        return 10000/*100% baseline*/ + (power);
     }
 
     function levelUp(uint256 id) public restricted {
-        Weapons.Weapon storage wep = tokens[id];
-        uint8 stars = getStars(wep.properties);
+        Weapon storage wep = tokens[id];
 
-        increaseLevel(id);
-        if(stars >= 4 && random(0,1) == 0) {
-            increaseStat2(id);
+        wep.level = wep.level + 1;
+        wep.stat1 = wep.stat1 + 1;
+
+        if(wep.stars >= 4 && randomSafeMinMax(0,1) == 0) {
+            wep.stat2 = wep.stat2 + 1;
         }
-        if(stars >= 5 && random(0,1) == 0) {
-            increaseStat3(id);
+        if(wep.stars >= 5 && randomSafeMinMax(0,1) == 0) {
+            wep.stat3 = wep.stat3 + 1;
         }
     }
 
-    function increaseLevel(uint256 id) public restricted {
-        Weapon storage w = tokens[id];
-        uint8 level = getLevel(w.stats);
-        level += 1;
-        w.stats = w.stats & 0xFFFC07; // nulls out the level bits
-        w.stats = w.stats | (level << 3);
-    }
-    
-    function increaseStat2(uint256 id) public restricted {
-        Weapon storage w = tokens[id];
-        uint8 stat2 = getStat2(w.stats);
-        stat2 += 1;
-        w.stats = w.stats & 0xFE03FF; // nulls out the stat2 bits
-        w.stats = w.stats | (stat2 << 10);
-    }
-    
-    function increaseStat3(uint256 id) public restricted {
-        Weapon storage w = tokens[id];
-        uint8 stat3 = getStat3(w.stats);
-        stat3 += 1;
-        w.stats = w.stats & 0x1FFFF; // nulls out the stat3 bits
-        w.stats = w.stats | (stat3 << 17);
-    }
 }
 
