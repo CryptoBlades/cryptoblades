@@ -3,6 +3,8 @@ pragma solidity ^0.6.0;
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "./util.sol";
+import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
+
 
 contract Characters is ERC721, Util {
 
@@ -80,6 +82,8 @@ contract Characters is ERC721, Util {
 
     function getPower(uint256 id) public view returns (uint24) {
         uint8 level = getLevel(id);
+        // does not use fixed points since the numbers are simple
+        // the breakpoints every 10 levels are floored as expected
         return (1000 + level * 10) * (level / 10 + 1); // 1010 to 3560 * 1 to 26 = 1010 to 92560
     }
 

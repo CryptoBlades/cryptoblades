@@ -2,9 +2,14 @@ pragma solidity ^0.6.0;
 
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
+import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./util.sol";
 
 contract Weapons is ERC721, Util {
+
+    using ABDKMath64x64 for int128;
+    using ABDKMath64x64 for uint256;
+    using ABDKMath64x64 for uint16;
 
     address main;
 
@@ -25,17 +30,19 @@ contract Weapons is ERC721, Util {
     */
 
     struct Weapon {
-        uint8 stars; // only the last 3 bits are used. TODO a good filler for the rest? (tiers?)
-        uint8 typeseed; // left to right: 2b trait, 6b stat pattern (0-59: 5x4x3)
+        uint16 properties; // right to left: 3b stars, 2b trait, 7b stat pattern, 4b EMPTY
+        /*uint8 stars; // only the last 3 bits are used. TODO a good filler for the rest? (tiers?)
+        uint8 trait; // only 2bits used on right
+        uint8 statPattern; // 7bits (0-124) on right used for */
+        // stats (each point refers to .25% improvement)
+        uint16 stat1;
+        uint16 stat2;
+        uint16 stat3;
         uint8 level; // separate from stat1 because stat1 will have a pre-roll
         // cosmetics, todo
         uint8 blade;
         uint8 crossguard;
         uint8 hilt;
-        // stats (each point refers to .25% improvement)
-        uint16 stat1;
-        uint16 stat2;
-        uint16 stat3;
     }
 
     Weapon[] public tokens;
@@ -47,20 +54,22 @@ contract Weapons is ERC721, Util {
         _;
     }
 
-    function get(uint256 id) public view returns (uint8, uint8, uint8, uint8, uint8, uint8, uint16, uint16, uint16) {
+    function get(uint256 id) public view returns (uint16, uint16, uint16, uint16, uint8, uint8, uint8, uint8) {
         Weapon memory w = tokens[id];
-        return (w.stars, w.typeseed, w.level, w.blade, w.crossguard, w.hilt, w.stat1, w.stat2, w.stat3);
+        return (w.properties, w.stat1, w.stat2, w.stat3, w.level, w.blade, w.crossguard, w.hilt);
     }
 
     function mint(address minter, uint8 maxStar) public restricted returns (uint256) {
         uint256 tokenID = tokens.length;
 
-        uint8 stars = 0;
+        uint256 stars = 0;
         if(maxStar > 0) {
-            stars = uint8(randomSafeMinMax(0,maxStar));
+            stars = randomSafeMinMax(0,maxStar);
         }
 
-        uint8 typeseed = uint8(randomSafeMinMax(0,255));
+        uint16 properties = uint16((stars & 0x7)
+            | ((randomSafeMinMax(0,3) << 3) & 0x3) // trait
+            | ((randomSafeMinMax(0,124) << 5) & 0x7F)); // statPattern
 
         // each point refers to .25%
         // so 1 * 4 is 1%
@@ -100,31 +109,51 @@ contract Weapons is ERC721, Util {
         uint8 crossguard = uint8(randomSafeMinMax(0, 255));
         uint8 hilt = uint8(randomSafeMinMax(0, 255));
 
-        tokens.push(Weapon(stars, typeseed, 0 /*level*/, blade, crossguard, hilt, stat1, stat2, stat3));
+        tokens.push(Weapon(properties, stat1, stat2, stat3, 0/*level*/, blade, crossguard, hilt));
 
         _mint(minter, tokenID);
         emit NewWeapon(tokenID);
         return tokenID;
     }
 
+    function getProperties(uint256 id) public view returns (uint16) {
+        return tokens[id].properties;
+    }
+
     function getStars(uint256 id) public view returns (uint8) {
-        return tokens[id].stars;
+        return getStarsFromProperties(getProperties(id));
     }
 
-    function getTypeseed(uint256 id) public view returns (uint8) {
-        return tokens[id].typeseed;
-    }
-
-    function getTraitFromTypeseed(uint8 typeseed) public pure returns (uint8) {
-        return typeseed & 0x3;
-    }
-
-    function getStatPatternFromTypeseed(uint8 typeseed) public pure returns (uint8) {
-        return (typeseed >> 2) & 0x3F;
+    function getStarsFromProperties(uint16 properties) public pure returns (uint8) {
+        return uint8(properties & 0x7); // first two bits for stars
     }
 
     function getTrait(uint256 id) public view returns (uint8) {
-        return getTraitFromTypeseed(getTypeseed(id));
+        return getTraitFromProperties(getProperties(id));
+    }
+
+    function getTraitFromProperties(uint16 properties) public pure returns (uint8) {
+        return uint8((properties >> 3) & 0x3); // two bits after star bits (3)
+    }
+
+    function getStatPattern(uint256 id) public view returns (uint8) {
+        return getStatPatternFromProperties(getProperties(id));
+    }
+
+    function getStatPatternFromProperties(uint16 properties) public pure returns (uint8) {
+        return uint8((properties >> 5) & 0x7F); // 7 bits after star(3) and trait(2) bits
+    }
+
+    function getStat1Trait(uint8 statPattern) public pure returns (uint8) {
+        return statPattern % 5; // 0-3 regular traits, 4 = traitless (PWR)
+    }
+
+    function getStat2Trait(uint8 statPattern) public pure returns (uint8) {
+        return (statPattern / 5) % 5; // 0-3 regular traits, 4 = traitless (PWR)
+    }
+
+    function getStat3Trait(uint8 statPattern) public pure returns (uint8) {
+        return (statPattern / 5 / 5) % 5; // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getLevel(uint256 id) public view returns (uint8) {
@@ -143,13 +172,52 @@ contract Weapons is ERC721, Util {
         return tokens[id].stat3;
     }
 
-    function getPowerMultiplier10k(uint256 id) public view returns (uint32) {
-        // returned number is a multiplier that needs dividing by 10000 on use
-        // 10000 = 100% = x1.0 and 1 = 0.01% = x0.0001
+    function getPowerMultiplier(uint256 id) public view returns (int128) {
+        // returns a 64.64 fixed point number for power multiplier
         // this function does not account for traits
+        // it is used to calculate base enemy powers for targeting
         Weapon memory wep = tokens[id];
-        uint16 power = wep.stat1 * 25 + wep.stat2 * 25 + wep.stat3 * 25;
-        return 10000/*100% baseline*/ + (power);
+        int128 powerPerPoint = uint256(1).divu(400); // 0.25% or x0.0025
+        int128 stat1 = wep.stat1.fromUInt().mul(powerPerPoint);
+        int128 stat2 = wep.stat2.fromUInt().mul(powerPerPoint);
+        int128 stat3 = wep.stat3.fromUInt().mul(powerPerPoint);
+        return uint256(1).fromUInt().add(stat1).add(stat2).add(stat3);
+    }
+
+    function getPowerMultiplierForTrait(uint256 id, uint8 trait) public view returns(int128) {
+        // Does not include character trait to weapon trait match
+        // Only counts arbitrary trait to weapon stat trait
+        // This function can be used by frontend to get expected % bonus for each type
+        // Making it easy to see on the market how useful it will be to you
+        Weapon memory wep = tokens[id];
+        int128 powerPerPoint = uint256(1).divu(400); // 0.25% or x0.0025
+        int128 matchingPowerPerPoint = powerPerPoint.mul(uint256(107).divu(100)); // +7%
+        int128 powerPerPWRPoint = powerPerPoint.mul(uint256(103).divu(100)); // +3%
+        uint8 statPattern = getStatPatternFromProperties(wep.properties);
+        int128 result = uint256(1).fromUInt();
+
+        if(getStat1Trait(statPattern) == trait)
+            result = result.add(wep.stat1.fromUInt().mul(matchingPowerPerPoint));
+        else if(getStat1Trait(statPattern) == 4) // PWR, traitless
+            result = result.add(wep.stat1.fromUInt().mul(powerPerPWRPoint));
+        else
+            result = result.add(wep.stat1.fromUInt().mul(powerPerPoint));
+        
+        if(getStat2Trait(statPattern) == trait)
+            result = result.add(wep.stat2.fromUInt().mul(matchingPowerPerPoint));
+        else if(getStat2Trait(statPattern) == 4) // PWR, traitless
+            result = result.add(wep.stat2.fromUInt().mul(powerPerPWRPoint));
+        else
+            result = result.add(wep.stat2.fromUInt().mul(powerPerPoint));
+
+        if(getStat3Trait(statPattern) == trait)
+            result = result.add(wep.stat3.fromUInt().mul(matchingPowerPerPoint));
+        else if(getStat3Trait(statPattern) == 4) // PWR, traitless
+            result = result.add(wep.stat3.fromUInt().mul(powerPerPWRPoint));
+        else
+            result = result.add(wep.stat3.fromUInt().mul(powerPerPoint));
+
+        return result;
     }
 
     function levelUp(uint256 id) public restricted {
@@ -158,10 +226,12 @@ contract Weapons is ERC721, Util {
         wep.level = wep.level + 1;
         wep.stat1 = wep.stat1 + 1;
 
-        if(wep.stars >= 4 && randomSafeMinMax(0,1) == 0) {
+        uint8 stars = getStarsFromProperties(wep.properties);
+
+        if(stars >= 4 && randomSafeMinMax(0,1) == 0) {
             wep.stat2 = wep.stat2 + 1;
         }
-        if(wep.stars >= 5 && randomSafeMinMax(0,1) == 0) {
+        if(stars >= 5 && randomSafeMinMax(0,1) == 0) {
             wep.stat3 = wep.stat3 + 1;
         }
     }

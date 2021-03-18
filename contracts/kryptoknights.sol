@@ -1,11 +1,17 @@
 pragma solidity ^0.6.0;
 
+import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 //import "./ownable.sol";
 import "./characters.sol";
 import "./weapons.sol";
 import "./util.sol";
 
 contract Kryptoknights is Util {
+
+    using ABDKMath64x64 for int256;
+    using ABDKMath64x64 for int128;
+    using ABDKMath64x64 for uint256;
+    using ABDKMath64x64 for uint24;
 
     Characters public characters;
     Weapons public weapons;
@@ -15,8 +21,11 @@ contract Kryptoknights is Util {
         weapons = new Weapons(address(this));
     }
 
+    // all ether, finny or wei numbers are to be interpreted in SKILL
     mapping (address => uint256) public skill;
+    uint256 public baseContractSkill = 1000000 * 1000 /*ether*/;
 
+    // prices when contract is at 100% load (50% of total skill)
     uint256 public mintCharacterFee = 500;
     uint256 public rerollTraitFee = 300;
     uint256 public rerollCosmeticsFee = 300;
@@ -80,33 +89,44 @@ contract Kryptoknights is Util {
     }
 
     function getXpGainForFight(uint256 char, uint256 wep, uint32 target) public view returns (uint16) {
-        return uint16(getMonsterPower(target)/getPlayerPower(char, wep) * 9);
+        int128 basePowerDifference = getMonsterPower(target).divu(getPlayerPower(char, wep));
+        // base XP gain is 16 for an equal fight
+        return uint16((basePowerDifference * 16).toUInt());
     }
 
     function getPlayerPowerRoll(uint256 char, uint256 wep, uint8 monsterTrait) internal returns(uint24) {
-        uint256 playerPower = getPlayerPower(char, wep);
-        playerPower = playerPower - (playerPower / 10) + (randomSafeMinMax(0, uint256(playerPower) / 10 * 2));
+        // roll for fights, non deterministic
+        uint256 playerPower = getPlayerFinalPower(char, wep);
+        playerPower = plusMinus10Percent(playerPower);
         uint8 playerTrait = characters.getTrait(char);
 
-        uint256 traitBonus = 0;
+        int128 traitBonus = uint256(1).fromUInt();
+        int128 oneBonus = uint256(75).divu(1000);
         if(playerTrait == weapons.getTrait(wep)) {
-            traitBonus += 75;
+            traitBonus = traitBonus.add(oneBonus);
         }
         if(isTraitEffectiveAgainst(playerTrait, monsterTrait)) {
-            traitBonus += 75;
+            traitBonus = traitBonus.add(oneBonus);
         }
         else if(isTraitWeakAgainst(playerTrait, monsterTrait)) {
-            traitBonus -= 75;
+            traitBonus = traitBonus.sub(oneBonus);
         }
-        return uint24(playerPower * traitBonus);
+        return uint24(playerPower.fromUInt().mul(traitBonus).toUInt());
     }
 
     function getMonsterPowerRoll(uint24 monsterPower) internal returns(uint24) {
-        return uint24(monsterPower - (monsterPower / 10) + (randomSafeMinMax(0, uint256(monsterPower) / 10 * 2)));
+        // roll for fights, non deterministic
+        return uint24(plusMinus10Percent(monsterPower));
     }
 
     function getPlayerPower(uint256 char, uint256 wep) public view returns (uint24) {
-        return characters.getPower(char) * uint24(weapons.getPowerMultiplier10k(wep) / 10000);
+        // does not account for trait matches
+        return uint24((characters.getPower(char).fromUInt().mul(weapons.getPowerMultiplier(wep))).toUInt());
+    }
+
+    function getPlayerFinalPower(uint256 char, uint256 wep) public view returns (uint24) {
+        // accounts for trait matches
+        return uint24((characters.getPower(char).fromUInt().mul(weapons.getPowerMultiplierForTrait(wep, characters.getTrait(char)))).toUInt());
     }
 
     function getTargets(uint256 char, uint256 wep) public view returns (uint32[4] memory) {
@@ -115,24 +135,35 @@ contract Kryptoknights is Util {
         // targets expire on the hour
         uint24 playerPower = getPlayerPower(char, wep);
 
-        uint[] memory seedArray = new uint[](3);
+        uint[] memory seedArray = new uint[](4);
         seedArray[0] = char;
         seedArray[1] = playerPower;
-        seedArray[2] = getCurrentHour();
-        uint256 seed = randomSeeded(combineSeeds(seedArray));
+        seedArray[2] = characters.getXp(char);
+        seedArray[3] = getCurrentHour();
+        uint256 baseSeed = combineSeeds(seedArray);
 
         uint32[4] memory targets;
         for(uint i = 0; i < targets.length; i++) {
-            uint24 monsterPower = playerPower - (playerPower / 10) + uint24(randomSeededMinMax(0, playerPower / 10 * 2, seed));
-            uint8 monsterTrait = uint8(randomSeededMinMax(0,3, seed));
+            // we alter seed per-index or they would be all the same
+            uint256 indexSeed = randomSeeded(combineSeeds(baseSeed, i));
+            uint24 monsterPower = uint24(plusMinus10PercentSeeded(playerPower, indexSeed));
+            uint8 monsterTrait = uint8(randomSeededMinMax(0,3, indexSeed));
             targets[i] = monsterPower | (monsterTrait << 24);
         }
 
         return targets;
     }
 
-    function testFrac(uint pow) public pure returns (uint16) {
-        return uint16(pow / 10000);
+    function testFrac() public pure returns (uint256) {
+        // returns double of the third of the input number
+        uint256 remainingSkill = 1000000 ether;
+        int128 halfPercent = uint(1).divu(2000000);
+        return halfPercent.mulu(remainingSkill);
+        /*// returns the percentage of the input number against 65536
+        uint256 compareAgainst = 65536; // an arbitrary number, not a limit or anything
+        int128 fixedResult = input.divu(compareAgainst) * 100; // we times it by 100 to make it a percentage
+        // regular * and / against fixed points should work like normal
+        return fixedResult.toUInt(); // need converting back to uint to put out*/
     }
 
     function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
@@ -216,9 +247,20 @@ contract Kryptoknights is Util {
         _;
     }
     
-    function paySkill(uint256 amount) internal {
-        require(skill[msg.sender] >= amount, string(abi.encodePacked("Not enough SKILL! Need ",(amount))));
-        skill[msg.sender] = skill[msg.sender] - amount;
+    function paySkill(uint256 baseAmount) internal {
+        uint256 convertedAmount = getCost(baseAmount);
+        require(skill[msg.sender] >= convertedAmount, string(abi.encodePacked("Not enough SKILL! Need ",(convertedAmount))));
+        skill[msg.sender] = skill[msg.sender] - convertedAmount;
+    }
+
+    function getContractSkillBalance() internal view returns (uint256) {
+        // this will be obtained in some other way, it's not address(this).balance, that would be BNB
+        uint available = baseContractSkill / 2;//0.5 ether;
+        return available;//baseContractSkill.fromUInt().mulu(available);//(baseContractSkill * 0.5);
+    }
+
+    function getCost(uint256 originalPrice) public view returns (uint256) {
+        return getContractSkillBalance().divu(baseContractSkill).mul(originalPrice.fromUInt()).toUInt();
     }
 
     function getCurrentHour() public view returns (uint256) {

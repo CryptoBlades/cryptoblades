@@ -1,6 +1,13 @@
 pragma solidity ^0.6.0;
 
+import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
+
 contract Util {
+    
+    using ABDKMath64x64 for int128;
+    using ABDKMath64x64 for uint256;
+    using ABDKMath64x64 for uint16;
+
     uint nonce;
 
     function randomSeededMinMax(uint min, uint max, uint seed) internal pure returns (uint) {
@@ -35,6 +42,16 @@ contract Util {
         uint seed = randomSeeded(combineSeeds(now, nonce));
         nonce = nonce + 1;
         return seed;
+    }
+
+    function plusMinus10Percent(uint256 num) internal returns (uint256) {
+        uint256 tenPercent = num / 10;
+        return num - tenPercent + (randomSafeMinMax(0, tenPercent * 2));
+    }
+
+    function plusMinus10PercentSeeded(uint256 num, uint256 seed) internal pure returns (uint256) {
+        uint256 tenPercent = num / 10;
+        return num - tenPercent + (randomSeededMinMax(0, tenPercent * 2, seed));
     }
 
 }
