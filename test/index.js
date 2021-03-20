@@ -1,49 +1,61 @@
-const Kryptoknights = artifacts.require('Kryptoknights');
+const CryptoBlades = artifacts.require('CryptoBlades');
 const Characters = artifacts.require('Characters');
 
-contract('Kryptoknights', accounts => {
+function assertEventEmitted(events, eventName, ...args) {
+  assert.isTrue(events.some(log => {
+    if (log.event !== eventName) {
+      return false;
+    }
+
+    for (let i = 0; i < args.length; i++) {
+      if (args[i] != log.returnValues[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }), `Expected event '${eventName}(${args.map(arg => '' + arg).join(', ')})' to be emitted`);
+}
+
+contract('CryptoBlades', accounts => {
   describe('mintCharacter', () => {
     it('should work', async () => {
-      const instance = await Kryptoknights.deployed();
+      const cryptoBlades = await CryptoBlades.deployed();
+      const characters = await Characters.at(await cryptoBlades.characters());
 
-      const res = await instance.mintCharacter({ from: accounts[2], value: web3.utils.toWei("5", "ether") });
+      await cryptoBlades.mintCharacter({ from: accounts[0] });
 
-      assert.equal(res.logs[0].event, 'NewCharacter');
-      assert.equal(res.logs[0].args.character.toNumber(), 0);
+      const events = await characters.getPastEvents();
+      assertEventEmitted(events, 'NewCharacter', 1);
     });
   });
 
   describe('characters.getRequiredXpForLevel', () => {
     it('should work', async () => {
-      const instance = await Kryptoknights.deployed();
+      const cryptoBlades = await CryptoBlades.deployed();
+      const characters = await Characters.at(await cryptoBlades.characters());
 
-      const charactersContractAddress = await instance.characters.call();
+      const requiredXp = await characters.getRequiredXpForNextLevel(3);
 
-      const characters = await Characters.at(charactersContractAddress);
-
-      const requiredXp = await characters.getRequiredXpForLevel.call(3);
-
-      assert.strictEqual(requiredXp.toNumber(), 18);
+      assert.strictEqual(requiredXp.toNumber(), 19);
     });
   });
 
-  describe('characters.setXp', () => {
+  describe('characters.gainXp', () => {
     it('should work', async () => {
-      const instance = await Kryptoknights.deployed();
+      const cryptoBlades = await CryptoBlades.deployed();
+      const characters = await Characters.at(await cryptoBlades.characters());
 
-      const mintRes = await instance.mintCharacter({ from: accounts[1], value: web3.utils.toWei("5", "ether") });
+      await cryptoBlades.mintCharacter({ from: accounts[0] });
 
-      const characterId = mintRes.logs[0].args.character.toNumber();
-
-      const charactersContractAddress = await instance.characters.call();
-
-      const characters = await Characters.at(charactersContractAddress);
+      const events = await characters.getPastEvents();
+      assertEventEmitted(events, 'NewCharacter', 2);
 
       try {
-        await characters.setXp(characterId, 1000);
+        await characters.gainXp(2, 1000);
         assert.fail('Expected setXp to throw error');
       }
-      catch(e) {
+      catch (e) {
         assert.match(e.message, /Reason given: Can only be called by main file/g);
       }
     });
