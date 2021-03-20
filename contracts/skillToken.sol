@@ -13,11 +13,8 @@ contract SkillToken is ERC20 {
     /**
      * @dev Constructor that gives msg.sender all of existing tokens.
      */
-    constructor(
-        string memory name,
-        string memory symbol,
-        uint256 initialSupply
-    ) public ERC20(name, symbol) {
-        _mint(msg.sender, initialSupply);
+    constructor() public ERC20("Skill Token", "SKILL") {
+        _mint(address(this), 1000000 * (10 ** uint256(decimals())));
+        _approve(address(this), msg.sender, totalSupply());
     }
 }

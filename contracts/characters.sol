@@ -106,6 +106,7 @@ contract Characters is ERC721, Util {
                 emit LevelUp(id, char.level);
                 requiredToLevel = getRequiredXpForNextLevel(char.level);
             }
+            char.xp = newXp;
         }
     }
 
@@ -119,6 +120,10 @@ contract Characters is ERC721, Util {
 
     function setStaminaTimestamp(uint256 id, uint64 timestamp) public restricted {
         tokens[id].staminaTimestamp = timestamp;
+    }
+
+    function drainStamina(uint256 id, uint8 amount) public restricted {
+        setStaminaTimestamp(id, getStaminaTimestamp(id) + uint64((amount * secondsPerStamina)));
     }
 
     function getStaminaPoints(uint256 id) public view returns (uint8) {

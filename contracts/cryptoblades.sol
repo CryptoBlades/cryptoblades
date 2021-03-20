@@ -7,7 +7,7 @@ import "./characters.sol";
 import "./weapons.sol";
 import "./util.sol";
 
-contract Kryptoknights is Util {
+contract CryptoBlades is Util {
 
     using ABDKMath64x64 for int256;
     using ABDKMath64x64 for int128;
@@ -25,13 +25,13 @@ contract Kryptoknights is Util {
     }
 
     // prices when contract is at 100% load (50% of total skill)
-    uint256 public mintCharacterFee = 500;
-    uint256 public rerollTraitFee = 300;
-    uint256 public rerollCosmeticsFee = 300;
-    uint256 public refillStaminaFee = 1000;
+    uint256 public mintCharacterFee = 50000 * 2;
+    //uint256 public rerollTraitFee = 30000 * 2;
+    //uint256 public rerollCosmeticsFee = 30000 * 2;
+    uint256 public refillStaminaFee = 100000 * 2;
     
-    uint256 public mintWeaponFee = 200;
-    uint256 public reforgeWeaponFee = 100;
+    uint256 public mintWeaponFee = 15000 * 2;
+    uint256 public reforgeWeaponFee = 5000 * 2;
     
     event FightOutcome(uint256 character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll);
 
@@ -47,17 +47,17 @@ contract Kryptoknights is Util {
         return address(weapons);
     }
 
-    function getSkill() external view returns (uint256) {
+    function getMySkill() external view returns (uint256) {
         return ERC20(skillTokens).balanceOf(msg.sender);
     }
 
     function giveMeSkill(uint256 amount) public {
         // TEMPORARY FUNCITON TO TEST WITH
-        //skill[msg.sender] = skill[msg.sender] + amount;
-        ERC20(skillTokens).transfer(msg.sender, amount);
+        ERC20(skillTokens).approve(address(this), amount);
+        ERC20(skillTokens).transferFrom(address(this), msg.sender, amount);
     }
 
-    function getCharacters() public view returns(uint256[] memory) {
+    function getMyCharacters() public view returns(uint256[] memory) {
         uint256[] memory tokens = new uint256[](characters.balanceOf(msg.sender));
         for(uint256 i = 0; i < tokens.length; i++) {
             tokens[i] = characters.tokenOfOwnerByIndex(msg.sender, i);
@@ -65,7 +65,7 @@ contract Kryptoknights is Util {
         return tokens;
     }
     
-    function getWeapons() public view returns(uint256[] memory) {
+    function getMyWeapons() public view returns(uint256[] memory) {
         uint256[] memory tokens = new uint256[](weapons.balanceOf(msg.sender));
         for(uint256 i = 0; i < tokens.length; i++) {
             tokens[i] = weapons.tokenOfOwnerByIndex(msg.sender, i);
@@ -86,6 +86,7 @@ contract Kryptoknights is Util {
             characters.gainXp(char, getXpGainForFight(char, wep, target));
             payPlayer(characters.ownerOf(char), getTokenGainForFight(target));
         }
+        characters.drainStamina(char, 20);
         emit FightOutcome(char, wep, target, playerRoll, monsterRoll);
     }
 
@@ -93,12 +94,12 @@ contract Kryptoknights is Util {
         return uint24(target & 0xFFFFFF);
     }
 
-    function getTokenGainForFight(uint32 target) public view returns (uint256) {
+    function getTokenGainForFight(uint32 target) internal view returns (uint256) {
         uint24 monsterPower = getMonsterPower(target);
         return getCost(monsterPower);
     }
 
-    function getXpGainForFight(uint256 char, uint256 wep, uint32 target) public view returns (uint16) {
+    function getXpGainForFight(uint256 char, uint256 wep, uint32 target) internal view returns (uint16) {
         int128 basePowerDifference = getMonsterPower(target).divu(getPlayerPower(char, wep));
         // base XP gain is 16 for an equal fight
         return uint16((basePowerDifference * 16).toUInt());
@@ -134,7 +135,7 @@ contract Kryptoknights is Util {
         return uint24((characters.getPower(char).fromUInt().mul(weapons.getPowerMultiplier(wep))).toUInt());
     }
 
-    function getPlayerFinalPower(uint256 char, uint256 wep) public view returns (uint24) {
+    function getPlayerFinalPower(uint256 char, uint256 wep) internal view returns (uint24) {
         // accounts for trait matches
         return uint24((characters.getPower(char).fromUInt().mul(weapons.getPowerMultiplierForTrait(wep, characters.getTrait(char)))).toUInt());
     }
@@ -145,11 +146,12 @@ contract Kryptoknights is Util {
         // targets expire on the hour
         uint24 playerPower = getPlayerPower(char, wep);
 
-        uint[] memory seedArray = new uint[](4);
+        uint[] memory seedArray = new uint[](5);
         seedArray[0] = char;
         seedArray[1] = playerPower;
         seedArray[2] = characters.getXp(char);
-        seedArray[3] = getCurrentHour();
+        seedArray[3] = characters.getStaminaTimestamp(char);
+        seedArray[4] = getCurrentHour();
         uint256 baseSeed = combineSeeds(seedArray);
 
         uint32[4] memory targets;
@@ -162,18 +164,6 @@ contract Kryptoknights is Util {
         }
 
         return targets;
-    }
-
-    function testFrac() public pure returns (uint256) {
-        // returns double of the third of the input number
-        uint256 remainingSkill = 1000000 ether;
-        int128 halfPercent = uint(1).divu(2000000);
-        return halfPercent.mulu(remainingSkill);
-        /*// returns the percentage of the input number against 65536
-        uint256 compareAgainst = 65536; // an arbitrary number, not a limit or anything
-        int128 fixedResult = input.divu(compareAgainst) * 100; // we times it by 100 to make it a percentage
-        // regular * and / against fixed points should work like normal
-        return fixedResult.toUInt(); // need converting back to uint to put out*/
     }
 
     function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
@@ -208,7 +198,7 @@ contract Kryptoknights is Util {
         return false;
     }
     
-    function mintCharacter() public returns (uint256) {
+    function mintCharacter() public requestPayFromPlayer(mintCharacterFee) returns (uint256) {
         require(characters.balanceOf(msg.sender) < 4, "You can only have 4 characters!");
         payContract(msg.sender, mintCharacterFee);
         uint256 tokenID = characters.mint(msg.sender);
@@ -217,18 +207,20 @@ contract Kryptoknights is Util {
         return tokenID;
     }
     
-    function mintWeapon() public returns (uint256) {
+    function mintWeapon() public requestPayFromPlayer(mintWeaponFee) returns (uint256) {
+        ERC20(skillTokens).approve(address(this), getCost(mintWeaponFee));
         payContract(msg.sender, mintWeaponFee);
         uint256 tokenID = weapons.mint(msg.sender, 4); // max 5 star
         return tokenID;
     }
     
-    function fillStamina(uint256 character) public isCharacterOwner(character) {
+    function fillStamina(uint256 character) public isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
         payContract(msg.sender, refillStaminaFee);
         characters.setStaminaTimestamp(character, characters.getStaminaTimestamp(character) - characters.getStaminaMaxWait());
     }
     
-    function reforgeWeapon(uint256 reforgeID, uint256 burnID) public {
+    function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
+            isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
         require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
         payContract(msg.sender, reforgeWeaponFee);
         weapons.levelUp(reforgeID);
@@ -257,12 +249,18 @@ contract Kryptoknights is Util {
         _;
     }
     
+    modifier requestPayFromPlayer(uint256 baseAmount) {
+        uint256 convertedAmount = getCost(baseAmount);
+        require(ERC20(skillTokens).balanceOf(msg.sender) >= convertedAmount,
+            string(abi.encodePacked("Not enough SKILL! Need ",convertedAmount)));
+        ERC20(skillTokens).approve(address(this), convertedAmount);
+        _;
+    }
+
     function payContract(address playerAddress, uint256 baseAmount) internal {
         uint256 convertedAmount = getCost(baseAmount);
-        ERC20(skillTokens).approve(playerAddress, convertedAmount);
+        // must use requestPayFromPlayer modifier to approve on the initial function!
         ERC20(skillTokens).transferFrom(playerAddress, address(this), convertedAmount);
-        //require(skill[msg.sender] >= convertedAmount, string(abi.encodePacked("Not enough SKILL! Need ",(convertedAmount))));
-        //skill[msg.sender] = skill[msg.sender] - convertedAmount;
     }
 
     function payPlayer(address playerAddress, uint256 baseAmount) internal {
@@ -279,8 +277,13 @@ contract Kryptoknights is Util {
         return getContractSkillBalance().divu(ERC20(skillTokens).totalSupply()).mul(originalPrice.fromUInt()).toUInt();
     }
 
+    function getApprovedBalance() external view returns (uint256) {
+        return ERC20(skillTokens).allowance(msg.sender, address(this));
+    }
+
     function getCurrentHour() public view returns (uint256) {
         // "now" returns unix time since 1970 Jan 1, in seconds
         return now / (1 hours);
     }
+    
 }
