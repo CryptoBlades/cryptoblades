@@ -29,10 +29,10 @@ contract CryptoBlades is Util {
     //uint256 public rerollTraitFee = 30000 * 2;
     //uint256 public rerollCosmeticsFee = 30000 * 2;
     uint256 public refillStaminaFee = 100000 * 2;
-    
+
     uint256 public mintWeaponFee = 15000 * 2;
     uint256 public reforgeWeaponFee = 5000 * 2;
-    
+
     event FightOutcome(uint256 character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll);
 
     function getSkillTokensAddress() external view returns (address) {
@@ -42,7 +42,7 @@ contract CryptoBlades is Util {
     function getCharactersAddress() external view returns (address) {
         return address(characters);
     }
-    
+
     function getWeaponsAddress() external view returns (address) {
         return address(weapons);
     }
@@ -64,7 +64,7 @@ contract CryptoBlades is Util {
         }
         return tokens;
     }
-    
+
     function getMyWeapons() public view returns(uint256[] memory) {
         uint256[] memory tokens = new uint256[](weapons.balanceOf(msg.sender));
         for(uint256 i = 0; i < tokens.length; i++) {
@@ -72,7 +72,7 @@ contract CryptoBlades is Util {
         }
         return tokens;
     }
-    
+
     function fight(uint256 char, uint256 wep, uint32 target) external
         isCharacterOwner(char)
         isWeaponOwner(wep)
@@ -197,28 +197,28 @@ contract CryptoBlades is Util {
         }
         return false;
     }
-    
+
     function mintCharacter() public requestPayFromPlayer(mintCharacterFee) returns (uint256) {
-        require(characters.balanceOf(msg.sender) < 4, "You can only have 4 characters!");
+        require(characters.balanceOf(msg.sender) <= 1000, "You can only have 1000 characters!");
         payContract(msg.sender, mintCharacterFee);
         uint256 tokenID = characters.mint(msg.sender);
         if(weapons.balanceOf(msg.sender) == 0)
             weapons.mint(msg.sender, 0); // first weapon free with a character mint, max 1 star
         return tokenID;
     }
-    
+
     function mintWeapon() public requestPayFromPlayer(mintWeaponFee) returns (uint256) {
         ERC20(skillTokens).approve(address(this), getCost(mintWeaponFee));
         payContract(msg.sender, mintWeaponFee);
         uint256 tokenID = weapons.mint(msg.sender, 4); // max 5 star
         return tokenID;
     }
-    
+
     function fillStamina(uint256 character) public isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
         payContract(msg.sender, refillStaminaFee);
         characters.setStaminaTimestamp(character, characters.getStaminaTimestamp(character) - characters.getStaminaMaxWait());
     }
-    
+
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
             isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
         require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
@@ -248,7 +248,7 @@ contract CryptoBlades is Util {
         require(foundMatch, "Target invalid");
         _;
     }
-    
+
     modifier requestPayFromPlayer(uint256 baseAmount) {
         uint256 convertedAmount = getCost(baseAmount);
         require(ERC20(skillTokens).balanceOf(msg.sender) >= convertedAmount,
@@ -285,5 +285,5 @@ contract CryptoBlades is Util {
         // "now" returns unix time since 1970 Jan 1, in seconds
         return now / (1 hours);
     }
-    
+
 }
