@@ -1,18 +1,26 @@
 <template>
   <div class="app">
     <div class="top-bar">
-      <h1 class="app-title">{{ appName }}</h1>
+      <h1 class="app-title">CryptoBlades</h1>
       <view-links></view-links>
     </div>
 
+    <h1 style="color: red" v-if="characterFetchError != null">
+      Error when fetching charas: {{ characterFetchError }}
+    </h1>
+
+    <h1 style="color: red" v-if="weaponFetchError != null">
+      Error when fetching weapons: {{ weaponFetchError }}
+    </h1>
+
     <div class="content">
-      <button @click="mintCharacter">Mint character</button>
-      <button @click="getCharacterXp">Get character XP</button>
-      <button @click="testThingie">Test</button>
       <router-view
         :character="character"
+        :characters="characters"
         :weapons="weapons"
         :stamina="stamina"
+        @mintCharacter="mintCharacter"
+        @selectCharacter="onSelectCharacter"
       />
     </div>
   </div>
@@ -21,95 +29,197 @@
 <script>
 import ViewLinks from "./components/ViewLinks.vue";
 
+import { setUpContracts } from "./contracts";
+
+import {
+  characterFromContract,
+  weaponFromContract,
+} from "./contract-models.js";
+
 export default {
-  inject: ["web3", "abi", "Kryptoknights"],
+  inject: ["web3"],
   components: {
     ViewLinks,
   },
 
   data() {
     return {
-      appName: "Unknown",
-      character: {
-        name: "Bimmy Bozo",
-        level: 12,
-        experience: 10,
-      },
-      characterIds: [],
+      CryptoBlades: null,
+      Characters: null,
+      Weapons: null,
+
       stamina: {
-        current: 85,
-        max: 120,
+        current: 0,
+        max: 0,
       },
-      weapons: ["one", "two", "three", "four", "five", "six", "seven", "steve"],
+
+      characterIds: [],
+      characters: [],
+      currentCharacterId: null,
+      weaponIds: [],
+      weapons: [],
+      skillBalance: 0,
+      now: Date.now(),
+
+      characterFetchError: null,
+      weaponFetchError: null,
     };
   },
 
-  methods: {
-    async testThingie() {
+  computed: {
+    character() {
+      if (this.characters.length < 1 || this.currentCharacterId == null) {
+        return {
+          name: "???",
+          level: -1,
+          experience: -1,
+        };
+      }
+
+      const c = this.characters.find((c) => c.id === this.currentCharacterId);
+      return {
+        name: `Character #${c.id} (Appearance ${c.appearance})`,
+        level: c.level,
+        experience: c.xp,
+      };
+    },
+
+    nowAndCurrentCharacterId() {
+      return [this.now, this.currentCharacterId];
+    },
+  },
+
+  watch: {
+    async characterIds(charaIds) {
+      if (charaIds.length == 0) {
+        this.currentCharacterId = null;
+      }
+
       try {
-        const accounts = await this.web3.eth.requestAccounts();
-
-        const charactersContractAddress = await this.Kryptoknights.methods
-          .characters()
-          .call();
-
-        const characters = new this.web3.eth.Contract(
-          this.abi,
-          charactersContractAddress
-        );
-
-        const xp = await characters.methods.setXp(0, 1000).send({
-          from: accounts[0],
-        });
-
-        console.log(xp);
+        this.characters = await this.getCharacters(charaIds);
+      } catch (e) {
+        console.error(e);
+        this.characterFetchError = e.message;
       }
-      catch(e) {
-        console.error('Oh no, a test error!', e);
+    },
+
+    async weaponIds(weaponIds) {
+      if (weaponIds.length == 0) {
+        this.currentCharacterId = null;
       }
+
+      try {
+        this.weapons = await this.getWeapons(weaponIds);
+      } catch (e) {
+        console.error(e);
+        this.weaponFetchError = e.message;
+      }
+    },
+
+    async nowAndCurrentCharacterId(data) {
+      const currentCharacterId = data[1];
+
+      if (currentCharacterId == null) {
+        this.stamina.current = 0;
+        return;
+      }
+
+      this.stamina.current = await this.Characters.methods
+        .getStaminaPoints(currentCharacterId)
+        .call();
+    },
+  },
+
+  methods: {
+    onSelectCharacter(chara) {
+      this.currentCharacterId = chara.id;
+    },
+
+    async getCharacters(characterIds) {
+      return Promise.all(
+        characterIds.map(async (charaId) => {
+          return characterFromContract(
+            charaId,
+            await this.Characters.methods.get(charaId).call()
+          );
+        })
+      );
+    },
+
+    async getWeapons(weaponIds) {
+      return Promise.all(
+        weaponIds.map(async (weaponId) => {
+          return weaponFromContract(
+            weaponId,
+            await this.Weapons.methods.get(weaponId).call()
+          );
+        })
+      );
     },
 
     async mintCharacter() {
       try {
-        const accounts = await this.web3.eth.requestAccounts();
-
-        const receipt = await this.Kryptoknights.methods.mintCharacter().send({
-          from: accounts[0],
-          value: this.web3.utils.toWei("5", "ether"),
+        await this.CryptoBlades.methods.mintCharacter().send({
+          from: this.web3.eth.defaultAccount,
         });
-        console.log("wew?", receipt);
-        const {
-          character: characterId,
-        } = receipt.events.NewCharacter.returnValues;
-
-        console.log(characterId);
-        this.characterIds.push(characterId);
+        console.log("Successful minting");
       } catch (e) {
-        console.error("oh noes, an error", e);
+        console.error("oh noes, an error when minting", e);
       }
-    },
-
-    async getCharacterXp() {
-      const accounts = await this.web3.eth.requestAccounts();
-
-      const res = await this.Kryptoknights.methods
-        .characters()
-        .call({ from: accounts[0] });
-
-      console.log(res);
-
-      const Characters = new this.web3.eth.Contract(this.abi, res);
-
-      const xpRes = await Characters.methods
-        .getXp(this.characterIds[0])
-        .call({ from: accounts[0] });
-
-      console.log(xpRes);
     },
   },
 
-  created() {
-    console.log(this.Kryptoknights.methods);
+  async created() {
+    setInterval(() => {
+      this.now = Date.now();
+    }, 3000);
+
+    const accounts = await this.web3.eth.requestAccounts();
+    this.web3.eth.defaultAccount = accounts[0];
+
+    const { CryptoBlades, Characters, Weapons } = await setUpContracts(
+      this.web3
+    );
+    this.CryptoBlades = CryptoBlades;
+    this.Characters = Characters;
+    this.Weapons = Weapons;
+
+    const [
+      skillBalance,
+      characterIds,
+      weaponIds,
+      maxStamina,
+    ] = await Promise.all([
+      this.CryptoBlades.methods.getMySkill().call(),
+      this.CryptoBlades.methods.getMyCharacters().call(),
+      this.CryptoBlades.methods.getMyWeapons().call(),
+      this.Characters.methods.maxStamina().call(),
+    ]);
+
+    this.skillBalance = skillBalance;
+    this.characterIds = Array.from(characterIds);
+    this.weaponIds = Array.from(weaponIds);
+    this.stamina.max = maxStamina;
+
+    this.Characters.events.NewCharacter((err, data) => {
+      if (err != null) {
+        console.error(err);
+        return;
+      }
+
+      console.log("NewCharacter event received! Data:", data);
+      this.characterIds.push(data.returnValues.character);
+    });
+
+    this.Weapons.events.NewWeapon((err, data) => {
+      if (err != null) {
+        console.error(err);
+        return;
+      }
+
+      console.log("NewWeapon event received! Data:", data);
+      this.weaponIds.push(data.returnValues.weapon);
+    });
   },
 };
 </script>

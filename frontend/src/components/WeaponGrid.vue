@@ -2,30 +2,29 @@
   <div class="weapon-grid-container">
     <h2 class="header">Weapons</h2>
     <ul class="weapon-grid">
-      <li
-        class="weapon"
-        v-for="weapon in weapons"
-        :key="getIdentifier(weapon)"
-      ></li>
+      <li class="weapon" v-for="weapon in weapons" :key="weapon.id">
+        <weapon-icon :weapon="weapon" @click="$emit('select', weapon)" />
+      </li>
     </ul>
   </div>
 </template>
 
 <script>
-import { getIdentifier } from "../weapon";
+import WeaponIcon from "./WeaponIcon.vue";
 
 export default {
   props: ["weapons"],
 
-  methods: {
-    getIdentifier,
+  components: {
+    WeaponIcon,
   },
 };
 </script>
 
-<style>
+<style scoped>
 .weapon-grid-container {
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {

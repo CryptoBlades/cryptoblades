@@ -1,6 +1,12 @@
 <template>
   <div class="body">
     <h1>Plaza</h1>
+    <character-list
+      class="character-list"
+      :characters="characters"
+      @mintCharacter="$emit('mintCharacter')"
+      @select="$emit('selectCharacter', $event)"
+    />
     <stamina-bar
       class="stamina-bar"
       :current="stamina.current"
@@ -21,13 +27,15 @@
 import StaminaBar from "../components/StaminaBar.vue";
 import WeaponGrid from "../components/WeaponGrid.vue";
 import Character from "../components/Character.vue";
+import CharacterList from "../components/CharacterList.vue";
 
 export default {
-  props: ["character", "weapons", "stamina"],
+  props: ["character", "characters", "weapons", "stamina"],
   components: {
     StaminaBar,
     WeaponGrid,
     Character,
+    CharacterList,
   },
 };
 </script>
@@ -37,9 +45,13 @@ export default {
   display: grid;
   grid-template-columns: 10cm 1fr 10cm;
   grid-template-rows: auto;
-  grid-template-areas: "header header header" "staminabar main empty" "weapongrid main empty" "empty2 main empty";
+  grid-template-areas: "header header header" "staminabar main characterlist" "weapongrid main characterlist" "empty2 main empty";
   column-gap: 0.5cm;
   row-gap: 0.2cm;
+}
+
+.character-list {
+  grid-area: characterlist;
 }
 
 .stamina-bar {

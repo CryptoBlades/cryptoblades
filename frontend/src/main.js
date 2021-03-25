@@ -2,7 +2,6 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Web3 from 'web3';
 
-import { abi, createContracts } from './contracts';
 import router from './router';
 
 import App from './App.vue';
@@ -17,7 +16,6 @@ new Vue({
   render: h => h(App),
   router,
   provide: {
-    web3, abi,
-    ...createContracts(web3)
+    web3
   }
 }).$mount('#app');
