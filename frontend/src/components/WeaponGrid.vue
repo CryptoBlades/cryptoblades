@@ -1,8 +1,7 @@
 <template>
   <div class="weapon-grid-container">
-    <h2 class="header">Weapons</h2>
     <ul class="weapon-grid">
-      <li class="weapon" v-for="weapon in weapons" :key="weapon.id">
+      <li class="weapon" :class="{ selected: weapon.id === selectedWeaponId }" v-for="weapon in weapons" :key="weapon.id">
         <weapon-icon :weapon="weapon" @click="$emit('select', weapon)" />
       </li>
     </ul>
@@ -13,7 +12,7 @@
 import WeaponIcon from "./WeaponIcon.vue";
 
 export default {
-  props: ["weapons"],
+  props: ["weapons", "selectedWeaponId"],
 
   components: {
     WeaponIcon,
@@ -46,5 +45,10 @@ export default {
   height: 2em;
   margin: 0.5em;
   background: gray;
+  cursor: pointer;
+}
+
+.weapon.selected {
+  background: orange;
 }
 </style>

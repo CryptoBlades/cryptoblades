@@ -18,3 +18,12 @@ export function weaponFromContract(id, data) {
   const hilt = data[7];
   return { id, properties, stat1, stat2, stat3, level, blade, crossguard, hilt };
 }
+
+export function targetFromContract(data) {
+  const n = parseInt(data, 10);
+  return {
+    original: data,
+    power: n & 0b11111111_11111111_11111111,
+    trait: n >> 24
+  };
+}

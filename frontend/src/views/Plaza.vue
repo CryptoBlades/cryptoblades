@@ -1,18 +1,22 @@
 <template>
   <div class="body">
     <h1>Plaza</h1>
-    <character-list
-      class="character-list"
-      :characters="characters"
-      @mintCharacter="$emit('mintCharacter')"
-      @select="$emit('selectCharacter', $event)"
-    />
-    <stamina-bar
-      class="stamina-bar"
-      :current="stamina.current"
-      :max="stamina.max"
-    />
-    <weapon-grid class="weapon-grid" :weapons="weapons" />
+    <div class="character-list">
+      <button @click="$emit('mintCharacter')">Mint new character</button>
+      <character-list
+        :characters="characters"
+        :selectedCharacterId="character.id"
+        @select="$emit('selectCharacter', $event)"
+      />
+    </div>
+    <div class="stamina-bar">
+      <h2>Stamina</h2>
+      <stamina-bar :current="stamina.current" :max="stamina.max" />
+    </div>
+    <div class="weapon-grid">
+      <h2>Weapons</h2>
+      <weapon-grid :weapons="weapons" />
+    </div>
     <div class="character-preview">
       <h2 class="character-name">{{ character.name }}</h2>
       <h3 class="character-sub">

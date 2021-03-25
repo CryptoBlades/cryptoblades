@@ -12,10 +12,12 @@ Vue.config.productionTip = false;
 
 Vue.use(VueRouter);
 
+const contractProvider = {};
+
 new Vue({
   render: h => h(App),
   router,
   provide: {
-    web3
+    web3, contractProvider
   }
 }).$mount('#app');

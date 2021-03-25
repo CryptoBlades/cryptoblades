@@ -2,7 +2,11 @@
   <div class="app">
     <div class="top-bar">
       <h1 class="app-title">CryptoBlades</h1>
-      <view-links></view-links>
+      <view-links class="view-links"></view-links>
+      <span>
+        <span class="bold">Balance</span>: {{ formattedSkillBalance }}
+        <button @click="addMoreSkill">Add more</button>
+      </span>
     </div>
 
     <h1 style="color: red" v-if="characterFetchError != null">
@@ -21,6 +25,7 @@
         :stamina="stamina"
         @mintCharacter="mintCharacter"
         @selectCharacter="onSelectCharacter"
+        @invalidateWeaponIds="updateWeaponIds"
       />
     </div>
   </div>
@@ -37,22 +42,17 @@ import {
 } from "./contract-models.js";
 
 export default {
-  inject: ["web3"],
+  inject: ["web3", "contractProvider"],
   components: {
     ViewLinks,
   },
 
   data() {
     return {
-      CryptoBlades: null,
-      Characters: null,
-      Weapons: null,
-
       stamina: {
         current: 0,
         max: 0,
       },
-
       characterIds: [],
       characters: [],
       currentCharacterId: null,
@@ -70,6 +70,7 @@ export default {
     character() {
       if (this.characters.length < 1 || this.currentCharacterId == null) {
         return {
+          id: null,
           name: "???",
           level: -1,
           experience: -1,
@@ -78,6 +79,7 @@ export default {
 
       const c = this.characters.find((c) => c.id === this.currentCharacterId);
       return {
+        id: c.id,
         name: `Character #${c.id} (Appearance ${c.appearance})`,
         level: c.level,
         experience: c.xp,
@@ -86,6 +88,15 @@ export default {
 
     nowAndCurrentCharacterId() {
       return [this.now, this.currentCharacterId];
+    },
+
+    formattedSkillBalance() {
+      const formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "ETH",
+      });
+
+      return formatter.format(this.skillBalance).replace(/ETH/g, "SKILL");
     },
   },
 
@@ -128,11 +139,39 @@ export default {
         .getStaminaPoints(currentCharacterId)
         .call();
     },
+
+    skillBalance(balance, oldBalance) {
+      console.log("BALANCE CHANGE:", balance, oldBalance, balance - oldBalance);
+    },
   },
 
   methods: {
+    async addMoreSkill() {
+      try {
+        const skillToAdd = parseFloat(
+          prompt("How much SKILL do you want?", "100")
+        );
+
+        await this.CryptoBlades.methods.giveMeSkill(skillToAdd).send({
+          from: this.web3.eth.defaultAccount,
+        });
+
+        await this.updateSkillBalance();
+
+        alert('Successfully added SKILL to your balance!');
+      } catch (e) {
+        console.error(e);
+      }
+    },
+
     onSelectCharacter(chara) {
       this.currentCharacterId = chara.id;
+    },
+
+    async updateWeaponIds() {
+      this.weaponIds = Array.from(
+        await this.CryptoBlades.methods.getMyWeapons().call()
+      );
     },
 
     async getCharacters(characterIds) {
@@ -167,6 +206,11 @@ export default {
         console.error("oh noes, an error when minting", e);
       }
     },
+
+    async updateSkillBalance() {
+      const skill = await this.CryptoBlades.methods.getMySkill().call();
+      this.skillBalance = skill;
+    },
   },
 
   async created() {
@@ -180,9 +224,9 @@ export default {
     const { CryptoBlades, Characters, Weapons } = await setUpContracts(
       this.web3
     );
-    this.CryptoBlades = CryptoBlades;
-    this.Characters = Characters;
-    this.Weapons = Weapons;
+    this.contractProvider.CryptoBlades = this.CryptoBlades = CryptoBlades;
+    this.contractProvider.Characters = this.Characters = Characters;
+    this.contractProvider.Weapons = this.Weapons = Weapons;
 
     const [
       skillBalance,
@@ -207,7 +251,8 @@ export default {
         return;
       }
 
-      console.log("NewCharacter event received! Data:", data);
+      this.updateSkillBalance(); // intentionally not awaited
+
       this.characterIds.push(data.returnValues.character);
     });
 
@@ -217,8 +262,29 @@ export default {
         return;
       }
 
-      console.log("NewWeapon event received! Data:", data);
+      this.updateSkillBalance(); // intentionally not awaited
+
       this.weaponIds.push(data.returnValues.weapon);
+    });
+
+    this.CryptoBlades.events.FightOutcome(async (err, data) => {
+      if (err != null) {
+        console.error(err);
+        return;
+      }
+
+      this.updateSkillBalance(); // intentionally not awaited
+
+      const characterId = data.returnValues.character;
+
+      const updatedCharacter = characterFromContract(
+        characterId,
+        await this.Characters.methods.get(characterId).call()
+      );
+
+      this.characters = this.characters.map((c) => {
+        return c.id === characterId ? updatedCharacter : c;
+      });
     });
   },
 };
@@ -245,7 +311,15 @@ body {
   margin-right: 1em;
 }
 
+.view-links {
+  flex-grow: 1;
+}
+
 .content {
   padding: 0 1em;
+}
+
+.bold {
+  font-weight: 1000;
 }
 </style>

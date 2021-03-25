@@ -1,6 +1,5 @@
 <template>
   <div class="outer">
-    <h2 class="header">Stamina</h2>
     <div class="bar-wrapper">
       <div class="bar" :style="{ width: percent + '%' }"></div>
     </div>
@@ -28,10 +27,6 @@ export default {
 .outer {
   padding: 0.5em;
   background: gray;
-}
-
-.header {
-  margin: 0.2cm 0;
 }
 
 .bar {
