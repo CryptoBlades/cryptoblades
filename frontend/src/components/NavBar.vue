@@ -24,7 +24,7 @@ export default {
 .top-bar {
   background: rgb(128, 18, 201);
   display: flex;
-  align-items: center;
+  align-items: stretch;
   padding: 0 1em;
   height: 64px;
 }
@@ -38,6 +38,5 @@ export default {
 
 .view-links {
   flex-grow: 1;
-  align-self: stretch;
 }
 </style>
