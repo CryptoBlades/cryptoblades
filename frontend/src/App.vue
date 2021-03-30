@@ -1,13 +1,6 @@
 <template>
   <div class="app">
-    <div class="top-bar">
-      <h1 class="app-title">CryptoBlades</h1>
-      <view-links class="view-links"></view-links>
-      <span>
-        <span class="bold">Balance</span>: {{ formattedSkillBalance }}
-        <button @click="addMoreSkill">Add more</button>
-      </span>
-    </div>
+    <nav-bar :skillBalance="skillBalance" @addMoreSkill="addMoreSkill" />
 
     <h1 style="color: red" v-if="characterFetchError != null">
       Error when fetching charas: {{ characterFetchError }}
@@ -32,7 +25,7 @@
 </template>
 
 <script>
-import ViewLinks from "./components/ViewLinks.vue";
+import NavBar from "./components/NavBar.vue";
 
 import { setUpContracts } from "./contracts";
 
@@ -44,7 +37,7 @@ import {
 export default {
   inject: ["web3", "contractProvider"],
   components: {
-    ViewLinks,
+    NavBar,
   },
 
   data() {
@@ -158,7 +151,7 @@ export default {
 
         await this.updateSkillBalance();
 
-        alert('Successfully added SKILL to your balance!');
+        alert("Successfully added SKILL to your balance!");
       } catch (e) {
         console.error(e);
       }
@@ -299,27 +292,20 @@ body {
   margin: 0;
 }
 
-.top-bar {
-  background: rgb(0, 217, 224);
-  display: flex;
-  align-items: baseline;
-  padding: 1em;
-}
-
-.app-title {
-  margin: 0;
-  margin-right: 1em;
-}
-
-.view-links {
-  flex-grow: 1;
-}
-
 .content {
   padding: 0 1em;
 }
 
 .bold {
   font-weight: 1000;
+}
+
+.main-font {
+  font-family: "Roboto", sans-serif;
+}
+
+.dark-bg-text {
+  opacity: 90%;
+  color: white;
 }
 </style>

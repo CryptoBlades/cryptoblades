@@ -1,0 +1,54 @@
+<template>
+  <div class="top-bar main-font dark-bg-text">
+    <h1 class="app-title">CryptoBlades</h1>
+    <view-links class="view-links"></view-links>
+    <span>
+      <span class="bold">Balance</span>: {{ formattedSkillBalance }}
+      <button @click="$emit('addMoreSkill')">Add more</button>
+    </span>
+  </div>
+</template>
+
+<script>
+import ViewLinks from "./ViewLinks.vue";
+
+export default {
+  props: ["skillBalance"],
+  components: {
+    ViewLinks,
+  },
+
+  computed: {
+    formattedSkillBalance() {
+      const formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "ETH",
+      });
+
+      return formatter.format(this.skillBalance).replace(/ETH/g, "SKILL");
+    },
+  },
+};
+</script>
+
+<style scoped>
+.top-bar {
+  background: rgb(128, 18, 201);
+  display: flex;
+  align-items: center;
+  padding: 0 1em;
+  height: 64px;
+}
+
+.app-title {
+  margin: 0;
+  margin-right: 1em;
+  padding: 12px 0;
+  user-select: none;
+}
+
+.view-links {
+  flex-grow: 1;
+  align-self: stretch;
+}
+</style>
