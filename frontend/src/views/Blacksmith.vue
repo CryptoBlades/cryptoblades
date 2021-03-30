@@ -4,13 +4,13 @@
 
     <h2>Weapon to reforge:</h2>
     <weapon-grid
-      :weapons="weapons"
+      :weapons="ownWeapons"
       :selectedWeaponId="selectedWeaponIdForReforging"
       @select="selectWeaponForReforging"
     />
     <h2>Weapon to burn:</h2>
     <weapon-grid
-      :weapons="weapons"
+      :weapons="ownWeapons"
       :selectedWeaponId="selectedWeaponIdForBurning"
       @select="selectWeaponForBurning"
     />
@@ -20,14 +20,14 @@
         class="button"
         mainText="Forge sword"
         subText="(1 loot)"
-        @click="forgeWeapon"
+        @click="onForgeWeapon"
       />
       <big-button
         class="button"
         mainText="Reforge sword"
         subText="(+weapon xp sacrificing another)"
         :disabled="canReforge"
-        @click="reforgeWeapon"
+        @click="onReforgeWeapon"
       />
     </div>
   </div>
@@ -36,11 +36,9 @@
 <script>
 import WeaponGrid from "../components/WeaponGrid.vue";
 import BigButton from "../components/BigButton.vue";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
-  props: ["weapons"],
-  inject: ["web3", "contractProvider"],
-
   data() {
     return {
       selectedWeaponIdForReforging: null,
@@ -49,6 +47,8 @@ export default {
   },
 
   computed: {
+    ...mapGetters(["ownWeapons"]),
+
     canReforge() {
       return (
         this.selectedWeaponIdForReforging == null ||
@@ -59,6 +59,8 @@ export default {
   },
 
   methods: {
+    ...mapActions(["mintWeapon", "reforgeWeapon"]),
+
     selectWeaponForReforging(weapon) {
       if (this.selectedWeaponIdForReforging == weapon.id) {
         this.selectedWeaponIdForReforging = null;
@@ -77,37 +79,20 @@ export default {
       this.selectedWeaponIdForBurning = weapon.id;
     },
 
-    async forgeWeapon() {
+    async onForgeWeapon() {
       try {
-        await this.contractProvider.CryptoBlades.methods.mintWeapon().send({
-          from: this.web3.eth.defaultAccount,
-        });
+        await this.mintWeapon();
       } catch (e) {
         console.error(e);
       }
     },
 
-    async reforgeWeapon() {
+    async onReforgeWeapon() {
       try {
-        await this.contractProvider.Weapons.methods
-          .approve(
-            this.contractProvider.CryptoBlades.options.address,
-            this.selectedWeaponIdForBurning
-          )
-          .send({
-            from: this.web3.eth.defaultAccount,
-          });
-
-        await this.contractProvider.CryptoBlades.methods
-          .reforgeWeapon(
-            this.selectedWeaponIdForReforging,
-            this.selectedWeaponIdForBurning
-          )
-          .send({
-            from: this.web3.eth.defaultAccount,
-          });
-
-        this.$emit("invalidateWeaponIds");
+        await this.reforgeWeapon({
+          burnWeaponId: this.selectedWeaponIdForBurning,
+          reforgeWeaponId: this.selectedWeaponIdForReforging,
+        });
       } catch (e) {
         console.error(e);
       }

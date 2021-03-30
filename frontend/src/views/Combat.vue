@@ -3,26 +3,29 @@
     <h1>Combat</h1>
     <h1 style="color: red" v-if="error != null">Error: {{ error }}</h1>
     <character-list
-      :characters="characters"
+      :characters="ownCharacters"
       :selectedCharacterId="selectedCharacterId"
       @select="selectedCharacterId = $event.id"
     />
     <weapon-grid
-      :weapons="weapons"
+      :weapons="ownWeapons"
       :selectedWeaponId="selectedWeaponId"
       @select="selectedWeaponId = $event.id"
     />
-    <ul class="encounter-list">
+
+    <ul class="encounter-list" v-if="targets.length > 0">
       <li v-for="(e, i) in targets" :key="i">
         <character />
         <big-button
           class="encounter-button"
           :mainText="`Monster with trait ${e.trait}`"
           :subText="`Power ${e.power}`"
-          @click="onClickEncounter(i, e)"
+          @click="onClickEncounter(e)"
         />
       </li>
     </ul>
+
+    <p v-if="isLoadingTargets">Loading...</p>
   </div>
 </template>
 
@@ -32,23 +35,40 @@ import BigButton from "../components/BigButton.vue";
 import CharacterList from "../components/CharacterList.vue";
 import WeaponGrid from "../components/WeaponGrid.vue";
 
-import { targetFromContract } from "../contract-models";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
-  props: ["weapons", "characters"],
-  inject: ["web3", "contractProvider"],
-
   data() {
     return {
       selectedWeaponId: null,
       selectedCharacterId: null,
-      targets: [],
 
       error: null,
     };
   },
 
   computed: {
+    ...mapGetters([
+      "getTargetsByCharacterIdAndWeaponId",
+      "ownCharacters",
+      "ownWeapons",
+    ]),
+
+    targets() {
+      return this.getTargetsByCharacterIdAndWeaponId(
+        this.selectedCharacterId,
+        this.selectedWeaponId
+      );
+    },
+
+    isLoadingTargets() {
+      return (
+        this.targets.length === 0 &&
+        this.selectedCharacterId != null &&
+        this.selectedWeaponId != null
+      );
+    },
+
     selections() {
       return [this.selectedCharacterId, this.selectedWeaponId];
     },
@@ -56,52 +76,31 @@ export default {
 
   watch: {
     async selections([characterId, weaponId]) {
-      await this.updateTargets(characterId, weaponId);
+      await this.fetchTargets({ characterId, weaponId });
     },
   },
 
   methods: {
-    async updateTargets(characterId, weaponId) {
-      if (characterId == null || weaponId == null) {
-        this.targets = [];
-        return;
-      }
+    ...mapActions(["fetchTargets", "doEncounter"]),
 
-      const targets = await this.contractProvider.CryptoBlades.methods
-        .getTargets(characterId, weaponId)
-        .call();
-
-      this.targets = targets.map(targetFromContract);
-    },
-
-    async onClickEncounter(i, targetToFight) {
+    async onClickEncounter(targetToFight) {
       if (this.selectedWeaponId == null || this.selectedCharacterId == null) {
         return;
       }
 
       try {
-        const res = await this.contractProvider.CryptoBlades.methods
-          .fight(
-            this.selectedCharacterId,
-            this.selectedWeaponId,
-            targetToFight.original
-          )
-          .send({ from: this.web3.eth.defaultAccount });
+        const success = await this.doEncounter({
+          characterId: this.selectedCharacterId,
+          weaponId: this.selectedWeaponId,
+          targetString: targetToFight.original,
+        });
 
-        const {
-          character,
-          weapon,
-          playerRoll,
-          enemyRoll,
-        } = res.events.FightOutcome.returnValues;
-
-        if (parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10)) {
+        if (success) {
           alert("Battle succeeded!");
         } else {
           alert("Battle failed...");
         }
-
-        await this.updateTargets(character, weapon);
+        this.error = null;
       } catch (e) {
         console.error(e);
         this.error = e.message;
