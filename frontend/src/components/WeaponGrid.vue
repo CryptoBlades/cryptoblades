@@ -1,21 +1,31 @@
 <template>
   <div class="weapon-grid-container">
     <ul class="weapon-grid">
-      <li class="weapon" :class="{ selected: weapon.id === selectedWeaponId }" v-for="weapon in weapons" :key="weapon.id">
-        <weapon-icon :weapon="weapon" @click="$emit('select', weapon)" />
+      <li
+        class="weapon"
+        :class="{ selected: weapon.id === value }"
+        v-for="weapon in ownWeapons"
+        :key="weapon.id"
+      >
+        <weapon-icon :weapon="weapon" @click="$emit('input', weapon.id)" />
       </li>
     </ul>
   </div>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import WeaponIcon from "./WeaponIcon.vue";
 
 export default {
-  props: ["weapons", "selectedWeaponId"],
+  props: ["value"],
 
   components: {
     WeaponIcon,
+  },
+
+  computed: {
+    ...mapGetters(["ownWeapons"]),
   },
 };
 </script>

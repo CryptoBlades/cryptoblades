@@ -20,21 +20,40 @@ export default {
   },
 
   computed: {
-    ...mapState(["defaultAccount"]),
+    ...mapState(["defaultAccount", "currentCharacterId"]),
   },
 
   watch: {
     defaultAccount(account) {
       this.web3.eth.defaultAccount = account;
     },
+
+    async currentCharacterId() {
+      await this.updateCurrentCharacterStamina();
+    },
   },
 
   methods: {
     ...mapActions({ initializeStore: "initialize" }),
+    ...mapActions(["fetchCharacterStamina"]),
+
+    async updateCurrentCharacterStamina() {
+      if (this.currentCharacterId != null) {
+        await this.fetchCharacterStamina(this.currentCharacterId);
+      }
+    },
   },
 
   async created() {
     await this.initializeStore();
+
+    this.nowInterval = setInterval(async () => {
+      await this.updateCurrentCharacterStamina();
+    }, 3000);
+  },
+
+  beforeDestroy() {
+    clearInterval(this.nowInterval);
   },
 };
 </script>

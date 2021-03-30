@@ -3,17 +3,10 @@
     <h1>Blacksmith</h1>
 
     <h2>Weapon to reforge:</h2>
-    <weapon-grid
-      :weapons="ownWeapons"
-      :selectedWeaponId="selectedWeaponIdForReforging"
-      @select="selectWeaponForReforging"
-    />
+    <weapon-grid v-model="reforgeWeaponId" />
+
     <h2>Weapon to burn:</h2>
-    <weapon-grid
-      :weapons="ownWeapons"
-      :selectedWeaponId="selectedWeaponIdForBurning"
-      @select="selectWeaponForBurning"
-    />
+    <weapon-grid v-model="burnWeaponId" />
 
     <div class="button-row">
       <big-button
@@ -41,8 +34,8 @@ import { mapActions, mapGetters } from "vuex";
 export default {
   data() {
     return {
-      selectedWeaponIdForReforging: null,
-      selectedWeaponIdForBurning: null,
+      reforgeWeaponId: null,
+      burnWeaponId: null,
     };
   },
 
@@ -51,33 +44,15 @@ export default {
 
     canReforge() {
       return (
-        this.selectedWeaponIdForReforging == null ||
-        this.selectedWeaponIdForBurning == null ||
-        this.selectedWeaponIdForReforging === this.selectedWeaponIdForBurning
+        this.reforgeWeaponId == null ||
+        this.burnWeaponId == null ||
+        this.reforgeWeaponId === this.burnWeaponId
       );
     },
   },
 
   methods: {
     ...mapActions(["mintWeapon", "reforgeWeapon"]),
-
-    selectWeaponForReforging(weapon) {
-      if (this.selectedWeaponIdForReforging == weapon.id) {
-        this.selectedWeaponIdForReforging = null;
-        return;
-      }
-
-      this.selectedWeaponIdForReforging = weapon.id;
-    },
-
-    selectWeaponForBurning(weapon) {
-      if (this.selectedWeaponIdForBurning == weapon.id) {
-        this.selectedWeaponIdForBurning = null;
-        return;
-      }
-
-      this.selectedWeaponIdForBurning = weapon.id;
-    },
 
     async onForgeWeapon() {
       try {
@@ -90,8 +65,8 @@ export default {
     async onReforgeWeapon() {
       try {
         await this.reforgeWeapon({
-          burnWeaponId: this.selectedWeaponIdForBurning,
-          reforgeWeaponId: this.selectedWeaponIdForReforging,
+          burnWeaponId: this.burnWeaponId,
+          reforgeWeaponId: this.reforgeWeaponId,
         });
       } catch (e) {
         console.error(e);

@@ -3,11 +3,11 @@
     <ul>
       <li
         class="character-item"
-        :class="{ selected: selectedCharacterId === c.id }"
-        v-for="c in characters"
+        :class="{ selected: value === c.id }"
+        v-for="c in ownCharacters"
         :key="c.id"
       >
-        <a @click="$emit('select', c)" :title="JSON.stringify(c, null, '  ')"
+        <a @click="$emit('input', c.id)" :title="JSON.stringify(c, null, '  ')"
           >Character #{{ c.id }}</a
         >
       </li>
@@ -16,8 +16,14 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
-  props: ["characters", "selectedCharacterId"],
+  props: ["value"],
+
+  computed: {
+    ...mapGetters(["ownCharacters"]),
+  },
 };
 </script>
 

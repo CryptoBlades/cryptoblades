@@ -18,6 +18,7 @@ export function createStore(web3) {
       ownedCharacterIds: [],
       ownedWeaponIds: [],
       maxStamina: 0,
+      currentCharacterId: null,
 
       characters: {},
       characterStaminas: {},
@@ -35,7 +36,7 @@ export function createStore(web3) {
         return (characterId, weaponId) => {
           const targetsByWeaponId = state.targetsByCharacterIdAndWeaponId[characterId];
           if (targetsByWeaponId == null) return [];
-          return targetsByWeaponId[weaponId];
+          return targetsByWeaponId[weaponId] || [];
         };
       },
 
@@ -49,6 +50,16 @@ export function createStore(web3) {
         const weapons = state.ownedWeaponIds.map((id) => state.weapons[id]);
         if (weapons.some((w) => w == null)) return [];
         return weapons;
+      },
+
+      currentCharacter(state) {
+        if (state.currentCharacterId == null) return null;
+
+        return state.characters[state.currentCharacterId];
+      },
+
+      currentCharacterStamina(state) {
+        return state.currentCharacterId == null ? 0 : state.characterStaminas[state.currentCharacterId];
       }
     },
 
@@ -77,6 +88,10 @@ export function createStore(web3) {
             Vue.set(state, key, payload[key]);
           }
         }
+      },
+
+      setCurrentCharacter(state, characterId) {
+        state.currentCharacterId = characterId;
       },
 
       addNewOwnedCharacterId(state, characterId) {

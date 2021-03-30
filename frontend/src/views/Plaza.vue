@@ -4,18 +4,17 @@
     <div class="character-list">
       <button @click="onMintCharacter">Mint new character</button>
       <character-list
-        :characters="ownCharacters"
-        :selectedCharacterId="character.id"
-        @select="onSelectCharacter"
+        :value="currentCharacterId"
+        @input="setCurrentCharacter"
       />
     </div>
     <div class="stamina-bar">
       <h2>Stamina</h2>
-      <stamina-bar :current="stamina.current" :max="stamina.max" />
+      <stamina-bar :current="currentCharacterStamina" :max="maxStamina" />
     </div>
     <div class="weapon-grid">
       <h2>Weapons</h2>
-      <weapon-grid :weapons="ownWeapons" />
+      <weapon-grid />
     </div>
     <div class="character-preview">
       <h2 class="character-name">{{ character.name }}</h2>
@@ -31,26 +30,18 @@
 import StaminaBar from "../components/StaminaBar.vue";
 import WeaponGrid from "../components/WeaponGrid.vue";
 import Character from "../components/Character.vue";
-import CharacterList from "../components/CharacterList.vue";
-import { mapActions, mapGetters, mapState } from "vuex";
+import CharacterList from "../components/smart/CharacterList.vue";
+import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
 
 export default {
-  data() {
-    return {
-      currentCharacterId: null,
-      now: Date.now(),
-    };
-  },
-
   computed: {
-    ...mapState(["characters", "characterStaminas", "maxStamina"]),
-    ...mapGetters(["ownCharacters", "ownWeapons"]),
-
-    currentCharacter() {
-      if (this.currentCharacterId == null) return null;
-
-      return this.characters[this.currentCharacterId];
-    },
+    ...mapState(["characters", "maxStamina", "currentCharacterId"]),
+    ...mapGetters([
+      "ownCharacters",
+      "ownWeapons",
+      "currentCharacter",
+      "currentCharacterStamina",
+    ]),
 
     character() {
       if (this.currentCharacter == null) {
@@ -70,36 +61,11 @@ export default {
         experience: c.xp,
       };
     },
-
-    stamina() {
-      const currentStamina =
-        this.currentCharacterId == null
-          ? 0
-          : this.characterStaminas[this.currentCharacterId];
-      return { current: currentStamina, max: this.maxStamina };
-    },
-
-    nowAndCurrentCharacterId() {
-      return [this.now, this.currentCharacterId];
-    },
-  },
-
-  watch: {
-    async nowAndCurrentCharacterId(data) {
-      const currentCharacterId = data[1];
-
-      if (currentCharacterId != null) {
-        await this.fetchCharacterStamina(currentCharacterId);
-      }
-    },
   },
 
   methods: {
-    ...mapActions(["mintCharacter", "fetchCharacterStamina"]),
-
-    onSelectCharacter(chara) {
-      this.currentCharacterId = chara.id;
-    },
+    ...mapMutations(["setCurrentCharacter"]),
+    ...mapActions(["mintCharacter"]),
 
     async onMintCharacter() {
       try {
@@ -109,16 +75,6 @@ export default {
         console.error("oh noes, an error when minting", e);
       }
     },
-  },
-
-  created() {
-    this.nowInterval = setInterval(() => {
-      this.now = Date.now();
-    }, 3000);
-  },
-
-  beforeDestroy() {
-    clearInterval(this.nowInterval);
   },
 
   components: {

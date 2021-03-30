@@ -2,16 +2,8 @@
   <div>
     <h1>Combat</h1>
     <h1 style="color: red" v-if="error != null">Error: {{ error }}</h1>
-    <character-list
-      :characters="ownCharacters"
-      :selectedCharacterId="selectedCharacterId"
-      @select="selectedCharacterId = $event.id"
-    />
-    <weapon-grid
-      :weapons="ownWeapons"
-      :selectedWeaponId="selectedWeaponId"
-      @select="selectedWeaponId = $event.id"
-    />
+    <character-list :value="currentCharacterId" @input="setCurrentCharacter" />
+    <weapon-grid v-model="selectedWeaponId" />
 
     <ul class="encounter-list" v-if="targets.length > 0">
       <li v-for="(e, i) in targets" :key="i">
@@ -32,22 +24,21 @@
 <script>
 import Character from "../components/Character.vue";
 import BigButton from "../components/BigButton.vue";
-import CharacterList from "../components/CharacterList.vue";
+import CharacterList from "../components/smart/CharacterList.vue";
 import WeaponGrid from "../components/WeaponGrid.vue";
 
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
 
 export default {
   data() {
     return {
       selectedWeaponId: null,
-      selectedCharacterId: null,
-
       error: null,
     };
   },
 
   computed: {
+    ...mapState(["currentCharacterId"]),
     ...mapGetters([
       "getTargetsByCharacterIdAndWeaponId",
       "ownCharacters",
@@ -56,7 +47,7 @@ export default {
 
     targets() {
       return this.getTargetsByCharacterIdAndWeaponId(
-        this.selectedCharacterId,
+        this.currentCharacterId,
         this.selectedWeaponId
       );
     },
@@ -64,13 +55,13 @@ export default {
     isLoadingTargets() {
       return (
         this.targets.length === 0 &&
-        this.selectedCharacterId != null &&
+        this.currentCharacterId != null &&
         this.selectedWeaponId != null
       );
     },
 
     selections() {
-      return [this.selectedCharacterId, this.selectedWeaponId];
+      return [this.currentCharacterId, this.selectedWeaponId];
     },
   },
 
@@ -81,16 +72,17 @@ export default {
   },
 
   methods: {
+    ...mapMutations(["setCurrentCharacter"]),
     ...mapActions(["fetchTargets", "doEncounter"]),
 
     async onClickEncounter(targetToFight) {
-      if (this.selectedWeaponId == null || this.selectedCharacterId == null) {
+      if (this.selectedWeaponId == null || this.currentCharacterId == null) {
         return;
       }
 
       try {
         const success = await this.doEncounter({
-          characterId: this.selectedCharacterId,
+          characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
           targetString: targetToFight.original,
         });
