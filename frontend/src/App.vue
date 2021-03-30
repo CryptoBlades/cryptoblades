@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <nav-bar :skillBalance="skillBalance" @addMoreSkill="onAddMoreSkill" />
+    <nav-bar />
 
     <div class="content">
       <router-view />
@@ -20,14 +20,10 @@ export default {
   },
 
   computed: {
-    ...mapState(["defaultAccount", "skillBalance"]),
+    ...mapState(["defaultAccount"]),
   },
 
   watch: {
-    skillBalance(balance, oldBalance) {
-      console.log("BALANCE CHANGE:", balance, oldBalance, balance - oldBalance);
-    },
-
     defaultAccount(account) {
       this.web3.eth.defaultAccount = account;
     },
@@ -35,19 +31,6 @@ export default {
 
   methods: {
     ...mapActions({ initializeStore: "initialize" }),
-    ...mapActions(["addMoreSkill"]),
-
-    async onAddMoreSkill() {
-      const skillToAdd = prompt("How much SKILL do you want?", "100");
-
-      try {
-        await this.addMoreSkill(skillToAdd);
-        alert("Successfully added SKILL to your balance!");
-      } catch (e) {
-        console.error(e);
-        alert("Oh no, an error occured!");
-      }
-    },
   },
 
   async created() {
