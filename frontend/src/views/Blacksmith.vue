@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import WeaponGrid from "../components/WeaponGrid.vue";
+import WeaponGrid from "../components/smart/WeaponGrid.vue";
 import BigButton from "../components/BigButton.vue";
 import { mapActions, mapGetters } from "vuex";
 

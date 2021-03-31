@@ -30,10 +30,11 @@ export default {};
   height: 100%;
   display: flex;
   align-items: stretch;
+  font-size: 1.1rem;
 }
 
 a {
-  padding: 20px;
+  padding: 1.2rem;
   color: white;
   text-decoration: none;
   user-select: none;

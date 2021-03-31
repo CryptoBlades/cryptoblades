@@ -75,7 +75,7 @@ body {
 
 .character-bar {
   background: rgb(96, 15, 150);
-  padding: 0 10px;
+  padding: 0.5em 1.2em;
 }
 
 .content {

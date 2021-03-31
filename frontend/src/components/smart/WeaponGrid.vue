@@ -15,7 +15,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-import WeaponIcon from "./WeaponIcon.vue";
+import WeaponIcon from "../WeaponIcon.vue";
 
 export default {
   props: ["value"],
@@ -34,10 +34,6 @@ export default {
 .weapon-grid-container {
   display: flex;
   flex-direction: column;
-}
-
-.header {
-  margin: 0.2cm 0;
 }
 
 .weapon-grid {

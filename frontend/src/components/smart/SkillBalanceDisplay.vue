@@ -52,21 +52,22 @@ export default {
 .skill-balance-display {
   display: flex;
   align-items: center;
+  font-size: 1.1rem;
 }
 
 .add-more-skill {
   background: none;
   border: none;
-  color: white;
-  width: 48px;
+  color: rgba(255, 255, 255, 0.6);
   height: 100%;
-  font-size: 0.8cm;
-  padding: 0;
-  margin-left: 10px;
+  font-size: 1.3em;
+  padding: 0 0.5rem;
+  margin-left: 0.625rem;
   cursor: pointer;
 }
 
 .add-more-skill:hover {
+  color: white;
   background: rgba(255, 255, 255, 0.25);
 }
 </style>

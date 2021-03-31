@@ -28,7 +28,7 @@
 
 <script>
 import StaminaBar from "../components/StaminaBar.vue";
-import WeaponGrid from "../components/WeaponGrid.vue";
+import WeaponGrid from "../components/smart/WeaponGrid.vue";
 import Character from "../components/Character.vue";
 import CharacterList from "../components/smart/CharacterList.vue";
 import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
@@ -89,11 +89,11 @@ export default {
 <style scoped>
 .body {
   display: grid;
-  grid-template-columns: 10cm 1fr 10cm;
+  grid-template-columns: 23rem 1fr 23rem;
   grid-template-rows: auto;
   grid-template-areas: "header header header" "staminabar main characterlist" "weapongrid main characterlist" "empty2 main empty";
-  column-gap: 0.5cm;
-  row-gap: 0.2cm;
+  column-gap: 1rem;
+  row-gap: 0.5rem;
 }
 
 .character-list {
@@ -112,7 +112,7 @@ export default {
   grid-area: main;
   display: flex;
   flex-direction: column;
-  min-height: 10cm;
+  min-height: 24rem;
 }
 
 .character-name {

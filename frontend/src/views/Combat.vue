@@ -23,7 +23,7 @@
 <script>
 import Character from "../components/Character.vue";
 import BigButton from "../components/BigButton.vue";
-import WeaponGrid from "../components/WeaponGrid.vue";
+import WeaponGrid from "../components/smart/WeaponGrid.vue";
 
 import { mapActions, mapGetters, mapState } from "vuex";
 
@@ -115,6 +115,6 @@ export default {
 }
 
 .encounter-button {
-  width: 8cm;
+  width: 19rem;
 }
 </style>

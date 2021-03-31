@@ -26,13 +26,14 @@ export default {
   display: flex;
   align-items: stretch;
   padding: 0 1em;
-  height: 64px;
+  height: 4rem;
 }
 
 .app-title {
   margin: 0;
   margin-right: 1em;
-  padding: 12px 0;
+  padding: 0.75rem 0;
+  align-self: center;
   user-select: none;
 }
 
