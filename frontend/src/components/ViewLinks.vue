@@ -1,5 +1,5 @@
 <template>
-  <ul class="link-list bold">
+  <ul class="link-list bold dark-bg-text">
     <li>
       <router-link :to="{ name: 'plaza' }" exact><span>Plaza</span></router-link>
     </li>
@@ -35,10 +35,9 @@ export default {};
 
 a {
   padding: 1.2rem;
-  color: white;
   text-decoration: none;
   user-select: none;
-
+  color: inherit;
   background: none;
   display: flex;
   justify-content: center;
@@ -46,6 +45,6 @@ a {
 }
 
 a:hover, a.router-link-active {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.15);
 }
 </style>

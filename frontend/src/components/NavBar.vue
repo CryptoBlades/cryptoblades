@@ -22,11 +22,12 @@ export default {
 
 <style scoped>
 .top-bar {
-  background: rgb(128, 18, 201);
+  background: url("../assets/title-bar-bg.png") #ffffff70;
+  background-blend-mode: hard-light;
   display: flex;
   align-items: stretch;
   padding: 0 1em;
-  height: 4rem;
+  height: 3.5rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 

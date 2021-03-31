@@ -39,19 +39,19 @@ export default {
 .weapon {
   width: 6em;
   height: 6em;
-  background: white;
-  box-shadow: 0 2px 4px gray;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px #ffffff38;
   border-radius: 5px;
   padding: 0.5em;
   cursor: pointer;
 }
 
 .weapon img {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .weapon.selected {
-  background: orange;
+  outline: solid currentcolor 2px;
 }
 </style>

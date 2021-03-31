@@ -1,6 +1,6 @@
 export function characterFromContract(id, data) {
   const xp = data[0];
-  const level = data[1];
+  const level = parseInt(data[1], 10);
   const trait = data[2];
   const staminaTimestamp = data[3];
   const appearance = data[4];

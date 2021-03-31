@@ -1,20 +1,23 @@
 <template>
   <div class="body main-font">
     <div class="character-list">
-      <button @click="onMintCharacter">Mint new character</button>
+      <div class="character-header-wrapper">
+        <h1>Characters</h1>
+        <button class="mint-character" @click="onMintCharacter"><i class="fas fa-plus"></i></button>
+      </div>
       <character-list
         :value="currentCharacterId"
         @input="setCurrentCharacter"
       />
     </div>
     <div class="weapon-grid">
-      <h1 class="">Weapons</h1>
+      <h1>Weapons</h1>
       <weapon-grid />
     </div>
     <div class="character-preview">
       <h1 class="character-name">{{ character.name }}</h1>
       <h2 class="character-sub">
-        Level {{ character.level }} ({{ character.experience }} XP)
+        Level {{ character.level + 1 }} ({{ character.experience }} XP)
       </h2>
       <character class="character-inner" />
     </div>
@@ -35,6 +38,7 @@ export default {
       "ownWeapons",
       "currentCharacter",
       "currentCharacterStamina",
+      "getCharacterName",
     ]),
 
     character() {
@@ -50,7 +54,7 @@ export default {
       const c = this.currentCharacter;
       return {
         id: c.id,
-        name: `Character #${c.id} (Appearance ${c.appearance})`,
+        name: this.getCharacterName(c.id),
         level: c.level,
         experience: c.xp,
       };
@@ -85,7 +89,7 @@ export default {
   grid-template-columns: 23rem 1fr 23rem;
   grid-template-rows: auto;
   grid-template-areas: "weapongrid main characterlist";
-  column-gap: 1rem;
+  column-gap: 4rem;
   row-gap: 0.5rem;
 }
 
@@ -93,8 +97,28 @@ export default {
   grid-area: characterlist;
 }
 
-.stamina-bar {
-  grid-area: staminabar;
+.character-header-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.character-header-wrapper h1 {
+  flex-grow: 1;
+}
+
+.character-header-wrapper .mint-character {
+  height: 2.5rem;
+  width: 2.5rem;
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.6);
+  background: none;
+  border: none;
+  border-radius: 0.1em;
+}
+
+.character-header-wrapper .mint-character:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .weapon-grid {

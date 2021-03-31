@@ -13,12 +13,12 @@
     </div>
 
     <div class="character-data-column dark-bg-text">
-      <span v-if="!isLoadingCharacter" class="name bold"
-        >Character #{{ currentCharacter.id }}</span
-      >
+      <span v-if="!isLoadingCharacter" class="name bold">{{
+        getCharacterName(currentCharacterId)
+      }}</span>
       <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
       <span v-if="!isLoadingCharacter" class="subtext">
-        Level {{ currentCharacter.level }} ({{ currentCharacter.xp }} XP)
+        Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} XP)
       </span>
       <span v-if="!isLoadingCharacter" class="subtext">Power: 9001</span>
       <small-bar
@@ -45,7 +45,11 @@ export default {
 
   computed: {
     ...mapState(["maxStamina", "currentCharacterId"]),
-    ...mapGetters(["currentCharacter", "currentCharacterStamina"]),
+    ...mapGetters([
+      "currentCharacter",
+      "currentCharacterStamina",
+      "getCharacterName",
+    ]),
 
     isLoadingCharacter() {
       return this.currentCharacter == null;
@@ -66,8 +70,12 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 4px purple inset;
+  border: 4px rgba(0, 0, 0, 0.5) inset;
+  background: url("../../assets/chara-bg.png") center bottom -4px no-repeat;
+  background-size: auto 140%;
+  background-clip: border-box;
   margin-right: 0.625em;
+  padding: 0.5em;
 }
 
 .character-portrait img {

@@ -6,7 +6,7 @@
       <character-display />
     </div>
 
-    <div class="content">
+    <div class="content dark-bg-text">
       <router-view />
     </div>
   </div>
@@ -41,7 +41,7 @@ export default {
 
   methods: {
     ...mapActions({ initializeStore: "initialize" }),
-    ...mapActions(["fetchCharacterStamina"]),
+    ...mapActions(["fetchCharacterStamina", "updateAccounts"]),
 
     async updateCurrentCharacterStamina() {
       if (this.currentCharacterId != null) {
@@ -53,13 +53,18 @@ export default {
   async created() {
     await this.initializeStore();
 
-    this.nowInterval = setInterval(async () => {
+    this.pollCharacterStamina = setInterval(async () => {
       await this.updateCurrentCharacterStamina();
     }, 3000);
+
+    this.pollAccounts = setInterval(async () => {
+      await this.updateAccounts();
+    }, 1000);
   },
 
   beforeDestroy() {
-    clearInterval(this.nowInterval);
+    clearInterval(this.pollAccounts);
+    clearInterval(this.pollCharacterStamina);
   },
 };
 </script>
@@ -67,20 +72,26 @@ export default {
 <style>
 body {
   margin: 0;
-  background: rgb(241, 241, 241);
+  background: #030a12;
 }
 
 .app {
   margin: 0;
 }
 
+.body {
+  display: flex;
+  flex-direction: column;
+}
+
 .character-bar {
-  background: rgb(96, 15, 150);
+  background-image: url("./assets/title-bar-bg.png");
   padding: 0.5em 1.2em;
 }
 
 .content {
   padding: 0 1em;
+  background: url('./assets/title-subbar.jpg') repeat-x #030a12;
 }
 
 .no-margin {
@@ -95,8 +106,11 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
+.title-bg-text {
+  color: #e1bb34;
+}
+
 .dark-bg-text {
-  opacity: 90%;
-  color: white;
+  color: #e1bb34;
 }
 </style>

@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import _ from 'lodash';
 
 import { setUpContracts } from "./contracts";
 import {
@@ -40,6 +41,23 @@ export function createStore(web3) {
         };
       },
 
+      getCharacterName(state) {
+        const names = [
+          'Gaa Chestbrew',
+          'Globrin Stun',
+          'Grar Nelag',
+          'Trudvurth Duskspirit',
+          'Lur Farglade',
+          'Lira-Zen Nizruzrik',
+          'Thek-Duf Huenkruld'
+        ];
+
+        return (characterId) => {
+          void (state);
+          return names[characterId];
+        };
+      },
+
       ownCharacters(state) {
         const characters = state.ownedCharacterIds.map((id) => state.characters[id]);
         if (characters.some((w) => w == null)) return [];
@@ -68,9 +86,7 @@ export function createStore(web3) {
         state.accounts = payload.accounts;
 
         if (payload.accounts.length > 0) {
-          if (state.defaultAccount == null || !payload.accounts.includes(state.defaultAccount)) {
-            state.defaultAccount = payload.accounts[0];
-          }
+          state.defaultAccount = payload.accounts[0];
         }
         else {
           state.defaultAccount = null;
@@ -129,12 +145,20 @@ export function createStore(web3) {
 
     actions: {
       async initialize({ dispatch }) {
-        await dispatch('initializeAccounts');
+        await dispatch('fetchAccounts');
+
         await dispatch('setUpContracts');
-        await Promise.all([
-          dispatch('fetchUserDetails'),
-          dispatch('setUpContractEvents')
-        ]);
+        await dispatch('setUpContractEvents');
+
+        await dispatch('fetchUserDetails');
+      },
+
+      async updateAccounts({ dispatch }) {
+        const changed = await dispatch('fetchAccounts');
+
+        if (changed) {
+          await dispatch('fetchUserDetails');
+        }
       },
 
       setUpContractEvents({ state, dispatch, commit }) {
@@ -186,9 +210,11 @@ export function createStore(web3) {
         });
       },
 
-      async initializeAccounts({ commit }) {
+      async fetchAccounts({ state, commit }) {
+        const oldAccounts = state.accounts;
         const accounts = await web3.eth.requestAccounts();
         commit('setAccounts', { accounts });
+        return !_.isEqual(oldAccounts, accounts);
       },
 
       async setUpContracts({ commit }) {
@@ -214,6 +240,13 @@ export function createStore(web3) {
           ownedWeaponIds: Array.from(ownedWeaponIds),
           maxStamina: parseInt(maxStamina, 10)
         });
+
+        // console.log([
+        //   skillBalance,
+        //   ownedCharacterIds,
+        //   ownedWeaponIds,
+        //   maxStamina,
+        // ]);
 
         await Promise.all([
           dispatch('fetchCharacters', ownedCharacterIds),

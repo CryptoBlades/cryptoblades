@@ -1,5 +1,5 @@
 <template>
-  <div class="main-font">
+  <div class="body main-font">
     <h1 style="color: red" v-if="error != null">Error: {{ error }}</h1>
 
     <h1>Choose a weapon:</h1>
