@@ -1,28 +1,23 @@
 <template>
-  <div class="weapon-grid-container">
-    <ul class="weapon-grid">
-      <li
-        class="weapon"
-        :class="{ selected: weapon.id === value }"
-        v-for="weapon in ownWeapons"
-        :key="weapon.id"
-      >
-        <weapon-icon :weapon="weapon" @click="$emit('input', weapon.id)" />
-      </li>
-    </ul>
-  </div>
+  <ul class="weapon-grid">
+    <li
+      class="weapon"
+      :class="{ selected: weapon.id === value }"
+      v-for="weapon in ownWeapons"
+      :key="weapon.id"
+      :title="JSON.stringify(weapon, null, '  ')"
+      @click="$emit('input', weapon.id)"
+    >
+      <img src="../../assets/sword-placeholder.png" alt="Placeholder weapon" />
+    </li>
+  </ul>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
-import WeaponIcon from "../WeaponIcon.vue";
 
 export default {
   props: ["value"],
-
-  components: {
-    WeaponIcon,
-  },
 
   computed: {
     ...mapGetters(["ownWeapons"]),
@@ -31,27 +26,29 @@ export default {
 </script>
 
 <style scoped>
-.weapon-grid-container {
-  display: flex;
-  flex-direction: column;
-}
-
 .weapon-grid {
   list-style-type: none;
   margin: 0;
+  padding: 0;
+  display: grid;
   padding: 0.5em;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  background: lightgray;
+  grid-template-columns: repeat(auto-fit, 7em);
+  gap: 0.5em;
 }
 
 .weapon {
-  width: 2em;
-  height: 2em;
-  margin: 0.5em;
-  background: gray;
+  width: 6em;
+  height: 6em;
+  background: white;
+  box-shadow: 0 2px 4px gray;
+  border-radius: 5px;
+  padding: 0.5em;
   cursor: pointer;
+}
+
+.weapon img {
+  width: 100%;
+  height: 100%;
 }
 
 .weapon.selected {

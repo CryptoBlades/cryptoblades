@@ -1,12 +1,13 @@
 <template>
-  <div>
-    <h1>Combat</h1>
+  <div class="main-font">
     <h1 style="color: red" v-if="error != null">Error: {{ error }}</h1>
+
+    <h1>Choose a weapon:</h1>
     <weapon-grid v-model="selectedWeaponId" />
 
     <ul class="encounter-list" v-if="targets.length > 0">
-      <li v-for="(e, i) in targets" :key="i">
-        <character />
+      <li class="encounter" v-for="(e, i) in targets" :key="i">
+        <img src="../assets/chara.png" alt="Placeholder character">
         <big-button
           class="encounter-button"
           :mainText="`Monster with trait ${e.trait}`"
@@ -21,7 +22,7 @@
 </template>
 
 <script>
-import Character from "../components/Character.vue";
+// import Character from "../components/Character.vue";
 import BigButton from "../components/BigButton.vue";
 import WeaponGrid from "../components/smart/WeaponGrid.vue";
 
@@ -98,7 +99,7 @@ export default {
   },
 
   components: {
-    Character,
+    // Character,
     BigButton,
     WeaponGrid,
   },
@@ -112,6 +113,16 @@ export default {
   margin: 0;
   padding: 0;
   justify-content: space-around;
+}
+
+.encounter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.encounter img {
+  max-width: 10em;
 }
 
 .encounter-button {

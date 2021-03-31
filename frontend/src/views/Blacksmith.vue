@@ -1,11 +1,9 @@
 <template>
-  <div class="body">
-    <h1>Blacksmith</h1>
-
-    <h2>Weapon to reforge:</h2>
+  <div class="body main-font">
+    <h1>Weapon to reforge:</h1>
     <weapon-grid v-model="reforgeWeaponId" />
 
-    <h2>Weapon to burn:</h2>
+    <h1>Weapon to burn:</h1>
     <weapon-grid v-model="burnWeaponId" />
 
     <div class="button-row">

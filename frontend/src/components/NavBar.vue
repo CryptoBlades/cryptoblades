@@ -27,6 +27,7 @@ export default {
   align-items: stretch;
   padding: 0 1em;
   height: 4rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .app-title {

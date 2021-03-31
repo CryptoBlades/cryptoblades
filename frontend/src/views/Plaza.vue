@@ -1,6 +1,5 @@
 <template>
-  <div class="body">
-    <h1>Plaza</h1>
+  <div class="body main-font">
     <div class="character-list">
       <button @click="onMintCharacter">Mint new character</button>
       <character-list
@@ -8,26 +7,21 @@
         @input="setCurrentCharacter"
       />
     </div>
-    <div class="stamina-bar">
-      <h2>Stamina</h2>
-      <stamina-bar :current="currentCharacterStamina" :max="maxStamina" />
-    </div>
     <div class="weapon-grid">
-      <h2>Weapons</h2>
+      <h1 class="">Weapons</h1>
       <weapon-grid />
     </div>
     <div class="character-preview">
-      <h2 class="character-name">{{ character.name }}</h2>
-      <h3 class="character-sub">
+      <h1 class="character-name">{{ character.name }}</h1>
+      <h2 class="character-sub">
         Level {{ character.level }} ({{ character.experience }} XP)
-      </h3>
+      </h2>
       <character class="character-inner" />
     </div>
   </div>
 </template>
 
 <script>
-import StaminaBar from "../components/StaminaBar.vue";
 import WeaponGrid from "../components/smart/WeaponGrid.vue";
 import Character from "../components/Character.vue";
 import CharacterList from "../components/smart/CharacterList.vue";
@@ -78,7 +72,6 @@ export default {
   },
 
   components: {
-    StaminaBar,
     WeaponGrid,
     Character,
     CharacterList,
@@ -91,7 +84,7 @@ export default {
   display: grid;
   grid-template-columns: 23rem 1fr 23rem;
   grid-template-rows: auto;
-  grid-template-areas: "header header header" "staminabar main characterlist" "weapongrid main characterlist" "empty2 main empty";
+  grid-template-areas: "weapongrid main characterlist";
   column-gap: 1rem;
   row-gap: 0.5rem;
 }
@@ -116,11 +109,12 @@ export default {
 }
 
 .character-name {
-  margin: 0;
+  margin-bottom: 0;
 }
 
 .character-sub {
-  margin: 0;
+  margin-top: 0;
+  opacity: 80%;
 }
 
 .character-inner {

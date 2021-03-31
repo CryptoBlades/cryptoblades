@@ -67,6 +67,7 @@ export default {
 <style>
 body {
   margin: 0;
+  background: rgb(241, 241, 241);
 }
 
 .app {
@@ -80,6 +81,10 @@ body {
 
 .content {
   padding: 0 1em;
+}
+
+.no-margin {
+  margin: 0;
 }
 
 .bold {

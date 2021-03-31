@@ -18,5 +18,6 @@ export default {};
 }
 
 .wrapper > img {
+  width: 15em;
 }
 </style>
