@@ -1,5 +1,5 @@
 <template>
-  <ul class="link-list">
+  <ul class="link-list bold">
     <li>
       <router-link :to="{ name: 'plaza' }" exact><span>Plaza</span></router-link>
     </li>
@@ -33,7 +33,7 @@ export default {};
 }
 
 a {
-  padding: 10px;
+  padding: 20px;
   color: white;
   text-decoration: none;
   user-select: none;

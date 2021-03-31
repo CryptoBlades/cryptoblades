@@ -2,6 +2,10 @@
   <div class="app">
     <nav-bar />
 
+    <div class="character-bar">
+      <character-display />
+    </div>
+
     <div class="content">
       <router-view />
     </div>
@@ -12,11 +16,13 @@
 import { mapState, mapActions } from "vuex";
 
 import NavBar from "./components/NavBar.vue";
+import CharacterDisplay from "./components/smart/CharacterDisplay.vue";
 
 export default {
   inject: ["web3"],
   components: {
     NavBar,
+    CharacterDisplay,
   },
 
   computed: {
@@ -65,6 +71,11 @@ body {
 
 .app {
   margin: 0;
+}
+
+.character-bar {
+  background: rgb(96, 15, 150);
+  padding: 0 10px;
 }
 
 .content {

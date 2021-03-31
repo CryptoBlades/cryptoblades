@@ -2,7 +2,6 @@
   <div>
     <h1>Combat</h1>
     <h1 style="color: red" v-if="error != null">Error: {{ error }}</h1>
-    <character-list :value="currentCharacterId" @input="setCurrentCharacter" />
     <weapon-grid v-model="selectedWeaponId" />
 
     <ul class="encounter-list" v-if="targets.length > 0">
@@ -24,10 +23,9 @@
 <script>
 import Character from "../components/Character.vue";
 import BigButton from "../components/BigButton.vue";
-import CharacterList from "../components/smart/CharacterList.vue";
 import WeaponGrid from "../components/WeaponGrid.vue";
 
-import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 
 export default {
   data() {
@@ -72,7 +70,6 @@ export default {
   },
 
   methods: {
-    ...mapMutations(["setCurrentCharacter"]),
     ...mapActions(["fetchTargets", "doEncounter"]),
 
     async onClickEncounter(targetToFight) {
@@ -100,12 +97,9 @@ export default {
     },
   },
 
-  created() {},
-
   components: {
     Character,
     BigButton,
-    CharacterList,
     WeaponGrid,
   },
 };

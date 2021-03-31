@@ -23,7 +23,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .outer {
   padding: 0.5em;
   background: gray;

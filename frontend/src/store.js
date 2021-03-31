@@ -88,6 +88,10 @@ export function createStore(web3) {
             Vue.set(state, key, payload[key]);
           }
         }
+
+        if (state.currentCharacterId == null) {
+          state.currentCharacterId = state.ownedCharacterIds.length > 0 ? state.ownedCharacterIds[0] : null;
+        }
       },
 
       setCurrentCharacter(state, characterId) {
