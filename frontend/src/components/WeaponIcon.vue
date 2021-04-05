@@ -1,14 +1,20 @@
 <template>
   <div
     class="weapon-icon"
+    :style="{ backgroundImage: `url(${getWeaponArt(weapon)})` }"
     :title="JSON.stringify(weapon, null, '  ')"
-    @click="$emit('click', weapon)"
   ></div>
 </template>
 
 <script>
+import { getWeaponArt } from "../weapon-arts-placeholder";
+
 export default {
   props: ["weapon"],
+
+  methods: {
+    getWeaponArt,
+  },
 };
 </script>
 
