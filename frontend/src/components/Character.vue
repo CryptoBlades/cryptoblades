@@ -1,12 +1,23 @@
 <template>
   <div class="wrapper">
     <!-- <img src="../assets/chara.png" alt="Placeholder character"> -->
-    <div class="image"></div>
+    <div
+      class="image"
+      :style="{ backgroundImage: `url(${getCharacterArt(this.character)})` }"
+    ></div>
   </div>
 </template>
 
 <script>
-export default {};
+import { getCharacterArt } from "../character-arts-placeholder";
+
+export default {
+  props: ["character"],
+
+  methods: {
+    getCharacterArt,
+  },
+};
 </script>
 
 <style>
@@ -23,7 +34,8 @@ export default {};
 .image {
   height: 100%;
   width: 100%;
-  background: url("../assets/chara.png") center no-repeat;
+  background-position: center;
+  background-repeat: no-repeat;
   background-size: contain;
 }
 </style>

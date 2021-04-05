@@ -6,7 +6,7 @@
     >
       <img
         v-if="!isLoadingCharacter"
-        src="../../assets/chara.png"
+        :src="getCharacterArt(currentCharacter)"
         alt="Placeholder character"
       />
       <span v-if="isLoadingCharacter">Loading...</span>
@@ -36,6 +36,7 @@
 
 <script>
 import { mapGetters, mapState } from "vuex";
+import { getCharacterArt } from "../../character-arts-placeholder";
 import SmallBar from "../SmallBar.vue";
 
 export default {
@@ -54,6 +55,10 @@ export default {
     isLoadingCharacter() {
       return this.currentCharacter == null;
     },
+  },
+
+  methods: {
+    getCharacterArt,
   },
 };
 </script>

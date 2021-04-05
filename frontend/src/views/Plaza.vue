@@ -19,7 +19,7 @@
       <h2 class="character-sub">
         Level {{ character.level + 1 }} ({{ character.experience }} XP)
       </h2>
-      <character class="character-inner" />
+      <character class="character-inner" :character="currentCharacter" />
     </div>
   </div>
 </template>
@@ -143,5 +143,6 @@ export default {
 
 .character-inner {
   flex-grow: 1;
+  min-height: 30em;
 }
 </style>

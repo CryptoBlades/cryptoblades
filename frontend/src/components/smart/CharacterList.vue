@@ -8,7 +8,7 @@
       :title="JSON.stringify(c, null, '  ')"
       @click="$emit('input', c.id)"
     >
-      <div class="art"></div>
+      <div class="art" :style="{ backgroundImage: `url(${getCharacterArt(c)})` }"></div>
       <div class="name-wrapper">
         <span class="name">{{ getCharacterName(c.id) }}</span>
       </div>
@@ -18,12 +18,17 @@
 
 <script>
 import { mapGetters } from "vuex";
+import { getCharacterArt } from "../../character-arts-placeholder";
 
 export default {
   props: ["value"],
 
   computed: {
     ...mapGetters(["ownCharacters", "getCharacterName"]),
+  },
+
+  methods: {
+    getCharacterArt,
   },
 };
 </script>
@@ -56,7 +61,9 @@ export default {
 .character .art {
   width: 100%;
   height: 100%;
-  background: url("../../assets/chara.png") center no-repeat;
+  background-image: url("../../assets/chara.png");
+  background-position: center;
+  background-repeat: no-repeat;
   background-size: contain;
 }
 
