@@ -122,8 +122,14 @@ contract Characters is ERC721, Util {
         tokens[id].staminaTimestamp = timestamp;
     }
 
-    function drainStamina(uint256 id, uint8 amount) public restricted {
-        setStaminaTimestamp(id, getStaminaTimestamp(id) + uint64((amount * secondsPerStamina)));
+    function drainStamina(uint256 id, uint8 amount) public restricted returns(bool) {
+        if(getStaminaPoints(id) >= amount) {
+            setStaminaTimestamp(id, getStaminaTimestamp(id) + uint64((amount * secondsPerStamina)));
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     function getStaminaPoints(uint256 id) public view returns (uint8) {

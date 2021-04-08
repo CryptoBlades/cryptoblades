@@ -1,9 +1,11 @@
+const { SSL_OP_EPHEMERAL_RSA } = require('constants');
+
 const CryptoBlades = artifacts.require('CryptoBlades');
-CryptoBlades.numberFormat = 'String';
+CryptoBlades.numberFormat = 'BN';
 const Characters = artifacts.require('Characters');
-Characters.numberFormat = 'String';
+Characters.numberFormat = 'BN';
 const Weapons = artifacts.require('Weapons');
-Weapons.numberFormat = 'String';
+Weapons.numberFormat = 'BN';
 
 function truffleTupleToArray(tuple) {
   const out = [];
@@ -98,14 +100,14 @@ contract('CryptoBlades', accounts => {
       const characters = await Characters.at(await cryptoBlades.characters());
       const weapons = await Weapons.at(await cryptoBlades.weapons());
 
-      await cryptoBlades.giveMeSkill('100000000');
+      await cryptoBlades.giveMeSkill('10000000000000');
 
       const preSkillAmountAccount = await cryptoBlades.getMySkill();
       const preSkillAmountContract = await cryptoBlades.getContractSkillBalance();
 
       const initialBlockNumber = await web3.eth.getBlockNumber();
 
-      for (let i = 0; i < 1000; i++) {
+      for (let i = 0; i < 10; i++) {
         if (i % 20 === 0) {
           console.log(`Minted ${i} characters...`);
         }
@@ -135,6 +137,9 @@ contract('CryptoBlades', accounts => {
       assert.lengthOf(mintedCharacterIds, 10);
       assert.lengthOf(mintedWeaponIds, 10);
 
+      const preFightSkillAmountAccount = await cryptoBlades.getMySkill();
+      const preFightSkillAmountContract = await cryptoBlades.getContractSkillBalance();
+
       for (let i = 0; i < 10 * 10; i++) {
         if (i % 20 === 0) {
           console.log(`Done ${i} fights...`);
@@ -163,8 +168,12 @@ contract('CryptoBlades', accounts => {
 
       const postSkillAmountAccount = await cryptoBlades.getMySkill();
       const postSkillAmountContract = await cryptoBlades.getContractSkillBalance();
-      console.log(`Account: ${preSkillAmountAccount} -> ${postSkillAmountAccount} (diff: ${preSkillAmountAccount - postSkillAmountAccount})`);
-      console.log(`Contract: ${preSkillAmountContract} -> ${postSkillAmountContract} (diff: ${preSkillAmountContract - postSkillAmountContract})`);
+      console.log(`Account: ${preSkillAmountAccount} -> ${postSkillAmountAccount} (diff: ${postSkillAmountAccount.sub(preSkillAmountAccount)})`);
+      console.log(`Contract: ${preSkillAmountContract} -> ${postSkillAmountContract} (diff: ${postSkillAmountContract.sub(preSkillAmountContract)})`);
+      console.log(`Account Mints: ${preSkillAmountAccount} -> ${preFightSkillAmountAccount} (diff: ${preFightSkillAmountAccount.sub(preSkillAmountAccount)})`);
+      console.log(`Contract Mints: ${preSkillAmountContract} -> ${preFightSkillAmountContract} (diff: ${preFightSkillAmountContract.sub(preSkillAmountContract)})`);
+      console.log(`Account Fights: ${preFightSkillAmountAccount} -> ${postSkillAmountAccount} (diff: ${postSkillAmountAccount.sub(preFightSkillAmountAccount)})`);
+      console.log(`Contract Fights: ${preFightSkillAmountContract} -> ${postSkillAmountContract} (diff: ${postSkillAmountContract.sub(preFightSkillAmountContract)})`);
     });
   });
 });

@@ -24,6 +24,10 @@ contract CryptoBlades is Util {
         weapons = new Weapons(address(this));
     }
 
+    // config vars
+    uint characterLimit = 1000;
+    uint8 staminaCostFight = 0;
+
     // prices when contract is at 100% load (50% of total skill)
     uint256 public mintCharacterFee = 50000 * 2;
     //uint256 public rerollTraitFee = 30000 * 2;
@@ -33,7 +37,7 @@ contract CryptoBlades is Util {
     uint256 public mintWeaponFee = 15000 * 2;
     uint256 public reforgeWeaponFee = 5000 * 2;
 
-    event FightOutcome(uint256 character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll);
+    event FightOutcome(uint256 character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
 
     function getSkillTokensAddress() external view returns (address) {
         return skillTokens;
@@ -74,20 +78,25 @@ contract CryptoBlades is Util {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target) external
-        isCharacterOwner(char)
-        isWeaponOwner(wep)
-        isTargetValid(char, wep, target) {
+            isCharacterOwner(char)
+            isWeaponOwner(wep)
+            isTargetValid(char, wep, target) {
+        performFight(char, wep, target);
+    }
+
+    function performFight(uint256 char, uint256 wep, uint32 target) private {
         // avg xp gain from a fight is 9 xp
+
+        require(characters.drainStamina(char, staminaCostFight), "Not enough stamina!");
 
         uint24 playerRoll = getPlayerPowerRoll(char, wep, uint8((target >> 24) & 0xFF)/*monster trait*/);
         uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target));
-
+        
         if(playerRoll >= monsterRoll) {
             characters.gainXp(char, getXpGainForFight(char, wep, target));
             payPlayer(characters.ownerOf(char), getTokenGainForFight(target));
         }
-        characters.drainStamina(char, 20);
-        emit FightOutcome(char, wep, target, playerRoll, monsterRoll);
+        emit FightOutcome(char, wep, target, playerRoll, monsterRoll, getXpGainForFight(char, wep, target), getTokenGainForFight(target));
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
@@ -199,7 +208,8 @@ contract CryptoBlades is Util {
     }
 
     function mintCharacter() public requestPayFromPlayer(mintCharacterFee) returns (uint256) {
-        require(characters.balanceOf(msg.sender) <= 1000, "You can only have 1000 characters!");
+        require(characters.balanceOf(msg.sender) <= characterLimit,
+            string(abi.encodePacked("You can only have ",staminaCostFight," characters!")));
         payContract(msg.sender, mintCharacterFee);
         uint256 tokenID = characters.mint(msg.sender);
         if(weapons.balanceOf(msg.sender) == 0)
