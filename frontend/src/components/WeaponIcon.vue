@@ -65,8 +65,7 @@ export default {
           this.renderer.render(this.scene, this.camera);
           textureLoader.load( "models/blades/0.png", texture => {
             var material = new Three.MeshLambertMaterial( { map: texture} );
-            this.blade.material = material;
-            this.blade.material.needsUpdate = true;
+            this.blade.traverse(child => { if(child.isMesh) { child.material = material; } })
             this.renderer.render(this.scene, this.camera);
             }
           );
@@ -86,8 +85,7 @@ export default {
           this.renderer.render(this.scene, this.camera);
           textureLoader.load( "models/hilts/0.png", texture => {
             var material = new Three.MeshLambertMaterial( { map: texture} );
-            this.blade.material = material;
-            this.blade.material.needsUpdate = true;
+            this.hilt.traverse(child => { if(child.isMesh) { child.material = material; } })
             this.renderer.render(this.scene, this.camera);
             }
           );
