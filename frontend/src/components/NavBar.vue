@@ -22,13 +22,13 @@ export default {
 
 <style scoped>
 .top-bar {
-  background: url("../assets/title-bar-bg.png") #ffffff70;
+  background: url("../assets/title-bar-bg-better-tiling-bottom.png") #ffffff9f;
   background-blend-mode: hard-light;
+  background-position-y: bottom;
   display: flex;
   align-items: stretch;
   padding: 0 1em;
   height: 3.5rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .app-title {

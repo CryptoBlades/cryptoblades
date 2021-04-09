@@ -85,13 +85,14 @@ body {
 }
 
 .character-bar {
-  background-image: url("./assets/title-bar-bg.png");
+  background-image: url("./assets/title-bar-bg-better-tiling-bottom.png");
+  background-position-y: bottom;
   padding: 0.5em 1.2em;
 }
 
 .content {
   padding: 0 1em;
-  background: url('./assets/title-subbar.jpg') repeat-x #030a12;
+  background: url('./assets/title-subbar.jpg') 0 -3px repeat-x #030a12;
 }
 
 .no-margin {
