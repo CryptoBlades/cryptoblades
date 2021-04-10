@@ -80,7 +80,7 @@
         <button
           class="StakeButton"
           :class="{
-            switch_active: currentState == 'ok',
+            switch_active: !loading && currentState == 'ok',
           }"
           @click="onSubmit"
         >
@@ -135,7 +135,7 @@ const contractIsFullButtonLabel = "Contract is Full";
 const enterAnAmountButtonLabel = "Enter an amount";
 const insufficientBalanceButtonLabel = "Insufficient balance";
 const notEnoughFundsInExitPoolButtonLabel = "Not enough funds in Exit Pool";
-const waitingButtonLabel = "waiting...";
+const waitingButtonLabel = "Waiting...";
 
 const stakeButtonLabel = "Stake";
 const unstakeButtonLabel = "Unstake";
@@ -146,13 +146,12 @@ export default {
     textAmount: "",
     isDeposit: true,
     gas: { low: 90, medium: 130, high: 180 },
-    loading: true,
+    loading: false,
     errorWhenUpdating: null,
     selectedGasLevel: "medium",
   }),
   async mounted() {
     this.gas = await getCurrentGasPrices();
-    this.loading = false;
 
     await this.fetchData();
   },
@@ -327,16 +326,24 @@ export default {
       }
     },
     async onSubmit() {
-      if (this.currentState !== "ok") return;
+      if (this.loading || this.currentState !== "ok") return;
 
       const amount = this.bigNumberAmount.toString();
       console.log("It is showtime:", this.bigNumberAmount, amount);
 
-      if (this.isDeposit) {
-        await this.stake({ amount, gas: this.chosenGas });
-      } else {
-        //unstake
-        await this.unstake({ amount, gas: this.chosenGas });
+      try {
+        this.loading = true;
+
+        if (this.isDeposit) {
+          await this.stake({ amount, gas: this.chosenGas });
+        } else {
+          //unstake
+          await this.unstake({ amount, gas: this.chosenGas });
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.loading = false;
       }
     },
     async fetchData() {
