@@ -8,13 +8,14 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^3.4.1",
+    "@truffle/hdwallet-provider": "^1.2.6",
     "abdk-libraries-solidity": "2.4.0",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
     "truffle": "^5.2.3",
-    "truffle-export-abi": "^1.0.1",
-    "truffle-contract-size": "^2.0.1"
+    "truffle-contract-size": "^2.0.1",
+    "truffle-export-abi": "^1.0.1"
   },
   "scripts": {
     "build": "truffle compile",

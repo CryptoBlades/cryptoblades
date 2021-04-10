@@ -20,11 +20,7 @@
 
 require('dotenv').config();
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
-// const infuraKey = "fj4jll3k.....";
-//
-// const fs = require('fs');
-// const mnemonic = fs.readFileSync(".secret").toString().trim();
+const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 module.exports = {
   /**
@@ -49,6 +45,16 @@ module.exports = {
       port: process.env.ETH_DEV_RPC_PORT || 7545,            // Standard Ethereum port (default: none)
       network_id: process.env.ETH_DEV_RPC_NETWORK_ID || '*',       // Any network (default: none)
       gas: parseInt(process.env.ETH_DEV_RPC_GAS, 10) || 67219750 // required for deploy, otherwise it throws weird require-errors on constructor
+    },
+    bsctestnet: {
+      provider: () => new HDWalletProvider(
+        process.env.BINANCE_WALLET_MNEMONIC, 'https://data-seed-prebsc-2-s2.binance.org:8545/'
+      ),
+      network_id: 0x61,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      gas: 8000000,
+      skipDryRun: false
     },
     // Another network with more advanced options...
     // advanced: {
@@ -88,11 +94,11 @@ module.exports = {
       version: "0.6.2",    // Fetch exact version from solc-bin (default: truffle's version)
       //docker: false,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: {          // See the solidity docs for advice about optimization and evmVersion
-       optimizer: {
-         enabled: true,
-         runs: 200
-       },
-       //evmVersion: "byzantium"
+        optimizer: {
+          enabled: true,
+          runs: 200
+        },
+        //evmVersion: "byzantium"
       }
     }
   },
