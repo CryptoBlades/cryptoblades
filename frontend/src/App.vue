@@ -7,13 +7,14 @@
     </div>
 
     <div class="content dark-bg-text">
-      <router-view />
+      <router-view v-if="canShowApp" />
     </div>
   </div>
 </template>
 
 <script>
 import { mapState, mapActions } from "vuex";
+import _ from "lodash";
 
 import NavBar from "./components/NavBar.vue";
 import CharacterDisplay from "./components/smart/CharacterDisplay.vue";
@@ -26,7 +27,11 @@ export default {
   },
 
   computed: {
-    ...mapState(["defaultAccount", "currentCharacterId"]),
+    ...mapState(["defaultAccount", "currentCharacterId", "contracts"]),
+
+    canShowApp() {
+      return !_.isEmpty(this.contracts);
+    }
   },
 
   watch: {
@@ -75,26 +80,6 @@ body {
   background: #030a12;
 }
 
-.app {
-  margin: 0;
-}
-
-.body {
-  display: flex;
-  flex-direction: column;
-}
-
-.character-bar {
-  background-image: url("./assets/title-bar-bg-better-tiling-bottom.png");
-  background-position-y: bottom;
-  padding: 0.5em 1.2em;
-}
-
-.content {
-  padding: 0 1em;
-  background: url('./assets/title-subbar.jpg') 0 -3px repeat-x #030a12;
-}
-
 .no-margin {
   margin: 0;
 }
@@ -113,5 +98,20 @@ body {
 
 .dark-bg-text {
   color: #e1bb34;
+}
+</style>
+<style scoped>
+.app {
+  margin: 0;
+}
+
+.character-bar {
+  background-image: url("./assets/title-bar-bg.png");
+  padding: 0.5em 1.2em;
+}
+
+.content {
+  padding: 0 1em;
+  background: url("./assets/title-subbar.jpg") repeat-x #030a12;
 }
 </style>

@@ -1,6 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import _ from 'lodash';
+import BN from "bignumber.js";
+BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
+BN.config({ EXPONENTIAL_AT: 100 });
 
 import { setUpContracts } from "./contracts";
 import {
@@ -25,7 +28,12 @@ export function createStore(web3) {
       characterStaminas: {},
       weapons: {},
 
-      targetsByCharacterIdAndWeaponId: {}
+      targetsByCharacterIdAndWeaponId: {},
+
+      stakedSkillBalance: 0,
+      stakeRemainingCapacityForDeposit: 0,
+      stakeRemainingCapacityForWithdraw: 0,
+      stakeContractBalance: 0,
     },
 
     getters: {
@@ -140,6 +148,16 @@ export function createStore(web3) {
         }
 
         Vue.set(state.targetsByCharacterIdAndWeaponId[characterId], weaponId, targets);
+      },
+
+      updateStakeData(state, {
+        stakedSkillBalance, stakeRemainingCapacityForDeposit,
+        stakeRemainingCapacityForWithdraw, stakeContractBalance
+      }) {
+        state.stakedSkillBalance = stakedSkillBalance;
+        state.stakeRemainingCapacityForDeposit = stakeRemainingCapacityForDeposit;
+        state.stakeRemainingCapacityForWithdraw = stakeRemainingCapacityForWithdraw;
+        state.stakeContractBalance = stakeContractBalance;
       }
     },
 
@@ -169,6 +187,8 @@ export function createStore(web3) {
             return;
           }
 
+          console.log('NewCharacter', data);
+
           const characterId = data.returnValues.character;
 
           commit('addNewOwnedCharacterId', characterId);
@@ -185,6 +205,8 @@ export function createStore(web3) {
             console.error(err);
             return;
           }
+
+          console.log('NewWeapon', data);
 
           const weaponId = data.returnValues.weapon;
 
@@ -203,17 +225,32 @@ export function createStore(web3) {
             return;
           }
 
+          console.log('FightOutcome', data);
+
           await Promise.all([
             dispatch('fetchCharacter', data.returnValues.character),
             dispatch('updateSkillBalance')
           ]);
+        });
+
+        state.contracts.StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err, data) => {
+          if (err != null) {
+            console.error(err);
+            return;
+          }
+
+          console.log('RewardPaid', data);
+
+          await dispatch('updateSkillBalance');
         });
       },
 
       async fetchAccounts({ state, commit }) {
         const oldAccounts = state.accounts;
         const accounts = await web3.eth.requestAccounts();
-        commit('setAccounts', { accounts });
+        if (!_.isEqual(oldAccounts, accounts)) {
+          commit('setAccounts', { accounts });
+        }
         return !_.isEqual(oldAccounts, accounts);
       },
 
@@ -303,7 +340,9 @@ export function createStore(web3) {
 
       async fetchCharacterStamina({ state, commit }, characterId) {
         const stamina = await state.contracts.Characters.methods.getStaminaPoints(characterId).call();
-        commit('updateCharacterStamina', { characterId, stamina });
+        if (state.characterStaminas[characterId] !== stamina) {
+          commit('updateCharacterStamina', { characterId, stamina });
+        }
       },
 
       async mintCharacter({ state }) {
@@ -374,7 +413,62 @@ export function createStore(web3) {
         } else {
           return false;
         }
-      }
+      },
+
+      async fetchStakeDetails({ state, commit }) {
+        const { StakingRewards, SkillToken } = state.contracts;
+
+        const [
+          stakedSkillBalance, stakeRemainingCapacityForDeposit,
+          stakeRemainingCapacityForWithdraw, stakeContractBalance
+        ] = await Promise.all([
+          StakingRewards.methods.balanceOf(state.defaultAccount).call(),
+          Promise.resolve(null),
+          StakingRewards.methods.totalSupply().call(),
+          SkillToken.methods.balanceOf(StakingRewards.options.address).call(),
+        ]);
+
+        const stakeData = {
+          stakedSkillBalance, stakeRemainingCapacityForDeposit,
+          stakeRemainingCapacityForWithdraw, stakeContractBalance
+        };
+        console.log(stakeData);
+        commit('updateStakeData', stakeData);
+      },
+
+      async stake({ state, dispatch }, { amount, gas }) {
+        const { StakingRewards, SkillToken } = state.contracts;
+
+        await SkillToken.methods.increaseAllowance(StakingRewards.options.address, amount).send({
+          from: state.defaultAccount
+        });
+
+        await StakingRewards.methods.stake(amount).send({
+          from: state.defaultAccount,
+          gas: 200_000,
+          gasPrice: BN(gas).multipliedBy(1e9).toString(),
+        });
+
+        await Promise.all([
+          dispatch('updateSkillBalance'),
+          dispatch('fetchStakeDetails'),
+        ]);
+      },
+
+      async unstake({ state, dispatch }, { amount, gas }) {
+        const { StakingRewards } = state.contracts;
+
+        await StakingRewards.methods.withdraw(amount).send({
+          from: state.defaultAccount,
+          gas: 200_000,
+          gasPrice: BN(gas).multipliedBy(1e9).toString(),
+        });
+
+        await Promise.all([
+          dispatch('updateSkillBalance'),
+          dispatch('fetchStakeDetails'),
+        ]);
+      },
     }
   });
 }

@@ -8,6 +8,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "axios": "^0.21.1",
+    "bignumber.js": "^9.0.1",
     "core-js": "^3.6.5",
     "three": "^0.127.0",
     "three-fbx-loader": "^1.0.3",

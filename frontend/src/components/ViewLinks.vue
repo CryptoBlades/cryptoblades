@@ -1,13 +1,20 @@
 <template>
   <ul class="link-list bold dark-bg-text">
     <li>
-      <router-link :to="{ name: 'plaza' }" exact><span>Plaza</span></router-link>
+      <router-link :to="{ name: 'plaza' }" exact
+        ><span>Plaza</span></router-link
+      >
     </li>
     <li>
-      <router-link :to="{ name: 'blacksmith' }"><span>Blacksmith</span></router-link>
+      <router-link :to="{ name: 'blacksmith' }"
+        ><span>Blacksmith</span></router-link
+      >
     </li>
     <li>
       <router-link :to="{ name: 'combat' }"><span>Combat</span></router-link>
+    </li>
+    <li>
+      <router-link :to="{ name: 'stake' }"><span>Stake</span></router-link>
     </li>
   </ul>
 </template>
@@ -44,7 +51,8 @@ a {
   flex-direction: column;
 }
 
-a:hover, a.router-link-active {
+a:hover,
+a.router-link-active {
   background: rgba(255, 255, 255, 0.15);
 }
 </style>
