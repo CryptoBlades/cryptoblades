@@ -123,11 +123,15 @@ export function createStore(web3) {
       },
 
       addNewOwnedCharacterId(state, characterId) {
-        state.ownedCharacterIds.push(characterId);
+        if (!state.ownedCharacterIds.includes(characterId)) {
+          state.ownedCharacterIds.push(characterId);
+        }
       },
 
       addNewOwnedWeaponId(state, weaponId) {
-        state.ownedWeaponIds.push(weaponId);
+        if (!state.ownedWeaponIds.includes(weaponId)) {
+          state.ownedWeaponIds.push(weaponId);
+        }
       },
 
       updateCharacter(state, { characterId, character }) {
