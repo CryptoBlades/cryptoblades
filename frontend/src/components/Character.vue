@@ -32,7 +32,6 @@ export default {
 }
 
 .image {
-  height: 100%;
   width: 100%;
   background-position: center;
   background-repeat: no-repeat;
