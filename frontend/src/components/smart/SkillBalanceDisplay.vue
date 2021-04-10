@@ -9,18 +9,14 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
+import BN from "bignumber.js";
 
 export default {
   computed: {
     ...mapState(["skillBalance"]),
 
     formattedSkillBalance() {
-      const formatter = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "ETH",
-      });
-
-      return formatter.format(this.skillBalance).replace(/ETH/g, "SKILL");
+      return BN(this.skillBalance).dividedBy(1e18).toFixed(4) + " SKILL";
     },
   },
 
@@ -28,10 +24,10 @@ export default {
     ...mapActions(["addMoreSkill"]),
 
     async onAddMoreSkill() {
-      const skillToAdd = prompt("How much SKILL do you want?", "100");
+      const skillToAdd = BN(prompt("How much SKILL do you want?", "5")).multipliedBy(1e18);
 
       try {
-        await this.addMoreSkill(skillToAdd);
+        await this.addMoreSkill(skillToAdd.toFixed());
         alert("Successfully added SKILL to your balance!");
       } catch (e) {
         console.error(e);
