@@ -34,6 +34,11 @@ export function createStore(web3) {
       stakeRemainingCapacityForDeposit: 0,
       stakeRemainingCapacityForWithdraw: 0,
       stakeContractBalance: 0,
+
+      stakeCurrentRewardEarned: '0',
+      stakeRewardPeriodEndUnix: 0,
+      stakeRewardPeriodDurationSeconds: 7 * 24 * 60 * 60,
+      stakeLatestBlockTimestampUnix: 0
     },
 
     getters: {
@@ -86,7 +91,11 @@ export function createStore(web3) {
 
       currentCharacterStamina(state) {
         return state.currentCharacterId == null ? 0 : state.characterStaminas[state.currentCharacterId];
-      }
+      },
+
+      stakeRewardPeriodStartUnix(state) {
+        return state.stakeRewardPeriodEndUnix - state.stakeRewardPeriodDurationSeconds;
+      },
     },
 
     mutations: {
@@ -162,6 +171,18 @@ export function createStore(web3) {
         state.stakeRemainingCapacityForDeposit = stakeRemainingCapacityForDeposit;
         state.stakeRemainingCapacityForWithdraw = stakeRemainingCapacityForWithdraw;
         state.stakeContractBalance = stakeContractBalance;
+      },
+
+      updateStakeRewardData(state, {
+        stakeCurrentRewardEarned,
+        stakeRewardPeriodEndUnix,
+        stakeRewardPeriodDurationSeconds,
+        stakeLatestBlockTimestampUnix
+      }) {
+        state.stakeCurrentRewardEarned = stakeCurrentRewardEarned;
+        state.stakeRewardPeriodEndUnix = stakeRewardPeriodEndUnix;
+        state.stakeRewardPeriodDurationSeconds = stakeRewardPeriodDurationSeconds;
+        state.stakeLatestBlockTimestampUnix = stakeLatestBlockTimestampUnix;
       }
     },
 
@@ -245,7 +266,32 @@ export function createStore(web3) {
 
           console.log('RewardPaid', data);
 
-          await dispatch('updateSkillBalance');
+          await Promise.all([
+            dispatch('updateSkillBalance'),
+            dispatch('fetchStakeRewardDetails'),
+          ]);
+        });
+
+        state.contracts.StakingRewards.events.RewardAdded(async (err, data) => {
+          if (err != null) {
+            console.error(err);
+            return;
+          }
+
+          console.log('RewardAdded', data);
+
+          await dispatch('fetchStakeRewardDetails');
+        });
+
+        state.contracts.StakingRewards.events.RewardsDurationUpdated(async (err, data) => {
+          if (err != null) {
+            console.error(err);
+            return;
+          }
+
+          console.log('RewardsDurationUpdated', data);
+
+          await dispatch('fetchStakeRewardDetails');
         });
       },
 
@@ -440,6 +486,40 @@ export function createStore(web3) {
         commit('updateStakeData', stakeData);
       },
 
+      async fetchStakeRewardDetails({ state, commit }) {
+        const { StakingRewards } = state.contracts;
+
+        const [
+          stakeCurrentRewardEarned,
+          stakeRewardPeriodEndUnix,
+          stakeRewardPeriodDurationSeconds,
+          stakeLatestBlockTimestampUnix
+        ] = await Promise.all([
+          StakingRewards.methods.earned(state.defaultAccount).call(),
+          StakingRewards.methods.periodFinish().call(),
+          StakingRewards.methods.rewardsDuration().call(),
+          web3.eth.getBlock('latest').then(b => b.timestamp),
+        ]);
+
+        const stateToChange = {
+          stakeCurrentRewardEarned,
+          stakeRewardPeriodEndUnix: parseInt(stakeRewardPeriodEndUnix, 10),
+          stakeRewardPeriodDurationSeconds: parseInt(stakeRewardPeriodDurationSeconds, 10),
+          stakeLatestBlockTimestampUnix: parseInt(stakeLatestBlockTimestampUnix, 10)
+        };
+        let doCommit = false;
+        for (const key in stateToChange) {
+          if (Object.hasOwnProperty.call(stateToChange, key) && stateToChange[key] !== state[key]) {
+            doCommit = true;
+            break;
+          }
+        }
+
+        if (doCommit) {
+          commit('updateStakeRewardData', stateToChange);
+        }
+      },
+
       async stake({ state, dispatch }, { amount, gas }) {
         const { StakingRewards, SkillToken } = state.contracts;
 
@@ -473,6 +553,19 @@ export function createStore(web3) {
           dispatch('fetchStakeDetails'),
         ]);
       },
+
+      async claimReward({ state, dispatch }) {
+        const { StakingRewards } = state.contracts;
+
+        await StakingRewards.methods.getReward().send({
+          from: state.defaultAccount,
+        });
+
+        await Promise.all([
+          dispatch('updateSkillBalance'),
+          dispatch('fetchStakeRewardDetails'),
+        ]);
+      }
     }
   });
 }

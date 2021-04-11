@@ -3,6 +3,28 @@
 <template>
   <div class="stake">
     <div class="staker">
+      <div
+        class="reward-claim-section medium-dark-bg"
+        :class="{ 'height-minimized': !showRewardClaimSection }"
+      >
+        <div class="reward-claim-inner-wrapper">
+          <h1 class="no-margin center-text">Rewards are available!</h1>
+          <p class="center-text">You have:</p>
+          <p class="center-text selectable">
+            {{ currentRewardEarned.toFixed(18) }} SKILL
+          </p>
+          <p class="center-text">to be claimed.</p>
+          <button
+            class="StakeButton"
+            :class="{
+              switch_active: !rewardClaimLoading,
+            }"
+            @click="onClaimReward"
+          >
+            {{ rewardClaimLoading ? "Loading..." : "Claim reward" }}
+          </button>
+        </div>
+      </div>
       <div class="chooser">
         <div class="navbar">
           <button
@@ -21,7 +43,7 @@
           </button>
         </div>
       </div>
-      <div class="stakePage">
+      <div class="stakePage medium-dark-bg">
         <div class="sPElement input">
           <div class="inputBody">
             <div class="flex_row">
@@ -78,7 +100,7 @@
           </div>
         </div>
         <button
-          class="StakeButton"
+          class="StakeButton spacing-top"
           :class="{
             switch_active: !loading && currentState == 'ok',
           }"
@@ -93,7 +115,7 @@
           </span>
         </button>
       </div>
-      <div class="navbar">
+      <div class="navbar gas-selector-spacing">
         <span id="gas">Gas</span>
         <button
           class="switch"
@@ -149,11 +171,19 @@ export default {
     loading: false,
     errorWhenUpdating: null,
     selectedGasLevel: "medium",
+    rewardClaimLoading: false,
   }),
   async mounted() {
     this.gas = await getCurrentGasPrices();
 
     await this.fetchData();
+
+    this.stakeRewardProgressInterval = setInterval(async () => {
+      await this.fetchStakeRewardDetails();
+    }, 5000);
+  },
+  beforeDestroy() {
+    clearInterval(this.stakeRewardProgressInterval);
   },
   computed: {
     ...mapState([
@@ -163,7 +193,12 @@ export default {
       "stakeRemainingCapacityForDeposit",
       "stakeRemainingCapacityForWithdraw",
       "stakeContractBalance",
+      "stakeCurrentRewardEarned",
     ]),
+
+    showRewardClaimSection() {
+      return this.currentRewardEarned.gt(0) || this.rewardClaimLoading;
+    },
 
     walletBalance() {
       return BN(this.skillBalance);
@@ -171,6 +206,10 @@ export default {
 
     stakedBalance() {
       return BN(this.stakedSkillBalance);
+    },
+
+    currentRewardEarned() {
+      return BN(this.stakeCurrentRewardEarned).dividedBy(1e18);
     },
 
     remainingCapacityForDeposit() {
@@ -291,7 +330,13 @@ export default {
     },
   },
   methods: {
-    ...mapActions(["fetchStakeDetails", "stake", "unstake"]),
+    ...mapActions([
+      "fetchStakeDetails",
+      "fetchStakeRewardDetails",
+      "stake",
+      "unstake",
+      "claimReward",
+    ]),
 
     async onMAX() {
       if (this.isDeposit) {
@@ -346,6 +391,17 @@ export default {
         this.loading = false;
       }
     },
+    async onClaimReward() {
+      try {
+        this.rewardClaimLoading = true;
+
+        await this.claimReward();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.rewardClaimLoading = false;
+      }
+    },
     async fetchData() {
       //balances
       try {
@@ -353,6 +409,7 @@ export default {
         this.loading = true;
 
         await this.fetchStakeDetails();
+        await this.fetchStakeRewardDetails();
       } catch (err) {
         this.errorWhenUpdating = err.message;
         console.log(err);
@@ -414,13 +471,10 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   max-width: 375px;
   width: 100%;
-  background-color: #181818;
   height: 90%;
-  max-height: 716px;
   overflow: visible;
   box-shadow: 0 0 50px rgb(0 0 0 / 10%);
   border-radius: 2px;
-  position: relative;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -481,7 +535,7 @@ export default {
   height: calc(80% - 20px);
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 1fr 0.2fr 1fr 0.5fr;
+  grid-template-rows: 1fr 0.2fr 1fr 5rem;
   gap: 0px 0px;
   grid-template-areas:
     "."
@@ -644,5 +698,44 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
+}
+
+.gas-selector-spacing {
+  margin: 1.5rem 0;
+}
+
+.reward-claim-section {
+  height: 14.5rem;
+  overflow: hidden;
+  /* padding: 10px; */
+  transition: height 0.7s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.reward-claim-section > * + * {
+  margin-top: 1rem;
+}
+
+.reward-claim-inner-wrapper {
+  padding: 10px;
+}
+
+.spacing-top {
+  margin-top: 1.5rem;
+}
+
+.center-text {
+  text-align: center;
+}
+
+.selectable {
+  user-select: text;
+}
+
+.medium-dark-bg {
+  background-color: #181818;
+}
+
+.height-minimized {
+  height: 0;
 }
 </style>
