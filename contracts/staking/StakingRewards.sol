@@ -134,6 +134,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
 
     // End rewards emission earlier
     function updatePeriodFinish(uint timestamp) external onlyOwner updateReward(address(0)) {
+        require(timestamp > lastUpdateTime, "Timestamp must be after lastUpdateTime");
         periodFinish = timestamp;
     }
 
