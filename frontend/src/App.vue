@@ -64,7 +64,7 @@ export default {
 
     this.pollAccounts = setInterval(async () => {
       await this.updateAccounts();
-    }, 1000);
+    }, 200);
   },
 
   beforeDestroy() {
