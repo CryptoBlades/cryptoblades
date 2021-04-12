@@ -61,7 +61,11 @@ export default {
     }, 3000);
 
     this.pollAccounts = setInterval(async () => {
-      await this.updateAccounts();
+      try {
+        await this.updateAccounts();
+      } catch (e) {
+        console.error(e);
+      }
     }, 200);
   },
 
