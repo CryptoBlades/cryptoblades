@@ -1,6 +1,7 @@
 <template>
   <div class="skill-balance-display">
     <div><span class="bold">Balance</span>: {{ formattedSkillBalance }}</div>
+
     <button class="add-more-skill" @click="onAddMoreSkill">
       <i class="fas fa-plus-circle"></i>
     </button>
@@ -10,13 +11,15 @@
 <script>
 import { mapActions, mapState } from "vuex";
 import BN from "bignumber.js";
+import Web3 from "web3";
 
 export default {
   computed: {
     ...mapState(["skillBalance"]),
 
     formattedSkillBalance() {
-      return BN(this.skillBalance).dividedBy(1e18).toFixed(4) + " SKILL";
+      const skillBalance = Web3.utils.fromWei(this.skillBalance, "ether");
+      return `${BN(skillBalance).toFixed(4)} SKILL`;
     },
   },
 
@@ -24,10 +27,13 @@ export default {
     ...mapActions(["addMoreSkill"]),
 
     async onAddMoreSkill() {
-      const skillToAdd = BN(prompt("How much SKILL do you want?", "5")).multipliedBy(1e18);
+      const skillToAdd = Web3.utils.toWei(
+        prompt("How much SKILL do you want?", "5"),
+        "ether"
+      );
 
       try {
-        await this.addMoreSkill(skillToAdd.toFixed());
+        await this.addMoreSkill(skillToAdd);
         alert("Successfully added SKILL to your balance!");
       } catch (e) {
         console.error(e);

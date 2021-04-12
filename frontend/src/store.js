@@ -20,7 +20,7 @@ export function createStore(web3) {
       accounts: [],
       defaultAccount: null,
 
-      skillBalance: 0,
+      skillBalance: '0',
       ownedCharacterIds: [],
       ownedWeaponIds: [],
       maxStamina: 0,
@@ -32,10 +32,10 @@ export function createStore(web3) {
 
       targetsByCharacterIdAndWeaponId: {},
 
-      stakedSkillBalance: 0,
-      stakeRemainingCapacityForDeposit: 0,
-      stakeRemainingCapacityForWithdraw: 0,
-      stakeContractBalance: 0,
+      stakedSkillBalance: '0',
+      stakeRemainingCapacityForDeposit: '0',
+      stakeRemainingCapacityForWithdraw: '0',
+      stakeContractBalance: '0',
 
       stakeCurrentRewardEarned: '0',
       stakeRewardPeriodEndUnix: 0,
