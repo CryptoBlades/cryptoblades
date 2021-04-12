@@ -2,9 +2,7 @@
   <div class="app">
     <nav-bar />
 
-    <div class="character-bar">
-      <character-display />
-    </div>
+    <character-bar v-if="currentCharacterId != null" />
 
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
@@ -17,13 +15,13 @@ import { mapState, mapActions } from "vuex";
 import _ from "lodash";
 
 import NavBar from "./components/NavBar.vue";
-import CharacterDisplay from "./components/smart/CharacterDisplay.vue";
+import CharacterBar from "./components/CharacterBar.vue";
 
 export default {
   inject: ["web3"],
   components: {
     NavBar,
-    CharacterDisplay,
+    CharacterBar,
   },
 
   computed: {
@@ -31,7 +29,7 @@ export default {
 
     canShowApp() {
       return !_.isEmpty(this.contracts);
-    }
+    },
   },
 
   watch: {
@@ -105,13 +103,8 @@ body {
   margin: 0;
 }
 
-.character-bar {
-  background-image: url("./assets/title-bar-bg.png");
-  padding: 0.5em 1.2em;
-}
-
 .content {
   padding: 0 1em;
-  background: url("./assets/title-subbar.jpg") repeat-x #030a12;
+  background: url("./assets/title-subbar.jpg") 0 -2px repeat-x #030a12;
 }
 </style>
