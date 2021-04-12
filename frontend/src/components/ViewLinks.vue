@@ -1,16 +1,16 @@
 <template>
   <ul class="link-list bold dark-bg-text">
-    <li>
+    <li v-if="!featureFlagStakeOnly">
       <router-link :to="{ name: 'plaza' }" exact
         ><span>Plaza</span></router-link
       >
     </li>
-    <li>
+    <li v-if="!featureFlagStakeOnly">
       <router-link :to="{ name: 'blacksmith' }"
         ><span>Blacksmith</span></router-link
       >
     </li>
-    <li>
+    <li v-if="!featureFlagStakeOnly">
       <router-link :to="{ name: 'combat' }"><span>Combat</span></router-link>
     </li>
     <li>
@@ -20,7 +20,9 @@
 </template>
 
 <script>
-export default {};
+export default {
+  inject: ["featureFlagStakeOnly"],
+};
 </script>
 
 <style scoped>

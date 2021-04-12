@@ -2,7 +2,7 @@
   <div class="app">
     <nav-bar />
 
-    <character-bar v-if="currentCharacterId != null" />
+    <character-bar v-if="!featureFlagStakeOnly && currentCharacterId != null" />
 
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
@@ -18,7 +18,7 @@ import NavBar from "./components/NavBar.vue";
 import CharacterBar from "./components/CharacterBar.vue";
 
 export default {
-  inject: ["web3"],
+  inject: ["web3", "featureFlagStakeOnly"],
   components: {
     NavBar,
     CharacterBar,

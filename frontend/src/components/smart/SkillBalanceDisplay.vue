@@ -2,7 +2,7 @@
   <div class="skill-balance-display">
     <div><span class="bold">Balance</span>: {{ formattedSkillBalance }}</div>
 
-    <button class="add-more-skill" @click="onAddMoreSkill">
+    <button v-if="!featureFlagStakeOnly" class="add-more-skill" @click="onAddMoreSkill">
       <i class="fas fa-plus-circle"></i>
     </button>
   </div>
@@ -14,6 +14,7 @@ import BN from "bignumber.js";
 import Web3 from "web3";
 
 export default {
+  inject: ["featureFlagStakeOnly"],
   computed: {
     ...mapState(["skillBalance"]),
 
