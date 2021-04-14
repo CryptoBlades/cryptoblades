@@ -6,6 +6,8 @@
 
 1. For Ganache, choose Quickstart Ethereum.
 
+1. Increase the gas limit in the workspace to `67219751`.
+
 1. Install [MetaMask](https://metamask.io/).
 
 1. Create a new connection to connect to Ganache with these settings: http://localhost:7545, any name, any chain id
