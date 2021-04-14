@@ -17,7 +17,7 @@ Vue.config.productionTip = false;
 Vue.use(Vuex);
 Vue.use(VueRouter);
 
-const store = createStore(web3);
+const store = createStore(web3, featureFlagStakeOnly);
 const router = createRouter(featureFlagStakeOnly);
 
 new Vue({
