@@ -14,6 +14,10 @@
       </div>
       <a href="https://metamask.io/" target="_blank">Get it here.</a>
     </div>
+
+    <div class="fullscreen-warning" v-if="errorMessage">
+      {{ errorMessage }}
+    </div>
   </div>
 </template>
 
@@ -30,6 +34,10 @@ export default {
     NavBar,
     CharacterBar,
   },
+
+  data: () => ({
+    errorMessage: ''
+  }),
 
   computed: {
     ...mapState(["defaultAccount", "currentCharacterId", "contracts"]),
@@ -65,7 +73,13 @@ export default {
   },
 
   async created() {
-    await this.initializeStore();
+    try {
+      await this.initializeStore();
+    } catch(e) {
+      this.errorMessage = "Could not initialize properly: Out of gas or ABI error.";
+      console.error(e);
+      throw e;
+    }
 
     this.pollCharacterStamina = setInterval(async () => {
       await this.updateCurrentCharacterStamina();
