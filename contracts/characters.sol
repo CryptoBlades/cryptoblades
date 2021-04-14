@@ -52,7 +52,7 @@ contract Characters is ERC721, Util {
         uint16 xp = 0;
         uint8 level = 0; // 1
         uint8 trait = uint8(randomSafeMinMax(0,3));
-        uint64 staminaTimestamp = uint64(now);
+        uint64 staminaTimestamp = uint64(now - getStaminaMaxWait());
         uint64 appearance = 0;
 
         tokens.push(Character(xp, level, trait, staminaTimestamp, appearance));
@@ -124,7 +124,13 @@ contract Characters is ERC721, Util {
 
     function drainStamina(uint256 id, uint8 amount) public restricted returns(bool) {
         if(getStaminaPoints(id) >= amount) {
-            setStaminaTimestamp(id, getStaminaTimestamp(id) + uint64((amount * secondsPerStamina)));
+            uint64 drainTime = uint64((amount * secondsPerStamina));
+            if(isStaminaFull(id)) { // if stamina full, we reset timestamp and drain from that
+                setStaminaTimestamp(id, uint64(now-getStaminaMaxWait() + drainTime));
+            }
+            else {
+                setStaminaTimestamp(id, getStaminaTimestamp(id) + drainTime);
+            }
             return true;
         }
         else {
@@ -133,7 +139,15 @@ contract Characters is ERC721, Util {
     }
 
     function getStaminaPoints(uint256 id) public view returns (uint8) {
-        return uint8(getStaminaTimestamp(id) / secondsPerStamina);
+        uint256 points = (now - getStaminaTimestamp(id)) / secondsPerStamina;
+        if(points > maxStamina) {
+            points = maxStamina;
+        }
+        return uint8(points);
+    }
+
+    function isStaminaFull(uint256 id) public view returns (bool) {
+        return getStaminaPoints(id) >= maxStamina;
     }
     
     function getStaminaMaxWait() public view returns (uint64) {

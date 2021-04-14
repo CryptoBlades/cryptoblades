@@ -1,6 +1,7 @@
 <template>
   <div
     class="weapon-icon"
+    :style="{ backgroundImage: `url(${getWeaponArt(weapon)})` }"
     :title="JSON.stringify(weapon, null, '  ')"
     ref="el"
   >
@@ -13,9 +14,10 @@ import { getWeaponArt } from "../weapon-arts-placeholder";
 import * as Three from 'three';
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 
-const bladeCount = 6;
-//const crossGuardCount = 2;
-const hiltCount = 6;
+const bladeCount = 24;
+const crossGuardCount = 24;
+const gripCount = 24;
+const pommelCount = 24;
 const modelScale = 1/75;
 const modelRotationZ = Math.PI / 4;
 const modelOffsetY = -0.625;
@@ -29,7 +31,8 @@ export default {
       camera: null,
       scene: null,
       renderer: null,
-      hilt: null,
+      pommel: null,
+      grip: null,
       crossGuard: null,
       blade: null
     }
@@ -50,10 +53,11 @@ export default {
 
 
         var blade = this.weapon.blade % bladeCount;
-        //var crossGuard = this.weapon.crossGuard % crossGuardCount; // todo with proper pack, no crossguard in free sample
-        var hilt = this.weapon.hilt % hiltCount;
+        var crossGuard = this.weapon.crossguard % crossGuardCount;
+        var grip = this.weapon.grip % gripCount;
+        var pommel = this.weapon.pommel % pommelCount;
 
-        loader.load("models/blades/".concat(blade).concat(".fbx"), model => {
+        loader.load("models/blades/Blade_".concat(blade).concat(".fbx"), model => {
 
           model.scale.set( modelScale,modelScale,modelScale );
           model.rotation.set(0, 0, modelRotationZ);
@@ -73,19 +77,59 @@ export default {
           console.error( error );
         } );
         
-        loader.load("models/hilts/".concat(hilt).concat(".fbx"), model => {
+        loader.load("models/crossguards/CrossGuard_".concat(crossGuard).concat(".fbx"), model => {
+
+          model.scale.set( modelScale,modelScale,modelScale );
+          model.rotation.set(0, 0, modelRotationZ);
+          model.position.y = modelOffsetY;
+          model.position.x = modelOffsetX;
+          this.crossGuard = model;
+          this.scene.add(model);
+          //console.log(this.mesh);
+          this.renderer.render(this.scene, this.camera);
+          textureLoader.load( "models/crossguards/0.png", texture => {
+            var material = new Three.MeshLambertMaterial( { map: texture} );
+            this.crossGuard.traverse(child => { if(child.isMesh) { child.material = material; } })
+            this.renderer.render(this.scene, this.camera);
+            }
+          );
+        }, undefined, function ( error ) {
+          console.error( error );
+        } );
+        
+        loader.load("models/grips/Grip_".concat(grip).concat(".fbx"), model => {
           
           model.scale.set( modelScale,modelScale,modelScale );
           model.rotation.set(0, 0, modelRotationZ);
           model.position.y = modelOffsetY;
           model.position.x = modelOffsetX;
-          this.hilt = model;
+          this.grip = model;
           this.scene.add(model);
           //console.log(this.mesh);
           this.renderer.render(this.scene, this.camera);
-          textureLoader.load( "models/hilts/0.png", texture => {
+          textureLoader.load( "models/grips/0.png", texture => {
             var material = new Three.MeshLambertMaterial( { map: texture} );
-            this.hilt.traverse(child => { if(child.isMesh) { child.material = material; } })
+            this.grip.traverse(child => { if(child.isMesh) { child.material = material; } })
+            this.renderer.render(this.scene, this.camera);
+            }
+          );
+        }, undefined, function ( error ) {
+          console.error( error );
+        } );
+        
+        loader.load("models/pommels/Pommel_".concat(pommel).concat(".fbx"), model => {
+
+          model.scale.set( modelScale,modelScale,modelScale );
+          model.rotation.set(0, 0, modelRotationZ);
+          model.position.y = modelOffsetY;
+          model.position.x = modelOffsetX;
+          this.pommel = model;
+          this.scene.add(model);
+          //console.log(this.mesh);
+          this.renderer.render(this.scene, this.camera);
+          textureLoader.load( "models/pommels/0.png", texture => {
+            var material = new Three.MeshLambertMaterial( { map: texture} );
+            this.pommel.traverse(child => { if(child.isMesh) { child.material = material; } })
             this.renderer.render(this.scene, this.camera);
             }
           );

@@ -12,7 +12,7 @@ import {
 
 const defaultCallOptions = state => ({ from: state.defaultAccount });
 
-export function createStore(web3) {
+export function createStore(web3, featureFlagStakeOnly) {
   return new Vuex.Store({
     state: {
       contracts: {},
@@ -116,8 +116,12 @@ export function createStore(web3) {
         state.contracts = payload;
       },
 
+      updateSkillBalance(state, { skillBalance }) {
+        state.skillBalance = skillBalance;
+      },
+
       updateUserDetails(state, payload) {
-        const keysToAllow = ['skillBalance', 'ownedCharacterIds', 'ownedWeaponIds', 'maxStamina'];
+        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina'];
         for (const key of keysToAllow) {
           if (Object.hasOwnProperty.call(payload, key)) {
             Vue.set(state, key, payload[key]);
@@ -202,13 +206,13 @@ export function createStore(web3) {
         await dispatch('setUpContractEvents');
 
         await dispatch('fetchAccounts');
-        await dispatch('fetchUserDetails');
       },
 
-      async updateAccounts({ dispatch }) {
-        const changed = await dispatch('fetchAccounts');
+      async fetchAccounts({ state, dispatch, commit }) {
+        const accounts = await web3.eth.requestAccounts();
 
-        if (changed) {
+        if (!_.isEqual(state.accounts, accounts)) {
+          commit('setAccounts', { accounts });
           await dispatch('fetchUserDetails');
         }
       },
@@ -229,7 +233,7 @@ export function createStore(web3) {
 
           await Promise.all([
             dispatch('fetchCharacter', characterId),
-            dispatch('updateSkillBalance')
+            dispatch('fetchSkillBalance')
           ]);
         });
 
@@ -248,7 +252,7 @@ export function createStore(web3) {
 
           await Promise.all([
             dispatch('fetchWeapon', weaponId),
-            dispatch('updateSkillBalance')
+            dispatch('fetchSkillBalance')
           ]);
         });
 
@@ -263,7 +267,7 @@ export function createStore(web3) {
 
           await Promise.all([
             dispatch('fetchCharacter', data.returnValues.character),
-            dispatch('updateSkillBalance')
+            dispatch('fetchSkillBalance')
           ]);
         });
 
@@ -276,7 +280,7 @@ export function createStore(web3) {
           console.log('RewardPaid', data);
 
           await Promise.all([
-            dispatch('updateSkillBalance'),
+            dispatch('fetchSkillBalance'),
             dispatch('fetchStakeRewardDetails'),
           ]);
         });
@@ -304,36 +308,33 @@ export function createStore(web3) {
         });
       },
 
-      async fetchAccounts({ state, commit }) {
-        const oldAccounts = state.accounts;
-        const accounts = await web3.eth.requestAccounts();
-        if (!_.isEqual(oldAccounts, accounts)) {
-          commit('setAccounts', { accounts });
-          return true;
-        }
-        return false;
-      },
-
       async setUpContracts({ commit }) {
         const contracts = await setUpContracts(web3);
         commit('setContracts', contracts);
       },
 
-      async fetchUserDetails({ state, dispatch, commit }) {
+      async fetchUserDetails({ dispatch }) {
+        const promises = [dispatch('fetchSkillBalance')];
+
+        if (!featureFlagStakeOnly) {
+          promises.push(dispatch('fetchUserGameDetails'));
+        }
+
+        await Promise.all([promises]);
+      },
+
+      async fetchUserGameDetails({ state, dispatch, commit }) {
         const [
-          skillBalance,
           ownedCharacterIds,
           ownedWeaponIds,
           maxStamina,
         ] = await Promise.all([
-          state.contracts.CryptoBlades.methods.getMySkill().call(defaultCallOptions(state)),
           state.contracts.CryptoBlades.methods.getMyCharacters().call(defaultCallOptions(state)),
           state.contracts.CryptoBlades.methods.getMyWeapons().call(defaultCallOptions(state)),
           state.contracts.Characters.methods.maxStamina().call(defaultCallOptions(state)),
         ]);
 
         commit('updateUserDetails', {
-          skillBalance,
           ownedCharacterIds: Array.from(ownedCharacterIds),
           ownedWeaponIds: Array.from(ownedWeaponIds),
           maxStamina: parseInt(maxStamina, 10)
@@ -353,9 +354,9 @@ export function createStore(web3) {
         await dispatch('fetchWeapons', ownedWeaponIds);
       },
 
-      async updateSkillBalance({ state, commit }) {
+      async fetchSkillBalance({ state, commit }) {
         const skillBalance = await state.contracts.CryptoBlades.methods.getMySkill().call(defaultCallOptions(state));
-        commit('updateUserDetails', { skillBalance });
+        commit('updateSkillBalance', { skillBalance });
       },
 
       async addMoreSkill({ state, dispatch }, skillToAdd) {
@@ -363,7 +364,7 @@ export function createStore(web3) {
           from: state.defaultAccount,
         });
 
-        await dispatch('updateSkillBalance');
+        await dispatch('fetchSkillBalance');
       },
 
       async fetchCharacters({ dispatch }, characterIds) {
@@ -538,7 +539,7 @@ export function createStore(web3) {
         });
 
         await Promise.all([
-          dispatch('updateSkillBalance'),
+          dispatch('fetchSkillBalance'),
           dispatch('fetchStakeDetails'),
         ]);
       },
@@ -553,7 +554,7 @@ export function createStore(web3) {
         });
 
         await Promise.all([
-          dispatch('updateSkillBalance'),
+          dispatch('fetchSkillBalance'),
           dispatch('fetchStakeDetails'),
         ]);
       },
@@ -566,7 +567,7 @@ export function createStore(web3) {
         });
 
         await Promise.all([
-          dispatch('updateSkillBalance'),
+          dispatch('fetchSkillBalance'),
           dispatch('fetchStakeRewardDetails'),
         ]);
       }

@@ -42,7 +42,8 @@ contract Weapons is ERC721, Util {
         // cosmetics, todo
         uint8 blade;
         uint8 crossguard;
-        uint8 hilt;
+        uint8 grip;
+        uint8 pommel;
     }
 
     Weapon[] public tokens;
@@ -54,9 +55,9 @@ contract Weapons is ERC721, Util {
         _;
     }
 
-    function get(uint256 id) public view returns (uint16, uint16, uint16, uint16, uint8, uint8, uint8, uint8) {
+    function get(uint256 id) public view returns (uint16, uint16, uint16, uint16, uint8, uint8, uint8, uint8, uint8) {
         Weapon memory w = tokens[id];
-        return (w.properties, w.stat1, w.stat2, w.stat3, w.level, w.blade, w.crossguard, w.hilt);
+        return (w.properties, w.stat1, w.stat2, w.stat3, w.level, w.blade, w.crossguard, w.grip, w.pommel);
     }
 
     function mint(address minter, uint8 maxStar) public restricted returns (uint256) {
@@ -73,29 +74,10 @@ contract Weapons is ERC721, Util {
 
         // each point refers to .25%
         // so 1 * 4 is 1%
-        uint16 minRoll = 1 * 4;
-        uint16 maxRoll = 50 * 4;
-        uint8 statCount = 1;
-        if(stars == 1) { // 2 star
-            minRoll = 45 * 4;
-            maxRoll = 75 * 4;
-        }
-        else if(stars == 2) { // 3 star
-            minRoll = 70 * 4;
-            maxRoll = 100 * 4;
-        }
-        else if(stars == 3) { // 4 star
-            minRoll = 50 * 4;
-            maxRoll = 100 * 4;
-            statCount = 2;
-        }
-        else if(stars > 3) { // 5 star and above
-            minRoll = 67 * 4;
-            maxRoll = 100 * 4;
-            statCount = 3;
-        }
+        uint16 minRoll = getStatMinRoll(stars);
+        uint16 maxRoll = getStatMaxRoll(stars);
+        uint8 statCount = getStatCount(stars);
 
-        uint16 stat1 = uint16(randomSafeMinMax(minRoll, maxRoll));
         uint16 stat2 = 0;
         uint16 stat3 = 0;
         if(statCount > 1) {
@@ -107,13 +89,59 @@ contract Weapons is ERC721, Util {
 
         uint8 blade = uint8(randomSafeMinMax(0, 255));
         uint8 crossguard = uint8(randomSafeMinMax(0, 255));
-        uint8 hilt = uint8(randomSafeMinMax(0, 255));
+        uint8 grip = uint8(randomSafeMinMax(0, 255));
+        uint8 pommel = uint8(randomSafeMinMax(0, 255));
 
-        tokens.push(Weapon(properties, stat1, stat2, stat3, 0/*level*/, blade, crossguard, hilt));
+        tokens.push(Weapon(properties, uint16(randomSafeMinMax(minRoll, maxRoll)), stat2, stat3, 0/*level*/, blade, crossguard, grip, pommel));
 
         _mint(minter, tokenID);
         emit NewWeapon(tokenID);
         return tokenID;
+    }
+
+    function getStatMinRoll(uint256 stars) private pure returns (uint16) {
+        uint16 minRoll = 1 * 4;
+        if(stars == 1) { // 2 star
+            minRoll = 45 * 4;
+        }
+        else if(stars == 2) { // 3 star
+            minRoll = 70 * 4;
+        }
+        else if(stars == 3) { // 4 star
+            minRoll = 50 * 4;
+        }
+        else if(stars > 3) { // 5 star and above
+            minRoll = 67 * 4;
+        }
+        return minRoll;
+    }
+
+    function getStatMaxRoll(uint256 stars) private pure returns (uint16) {
+        uint16 maxRoll = 50 * 4;
+        if(stars == 1) { // 2 star
+            maxRoll = 75 * 4;
+        }
+        else if(stars == 2) { // 3 star
+            maxRoll = 100 * 4;
+        }
+        else if(stars == 3) { // 4 star
+            maxRoll = 100 * 4;
+        }
+        else if(stars > 3) { // 5 star and above
+            maxRoll = 100 * 4;
+        }
+        return maxRoll;
+    }
+
+    function getStatCount(uint256 stars) private pure returns (uint8) {
+        uint8 statCount = 1;
+        if(stars == 3) { // 4 star
+            statCount = 2;
+        }
+        else if(stars > 3) { // 5 star and above
+            statCount = 3;
+        }
+        return statCount;
     }
 
     function getProperties(uint256 id) public view returns (uint16) {

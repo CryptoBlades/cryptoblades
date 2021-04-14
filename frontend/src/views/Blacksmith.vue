@@ -10,7 +10,7 @@
       <big-button
         class="button"
         mainText="Forge sword"
-        subText="(1 loot)"
+        subText="(1 SKILL)"
         @click="onForgeWeapon"
       />
       <big-button

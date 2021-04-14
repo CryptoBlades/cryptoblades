@@ -63,7 +63,7 @@ export default {
 
   methods: {
     ...mapActions({ initializeStore: "initialize" }),
-    ...mapActions(["fetchCharacterStamina", "updateAccounts"]),
+    ...mapActions(["fetchCharacterStamina", "fetchAccounts"]),
 
     async updateCurrentCharacterStamina() {
       if (this.currentCharacterId != null) {
@@ -87,7 +87,7 @@ export default {
 
     this.pollAccounts = setInterval(async () => {
       try {
-        await this.updateAccounts();
+        await this.fetchAccounts();
       } catch (e) {
         console.error(e);
       }
