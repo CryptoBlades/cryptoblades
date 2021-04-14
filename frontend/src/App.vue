@@ -7,6 +7,13 @@
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
+
+    <div class="fullscreen-warning" v-if="showMetamaskWarning">
+      <div>
+        You need Metamask installed to use this app. 
+      </div>
+      <a href="https://metamask.io/" target="_blank">Get it here.</a>
+    </div>
   </div>
 </template>
 
@@ -30,6 +37,10 @@ export default {
     canShowApp() {
       return !_.isEmpty(this.contracts);
     },
+
+    showMetamaskWarning() {
+      return !this.web3.currentProvider;
+    }
   },
 
   watch: {
@@ -110,5 +121,15 @@ body {
 .content {
   padding: 0 1em;
   background: url("./assets/title-subbar.jpg") 0 -2px repeat-x #030a12;
+}
+
+.fullscreen-warning {
+  height: calc(100vh - 56px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-size: 3rem;
+  color: #fff;
 }
 </style>
