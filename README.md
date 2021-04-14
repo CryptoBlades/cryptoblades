@@ -1,11 +1,34 @@
-# kryptoknights
+# CryptoBlades
 
-to get dependencies:
-npm install
-npm install -g truffle-export-abi
+## Getting Started
 
-contracts need to be included in "migrations"
-deploy.bat to get the contracts compiled and deployed to ganache
-truffle-config.js holds parameters for the compile/deploy process
-extract_abi.bat will grab the ABI part of the build
-the ABI needs to be passed as a string arg to the contract init
+`npm install`
+
+Create a `.env` file in `frontend` with the following values:
+
+- `VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS`
+- `VUE_APP_STAKING_REWARDS_CONTRACT_ADDRESS`
+- `VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS`
+
+## Truffle Environment Variables
+
+Truffle also supports some environment variables, if you create a `.env` file in the root you can specify:
+
+- `ETH_DEV_RPC_HOST`
+- `ETH_DEV_RPC_PORT`
+- `ETH_DEV_RPC_NETWORK_ID`
+- `ETH_DEV_RPC_GAS`
+- `BINANCE_WALLET_MNEMONIC`
+
+## Structure
+
+- `contracts` contains the solidity contracts for the game
+- `frontend` contains the Vue code for the frontend
+- `migrations` contains migration files
+- `test` contains tests
+
+## Commands
+
+- `npm run start:frontend` - start up a server for the Vue frontend
+- `npm run contract:prepare` - extract the ABI and re-compile Truffle contracts
+- `npm run contract:deploy` - deploy the Truffle contracts for testing
