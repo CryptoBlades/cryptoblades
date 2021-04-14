@@ -40,7 +40,8 @@ export function createStore(web3, featureFlagStakeOnly) {
       stakeCurrentRewardEarned: '0',
       stakeRewardPeriodEndUnix: 0,
       stakeRewardPeriodDurationSeconds: 7 * 24 * 60 * 60,
-      stakeLatestBlockTimestampUnix: 0
+      stakeRewardDistributionTimeLeft: 0,
+      stakeUnlockTimeLeft: 0,
     },
 
     getters: {
@@ -191,12 +192,14 @@ export function createStore(web3, featureFlagStakeOnly) {
         stakeCurrentRewardEarned,
         stakeRewardPeriodEndUnix,
         stakeRewardPeriodDurationSeconds,
-        stakeLatestBlockTimestampUnix
+        stakeRewardDistributionTimeLeft,
+        stakeUnlockTimeLeft
       }) {
         state.stakeCurrentRewardEarned = stakeCurrentRewardEarned;
         state.stakeRewardPeriodEndUnix = stakeRewardPeriodEndUnix;
         state.stakeRewardPeriodDurationSeconds = stakeRewardPeriodDurationSeconds;
-        state.stakeLatestBlockTimestampUnix = stakeLatestBlockTimestampUnix;
+        state.stakeRewardDistributionTimeLeft = stakeRewardDistributionTimeLeft;
+        state.stakeUnlockTimeLeft = stakeUnlockTimeLeft;
       }
     },
 
@@ -498,19 +501,22 @@ export function createStore(web3, featureFlagStakeOnly) {
           stakeCurrentRewardEarned,
           stakeRewardPeriodEndUnix,
           stakeRewardPeriodDurationSeconds,
-          stakeLatestBlockTimestampUnix
+          stakeRewardDistributionTimeLeft,
+          stakeUnlockTimeLeft
         ] = await Promise.all([
           StakingRewards.methods.earned(state.defaultAccount).call(defaultCallOptions(state)),
           StakingRewards.methods.periodFinish().call(defaultCallOptions(state)),
           StakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
-          web3.eth.getBlock('latest').then(b => b.timestamp),
+          StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
+          StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
 
         const stateToChange = {
           stakeCurrentRewardEarned,
           stakeRewardPeriodEndUnix: parseInt(stakeRewardPeriodEndUnix, 10),
           stakeRewardPeriodDurationSeconds: parseInt(stakeRewardPeriodDurationSeconds, 10),
-          stakeLatestBlockTimestampUnix: parseInt(stakeLatestBlockTimestampUnix, 10)
+          stakeRewardDistributionTimeLeft: parseInt(stakeRewardDistributionTimeLeft, 10),
+          stakeUnlockTimeLeft: parseInt(stakeUnlockTimeLeft, 10)
         };
         let doCommit = false;
         for (const key in stateToChange) {
