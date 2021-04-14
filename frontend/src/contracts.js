@@ -1,11 +1,8 @@
-import abi from '../../build/ABI.json';
 import { abi as cryptoBladesAbi } from '../../build/contracts/CryptoBlades.json';
 import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
 import { abi as stakingRewardsAbi } from '../../build/contracts/StakingRewards.json';
 import { abi as skillTokenAbi } from '../../build/contracts/SkillToken.json';
-
-export { abi };
 
 function createContracts(web3) {
   const at = abi => addr => new web3.eth.Contract(abi, addr);

@@ -13,7 +13,7 @@ contract Weapons is ERC721, Util {
 
     address main;
 
-    constructor (address source) public ERC721("Kryptoknight weapon", "KNW") {
+    constructor (address source) public ERC721("CryptoBlades weapon", "CBW") {
         main = source;
     }
 

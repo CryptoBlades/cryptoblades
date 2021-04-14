@@ -10,7 +10,7 @@ contract Characters is ERC721, Util {
 
     address main;
 
-    constructor (address source) public ERC721("Kryptoknight", "KNT") {
+    constructor (address source) public ERC721("CryptoBlades character", "CBC") {
         main = source;
     }
 
