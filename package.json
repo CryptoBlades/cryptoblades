@@ -21,7 +21,7 @@
   "scripts": {
     "postinstall": "npm run contract:prepare && lerna exec -- npm install",
     "start:frontend": "cd frontend && npm start",
-    "contract:prepare": "npm run build && npm run extract-abi",
+    "contract:prepare": "npm run build",
     "contract:deploy": "npm run deploy",
     "build": "truffle compile",
     "test": "truffle test",
