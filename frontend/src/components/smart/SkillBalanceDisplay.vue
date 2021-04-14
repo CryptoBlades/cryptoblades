@@ -28,8 +28,11 @@ export default {
     ...mapActions(["addMoreSkill"]),
 
     async onAddMoreSkill() {
+      const valueSkillToAdd = prompt("How much SKILL do you want?", "5");
+      if(!valueSkillToAdd) return;
+
       const skillToAdd = Web3.utils.toWei(
-        prompt("How much SKILL do you want?", "5"),
+        valueSkillToAdd,
         "ether"
       );
 
