@@ -1,10 +1,26 @@
 # CryptoBlades
 
-## Getting Started
+## Getting Started (Crypto)
 
-`npm install`
+1. Install [Ganache](https://www.trufflesuite.com/ganache).
 
-Create a `.env` file in `frontend` with the following values:
+1. For Ganache, choose Quickstart Ethereum.
+
+1. Install [MetaMask](https://metamask.io/).
+
+1. Create a new connection to connect to Ganache with these settings: http://localhost:7545, any name, any chain id
+
+1. In Ganache, click the key icon on the right side of any address and grab the private key.
+
+1. In MetaMask, create a new account, import from private key, and paste the key in there. 
+
+You should now have 100 fake eth! You're now fake rich.
+
+## Getting Started (Frontend)
+
+1. `npm install`
+
+1. Create a `.env` file in `frontend` with the following values:
 
 - `VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS`
 - `VUE_APP_STAKING_REWARDS_CONTRACT_ADDRESS`
