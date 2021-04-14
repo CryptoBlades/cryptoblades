@@ -225,6 +225,7 @@ contract CryptoBlades is Util {
     }
 
     function fillStamina(uint256 character) public isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
+        require(characters.isStaminaFull(character) == false, "Your stamina is already full!");
         payContract(msg.sender, refillStaminaFee);
         characters.setStaminaTimestamp(character, characters.getStaminaTimestamp(character) - characters.getStaminaMaxWait());
     }

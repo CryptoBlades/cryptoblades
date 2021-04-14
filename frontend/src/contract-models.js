@@ -15,8 +15,9 @@ export function weaponFromContract(id, data) {
   const level = data[4];
   const blade = data[5];
   const crossguard = data[6];
-  const hilt = data[7];
-  return { id, properties, stat1, stat2, stat3, level, blade, crossguard, hilt };
+  const grip = data[7];
+  const pommel = data[8];
+  return { id, properties, stat1, stat2, stat3, level, blade, crossguard, grip, pommel };
 }
 
 export function targetFromContract(data) {
