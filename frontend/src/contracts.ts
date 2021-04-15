@@ -4,12 +4,19 @@ import { abi as skillTokenAbi, networks as skillTokenNetworks } from '../../buil
 
 import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
+
 import Web3 from 'web3';
-import { AbiItem } from 'web3-utils';
+import { Contract as Web3EthContract } from 'web3-eth-contract';
 
-function createContracts(web3: Web3, featureFlagStakeOnly: boolean) {
-  const at = (abi: AbiItem) => (addr: string) => new web3.eth.Contract(abi, addr);
+export interface Contracts {
+  SkillToken: Web3EthContract;
+  StakingRewards: Web3EthContract;
+  CryptoBlades?: Web3EthContract;
+  Characters?: Web3EthContract;
+  Weapons?: Web3EthContract;
+}
 
+export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean): Promise<Contracts> {
   const networkId = process.env.VUE_APP_NETWORK_ID || '5777';
   const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as any)[networkId].address;
   const stakingRewardsContractAddr = process.env.VUE_APP_STAKING_REWARDS_CONTRACT_ADDRESS || (stakingRewardsNetworks as any)[networkId].address;
@@ -23,28 +30,12 @@ function createContracts(web3: Web3, featureFlagStakeOnly: boolean) {
   }
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as any, cryptoBladesContractAddr);
-  const Characters = { at: at(charactersAbi as any) };
-  const Weapons = { at: at(weaponsAbi as any) };
-
-  return { CryptoBlades, Characters, Weapons, StakingRewards, SkillToken };
-}
-
-export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean) {
-  const contracts = createContracts(web3, featureFlagStakeOnly);
-
-  if (featureFlagStakeOnly) {
-    return contracts;
-  }
-
-  const CryptoBlades = contracts.CryptoBlades;
-  const StakingRewards = contracts.StakingRewards;
-  const SkillToken = contracts.SkillToken;
   const [charactersAddr, weaponsAddr] = await Promise.all([
-    contracts.CryptoBlades?.methods.getCharactersAddress().call(),
-    contracts.CryptoBlades?.methods.getWeaponsAddress().call(),
+    CryptoBlades.methods.getCharactersAddress().call(),
+    CryptoBlades.methods.getWeaponsAddress().call(),
   ]);
-  const Characters = contracts.Characters?.at(charactersAddr);
-  const Weapons = contracts.Weapons?.at(weaponsAddr);
+  const Characters = new web3.eth.Contract(charactersAbi as any, charactersAddr);
+  const Weapons = new web3.eth.Contract(weaponsAbi as any, weaponsAddr);
 
   return { CryptoBlades, Characters, Weapons, StakingRewards, SkillToken };
 }

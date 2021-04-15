@@ -49,17 +49,19 @@
       "@vue/typescript"
     ],
     "parserOptions": {
-      "project": ["tsconfig.json"],
+      "project": [
+        "tsconfig.json"
+      ],
       "parser": "@typescript-eslint/parser"
     },
     "rules": {
       "eqeqeq": "error",
       "max-len": [
-          "error",
-          {
-              "ignorePattern": "//",
-              "code": 160
-          }
+        "error",
+        {
+          "ignorePattern": "//",
+          "code": 160
+        }
       ],
       "no-debugger": "error",
       "no-eval": "error",
@@ -78,8 +80,8 @@
       "radix": "error",
       "use-isnan": "error",
       "quote-props": [
-          "error",
-          "as-needed"
+        "error",
+        "as-needed"
       ],
       "indent": "off",
       "@typescript-eslint/no-unused-vars": "error",
@@ -119,24 +121,24 @@
       "@typescript-eslint/no-namespace": "error",
       "@typescript-eslint/no-unused-expressions": "error",
       "@typescript-eslint/indent": [
-          "error",
-          2,
-          {
-              "FunctionDeclaration": {
-                  "parameters": "first"
-              },
-              "FunctionExpression": {
-                  "parameters": "first"
-              }
+        "error",
+        2,
+        {
+          "FunctionDeclaration": {
+            "parameters": "first"
+          },
+          "FunctionExpression": {
+            "parameters": "first"
           }
+        }
       ],
       "@typescript-eslint/quotes": [
-          "error",
-          "single"
+        "error",
+        "single"
       ],
       "@typescript-eslint/semi": [
-          "error",
-          "always"
+        "error",
+        "always"
       ]
     }
   },

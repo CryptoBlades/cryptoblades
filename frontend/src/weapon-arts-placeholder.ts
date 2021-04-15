@@ -6,7 +6,7 @@ import img5 from './assets/sword-placeholder-5.png';
 import img6 from './assets/sword-placeholder-6.png';
 import img7 from './assets/sword-placeholder-7.png';
 
-import { IWeapon } from '../interfaces';
+import { IWeapon } from './interfaces';
 
 const allImages = [img1, img2, img3, img4, img5, img6, img7];
 

@@ -10,7 +10,7 @@ import { setUpContracts } from './contracts';
 import {
   characterFromContract, targetFromContract, weaponFromContract
 } from './contract-models';
-import { IState } from '../interfaces';
+import { IState } from './interfaces';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 

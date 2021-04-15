@@ -1,5 +1,5 @@
 
-import { ICharacter, ITarget, IWeapon } from '../interfaces';
+import { ICharacter, ITarget, IWeapon } from './interfaces';
 
 export function characterFromContract(id: number, data: string): ICharacter {
   const xp = data[0];
