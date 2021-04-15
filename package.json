@@ -26,7 +26,8 @@
     "build": "truffle compile",
     "test": "truffle test",
     "extract-abi": "truffle-export-abi",
-    "deploy": "truffle migrate --reset"
+    "deploy": "truffle migrate --reset",
+    "deploy-testnet": "truffle migrate --network bsctestnet"
   },
   "keywords": [],
   "author": "",
