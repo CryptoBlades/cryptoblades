@@ -99,6 +99,13 @@
             </div>
           </div>
         </div>
+
+        <p class="no-margin spacing-top" v-if="isDeposit && stakeRewardMinimumStakeTime > 0">
+          <span class="bold">NOTE</span>: You will not be able to unstake or
+          claim rewards until {{ minimumStakeTimeFormatted }} has passed since
+          your initial stake.
+        </p>
+
         <button
           class="StakeButton spacing-top"
           :class="{
@@ -150,6 +157,7 @@ BN.config({ EXPONENTIAL_AT: 100 });
 import { mapActions, mapState } from "vuex";
 
 import { getCurrentGasPrices } from "../../utils/common";
+import { formatDurationFromSeconds } from "../../utils/date-time";
 
 const connectToWalletButtonLabel = "Connect to wallet ↗";
 const amountIsTooBigButtonLabel = "Amount is too big";
@@ -204,12 +212,17 @@ export default {
       "stakeRemainingCapacityForWithdraw",
       "stakeContractBalance",
       "stakeCurrentRewardEarned",
+      "stakeRewardMinimumStakeTime",
       "stakeRewardDistributionTimeLeft",
       "stakeUnlockTimeLeft",
     ]),
 
+    minimumStakeTimeFormatted() {
+      return formatDurationFromSeconds(this.stakeRewardMinimumStakeTime);
+    },
+
     estimatedUnlockTimeLeftFormatted() {
-      return `${this.stakeUnlockTimeLeftCurrentEstimate} seconds`;
+      return formatDurationFromSeconds(this.stakeUnlockTimeLeftCurrentEstimate);
     },
 
     showRewardClaimSection() {

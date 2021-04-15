@@ -40,6 +40,7 @@ export function createStore(web3, featureFlagStakeOnly) {
       stakeCurrentRewardEarned: '0',
       stakeRewardPeriodEndUnix: 0,
       stakeRewardPeriodDurationSeconds: 7 * 24 * 60 * 60,
+      stakeRewardMinimumStakeTime: 0,
       stakeRewardDistributionTimeLeft: 0,
       stakeUnlockTimeLeft: 0,
     },
@@ -192,12 +193,14 @@ export function createStore(web3, featureFlagStakeOnly) {
         stakeCurrentRewardEarned,
         stakeRewardPeriodEndUnix,
         stakeRewardPeriodDurationSeconds,
+        stakeRewardMinimumStakeTime,
         stakeRewardDistributionTimeLeft,
         stakeUnlockTimeLeft
       }) {
         state.stakeCurrentRewardEarned = stakeCurrentRewardEarned;
         state.stakeRewardPeriodEndUnix = stakeRewardPeriodEndUnix;
         state.stakeRewardPeriodDurationSeconds = stakeRewardPeriodDurationSeconds;
+        state.stakeRewardMinimumStakeTime = stakeRewardMinimumStakeTime;
         state.stakeRewardDistributionTimeLeft = stakeRewardDistributionTimeLeft;
         state.stakeUnlockTimeLeft = stakeUnlockTimeLeft;
       }
@@ -505,12 +508,14 @@ export function createStore(web3, featureFlagStakeOnly) {
           stakeCurrentRewardEarned,
           stakeRewardPeriodEndUnix,
           stakeRewardPeriodDurationSeconds,
+          stakeRewardMinimumStakeTime,
           stakeRewardDistributionTimeLeft,
           stakeUnlockTimeLeft
         ] = await Promise.all([
           StakingRewards.methods.earned(state.defaultAccount).call(defaultCallOptions(state)),
           StakingRewards.methods.periodFinish().call(defaultCallOptions(state)),
           StakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
+          StakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
           StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
@@ -519,6 +524,7 @@ export function createStore(web3, featureFlagStakeOnly) {
           stakeCurrentRewardEarned,
           stakeRewardPeriodEndUnix: parseInt(stakeRewardPeriodEndUnix, 10),
           stakeRewardPeriodDurationSeconds: parseInt(stakeRewardPeriodDurationSeconds, 10),
+          stakeRewardMinimumStakeTime: parseInt(stakeRewardMinimumStakeTime, 10),
           stakeRewardDistributionTimeLeft: parseInt(stakeRewardDistributionTimeLeft, 10),
           stakeUnlockTimeLeft: parseInt(stakeUnlockTimeLeft, 10)
         };
