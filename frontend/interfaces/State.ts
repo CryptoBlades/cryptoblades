@@ -1,10 +1,11 @@
 import { ICharacter } from './Character';
+import { ITarget } from './Target';
 import { IWeapon } from './Weapon';
 
 export interface IState {
   contracts: Record<string, any>;
-  accounts: any[];
-  defaultAccount: any;
+  accounts: string[];
+  defaultAccount: string | null;
 
   skillBalance: string;
   ownedCharacterIds: number[];
