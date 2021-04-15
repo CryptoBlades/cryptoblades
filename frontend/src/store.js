@@ -40,7 +40,9 @@ export function createStore(web3, featureFlagStakeOnly) {
       stakeCurrentRewardEarned: '0',
       stakeRewardPeriodEndUnix: 0,
       stakeRewardPeriodDurationSeconds: 7 * 24 * 60 * 60,
-      stakeLatestBlockTimestampUnix: 0
+      stakeRewardMinimumStakeTime: 0,
+      stakeRewardDistributionTimeLeft: 0,
+      stakeUnlockTimeLeft: 0,
     },
 
     getters: {
@@ -191,12 +193,16 @@ export function createStore(web3, featureFlagStakeOnly) {
         stakeCurrentRewardEarned,
         stakeRewardPeriodEndUnix,
         stakeRewardPeriodDurationSeconds,
-        stakeLatestBlockTimestampUnix
+        stakeRewardMinimumStakeTime,
+        stakeRewardDistributionTimeLeft,
+        stakeUnlockTimeLeft
       }) {
         state.stakeCurrentRewardEarned = stakeCurrentRewardEarned;
         state.stakeRewardPeriodEndUnix = stakeRewardPeriodEndUnix;
         state.stakeRewardPeriodDurationSeconds = stakeRewardPeriodDurationSeconds;
-        state.stakeLatestBlockTimestampUnix = stakeLatestBlockTimestampUnix;
+        state.stakeRewardMinimumStakeTime = stakeRewardMinimumStakeTime;
+        state.stakeRewardDistributionTimeLeft = stakeRewardDistributionTimeLeft;
+        state.stakeUnlockTimeLeft = stakeUnlockTimeLeft;
       }
     },
 
@@ -218,58 +224,60 @@ export function createStore(web3, featureFlagStakeOnly) {
       },
 
       setUpContractEvents({ state, dispatch, commit }) {
-        // TODO filter to only get own
-        state.contracts.Characters.events.NewCharacter(async (err, data) => {
-          if (err != null) {
-            console.error(err);
-            return;
-          }
+        if (!featureFlagStakeOnly) {
+          // TODO filter to only get own
+          state.contracts.Characters.events.NewCharacter(async (err, data) => {
+            if (err != null) {
+              console.error(err);
+              return;
+            }
 
-          console.log('NewCharacter', data);
+            console.log('NewCharacter', data);
 
-          const characterId = data.returnValues.character;
+            const characterId = data.returnValues.character;
 
-          commit('addNewOwnedCharacterId', characterId);
+            commit('addNewOwnedCharacterId', characterId);
 
-          await Promise.all([
-            dispatch('fetchCharacter', characterId),
-            dispatch('fetchSkillBalance')
-          ]);
-        });
+            await Promise.all([
+              dispatch('fetchCharacter', characterId),
+              dispatch('fetchSkillBalance')
+            ]);
+          });
 
-        // TODO filter to only get own
-        state.contracts.Weapons.events.NewWeapon(async (err, data) => {
-          if (err != null) {
-            console.error(err);
-            return;
-          }
+          // TODO filter to only get own
+          state.contracts.Weapons.events.NewWeapon(async (err, data) => {
+            if (err != null) {
+              console.error(err);
+              return;
+            }
 
-          console.log('NewWeapon', data);
+            console.log('NewWeapon', data);
 
-          const weaponId = data.returnValues.weapon;
+            const weaponId = data.returnValues.weapon;
 
-          commit('addNewOwnedWeaponId', weaponId);
+            commit('addNewOwnedWeaponId', weaponId);
 
-          await Promise.all([
-            dispatch('fetchWeapon', weaponId),
-            dispatch('fetchSkillBalance')
-          ]);
-        });
+            await Promise.all([
+              dispatch('fetchWeapon', weaponId),
+              dispatch('fetchSkillBalance')
+            ]);
+          });
 
-        // TODO filter to only get own
-        state.contracts.CryptoBlades.events.FightOutcome(async (err, data) => {
-          if (err != null) {
-            console.error(err);
-            return;
-          }
+          // TODO filter to only get own
+          state.contracts.CryptoBlades.events.FightOutcome(async (err, data) => {
+            if (err != null) {
+              console.error(err);
+              return;
+            }
 
-          console.log('FightOutcome', data);
+            console.log('FightOutcome', data);
 
-          await Promise.all([
-            dispatch('fetchCharacter', data.returnValues.character),
-            dispatch('fetchSkillBalance')
-          ]);
-        });
+            await Promise.all([
+              dispatch('fetchCharacter', data.returnValues.character),
+              dispatch('fetchSkillBalance')
+            ]);
+          });
+        }
 
         state.contracts.StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err, data) => {
           if (err != null) {
@@ -309,7 +317,7 @@ export function createStore(web3, featureFlagStakeOnly) {
       },
 
       async setUpContracts({ commit }) {
-        const contracts = await setUpContracts(web3);
+        const contracts = await setUpContracts(web3, featureFlagStakeOnly);
         commit('setContracts', contracts);
       },
 
@@ -355,7 +363,9 @@ export function createStore(web3, featureFlagStakeOnly) {
       },
 
       async fetchSkillBalance({ state, commit }) {
-        const skillBalance = await state.contracts.CryptoBlades.methods.getMySkill().call(defaultCallOptions(state));
+        const skillBalance = await state.contracts.SkillToken.methods
+          .balanceOf(state.defaultAccount)
+          .call(defaultCallOptions(state));
         commit('updateSkillBalance', { skillBalance });
       },
 
@@ -498,19 +508,25 @@ export function createStore(web3, featureFlagStakeOnly) {
           stakeCurrentRewardEarned,
           stakeRewardPeriodEndUnix,
           stakeRewardPeriodDurationSeconds,
-          stakeLatestBlockTimestampUnix
+          stakeRewardMinimumStakeTime,
+          stakeRewardDistributionTimeLeft,
+          stakeUnlockTimeLeft
         ] = await Promise.all([
           StakingRewards.methods.earned(state.defaultAccount).call(defaultCallOptions(state)),
           StakingRewards.methods.periodFinish().call(defaultCallOptions(state)),
           StakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
-          web3.eth.getBlock('latest').then(b => b.timestamp),
+          StakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
+          StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
+          StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
 
         const stateToChange = {
           stakeCurrentRewardEarned,
           stakeRewardPeriodEndUnix: parseInt(stakeRewardPeriodEndUnix, 10),
           stakeRewardPeriodDurationSeconds: parseInt(stakeRewardPeriodDurationSeconds, 10),
-          stakeLatestBlockTimestampUnix: parseInt(stakeLatestBlockTimestampUnix, 10)
+          stakeRewardMinimumStakeTime: parseInt(stakeRewardMinimumStakeTime, 10),
+          stakeRewardDistributionTimeLeft: parseInt(stakeRewardDistributionTimeLeft, 10),
+          stakeUnlockTimeLeft: parseInt(stakeUnlockTimeLeft, 10)
         };
         let doCommit = false;
         for (const key in stateToChange) {

@@ -5,7 +5,7 @@ import { abi as skillTokenAbi, networks as skillTokenNetworks } from '../../buil
 import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
 
-function createContracts(web3) {
+function createContracts(web3, featureFlagStakeOnly) {
   const at = abi => addr => new web3.eth.Contract(abi, addr);
 
   const networkId = process.env.VUE_APP_NETWORK_ID || 5777;
@@ -13,18 +13,26 @@ function createContracts(web3) {
   const stakingRewardsContractAddr = process.env.VUE_APP_STAKING_REWARDS_CONTRACT_ADDRESS || stakingRewardsNetworks[networkId].address;
   const skillTokenContractAddr = process.env.VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS || skillTokenNetworks[networkId].address;
 
-  const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi, cryptoBladesContractAddr);
   const StakingRewards = new web3.eth.Contract(stakingRewardsAbi, stakingRewardsContractAddr);
   const SkillToken = new web3.eth.Contract(skillTokenAbi, skillTokenContractAddr);
 
+  if (featureFlagStakeOnly) {
+    return { StakingRewards, SkillToken };
+  }
+
+  const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi, cryptoBladesContractAddr);
   const Characters = { at: at(charactersAbi) };
   const Weapons = { at: at(weaponsAbi) };
 
   return { CryptoBlades, Characters, Weapons, StakingRewards, SkillToken };
 }
 
-export async function setUpContracts(web3) {
-  const contracts = createContracts(web3);
+export async function setUpContracts(web3, featureFlagStakeOnly) {
+  const contracts = createContracts(web3, featureFlagStakeOnly);
+
+  if (featureFlagStakeOnly) {
+    return contracts;
+  }
 
   const CryptoBlades = contracts.CryptoBlades;
   const StakingRewards = contracts.StakingRewards;

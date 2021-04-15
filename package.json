@@ -25,6 +25,10 @@
     "contract:deploy": "npm run deploy",
     "build": "truffle compile",
     "test": "truffle test",
-    "deploy": "truffle migrate --reset"
-  }
+    "deploy": "truffle migrate --reset",
+    "deploy-testnet": "truffle migrate --network bsctestnet"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

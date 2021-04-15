@@ -17,11 +17,11 @@
           <button
             class="StakeButton"
             :class="{
-              switch_active: !rewardClaimLoading,
+              switch_active: rewardClaimState === 'ok',
             }"
             @click="onClaimReward"
           >
-            {{ rewardClaimLoading ? "Loading..." : "Claim reward" }}
+            {{ claimRewardButtonLabel }}
           </button>
         </div>
       </div>
@@ -99,6 +99,13 @@
             </div>
           </div>
         </div>
+
+        <p class="no-margin spacing-top" v-if="isDeposit && stakeRewardMinimumStakeTime > 0">
+          <span class="bold">NOTE</span>: You will not be able to unstake or
+          claim rewards until {{ minimumStakeTimeFormatted }} has passed since
+          your initial stake.
+        </p>
+
         <button
           class="StakeButton spacing-top"
           :class="{
@@ -150,6 +157,7 @@ BN.config({ EXPONENTIAL_AT: 100 });
 import { mapActions, mapState } from "vuex";
 
 import { getCurrentGasPrices } from "../../utils/common";
+import { formatDurationFromSeconds } from "../../utils/date-time";
 
 const connectToWalletButtonLabel = "Connect to wallet ↗";
 const amountIsTooBigButtonLabel = "Amount is too big";
@@ -172,15 +180,25 @@ export default {
     errorWhenUpdating: null,
     selectedGasLevel: "medium",
     rewardClaimLoading: false,
+
+    stakeUnlockTimeLeftCurrentEstimate: 0,
+    stakeRewardDistributionTimeLeftCurrentEstimate: 0,
   }),
   async mounted() {
     this.gas = await getCurrentGasPrices();
 
     await this.fetchData();
 
+    this.stakeUnlockTimeLeftCurrentEstimate = this.stakeUnlockTimeLeft;
+    this.stakeRewardDistributionTimeLeftCurrentEstimate = this.stakeRewardDistributionTimeLeft;
+
     this.stakeRewardProgressInterval = setInterval(async () => {
       await this.fetchStakeRewardDetails();
-    }, 5000);
+    }, 10 * 1000);
+
+    this.secondsInterval = setInterval(() => {
+      this.updateEstimates();
+    }, 1000);
   },
   beforeDestroy() {
     clearInterval(this.stakeRewardProgressInterval);
@@ -194,10 +212,25 @@ export default {
       "stakeRemainingCapacityForWithdraw",
       "stakeContractBalance",
       "stakeCurrentRewardEarned",
+      "stakeRewardMinimumStakeTime",
+      "stakeRewardDistributionTimeLeft",
+      "stakeUnlockTimeLeft",
     ]),
 
+    minimumStakeTimeFormatted() {
+      return formatDurationFromSeconds(this.stakeRewardMinimumStakeTime);
+    },
+
+    estimatedUnlockTimeLeftFormatted() {
+      return formatDurationFromSeconds(this.stakeUnlockTimeLeftCurrentEstimate);
+    },
+
     showRewardClaimSection() {
-      return this.currentRewardEarned.gt(0) || this.rewardClaimLoading;
+      if (this.rewardClaimState === "loading") {
+        return true;
+      }
+
+      return this.currentRewardEarned.gt(0);
     },
 
     walletBalance() {
@@ -249,6 +282,10 @@ export default {
     currentState() {
       if (this.defaultAccount == null || this.errorWhenUpdating != null) {
         return "connectWallet";
+      }
+
+      if (!this.isDeposit && this.stakeUnlockTimeLeft > 0) {
+        return "stakeLocked";
       }
 
       if (
@@ -313,8 +350,33 @@ export default {
           return insufficientBalanceButtonLabel;
         case "notEnoughFundsInExitPool":
           return notEnoughFundsInExitPoolButtonLabel;
+        case "stakeLocked":
+          return `Sorry, stake is still locked; please wait about ${this.estimatedUnlockTimeLeftFormatted}`;
         default:
           return connectToWalletButtonLabel;
+      }
+    },
+
+    rewardClaimState() {
+      if (this.rewardClaimLoading) {
+        return "loading";
+      }
+
+      if (this.stakeUnlockTimeLeft > 0) {
+        return "rewardLocked";
+      }
+
+      return "ok";
+    },
+
+    claimRewardButtonLabel() {
+      switch (this.rewardClaimState) {
+        case "loading":
+          return "Loading...";
+        case "rewardLocked":
+          return `Sorry, reward is still locked; please wait about ${this.estimatedUnlockTimeLeftFormatted}`;
+        default:
+          return "Claim reward";
       }
     },
 
@@ -337,6 +399,16 @@ export default {
       "unstake",
       "claimReward",
     ]),
+
+    updateEstimates() {
+      if (this.stakeUnlockTimeLeftCurrentEstimate > 0) {
+        this.stakeUnlockTimeLeftCurrentEstimate--;
+      }
+
+      if (this.stakeRewardDistributionTimeLeftCurrentEstimate > 0) {
+        this.stakeRewardDistributionTimeLeftCurrentEstimate--;
+      }
+    },
 
     async onMAX() {
       if (this.isDeposit) {
@@ -390,8 +462,12 @@ export default {
       } finally {
         this.loading = false;
       }
+
+      await this.fetchStakeRewardDetails();
     },
     async onClaimReward() {
+      if (this.rewardClaimState !== "ok") return;
+
       try {
         this.rewardClaimLoading = true;
 
@@ -401,6 +477,8 @@ export default {
       } finally {
         this.rewardClaimLoading = false;
       }
+
+      await this.fetchStakeRewardDetails();
     },
     async fetchData() {
       //balances
@@ -419,6 +497,18 @@ export default {
     },
   },
   watch: {
+    stakeRewardDistributionTimeLeft(newValue, oldValue) {
+      console.log("stakeRewardDistributionTimeLeft", newValue, oldValue);
+      if (newValue !== oldValue) {
+        this.stakeRewardDistributionTimeLeftCurrentEstimate = newValue;
+      }
+    },
+    stakeUnlockTimeLeft(newValue, oldValue) {
+      console.log("stakeUnlockTimeLeft", newValue, oldValue);
+      if (newValue !== oldValue) {
+        this.stakeUnlockTimeLeftCurrentEstimate = newValue;
+      }
+    },
     textAmount: function (newValue, oldVal) {
       if (newValue.length > 40) {
         this.textAmount = oldVal;
