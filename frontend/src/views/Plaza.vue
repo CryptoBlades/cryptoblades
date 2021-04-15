@@ -71,7 +71,7 @@ export default {
     ]),
 
     character() {
-      if (this.currentCharacter == null) {
+      if (!this.currentCharacter) {
         return {
           id: null,
           name: '???',

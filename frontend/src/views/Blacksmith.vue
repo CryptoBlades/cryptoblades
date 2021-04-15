@@ -57,8 +57,8 @@ export default {
 
     canReforge() {
       return (
-        this.reforgeWeaponId == null ||
-        this.burnWeaponId == null ||
+        this.reforgeWeaponId === null ||
+        this.burnWeaponId === null ||
         this.reforgeWeaponId === this.burnWeaponId
       );
     },

@@ -53,7 +53,7 @@ export default {
     ]),
 
     isLoadingCharacter() {
-      return this.currentCharacter == null;
+      return !this.currentCharacter;
     },
   },
 

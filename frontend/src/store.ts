@@ -134,7 +134,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
         if (state.ownedCharacterIds.length > 0 &&
           (
-            state.currentCharacterId == null ||
+            !state.currentCharacterId ||
             !state.ownedCharacterIds.includes(state.currentCharacterId)
           )
         ) {
@@ -174,7 +174,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       updateTargets(state: IState, { characterId, weaponId, targets }) {
-        if (state.targetsByCharacterIdAndWeaponId[characterId] == null) {
+        if (!state.targetsByCharacterIdAndWeaponId[characterId]) {
           Vue.set(state.targetsByCharacterIdAndWeaponId, characterId, {});
         }
 
@@ -447,7 +447,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async fetchTargets({ state, commit }, { characterId, weaponId }) {
-        if (characterId == null || weaponId == null) {
+        if (!characterId || !weaponId) {
           commit('updateTargets', { characterId, weaponId, targets: [] });
           return;
         }

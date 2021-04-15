@@ -53,6 +53,7 @@
       "parser": "@typescript-eslint/parser"
     },
     "rules": {
+      "eqeqeq": "error",
       "max-len": [
           "error",
           {

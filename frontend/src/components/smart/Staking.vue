@@ -109,7 +109,7 @@
         <button
           class="StakeButton spacing-top"
           :class="{
-            switch_active: !loading && currentState == 'ok',
+            switch_active: !loading && currentState === 'ok',
           }"
           @click="onSubmit"
         >
@@ -133,14 +133,14 @@
         </button>
         <button
           class="switch"
-          :class="{ switch_active: selectedGasLevel == 'medium' }"
+          :class="{ switch_active: selectedGasLevel === 'medium' }"
           @click="selectedGasLevel = 'medium'"
         >
           <span>{{ gas.medium.toFixed(0) }}</span>
         </button>
         <button
           class="switch"
-          :class="{ switch_active: selectedGasLevel == 'high' }"
+          :class="{ switch_active: selectedGasLevel === 'high' }"
           @click="selectedGasLevel = 'high'"
         >
           <span>{{ gas.high.toFixed(0) }}</span>
@@ -246,7 +246,7 @@ export default {
     },
 
     remainingCapacityForDeposit() {
-      if (this.stakeRemainingCapacityForDeposit == null) {
+      if (!this.stakeRemainingCapacityForDeposit) {
         return null;
       }
 
@@ -280,7 +280,7 @@ export default {
     },
 
     currentState() {
-      if (this.defaultAccount == null || this.errorWhenUpdating != null) {
+      if (!this.defaultAccount || this.errorWhenUpdating) {
         return 'connectWallet';
       }
 
@@ -289,7 +289,7 @@ export default {
       }
 
       if (
-        this.remainingCapacityForDeposit != null &&
+        !this.remainingCapacityForDeposit &&
         this.remainingCapacityForDeposit.eq(0) &&
         this.isDeposit
       ) {
@@ -297,7 +297,7 @@ export default {
       }
 
       if (
-        this.remainingCapacityForDeposit != null &&
+        !this.remainingCapacityForDeposit &&
         this.bigNumberAmount.gt(this.remainingCapacityForDeposit) &&
         this.isDeposit
       ) {
@@ -416,7 +416,7 @@ export default {
         const walletBalance = this.walletBalance;
 
         if (
-          this.remainingCapacityForDeposit != null &&
+          !this.remainingCapacityForDeposit &&
           this.remainingCapacityForDeposit.eq(0)
         ) {
           return;
@@ -425,7 +425,7 @@ export default {
         this.bigNumberAmount = BN(walletBalance);
 
         if (
-          this.remainingCapacityForDeposit != null &&
+          !this.remainingCapacityForDeposit &&
           this.bigNumberAmount.gt(this.remainingCapacityForDeposit)
         ) {
           this.bigNumberAmount = BN(this.remainingCapacityForDeposit);
@@ -515,7 +515,7 @@ export default {
         return;
       }
 
-      if (newValue[newValue.length - 1] == 0) {
+      if (newValue[newValue.length - 1] === 0) {
         this.textAmount = newValue;
         return;
       }

@@ -66,8 +66,8 @@ export default {
     isLoadingTargets() {
       return (
         this.targets.length === 0 &&
-        this.currentCharacterId != null &&
-        this.selectedWeaponId != null
+        !this.currentCharacterId &&
+        !this.selectedWeaponId
       );
     },
 
@@ -86,7 +86,7 @@ export default {
     ...mapActions(['fetchTargets', 'doEncounter']),
 
     async onClickEncounter(targetToFight) {
-      if (this.selectedWeaponId == null || this.currentCharacterId == null) {
+      if (!this.selectedWeaponId || !this.currentCharacterId) {
         return;
       }
 
