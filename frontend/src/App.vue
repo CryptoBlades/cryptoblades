@@ -136,6 +136,10 @@ body {
   max-height: calc(100vh - 56px - 160px);
 }
 
+button {
+  cursor: pointer;
+}
+
 </style>
 <style scoped>
 .app {

@@ -68,9 +68,8 @@ export default {
     async onMintCharacter() {
       try {
         await this.mintCharacter();
-        console.log("Successful minting");
       } catch (e) {
-        console.error("oh noes, an error when minting", e);
+        alert('Could not mint character: insufficient funds or transaction denied.');
       }
     },
   },
