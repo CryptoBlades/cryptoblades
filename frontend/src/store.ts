@@ -106,6 +106,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
     mutations: {
       setAccounts(state: IState, payload) {
+        console.log(payload)
         state.accounts = payload.accounts;
 
         if (payload.accounts.length > 0) {
