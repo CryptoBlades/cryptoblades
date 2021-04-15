@@ -76,7 +76,12 @@ export default {
     try {
       await this.initializeStore();
     } catch(e) {
-      this.errorMessage = "Could not initialize properly: Out of gas or ABI error.";
+      this.errorMessage = "Error: Out of gas or ABI error.";
+
+      if(e.code === 4001) {
+        this.errorMessage = "Error: MetaMask could not get permissions."
+      }
+
       console.error(e);
       throw e;
     }
