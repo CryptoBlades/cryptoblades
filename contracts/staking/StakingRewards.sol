@@ -9,12 +9,14 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./interfaces/IStakingRewards.sol";
 import "./RewardsDistributionRecipient.sol";
 import "./Pausable.sol";
+import "./Failsafe.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/stakingrewards
 contract StakingRewards is
     IStakingRewards,
     RewardsDistributionRecipient,
     ReentrancyGuard,
+    Failsafe,
     Pausable
 {
     using SafeMath for uint256;
@@ -120,6 +122,7 @@ contract StakingRewards is
     function stake(uint256 amount)
         external
         override
+        normalMode
         nonReentrant
         notPaused
         updateReward(msg.sender)
@@ -137,6 +140,7 @@ contract StakingRewards is
     function withdraw(uint256 amount)
         public
         override
+        normalMode
         nonReentrant
         updateReward(msg.sender)
     {
@@ -156,7 +160,13 @@ contract StakingRewards is
         emit Withdrawn(msg.sender, amount);
     }
 
-    function getReward() public override nonReentrant updateReward(msg.sender) {
+    function getReward()
+        public
+        override
+        normalMode
+        nonReentrant
+        updateReward(msg.sender)
+    {
         require(
             minimumStakeTime == 0 ||
                 block.timestamp.sub(_stakeTimestamp[msg.sender]) >=
@@ -171,9 +181,18 @@ contract StakingRewards is
         }
     }
 
-    function exit() external override {
+    function exit() external override normalMode {
         withdraw(_balances[msg.sender]);
         getReward();
+    }
+
+    function recoverOwnStake() external failsafeMode {
+        uint256 amount = _balances[msg.sender];
+        if (amount > 0) {
+            _totalSupply = _totalSupply.sub(amount);
+            _balances[msg.sender] = _balances[msg.sender].sub(amount);
+            stakingToken.safeTransfer(msg.sender, amount);
+        }
     }
 
     /* ========== RESTRICTED FUNCTIONS ========== */
@@ -181,6 +200,7 @@ contract StakingRewards is
     function notifyRewardAmount(uint256 reward)
         external
         override
+        normalMode
         onlyRewardsDistribution
         updateReward(address(0))
     {
@@ -210,6 +230,7 @@ contract StakingRewards is
     // End rewards emission earlier
     function updatePeriodFinish(uint256 timestamp)
         external
+        normalMode
         onlyOwner
         updateReward(address(0))
     {
@@ -233,7 +254,11 @@ contract StakingRewards is
         emit Recovered(tokenAddress, tokenAmount);
     }
 
-    function setRewardsDuration(uint256 _rewardsDuration) external onlyOwner {
+    function setRewardsDuration(uint256 _rewardsDuration)
+        external
+        normalMode
+        onlyOwner
+    {
         require(
             block.timestamp > periodFinish,
             "Previous rewards period must be complete before changing the duration for the new period"
@@ -242,19 +267,48 @@ contract StakingRewards is
         emit RewardsDurationUpdated(rewardsDuration);
     }
 
-    function setMinimumStakeTime(uint256 _minimumStakeTime) external onlyOwner {
+    function setMinimumStakeTime(uint256 _minimumStakeTime)
+        external
+        normalMode
+        onlyOwner
+    {
         minimumStakeTime = _minimumStakeTime;
         emit MinimumStakeTimeUpdated(_minimumStakeTime);
+    }
+
+    function enableFailsafeMode() public override normalMode onlyOwner {
+        minimumStakeTime = 0;
+        periodFinish = 0;
+        rewardRate = 0;
+        rewardPerTokenStored = 0;
+
+        super.enableFailsafeMode();
+    }
+
+    function recoverExtraStakingTokensToOwner() external failsafeMode onlyOwner {
+        // stake() and withdraw() should guarantee that
+        // _totalSupply <= stakingToken.balanceOf(this)
+        uint256 stakingTokenAmountBelongingToOwner =
+            stakingToken.balanceOf(address(this)).sub(_totalSupply);
+
+        if (stakingTokenAmountBelongingToOwner > 0) {
+            stakingToken.safeTransfer(
+                owner,
+                stakingTokenAmountBelongingToOwner
+            );
+        }
     }
 
     /* ========== MODIFIERS ========== */
 
     modifier updateReward(address account) {
-        rewardPerTokenStored = rewardPerToken();
-        lastUpdateTime = lastTimeRewardApplicable();
-        if (account != address(0)) {
-            rewards[account] = earned(account);
-            userRewardPerTokenPaid[account] = rewardPerTokenStored;
+        if (!failsafeModeActive) {
+            rewardPerTokenStored = rewardPerToken();
+            lastUpdateTime = lastTimeRewardApplicable();
+            if (account != address(0)) {
+                rewards[account] = earned(account);
+                userRewardPerTokenPaid[account] = rewardPerTokenStored;
+            }
         }
         _;
     }
