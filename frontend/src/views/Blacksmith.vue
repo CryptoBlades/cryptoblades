@@ -57,6 +57,7 @@ export default {
         await this.mintWeapon();
       } catch (e) {
         console.error(e);
+        alert('Could not forge sword: insuffucient funds or transaction denied.');
       }
     },
 
@@ -68,6 +69,7 @@ export default {
         });
       } catch (e) {
         console.error(e);
+        alert('Could not forge sword: insuffucient funds or transaction denied.');
       }
     },
   },
