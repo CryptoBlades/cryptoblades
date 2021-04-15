@@ -8,7 +8,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapActions, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
@@ -18,16 +18,16 @@ export default {
   computed: {
     ...mapState(['skillBalance']),
 
-    formattedSkillBalance() {
-      const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
-      return `${BN(skillBalance).toFixed(4)} SKILL`;
+    formattedSkillBalance(): string {
+      const skillBalance = Web3.utils.fromWei(this.skillBalance as unknown as string, 'ether');
+      return `${new BN(skillBalance).toFixed(4)} SKILL`;
     },
   },
 
   methods: {
     ...mapActions(['addMoreSkill']),
 
-    async onAddMoreSkill() {
+    async onAddMoreSkill(): Promise<void> {
       const valueSkillToAdd = prompt('How much SKILL do you want?', '5');
       if(!valueSkillToAdd) return;
 
@@ -47,7 +47,7 @@ export default {
   },
 
   watch: {
-    skillBalance(balance, oldBalance) {
+    skillBalance(balance: number, oldBalance: number) {
       console.log('BALANCE CHANGE:', balance, oldBalance, balance - oldBalance);
     },
   },

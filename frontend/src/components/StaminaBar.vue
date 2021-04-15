@@ -1,23 +1,23 @@
 <template>
   <div class="outer">
     <div class="bar-wrapper">
-      <div class="bar" :style="{ width: percent + '%' }"></div>
+      <div class="bar" :style="{ width: percent }"></div>
     </div>
     <div class="text-wrapper">{{ current }} / {{ max }}</div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   props: ['current', 'max'],
 
   computed: {
-    factor() {
-      return this.current / this.max;
+    factor(): number {
+      return Math.min(1, ((this as any).current) / ((this as any).max));
     },
 
-    percent() {
-      return this.factor * 100 + '';
+    percent(): string {
+      return (this.factor as unknown as number * 100) + '%';
     },
   },
 };

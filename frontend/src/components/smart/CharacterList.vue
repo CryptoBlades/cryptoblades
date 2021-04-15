@@ -16,7 +16,7 @@
   </ul>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 

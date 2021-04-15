@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import CharacterDisplay from './smart/CharacterDisplay.vue';
 
 export default {

@@ -13,7 +13,7 @@
   </ul>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 
 import WeaponIcon from '../WeaponIcon.vue';

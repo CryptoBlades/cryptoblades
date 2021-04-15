@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import Staking from '../components/smart/Staking.vue';
 
 export default {

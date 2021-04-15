@@ -8,7 +8,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import ViewLinks from './ViewLinks.vue';
 import SkillBalanceDisplay from './smart/SkillBalanceDisplay.vue';
 

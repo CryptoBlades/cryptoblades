@@ -8,7 +8,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { getCharacterArt } from '../character-arts-placeholder';
 
 export default {

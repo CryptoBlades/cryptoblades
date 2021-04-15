@@ -2,7 +2,7 @@
   <div class="app">
     <nav-bar />
 
-    <character-bar v-if="!featureFlagStakeOnly && currentCharacterId != null" />
+    <character-bar v-if="!featureFlagStakeOnly && currentCharacterId" />
 
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
@@ -10,7 +10,7 @@
 
     <div class="fullscreen-warning" v-if="showMetamaskWarning">
       <div>
-        You need Metamask installed to use this app. 
+        You need Metamask installed to use this app.
       </div>
       <a href="https://metamask.io/" target="_blank">Get it here.</a>
     </div>
@@ -22,14 +22,14 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
-import _ from "lodash";
+import { mapState, mapActions } from 'vuex';
+import _ from 'lodash';
 
-import NavBar from "./components/NavBar.vue";
-import CharacterBar from "./components/CharacterBar.vue";
+import NavBar from './components/NavBar.vue';
+import CharacterBar from './components/CharacterBar.vue';
 
 export default {
-  inject: ["web3", "featureFlagStakeOnly"],
+  inject: ['web3', 'featureFlagStakeOnly'],
   components: {
     NavBar,
     CharacterBar,
@@ -40,7 +40,7 @@ export default {
   }),
 
   computed: {
-    ...mapState(["defaultAccount", "currentCharacterId", "contracts"]),
+    ...mapState(['defaultAccount', 'currentCharacterId', 'contracts']),
 
     canShowApp() {
       return !_.isEmpty(this.contracts);
@@ -62,8 +62,8 @@ export default {
   },
 
   methods: {
-    ...mapActions({ initializeStore: "initialize" }),
-    ...mapActions(["fetchCharacterStamina", "fetchAccounts"]),
+    ...mapActions({ initializeStore: 'initialize' }),
+    ...mapActions(['fetchCharacterStamina', 'fetchAccounts']),
 
     async updateCurrentCharacterStamina() {
       if (this.currentCharacterId != null) {
@@ -76,10 +76,10 @@ export default {
     try {
       await this.initializeStore();
     } catch(e) {
-      this.errorMessage = "Error: Out of gas or ABI error.";
+      this.errorMessage = 'Error: Out of gas or ABI error.';
 
       if(e.code === 4001) {
-        this.errorMessage = "Error: MetaMask could not get permissions."
+        this.errorMessage = 'Error: MetaMask could not get permissions.';
       }
 
       console.error(e);

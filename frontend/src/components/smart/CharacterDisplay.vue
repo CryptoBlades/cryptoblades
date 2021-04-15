@@ -34,7 +34,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import SmallBar from '../SmallBar.vue';
@@ -52,7 +52,7 @@ export default {
       'getCharacterName',
     ]),
 
-    isLoadingCharacter() {
+    isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
   },

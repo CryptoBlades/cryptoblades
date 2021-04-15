@@ -19,7 +19,7 @@
   </ul>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   inject: ['featureFlagStakeOnly'],
 };
