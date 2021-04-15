@@ -21,6 +21,7 @@
   "scripts": {
     "postinstall": "npm run contract:prepare && lerna exec -- npm install",
     "lint": "lerna exec -- npm run lint",
+    "build:frontend": "cd frontend && npm run build",
     "start:frontend": "cd frontend && npm start",
     "contract:prepare": "npm run build",
     "contract:deploy": "npm run deploy",

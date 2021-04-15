@@ -1,5 +1,4 @@
 import { ICharacter } from './Character';
-import { ITarget } from './Target';
 import { IWeapon } from './Weapon';
 
 export interface IState {
