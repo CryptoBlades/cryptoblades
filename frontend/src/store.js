@@ -221,58 +221,60 @@ export function createStore(web3, featureFlagStakeOnly) {
       },
 
       setUpContractEvents({ state, dispatch, commit }) {
-        // TODO filter to only get own
-        state.contracts.Characters.events.NewCharacter(async (err, data) => {
-          if (err != null) {
-            console.error(err);
-            return;
-          }
+        if (!featureFlagStakeOnly) {
+          // TODO filter to only get own
+          state.contracts.Characters.events.NewCharacter(async (err, data) => {
+            if (err != null) {
+              console.error(err);
+              return;
+            }
 
-          console.log('NewCharacter', data);
+            console.log('NewCharacter', data);
 
-          const characterId = data.returnValues.character;
+            const characterId = data.returnValues.character;
 
-          commit('addNewOwnedCharacterId', characterId);
+            commit('addNewOwnedCharacterId', characterId);
 
-          await Promise.all([
-            dispatch('fetchCharacter', characterId),
-            dispatch('fetchSkillBalance')
-          ]);
-        });
+            await Promise.all([
+              dispatch('fetchCharacter', characterId),
+              dispatch('fetchSkillBalance')
+            ]);
+          });
 
-        // TODO filter to only get own
-        state.contracts.Weapons.events.NewWeapon(async (err, data) => {
-          if (err != null) {
-            console.error(err);
-            return;
-          }
+          // TODO filter to only get own
+          state.contracts.Weapons.events.NewWeapon(async (err, data) => {
+            if (err != null) {
+              console.error(err);
+              return;
+            }
 
-          console.log('NewWeapon', data);
+            console.log('NewWeapon', data);
 
-          const weaponId = data.returnValues.weapon;
+            const weaponId = data.returnValues.weapon;
 
-          commit('addNewOwnedWeaponId', weaponId);
+            commit('addNewOwnedWeaponId', weaponId);
 
-          await Promise.all([
-            dispatch('fetchWeapon', weaponId),
-            dispatch('fetchSkillBalance')
-          ]);
-        });
+            await Promise.all([
+              dispatch('fetchWeapon', weaponId),
+              dispatch('fetchSkillBalance')
+            ]);
+          });
 
-        // TODO filter to only get own
-        state.contracts.CryptoBlades.events.FightOutcome(async (err, data) => {
-          if (err != null) {
-            console.error(err);
-            return;
-          }
+          // TODO filter to only get own
+          state.contracts.CryptoBlades.events.FightOutcome(async (err, data) => {
+            if (err != null) {
+              console.error(err);
+              return;
+            }
 
-          console.log('FightOutcome', data);
+            console.log('FightOutcome', data);
 
-          await Promise.all([
-            dispatch('fetchCharacter', data.returnValues.character),
-            dispatch('fetchSkillBalance')
-          ]);
-        });
+            await Promise.all([
+              dispatch('fetchCharacter', data.returnValues.character),
+              dispatch('fetchSkillBalance')
+            ]);
+          });
+        }
 
         state.contracts.StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err, data) => {
           if (err != null) {
@@ -312,7 +314,7 @@ export function createStore(web3, featureFlagStakeOnly) {
       },
 
       async setUpContracts({ commit }) {
-        const contracts = await setUpContracts(web3);
+        const contracts = await setUpContracts(web3, featureFlagStakeOnly);
         commit('setContracts', contracts);
       },
 
@@ -358,7 +360,9 @@ export function createStore(web3, featureFlagStakeOnly) {
       },
 
       async fetchSkillBalance({ state, commit }) {
-        const skillBalance = await state.contracts.CryptoBlades.methods.getMySkill().call(defaultCallOptions(state));
+        const skillBalance = await state.contracts.SkillToken.methods
+          .balanceOf(state.defaultAccount)
+          .call(defaultCallOptions(state));
         commit('updateSkillBalance', { skillBalance });
       },
 
