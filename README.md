@@ -6,7 +6,7 @@
 
 1. For Ganache, choose Quickstart Ethereum.
 
-1. Increase the gas limit in the workspace to `67219751`.
+1. Increase the gas limit in the workspace to `67219751` (or some other high number so you can deploy).
 
 1. Install [MetaMask](https://metamask.io/).
 
@@ -22,11 +22,16 @@ You should now have 100 fake eth! You're now fake rich.
 
 1. `npm install`
 
-1. Create a `.env` file in `frontend` with the following values:
+1. `npm run contract:deploy` (this deploys your contracts to your local blockchain)
 
+You can also create a `.env` file in `frontend` with the following values:
+
+- `VUE_APP_NETWORK_ID` - the network ID to use for each contract (default: `5777`)
 - `VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS`
 - `VUE_APP_STAKING_REWARDS_CONTRACT_ADDRESS`
 - `VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS`
+
+But if not specified, the deployed contracts will be pulled in automatically.
 
 ## Truffle Environment Variables
 

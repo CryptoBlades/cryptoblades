@@ -1,18 +1,21 @@
-import abi from '../../build/ABI.json';
-import { abi as cryptoBladesAbi } from '../../build/contracts/CryptoBlades.json';
+import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../build/contracts/CryptoBlades.json';
+import { abi as stakingRewardsAbi, networks as stakingRewardsNetworks } from '../../build/contracts/StakingRewards.json';
+import { abi as skillTokenAbi, networks as skillTokenNetworks } from '../../build/contracts/SkillToken.json';
+
 import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
-import { abi as stakingRewardsAbi } from '../../build/contracts/StakingRewards.json';
-import { abi as skillTokenAbi } from '../../build/contracts/SkillToken.json';
-
-export { abi };
 
 function createContracts(web3) {
   const at = abi => addr => new web3.eth.Contract(abi, addr);
 
-  const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi, process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS);
-  const StakingRewards = new web3.eth.Contract(stakingRewardsAbi, process.env.VUE_APP_STAKING_REWARDS_CONTRACT_ADDRESS);
-  const SkillToken = new web3.eth.Contract(skillTokenAbi, process.env.VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS);
+  const networkId = process.env.VUE_APP_NETWORK_ID || 5777;
+  const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || cryptoBladesNetworks[networkId].address;
+  const stakingRewardsContractAddr = process.env.VUE_APP_STAKING_REWARDS_CONTRACT_ADDRESS || stakingRewardsNetworks[networkId].address;
+  const skillTokenContractAddr = process.env.VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS || skillTokenNetworks[networkId].address;
+
+  const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi, cryptoBladesContractAddr);
+  const StakingRewards = new web3.eth.Contract(stakingRewardsAbi, stakingRewardsContractAddr);
+  const SkillToken = new web3.eth.Contract(skillTokenAbi, skillTokenContractAddr);
 
   const Characters = { at: at(charactersAbi) };
   const Weapons = { at: at(weaponsAbi) };
