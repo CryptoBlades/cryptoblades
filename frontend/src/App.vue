@@ -133,7 +133,7 @@ body {
 }
 
 .body {
-  height: calc(100vh - 56px);
+  max-height: calc(100vh - 56px - 160px);
 }
 
 </style>

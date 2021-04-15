@@ -32,5 +32,6 @@ export default {
 
 h1 {
   margin-top: 0;
+  padding-top: 10px;
 }
 </style>
