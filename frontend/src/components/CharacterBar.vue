@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import CharacterDisplay from "./smart/CharacterDisplay.vue";
+import CharacterDisplay from './smart/CharacterDisplay.vue';
 
 export default {
   components: {

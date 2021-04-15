@@ -151,34 +151,34 @@
 </template>
 
 <script>
-import BN from "bignumber.js";
+import BN from 'bignumber.js';
 BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapState } from 'vuex';
 
-import { getCurrentGasPrices } from "../../utils/common";
-import { formatDurationFromSeconds } from "../../utils/date-time";
+import { getCurrentGasPrices } from '../../utils/common';
+import { formatDurationFromSeconds } from '../../utils/date-time';
 
-const connectToWalletButtonLabel = "Connect to wallet ↗";
-const amountIsTooBigButtonLabel = "Amount is too big";
-const contractIsFullButtonLabel = "Contract is Full";
-const enterAnAmountButtonLabel = "Enter an amount";
-const insufficientBalanceButtonLabel = "Insufficient balance";
-const notEnoughFundsInExitPoolButtonLabel = "Not enough funds in Exit Pool";
-const waitingButtonLabel = "Waiting...";
+const connectToWalletButtonLabel = 'Connect to wallet ↗';
+const amountIsTooBigButtonLabel = 'Amount is too big';
+const contractIsFullButtonLabel = 'Contract is Full';
+const enterAnAmountButtonLabel = 'Enter an amount';
+const insufficientBalanceButtonLabel = 'Insufficient balance';
+const notEnoughFundsInExitPoolButtonLabel = 'Not enough funds in Exit Pool';
+const waitingButtonLabel = 'Waiting...';
 
-const stakeButtonLabel = "Stake";
-const unstakeButtonLabel = "Unstake";
+const stakeButtonLabel = 'Stake';
+const unstakeButtonLabel = 'Unstake';
 
 export default {
   // components: { ImageVue, StakeGauge },
   data: () => ({
-    textAmount: "",
+    textAmount: '',
     isDeposit: true,
     gas: { low: 90, medium: 130, high: 180 },
     loading: false,
     errorWhenUpdating: null,
-    selectedGasLevel: "medium",
+    selectedGasLevel: 'medium',
     rewardClaimLoading: false,
 
     stakeUnlockTimeLeftCurrentEstimate: 0,
@@ -205,16 +205,16 @@ export default {
   },
   computed: {
     ...mapState([
-      "defaultAccount",
-      "skillBalance",
-      "stakedSkillBalance",
-      "stakeRemainingCapacityForDeposit",
-      "stakeRemainingCapacityForWithdraw",
-      "stakeContractBalance",
-      "stakeCurrentRewardEarned",
-      "stakeRewardMinimumStakeTime",
-      "stakeRewardDistributionTimeLeft",
-      "stakeUnlockTimeLeft",
+      'defaultAccount',
+      'skillBalance',
+      'stakedSkillBalance',
+      'stakeRemainingCapacityForDeposit',
+      'stakeRemainingCapacityForWithdraw',
+      'stakeContractBalance',
+      'stakeCurrentRewardEarned',
+      'stakeRewardMinimumStakeTime',
+      'stakeRewardDistributionTimeLeft',
+      'stakeUnlockTimeLeft',
     ]),
 
     minimumStakeTimeFormatted() {
@@ -226,7 +226,7 @@ export default {
     },
 
     showRewardClaimSection() {
-      if (this.rewardClaimState === "loading") {
+      if (this.rewardClaimState === 'loading') {
         return true;
       }
 
@@ -281,11 +281,11 @@ export default {
 
     currentState() {
       if (this.defaultAccount == null || this.errorWhenUpdating != null) {
-        return "connectWallet";
+        return 'connectWallet';
       }
 
       if (!this.isDeposit && this.stakeUnlockTimeLeft > 0) {
-        return "stakeLocked";
+        return 'stakeLocked';
       }
 
       if (
@@ -293,7 +293,7 @@ export default {
         this.remainingCapacityForDeposit.eq(0) &&
         this.isDeposit
       ) {
-        return "contractFull";
+        return 'contractFull';
       }
 
       if (
@@ -301,15 +301,15 @@ export default {
         this.bigNumberAmount.gt(this.remainingCapacityForDeposit) &&
         this.isDeposit
       ) {
-        return "amountIsTooBig";
+        return 'amountIsTooBig';
       }
 
-      if (this.textAmount[this.textAmount.length - 1] === ".") {
-        return "waiting";
+      if (this.textAmount[this.textAmount.length - 1] === '.') {
+        return 'waiting';
       }
 
       if (this.textAmount <= 0) {
-        return "inputIsZero";
+        return 'inputIsZero';
       }
 
       const hasSufficientBalance = this.isDeposit
@@ -317,66 +317,66 @@ export default {
         : this.stakedBalance.gte(this.bigNumberAmount);
 
       if (!hasSufficientBalance) {
-        return "insufficientBalance";
+        return 'insufficientBalance';
       }
 
       if (this.bigNumberAmount.gt(this.contractBalance) && !this.isDeposit) {
-        return "notEnoughFundsInExitPool";
+        return 'notEnoughFundsInExitPool';
       }
 
       if (
         this.bigNumberAmount.gt(this.remainingCapacityForWithdraw) &&
         !this.isDeposit
       ) {
-        return "notEnoughFundsInExitPool";
+        return 'notEnoughFundsInExitPool';
       }
 
-      return "ok";
+      return 'ok';
     },
 
     submitButtonLabel() {
       switch (this.currentState) {
-        case "ok":
-          return this.isDeposit ? stakeButtonLabel : unstakeButtonLabel;
-        case "contractFull":
-          return contractIsFullButtonLabel;
-        case "amountIsTooBig":
-          return amountIsTooBigButtonLabel;
-        case "waiting":
-          return waitingButtonLabel;
-        case "inputIsZero":
-          return enterAnAmountButtonLabel;
-        case "insufficientBalance":
-          return insufficientBalanceButtonLabel;
-        case "notEnoughFundsInExitPool":
-          return notEnoughFundsInExitPoolButtonLabel;
-        case "stakeLocked":
-          return `Sorry, stake is still locked; please wait about ${this.estimatedUnlockTimeLeftFormatted}`;
-        default:
-          return connectToWalletButtonLabel;
+      case 'ok':
+        return this.isDeposit ? stakeButtonLabel : unstakeButtonLabel;
+      case 'contractFull':
+        return contractIsFullButtonLabel;
+      case 'amountIsTooBig':
+        return amountIsTooBigButtonLabel;
+      case 'waiting':
+        return waitingButtonLabel;
+      case 'inputIsZero':
+        return enterAnAmountButtonLabel;
+      case 'insufficientBalance':
+        return insufficientBalanceButtonLabel;
+      case 'notEnoughFundsInExitPool':
+        return notEnoughFundsInExitPoolButtonLabel;
+      case 'stakeLocked':
+        return `Sorry, stake is still locked; please wait about ${this.estimatedUnlockTimeLeftFormatted}`;
+      default:
+        return connectToWalletButtonLabel;
       }
     },
 
     rewardClaimState() {
       if (this.rewardClaimLoading) {
-        return "loading";
+        return 'loading';
       }
 
       if (this.stakeUnlockTimeLeft > 0) {
-        return "rewardLocked";
+        return 'rewardLocked';
       }
 
-      return "ok";
+      return 'ok';
     },
 
     claimRewardButtonLabel() {
       switch (this.rewardClaimState) {
-        case "loading":
-          return "Loading...";
-        case "rewardLocked":
-          return `Sorry, reward is still locked; please wait about ${this.estimatedUnlockTimeLeftFormatted}`;
-        default:
-          return "Claim reward";
+      case 'loading':
+        return 'Loading...';
+      case 'rewardLocked':
+        return `Sorry, reward is still locked; please wait about ${this.estimatedUnlockTimeLeftFormatted}`;
+      default:
+        return 'Claim reward';
       }
     },
 
@@ -393,11 +393,11 @@ export default {
   },
   methods: {
     ...mapActions([
-      "fetchStakeDetails",
-      "fetchStakeRewardDetails",
-      "stake",
-      "unstake",
-      "claimReward",
+      'fetchStakeDetails',
+      'fetchStakeRewardDetails',
+      'stake',
+      'unstake',
+      'claimReward',
     ]),
 
     updateEstimates() {
@@ -443,10 +443,10 @@ export default {
       }
     },
     async onSubmit() {
-      if (this.loading || this.currentState !== "ok") return;
+      if (this.loading || this.currentState !== 'ok') return;
 
       const amount = this.bigNumberAmount.toString();
-      console.log("It is showtime:", this.bigNumberAmount, amount);
+      console.log('It is showtime:', this.bigNumberAmount, amount);
 
       try {
         this.loading = true;
@@ -466,7 +466,7 @@ export default {
       await this.fetchStakeRewardDetails();
     },
     async onClaimReward() {
-      if (this.rewardClaimState !== "ok") return;
+      if (this.rewardClaimState !== 'ok') return;
 
       try {
         this.rewardClaimLoading = true;
@@ -498,18 +498,18 @@ export default {
   },
   watch: {
     stakeRewardDistributionTimeLeft(newValue, oldValue) {
-      console.log("stakeRewardDistributionTimeLeft", newValue, oldValue);
+      console.log('stakeRewardDistributionTimeLeft', newValue, oldValue);
       if (newValue !== oldValue) {
         this.stakeRewardDistributionTimeLeftCurrentEstimate = newValue;
       }
     },
     stakeUnlockTimeLeft(newValue, oldValue) {
-      console.log("stakeUnlockTimeLeft", newValue, oldValue);
+      console.log('stakeUnlockTimeLeft', newValue, oldValue);
       if (newValue !== oldValue) {
         this.stakeUnlockTimeLeftCurrentEstimate = newValue;
       }
     },
-    textAmount: function (newValue, oldVal) {
+    textAmount (newValue, oldVal) {
       if (newValue.length > 40) {
         this.textAmount = oldVal;
         return;
@@ -521,8 +521,8 @@ export default {
       }
 
       if (
-        newValue[newValue.length - 1] === "." &&
-        newValue[newValue.length - 2] !== "."
+        newValue[newValue.length - 1] === '.' &&
+        newValue[newValue.length - 2] !== '.'
       ) {
         return;
       }
@@ -536,8 +536,8 @@ export default {
         this.textAmount = 0;
       }
     },
-    isDeposit: function () {
-      this.textAmount = "";
+    isDeposit () {
+      this.textAmount = '';
     },
     async defaultAccount(newVal) {
       if (newVal) {

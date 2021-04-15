@@ -9,9 +9,9 @@
               <i class="fas fa-plus"></i>
             </button>
           </h1>
-          
+
         </div>
-        
+
         <character-list
           :value="currentCharacterId"
           @input="setCurrentCharacter"
@@ -19,7 +19,7 @@
       </div>
       <div class="weapon-grid">
         <h1>Weapons</h1>
-        
+
         <div v-if="ownWeapons.length > 0">
           <weapon-grid />
         </div>
@@ -53,28 +53,28 @@
 </template>
 
 <script>
-import BigButton from "../components/BigButton.vue";
-import WeaponGrid from "../components/smart/WeaponGrid.vue";
-import Character from "../components/Character.vue";
-import CharacterList from "../components/smart/CharacterList.vue";
-import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
+import BigButton from '../components/BigButton.vue';
+import WeaponGrid from '../components/smart/WeaponGrid.vue';
+import Character from '../components/Character.vue';
+import CharacterList from '../components/smart/CharacterList.vue';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 
 export default {
   computed: {
-    ...mapState(["characters", "maxStamina", "currentCharacterId"]),
+    ...mapState(['characters', 'maxStamina', 'currentCharacterId']),
     ...mapGetters([
-      "ownCharacters",
-      "ownWeapons",
-      "currentCharacter",
-      "currentCharacterStamina",
-      "getCharacterName",
+      'ownCharacters',
+      'ownWeapons',
+      'currentCharacter',
+      'currentCharacterStamina',
+      'getCharacterName',
     ]),
 
     character() {
       if (this.currentCharacter == null) {
         return {
           id: null,
-          name: "???",
+          name: '???',
           level: -1,
           experience: -1,
         };
@@ -91,8 +91,8 @@ export default {
   },
 
   methods: {
-    ...mapMutations(["setCurrentCharacter"]),
-    ...mapActions(["mintCharacter"]),
+    ...mapMutations(['setCurrentCharacter']),
+    ...mapActions(['mintCharacter']),
 
     async onMintCharacter() {
       try {

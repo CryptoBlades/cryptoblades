@@ -14,19 +14,19 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters } from 'vuex';
 
-import WeaponIcon from "../WeaponIcon.vue";
+import WeaponIcon from '../WeaponIcon.vue';
 
 export default {
-  props: ["value"],
+  props: ['value'],
 
   components: {
     WeaponIcon,
   },
 
   computed: {
-    ...mapGetters(["ownWeapons"]),
+    ...mapGetters(['ownWeapons']),
   },
 };
 </script>

@@ -9,7 +9,7 @@
 
 <script>
 export default {
-  props: ["current", "max"],
+  props: ['current', 'max'],
 
   computed: {
     factor() {
@@ -17,7 +17,7 @@ export default {
     },
 
     percent() {
-      return this.factor * 100 + "";
+      return this.factor * 100 + '';
     },
   },
 };

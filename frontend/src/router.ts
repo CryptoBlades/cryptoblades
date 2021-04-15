@@ -5,7 +5,7 @@ import Blacksmith from './views/Blacksmith.vue';
 import Combat from './views/Combat.vue';
 import Stake from './views/Stake.vue';
 
-function createRouter(featureFlagStakeOnly) {
+function createRouter(featureFlagStakeOnly: boolean) {
   if (featureFlagStakeOnly) {
     return new VueRouter({
       routes: [

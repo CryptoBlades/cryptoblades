@@ -53,5 +53,6 @@ Truffle also supports some environment variables, if you create a `.env` file in
 ## Commands
 
 - `npm run start:frontend` - start up a server for the Vue frontend
+- `npm run lint` - run lint checking for all modules
 - `npm run contract:prepare` - extract the ABI and re-compile Truffle contracts
 - `npm run contract:deploy` - deploy the Truffle contracts for testing

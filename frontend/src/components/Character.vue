@@ -9,10 +9,10 @@
 </template>
 
 <script>
-import { getCharacterArt } from "../character-arts-placeholder";
+import { getCharacterArt } from '../character-arts-placeholder';
 
 export default {
-  props: ["character"],
+  props: ['character'],
 
   methods: {
     getCharacterArt,

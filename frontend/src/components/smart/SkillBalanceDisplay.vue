@@ -9,31 +9,31 @@
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
-import BN from "bignumber.js";
-import Web3 from "web3";
+import { mapActions, mapState } from 'vuex';
+import BN from 'bignumber.js';
+import Web3 from 'web3';
 
 export default {
-  inject: ["featureFlagStakeOnly"],
+  inject: ['featureFlagStakeOnly'],
   computed: {
-    ...mapState(["skillBalance"]),
+    ...mapState(['skillBalance']),
 
     formattedSkillBalance() {
-      const skillBalance = Web3.utils.fromWei(this.skillBalance, "ether");
+      const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
       return `${BN(skillBalance).toFixed(4)} SKILL`;
     },
   },
 
   methods: {
-    ...mapActions(["addMoreSkill"]),
+    ...mapActions(['addMoreSkill']),
 
     async onAddMoreSkill() {
-      const valueSkillToAdd = prompt("How much SKILL do you want?", "5");
+      const valueSkillToAdd = prompt('How much SKILL do you want?', '5');
       if(!valueSkillToAdd) return;
 
       const skillToAdd = Web3.utils.toWei(
         valueSkillToAdd,
-        "ether"
+        'ether'
       );
 
       try {
@@ -41,14 +41,14 @@ export default {
         alert(`Successfully added ${valueSkillToAdd} SKILL to your balance!`);
       } catch (e) {
         console.error(e);
-        alert("Could not add SKILL; insufficient funds or transaction denied.");
+        alert('Could not add SKILL; insufficient funds or transaction denied.');
       }
     },
   },
 
   watch: {
     skillBalance(balance, oldBalance) {
-      console.log("BALANCE CHANGE:", balance, oldBalance, balance - oldBalance);
+      console.log('BALANCE CHANGE:', balance, oldBalance, balance - oldBalance);
     },
   },
 };

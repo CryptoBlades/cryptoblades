@@ -1,4 +1,7 @@
-export function characterFromContract(id, data) {
+
+import { ICharacter, ITarget, IWeapon } from '../interfaces';
+
+export function characterFromContract(id: number, data: string): ICharacter {
   const xp = data[0];
   const level = parseInt(data[1], 10);
   const trait = data[2];
@@ -7,7 +10,7 @@ export function characterFromContract(id, data) {
   return { id, xp, level, trait, staminaTimestamp, appearance };
 }
 
-export function weaponFromContract(id, data) {
+export function weaponFromContract(id: number, data: string): IWeapon {
   const properties = data[0];
   const stat1 = data[1];
   const stat2 = data[2];
@@ -20,7 +23,7 @@ export function weaponFromContract(id, data) {
   return { id, properties, stat1, stat2, stat3, level, blade, crossguard, grip, pommel };
 }
 
-export function targetFromContract(data) {
+export function targetFromContract(data: string): ITarget {
   const n = parseInt(data, 10);
   return {
     original: data,

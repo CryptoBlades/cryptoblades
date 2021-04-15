@@ -9,8 +9,8 @@
 </template>
 
 <script>
-import ViewLinks from "./ViewLinks.vue";
-import SkillBalanceDisplay from "./smart/SkillBalanceDisplay.vue";
+import ViewLinks from './ViewLinks.vue';
+import SkillBalanceDisplay from './smart/SkillBalanceDisplay.vue';
 
 export default {
   components: {

@@ -17,7 +17,7 @@
 
 <script>
 export default {
-  props: ["current", "max", "faIcon", "primaryColor", "altText"],
+  props: ['current', 'max', 'faIcon', 'primaryColor', 'altText'],
 
   computed: {
     factor() {
@@ -25,7 +25,7 @@ export default {
     },
 
     percent() {
-      return this.factor * 100 + "%";
+      return this.factor * 100 + '%';
     },
   },
 };

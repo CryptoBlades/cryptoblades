@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import Staking from "../components/smart/Staking.vue";
+import Staking from '../components/smart/Staking.vue';
 
 export default {
   components: {

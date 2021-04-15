@@ -35,9 +35,9 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from "vuex";
-import { getCharacterArt } from "../../character-arts-placeholder";
-import SmallBar from "../SmallBar.vue";
+import { mapGetters, mapState } from 'vuex';
+import { getCharacterArt } from '../../character-arts-placeholder';
+import SmallBar from '../SmallBar.vue';
 
 export default {
   components: {
@@ -45,11 +45,11 @@ export default {
   },
 
   computed: {
-    ...mapState(["maxStamina", "currentCharacterId"]),
+    ...mapState(['maxStamina', 'currentCharacterId']),
     ...mapGetters([
-      "currentCharacter",
-      "currentCharacterStamina",
-      "getCharacterName",
+      'currentCharacter',
+      'currentCharacterStamina',
+      'getCharacterName',
     ]),
 
     isLoadingCharacter() {

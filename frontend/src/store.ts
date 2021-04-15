@@ -1,18 +1,20 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import Web3 from 'web3';
 import _ from 'lodash';
-import BN from "bignumber.js";
+import BN from 'bignumber.js';
 BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 
-import { setUpContracts } from "./contracts";
+import { setUpContracts } from './contracts';
 import {
   characterFromContract, targetFromContract, weaponFromContract
-} from "./contract-models.js";
+} from './contract-models';
+import { IState } from '../interfaces';
 
-const defaultCallOptions = state => ({ from: state.defaultAccount });
+const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
-export function createStore(web3, featureFlagStakeOnly) {
+export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
   return new Vuex.Store({
     state: {
       contracts: {},
@@ -46,19 +48,20 @@ export function createStore(web3, featureFlagStakeOnly) {
     },
 
     getters: {
-      contractProvider(state) {
+      contractProvider(state: IState): Record<string, any> {
         return state.contracts;
       },
 
-      getTargetsByCharacterIdAndWeaponId(state) {
-        return (characterId, weaponId) => {
+      getTargetsByCharacterIdAndWeaponId(state: IState) {
+        return (characterId: number, weaponId: number) => {
           const targetsByWeaponId = state.targetsByCharacterIdAndWeaponId[characterId];
-          if (targetsByWeaponId == null) return [];
-          return targetsByWeaponId[weaponId] || [];
+          if (!targetsByWeaponId) return [];
+
+          return targetsByWeaponId[weaponId] ?? [];
         };
       },
 
-      getCharacterName(state) {
+      getCharacterName() {
         const names = [
           'Gaa Chestbrew',
           'Globrin Stun',
@@ -69,32 +72,31 @@ export function createStore(web3, featureFlagStakeOnly) {
           'Thek-Duf Huenkruld'
         ];
 
-        return (characterId) => {
-          void (state);
+        return (characterId: number) => {
           return names[characterId];
         };
       },
 
       ownCharacters(state) {
         const characters = state.ownedCharacterIds.map((id) => state.characters[id]);
-        if (characters.some((w) => w == null)) return [];
+        if (characters.some((w) => w === null)) return [];
         return characters;
       },
 
       ownWeapons(state) {
         const weapons = state.ownedWeaponIds.map((id) => state.weapons[id]);
-        if (weapons.some((w) => w == null)) return [];
+        if (weapons.some((w) => w === null)) return [];
         return weapons;
       },
 
       currentCharacter(state) {
-        if (state.currentCharacterId == null) return null;
+        if (!state.currentCharacterId) return null;
 
         return state.characters[state.currentCharacterId];
       },
 
       currentCharacterStamina(state) {
-        return state.currentCharacterId == null ? 0 : state.characterStaminas[state.currentCharacterId];
+        return state.currentCharacterId === null ? 0 : state.characterStaminas[state.currentCharacterId];
       },
 
       stakeRewardPeriodStartUnix(state) {
@@ -103,7 +105,7 @@ export function createStore(web3, featureFlagStakeOnly) {
     },
 
     mutations: {
-      setAccounts(state, payload) {
+      setAccounts(state: IState, payload) {
         state.accounts = payload.accounts;
 
         if (payload.accounts.length > 0) {
@@ -114,15 +116,15 @@ export function createStore(web3, featureFlagStakeOnly) {
         }
       },
 
-      setContracts(state, payload) {
+      setContracts(state: IState, payload) {
         state.contracts = payload;
       },
 
-      updateSkillBalance(state, { skillBalance }) {
+      updateSkillBalance(state: IState, { skillBalance }) {
         state.skillBalance = skillBalance;
       },
 
-      updateUserDetails(state, payload) {
+      updateUserDetails(state: IState, payload) {
         const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina'];
         for (const key of keysToAllow) {
           if (Object.hasOwnProperty.call(payload, key)) {
@@ -143,35 +145,35 @@ export function createStore(web3, featureFlagStakeOnly) {
         }
       },
 
-      setCurrentCharacter(state, characterId) {
+      setCurrentCharacter(state: IState, characterId: number) {
         state.currentCharacterId = characterId;
       },
 
-      addNewOwnedCharacterId(state, characterId) {
+      addNewOwnedCharacterId(state: IState, characterId: number) {
         if (!state.ownedCharacterIds.includes(characterId)) {
           state.ownedCharacterIds.push(characterId);
         }
       },
 
-      addNewOwnedWeaponId(state, weaponId) {
+      addNewOwnedWeaponId(state: IState, weaponId: number) {
         if (!state.ownedWeaponIds.includes(weaponId)) {
           state.ownedWeaponIds.push(weaponId);
         }
       },
 
-      updateCharacter(state, { characterId, character }) {
+      updateCharacter(state: IState, { characterId, character }) {
         Vue.set(state.characters, characterId, character);
       },
 
-      updateWeapon(state, { weaponId, weapon }) {
+      updateWeapon(state: IState, { weaponId, weapon }) {
         Vue.set(state.weapons, weaponId, weapon);
       },
 
-      updateCharacterStamina(state, { characterId, stamina }) {
+      updateCharacterStamina(state: IState, { characterId, stamina }) {
         Vue.set(state.characterStaminas, characterId, stamina);
       },
 
-      updateTargets(state, { characterId, weaponId, targets }) {
+      updateTargets(state: IState, { characterId, weaponId, targets }) {
         if (state.targetsByCharacterIdAndWeaponId[characterId] == null) {
           Vue.set(state.targetsByCharacterIdAndWeaponId, characterId, {});
         }
@@ -179,7 +181,7 @@ export function createStore(web3, featureFlagStakeOnly) {
         Vue.set(state.targetsByCharacterIdAndWeaponId[characterId], weaponId, targets);
       },
 
-      updateStakeData(state, {
+      updateStakeData(state: IState, {
         stakedSkillBalance, stakeRemainingCapacityForDeposit,
         stakeRemainingCapacityForWithdraw, stakeContractBalance
       }) {
@@ -189,7 +191,7 @@ export function createStore(web3, featureFlagStakeOnly) {
         state.stakeContractBalance = stakeContractBalance;
       },
 
-      updateStakeRewardData(state, {
+      updateStakeRewardData(state: IState, {
         stakeCurrentRewardEarned,
         stakeRewardPeriodEndUnix,
         stakeRewardPeriodDurationSeconds,
@@ -226,8 +228,8 @@ export function createStore(web3, featureFlagStakeOnly) {
       setUpContractEvents({ state, dispatch, commit }) {
         if (!featureFlagStakeOnly) {
           // TODO filter to only get own
-          state.contracts.Characters.events.NewCharacter(async (err, data) => {
-            if (err != null) {
+          state.contracts.Characters.events.NewCharacter(async (err: Error, data: any) => {
+            if (err) {
               console.error(err);
               return;
             }
@@ -245,8 +247,8 @@ export function createStore(web3, featureFlagStakeOnly) {
           });
 
           // TODO filter to only get own
-          state.contracts.Weapons.events.NewWeapon(async (err, data) => {
-            if (err != null) {
+          state.contracts.Weapons.events.NewWeapon(async (err: Error, data: any) => {
+            if (err) {
               console.error(err);
               return;
             }
@@ -264,8 +266,8 @@ export function createStore(web3, featureFlagStakeOnly) {
           });
 
           // TODO filter to only get own
-          state.contracts.CryptoBlades.events.FightOutcome(async (err, data) => {
-            if (err != null) {
+          state.contracts.CryptoBlades.events.FightOutcome(async (err: Error, data: any) => {
+            if (err) {
               console.error(err);
               return;
             }
@@ -279,8 +281,8 @@ export function createStore(web3, featureFlagStakeOnly) {
           });
         }
 
-        state.contracts.StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err, data) => {
-          if (err != null) {
+        state.contracts.StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err: Error, data: any) => {
+          if (err) {
             console.error(err);
             return;
           }
@@ -293,8 +295,8 @@ export function createStore(web3, featureFlagStakeOnly) {
           ]);
         });
 
-        state.contracts.StakingRewards.events.RewardAdded(async (err, data) => {
-          if (err != null) {
+        state.contracts.StakingRewards.events.RewardAdded(async (err: Error, data: any) => {
+          if (err) {
             console.error(err);
             return;
           }
@@ -304,8 +306,8 @@ export function createStore(web3, featureFlagStakeOnly) {
           await dispatch('fetchStakeRewardDetails');
         });
 
-        state.contracts.StakingRewards.events.RewardsDurationUpdated(async (err, data) => {
-          if (err != null) {
+        state.contracts.StakingRewards.events.RewardsDurationUpdated(async (err: Error, data: any) => {
+          if (err) {
             console.error(err);
             return;
           }
@@ -369,7 +371,7 @@ export function createStore(web3, featureFlagStakeOnly) {
         commit('updateSkillBalance', { skillBalance });
       },
 
-      async addMoreSkill({ state, dispatch }, skillToAdd) {
+      async addMoreSkill({ state, dispatch }, skillToAdd: string) {
         await state.contracts.CryptoBlades.methods.giveMeSkill(skillToAdd).send({
           from: state.defaultAccount,
         });
@@ -377,11 +379,11 @@ export function createStore(web3, featureFlagStakeOnly) {
         await dispatch('fetchSkillBalance');
       },
 
-      async fetchCharacters({ dispatch }, characterIds) {
-        await Promise.all(characterIds.map(id => dispatch('fetchCharacter', id)));
+      async fetchCharacters({ dispatch }, characterIds: number[]) {
+        await Promise.all(characterIds.map((id: number) => dispatch('fetchCharacter', id)));
       },
 
-      async fetchCharacter({ state, commit }, characterId) {
+      async fetchCharacter({ state, commit }, characterId: number) {
         const character = characterFromContract(
           characterId,
           await state.contracts.Characters.methods.get(characterId).call(defaultCallOptions(state))
@@ -390,11 +392,11 @@ export function createStore(web3, featureFlagStakeOnly) {
         commit('updateCharacter', { characterId, character });
       },
 
-      async fetchWeapons({ dispatch }, weaponIds) {
-        await Promise.all(weaponIds.map(id => dispatch('fetchWeapon', id)));
+      async fetchWeapons({ dispatch }, weaponIds: number[]) {
+        await Promise.all(weaponIds.map((id: number) => dispatch('fetchWeapon', id)));
       },
 
-      async fetchWeapon({ state, commit }, weaponId) {
+      async fetchWeapon({ state, commit }, weaponId: number) {
         const weapon = weaponFromContract(
           weaponId,
           await state.contracts.Weapons.methods.get(weaponId).call(defaultCallOptions(state))
@@ -403,7 +405,7 @@ export function createStore(web3, featureFlagStakeOnly) {
         commit('updateWeapon', { weaponId, weapon });
       },
 
-      async fetchCharacterStamina({ state, commit }, characterId) {
+      async fetchCharacterStamina({ state, commit }, characterId: number) {
         const stamina = await state.contracts.Characters.methods.getStaminaPoints(characterId).call(defaultCallOptions(state));
         if (state.characterStaminas[characterId] !== stamina) {
           commit('updateCharacterStamina', { characterId, stamina });
@@ -520,7 +522,7 @@ export function createStore(web3, featureFlagStakeOnly) {
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
 
-        const stateToChange = {
+        const stateToChange: Record<string, number> = {
           stakeCurrentRewardEarned,
           stakeRewardPeriodEndUnix: parseInt(stakeRewardPeriodEndUnix, 10),
           stakeRewardPeriodDurationSeconds: parseInt(stakeRewardPeriodDurationSeconds, 10),
@@ -528,9 +530,10 @@ export function createStore(web3, featureFlagStakeOnly) {
           stakeRewardDistributionTimeLeft: parseInt(stakeRewardDistributionTimeLeft, 10),
           stakeUnlockTimeLeft: parseInt(stakeUnlockTimeLeft, 10)
         };
+
         let doCommit = false;
         for (const key in stateToChange) {
-          if (Object.hasOwnProperty.call(stateToChange, key) && stateToChange[key] !== state[key]) {
+          if (Object.hasOwnProperty.call(stateToChange, key) && stateToChange[key] !== (state as IState)[key as keyof IState]) {
             doCommit = true;
             break;
           }
@@ -551,7 +554,7 @@ export function createStore(web3, featureFlagStakeOnly) {
         await StakingRewards.methods.stake(amount).send({
           from: state.defaultAccount,
           gas: 200_000,
-          gasPrice: BN(gas).multipliedBy(1e9).toString(),
+          gasPrice: new BN(gas).multipliedBy(1e9).toString(),
         });
 
         await Promise.all([
@@ -566,7 +569,7 @@ export function createStore(web3, featureFlagStakeOnly) {
         await StakingRewards.methods.withdraw(amount).send({
           from: state.defaultAccount,
           gas: 200_000,
-          gasPrice: BN(gas).multipliedBy(1e9).toString(),
+          gasPrice: new BN(gas).multipliedBy(1e9).toString(),
         });
 
         await Promise.all([

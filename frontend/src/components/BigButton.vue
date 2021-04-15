@@ -7,7 +7,7 @@
 
 <script>
 export default {
-  props: ["mainText", "subText"],
+  props: ['mainText', 'subText'],
 };
 </script>
 

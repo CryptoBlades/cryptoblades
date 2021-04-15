@@ -17,14 +17,14 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-import { getCharacterArt } from "../../character-arts-placeholder";
+import { mapGetters } from 'vuex';
+import { getCharacterArt } from '../../character-arts-placeholder';
 
 export default {
-  props: ["value"],
+  props: ['value'],
 
   computed: {
-    ...mapGetters(["ownCharacters", "getCharacterName"]),
+    ...mapGetters(['ownCharacters', 'getCharacterName']),
   },
 
   methods: {

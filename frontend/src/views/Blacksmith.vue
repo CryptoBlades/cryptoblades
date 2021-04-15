@@ -40,9 +40,9 @@
 </template>
 
 <script>
-import WeaponGrid from "../components/smart/WeaponGrid.vue";
-import BigButton from "../components/BigButton.vue";
-import { mapActions, mapGetters } from "vuex";
+import WeaponGrid from '../components/smart/WeaponGrid.vue';
+import BigButton from '../components/BigButton.vue';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   data() {
@@ -53,7 +53,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(["ownWeapons"]),
+    ...mapGetters(['ownWeapons']),
 
     canReforge() {
       return (
@@ -65,7 +65,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(["mintWeapon", "reforgeWeapon"]),
+    ...mapActions(['mintWeapon', 'reforgeWeapon']),
 
     async onForgeWeapon() {
       try {

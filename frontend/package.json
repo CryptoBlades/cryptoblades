@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "npm run serve",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "start": "npm run serve"
   },
   "dependencies": {
     "axios": "^0.21.1",
@@ -16,18 +16,26 @@
     "three-fbx-loader": "^1.0.3",
     "vue": "^2.6.11",
     "vue-3d-model": "^1.3.1",
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.5.1",
     "vuex": "^3.6.2",
     "web3": "^1.3.4"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.168",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
     "@vue/cli": "^4.5.12",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-typescript": "^4.5.12",
     "@vue/cli-service": "~4.5.0",
+    "@vue/eslint-config-typescript": "^5.0.2",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "typescript": "~4.1.5",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
@@ -37,12 +45,99 @@
     },
     "extends": [
       "plugin:vue/essential",
-      "eslint:recommended"
+      "eslint:recommended",
+      "@vue/typescript"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "project": ["tsconfig.json"],
+      "parser": "@typescript-eslint/parser"
     },
-    "rules": {}
+    "rules": {
+      "max-len": [
+          "error",
+          {
+              "ignorePattern": "//",
+              "code": 160
+          }
+      ],
+      "no-debugger": "error",
+      "no-eval": "error",
+      "no-fallthrough": "error",
+      "new-parens": "error",
+      "no-caller": "error",
+      "no-cond-assign": "error",
+      "no-throw-literal": "error",
+      "no-trailing-spaces": "error",
+      "no-undef-init": "error",
+      "no-unsafe-finally": "error",
+      "no-unused-labels": "error",
+      "no-var": "error",
+      "object-shorthand": "error",
+      "prefer-const": "error",
+      "radix": "error",
+      "use-isnan": "error",
+      "quote-props": [
+          "error",
+          "as-needed"
+      ],
+      "indent": "off",
+      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-use-before-define": "error",
+      "@typescript-eslint/ban-types": [
+        "error",
+        {
+          "types": {
+            "Object": {
+              "message": "Avoid using the `Object` type. Did you mean `object`?"
+            },
+            "Function": {
+              "message": "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."
+            },
+            "Boolean": {
+              "message": "Avoid using the `Boolean` type. Did you mean `boolean`?"
+            },
+            "Number": {
+              "message": "Avoid using the `Number` type. Did you mean `number`?"
+            },
+            "String": {
+              "message": "Avoid using the `String` type. Did you mean `string`?"
+            },
+            "Symbol": {
+              "message": "Avoid using the `Symbol` type. Did you mean `symbol`?"
+            }
+          }
+        }
+      ],
+      "@typescript-eslint/type-annotation-spacing": "error",
+      "@typescript-eslint/unified-signatures": "error",
+      "@typescript-eslint/consistent-type-assertions": "error",
+      "@typescript-eslint/consistent-type-definitions": "error",
+      "@typescript-eslint/dot-notation": "error",
+      "@typescript-eslint/no-empty-interface": "error",
+      "@typescript-eslint/no-misused-new": "error",
+      "@typescript-eslint/no-namespace": "error",
+      "@typescript-eslint/no-unused-expressions": "error",
+      "@typescript-eslint/indent": [
+          "error",
+          2,
+          {
+              "FunctionDeclaration": {
+                  "parameters": "first"
+              },
+              "FunctionExpression": {
+                  "parameters": "first"
+              }
+          }
+      ],
+      "@typescript-eslint/quotes": [
+          "error",
+          "single"
+      ],
+      "@typescript-eslint/semi": [
+          "error",
+          "always"
+      ]
+    }
   },
   "browserslist": [
     "> 1%",

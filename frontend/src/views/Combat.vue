@@ -35,10 +35,10 @@
 
 <script>
 // import Character from "../components/Character.vue";
-import BigButton from "../components/BigButton.vue";
-import WeaponGrid from "../components/smart/WeaponGrid.vue";
+import BigButton from '../components/BigButton.vue';
+import WeaponGrid from '../components/smart/WeaponGrid.vue';
 
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 export default {
   data() {
@@ -49,11 +49,11 @@ export default {
   },
 
   computed: {
-    ...mapState(["currentCharacterId"]),
+    ...mapState(['currentCharacterId']),
     ...mapGetters([
-      "getTargetsByCharacterIdAndWeaponId",
-      "ownCharacters",
-      "ownWeapons",
+      'getTargetsByCharacterIdAndWeaponId',
+      'ownCharacters',
+      'ownWeapons',
     ]),
 
     targets() {
@@ -83,7 +83,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(["fetchTargets", "doEncounter"]),
+    ...mapActions(['fetchTargets', 'doEncounter']),
 
     async onClickEncounter(targetToFight) {
       if (this.selectedWeaponId == null || this.currentCharacterId == null) {
@@ -98,9 +98,9 @@ export default {
         });
 
         if (success) {
-          alert("Battle succeeded!");
+          alert('Battle succeeded!');
         } else {
-          alert("Battle failed...");
+          alert('Battle failed...');
         }
         this.error = null;
       } catch (e) {
