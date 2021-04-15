@@ -38,7 +38,7 @@ export default {
 
       try {
         await this.addMoreSkill(skillToAdd);
-        alert(`Successfully added ${skillToAdd} SKILL to your balance!`);
+        alert(`Successfully added ${valueSkillToAdd} SKILL to your balance!`);
       } catch (e) {
         console.error(e);
         alert("Could not add SKILL; insufficient funds or transaction denied.");
