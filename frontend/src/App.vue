@@ -131,6 +131,11 @@ body {
 .dark-bg-text {
   color: #e1bb34;
 }
+
+.body {
+  height: calc(100vh - 56px);
+}
+
 </style>
 <style scoped>
 .app {

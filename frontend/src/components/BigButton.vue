@@ -29,4 +29,8 @@ export default {
 .button:disabled {
   opacity: 40%;
 }
+
+h1 {
+  margin-top: 0;
+}
 </style>

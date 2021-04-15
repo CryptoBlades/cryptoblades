@@ -1,6 +1,6 @@
 <template>
   <div class="body main-font">
-    <staking />
+    <staking class="staking" />
   </div>
 </template>
 
@@ -16,9 +16,13 @@ export default {
 
 <style scoped>
 .body {
-  padding: 2em;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
+.staking {
+  padding-top: 2em;
+}
+
 </style>
