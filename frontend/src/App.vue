@@ -140,6 +140,19 @@ button {
   cursor: pointer;
 }
 
+.blank-slate {
+  width: calc(100vw - 36px);
+  height: calc(100vh - 56px);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+  font-size: 2rem;
+  text-align: center;
+}
+
 </style>
 <style scoped>
 .app {

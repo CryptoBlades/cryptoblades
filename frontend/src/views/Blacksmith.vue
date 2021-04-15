@@ -1,24 +1,39 @@
 <template>
   <div class="body main-font">
-    <h1>Weapon to reforge:</h1>
-    <weapon-grid v-model="reforgeWeaponId" />
+    <div v-if="ownWeapons.length > 0">
+      <h1>Weapon to reforge:</h1>
+      <weapon-grid v-model="reforgeWeaponId" />
 
-    <h1>Weapon to burn:</h1>
-    <weapon-grid v-model="burnWeaponId" />
+      <h1>Weapon to burn:</h1>
+      <weapon-grid v-model="burnWeaponId" />
 
-    <div class="button-row">
+      <div class="button-row">
+        <big-button
+          class="button"
+          mainText="Forge sword"
+          subText="(1 SKILL)"
+          @click="onForgeWeapon"
+        />
+        <big-button
+          class="button"
+          mainText="Reforge sword"
+          subText="(+weapon xp sacrificing another)"
+          :disabled="canReforge"
+          @click="onReforgeWeapon"
+        />
+      </div>
+    </div>
+
+    <div class="blank-slate" v-if="ownWeapons.length === 0">
+      You do not currently have any weapons.
+      <br>
+      You can forge one for 1 SKILL.
+      <br>
+      <br>
       <big-button
         class="button"
         mainText="Forge sword"
-        subText="(1 SKILL)"
         @click="onForgeWeapon"
-      />
-      <big-button
-        class="button"
-        mainText="Reforge sword"
-        subText="(+weapon xp sacrificing another)"
-        :disabled="canReforge"
-        @click="onReforgeWeapon"
       />
     </div>
   </div>
