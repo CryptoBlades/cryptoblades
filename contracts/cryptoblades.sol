@@ -235,7 +235,8 @@ contract CryptoBlades is Util {
         require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
         payContract(msg.sender, reforgeWeaponFee);
         weapons.levelUp(reforgeID);
-        weapons.transferFrom(weapons.ownerOf(burnID), address(0x0), burnID);
+
+        weapons.burn(burnID);
     }
 
     modifier isWeaponOwner(uint256 weapon) {

@@ -99,6 +99,11 @@ contract Weapons is ERC721, Util {
         return tokenID;
     }
 
+    function burn(uint256 id) public restricted {
+        // original function is internal, so we must have this exposure to call from main
+        _burn(id);
+    }
+
     function getStatMinRoll(uint256 stars) private pure returns (uint16) {
         uint16 minRoll = 1 * 4;
         if(stars == 1) { // 2 star
