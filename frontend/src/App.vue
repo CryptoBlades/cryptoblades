@@ -66,7 +66,7 @@ export default {
     ...mapActions(['fetchCharacterStamina', 'fetchAccounts']),
 
     async updateCurrentCharacterStamina() {
-      if (this.currentCharacterId != null) {
+      if (this.currentCharacterId) {
         await this.fetchCharacterStamina(this.currentCharacterId);
       }
     },
