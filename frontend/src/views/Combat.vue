@@ -1,23 +1,35 @@
 <template>
   <div class="body main-font">
-    <h1 style="color: red" v-if="error != null">Error: {{ error }}</h1>
+    <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
+      <h1 class="error" v-if="error !== null">Error: {{ error }}</h1>
 
-    <h1>Choose a weapon:</h1>
-    <weapon-grid v-model="selectedWeaponId" />
+      <h1>Choose a weapon:</h1>
+      <weapon-grid v-model="selectedWeaponId" />
 
-    <ul class="encounter-list" v-if="targets.length > 0">
-      <li class="encounter" v-for="(e, i) in targets" :key="i">
-        <img src="../assets/chara.png" alt="Placeholder character">
-        <big-button
-          class="encounter-button"
-          :mainText="`Monster with trait ${e.trait}`"
-          :subText="`Power ${e.power}`"
-          @click="onClickEncounter(e)"
-        />
-      </li>
-    </ul>
+      <ul class="encounter-list" v-if="targets.length > 0">
+        <li class="encounter" v-for="(e, i) in targets" :key="i">
+          <img src="../assets/chara.png" alt="Placeholder character">
+          <big-button
+            class="encounter-button"
+            :mainText="`Monster with trait ${e.trait}`"
+            :subText="`Power ${e.power}`"
+            @click="onClickEncounter(e)"
+          />
+        </li>
+      </ul>
 
-    <p v-if="isLoadingTargets">Loading...</p>
+      <p v-if="isLoadingTargets">Loading...</p>
+    </div>
+
+    <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
+      <div v-if="ownWeapons.length === 0">
+        You do not currently have any weapons. You can forge one at the Blacksmith.
+      </div>
+
+      <div v-if="ownCharacters.length === 0">
+        You do not currently have any characters. You can recruit one at the Plaza.
+      </div>
+    </div>
   </div>
 </template>
 

@@ -148,9 +148,13 @@ button {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  
+
   font-size: 2rem;
   text-align: center;
+}
+
+.error {
+  color: red;
 }
 
 </style>
