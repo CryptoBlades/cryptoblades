@@ -1,30 +1,59 @@
 <template>
   <div class="body main-font">
-    <div class="character-list">
-      <div class="character-header-wrapper">
-        <h1>Characters</h1>
-        <button class="mint-character" @click="onMintCharacter"><i class="fas fa-plus"></i></button>
+    <div class="container" v-if="ownCharacters.length > 0">
+      <div class="character-list">
+        <div class="character-header-wrapper">
+          <h1>
+            Characters
+            <button class="mint-character" @click="onMintCharacter">
+              <i class="fas fa-plus"></i>
+            </button>
+          </h1>
+          
+        </div>
+        
+        <character-list
+          :value="currentCharacterId"
+          @input="setCurrentCharacter"
+        />
       </div>
-      <character-list
-        :value="currentCharacterId"
-        @input="setCurrentCharacter"
+      <div class="weapon-grid">
+        <h1>Weapons</h1>
+        
+        <div v-if="ownWeapons.length > 0">
+          <weapon-grid />
+        </div>
+
+        <div v-if="ownWeapons.length === 0">
+          You do not have any weapons. You can forge one at the Blacksmith.
+        </div>
+      </div>
+      <div class="character-preview">
+        <h1 class="character-name">{{ character.name }}</h1>
+        <h2 class="character-sub">
+          Level {{ character.level + 1 }} ({{ character.experience }} XP)
+        </h2>
+        <character class="character-inner" :character="currentCharacter" />
+      </div>
+    </div>
+
+    <div v-if="ownCharacters.length === 0" class="blank-slate">
+      You do not have any characters.
+      <br>
+      You can recruit one by clicking the button below.
+      <br>
+      <br>
+      <big-button
+        class="button"
+        mainText="Recruit character"
+        @click="onMintCharacter"
       />
-    </div>
-    <div class="weapon-grid">
-      <h1>Weapons</h1>
-      <weapon-grid />
-    </div>
-    <div class="character-preview">
-      <h1 class="character-name">{{ character.name }}</h1>
-      <h2 class="character-sub">
-        Level {{ character.level + 1 }} ({{ character.experience }} XP)
-      </h2>
-      <character class="character-inner" :character="currentCharacter" />
     </div>
   </div>
 </template>
 
 <script>
+import BigButton from "../components/BigButton.vue";
 import WeaponGrid from "../components/smart/WeaponGrid.vue";
 import Character from "../components/Character.vue";
 import CharacterList from "../components/smart/CharacterList.vue";
@@ -75,6 +104,7 @@ export default {
   },
 
   components: {
+    BigButton,
     WeaponGrid,
     Character,
     CharacterList,
@@ -83,7 +113,7 @@ export default {
 </script>
 
 <style scoped>
-.body {
+.container {
   display: grid;
   grid-template-columns: 23rem 1fr 23rem;
   grid-template-rows: auto;
@@ -113,6 +143,8 @@ export default {
   background: none;
   border: none;
   border-radius: 0.1em;
+
+  float: right;
 }
 
 .character-header-wrapper .mint-character:hover {

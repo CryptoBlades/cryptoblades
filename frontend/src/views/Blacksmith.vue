@@ -11,7 +11,7 @@
         <big-button
           class="button"
           mainText="Forge sword"
-          subText="(1 SKILL)"
+          subText="(SKILL)"
           @click="onForgeWeapon"
         />
         <big-button
@@ -27,7 +27,7 @@
     <div class="blank-slate" v-if="ownWeapons.length === 0">
       You do not currently have any weapons.
       <br>
-      You can forge one for 1 SKILL.
+      You can forge one by clicking the button below.
       <br>
       <br>
       <big-button
