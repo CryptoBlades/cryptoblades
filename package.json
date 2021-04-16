@@ -28,7 +28,8 @@
     "build": "truffle compile",
     "test": "truffle test",
     "deploy": "truffle migrate --reset",
-    "deploy-testnet": "truffle migrate --network bsctestnet"
+    "deploy-testnet": "truffle migrate --network bsctestnet",
+    "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet"
   },
   "keywords": [],
   "author": "",
