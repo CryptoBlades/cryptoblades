@@ -1,10 +1,22 @@
 import { ICharacter } from './Character';
 import { IWeapon } from './Weapon';
 import { ITarget } from './Target';
-import { Contract as Web3EthContract } from 'web3-eth-contract';
+import { Contracts } from './Contracts';
+
+export interface IStakeState {
+  ownBalance: string;
+  stakedBalance: string;
+  remainingCapacityForDeposit: string | null;
+  remainingCapacityForWithdraw: string;
+  contractBalance: string;
+  currentRewardEarned: string;
+  rewardMinimumStakeTime: number;
+  rewardDistributionTimeLeft: number;
+  unlockTimeLeft: number;
+}
 
 export interface IState {
-  contracts: Record<string, Web3EthContract>;
+  contracts: Contracts;
   accounts: string[];
   defaultAccount: string | null;
 
@@ -20,15 +32,8 @@ export interface IState {
   weapons: Record<number, IWeapon>;
   targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
 
-  stakedSkillBalance: string;
-  stakeRemainingCapacityForDeposit: string;
-  stakeRemainingCapacityForWithdraw: string;
-  stakeContractBalance: string;
-  stakeCurrentRewardEarned: string;
-  stakeRewardPeriodEndUnix: number;
-  stakeRewardPeriodDurationSeconds: number;
-  stakeRewardMinimumStakeTime: number;
-  stakeRewardDistributionTimeLeft: number;
-  stakeUnlockTimeLeft: number;
-
+  staking: {
+    skill: IStakeState,
+    lp: IStakeState
+  };
 }

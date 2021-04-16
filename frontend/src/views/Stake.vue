@@ -1,6 +1,7 @@
 <template>
   <div class="body main-font">
-    <staking class="staking" />
+    <staking class="staking" stakeType="skill" />
+    <staking class="staking" stakeType="lp" />
   </div>
 </template>
 

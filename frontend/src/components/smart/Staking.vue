@@ -62,7 +62,7 @@
                 value=""
                 v-model="textAmount"
               />
-              <div class="ant-col">{{ isDeposit ? "SKILL" : "SKILL" }}</div>
+              <div class="ant-col">{{ stakingTokenName }}</div>
             </div>
             <div class="balance" id="balance" @click="onMAX">
               wallet: {{ inputSideBalance }}
@@ -91,7 +91,7 @@
                 readonly
               />
               <div class="ant-col">
-                {{ isDeposit ? "SKILL" : "SKILL" }}
+                {{ stakingTokenName }}
               </div>
             </div>
             <div class="balance" id="balance" @click="onMAX">
@@ -102,7 +102,7 @@
 
         <p
           class="no-margin spacing-top"
-          v-if="isDeposit && stakeRewardMinimumStakeTime > 0"
+          v-if="isDeposit && stakeData.rewardMinimumStakeTime > 0"
         >
           <span class="bold">NOTE</span>: You will not be able to unstake or
           claim rewards until {{ minimumStakeTimeFormatted }} has passed since
@@ -174,6 +174,15 @@ const stakeButtonLabel = 'Stake';
 const unstakeButtonLabel = 'Unstake';
 
 export default {
+  props: {
+    stakeType: {
+      type: String,
+      validator(type) {
+        return ['skill', 'lp'].includes(type);
+      }
+    }
+  },
+
   data() {
     return {
       textAmount: '',
@@ -193,11 +202,11 @@ export default {
 
     await this.fetchData();
 
-    this.stakeUnlockTimeLeftCurrentEstimate = this.stakeUnlockTimeLeft;
-    this.stakeRewardDistributionTimeLeftCurrentEstimate = this.stakeRewardDistributionTimeLeft;
+    this.stakeUnlockTimeLeftCurrentEstimate = this.unlockTimeLeftInternal;
+    this.stakeRewardDistributionTimeLeftCurrentEstimate = this.rewardDistributionTimeLeftInternal;
 
     this.stakeRewardProgressInterval = setInterval(async () => {
-      await this.fetchStakeRewardDetails();
+      await this.fetchStakeDetails({ stakeType: this.stakeType });
     }, 10 * 1000);
 
     this.secondsInterval = setInterval(() => {
@@ -208,21 +217,21 @@ export default {
     clearInterval(this.stakeRewardProgressInterval);
   },
   computed: {
-    ...mapState([
-      'defaultAccount',
-      'skillBalance',
-      'stakedSkillBalance',
-      'stakeRemainingCapacityForDeposit',
-      'stakeRemainingCapacityForWithdraw',
-      'stakeContractBalance',
-      'stakeCurrentRewardEarned',
-      'stakeRewardMinimumStakeTime',
-      'stakeRewardDistributionTimeLeft',
-      'stakeUnlockTimeLeft',
-    ]),
+    ...mapState(['defaultAccount', 'staking']),
+
+    stakeData() {
+      return this.staking[this.stakeType];
+    },
+
+    rewardDistributionTimeLeftInternal() { return this.stakeData.rewardDistributionTimeLeft; },
+    unlockTimeLeftInternal() { return this.stakeData.unlockTimeLeft; },
+
+    stakingTokenName() {
+      return this.stakeType === 'skill' ? 'SKILL' : 'SKILL-BNB';
+    },
 
     minimumStakeTimeFormatted() {
-      return formatDurationFromSeconds(this.stakeRewardMinimumStakeTime);
+      return formatDurationFromSeconds(this.stakeData.rewardMinimumStakeTime);
     },
 
     estimatedUnlockTimeLeftFormatted() {
@@ -238,31 +247,31 @@ export default {
     },
 
     walletBalance() {
-      return BN(this.skillBalance);
+      return BN(this.stakeData.ownBalance);
     },
 
     stakedBalance() {
-      return BN(this.stakedSkillBalance);
+      return BN(this.stakeData.stakedBalance);
     },
 
     currentRewardEarned() {
-      return BN(this.stakeCurrentRewardEarned).dividedBy(1e18);
+      return BN(this.stakeData.currentRewardEarned).dividedBy(1e18);
     },
 
     remainingCapacityForDeposit() {
-      if (!this.stakeRemainingCapacityForDeposit) {
+      if (!this.stakeData.remainingCapacityForDeposit) {
         return null;
       }
 
-      return BN(this.stakeRemainingCapacityForDeposit);
+      return BN(this.stakeData.remainingCapacityForDeposit);
     },
 
     remainingCapacityForWithdraw() {
-      return BN(this.stakeRemainingCapacityForWithdraw);
+      return BN(this.stakeData.remainingCapacityForWithdraw);
     },
 
     contractBalance() {
-      return BN(this.stakeContractBalance);
+      return BN(this.stakeData.contractBalance);
     },
 
     validator() {
@@ -288,7 +297,7 @@ export default {
         return 'connectWallet';
       }
 
-      if (!this.isDeposit && this.stakeUnlockTimeLeft > 0) {
+      if (!this.isDeposit && this.unlockTimeLeftInternal > 0) {
         return 'stakeLocked';
       }
 
@@ -366,7 +375,7 @@ export default {
         return 'loading';
       }
 
-      if (this.stakeUnlockTimeLeft > 0) {
+      if (this.unlockTimeLeftInternal > 0) {
         return 'rewardLocked';
       }
 
@@ -398,7 +407,6 @@ export default {
   methods: {
     ...mapActions([
       'fetchStakeDetails',
-      'fetchStakeRewardDetails',
       'stake',
       'unstake',
       'claimReward',
@@ -416,9 +424,6 @@ export default {
 
     async onMAX() {
       if (this.isDeposit) {
-        console.log(this.walletBalance.toString());
-        const walletBalance = this.walletBalance;
-
         if (
           this.remainingCapacityForDeposit &&
           this.remainingCapacityForDeposit.eq(0)
@@ -426,7 +431,7 @@ export default {
           return;
         }
 
-        this.bigNumberAmount = BN(walletBalance);
+        this.bigNumberAmount = this.walletBalance;
 
         if (
           this.remainingCapacityForDeposit &&
@@ -456,18 +461,16 @@ export default {
         this.loading = true;
 
         if (this.isDeposit) {
-          await this.stake({ amount, gas: this.chosenGas });
+          await this.stake({ amount, gas: this.chosenGas, stakeType: this.stakeType });
         } else {
           //unstake
-          await this.unstake({ amount, gas: this.chosenGas });
+          await this.unstake({ amount, gas: this.chosenGas, stakeType: this.stakeType });
         }
       } catch (e) {
         console.error(e);
       } finally {
         this.loading = false;
       }
-
-      await this.fetchStakeRewardDetails();
     },
     async onClaimReward() {
       if (this.rewardClaimState !== 'ok') return;
@@ -475,14 +478,12 @@ export default {
       try {
         this.rewardClaimLoading = true;
 
-        await this.claimReward();
+        await this.claimReward({ stakeType: this.stakeType });
       } catch (e) {
         console.error(e);
       } finally {
         this.rewardClaimLoading = false;
       }
-
-      await this.fetchStakeRewardDetails();
     },
     async fetchData() {
       //balances
@@ -490,8 +491,7 @@ export default {
         this.errorWhenUpdating = null;
         this.loading = true;
 
-        await this.fetchStakeDetails();
-        await this.fetchStakeRewardDetails();
+        await this.fetchStakeDetails({ stakeType: this.stakeType });
       } catch (err) {
         this.errorWhenUpdating = err.message;
         console.log(err);
@@ -501,14 +501,14 @@ export default {
     },
   },
   watch: {
-    stakeRewardDistributionTimeLeft(newValue, oldValue) {
-      console.log('stakeRewardDistributionTimeLeft', newValue, oldValue);
+    rewardDistributionTimeLeftInternal(newValue, oldValue) {
+      console.log('rewardDistributionTimeLeftInternal', newValue, oldValue);
       if (newValue !== oldValue) {
         this.stakeRewardDistributionTimeLeftCurrentEstimate = newValue;
       }
     },
-    stakeUnlockTimeLeft(newValue, oldValue) {
-      console.log('stakeUnlockTimeLeft', newValue, oldValue);
+    unlockTimeLeftInternal(newValue, oldValue) {
+      console.log('unlockTimeLeftInternal', newValue, oldValue);
       if (newValue !== oldValue) {
         this.stakeUnlockTimeLeftCurrentEstimate = newValue;
       }

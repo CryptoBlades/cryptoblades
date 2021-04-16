@@ -10,14 +10,39 @@ import { setUpContracts } from './contracts';
 import {
   characterFromContract, targetFromContract, weaponFromContract
 } from './contract-models';
-import { IState } from './interfaces';
+import { Contracts, IStakeState, IState } from './interfaces';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
+
+type StakeType = 'skill' | 'lp';
+
+type StakingRewardsAlias = Contracts['LPStakingRewards'] & Contracts['SkillStakingRewards'];
+
+interface StakingContracts {
+  StakingRewards: StakingRewardsAlias,
+  StakingToken: Contracts['LPToken'] & Contracts['SkillToken'],
+  RewardToken: Contracts['SkillToken'],
+}
+
+function getStakingContracts(contracts: Contracts, stakeType: StakeType): StakingContracts {
+  switch(stakeType) {
+  case 'skill': return {
+    StakingRewards: contracts.SkillStakingRewards,
+    StakingToken: contracts.SkillToken,
+    RewardToken: contracts.SkillToken
+  };
+  case 'lp': return {
+    StakingRewards: contracts.LPStakingRewards,
+    StakingToken: contracts.LPToken,
+    RewardToken: contracts.SkillToken
+  };
+  }
+}
 
 export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
   return new Vuex.Store({
     state: {
-      contracts: {},
+      contracts: null!,
 
       accounts: [],
       defaultAccount: null,
@@ -34,24 +59,33 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       targetsByCharacterIdAndWeaponId: {},
 
-      stakedSkillBalance: '0',
-      stakeRemainingCapacityForDeposit: '0',
-      stakeRemainingCapacityForWithdraw: '0',
-      stakeContractBalance: '0',
-
-      stakeCurrentRewardEarned: '0',
-      stakeRewardPeriodEndUnix: 0,
-      stakeRewardPeriodDurationSeconds: 7 * 24 * 60 * 60,
-      stakeRewardMinimumStakeTime: 0,
-      stakeRewardDistributionTimeLeft: 0,
-      stakeUnlockTimeLeft: 0,
+      staking: {
+        skill: {
+          ownBalance: '0',
+          stakedBalance: '0',
+          remainingCapacityForDeposit: '0',
+          remainingCapacityForWithdraw: '0',
+          contractBalance: '0',
+          currentRewardEarned: '0',
+          rewardMinimumStakeTime: 0,
+          rewardDistributionTimeLeft: 0,
+          unlockTimeLeft: 0,
+        },
+        lp: {
+          ownBalance: '0',
+          stakedBalance: '0',
+          remainingCapacityForDeposit: '0',
+          remainingCapacityForWithdraw: '0',
+          contractBalance: '0',
+          currentRewardEarned: '0',
+          rewardMinimumStakeTime: 0,
+          rewardDistributionTimeLeft: 0,
+          unlockTimeLeft: 0,
+        }
+      },
     },
 
     getters: {
-      contractProvider(state: IState): Record<string, any> {
-        return state.contracts;
-      },
-
       getTargetsByCharacterIdAndWeaponId(state: IState) {
         return (characterId: number, weaponId: number) => {
           const targetsByWeaponId = state.targetsByCharacterIdAndWeaponId[characterId];
@@ -99,9 +133,9 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         return state.currentCharacterId === null ? 0 : state.characterStaminas[state.currentCharacterId];
       },
 
-      stakeRewardPeriodStartUnix(state) {
-        return state.stakeRewardPeriodEndUnix - state.stakeRewardPeriodDurationSeconds;
-      },
+      stakeState(state) {
+        return (stakeType: StakeType): IStakeState => state.staking[stakeType];
+      }
     },
 
     mutations: {
@@ -181,30 +215,8 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         Vue.set(state.targetsByCharacterIdAndWeaponId[characterId], weaponId, targets);
       },
 
-      updateStakeData(state: IState, {
-        stakedSkillBalance, stakeRemainingCapacityForDeposit,
-        stakeRemainingCapacityForWithdraw, stakeContractBalance
-      }) {
-        state.stakedSkillBalance = stakedSkillBalance;
-        state.stakeRemainingCapacityForDeposit = stakeRemainingCapacityForDeposit;
-        state.stakeRemainingCapacityForWithdraw = stakeRemainingCapacityForWithdraw;
-        state.stakeContractBalance = stakeContractBalance;
-      },
-
-      updateStakeRewardData(state: IState, {
-        stakeCurrentRewardEarned,
-        stakeRewardPeriodEndUnix,
-        stakeRewardPeriodDurationSeconds,
-        stakeRewardMinimumStakeTime,
-        stakeRewardDistributionTimeLeft,
-        stakeUnlockTimeLeft
-      }) {
-        state.stakeCurrentRewardEarned = stakeCurrentRewardEarned;
-        state.stakeRewardPeriodEndUnix = stakeRewardPeriodEndUnix;
-        state.stakeRewardPeriodDurationSeconds = stakeRewardPeriodDurationSeconds;
-        state.stakeRewardMinimumStakeTime = stakeRewardMinimumStakeTime;
-        state.stakeRewardDistributionTimeLeft = stakeRewardDistributionTimeLeft;
-        state.stakeUnlockTimeLeft = stakeUnlockTimeLeft;
+      updateStakeData(state: IState, { stakeType, ...payload }: { stakeType: StakeType } & IStakeState) {
+        Vue.set(state.staking, stakeType, payload);
       }
     },
 
@@ -228,7 +240,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       setUpContractEvents({ state, dispatch, commit }) {
         if (!featureFlagStakeOnly) {
           // TODO filter to only get own
-          state.contracts.Characters.events.NewCharacter(async (err: Error, data: any) => {
+          state.contracts.Characters!.events.NewCharacter(async (err: Error, data: any) => {
             if (err) {
               console.error(err);
               return;
@@ -247,7 +259,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           });
 
           // TODO filter to only get own
-          state.contracts.Weapons.events.NewWeapon(async (err: Error, data: any) => {
+          state.contracts.Weapons!.events.NewWeapon(async (err: Error, data: any) => {
             if (err) {
               console.error(err);
               return;
@@ -266,7 +278,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           });
 
           // TODO filter to only get own
-          state.contracts.CryptoBlades.events.FightOutcome(async (err: Error, data: any) => {
+          state.contracts.CryptoBlades!.events.FightOutcome(async (err: Error, data: any) => {
             if (err) {
               console.error(err);
               return;
@@ -281,41 +293,43 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           });
         }
 
-        state.contracts.StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err: Error, data: any) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
+        function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias) {
+          StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err: Error, data: any) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
 
-          console.log('RewardPaid', data);
+            console.log('RewardPaid', data);
 
-          await Promise.all([
-            dispatch('fetchSkillBalance'),
-            dispatch('fetchStakeRewardDetails'),
-          ]);
-        });
+            await dispatch('fetchStakeDetails', { stakeType });
+          });
 
-        state.contracts.StakingRewards.events.RewardAdded(async (err: Error, data: any) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
+          StakingRewards.events.RewardAdded(async (err: Error, data: any) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
 
-          console.log('RewardAdded', data);
+            console.log('RewardAdded', data);
 
-          await dispatch('fetchStakeRewardDetails');
-        });
+            await dispatch('fetchStakeDetails', { stakeType });
+          });
 
-        state.contracts.StakingRewards.events.RewardsDurationUpdated(async (err: Error, data: any) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
+          StakingRewards.events.RewardsDurationUpdated(async (err: Error, data: any) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
 
-          console.log('RewardsDurationUpdated', data);
+            console.log('RewardsDurationUpdated', data);
 
-          await dispatch('fetchStakeRewardDetails');
-        });
+            await dispatch('fetchStakeDetails', { stakeType });
+          });
+        }
+
+        setupStakingEvents('skill', state.contracts.SkillStakingRewards);
+        setupStakingEvents('lp', state.contracts.LPStakingRewards);
       },
 
       async setUpContracts({ commit }) {
@@ -334,14 +348,16 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async fetchUserGameDetails({ state, dispatch, commit }) {
+        if(featureFlagStakeOnly) return;
+
         const [
           ownedCharacterIds,
           ownedWeaponIds,
           maxStamina,
         ] = await Promise.all([
-          state.contracts.CryptoBlades.methods.getMyCharacters().call(defaultCallOptions(state)),
-          state.contracts.CryptoBlades.methods.getMyWeapons().call(defaultCallOptions(state)),
-          state.contracts.Characters.methods.maxStamina().call(defaultCallOptions(state)),
+          state.contracts.CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
+          state.contracts.CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
+          state.contracts.Characters!.methods.maxStamina().call(defaultCallOptions(state)),
         ]);
 
         commit('updateUserDetails', {
@@ -357,7 +373,9 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async updateWeaponIds({ state, dispatch, commit }) {
-        const ownedWeaponIds = await state.contracts.CryptoBlades.methods.getMyWeapons().call(defaultCallOptions(state));
+        if(featureFlagStakeOnly) return;
+
+        const ownedWeaponIds = await state.contracts.CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state));
         commit('updateUserDetails', {
           ownedWeaponIds: Array.from(ownedWeaponIds)
         });
@@ -368,11 +386,16 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         const skillBalance = await state.contracts.SkillToken.methods
           .balanceOf(state.defaultAccount)
           .call(defaultCallOptions(state));
-        commit('updateSkillBalance', { skillBalance });
+
+        if(state.skillBalance !== skillBalance) {
+          commit('updateSkillBalance', { skillBalance });
+        }
       },
 
       async addMoreSkill({ state, dispatch }, skillToAdd: string) {
-        await state.contracts.CryptoBlades.methods.giveMeSkill(skillToAdd).send({
+        if(featureFlagStakeOnly) return;
+
+        await state.contracts.CryptoBlades!.methods.giveMeSkill(skillToAdd).send({
           from: state.defaultAccount,
         });
 
@@ -384,9 +407,11 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async fetchCharacter({ state, commit }, characterId: number) {
+        if(featureFlagStakeOnly) return;
+
         const character = characterFromContract(
           characterId,
-          await state.contracts.Characters.methods.get(characterId).call(defaultCallOptions(state))
+          await state.contracts.Characters!.methods.get(characterId).call(defaultCallOptions(state))
         );
 
         commit('updateCharacter', { characterId, character });
@@ -397,44 +422,54 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async fetchWeapon({ state, commit }, weaponId: number) {
+        if(featureFlagStakeOnly) return;
+
         const weapon = weaponFromContract(
           weaponId,
-          await state.contracts.Weapons.methods.get(weaponId).call(defaultCallOptions(state))
+          await state.contracts.Weapons!.methods.get(weaponId).call(defaultCallOptions(state))
         );
 
         commit('updateWeapon', { weaponId, weapon });
       },
 
       async fetchCharacterStamina({ state, commit }, characterId: number) {
-        const stamina = await state.contracts.Characters.methods.getStaminaPoints(characterId).call(defaultCallOptions(state));
+        if(featureFlagStakeOnly) return;
+
+        const stamina = await state.contracts.Characters!.methods.getStaminaPoints(characterId).call(defaultCallOptions(state));
         if (state.characterStaminas[characterId] !== stamina) {
           commit('updateCharacterStamina', { characterId, stamina });
         }
       },
 
       async mintCharacter({ state }) {
-        await state.contracts.CryptoBlades.methods.mintCharacter().send({
+        if(featureFlagStakeOnly) return;
+
+        await state.contracts.CryptoBlades!.methods.mintCharacter().send({
           from: state.defaultAccount,
         });
       },
 
       async mintWeapon({ state }) {
-        await state.contracts.CryptoBlades.methods.mintWeapon().send({
+        if(featureFlagStakeOnly) return;
+
+        await state.contracts.CryptoBlades!.methods.mintWeapon().send({
           from: state.defaultAccount,
         });
       },
 
       async reforgeWeapon({ state, dispatch }, { burnWeaponId, reforgeWeaponId }) {
-        await state.contracts.Weapons.methods
+        if(featureFlagStakeOnly) return;
+
+        await state.contracts.Weapons!.methods
           .approve(
-            state.contracts.CryptoBlades.options.address,
+            state.contracts.CryptoBlades!.options.address,
             burnWeaponId
           )
           .send({
             from: state.defaultAccount,
           });
 
-        await state.contracts.CryptoBlades.methods
+        await state.contracts.CryptoBlades!.methods
           .reforgeWeapon(
             reforgeWeaponId,
             burnWeaponId
@@ -447,12 +482,14 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async fetchTargets({ state, commit }, { characterId, weaponId }) {
+        if(featureFlagStakeOnly) return;
+
         if (!characterId || !weaponId) {
           commit('updateTargets', { characterId, weaponId, targets: [] });
           return;
         }
 
-        const targets = await state.contracts.CryptoBlades.methods
+        const targets = await state.contracts.CryptoBlades!.methods
           .getTargets(characterId, weaponId)
           .call(defaultCallOptions(state));
 
@@ -460,7 +497,9 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async doEncounter({ state, dispatch }, { characterId, weaponId, targetString }) {
-        const res = await state.contracts.CryptoBlades.methods
+        if(featureFlagStakeOnly) return;
+
+        const res = await state.contracts.CryptoBlades!.methods
           .fight(
             characterId,
             weaponId,
@@ -482,72 +521,49 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         }
       },
 
-      async fetchStakeDetails({ state, commit }) {
-        const { StakingRewards, SkillToken } = state.contracts;
+      async fetchStakeDetails({ state, commit }, { stakeType }: { stakeType: StakeType }) {
+        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts, stakeType);
 
         const [
-          stakedSkillBalance, stakeRemainingCapacityForDeposit,
-          stakeRemainingCapacityForWithdraw, stakeContractBalance
+          ownBalance,
+          stakedBalance,
+          remainingCapacityForDeposit,
+          remainingCapacityForWithdraw,
+          contractBalance,
+          currentRewardEarned,
+          rewardMinimumStakeTime,
+          rewardDistributionTimeLeft,
+          unlockTimeLeft
         ] = await Promise.all([
+          StakingToken.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)),
           StakingRewards.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)),
-          Promise.resolve(null),
+          Promise.resolve(null as string | null),
           StakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
-          SkillToken.methods.balanceOf(StakingRewards.options.address).call(defaultCallOptions(state)),
-        ]);
-
-        const stakeData = {
-          stakedSkillBalance, stakeRemainingCapacityForDeposit,
-          stakeRemainingCapacityForWithdraw, stakeContractBalance
-        };
-        // console.log(stakeData);
-        commit('updateStakeData', stakeData);
-      },
-
-      async fetchStakeRewardDetails({ state, commit }) {
-        const { StakingRewards } = state.contracts;
-
-        const [
-          stakeCurrentRewardEarned,
-          stakeRewardPeriodEndUnix,
-          stakeRewardPeriodDurationSeconds,
-          stakeRewardMinimumStakeTime,
-          stakeRewardDistributionTimeLeft,
-          stakeUnlockTimeLeft
-        ] = await Promise.all([
+          StakingToken.methods.balanceOf(StakingRewards.options.address).call(defaultCallOptions(state)),
           StakingRewards.methods.earned(state.defaultAccount).call(defaultCallOptions(state)),
-          StakingRewards.methods.periodFinish().call(defaultCallOptions(state)),
-          StakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
           StakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
           StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
 
-        const stateToChange: Record<string, number> = {
-          stakeCurrentRewardEarned,
-          stakeRewardPeriodEndUnix: parseInt(stakeRewardPeriodEndUnix, 10),
-          stakeRewardPeriodDurationSeconds: parseInt(stakeRewardPeriodDurationSeconds, 10),
-          stakeRewardMinimumStakeTime: parseInt(stakeRewardMinimumStakeTime, 10),
-          stakeRewardDistributionTimeLeft: parseInt(stakeRewardDistributionTimeLeft, 10),
-          stakeUnlockTimeLeft: parseInt(stakeUnlockTimeLeft, 10)
-        };
-
-        let doCommit = false;
-        for (const key in stateToChange) {
-          if (Object.hasOwnProperty.call(stateToChange, key) && stateToChange[key] !== (state as IState)[key as keyof IState]) {
-            doCommit = true;
-            break;
-          }
-        }
-
-        if (doCommit) {
-          commit('updateStakeRewardData', stateToChange);
-        }
+        commit('updateStakeData', {
+          stakeType,
+          ownBalance,
+          stakedBalance,
+          remainingCapacityForDeposit,
+          remainingCapacityForWithdraw,
+          contractBalance,
+          currentRewardEarned,
+          rewardMinimumStakeTime: parseInt(rewardMinimumStakeTime, 10),
+          rewardDistributionTimeLeft: parseInt(rewardDistributionTimeLeft, 10),
+          unlockTimeLeft: parseInt(unlockTimeLeft, 10)
+        } as { stakeType: StakeType } & IStakeState);
       },
 
-      async stake({ state, dispatch }, { amount, gas }) {
-        const { StakingRewards, SkillToken } = state.contracts;
+      async stake({ state, dispatch }, { amount, gas, stakeType }: { amount: string, gas: string, stakeType: StakeType }) {
+        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts, stakeType);
 
-        await SkillToken.methods.increaseAllowance(StakingRewards.options.address, amount).send({
+        await StakingToken.methods.increaseAllowance(StakingRewards.options.address, amount).send({
           from: state.defaultAccount
         });
 
@@ -557,14 +573,11 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           gasPrice: new BN(gas).multipliedBy(1e9).toString(),
         });
 
-        await Promise.all([
-          dispatch('fetchSkillBalance'),
-          dispatch('fetchStakeDetails'),
-        ]);
+        await dispatch('fetchStakeDetails', { stakeType });
       },
 
-      async unstake({ state, dispatch }, { amount, gas }) {
-        const { StakingRewards } = state.contracts;
+      async unstake({ state, dispatch }, { amount, gas, stakeType }: { amount: string, gas: string, stakeType: StakeType }) {
+        const { StakingRewards } = getStakingContracts(state.contracts, stakeType);
 
         await StakingRewards.methods.withdraw(amount).send({
           from: state.defaultAccount,
@@ -572,23 +585,17 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           gasPrice: new BN(gas).multipliedBy(1e9).toString(),
         });
 
-        await Promise.all([
-          dispatch('fetchSkillBalance'),
-          dispatch('fetchStakeDetails'),
-        ]);
+        await dispatch('fetchStakeDetails', { stakeType });
       },
 
-      async claimReward({ state, dispatch }) {
-        const { StakingRewards } = state.contracts;
+      async claimReward({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
+        const { StakingRewards } = getStakingContracts(state.contracts, stakeType);
 
         await StakingRewards.methods.getReward().send({
           from: state.defaultAccount,
         });
 
-        await Promise.all([
-          dispatch('fetchSkillBalance'),
-          dispatch('fetchStakeRewardDetails'),
-        ]);
+        await dispatch('fetchStakeDetails', { stakeType });
       }
     }
   });
