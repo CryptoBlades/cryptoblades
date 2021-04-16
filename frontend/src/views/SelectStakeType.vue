@@ -2,10 +2,10 @@
   <div class="body main-font">
     <ul class="stake-select-list">
       <li class="stake-select-item">
-        <stake-selector-item stakeTokenName="SKILL" rewardTokenName="SKILL" stakeType="skill" />
+        <stake-selector-item stakeTokenName="SKILL" rewardTokenName="SKILL" stakeType="skill" apr="45%" />
       </li>
       <li class="stake-select-item">
-        <stake-selector-item stakeTokenName="SKILL-BNB" rewardTokenName="SKILL" stakeType="lp" />
+        <stake-selector-item stakeTokenName="SKILL-BNB" rewardTokenName="SKILL" stakeType="lp" apr="75%" />
       </li>
     </ul>
   </div>

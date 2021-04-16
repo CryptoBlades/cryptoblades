@@ -21,6 +21,14 @@
           {{ rewardTokenName }}
         </td>
       </tr>
+      <tr>
+        <td class="bold">
+          APR:
+        </td>
+        <td class="align-right">
+          {{ apr }}
+        </td>
+      </tr>
     </table>
     <router-link
       class="stake-select-button button dark-bg-text"
@@ -32,7 +40,7 @@
 
 <script>
 export default {
-  props: ['stakeTokenName', 'rewardTokenName', 'stakeType']
+  props: ['stakeTokenName', 'rewardTokenName', 'stakeType', 'apr']
 };
 </script>
 
