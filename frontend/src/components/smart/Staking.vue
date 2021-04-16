@@ -100,7 +100,10 @@
           </div>
         </div>
 
-        <p class="no-margin spacing-top" v-if="isDeposit && stakeRewardMinimumStakeTime > 0">
+        <p
+          class="no-margin spacing-top"
+          v-if="isDeposit && stakeRewardMinimumStakeTime > 0"
+        >
           <span class="bold">NOTE</span>: You will not be able to unstake or
           claim rewards until {{ minimumStakeTimeFormatted }} has passed since
           your initial stake.
@@ -171,19 +174,20 @@ const stakeButtonLabel = 'Stake';
 const unstakeButtonLabel = 'Unstake';
 
 export default {
-  // components: { ImageVue, StakeGauge },
-  data: () => ({
-    textAmount: '',
-    isDeposit: true,
-    gas: { low: 90, medium: 130, high: 180 },
-    loading: false,
-    errorWhenUpdating: null,
-    selectedGasLevel: 'medium',
-    rewardClaimLoading: false,
+  data() {
+    return {
+      textAmount: '',
+      isDeposit: true,
+      gas: { low: 90, medium: 130, high: 180 },
+      loading: false,
+      errorWhenUpdating: null,
+      selectedGasLevel: 'medium',
+      rewardClaimLoading: false,
 
-    stakeUnlockTimeLeftCurrentEstimate: 0,
-    stakeRewardDistributionTimeLeftCurrentEstimate: 0,
-  }),
+      stakeUnlockTimeLeftCurrentEstimate: 0,
+      stakeRewardDistributionTimeLeftCurrentEstimate: 0,
+    };
+  },
   async mounted() {
     this.gas = await getCurrentGasPrices();
 
@@ -289,7 +293,7 @@ export default {
       }
 
       if (
-        !this.remainingCapacityForDeposit &&
+        this.remainingCapacityForDeposit &&
         this.remainingCapacityForDeposit.eq(0) &&
         this.isDeposit
       ) {
@@ -297,7 +301,7 @@ export default {
       }
 
       if (
-        !this.remainingCapacityForDeposit &&
+        this.remainingCapacityForDeposit &&
         this.bigNumberAmount.gt(this.remainingCapacityForDeposit) &&
         this.isDeposit
       ) {
@@ -416,7 +420,7 @@ export default {
         const walletBalance = this.walletBalance;
 
         if (
-          !this.remainingCapacityForDeposit &&
+          this.remainingCapacityForDeposit &&
           this.remainingCapacityForDeposit.eq(0)
         ) {
           return;
@@ -425,7 +429,7 @@ export default {
         this.bigNumberAmount = BN(walletBalance);
 
         if (
-          !this.remainingCapacityForDeposit &&
+          this.remainingCapacityForDeposit &&
           this.bigNumberAmount.gt(this.remainingCapacityForDeposit)
         ) {
           this.bigNumberAmount = BN(this.remainingCapacityForDeposit);
@@ -509,7 +513,7 @@ export default {
         this.stakeUnlockTimeLeftCurrentEstimate = newValue;
       }
     },
-    textAmount (newValue, oldVal) {
+    textAmount(newValue, oldVal) {
       if (newValue.length > 40) {
         this.textAmount = oldVal;
         return;
@@ -536,7 +540,7 @@ export default {
         this.textAmount = 0;
       }
     },
-    isDeposit () {
+    isDeposit() {
       this.textAmount = '';
     },
     async defaultAccount(newVal) {

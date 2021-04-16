@@ -66,8 +66,8 @@ export default {
     isLoadingTargets() {
       return (
         this.targets.length === 0 &&
-        !this.currentCharacterId &&
-        !this.selectedWeaponId
+        this.currentCharacterId &&
+        this.selectedWeaponId
       );
     },
 
