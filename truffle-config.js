@@ -56,6 +56,16 @@ module.exports = {
       gas: 8000000,
       skipDryRun: false
     },
+    bscmainnet: {
+      provider: () => new HDWalletProvider(
+        process.env.BINANCE_MAINNET_WALLET_MNEMONIC, 'https://bsc-dataseed.binance.org/'
+      ),
+      network_id: 0x38,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      gas: 8000000,
+      skipDryRun: true
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port

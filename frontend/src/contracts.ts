@@ -13,7 +13,6 @@ import { Contracts } from './interfaces';
 
 export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean): Promise<Contracts> {
   const networkId = process.env.VUE_APP_NETWORK_ID || '5777';
-  const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as any)[networkId].address;
   const skillStakingRewardsContractAddr = process.env.VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS || (skillStakingRewardsNetworks as any)[networkId].address;
   const lpStakingRewardsContractAddr = process.env.VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS || (lpStakingRewardsNetworks as any)[networkId].address;
   const skillTokenContractAddr = process.env.VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS || (skillTokenNetworks as any)[networkId].address;
@@ -27,6 +26,8 @@ export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean):
   if (featureFlagStakeOnly) {
     return { SkillStakingRewards, LPStakingRewards, SkillToken, LPToken };
   }
+
+  const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as any)[networkId].address;
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as any, cryptoBladesContractAddr);
   const [charactersAddr, weaponsAddr] = await Promise.all([
