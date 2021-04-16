@@ -13,6 +13,7 @@ import { getWeaponArt } from '../weapon-arts-placeholder';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import swordspecs from '../assets/swordspecs.json';
+import maskChroma from '../shaders/maskchroma_frag.glsl.js';
 
 const bladeCount = 24;
 const crossGuardCount = 24;
@@ -84,8 +85,8 @@ export default {
       baseMaterial.aoMapIntensity = 0.375;
       baseMaterial.envMap = textureCube;
       baseMaterial.envMapIntensity = 1;
-      baseMaterial.metalness = 0.35;
-      baseMaterial.roughness = 0.25;
+      baseMaterial.metalness = 1.0;
+      baseMaterial.roughness = 0.5;
 
       loader.load('models/blades/Blade_'.concat(blade).concat('.FBX'), model => {
 
@@ -98,8 +99,25 @@ export default {
         this.group.add(model);
 
         const material = baseMaterial.clone();
+        material.userData.maskR = { value: 0.5 };
+        material.userData.maskG = { value: 0.5 };
+        material.userData.maskB = { value: 0.5 };
+        material.onBeforeCompile = shader => {
+          shader.uniforms.maskR = material.userData.maskR;
+          shader.uniforms.maskG = material.userData.maskG;
+          shader.uniforms.maskB = material.userData.maskB;
+          shader.fragmentShader = 'uniform float maskR;\nuniform float maskG;\nuniform float maskB;\n' + shader.fragmentShader;
+          shader.fragmentShader =
+            shader.fragmentShader.replace(
+              '#include <map_fragment>',
+              maskChroma
+            );
+        };
+
+        const maskMap = textureLoader.load( '../assets/swords/blades/Txt_Blade_'.concat(blade).concat('_Mask.TGA'));
         const normalMap = textureLoader.load( '../assets/swords/blades/Txt_Blade_'.concat(blade).concat('_Normal.TGA'));
         const aoMap = textureLoader.load( '../assets/swords/blades/Txt_Blade_'.concat(blade).concat('_AO.BMP'));
+        material.map = maskMap;
         material.normalMap = normalMap;
         material.aoMap = aoMap;
 
@@ -119,6 +137,21 @@ export default {
         this.group.add(model);
 
         const material = baseMaterial.clone();
+        material.userData.maskR = { value: 0.5 };
+        material.userData.maskG = { value: 0.5 };
+        material.userData.maskB = { value: 0.5 };
+        material.onBeforeCompile = shader => {
+          shader.uniforms.maskR = material.userData.maskR;
+          shader.uniforms.maskG = material.userData.maskG;
+          shader.uniforms.maskB = material.userData.maskB;
+          shader.fragmentShader = 'uniform float maskR;\nuniform float maskG;\nuniform float maskB;\n' + shader.fragmentShader;
+          shader.fragmentShader =
+            shader.fragmentShader.replace(
+              '#include <map_fragment>',
+              maskChroma
+            );
+        };
+
         const normalMap = textureLoader.load( '../assets/swords/crossguards/Txt_CrossGuard_'.concat(crossGuard).concat('_Normal.TGA'));
         const aoMap = textureLoader.load( '../assets/swords/crossguards/Txt_CrossGuard_'.concat(crossGuard).concat('_AO.BMP'));
         material.normalMap = normalMap;
@@ -140,8 +173,25 @@ export default {
         this.group.add(model);
 
         const material = baseMaterial.clone();
+        material.userData.maskR = { value: 0.5 };
+        material.userData.maskG = { value: 0.5 };
+        material.userData.maskB = { value: 0.5 };
+        material.onBeforeCompile = shader => {
+          shader.uniforms.maskR = material.userData.maskR;
+          shader.uniforms.maskG = material.userData.maskG;
+          shader.uniforms.maskB = material.userData.maskB;
+          shader.fragmentShader = 'uniform float maskR;\nuniform float maskG;\nuniform float maskB;\n' + shader.fragmentShader;
+          shader.fragmentShader =
+            shader.fragmentShader.replace(
+              '#include <map_fragment>',
+              maskChroma
+            );
+        };
+
+        const maskMap = textureLoader.load( '../assets/swords/grips/Txt_Grip_'.concat(grip).concat('_Mask.TGA'));
         const normalMap = textureLoader.load( '../assets/swords/grips/Txt_Grip_'.concat(grip).concat('_Normal.TGA'));
         const aoMap = textureLoader.load( '../assets/swords/grips/Txt_Grip_'.concat(grip).concat('_AO.BMP'));
+        material.map = maskMap;
         material.normalMap = normalMap;
         material.aoMap = aoMap;
 
@@ -161,10 +211,26 @@ export default {
         this.group.add(model);
 
         const material = baseMaterial.clone();
+        material.userData.maskR = { value: 0.5 };
+        material.userData.maskG = { value: 0.5 };
+        material.userData.maskB = { value: 0.5 };
+        material.onBeforeCompile = shader => {
+          shader.uniforms.maskR = material.userData.maskR;
+          shader.uniforms.maskG = material.userData.maskG;
+          shader.uniforms.maskB = material.userData.maskB;
+          shader.fragmentShader = 'uniform float maskR;\nuniform float maskG;\nuniform float maskB;\n' + shader.fragmentShader;
+          shader.fragmentShader =
+            shader.fragmentShader.replace(
+              '#include <map_fragment>',
+              maskChroma
+            );
+        };
+
         const normalMap = textureLoader.load( '../assets/swords/pommels/Txt_Pommel_'.concat(pommel).concat('_Normal.TGA'));
         const aoMap = textureLoader.load( '../assets/swords/pommels/Txt_Pommel_'.concat(pommel).concat('_AO.BMP'));
         material.normalMap = normalMap;
         material.aoMap = aoMap;
+        material.color = new Three.Color(0xff0000);
 
         this.pommel.traverse(child => { if(child.isMesh) { child.material = material; } });
         this.renderer.render(this.scene, this.camera);
@@ -179,7 +245,7 @@ export default {
       directionalLight.position.y = 1.375;
       directionalLight.position.z = 2.0;
       this.scene.add( directionalLight );
-      this.renderer = new Three.WebGLRenderer({antialias: true, alpha:true});
+      this.renderer = new Three.WebGLRenderer({antialias: false, alpha:true});
       this.renderer.setClearColor( 0x000000, 0 );
       this.renderer.setSize(container.clientWidth, container.clientHeight);
       container.appendChild(this.renderer.domElement);
