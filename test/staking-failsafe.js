@@ -55,6 +55,29 @@ contract('StakingRewards', accounts => {
         assert.match(e.message, /Reason given: This action cannot be performed while the contract is in Failsafe Mode/ig);
       }
     });
+
+    it('should allow owner to recover staking tokens that were not staked, even when disabled', async () => {
+      const skill = await SkillToken.deployed();
+
+      assert.isFalse(await sr.failsafeModeActive(), 'Failsafe Mode should be disabled');
+
+      // stake 200
+      await skill.increaseAllowance(sr.address, 200, { from: accounts[0] });
+      await sr.stake(200, { from: accounts[0] });
+
+      // transfer extra 300 skill that weren't actually staked
+      await skill.transfer(sr.address, 300, { from: accounts[0] });
+
+      assert.strictEqual((await sr.balanceOf(accounts[0])).toNumber(), 200);
+      assert.strictEqual((await sr.totalSupply()).toNumber(), 200);
+      assert.strictEqual((await skill.balanceOf(sr.address)).toNumber(), 500);
+
+      await sr.recoverExtraStakingTokensToOwner({ from: accounts[0] });
+
+      assert.strictEqual((await sr.balanceOf(accounts[0])).toNumber(), 200);
+      assert.strictEqual((await sr.totalSupply()).toNumber(), 200);
+      assert.strictEqual((await skill.balanceOf(sr.address)).toNumber(), 200);
+    });
   });
 });
 

@@ -285,7 +285,7 @@ contract StakingRewards is
         super.enableFailsafeMode();
     }
 
-    function recoverExtraStakingTokensToOwner() external failsafeMode onlyOwner {
+    function recoverExtraStakingTokensToOwner() external onlyOwner {
         // stake() and withdraw() should guarantee that
         // _totalSupply <= stakingToken.balanceOf(this)
         uint256 stakingTokenAmountBelongingToOwner =
