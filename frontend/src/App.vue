@@ -60,7 +60,7 @@ export default {
     },
 
     showNetworkError() {
-      return this.expectedNetworkId && this.currentNetworkId !== this.expectedNetworkId;
+      return this.expectedNetworkId && this.currentNetworkId !== null && this.currentNetworkId !== this.expectedNetworkId;
     }
   },
 
@@ -79,6 +79,8 @@ export default {
     ...mapActions(['fetchCharacterStamina', 'pollAccountsAndNetwork']),
 
     async updateCurrentCharacterStamina() {
+      if(this.featureFlagStakeOnly) return;
+
       if (this.currentCharacterId) {
         await this.fetchCharacterStamina(this.currentCharacterId);
       }
@@ -99,22 +101,28 @@ export default {
       throw e;
     }
 
-    this.pollCharacterStamina = setInterval(async () => {
+    this.pollCharacterStaminaIntervalId = setInterval(async () => {
       await this.updateCurrentCharacterStamina();
     }, 3000);
 
-    this.pollAccounts = setInterval(async () => {
+    this.doPollAccounts = true;
+    const pollAccounts = async () => {
+      if(!this.doPollAccounts) return;
+
       try {
         await this.pollAccountsAndNetwork();
       } catch (e) {
         console.error(e);
       }
-    }, 200);
+
+      setTimeout(pollAccounts, 200);
+    };
+    pollAccounts();
   },
 
   beforeDestroy() {
-    clearInterval(this.pollAccounts);
-    clearInterval(this.pollCharacterStamina);
+    this.doPollAccounts = false;
+    clearInterval(this.pollCharacterStaminaIntervalId);
   },
 };
 </script>
