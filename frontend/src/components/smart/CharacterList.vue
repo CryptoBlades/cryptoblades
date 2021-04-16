@@ -5,7 +5,7 @@
       :class="{ selected: value === c.id }"
       v-for="c in ownCharacters"
       :key="c.id"
-      :title="JSON.stringify(c, null, '  ')"
+      v-tooltip="tooltipHtml(c)"
       @click="$emit('input', c.id)"
     >
       <div class="art" :style="{ backgroundImage: `url(${getCharacterArt(c)})` }"></div>
@@ -19,6 +19,7 @@
 <script lang="ts">
 import { mapGetters } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
+import { ICharacter } from '../../interfaces';
 
 export default {
   props: ['value'],
@@ -29,6 +30,19 @@ export default {
 
   methods: {
     getCharacterArt,
+    tooltipHtml(character: ICharacter) {
+      if(!character) return '';
+
+      return `
+        Level ${character.level}
+        <br>
+        XP ${character.xp}
+        <br>
+        Trait ${character.trait}
+        <br>
+        Stamina ${character.staminaTimestamp}
+      `;
+    }
   },
 };
 </script>

@@ -1,8 +1,7 @@
 <template>
-
   <div
     class="weapon-icon"
-    :title="JSON.stringify(weapon, null, '  ')"
+    v-tooltip="tooltipHtml"
     ref="el">
 
     <div class="glow-container" :class="['glow-' + (weapon.stars || 0)]"></div>
@@ -29,6 +28,24 @@ const modelRotationZ = 0;
 export default {
   props: ['weapon'],
 
+  computed: {
+    tooltipHtml() {
+      if(!this.weapon) return '';
+
+      return `
+        ${Array(this.weapon.stars + 1).fill('★')}
+        <br>
+        Level ${this.weapon.level}
+        <br>
+        Stat1 +${this.weapon.stat1}
+        <br>
+        Stat2 +${this.weapon.stat2}
+        <br>
+        Stat3 +${this.weapon.stat3}
+      `;
+    }
+  },
+
   data() {
     return {
       camera: null,
@@ -41,6 +58,7 @@ export default {
       group: null
     };
   },
+
   methods: {
     getWeaponArt,
 
@@ -258,6 +276,7 @@ export default {
       this.renderer.render(this.scene, this.camera);
     }
   },
+
   mounted() {
     this.init();
     //this.animate();

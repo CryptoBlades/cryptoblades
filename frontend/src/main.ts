@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import VueRouter from 'vue-router';
+import VTooltip from 'v-tooltip';
 import Web3 from 'web3';
 
 import { createStore } from './store';
@@ -22,6 +23,7 @@ Vue.config.productionTip = false;
 
 Vue.use(Vuex);
 Vue.use(VueRouter);
+Vue.use(VTooltip);
 
 const store = createStore(web3, featureFlagStakeOnly);
 const router = createRouter(featureFlagStakeOnly);

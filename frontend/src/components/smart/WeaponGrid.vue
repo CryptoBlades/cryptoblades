@@ -5,7 +5,6 @@
       :class="{ selected: weapon.id === value }"
       v-for="weapon in ownWeapons"
       :key="weapon.id"
-      :title="JSON.stringify(weapon, null, '  ')"
       @click="$emit('input', weapon.id)"
     >
       <weapon-icon :weapon="weapon" />
