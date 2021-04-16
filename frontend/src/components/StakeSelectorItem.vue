@@ -24,10 +24,10 @@
         </tr>
         <tr v-if="estimatedYield" title="Estimated yield per year and token.">
           <th class="bold">
-            Est. yield:
+            APY:
           </th>
           <td class="align-right">
-            {{ estimatedYield.toFixed(2) }} SKILL/y/t
+            {{ estimatedYield.multipliedBy(100).toFixed(2) }}%
           </td>
         </tr>
         <tr v-if="minimumStakeTime !== 0">
