@@ -15,6 +15,16 @@ export interface IStakeState {
   unlockTimeLeft: number;
 }
 
+export interface IStakeOverviewState {
+  stakeSkillRewardRate: string;
+  stakeSkillRewardsDuration: number;
+  stakeSkillTotalSupply: string;
+
+  stakeLpRewardRate: string;
+  stakeLpRewardsDuration: number;
+  stakeLpTotalSupply: string;
+}
+
 export interface IState {
   contracts: Contracts;
   accounts: string[];
@@ -37,4 +47,5 @@ export interface IState {
     skill: IStakeState,
     lp: IStakeState
   };
+  stakeOverview: IStakeOverviewState | null;
 }

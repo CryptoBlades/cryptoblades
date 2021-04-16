@@ -10,7 +10,7 @@ import { setUpContracts } from './contracts';
 import {
   characterFromContract, targetFromContract, weaponFromContract
 } from './contract-models';
-import { Contracts, IStakeState, IState } from './interfaces';
+import { Contracts, IStakeOverviewState, IStakeState, IState } from './interfaces';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -84,6 +84,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           unlockTimeLeft: 0,
         }
       },
+      stakeOverview: null,
     },
 
     getters: {
@@ -222,6 +223,10 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       updateStakeData(state: IState, { stakeType, ...payload }: { stakeType: StakeType } & IStakeState) {
         Vue.set(state.staking, stakeType, payload);
+      },
+
+      updateStakeOverviewData(state, payload) {
+        state.stakeOverview = payload;
       }
     },
 
@@ -536,6 +541,45 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         } else {
           return false;
         }
+      },
+
+      async fetchStakeOverviewData({ state, commit }) {
+        const { StakingRewards: SkillStakingRewards } = getStakingContracts(state.contracts, 'skill');
+        const { StakingRewards: LPStakingRewards } = getStakingContracts(state.contracts, 'lp');
+
+        const [
+          stakeSkillRewardRate,
+          stakeSkillRewardsDuration,
+          stakeSkillTotalSupply,
+          stakeSkillMinimumStakeTime,
+
+          stakeLpRewardRate,
+          stakeLpRewardsDuration,
+          stakeLpTotalSupply,
+          stakeLpMinimumStakeTime,
+        ] = await Promise.all([
+          SkillStakingRewards.methods.rewardRate().call(defaultCallOptions(state)),
+          SkillStakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
+          SkillStakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
+          SkillStakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
+
+          LPStakingRewards.methods.rewardRate().call(defaultCallOptions(state)),
+          LPStakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
+          LPStakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
+          LPStakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
+        ]);
+
+        commit('updateStakeOverviewData', {
+          stakeSkillRewardRate,
+          stakeSkillRewardsDuration: parseInt(stakeSkillRewardsDuration, 10),
+          stakeSkillTotalSupply,
+          stakeSkillMinimumStakeTime: parseInt(stakeSkillMinimumStakeTime, 10),
+
+          stakeLpRewardRate,
+          stakeLpRewardsDuration: parseInt(stakeLpRewardsDuration, 10),
+          stakeLpTotalSupply,
+          stakeLpMinimumStakeTime: parseInt(stakeLpMinimumStakeTime, 10),
+        } as IStakeOverviewState);
       },
 
       async fetchStakeDetails({ state, commit }, { stakeType }: { stakeType: StakeType }) {

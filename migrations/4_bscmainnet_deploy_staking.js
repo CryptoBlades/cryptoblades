@@ -2,7 +2,7 @@ const SkillStakingRewards = artifacts.require("SkillStakingRewards");
 const LPStakingRewards = artifacts.require("LPStakingRewards");
 
 module.exports = async function (deployer, network) {
-  if (network === 'bscmainnet') {
+  if (network === 'bscmainnet' || network === 'bscmainnet-fork') {
     const ownerAddress = '0xC2573A26297a0c952C92bb48Fdcb6929524F7F48';
     const rewardDistributorAddress = '0xC2573A26297a0c952C92bb48Fdcb6929524F7F48';
 
