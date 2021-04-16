@@ -46,6 +46,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       accounts: [],
       defaultAccount: null,
+      currentNetworkId: null,
 
       skillBalance: '0',
       ownedCharacterIds: [],
@@ -139,6 +140,10 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
     },
 
     mutations: {
+      setNetworkId(state, payload) {
+        state.currentNetworkId = payload;
+      },
+
       setAccounts(state: IState, payload) {
         state.accounts = payload.accounts;
 
@@ -225,14 +230,26 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         await dispatch('setUpContracts');
         await dispatch('setUpContractEvents');
 
-        await dispatch('fetchAccounts');
+        await dispatch('pollAccountsAndNetwork');
       },
 
-      async fetchAccounts({ state, dispatch, commit }) {
+      async pollAccountsAndNetwork({ state, dispatch, commit }) {
+        let refreshUserDetails = false;
+        const networkId = await web3.eth.net.getId();
+
+        if(state.currentNetworkId !== networkId) {
+          commit('setNetworkId', networkId);
+          refreshUserDetails = true;
+        }
+
         const accounts = await web3.eth.requestAccounts();
 
         if (!_.isEqual(state.accounts, accounts)) {
           commit('setAccounts', { accounts });
+          refreshUserDetails = true;
+        }
+
+        if(refreshUserDetails) {
           await dispatch('fetchUserDetails');
         }
       },

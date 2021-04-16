@@ -19,6 +19,7 @@ export interface IState {
   contracts: Contracts;
   accounts: string[];
   defaultAccount: string | null;
+  currentNetworkId: number | null;
 
   skillBalance: string;
   ownedCharacterIds: number[];

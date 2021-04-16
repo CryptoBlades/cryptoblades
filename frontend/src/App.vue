@@ -18,6 +18,15 @@
     <div class="fullscreen-warning" v-if="errorMessage">
       {{ errorMessage }}
     </div>
+
+    <div class="fullscreen-warning" v-if="showNetworkError">
+      <div>
+        You are currently on the incorrect network.
+      </div>
+      <div>
+        Please switch to <span class="bold">{{ expectedNetworkName }}</span>.
+      </div>
+    </div>
   </div>
 </template>
 
@@ -29,7 +38,7 @@ import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 
 export default {
-  inject: ['web3', 'featureFlagStakeOnly'],
+  inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
     CharacterBar,
@@ -40,14 +49,18 @@ export default {
   }),
 
   computed: {
-    ...mapState(['defaultAccount', 'currentCharacterId', 'contracts']),
+    ...mapState(['defaultAccount', 'currentNetworkId', 'currentCharacterId', 'contracts']),
 
     canShowApp() {
-      return !_.isEmpty(this.contracts);
+      return !_.isEmpty(this.contracts) && !this.showNetworkError;
     },
 
     showMetamaskWarning() {
       return !this.web3.currentProvider;
+    },
+
+    showNetworkError() {
+      return this.expectedNetworkId && this.currentNetworkId !== this.expectedNetworkId;
     }
   },
 
@@ -63,7 +76,7 @@ export default {
 
   methods: {
     ...mapActions({ initializeStore: 'initialize' }),
-    ...mapActions(['fetchCharacterStamina', 'fetchAccounts']),
+    ...mapActions(['fetchCharacterStamina', 'pollAccountsAndNetwork']),
 
     async updateCurrentCharacterStamina() {
       if (this.currentCharacterId) {
@@ -92,7 +105,7 @@ export default {
 
     this.pollAccounts = setInterval(async () => {
       try {
-        await this.fetchAccounts();
+        await this.pollAccountsAndNetwork();
       } catch (e) {
         console.error(e);
       }
@@ -169,7 +182,12 @@ button {
 }
 
 .fullscreen-warning {
-  height: calc(100vh - 56px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.425);
+  height: 100vh;
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;

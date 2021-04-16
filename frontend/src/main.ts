@@ -10,6 +10,12 @@ import App from './App.vue';
 
 const featureFlagStakeOnly = ['1', 'true', 't'].includes((process.env.VUE_APP_STAKING_ONLY + '').toLowerCase());
 
+let expectedNetworkId: number | null = null;
+if(process.env.VUE_APP_EXPECTED_NETWORK_ID) {
+  expectedNetworkId = parseInt(process.env.VUE_APP_EXPECTED_NETWORK_ID, 10);
+}
+const expectedNetworkName = process.env.VUE_APP_EXPECTED_NETWORK_NAME;
+
 const web3 = new Web3(Web3.givenProvider || process.env.VUE_APP_WEB3_FALLBACK_PROVIDER);
 
 Vue.config.productionTip = false;
@@ -24,6 +30,6 @@ new Vue({
   render: h => h(App),
   router, store,
   provide: {
-    web3, featureFlagStakeOnly
+    web3, featureFlagStakeOnly, expectedNetworkId, expectedNetworkName
   }
 }).$mount('#app');
