@@ -1,9 +1,11 @@
 <template>
+
   <div
     class="weapon-icon"
     :title="JSON.stringify(weapon, null, '  ')"
-    ref="el"
-  >
+    ref="el">
+
+    <div class="glow-container" :class="['glow-' + (weapon.stars || 0)]"></div>
 
   </div>
 </template>
@@ -268,7 +270,72 @@ export default {
 .weapon-icon {
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-image: url("../assets/iconGlow.png");
+
+  position: relative;
+}
+
+.glow-container {
+  border-radius: 50%;
+  height: 96px;
+  width: 96px;
+  position: absolute;
+  top: 0;
+  z-index: 540;
+}
+
+.glow-0 {
+  animation: none;
+}
+
+.glow-1 {
+  animation: glow-1 800ms ease-out infinite alternate;
+}
+
+.glow-2 {
+  animation: glow-2 700ms ease-out infinite alternate;
+}
+
+.glow-3 {
+  animation: glow-3 600ms ease-out infinite alternate;
+}
+
+.glow-4 {
+  animation: glow-4 500ms ease-out infinite alternate;
+}
+
+@keyframes glow-1 {
+  0% {
+    box-shadow: inset 0 0 10px #00a;
+  }
+  100% {
+    box-shadow: inset 0 0 15px #00a;
+  }
+}
+
+@keyframes glow-2 {
+  0% {
+    box-shadow: inset 0 0 10px #a0a;
+  }
+  100% {
+    box-shadow: inset 0 0 20px #a0a;
+  }
+}
+
+@keyframes glow-3 {
+  0% {
+    box-shadow: inset 0 0 10px #f60;
+  }
+  100% {
+    box-shadow: inset 0 0 25px #f60;
+  }
+}
+
+@keyframes glow-4 {
+  0% {
+    box-shadow: inset 0 0 10px #a00;
+  }
+  100% {
+    box-shadow: inset 0 0 30px #a00;
+  }
 }
 </style>

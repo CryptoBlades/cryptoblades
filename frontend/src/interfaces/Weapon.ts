@@ -10,4 +10,5 @@ export interface IWeapon {
   crossguard: string;
   grip: string;
   pommel: string;
+  stars: number;
 }

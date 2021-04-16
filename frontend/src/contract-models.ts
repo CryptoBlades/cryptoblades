@@ -20,7 +20,9 @@ export function weaponFromContract(id: number, data: string): IWeapon {
   const crossguard = data[6];
   const grip = data[7];
   const pommel = data[8];
-  return { id, properties, stat1, stat2, stat3, level, blade, crossguard, grip, pommel };
+
+  const stars = (+properties) & 0x7;
+  return { id, properties, stat1, stat2, stat3, level, blade, crossguard, grip, pommel, stars };
 }
 
 export function targetFromContract(data: string): ITarget {
