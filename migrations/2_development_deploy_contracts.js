@@ -5,7 +5,7 @@ const SkillStakingRewards = artifacts.require("SkillStakingRewards");
 const LPStakingRewards = artifacts.require("LPStakingRewards");
 
 module.exports = async function (deployer, network, accounts) {
-  if (network === 'development') {
+  if (network === 'development' || network === 'development-fork') {
     await deployer.deploy(SkillToken);
     const token = await SkillToken.deployed();
 
