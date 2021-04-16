@@ -4,32 +4,42 @@
       <img src="https://seiyria.com/gameicons-font/svg/two-coins.svg" alt="" class="stake-type-icon">
     </div>
     <h1 class="stake-type-title">{{ stakeTokenName }} for {{ rewardTokenName }}</h1>
-    <table class="stake-data-table">
-      <tr>
-        <td class="bold">
-          Stake:
-        </td>
-        <td class="align-right">
-          {{ stakeTokenName }}
-        </td>
-      </tr>
-      <tr>
-        <td class="bold">
-          Earn:
-        </td>
-        <td class="align-right">
-          {{ rewardTokenName }}
-        </td>
-      </tr>
-      <tr>
-        <td class="bold">
-          APR:
-        </td>
-        <td class="align-right">
-          {{ apr }}
-        </td>
-      </tr>
-    </table>
+    <div class="table-wrapper">
+      <table class="stake-data-table">
+        <tr>
+          <th class="bold">
+            Stake:
+          </th>
+          <td class="align-right">
+            {{ stakeTokenName }}
+          </td>
+        </tr>
+        <tr>
+          <th class="bold">
+            Earn:
+          </th>
+          <td class="align-right">
+            {{ rewardTokenName }}
+          </td>
+        </tr>
+        <tr v-if="estimatedYield" title="Estimated yield per year and token.">
+          <th class="bold">
+            Est. yield:
+          </th>
+          <td class="align-right">
+            {{ estimatedYield.toFixed(2) }} SKILL/y/t
+          </td>
+        </tr>
+        <tr v-if="minimumStakeTime !== 0">
+          <th class="bold">
+            Stake locked:
+          </th>
+          <td class="align-right">
+            {{ minimumStakeTimeFormatted }}
+          </td>
+        </tr>
+      </table>
+    </div>
     <router-link
       class="stake-select-button button dark-bg-text"
       :to="{ name: 'stake', params: { stakeType } }">
@@ -39,8 +49,16 @@
 </template>
 
 <script>
+import { formatDurationFromSeconds } from '../utils/date-time';
+
 export default {
-  props: ['stakeTokenName', 'rewardTokenName', 'stakeType', 'apr']
+  props: ['stakeTokenName', 'rewardTokenName', 'stakeType', 'minimumStakeTime', 'estimatedYield'],
+
+  computed: {
+    minimumStakeTimeFormatted() {
+      return formatDurationFromSeconds(this.minimumStakeTime);
+    }
+  }
 };
 </script>
 
@@ -76,9 +94,13 @@ export default {
   font-size: 1.2rem;
 }
 
-.stake-data-table {
+.table-wrapper {
   width: 100%;
   flex-grow: 1;
+}
+
+.stake-data-table {
+  width: 100%;
   padding: 1rem 0;
 }
 
