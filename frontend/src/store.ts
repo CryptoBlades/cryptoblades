@@ -563,7 +563,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       async stake({ state, dispatch }, { amount, gas, stakeType }: { amount: string, gas: string, stakeType: StakeType }) {
         const { StakingRewards, StakingToken } = getStakingContracts(state.contracts, stakeType);
 
-        await StakingToken.methods.increaseAllowance(StakingRewards.options.address, amount).send({
+        await StakingToken.methods.approve(StakingRewards.options.address, amount).send({
           from: state.defaultAccount
         });
 

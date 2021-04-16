@@ -1,8 +1,9 @@
 import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../build/contracts/CryptoBlades.json';
 import { abi as skillStakingRewardsAbi, networks as skillStakingRewardsNetworks } from '../../build/contracts/SkillStakingRewards.json';
 import { abi as lpStakingRewardsAbi, networks as lpStakingRewardsNetworks } from '../../build/contracts/LPStakingRewards.json';
-import { abi as skillTokenAbi, networks as skillTokenNetworks } from '../../build/contracts/SkillToken.json';
-import { abi as lpTokenAbi, networks as lpTokenNetworks } from '../../build/contracts/ExperimentToken.json';
+import { networks as skillTokenNetworks } from '../../build/contracts/SkillToken.json';
+import { networks as lpTokenNetworks } from '../../build/contracts/ExperimentToken.json';
+import { abi as erc20Abi } from '../../build/contracts/IERC20.json';
 
 import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
@@ -20,8 +21,8 @@ export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean):
 
   const SkillStakingRewards = new web3.eth.Contract(skillStakingRewardsAbi as any, skillStakingRewardsContractAddr);
   const LPStakingRewards = new web3.eth.Contract(lpStakingRewardsAbi as any, lpStakingRewardsContractAddr);
-  const SkillToken = new web3.eth.Contract(skillTokenAbi as any, skillTokenContractAddr);
-  const LPToken = new web3.eth.Contract(lpTokenAbi as any, lpTokenContractAddr);
+  const SkillToken = new web3.eth.Contract(erc20Abi as any, skillTokenContractAddr);
+  const LPToken = new web3.eth.Contract(erc20Abi as any, lpTokenContractAddr);
 
   if (featureFlagStakeOnly) {
     return { SkillStakingRewards, LPStakingRewards, SkillToken, LPToken };
