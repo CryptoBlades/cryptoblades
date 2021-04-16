@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font">
-    <staking class="staking" stakeType="skill" />
-    <staking class="staking" stakeType="lp" />
+    <staking class="staking" v-if="stakeType === 'skill' || stakeType === 'lp'" :stakeType="stakeType" />
+    <h1 v-else>Unknown stake type, please try again.</h1>
   </div>
 </template>
 
@@ -9,6 +9,15 @@
 import Staking from '../components/smart/Staking.vue';
 
 export default {
+  props: {
+    stakeType: {
+      type: String,
+      validator(type: string) {
+        return ['skill', 'lp'].includes(type);
+      }
+    }
+  },
+
   components: {
     Staking,
   },

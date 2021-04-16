@@ -14,7 +14,7 @@
       <router-link :to="{ name: 'combat' }"><span>Combat</span></router-link>
     </li>
     <li>
-      <router-link :to="{ name: 'stake' }"><span>Stake</span></router-link>
+      <router-link :to="{ name: 'select-stake-type' }"><span>Stake</span></router-link>
     </li>
   </ul>
 </template>
