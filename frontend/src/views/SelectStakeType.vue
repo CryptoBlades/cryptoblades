@@ -54,7 +54,7 @@ export default {
       return this.calculateEstimatedYield(
         this.stakeOverview.stakeLpRewardRate,
         this.stakeOverview.stakeLpTotalSupply
-      );
+      ).multipliedBy(0.102); // temporary, fetch from pancakeswap instead in the future
     },
   },
 
