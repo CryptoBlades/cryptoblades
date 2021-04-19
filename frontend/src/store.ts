@@ -11,6 +11,7 @@ import {
   characterFromContract, targetFromContract, weaponFromContract
 } from './contract-models';
 import { Contracts, IStakeOverviewState, IStakeState, IState } from './interfaces';
+import { getCharacterNameFromSeed } from './character-name';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -98,18 +99,9 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       getCharacterName() {
-        const names = [
-          'Gaa Chestbrew',
-          'Globrin Stun',
-          'Grar Nelag',
-          'Trudvurth Duskspirit',
-          'Lur Farglade',
-          'Lira-Zen Nizruzrik',
-          'Thek-Duf Huenkruld'
-        ];
 
         return (characterId: number) => {
-          return names[characterId];
+          return getCharacterNameFromSeed(characterId);
         };
       },
 
