@@ -47,7 +47,6 @@ export default {
   background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 4px #ffffff38;
   border-radius: 5px;
-  padding: 0.5em;
   cursor: pointer;
 }
 
