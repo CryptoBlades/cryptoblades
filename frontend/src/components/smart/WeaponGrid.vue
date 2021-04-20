@@ -45,7 +45,6 @@ export default {
   width: 6em;
   height: 6em;
   background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 4px #ffffff38;
   border-radius: 5px;
   cursor: pointer;
 }
