@@ -21,7 +21,9 @@ module.exports = async function (deployer, network, accounts) {
     await token.transferFrom(token.address, game.address, "500000000000000000000000");
     // This next bit is temporary, we'll handle approvals through the frontend somehow
     await token.approve(game.address, "1000000000000000000000000");
-    await game.giveMeSkill("1000000");
+    await game.giveMeSkill("1000000000000000000000"); // 1000 skill, test token value is $5 usd
     await game.mintCharacter();
+
+    //console.log("Weapon mint gastimate: "+(await game.mintWeapon.estimateGas({ from: accounts[0] })).toString());
   }
 };

@@ -81,10 +81,18 @@ contract Characters is ERC721, Util {
     }
 
     function getPower(uint256 id) public view returns (uint24) {
-        uint8 level = getLevel(id);
+        return getPowerAtLevel(getLevel(id));
+    }
+
+    function getPowerAtLevel(uint8 level) public pure returns (uint24) {
         // does not use fixed points since the numbers are simple
         // the breakpoints every 10 levels are floored as expected
-        return (1000 + level * 10) * (level / 10 + 1); // 1010 to 3560 * 1 to 26 = 1010 to 92560
+        // level starts at 0 (visually 1)
+        // 1000 at lvl 1
+        // 9000 at lvl 51 (~3months)
+        // 22440 at lvl 105 (~3 years)
+        // 92300 at lvl 255 (heat death of the universe)
+        return (1000 + level * 10) * (level / 10 + 1);
     }
 
     function getTrait(uint256 id) public view returns (uint8) {

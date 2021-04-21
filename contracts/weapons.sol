@@ -60,17 +60,13 @@ contract Weapons is ERC721, Util {
         return (w.properties, w.stat1, w.stat2, w.stat3, w.level, w.blade, w.crossguard, w.grip, w.pommel);
     }
 
-    function mint(address minter, uint8 maxStar) public restricted returns (uint256) {
+    function mint(address minter, uint8 maxStar, uint256 seed) public restricted returns (uint256) {
         uint256 tokenID = tokens.length;
-
-        uint256 stars = 0;
-        if(maxStar > 0) {
-            stars = randomSafeMinMax(0,maxStar);
-        }
+        uint256 stars = getRandomStar(maxStar, combineSeeds(seed,0));
 
         uint16 properties = uint16((stars & 0x7)
-            | ((randomSafeMinMax(0,3) << 3) & 0x3) // trait
-            | ((randomSafeMinMax(0,124) << 5) & 0x7F)); // statPattern
+            | ((randomSeededMinMax(0,3,combineSeeds(seed,1)) << 3) & 0x3) // trait
+            | ((randomSeededMinMax(0,124,combineSeeds(seed,2)) << 5) & 0x7F)); // statPattern
 
         // each point refers to .25%
         // so 1 * 4 is 1%
@@ -81,22 +77,54 @@ contract Weapons is ERC721, Util {
         uint16 stat2 = 0;
         uint16 stat3 = 0;
         if(statCount > 1) {
-            stat2 = uint16(randomSafeMinMax(minRoll, maxRoll));
+            stat2 = getRandomStat(minRoll, maxRoll, seed, 3);
         }
         if(statCount > 2) {
-            stat3 = uint16(randomSafeMinMax(minRoll, maxRoll));
+            stat3 = getRandomStat(minRoll, maxRoll, seed, 4);
         }
 
-        uint8 blade = uint8(randomSafeMinMax(0, 255));
-        uint8 crossguard = uint8(randomSafeMinMax(0, 255));
-        uint8 grip = uint8(randomSafeMinMax(0, 255));
-        uint8 pommel = uint8(randomSafeMinMax(0, 255));
-
-        tokens.push(Weapon(properties, uint16(randomSafeMinMax(minRoll, maxRoll)), stat2, stat3, 0/*level*/, blade, crossguard, grip, pommel));
+        tokens.push(Weapon(properties, getRandomStat(minRoll, maxRoll, seed, 5), stat2, stat3,
+            0, // level
+            getRandomCosmetic(seed,6), // blade
+            getRandomCosmetic(seed,7), // crossguard
+            getRandomCosmetic(seed,8), // grip
+            getRandomCosmetic(seed,9) // pommel
+        ));
 
         _mint(minter, tokenID);
         emit NewWeapon(tokenID);
         return tokenID;
+    }
+
+    function getRandomStar(uint8 maxStar, uint256 seed) private pure returns (uint8) {
+        if(maxStar < 1) {
+            return 0;
+        }
+        uint256 roll = randomSeededMinMax(0, 99, seed);
+        // will need revision, possibly manual configuration if we support more than 5 stars
+        if(roll < 1) {
+            return 4; // 5* at 1%
+        }
+        else if(roll < 6) { // 4* at 5%
+            return 3;
+        }
+        else if(roll < 21) { // 3* at 15%
+            return 2;
+        }
+        else if(roll < 56) { // 2* at 35%
+            return 1;
+        }
+        else {
+            return 0; // 1* at 44%
+        }
+    }
+
+    function getRandomStat(uint16 minRoll, uint16 maxRoll, uint256 seed, uint256 seed2) private pure returns (uint16) {
+        return uint16(randomSeededMinMax(minRoll, maxRoll,combineSeeds(seed, seed2)));
+    }
+
+    function getRandomCosmetic(uint256 seed, uint256 seed2) private pure returns (uint8) {
+        return uint8(randomSeededMinMax(0, 255, seed));
     }
 
     function burn(uint256 id) public restricted {
