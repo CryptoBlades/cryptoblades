@@ -2,10 +2,10 @@
   <ul class="weapon-grid">
     <li
       class="weapon"
-      :class="{ selected: weapon.id === value }"
-      v-for="weapon in ownWeapons"
+      :class="{ selected: weapon.id === highlight }"
+      v-for="weapon in displayWeapons"
       :key="weapon.id"
-      @click="$emit('input', weapon.id)"
+      @click="$emit('choose-weapon', weapon.id)"
     >
       <weapon-icon :weapon="weapon" />
     </li>
@@ -14,11 +14,12 @@
 
 <script lang="ts">
 import { mapGetters } from 'vuex';
+import { IWeapon } from '../../interfaces';
 
 import WeaponIcon from '../WeaponIcon.vue';
 
 export default {
-  props: ['value'],
+  props: ['value', 'ignore', 'highlight'],
 
   components: {
     WeaponIcon,
@@ -26,6 +27,11 @@ export default {
 
   computed: {
     ...mapGetters(['ownWeapons']),
+
+    displayWeapons(): IWeapon[] {
+      if(!this.ownWeapons) return [];
+      return (this.ownWeapons as unknown as IWeapon[]).filter(Boolean).filter((x: IWeapon) => x.id !== (this as any).ignore);
+    }
   },
 };
 </script>

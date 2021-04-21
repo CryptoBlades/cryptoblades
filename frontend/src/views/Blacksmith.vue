@@ -1,26 +1,40 @@
 <template>
   <div class="body main-font">
-    <div v-if="ownWeapons.length > 0">
-      <h1>Weapon to reforge:</h1>
-      <weapon-grid v-model="reforgeWeaponId" />
+    <div v-if="ownWeapons.length > 0" class="weapon-container">
+      <div class="sub-container">
+        <h1>
+          Weapons
+          <button class="mint-weapon" @click="onForgeWeapon">
+            <i class="fas fa-plus"></i>
+          </button>
+        </h1>
 
-      <h1>Weapon to burn:</h1>
-      <weapon-grid v-model="burnWeaponId" />
+        <weapon-grid v-on:choose-weapon="setWeapon($event)" :highlight="reforgeWeaponId" />
 
-      <div class="button-row">
-        <big-button
-          class="button"
-          mainText="Forge sword"
-          subText="(SKILL)"
-          @click="onForgeWeapon"
-        />
-        <big-button
-          class="button"
-          mainText="Reforge sword"
-          subText="(+weapon xp sacrificing another)"
-          :disabled="canReforge"
-          @click="onReforgeWeapon"
-        />
+        <div class="button-row" v-if="reforgeWeaponId">
+          <big-button
+            class="button"
+            mainText="Reforge Sword"
+            v-tooltip="'Gain weapon XP by sacrificing a different weapon'"
+            @click="setReforge(true)"
+          />
+        </div>
+      </div>
+
+      <div class="sub-container">
+        <div v-if="showReforge">
+          <h1>Choose Reforge Weapon</h1>
+          <weapon-grid v-on:choose-weapon="setBurnWeapon($event)" :highlight="burnWeaponId" :ignore="reforgeWeaponId" />
+
+          <div class="button-row">
+            <big-button
+              class="button"
+              mainText="Confirm Reforge"
+              :disabled="canReforge"
+              @click="onReforgeWeapon"
+            />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -47,6 +61,7 @@ import { mapActions, mapGetters } from 'vuex';
 export default {
   data() {
     return {
+      showReforge: false,
       reforgeWeaponId: null,
       burnWeaponId: null,
     };
@@ -82,11 +97,27 @@ export default {
           burnWeaponId: this.burnWeaponId,
           reforgeWeaponId: this.reforgeWeaponId,
         });
+
+        this.burnWeaponId = null;
       } catch (e) {
         console.error(e);
         alert('Could not forge sword: insuffucient funds or transaction denied.');
       }
     },
+
+    setReforge(reforge) {
+      this.showReforge = reforge;
+    },
+
+    setWeapon(weaponId) {
+      console.log('set', weaponId);
+      this.reforgeWeaponId = weaponId;
+      this.setReforge(false);
+    },
+
+    setBurnWeapon(weaponId) {
+      this.burnWeaponId = weaponId;
+    }
   },
 
   components: {
@@ -102,7 +133,26 @@ export default {
   display: flex;
 }
 
-.button + .button {
-  margin-left: 1em;
+.mint-weapon {
+  height: 2.5rem;
+  width: 2.5rem;
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.6);
+  background: none;
+  border: none;
+  border-radius: 0.1em;
+  margin-right: 1em;
+
+  float: right;
+}
+
+.weapon-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.sub-container {
+  flex: 1;
 }
 </style>
