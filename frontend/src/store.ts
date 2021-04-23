@@ -613,7 +613,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         } as { stakeType: StakeType } & IStakeState);
       },
 
-      async stake({ state, dispatch }, { amount, gas, stakeType }: { amount: string, gas: string, stakeType: StakeType }) {
+      async stake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
         const { StakingRewards, StakingToken } = getStakingContracts(state.contracts, stakeType);
 
         await StakingToken.methods.approve(StakingRewards.options.address, amount).send({
@@ -622,20 +622,16 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
         await StakingRewards.methods.stake(amount).send({
           from: state.defaultAccount,
-          gas: 200_000,
-          gasPrice: new BN(gas).multipliedBy(1e9).toString(),
         });
 
         await dispatch('fetchStakeDetails', { stakeType });
       },
 
-      async unstake({ state, dispatch }, { amount, gas, stakeType }: { amount: string, gas: string, stakeType: StakeType }) {
+      async unstake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
         const { StakingRewards } = getStakingContracts(state.contracts, stakeType);
 
         await StakingRewards.methods.withdraw(amount).send({
           from: state.defaultAccount,
-          gas: 200_000,
-          gasPrice: new BN(gas).multipliedBy(1e9).toString(),
         });
 
         await dispatch('fetchStakeDetails', { stakeType });
