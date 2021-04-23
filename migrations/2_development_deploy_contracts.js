@@ -5,7 +5,7 @@ const SkillStakingRewards = artifacts.require("SkillStakingRewards");
 const LPStakingRewards = artifacts.require("LPStakingRewards");
 
 module.exports = async function (deployer, network, accounts) {
-  if (network === 'development' || network === 'development-fork') {
+  if (network === 'development' || network === 'development-fork') { // TEMP TEMP TEMP
     await deployer.deploy(SkillToken);
     const token = await SkillToken.deployed();
 
@@ -23,7 +23,5 @@ module.exports = async function (deployer, network, accounts) {
     await token.approve(game.address, "1000000000000000000000000");
     await game.giveMeSkill("1000000000000000000000"); // 1000 skill, test token value is $5 usd
     await game.mintCharacter();
-
-    //console.log("Weapon mint gastimate: "+(await game.mintWeapon.estimateGas({ from: accounts[0] })).toString());
   }
 };

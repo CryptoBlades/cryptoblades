@@ -46,9 +46,10 @@ contract Weapons is ERC721, Util {
         uint8 pommel;
     }
 
-    Weapon[] public tokens;
+    Weapon[] private tokens;
     
-    event NewWeapon(uint256 weapon);
+    event NewWeapon(uint256 indexed weapon, address indexed minter);
+    event Reforged(uint256 indexed reforged, uint256 indexed burned, uint8 level, uint16 stat1Gain, uint16 stat2Gain, uint16 stat3Gain);
 
     modifier restricted() {
         require(main == msg.sender, "Can only be called by main file");
@@ -60,47 +61,43 @@ contract Weapons is ERC721, Util {
         return (w.properties, w.stat1, w.stat2, w.stat3, w.level, w.blade, w.crossguard, w.grip, w.pommel);
     }
 
-    function mint(address minter, uint8 maxStar, uint256 seed) public restricted returns (uint256) {
-        uint256 tokenID = tokens.length;
-        uint256 stars = getRandomStar(maxStar, combineSeeds(seed,0));
+    function mint(address minter, uint256 seed) public restricted {
 
-        uint16 properties = uint16((stars & 0x7)
-            | ((randomSeededMinMax(0,3,combineSeeds(seed,1)) << 3) & 0x3) // trait
-            | ((randomSeededMinMax(0,124,combineSeeds(seed,2)) << 5) & 0x7F)); // statPattern
+        uint256 stars = getRandomStar(seed);
+        (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
-        // each point refers to .25%
-        // so 1 * 4 is 1%
-        uint16 minRoll = getStatMinRoll(stars);
-        uint16 maxRoll = getStatMaxRoll(stars);
-        uint8 statCount = getStatCount(stars);
-
-        uint16 stat2 = 0;
-        uint16 stat3 = 0;
-        if(statCount > 1) {
-            stat2 = getRandomStat(minRoll, maxRoll, seed, 3);
-        }
-        if(statCount > 2) {
-            stat3 = getRandomStat(minRoll, maxRoll, seed, 4);
-        }
-
-        tokens.push(Weapon(properties, getRandomStat(minRoll, maxRoll, seed, 5), stat2, stat3,
-            0, // level
+        performMintWeapon(minter,
+            getRandomProperties(stars, seed),
+            stat1,
+            stat2,
+            stat3,
             getRandomCosmetic(seed,6), // blade
             getRandomCosmetic(seed,7), // crossguard
             getRandomCosmetic(seed,8), // grip
             getRandomCosmetic(seed,9) // pommel
-        ));
-
-        _mint(minter, tokenID);
-        emit NewWeapon(tokenID);
-        return tokenID;
+        );
     }
 
-    function getRandomStar(uint8 maxStar, uint256 seed) private pure returns (uint8) {
-        if(maxStar < 1) {
-            return 0;
-        }
-        uint256 roll = randomSeededMinMax(0, 99, seed);
+    function performMintWeapon(address minter,
+        uint16 properties,
+        uint16 stat1, uint16 stat2, uint16 stat3,
+        uint8 blade, uint8 crossguard, uint8 grip, uint8 pommel
+    ) public restricted {
+
+        uint256 tokenID = tokens.length;
+        tokens.push(Weapon(properties, stat1, stat2, stat3, 0, blade, crossguard, grip, pommel));
+        _mint(minter, tokenID);
+        emit NewWeapon(tokenID, minter);
+    }
+
+    function getRandomProperties(uint256 stars, uint256 seed) public pure returns (uint16) {
+        return uint16((stars & 0x7) // stars aren't randomized here!
+            | ((randomSeededMinMax(0,3,combineSeeds(seed,1)) << 3) & 0x3) // trait
+            | ((randomSeededMinMax(0,124,combineSeeds(seed,2)) << 5) & 0x7F)); // statPattern
+    }
+
+    function getRandomStar(uint256 seed) private pure returns (uint8) {
+        uint256 roll = seed % 100;
         // will need revision, possibly manual configuration if we support more than 5 stars
         if(roll < 1) {
             return 4; // 5* at 1%
@@ -119,20 +116,34 @@ contract Weapons is ERC721, Util {
         }
     }
 
-    function getRandomStat(uint16 minRoll, uint16 maxRoll, uint256 seed, uint256 seed2) private pure returns (uint16) {
+    function getStatRolls(uint256 stars, uint256 seed) private pure returns (uint16, uint16, uint16) {
+        // each point refers to .25%
+        // so 1 * 4 is 1%
+        uint16 minRoll = getStatMinRoll(stars);
+        uint16 maxRoll = getStatMaxRoll(stars);
+        uint8 statCount = getStatCount(stars);
+
+        uint16 stat1 = getRandomStat(minRoll, maxRoll, seed, 5);
+        uint16 stat2 = 0;
+        uint16 stat3 = 0;
+        if(statCount > 1) {
+            stat2 = getRandomStat(minRoll, maxRoll, seed, 3);
+        }
+        if(statCount > 2) {
+            stat3 = getRandomStat(minRoll, maxRoll, seed, 4);
+        }
+        return (stat1, stat2, stat3);
+    }
+
+    function getRandomStat(uint16 minRoll, uint16 maxRoll, uint256 seed, uint256 seed2) public pure returns (uint16) {
         return uint16(randomSeededMinMax(minRoll, maxRoll,combineSeeds(seed, seed2)));
     }
 
-    function getRandomCosmetic(uint256 seed, uint256 seed2) private pure returns (uint8) {
-        return uint8(randomSeededMinMax(0, 255, seed));
+    function getRandomCosmetic(uint256 seed, uint256 seed2) public pure returns (uint8) {
+        return uint8(randomSeededMinMax(0, 255, combineSeeds(seed, seed2)));
     }
 
-    function burn(uint256 id) public restricted {
-        // original function is internal, so we must have this exposure to call from main
-        _burn(id);
-    }
-
-    function getStatMinRoll(uint256 stars) private pure returns (uint16) {
+    function getStatMinRoll(uint256 stars) public pure returns (uint16) {
         uint16 minRoll = 1 * 4;
         if(stars == 1) { // 2 star
             minRoll = 45 * 4;
@@ -149,7 +160,7 @@ contract Weapons is ERC721, Util {
         return minRoll;
     }
 
-    function getStatMaxRoll(uint256 stars) private pure returns (uint16) {
+    function getStatMaxRoll(uint256 stars) public pure returns (uint16) {
         uint16 maxRoll = 50 * 4;
         if(stars == 1) { // 2 star
             maxRoll = 75 * 4;
@@ -166,7 +177,7 @@ contract Weapons is ERC721, Util {
         return maxRoll;
     }
 
-    function getStatCount(uint256 stars) private pure returns (uint8) {
+    function getStatCount(uint256 stars) public pure returns (uint8) {
         uint8 statCount = 1;
         if(stars == 3) { // 4 star
             statCount = 2;
@@ -281,7 +292,17 @@ contract Weapons is ERC721, Util {
         return result;
     }
 
-    function levelUp(uint256 id) public restricted {
+    function reforge(uint256 reforgeID, uint256 burnID, uint256 seed) public restricted {
+        Weapon storage wep = tokens[reforgeID];
+        uint16 stat1 = wep.stat1;
+        uint16 stat2 = wep.stat2;
+        uint16 stat3 = wep.stat3;
+        levelUp(reforgeID, seed);
+        _burn(burnID);
+        emit Reforged(reforgeID, burnID, wep.level, wep.stat1-stat1, wep.stat2-stat2, wep.stat3-stat3);
+    }
+
+    function levelUp(uint256 id, uint256 seed) private {
         Weapon storage wep = tokens[id];
 
         wep.level = wep.level + 1;
@@ -289,10 +310,10 @@ contract Weapons is ERC721, Util {
 
         uint8 stars = getStarsFromProperties(wep.properties);
 
-        if(stars >= 4 && randomSafeMinMax(0,1) == 0) {
+        if(stars >= 4 && randomSeededMinMax(0,1, seed) == 0) {
             wep.stat2 = wep.stat2 + 1;
         }
-        if(stars >= 5 && randomSafeMinMax(0,1) == 0) {
+        if(stars >= 5 && randomSeededMinMax(0,1, combineSeeds(seed,1)) == 0) {
             wep.stat3 = wep.stat3 + 1;
         }
     }

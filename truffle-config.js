@@ -53,7 +53,7 @@ module.exports = {
       network_id: 0x61,
       confirmations: 10,
       timeoutBlocks: 200,
-      gas: 8000000,
+      gas: 10000000,//8000000,
       skipDryRun: true
     },
     bscmainnet: {
@@ -101,7 +101,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.6.2",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.6.5",    // Fetch exact version from solc-bin (default: truffle's version)
       //docker: false,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: {          // See the solidity docs for advice about optimization and evmVersion
         optimizer: {

@@ -28,13 +28,13 @@ contract Characters is ERC721, Util {
         uint64 appearance; // placeholder; cat ears, cup size and shit. PIMP MY KNIGHT
     }
 
-    Character[] public tokens;
+    Character[] private tokens;
 
     uint256 public maxStamina = 200;
     uint256 public secondsPerStamina = 300; //5 * 60
     
-    event NewCharacter(uint256 character);
-    event LevelUp(uint256 character, uint16 level);
+    event NewCharacter(uint256 indexed character, address indexed minter);
+    event LevelUp(uint256 indexed character, uint16 level);
 
     modifier restricted() {
         require(main == msg.sender, "Can only be called by main file");
@@ -46,19 +46,18 @@ contract Characters is ERC721, Util {
         return (c.xp, c.level, c.trait, c.staminaTimestamp, c.appearance);
     }
 
-    function mint(address minter) public restricted returns (uint256) {
+    function mint(address minter, uint256 seed) public restricted {
         uint256 tokenID = tokens.length;
 
         uint16 xp = 0;
         uint8 level = 0; // 1
-        uint8 trait = uint8(randomSafeMinMax(0,3));
+        uint8 trait = uint8(randomSeededMinMax(0,3,seed));
         uint64 staminaTimestamp = uint64(now - getStaminaMaxWait());
         uint64 appearance = 0;
 
         tokens.push(Character(xp, level, trait, staminaTimestamp, appearance));
         _mint(minter, tokenID);
-        emit NewCharacter(tokenID);
-        return tokenID;
+        emit NewCharacter(tokenID, minter);
     }
 
     function getLevel(uint256 id) public view returns (uint8) {

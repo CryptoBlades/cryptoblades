@@ -8,6 +8,7 @@ import "./characters.sol";
 import "./weapons.sol";
 import "./util.sol";
 import "./dummyPriceService.sol";
+import "./randoms.sol";
 
 contract CryptoBlades is Util {
 
@@ -20,6 +21,7 @@ contract CryptoBlades is Util {
     Weapons public weapons;
     address public skillTokens;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
     address public priceChecker; // TODO: Remove temp init in constructor, instead use real world oracle by chainlink
+    Randoms public randoms;
 
     constructor(address tokenAddress) public /*Ownable()*/ {
         skillTokens = tokenAddress;
@@ -27,6 +29,7 @@ contract CryptoBlades is Util {
         weapons = new Weapons(address(this));
         
         priceChecker = address(new DummyPriceService()); // TEMP! TODO
+        randoms = new Randoms(address(this));
     }
 
     // config vars
@@ -44,7 +47,7 @@ contract CryptoBlades is Util {
     int128 public mintWeaponFee = uint256(3 * 10000).divu(10000);//3 usd;
     int128 public reforgeWeaponFee = uint256(1 * 5000).divu(10000);//0.5 usd;
 
-    event FightOutcome(uint256 character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
+    event FightOutcome(uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
 
     function getSkillTokensAddress() external view returns (address) {
         return skillTokens;
@@ -84,20 +87,32 @@ contract CryptoBlades is Util {
         return tokens;
     }
 
+    function hasSafeRandom(address user) private returns (bool) {
+        // returns true if this user has a random number waiting
+        if(randoms.hasConsumableSeed(user) == false) {
+            require(randoms.hasRequestedSeed(user) == false, "You cannot request another random seed");
+            randoms.getRandomNumber(user, unsafeRandom());
+            return false;
+        }
+        return true;
+    }
+
     function fight(uint256 char, uint256 wep, uint32 target) external
             isCharacterOwner(char)
             isWeaponOwner(wep)
             isTargetValid(char, wep, target) {
-        performFight(char, wep, target);
+        if(hasSafeRandom(msg.sender))
+            performFight(msg.sender, char, wep, target);
     }
 
-    function performFight(uint256 char, uint256 wep, uint32 target) private {
+    function performFight(address user, uint256 char, uint256 wep, uint32 target) private {
         // avg xp gain from a fight is 9 xp
 
         require(characters.drainStamina(char, staminaCostFight), "Not enough stamina!");
 
-        uint24 playerRoll = getPlayerPowerRoll(char, wep, uint8((target >> 24) & 0xFF)/*monster trait*/);
-        uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target));
+        uint256 seed = randoms.consumeSeed(user);
+        uint24 playerRoll = getPlayerPowerRoll(char, wep, uint8((target >> 24) & 0xFF)/*monster trait*/, seed);
+        uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target), combineSeeds(seed,1));
         
         if(playerRoll >= monsterRoll) {
             characters.gainXp(char, getXpGainForFight(char, wep, target));
@@ -121,10 +136,10 @@ contract CryptoBlades is Util {
         return uint16((basePowerDifference * 16).toUInt());
     }
 
-    function getPlayerPowerRoll(uint256 char, uint256 wep, uint8 monsterTrait) internal returns(uint24) {
+    function getPlayerPowerRoll(uint256 char, uint256 wep, uint8 monsterTrait, uint256 seed) internal view returns(uint24) {
         // roll for fights, non deterministic
         uint256 playerPower = getPlayerFinalPower(char, wep);
-        playerPower = plusMinus10Percent(playerPower);
+        playerPower = plusMinus10PercentSeeded(playerPower, seed);
         uint8 playerTrait = characters.getTrait(char);
 
         int128 traitBonus = uint256(1).fromUInt();
@@ -141,9 +156,9 @@ contract CryptoBlades is Util {
         return uint24(playerPower.fromUInt().mul(traitBonus).toUInt());
     }
 
-    function getMonsterPowerRoll(uint24 monsterPower) internal returns(uint24) {
+    function getMonsterPowerRoll(uint24 monsterPower, uint256 seed) internal pure returns(uint24) {
         // roll for fights, non deterministic
-        return uint24(plusMinus10Percent(monsterPower));
+        return uint24(plusMinus10PercentSeeded(monsterPower, seed));
     }
 
     function getPlayerPower(uint256 char, uint256 wep) public view returns (uint24) {
@@ -214,21 +229,46 @@ contract CryptoBlades is Util {
         return false;
     }
 
-    function mintCharacter() public requestPayFromPlayer(mintCharacterFee) returns (uint256) {
-        require(characters.balanceOf(msg.sender) <= characterLimit,
-            string(abi.encodePacked("You can only have ",staminaCostFight," characters!")));
-        payContract(msg.sender, mintCharacterFee);
-        uint256 tokenID = characters.mint(msg.sender);
-        if(weapons.balanceOf(msg.sender) == 0)
-            weapons.mint(msg.sender, 0, safeRandom()); // first weapon free with a character mint, max 1 star
-        return tokenID;
+    function mintCharacter() public requestPayFromPlayer(mintCharacterFee) {
+
+        if(hasSafeRandom(msg.sender)) {
+            require(characters.balanceOf(msg.sender) <= characterLimit,
+                string(abi.encodePacked("You can only have ",staminaCostFight," characters!")));
+            payContract(msg.sender, mintCharacterFee);
+
+            uint256 seed = randoms.consumeSeed(msg.sender);
+            characters.mint(msg.sender, seed);
+
+            // first weapon free with a character mint, max 1 star
+            if(weapons.balanceOf(msg.sender) == 0) {
+                weapons.performMintWeapon(msg.sender,
+                    weapons.getRandomProperties(0, combineSeeds(seed,100)),
+                    weapons.getRandomStat(4, 200, seed, 101),
+                    0, // stat2
+                    0, // stat3
+                    weapons.getRandomCosmetic(seed,102), // blade
+                    weapons.getRandomCosmetic(seed,103), // crossguard
+                    weapons.getRandomCosmetic(seed,104), // grip
+                    weapons.getRandomCosmetic(seed,105) // pommel
+                );
+            }
+        }
     }
 
-    function mintWeapon() public requestPayFromPlayer(mintWeaponFee) returns (uint256) {
-        ERC20(skillTokens).approve(address(this), usdToSkill(mintWeaponFee));
-        payContract(msg.sender, mintWeaponFee);
-        uint256 tokenID = weapons.mint(msg.sender, 4, safeRandom()); // max 5 star
-        return tokenID;
+    function mintWeapon() public requestPayFromPlayer(mintWeaponFee) {
+
+        if(hasSafeRandom(msg.sender)) {
+            ERC20(skillTokens).approve(address(this), usdToSkill(mintWeaponFee));
+            payContract(msg.sender, mintWeaponFee);
+
+            uint256 seed = randoms.consumeSeed(msg.sender);
+            weapons.mint(msg.sender, seed);
+        }
+    }
+
+    function mintWeaponTest() public {
+        uint256 seed = randoms.consumeSeed(msg.sender);
+        weapons.mint(msg.sender, seed);
     }
 
     function fillStamina(uint256 character) public isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
@@ -239,11 +279,14 @@ contract CryptoBlades is Util {
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
             isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
-        require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
-        payContract(msg.sender, reforgeWeaponFee);
-        weapons.levelUp(reforgeID);
+        
+        if(hasSafeRandom(msg.sender)) {
+            require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
+            payContract(msg.sender, reforgeWeaponFee);
 
-        weapons.burn(burnID);
+            uint256 seed = randoms.consumeSeed(msg.sender);
+            weapons.reforge(reforgeID, burnID, seed);
+        }
     }
 
     modifier isWeaponOwner(uint256 weapon) {
@@ -298,19 +341,6 @@ contract CryptoBlades is Util {
         (,int256 usdPerSkill,,,) = AggregatorV3Interface(priceChecker).latestRoundData();
         return originalPrice.div(usdPerSkill.from128x128()).mulu(1 ether);
         //return getContractSkillBalance().divu(ERC20(skillTokens).totalSupply()).mul(originalPrice.fromUInt()).toUInt();
-    }
-
-    function testPriceCharacter() public view returns (uint256) {
-        return usdToSkill(mintCharacterFee);
-    }
-
-    function testPriceWeapon() public view returns (uint256) {
-        return usdToSkill(mintWeaponFee);
-    }
-
-    function testPriceFight(uint256 power) public view returns (uint256) {
-        // values range from 1010 for a basic character with no weapon (doesn't happen)
-        return usdToSkill(getTokenGainForFight(uint32(power)));
     }
 
     function getApprovedBalance() external view returns (uint256) {
