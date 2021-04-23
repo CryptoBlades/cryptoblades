@@ -125,30 +125,6 @@
           </span>
         </button>
       </div>
-      <div class="navbar gas-selector-spacing">
-        <span id="gas">Gas</span>
-        <button
-          class="switch"
-          :class="{ switch_active: selectedGasLevel === 'low' }"
-          @click="selectedGasLevel = 'low'"
-        >
-          <span>{{ gas.low.toFixed(0) }}</span>
-        </button>
-        <button
-          class="switch"
-          :class="{ switch_active: selectedGasLevel === 'medium' }"
-          @click="selectedGasLevel = 'medium'"
-        >
-          <span>{{ gas.medium.toFixed(0) }}</span>
-        </button>
-        <button
-          class="switch"
-          :class="{ switch_active: selectedGasLevel === 'high' }"
-          @click="selectedGasLevel = 'high'"
-        >
-          <span>{{ gas.high.toFixed(0) }}</span>
-        </button>
-      </div>
     </div>
   </div>
 </template>
@@ -159,7 +135,6 @@ BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import { mapActions, mapState } from 'vuex';
 
-import { getCurrentGasPrices } from '../../utils/common';
 import { formatDurationFromSeconds } from '../../utils/date-time';
 
 const connectToWalletButtonLabel = 'Connect to wallet ↗';
@@ -187,10 +162,8 @@ export default {
     return {
       textAmount: '',
       isDeposit: true,
-      gas: { low: 90, medium: 130, high: 180 },
       loading: false,
       errorWhenUpdating: null,
-      selectedGasLevel: 'medium',
       rewardClaimLoading: false,
 
       stakeUnlockTimeLeftCurrentEstimate: 0,
@@ -198,8 +171,6 @@ export default {
     };
   },
   async mounted() {
-    this.gas = await getCurrentGasPrices();
-
     await this.fetchData();
 
     this.stakeUnlockTimeLeftCurrentEstimate = this.unlockTimeLeftInternal;
@@ -276,10 +247,6 @@ export default {
 
     validator() {
       return null;
-    },
-
-    chosenGas() {
-      return this.gas[this.selectedGasLevel];
     },
 
     inputSideBalance() {
@@ -461,10 +428,10 @@ export default {
         this.loading = true;
 
         if (this.isDeposit) {
-          await this.stake({ amount, gas: this.chosenGas, stakeType: this.stakeType });
+          await this.stake({ amount, stakeType: this.stakeType });
         } else {
           //unstake
-          await this.unstake({ amount, gas: this.chosenGas, stakeType: this.stakeType });
+          await this.unstake({ amount, stakeType: this.stakeType });
         }
       } catch (e) {
         console.error(e);
@@ -589,15 +556,6 @@ export default {
   box-sizing: border-box;
   border-radius: 100px;
   width: 100%;
-}
-#gas {
-  padding: 0 20px;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  color: #fff;
 }
 .switch {
   height: 40px;
@@ -792,10 +750,6 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
-}
-
-.gas-selector-spacing {
-  margin: 1.5rem 0;
 }
 
 .reward-claim-section {
