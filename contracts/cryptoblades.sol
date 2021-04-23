@@ -267,8 +267,24 @@ contract CryptoBlades is Util {
     }
 
     function mintWeaponTest() public {
-        uint256 seed = randoms.consumeSeed(msg.sender);
-        weapons.mint(msg.sender, seed);
+        // This is a temp function so we can get some nice shots of various weapon qualities
+        mintWeaponTest2(1);
+        mintWeaponTest2(1);
+        mintWeaponTest2(1);
+        mintWeaponTest2(2);
+        mintWeaponTest2(2);
+        mintWeaponTest2(3);
+        mintWeaponTest2(3);
+        mintWeaponTest2(4);
+    }
+
+    function mintWeaponTest2(uint stars) private {
+        weapons.performMintWeapon(msg.sender, weapons.getRandomProperties(stars, unsafeRandom()), 100, 0, 0,
+            uint8(randomSeededMinMax(0, 255, unsafeRandom())),
+            uint8(randomSeededMinMax(0, 255, unsafeRandom())),
+            uint8(randomSeededMinMax(0, 255, unsafeRandom())),
+            uint8(randomSeededMinMax(0, 255, unsafeRandom()))
+        );
     }
 
     function fillStamina(uint256 character) public isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {

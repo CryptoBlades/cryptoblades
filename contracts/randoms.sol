@@ -15,18 +15,18 @@ contract Randoms is VRFConsumerBase {
     uint256 internal requestID = 1;
 
     
-  mapping(address => uint256) private requests;
-  mapping(uint256 => bool) private seedAvailable;
-  mapping(uint256/*requestID*/ => uint256/*seed*/) private seeds;
+    mapping(address => uint256) private requests;
+    mapping(uint256 => bool) private seedAvailable;
+    mapping(uint256/*requestID*/ => uint256/*seed*/) private seeds;
 
     constructor(address source) 
         VRFConsumerBase(
-            0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9, // VRF Coordinator
-            0xa36085F69e2889c224210F603D836748e7dC0088  // LINK Token
+            0xa555fC018435bef5A13C6c6870a9d4C11DEC329C, // VRF Coordinator
+            0x84b9b910527ad5c03a9ca831909e21e236ea7b06  // LINK Token
         ) public
     {
         main = source;
-        keyHash = 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4;
+        keyHash = 0xcaf3c3727e033261d383b315559476f48034c13b18f8cafed4d871abe5049186;
         fee = 0.1 * 10 ** 18; // 0.1 LINK
     }
 
