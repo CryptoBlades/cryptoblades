@@ -240,7 +240,6 @@ export default {
 
     },
     loadingProgress() {
-      console.log('LOADCUNT '+(this.loadCount + 1));
       if(++this.loadCount >= 14) {
         this.loadingFinished();
       }
