@@ -279,7 +279,10 @@ contract CryptoBlades is Util {
     }
 
     function mintWeaponTest2(uint stars) private {
-        weapons.performMintWeapon(msg.sender, weapons.getRandomProperties(stars, unsafeRandom()), 100, 0, 0,
+        weapons.performMintWeapon(msg.sender, weapons.getRandomProperties(stars, unsafeRandom()),
+            uint16(randomSeededMinMax(0, 128, unsafeRandom())),
+            uint16(randomSeededMinMax(0, 128, unsafeRandom())),
+            uint16(randomSeededMinMax(0, 128, unsafeRandom())),
             uint8(randomSeededMinMax(0, 255, unsafeRandom())),
             uint8(randomSeededMinMax(0, 255, unsafeRandom())),
             uint8(randomSeededMinMax(0, 255, unsafeRandom())),

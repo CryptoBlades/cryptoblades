@@ -22,7 +22,7 @@ contract Randoms is VRFConsumerBase {
     constructor(address source) 
         VRFConsumerBase(
             0xa555fC018435bef5A13C6c6870a9d4C11DEC329C, // VRF Coordinator
-            0x84b9b910527ad5c03a9ca831909e21e236ea7b06  // LINK Token
+            0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06  // LINK Token
         ) public
     {
         main = source;

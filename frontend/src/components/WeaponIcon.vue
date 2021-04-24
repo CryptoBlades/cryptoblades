@@ -72,14 +72,6 @@ export default {
         Stat2 +${this.weapon.stat2}
         <br>
         Stat3 +${this.weapon.stat3}
-        <br>
-        blade +${this.weapon.blade}
-        <br>
-        Crossguard +${this.weapon.crossguard}
-        <br>
-        Grip +${this.weapon.grip}
-        <br>
-        Pommel +${this.weapon.pommel}
       `;
     }
   },
@@ -279,7 +271,7 @@ export default {
     },
     animate() {
       requestAnimationFrame(this.animate);
-      this.group.rotation.y += 0.02;
+      //this.group.rotation.y += 0.02;
       this.renderer.render(this.scene, this.camera);
     }
   },
