@@ -112,5 +112,10 @@ module.exports = {
       }
     }
   },
-  //plugins: ["truffle-contract-size"]
+  plugins: [
+    "truffle-plugin-verify"
+  ],
+  api_keys: {
+    bscscan: process.env.BSCSCAN_API_KEY
+  }
 };
