@@ -30,26 +30,7 @@ const gColor = new Three.Color(0x413F41);
 const bColor = new Three.Color(0xAF5822);
 const white = new Three.Color(0xFFFFFF);
 
-let bladeMaterial;
-let crossGuardMaterial;
-let gripMaterial;
-let pommelMaterial;
-
-let bladeMaskTexture;
-let bladeNormalTexture;
-let bladeAOTexture;
-
-let crossGuardNormalTexture;
-let crossGuardAOTexture;
-
-let gripMaskTexture;
-let gripNormalTexture;
-let gripAOTexture;
-
-let pommelNormalTexture;
-let pommelAOTexture;
-
-let textureCube;
+let baseMaterial;
 
 function patchShader(material, rc, gc, bc) {
   material.userData.maskR = { value: rc };
@@ -100,11 +81,22 @@ export default {
       camera: null,
       scene: null,
       renderer: null,
+      loadCount: 0,
       pommel: null,
       grip: null,
       crossGuard: null,
       blade: null,
-      group: null
+      group: null,
+      bladeMaskTexture: null,
+      bladeNormalTexture: null,
+      bladeAOTexture: null,
+      crossGuardNormalTexture: null,
+      crossGuardAOTexture: null,
+      gripMaskTexture: null,
+      gripNormalTexture: null,
+      gripAOTexture: null,
+      pommelNormalTexture: null,
+      pommelAOTexture: null,
     };
   },
 
@@ -126,11 +118,37 @@ export default {
       directionalLight.position.z = 2.0;
       this.scene.add( directionalLight );
 
-      this.renderer = new Three.WebGLRenderer({antialias: false, alpha:true});
+      this.renderer = new Three.WebGLRenderer({antialias: true, alpha:true});
       this.renderer.setClearColor( 0x000000, 0 );
       this.renderer.setSize(container.clientWidth, container.clientHeight);
+      this.renderer.getContext().canvas.addEventListener('webglcontextlost', (event) => {
+        event.preventDefault();
+        this.setupModel();
+      }, false);
 
       container.appendChild(this.renderer.domElement);
+
+      if(baseMaterial === undefined) {
+        baseMaterial = new Three.MeshPhysicalMaterial();
+        baseMaterial.aoMapIntensity = 0.375;
+        baseMaterial.envMapIntensity = 0.75;
+        baseMaterial.metalness = 1.0;
+        baseMaterial.roughness = 0.5;
+
+        const cmLoader = new Three.CubeTextureLoader();
+        cmLoader.load( [
+          'textures/cubemap/001_natureHDRI_LookOut.hdr_Lef.png', 'textures/cubemap/001_natureHDRI_LookOut.hdr_Rig.png',
+          'textures/cubemap/001_natureHDRI_LookOut.hdr_Top.png', 'textures/cubemap/001_natureHDRI_LookOut.hdr_Bot.png',
+          'textures/cubemap/001_natureHDRI_LookOut.hdr_Fro.png', 'textures/cubemap/001_natureHDRI_LookOut.hdr_Bak.png'
+        ], (cube) => {
+          baseMaterial.envMap = cube;
+        });
+      }
+
+      this.setupModel();
+    },
+    setupModel() {
+      this.loadCount = 0;
 
       const blade = (this.weapon.blade % bladeCount)+1;
       const crossGuard = (this.weapon.crossguard % crossGuardCount)+1;
@@ -150,96 +168,30 @@ export default {
       this.group = new Three.Group();
       this.scene.add(this.group);
 
-      const baseMaterial = new Three.MeshPhysicalMaterial();
-      baseMaterial.aoMapIntensity = 0.375;
-      baseMaterial.envMapIntensity = 0.75;
-      baseMaterial.metalness = 1.0;
-      baseMaterial.roughness = 0.5;
+      const modelLoader = new FBXLoader();
+      const textureLoader = new Three.TextureLoader();
 
-      // some access level bullshit for the manager's lambda
-      let bladeModel;
-      let crossGuardModel;
-      let gripModel;
-      let pommelModel;
-      const scene = this.scene;
-      const renderer = this.renderer;
-      const camera = this.camera;
+      this.bladeMaskTexture = textureLoader.load( 'textures/swords/blades/Txt_Blade_' + blade + '_Mask.png' , this.loadingProgress());
+      this.bladeNormalTexture = textureLoader.load( 'textures/swords/blades/Txt_Blade_' + blade + '_Normal.png' , this.loadingProgress());
+      this.bladeAOTexture = textureLoader.load( 'textures/swords/blades/Txt_Blade_' + blade + '_AO.png' , this.loadingProgress());
 
-      const manager = new Three.LoadingManager(
-        function () {
-          //console.log('All sword assets loaded');
+      this.crossGuardNormalTexture = textureLoader.load( 'textures/swords/crossguards/Txt_CrossGuard_' + crossGuard + '_Normal.png', this.loadingProgress());
+      this.crossGuardAOTexture = textureLoader.load( 'textures/swords/crossguards/Txt_CrossGuard_' + crossGuard + '_AO.png', this.loadingProgress());
 
-          baseMaterial.envMap = textureCube;
+      this.gripMaskTexture = textureLoader.load( 'textures/swords/grips/Txt_Grip_' + grip + '_Mask.png', this.loadingProgress());
+      this.gripNormalTexture = textureLoader.load( 'textures/swords/grips/Txt_Grip_' + grip + '_Normal.png', this.loadingProgress());
+      this.gripAOTexture = textureLoader.load( 'textures/swords/grips/Txt_Grip_' + grip + '_AO.png', this.loadingProgress());
 
-          bladeMaterial = baseMaterial.clone();
-          crossGuardMaterial = baseMaterial.clone();
-          gripMaterial = baseMaterial.clone();
-          pommelMaterial = baseMaterial.clone();
-          patchShader(bladeMaterial, rColor, gColor, bColor);
-          patchShader(crossGuardMaterial, rColor, white, white);
-          patchShader(gripMaterial, rColor, gColor, bColor);
-          patchShader(pommelMaterial, rColor, white, white);
-
-          bladeMaterial.map = bladeMaskTexture;
-          bladeMaterial.normalMap = bladeNormalTexture;
-          bladeMaterial.aoMap = bladeAOTexture;
-          bladeModel.traverse(child => { if(child.isMesh) { child.material = bladeMaterial; } });
-
-          crossGuardMaterial.normalMap = crossGuardNormalTexture;
-          crossGuardMaterial.aoMap = crossGuardAOTexture;
-          crossGuardModel.traverse(child => { if(child.isMesh) { child.material = crossGuardMaterial; } });
-
-          gripMaterial.map = gripMaskTexture;
-          gripMaterial.normalMap = gripNormalTexture;
-          gripMaterial.aoMap = gripAOTexture;
-          gripModel.traverse(child => { if(child.isMesh) { child.material = gripMaterial; } });
-
-          pommelMaterial.normalMap = pommelNormalTexture;
-          pommelMaterial.aoMap = pommelAOTexture;
-          pommelModel.traverse(child => { if(child.isMesh) { child.material = pommelMaterial; } });
-
-          renderer.render(scene, camera);
-
-          //console.log('Finished applying stuff');
-        }/*,
-        function () {
-          console.log('Three Progress Update');
-        },
-        function () {
-          console.log('Three loading error');
-        }*/
-      );
-      const modelLoader = new FBXLoader(manager);
-      const textureLoader = new Three.TextureLoader(manager);
-      const cmLoader = new Three.CubeTextureLoader(manager);
-
-      bladeMaskTexture = textureLoader.load( 'textures/swords/blades/Txt_Blade_' + blade + '_Mask.png' );
-      bladeNormalTexture = textureLoader.load( 'textures/swords/blades/Txt_Blade_' + blade + '_Normal.png' );
-      bladeAOTexture = textureLoader.load( 'textures/swords/blades/Txt_Blade_' + blade + '_AO.png' );
-
-      crossGuardNormalTexture = textureLoader.load( 'textures/swords/crossguards/Txt_CrossGuard_' + crossGuard + '_Normal.png');
-      crossGuardAOTexture = textureLoader.load( 'textures/swords/crossguards/Txt_CrossGuard_' + crossGuard + '_AO.png');
-
-      gripMaskTexture = textureLoader.load( 'textures/swords/grips/Txt_Grip_' + grip + '_Mask.png');
-      gripNormalTexture = textureLoader.load( 'textures/swords/grips/Txt_Grip_' + grip + '_Normal.png');
-      gripAOTexture = textureLoader.load( 'textures/swords/grips/Txt_Grip_' + grip + '_AO.png');
-
-      pommelNormalTexture = textureLoader.load( 'textures/swords/pommels/Txt_Pommel_' + pommel + '_Normal.png');
-      pommelAOTexture = textureLoader.load( 'textures/swords/pommels/Txt_Pommel_' + pommel + '_AO.png');
-
-      textureCube = cmLoader.load( [
-        'textures/cubemap/001_natureHDRI_LookOut.hdr_Lef.png', 'textures/cubemap/001_natureHDRI_LookOut.hdr_Rig.png',
-        'textures/cubemap/001_natureHDRI_LookOut.hdr_Top.png', 'textures/cubemap/001_natureHDRI_LookOut.hdr_Bot.png',
-        'textures/cubemap/001_natureHDRI_LookOut.hdr_Fro.png', 'textures/cubemap/001_natureHDRI_LookOut.hdr_Bak.png'
-      ] );
+      this.pommelNormalTexture = textureLoader.load( 'textures/swords/pommels/Txt_Pommel_' + pommel + '_Normal.png', this.loadingProgress());
+      this.pommelAOTexture = textureLoader.load( 'textures/swords/pommels/Txt_Pommel_' + pommel + '_AO.png', this.loadingProgress());
 
       modelLoader.load('models/blades/Blade_' + blade + '.FBX', model => {
 
         transformModel(model, swordspecs['GRIP_'+grip].top
           + (swordspecs['CROSSGUARD_'+crossGuard].top - swordspecs['CROSSGUARD_'+crossGuard].bottom));
         this.blade = model;
-        bladeModel = model;
         this.group.add(model);
+        this.loadingProgress();
 
       }, undefined, function ( error ) {
         console.error( error );
@@ -249,8 +201,8 @@ export default {
 
         transformModel(model, swordspecs['GRIP_'+grip].top);
         this.crossGuard = model;
-        crossGuardModel = model;
         this.group.add(model);
+        this.loadingProgress();
 
       }, undefined, function ( error ) {
         console.error( error );
@@ -260,8 +212,8 @@ export default {
 
         transformModel(model, 0);// grip stays at origin 0,0
         this.grip = model;
-        gripModel = model;
         this.group.add(model);
+        this.loadingProgress();
 
       }, undefined, function ( error ) {
         console.error( error );
@@ -271,21 +223,58 @@ export default {
 
         transformModel(model, swordspecs['GRIP_'+grip].bottom);
         this.pommel = model;
-        pommelModel = model;
         this.group.add(model);
+        this.loadingProgress();
 
       }, undefined, function ( error ) {
         console.error( error );
       } );
 
     },
+    loadingProgress() {
+      if(++this.loadCount >= 14) {
+        this.loadingFinished();
+      }
+    },
+    loadingFinished() {
+
+      const bladeMaterial = baseMaterial.clone();
+      const crossGuardMaterial = baseMaterial.clone();
+      const gripMaterial = baseMaterial.clone();
+      const pommelMaterial = baseMaterial.clone();
+      patchShader(bladeMaterial, rColor, gColor, bColor);
+      patchShader(crossGuardMaterial, rColor, white, white);
+      patchShader(gripMaterial, rColor, gColor, bColor);
+      patchShader(pommelMaterial, rColor, white, white);
+
+      bladeMaterial.map = this.bladeMaskTexture;
+      bladeMaterial.normalMap = this.bladeNormalTexture;
+      bladeMaterial.aoMap = this.bladeAOTexture;
+      this.blade.traverse(child => { if(child.isMesh) { child.material = bladeMaterial; } });
+
+      crossGuardMaterial.normalMap = this.crossGuardNormalTexture;
+      crossGuardMaterial.aoMap = this.crossGuardAOTexture;
+      this.crossGuard.traverse(child => { if(child.isMesh) { child.material = crossGuardMaterial; } });
+
+      gripMaterial.map = this.gripMaskTexture;
+      gripMaterial.normalMap = this.gripNormalTexture;
+      gripMaterial.aoMap = this.gripAOTexture;
+      this.grip.traverse(child => { if(child.isMesh) { child.material = gripMaterial; } });
+
+      pommelMaterial.normalMap = this.pommelNormalTexture;
+      pommelMaterial.aoMap = this.pommelAOTexture;
+      this.pommel.traverse(child => { if(child.isMesh) { child.material = pommelMaterial; } });
+
+      this.renderer.render(this.scene, this.camera);
+
+      //console.log( this.weapon.id + ' >> Finished applying stuff');
+    },
     animate() {
       requestAnimationFrame(this.animate);
-      this.group.rotation.y += 0.02;
+      //this.group.rotation.y += 0.02;
       this.renderer.render(this.scene, this.camera);
     }
   },
-
   mounted() {
     this.init();
     //this.animate();
