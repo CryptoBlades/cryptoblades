@@ -17,7 +17,8 @@
     "lerna": "^4.0.0",
     "truffle": "^5.2.3",
     "truffle-contract-size": "^2.0.1",
-    "truffle-export-abi": "^1.0.1"
+    "truffle-export-abi": "^1.0.1",
+    "truffle-plugin-verify": "^0.5.7"
   },
   "scripts": {
     "postinstall": "npm run contract:prepare && lerna exec -- npm install",
