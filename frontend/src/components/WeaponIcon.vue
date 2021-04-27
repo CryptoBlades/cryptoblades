@@ -5,6 +5,9 @@
     ref="el">
 
     <div class="glow-container" :class="['glow-' + (weapon.stars || 0)]"></div>
+    <div class="loading-container" v-if="!allLoaded">
+      <i class="fas fa-spinner fa-spin"></i>
+    </div>
 
   </div>
 </template>
@@ -78,6 +81,7 @@ export default {
 
   data() {
     return {
+      allLoaded: false,
       camera: null,
       scene: null,
       renderer: null,
@@ -266,6 +270,7 @@ export default {
       this.pommel.traverse(child => { if(child.isMesh) { child.material = pommelMaterial; } });
 
       this.renderer.render(this.scene, this.camera);
+      this.allLoaded = true;
 
       //console.log( this.weapon.id + ' >> Finished applying stuff');
     },
@@ -291,13 +296,24 @@ export default {
   position: relative;
 }
 
-.glow-container {
-  border-radius: 5px;
+.glow-container, .loading-container {
   height: 96px;
   width: 96px;
   position: absolute;
   top: 0;
+}
+
+.glow-container {
+  border-radius: 5px;
   z-index: 540;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  z-index: 541;
 }
 
 .glow-0 {
