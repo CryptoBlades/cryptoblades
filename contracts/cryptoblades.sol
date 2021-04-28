@@ -308,6 +308,11 @@ contract CryptoBlades is Util {
         }
     }
 
+    modifier restricted() {
+        // todo proper with accessControl
+        _;
+    }
+
     modifier isWeaponOwner(uint256 weapon) {
         require(weapons.ownerOf(weapon) == msg.sender, "Not the weapon owner");
         _;
@@ -338,16 +343,30 @@ contract CryptoBlades is Util {
         _;
     }
 
-    function payContract(address playerAddress, int128 baseAmount) internal {
-        uint256 convertedAmount = usdToSkill(baseAmount);
+    function payContract(address playerAddress, int128 baseAmount) public restricted {
+        payContractConverted(playerAddress, usdToSkill(baseAmount));
+    }
+
+    function payContractConverted(address playerAddress, uint256 convertedAmount) public restricted {
         // must use requestPayFromPlayer modifier to approve on the initial function!
         ERC20(skillTokens).transferFrom(playerAddress, address(this), convertedAmount);
     }
 
-    function payPlayer(address playerAddress, int128 baseAmount) internal {
-        uint256 convertedAmount = usdToSkill(baseAmount);
+    function payPlayer(address playerAddress, int128 baseAmount) public restricted {
+        payPlayerConverted(playerAddress, usdToSkill(baseAmount));
+    }
+
+    function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
         ERC20(skillTokens).approve(address(this), convertedAmount);
         ERC20(skillTokens).transferFrom(address(this), playerAddress, convertedAmount);
+    }
+
+    function approveContractCharacterFor(uint256 characterID, address playerAddress) public restricted {
+        characters.approve(playerAddress, characterID);
+    }
+
+    function approveContractWeaponFor(uint256 weaponID, address playerAddress) public restricted {
+        weapons.approve(playerAddress, weaponID);
     }
 
     function getContractSkillBalance() public view returns (uint256) {

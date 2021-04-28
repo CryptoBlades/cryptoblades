@@ -8,24 +8,26 @@ import "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 abstract contract Raid is MultiAccess {
 
-    // Basic raids contract that we can iterate on and deploy multiple of.
+    // Outline raids contract that we can iterate on and deploy multiple of.
     // Needs to be granted access to NFT contracts to interact with them
 
-    uint256 completeTime;
+    bool internal completed;
 
     CryptoBlades internal game;
     Characters internal characters;
     Weapons internal weapons;
-    ERC20 internal skill = ERC20(0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab);
 
     struct Raider {
         uint256 owner;
         uint256 charID;
         uint256 wepID;
+        uint24 power;
     }
-    Raider[] public raiders;
+    Raider[] internal raiders;
+    mapping(uint256 => bool) internal participation;
 
-    event RaiderJoined(address owner, uint256 character, uint256 weapon);
+    event RaidReset();
+    event RaiderJoined(address owner, uint256 character, uint256 weapon, uint24 power);
     event RaidCompleted();
 
     constructor(address gameContract) public MultiAccess() {
@@ -38,15 +40,9 @@ abstract contract Raid is MultiAccess {
 
     function reset() public restricted {
         delete raiders;
-        completeTime = 0;
-    }
-
-    function setCompleteTime(uint256 time) public restricted {
-        completeTime = time;
-    }
-
-    function getCompleteTime() public view returns(uint256) {
-        return completeTime;
+        delete participation;
+        completed = false;
+        emit RaidReset();
     }
 
     function addRaider(address owner, uint256 characterID, uint256 weaponID) public virtual;

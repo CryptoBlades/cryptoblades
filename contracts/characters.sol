@@ -37,7 +37,8 @@ contract Characters is ERC721, Util {
     event LevelUp(uint256 indexed character, uint16 level);
 
     modifier restricted() {
-        require(main == msg.sender, "Can only be called by main file");
+        //require(main == msg.sender, "Can only be called by main file");
+        // todo proper with accessControl
         _;
     }
 
@@ -146,7 +147,11 @@ contract Characters is ERC721, Util {
     }
 
     function getStaminaPoints(uint256 id) public view returns (uint8) {
-        uint256 points = (now - getStaminaTimestamp(id)) / secondsPerStamina;
+        uint64 timestamp = getStaminaTimestamp(id);
+        if(timestamp  > now)
+            return 0;
+        
+        uint256 points = (now - timestamp) / secondsPerStamina;
         if(points > maxStamina) {
             points = maxStamina;
         }

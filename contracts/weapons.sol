@@ -52,7 +52,8 @@ contract Weapons is ERC721, Util {
     event Reforged(uint256 indexed reforged, uint256 indexed burned, uint8 level, uint16 stat1Gain, uint16 stat2Gain, uint16 stat3Gain);
 
     modifier restricted() {
-        require(main == msg.sender, "Can only be called by main file");
+        //require(main == msg.sender, "Can only be called by main file");
+        // todo proper with accessControl
         _;
     }
 
@@ -61,12 +62,17 @@ contract Weapons is ERC721, Util {
         return (w.properties, w.stat1, w.stat2, w.stat3, w.level, w.blade, w.crossguard, w.grip, w.pommel);
     }
 
-    function mint(address minter, uint256 seed) public restricted {
+    function mint(address minter, uint256 seed) public restricted returns(uint256) {
 
         uint256 stars = getRandomStar(seed);
+        return mintWeaponWithStars(minter, stars, seed);
+    }
+
+    function mintWeaponWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
+        require(stars < 8, "Stars parameter too high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
-        performMintWeapon(minter,
+        return performMintWeapon(minter,
             getRandomProperties(stars, seed),
             stat1,
             stat2,
@@ -82,12 +88,13 @@ contract Weapons is ERC721, Util {
         uint16 properties,
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint8 blade, uint8 crossguard, uint8 grip, uint8 pommel
-    ) public restricted {
+    ) public restricted returns(uint256) {
 
         uint256 tokenID = tokens.length;
         tokens.push(Weapon(properties, stat1, stat2, stat3, 0, blade, crossguard, grip, pommel));
         _mint(minter, tokenID);
         emit NewWeapon(tokenID, minter);
+        return tokenID;
     }
 
     function getRandomProperties(uint256 stars, uint256 seed) public pure returns (uint16) {
