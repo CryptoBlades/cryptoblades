@@ -11,13 +11,18 @@ contract RaidBasic is Raid, Util {
     uint64 internal staminaDrain = 12 * 60 * 60;
     uint256[] weaponDrops; // given out randomly, we add them manually
     uint256 bounty; // split based on power
+    uint8 bossTrait; // set manually for now
+
+    uint256 totalPower;
 
     event SkillWinner(address addr, uint256 amount);
     event WeaponWinner(address addr, uint256 wepID);
 
     constructor(address gameContract) public Raid(gameContract) { }
 
-    function addRaider(address owner, uint256 characterID, uint256 weaponID) public override restricted {
+    function addRaider(uint256 characterID, uint256 weaponID) public override {
+        require(characters.ownerOf(characterID) == msg.sender);
+        require(weapons.ownerOf(weaponID) == msg.sender);
         require(participation[characterID] == false, "This character is already part of the raid");
         require(characters.getStaminaPoints(characterID) > 0, "You cannot join with 0 stamina");
 
@@ -26,24 +31,30 @@ contract RaidBasic is Raid, Util {
         // we may want to have a specific lockout in the future
         characters.setStaminaTimestamp(characterID, uint64(now + (staminaDrain)));
 
-        uint24 power = game.getPlayerPower(characterID, weaponID);
-        raiders.push(Raider(uint256(owner), characterID, weaponID, power));
-        emit RaiderJoined(owner, characterID, weaponID, power);
+        int128 traitMultiplier = game.getPlayerTraitBonusAgainst(
+            characters.getTrait(characterID),
+            weapons.getTrait(weaponID),
+            bossTrait
+        );
+        uint24 power = uint24(traitMultiplier.mulu(game.getPlayerFinalPower(characterID, weaponID)));
+        totalPower += power;
+        raiders.push(Raider(uint256(msg.sender), characterID, weaponID, power));
+        emit RaiderJoined(msg.sender, characterID, weaponID, power);
     }
     
     function completeRaid(uint256 seed) public override restricted {
         require(completed == false, "Raid already completed, run reset first");
         completed = true;
-        uint256 totalPower = 0;
-        for(uint i = 0; i < raiders.length; i++) {
-            Raider memory r = raiders[i];
-            totalPower += r.power;
-        }
-        
+
+        // TODO convert to giving xp instead (transfers cost a ton)
+        // TODO come up with balanced formula for xp amount
+        /*for(uint i = 0; i < raiders.length; i++) {
+            characters.gainXp(raiders[i].charID, 20);
+        }*/
         for(uint i = 0; i < raiders.length; i++) {
             Raider memory r = raiders[i];
             
-            int128 powerPercentage = totalPower.divu(r.power);
+            int128 powerPercentage = uint256(r.power).divu(totalPower);
             uint256 payout = powerPercentage.mulu(bounty);
             game.payPlayerConverted(address(r.owner), payout);
             emit SkillWinner(address(r.owner), payout);
@@ -59,12 +70,27 @@ contract RaidBasic is Raid, Util {
         emit RaidCompleted();
     }
 
+    function reset() public override restricted {
+        totalPower = 0;
+        bounty = 0;
+        delete weaponDrops;
+        super.reset();
+    }
+
     function setBounty(uint256 to) public restricted {
         bounty = to;
     }
 
     function getBounty() public view returns(uint256) {
         return bounty;
+    }
+
+    function setBossTrait(uint8 trait) public restricted {
+        bossTrait = trait;
+    }
+
+    function getTotalPower() public view returns(uint256) {
+        return totalPower;
     }
 
     function addRewardWeapon(uint256 id) public restricted {
@@ -75,6 +101,16 @@ contract RaidBasic is Raid, Util {
     function mintRewardWeapon(uint256 stars, uint256 seed) public restricted {
         uint256 tokenId = weapons.mintWeaponWithStars(address(game), stars, seed);
         addRewardWeapon(tokenId);
+    }
+
+    function removeRewardWeapon(uint256 index) public restricted {
+        require(index < weaponDrops.length, "Index out of bounds");
+
+        delete weaponDrops[index];
+    }
+
+    function getWeaponDrops() public view returns(uint256[] memory) {
+        return weaponDrops;
     }
 
     function setStaminaDrainSeconds(uint64 secs) public restricted {
