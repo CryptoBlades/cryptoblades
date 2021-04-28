@@ -65,17 +65,25 @@ export default {
     tooltipHtml() {
       if(!this.weapon) return '';
 
-      return `
+      let ttHtml = `
         ${Array(this.weapon.stars + 1).fill('★').join('')}
         <br>
-        Level ${this.weapon.level}
-        <br>
-        Stat1 +${this.weapon.stat1}
-        <br>
-        Stat2 +${this.weapon.stat2}
-        <br>
-        Stat3 +${this.weapon.stat3}
+        Level ${this.weapon.level + 1}
       `;
+
+      if(this.weapon.stat1Value) {
+        ttHtml += `<br>${this.weapon.stat1}: +${this.weapon.stat1Value}`;
+      }
+
+      if(this.weapon.stat2Value) {
+        ttHtml += `<br>${this.weapon.stat2}: +${this.weapon.stat2Value}`;
+      }
+
+      if(this.weapon.stat3Value) {
+        ttHtml += `<br>${this.weapon.stat3}: +${this.weapon.stat3Value}`;
+      }
+
+      return ttHtml;
     }
   },
 

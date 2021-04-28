@@ -1,5 +1,5 @@
 
-import { ICharacter, ITarget, IWeapon } from './interfaces';
+import { ICharacter, ITarget, IWeapon, Trait } from './interfaces';
 
 export function characterFromContract(id: number, data: string): ICharacter {
   const xp = data[0];
@@ -8,6 +8,33 @@ export function characterFromContract(id: number, data: string): ICharacter {
   const staminaTimestamp = data[3];
   const appearance = data[4];
   return { id, xp, level, trait, staminaTimestamp, appearance };
+}
+
+export function getStatPatternFromProperties(properties: number): number {
+  return (properties >> 5) & 0x7f;
+}
+
+export function getStat1Trait(statPattern: number): number {
+  return (statPattern % 5);
+}
+
+export function getStat2Trait(statPattern: number): number {
+  return ((statPattern / 5) % 5);
+}
+
+export function getStat3Trait(statPattern: number): number {
+  return (((statPattern / 5) / 5) % 5);
+}
+
+export function statNumberToName(statNum: number): string {
+  switch(statNum) {
+  case Trait.CHA: return 'CHA';
+  case Trait.DEX: return 'DEX';
+  case Trait.INT: return 'INT';
+  case Trait.PWR: return 'PWR';
+  case Trait.STR: return 'STR';
+  default:        return '???';
+  }
 }
 
 export function weaponFromContract(id: number, data: string): IWeapon {
@@ -21,8 +48,29 @@ export function weaponFromContract(id: number, data: string): IWeapon {
   const grip = data[7];
   const pommel = data[8];
 
+  const stat1Value = +stat1;
+  const stat2Value = +stat2;
+  const stat3Value = +stat3;
+
+  const pattern1 = getStatPatternFromProperties(stat1Value);
+  const stat1Type = getStat1Trait(pattern1);
+
+  const pattern2 = getStatPatternFromProperties(stat2Value);
+  const stat2Type = getStat1Trait(pattern2);
+
+  const pattern3 = getStatPatternFromProperties(stat3Value);
+  const stat3Type = getStat1Trait(pattern3);
+
   const stars = (+properties) & 0x7;
-  return { id, properties, stat1, stat2, stat3, level, blade, crossguard, grip, pommel, stars };
+  return {
+    id, properties,
+    stat1: statNumberToName(stat1Type), stat1Value,
+    stat2: statNumberToName(stat2Type), stat2Value,
+    stat3: statNumberToName(stat3Type), stat3Value,
+    level,
+    blade, crossguard, grip, pommel,
+    stars
+  };
 }
 
 export function targetFromContract(data: string): ITarget {
