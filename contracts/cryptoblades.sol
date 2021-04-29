@@ -1,7 +1,8 @@
 pragma solidity ^0.6.0;
 
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../node_modules/@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 //import "./ownable.sol";
 import "./characters.sol";
@@ -10,7 +11,7 @@ import "./util.sol";
 import "./dummyPriceService.sol";
 import "./randoms.sol";
 
-contract CryptoBlades is Util {
+contract CryptoBlades is Initializable, Util {
 
     using ABDKMath64x64 for int256;
     using ABDKMath64x64 for int128;
@@ -23,29 +24,40 @@ contract CryptoBlades is Util {
     address public priceChecker; // TODO: Remove temp init in constructor, instead use real world oracle by chainlink
     Randoms public randoms;
 
-    constructor(address tokenAddress) public /*Ownable()*/ {
-        skillTokens = tokenAddress;
-        characters = new Characters(address(this));
-        weapons = new Weapons(address(this));
-        
+    function initialize(address _tokenAddress, Characters _characters, Weapons _weapons) public initializer {
+        skillTokens = _tokenAddress;
+        characters = _characters;
+        weapons = _weapons;
+        // characters = new Characters(address(this));
+        // weapons = new Weapons(address(this));
+
         priceChecker = address(new DummyPriceService()); // TEMP! TODO
         randoms = new Randoms(address(this));
+
+        characterLimit = 1000;
+        staminaCostFight = 0;
+        mintCharacterFee = uint256(10 * 10000).divu(10000);//10 usd;
+        refillStaminaFee = uint256(5 * 10000).divu(10000);//5 usd;
+        fightRewardBaseline = uint256(1 * 100).divu(10000);//0.01 usd;
+        mintWeaponFee = uint256(3 * 10000).divu(10000);//3 usd;
+        reforgeWeaponFee = uint256(1 * 5000).divu(10000);//0.5 usd;
     }
 
     // config vars
-    uint characterLimit = 1000;
-    uint8 staminaCostFight = 0;
+    uint characterLimit;
+    uint8 staminaCostFight;
 
     // prices & payouts are in USD, with 4 decimals of accuracy in 64.64 fixed point format
-    int128 public mintCharacterFee = uint256(10 * 10000).divu(10000);//10 usd;
+    int128 public mintCharacterFee;
     //int128 public rerollTraitFee;
     //int128 public rerollCosmeticsFee;
-    int128 public refillStaminaFee = uint256(5 * 10000).divu(10000);//5 usd;
+    int128 public refillStaminaFee;
     // lvl 1 player power could be anywhere between ~909 to 1666
-    int128 public fightRewardBaseline = uint256(1 * 100).divu(10000);//0.01 usd; // cents per fight multiplied by monster power divided by 1000 (lv1 power)
+    // cents per fight multiplied by monster power divided by 1000 (lv1 power)
+    int128 public fightRewardBaseline;
 
-    int128 public mintWeaponFee = uint256(3 * 10000).divu(10000);//3 usd;
-    int128 public reforgeWeaponFee = uint256(1 * 5000).divu(10000);//0.5 usd;
+    int128 public mintWeaponFee;
+    int128 public reforgeWeaponFee;
 
     event FightOutcome(uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
 
@@ -62,13 +74,13 @@ contract CryptoBlades is Util {
     }
 
     function getMySkill() external view returns (uint256) {
-        return ERC20(skillTokens).balanceOf(msg.sender);
+        return IERC20(skillTokens).balanceOf(msg.sender);
     }
 
     function giveMeSkill(uint256 amount) public {
         // TEMPORARY FUNCITON TO TEST WITH
-        ERC20(skillTokens).approve(address(this), amount);
-        ERC20(skillTokens).transferFrom(address(this), msg.sender, amount);
+        IERC20(skillTokens).approve(address(this), amount);
+        IERC20(skillTokens).transferFrom(address(this), msg.sender, amount);
     }
 
     function getMyCharacters() public view returns(uint256[] memory) {
@@ -114,7 +126,7 @@ contract CryptoBlades is Util {
         uint256 seed = randoms.consumeSeed(user);
         uint24 playerRoll = getPlayerPowerRoll(char, wep, uint8((target >> 24) & 0xFF)/*monster trait*/, seed);
         uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target), combineSeeds(seed,1));
-        
+
         if(playerRoll >= monsterRoll) {
             characters.gainXp(char, getXpGainForFight(char, wep, target));
             payPlayer(characters.ownerOf(char), getTokenGainForFight(target));
@@ -141,7 +153,7 @@ contract CryptoBlades is Util {
         // roll for fights, non deterministic
         uint256 playerPower = getPlayerFinalPower(char, wep);
         playerPower = plusMinus10PercentSeeded(playerPower, seed);
-        
+
         return uint24(getPlayerTraitBonusAgainst(characters.getTrait(char), weapons.getTrait(wep), monsterTrait).mulu(playerPower));
     }
 
@@ -262,7 +274,7 @@ contract CryptoBlades is Util {
     function mintWeapon() public requestPayFromPlayer(mintWeaponFee) {
 
         if(hasSafeRandom(msg.sender)) {
-            ERC20(skillTokens).approve(address(this), usdToSkill(mintWeaponFee));
+            IERC20(skillTokens).approve(address(this), usdToSkill(mintWeaponFee));
             payContract(msg.sender, mintWeaponFee);
 
             uint256 seed = randoms.consumeSeed(msg.sender);
@@ -302,7 +314,7 @@ contract CryptoBlades is Util {
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
             isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
-        
+
         if(hasSafeRandom(msg.sender)) {
             require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
             payContract(msg.sender, reforgeWeaponFee);
@@ -341,9 +353,9 @@ contract CryptoBlades is Util {
 
     modifier requestPayFromPlayer(int128 baseAmount) {
         uint256 convertedAmount = usdToSkill(baseAmount);
-        require(ERC20(skillTokens).balanceOf(msg.sender) >= convertedAmount,
+        require(IERC20(skillTokens).balanceOf(msg.sender) >= convertedAmount,
             string(abi.encodePacked("Not enough SKILL! Need ",uint2str(convertedAmount))));
-        ERC20(skillTokens).approve(address(this), convertedAmount);
+        IERC20(skillTokens).approve(address(this), convertedAmount);
         _;
     }
 
@@ -353,7 +365,7 @@ contract CryptoBlades is Util {
 
     function payContractConverted(address playerAddress, uint256 convertedAmount) public restricted {
         // must use requestPayFromPlayer modifier to approve on the initial function!
-        ERC20(skillTokens).transferFrom(playerAddress, address(this), convertedAmount);
+        IERC20(skillTokens).transferFrom(playerAddress, address(this), convertedAmount);
     }
 
     function payPlayer(address playerAddress, int128 baseAmount) public restricted {
@@ -361,8 +373,8 @@ contract CryptoBlades is Util {
     }
 
     function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
-        ERC20(skillTokens).approve(address(this), convertedAmount);
-        ERC20(skillTokens).transferFrom(address(this), playerAddress, convertedAmount);
+        IERC20(skillTokens).approve(address(this), convertedAmount);
+        IERC20(skillTokens).transferFrom(address(this), playerAddress, convertedAmount);
     }
 
     function approveContractCharacterFor(uint256 characterID, address playerAddress) public restricted {
@@ -374,7 +386,7 @@ contract CryptoBlades is Util {
     }
 
     function getContractSkillBalance() public view returns (uint256) {
-        return ERC20(skillTokens).balanceOf(address(this));
+        return IERC20(skillTokens).balanceOf(address(this));
     }
 
     function usdToSkill(int128 originalPrice) public view returns (uint256) {
@@ -382,11 +394,11 @@ contract CryptoBlades is Util {
         // The format of the int256 returned by the interface is not specified so i assume it's 128.128 fixed point
         (,int256 usdPerSkill,,,) = AggregatorV3Interface(priceChecker).latestRoundData();
         return originalPrice.div(usdPerSkill.from128x128()).mulu(1 ether);
-        //return getContractSkillBalance().divu(ERC20(skillTokens).totalSupply()).mul(originalPrice.fromUInt()).toUInt();
+        //return getContractSkillBalance().divu(IERC20(skillTokens).totalSupply()).mul(originalPrice.fromUInt()).toUInt();
     }
 
     function getApprovedBalance() external view returns (uint256) {
-        return ERC20(skillTokens).allowance(msg.sender, address(this));
+        return IERC20(skillTokens).allowance(msg.sender, address(this));
     }
 
     function getCurrentHour() public view returns (uint256) {
