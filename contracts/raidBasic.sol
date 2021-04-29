@@ -1,14 +1,15 @@
 pragma solidity ^0.6.0;
 
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./raid.sol";
 
-contract RaidBasic is Raid, Util {
+contract RaidBasic is Initializable, Raid, Util {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
 
-    uint64 internal staminaDrain = 12 * 60 * 60;
+    uint64 internal staminaDrain;
     uint256[] weaponDrops; // given out randomly, we add them manually
     uint256 bounty; // split based on power
     uint8 bossTrait; // set manually for now
@@ -18,7 +19,11 @@ contract RaidBasic is Raid, Util {
     event SkillWinner(address addr, uint256 amount);
     event WeaponWinner(address addr, uint256 wepID);
 
-    constructor(address gameContract) public Raid(gameContract) { }
+    function initialize(address gameContract) public override initializer {
+        Raid.initialize(gameContract);
+
+        staminaDrain = 12 * 60 * 60;
+    }
 
     function addRaider(uint256 characterID, uint256 weaponID) public override {
         require(characters.ownerOf(characterID) == msg.sender);
@@ -41,7 +46,7 @@ contract RaidBasic is Raid, Util {
         raiders.push(Raider(uint256(msg.sender), characterID, weaponID, power));
         emit RaiderJoined(msg.sender, characterID, weaponID, power);
     }
-    
+
     function completeRaid(uint256 seed) public override restricted {
         require(completed == false, "Raid already completed, run reset first");
         completed = true;
@@ -53,7 +58,7 @@ contract RaidBasic is Raid, Util {
         }*/
         for(uint i = 0; i < raiders.length; i++) {
             Raider memory r = raiders[i];
-            
+
             int128 powerPercentage = uint256(r.power).divu(totalPower);
             uint256 payout = powerPercentage.mulu(bounty);
             game.payPlayerConverted(address(r.owner), payout);
@@ -66,7 +71,7 @@ contract RaidBasic is Raid, Util {
             weapons.transferFrom(address(game), address(r.owner), weaponDrops[i]);
             emit WeaponWinner(address(r.owner), weaponDrops[i]);
         }
-        
+
         emit RaidCompleted();
     }
 

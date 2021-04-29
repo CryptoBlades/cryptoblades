@@ -1,12 +1,13 @@
 pragma solidity ^0.6.0;
 
-import "./multiAccess.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "./multiAccessUpgradeable.sol";
 import "./cryptoblades.sol";
 import "./characters.sol";
 import "./weapons.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-abstract contract Raid is MultiAccess {
+abstract contract Raid is Initializable, MultiAccessUpgradeable {
 
     // Outline raids contract that we can iterate on and deploy multiple of.
     // Needs to be granted access to NFT contracts to interact with them
@@ -31,7 +32,9 @@ abstract contract Raid is MultiAccess {
     event RaiderJoined(address owner, uint256 character, uint256 weapon, uint24 power);
     event RaidCompleted();
 
-    constructor(address gameContract) public MultiAccess() {
+    function initialize(address gameContract) public virtual initializer {
+        MultiAccessUpgradeable.initialize();
+
         grantAccess(gameContract);
         game = CryptoBlades(gameContract);
         // maybe just use extra params for NFT addresses?
