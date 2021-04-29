@@ -88,12 +88,13 @@ contract CryptoBlades is Util {
     }
 
     function hasSafeRandom(address user) private returns (bool) {
+        // TODO re enable this when VRF is available
         // returns true if this user has a random number waiting
-        if(randoms.hasConsumableSeed(user) == false) {
+        /*if(randoms.hasConsumableSeed(user) == false) {
             require(randoms.hasRequestedSeed(user) == false, "You cannot request another random seed");
             randoms.getRandomNumber(user, unsafeRandom());
             return false;
-        }
+        }*/
         return true;
     }
 
@@ -140,20 +141,8 @@ contract CryptoBlades is Util {
         // roll for fights, non deterministic
         uint256 playerPower = getPlayerFinalPower(char, wep);
         playerPower = plusMinus10PercentSeeded(playerPower, seed);
-        uint8 playerTrait = characters.getTrait(char);
-
-        int128 traitBonus = uint256(1).fromUInt();
-        int128 oneBonus = uint256(75).divu(1000);
-        if(playerTrait == weapons.getTrait(wep)) {
-            traitBonus = traitBonus.add(oneBonus);
-        }
-        if(isTraitEffectiveAgainst(playerTrait, monsterTrait)) {
-            traitBonus = traitBonus.add(oneBonus);
-        }
-        else if(isTraitWeakAgainst(playerTrait, monsterTrait)) {
-            traitBonus = traitBonus.sub(oneBonus);
-        }
-        return uint24(playerPower.fromUInt().mul(traitBonus).toUInt());
+        
+        return uint24(getPlayerTraitBonusAgainst(characters.getTrait(char), weapons.getTrait(wep), monsterTrait).mulu(playerPower));
     }
 
     function getMonsterPowerRoll(uint24 monsterPower, uint256 seed) internal pure returns(uint24) {
@@ -166,9 +155,24 @@ contract CryptoBlades is Util {
         return uint24((characters.getPower(char).fromUInt().mul(weapons.getPowerMultiplier(wep))).toUInt());
     }
 
-    function getPlayerFinalPower(uint256 char, uint256 wep) internal view returns (uint24) {
+    function getPlayerFinalPower(uint256 char, uint256 wep) public view returns (uint24) {
         // accounts for trait matches
         return uint24((characters.getPower(char).fromUInt().mul(weapons.getPowerMultiplierForTrait(wep, characters.getTrait(char)))).toUInt());
+    }
+
+    function getPlayerTraitBonusAgainst(uint8 characterTrait, uint8 weaponTrait, uint8 monsterTrait) public view returns(int128) {
+        int128 traitBonus = uint256(1).fromUInt();
+        int128 oneBonus = uint256(75).divu(1000);
+        if(characterTrait == weaponTrait) {
+            traitBonus = traitBonus.add(oneBonus);
+        }
+        if(isTraitEffectiveAgainst(characterTrait, monsterTrait)) {
+            traitBonus = traitBonus.add(oneBonus);
+        }
+        else if(isTraitWeakAgainst(characterTrait, monsterTrait)) {
+            traitBonus = traitBonus.sub(oneBonus);
+        }
+        return traitBonus;
     }
 
     function getTargets(uint256 char, uint256 wep) public view returns (uint32[4] memory) {

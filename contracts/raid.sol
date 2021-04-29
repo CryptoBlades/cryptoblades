@@ -12,6 +12,7 @@ abstract contract Raid is MultiAccess {
     // Needs to be granted access to NFT contracts to interact with them
 
     bool internal completed;
+    uint256 internal expectedFinishTime; // not a guarantee since we don't automate this (atm)
 
     CryptoBlades internal game;
     Characters internal characters;
@@ -38,13 +39,31 @@ abstract contract Raid is MultiAccess {
         weapons = Weapons(game.getWeaponsAddress());
     }
 
-    function reset() public restricted {
+    function reset() public virtual restricted {
+        for(uint i = 0; i < raiders.length; i++) {
+            delete participation[raiders[i].charID]; // we cant clear all mappings in one delete call
+        }
         delete raiders;
-        delete participation;
         completed = false;
         emit RaidReset();
     }
 
-    function addRaider(address owner, uint256 characterID, uint256 weaponID) public virtual;
+    function isRaider(uint256 character) public view returns(bool) {
+        return participation[character];
+    }
+
+    function getRaiderCount() public view returns(uint256) {
+        return raiders.length;
+    }
+
+    function getExpectedFinishTime() public view returns(uint256) {
+        return expectedFinishTime;
+    }
+
+    function setExpectedFinishTime(uint256 time) public restricted {
+        expectedFinishTime = time;
+    }
+
+    function addRaider(uint256 characterID, uint256 weaponID) public virtual;
     function completeRaid(uint256 seed) public virtual;
 }

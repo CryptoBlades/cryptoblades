@@ -6,7 +6,7 @@ const LPStakingRewards = artifacts.require("LPStakingRewards");
 const RaidBasic = artifacts.require("RaidBasic");
 
 module.exports = async function (deployer, network, accounts) {
-  if (network === 'development' || network === 'development-fork') { // TEMP TEMP TEMP
+  if (network === 'development' || network === 'development-fork') {
     await deployer.deploy(SkillToken);
     const token = await SkillToken.deployed();
 
