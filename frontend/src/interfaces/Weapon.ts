@@ -1,12 +1,12 @@
 
-export enum Element {
+export enum WeaponElement {
   Fire = 0,
   Earth = 1,
   Lightning = 2,
   Water = 3,
 }
 
-export enum Trait {
+export enum WeaponTrait {
   STR = 0,
   DEX = 1,
   CHA = 2,
@@ -16,13 +16,14 @@ export enum Trait {
 export interface IWeapon {
   id: number;
   properties: string;
+  element: string;
   stat1: string;
   stat1Value: number;
   stat2: string;
   stat2Value: number;
   stat3: string;
   stat3Value: number;
-  level: string;
+  level: number;
   blade: string;
   crossguard: string;
   grip: string;

@@ -1,5 +1,5 @@
 
-import { ICharacter, ITarget, IWeapon, Trait } from './interfaces';
+import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement } from './interfaces';
 
 export function characterFromContract(id: number, data: string): ICharacter {
   const xp = data[0];
@@ -28,12 +28,26 @@ export function getStat3Trait(statPattern: number): number {
 
 export function statNumberToName(statNum: number): string {
   switch(statNum) {
-  case Trait.CHA: return 'CHA';
-  case Trait.DEX: return 'DEX';
-  case Trait.INT: return 'INT';
-  case Trait.PWR: return 'PWR';
-  case Trait.STR: return 'STR';
-  default:        return '???';
+  case WeaponTrait.CHA: return 'CHA';
+  case WeaponTrait.DEX: return 'DEX';
+  case WeaponTrait.INT: return 'INT';
+  case WeaponTrait.PWR: return 'PWR';
+  case WeaponTrait.STR: return 'STR';
+  default:              return '???';
+  }
+}
+
+export function getWeaponTraitFromProperties(properties: number): number {
+  return (properties >> 3) & 0x3;
+}
+
+export function traitNumberToName(traitNum: number): string {
+  switch(traitNum) {
+  case WeaponElement.Fire:        return 'Fire';
+  case WeaponElement.Earth:       return 'Earth';
+  case WeaponElement.Water:       return 'Water';
+  case WeaponElement.Lightning:   return 'Lightning';
+  default:                        return '???';
   }
 }
 
@@ -42,7 +56,7 @@ export function weaponFromContract(id: number, data: string): IWeapon {
   const stat1 = data[1];
   const stat2 = data[2];
   const stat3 = data[3];
-  const level = data[4];
+  const level = +data[4];
   const blade = data[5];
   const crossguard = data[6];
   const grip = data[7];
@@ -61,9 +75,12 @@ export function weaponFromContract(id: number, data: string): IWeapon {
   const pattern3 = getStatPatternFromProperties(stat3Value);
   const stat3Type = getStat1Trait(pattern3);
 
+  const traitNum = getWeaponTraitFromProperties(+properties);
+
   const stars = (+properties) & 0x7;
   return {
     id, properties,
+    element: traitNumberToName(traitNum),
     stat1: statNumberToName(stat1Type), stat1Value,
     stat2: statNumberToName(stat2Type), stat2Value,
     stat3: statNumberToName(stat3Type), stat3Value,

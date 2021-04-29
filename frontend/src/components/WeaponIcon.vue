@@ -65,22 +65,30 @@ export default {
     tooltipHtml() {
       if(!this.weapon) return '';
 
+      const wrapInSpan = (spanClass, text) => {
+        return `<span class="${spanClass.toLowerCase()}">${text}</span>`;
+      };
+
       let ttHtml = `
         ${Array(this.weapon.stars + 1).fill('★').join('')}
         <br>
         Level ${this.weapon.level + 1}
       `;
 
+      if(this.weapon.element) {
+        ttHtml += `<br>Element: ${wrapInSpan(this.weapon.element, this.weapon.element)}`;
+      }
+
       if(this.weapon.stat1Value) {
-        ttHtml += `<br>${this.weapon.stat1}: +${this.weapon.stat1Value}`;
+        ttHtml += `<br>${wrapInSpan(this.weapon.stat1, this.weapon.stat1)}: +${this.weapon.stat1Value}`;
       }
 
       if(this.weapon.stat2Value) {
-        ttHtml += `<br>${this.weapon.stat2}: +${this.weapon.stat2Value}`;
+        ttHtml += `<br>${wrapInSpan(this.weapon.stat2, this.weapon.stat2)}: +${this.weapon.stat2Value}`;
       }
 
       if(this.weapon.stat3Value) {
-        ttHtml += `<br>${this.weapon.stat3}: +${this.weapon.stat3Value}`;
+        ttHtml += `<br>${wrapInSpan(this.weapon.stat3, this.weapon.stat3)}: +${this.weapon.stat3Value}`;
       }
 
       return ttHtml;

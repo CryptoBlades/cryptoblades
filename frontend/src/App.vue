@@ -178,6 +178,22 @@ button {
   color: red;
 }
 
+.fire, .str {
+  color: red;
+}
+
+.earth, .dex {
+  color: brown;
+}
+
+.water, .int {
+  color: blue;
+}
+
+.lightning, .cha {
+  color: yellow;
+}
+
 </style>
 <style scoped>
 .app {
