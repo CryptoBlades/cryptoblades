@@ -1,5 +1,7 @@
+const SkillToken = artifacts.require('SkillToken');
 const CryptoBlades = artifacts.require('CryptoBlades');
 const Characters = artifacts.require('Characters');
+const Weapons = artifacts.require('Weapons');
 
 function assertEventEmitted(events, eventName, ...args) {
   assert.isTrue(events.some(log => {
@@ -17,47 +19,65 @@ function assertEventEmitted(events, eventName, ...args) {
   }), `Expected event '${eventName}(${args.map(arg => '' + arg).join(', ')})' to be emitted`);
 }
 
-contract('CryptoBlades', accounts => {
-  describe('mintCharacter', () => {
-    it('should work', async () => {
-      const cryptoBlades = await CryptoBlades.deployed();
-      const characters = await Characters.at(await cryptoBlades.characters());
+contract('Characters', accounts => {
+  let characters;
+  beforeEach(async () => {
+    characters = await Characters.new();
 
-      await cryptoBlades.mintCharacter({ from: accounts[0] });
+    await characters.initialize();
 
-      const events = await characters.getPastEvents();
-      assertEventEmitted(events, 'NewCharacter', 1);
-    });
+    await characters.setMain(accounts[0]);
   });
 
-  describe('characters.getRequiredXpForLevel', () => {
+  describe('getRequiredXpForLevel', () => {
     it('should work', async () => {
-      const cryptoBlades = await CryptoBlades.deployed();
-      const characters = await Characters.at(await cryptoBlades.characters());
-
       const requiredXp = await characters.getRequiredXpForNextLevel(3);
 
       assert.strictEqual(requiredXp.toNumber(), 19);
     });
   });
 
-  describe('characters.gainXp', () => {
+  describe('gainXp', () => {
     it('should work', async () => {
-      const cryptoBlades = await CryptoBlades.deployed();
-      const characters = await Characters.at(await cryptoBlades.characters());
+      await characters.mint(accounts[0], '123');
 
+      const events = await characters.getPastEvents();
+      assertEventEmitted(events, 'NewCharacter', 0);
+
+      await characters.gainXp(0, 1000);
+
+      const [lv, xp] = await Promise.all([
+        characters.getLevel(0), characters.getXp(0)
+      ]);
+
+      assert.strictEqual(lv.toString(), '23');
+      assert.strictEqual(xp.toString(), '22');
+    });
+  });
+});
+
+contract('CryptoBlades', accounts => {
+  let token, cryptoBlades, characters, weapons;
+  beforeEach(async () => {
+    token = await SkillToken.deployed();
+
+    cryptoBlades = await CryptoBlades.new();
+    characters = await Characters.new();
+    weapons = await Weapons.new();
+
+    await Promise.all([
+      cryptoBlades.initialize(token.address, characters.address, weapons.address),
+      characters.initialize().then(() => characters.setMain(cryptoBlades.address)),
+      weapons.initialize().then(() => weapons.setMain(cryptoBlades.address)),
+    ]);
+  });
+
+  describe('mintCharacter', () => {
+    it('should work', async () => {
       await cryptoBlades.mintCharacter({ from: accounts[0] });
 
       const events = await characters.getPastEvents();
-      assertEventEmitted(events, 'NewCharacter', 2);
-
-      try {
-        await characters.gainXp(2, 1000);
-        assert.fail('Expected setXp to throw error');
-      }
-      catch (e) {
-        assert.match(e.message, /Reason given: Can only be called by main file/g);
-      }
+      assertEventEmitted(events, 'NewCharacter', 0);
     });
   });
 });

@@ -16,30 +16,36 @@ contract('StakingRewards', accounts => {
       assert.isFalse(await sr.failsafeModeActive(), 'Failsafe Mode should be disabled');
 
       // stake 200
-      await skill.increaseAllowance(sr.address, 200, { from: accounts[0] });
-      await sr.stake(200, { from: accounts[0] });
+      await skill.increaseAllowance(sr.address, '200', { from: accounts[0] });
+      await sr.stake('200', { from: accounts[0] });
 
       // transfer extra 300 skill that wasn't actually staked
-      await skill.transfer(sr.address, 300, { from: accounts[0] });
+      await skill.transfer(sr.address, '300', { from: accounts[0] });
 
-      assert.strictEqual((await sr.balanceOf(accounts[0])).toNumber(), 200);
-      assert.strictEqual((await skill.balanceOf(sr.address)).toNumber(), 500);
+      assert.strictEqual((await sr.balanceOf(accounts[0])).toString(), '200');
+      assert.strictEqual((await skill.balanceOf(sr.address)).toString(), '500');
 
       await sr.enableFailsafeMode({ from: accounts[0] });
 
-      const account0SkillBalanceBefore = (await skill.balanceOf(accounts[0])).toNumber();
+      const account0SkillBalanceBefore = await skill.balanceOf(accounts[0]);
 
       await sr.recoverOwnStake({ from: accounts[0] });
-      assert.strictEqual((await sr.balanceOf(accounts[0])).toNumber(), 0);
-      assert.strictEqual((await sr.totalSupply()).toNumber(), 0);
-      assert.strictEqual((await skill.balanceOf(sr.address)).toNumber(), 300);
-      assert.strictEqual((await skill.balanceOf(accounts[0])).toNumber(), account0SkillBalanceBefore + 200);
+      assert.strictEqual((await sr.balanceOf(accounts[0])).toString(), '0');
+      assert.strictEqual((await sr.totalSupply()).toString(), '0');
+      assert.strictEqual((await skill.balanceOf(sr.address)).toString(), '300');
+      assert.strictEqual(
+        (await skill.balanceOf(accounts[0])).toString(),
+        account0SkillBalanceBefore.add(web3.utils.toBN('200')).toString()
+      );
 
       await sr.recoverExtraStakingTokensToOwner({ from: accounts[0] });
-      assert.strictEqual((await sr.balanceOf(accounts[0])).toNumber(), 0);
-      assert.strictEqual((await sr.totalSupply()).toNumber(), 0);
-      assert.strictEqual((await skill.balanceOf(sr.address)).toNumber(), 0);
-      assert.strictEqual((await skill.balanceOf(accounts[0])).toNumber(), account0SkillBalanceBefore + 500);
+      assert.strictEqual((await sr.balanceOf(accounts[0])).toString(), '0');
+      assert.strictEqual((await sr.totalSupply()).toString(), '0');
+      assert.strictEqual((await skill.balanceOf(sr.address)).toString(), '0');
+      assert.strictEqual(
+        (await skill.balanceOf(accounts[0])).toString(),
+        account0SkillBalanceBefore.add(web3.utils.toBN('500')).toString()
+      );
     });
 
     it('should prevent any normal functionality when in failsafe mode', async () => {
@@ -62,21 +68,21 @@ contract('StakingRewards', accounts => {
       assert.isFalse(await sr.failsafeModeActive(), 'Failsafe Mode should be disabled');
 
       // stake 200
-      await skill.increaseAllowance(sr.address, 200, { from: accounts[0] });
-      await sr.stake(200, { from: accounts[0] });
+      await skill.increaseAllowance(sr.address, '200', { from: accounts[0] });
+      await sr.stake('200', { from: accounts[0] });
 
       // transfer extra 300 skill that weren't actually staked
-      await skill.transfer(sr.address, 300, { from: accounts[0] });
+      await skill.transfer(sr.address, '300', { from: accounts[0] });
 
-      assert.strictEqual((await sr.balanceOf(accounts[0])).toNumber(), 200);
-      assert.strictEqual((await sr.totalSupply()).toNumber(), 200);
-      assert.strictEqual((await skill.balanceOf(sr.address)).toNumber(), 500);
+      assert.strictEqual((await sr.balanceOf(accounts[0])).toString(), '200');
+      assert.strictEqual((await sr.totalSupply()).toString(), '200');
+      assert.strictEqual((await skill.balanceOf(sr.address)).toString(), '500');
 
       await sr.recoverExtraStakingTokensToOwner({ from: accounts[0] });
 
-      assert.strictEqual((await sr.balanceOf(accounts[0])).toNumber(), 200);
-      assert.strictEqual((await sr.totalSupply()).toNumber(), 200);
-      assert.strictEqual((await skill.balanceOf(sr.address)).toNumber(), 200);
+      assert.strictEqual((await sr.balanceOf(accounts[0])).toString(), '200');
+      assert.strictEqual((await sr.totalSupply()).toString(), '200');
+      assert.strictEqual((await skill.balanceOf(sr.address)).toString(), '200');
     });
   });
 });

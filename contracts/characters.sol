@@ -1,17 +1,25 @@
 pragma solidity ^0.6.0;
 
-import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "./util.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 
 
-contract Characters is ERC721, Util {
+contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable, Util {
 
-    address main;
+    address private main;
 
-    constructor (address source) public ERC721("CryptoBlades character", "CBC") {
-        main = source;
+    function initialize () public initializer {
+        __ERC721_init("CryptoBlades character", "CBC");
+        __Ownable_init_unchained();
+        main = address(0);
+    }
+
+    function setMain(address newMain) external onlyOwner {
+        main = newMain;
     }
 
     /*
@@ -30,9 +38,9 @@ contract Characters is ERC721, Util {
 
     Character[] private tokens;
 
-    uint256 public maxStamina = 200;
-    uint256 public secondsPerStamina = 300; //5 * 60
-    
+    uint256 public constant maxStamina = 200;
+    uint256 public constant secondsPerStamina = 300; //5 * 60
+
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(uint256 indexed character, uint16 level);
 
@@ -161,8 +169,8 @@ contract Characters is ERC721, Util {
     function isStaminaFull(uint256 id) public view returns (bool) {
         return getStaminaPoints(id) >= maxStamina;
     }
-    
-    function getStaminaMaxWait() public view returns (uint64) {
+
+    function getStaminaMaxWait() public pure returns (uint64) {
         return uint64(maxStamina * secondsPerStamina);
     }
 }

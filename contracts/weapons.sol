@@ -1,20 +1,28 @@
 pragma solidity ^0.6.0;
 
-import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./util.sol";
 
-contract Weapons is ERC721, Util {
+contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable, Util {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
     using ABDKMath64x64 for uint16;
 
-    address main;
+    address private main;
 
-    constructor (address source) public ERC721("CryptoBlades weapon", "CBW") {
-        main = source;
+    function initialize () public initializer {
+        __ERC721_init("CryptoBlades weapon", "CBW");
+        __Ownable_init_unchained();
+        main = address(0);
+    }
+
+    function setMain(address newMain) external onlyOwner {
+        main = newMain;
     }
 
     /*
@@ -47,7 +55,7 @@ contract Weapons is ERC721, Util {
     }
 
     Weapon[] private tokens;
-    
+
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(uint256 indexed reforged, uint256 indexed burned, uint8 level, uint16 stat1Gain, uint16 stat2Gain, uint16 stat3Gain);
 
@@ -281,7 +289,7 @@ contract Weapons is ERC721, Util {
             result = result.add(wep.stat1.fromUInt().mul(powerPerPWRPoint));
         else
             result = result.add(wep.stat1.fromUInt().mul(powerPerPoint));
-        
+
         if(getStat2Trait(statPattern) == trait)
             result = result.add(wep.stat2.fromUInt().mul(matchingPowerPerPoint));
         else if(getStat2Trait(statPattern) == 4) // PWR, traitless

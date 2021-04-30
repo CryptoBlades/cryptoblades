@@ -1,11 +1,13 @@
 pragma solidity ^0.6.0;
 
-contract MultiAccess {
-    
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+
+contract MultiAccessUpgradeable is Initializable {
+
     // how about a master address that cannot be revoked?
     mapping(address => bool) private access;
 
-    constructor() public {
+    function initialize() public initializer {
         access[msg.sender] = true;
     }
 

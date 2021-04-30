@@ -1,5 +1,7 @@
 build/
+build-*/
 node_modules/
+.openzeppelin/unknown-1337.json
 .env
 package-lock.json
 *.log
