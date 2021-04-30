@@ -45,11 +45,11 @@
     <div class="right-side fill-space raid-signup">
       <div class="chooser">
         <div class="left-side">
-          Characters
+          <character-list />
         </div>
 
         <div class="right-side">
-          Weapons
+          <weapon-grid />
         </div>
       </div>
 
@@ -80,14 +80,28 @@
 </template>
 
 <script lang="ts">
+import { mapGetters } from 'vuex';
+
+import CharacterList from '../components/smart/CharacterList.vue';
+import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
 
 export default {
+  computed: {
+
+    ...mapGetters([
+      'ownCharacters',
+      'ownWeapons'
+    ]),
+  },
+
   props: {
   },
 
   components: {
-    BigButton
+    BigButton,
+    CharacterList,
+    WeaponGrid
   },
 };
 </script>
@@ -121,6 +135,11 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: row;
+}
+
+.chooser .left-side, .chooser .right-side {
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .raid-info {
