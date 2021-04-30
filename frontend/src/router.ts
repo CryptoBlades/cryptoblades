@@ -5,6 +5,7 @@ import Blacksmith from './views/Blacksmith.vue';
 import Combat from './views/Combat.vue';
 import Stake from './views/Stake.vue';
 import SelectStakeType from './views/SelectStakeType.vue';
+import Raid from './views/Raid.vue';
 
 function createRouter(featureFlagStakeOnly: boolean) {
   if (featureFlagStakeOnly) {
@@ -24,6 +25,7 @@ function createRouter(featureFlagStakeOnly: boolean) {
       { path: '/combat', name: 'combat', component: Combat },
       { path: '/stake', name: 'select-stake-type', component: SelectStakeType },
       { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
+      { path: '/raid/', name: 'raid', component: Raid },
     ]
   });
 }
