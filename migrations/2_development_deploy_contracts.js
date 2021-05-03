@@ -32,7 +32,7 @@ module.exports = async function (deployer, network, accounts) {
     await deployer.deploy(SkillStakingRewards, accounts[0], accounts[0], token.address, token.address, 60);
     await deployer.deploy(LPStakingRewards, accounts[0], accounts[0], token.address, expToken.address, 0);
 
-    await deployer.deploy(RaidBasic, game.address);
+    await deployProxy(RaidBasic, [game.address], { deployer });
 
     await token.transferFrom(token.address, game.address, "500000000000000000000000");
     // This next bit is temporary, we'll handle approvals through the frontend somehow
