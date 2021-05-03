@@ -79,7 +79,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { mapActions, mapGetters } from 'vuex';
 
 import CharacterList from '../components/smart/CharacterList.vue';
