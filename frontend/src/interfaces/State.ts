@@ -25,6 +25,17 @@ export interface IStakeOverviewState {
   stakeLpTotalSupply: string;
 }
 
+export interface IRaidState {
+  expectedFinishTime: string;
+  raiderCount: number;
+  bounty: string;
+  totalPower: string;
+  weaponDrops: string[];
+  staminaDrainSeconds: number;
+
+  isOwnedCharacterRaidingById: Record<number, boolean>; // ?
+}
+
 export interface IState {
   contracts: Contracts;
   accounts: string[];
@@ -48,4 +59,6 @@ export interface IState {
     lp: IStakeState
   };
   stakeOverview: IStakeOverviewState | null;
+
+  raid: IRaidState;
 }

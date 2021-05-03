@@ -80,7 +80,7 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
@@ -96,6 +96,14 @@ export default {
   },
 
   props: {
+  },
+
+  methods: {
+    ...mapActions(['fetchRaidData', 'fetchOwnedCharacterRaidStatus'])
+  },
+
+  async mounted() {
+    await Promise.all([this.fetchRaidData(), this.fetchOwnedCharacterRaidStatus()]);
   },
 
   components: {

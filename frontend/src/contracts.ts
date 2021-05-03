@@ -1,6 +1,7 @@
 import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../build/contracts/CryptoBlades.json';
 import { abi as skillStakingRewardsAbi, networks as skillStakingRewardsNetworks } from '../../build/contracts/SkillStakingRewards.json';
 import { abi as lpStakingRewardsAbi, networks as lpStakingRewardsNetworks } from '../../build/contracts/LPStakingRewards.json';
+import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/RaidBasic.json';
 import { networks as skillTokenNetworks } from '../../build/contracts/SkillToken.json';
 import { networks as lpTokenNetworks } from '../../build/contracts/ExperimentToken.json';
 import { abi as erc20Abi } from '../../build/contracts/IERC20.json';
@@ -28,6 +29,7 @@ export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean):
   }
 
   const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as any)[networkId].address;
+  const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as any)[networkId].address;
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as any, cryptoBladesContractAddr);
   const [charactersAddr, weaponsAddr] = await Promise.all([
@@ -36,6 +38,7 @@ export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean):
   ]);
   const Characters = new web3.eth.Contract(charactersAbi as any, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as any, weaponsAddr);
+  const RaidBasic = new web3.eth.Contract(raidAbi as any, raidContractAddr);
 
-  return { CryptoBlades, Characters, Weapons, SkillStakingRewards, LPStakingRewards, SkillToken, LPToken };
+  return { CryptoBlades, Characters, Weapons, SkillStakingRewards, LPStakingRewards, SkillToken, LPToken, RaidBasic };
 }

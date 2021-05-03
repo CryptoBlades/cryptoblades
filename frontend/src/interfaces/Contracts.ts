@@ -9,4 +9,5 @@ export interface Contracts {
   CryptoBlades?: Web3EthContract;
   Characters?: Web3EthContract;
   Weapons?: Web3EthContract;
+  RaidBasic?: Web3EthContract;
 }

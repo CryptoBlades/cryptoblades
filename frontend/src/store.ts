@@ -40,6 +40,15 @@ function getStakingContracts(contracts: Contracts, stakeType: StakeType): Stakin
   }
 }
 
+interface RaidData {
+  expectedFinishTime: string;
+  raiderCount: number;
+  bounty: string;
+  totalPower: string;
+  weaponDrops: string[];
+  staminaDrainSeconds: number;
+}
+
 export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
   return new Vuex.Store({
     state: {
@@ -86,6 +95,16 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         }
       },
       stakeOverview: null,
+
+      raid: {
+        expectedFinishTime: '0',
+        raiderCount: 0,
+        bounty: '0',
+        totalPower: '0',
+        weaponDrops: [],
+        staminaDrainSeconds: 0,
+        isOwnedCharacterRaidingById: {}
+      }
     },
 
     getters: {
@@ -129,6 +148,10 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       stakeState(state) {
         return (stakeType: StakeType): IStakeState => state.staking[stakeType];
+      },
+
+      isOwnedCharacterRaiding(state) {
+        return (characterId: number): boolean => state.raid.isOwnedCharacterRaidingById[characterId] || false;
       }
     },
 
@@ -219,6 +242,19 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       updateStakeOverviewData(state, payload) {
         state.stakeOverview = payload;
+      },
+
+      updateRaidData(state, payload: RaidData) {
+        state.raid.expectedFinishTime = payload.expectedFinishTime;
+        state.raid.raiderCount = payload.raiderCount;
+        state.raid.bounty = payload.bounty;
+        state.raid.totalPower = payload.totalPower;
+        state.raid.weaponDrops = payload.weaponDrops;
+        state.raid.staminaDrainSeconds = payload.staminaDrainSeconds;
+      },
+
+      updateAllIsOwnedCharacterRaidingById(state, payload: Record<number, boolean>) {
+        state.raid.isOwnedCharacterRaidingById = payload;
       }
     },
 
@@ -418,6 +454,8 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       async fetchCharacters({ dispatch }, characterIds: number[]) {
         await Promise.all(characterIds.map((id: number) => dispatch('fetchCharacter', id)));
+
+        await dispatch('fetchOwnedCharacterRaidStatus');
       },
 
       async fetchCharacter({ state, commit }, characterId: number) {
@@ -645,6 +683,56 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         });
 
         await dispatch('fetchStakeDetails', { stakeType });
+      },
+
+      async fetchRaidData({ state, commit }) {
+        if(featureFlagStakeOnly) return;
+
+        const RaidBasic = state.contracts.RaidBasic!;
+
+        const [
+          expectedFinishTime,
+          raiderCount,
+          bounty,
+          totalPower,
+          weaponDrops,
+          staminaDrainSeconds
+        ] = await Promise.all([
+          RaidBasic.methods.getExpectedFinishTime().call(defaultCallOptions(state)) as Promise<string>,
+          RaidBasic.methods.getRaiderCount().call(defaultCallOptions(state)) as Promise<string>,
+          RaidBasic.methods.getBounty().call(defaultCallOptions(state)) as Promise<string>,
+          RaidBasic.methods.getTotalPower().call(defaultCallOptions(state)) as Promise<string>,
+          RaidBasic.methods.getWeaponDrops().call(defaultCallOptions(state)) as Promise<string[]>,
+          RaidBasic.methods.getStaminaDrainSeconds().call(defaultCallOptions(state)) as Promise<string>,
+        ]);
+
+        const raidData: RaidData = {
+          expectedFinishTime,
+          raiderCount: parseInt(raiderCount, 10),
+          bounty,
+          totalPower,
+          weaponDrops,
+          staminaDrainSeconds: parseInt(staminaDrainSeconds, 10)
+        };
+        commit('updateRaidData', raidData);
+      },
+
+      async fetchOwnedCharacterRaidStatus({ state, commit }) {
+        if(featureFlagStakeOnly) return;
+
+        const RaidBasic = state.contracts.RaidBasic!;
+
+        const ownedCharacterIds = _.clone(state.ownedCharacterIds);
+        const characterIsRaidingRes = await Promise.all(
+          ownedCharacterIds.map(
+            cid => RaidBasic.methods.isRaider(cid).call(defaultCallOptions(state))
+          ) as Promise<boolean>[]
+        );
+        const isOwnedCharacterRaiding: Record<number, boolean> = _.fromPairs(
+          _.zip(ownedCharacterIds, characterIsRaidingRes)
+        );
+
+        commit('updateAllIsOwnedCharacterRaidingById', isOwnedCharacterRaiding);
       }
     }
   });
