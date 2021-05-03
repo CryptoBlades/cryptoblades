@@ -117,5 +117,8 @@ module.exports = {
   ],
   api_keys: {
     bscscan: process.env.BSCSCAN_API_KEY
+  },
+  subscribers: {
+    abisToTs: require('./truffle-subscriber-abis-to-ts.js')
   }
 };

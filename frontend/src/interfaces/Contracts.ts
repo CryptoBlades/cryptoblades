@@ -1,13 +1,21 @@
 import { Contract as Web3EthContract } from 'web3-eth-contract';
+import { AbiMethods } from '../abi-to-ts';
+import type { IERC20, StakingRewards, CryptoBlades, Characters, Weapons, RaidBasic } from '../../../build/abis';
+
+interface TypeSafeContract<Abi> {
+  methods: AbiMethods<Abi>;
+}
+
+type Contract<Abi> = Omit<Web3EthContract, 'methods'> & TypeSafeContract<Abi>;
 
 export interface Contracts {
-  SkillToken: Web3EthContract;
-  LPToken: Web3EthContract;
-  SkillStakingRewards: Web3EthContract;
-  LPStakingRewards: Web3EthContract;
+  SkillToken: Contract<typeof IERC20>;
+  LPToken: Contract<typeof IERC20>;
+  SkillStakingRewards: Contract<typeof StakingRewards>;
+  LPStakingRewards: Contract<typeof StakingRewards>;
 
-  CryptoBlades?: Web3EthContract;
-  Characters?: Web3EthContract;
-  Weapons?: Web3EthContract;
-  RaidBasic?: Web3EthContract;
+  CryptoBlades?: Contract<typeof CryptoBlades>;
+  Characters?: Contract<typeof Characters>;
+  Weapons?: Contract<typeof Weapons>;
+  RaidBasic?: Contract<typeof RaidBasic>;
 }

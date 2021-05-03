@@ -1,7 +1,7 @@
 
 import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement } from './interfaces';
 
-export function characterFromContract(id: number, data: string): ICharacter {
+export function characterFromContract(id: number, data: string[]): ICharacter {
   const xp = data[0];
   const level = parseInt(data[1], 10);
   const trait = data[2];
@@ -51,7 +51,7 @@ export function traitNumberToName(traitNum: number): string {
   }
 }
 
-export function weaponFromContract(id: number, data: string): IWeapon {
+export function weaponFromContract(id: number, data: string[]): IWeapon {
   const properties = data[0];
   const stat1 = data[1];
   const stat2 = data[2];

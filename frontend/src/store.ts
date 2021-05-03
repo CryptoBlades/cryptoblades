@@ -433,6 +433,8 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async fetchSkillBalance({ state, commit }) {
+        if(!state.defaultAccount) return;
+
         const skillBalance = await state.contracts.SkillToken.methods
           .balanceOf(state.defaultAccount)
           .call(defaultCallOptions(state));
@@ -463,7 +465,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
         const character = characterFromContract(
           characterId,
-          await state.contracts.Characters!.methods.get(characterId).call(defaultCallOptions(state))
+          await state.contracts.Characters!.methods.get('' + characterId).call(defaultCallOptions(state))
         );
 
         commit('updateCharacter', { characterId, character });
@@ -478,7 +480,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
         const weapon = weaponFromContract(
           weaponId,
-          await state.contracts.Weapons!.methods.get(weaponId).call(defaultCallOptions(state))
+          await state.contracts.Weapons!.methods.get('' + weaponId).call(defaultCallOptions(state))
         );
 
         commit('updateWeapon', { weaponId, weapon });
@@ -487,7 +489,11 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       async fetchCharacterStamina({ state, commit }, characterId: number) {
         if(featureFlagStakeOnly) return;
 
-        const stamina = await state.contracts.Characters!.methods.getStaminaPoints(characterId).call(defaultCallOptions(state));
+        const staminaString = await state.contracts.Characters!.methods
+          .getStaminaPoints('' + characterId)
+          .call(defaultCallOptions(state));
+
+        const stamina = parseInt(staminaString, 10);
         if (state.characterStaminas[characterId] !== stamina) {
           commit('updateCharacterStamina', { characterId, stamina });
         }
@@ -613,6 +619,8 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async fetchStakeDetails({ state, commit }, { stakeType }: { stakeType: StakeType }) {
+        if(!state.defaultAccount) return;
+
         const { StakingRewards, StakingToken } = getStakingContracts(state.contracts, stakeType);
 
         const [
@@ -698,12 +706,12 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           weaponDrops,
           staminaDrainSeconds
         ] = await Promise.all([
-          RaidBasic.methods.getExpectedFinishTime().call(defaultCallOptions(state)) as Promise<string>,
-          RaidBasic.methods.getRaiderCount().call(defaultCallOptions(state)) as Promise<string>,
-          RaidBasic.methods.getBounty().call(defaultCallOptions(state)) as Promise<string>,
-          RaidBasic.methods.getTotalPower().call(defaultCallOptions(state)) as Promise<string>,
-          RaidBasic.methods.getWeaponDrops().call(defaultCallOptions(state)) as Promise<string[]>,
-          RaidBasic.methods.getStaminaDrainSeconds().call(defaultCallOptions(state)) as Promise<string>,
+          RaidBasic.methods.getExpectedFinishTime().call(defaultCallOptions(state)),
+          RaidBasic.methods.getRaiderCount().call(defaultCallOptions(state)),
+          RaidBasic.methods.getBounty().call(defaultCallOptions(state)),
+          RaidBasic.methods.getTotalPower().call(defaultCallOptions(state)),
+          RaidBasic.methods.getWeaponDrops().call(defaultCallOptions(state)),
+          RaidBasic.methods.getStaminaDrainSeconds().call(defaultCallOptions(state)),
         ]);
 
         const raidData: RaidData = {
@@ -725,8 +733,8 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         const ownedCharacterIds = _.clone(state.ownedCharacterIds);
         const characterIsRaidingRes = await Promise.all(
           ownedCharacterIds.map(
-            cid => RaidBasic.methods.isRaider(cid).call(defaultCallOptions(state))
-          ) as Promise<boolean>[]
+            cid => RaidBasic.methods.isRaider('' + cid).call(defaultCallOptions(state))
+          )
         );
         const isOwnedCharacterRaiding: Record<number, boolean> = _.fromPairs(
           _.zip(ownedCharacterIds, characterIsRaidingRes)
