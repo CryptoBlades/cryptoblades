@@ -35,6 +35,14 @@
         </h2>
         <character class="character-inner" :character="currentCharacter" />
       </div>
+      <div class="webgl-content">
+        <div id="unityContainer" style="width: 960px; height: 600px"></div>
+        <!--div class="footer">
+          <div class="webgl-logo"></div>
+          <div class="fullscreen" onclick="unityInstance.SetFullscreen(1)"></div>
+          <div class="title">CryptoBlades</div>
+        </div-->
+      </div>
     </div>
 
     <div v-if="ownCharacters.length === 0" class="blank-slate">
@@ -58,6 +66,10 @@ import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import Character from '../components/Character.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
+import UnityProgress from '../TemplateData/UnityProgress.js';
+import UnityLoader from '../Build/UnityLoader.js';
+
+//let unityInstance;
 
 export default {
   computed: {
@@ -101,6 +113,14 @@ export default {
         alert('Could not mint character: insufficient funds or transaction denied.');
       }
     },
+    initUnity() {
+      /*unityInstance = */UnityLoader.instantiate('unityContainer', 'unity/Build/CB_Web.json', {onProgress: UnityProgress});
+      //UnityLoader.instantiate('unityContainer', '../Build/CB_Web.json', {onProgress: UnityProgress});
+    }
+  },
+
+  mounted() {
+    this.initUnity();
   },
 
   components: {

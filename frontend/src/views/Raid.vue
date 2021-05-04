@@ -103,7 +103,7 @@ export default {
   },
 
   async mounted() {
-    await Promise.all([this.fetchRaidData(), this.fetchOwnedCharacterRaidStatus()]);
+    //await Promise.all([this.fetchRaidData(), this.fetchOwnedCharacterRaidStatus()]);
   },
 
   components: {
