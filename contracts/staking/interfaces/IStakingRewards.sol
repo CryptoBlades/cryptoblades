@@ -15,6 +15,16 @@ interface IStakingRewards {
 
     function balanceOf(address account) external view returns (uint256);
 
+    function minimumStakeTime() external view returns (uint256);
+
+    function getStakeRewardDistributionTimeLeft() external view returns (uint256);
+
+    function getStakeUnlockTimeLeft() external view returns (uint256);
+
+    function rewardRate() external view returns (uint256);
+
+    function rewardsDuration() external view returns (uint256);
+
     // Mutative
     function stake(uint256 amount) external;
 

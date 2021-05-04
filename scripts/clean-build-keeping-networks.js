@@ -23,3 +23,6 @@ for(const buildArtifact of shell.ls('build/contracts/*.json')) {
         shell.ShellString(JSON.stringify(data, null, '  ')).to(buildArtifact);
     }
 }
+
+const path = require('path');
+shell.exec(`node ${path.join(__dirname, 'generate-ts-from-abis.js')}`);

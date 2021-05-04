@@ -8,8 +8,8 @@ const ExperimentToken = artifacts.require("ExperimentToken");
 const CryptoBlades = artifacts.require("CryptoBlades");
 const Characters = artifacts.require("Characters");
 const Weapons = artifacts.require("Weapons");
-const SkillStakingRewards = artifacts.require("SkillStakingRewards");
-const LPStakingRewards = artifacts.require("LPStakingRewards");
+const SkillStakingRewardsUpgradeable = artifacts.require("SkillStakingRewardsUpgradeable");
+const LPStakingRewardsUpgradeable = artifacts.require("LPStakingRewardsUpgradeable");
 const RaidBasic = artifacts.require("RaidBasic");
 
 writeFileAsync = util.promisify(fs.writeFile);
@@ -28,9 +28,8 @@ module.exports = async function (deployer, network, accounts) {
     await charas.setMain(game.address);
     await weps.setMain(game.address);
 
-    // TODO make these upgrade-friendly
-    await deployer.deploy(SkillStakingRewards, accounts[0], accounts[0], token.address, token.address, 60);
-    await deployer.deploy(LPStakingRewards, accounts[0], accounts[0], token.address, expToken.address, 0);
+    await deployProxy(SkillStakingRewardsUpgradeable, [accounts[0], accounts[0], token.address, token.address, 60], { deployer });
+    await deployProxy(LPStakingRewardsUpgradeable, [accounts[0], accounts[0], token.address, expToken.address, 0], { deployer });
 
     await deployProxy(RaidBasic, [game.address], { deployer });
 

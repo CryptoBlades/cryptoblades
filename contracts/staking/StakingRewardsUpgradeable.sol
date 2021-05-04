@@ -1,23 +1,25 @@
 pragma solidity ^0.6.2;
 
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "../../node_modules/@openzeppelin/contracts/math/Math.sol";
 import "../../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../../node_modules/@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "../../node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 // Inheritance
 import "./interfaces/IStakingRewards.sol";
-import "./RewardsDistributionRecipient.sol";
-import "./Pausable.sol";
-import "./Failsafe.sol";
+import "./RewardsDistributionRecipientUpgradeable.sol";
+import "./FailsafeUpgradeable.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/stakingrewards
-contract StakingRewards is
+contract StakingRewardsUpgradeable is
     IStakingRewards,
-    RewardsDistributionRecipient,
-    ReentrancyGuard,
-    Failsafe,
-    Pausable
+    Initializable,
+    RewardsDistributionRecipientUpgradeable,
+    ReentrancyGuardUpgradeable,
+    FailsafeUpgradeable,
+    PausableUpgradeable
 {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -26,9 +28,9 @@ contract StakingRewards is
 
     IERC20 public rewardsToken;
     IERC20 public stakingToken;
-    uint256 public periodFinish = 0;
-    uint256 public override rewardRate = 0;
-    uint256 public override rewardsDuration = 180 days;
+    uint256 public periodFinish;
+    uint256 public override rewardRate;
+    uint256 public override rewardsDuration;
     uint256 public override minimumStakeTime;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
@@ -42,17 +44,31 @@ contract StakingRewards is
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(
+    function initialize(
         address _owner,
         address _rewardsDistribution,
         address _rewardsToken,
         address _stakingToken,
         uint256 _minimumStakeTime
-    ) public Owned(_owner) {
+    ) public virtual initializer {
+        __Context_init();
+        __Ownable_init_unchained();
+        __Pausable_init_unchained();
+        __Failsafe_init_unchained();
+        __ReentrancyGuard_init_unchained();
+        __RewardsDistributionRecipient_init_unchained();
+
+        // for consistency with the old contract
+        transferOwnership(_owner);
+
         rewardsToken = IERC20(_rewardsToken);
         stakingToken = IERC20(_stakingToken);
         rewardsDistribution = _rewardsDistribution;
         minimumStakeTime = _minimumStakeTime;
+
+        periodFinish = 0;
+        rewardRate = 0;
+        rewardsDuration = 180 days;
     }
 
     /* ========== VIEWS ========== */
@@ -125,7 +141,7 @@ contract StakingRewards is
         override
         normalMode
         nonReentrant
-        notPaused
+        whenNotPaused
         updateReward(msg.sender)
     {
         require(amount > 0, "Cannot stake 0");
@@ -251,7 +267,7 @@ contract StakingRewards is
             tokenAddress != address(stakingToken),
             "Cannot withdraw the staking token"
         );
-        IERC20(tokenAddress).safeTransfer(owner, tokenAmount);
+        IERC20(tokenAddress).safeTransfer(owner(), tokenAmount);
         emit Recovered(tokenAddress, tokenAmount);
     }
 
@@ -294,10 +310,18 @@ contract StakingRewards is
 
         if (stakingTokenAmountBelongingToOwner > 0) {
             stakingToken.safeTransfer(
-                owner,
+                owner(),
                 stakingTokenAmountBelongingToOwner
             );
         }
+    }
+
+    function pause() external onlyOwner whenNotPaused {
+        _pause();
+    }
+
+    function unpause() external onlyOwner whenPaused {
+        _unpause();
     }
 
     /* ========== MODIFIERS ========== */

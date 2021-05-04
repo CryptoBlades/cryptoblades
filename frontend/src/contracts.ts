@@ -1,6 +1,6 @@
 import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../build/contracts/CryptoBlades.json';
-import { abi as skillStakingRewardsAbi, networks as skillStakingRewardsNetworks } from '../../build/contracts/SkillStakingRewards.json';
-import { abi as lpStakingRewardsAbi, networks as lpStakingRewardsNetworks } from '../../build/contracts/LPStakingRewards.json';
+import { abi as skillStakingRewardsAbi, networks as skillStakingRewardsNetworks } from '../../build/contracts/SkillStakingRewardsUpgradeable.json';
+import { abi as lpStakingRewardsAbi, networks as lpStakingRewardsNetworks } from '../../build/contracts/LPStakingRewardsUpgradeable.json';
 import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/RaidBasic.json';
 import { networks as skillTokenNetworks } from '../../build/contracts/SkillToken.json';
 import { networks as lpTokenNetworks } from '../../build/contracts/ExperimentToken.json';
