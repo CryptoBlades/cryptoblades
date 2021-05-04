@@ -17,6 +17,7 @@
   "devDependencies": {
     "@openzeppelin/truffle-upgrades": "^1.5.2",
     "lerna": "^4.0.0",
+    "ohm-js": "^15.5.0",
     "shelljs": "^0.8.4",
     "truffle": "^5.2.3",
     "truffle-contract-size": "^2.0.1",
