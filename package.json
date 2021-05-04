@@ -32,6 +32,7 @@
     "contract:prepare": "npm run build",
     "contract:deploy": "npm run deploy",
     "build": "truffle compile",
+    "postbuild": "node scripts/generate-ts-from-abis.js",
     "test": "truffle test",
     "deploy": "truffle migrate --reset",
     "deploy-testnet": "truffle migrate --network bsctestnet",
