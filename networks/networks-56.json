@@ -1,0 +1,20 @@
+{
+  "build/contracts/LPStakingRewards.json": {
+    "events": {},
+    "links": {},
+    "address": "0x06c0B596a0818d5Bc791e1de78b0e8d1112F6234",
+    "transactionHash": "0x6637a0e0736d3c59adf49135054f9125fb6a1f471eb26dc3bf809ca85c1ccc46"
+  },
+  "build/contracts/Migrations.json": {
+    "events": {},
+    "links": {},
+    "address": "0x5288E3551AB01cAdcAA25d24800e1B9c342C3016",
+    "transactionHash": "0x0d02cef5bf5e3d0b92312015324b0608d04f0a3117ae4759b8c5934c38a67362"
+  },
+  "build/contracts/SkillStakingRewards.json": {
+    "events": {},
+    "links": {},
+    "address": "0x895BF27C99822Ef5ba88A3E6764F6247e13f0dfA",
+    "transactionHash": "0xb9e62402f06061dd82d04199ea8a878bdbcd26386f232ad15ee1275d6e42560d"
+  }
+}
