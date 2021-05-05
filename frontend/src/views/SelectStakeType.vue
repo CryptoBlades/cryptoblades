@@ -1,21 +1,13 @@
 <template>
   <div class="body main-font">
-    <ul class="stake-select-list" v-if="stakeOverview">
-      <li class="stake-select-item">
+    <ul class="stake-select-list" v-if="true">
+      <li class="stake-select-item" v-for="e in entries" :key="e.stakeType">
         <stake-selector-item
-          stakeTokenName="SKILL"
-          rewardTokenName="SKILL"
-          stakeType="skill"
-          :minimumStakeTime="stakeOverview.stakeSkillMinimumStakeTime"
-          :estimatedYield="skillStakeEstimatedYield" />
-      </li>
-      <li class="stake-select-item">
-        <stake-selector-item
-          stakeTokenName="SKILL-BNB"
-          rewardTokenName="SKILL"
-          stakeType="lp"
-          :minimumStakeTime="stakeOverview.stakeLpMinimumStakeTime"
-          :estimatedYield="skillLpEstimatedYield" />
+          :stakeTokenName="e.stakeTokenName"
+          :rewardTokenName="e.rewardTokenName"
+          :stakeType="e.stakeType"
+          :minimumStakeTime="stakeOverviews[e.stakeType].minimumStakeTime"
+          :estimatedYield="estimatedYields[e.stakeType]" />
       </li>
     </ul>
     <div class="loading-indicator" v-else>
@@ -27,46 +19,67 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import BN from 'bignumber.js';
+import _ from 'lodash';
 BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import StakeSelectorItem from '../components/StakeSelectorItem.vue';
+import { allStakeTypes } from '../interfaces/State';
 
 export default {
   components: {
     StakeSelectorItem,
   },
 
+  data() {
+    return {
+      allStakeTypes,
+
+      entries: [
+        {
+          stakeType: 'skill',
+          stakeTokenName: 'SKILL',
+          rewardTokenName: 'SKILL'
+        },
+        {
+          stakeType: 'lp',
+          stakeTokenName: 'SKILL-BNB',
+          rewardTokenName: 'SKILL'
+        },
+      ],
+    };
+  },
+
   computed: {
-    ...mapState(['stakeOverview']),
+    ...mapState(['stakeOverviews']),
 
-    skillStakeEstimatedYield() {
-      if(!this.stakeOverview) return null;
-
-      return this.calculateEstimatedYield(
-        this.stakeOverview.stakeSkillRewardRate,
-        this.stakeOverview.stakeSkillTotalSupply
+    estimatedYields() {
+      return _.fromPairs(
+        allStakeTypes.map(stakeType => [
+          stakeType,
+          this.calculateEstimatedYield(stakeType)
+        ])
       );
-    },
-
-    skillLpEstimatedYield() {
-      if(!this.stakeOverview) return null;
-
-      return this.calculateEstimatedYield(
-        this.stakeOverview.stakeLpRewardRate,
-        this.stakeOverview.stakeLpTotalSupply
-      ).multipliedBy(0.102); // temporary, fetch from pancakeswap instead in the future
     },
   },
 
   methods: {
     ...mapActions(['fetchStakeOverviewData']),
 
-    calculateEstimatedYield(rewardRate, totalStaked) {
+    calculateEstimatedYield(stakeType) {
+      const rewardRate = this.stakeOverviews[stakeType].rewardRate;
+      const totalStaked = this.stakeOverviews[stakeType].totalSupply;
+
       const rewardsPerDay = BN(rewardRate).multipliedBy(365.24 * 24 * 60 * 60);
 
       const totalSupply = BN(totalStaked);
 
-      return rewardsPerDay.dividedBy(totalSupply);
+      const estYield = rewardsPerDay.dividedBy(totalSupply);
+
+      if(stakeType === 'lp') {
+        return estYield.multipliedBy(0.102); // temporary, fetch from pancakeswap instead in the future
+      }
+
+      return estYield;
     }
   },
 

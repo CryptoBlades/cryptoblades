@@ -3,6 +3,9 @@ import { IWeapon } from './Weapon';
 import { ITarget } from './Target';
 import { Contracts } from './Contracts';
 
+export type StakeType = 'skill' | 'lp';
+export const allStakeTypes: StakeType[] = ['skill', 'lp'];
+
 export interface IStakeState {
   ownBalance: string;
   stakedBalance: string;
@@ -16,13 +19,10 @@ export interface IStakeState {
 }
 
 export interface IStakeOverviewState {
-  stakeSkillRewardRate: string;
-  stakeSkillRewardsDuration: number;
-  stakeSkillTotalSupply: string;
-
-  stakeLpRewardRate: string;
-  stakeLpRewardsDuration: number;
-  stakeLpTotalSupply: string;
+  rewardRate: string;
+  rewardsDuration: number;
+  totalSupply: string;
+  minimumStakeTime: number;
 }
 
 export interface IRaidState {
@@ -54,11 +54,8 @@ export interface IState {
   weapons: Record<number, IWeapon>;
   targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
 
-  staking: {
-    skill: IStakeState,
-    lp: IStakeState
-  };
-  stakeOverview: IStakeOverviewState | null;
+  staking: Record<StakeType, IStakeState>;
+  stakeOverviews: Record<StakeType, IStakeOverviewState>;
 
   raid: IRaidState;
 }

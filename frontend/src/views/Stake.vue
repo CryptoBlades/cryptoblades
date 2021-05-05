@@ -1,20 +1,27 @@
 <template>
   <div class="body main-font">
-    <staking class="staking" v-if="stakeType === 'skill' || stakeType === 'lp'" :stakeType="stakeType" />
+    <staking class="staking" v-if="isKnownStakeType" :stakeType="stakeType" />
     <h1 v-else>Unknown stake type, please try again.</h1>
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import Staking from '../components/smart/Staking.vue';
+import { allStakeTypes } from '../interfaces/State';
 
 export default {
   props: {
     stakeType: {
       type: String,
-      validator(type: string) {
-        return ['skill', 'lp'].includes(type);
+      validator(type) {
+        return allStakeTypes.includes(type);
       }
+    }
+  },
+
+  computed: {
+    isKnownStakeType() {
+      return allStakeTypes.includes(this.stakeType);
     }
   },
 

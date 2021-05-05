@@ -10,18 +10,16 @@ import { setUpContracts } from './contracts';
 import {
   characterFromContract, targetFromContract, weaponFromContract
 } from './contract-models';
-import { Contracts, IStakeOverviewState, IStakeState, IState } from './interfaces';
+import { allStakeTypes, Contracts, IStakeOverviewState, IStakeState, IState, StakeType } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
-type StakeType = 'skill' | 'lp';
-
-type StakingRewardsAlias = Contracts['LPStakingRewards'] & Contracts['SkillStakingRewards'];
+type StakingRewardsAlias = Contracts['LPStakingRewards'] | Contracts['SkillStakingRewards'];
 
 interface StakingContracts {
   StakingRewards: StakingRewardsAlias,
-  StakingToken: Contracts['LPToken'] & Contracts['SkillToken'],
+  StakingToken: Contracts['LPToken'] | Contracts['SkillToken'],
   RewardToken: Contracts['SkillToken'],
 }
 
@@ -49,6 +47,25 @@ interface RaidData {
   staminaDrainSeconds: number;
 }
 
+const defaultStakeState: IStakeState = {
+  ownBalance: '0',
+  stakedBalance: '0',
+  remainingCapacityForDeposit: '0',
+  remainingCapacityForWithdraw: '0',
+  contractBalance: '0',
+  currentRewardEarned: '0',
+  rewardMinimumStakeTime: 0,
+  rewardDistributionTimeLeft: 0,
+  unlockTimeLeft: 0,
+};
+
+const defaultStakeOverviewState: IStakeOverviewState = {
+  rewardRate: '0',
+  rewardsDuration: 0,
+  totalSupply: '0',
+  minimumStakeTime: 0
+};
+
 export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
   return new Vuex.Store({
     state: {
@@ -71,30 +88,13 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       targetsByCharacterIdAndWeaponId: {},
 
       staking: {
-        skill: {
-          ownBalance: '0',
-          stakedBalance: '0',
-          remainingCapacityForDeposit: '0',
-          remainingCapacityForWithdraw: '0',
-          contractBalance: '0',
-          currentRewardEarned: '0',
-          rewardMinimumStakeTime: 0,
-          rewardDistributionTimeLeft: 0,
-          unlockTimeLeft: 0,
-        },
-        lp: {
-          ownBalance: '0',
-          stakedBalance: '0',
-          remainingCapacityForDeposit: '0',
-          remainingCapacityForWithdraw: '0',
-          contractBalance: '0',
-          currentRewardEarned: '0',
-          rewardMinimumStakeTime: 0,
-          rewardDistributionTimeLeft: 0,
-          unlockTimeLeft: 0,
-        }
+        skill: { ...defaultStakeState },
+        lp: { ...defaultStakeState }
       },
-      stakeOverview: null,
+      stakeOverviews: {
+        skill: { ...defaultStakeOverviewState },
+        lp: { ...defaultStakeOverviewState }
+      },
 
       raid: {
         expectedFinishTime: '0',
@@ -240,8 +240,9 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         Vue.set(state.staking, stakeType, payload);
       },
 
-      updateStakeOverviewData(state, payload) {
-        state.stakeOverview = payload;
+      updateStakeOverviewDataPartial(state, payload: { stakeType: StakeType } & IStakeOverviewState) {
+        const { stakeType, ...data } = payload;
+        Vue.set(state.stakeOverviews, stakeType, data);
       },
 
       updateRaidData(state, payload: RaidData) {
@@ -579,43 +580,37 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         }
       },
 
-      async fetchStakeOverviewData({ state, commit }) {
-        const { StakingRewards: SkillStakingRewards } = getStakingContracts(state.contracts, 'skill');
-        const { StakingRewards: LPStakingRewards } = getStakingContracts(state.contracts, 'lp');
+      async fetchStakeOverviewData({ dispatch }) {
+        await Promise.all(
+          allStakeTypes
+            .map(stakeType =>
+              dispatch('fetchStakeOverviewDataPartial', { stakeType })
+            )
+        );
+      },
+
+      async fetchStakeOverviewDataPartial({ state, commit }, { stakeType }: { stakeType: StakeType }) {
+        const { StakingRewards } = getStakingContracts(state.contracts, stakeType);
 
         const [
-          stakeSkillRewardRate,
-          stakeSkillRewardsDuration,
-          stakeSkillTotalSupply,
-          stakeSkillMinimumStakeTime,
-
-          stakeLpRewardRate,
-          stakeLpRewardsDuration,
-          stakeLpTotalSupply,
-          stakeLpMinimumStakeTime,
+          rewardRate,
+          rewardsDuration,
+          totalSupply,
+          minimumStakeTime,
         ] = await Promise.all([
-          SkillStakingRewards.methods.rewardRate().call(defaultCallOptions(state)),
-          SkillStakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
-          SkillStakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
-          SkillStakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
-
-          LPStakingRewards.methods.rewardRate().call(defaultCallOptions(state)),
-          LPStakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
-          LPStakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
-          LPStakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
+          StakingRewards.methods.rewardRate().call(defaultCallOptions(state)),
+          StakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
+          StakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
+          StakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
         ]);
 
-        commit('updateStakeOverviewData', {
-          stakeSkillRewardRate,
-          stakeSkillRewardsDuration: parseInt(stakeSkillRewardsDuration, 10),
-          stakeSkillTotalSupply,
-          stakeSkillMinimumStakeTime: parseInt(stakeSkillMinimumStakeTime, 10),
-
-          stakeLpRewardRate,
-          stakeLpRewardsDuration: parseInt(stakeLpRewardsDuration, 10),
-          stakeLpTotalSupply,
-          stakeLpMinimumStakeTime: parseInt(stakeLpMinimumStakeTime, 10),
-        } as IStakeOverviewState);
+        const stakeSkillOverviewData: IStakeOverviewState = {
+          rewardRate,
+          rewardsDuration: parseInt(rewardsDuration, 10),
+          totalSupply,
+          minimumStakeTime: parseInt(minimumStakeTime, 10),
+        };
+        commit('updateStakeOverviewDataPartial', { stakeType, ...stakeSkillOverviewData });
       },
 
       async fetchStakeDetails({ state, commit }, { stakeType }: { stakeType: StakeType }) {
