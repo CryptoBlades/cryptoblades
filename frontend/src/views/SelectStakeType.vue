@@ -45,6 +45,11 @@ export default {
           stakeTokenName: 'SKILL-BNB',
           rewardTokenName: 'SKILL'
         },
+        {
+          stakeType: 'lp2',
+          stakeTokenName: 'SKILL-BNB',
+          rewardTokenName: 'SKILL'
+        },
       ],
     };
   },

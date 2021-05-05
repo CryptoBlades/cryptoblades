@@ -3,8 +3,8 @@ import { IWeapon } from './Weapon';
 import { ITarget } from './Target';
 import { Contracts } from './Contracts';
 
-export type StakeType = 'skill' | 'lp';
-export const allStakeTypes: StakeType[] = ['skill', 'lp'];
+export type StakeType = 'skill' | 'lp' | 'lp2';
+export const allStakeTypes: StakeType[] = ['skill', 'lp', 'lp2'];
 
 export interface IStakeState {
   ownBalance: string;

@@ -15,11 +15,11 @@ import { getCharacterNameFromSeed } from './character-name';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
-type StakingRewardsAlias = Contracts['LPStakingRewards'] | Contracts['SkillStakingRewards'];
+type StakingRewardsAlias = Contracts['LPStakingRewards'] | Contracts['LP2StakingRewards'] | Contracts['SkillStakingRewards'];
 
 interface StakingContracts {
   StakingRewards: StakingRewardsAlias,
-  StakingToken: Contracts['LPToken'] | Contracts['SkillToken'],
+  StakingToken: Contracts['LPToken'] | Contracts['LP2Token'] | Contracts['SkillToken'],
   RewardToken: Contracts['SkillToken'],
 }
 
@@ -33,6 +33,11 @@ function getStakingContracts(contracts: Contracts, stakeType: StakeType): Stakin
   case 'lp': return {
     StakingRewards: contracts.LPStakingRewards,
     StakingToken: contracts.LPToken,
+    RewardToken: contracts.SkillToken
+  };
+  case 'lp2': return {
+    StakingRewards: contracts.LP2StakingRewards,
+    StakingToken: contracts.LP2Token,
     RewardToken: contracts.SkillToken
   };
   }
@@ -89,11 +94,13 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       staking: {
         skill: { ...defaultStakeState },
-        lp: { ...defaultStakeState }
+        lp: { ...defaultStakeState },
+        lp2: { ...defaultStakeState }
       },
       stakeOverviews: {
         skill: { ...defaultStakeOverviewState },
-        lp: { ...defaultStakeOverviewState }
+        lp: { ...defaultStakeOverviewState },
+        lp2: { ...defaultStakeOverviewState }
       },
 
       raid: {
@@ -381,6 +388,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
         setupStakingEvents('skill', state.contracts.SkillStakingRewards);
         setupStakingEvents('lp', state.contracts.LPStakingRewards);
+        setupStakingEvents('lp2', state.contracts.LP2StakingRewards);
       },
 
       async setUpContracts({ commit }) {
@@ -640,7 +648,9 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
 
-        commit('updateStakeData', {
+        console.log('fetched data for', stakeType, StakingRewards.options.address, StakingToken.options.address);
+
+        const stakeData: { stakeType: StakeType } & IStakeState = {
           stakeType,
           ownBalance,
           stakedBalance,
@@ -651,7 +661,8 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           rewardMinimumStakeTime: parseInt(rewardMinimumStakeTime, 10),
           rewardDistributionTimeLeft: parseInt(rewardDistributionTimeLeft, 10),
           unlockTimeLeft: parseInt(unlockTimeLeft, 10)
-        } as { stakeType: StakeType } & IStakeState);
+        };
+        commit('updateStakeData', stakeData);
       },
 
       async stake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
