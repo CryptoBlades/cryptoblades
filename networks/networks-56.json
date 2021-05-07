@@ -1,4 +1,9 @@
 {
+  "build/contracts/LP2StakingRewardsUpgradeable.json": {
+    "events": {},
+    "links": {},
+    "address": "0xEb6410Ff4f9eF51938D990CDeA850b22A341E7Be"
+  },
   "build/contracts/LPStakingRewards.json": {
     "events": {},
     "links": {},

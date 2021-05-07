@@ -63,7 +63,7 @@ module.exports = {
       network_id: 0x38,
       confirmations: 10,
       timeoutBlocks: 200,
-      gas: 2500000,
+      gas: 2600000,
       skipDryRun: true
     },
     // Another network with more advanced options...

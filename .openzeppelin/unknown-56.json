@@ -1,0 +1,184 @@
+{
+  "manifestVersion": "3.1",
+  "impls": {
+    "982b5f1eac2d8abd8b2182b7b5405db4a47f1c85128055148d4481162e19be2e": {
+      "address": "0x86418EcAe310B9a64c42679F9fB1383d33817a2a",
+      "txHash": "0x050c381f0082ba42a777a0de6ffa05b9ac4323243e0ebb32f577cab0cbf9029f",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:20"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:74"
+          },
+          {
+            "contract": "RewardsDistributionRecipientUpgradeable",
+            "label": "rewardsDistribution",
+            "type": "t_address",
+            "src": "staking/RewardsDistributionRecipientUpgradeable.sol:9"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "_status",
+            "type": "t_uint256",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:37"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:67"
+          },
+          {
+            "contract": "FailsafeUpgradeable",
+            "label": "failsafeModeActive",
+            "type": "t_bool",
+            "src": "staking/FailsafeUpgradeable.sol:7"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "_paused",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:28"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:96"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "rewardsToken",
+            "type": "t_contract(IERC20)9077",
+            "src": "staking/StakingRewardsUpgradeable.sol:29"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "stakingToken",
+            "type": "t_contract(IERC20)9077",
+            "src": "staking/StakingRewardsUpgradeable.sol:30"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "periodFinish",
+            "type": "t_uint256",
+            "src": "staking/StakingRewardsUpgradeable.sol:31"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "rewardRate",
+            "type": "t_uint256",
+            "src": "staking/StakingRewardsUpgradeable.sol:32"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "rewardsDuration",
+            "type": "t_uint256",
+            "src": "staking/StakingRewardsUpgradeable.sol:33"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "minimumStakeTime",
+            "type": "t_uint256",
+            "src": "staking/StakingRewardsUpgradeable.sol:34"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "lastUpdateTime",
+            "type": "t_uint256",
+            "src": "staking/StakingRewardsUpgradeable.sol:35"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "rewardPerTokenStored",
+            "type": "t_uint256",
+            "src": "staking/StakingRewardsUpgradeable.sol:36"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "userRewardPerTokenPaid",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "staking/StakingRewardsUpgradeable.sol:38"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "rewards",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "staking/StakingRewardsUpgradeable.sol:39"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "_totalSupply",
+            "type": "t_uint256",
+            "src": "staking/StakingRewardsUpgradeable.sol:41"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "_balances",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "staking/StakingRewardsUpgradeable.sol:42"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "_stakeTimestamp",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "staking/StakingRewardsUpgradeable.sol:43"
+          }
+        ],
+        "types": {
+          "t_contract(IERC20)9077": {
+            "label": "contract IERC20"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    }
+  },
+  "admin": {
+    "address": "0x0eA07150Eb2C21D59e3371e4978c87633eFEB809",
+    "txHash": "0x762710a0b0acf4c88d0a04dcc11d170b4f70f0c3031278866f7cd3a00cdd2012"
+  }
+}
