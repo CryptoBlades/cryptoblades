@@ -3,7 +3,7 @@
     <div class="stake-icon-wrapper">
       <img src="https://seiyria.com/gameicons-font/svg/two-coins.svg" alt="" class="stake-type-icon">
     </div>
-    <h1 class="stake-type-title">{{ stakeTokenName }} for {{ rewardTokenName }}</h1>
+    <h1 class="stake-type-title">{{ stakeTitle }}</h1>
     <div class="table-wrapper">
       <table class="stake-data-table">
         <tr>
@@ -52,7 +52,7 @@
 import { formatDurationFromSeconds } from '../utils/date-time';
 
 export default {
-  props: ['stakeTokenName', 'rewardTokenName', 'stakeType', 'minimumStakeTime', 'estimatedYield'],
+  props: ['stakeTitle', 'stakeTokenName', 'rewardTokenName', 'stakeType', 'minimumStakeTime', 'estimatedYield'],
 
   computed: {
     minimumStakeTimeFormatted() {

@@ -3,6 +3,7 @@
     <ul class="stake-select-list" v-if="true">
       <li class="stake-select-item" v-for="e in entries" :key="e.stakeType">
         <stake-selector-item
+          :stakeTitle="e.stakeTitle"
           :stakeTokenName="e.stakeTokenName"
           :rewardTokenName="e.rewardTokenName"
           :stakeType="e.stakeType"
@@ -38,17 +39,20 @@ export default {
         {
           stakeType: 'skill',
           stakeTokenName: 'SKILL',
-          rewardTokenName: 'SKILL'
+          rewardTokenName: 'SKILL',
+          stakeTitle: 'SKILL for SKILL'
         },
         {
           stakeType: 'lp',
           stakeTokenName: 'SKILL-BNB',
-          rewardTokenName: 'SKILL'
+          rewardTokenName: 'SKILL',
+          stakeTitle: 'SKILL-BNB for SKILL V1'
         },
         {
           stakeType: 'lp2',
           stakeTokenName: 'SKILL-BNB',
-          rewardTokenName: 'SKILL'
+          rewardTokenName: 'SKILL',
+          stakeTitle: 'SKILL-BNB for SKILL V2'
         },
       ],
     };
@@ -100,7 +104,7 @@ export default {
   margin: 0 auto;
   padding: 0;
   display: flex;
-  max-width: 60rem;
+  max-width: 80rem;
   justify-content: center;
   flex-wrap: wrap;
 }
