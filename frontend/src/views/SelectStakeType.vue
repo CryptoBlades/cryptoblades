@@ -84,7 +84,7 @@ export default {
 
       const estYield = rewardsPerDay.dividedBy(totalSupply);
 
-      if(stakeType === 'lp') {
+      if(stakeType === 'lp' || stakeType === 'lp2') {
         return estYield.multipliedBy(0.102); // temporary, fetch from pancakeswap instead in the future
       }
 
