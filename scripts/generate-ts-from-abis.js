@@ -151,4 +151,4 @@ for(const buildArtifact of shell.ls('build/contracts/*.json')) {
 
 shell.ShellString(generationInterfaceOutput).to('build/abi-interfaces.ts');
 
-console.log(`Generated build/abi-interfaces.ts from [${Array.from(contracts).join(', ')}]`);
+console.log(`Generated build/abi-interfaces.ts from ${contracts.size} contracts`);
