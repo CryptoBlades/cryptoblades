@@ -4,12 +4,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../node_modules/@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
+import "./interfaces/IRandoms.sol";
 //import "./ownable.sol";
 import "./characters.sol";
 import "./weapons.sol";
 import "./util.sol";
 import "./dummyPriceService.sol";
-import "./randoms.sol";
 
 contract CryptoBlades is Initializable, Util {
 
@@ -20,19 +20,16 @@ contract CryptoBlades is Initializable, Util {
 
     Characters public characters;
     Weapons public weapons;
-    address public skillTokens;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
-    address public priceChecker; // TODO: Remove temp init in constructor, instead use real world oracle by chainlink
-    Randoms public randoms;
+    IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
+    AggregatorV3Interface public priceChecker;
+    IRandoms public randoms;
 
-    function initialize(address _tokenAddress, Characters _characters, Weapons _weapons) public initializer {
-        skillTokens = _tokenAddress;
+    function initialize(IERC20 _skillToken, Characters _characters, Weapons _weapons, AggregatorV3Interface _priceChecker, IRandoms _randoms) public initializer {
+        skillToken = _skillToken;
         characters = _characters;
         weapons = _weapons;
-        // characters = new Characters(address(this));
-        // weapons = new Weapons(address(this));
-
-        priceChecker = address(new DummyPriceService()); // TEMP! TODO
-        randoms = new Randoms(address(this));
+        priceChecker = _priceChecker;
+        randoms = _randoms;
 
         characterLimit = 1000;
         staminaCostFight = 0;
@@ -61,26 +58,14 @@ contract CryptoBlades is Initializable, Util {
 
     event FightOutcome(uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
 
-    function getSkillTokensAddress() external view returns (address) {
-        return skillTokens;
-    }
-
-    function getCharactersAddress() external view returns (address) {
-        return address(characters);
-    }
-
-    function getWeaponsAddress() external view returns (address) {
-        return address(weapons);
-    }
-
     function getMySkill() external view returns (uint256) {
-        return IERC20(skillTokens).balanceOf(msg.sender);
+        return skillToken.balanceOf(msg.sender);
     }
 
     function giveMeSkill(uint256 amount) public {
         // TEMPORARY FUNCITON TO TEST WITH
-        IERC20(skillTokens).approve(address(this), amount);
-        IERC20(skillTokens).transferFrom(address(this), msg.sender, amount);
+        skillToken.approve(address(this), amount);
+        skillToken.transferFrom(address(this), msg.sender, amount);
     }
 
     function getMyCharacters() public view returns(uint256[] memory) {
@@ -102,20 +87,22 @@ contract CryptoBlades is Initializable, Util {
     function hasSafeRandom(address user) private returns (bool) {
         // TODO re enable this when VRF is available
         // returns true if this user has a random number waiting
-        /*if(randoms.hasConsumableSeed(user) == false) {
-            require(randoms.hasRequestedSeed(user) == false, "You cannot request another random seed");
+        //*
+        if(!randoms.hasConsumableSeed(user)) {
+            require(!randoms.hasRequestedSeed(user), "You cannot request another random seed");
             randoms.getRandomNumber(user, unsafeRandom());
             return false;
-        }*/
+        }
+        //*/
         return true;
     }
 
     function fight(uint256 char, uint256 wep, uint32 target) external
             isCharacterOwner(char)
             isWeaponOwner(wep)
-            isTargetValid(char, wep, target) {
-        if(hasSafeRandom(msg.sender))
-            performFight(msg.sender, char, wep, target);
+            isTargetValid(char, wep, target)
+            needsRandom {
+        performFight(msg.sender, char, wep, target);
     }
 
     function performFight(address user, uint256 char, uint256 wep, uint32 target) private {
@@ -245,41 +232,35 @@ contract CryptoBlades is Initializable, Util {
         return false;
     }
 
-    function mintCharacter() public requestPayFromPlayer(mintCharacterFee) {
+    function mintCharacter() public requestPayFromPlayer(mintCharacterFee) needsRandom {
+        require(characters.balanceOf(msg.sender) <= characterLimit,
+            string(abi.encodePacked("You can only have ",staminaCostFight," characters!")));
+        payContract(msg.sender, mintCharacterFee);
 
-        if(hasSafeRandom(msg.sender)) {
-            require(characters.balanceOf(msg.sender) <= characterLimit,
-                string(abi.encodePacked("You can only have ",staminaCostFight," characters!")));
-            payContract(msg.sender, mintCharacterFee);
+        uint256 seed = randoms.consumeSeed(msg.sender);
+        characters.mint(msg.sender, seed);
 
-            uint256 seed = randoms.consumeSeed(msg.sender);
-            characters.mint(msg.sender, seed);
-
-            // first weapon free with a character mint, max 1 star
-            if(weapons.balanceOf(msg.sender) == 0) {
-                weapons.performMintWeapon(msg.sender,
-                    weapons.getRandomProperties(0, combineSeeds(seed,100)),
-                    weapons.getRandomStat(4, 200, seed, 101),
-                    0, // stat2
-                    0, // stat3
-                    weapons.getRandomCosmetic(seed,102), // blade
-                    weapons.getRandomCosmetic(seed,103), // crossguard
-                    weapons.getRandomCosmetic(seed,104), // grip
-                    weapons.getRandomCosmetic(seed,105) // pommel
-                );
-            }
+        // first weapon free with a character mint, max 1 star
+        if(weapons.balanceOf(msg.sender) == 0) {
+            weapons.performMintWeapon(msg.sender,
+                weapons.getRandomProperties(0, combineSeeds(seed,100)),
+                weapons.getRandomStat(4, 200, seed, 101),
+                0, // stat2
+                0, // stat3
+                weapons.getRandomCosmetic(seed,102), // blade
+                weapons.getRandomCosmetic(seed,103), // crossguard
+                weapons.getRandomCosmetic(seed,104), // grip
+                weapons.getRandomCosmetic(seed,105) // pommel
+            );
         }
     }
 
-    function mintWeapon() public requestPayFromPlayer(mintWeaponFee) {
+    function mintWeapon() public requestPayFromPlayer(mintWeaponFee) needsRandom {
+        skillToken.approve(address(this), usdToSkill(mintWeaponFee));
+        payContract(msg.sender, mintWeaponFee);
 
-        if(hasSafeRandom(msg.sender)) {
-            IERC20(skillTokens).approve(address(this), usdToSkill(mintWeaponFee));
-            payContract(msg.sender, mintWeaponFee);
-
-            uint256 seed = randoms.consumeSeed(msg.sender);
-            weapons.mint(msg.sender, seed);
-        }
+        uint256 seed = randoms.consumeSeed(msg.sender);
+        weapons.mint(msg.sender, seed);
     }
 
     function mintWeaponTest() public {
@@ -313,15 +294,14 @@ contract CryptoBlades is Initializable, Util {
     }
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
-            isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
+            isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee)
+            needsRandom {
 
-        if(hasSafeRandom(msg.sender)) {
-            require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
-            payContract(msg.sender, reforgeWeaponFee);
+        require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
+        payContract(msg.sender, reforgeWeaponFee);
 
-            uint256 seed = randoms.consumeSeed(msg.sender);
-            weapons.reforge(reforgeID, burnID, seed);
-        }
+        uint256 seed = randoms.consumeSeed(msg.sender);
+        weapons.reforge(reforgeID, burnID, seed);
     }
 
     modifier restricted() {
@@ -339,6 +319,12 @@ contract CryptoBlades is Initializable, Util {
         _;
     }
 
+    modifier needsRandom() {
+        if(hasSafeRandom(msg.sender)) {
+            _;
+        }
+    }
+
     modifier isTargetValid(uint256 character, uint256 weapon, uint32 target) {
         bool foundMatch = false;
         uint32[4] memory targets = getTargets(character, weapon);
@@ -353,9 +339,9 @@ contract CryptoBlades is Initializable, Util {
 
     modifier requestPayFromPlayer(int128 baseAmount) {
         uint256 convertedAmount = usdToSkill(baseAmount);
-        require(IERC20(skillTokens).balanceOf(msg.sender) >= convertedAmount,
+        require(skillToken.balanceOf(msg.sender) >= convertedAmount,
             string(abi.encodePacked("Not enough SKILL! Need ",uint2str(convertedAmount))));
-        IERC20(skillTokens).approve(address(this), convertedAmount);
+        skillToken.approve(address(this), convertedAmount);
         _;
     }
 
@@ -365,7 +351,7 @@ contract CryptoBlades is Initializable, Util {
 
     function payContractConverted(address playerAddress, uint256 convertedAmount) public restricted {
         // must use requestPayFromPlayer modifier to approve on the initial function!
-        IERC20(skillTokens).transferFrom(playerAddress, address(this), convertedAmount);
+        skillToken.transferFrom(playerAddress, address(this), convertedAmount);
     }
 
     function payPlayer(address playerAddress, int128 baseAmount) public restricted {
@@ -373,8 +359,8 @@ contract CryptoBlades is Initializable, Util {
     }
 
     function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
-        IERC20(skillTokens).approve(address(this), convertedAmount);
-        IERC20(skillTokens).transferFrom(address(this), playerAddress, convertedAmount);
+        skillToken.approve(address(this), convertedAmount);
+        skillToken.transferFrom(address(this), playerAddress, convertedAmount);
     }
 
     function approveContractCharacterFor(uint256 characterID, address playerAddress) public restricted {
@@ -386,19 +372,19 @@ contract CryptoBlades is Initializable, Util {
     }
 
     function getContractSkillBalance() public view returns (uint256) {
-        return IERC20(skillTokens).balanceOf(address(this));
+        return skillToken.balanceOf(address(this));
     }
 
     function usdToSkill(int128 originalPrice) public view returns (uint256) {
         // returns a skill cost adjusted for its original price based on USD
         // The format of the int256 returned by the interface is not specified so i assume it's 128.128 fixed point
-        (,int256 usdPerSkill,,,) = AggregatorV3Interface(priceChecker).latestRoundData();
+        (,int256 usdPerSkill,,,) = priceChecker.latestRoundData();
         return originalPrice.div(usdPerSkill.from128x128()).mulu(1 ether);
-        //return getContractSkillBalance().divu(IERC20(skillTokens).totalSupply()).mul(originalPrice.fromUInt()).toUInt();
+        //return getContractSkillBalance().divu(skillToken.totalSupply()).mul(originalPrice.fromUInt()).toUInt();
     }
 
     function getApprovedBalance() external view returns (uint256) {
-        return IERC20(skillTokens).allowance(msg.sender, address(this));
+        return skillToken.allowance(msg.sender, address(this));
     }
 
     function getCurrentHour() public view returns (uint256) {

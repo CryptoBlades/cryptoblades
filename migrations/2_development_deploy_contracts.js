@@ -9,6 +9,9 @@ const ExperimentToken2 = artifacts.require("ExperimentToken2");
 const CryptoBlades = artifacts.require("CryptoBlades");
 const Characters = artifacts.require("Characters");
 const Weapons = artifacts.require("Weapons");
+const DummyPriceService = artifacts.require("DummyPriceService");
+const DummyRandoms = artifacts.require("DummyRandoms");
+// const ChainlinkRandoms = artifacts.require("ChainlinkRandoms");
 const SkillStakingRewardsUpgradeable = artifacts.require("SkillStakingRewardsUpgradeable");
 const LPStakingRewardsUpgradeable = artifacts.require("LPStakingRewardsUpgradeable");
 const LP2StakingRewardsUpgradeable = artifacts.require("LP2StakingRewardsUpgradeable");
@@ -28,10 +31,19 @@ module.exports = async function (deployer, network, accounts) {
     const expToken2 = await ExperimentToken2.deployed();
 
     const charas = await deployProxy(Characters, [], { deployer });
+
     const weps = await deployProxy(Weapons, [], { deployer });
-    const game = await deployProxy(CryptoBlades, [token.address, charas.address, weps.address], { deployer });
+
+    const priceChecker = await deployer.deploy(DummyPriceService);
+
+    const randoms = await deployProxy(DummyRandoms, [], { deployer });
+    // const randoms = await deployer.deploy(ChainlinkRandoms);
+
+    const game = await deployProxy(CryptoBlades, [token.address, charas.address, weps.address, priceChecker.address, randoms.address], { deployer });
+
     await charas.setMain(game.address);
     await weps.setMain(game.address);
+    await randoms.setMain(game.address);
 
     await deployProxy(SkillStakingRewardsUpgradeable, [accounts[0], accounts[0], token.address, token.address, 60], { deployer });
     await deployProxy(LPStakingRewardsUpgradeable, [accounts[0], accounts[0], token.address, expToken.address, 0], { deployer });

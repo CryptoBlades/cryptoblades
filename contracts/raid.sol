@@ -38,8 +38,8 @@ abstract contract Raid is Initializable, MultiAccessUpgradeable {
         grantAccess(gameContract);
         game = CryptoBlades(gameContract);
         // maybe just use extra params for NFT addresses?
-        characters = Characters(game.getCharactersAddress());
-        weapons = Weapons(game.getWeaponsAddress());
+        characters = Characters(game.characters());
+        weapons = Weapons(game.weapons());
     }
 
     function reset() public virtual restricted {

@@ -1,6 +1,8 @@
 [contracts/*.sol]
+indent_style = space
+indent_size = 4
 trim_trailing_whitespace = true
 
-[migrations/*.js]
+[{migrations,test}/*.js]
 indent_style = space
 indent_size = 2

@@ -41,8 +41,8 @@ export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean):
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as any, cryptoBladesContractAddr);
   const [charactersAddr, weaponsAddr] = await Promise.all([
-    CryptoBlades.methods.getCharactersAddress().call(),
-    CryptoBlades.methods.getWeaponsAddress().call(),
+    CryptoBlades.methods.characters().call(),
+    CryptoBlades.methods.weapons().call(),
   ]);
   const Characters = new web3.eth.Contract(charactersAbi as any, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as any, weaponsAddr);
