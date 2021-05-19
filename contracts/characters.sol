@@ -8,7 +8,7 @@ import "./util.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 
 
-contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable, Util {
+contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable {
 
     address private main;
 
@@ -60,7 +60,7 @@ contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable, Uti
 
         uint16 xp = 0;
         uint8 level = 0; // 1
-        uint8 trait = uint8(randomSeededMinMax(0,3,seed));
+        uint8 trait = uint8(RandomUtil.randomSeededMinMax(0,3,seed));
         uint64 staminaTimestamp = uint64(now - getStaminaMaxWait());
         uint64 appearance = 0;
 
@@ -158,7 +158,7 @@ contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable, Uti
         uint64 timestamp = getStaminaTimestamp(id);
         if(timestamp  > now)
             return 0;
-        
+
         uint256 points = (now - timestamp) / secondsPerStamina;
         if(points > maxStamina) {
             points = maxStamina;

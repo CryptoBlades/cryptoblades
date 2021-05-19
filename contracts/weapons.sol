@@ -7,7 +7,7 @@ import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./util.sol";
 
-contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable, Util {
+contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
@@ -107,8 +107,8 @@ contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable, Util {
 
     function getRandomProperties(uint256 stars, uint256 seed) public pure returns (uint16) {
         return uint16((stars & 0x7) // stars aren't randomized here!
-            | ((randomSeededMinMax(0,3,combineSeeds(seed,1)) << 3) & 0x3) // trait
-            | ((randomSeededMinMax(0,124,combineSeeds(seed,2)) << 5) & 0x7F)); // statPattern
+            | ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) << 3) & 0x3) // trait
+            | ((RandomUtil.randomSeededMinMax(0,124,RandomUtil.combineSeeds(seed,2)) << 5) & 0x7F)); // statPattern
     }
 
     function getRandomStar(uint256 seed) private pure returns (uint8) {
@@ -151,11 +151,11 @@ contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable, Util {
     }
 
     function getRandomStat(uint16 minRoll, uint16 maxRoll, uint256 seed, uint256 seed2) public pure returns (uint16) {
-        return uint16(randomSeededMinMax(minRoll, maxRoll,combineSeeds(seed, seed2)));
+        return uint16(RandomUtil.randomSeededMinMax(minRoll, maxRoll,RandomUtil.combineSeeds(seed, seed2)));
     }
 
     function getRandomCosmetic(uint256 seed, uint256 seed2) public pure returns (uint8) {
-        return uint8(randomSeededMinMax(0, 255, combineSeeds(seed, seed2)));
+        return uint8(RandomUtil.randomSeededMinMax(0, 255, RandomUtil.combineSeeds(seed, seed2)));
     }
 
     function getStatMinRoll(uint256 stars) public pure returns (uint16) {
@@ -325,10 +325,10 @@ contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable, Util {
 
         uint8 stars = getStarsFromProperties(wep.properties);
 
-        if(stars >= 4 && randomSeededMinMax(0,1, seed) == 0) {
+        if(stars >= 4 && RandomUtil.randomSeededMinMax(0,1, seed) == 0) {
             wep.stat2 = wep.stat2 + 1;
         }
-        if(stars >= 5 && randomSeededMinMax(0,1, combineSeeds(seed,1)) == 0) {
+        if(stars >= 5 && RandomUtil.randomSeededMinMax(0,1, RandomUtil.combineSeeds(seed,1)) == 0) {
             wep.stat3 = wep.stat3 + 1;
         }
     }

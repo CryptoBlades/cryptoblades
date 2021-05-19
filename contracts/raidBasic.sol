@@ -4,7 +4,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./raid.sol";
 
-contract RaidBasic is Initializable, Raid, Util {
+contract RaidBasic is Initializable, Raid {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
@@ -66,7 +66,7 @@ contract RaidBasic is Initializable, Raid, Util {
         }
 
         for(uint i = 0; i < weaponDrops.length; i++) {
-            Raider memory r = raiders[randomSeededMinMax(0, raiders.length-1, combineSeeds(seed,i))];
+            Raider memory r = raiders[RandomUtil.randomSeededMinMax(0, raiders.length-1, RandomUtil.combineSeeds(seed,i))];
             game.approveContractWeaponFor(weaponDrops[i], address(this));
             weapons.transferFrom(address(game), address(r.owner), weaponDrops[i]);
             emit WeaponWinner(address(r.owner), weaponDrops[i]);

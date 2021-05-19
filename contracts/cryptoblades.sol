@@ -11,7 +11,7 @@ import "./weapons.sol";
 import "./util.sol";
 import "./dummyPriceService.sol";
 
-contract CryptoBlades is Initializable, Util {
+contract CryptoBlades is Initializable {
 
     using ABDKMath64x64 for int256;
     using ABDKMath64x64 for int128;
@@ -56,6 +56,8 @@ contract CryptoBlades is Initializable, Util {
     int128 public mintWeaponFee;
     int128 public reforgeWeaponFee;
 
+    uint256 nonce;
+
     event FightOutcome(uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
 
     function getMySkill() external view returns (uint256) {
@@ -92,7 +94,8 @@ contract CryptoBlades is Initializable, Util {
         require(!hasRandom(), "Sender already has random seed");
 
         if(!randoms.hasRequestedSeed(msg.sender)) {
-            randoms.getRandomNumber(msg.sender, unsafeRandom());
+            uint256 _nonce = nonce++;
+            randoms.getRandomNumber(msg.sender, RandomUtil.unsafeRandom(_nonce));
         }
     }
 
@@ -111,7 +114,7 @@ contract CryptoBlades is Initializable, Util {
 
         uint256 seed = randoms.consumeSeed(user);
         uint24 playerRoll = getPlayerPowerRoll(char, wep, uint8((target >> 24) & 0xFF)/*monster trait*/, seed);
-        uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target), combineSeeds(seed,1));
+        uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target), RandomUtil.combineSeeds(seed,1));
 
         if(playerRoll >= monsterRoll) {
             characters.gainXp(char, getXpGainForFight(char, wep, target));
@@ -138,14 +141,14 @@ contract CryptoBlades is Initializable, Util {
     function getPlayerPowerRoll(uint256 char, uint256 wep, uint8 monsterTrait, uint256 seed) internal view returns(uint24) {
         // roll for fights, non deterministic
         uint256 playerPower = getPlayerFinalPower(char, wep);
-        playerPower = plusMinus10PercentSeeded(playerPower, seed);
+        playerPower = RandomUtil.plusMinus10PercentSeeded(playerPower, seed);
 
         return uint24(getPlayerTraitBonusAgainst(characters.getTrait(char), weapons.getTrait(wep), monsterTrait).mulu(playerPower));
     }
 
     function getMonsterPowerRoll(uint24 monsterPower, uint256 seed) internal pure returns(uint24) {
         // roll for fights, non deterministic
-        return uint24(plusMinus10PercentSeeded(monsterPower, seed));
+        return uint24(RandomUtil.plusMinus10PercentSeeded(monsterPower, seed));
     }
 
     function getPlayerPower(uint256 char, uint256 wep) public view returns (uint24) {
@@ -185,14 +188,14 @@ contract CryptoBlades is Initializable, Util {
         seedArray[2] = characters.getXp(char);
         seedArray[3] = characters.getStaminaTimestamp(char);
         seedArray[4] = getCurrentHour();
-        uint256 baseSeed = combineSeeds(seedArray);
+        uint256 baseSeed = RandomUtil.combineSeeds(seedArray);
 
         uint32[4] memory targets;
         for(uint i = 0; i < targets.length; i++) {
             // we alter seed per-index or they would be all the same
-            uint256 indexSeed = randomSeeded(combineSeeds(baseSeed, i));
-            uint24 monsterPower = uint24(plusMinus10PercentSeeded(playerPower, indexSeed));
-            uint256 monsterTrait = randomSeededMinMax(0,3, indexSeed);
+            uint256 indexSeed = RandomUtil.randomSeeded(RandomUtil.combineSeeds(baseSeed, i));
+            uint24 monsterPower = uint24(RandomUtil.plusMinus10PercentSeeded(playerPower, indexSeed));
+            uint256 monsterTrait = RandomUtil.randomSeededMinMax(0,3, indexSeed);
             targets[i] = monsterPower | (uint32(monsterTrait) << 24);
         }
 
@@ -242,7 +245,7 @@ contract CryptoBlades is Initializable, Util {
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
             weapons.performMintWeapon(msg.sender,
-                weapons.getRandomProperties(0, combineSeeds(seed,100)),
+                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100)),
                 weapons.getRandomStat(4, 200, seed, 101),
                 0, // stat2
                 0, // stat3
@@ -275,14 +278,15 @@ contract CryptoBlades is Initializable, Util {
     }
 
     function mintWeaponTest2(uint stars) private {
-        weapons.performMintWeapon(msg.sender, weapons.getRandomProperties(stars, unsafeRandom()),
-            uint16(randomSeededMinMax(0, 128, unsafeRandom())),
-            uint16(randomSeededMinMax(0, 128, unsafeRandom())),
-            uint16(randomSeededMinMax(0, 128, unsafeRandom())),
-            uint8(randomSeededMinMax(0, 255, unsafeRandom())),
-            uint8(randomSeededMinMax(0, 255, unsafeRandom())),
-            uint8(randomSeededMinMax(0, 255, unsafeRandom())),
-            uint8(randomSeededMinMax(0, 255, unsafeRandom()))
+        nonce += 7;
+        weapons.performMintWeapon(msg.sender, weapons.getRandomProperties(stars, RandomUtil.unsafeRandom(nonce)),
+            uint16(RandomUtil.randomSeededMinMax(0, 128, RandomUtil.unsafeRandom(nonce+1))),
+            uint16(RandomUtil.randomSeededMinMax(0, 128, RandomUtil.unsafeRandom(nonce+2))),
+            uint16(RandomUtil.randomSeededMinMax(0, 128, RandomUtil.unsafeRandom(nonce+3))),
+            uint8(RandomUtil.randomSeededMinMax(0, 255, RandomUtil.unsafeRandom(nonce+4))),
+            uint8(RandomUtil.randomSeededMinMax(0, 255, RandomUtil.unsafeRandom(nonce+5))),
+            uint8(RandomUtil.randomSeededMinMax(0, 255, RandomUtil.unsafeRandom(nonce+6))),
+            uint8(RandomUtil.randomSeededMinMax(0, 255, RandomUtil.unsafeRandom(nonce+7)))
         );
     }
 
@@ -338,7 +342,7 @@ contract CryptoBlades is Initializable, Util {
     modifier requestPayFromPlayer(int128 baseAmount) {
         uint256 convertedAmount = usdToSkill(baseAmount);
         require(skillToken.balanceOf(msg.sender) >= convertedAmount,
-            string(abi.encodePacked("Not enough SKILL! Need ",uint2str(convertedAmount))));
+            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(convertedAmount))));
         skillToken.approve(address(this), convertedAmount);
         _;
     }
