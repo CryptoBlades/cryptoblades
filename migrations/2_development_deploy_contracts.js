@@ -57,6 +57,6 @@ module.exports = async function (deployer, network, accounts) {
     // This next bit is temporary, we'll handle approvals through the frontend somehow
     await token.approve(game.address, "1000000000000000000000000");
     await game.giveMeSkill("1000000000000000000000"); // 1000 skill, test token value is $5 usd
-    await game.mintCharacter();
+    // await game.mintCharacter();
   }
 };

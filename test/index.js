@@ -1,7 +1,11 @@
+const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
+
 const SkillToken = artifacts.require('SkillToken');
 const CryptoBlades = artifacts.require('CryptoBlades');
 const Characters = artifacts.require('Characters');
 const Weapons = artifacts.require('Weapons');
+const DummyRandoms = artifacts.require('DummyRandoms');
+const DummyPriceService = artifacts.require('DummyPriceService');
 
 function assertEventEmitted(events, eventName, ...args) {
   assert.isTrue(events.some(log => {
@@ -57,27 +61,60 @@ contract('Characters', accounts => {
 });
 
 contract('CryptoBlades', accounts => {
-  let token, cryptoBlades, characters, weapons;
+  let token, cryptoBlades, characters, weapons, priceChecker, randoms;
   beforeEach(async () => {
     token = await SkillToken.deployed();
 
     cryptoBlades = await CryptoBlades.new();
     characters = await Characters.new();
     weapons = await Weapons.new();
+    priceChecker = await DummyPriceService.new();
+    randoms = await DummyRandoms.new();
 
     await Promise.all([
-      cryptoBlades.initialize(token.address, characters.address, weapons.address),
+      cryptoBlades.initialize(token.address, characters.address, weapons.address, priceChecker.address, randoms.address),
       characters.initialize().then(() => characters.setMain(cryptoBlades.address)),
       weapons.initialize().then(() => weapons.setMain(cryptoBlades.address)),
+      randoms.initialize().then(() => randoms.setMain(cryptoBlades.address)),
+      token.approve(cryptoBlades.address, '100' + '0'.repeat(18)),
     ]);
+  });
+
+  describe('needsRandom', () => {
+    it('causes a revert if no random seed is available', async () => {
+      assert.isFalse(await cryptoBlades.hasRandom());
+
+      await expectRevert(cryptoBlades.mintCharacter({ from: accounts[0] }), "Sender has no random seed");
+    });
+
+    it('works if the sender has a random seed', async () => {
+      await cryptoBlades.requestRandom(); // random is fulfilled immediately in dummy impl
+
+      assert.isTrue(await cryptoBlades.hasRandom());
+
+      const res = await cryptoBlades.mintCharacter({ from: accounts[0] });
+      assert.isObject(res);
+    });
   });
 
   describe('mintCharacter', () => {
     it('should work', async () => {
-      await cryptoBlades.mintCharacter({ from: accounts[0] });
+      await cryptoBlades.requestRandom(); // random is fulfilled immediately in dummy impl
 
-      const events = await characters.getPastEvents();
-      assertEventEmitted(events, 'NewCharacter', 0);
+      const { tx } = await cryptoBlades.mintCharacter({ from: accounts[0] });
+
+      await expectEvent.inTransaction(tx, characters, 'NewCharacter', { character: '0', minter: accounts[0] });
+    });
+
+    it('consumes random', async () => {
+      await cryptoBlades.requestRandom(); // random is fulfilled immediately in dummy impl
+
+      assert.isTrue(await cryptoBlades.hasRandom());
+
+      const res = await cryptoBlades.mintCharacter({ from: accounts[0] });
+      assert.isObject(res);
+
+      assert.isFalse(await cryptoBlades.hasRandom());
     });
   });
 });

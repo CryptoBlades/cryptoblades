@@ -15,6 +15,7 @@
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.11",
     "@openzeppelin/truffle-upgrades": "^1.5.2",
     "lerna": "^4.0.0",
     "ohm-js": "^15.5.0",

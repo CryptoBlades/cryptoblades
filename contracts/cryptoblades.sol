@@ -84,17 +84,16 @@ contract CryptoBlades is Initializable, Util {
         return tokens;
     }
 
-    function hasSafeRandom(address user) private returns (bool) {
-        // TODO re enable this when VRF is available
-        // returns true if this user has a random number waiting
-        //*
-        if(!randoms.hasConsumableSeed(user)) {
-            require(!randoms.hasRequestedSeed(user), "You cannot request another random seed");
-            randoms.getRandomNumber(user, unsafeRandom());
-            return false;
+    function hasRandom() public view returns (bool) {
+        return randoms.hasConsumableSeed(msg.sender);
+    }
+
+    function requestRandom() external {
+        require(!hasRandom(), "Sender already has random seed");
+
+        if(!randoms.hasRequestedSeed(msg.sender)) {
+            randoms.getRandomNumber(msg.sender, unsafeRandom());
         }
-        //*/
-        return true;
     }
 
     function fight(uint256 char, uint256 wep, uint32 target) external
@@ -159,7 +158,7 @@ contract CryptoBlades is Initializable, Util {
         return uint24((characters.getPower(char).fromUInt().mul(weapons.getPowerMultiplierForTrait(wep, characters.getTrait(char)))).toUInt());
     }
 
-    function getPlayerTraitBonusAgainst(uint8 characterTrait, uint8 weaponTrait, uint8 monsterTrait) public view returns(int128) {
+    function getPlayerTraitBonusAgainst(uint8 characterTrait, uint8 weaponTrait, uint8 monsterTrait) public pure returns(int128) {
         int128 traitBonus = uint256(1).fromUInt();
         int128 oneBonus = uint256(75).divu(1000);
         if(characterTrait == weaponTrait) {
@@ -320,9 +319,8 @@ contract CryptoBlades is Initializable, Util {
     }
 
     modifier needsRandom() {
-        if(hasSafeRandom(msg.sender)) {
-            _;
-        }
+        require(randoms.hasConsumableSeed(msg.sender), "Sender has no random seed");
+        _;
     }
 
     modifier isTargetValid(uint256 character, uint256 weapon, uint32 target) {
