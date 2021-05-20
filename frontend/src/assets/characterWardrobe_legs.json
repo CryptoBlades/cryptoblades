@@ -1,0 +1,230 @@
+{
+  "0": [
+    "humwar_Trousers"
+  ],
+  "1": [
+    "humwar_Trousers",
+    "humwar_Belt_Sheathe",
+    "humwar_Dagger_Pouch"
+  ],
+  "2": [
+    "humwar_Trousers",
+    "humwar_Gladiator_Belt"
+  ],
+  "3": [
+    "humwar_Trousers",
+    "humwar_Gladiator_Belt",
+    "humwar_Pteruges"
+  ],
+  "4": [
+    "humwar_Trousers",
+    "humwar_Faulds"
+  ],
+  "5": [
+    "humwar_Trousers",
+    "humwar_Faulds",
+    "humwar_Belt_Sheathe",
+    "humwar_Dagger_Pouch"
+  ],
+  "6": [
+    "humwar_Skirt",
+    "humwar_Gladiator_Belt"
+  ],
+  "7": [
+    "humwar_Skirt",
+    "humwar_Gladiator_Belt",
+    "humwar_Pteruges"
+  ],
+  "8": [
+    "humwar_Skirt",
+    "humwar_Faulds"
+  ],
+  "9": [
+    "humwar_Skirt",
+    "humwar_Faulds",
+    "humwar_Pteruges"
+  ],
+  "10": [
+    "humwar_Skirt",
+    "humwar_Faulds",
+    "humwar_Belt_Sheathe",
+    "humwar_Dagger_Pouch"
+  ],
+  "11": [
+    "humwar_Skirt",
+    "humwar_Faulds",
+    "humwar_Pteruges",
+    "humwar_Belt_Sheathe",
+    "humwar_Dagger_Pouch"
+  ],
+  "12": [
+    "elfwar_ElfPants"
+  ],
+  "13": [
+    "elfwar_ElfPants",
+    "elfwar_Belt_2",
+    "elfwar_Belt_1"
+  ],
+  "14": [
+    "elfwar_ElfPants",
+    "elfwar_Belt_2",
+    "elfwar_Belt_1",
+    "elfwar_Hip_Armor_1",
+    "elfwar_Hip_Armor_2"
+  ],
+  "15": [
+    "elfwar_ElfPants",
+    "elfwar_Belt_2",
+    "elfwar_Belt_1",
+    "elfwar_Hip_Armor_1",
+    "elfwar_Hip_Armor_2",
+    "elfwar_ElfHangers"
+  ],
+  "16": [
+    "elfwar_ElfPants",
+    "elfwar_Sash",
+    "elfwar_Waistcloth"
+  ],
+  "17": [
+    "elfwar_ElfPants",
+    "elfwar_Sash",
+    "elfwar_Waistcloth",
+    "elfwar_ElfHangers"
+  ],
+  "18": [
+    "elfwar_ElfPants",
+    "elfwar_Sash",
+    "elfwar_Waistcloth",
+    "elfwar_Hip_Armor_1",
+    "elfwar_Hip_Armor_2"
+  ],
+  "19": [
+    "elfwar_ElfPants",
+    "elfwar_Sash",
+    "elfwar_Waistcloth",
+    "elfwar_Hip_Armor_1",
+    "elfwar_Hip_Armor_2",
+    "elfwar_ElfHangers"
+  ],
+  "20": [
+    "hfowar_HalfOrcPants"
+  ],
+  "21": [
+    "hfowar_HalfOrcPants",
+    "hfowar_Skirt",
+    "hfowar_Skirt_Hangers",
+    "hfowar_Fur_Skirt"
+  ],
+  "22": [
+    "hfowar_Skirt",
+    "hfowar_Skirt_Hangers",
+    "hfowar_Fur_Skirt"
+  ],
+  "23": [
+    "humwar_Trousers",
+    "arm2_Armor2_Big_Belt",
+    "arm2_Armor2_Waistwrap"
+  ],
+  "24": [
+    "humwar_Trousers",
+    "arm2_Armor2_Big_Belt",
+    "arm2_Armor2_Waistwrap",
+    "arm2_Armor2_Thigh_L2",
+    "arm2_Armor2_Thigh_L2Fur",
+    "arm2_Armor2_Thigh_R2",
+    "arm2_Armor2_Thigh_R2Fur"
+  ],
+  "25": [
+    "humwar_Trousers",
+    "arm2_Armor2_Big_Belt",
+    "arm2_Armor2_Waistwrap",
+    "arm2_Armor2_Thigh_L2",
+    "arm2_Armor2_Thigh_L2Fur",
+    "arm2_Armor2_Thigh_R2",
+    "arm2_Armor2_Thigh_R2Fur",
+    "arm2_Armor2_Thigh_L1",
+    "arm2_Armor2_Thigh_L1Fur",
+    "arm2_Armor2_Thigh_R1",
+    "arm2_Armor2_Thigh_R1Fur"
+  ],
+  "26": [
+    "humwar_Trousers",
+    "arm5_Armor5_Belt",
+    "arm5_Armor5_Waistwrap"
+  ],
+  "27": [
+    "humwar_Trousers",
+    "arm5_Armor5_Belt",
+    "arm5_Armor5_Waistwrap",
+    "arm5_Armor5_Pouch_L",
+    "arm5_Armor5_Pouch_R"
+  ],
+  "28": [
+    "arm6_UniversalTrousers",
+    "arm6_Armor6Faulds"
+  ],
+  "29": [
+    "arm6_UniversalTrousers",
+    "arm6_Armor6Faulds",
+    "arm6_Armor6Skirt"
+  ],
+  "30": [
+    "arm6_UniversalTrousers",
+    "arm7_Armor7Faulds"
+  ],
+  "31": [
+    "arm6_UniversalTrousers",
+    "arm8_Armor8Faulds"
+  ],
+  "32": [
+    "arm6_UniversalTrousers",
+    "arm8_Armor8Waistwrap"
+  ],
+  "33": [
+    "arm6_UniversalTrousers",
+    "arm8_Armor8Faulds",
+    "arm8_Armor8Waistwrap"
+  ],
+  "34": [
+    "arm6_UniversalTrousers",
+    "arm9_Armor9Faulds1",
+    "arm9_Armor9Faulds2"
+  ],
+  "35": [
+    "arm6_UniversalTrousers",
+    "arm9_Armor9Faulds1",
+    "arm9_Armor9Faulds2",
+    "arm9_Armor9HipL",
+    "arm9_Armor9_HipR"
+  ],
+  "36": [
+    "arm6_UniversalTrousers",
+    "arm10_Armor10Faulds"
+  ],
+  "37": [
+    "arm6_UniversalTrousers",
+    "arm10_Armor10CuisseLeft",
+    "arm10_Armor10CuisseRight"
+  ],
+  "38": [
+    "arm6_UniversalTrousers",
+    "arm10_Armor10CuisseLeft",
+    "arm10_Armor10CuisseRight",
+    "arm10_Armor10KneewrapLeft",
+    "arm10_Armor10KneewrapRight"
+  ],
+  "39": [
+    "arm6_UniversalTrousers",
+    "arm10_Armor10CuisseLeft",
+    "arm10_Armor10CuisseRight",
+    "arm10_Armor10Faulds"
+  ],
+  "40": [
+    "arm6_UniversalTrousers",
+    "arm10_Armor10CuisseLeft",
+    "arm10_Armor10CuisseRight",
+    "arm10_Armor10Faulds",
+    "arm10_Armor10KneewrapLeft",
+    "arm10_Armor10KneewrapRight"
+  ]
+}

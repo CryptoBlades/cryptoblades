@@ -1,0 +1,442 @@
+{
+  "0": [
+    "humwar_Undergarment_Top",
+    "humwar_Pauldron_L"
+  ],
+  "1": [
+    "humwar_Undergarment_Top",
+    "humwar_Pauldron_L",
+    "humwar_Pauldron_R"
+  ],
+  "2": [
+    "humwar_Undergarment_Top",
+    "humwar_Pauldron_L",
+    "humwar_Spaulder_Chest"
+  ],
+  "3": [
+    "humwar_Undergarment_Top",
+    "humwar_Pauldron_L",
+    "humwar_Spaulder_Chest",
+    "humwar_Spaulder_R"
+  ],
+  "4": [
+    "humwar_Undergarment_Top",
+    "humwar_Spaulder_Chest",
+    "humwar_Spaulder_L",
+    "humwar_Spaulder_R"
+  ],
+  "5": [
+    "elfwar_Curiass"
+  ],
+  "6": [
+    "elfwar_Curiass",
+    "elfwar_Shirt",
+    "elfwar_Sleeves"
+  ],
+  "7": [
+    "elfwar_Shirt",
+    "elfwar_Sleeves"
+  ],
+  "8": [
+    "elfwar_Shirt",
+    "elfwar_Sleeves",
+    "elfwar_ElfVest",
+    "elfwar_Vest_Belts"
+  ],
+  "9": [
+    "elfwar_ElfVest",
+    "elfwar_Vest_Belts"
+  ],
+  "10": [
+    "hfowar_Fur_Chest",
+    "hfowar_Waist_Wrap",
+    "hfowar_Waistwrap_Loops",
+    "hfowar_X_Belt_1"
+  ],
+  "11": [
+    "hfowar_Fur_Chest",
+    "hfowar_Waist_Wrap",
+    "hfowar_Waistwrap_Loops",
+    "hfowar_X_Belt_1",
+    "hfowar_Pauldron_R",
+    "hfowar_Pauldron_Spikes_R",
+    "hfowar_Fur_Pauldron_R"
+  ],
+  "12": [
+    "hfowar_Fur_Chest",
+    "hfowar_Waist_Wrap",
+    "hfowar_Waistwrap_Loops",
+    "hfowar_X_Belt_2"
+  ],
+  "13": [
+    "hfowar_Fur_Chest",
+    "hfowar_Waist_Wrap",
+    "hfowar_Waistwrap_Loops",
+    "hfowar_X_Belt_2",
+    "hfowar_Pauldron_L",
+    "hfowar_Pauldron_Spikes_L",
+    "hfowar_Fur_Pauldron_L"
+  ],
+  "14": [
+    "hfowar_Fur_Chest",
+    "hfowar_Waist_Wrap",
+    "hfowar_Waistwrap_Loops",
+    "hfowar_X_Belt_1",
+    "hfowar_X_Belt_2",
+    "hfowar_Pauldron_R",
+    "hfowar_Pauldron_Spikes_R",
+    "hfowar_Fur_Pauldron_R",
+    "hfowar_Pauldron_L",
+    "hfowar_Pauldron_Spikes_L",
+    "hfowar_Fur_Pauldron_L"
+  ],
+  "15": [
+    "hfowar_Fur_Chest",
+    "hfowar_X_Belt_1",
+    "hfowar_X_Belt_2"
+  ],
+  "16": [
+    "hfowar_Fur_Chest",
+    "hfowar_X_Belt_1",
+    "hfowar_X_Belt_2",
+    "hfowar_Pauldron_R",
+    "hfowar_Pauldron_Spikes_R",
+    "hfowar_Fur_Pauldron_R",
+    "hfowar_Pauldron_L",
+    "hfowar_Pauldron_Spikes_L",
+    "hfowar_Fur_Pauldron_L"
+  ],
+  "17": [
+    "hfowar_Vest",
+    "hfowar_Vest_Belt_1",
+    "hfowar_Vest_Belt_2",
+    "hfowar_X_Belt_2"
+  ],
+  "18": [
+    "hfowar_Vest",
+    "hfowar_Vest_Belt_1",
+    "hfowar_Vest_Belt_2",
+    "hfowar_X_Belt_2",
+    "hfowar_Pauldron_L",
+    "hfowar_Pauldron_Spikes_L",
+    "hfowar_Fur_Pauldron_L"
+  ],
+  "19": [
+    "hfowar_Vest",
+    "hfowar_Vest_Belt_1",
+    "hfowar_Vest_Belt_2",
+    "hfowar_X_Belt_2",
+    "hfowar_X_Belt_1"
+  ],
+  "20": [
+    "hfowar_Vest",
+    "hfowar_Vest_Belt_1",
+    "hfowar_Vest_Belt_2",
+    "hfowar_X_Belt_2",
+    "hfowar_X_Belt_1",
+    "hfowar_Pauldron_L",
+    "hfowar_Pauldron_Spikes_L",
+    "hfowar_Fur_Pauldron_L",
+    "hfowar_Pauldron_R",
+    "hfowar_Pauldron_Spikes_R",
+    "hfowar_Fur_Pauldron_R"
+  ],
+  "21": [
+    "arm1_Armor1_Main",
+    "arm1_Armor1_Collar"
+  ],
+  "22": [
+    "arm1_Armor1_Main",
+    "arm1_Armor1_Collar",
+    "arm1_Armor1_Straps",
+    "arm1_Armor1_Pouch"
+  ],
+  "23": [
+    "arm1_Armor1_Main",
+    "arm1_Armor1_Collar",
+    "arm1_Armor1_Waistcloth",
+    "arm1_Armor1_Pouch"
+  ],
+  "24": [
+    "arm1_Armor1_Main",
+    "arm1_Armor1_Collar",
+    "arm1_Armor1_Pauldron_L1",
+    "arm1_Armor1_Pauldron_L2",
+    "arm1_Armor1_Pouch",
+    "arm1_Armor1_Straps",
+    "arm1_Armor1_Waistcloth"
+  ],
+  "25": [
+    "arm1_Armor1_Main",
+    "arm1_Armor1_Collar",
+    "arm1_Armor1_Pauldron_L1",
+    "arm1_Armor1_Pauldron_L2",
+    "arm1_Armor1_Pauldron_R1",
+    "arm1_Armor1_Pauldron_R2",
+    "arm1_Armor1_Pouch",
+    "arm1_Armor1_Straps",
+    "arm1_Armor1_Waistcloth"
+  ],
+  "26": [
+    "arm1_Armor1_Main",
+    "arm1_Armor1_Collar",
+    "arm1_Armor1_Pauldron_L1",
+    "arm1_Armor1_Pauldron_L2",
+    "arm1_Armor1_Pauldron_R1",
+    "arm1_Armor1_Pauldron_R2",
+    "arm1_Armor1_Straps"
+  ],
+  "27": [
+    "arm2_Armor2_Main",
+    "arm2_Armor2_Gorget",
+    "arm2_Armor2_Neckbelts",
+    "arm2_Armor2_Chest_Fur",
+    "arm2_Armor2_Tabbard",
+    "arm2_Armor2_Tabbard_Belt"
+  ],
+  "28": [
+    "arm2_Armor2_Main",
+    "arm2_Armor2_Gorget",
+    "arm2_Armor2_Neckbelts",
+    "arm2_Armor2_Chest_Fur",
+    "arm2_Armor2_Tabbard",
+    "arm2_Armor2_Tabbard_Belt",
+    "arm2_Armor2_Pauldron_L1",
+    "arm2_Armor2_Pauldron_L2",
+    "arm2_Armor2_Pauldron_LFur",
+    "arm2_Armor2_Pauldron_R1",
+    "arm2_Armor2_Pauldron_R2",
+    "arm2_Armor2_Pauldron_RFur"
+  ],
+  "29": [
+    "arm2_Armor2_Main",
+    "arm2_Armor2_Gorget",
+    "arm2_Armor2_Chest_Fur",
+    "arm2_Armor2_Tabbard",
+    "arm2_Armor2_Tabbard_Belt",
+    "arm2_Armor2_Pauldron_L1",
+    "arm2_Armor2_Pauldron_L2",
+    "arm2_Armor2_Pauldron_LFur",
+    "arm2_Armor2_Pauldron_R1",
+    "arm2_Armor2_Pauldron_R2",
+    "arm2_Armor2_Pauldron_RFur"
+  ],
+  "30": [
+    "arm4_Armor4_Main",
+    "arm4_Armor4_Padding_Shoulder_L",
+    "arm4_Armor4_Padding_Shoulder_R"
+  ],
+  "31": [
+    "arm4_Armor4_Main",
+    "arm4_Armor4_Padding_Shoulder_L",
+    "arm4_Armor4_Padding_Shoulder_R",
+    "arm4_Armor4_Padding_Lower",
+    "arm4_Armor4_Padding_Mid",
+    "arm4_Armor4_Stitches"
+  ],
+  "32": [
+    "arm4_Armor4_Main",
+    "arm4_Armor4_Padding_Shoulder_L",
+    "arm4_Armor4_Padding_Shoulder_R",
+    "arm4_Armor4_Padding_Lower",
+    "arm4_Armor4_Padding_Mid",
+    "arm4_Armor4_Stitches",
+    "arm4_Armor4_Padding_Upper"
+  ],
+  "33": [
+    "arm5_Armor5_Main",
+    "arm5_Armor5_ShoulderL",
+    "arm5_Armor5_ShoulderR"
+  ],
+  "34": [
+    "arm5_Armor5_Main",
+    "arm5_Armor5_ShoulderL",
+    "arm5_Armor5_ShoulderR",
+    "arm5_Armor5_SleeveL",
+    "arm5_Armor5_SleeveR"
+  ],
+  "35": [
+    "arm5_Armor5_Main",
+    "arm5_Armor5_ShoulderL",
+    "arm5_Armor5_ShoulderR",
+    "arm5_Armor5_SleeveL",
+    "arm5_Armor5_SleeveR",
+    "arm5_Armor5_Pauldron_Belt",
+    "arm5_Armor5_Pauldron1"
+  ],
+  "36": [
+    "arm5_Armor5_Main",
+    "arm5_Armor5_ShoulderL",
+    "arm5_Armor5_ShoulderR",
+    "arm5_Armor5_SleeveL",
+    "arm5_Armor5_SleeveR",
+    "arm5_Armor5_Pauldron_Belt",
+    "arm5_Armor5_Pauldron1",
+    "arm5_Armor5_Pauldron2"
+  ],
+  "37": [
+    "arm6_Armor6Curiass",
+    "arm6_UniversalCollar",
+    "arm6_Armor6Belt"
+  ],
+  "38": [
+    "arm6_Armor6Curiass",
+    "arm6_UniversalCollar",
+    "arm6_Armor6Belt",
+    "arm6_Armor6Sleeves"
+  ],
+  "39": [
+    "arm6_Armor6Curiass",
+    "arm6_UniversalCollar",
+    "arm6_Armor6Belt",
+    "arm6_Armor6PauldronL",
+    "arm6_Armor6PauldronStrapsL",
+    "arm6_Armor6PauldronR",
+    "arm6_Armor6PauldronStrapsR"
+  ],
+  "40": [
+    "arm6_Armor6Curiass",
+    "arm6_UniversalCollar",
+    "arm6_Armor6Belt",
+    "arm6_Armor6PauldronL",
+    "arm6_Armor6PauldronStrapsL",
+    "arm6_Armor6PauldronR",
+    "arm6_Armor6PauldronStrapsR",
+    "arm6_Armor6RerebraceL",
+    "arm6_Armor6RerebraceR"
+  ],
+  "41": [
+    "arm6_Armor6Curiass",
+    "arm6_UniversalCollar",
+    "arm6_Armor6Belt",
+    "arm6_Armor6Sleeves",
+    "arm6_Armor6PauldronL",
+    "arm6_Armor6PauldronStrapsL",
+    "arm6_Armor6PauldronR",
+    "arm6_Armor6PauldronStrapsR"
+  ],
+  "42": [
+    "arm6_Armor6Curiass",
+    "arm6_UniversalCollar",
+    "arm6_Armor6Belt",
+    "arm6_Armor6Sleeves",
+    "arm6_Armor6PauldronL",
+    "arm6_Armor6PauldronStrapsL",
+    "arm6_Armor6PauldronR",
+    "arm6_Armor6PauldronStrapsR",
+    "arm6_Armor6RerebraceL",
+    "arm6_Armor6RerebraceR"
+  ],
+  "43": [
+    "arm7_Armor7Curiass",
+    "arm7_Armor7CuriassWings",
+    "arm6_UniversalCollar",
+    "arm7_Armor7LeatherVest"
+  ],
+  "44": [
+    "arm7_Armor7Curiass",
+    "arm7_Armor7CuriassWings",
+    "arm6_UniversalCollar",
+    "arm7_Armor7LeatherVest",
+    "arm7_Armor7Sleeves"
+  ],
+  "45": [
+    "arm7_Armor7Curiass",
+    "arm7_Armor7CuriassWings",
+    "arm6_UniversalCollar",
+    "arm7_Armor7LeatherVest",
+    "arm7_Armor7PauldronL",
+    "arm7_Armor7PauldronR"
+  ],
+  "46": [
+    "arm7_Armor7Curiass",
+    "arm7_Armor7CuriassWings",
+    "arm6_UniversalCollar",
+    "arm7_Armor7LeatherVest",
+    "arm7_Armor7PauldronL",
+    "arm7_Armor7PauldrnoR",
+    "arm7_Armor7Sleeves"
+  ],
+  "47": [
+    "arm8_Armor8Curiass"
+  ],
+  "48": [
+    "arm8_Armor8Curiass",
+    "arm8_Armor8Sleeves"
+  ],
+  "49": [
+    "arm8_Armor8Curiass",
+    "arm8_Armor8PauldronL",
+    "arm8_Armor8PauldronR"
+  ],
+  "50": [
+    "arm8_Armor8Curiass",
+    "arm8_Armor8Sleeves",
+    "arm8_Armor8PauldronR"
+  ],
+  "51": [
+    "arm8_Armor8Curiass",
+    "arm8_Armor8Sleeves",
+    "arm8_Armor8PauldronL"
+  ],
+  "52": [
+    "arm8_Armor8Curiass",
+    "arm8_Armor8Sleeves",
+    "arm8_Armor8PauldronL",
+    "arm8_Armor8PauldronR"
+  ],
+  "53": [
+    "arm9_Armor9Curiass",
+    "arm9_Armor9CuriassV"
+  ],
+  "54": [
+    "arm9_Armor9Curiass",
+    "arm9_Armor9CuriassV",
+    "arm9_Armor9Sleeves"
+  ],
+  "55": [
+    "arm9_Armor9Curiass",
+    "arm9_Armor9CuriassV",
+    "arm9_Armor9PauldronL",
+    "arm9_Armor9PauldronR"
+  ],
+  "56": [
+    "arm9_Armor9Curiass",
+    "arm9_Armor9CuriassV",
+    "arm9_Armor9PauldronL",
+    "arm9_Armor9PauldronR",
+    "arm9_Armor9Sleeves"
+  ],
+  "57": [
+    "arm10_Armor10Curiass",
+    "arm6_UniversalCollar",
+    "arm10_Armor10Sleeves"
+  ],
+  "58": [
+    "arm10_Armor10Curiass",
+    "arm6_UniversalCollar",
+    "arm10_Armor10Sleeves",
+    "arm10_Armor10PauldronRight",
+    "arm10_Armor10PauldronStrapRight",
+    "arm10_Armor10BesagewRight"
+  ],
+  "59": [
+    "arm10_Armor10Curiass",
+    "arm6_UniversalCollar",
+    "arm10_Armor10Sleeves",
+    "arm10_Armor10PauldronLeft",
+    "arm10_Armor10PauldronStrapLeft",
+    "arm10_Armor10BesagewLeft"
+  ],
+  "60": [
+    "arm10_Armor10Curiass",
+    "arm6_UniversalCollar",
+    "arm10_Armor10Sleeves",
+    "arm10_Armor10PauldronLeft",
+    "arm10_Armor10PauldronStrapLeft",
+    "arm10_Armor10BesagewLeft",
+    "arm10_Armor10PauldronRight",
+    "arm10_Armor10PauldronStrapRight",
+    "arm10_Armor10BesagewRight"
+  ]
+}

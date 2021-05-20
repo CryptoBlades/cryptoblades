@@ -1,0 +1,49 @@
+{
+  "0": [
+    "hair_ElfHairLong"
+  ],
+  "1": [
+    "hair_ElfHairShort",
+    "hair_ElfHairPonytail"
+  ],
+  "2": [
+    "hair_HumanMaleHairLong",
+    "hair_HumanHairLong"
+  ],
+  "3": [
+    "hair_HumanMaleHairShort",
+    "hair_HumanHairShort"
+  ],
+  "4": [
+    "hair_OrcMaleHairLong",
+    "hair_OrcHairLong"
+  ],
+  "5": [
+    "hair_OrcMaleHairShort",
+    "hair_OrcHairShort"
+  ],
+  "6": [
+    "humwar_Barbute"
+  ],
+  "7": [
+    "elfwar_Hood_1",
+    "elfwar_Hood_2"
+  ],
+  "8": [
+    "elfwar_Hood_1",
+    "elfwar_Hood_2",
+    "elfwar_Mask"
+  ],
+  "9": [
+    "arm6_Armor6CrusaderHelmet"
+  ],
+  "10": [
+    "arm8_Armor8PaladinHelmet"
+  ],
+  "11": [
+    "arm9_Armor9Helmet"
+  ],
+  "12": [
+    "arm10_Armor10Helmet"
+  ]
+}

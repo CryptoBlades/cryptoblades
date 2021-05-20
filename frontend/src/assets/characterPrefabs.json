@@ -1,0 +1,3472 @@
+{
+  "arm5_Armor5_Belt": {
+    "model": "armor5/Armor5_Belt.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_Main": {
+    "model": "armor5/Armor5_Main.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_Pauldron1": {
+    "model": "armor5/Armor5_Pauldron1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_Pauldron2": {
+    "model": "armor5/Armor5_Pauldron2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_Pauldron_Belt": {
+    "model": "armor5/Armor5_Pauldron_Belt.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_Pouch_L": {
+    "model": "armor5/Armor5_Pouch_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_Pouch_R": {
+    "model": "armor5/Armor5_Pouch_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_ShoulderL": {
+    "model": "armor5/Armor5_ShoulderL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_ShoulderR": {
+    "model": "armor5/Armor5_ShoulderR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_SleeveL": {
+    "model": "armor5/Armor5_SleeveL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_SleeveR": {
+    "model": "armor5/Armor5_SleeveR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm5_Armor5_Waistwrap": {
+    "model": "armor5/Armor5_Waistwrap.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor5/leather5_leather5_set_AlbedoOpacity.png",
+    "normal": "armor5/leather5_leather5_set_Normal.png",
+    "ao": null,
+    "spec": "armor5/leather5_leather5_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Big_Belt": {
+    "model": "armor2/Armor2_Big_Belt.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Chest_Fur": {
+    "model": "armor2/Armor2_Chest_Fur.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_fur_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_fur_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_fur_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Gorget": {
+    "model": "armor2/Armor2_Gorget.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Main": {
+    "model": "armor2/Armor2_Main.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Neckbelts": {
+    "model": "armor2/Armor2_Neckbelts.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Pauldron_L1": {
+    "model": "armor2/Armor2_Pauldron_L1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Pauldron_L2": {
+    "model": "armor2/Armor2_Pauldron_L2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Pauldron_LFur": {
+    "model": "armor2/Armor2_Pauldron_LFur.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_fur_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_fur_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_fur_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Pauldron_R1": {
+    "model": "armor2/Armor2_Pauldron_R1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Pauldron_R2": {
+    "model": "armor2/Armor2_Pauldron_R2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Pauldron_RFur": {
+    "model": "armor2/Armor2_Pauldron_RFur.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_fur_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_fur_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_fur_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Tabbard": {
+    "model": "armor2/Armor2_Tabbard.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Tabbard_Belt": {
+    "model": "armor2/Armor2_Tabbard_Belt.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Thigh_L1": {
+    "model": "armor2/Armor2_Thigh_L1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Thigh_L1Fur": {
+    "model": "armor2/Armor2_Thigh_L1Fur.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_fur_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_fur_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_fur_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Thigh_L2": {
+    "model": "armor2/Armor2_Thigh_L2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Thigh_L2Fur": {
+    "model": "armor2/Armor2_Thigh_L2Fur.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_fur_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_fur_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_fur_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Thigh_R1": {
+    "model": "armor2/Armor2_Thigh_R1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Thigh_R1Fur": {
+    "model": "armor2/Armor2_Thigh_R1Fur.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_fur_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_fur_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_fur_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Thigh_R2": {
+    "model": "armor2/Armor2_Thigh_R2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Thigh_R2Fur": {
+    "model": "armor2/Armor2_Thigh_R2Fur.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_fur_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_fur_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_fur_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Waist_FurMain": {
+    "model": "armor2/Armor2_Waist_FurMain.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_fur_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_fur_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_fur_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Waist_FurWrap": {
+    "model": "armor2/Armor2_Waist_FurWrap.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_fur_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_fur_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_fur_set_MetalAOHeightRough.png"
+  },
+  "arm2_Armor2_Waistwrap": {
+    "model": "armor2/Armor2_Waistwrap.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor2/Leather2_leather2_set_AlbedoOpacity.png",
+    "normal": "armor2/Leather2_leather2_set_Normal.png",
+    "ao": null,
+    "spec": "armor2/Leather2_leather2_set_MetalAOHeightRough.png"
+  },
+  "hair_ElfHairLong": {
+    "model": null,
+    "maleModel": "hair/MaleElfHairLong.FBX",
+    "femaleModel": "hair/ElfHairLong.FBX",
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_ElfHairLongBarbute": {
+    "model": null,
+    "maleModel": "hair/ElfHairLongBarbute.FBX",
+    "femaleModel": null,
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_ElfHairShort": {
+    "model": null,
+    "maleModel": "hair/ElfHairShort.FBX",
+    "femaleModel": null,
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_HumanMaleHairBuzz": {
+    "model": null,
+    "maleModel": "hair/HumanMaleHairBuzz.FBX",
+    "femaleModel": null,
+    "color": "A18731FF",
+    "albedo": "hair/Hair_Buzz_diff.png",
+    "normal": "hair/Hair_Buzz_normals.png",
+    "ao": null,
+    "spec": "hair/Hair_Buzz_spec.png"
+  },
+  "hair_HumanMaleHairLong": {
+    "model": null,
+    "maleModel": "hair/HumanMaleHairLong.FBX",
+    "femaleModel": null,
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_HumanMaleHairShort": {
+    "model": null,
+    "maleModel": "hair/MaleHairShort.FBX",
+    "femaleModel": null,
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_MaleElfHairLong": {
+    "model": null,
+    "maleModel": "hair/MaleElfHairLong.FBX",
+    "femaleModel": null,
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_MaleHairShort": {
+    "model": null,
+    "maleModel": "hair/MaleHairShort.FBX",
+    "femaleModel": null,
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_OrcMaleHairHood": {
+    "model": null,
+    "maleModel": "hair/OrcMaleHairHood.FBX",
+    "femaleModel": null,
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_OrcMaleHairLong": {
+    "model": null,
+    "maleModel": "hair/OrcMaleHairLong.FBX",
+    "femaleModel": null,
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_OrcMaleHairPonytail": {
+    "model": null,
+    "maleModel": "hair/OrcMaleHairPonytail.FBX",
+    "femaleModel": null,
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_OrcMaleHairShort": {
+    "model": null,
+    "maleModel": "hair/OrcMaleHairShort.FBX",
+    "femaleModel": null,
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "arm10_Armor10ArmwrapLeft": {
+    "model": "armor10/Armor10ArmwrapLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10ArmwrapRight": {
+    "model": "armor10/Armor10ArmwrapRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10BesagewLeft": {
+    "model": "armor10/Armor10BesagewLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10BesagewRight": {
+    "model": "armor10/Armor10BesagewRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10CouterLeft": {
+    "model": "armor10/Armor10CouterLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10CouterRight": {
+    "model": "armor10/Armor10CouterRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10CuisseLeft": {
+    "model": "armor10/Armor10CuisseLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5C_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5C_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5C_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10CuisseRight": {
+    "model": "armor10/Armor10CuisseRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5C_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5C_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5C_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10Curiass": {
+    "model": "armor10/Armor10Curiass.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5B_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5B_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5B_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10Faulds": {
+    "model": "armor10/Armor10Faulds.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5C_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5C_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5C_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10GauntletLeft": {
+    "model": "armor10/Armor10GauntletLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_heavygauntlets_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_heavygauntlets_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_heavygauntlets_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10GauntletRight": {
+    "model": "armor10/Armor10GauntletRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_heavygauntlets_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_heavygauntlets_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_heavygauntlets_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10GreaveLeft": {
+    "model": "armor10/Armor10GreaveLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_heavyboots_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_heavyboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_heavyboots_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10GreaveRight": {
+    "model": "armor10/Armor10GreaveRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_heavyboots_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_heavyboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_heavyboots_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10Helmet": {
+    "model": "armor10/Armor10Helmet.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_heavyhelmet_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_heavyhelmet_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_heavyhelmet_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10KneewrapLeft": {
+    "model": "armor10/Armor10KneewrapLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5C_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5C_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5C_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10KneewrapRight": {
+    "model": "armor10/Armor10KneewrapRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5C_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5C_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5C_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10PauldronLeft": {
+    "model": "armor10/Armor10PauldronLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10PauldronRight": {
+    "model": "armor10/Armor10PauldronRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10PauldronStrapLeft": {
+    "model": "armor10/Armor10PauldronStrapLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10PauldronStrapRight": {
+    "model": "armor10/Armor10PauldronStrapRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10PoleynLeft": {
+    "model": "armor10/Armor10PoleynLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_heavyboots_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_heavyboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_heavyboots_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10PoleynRight": {
+    "model": "armor10/Armor10PoleynRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_heavyboots_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_heavyboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_heavyboots_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10SabatonLeft": {
+    "model": "armor10/Armor10SabatonLeft.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_heavyboots_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_heavyboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_heavyboots_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10SabatonRight": {
+    "model": "armor10/Armor10SabatonRight.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_heavyboots_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_heavyboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_heavyboots_mat_MetalAOHeightRough.png"
+  },
+  "arm10_Armor10Sleeves": {
+    "model": "armor10/Armor10Sleeves.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor10A_platearmor5A_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor10A_platearmor5A_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor10A_platearmor5A_mat_MetalAOHeightRough.png"
+  },
+  "arm10_UniversalTrousers": {
+    "model": "armor10/UniversalTrousers.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor6A_TrousersSG1_AlbedoHeight.png",
+    "normal": "armor10/Armor6A_TrousersSG1_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor6A_TrousersSG1_MetalAOHeightRough.png"
+  },
+  "arm10_UniversalCollar": {
+    "model": "armor10/UniversalCollar.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor10/Armor6A_UniversalCollar_mat_AlbedoHeight.png",
+    "normal": "armor10/Armor6A_UniversalCollar_mat_Normal.png",
+    "ao": null,
+    "spec": "armor10/Armor6A_UniversalCollar_mat_MetalAOHeightRough.png"
+  },
+  "arm4_Armor4_Main": {
+    "model": "armor4/Armor4_Main.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor4/Leather4_leather4_set_AlbedoOpacity.png",
+    "normal": "armor4/Leather4_leather4_set_Normal.png",
+    "ao": null,
+    "spec": "armor4/Leather4_leather4_set_MetalAOHeightRough.png"
+  },
+  "arm4_Armor4_Padding_Lower": {
+    "model": "armor4/Armor4_Padding_Lower.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor4/Leather4_leather4_set_AlbedoOpacity.png",
+    "normal": "armor4/Leather4_leather4_set_Normal.png",
+    "ao": null,
+    "spec": "armor4/Leather4_leather4_set_MetalAOHeightRough.png"
+  },
+  "arm4_Armor4_Padding_Mid": {
+    "model": "armor4/Armor4_Padding_Mid.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor4/Leather4_leather4_set_AlbedoOpacity.png",
+    "normal": "armor4/Leather4_leather4_set_Normal.png",
+    "ao": null,
+    "spec": "armor4/Leather4_leather4_set_MetalAOHeightRough.png"
+  },
+  "arm4_Armor4_Padding_Shoulder_L": {
+    "model": "armor4/Armor4_Padding_Shoulder_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor4/Leather4_leather4_set_AlbedoOpacity.png",
+    "normal": "armor4/Leather4_leather4_set_Normal.png",
+    "ao": null,
+    "spec": "armor4/Leather4_leather4_set_MetalAOHeightRough.png"
+  },
+  "arm4_Armor4_Padding_Shoulder_R": {
+    "model": "armor4/Armor4_Padding_Shoulder_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor4/Leather4_leather4_set_AlbedoOpacity.png",
+    "normal": "armor4/Leather4_leather4_set_Normal.png",
+    "ao": null,
+    "spec": "armor4/Leather4_leather4_set_MetalAOHeightRough.png"
+  },
+  "arm4_Armor4_Padding_Upper": {
+    "model": "armor4/Armor4_Padding_Upper.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor4/Leather4_leather4_set_AlbedoOpacity.png",
+    "normal": "armor4/Leather4_leather4_set_Normal.png",
+    "ao": null,
+    "spec": "armor4/Leather4_leather4_set_MetalAOHeightRough.png"
+  },
+  "arm4_Armor4_Stitches": {
+    "model": "armor4/Armor4_Stitches.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor4/Leather4_leather4_set_AlbedoOpacity.png",
+    "normal": "armor4/Leather4_leather4_set_Normal.png",
+    "ao": null,
+    "spec": "armor4/Leather4_leather4_set_MetalAOHeightRough.png"
+  },
+  "hair_ElfHairLongHooded": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "hair/ElfHairLongHooded.FBX",
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_ElfHairPonytail": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "hair/ElfHairPonytail.FBX",
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_ElfHairPonytailHooded": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "hair/ElfHairPonytailHooded.FBX",
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_HumanHairLong": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "hair/HumanHairLong.FBX",
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_HumanHairShort": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "hair/HumanHairShort.FBX",
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_OrcHairLong": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "hair/OrcHairLong.FBX",
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_OrcHairPonytail": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "hair/OrcHairPonytail.FBX",
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "hair_OrcHairShort": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "hair/OrcHairShort.FBX",
+    "color": "652F14FF",
+    "albedo": "hair/Clumps1_color_w-alpha_03.png",
+    "normal": "hair/Clumps1_normal.png",
+    "ao": null,
+    "spec": null
+  },
+  "arm6_Armor6Belt": {
+    "model": "armor6/Armor6Belt.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1b_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1b_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6CouterL": {
+    "model": "armor6/Armor6CouterL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6CouterR": {
+    "model": "armor6/Armor6CouterR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6CrusaderHelmet": {
+    "model": "armor6/Armor6CrusaderHelmet.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_CrusaderHelm_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_CrusaderHelm_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_CrusaderHelm_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6Curiass": {
+    "model": "armor6/Armor6Curiass.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1b_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1b_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6Faulds": {
+    "model": "armor6/Armor6Faulds.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1b_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1b_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6PauldronL": {
+    "model": "armor6/Armor6PauldronL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6PauldronR": {
+    "model": "armor6/Armor6PauldronR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6PauldronStrapsL": {
+    "model": "armor6/Armor6PauldronStrapsL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6PauldronStrapsR": {
+    "model": "armor6/Armor6PauldronStrapsR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6PoleynL": {
+    "model": "armor6/Armor6PoleynL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6PoleynR": {
+    "model": "armor6/Armor6PoleynR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6RerebraceL": {
+    "model": "armor6/Armor6RerebraceL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6RerebraceR": {
+    "model": "armor6/Armor6RerebraceR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6Skirt": {
+    "model": "armor6/Armor6Skirt.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1b_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1b_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6Sleeves": {
+    "model": "armor6/Armor6Sleeves.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6StandardBootL": {
+    "model": "armor6/Armor6StandardBootL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_StandardBoot_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_StandardBoot_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_StandardBoot_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6StandardBootR": {
+    "model": "armor6/Armor6StandardBootR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_StandardBoot_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_StandardBoot_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_StandardBoot_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6StandardGauntletL": {
+    "model": "armor6/Armor6StandardGauntletL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_StandardGauntlet_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_StandardGauntlet_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_StandardGauntlet_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6StandardGauntletR": {
+    "model": "armor6/Armor6StandardGauntletR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_StandardGauntlet_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_StandardGauntlet_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_StandardGauntlet_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6VambraceL": {
+    "model": "armor6/Armor6VambraceL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_Armor6VambraceR": {
+    "model": "armor6/Armor6VambraceR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_PlateArmor1a_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_PlateArmor1a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_PlateArmor1a_mat_MetalAOHeightRough.png"
+  },
+  "arm6_UniversalCollar": {
+    "model": "armor6/UniversalCollar.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_UniversalCollar_mat_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_UniversalCollar_mat_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_UniversalCollar_mat_MetalAOHeightRough.png"
+  },
+  "arm6_UniversalTrousers": {
+    "model": "armor6/UniversalTrousers.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor6/Armor6A_TrousersSG1_AlbedoHeight.png",
+    "normal": "armor6/Armor6A_TrousersSG1_Normal.png",
+    "ao": null,
+    "spec": "armor6/Armor6A_TrousersSG1_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7Curiass": {
+    "model": "armor7/Armor7Curiass.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_platearmor2b_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_platearmor2b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_platearmor2b_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7CuriassWings": {
+    "model": "armor7/Armor7CuriassWings.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_platearmor2b_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_platearmor2b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_platearmor2b_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7ElvenBootL": {
+    "model": "armor7/Armor7ElvenBootL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_elvenboots_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_elvenboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_elvenboots_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7ElvenBootR": {
+    "model": "armor7/Armor7ElvenBootR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_elvenboots_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_elvenboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_elvenboots_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7ElvenGauntletL": {
+    "model": "armor7/Armor7ElvenGauntletL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_elvengauntlet_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_elvengauntlet_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_elvengauntlet_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7ElvenGauntletR": {
+    "model": "armor7/Armor7ElvenGauntletR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_elvengauntlet_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_elvengauntlet_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_elvengauntlet_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7Faulds": {
+    "model": "armor7/Armor7Faulds.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_platearmor2a_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_platearmor2a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_platearmor2a_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7LeatherVest": {
+    "model": "armor7/Armor7LeatherVest.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_platearmor2a_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_platearmor2a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_platearmor2a_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7PauldronL": {
+    "model": "armor7/Armor7PauldronL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_platearmor2b_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_platearmor2b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_platearmor2b_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7PauldronR": {
+    "model": "armor7/Armor7PauldronR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_platearmor2b_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_platearmor2b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_platearmor2b_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7PoleynL": {
+    "model": "armor7/Armor7PoleynL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_platearmor2a_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_platearmor2a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_platearmor2a_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7PoleynR": {
+    "model": "armor7/Armor7PoleynR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_platearmor2a_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_platearmor2a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_platearmor2a_mat_MetalAOHeightRough.png"
+  },
+  "arm7_Armor7Sleeves": {
+    "model": "armor7/Armor7Sleeves.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor7A_platearmor2b_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor7A_platearmor2b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor7A_platearmor2b_mat_MetalAOHeightRough.png"
+  },
+  "arm7_UniversalTrousers": {
+    "model": "armor7/UniversalTrousers.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor6A_TrousersSG1_AlbedoHeight.png",
+    "normal": "armor7/Armor6A_TrousersSG1_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor6A_TrousersSG1_MetalAOHeightRough.png"
+  },
+  "arm7_UniversalCollar": {
+    "model": "armor7/UniversalCollar.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor7/Armor6A_UniversalCollar_mat_AlbedoHeight.png",
+    "normal": "armor7/Armor6A_UniversalCollar_mat_Normal.png",
+    "ao": null,
+    "spec": "armor7/Armor6A_UniversalCollar_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8CouterL": {
+    "model": "armor8/Armor8CouterL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3a_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3a_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8CouterR": {
+    "model": "armor8/Armor8CouterR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3a_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3a_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8Curiass": {
+    "model": "armor8/Armor8Curiass.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3b_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3b_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8Faulds": {
+    "model": "armor8/Armor8Faulds.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3a_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3a_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8KneewrapL": {
+    "model": "armor8/Armor8KneewrapL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3a_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3a_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8KneewrapR": {
+    "model": "armor8/Armor8KneewrapR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3a_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3a_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8PaladinBootL": {
+    "model": "armor8/Armor8PaladinBootL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_paladinboots_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_paladinboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_paladinboots_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8PaladinBootR": {
+    "model": "armor8/Armor8PaladinBootR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_paladinboots_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_paladinboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_paladinboots_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8PaladinGauntletL": {
+    "model": "armor8/Armor8PaladinGauntletL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_paladingauntlets_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_paladingauntlets_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_paladingauntlets_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8PaladinGauntletR": {
+    "model": "armor8/Armor8PaladinGauntletR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_paladingauntlets_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_paladingauntlets_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_paladingauntlets_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8PaladinHelmet": {
+    "model": "armor8/Armor8PaladinHelmet.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_paladinhelm_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_paladinhelm_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_paladinhelm_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8PauldronL": {
+    "model": "armor8/Armor8PauldronL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3b_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3b_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8PauldronR": {
+    "model": "armor8/Armor8PauldronR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3b_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3b_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8PoleynL": {
+    "model": "armor8/Armor8PoleynL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3a_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3a_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8PoleynR": {
+    "model": "armor8/Armor8PoleynR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3a_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3a_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8Sleeves": {
+    "model": "armor8/Armor8Sleeves.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3a_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3a_mat_MetalAOHeightRough.png"
+  },
+  "arm8_Armor8Waistwrap": {
+    "model": "armor8/Armor8Waistwrap.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor8A_platearmor3b_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor8A_platearmor3b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor8A_platearmor3b_mat_MetalAOHeightRough.png"
+  },
+  "arm8_UniversalTrousers": {
+    "model": "armor8/UniversalTrousers.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor6A_TrousersSG1_AlbedoHeight.png",
+    "normal": "armor8/Armor6A_TrousersSG1_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor6A_TrousersSG1_MetalAOHeightRough.png"
+  },
+  "arm8_UniversalCollar": {
+    "model": "armor8/UniversalCollar.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor8/Armor6A_UniversalCollar_mat_AlbedoHeight.png",
+    "normal": "armor8/Armor6A_UniversalCollar_mat_Normal.png",
+    "ao": null,
+    "spec": "armor8/Armor6A_UniversalCollar_mat_MetalAOHeightRough.png"
+  },
+  "humwar_Armband_L": {
+    "model": null,
+    "maleModel": "humanWardrobe/Armband_L.FBX",
+    "femaleModel": "humanWardrobe/F_Armband_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Couter_albedoOpacity.png",
+    "normal": "humanWardrobe/Couter_normal.png",
+    "ao": "humanWardrobe/Couter_ambientOcclusion.png",
+    "spec": "humanWardrobe/Couter_metallicRoughness.png"
+  },
+  "humwar_Armband_R": {
+    "model": null,
+    "maleModel": "humanWardrobe/Armband_R.FBX",
+    "femaleModel": "humanWardrobe/F_Armband_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Couter_albedoOpacity.png",
+    "normal": "humanWardrobe/Couter_normal.png",
+    "ao": "humanWardrobe/Couter_ambientOcclusion.png",
+    "spec": "humanWardrobe/Couter_metallicRoughness.png"
+  },
+  "humwar_Barbute": {
+    "model": null,
+    "maleModel": "humanWardrobe/Barbute.FBX",
+    "femaleModel": "humanWardrobe/F_Barbute.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Barbute_albedoOpacity.png",
+    "normal": "humanWardrobe/Barbute_normal.png",
+    "ao": "humanWardrobe/Barbute_ambientOcclusion.png",
+    "spec": "humanWardrobe/Barbute_metallicRoughness.png"
+  },
+  "humwar_Belt_Sheathe": {
+    "model": null,
+    "maleModel": "humanWardrobe/Belt_Sheathe.FBX",
+    "femaleModel": "humanWardrobe/F_Belt_Sheathe.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Faulds_albedoOpacity.png",
+    "normal": "humanWardrobe/Faulds_normal.png",
+    "ao": "humanWardrobe/Faulds_ambientOcclusion.png",
+    "spec": "humanWardrobe/Faulds_metallicRoughness.png"
+  },
+  "humwar_Boot_Flaps_Left": {
+    "model": null,
+    "maleModel": "humanWardrobe/Boot_Flaps_Left.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Boot_Flaps_Right": {
+    "model": null,
+    "maleModel": "humanWardrobe/Boot_Flaps_Right.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Boot_Left": {
+    "model": null,
+    "maleModel": "humanWardrobe/Boot_Left.FBX",
+    "femaleModel": "humanWardrobe/F_Boot_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Boot_Right": {
+    "model": null,
+    "maleModel": "humanWardrobe/Boot_Right.FBX",
+    "femaleModel": "humanWardrobe/F_Boot_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Bracer_L": {
+    "model": null,
+    "maleModel": "humanWardrobe/Bracer_L.FBX",
+    "femaleModel": "humanWardrobe/F_Bracer_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Bracers_albedoOpacity.png",
+    "normal": "humanWardrobe/Bracers_normal.png",
+    "ao": "humanWardrobe/Bracers_ambientOcclusion.png",
+    "spec": "humanWardrobe/Bracers_metallicRoughness.png"
+  },
+  "humwar_Bracer_R": {
+    "model": null,
+    "maleModel": "humanWardrobe/Bracer_R.FBX",
+    "femaleModel": "humanWardrobe/F_Bracer_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Bracers_albedoOpacity.png",
+    "normal": "humanWardrobe/Bracers_normal.png",
+    "ao": "humanWardrobe/Bracers_ambientOcclusion.png",
+    "spec": "humanWardrobe/Bracers_metallicRoughness.png"
+  },
+  "humwar_Cloth_Tasset": {
+    "model": null,
+    "maleModel": "humanWardrobe/Cloth_Tasset.FBX",
+    "femaleModel": "humanWardrobe/F_Cloth_Tasset.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Skirt_albedoOpacity.png",
+    "normal": "humanWardrobe/Skirt_normal.png",
+    "ao": "humanWardrobe/Skirt_ambientOcclusion.png",
+    "spec": "humanWardrobe/Skirt_metallicRoughness.png"
+  },
+  "humwar_Couter_L": {
+    "model": null,
+    "maleModel": "humanWardrobe/Couter_L.FBX",
+    "femaleModel": "humanWardrobe/F_Couter_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Couter_albedoOpacity.png",
+    "normal": "humanWardrobe/Couter_normal.png",
+    "ao": "humanWardrobe/Couter_ambientOcclusion.png",
+    "spec": "humanWardrobe/Couter_metallicRoughness.png"
+  },
+  "humwar_Couter_R": {
+    "model": null,
+    "maleModel": "humanWardrobe/Couter_R.FBX",
+    "femaleModel": "humanWardrobe/F_Couter_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Couter_albedoOpacity.png",
+    "normal": "humanWardrobe/Couter_normal.png",
+    "ao": "humanWardrobe/Couter_ambientOcclusion.png",
+    "spec": "humanWardrobe/Couter_metallicRoughness.png"
+  },
+  "humwar_DaggerMesh": {
+    "model": null,
+    "maleModel": "humanWardrobe/Dagger.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Dagger_albedoOpacity.png",
+    "normal": "humanWardrobe/Dagger_normal.png",
+    "ao": "humanWardrobe/Dagger_ambientOcclusion.png",
+    "spec": "humanWardrobe/Dagger_metallicRoughness.png"
+  },
+  "humwar_Dagger_Pouch": {
+    "model": null,
+    "maleModel": "humanWardrobe/Dagger_Pouch.FBX",
+    "femaleModel": "humanWardrobe/F_Dagger_Pouch.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Dagger_albedoOpacity.png",
+    "normal": "humanWardrobe/Dagger_normal.png",
+    "ao": "humanWardrobe/Dagger_ambientOcclusion.png",
+    "spec": "humanWardrobe/Dagger_metallicRoughness.png"
+  },
+  "humwar_Faulds": {
+    "model": null,
+    "maleModel": "humanWardrobe/Faulds.FBX",
+    "femaleModel": "humanWardrobe/F_Faulds.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Faulds_albedoOpacity.png",
+    "normal": "humanWardrobe/Faulds_normal.png",
+    "ao": "humanWardrobe/Faulds_ambientOcclusion.png",
+    "spec": "humanWardrobe/Faulds_metallicRoughness.png"
+  },
+  "humwar_Gauntlet_L": {
+    "model": null,
+    "maleModel": "humanWardrobe/Gauntlet_L.FBX",
+    "femaleModel": "humanWardrobe/F_Gauntlet_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Gauntlet_albedoOpacity.png",
+    "normal": "humanWardrobe/Gauntlet_normal.png",
+    "ao": "humanWardrobe/Gauntlet_ambientOcclusion.png",
+    "spec": "humanWardrobe/Gauntlet_metallicRoughness.png"
+  },
+  "humwar_Gauntlet_R": {
+    "model": null,
+    "maleModel": "humanWardrobe/Gauntlet_R.FBX",
+    "femaleModel": "humanWardrobe/F_Gauntlet_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Gauntlet_albedoOpacity.png",
+    "normal": "humanWardrobe/Gauntlet_normal.png",
+    "ao": "humanWardrobe/Gauntlet_ambientOcclusion.png",
+    "spec": "humanWardrobe/Gauntlet_metallicRoughness.png"
+  },
+  "humwar_Gladiator_Belt": {
+    "model": null,
+    "maleModel": "humanWardrobe/Gladiator_Belt.FBX",
+    "femaleModel": "humanWardrobe/F_Gladiator_Belt.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Gladiator_Belt_albedoOpacity.png",
+    "normal": "humanWardrobe/Gladiator_Belt_normal.png",
+    "ao": "humanWardrobe/Gladiator_Belt_ambientOcclusion.png",
+    "spec": "humanWardrobe/Gladiator_Belt_metallicRoughness.png"
+  },
+  "humwar_Glove_L": {
+    "model": null,
+    "maleModel": "humanWardrobe/Glove_L.FBX",
+    "femaleModel": "humanWardrobe/F_Glove_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Gauntlet_albedoOpacity.png",
+    "normal": "humanWardrobe/Gauntlet_normal.png",
+    "ao": "humanWardrobe/Gauntlet_ambientOcclusion.png",
+    "spec": "humanWardrobe/Gauntlet_metallicRoughness.png"
+  },
+  "humwar_Glove_R": {
+    "model": null,
+    "maleModel": "humanWardrobe/Glove_R.FBX",
+    "femaleModel": "humanWardrobe/F_Glove_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Gauntlet_albedoOpacity.png",
+    "normal": "humanWardrobe/Gauntlet_normal.png",
+    "ao": "humanWardrobe/Gauntlet_ambientOcclusion.png",
+    "spec": "humanWardrobe/Gauntlet_metallicRoughness.png"
+  },
+  "humwar_Kneepad_Left": {
+    "model": null,
+    "maleModel": "humanWardrobe/Kneepad_Left.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Poleyn_albedoOpacity.png",
+    "normal": "humanWardrobe/Poleyn_normal.png",
+    "ao": "humanWardrobe/Poleyn_ambientOcclusion.png",
+    "spec": "humanWardrobe/Poleyn_metallicRoughness.png"
+  },
+  "humwar_Kneepad_Right": {
+    "model": null,
+    "maleModel": "humanWardrobe/Kneepad_Right.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Poleyn_albedoOpacity.png",
+    "normal": "humanWardrobe/Poleyn_normal.png",
+    "ao": "humanWardrobe/Poleyn_ambientOcclusion.png",
+    "spec": "humanWardrobe/Poleyn_metallicRoughness.png"
+  },
+  "humwar_Loincloth": {
+    "model": null,
+    "maleModel": "humanWardrobe/Loincloth.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Loincloth_albedoOpacity.png",
+    "normal": "humanWardrobe/Loincloth_normal.png",
+    "ao": "humanWardrobe/Loincloth_ambientOcclusion.png",
+    "spec": "humanWardrobe/Loincloth_metallicRoughness.png"
+  },
+  "humwar_Loincloth_Under": {
+    "model": null,
+    "maleModel": "humanWardrobe/Loincloth_Under.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Loincloth_albedoOpacity.png",
+    "normal": "humanWardrobe/Loincloth_normal.png",
+    "ao": "humanWardrobe/Loincloth_ambientOcclusion.png",
+    "spec": "humanWardrobe/Loincloth_metallicRoughness.png"
+  },
+  "humwar_Manica": {
+    "model": null,
+    "maleModel": "humanWardrobe/Manica.FBX",
+    "femaleModel": "humanWardrobe/F_Manica.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Manica_albedoOpacity.png",
+    "normal": "humanWardrobe/Manica_normal.png",
+    "ao": "humanWardrobe/Manica_ambientOcclusion.png",
+    "spec": "humanWardrobe/Manica_metallicRoughness.png"
+  },
+  "humwar_Pauldron_L": {
+    "model": null,
+    "maleModel": "humanWardrobe/Pauldron_L.FBX",
+    "femaleModel": "humanWardrobe/F_Pauldron_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Pauldron_albedoOpacity.png",
+    "normal": "humanWardrobe/Pauldron_normal.png",
+    "ao": "humanWardrobe/Pauldron_ambientOcclusion.png",
+    "spec": "humanWardrobe/Pauldron_metallicRoughness.png"
+  },
+  "humwar_Pauldron_R": {
+    "model": null,
+    "maleModel": "humanWardrobe/Pauldron_R.FBX",
+    "femaleModel": "humanWardrobe/F_Pauldron_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Pauldron_albedoOpacity.png",
+    "normal": "humanWardrobe/Pauldron_normal.png",
+    "ao": "humanWardrobe/Pauldron_ambientOcclusion.png",
+    "spec": "humanWardrobe/Pauldron_metallicRoughness.png"
+  },
+  "humwar_Poleyn_Left": {
+    "model": null,
+    "maleModel": "humanWardrobe/Poleyn_Left.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Poleyn_albedoOpacity.png",
+    "normal": "humanWardrobe/Poleyn_normal.png",
+    "ao": "humanWardrobe/Poleyn_ambientOcclusion.png",
+    "spec": "humanWardrobe/Poleyn_metallicRoughness.png"
+  },
+  "humwar_Poleyn_Right": {
+    "model": null,
+    "maleModel": "humanWardrobe/Poleyn_Right.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Poleyn_albedoOpacity.png",
+    "normal": "humanWardrobe/Poleyn_normal.png",
+    "ao": "humanWardrobe/Poleyn_ambientOcclusion.png",
+    "spec": "humanWardrobe/Poleyn_metallicRoughness.png"
+  },
+  "humwar_Pteruges": {
+    "model": null,
+    "maleModel": "humanWardrobe/Pteruges.FBX",
+    "femaleModel": "humanWardrobe/F_Pteruges.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Gladiator_Belt_albedoOpacity.png",
+    "normal": "humanWardrobe/Gladiator_Belt_normal.png",
+    "ao": "humanWardrobe/Gladiator_Belt_ambientOcclusion.png",
+    "spec": "humanWardrobe/Gladiator_Belt_metallicRoughness.png"
+  },
+  "humwar_Sabatons_Left": {
+    "model": null,
+    "maleModel": "humanWardrobe/Sabatons_Left.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Sabatons_Right": {
+    "model": null,
+    "maleModel": "humanWardrobe/Sabatons_Right.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Schynbalds_Left": {
+    "model": null,
+    "maleModel": "humanWardrobe/Schynbalds_Left.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Schynbalds_Right": {
+    "model": null,
+    "maleModel": "humanWardrobe/Schynbalds_Right.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Skirt": {
+    "model": null,
+    "maleModel": "humanWardrobe/Skirt.FBX",
+    "femaleModel": "humanWardrobe/F_Skirt.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Skirt_albedoOpacity.png",
+    "normal": "humanWardrobe/Skirt_normal.png",
+    "ao": "humanWardrobe/Skirt_ambientOcclusion.png",
+    "spec": "humanWardrobe/Skirt_metallicRoughness.png"
+  },
+  "humwar_Spaulder_Chest": {
+    "model": null,
+    "maleModel": "humanWardrobe/Spaulder_Chest.FBX",
+    "femaleModel": "humanWardrobe/F_Spaulder_Chest.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Spaulder_albedoOpacity.png",
+    "normal": "humanWardrobe/Spaulder_normal.png",
+    "ao": "humanWardrobe/Spaulder_ambientOcclusion.png",
+    "spec": "humanWardrobe/Spaulder_metallicRoughness.png"
+  },
+  "humwar_Spaulder_L": {
+    "model": null,
+    "maleModel": "humanWardrobe/Spaulder_L.FBX",
+    "femaleModel": "humanWardrobe/F_Spaulder_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Spaulder_albedoOpacity.png",
+    "normal": "humanWardrobe/Spaulder_normal.png",
+    "ao": "humanWardrobe/Spaulder_ambientOcclusion.png",
+    "spec": "humanWardrobe/Spaulder_metallicRoughness.png"
+  },
+  "humwar_Spaulder_R": {
+    "model": null,
+    "maleModel": "humanWardrobe/Spaulder_R.FBX",
+    "femaleModel": "humanWardrobe/F_Spaulder_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Spaulder_albedoOpacity.png",
+    "normal": "humanWardrobe/Spaulder_normal.png",
+    "ao": "humanWardrobe/Spaulder_ambientOcclusion.png",
+    "spec": "humanWardrobe/Spaulder_metallicRoughness.png"
+  },
+  "humwar_Trousers": {
+    "model": null,
+    "maleModel": "humanWardrobe/Trousers.FBX",
+    "femaleModel": "humanWardrobe/F_Trousers.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Trousers_albedoOpacity.png",
+    "normal": "humanWardrobe/Trousers_normal.png",
+    "ao": "humanWardrobe/Trousers_ambientOcclusion.png",
+    "spec": "humanWardrobe/Trousers_metallicRoughness.png"
+  },
+  "humwar_Vambrace_L": {
+    "model": null,
+    "maleModel": "humanWardrobe/Vambrace_L.FBX",
+    "femaleModel": "humanWardrobe/F_Vambrace_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Bracers_albedoOpacity.png",
+    "normal": "humanWardrobe/Bracers_normal.png",
+    "ao": "humanWardrobe/Bracers_ambientOcclusion.png",
+    "spec": "humanWardrobe/Bracers_metallicRoughness.png"
+  },
+  "humwar_Vambrace_R": {
+    "model": null,
+    "maleModel": "humanWardrobe/Vambrace_R.FBX",
+    "femaleModel": "humanWardrobe/F_Vambrace_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Bracers_albedoOpacity.png",
+    "normal": "humanWardrobe/Bracers_normal.png",
+    "ao": "humanWardrobe/Bracers_ambientOcclusion.png",
+    "spec": "humanWardrobe/Bracers_metallicRoughness.png"
+  },
+  "hfowar_Arm_Wrap_L": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "halfOrcWardrobe/Arm_Wrap_L.FBX",
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Arm_Wrap_R": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "halfOrcWardrobe/Arm_Wrap_R.FBX",
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Bicep_Wrap_L": {
+    "model": "halfOrcWardrobe/Bicep_Wrap_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Bicep_Wrap_R": {
+    "model": "halfOrcWardrobe/Bicep_Wrap_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Bracer_L": {
+    "model": "halfOrcWardrobe/Bracer_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Bracer_R": {
+    "model": "halfOrcWardrobe/Bracer_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Bracer_Spikes_L": {
+    "model": "halfOrcWardrobe/Bracer_Spikes_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Bracer_Spikes_R": {
+    "model": "halfOrcWardrobe/Bracer_Spikes_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_bracers_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Fur_Arm_L": {
+    "model": "halfOrcWardrobe/Fur_Arm_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_MetalAOHeightRough.png"
+  },
+  "hfowar_Fur_Arm_R": {
+    "model": "halfOrcWardrobe/Fur_Arm_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_MetalAOHeightRough.png"
+  },
+  "hfowar_Fur_Chest": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "halfOrcWardrobe/Fur_Chest.FBX",
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_MetalAOHeightRough.png"
+  },
+  "hfowar_Fur_Leg_L": {
+    "model": "halfOrcWardrobe/Fur_Leg_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_MetalAOHeightRough.png"
+  },
+  "hfowar_Fur_Leg_R": {
+    "model": "halfOrcWardrobe/Fur_Leg_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_MetalAOHeightRough.png"
+  },
+  "hfowar_Fur_Pauldron_L": {
+    "model": "halfOrcWardrobe/Fur_Pauldron_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_MetalAOHeightRough.png"
+  },
+  "hfowar_Fur_Pauldron_R": {
+    "model": "halfOrcWardrobe/Fur_Pauldron_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_MetalAOHeightRough.png"
+  },
+  "hfowar_Fur_Skirt": {
+    "model": "halfOrcWardrobe/Fur_Skirt.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_DevilFur_albedoOpacity_MetalAOHeightRough.png"
+  },
+  "hfowar_HalfOrcPants": {
+    "model": "halfOrcWardrobe/HalfOrcPants.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pants_shoes_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pants_shoes_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pants_shoes_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Jewelry_Ear_L": {
+    "model": "halfOrcWardrobe/Jewelry_Ear_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Jewelry_Ear_R": {
+    "model": "halfOrcWardrobe/Jewelry_Ear_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Jewelry_Nose": {
+    "model": "halfOrcWardrobe/Jewelry_Nose.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Legwrap_L": {
+    "model": "halfOrcWardrobe/Legwrap_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Legwrap_R": {
+    "model": "halfOrcWardrobe/Legwrap_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Pauldron_L": {
+    "model": "halfOrcWardrobe/Pauldron_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Pauldron_R": {
+    "model": "halfOrcWardrobe/Pauldron_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Pauldron_Spikes_L": {
+    "model": "halfOrcWardrobe/Pauldron_Spikes_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Pauldron_Spikes_R": {
+    "model": "halfOrcWardrobe/Pauldron_Spikes_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Poleyn_L": {
+    "model": "halfOrcWardrobe/Poleyn_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Poleyn_R": {
+    "model": "halfOrcWardrobe/Poleyn_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Poleyn_Spikes_L": {
+    "model": "halfOrcWardrobe/Poleyn_Spikes_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Poleyn_Spikes_R": {
+    "model": "halfOrcWardrobe/Poleyn_Spikes_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Shinguard_L": {
+    "model": "halfOrcWardrobe/Shinguard_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Shinguard_R": {
+    "model": "halfOrcWardrobe/Shinguard_R.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Shinguard_Spikes_L": {
+    "model": "halfOrcWardrobe/Shinguard_Spikes_L.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Shinguard_Spikes_R2": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "halfOrcWardrobe/Shinguard_Spikes_R.FBX",
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_MetalAOHeightRough.png"
+  },
+  "hfowar_ShoeL": {
+    "model": "halfOrcWardrobe/ShoeL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pants_shoes_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pants_shoes_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pants_shoes_set_MetalAOHeightRough.png"
+  },
+  "hfowar_ShoeR": {
+    "model": "halfOrcWardrobe/ShoeR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pants_shoes_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pants_shoes_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pants_shoes_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Skirt": {
+    "model": "halfOrcWardrobe/Skirt.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_skirt_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_skirt_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_skirt_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Skirt_Hangers": {
+    "model": "halfOrcWardrobe/Skirt_Hangers.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_skirt_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_skirt_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_skirt_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Thigh_Wrap_L": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "halfOrcWardrobe/Thigh_Wrap_L.FBX",
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Thigh_Wrap_R": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "halfOrcWardrobe/Thigh_Wrap_R.FBX",
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Vest": {
+    "model": "halfOrcWardrobe/Vest.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_vest_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_vest_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_vest_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Vest_Belt_1": {
+    "model": "halfOrcWardrobe/Vest_Belt_1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_vest_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_vest_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_vest_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Vest_Belt_2": {
+    "model": "halfOrcWardrobe/Vest_Belt_2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_vest_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_vest_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_vest_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Waist_Wrap": {
+    "model": "halfOrcWardrobe/Waist_Wrap.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Waistwrap_Loops": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "halfOrcWardrobe/Waistwrap_Loops.FBX",
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_MetalAOHeightRough.png"
+  },
+  "hfowar_X_Belt_1": {
+    "model": "halfOrcWardrobe/X_Belt_1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_MetalAOHeightRough.png"
+  },
+  "hfowar_X_Belt_2": {
+    "model": "halfOrcWardrobe/X_Belt_2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_MetalAOHeightRough.png"
+  },
+  "arm1_Armor1_Collar": {
+    "model": "armor1/Armor1_Collar.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor1/Leather1_leather1_set_AlbedoOpacity.png",
+    "normal": "armor1/Leather1_leather1_set_Normal.png",
+    "ao": null,
+    "spec": "armor1/Leather1_leather1_set_MetalAOHeightRough.png"
+  },
+  "arm1_Armor1_Main": {
+    "model": "armor1/Armor1_Main.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor1/Leather1_leather1_set_AlbedoOpacity.png",
+    "normal": "armor1/Leather1_leather1_set_Normal.png",
+    "ao": null,
+    "spec": "armor1/Leather1_leather1_set_MetalAOHeightRough.png"
+  },
+  "arm1_Armor1_Pauldron_L1": {
+    "model": "armor1/Armor1_Pauldron_L1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor1/Leather1_leather1_set_AlbedoOpacity.png",
+    "normal": "armor1/Leather1_leather1_set_Normal.png",
+    "ao": null,
+    "spec": "armor1/Leather1_leather1_set_MetalAOHeightRough.png"
+  },
+  "arm1_Armor1_Pauldron_L2": {
+    "model": "armor1/Armor1_Pauldron_L2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor1/Leather1_leather1_set_AlbedoOpacity.png",
+    "normal": "armor1/Leather1_leather1_set_Normal.png",
+    "ao": null,
+    "spec": "armor1/Leather1_leather1_set_MetalAOHeightRough.png"
+  },
+  "arm1_Armor1_Pauldron_R1": {
+    "model": "armor1/Armor1_Pauldron_R1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor1/Leather1_leather1_set_AlbedoOpacity.png",
+    "normal": "armor1/Leather1_leather1_set_Normal.png",
+    "ao": null,
+    "spec": "armor1/Leather1_leather1_set_MetalAOHeightRough.png"
+  },
+  "arm1_Armor1_Pauldron_R2": {
+    "model": "armor1/Armor1_Pauldron_R2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor1/Leather1_leather1_set_AlbedoOpacity.png",
+    "normal": "armor1/Leather1_leather1_set_Normal.png",
+    "ao": null,
+    "spec": "armor1/Leather1_leather1_set_MetalAOHeightRough.png"
+  },
+  "arm1_Armor1_Pouch": {
+    "model": "armor1/Armor1_Pouch.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor1/Leather1_leather1_set_AlbedoOpacity.png",
+    "normal": "armor1/Leather1_leather1_set_Normal.png",
+    "ao": null,
+    "spec": "armor1/Leather1_leather1_set_MetalAOHeightRough.png"
+  },
+  "arm1_Armor1_Straps": {
+    "model": "armor1/Armor1_Straps.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor1/Leather1_leather1_set_AlbedoOpacity.png",
+    "normal": "armor1/Leather1_leather1_set_Normal.png",
+    "ao": null,
+    "spec": "armor1/Leather1_leather1_set_MetalAOHeightRough.png"
+  },
+  "arm1_Armor1_Waistcloth": {
+    "model": "armor1/Armor1_Waistcloth.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor1/Leather1_leather1_set_AlbedoOpacity.png",
+    "normal": "armor1/Leather1_leather1_set_Normal.png",
+    "ao": null,
+    "spec": "armor1/Leather1_leather1_set_MetalAOHeightRough.png"
+  },
+  "elfwar_ArmArmorLeft": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/ArmArmorLeft.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ArmArmorRight": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/ArmArmorRight.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ArmsStrapsLeft": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/ArmsStrapsLeft.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ArmStrapsRight": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/ArmStrapsRight.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_Belt_1": {
+    "model": "elfWardrobe/Belt_1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_WaistArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_WaistArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_WaistArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_Belt_2": {
+    "model": "elfWardrobe/Belt_2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_WaistArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_WaistArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_WaistArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_BootLeft": {
+    "model": null,
+    "maleModel": "elfWardrobe/BootL.FBX",
+    "femaleModel": "elfWardrobe/BootLeft.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Boots_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Boots_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Boots_MetalAOHeightRough.png"
+  },
+  "elfwar_BootRight": {
+    "model": null,
+    "maleModel": "elfWardrobe/BootR.FBX",
+    "femaleModel": "elfWardrobe/BootRight.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Boots_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Boots_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Boots_MetalAOHeightRough.png"
+  },
+  "elfwar_Curiass": {
+    "model": "elfWardrobe/Curiass.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Curiass_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Curiass_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Curiass_MetalAOHeightRough.png"
+  },
+  "elfwar_ElfHangers": {
+    "model": "elfWardrobe/ElfHangers.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_WaistArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_WaistArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_WaistArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ElfPants": {
+    "model": "elfWardrobe/ElfPants.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Pants_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Pants_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Pants_MetalAOHeightRough.png"
+  },
+  "elfwar_ElfVest": {
+    "model": "elfWardrobe/ElfVest.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Vest_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Vest_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Vest_MetalAOHeightRough.png"
+  },
+  "elfwar_Hip_Armor_1": {
+    "model": "elfWardrobe/Hip_Armor_1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_WaistArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_WaistArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_WaistArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_Hip_Armor_2": {
+    "model": "elfWardrobe/Hip_Armor_2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_WaistArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_WaistArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_WaistArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_Hood_1": {
+    "model": "elfWardrobe/Hood_1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Hood_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Hood_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Hood_MetalAOHeightRough.png"
+  },
+  "elfwar_Hood_2": {
+    "model": "elfWardrobe/Hood_2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Hood_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Hood_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Hood_MetalAOHeightRough.png"
+  },
+  "elfwar_Jewelry": {
+    "model": "elfWardrobe/Jewelry.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Jewelry_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Jewelry_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Jewelry_MetalAOHeightRough.png"
+  },
+  "elfwar_LegArmor1Left": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/LegArmor1Left.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_LegArmor1Right": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/LegArmor1Right.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_LegArmor1StrapsLeft": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/LegArmor1StrapsLeft.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_LegArmor1StrapsRight": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/LegArmor1StrapsRight.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_LegArmor2Left": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/LegArmor2Left.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_LegArmor2Right": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/LegArmor2Right.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ManicaLeft": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/ManicaLeft.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ManicaRight": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/ManicaRight.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_Mask": {
+    "model": "elfWardrobe/Mask.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Mask_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Mask_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Mask_MetalAOHeightRough.png"
+  },
+  "elfwar_PoleynLeft": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/PoleynLeft.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_PoleynRight": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/PoleynRight.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_Sash": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "elfWardrobe/Sash.FBX",
+    "color": null,
+    "albedo": "elfWardrobe/Elf_WaistCloth_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_WaistCloth_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_WaistCloth_MetalAOHeightRough.png"
+  },
+  "elfwar_Shirt": {
+    "model": "elfWardrobe/Shirt.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Shirt_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Shirt_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Shirt_MetalAOHeightRough.png"
+  },
+  "elfwar_Vest_Belts": {
+    "model": "elfWardrobe/Vest_Belts.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Vest_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Vest_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Vest_MetalAOHeightRough.png"
+  },
+  "humwar_Boot_Flaps_L": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Boot_Flaps_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Boot_Flaps_R": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Boot_Flaps_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Dagger": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Dagger.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Dagger_albedoOpacity.png",
+    "normal": "humanWardrobe/Dagger_normal.png",
+    "ao": "humanWardrobe/Dagger_ambientOcclusion.png",
+    "spec": "humanWardrobe/Dagger_metallicRoughness.png"
+  },
+  "humwar_Kneepad_L": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Kneepad_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Poleyn_albedoOpacity.png",
+    "normal": "humanWardrobe/Poleyn_normal.png",
+    "ao": "humanWardrobe/Poleyn_ambientOcclusion.png",
+    "spec": "humanWardrobe/Poleyn_metallicRoughness.png"
+  },
+  "humwar_Kneepad_R": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Kneepad_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Poleyn_albedoOpacity.png",
+    "normal": "humanWardrobe/Poleyn_normal.png",
+    "ao": "humanWardrobe/Poleyn_ambientOcclusion.png",
+    "spec": "humanWardrobe/Poleyn_metallicRoughness.png"
+  },
+  "humwar_Poleyn_L": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Poleyn_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Poleyn_albedoOpacity.png",
+    "normal": "humanWardrobe/Poleyn_normal.png",
+    "ao": "humanWardrobe/Poleyn_ambientOcclusion.png",
+    "spec": "humanWardrobe/Poleyn_metallicRoughness.png"
+  },
+  "humwar_Poleyn_R": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Poleyn_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Poleyn_albedoOpacity.png",
+    "normal": "humanWardrobe/Poleyn_normal.png",
+    "ao": "humanWardrobe/Poleyn_ambientOcclusion.png",
+    "spec": "humanWardrobe/Poleyn_metallicRoughness.png"
+  },
+  "humwar_Sabatons_L": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Sabatons_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Sabatons_R": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Sabatons_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Schynbalds_L": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Schynbalds_L.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Schynbalds_R": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Schynbalds_R.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Boots_albedoOpacity.png",
+    "normal": "humanWardrobe/Boots_normal.png",
+    "ao": "humanWardrobe/Boots_ambientOcclusion.png",
+    "spec": "humanWardrobe/Boots_metallicRoughness.png"
+  },
+  "humwar_Undergarment_Bottom_A": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Undergarment_Bottom_A.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Loincloth_albedoOpacity.png",
+    "normal": "humanWardrobe/Loincloth_normal.png",
+    "ao": "humanWardrobe/Loincloth_ambientOcclusion.png",
+    "spec": "humanWardrobe/Loincloth_metallicRoughness.png"
+  },
+  "humwar_Undergarment_Bottom_B": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Undergarment_Bottom_B.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Loincloth_albedoOpacity.png",
+    "normal": "humanWardrobe/Loincloth_normal.png",
+    "ao": "humanWardrobe/Loincloth_ambientOcclusion.png",
+    "spec": "humanWardrobe/Loincloth_metallicRoughness.png"
+  },
+  "humwar_Undergarment_Top": {
+    "model": null,
+    "maleModel": null,
+    "femaleModel": "humanWardrobe/F_Undergarment_Top.FBX",
+    "color": null,
+    "albedo": "humanWardrobe/Loincloth_albedoOpacity.png",
+    "normal": "humanWardrobe/Loincloth_normal.png",
+    "ao": "humanWardrobe/Loincloth_ambientOcclusion.png",
+    "spec": "humanWardrobe/Loincloth_metallicRoughness.png"
+  },
+  "hfowar_Armwrap_L": {
+    "model": null,
+    "maleModel": "halfOrcWardrobe/Armwrap_L.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Armwrap_R": {
+    "model": null,
+    "maleModel": "halfOrcWardrobe/Armwrap_R.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_armwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Jewelry_Lip": {
+    "model": null,
+    "maleModel": "halfOrcWardrobe/Jewelry_Lip.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_pauldron_facerings_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Shinguard_Spikes_R": {
+    "model": null,
+    "maleModel": "halfOrcWardrobe/Shinguard_Spikes_R.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_leg_armor_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Thighwrap_L": {
+    "model": null,
+    "maleModel": "halfOrcWardrobe/Thighwrap_L.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Thighwrap_R": {
+    "model": null,
+    "maleModel": "halfOrcWardrobe/Thighwrap_R.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_legwraps_set_MetalAOHeightRough.png"
+  },
+  "hfowar_Waist_Wrap_Loops": {
+    "model": null,
+    "maleModel": "halfOrcWardrobe/Waist_Wrap_Loops.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_AlbedoOpacity.png",
+    "normal": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_Normal.png",
+    "ao": null,
+    "spec": "halfOrcWardrobe/HalfOrcWardrobePainter_torso_belts_set_MetalAOHeightRough.png"
+  },
+  "arm3_Armor3_Main1": {
+    "model": "armor3/Armor3_Main1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor3/Leather3_leather3_set_AlbedoOpacity.png",
+    "normal": "armor3/Leather3_leather3_set_Normal.png",
+    "ao": null,
+    "spec": "armor3/Leather3_leather3_set_MetalAOHeightRough.png"
+  },
+  "arm3_Armor3_Main2": {
+    "model": "armor3/Armor3_Main2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor3/Leather3_leather3_set_AlbedoOpacity.png",
+    "normal": "armor3/Leather3_leather3_set_Normal.png",
+    "ao": null,
+    "spec": "armor3/Leather3_leather3_set_MetalAOHeightRough.png"
+  },
+  "arm3_Armor3_Main3": {
+    "model": "armor3/Armor3_Main3.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor3/Leather3_leather3_set_AlbedoOpacity.png",
+    "normal": "armor3/Leather3_leather3_set_Normal.png",
+    "ao": null,
+    "spec": "armor3/Leather3_leather3_set_MetalAOHeightRough.png"
+  },
+  "arm3_Armor3_Pauldron_L1": {
+    "model": "armor3/Armor3_Pauldron_L1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor3/Leather3_leather3_set_AlbedoOpacity.png",
+    "normal": "armor3/Leather3_leather3_set_Normal.png",
+    "ao": null,
+    "spec": "armor3/Leather3_leather3_set_MetalAOHeightRough.png"
+  },
+  "arm3_Armor3_Pauldron_L2": {
+    "model": "armor3/Armor3_Pauldron_L2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor3/Leather3_leather3_set_AlbedoOpacity.png",
+    "normal": "armor3/Leather3_leather3_set_Normal.png",
+    "ao": null,
+    "spec": "armor3/Leather3_leather3_set_MetalAOHeightRough.png"
+  },
+  "arm3_Armor3_Pauldron_L3": {
+    "model": "armor3/Armor3_Pauldron_L3.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor3/Leather3_leather3_set_AlbedoOpacity.png",
+    "normal": "armor3/Leather3_leather3_set_Normal.png",
+    "ao": null,
+    "spec": "armor3/Leather3_leather3_set_MetalAOHeightRough.png"
+  },
+  "arm3_Armor3_Pauldron_R1": {
+    "model": "armor3/Armor3_Pauldron_R1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor3/Leather3_leather3_set_AlbedoOpacity.png",
+    "normal": "armor3/Leather3_leather3_set_Normal.png",
+    "ao": null,
+    "spec": "armor3/Leather3_leather3_set_MetalAOHeightRough.png"
+  },
+  "arm3_Armor3_Pauldron_R2": {
+    "model": "armor3/Armor3_Pauldron_R2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor3/Leather3_leather3_set_AlbedoOpacity.png",
+    "normal": "armor3/Leather3_leather3_set_Normal.png",
+    "ao": null,
+    "spec": "armor3/Leather3_leather3_set_MetalAOHeightRough.png"
+  },
+  "arm3_Armor3_Pauldron_R3": {
+    "model": "armor3/Armor3_Pauldron_R3.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor3/Leather3_leather3_set_AlbedoOpacity.png",
+    "normal": "armor3/Leather3_leather3_set_Normal.png",
+    "ao": null,
+    "spec": "armor3/Leather3_leather3_set_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9BootL": {
+    "model": "armor9/Armor9BootL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_royalboots_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_royalboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_royalboots_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9BootR": {
+    "model": "armor9/Armor9BootR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_royalboots_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_royalboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_royalboots_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9Curiass": {
+    "model": "armor9/Armor9Curiass.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4b_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4b_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9CuriassV": {
+    "model": "armor9/Armor9CuriassV.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4b_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4b_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9Faulds1": {
+    "model": "armor9/Armor9Faulds1.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4a_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4a_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9Faulds2": {
+    "model": "armor9/Armor9Faulds2.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4a_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4a_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9GauntletL": {
+    "model": "armor9/Armor9GauntletL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_royalgauntlets_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_royalgauntlets_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_royalgauntlets_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9GauntletR": {
+    "model": "armor9/Armor9GauntletR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_royalgauntlets_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_royalgauntlets_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_royalgauntlets_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9GreavesL": {
+    "model": "armor9/Armor9GreavesL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_royalboots_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_royalboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_royalboots_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9GreavesR": {
+    "model": "armor9/Armor9GreavesR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_royalboots_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_royalboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_royalboots_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9Helmet": {
+    "model": "armor9/Armor9Helmet.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_royalhelmet_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_royalhelmet_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_royalhelmet_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9HipL": {
+    "model": "armor9/Armor9HipL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4a_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4a_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9HipR": {
+    "model": "armor9/Armor9HipR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4a_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4a_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9PauldronL": {
+    "model": "armor9/Armor9PauldronL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4b_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4b_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9PauldronR": {
+    "model": "armor9/Armor9PauldronR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4b_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4b_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4b_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9PoleynL": {
+    "model": "armor9/Armor9PoleynL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_royalboots_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_royalboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_royalboots_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9PoleynR": {
+    "model": "armor9/Armor9PoleynR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_royalboots_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_royalboots_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_royalboots_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9Sleeves": {
+    "model": "armor9/Armor9Sleeves.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4a_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4a_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9ThighbeltL": {
+    "model": "armor9/Armor9ThighbeltL.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4a_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4a_mat_MetalAOHeightRough.png"
+  },
+  "arm9_Armor9ThighbeltR": {
+    "model": "armor9/Armor9ThighbeltR.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor9A_platearmor4a_mat_AlbedoHeight.png",
+    "normal": "armor9/Armor9A_platearmor4a_mat_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor9A_platearmor4a_mat_MetalAOHeightRough.png"
+  },
+  "arm9_UniversalTrousers": {
+    "model": "armor9/UniversalTrousers.FBX",
+    "maleModel": null,
+    "femaleModel": null,
+    "color": null,
+    "albedo": "armor9/Armor6A_TrousersSG1_AlbedoHeight.png",
+    "normal": "armor9/Armor6A_TrousersSG1_Normal.png",
+    "ao": null,
+    "spec": "armor9/Armor6A_TrousersSG1_MetalAOHeightRough.png"
+  },
+  "elfwar_ArmArmorL": {
+    "model": null,
+    "maleModel": "elfWardrobe/ArmArmorL.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ArmArmorR": {
+    "model": null,
+    "maleModel": "elfWardrobe/ArmArmorR.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ArmStrapsL": {
+    "model": null,
+    "maleModel": "elfWardrobe/ArmStrapsL.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ArmStrapsR": {
+    "model": null,
+    "maleModel": "elfWardrobe/ArmStrapsR.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_BootCuffL": {
+    "model": null,
+    "maleModel": "elfWardrobe/BootCuffL.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Boots_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Boots_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Boots_MetalAOHeightRough.png"
+  },
+  "elfwar_BootCuffR": {
+    "model": null,
+    "maleModel": "elfWardrobe/BootCuffR.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Boots_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Boots_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Boots_MetalAOHeightRough.png"
+  },
+  "elfwar_LegArmor1L": {
+    "model": null,
+    "maleModel": "elfWardrobe/LegArmor1L.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_LegArmor1R": {
+    "model": null,
+    "maleModel": "elfWardrobe/LegArmor1R.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_LegArmor2L": {
+    "model": null,
+    "maleModel": "elfWardrobe/LegArmor2L.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_LegArmor2R": {
+    "model": null,
+    "maleModel": "elfWardrobe/LegArmor2R.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_LegStrapsL": {
+    "model": null,
+    "maleModel": "elfWardrobe/LegStrapsL.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_LegStrapsR": {
+    "model": null,
+    "maleModel": "elfWardrobe/LegStrapsR.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ManicaL": {
+    "model": null,
+    "maleModel": "elfWardrobe/ManicaL.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_ManicaR": {
+    "model": null,
+    "maleModel": "elfWardrobe/ManicaR.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_ArmArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_ArmArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_ArmArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_PoleynL": {
+    "model": null,
+    "maleModel": "elfWardrobe/PoleynL.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_PoleynR": {
+    "model": null,
+    "maleModel": "elfWardrobe/PoleynR.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_LegArmor_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_LegArmor_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_LegArmor_MetalAOHeightRough.png"
+  },
+  "elfwar_Sleeves": {
+    "model": null,
+    "maleModel": "elfWardrobe/Sleeves.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_Shirt_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_Shirt_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_Shirt_MetalAOHeightRough.png"
+  },
+  "elfwar_Waistcloth": {
+    "model": null,
+    "maleModel": "elfWardrobe/Waistcloth.FBX",
+    "femaleModel": null,
+    "color": null,
+    "albedo": "elfWardrobe/Elf_WaistCloth_AlbedoOpacity.png",
+    "normal": "elfWardrobe/Elf_WaistCloth_Normal.png",
+    "ao": null,
+    "spec": "elfWardrobe/Elf_WaistCloth_MetalAOHeightRough.png"
+  }
+}

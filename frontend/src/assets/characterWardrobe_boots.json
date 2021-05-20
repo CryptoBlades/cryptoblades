@@ -1,0 +1,172 @@
+{
+  "0": [
+    "humwar_Boot_Left",
+    "humwar_Boot_Right"
+  ],
+  "1": [
+    "humwar_Boot_Left",
+    "humwar_Boot_Right",
+    "humwar_Boot_Flaps_Left",
+    "humwar_Boot_Flaps_Right"
+  ],
+  "2": [
+    "humwar_Sabatons_Left",
+    "humwar_Sabatons_Right",
+    "humwar_Schynbalds_Left",
+    "humwar_Schynbalds_Right",
+    "humwar_Boot_Left",
+    "humwar_Boot_Right"
+  ],
+  "3": [
+    "humwar_Sabatons_Left",
+    "humwar_Sabatons_Right",
+    "humwar_Schynbalds_Left",
+    "humwar_Schynbalds_Right",
+    "humwar_Boot_Left",
+    "humwar_Boot_Right",
+    "humwar_Boot_Flaps_Left",
+    "humwar_Boot_Flaps_Right"
+  ],
+  "4": [
+    "elfwar_BootLeft",
+    "elfwar_BootRight",
+    "elfwar_BootCuffL",
+    "elfwar_BootCuffR"
+  ],
+  "5": [
+    "elfwar_BootLeft",
+    "elfwar_BootRight",
+    "elfwar_BootCuffL",
+    "elfwar_BootCuffR",
+    "elfwar_LegArmor1Left",
+    "elfwar_LegArmor1StrapsLeft",
+    "elfwar_LegArmor1Right",
+    "elfwar_LegArmor1StrapsRight"
+  ],
+  "6": [
+    "elfwar_BootLeft",
+    "elfwar_BootRight",
+    "elfwar_BootCuffL",
+    "elfwar_BootCuffR",
+    "elfwar_LegArmor1Left",
+    "elfwar_LegArmor1StrapsLeft",
+    "elfwar_LegArmor2Left",
+    "elfwar_LegArmor1Right",
+    "elfwar_LegArmor1StrapsRight",
+    "elfwar_LegArmor2Right"
+  ],
+  "7": [
+    "elfwar_BootLeft",
+    "elfwar_BootRight",
+    "elfwar_BootCuffL",
+    "elfwar_BootCuffR",
+    "elfwar_LegArmor1Left",
+    "elfwar_LegArmor1StrapsLeft",
+    "elfwar_LegArmor2Left",
+    "elfwar_LegArmor1Right",
+    "elfwar_LegArmor1StrapsRight",
+    "elfwar_LegArmor2Right",
+    "elfwar_PoleynLeft",
+    "elfwar_PoleynRight"
+  ],
+  "8": [
+    "hfowar_ShoeL",
+    "hfowar_ShoeR",
+    "hfowar_Shinguard_L",
+    "hfowar_Shinguard_Spikes_L",
+    "hfowar_Fur_Leg_L",
+    "hfowar_Shinguard_R",
+    "hfowar_Shinguard_Spikes_R",
+    "hfowar_Fur_Leg_R"
+  ],
+  "9": [
+    "hfowar_ShoeL",
+    "hfowar_ShoeR",
+    "hfowar_Shinguard_L",
+    "hfowar_Shinguard_Spikes_L",
+    "hfowar_Shinguard_R",
+    "hfowar_Shinguard_Spikes_R",
+    "hfowar_Poleyn_L",
+    "hfowar_Poleyn_Spikes_L",
+    "hfowar_Poleyn_R",
+    "hfowar_Poleyn_Spikes_R"
+  ],
+  "10": [
+    "hfowar_ShoeL",
+    "hfowar_ShoeR",
+    "hfowar_Shinguard_L",
+    "hfowar_Shinguard_R",
+    "hfowar_Poleyn_L",
+    "hfowar_Poleyn_Spikes_L",
+    "hfowar_Poleyn_R",
+    "hfowar_Poleyn_Spikes_R"
+  ],
+  "11": [
+    "hfowar_ShoeL",
+    "hfowar_ShoeR",
+    "hfowar_Shinguard_L",
+    "hfowar_Shinguard_Spikes_L",
+    "hfowar_Shinguard_R",
+    "hfowar_Shinguard_Spikes_R",
+    "hfowar_Poleyn_L",
+    "hfowar_Poleyn_R"
+  ],
+  "12": [
+    "arm6_Armor6StandardBootL",
+    "arm6_Armor6StandardBootR"
+  ],
+  "13": [
+    "arm6_Armor6StandardBootL",
+    "arm6_Armor6StandardBootR",
+    "arm6_Armor6PoleynL",
+    "arm6_Armor6PoleynR"
+  ],
+  "14": [
+    "arm7_Armor7ElvenBootL",
+    "arm7_Armor7ElvenBootR"
+  ],
+  "15": [
+    "arm7_Armor7ElvenBootL",
+    "arm7_Armor7ElvenBootR",
+    "arm7_Armor7PoleynL",
+    "arm7_Armor7PoleynR"
+  ],
+  "16": [
+    "arm8_Armor8PaladinBootL",
+    "arm8_Armor8PaladinBootR"
+  ],
+  "17": [
+    "arm8_Armor8PaladinBootL",
+    "arm8_Armor8PaladinBootR",
+    "arm8_Armor8PoleynL",
+    "arm8_Armor8PoleynR"
+  ],
+  "18": [
+    "arm9_Armor9BootL",
+    "arm9_Armor9BootR",
+    "arm9_Armor9GreavesL",
+    "arm9_Armor9GreavesR"
+  ],
+  "19": [
+    "arm9_Armor9BootL",
+    "arm9_Armor9BootR",
+    "arm9_Armor9GreavesL",
+    "arm9_Armor9GreavesR",
+    "arm9_Armor9PoleynL",
+    "arm9_Armor9PoleynR"
+  ],
+  "20": [
+    "arm10_Armor10SabatonLeft",
+    "arm10_Armor10SabatonRight",
+    "arm10_Armor10GreaveLeft",
+    "arm10_Armor10GreaveRight"
+  ],
+  "21": [
+    "arm10_Armor10SabatonLeft",
+    "arm10_Armor10SabatonRight",
+    "arm10_Armor10GreaveLeft",
+    "arm10_Armor10GreaveRight",
+    "arm10_Armor10PoleynLeft",
+    "arm10_Armor10PoleynRight"
+  ]
+}

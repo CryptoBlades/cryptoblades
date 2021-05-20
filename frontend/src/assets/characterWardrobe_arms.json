@@ -1,0 +1,253 @@
+{
+  "0": [
+    "humwar_Manica"
+  ],
+  "1": [
+    "humwar_Manica",
+    "humwar_Glove_R"
+  ],
+  "2": [
+    "humwar_Manica",
+    "humwar_Glove_R",
+    "humwar_Gauntlet_R",
+    "humwar_Glove_L"
+  ],
+  "3": [
+    "humwar_Manica",
+    "humwar_Glove_R",
+    "humwar_Gauntlet_R",
+    "humwar_Glove_L",
+    "humwar_Gauntlet_L"
+  ],
+  "4": [
+    "humwar_Manica",
+    "humwar_Glove_R",
+    "humwar_Gauntlet_R",
+    "humwar_Glove_L",
+    "humwar_Gauntlet_L",
+    "humwar_Vambrace_L",
+    "humwar_Vambrace_R"
+  ],
+  "5": [
+    "humwar_Manica",
+    "humwar_Glove_R",
+    "humwar_Gauntlet_R",
+    "humwar_Glove_L",
+    "humwar_Gauntlet_L",
+    "humwar_Vambrace_L",
+    "humwar_Vambrace_R",
+    "humwar_Armband_L",
+    "humwar_Couter_L"
+  ],
+  "6": [
+    "humwar_Glove_R",
+    "humwar_Glove_L",
+    "humwar_Armband_L",
+    "humwar_Armband_R"
+  ],
+  "7": [
+    "humwar_Glove_R",
+    "humwar_Glove_L",
+    "humwar_Armband_L",
+    "humwar_Armband_R",
+    "humwar_Couter_L",
+    "humwar_Couter_R",
+    "humwar_Vambrace_L",
+    "humwar_Vambrace_R"
+  ],
+  "8": [
+    "humwar_Glove_R",
+    "humwar_Glove_L",
+    "humwar_Armband_L",
+    "humwar_Armband_R",
+    "humwar_Couter_L",
+    "humwar_Couter_R",
+    "humwar_Vambrace_L",
+    "humwar_Vambrace_R",
+    "humwar_Gauntlet_L",
+    "humwar_Gauntlet_R"
+  ],
+  "9": [
+    "humwar_Glove_R",
+    "humwar_Glove_L",
+    "humwar_Gauntlet_R",
+    "humwar_Vambrace_R"
+  ],
+  "10": [
+    "humwar_Glove_R",
+    "humwar_Glove_L",
+    "humwar_Gauntlet_L",
+    "humwar_Vambrace_R",
+    "humwar_Armband_R",
+    "humwar_Couter_R"
+  ],
+  "11": [
+    "humwar_Vambrace_L",
+    "humwar_Vambrace_R",
+    "humwar_Armband_L",
+    "humwar_Armband_R"
+  ],
+  "12": [
+    "elfwar_ArmStrapsRight",
+    "elfwar_ArmsStrapsLeft"
+  ],
+  "13": [
+    "elfwar_ArmArmorRight",
+    "elfwar_ArmStrapsRight"
+  ],
+  "14": [
+    "elfwar_ArmArmorRight",
+    "elfwar_ArmStrapsRight",
+    "elfwar_ManicaLeft"
+  ],
+  "15": [
+    "elfwar_ArmArmorRight",
+    "elfwar_ArmStrapsRight",
+    "elfwar_ArmArmorLeft",
+    "elfwar_ArmsStrapsLeft"
+  ],
+  "16": [
+    "elfwar_ManicaRight"
+  ],
+  "17": [
+    "elfwar_ManicaRight",
+    "elfwar_ManicaLeft"
+  ],
+  "18": [
+    "elfwar_ManicaRight",
+    "elfwar_ArmArmorRight",
+    "elfwar_ManicaLeft",
+    "elfwar_ArmArmorLeft"
+  ],
+  "19": [
+    "elfwar_ManicaRight",
+    "elfwar_ArmsStrapsLeft"
+  ],
+  "20": [
+    "hfowar_Arm_Wrap_L",
+    "hfowar_Arm_Wrap_R"
+  ],
+  "21": [
+    "hfowar_Arm_Wrap_L",
+    "hfowar_Arm_Wrap_R",
+    "hfowar_Bicep_Wrap_L",
+    "hfowar_Bicep_Wrap_R"
+  ],
+  "22": [
+    "hfowar_Bracer_L",
+    "hfowar_Bracer_R"
+  ],
+  "23": [
+    "hfowar_Bracer_L",
+    "hfowar_Bracer_R",
+    "hfowar_Bicep_Wrap_L",
+    "hfowar_Bicep_Wrap_R"
+  ],
+  "24": [
+    "hfowar_Bracer_L",
+    "hfowar_Bracer_R",
+    "hfowar_Bracer_Spikes_L",
+    "hfowar_Bracer_Spikes_R"
+  ],
+  "25": [
+    "hfowar_Bracer_L",
+    "hfowar_Bracer_R",
+    "hfowar_Bicep_Wrap_L",
+    "hfowar_Bicep_Wrap_R",
+    "hfowar_Bracer_Spikes_L",
+    "hfowar_Bracer_Spikes_R"
+  ],
+  "26": [
+    "arm6_Armor6VambraceL",
+    "arm6_Armor6VambraceR"
+  ],
+  "27": [
+    "arm6_Armor6VambraceL",
+    "arm6_Armor6VambraceR",
+    "arm6_Armor6CouterL",
+    "arm6_Armor6CouterR"
+  ],
+  "28": [
+    "arm6_Armor6VambraceL",
+    "arm6_Armor6VambraceR",
+    "arm6_Armor6CouterL",
+    "arm6_Armor6CouterR",
+    "arm6_Armor6StandardGauntletL",
+    "arm6_Armor6StandardGauntletR"
+  ],
+  "29": [
+    "arm6_Armor6VambraceL",
+    "arm6_Armor6VambraceR",
+    "arm6_Armor6StandardGauntletL",
+    "arm6_Armor6StandardGauntletR"
+  ],
+  "30": [
+    "arm6_Armor6StandardGauntletL",
+    "arm6_Armor6StandardGauntletR"
+  ],
+  "31": [
+    "arm6_Armor6StandardGauntletL",
+    "arm6_Armor6StandardGauntletR",
+    "arm6_Armor6CouterL",
+    "arm6_Armor6CouterR"
+  ],
+  "32": [
+    "arm7_Armor7ElvenGauntletL",
+    "arm7_Armor7ElvenGauntletR"
+  ],
+  "33": [
+    "arm7_Armor7ElvenGauntletR"
+  ],
+  "34": [
+    "arm8_Armor8CouterL",
+    "arm8_Armor8CouterR"
+  ],
+  "35": [
+    "arm8_Armor8PaladinGauntletL",
+    "arm8_Armor8PaladinGauntletR"
+  ],
+  "36": [
+    "arm8_Armor8PaladinGauntletL",
+    "arm8_Armor8PaladinGauntletR",
+    "arm8_Armor8CouterL",
+    "arm8_Armor8CouterR"
+  ],
+  "37": [
+    "arm8_Armor8CouterR",
+    "arm8_Armor8PaladinGauntletR"
+  ],
+  "38": [
+    "arm9_Armor9GauntletL",
+    "arm9_Armor9GauntletR"
+  ],
+  "39": [
+    "arm9_Armor9GauntletL"
+  ],
+  "40": [
+    "arm9_Armor9GauntletR"
+  ],
+  "41": [
+    "arm10_Armor10ArmwrapLeft",
+    "arm10_Armor10ArmwrapRight"
+  ],
+  "42": [
+    "arm10_Armor10ArmwrapLeft",
+    "arm10_Armor10ArmwrapRight",
+    "arm10_Armor10CouterLeft",
+    "arm10_Armor10CouterRight"
+  ],
+  "43": [
+    "arm10_Armor10ArmwrapLeft",
+    "arm10_Armor10ArmwrapRight",
+    "arm10_Armor10CouterLeft",
+    "arm10_Armor10CouterRight",
+    "arm10_Armor10GauntletRight",
+    "arm10_Armor10GauntletLeft"
+  ],
+  "44": [
+    "arm10_Armor10ArmwrapLeft",
+    "arm10_Armor10ArmwrapRight",
+    "arm10_Armor10GauntletRight",
+    "arm10_Armor10GauntletLeft"
+  ]
+}

@@ -6,8 +6,13 @@ export function characterFromContract(id: number, data: string[]): ICharacter {
   const level = parseInt(data[1], 10);
   const trait = data[2];
   const staminaTimestamp = data[3];
-  const appearance = data[4];
-  return { id, xp, level, trait, staminaTimestamp, appearance };
+  const head = data[4];
+  const arms = data[5];
+  const torso = data[6];
+  const legs = data[7];
+  const boots = data[8];
+  const race = data[9];
+  return { id, xp, level, trait, staminaTimestamp, head, arms, torso, legs, boots, race };
 }
 
 export function getStatPatternFromProperties(properties: number): number {

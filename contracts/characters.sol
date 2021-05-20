@@ -33,7 +33,6 @@ contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable {
         uint8 level; // up to 256 cap
         uint8 trait; // 2b trait, TBD
         uint64 staminaTimestamp; // standard timestamp in seconds-resolution marking regen start from 0
-        uint64 appearance; // placeholder; cat ears, cup size and shit. PIMP MY KNIGHT
     }
 
     Character[] private tokens;
@@ -50,9 +49,18 @@ contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable {
         _;
     }
 
-    function get(uint256 id) public view returns (uint16, uint8, uint8, uint64, uint64) {
+    function get(uint256 id) public view returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
         Character memory c = tokens[id];
-        return (c.xp, c.level, c.trait, c.staminaTimestamp, c.appearance);
+        uint appearance = RandomUtil.randomSeeded(id);
+        return (c.xp, c.level, c.trait, c.staminaTimestamp,
+            // feel free to change this but beware of stack limits
+            uint16(appearance % 256), // head
+            uint16((appearance / 64) % 256), // arms
+            uint16((appearance / 4096) % 256), // torso
+            uint16((appearance / 262144) % 256), // legs
+            uint16((appearance / 16777216) % 256), // boots
+            uint16((appearance / 1073741824) % 256) // race
+        );
     }
 
     function mint(address minter, uint256 seed) public restricted {
@@ -62,9 +70,8 @@ contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable {
         uint8 level = 0; // 1
         uint8 trait = uint8(RandomUtil.randomSeededMinMax(0,3,seed));
         uint64 staminaTimestamp = uint64(now - getStaminaMaxWait());
-        uint64 appearance = 0;
 
-        tokens.push(Character(xp, level, trait, staminaTimestamp, appearance));
+        tokens.push(Character(xp, level, trait, staminaTimestamp));
         _mint(minter, tokenID);
         emit NewCharacter(tokenID, minter);
     }
@@ -124,10 +131,6 @@ contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable {
             }
             char.xp = newXp;
         }
-    }
-
-    function getAppearance(uint256 id) public view returns (uint64) {
-        return tokens[id].appearance;
     }
 
     function getStaminaTimestamp(uint256 id) public view returns (uint64) {

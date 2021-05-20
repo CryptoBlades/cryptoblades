@@ -8,7 +8,9 @@
       v-tooltip="tooltipHtml(c)"
       @click="$emit('input', c.id)"
     >
-      <div class="art" :style="{ backgroundImage: `url(${getCharacterArt(c)})` }"></div>
+      <div class="art">
+        <CharacterArt :character="c" />
+      </div>
       <div class="name-wrapper">
         <span class="name">{{ getCharacterName(c.id) }}</span>
       </div>
@@ -20,6 +22,7 @@
 import { mapGetters } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import { ICharacter } from '../../interfaces';
+import CharacterArt from '../CharacterArt.vue';
 
 export default {
   props: ['value'],
@@ -44,6 +47,10 @@ export default {
       `;
     }
   },
+
+  components: {
+    CharacterArt,
+  }
 };
 </script>
 
@@ -75,7 +82,6 @@ export default {
 .character .art {
   width: 100%;
   height: 100%;
-  background-image: url("../../assets/chara.png");
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;

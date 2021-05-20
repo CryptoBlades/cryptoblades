@@ -127,18 +127,25 @@ export default {
       const container = this.$refs.el;
 
       this.camera = new Three.PerspectiveCamera(70, container.clientWidth/container.clientHeight, 0.01, 1000);
-      this.camera.position.z = 1.15625;
+      this.camera.position.z = 0.5;//1.15625;
       this.camera.rotation.z = Math.PI / 4;
 
       this.scene = new Three.Scene();
 
-      const directionalLight = new Three.DirectionalLight( 0xffffff, 0.5 );
+      const directionalLight = new Three.DirectionalLight( 0xffffff, 1.0 );
       directionalLight.position.x = -0.375;
       directionalLight.position.y = 1.375;
       directionalLight.position.z = 2.0;
       this.scene.add( directionalLight );
 
+      const directionalLight2 = new Three.DirectionalLight( 0xffffff, 0.375 );
+      directionalLight2.position.x = -0.075;
+      directionalLight2.position.y = -1.375;
+      directionalLight2.position.z = 2.0;
+      this.scene.add( directionalLight2 );
+
       this.renderer = new Three.WebGLRenderer({antialias: true, alpha:true});
+      this.renderer.setPixelRatio( window.devicePixelRatio );
       this.renderer.setClearColor( 0x000000, 0 );
       this.renderer.setSize(container.clientWidth, container.clientHeight);
       this.renderer.getContext().canvas.addEventListener('webglcontextlost', (event) => {
@@ -151,15 +158,15 @@ export default {
       if(baseMaterial === undefined) {
         baseMaterial = new Three.MeshPhysicalMaterial();
         baseMaterial.aoMapIntensity = 0.375;
-        baseMaterial.envMapIntensity = 0.75;
-        baseMaterial.metalness = 1.0;
+        baseMaterial.envMapIntensity = 1.0;
+        baseMaterial.metalness = 1.0; // non-1 allows ambient lights in
         baseMaterial.roughness = 0.5;
 
         const cmLoader = new Three.CubeTextureLoader();
         cmLoader.load( [
-          'textures/cubemap/001_natureHDRI_LookOut.hdr_Lef.png', 'textures/cubemap/001_natureHDRI_LookOut.hdr_Rig.png',
-          'textures/cubemap/001_natureHDRI_LookOut.hdr_Top.png', 'textures/cubemap/001_natureHDRI_LookOut.hdr_Bot.png',
-          'textures/cubemap/001_natureHDRI_LookOut.hdr_Fro.png', 'textures/cubemap/001_natureHDRI_LookOut.hdr_Bak.png'
+          'textures/cubemap/001_studioHDRI.hdr_Rig2.png', 'textures/cubemap/001_studioHDRI.hdr_Lef2.png',
+          'textures/cubemap/001_studioHDRI.hdr_Top2.png', 'textures/cubemap/001_studioHDRI.hdr_Bot2.png',
+          'textures/cubemap/001_studioHDRI.hdr_Fro2.png', 'textures/cubemap/001_studioHDRI.hdr_Bak2.png'
         ], (cube) => {
           baseMaterial.envMap = cube;
         });
@@ -186,6 +193,8 @@ export default {
         + swordspecs['GRIP_'+grip].bottom;
 
       this.group = new Three.Group();
+      this.group.scale.set(1.0/totalHeight,1.0/totalHeight,1.0/totalHeight);
+      this.group.position.y = 0.1;
       this.scene.add(this.group);
 
       const modelLoader = new FBXLoader();
@@ -292,7 +301,7 @@ export default {
     },
     animate() {
       requestAnimationFrame(this.animate);
-      //this.group.rotation.y += 0.02;
+      this.group.rotation.y += 0.02;
       this.renderer.render(this.scene, this.camera);
     }
   },

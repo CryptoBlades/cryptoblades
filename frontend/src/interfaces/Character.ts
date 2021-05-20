@@ -5,5 +5,10 @@ export interface ICharacter {
   level: number;
   trait: string;
   staminaTimestamp: string;
-  appearance: string;
+  head: string;
+  arms: string;
+  torso: string;
+  legs: string;
+  boots: string;
+  race: string;
 }
