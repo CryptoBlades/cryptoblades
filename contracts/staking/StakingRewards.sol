@@ -8,7 +8,7 @@ import "../../node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 // Inheritance
 import "./interfaces/IStakingRewards.sol";
 import "./RewardsDistributionRecipient.sol";
-import "./Pausable.sol";
+import "./SynthetixPausable.sol";
 import "./Failsafe.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/stakingrewards
@@ -17,7 +17,7 @@ contract StakingRewards is
     RewardsDistributionRecipient,
     ReentrancyGuard,
     Failsafe,
-    Pausable
+    SynthetixPausable
 {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;

@@ -4,7 +4,7 @@ pragma solidity ^0.6.2;
 import "./Owned.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/pausable
-abstract contract Pausable is Owned {
+abstract contract SynthetixPausable is Owned {
     uint256 public lastPauseTime;
     bool public paused;
 

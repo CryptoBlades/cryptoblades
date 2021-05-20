@@ -11,53 +11,26 @@ contract DummyRandoms is IRandoms, HasMain {
         __HasMain_init();
     }
 
-    // Views
-    function hasRequestedSeed(address user)
-        public
-        view
-        override
-        restrictedToMain
-        returns (bool)
-    {
-        // since we immediatelly fulfill with a fake random value,
-        // the moment a value is requested, it will also be available for consumption
-        return hasConsumableSeed(user);
-    }
-
-    function hasConsumableSeed(address user)
-        public
-        view
-        override
-        restrictedToMain
-        returns (bool)
-    {
-        return seedAvailable[user];
-    }
-
     // Mutative
-    function getRandomNumber(address user, uint256 userProvidedSeed)
-        external
-        override
-        restrictedToMain
-    {
-        uint256 fakeRandomValue = uint256(keccak256(abi.encodePacked(block.timestamp, user, userProvidedSeed)));
+    function getRandomNumber(address user) external override {
+        uint256 fakeRandomValue =
+            uint256(keccak256(abi.encodePacked(block.timestamp, user)));
         seeds[user] = fakeRandomValue;
         seedAvailable[user] = true;
     }
 
-    function consumeSeed(address user)
-        external
-        override
-        restrictedToMain
-        returns (uint256)
-    {
+    function consumeSeed(address user) external override returns (uint256) {
+        require(seedAvailable[user], "User has no random seed");
         uint256 seed = seeds[user];
         delete seeds[user];
         delete seedAvailable[user];
         return seed;
     }
 
-    function setRandomNumberForUserForTestingPurposes(address user, uint256 randomValue) external {
+    function setRandomNumberForUserForTestingPurposes(
+        address user,
+        uint256 randomValue
+    ) external {
         seeds[user] = randomValue;
         seedAvailable[user] = true;
     }

@@ -86,24 +86,14 @@ contract CryptoBlades is Initializable {
         return tokens;
     }
 
-    function hasRandom() public view returns (bool) {
-        return randoms.hasConsumableSeed(msg.sender);
-    }
-
     function requestRandom() external {
-        require(!hasRandom(), "Sender already has random seed");
-
-        if(!randoms.hasRequestedSeed(msg.sender)) {
-            uint256 _nonce = nonce++;
-            randoms.getRandomNumber(msg.sender, RandomUtil.unsafeRandom(_nonce));
-        }
+        randoms.getRandomNumber(msg.sender);
     }
 
     function fight(uint256 char, uint256 wep, uint32 target) external
             isCharacterOwner(char)
             isWeaponOwner(wep)
-            isTargetValid(char, wep, target)
-            needsRandom {
+            isTargetValid(char, wep, target) {
         performFight(msg.sender, char, wep, target);
     }
 
@@ -234,7 +224,7 @@ contract CryptoBlades is Initializable {
         return false;
     }
 
-    function mintCharacter() public requestPayFromPlayer(mintCharacterFee) needsRandom {
+    function mintCharacter() public requestPayFromPlayer(mintCharacterFee) {
         require(characters.balanceOf(msg.sender) <= characterLimit,
             string(abi.encodePacked("You can only have ",staminaCostFight," characters!")));
         payContract(msg.sender, mintCharacterFee);
@@ -257,7 +247,7 @@ contract CryptoBlades is Initializable {
         }
     }
 
-    function mintWeapon() public requestPayFromPlayer(mintWeaponFee) needsRandom {
+    function mintWeapon() public requestPayFromPlayer(mintWeaponFee) {
         skillToken.approve(address(this), usdToSkill(mintWeaponFee));
         payContract(msg.sender, mintWeaponFee);
 
@@ -297,8 +287,7 @@ contract CryptoBlades is Initializable {
     }
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
-            isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee)
-            needsRandom {
+            isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
 
         require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
         payContract(msg.sender, reforgeWeaponFee);
@@ -319,11 +308,6 @@ contract CryptoBlades is Initializable {
 
     modifier isCharacterOwner(uint256 character) {
         require(characters.ownerOf(character) == msg.sender, "Not the character owner");
-        _;
-    }
-
-    modifier needsRandom() {
-        require(randoms.hasConsumableSeed(msg.sender), "Sender has no random seed");
         _;
     }
 
