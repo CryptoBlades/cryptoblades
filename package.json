@@ -38,7 +38,8 @@
     "test": "truffle test",
     "deploy": "truffle migrate --reset",
     "deploy-testnet": "truffle migrate --network bsctestnet",
-    "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet"
+    "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet",
+    "deploy-mainnet-dry-run": "truffle migrate --network bscmainnet --dry-run"
   },
   "keywords": [],
   "author": "",
