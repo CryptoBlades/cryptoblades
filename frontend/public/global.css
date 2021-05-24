@@ -92,3 +92,20 @@
   opacity: 1;
   transition: opacity .15s;
 }
+
+* {
+  font-family: 'Arial Narrow';
+}
+
+.add-button {
+  width: 21px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #968332;
+  color: #968332;
+  background-color: #181e22;
+}
+
+.add-button .fas {
+  margin-left: -3px;
+}

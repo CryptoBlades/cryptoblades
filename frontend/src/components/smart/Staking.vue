@@ -626,22 +626,10 @@ export default {
   align-items: center;
 }
 .StakeButton {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid #3c3c3c;
-  box-sizing: border-box;
-  background-color: rgb(15, 16, 19);
-  color: #fff;
-  height: 50px;
-  padding: 0 20px;
-  font-size: 16px;
-  border-radius: 100px;
-  line-height: 24px;
-  box-shadow: 0 2px 0 rgb(0 0 0 / 2%);
-  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  border-radius: 100px;
+  border: 2px solid #6c5f38;
+  border-radius: 0.1em;
+  background: rgb(31,31,34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
 .switch_active {
   border: 2px solid rgb(37, 167, 219);

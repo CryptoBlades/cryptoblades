@@ -34,7 +34,6 @@ export default {
   padding: 0;
   margin: 0;
   display: flex;
-  font-family: "Roboto", sans-serif;
 }
 
 .link-list > li {
@@ -43,6 +42,9 @@ export default {
   display: flex;
   align-items: stretch;
   font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  color: #9e8a57;
 }
 
 a {
@@ -58,6 +60,7 @@ a {
 
 a:hover,
 a.router-link-active {
-  background: rgba(255, 255, 255, 0.15);
+  color: #f2e3bc;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #e1bb34, 0 0 10px #e1bb34;
 }
 </style>

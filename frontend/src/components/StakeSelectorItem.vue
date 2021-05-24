@@ -8,7 +8,7 @@
       <table class="stake-data-table">
         <tr>
           <th class="bold">
-            Stake:
+            Stake
           </th>
           <td class="align-right">
             {{ stakeTokenName }}
@@ -16,7 +16,7 @@
         </tr>
         <tr>
           <th class="bold">
-            Earn:
+            Earn
           </th>
           <td class="align-right">
             {{ rewardTokenName }}
@@ -24,7 +24,7 @@
         </tr>
         <tr v-if="estimatedYield" title="Estimated yield per year and token.">
           <th class="bold">
-            APY:
+            APY
           </th>
           <td class="align-right">
             {{ estimatedYield.multipliedBy(100).toFixed(2) }}%
@@ -32,7 +32,7 @@
         </tr>
         <tr v-if="minimumStakeTime !== 0">
           <th class="bold">
-            Stake locked:
+            Stake locked
           </th>
           <td class="align-right">
             {{ minimumStakeTimeFormatted }}
@@ -64,10 +64,8 @@ export default {
 
 <style scoped>
 .container {
-  background: url("../assets/title-bar-bg-better-tiling.png");
-  background-color: rgba(0, 0, 0, 0.233);
-  background-blend-mode: darken;
-  background-repeat: repeat-y;
+  background: rgb(22, 22, 22);
+  background: linear-gradient(180deg, rgba(22, 22, 22, 1) 0%, rgba(16, 17, 17, 1) 100%);
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -77,9 +75,6 @@ export default {
 .stake-icon-wrapper {
   width: 5rem;
   height: 5rem;
-  background-color: black;
-  border-radius: 5rem;
-  border: solid currentColor 2px;
   padding: 0.5rem;
   box-sizing: border-box;
 }
@@ -92,6 +87,8 @@ export default {
 
 .stake-type-title {
   font-size: 1.2rem;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #6c5f38;
 }
 
 .table-wrapper {
@@ -106,6 +103,7 @@ export default {
 
 .align-right {
   text-align: right;
+  color: #fff;
 }
 
 .stake-select-button {
@@ -116,14 +114,11 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.button {
-  background-image: url("../assets/title-bar-bg-better-tiling.png");
-  background-color: rgba(255, 255, 255, 0);
-  background-blend-mode: lighten;
-  border: rgba(0, 0, 0, 0.2) outset 4px;
+  border: 2px solid #6c5f38;
   border-radius: 0.1em;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  text-transform: uppercase;
 }
 
 .button:hover:not(:disabled) {
