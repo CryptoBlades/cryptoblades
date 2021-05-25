@@ -13,11 +13,11 @@ export default {
 
 <style>
 .button {
-  background-image: url("../assets/title-bar-bg-better-tiling.png");
-  background-color: rgba(255, 255, 255, 0);
-  background-blend-mode: lighten;
-  border: rgba(0, 0, 0, 0.2) outset 4px;
+  border: 2px solid #6c5f38;
   border-radius: 0.1em;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+
 }
 
 .button:hover:not(:disabled) {

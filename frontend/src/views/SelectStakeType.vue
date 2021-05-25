@@ -114,8 +114,9 @@ export default {
   height: 22rem;
   margin: 2rem;
   border-radius: 1rem;
-  border: currentColor solid 2px;
   overflow: hidden;
+  border: 2px solid #6c5f38;
+  border-radius: 0.1em;
 }
 
 .stake-select-item > * {

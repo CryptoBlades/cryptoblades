@@ -1,8 +1,8 @@
 <template>
   <div class="skill-balance-display">
-    <div><span class="bold">Balance</span>: {{ formattedSkillBalance }}</div>
+    <div class="balance-container"><span class="bold">Balance</span>: <span class="balance">{{ formattedSkillBalance }}</span></div>
 
-    <button v-if="!featureFlagStakeOnly" class="add-more-skill" @click="onAddMoreSkill">
+    <button v-if="!featureFlagStakeOnly" class="add-button" @click="onAddMoreSkill">
       <i class="fas fa-plus-circle"></i>
     </button>
   </div>
@@ -61,19 +61,16 @@ export default {
   font-size: 1.1rem;
 }
 
-.add-more-skill {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.6);
-  height: 100%;
-  font-size: 1.3em;
-  padding: 0 0.5rem;
-  margin-left: 0.625rem;
-  cursor: pointer;
-}
-
 .add-more-skill:hover {
   color: white;
   background: rgba(255, 255, 255, 0.25);
+}
+
+.balance-container {
+  margin-right: 5px;
+}
+
+.balance {
+  color: #b3b0a7;
 }
 </style>
