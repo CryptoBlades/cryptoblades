@@ -11,11 +11,7 @@ import "./weapons.sol";
 import "./util.sol";
 
 contract CryptoBlades is Initializable {
-
-    using ABDKMath64x64 for int256;
     using ABDKMath64x64 for int128;
-    using ABDKMath64x64 for uint256;
-    using ABDKMath64x64 for uint24;
 
     Characters public characters;
     Weapons public weapons;
@@ -30,13 +26,13 @@ contract CryptoBlades is Initializable {
         priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
         randoms = _randoms;
 
-        characterLimit = 1000;
+        characterLimit = 4;
         staminaCostFight = 0;
-        mintCharacterFee = uint256(10 * 10000).divu(10000);//10 usd;
-        refillStaminaFee = uint256(5 * 10000).divu(10000);//5 usd;
-        fightRewardBaseline = uint256(1 * 100).divu(10000);//0.01 usd;
-        mintWeaponFee = uint256(3 * 10000).divu(10000);//3 usd;
-        reforgeWeaponFee = uint256(1 * 5000).divu(10000);//0.5 usd;
+        mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
+        refillStaminaFee = ABDKMath64x64.divu(5, 1);//5 usd;
+        fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
+        mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
+        reforgeWeaponFee = ABDKMath64x64.divu(5, 10);//0.5 usd;
     }
 
     // config vars
@@ -117,11 +113,11 @@ contract CryptoBlades is Initializable {
 
     function getTokenGainForFight(uint32 target) internal view returns (int128) {
         uint256 monsterPower = uint256(getMonsterPower(target));
-        return monsterPower.divu(characters.getPowerAtLevel(0)).mul(fightRewardBaseline);
+        return ABDKMath64x64.divu(monsterPower, characters.getPowerAtLevel(0)).mul(fightRewardBaseline);
     }
 
     function getXpGainForFight(uint256 char, uint256 wep, uint32 target) internal view returns (uint16) {
-        int128 basePowerDifference = getMonsterPower(target).divu(getPlayerPower(char, wep));
+        int128 basePowerDifference = ABDKMath64x64.divu(getMonsterPower(target), getPlayerPower(char, wep));
         // base XP gain is 16 for an equal fight
         return uint16((basePowerDifference * 16).toUInt());
     }
@@ -141,17 +137,27 @@ contract CryptoBlades is Initializable {
 
     function getPlayerPower(uint256 char, uint256 wep) public view returns (uint24) {
         // does not account for trait matches
-        return uint24((characters.getPower(char).fromUInt().mul(weapons.getPowerMultiplier(wep))).toUInt());
+        return uint24(
+            ABDKMath64x64.fromUInt(characters.getPower(char))
+                .mul(weapons.getPowerMultiplier(wep))
+                .toUInt()
+        );
     }
 
     function getPlayerFinalPower(uint256 char, uint256 wep) public view returns (uint24) {
         // accounts for trait matches
-        return uint24((characters.getPower(char).fromUInt().mul(weapons.getPowerMultiplierForTrait(wep, characters.getTrait(char)))).toUInt());
+        return uint24(
+            ABDKMath64x64.fromUInt(characters.getPower(char))
+                .mul(
+                    weapons.getPowerMultiplierForTrait(wep, characters.getTrait(char))
+                )
+                .toUInt()
+        );
     }
 
     function getPlayerTraitBonusAgainst(uint8 characterTrait, uint8 weaponTrait, uint8 monsterTrait) public pure returns(int128) {
-        int128 traitBonus = uint256(1).fromUInt();
-        int128 oneBonus = uint256(75).divu(1000);
+        int128 traitBonus = ABDKMath64x64.fromUInt(1);
+        int128 oneBonus = ABDKMath64x64.divu(75, 1000);
         if(characterTrait == weaponTrait) {
             traitBonus = traitBonus.add(oneBonus);
         }
