@@ -1,6 +1,7 @@
 pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IRandoms.sol";
@@ -10,8 +11,10 @@ import "./characters.sol";
 import "./weapons.sol";
 import "./util.sol";
 
-contract CryptoBlades is Initializable {
+contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
+
+    bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     Characters public characters;
     Weapons public weapons;
@@ -20,6 +23,11 @@ contract CryptoBlades is Initializable {
     IRandoms public randoms;
 
     function initialize(IERC20 _skillToken, Characters _characters, Weapons _weapons, IPriceOracle _priceOracleSkillPerUsd, IRandoms _randoms) public initializer {
+        __AccessControl_init();
+
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(GAME_ADMIN, msg.sender);
+
         skillToken = _skillToken;
         characters = _characters;
         weapons = _weapons;
@@ -301,7 +309,7 @@ contract CryptoBlades is Initializable {
     }
 
     modifier restricted() {
-        // todo proper with accessControl
+        require(hasRole(GAME_ADMIN, msg.sender), "Missing GAME_ADMIN role");
         _;
     }
 
