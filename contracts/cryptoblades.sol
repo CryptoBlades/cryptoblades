@@ -3,13 +3,12 @@ pragma solidity ^0.6.0;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../node_modules/@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 import "./interfaces/IRandoms.sol";
+import "./interfaces/IPriceOracle.sol";
 //import "./ownable.sol";
 import "./characters.sol";
 import "./weapons.sol";
 import "./util.sol";
-import "./dummyPriceService.sol";
 
 contract CryptoBlades is Initializable {
 
@@ -21,14 +20,14 @@ contract CryptoBlades is Initializable {
     Characters public characters;
     Weapons public weapons;
     IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
-    AggregatorV3Interface public priceChecker;
+    IPriceOracle public priceOracleSkillPerUsd;
     IRandoms public randoms;
 
-    function initialize(IERC20 _skillToken, Characters _characters, Weapons _weapons, AggregatorV3Interface _priceChecker, IRandoms _randoms) public initializer {
+    function initialize(IERC20 _skillToken, Characters _characters, Weapons _weapons, IPriceOracle _priceOracleSkillPerUsd, IRandoms _randoms) public initializer {
         skillToken = _skillToken;
         characters = _characters;
         weapons = _weapons;
-        priceChecker = _priceChecker;
+        priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
         randoms = _randoms;
 
         characterLimit = 1000;
@@ -360,11 +359,7 @@ contract CryptoBlades is Initializable {
     }
 
     function usdToSkill(int128 usdAmount) public view returns (uint256) {
-        // returns a skill cost adjusted for its original price based on USD
-        // The format of the int256 returned by the interface is not specified so i assume it's 128.128 fixed point
-        (,int256 usdPerSkill,,,) = priceChecker.latestRoundData();
-        return usdAmount.div(usdPerSkill.from128x128()).mulu(1 ether);
-        //return getContractSkillBalance().divu(skillToken.totalSupply()).mul(usdAmount.fromUInt()).toUInt();
+        return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
     }
 
     function getApprovedBalance() external view returns (uint256) {
