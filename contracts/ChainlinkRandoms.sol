@@ -55,12 +55,12 @@ contract ChainlinkRandoms is IRandoms, PausableOwnable, VRFConsumerBase {
 
     // Views
 
-    function hasRequestedSeed(address user) internal view returns (bool) {
+    function hasRequestedSeed(address user) public override view returns (bool) {
         return seedStates[user].requestId != 0;
     }
 
-    function hasConsumableSeed(address user) internal view returns (bool) {
-        return hasRequestedSeed(user) && seedStates[user].isAvailable;
+    function hasReceivedSeed(address user) public override view returns (bool) {
+        return seedStates[user].isAvailable;
     }
 
     // Mutative
@@ -74,7 +74,8 @@ contract ChainlinkRandoms is IRandoms, PausableOwnable, VRFConsumerBase {
      */
     function getRandomNumber(address user) external override whenNotPaused {
         require(msg.sender == main || msg.sender == user, "Is not self or main");
-        require(hasRequestedSeed(user), "Already requested");
+        require(!hasReceivedSeed(user), "Already received");
+        require(!hasRequestedSeed(user), "Already requested");
         require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK");
 
         // the user-provided seed is not necessary, as per the docs

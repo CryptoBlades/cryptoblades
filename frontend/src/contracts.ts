@@ -12,6 +12,7 @@ import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../
 import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/RaidBasic.json';
 import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
+import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 
 import Web3 from 'web3';
 import { Contracts } from './interfaces';
@@ -51,16 +52,18 @@ export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean):
   const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as any)[networkId].address;
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as any, cryptoBladesContractAddr);
-  const [charactersAddr, weaponsAddr] = await Promise.all([
+  const [charactersAddr, weaponsAddr, randomsAddr] = await Promise.all([
     CryptoBlades.methods.characters().call(),
     CryptoBlades.methods.weapons().call(),
+    CryptoBlades.methods.randoms().call(),
   ]);
+  const Randoms = new web3.eth.Contract(randomsAbi as any, randomsAddr);
   const Characters = new web3.eth.Contract(charactersAbi as any, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as any, weaponsAddr);
   const RaidBasic = new web3.eth.Contract(raidAbi as any, raidContractAddr);
 
   return {
-    CryptoBlades, Characters, Weapons,
+    CryptoBlades, Randoms, Characters, Weapons,
     SkillStakingRewards, LPStakingRewards, LP2StakingRewards,
     SkillToken, LPToken, LP2Token,
     RaidBasic

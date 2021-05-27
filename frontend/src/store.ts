@@ -12,7 +12,8 @@ import {
 } from './contract-models';
 import { allStakeTypes, Contracts, IStakeOverviewState, IStakeState, IState, StakeType } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee } from './contract-call-utils';
+import { approveFee, waitUntilEvent } from './contract-call-utils';
+import { Web3JsTransactionResult } from '../../abi-common';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -527,13 +528,40 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async requestRandom({ state }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
-        await state.contracts.CryptoBlades!.methods
-          .requestRandom()
-          .send(defaultCallOptions(state));
+        const sender = state.defaultAccount;
+        const currentBlockNumber = await web3.eth.getBlockNumber();
+        console.log('Starting randomness request at block number', currentBlockNumber);
 
-        // TODO wait on event
+        const [hasRequestedSeed, hasReceivedSeed] = await Promise.all([
+          state.contracts.Randoms!.methods
+            .hasRequestedSeed(sender)
+            .call(defaultCallOptions(state), currentBlockNumber),
+          state.contracts.Randoms!.methods
+            .hasReceivedSeed(sender)
+            .call(defaultCallOptions(state), currentBlockNumber),
+        ]);
+
+        console.log({ hasRequestedSeed, hasReceivedSeed });
+
+        if(!hasReceivedSeed) {
+          let res: Web3JsTransactionResult | null = null;
+          if(!hasRequestedSeed) {
+            res = await state.contracts.Randoms!.methods
+              .getRandomNumber(sender)
+              .send(defaultCallOptions(state));
+          }
+
+          const fromBlock = res?.blockNumber || currentBlockNumber;
+          console.log(`waiting for RandomNumberReceived starting from block ${fromBlock}...`);
+          await waitUntilEvent(state.contracts.Randoms!, 'RandomNumberReceived', {
+            fromBlock,
+            filter: {
+              user: sender
+            }
+          });
+        }
       },
 
       async mintCharacter({ state, dispatch }) {

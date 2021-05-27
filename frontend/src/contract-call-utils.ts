@@ -1,5 +1,5 @@
 import { Web3JsCallOptions, Web3JsAbiCall } from '../../abi-common';
-import { Contracts } from './interfaces';
+import { Contract, Contracts } from './interfaces';
 
 export type CryptoBladesAlias = NonNullable<Contracts['CryptoBlades']>;
 
@@ -31,4 +31,19 @@ export async function approveFee(
   return await skillToken.methods
     .approve(cryptoBladesContract.options.address, feeInSkill)
     .send(approveOpts);
+}
+
+export async function waitUntilEvent(contract: Contract<unknown>, eventName: string, opts: object): Promise<object> {
+  let subscriber: any;
+
+  const data = await new Promise<object>((resolve, reject) => {
+    subscriber = contract.events[eventName](opts, (err: Error | null, data: object | null) => {
+      if(err) reject(err);
+      else resolve(data!);
+    });
+  });
+
+  subscriber.unsubscribe();
+
+  return data;
 }
