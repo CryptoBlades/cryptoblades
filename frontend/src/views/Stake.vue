@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import Staking from '../components/smart/Staking.vue';
 import { allStakeTypes } from '../interfaces/State';
 
@@ -20,8 +21,10 @@ export default {
   },
 
   computed: {
+    ...mapGetters(['availableStakeTypes']),
+
     isKnownStakeType() {
-      return allStakeTypes.includes(this.stakeType);
+      return this.availableStakeTypes.includes(this.stakeType);
     }
   },
 

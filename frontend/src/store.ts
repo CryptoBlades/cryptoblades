@@ -115,6 +115,20 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
     },
 
     getters: {
+      availableStakeTypes(state: IState) {
+        const out: StakeType[] = ['skill'];
+
+        if(state.contracts.LPStakingRewards) {
+          out.push('lp');
+        }
+
+        if(state.contracts.LP2StakingRewards) {
+          out.push('lp2');
+        }
+
+        return out;
+      },
+
       getTargetsByCharacterIdAndWeaponId(state: IState) {
         return (characterId: number, weaponId: number) => {
           const targetsByWeaponId = state.targetsByCharacterIdAndWeaponId[characterId];
@@ -352,6 +366,8 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         }
 
         function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias) {
+          if(!StakingRewards) return;
+
           StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err: Error, data: any) => {
             if (err) {
               console.error(err);
@@ -599,6 +615,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       async fetchStakeOverviewDataPartial({ state, commit }, { stakeType }: { stakeType: StakeType }) {
         const { StakingRewards } = getStakingContracts(state.contracts, stakeType);
+        if(!StakingRewards) return;
 
         const [
           rewardRate,
@@ -625,6 +642,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         if(!state.defaultAccount) return;
 
         const { StakingRewards, StakingToken } = getStakingContracts(state.contracts, stakeType);
+        if(!StakingRewards || !StakingToken) return;
 
         const [
           ownBalance,
@@ -667,6 +685,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       async stake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
         const { StakingRewards, StakingToken } = getStakingContracts(state.contracts, stakeType);
+        if(!StakingRewards || !StakingToken) return;
 
         await StakingToken.methods.approve(StakingRewards.options.address, amount).send({
           from: state.defaultAccount
@@ -681,6 +700,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       async unstake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
         const { StakingRewards } = getStakingContracts(state.contracts, stakeType);
+        if(!StakingRewards) return;
 
         await StakingRewards.methods.withdraw(amount).send({
           from: state.defaultAccount,
@@ -691,6 +711,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       async claimReward({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
         const { StakingRewards } = getStakingContracts(state.contracts, stakeType);
+        if(!StakingRewards) return;
 
         await StakingRewards.methods.getReward().send({
           from: state.defaultAccount,

@@ -18,13 +18,12 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import _ from 'lodash';
 BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import StakeSelectorItem from '../components/StakeSelectorItem.vue';
-import { allStakeTypes } from '../interfaces/State';
 
 export default {
   components: {
@@ -33,9 +32,7 @@ export default {
 
   data() {
     return {
-      allStakeTypes,
-
-      entries: [
+      allEntries: [
         {
           stakeType: 'skill',
           stakeTokenName: 'SKILL',
@@ -60,10 +57,15 @@ export default {
 
   computed: {
     ...mapState(['stakeOverviews']),
+    ...mapGetters(['availableStakeTypes']),
+
+    entries() {
+      return this.allEntries.filter(e => this.availableStakeTypes.includes(e.stakeType));
+    },
 
     estimatedYields() {
       return _.fromPairs(
-        allStakeTypes.map(stakeType => [
+        this.availableStakeTypes.map(stakeType => [
           stakeType,
           this.calculateEstimatedYield(stakeType)
         ])

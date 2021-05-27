@@ -9,11 +9,11 @@ type Contract<Abi> = Omit<Web3EthContract, 'methods'> & TypeSafeContract<Abi>;
 
 export interface Contracts {
   SkillToken: Contract<IERC20>;
-  LPToken: Contract<IERC20>;
-  LP2Token: Contract<IERC20>;
+  LPToken: Contract<IERC20> | null;
+  LP2Token: Contract<IERC20> | null;
   SkillStakingRewards: Contract<IStakingRewards>;
-  LPStakingRewards: Contract<IStakingRewards>;
-  LP2StakingRewards: Contract<IStakingRewards>;
+  LPStakingRewards: Contract<IStakingRewards> | null;
+  LP2StakingRewards: Contract<IStakingRewards> | null;
 
   CryptoBlades?: Contract<CryptoBlades>;
   Characters?: Contract<Characters>;
