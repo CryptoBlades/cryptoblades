@@ -305,7 +305,6 @@ export default {
       } );
     },
     loadingProgress() {
-      //console.log((this.loadCount+1)+' of '+(this.loadCountTotal));
       if(++this.loadCount >= this.loadCountTotal && this.allLoadStarted) {
         this.loadingFinished();
       }
@@ -335,7 +334,7 @@ export default {
 <style scoped>
 .character-art {
   width: 100%;
-  height: 10em;
+  height: 100%;
 
   position: relative;
 }

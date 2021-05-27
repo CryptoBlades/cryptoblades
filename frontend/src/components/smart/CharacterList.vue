@@ -61,13 +61,13 @@ export default {
   padding: 0;
   display: grid;
   padding: 0.5em;
-  grid-template-columns: repeat(auto-fit, 7em);
+  grid-template-columns: repeat(auto-fit, 14em);
   gap: 0.5em;
 }
 
 .character {
-  width: 6em;
-  height: 10em;
+  width: 12em;
+  height: 20em;
   background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 4px #ffffff38;
   border-radius: 5px;

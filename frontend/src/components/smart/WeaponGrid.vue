@@ -5,7 +5,7 @@
       :class="{ selected: weapon.id === highlight }"
       v-for="weapon in displayWeapons"
       :key="weapon.id"
-      @click="$emit('choose-weapon', weapon.id)"
+      @click="$emit('input', weapon.id)"
     >
       <weapon-icon :weapon="weapon" />
     </li>
@@ -43,13 +43,13 @@ export default {
   padding: 0;
   display: grid;
   padding: 0.5em;
-  grid-template-columns: repeat(auto-fit, 7em);
+  grid-template-columns: repeat(auto-fit, 14em);
   gap: 0.5em;
 }
 
 .weapon {
-  width: 6em;
-  height: 6em;
+  width: 12em;
+  height: 12em;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
   cursor: pointer;

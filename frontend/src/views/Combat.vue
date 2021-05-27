@@ -4,7 +4,11 @@
       <h1 class="error" v-if="error !== null">Error: {{ error }}</h1>
 
       <h1>Choose a weapon:</h1>
-      <weapon-grid v-model="selectedWeaponId" />
+      <weapon-grid
+        v-model="selectedWeaponId"
+        :selectedWeaponId="selectedWeaponId"
+        @input="setCurrentWeapon"
+      />
 
       <ul class="encounter-list" v-if="targets.length > 0">
         <li class="encounter" v-for="(e, i) in targets" :key="i">
@@ -38,7 +42,7 @@
 import BigButton from '../components/BigButton.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 
 export default {
   data() {
@@ -83,6 +87,7 @@ export default {
   },
 
   methods: {
+    ...mapMutations(['setCurrentWeapon']),
     ...mapActions(['fetchTargets', 'doEncounter']),
 
     async onClickEncounter(targetToFight) {

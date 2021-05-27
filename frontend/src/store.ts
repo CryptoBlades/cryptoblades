@@ -87,6 +87,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       ownedWeaponIds: [],
       maxStamina: 0,
       currentCharacterId: null,
+      currentWeaponId: null,
 
       characters: {},
       characterStaminas: {},
@@ -231,6 +232,10 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         if (!state.ownedCharacterIds.includes(characterId)) {
           state.ownedCharacterIds.push(characterId);
         }
+      },
+
+      setCurrentWeapon(state: IState, weaponId: number) {
+        state.currentWeaponId = weaponId;
       },
 
       addNewOwnedWeaponId(state: IState, weaponId: number) {

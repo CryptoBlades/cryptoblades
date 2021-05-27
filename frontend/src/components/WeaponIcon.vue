@@ -2,7 +2,10 @@
   <div
     class="weapon-icon"
     v-tooltip="tooltipHtml"
-    ref="el">
+    ref="el"
+    @mouseover="hover = true"
+    @mouseleave="hover = false"
+  >
 
     <div class="glow-container" :class="['glow-' + (weapon.stars || 0)]"></div>
     <div class="loading-container" v-if="!allLoaded">
@@ -32,25 +35,6 @@ const rColor = new Three.Color(0x7A7A7A);
 const gColor = new Three.Color(0x413F41);
 const bColor = new Three.Color(0xAF5822);
 const white = new Three.Color(0xFFFFFF);
-
-let baseMaterial;
-
-function patchShader(material, rc, gc, bc) {
-  material.userData.maskR = { value: rc };
-  material.userData.maskG = { value: gc };
-  material.userData.maskB = { value: bc };
-  material.onBeforeCompile = shader => {
-    shader.uniforms.maskR = material.userData.maskR;
-    shader.uniforms.maskG = material.userData.maskG;
-    shader.uniforms.maskB = material.userData.maskB;
-    shader.fragmentShader = 'uniform vec3 maskR;\nuniform vec3 maskG;\nuniform vec3 maskB;\n' + shader.fragmentShader;
-    shader.fragmentShader =
-      shader.fragmentShader.replace(
-        '#include <map_fragment>',
-        maskChroma
-      );
-  };
-}
 
 function transformModel(model, y) {
   model.scale.set( modelScale,modelScale,modelScale );
@@ -97,11 +81,15 @@ export default {
 
   data() {
     return {
+      hover: false,
       allLoaded: false,
+      allLoadStarted: false,
       camera: null,
       scene: null,
       renderer: null,
+      baseMaterial: null,
       loadCount: 0,
+      loadCountTotal: 0,
       pommel: null,
       grip: null,
       crossGuard: null,
@@ -127,12 +115,12 @@ export default {
       const container = this.$refs.el;
 
       this.camera = new Three.PerspectiveCamera(70, container.clientWidth/container.clientHeight, 0.01, 1000);
-      this.camera.position.z = 0.5;//1.15625;
+      this.camera.position.z = 0.6;//1.15625;
       this.camera.rotation.z = Math.PI / 4;
 
       this.scene = new Three.Scene();
 
-      const directionalLight = new Three.DirectionalLight( 0xffffff, 1.0 );
+      const directionalLight = new Three.DirectionalLight( 0xffffff, 0.75 );
       directionalLight.position.x = -0.375;
       directionalLight.position.y = 1.375;
       directionalLight.position.z = 2.0;
@@ -155,27 +143,31 @@ export default {
 
       container.appendChild(this.renderer.domElement);
 
-      if(baseMaterial === undefined) {
-        baseMaterial = new Three.MeshPhysicalMaterial();
-        baseMaterial.aoMapIntensity = 0.375;
-        baseMaterial.envMapIntensity = 1.0;
-        baseMaterial.metalness = 1.0; // non-1 allows ambient lights in
-        baseMaterial.roughness = 0.5;
+      if(this.baseMaterial === undefined || this.baseMaterial === null) {
+        this.baseMaterial = new Three.MeshPhysicalMaterial();
+        this.baseMaterial.aoMapIntensity = 0.375;
+        this.baseMaterial.envMapIntensity = 1.0;
+        this.baseMaterial.metalness = 1.0; // non-1 allows ambient lights in
+        this.baseMaterial.roughness = 0.5;
 
         const cmLoader = new Three.CubeTextureLoader();
         cmLoader.load( [
-          'textures/cubemap/001_studioHDRI.hdr_Rig2.png', 'textures/cubemap/001_studioHDRI.hdr_Lef2.png',
-          'textures/cubemap/001_studioHDRI.hdr_Top2.png', 'textures/cubemap/001_studioHDRI.hdr_Bot2.png',
-          'textures/cubemap/001_studioHDRI.hdr_Fro2.png', 'textures/cubemap/001_studioHDRI.hdr_Bak2.png'
+          'textures/cubemap/001_studioHDRI.hdr_Rig.png', 'textures/cubemap/001_studioHDRI.hdr_Lef.png',
+          'textures/cubemap/001_studioHDRI.hdr_Top.png', 'textures/cubemap/001_studioHDRI.hdr_Bot.png',
+          'textures/cubemap/001_studioHDRI.hdr_Fro.png', 'textures/cubemap/001_studioHDRI.hdr_Bak.png'
         ], (cube) => {
-          baseMaterial.envMap = cube;
+          this.baseMaterial.envMap = cube;
+          this.loadingProgress();
         });
       }
 
       this.setupModel();
     },
     setupModel() {
+      this.allLoaded = false;
+      this.allLoadStarted = false;
       this.loadCount = 0;
+      this.loadCountTotal = 15;
 
       const blade = (this.weapon.blade % bladeCount)+1;
       const crossGuard = (this.weapon.crossguard % crossGuardCount)+1;
@@ -188,13 +180,12 @@ export default {
         + swordspecs['GRIP_'+crossGuard].sizeZ
         + swordspecs['POMMEL_'+crossGuard].sizeZ;
 
-      this.camera.position.y = (totalHeight / 2)
+      this.camera.position.y = ((totalHeight / 2)
         - swordspecs['POMMEL_'+pommel].sizeZ
-        + swordspecs['GRIP_'+grip].bottom;
+        + swordspecs['GRIP_'+grip].bottom) * (1.0/totalHeight);
 
       this.group = new Three.Group();
       this.group.scale.set(1.0/totalHeight,1.0/totalHeight,1.0/totalHeight);
-      this.group.position.y = 0.1;
       this.scene.add(this.group);
 
       const modelLoader = new FBXLoader();
@@ -259,22 +250,42 @@ export default {
         console.error( error );
       } );
 
+      this.allLoadStarted = true;
+    },
+
+    patchShader(material, rc, gc, bc) {
+      material.userData.maskR = { value: rc };
+      material.userData.maskG = { value: gc };
+      material.userData.maskB = { value: bc };
+      material.onBeforeCompile = shader => {
+        shader.uniforms.maskR = material.userData.maskR;
+        shader.uniforms.maskG = material.userData.maskG;
+        shader.uniforms.maskB = material.userData.maskB;
+        shader.fragmentShader = 'uniform vec3 maskR;\nuniform vec3 maskG;\nuniform vec3 maskB;\n' + shader.fragmentShader;
+        shader.fragmentShader =
+          shader.fragmentShader.replace(
+            '#include <map_fragment>',
+            maskChroma
+          );
+      };
+      if(this.allLoaded) // fallback, doesn't always work
+        this.renderer.render(this.scene, this.camera);
     },
     loadingProgress() {
-      if(++this.loadCount >= 14) {
+      if(++this.loadCount >= this.loadCountTotal && this.allLoadStarted) {
         this.loadingFinished();
       }
     },
     loadingFinished() {
 
-      const bladeMaterial = baseMaterial.clone();
-      const crossGuardMaterial = baseMaterial.clone();
-      const gripMaterial = baseMaterial.clone();
-      const pommelMaterial = baseMaterial.clone();
-      patchShader(bladeMaterial, rColor, gColor, bColor);
-      patchShader(crossGuardMaterial, rColor, white, white);
-      patchShader(gripMaterial, rColor, gColor, bColor);
-      patchShader(pommelMaterial, rColor, white, white);
+      const bladeMaterial = this.baseMaterial.clone();
+      const crossGuardMaterial = this.baseMaterial.clone();
+      const gripMaterial = this.baseMaterial.clone();
+      const pommelMaterial = this.baseMaterial.clone();
+      this.patchShader(bladeMaterial, rColor, gColor, bColor);
+      this.patchShader(crossGuardMaterial, rColor, white, white);
+      this.patchShader(gripMaterial, rColor, gColor, bColor);
+      this.patchShader(pommelMaterial, rColor, white, white);
 
       bladeMaterial.map = this.bladeMaskTexture;
       bladeMaterial.normalMap = this.bladeNormalTexture;
@@ -296,18 +307,24 @@ export default {
 
       this.renderer.render(this.scene, this.camera);
       this.allLoaded = true;
-
-      //console.log( this.weapon.id + ' >> Finished applying stuff');
     },
     animate() {
       requestAnimationFrame(this.animate);
-      this.group.rotation.y += 0.02;
-      this.renderer.render(this.scene, this.camera);
+      if(this.hover) {
+        this.group.rotation.y += 0.02;
+        this.renderer.render(this.scene, this.camera);
+      }
+      else {
+        if(this.group.rotation.y !== 0) {
+          this.group.rotation.y = 0;
+          this.renderer.render(this.scene, this.camera);
+        }
+      }
     }
   },
   mounted() {
     this.init();
-    //this.animate();
+    this.animate();
   }
 };
 
@@ -322,8 +339,8 @@ export default {
 }
 
 .glow-container, .loading-container {
-  height: 96px;
-  width: 96px;
+  height: 100%;
+  width: 100%;
   position: absolute;
   top: 0;
 }

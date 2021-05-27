@@ -115,7 +115,7 @@ export default {
 <style scoped>
 .container {
   display: grid;
-  grid-template-columns: 23rem 1fr 23rem;
+  grid-template-columns: 30rem 1fr 30rem;
   grid-template-rows: auto;
   grid-template-areas: "weapongrid main characterlist";
   column-gap: 4rem;
