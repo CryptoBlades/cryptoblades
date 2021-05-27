@@ -19,7 +19,7 @@ contract DummyRandoms is IRandoms, HasMain {
         seedAvailable[user] = true;
     }
 
-    function consumeSeed(address user) external override returns (uint256) {
+    function consumeSeed(address user) external override restrictedToMain returns (uint256) {
         require(seedAvailable[user], "User has no random seed");
         uint256 seed = seeds[user];
         delete seeds[user];
