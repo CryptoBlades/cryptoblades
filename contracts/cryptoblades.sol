@@ -64,6 +64,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     event FightOutcome(uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
 
     function getMySkill() external view returns (uint256) {
+        // TODO remove as it is unnecessary - just call skillToken.balanceOf directly
         return skillToken.balanceOf(msg.sender);
     }
 
@@ -369,6 +370,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getContractSkillBalance() public view returns (uint256) {
+        // TODO remove as it is unnecessary - just call skillToken.balanceOf directly
         return skillToken.balanceOf(address(this));
     }
 
@@ -377,6 +379,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getApprovedBalance() external view returns (uint256) {
+        // TODO remove as it is unnecessary - just call skillToken.allowance directly
         return skillToken.allowance(msg.sender, address(this));
     }
 
