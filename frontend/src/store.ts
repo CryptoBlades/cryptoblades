@@ -12,6 +12,7 @@ import {
 } from './contract-models';
 import { allStakeTypes, Contracts, IStakeOverviewState, IStakeState, IState, StakeType } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
+import { approveFee } from './contract-call-utils';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -470,6 +471,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async addMoreSkill({ state, dispatch }, skillToAdd: string) {
+        // TODO REMOVE BEFORE LAUNCH
         if(featureFlagStakeOnly) return;
 
         await state.contracts.CryptoBlades!.methods.giveMeSkill(skillToAdd).send({
@@ -524,16 +526,44 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         }
       },
 
-      async mintCharacter({ state }) {
+      async requestRandom({ state }) {
         if(featureFlagStakeOnly) return;
 
-        await state.contracts.CryptoBlades!.methods.mintCharacter().send({
-          from: state.defaultAccount,
-        });
+        await state.contracts.CryptoBlades!.methods
+          .requestRandom()
+          .send(defaultCallOptions(state));
+
+        // TODO wait on event
       },
 
-      async mintWeapon({ state }) {
+      async mintCharacter({ state, dispatch }) {
         if(featureFlagStakeOnly) return;
+
+        await approveFee(
+          state.contracts.CryptoBlades!,
+          state.contracts.SkillToken,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee()
+        );
+
+        await dispatch('requestRandom');
+
+        await state.contracts.CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
+      },
+
+      async mintWeapon({ state, dispatch }) {
+        if(featureFlagStakeOnly) return;
+
+        await approveFee(
+          state.contracts.CryptoBlades!,
+          state.contracts.SkillToken,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
+        );
+
+        await dispatch('requestRandom');
 
         await state.contracts.CryptoBlades!.methods.mintWeapon().send({
           from: state.defaultAccount,
@@ -542,6 +572,16 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       async reforgeWeapon({ state, dispatch }, { burnWeaponId, reforgeWeaponId }) {
         if(featureFlagStakeOnly) return;
+
+        await approveFee(
+          state.contracts.CryptoBlades!,
+          state.contracts.SkillToken,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee()
+        );
+
+        await dispatch('requestRandom');
 
         await state.contracts.Weapons!.methods
           .approve(
@@ -581,6 +621,8 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       async doEncounter({ state, dispatch }, { characterId, weaponId, targetString }) {
         if(featureFlagStakeOnly) return;
+
+        await dispatch('requestRandom');
 
         const res = await state.contracts.CryptoBlades!.methods
           .fight(

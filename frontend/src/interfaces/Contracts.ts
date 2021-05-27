@@ -5,7 +5,7 @@ interface TypeSafeContract<Abi> {
   methods: Abi;
 }
 
-type Contract<Abi> = Omit<Web3EthContract, 'methods'> & TypeSafeContract<Abi>;
+export type Contract<Abi> = Omit<Web3EthContract, 'methods'> & TypeSafeContract<Abi>;
 
 export interface Contracts {
   SkillToken: Contract<IERC20>;
