@@ -111,7 +111,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         if(playerRoll >= monsterRoll) {
             characters.gainXp(char, getXpGainForFight(char, wep, target));
-            payPlayer(characters.ownerOf(char), getTokenGainForFight(target));
+            _payPlayer(characters.ownerOf(char), getTokenGainForFight(target));
         }
         emit FightOutcome(char, wep, target, playerRoll, monsterRoll, getXpGainForFight(char, wep, target), usdToSkill(getTokenGainForFight(target)));
     }
@@ -240,7 +240,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function mintCharacter() public requestPayFromPlayer(mintCharacterFee) {
         require(characters.balanceOf(msg.sender) <= characterLimit,
             string(abi.encodePacked("You can only have ",staminaCostFight," characters!")));
-        payContract(msg.sender, mintCharacterFee);
+        _payContract(msg.sender, mintCharacterFee);
 
         uint256 seed = randoms.consumeSeed(msg.sender);
         characters.mint(msg.sender, seed);
@@ -261,7 +261,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function mintWeapon() public requestPayFromPlayer(mintWeaponFee) {
-        payContract(msg.sender, mintWeaponFee);
+        _payContract(msg.sender, mintWeaponFee);
 
         uint256 seed = randoms.consumeSeed(msg.sender);
         weapons.mint(msg.sender, seed);
@@ -295,7 +295,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function fillStamina(uint256 character) public isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
         require(characters.isStaminaFull(character) == false, "Your stamina is already full!");
-        payContract(msg.sender, refillStaminaFee);
+        _payContract(msg.sender, refillStaminaFee);
         characters.setStaminaTimestamp(character, characters.getStaminaTimestamp(character) - characters.getStaminaMaxWait());
     }
 
@@ -303,7 +303,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
 
         require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
-        payContract(msg.sender, reforgeWeaponFee);
+        _payContract(msg.sender, reforgeWeaponFee);
 
         uint256 seed = randoms.consumeSeed(msg.sender);
         weapons.reforge(reforgeID, burnID, seed);
@@ -344,28 +344,52 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function payContract(address playerAddress, int128 usdAmount) public restricted {
-        payContractConverted(playerAddress, usdToSkill(usdAmount));
+        _payContract(playerAddress, usdAmount);
     }
 
     function payContractConverted(address playerAddress, uint256 convertedAmount) public restricted {
+        _payContractConverted(playerAddress, convertedAmount);
+    }
+
+    function payPlayer(address playerAddress, int128 baseAmount) public restricted {
+        _payPlayer(playerAddress, baseAmount);
+    }
+
+    function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
+        _payPlayerConverted(playerAddress, convertedAmount);
+    }
+
+    function approveContractCharacterFor(uint256 characterID, address playerAddress) public restricted {
+        _approveContractCharacterFor(characterID, playerAddress);
+    }
+
+    function approveContractWeaponFor(uint256 weaponID, address playerAddress) public restricted {
+        _approveContractWeaponFor(weaponID, playerAddress);
+    }
+
+    function _payContract(address playerAddress, int128 usdAmount) internal {
+        _payContractConverted(playerAddress, usdToSkill(usdAmount));
+    }
+
+    function _payContractConverted(address playerAddress, uint256 convertedAmount) internal {
         // must use requestPayFromPlayer modifier to approve on the initial function!
         skillToken.transferFrom(playerAddress, address(this), convertedAmount);
     }
 
-    function payPlayer(address playerAddress, int128 baseAmount) public restricted {
-        payPlayerConverted(playerAddress, usdToSkill(baseAmount));
+    function _payPlayer(address playerAddress, int128 baseAmount) internal {
+        _payPlayerConverted(playerAddress, usdToSkill(baseAmount));
     }
 
-    function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
+    function _payPlayerConverted(address playerAddress, uint256 convertedAmount) internal {
         skillToken.approve(address(this), convertedAmount);
         skillToken.transferFrom(address(this), playerAddress, convertedAmount);
     }
 
-    function approveContractCharacterFor(uint256 characterID, address playerAddress) public restricted {
+    function _approveContractCharacterFor(uint256 characterID, address playerAddress) internal {
         characters.approve(playerAddress, characterID);
     }
 
-    function approveContractWeaponFor(uint256 weaponID, address playerAddress) public restricted {
+    function _approveContractWeaponFor(uint256 weaponID, address playerAddress) internal {
         weapons.approve(playerAddress, weaponID);
     }
 
