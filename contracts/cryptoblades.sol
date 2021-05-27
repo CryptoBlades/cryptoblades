@@ -65,9 +65,8 @@ contract CryptoBlades is Initializable {
     }
 
     function giveMeSkill(uint256 amount) public {
-        // TEMPORARY FUNCITON TO TEST WITH
-        skillToken.approve(address(this), amount);
-        skillToken.transferFrom(address(this), msg.sender, amount);
+        // TODO REMOVE; TEMPORARY FUNCITON TO TEST WITH
+        skillToken.transfer(msg.sender, amount);
     }
 
     function getMyCharacters() public view returns(uint256[] memory) {
@@ -248,7 +247,6 @@ contract CryptoBlades is Initializable {
     }
 
     function mintWeapon() public requestPayFromPlayer(mintWeaponFee) {
-        skillToken.approve(address(this), usdToSkill(mintWeaponFee));
         payContract(msg.sender, mintWeaponFee);
 
         uint256 seed = randoms.consumeSeed(msg.sender);
@@ -256,7 +254,7 @@ contract CryptoBlades is Initializable {
     }
 
     function mintWeaponTest() public {
-        // This is a temp function so we can get some nice shots of various weapon qualities
+        // TODO REMOVE BEFORE LAUNCH; This is a temp function so we can get some nice shots of various weapon qualities
         mintWeaponTest2(1);
         mintWeaponTest2(1);
         mintWeaponTest2(1);
@@ -268,6 +266,7 @@ contract CryptoBlades is Initializable {
     }
 
     function mintWeaponTest2(uint stars) private {
+        // TODO REMOVE BEFORE LAUNCH
         nonce += 7;
         weapons.performMintWeapon(msg.sender, weapons.getRandomProperties(stars, RandomUtil.unsafeRandom(nonce)),
             uint16(RandomUtil.randomSeededMinMax(0, 128, RandomUtil.unsafeRandom(nonce+1))),
@@ -323,16 +322,15 @@ contract CryptoBlades is Initializable {
         _;
     }
 
-    modifier requestPayFromPlayer(int128 baseAmount) {
-        uint256 convertedAmount = usdToSkill(baseAmount);
-        require(skillToken.balanceOf(msg.sender) >= convertedAmount,
-            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(convertedAmount))));
-        skillToken.approve(address(this), convertedAmount);
+    modifier requestPayFromPlayer(int128 usdAmount) {
+        uint256 skillAmount = usdToSkill(usdAmount);
+        require(skillToken.balanceOf(msg.sender) >= skillAmount,
+            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(skillAmount))));
         _;
     }
 
-    function payContract(address playerAddress, int128 baseAmount) public restricted {
-        payContractConverted(playerAddress, usdToSkill(baseAmount));
+    function payContract(address playerAddress, int128 usdAmount) public restricted {
+        payContractConverted(playerAddress, usdToSkill(usdAmount));
     }
 
     function payContractConverted(address playerAddress, uint256 convertedAmount) public restricted {
@@ -361,12 +359,12 @@ contract CryptoBlades is Initializable {
         return skillToken.balanceOf(address(this));
     }
 
-    function usdToSkill(int128 originalPrice) public view returns (uint256) {
+    function usdToSkill(int128 usdAmount) public view returns (uint256) {
         // returns a skill cost adjusted for its original price based on USD
         // The format of the int256 returned by the interface is not specified so i assume it's 128.128 fixed point
         (,int256 usdPerSkill,,,) = priceChecker.latestRoundData();
-        return originalPrice.div(usdPerSkill.from128x128()).mulu(1 ether);
-        //return getContractSkillBalance().divu(skillToken.totalSupply()).mul(originalPrice.fromUInt()).toUInt();
+        return usdAmount.div(usdPerSkill.from128x128()).mulu(1 ether);
+        //return getContractSkillBalance().divu(skillToken.totalSupply()).mul(usdAmount.fromUInt()).toUInt();
     }
 
     function getApprovedBalance() external view returns (uint256) {
