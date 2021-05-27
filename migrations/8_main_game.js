@@ -26,7 +26,8 @@ module.exports = async function (deployer, network) {
     const keyHash = '0xcaf3c3727e033261d383b315559476f48034c13b18f8cafed4d871abe5049186';
     const fee = web3.utils.toWei('0.1', 'ether');
 
-    randoms = await deployer.deploy(ChainlinkRandoms, vrfCoordinator, linkToken, keyHash, fee);
+    await deployer.deploy(ChainlinkRandoms, vrfCoordinator, linkToken, keyHash, fee);
+    randoms = await ChainlinkRandoms.deployed();
 
     skillToken = await SkillToken.deployed();
   }
