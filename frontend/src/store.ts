@@ -810,7 +810,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         ] = await Promise.all([
           RaidBasic.methods.getExpectedFinishTime().call(defaultCallOptions(state)),
           RaidBasic.methods.getRaiderCount().call(defaultCallOptions(state)),
-          RaidBasic.methods.getBounty().call(defaultCallOptions(state)),
+          Promise.resolve('0'),
           RaidBasic.methods.getTotalPower().call(defaultCallOptions(state)),
           RaidBasic.methods.getWeaponDrops().call(defaultCallOptions(state)),
           RaidBasic.methods.getStaminaDrainSeconds().call(defaultCallOptions(state)),
