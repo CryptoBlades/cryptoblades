@@ -11,6 +11,7 @@ contract RaidBasic is Initializable, Raid {
 
     uint64 internal staminaDrain;
     uint256[] weaponDrops; // given out randomly, we add them manually
+    uint256 bounty; // UNUSED; KEPT FOR UPGRADE PROXY BACKWARDS COMPAT
     uint8 bossTrait; // set manually for now
 
     uint256 totalPower;
@@ -76,7 +77,6 @@ contract RaidBasic is Initializable, Raid {
 
     function reset() public override restricted {
         totalPower = 0;
-        bounty = 0;
         delete weaponDrops;
         super.reset();
     }

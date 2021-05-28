@@ -104,7 +104,7 @@
     "events": {},
     "links": {},
     "address": "0xb1f8Ddc2a661478b7b3d8A61341bd87fc65659B5",
-    "transactionHash": "0x0683b4188bcefe4485cf98c480e217dc2a3c9b55da4fc44e40a7db129bc671f2"
+    "transactionHash": "0x5e0444a5a5067ec65f6cf1fa860e3a6dfc5b24ba023b48233a0686a46fd4dc81"
   },
   "build/contracts/CryptoBlades.json": {
     "events": {
@@ -235,7 +235,7 @@
     },
     "links": {},
     "address": "0x03c048DdaEA7e6df0F6c91D60492aB8335b1339b",
-    "transactionHash": "0x5e2010b6e6021c2dc71c2bfc821c0f4eef792e33b75ba041f8a434002f591a43"
+    "transactionHash": "0x523cd585a530c0c2edac809d688d9c033b5edb43039c0a69aa33cf1df1c4cd77"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -371,7 +371,7 @@
     "events": {},
     "links": {},
     "address": "0xfFcd1a09f604E48095e050fc4c59722A5DEEa220",
-    "transactionHash": "0x5863324b02c20d0a924f14b38478fdbba3bc9c00bf231b6488bb533ff027c9e8"
+    "transactionHash": "0x7c6ca180356bc0324b4cf0c2fc7334ceaa224250cfbacad53db2b63753c2d0b8"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
@@ -440,6 +440,6 @@
     "events": {},
     "links": {},
     "address": "0x2eD38D419d67C99d054A705C28Bb5cf8EB08756A",
-    "transactionHash": "0x221cbf9b576f8fca77e9f895133615a51c0fc1001bb8c35cbe214fae41c8fec0"
+    "transactionHash": "0xb3b041aebb27a623d139e921e55b55c307b4e0ebe2c673c93c7dd8b143494097"
   }
 }
