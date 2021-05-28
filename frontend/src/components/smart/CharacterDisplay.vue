@@ -4,11 +4,15 @@
       class="character-portrait"
       :title="JSON.stringify(currentCharacter, null, '  ')"
     >
-      <img
+      <!--img
         v-if="!isLoadingCharacter"
         :src="getCharacterArt(currentCharacter)"
         alt="Placeholder character"
-      />
+      /-->
+      <CharacterArt
+        v-if="!isLoadingCharacter"
+        :character="currentCharacter"
+        :portrait="true" />
       <span v-if="isLoadingCharacter">Loading...</span>
     </div>
 
@@ -38,9 +42,11 @@
 import { mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import SmallBar from '../SmallBar.vue';
+import CharacterArt from '../CharacterArt.vue';
 
 export default {
   components: {
+    CharacterArt,
     SmallBar,
   },
 
@@ -80,7 +86,6 @@ export default {
   background-size: auto 140%;
   background-clip: border-box;
   margin-right: 0.625em;
-  padding: 0.5em;
 }
 
 .character-portrait img {

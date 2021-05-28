@@ -41,7 +41,7 @@ contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable {
     uint256 public constant secondsPerStamina = 300; //5 * 60
 
     event NewCharacter(uint256 indexed character, address indexed minter);
-    event LevelUp(uint256 indexed character, uint16 level);
+    event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
 
     modifier restricted() {
         //require(main == msg.sender, "Can only be called by main file");
@@ -126,7 +126,7 @@ contract Characters is Initializable, ERC721Upgradeable, OwnableUpgradeable {
             while(newXp > requiredToLevel) {
                 newXp = newXp - requiredToLevel;
                 char.level = char.level + 1;
-                emit LevelUp(id, char.level);
+                emit LevelUp(ownerOf(id), id, char.level);
                 requiredToLevel = getRequiredXpForNextLevel(char.level);
             }
             char.xp = newXp;

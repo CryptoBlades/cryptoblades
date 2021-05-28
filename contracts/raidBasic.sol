@@ -11,12 +11,11 @@ contract RaidBasic is Initializable, Raid {
 
     uint64 internal staminaDrain;
     uint256[] weaponDrops; // given out randomly, we add them manually
-    uint256 bounty; // split based on power
     uint8 bossTrait; // set manually for now
 
     uint256 totalPower;
 
-    event SkillWinner(address addr, uint256 amount);
+    event XpReward(address addr, uint256 charID, uint256 amount);
     event WeaponWinner(address addr, uint256 wepID);
 
     function initialize(address gameContract) public override initializer {
@@ -51,19 +50,19 @@ contract RaidBasic is Initializable, Raid {
         require(completed == false, "Raid already completed, run reset first");
         completed = true;
 
-        // TODO convert to giving xp instead (transfers cost a ton)
-        // TODO come up with balanced formula for xp amount
-        /*for(uint i = 0; i < raiders.length; i++) {
-            characters.gainXp(raiders[i].charID, 20);
-        }*/
+        // TODO revisit rewards
         for(uint i = 0; i < raiders.length; i++) {
+            emit XpReward(address(raiders[i].owner), raiders[i].charID, 96);
+            characters.gainXp(raiders[i].charID, 96);
+        }
+        /*for(uint i = 0; i < raiders.length; i++) {
             Raider memory r = raiders[i];
 
             int128 powerPercentage = uint256(r.power).divu(totalPower);
             uint256 payout = powerPercentage.mulu(bounty);
             game.payPlayerConverted(address(r.owner), payout);
             emit SkillWinner(address(r.owner), payout);
-        }
+        }*/
 
         for(uint i = 0; i < weaponDrops.length; i++) {
             Raider memory r = raiders[RandomUtil.randomSeededMinMax(0, raiders.length-1, RandomUtil.combineSeeds(seed,i))];
@@ -80,14 +79,6 @@ contract RaidBasic is Initializable, Raid {
         bounty = 0;
         delete weaponDrops;
         super.reset();
-    }
-
-    function setBounty(uint256 to) public restricted {
-        bounty = to;
-    }
-
-    function getBounty() public view returns(uint256) {
-        return bounty;
     }
 
     function setBossTrait(uint8 trait) public restricted {

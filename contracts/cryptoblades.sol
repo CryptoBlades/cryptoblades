@@ -6,7 +6,6 @@ import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IRandoms.sol";
 import "./interfaces/IPriceOracle.sol";
-//import "./ownable.sol";
 import "./characters.sol";
 import "./weapons.sol";
 import "./util.sol";
@@ -61,12 +60,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     uint256 nonce;
 
-    event FightOutcome(uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
-
-    function getMySkill() external view returns (uint256) {
-        // TODO remove as it is unnecessary - just call skillToken.balanceOf directly
-        return skillToken.balanceOf(msg.sender);
-    }
+    event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
 
     function giveMeSkill(uint256 amount) public {
         // TODO REMOVE; TEMPORARY FUNCITON TO TEST WITH
@@ -113,7 +107,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             characters.gainXp(char, getXpGainForFight(char, wep, target));
             _payPlayer(characters.ownerOf(char), getTokenGainForFight(target));
         }
-        emit FightOutcome(char, wep, target, playerRoll, monsterRoll, getXpGainForFight(char, wep, target), usdToSkill(getTokenGainForFight(target)));
+        emit FightOutcome(characters.ownerOf(char), char, wep, target, playerRoll, monsterRoll, getXpGainForFight(char, wep, target), usdToSkill(getTokenGainForFight(target)));
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
@@ -239,7 +233,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function mintCharacter() public requestPayFromPlayer(mintCharacterFee) {
         require(characters.balanceOf(msg.sender) <= characterLimit,
-            string(abi.encodePacked("You can only have ",staminaCostFight," characters!")));
+            string(abi.encodePacked("You can only have ",characterLimit," characters!")));
         _payContract(msg.sender, mintCharacterFee);
 
         uint256 seed = randoms.consumeSeed(msg.sender);
@@ -265,32 +259,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         uint256 seed = randoms.consumeSeed(msg.sender);
         weapons.mint(msg.sender, seed);
-    }
-
-    function mintWeaponTest() public {
-        // TODO REMOVE BEFORE LAUNCH; This is a temp function so we can get some nice shots of various weapon qualities
-        mintWeaponTest2(1);
-        mintWeaponTest2(1);
-        mintWeaponTest2(1);
-        mintWeaponTest2(2);
-        mintWeaponTest2(2);
-        mintWeaponTest2(3);
-        mintWeaponTest2(3);
-        mintWeaponTest2(4);
-    }
-
-    function mintWeaponTest2(uint stars) private {
-        // TODO REMOVE BEFORE LAUNCH
-        nonce += 7;
-        weapons.performMintWeapon(msg.sender, weapons.getRandomProperties(stars, RandomUtil.unsafeRandom(nonce)),
-            uint16(RandomUtil.randomSeededMinMax(0, 128, RandomUtil.unsafeRandom(nonce+1))),
-            uint16(RandomUtil.randomSeededMinMax(0, 128, RandomUtil.unsafeRandom(nonce+2))),
-            uint16(RandomUtil.randomSeededMinMax(0, 128, RandomUtil.unsafeRandom(nonce+3))),
-            uint8(RandomUtil.randomSeededMinMax(0, 255, RandomUtil.unsafeRandom(nonce+4))),
-            uint8(RandomUtil.randomSeededMinMax(0, 255, RandomUtil.unsafeRandom(nonce+5))),
-            uint8(RandomUtil.randomSeededMinMax(0, 255, RandomUtil.unsafeRandom(nonce+6))),
-            uint8(RandomUtil.randomSeededMinMax(0, 255, RandomUtil.unsafeRandom(nonce+7)))
-        );
     }
 
     function fillStamina(uint256 character) public isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
@@ -393,18 +361,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         weapons.approve(playerAddress, weaponID);
     }
 
-    function getContractSkillBalance() public view returns (uint256) {
-        // TODO remove as it is unnecessary - just call skillToken.balanceOf directly
-        return skillToken.balanceOf(address(this));
-    }
-
     function usdToSkill(int128 usdAmount) public view returns (uint256) {
         return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
-    }
-
-    function getApprovedBalance() external view returns (uint256) {
-        // TODO remove as it is unnecessary - just call skillToken.allowance directly
-        return skillToken.allowance(msg.sender, address(this));
     }
 
     function getCurrentHour() public view returns (uint256) {

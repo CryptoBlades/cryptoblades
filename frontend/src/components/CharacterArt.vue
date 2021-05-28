@@ -35,7 +35,13 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character'],
+  props: ['character', 'portrait'],
+  watch: {
+    character() {
+      this.clearScene();
+      this.setupModel();
+    }
+  },
 
   data() {
     return {
@@ -62,15 +68,6 @@ export default {
       this.camera.position.z = 1.65;
 
       this.scene = new Three.Scene();
-
-      const directionalLight = new Three.DirectionalLight( 0xffffff, 1.0 * 1.5 );
-      directionalLight.position.x = -0.375;
-      directionalLight.position.y = 1.375;
-      directionalLight.position.z = 2.0;
-      this.scene.add( directionalLight );
-
-      const light = new Three.AmbientLight( 0x202020 ); // soft white light
-      this.scene.add( light );
 
       this.renderer = new Three.WebGLRenderer({antialias: true, alpha:true});
       this.renderer.setPixelRatio( window.devicePixelRatio);
@@ -106,7 +103,25 @@ export default {
 
       this.setupModel();
     },
+    clearScene() {
+      if(this.scene !== undefined && this.scene !== null) {
+        this.scene.clear();
+        this.renderer.render(this.scene, this.camera);
+      }
+    },
+    setupLighting() {
+
+      const directionalLight = new Three.DirectionalLight( 0xffffff, 1.0 * 1.5 );
+      directionalLight.position.x = -0.375;
+      directionalLight.position.y = 1.375;
+      directionalLight.position.z = 2.0;
+      this.scene.add( directionalLight );
+
+      const light = new Three.AmbientLight( 0x202020 ); // soft white light
+      this.scene.add( light );
+    },
     setupModel() {
+      this.setupLighting();
       this.allLoaded = false;
       this.allLoadStarted = false;
       this.loadCount = 0;
@@ -117,6 +132,12 @@ export default {
       this.group.rotation.x = Math.PI/16;
       this.group.position.y = -1.0;
       this.scene.add(this.group);
+
+      if(this.portrait) {
+        this.camera.position.z = 0.7;
+        this.camera.position.y = 0.65;
+        this.group.rotation.y = Math.PI/8;
+      }
 
       const gender = (this.character.race % 2) === 1 ? 'female' : 'male';
 
@@ -133,6 +154,7 @@ export default {
         this.group.add(model);
 
         const bodyMaterial = this.baseMaterial.clone();
+        bodyMaterial.metalness = 0.0;
         // BODY ALBEDO/COLOR MAP
         this.loadCountTotal++;
         this.textureLoader.load('body/Body_'+gender+'_Albedo.png' , texture => {
@@ -151,6 +173,7 @@ export default {
         } );
 
         const headMaterial = this.baseMaterial.clone();
+        headMaterial.metalness = 0.0;
         // HEAD ALBEDO/COLOR MAP
         this.loadCountTotal++;
         this.textureLoader.load('body/Head_'+gender+'_Albedo.png' , texture => {
@@ -168,13 +191,19 @@ export default {
           console.error( error );
         } );
 
+        const eyebrowMaterial = new Three.MeshBasicMaterial();
+        eyebrowMaterial.color = new Three.Color(0x583a25);
+        eyebrowMaterial.opacity = 0.825;
+        eyebrowMaterial.transparent = true;
+        const eyeMaterial = new Three.MeshBasicMaterial();
+        eyeMaterial.color = new Three.Color(0x000000);
         const bodyMats = [
           bodyMaterial,
           headMaterial,
-          //mouth
-          //eyebrow
-          //eye
-          //eyereflection
+          null,//mouth
+          eyebrowMaterial,//eyebrow
+          eyeMaterial/*,//eye
+          null*///eyereflection
         ];
         this.body.traverse(child => { if(child.isMesh) { child.material = bodyMats; } });
 
@@ -249,7 +278,7 @@ export default {
         // COLOR VALUE
         if(modelData.color !== null && modelData.color !== undefined) {
           const colorString = '#' + modelData.color.substring(0,6);
-          modelMaterial.color = new Three.Color(colorString/*modelData.color*/);
+          modelMaterial.color = new Three.Color(colorString);
         }
 
         // ALBEDO/COLOR MAP

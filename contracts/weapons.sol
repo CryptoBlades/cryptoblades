@@ -34,20 +34,17 @@ contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable {
         base stat rolls: 1*(1-50), 2*(45-75), 3*(70-100), 4*(50-100), 5*(66-100, main is 68-100)
         burns: add level & main stat, and 50% chance to increase secondaries
         power: each point contributes .25% to fight power
-        cosmetics: TBD
+        cosmetics: 0-255 but only 24 is used, may want to cap so future expansions dont change existing weps
     */
 
     struct Weapon {
         uint16 properties; // right to left: 3b stars, 2b trait, 7b stat pattern, 4b EMPTY
-        /*uint8 stars; // only the last 3 bits are used. TODO a good filler for the rest? (tiers?)
-        uint8 trait; // only 2bits used on right
-        uint8 statPattern; // 7bits (0-124) on right used for */
         // stats (each point refers to .25% improvement)
         uint16 stat1;
         uint16 stat2;
         uint16 stat3;
         uint8 level; // separate from stat1 because stat1 will have a pre-roll
-        // cosmetics, todo
+        // cosmetics
         uint8 blade;
         uint8 crossguard;
         uint8 grip;
@@ -57,7 +54,7 @@ contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable {
     Weapon[] private tokens;
 
     event NewWeapon(uint256 indexed weapon, address indexed minter);
-    event Reforged(uint256 indexed reforged, uint256 indexed burned, uint8 level, uint16 stat1Gain, uint16 stat2Gain, uint16 stat3Gain);
+    event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 level, uint16 stat1Gain, uint16 stat2Gain, uint16 stat3Gain);
 
     modifier restricted() {
         //require(main == msg.sender, "Can only be called by main file");
@@ -314,7 +311,7 @@ contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable {
         uint16 stat3 = wep.stat3;
         levelUp(reforgeID, seed);
         _burn(burnID);
-        emit Reforged(reforgeID, burnID, wep.level, wep.stat1-stat1, wep.stat2-stat2, wep.stat3-stat3);
+        emit Reforged(ownerOf(reforgeID), reforgeID, burnID, wep.level, wep.stat1-stat1, wep.stat2-stat2, wep.stat3-stat3);
     }
 
     function levelUp(uint256 id, uint256 seed) private {
