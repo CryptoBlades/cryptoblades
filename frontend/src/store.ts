@@ -12,8 +12,7 @@ import {
 } from './contract-models';
 import { allStakeTypes, Contracts, IStakeOverviewState, IStakeState, IState, StakeType } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee, waitUntilEvent } from './contract-call-utils';
-import { Web3JsTransactionResult } from '../../abi-common';
+import { approveFee } from './contract-call-utils';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -532,44 +531,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         }
       },
 
-      async requestRandom({ state }) {
-        if(featureFlagStakeOnly || !state.defaultAccount) return;
-
-        const sender = state.defaultAccount;
-        const currentBlockNumber = await web3.eth.getBlockNumber();
-        console.log('Starting randomness request at block number', currentBlockNumber);
-
-        const [hasRequestedSeed, hasReceivedSeed] = await Promise.all([
-          state.contracts.Randoms!.methods
-            .hasRequestedSeed(sender)
-            .call(defaultCallOptions(state), currentBlockNumber),
-          state.contracts.Randoms!.methods
-            .hasReceivedSeed(sender)
-            .call(defaultCallOptions(state), currentBlockNumber),
-        ]);
-
-        console.log({ hasRequestedSeed, hasReceivedSeed });
-
-        if(!hasReceivedSeed) {
-          let res: Web3JsTransactionResult | null = null;
-          if(!hasRequestedSeed) {
-            res = await state.contracts.Randoms!.methods
-              .getRandomNumber(sender)
-              .send(defaultCallOptions(state));
-          }
-
-          const fromBlock = res?.blockNumber || currentBlockNumber;
-          console.log(`waiting for RandomNumberReceived starting from block ${fromBlock}...`);
-          await waitUntilEvent(state.contracts.Randoms!, 'RandomNumberReceived', {
-            fromBlock,
-            filter: {
-              user: sender
-            }
-          });
-        }
-      },
-
-      async mintCharacter({ state, dispatch }) {
+      async mintCharacter({ state }) {
         if(featureFlagStakeOnly) return;
 
         await approveFee(
@@ -580,12 +542,10 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee()
         );
 
-        await dispatch('requestRandom');
-
         await state.contracts.CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
       },
 
-      async mintWeapon({ state, dispatch }) {
+      async mintWeapon({ state }) {
         if(featureFlagStakeOnly) return;
 
         await approveFee(
@@ -595,8 +555,6 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           defaultCallOptions(state),
           cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
         );
-
-        await dispatch('requestRandom');
 
         await state.contracts.CryptoBlades!.methods.mintWeapon().send({
           from: state.defaultAccount,
@@ -613,8 +571,6 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
           defaultCallOptions(state),
           cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee()
         );
-
-        await dispatch('requestRandom');
 
         await state.contracts.Weapons!.methods
           .approve(
@@ -654,8 +610,6 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
 
       async doEncounter({ state, dispatch }, { characterId, weaponId, targetString }) {
         if(featureFlagStakeOnly) return;
-
-        await dispatch('requestRandom');
 
         const res = await state.contracts.CryptoBlades!.methods
           .fight(

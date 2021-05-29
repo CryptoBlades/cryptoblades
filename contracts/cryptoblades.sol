@@ -60,6 +60,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     uint256 nonce;
 
+    mapping(address => uint256) lastBlockNumberCalled;
+
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
 
     function giveMeSkill(uint256 amount) public {
@@ -83,11 +85,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return tokens;
     }
 
-    function requestRandom() external {
-        randoms.getRandomNumber(msg.sender);
-    }
-
     function fight(uint256 char, uint256 wep, uint32 target) external
+            oncePerBlock(msg.sender)
             isCharacterOwner(char)
             isWeaponOwner(wep)
             isTargetValid(char, wep, target) {
@@ -99,7 +98,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         require(characters.drainStamina(char, staminaCostFight), "Not enough stamina!");
 
-        uint256 seed = randoms.consumeSeed(user);
+        uint256 seed = randoms.getRandomSeed(user);
         uint24 playerRoll = getPlayerPowerRoll(char, wep, uint8((target >> 24) & 0xFF)/*monster trait*/, seed);
         uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target), RandomUtil.combineSeeds(seed,1));
 
@@ -231,12 +230,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return false;
     }
 
-    function mintCharacter() public requestPayFromPlayer(mintCharacterFee) {
+    function mintCharacter() public oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
         require(characters.balanceOf(msg.sender) <= characterLimit,
             string(abi.encodePacked("You can only have ",characterLimit," characters!")));
         _payContract(msg.sender, mintCharacterFee);
 
-        uint256 seed = randoms.consumeSeed(msg.sender);
+        uint256 seed = randoms.getRandomSeed(msg.sender);
         characters.mint(msg.sender, seed);
 
         // first weapon free with a character mint, max 1 star
@@ -254,10 +253,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeapon() public requestPayFromPlayer(mintWeaponFee) {
+    function mintWeapon() public oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
         _payContract(msg.sender, mintWeaponFee);
 
-        uint256 seed = randoms.consumeSeed(msg.sender);
+        uint256 seed = randoms.getRandomSeed(msg.sender);
         weapons.mint(msg.sender, seed);
     }
 
@@ -268,17 +267,28 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
-            isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
+            oncePerBlock(msg.sender) isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
 
         require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
         _payContract(msg.sender, reforgeWeaponFee);
 
-        uint256 seed = randoms.consumeSeed(msg.sender);
+        uint256 seed = randoms.getRandomSeed(msg.sender);
         weapons.reforge(reforgeID, burnID, seed);
+    }
+
+    function migrateRandoms(IRandoms _newRandoms) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        randoms = _newRandoms;
     }
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Missing GAME_ADMIN role");
+        _;
+    }
+
+    modifier oncePerBlock(address user) {
+        require(lastBlockNumberCalled[user] < block.number, "Only callable once per block");
+        lastBlockNumberCalled[user] = block.number;
         _;
     }
 
