@@ -12,10 +12,10 @@
 
       <ul class="encounter-list" v-if="targets.length > 0">
         <li class="encounter" v-for="(e, i) in targets" :key="i">
-          <img src="../assets/chara.png" alt="Placeholder character">
+          <img :src="getEnemyArt(e.power)" alt="Placeholder character">
           <big-button
             class="encounter-button"
-            :mainText="`Monster with trait ${e.trait}`"
+            :mainText="`Enemy with trait ${e.trait}`"
             :subText="`Power ${e.power}`"
             @click="onClickEncounter(e)"
           />
@@ -41,6 +41,7 @@
 // import Character from "../components/Character.vue";
 import BigButton from '../components/BigButton.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
+import { getEnemyArt } from '../enemy-art';
 
 import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 
@@ -90,6 +91,7 @@ export default {
     ...mapMutations(['setCurrentWeapon']),
     ...mapActions(['fetchTargets', 'doEncounter']),
 
+    getEnemyArt,
     async onClickEncounter(targetToFight) {
       if (!this.selectedWeaponId || !this.currentCharacterId) {
         return;
@@ -139,7 +141,8 @@ export default {
 }
 
 .encounter img {
-  max-width: 10em;
+  max-width: 19rem;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .encounter-button {
