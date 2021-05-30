@@ -3,6 +3,13 @@
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <h1 class="error" v-if="error !== null">Error: {{ error }}</h1>
 
+      <div class="combat-hints">
+        <img class="fire-icon"> {{ ">>" }}
+        <img class="earth-icon"> {{ ">>" }}
+        <img class="lightning-icon"> {{ ">>" }}
+        <img class="water-icon"> {{ ">>" }}
+        <img class="fire-icon">
+      </div>
       <h1>Choose a weapon:</h1>
       <weapon-grid
         v-model="selectedWeaponId"
@@ -12,10 +19,14 @@
 
       <ul class="encounter-list" v-if="targets.length > 0">
         <li class="encounter" v-for="(e, i) in targets" :key="i">
-          <img :src="getEnemyArt(e.power)" alt="Placeholder character">
+          <img :src="getEnemyArt(e.power)" alt="Enemy">
+          <div class="encounter-element">
+            <span :class="getCharacterTrait(e.trait).toLowerCase()">{{getCharacterTrait(e.trait)}}</span>
+            <img :class="getCharacterTrait(e.trait).toLowerCase()+'-icon'">
+          </div>
           <big-button
             class="encounter-button"
-            :mainText="`Enemy with trait ${e.trait}`"
+            :mainText="`Fight!`"
             :subText="`Power ${e.power}`"
             @click="onClickEncounter(e)"
           />
@@ -42,6 +53,7 @@
 import BigButton from '../components/BigButton.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import { getEnemyArt } from '../enemy-art';
+import { CharacterTrait } from '../interfaces';
 
 import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 
@@ -92,22 +104,34 @@ export default {
     ...mapActions(['fetchTargets', 'doEncounter']),
 
     getEnemyArt,
+    getCharacterTrait(trait) {
+      return CharacterTrait[trait];
+    },
     async onClickEncounter(targetToFight) {
       if (!this.selectedWeaponId || !this.currentCharacterId) {
         return;
       }
 
       try {
-        const success = await this.doEncounter({
+        const results = await this.doEncounter({
           characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
           targetString: targetToFight.original,
         });
+        // todo turn this into a proper popup with nice styling
+        const success = results[0];
+        const playerRoll = results[1];
+        const enemyRoll = results[2];
+        const xpGain = results[3];
+        const skillGain = results[4];
 
         if (success) {
-          alert('Battle succeeded!');
+          alert('Battle succeeded! You rolled '+playerRoll
+          +' and the enemy rolled '+enemyRoll
+          +', you gain '+xpGain+'xp and '+skillGain+' SKILL');
         } else {
-          alert('Battle failed...');
+          alert('Battle failed... You rolled '+playerRoll
+          +' and the enemy rolled '+enemyRoll);
         }
         this.error = null;
       } catch (e) {
@@ -142,10 +166,20 @@ export default {
 
 .encounter img {
   max-width: 19rem;
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .encounter-button {
   width: 19rem;
+}
+
+.encounter-element {
+  font-size: 2em;
+}
+
+.combat-hints {
+  margin: auto;
+  text-align: center;
+  padding: 1em;
+  font-size: 2em;
 }
 </style>

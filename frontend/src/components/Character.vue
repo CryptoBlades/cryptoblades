@@ -1,10 +1,12 @@
 <template>
   <div class="wrapper">
     <!-- <img src="../assets/chara.png" alt="Placeholder character"> -->
+    <!-- :style="{ backgroundImage: `url(${getCharacterArt(this.character)})` }" -->
     <div
       class="image"
-      :style="{ backgroundImage: `url(${getCharacterArt(this.character)})` }"
-    ></div>
+    >
+      <h1>3D Plaza scene coming soon</h1>
+    </div>
   </div>
 </template>
 
@@ -26,7 +28,7 @@ export default {
   display: flex;
   justify-content: center;
   align-content: center;
-  background: url("../assets/chara-bg.png") center bottom no-repeat;
+  background: url("../assets/chara-bg.png") center center no-repeat;
   padding: 5em;
   padding-bottom: 1em;
 }
@@ -36,5 +38,7 @@ export default {
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
+  text-align: center;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
 }
 </style>

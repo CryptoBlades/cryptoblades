@@ -19,32 +19,53 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import { ICharacter } from '../../interfaces';
+import { CharacterTrait } from '../../interfaces';
+import { RequiredXp } from '../../interfaces';
 import CharacterArt from '../CharacterArt.vue';
 
 export default {
   props: ['value'],
 
   computed: {
+    ...mapState(['maxStamina']),
     ...mapGetters(['ownCharacters', 'getCharacterName']),
   },
 
   methods: {
-    getCharacterArt,
     tooltipHtml(character: ICharacter) {
       if(!character) return '';
 
+      const wrapInSpan = (spanClass, text) => {
+        return `<span class="${spanClass.toLowerCase()}">${text}</span><img class="${spanClass.toLowerCase()+'-icon'}">`;
+      };
+
       return `
-        Level ${character.level}
+        Level ${character.level + 1}
         <br>
-        XP ${character.xp}
+        XP ${character.xp} / ${RequiredXp(character.level)}
         <br>
-        Trait ${character.trait}
+        Trait: ${wrapInSpan(CharacterTrait[character.trait], CharacterTrait[character.trait])}
         <br>
-        Stamina ${character.staminaTimestamp}
+        Stamina ${this.getStaminaPoints(character.staminaTimestamp)} / ${this.maxStamina}
       `;
+    },
+    getCharacterArt,
+
+    getStaminaPoints(timestamp_str: string) {
+      // super temporary function, just to make it work for now. sorry
+      const timestamp = parseInt(timestamp_str, 10);
+      const now = Date.now();
+      if(timestamp  > now)
+        return 0;
+
+      let points = (now - timestamp) / 300;
+      if(points > 200) {
+        points = 200;
+      }
+      return points;
     }
   },
 

@@ -22,9 +22,9 @@
       }}</span>
       <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
       <span v-if="!isLoadingCharacter" class="subtext">
-        Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} XP)
+        Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level)}} XP)
       </span>
-      <span v-if="!isLoadingCharacter" class="subtext">Power: 9001</span>
+      <span v-if="!isLoadingCharacter" class="subtext">Power: {{CharacterPower(currentCharacter.level)}}</span>
       <small-bar
         v-if="!isLoadingCharacter"
         class="bar stamina"
@@ -43,6 +43,8 @@ import { mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import SmallBar from '../SmallBar.vue';
 import CharacterArt from '../CharacterArt.vue';
+import { CharacterPower } from '../../interfaces';
+import { RequiredXp } from '../../interfaces';
 
 export default {
   components: {
@@ -57,7 +59,6 @@ export default {
       'currentCharacterStamina',
       'getCharacterName',
     ]),
-
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
@@ -65,6 +66,8 @@ export default {
 
   methods: {
     getCharacterArt,
+    CharacterPower,
+    RequiredXp,
   },
 };
 </script>

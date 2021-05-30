@@ -622,15 +622,22 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
         await dispatch('fetchTargets', { characterId, weaponId });
 
         const {
+          /*owner,
+          character,
+          weapon,
+          target,*/
           playerRoll,
           enemyRoll,
+          xpGain,
+          skillGain
         } = res.events.FightOutcome.returnValues;
 
-        if (parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10)) {
-          return true;
-        } else {
-          return false;
-        }
+        return [parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
+          playerRoll,
+          enemyRoll,
+          xpGain,
+          skillGain
+        ];
       },
 
       async fetchStakeOverviewData({ dispatch }) {

@@ -29,10 +29,10 @@
         </div>
       </div>
       <div class="character-preview">
-        <h1 class="character-name">{{ character.name }}</h1>
+        <!--h1 class="character-name">{{ character.name }}</h1>
         <h2 class="character-sub">
           Level {{ character.level + 1 }} ({{ character.experience }} XP)
-        </h2>
+        </h2-->
         <character class="character-inner" :character="currentCharacter" />
       </div>
     </div>

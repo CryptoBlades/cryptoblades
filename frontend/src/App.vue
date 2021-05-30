@@ -183,15 +183,43 @@ button {
 }
 
 .earth, .dex {
-  color: brown;
+  color: green;
 }
 
 .water, .int {
-  color: blue;
+  color: cyan;
 }
 
 .lightning, .cha {
   color: yellow;
+}
+
+.fire-icon, .str-icon {
+  color: red;
+  content: url("assets/elements/fire.png");
+  width: 1em;
+  height: 1em;
+}
+
+.earth-icon, .dex-icon {
+  color: green;
+  content: url("assets/elements/earth.png");
+  width: 1em;
+  height: 1em;
+}
+
+.water-icon, .int-icon {
+  color: cyan;
+  content: url("assets/elements/water.png");
+  width: 1em;
+  height: 1em;
+}
+
+.lightning-icon, .cha-icon {
+  color: yellow;
+  content: url("assets/elements/lightning.png");
+  width: 1em;
+  height: 1em;
 }
 
 </style>

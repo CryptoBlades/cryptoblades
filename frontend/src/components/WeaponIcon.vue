@@ -50,7 +50,7 @@ export default {
       if(!this.weapon) return '';
 
       const wrapInSpan = (spanClass, text) => {
-        return `<span class="${spanClass.toLowerCase()}">${text}</span>`;
+        return `<span class="${spanClass.toLowerCase()}">${text}</span><img class="${spanClass.toLowerCase()+'-icon'}">`;
       };
 
       let ttHtml = `
