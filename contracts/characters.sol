@@ -74,7 +74,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         uint16 xp = 0;
         uint8 level = 0; // 1
         uint8 trait = uint8(RandomUtil.randomSeededMinMax(0,3,seed));
-        uint64 staminaTimestamp = uint64(SafeMath.sub(now, getStaminaMaxWait()));
+        uint64 staminaTimestamp = uint64(now.sub(getStaminaMaxWait()));
 
         tokens.push(Character(xp, level, trait, staminaTimestamp));
         cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
@@ -88,7 +88,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function getRequiredXpForNextLevel(uint8 currentLevel) public pure returns (uint16) {
         uint xp = 16;
-        for(uint i = 0; i < currentLevel; i = i.add(1)) {
+        for(uint i = 0; i < currentLevel; i++) {
             if (xp <= 112)
             {
                 xp = xp.add(xp.div(10));
@@ -113,7 +113,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         // 9000 at lvl 51 (~3months)
         // 22440 at lvl 105 (~3 years)
         // 92300 at lvl 255 (heat death of the universe)
-        return uint24((SafeMath.add(1000, level.mul(10))).mul(level.div(10).add(1)));
+        return uint24(
+            uint256(1000)
+                .add(level.mul(10))
+                .mul(level.div(10).add(1))
+        );
     }
 
     function getTrait(uint256 id) public view returns (uint8) {
@@ -149,12 +153,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function drainStamina(uint256 id, uint8 amount) public restricted returns(bool) {
         if(getStaminaPoints(id) >= amount) {
-            uint64 drainTime = uint64((amount.mul(secondsPerStamina)));
+            uint64 drainTime = uint64(amount.mul(secondsPerStamina));
             if(isStaminaFull(id)) { // if stamina full, we reset timestamp and drain from that
                 setStaminaTimestamp(id, uint64(now.sub(getStaminaMaxWait()).add(drainTime)));
             }
             else {
-                setStaminaTimestamp(id, uint64(SafeMath.add(getStaminaTimestamp(id), drainTime)));
+                setStaminaTimestamp(id, uint64(uint256(getStaminaTimestamp(id)).add(drainTime)));
             }
             return true;
         }

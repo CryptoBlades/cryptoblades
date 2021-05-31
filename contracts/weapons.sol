@@ -229,15 +229,15 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getStat1Trait(uint8 statPattern) public pure returns (uint8) {
-        return statPattern % 5; // 0-3 regular traits, 4 = traitless (PWR)
+        return uint8(uint256(statPattern).mod(5)); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getStat2Trait(uint8 statPattern) public pure returns (uint8) {
-        return uint8(SafeMath.div(statPattern, 5) % 5); // 0-3 regular traits, 4 = traitless (PWR)
+        return uint8(SafeMath.div(statPattern, 5).mod(5)); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getStat3Trait(uint8 statPattern) public pure returns (uint8) {
-        return uint8(SafeMath.div(SafeMath.div(statPattern, 5), 5) % 5); // 0-3 regular traits, 4 = traitless (PWR)
+        return uint8(SafeMath.div(statPattern, 25).mod(5)); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getLevel(uint256 id) public view returns (uint8) {
@@ -311,7 +311,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 stat3 = wep.stat3;
         levelUp(reforgeID, seed);
         _burn(burnID);
-        emit Reforged(ownerOf(reforgeID), reforgeID, burnID, wep.level, 
+
+        emit Reforged(
+            ownerOf(reforgeID),
+            reforgeID,
+            burnID,
+            wep.level,
             uint16(SafeMath.sub(wep.stat1, stat1)),
             uint16(SafeMath.sub(wep.stat2, stat2)),
             uint16(SafeMath.sub(wep.stat3, stat3))

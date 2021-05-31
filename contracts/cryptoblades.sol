@@ -76,7 +76,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getMyCharacters() public view returns(uint256[] memory) {
         uint256[] memory tokens = new uint256[](characters.balanceOf(msg.sender));
-        for(uint256 i = 0; i < tokens.length; i = i.add(1)) {
+        for(uint256 i = 0; i < tokens.length; i++) {
             tokens[i] = characters.tokenOfOwnerByIndex(msg.sender, i);
         }
         return tokens;
@@ -84,7 +84,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getMyWeapons() public view returns(uint256[] memory) {
         uint256[] memory tokens = new uint256[](weapons.balanceOf(msg.sender));
-        for(uint256 i = 0; i < tokens.length; i = i.add(1)) {
+        for(uint256 i = 0; i < tokens.length; i++) {
             tokens[i] = weapons.tokenOfOwnerByIndex(msg.sender, i);
         }
         return tokens;
@@ -129,7 +129,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function getXpGainForFight(uint256 char, uint256 wep, uint32 target) internal view returns (uint16) {
         int128 basePowerDifference = ABDKMath64x64.divu(getMonsterPower(target), getPlayerPower(char, wep));
         // base XP gain is 16 for an equal fight
-        return uint16((basePowerDifference.mul(ABDKMath64x64.fromUInt(16))).toUInt());
+        return uint16(basePowerDifference.mulu(16));
     }
 
     function getPlayerPowerRoll(uint256 char, uint256 wep, uint8 monsterTrait, uint256 seed) internal view returns(uint24) {
@@ -195,7 +195,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 baseSeed = RandomUtil.combineSeeds(seedArray);
 
         uint32[4] memory targets;
-        for(uint i = 0; i < targets.length; i = i.add(1)) {
+        for(uint i = 0; i < targets.length; i++) {
             // we alter seed per-index or they would be all the same
             uint256 indexSeed = RandomUtil.randomSeeded(RandomUtil.combineSeeds(baseSeed, i));
             uint24 monsterPower = uint24(RandomUtil.plusMinus10PercentSeeded(playerPower, indexSeed));
@@ -269,7 +269,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(characters.isStaminaFull(character) == false, "Your stamina is already full!");
         _payContract(msg.sender, refillStaminaFee);
         characters.setStaminaTimestamp(character,
-            uint64(characters.getStaminaTimestamp(character).sub(characters.getStaminaMaxWait()))
+            uint64(
+                characters.getStaminaTimestamp(character)
+                    .sub(characters.getStaminaMaxWait())
+            )
         );
     }
 
@@ -312,7 +315,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     modifier isTargetValid(uint256 character, uint256 weapon, uint32 target) {
         bool foundMatch = false;
         uint32[4] memory targets = getTargets(character, weapon);
-        for(uint i = 0; i < targets.length; i = i.add(1)) {
+        for(uint i = 0; i < targets.length; i++) {
             if(targets[i] == target) {
                 foundMatch = true;
             }
@@ -381,15 +384,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function setCharacterMintValue(uint256 cents) public restricted {
         mintCharacterFee = ABDKMath64x64.divu(cents, 100);
     }
-    
+
     function setRefillStaminaValue(uint256 cents) public restricted {
         refillStaminaFee = ABDKMath64x64.divu(cents, 100);
     }
-    
+
     function setFightRewardBaselineValue(uint256 tenthcents) public restricted {
         fightRewardBaseline = ABDKMath64x64.divu(tenthcents, 1000); // !!! THIS TAKES TENTH OF CENTS !!!
     }
-    
+
     function setFightRewardGasOffsetValue(uint256 cents) public restricted {
         fightRewardGasOffset = ABDKMath64x64.divu(cents, 100);
     }
@@ -397,7 +400,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function setWeaponMintValue(uint256 cents) public restricted {
         mintWeaponFee = ABDKMath64x64.divu(cents, 100);
     }
-    
+
     function setReforgeWeaponValue(uint256 cents) public restricted {
         reforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
     }
