@@ -18,10 +18,9 @@
   </ul>
 </template>
 
-<script lang="ts">
+<script>
 import { mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
-import { ICharacter } from '../../interfaces';
 import { CharacterTrait } from '../../interfaces';
 import { RequiredXp } from '../../interfaces';
 import CharacterArt from '../CharacterArt.vue';
@@ -35,7 +34,7 @@ export default {
   },
 
   methods: {
-    tooltipHtml(character: ICharacter) {
+    tooltipHtml(character) {
       if(!character) return '';
 
       const wrapInSpan = (spanClass, text) => {
@@ -54,7 +53,7 @@ export default {
     },
     getCharacterArt,
 
-    getStaminaPoints(timestamp_str: string) {
+    getStaminaPoints(timestamp_str) {
       // super temporary function, just to make it work for now. sorry
       const timestamp = parseInt(timestamp_str, 10);
       const now = Date.now();
