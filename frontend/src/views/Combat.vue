@@ -9,8 +9,18 @@
         <img class="lightning-icon"> {{ ">>" }}
         <img class="water-icon"> {{ ">>" }}
         <img class="fire-icon">
+        <Hint text="The elements affect power:<br>
+          <br>Weapon vs Enemy: bonus or penalty as shown above
+          <br>Character and Weapon match gives bonus" />
       </div>
-      <h1>Choose a weapon:</h1>
+      <div class="loading-container waiting" v-if="waitingResults" margin="auto">
+        <i class="fas fa-spinner fa-spin"></i>
+        Waiting for fight results...
+      </div>
+      <CombatResults v-if="resultsAvailable" :results="fightResults" />
+      <h1>Choose a weapon:<Hint text="Your weapon multiplies your power<br>
+        <br>+Stats determine the multiplier
+        <br>Stat element match with character gives greater bonus" /></h1>
       <weapon-grid v-model="selectedWeaponId" />
 
       <ul class="encounter-list" v-if="targets.length > 0">
@@ -24,6 +34,7 @@
             class="encounter-button"
             :mainText="`Fight!`"
             :subText="`Power ${e.power}`"
+            v-tooltip="'Cost 20 stamina'"
             @click="onClickEncounter(e)"
           />
         </li>
@@ -50,6 +61,8 @@ import BigButton from '../components/BigButton.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import { getEnemyArt } from '../enemy-art';
 import { CharacterTrait } from '../interfaces';
+import Hint from '../components/Hint.vue';
+import CombatResults from '../components/CombatResults.vue';
 
 import { mapActions, mapGetters, mapState } from 'vuex';
 
@@ -58,6 +71,9 @@ export default {
     return {
       selectedWeaponId: null,
       error: null,
+      waitingResults: false,
+      resultsAvailable: false,
+      fightResults: null,
     };
   },
 
@@ -97,7 +113,6 @@ export default {
 
   methods: {
     ...mapActions(['fetchTargets', 'doEncounter']),
-
     getEnemyArt,
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
@@ -108,26 +123,31 @@ export default {
       }
 
       try {
+        this.waitingResults = true;
         const results = await this.doEncounter({
           characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
           targetString: targetToFight.original,
         });
-        // todo turn this into a proper popup with nice styling
-        const success = results[0];
+        /*const success = results[0];
         const playerRoll = results[1];
         const enemyRoll = results[2];
         const xpGain = results[3];
-        const skillGain = results[4];
+        const skillGain = results[4];*/
+        this.fightResults = results;
 
-        if (success) {
+        this.resultsAvailable = true;
+        // results are passed to the CombatResults element
+        this.waitingResults = false;
+
+        /*if (success) {
           alert('Battle succeeded! You rolled '+playerRoll
           +' and the enemy rolled '+enemyRoll
           +', you gain '+xpGain+'xp and '+skillGain+' SKILL');
         } else {
           alert('Battle failed... You rolled '+playerRoll
           +' and the enemy rolled '+enemyRoll);
-        }
+        }*/
         this.error = null;
       } catch (e) {
         console.error(e);
@@ -140,6 +160,8 @@ export default {
     // Character,
     BigButton,
     WeaponGrid,
+    Hint,
+    CombatResults,
   },
 };
 </script>
@@ -176,5 +198,11 @@ export default {
   text-align: center;
   padding: 1em;
   font-size: 2em;
+}
+
+.waiting {
+  font-size: 2em;
+  margin: auto;
+  text-align: center;
 }
 </style>

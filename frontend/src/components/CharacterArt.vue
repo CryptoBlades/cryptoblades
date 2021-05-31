@@ -25,6 +25,7 @@ const armsCount = 45;
 const torsoCount = 61;
 const legsCount = 41;
 const bootsCount = 22;
+//const raceCount = 2; // separate genders of each race!
 
 const modelScale = 1/100;
 

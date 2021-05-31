@@ -34,10 +34,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         randoms = _randoms;
 
         characterLimit = 4;
-        staminaCostFight = 0;
+        staminaCostFight = 20;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         refillStaminaFee = ABDKMath64x64.divu(5, 1);//5 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
+        fightRewardGasOffset = ABDKMath64x64.divu(8, 10);//0.8 usd;
         mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
         reforgeWeaponFee = ABDKMath64x64.divu(5, 10);//0.5 usd;
     }
@@ -54,6 +55,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     // lvl 1 player power could be anywhere between ~909 to 1666
     // cents per fight multiplied by monster power divided by 1000 (lv1 power)
     int128 public fightRewardBaseline;
+    int128 public fightRewardGasOffset;
 
     int128 public mintWeaponFee;
     int128 public reforgeWeaponFee;
@@ -115,7 +117,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getTokenGainForFight(uint32 target) internal view returns (int128) {
         uint256 monsterPower = uint256(getMonsterPower(target));
-        return ABDKMath64x64.divu(monsterPower, characters.getPowerAtLevel(0)).mul(fightRewardBaseline);
+        return ABDKMath64x64.add(
+            ABDKMath64x64.divu(monsterPower, characters.getPowerAtLevel(0)).mul(fightRewardBaseline),
+            fightRewardGasOffset
+        );
     }
 
     function getXpGainForFight(uint256 char, uint256 wep, uint32 target) internal view returns (uint16) {
@@ -369,6 +374,38 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _approveContractWeaponFor(uint256 weaponID, address playerAddress) internal {
         weapons.approve(playerAddress, weaponID);
+    }
+
+    function setCharacterMintValue(uint256 cents) public restricted {
+        mintCharacterFee = ABDKMath64x64.divu(cents, 100);
+    }
+    
+    function setRefillStaminaValue(uint256 cents) public restricted {
+        refillStaminaFee = ABDKMath64x64.divu(cents, 100);
+    }
+    
+    function setFightRewardBaselineValue(uint256 tenthcents) public restricted {
+        fightRewardBaseline = ABDKMath64x64.divu(tenthcents, 1000); // !!! THIS TAKES TENTH OF CENTS !!!
+    }
+    
+    function setFightRewardGasOffsetValue(uint256 cents) public restricted {
+        fightRewardGasOffset = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setWeaponMintValue(uint256 cents) public restricted {
+        mintWeaponFee = ABDKMath64x64.divu(cents, 100);
+    }
+    
+    function setReforgeWeaponValue(uint256 cents) public restricted {
+        reforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setStaminaCostFight(uint8 points) public restricted {
+        staminaCostFight = points;
+    }
+
+    function setCharacterLimit(uint256 max) public restricted {
+        characterLimit = max;
     }
 
     function usdToSkill(int128 usdAmount) public view returns (uint256) {

@@ -5,7 +5,10 @@
         <div class="character-header-wrapper">
           <h1>
             Characters
-            <button class="mint-character" @click="onMintCharacter">
+            <button
+              class="mint-character"
+              @click="onMintCharacter"
+              v-tooltip="'Create new character'">
               <i class="fas fa-plus"></i>
             </button>
           </h1>

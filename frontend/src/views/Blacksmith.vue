@@ -4,7 +4,9 @@
       <div class="sub-container">
         <h1>
           Weapons
-          <button class="mint-weapon" @click="onForgeWeapon">
+          <button class="mint-weapon"
+            @click="onForgeWeapon"
+            v-tooltip="'Create new weapon'">
             <i class="fas fa-plus"></i>
           </button>
         </h1>
@@ -15,7 +17,7 @@
           <big-button
             class="button"
             mainText="Reforge Sword"
-            v-tooltip="'Gain weapon XP by sacrificing a different weapon'"
+            v-tooltip="'Gain stats by burning a different weapon'"
             @click="showReforge = true"
           />
         </div>
@@ -23,7 +25,7 @@
 
       <div class="sub-container">
         <div v-if="showReforge">
-          <h1>Choose Reforge Weapon</h1>
+          <h1>Choose Weapon to burn</h1>
           <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" />
 
           <div class="button-row">
@@ -135,7 +137,6 @@ export default {
   border-radius: 0.1em;
   margin-right: 1em;
 
-  float: right;
 }
 
 .weapon-container {
