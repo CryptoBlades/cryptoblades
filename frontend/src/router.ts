@@ -7,7 +7,9 @@ import Stake from './views/Stake.vue';
 import SelectStakeType from './views/SelectStakeType.vue';
 import Raid from './views/Raid.vue';
 
-function createRouter(featureFlagStakeOnly: boolean) {
+import { raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly } from './feature-flags';
+
+function createRouter() {
   if (featureFlagStakeOnly) {
     return new VueRouter({
       routes: [
@@ -18,16 +20,21 @@ function createRouter(featureFlagStakeOnly: boolean) {
     });
   }
 
-  return new VueRouter({
+  const router = new VueRouter({
     routes: [
       { path: '/', name: 'plaza', component: Plaza },
       { path: '/blacksmith', name: 'blacksmith', component: Blacksmith },
       { path: '/combat', name: 'combat', component: Combat },
       { path: '/stake', name: 'select-stake-type', component: SelectStakeType },
       { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
-      { path: '/raid/', name: 'raid', component: Raid },
     ]
   });
+
+  if(featureFlagRaid) {
+    router.addRoute({ path: '/raid/', name: 'raid', component: Raid });
+  }
+
+  return router;
 }
 
 export default createRouter;

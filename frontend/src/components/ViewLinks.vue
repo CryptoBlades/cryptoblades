@@ -13,7 +13,7 @@
     <li v-if="!featureFlagStakeOnly">
       <router-link :to="{ name: 'combat' }"><span>Combat</span></router-link>
     </li>
-    <li v-if="!featureFlagStakeOnly">
+    <li v-if="!featureFlagStakeOnly && featureFlagRaid">
       <router-link :to="{ name: 'raid' }"><span>Raid</span></router-link>
     </li>
     <li>
@@ -24,7 +24,7 @@
 
 <script lang="ts">
 export default {
-  inject: ['featureFlagStakeOnly'],
+  inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
 };
 </script>
 

@@ -17,8 +17,13 @@ import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import Web3 from 'web3';
 import { Contracts } from './interfaces';
 
-export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean): Promise<Contracts> {
-  const networkId = process.env.VUE_APP_NETWORK_ID || '5777';
+import { raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly } from './feature-flags';
+
+interface RaidContracts {
+  RaidBasic?: Contracts['RaidBasic'];
+}
+
+async function setUpStakingContracts(web3: Web3, networkId: string) {
   const skillStakingRewardsContractAddr = process.env.VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS || (skillStakingRewardsNetworks as any)[networkId].address;
   const lpStakingRewardsContractAddr = process.env.VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS || (lpStakingRewardsNetworks as any)[networkId].address;
   const lp2StakingRewardsContractAddr = process.env.VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS || (lp2StakingRewardsNetworks as any)[networkId].address;
@@ -44,8 +49,16 @@ export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean):
     LP2Token = new web3.eth.Contract(erc20Abi as any, lp2TokenContractAddr);
   }
 
+  return { SkillStakingRewards, LPStakingRewards, LP2StakingRewards, SkillToken, LPToken, LP2Token };
+}
+
+export async function setUpContracts(web3: Web3): Promise<Contracts> {
+  const networkId = process.env.VUE_APP_NETWORK_ID || '5777';
+
+  const stakingContracts = await setUpStakingContracts(web3, networkId);
+
   if (featureFlagStakeOnly) {
-    return { SkillStakingRewards, LPStakingRewards, LP2StakingRewards, SkillToken, LPToken, LP2Token };
+    return stakingContracts;
   }
 
   const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as any)[networkId].address;
@@ -60,12 +73,15 @@ export async function setUpContracts(web3: Web3, featureFlagStakeOnly: boolean):
   const Randoms = new web3.eth.Contract(randomsAbi as any, randomsAddr);
   const Characters = new web3.eth.Contract(charactersAbi as any, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as any, weaponsAddr);
-  const RaidBasic = new web3.eth.Contract(raidAbi as any, raidContractAddr);
+
+  const raidContracts: RaidContracts = {};
+  if(featureFlagRaid) {
+    raidContracts.RaidBasic = new web3.eth.Contract(raidAbi as any, raidContractAddr);
+  }
 
   return {
+    ...stakingContracts,
     CryptoBlades, Randoms, Characters, Weapons,
-    SkillStakingRewards, LPStakingRewards, LP2StakingRewards,
-    SkillToken, LPToken, LP2Token,
-    RaidBasic
+    ...raidContracts
   };
 }

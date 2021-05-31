@@ -9,7 +9,7 @@ import createRouter from './router';
 
 import App from './App.vue';
 
-const featureFlagStakeOnly = ['1', 'true', 't'].includes((process.env.VUE_APP_STAKING_ONLY + '').toLowerCase());
+import { raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly } from './feature-flags';
 
 let expectedNetworkId: number | null = null;
 if(process.env.VUE_APP_EXPECTED_NETWORK_ID) {
@@ -25,13 +25,15 @@ Vue.use(Vuex);
 Vue.use(VueRouter);
 Vue.use(VTooltip);
 
-const store = createStore(web3, featureFlagStakeOnly);
-const router = createRouter(featureFlagStakeOnly);
+const store = createStore(web3);
+const router = createRouter();
 
 new Vue({
   render: h => h(App),
   router, store,
   provide: {
-    web3, featureFlagStakeOnly, expectedNetworkId, expectedNetworkName
+    web3,
+    featureFlagStakeOnly, featureFlagRaid,
+    expectedNetworkId, expectedNetworkName
   }
 }).$mount('#app');

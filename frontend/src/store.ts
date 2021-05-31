@@ -14,6 +14,8 @@ import { allStakeTypes, Contracts, IStakeOverviewState, IStakeState, IState, Sta
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee } from './contract-call-utils';
 
+import { stakeOnly as featureFlagStakeOnly, raid as featureFlagRaid } from './feature-flags';
+
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
 type StakingRewardsAlias = Contracts['LPStakingRewards'] | Contracts['LP2StakingRewards'] | Contracts['SkillStakingRewards'];
@@ -72,7 +74,7 @@ const defaultStakeOverviewState: IStakeOverviewState = {
   minimumStakeTime: 0
 };
 
-export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
+export function createStore(web3: Web3) {
   return new Vuex.Store({
     state: {
       contracts: null!,
@@ -173,6 +175,8 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       isOwnedCharacterRaiding(state) {
+        if(!featureFlagRaid) return false;
+
         return (characterId: number): boolean => state.raid.isOwnedCharacterRaidingById[characterId] || false;
       }
     },
@@ -409,7 +413,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async setUpContracts({ commit }) {
-        const contracts = await setUpContracts(web3, featureFlagStakeOnly);
+        const contracts = await setUpContracts(web3);
         commit('setContracts', contracts);
       },
 
@@ -752,7 +756,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async fetchRaidData({ state, commit }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !featureFlagRaid) return;
 
         const RaidBasic = state.contracts.RaidBasic!;
 
@@ -784,7 +788,7 @@ export function createStore(web3: Web3, featureFlagStakeOnly: boolean) {
       },
 
       async fetchOwnedCharacterRaidStatus({ state, commit }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !featureFlagRaid) return;
 
         const RaidBasic = state.contracts.RaidBasic!;
 
