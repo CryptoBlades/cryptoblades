@@ -91,7 +91,7 @@
       }
     },
     "links": {},
-    "address": "0x5E1067513c0174d17a3c5cD38ff2E8de0b8dEb55",
+    "address": "0x96B7BAeE65FDDB611FAb32238A1c50218928520A",
     "transactionHash": "0x65ead15d59e15d3147ec0fbec5c9be60f91c0021e6b2bed0e621e0483c5935b7"
   },
   "build/contracts/ChainlinkRandoms.json": {
@@ -199,8 +199,8 @@
       }
     },
     "links": {},
-    "address": "0xC008Aaa334Be81f92D822ac52610cB213fB6A183",
-    "transactionHash": "0x5ee3b21ffd2939b5a09784c420c16b7d5f36be98868c38383318c9149d7a792c"
+    "address": "0x959a741d44BD61104BB4f97674970EE4d059190e",
+    "transactionHash": "0xa82596abf90424a279b74878c434ab6c12277bb5c4153fdeac2dd6d9c3dbbc6e"
   },
   "build/contracts/Characters.json": {
     "events": {
@@ -400,8 +400,8 @@
       }
     },
     "links": {},
-    "address": "0x0F5Ec0DC9F5bE1B47B73F25d8D4567aBFEC445d0",
-    "transactionHash": "0x06da77f94a41290e5aa77f4f21211647c85473aa9c20bb4bc1a955c70ff16f3c"
+    "address": "0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
+    "transactionHash": "0x96d4011e92af6d82dcbb30ac9a7584f1df666413cdaf3c80c7a8d9848bdc13ff"
   },
   "build/contracts/CryptoBlades.json": {
     "events": {
@@ -586,8 +586,8 @@
       }
     },
     "links": {},
-    "address": "0xC05AC465cE9146af82D6623f12Df97884b862FA0",
-    "transactionHash": "0x523cd585a530c0c2edac809d688d9c033b5edb43039c0a69aa33cf1df1c4cd77"
+    "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
+    "transactionHash": "0x48e618e72ca66d577ebf80f778db3e63a79b5ec412231c864138e06fb9fafe75"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -722,8 +722,8 @@
   "build/contracts/RaidBasic.json": {
     "events": {},
     "links": {},
-    "address": "0xeEf27C0BC70d13cA44c0685fF8D406d707832e3F",
-    "transactionHash": "0x7c6ca180356bc0324b4cf0c2fc7334ceaa224250cfbacad53db2b63753c2d0b8"
+    "address": "0x874607dd1D157b60E60A56cBE96b112e24a9Ca7b",
+    "transactionHash": "0x9bd0f81d4c617dc2bd0bbe746e0d1a511486a68203aaa8a72c392211c5fb4bed"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
@@ -1010,7 +1010,7 @@
       }
     },
     "links": {},
-    "address": "0xc30232b820e29968742B4dF294FD80fE5e8D3c53",
-    "transactionHash": "0x0d88283a983c822d5ef9c859fa8e51396284512e7003ba54e28cd87371373382"
+    "address": "0x672E4CddA311b3BfAd1e09313241C62B4eFF5782",
+    "transactionHash": "0x61f03dd2056665c14028b109b8f7a8bbe1ce3f683001edc22434cadf26b513b0"
   }
 }
