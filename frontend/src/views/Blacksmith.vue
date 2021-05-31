@@ -9,14 +9,14 @@
           </button>
         </h1>
 
-        <weapon-grid v-on:choose-weapon="setWeapon($event)" :highlight="reforgeWeaponId" />
+        <weapon-grid v-model="reforgeWeaponId" />
 
         <div class="button-row" v-if="reforgeWeaponId">
           <big-button
             class="button"
             mainText="Reforge Sword"
             v-tooltip="'Gain weapon XP by sacrificing a different weapon'"
-            @click="setReforge(true)"
+            @click="showReforge = true"
           />
         </div>
       </div>
@@ -24,7 +24,7 @@
       <div class="sub-container">
         <div v-if="showReforge">
           <h1>Choose Reforge Weapon</h1>
-          <weapon-grid v-on:choose-weapon="setBurnWeapon($event)" :highlight="burnWeaponId" :ignore="reforgeWeaponId" />
+          <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" />
 
           <div class="button-row">
             <big-button
@@ -79,6 +79,12 @@ export default {
     },
   },
 
+  watch: {
+    reforgeWeaponId() {
+      this.showReforge = false;
+    }
+  },
+
   methods: {
     ...mapActions(['mintWeapon', 'reforgeWeapon']),
 
@@ -103,20 +109,6 @@ export default {
         console.error(e);
         alert('Could not forge sword: insuffucient funds or transaction denied.');
       }
-    },
-
-    setReforge(reforge) {
-      this.showReforge = reforge;
-    },
-
-    setWeapon(weaponId) {
-      console.log('set', weaponId);
-      this.reforgeWeaponId = weaponId;
-      this.setReforge(false);
-    },
-
-    setBurnWeapon(weaponId) {
-      this.burnWeaponId = weaponId;
     }
   },
 

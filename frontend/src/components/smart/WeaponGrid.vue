@@ -5,7 +5,7 @@
       :class="{ selected: weapon.id === highlight }"
       v-for="weapon in displayWeapons"
       :key="weapon.id"
-      @click="$emit('input', weapon.id)"
+      @click="$emit('choose-weapon', weapon.id)"
     >
       <weapon-icon :weapon="weapon" />
     </li>
@@ -19,7 +19,11 @@ import { IWeapon } from '../../interfaces';
 import WeaponIcon from '../WeaponIcon.vue';
 
 export default {
-  props: ['value', 'ignore', 'highlight'],
+  model: {
+    prop: 'highlight',
+    event: 'choose-weapon'
+  },
+  props: ['highlight', 'ignore'],
 
   components: {
     WeaponIcon,

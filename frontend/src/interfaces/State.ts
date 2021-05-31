@@ -52,7 +52,6 @@ export interface IState {
   characterStaminas: Record<number, number>;
 
   weapons: Record<number, IWeapon>;
-  currentWeaponId: number | null;
   targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
 
   staking: Record<StakeType, IStakeState>;

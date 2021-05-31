@@ -11,11 +11,7 @@
         <img class="fire-icon">
       </div>
       <h1>Choose a weapon:</h1>
-      <weapon-grid
-        v-model="selectedWeaponId"
-        :selectedWeaponId="selectedWeaponId"
-        @input="setCurrentWeapon"
-      />
+      <weapon-grid v-model="selectedWeaponId" />
 
       <ul class="encounter-list" v-if="targets.length > 0">
         <li class="encounter" v-for="(e, i) in targets" :key="i">
@@ -55,7 +51,7 @@ import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import { getEnemyArt } from '../enemy-art';
 import { CharacterTrait } from '../interfaces';
 
-import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 export default {
   data() {
@@ -100,7 +96,6 @@ export default {
   },
 
   methods: {
-    ...mapMutations(['setCurrentWeapon']),
     ...mapActions(['fetchTargets', 'doEncounter']),
 
     getEnemyArt,
