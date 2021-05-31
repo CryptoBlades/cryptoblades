@@ -10,13 +10,17 @@ import { setUpContracts } from './contracts';
 import {
   characterFromContract, targetFromContract, weaponFromContract
 } from './contract-models';
-import { allStakeTypes, Contracts, IStakeOverviewState, IStakeState, IState, StakeType } from './interfaces';
+import { allStakeTypes, Contracts, IStakeOverviewState, IStakeState, IState, IWeb3EventSubscription, StakeType } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee } from './contract-call-utils';
 
 import { stakeOnly as featureFlagStakeOnly, raid as featureFlagRaid } from './feature-flags';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
+
+interface SetEventSubscriptionsPayload {
+  eventSubscriptions: IWeb3EventSubscription[];
+}
 
 type StakingRewardsAlias = Contracts['LPStakingRewards'] | Contracts['LP2StakingRewards'] | Contracts['SkillStakingRewards'];
 
@@ -78,6 +82,7 @@ export function createStore(web3: Web3) {
   return new Vuex.Store({
     state: {
       contracts: null!,
+      eventSubscriptions: [],
 
       accounts: [],
       defaultAccount: null,
@@ -201,6 +206,10 @@ export function createStore(web3: Web3) {
         state.contracts = payload;
       },
 
+      setEventSubscriptions(state: IState, payload: SetEventSubscriptionsPayload) {
+        state.eventSubscriptions = payload.eventSubscriptions;
+      },
+
       updateSkillBalance(state: IState, { skillBalance }) {
         state.skillBalance = skillBalance;
       },
@@ -310,106 +319,134 @@ export function createStore(web3: Web3) {
         }
 
         if(refreshUserDetails) {
-          await dispatch('fetchUserDetails');
+          await Promise.all([
+            dispatch('setUpContractEvents'),
+            dispatch('fetchUserDetails')
+          ]);
         }
       },
 
       setUpContractEvents({ state, dispatch, commit }) {
+        state.eventSubscriptions.forEach(sub => sub.unsubscribe());
+
+        const emptySubsPayload: SetEventSubscriptionsPayload = { eventSubscriptions: [] };
+        commit('setEventSubscriptions', emptySubsPayload);
+
+        if(!state.defaultAccount) return;
+
+        const subscriptions: IWeb3EventSubscription[] = [];
+
         if (!featureFlagStakeOnly) {
-          // TODO filter to only get own
-          state.contracts.Characters!.events.NewCharacter(async (err: Error, data: any) => {
-            if (err) {
-              console.error(err);
-              return;
-            }
+          console.log('setting up events for:', state.defaultAccount);
 
-            console.log('NewCharacter', data);
+          subscriptions.push(
+            state.contracts.Characters!.events.NewCharacter(
+              { filter: { minter: state.defaultAccount } },
+              async (err: Error, data: any) => {
+                if (err) {
+                  console.error(err);
+                  return;
+                }
 
-            const characterId = data.returnValues.character;
+                console.log('NewCharacter', data);
 
-            commit('addNewOwnedCharacterId', characterId);
+                const characterId = data.returnValues.character;
 
-            await Promise.all([
-              dispatch('fetchCharacter', characterId),
-              dispatch('fetchSkillBalance')
-            ]);
-          });
+                commit('addNewOwnedCharacterId', characterId);
 
-          // TODO filter to only get own
-          state.contracts.Weapons!.events.NewWeapon(async (err: Error, data: any) => {
-            if (err) {
-              console.error(err);
-              return;
-            }
+                await Promise.all([
+                  dispatch('fetchCharacter', characterId),
+                  dispatch('fetchSkillBalance')
+                ]);
+              })
+          );
 
-            console.log('NewWeapon', data);
+          subscriptions.push(
+            state.contracts.Weapons!.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
 
-            const weaponId = data.returnValues.weapon;
+              console.log('NewWeapon', data);
 
-            commit('addNewOwnedWeaponId', weaponId);
+              const weaponId = data.returnValues.weapon;
 
-            await Promise.all([
-              dispatch('fetchWeapon', weaponId),
-              dispatch('fetchSkillBalance')
-            ]);
-          });
+              commit('addNewOwnedWeaponId', weaponId);
 
-          // TODO filter to only get own
-          state.contracts.CryptoBlades!.events.FightOutcome(async (err: Error, data: any) => {
-            if (err) {
-              console.error(err);
-              return;
-            }
+              await Promise.all([
+                dispatch('fetchWeapon', weaponId),
+                dispatch('fetchSkillBalance')
+              ]);
+            })
+          );
 
-            console.log('FightOutcome', data);
+          subscriptions.push(
+            state.contracts.CryptoBlades!.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
 
-            await Promise.all([
-              dispatch('fetchCharacter', data.returnValues.character),
-              dispatch('fetchSkillBalance')
-            ]);
-          });
+              console.log('FightOutcome', data);
+
+              await Promise.all([
+                dispatch('fetchCharacter', data.returnValues.character),
+                dispatch('fetchSkillBalance')
+              ]);
+            })
+          );
         }
 
         function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias) {
           if(!StakingRewards) return;
 
-          StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err: Error, data: any) => {
-            if (err) {
-              console.error(err);
-              return;
-            }
+          subscriptions.push(
+            StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err: Error, data: any) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
 
-            console.log('RewardPaid', data);
+              console.log('RewardPaid', data);
 
-            await dispatch('fetchStakeDetails', { stakeType });
-          });
+              await dispatch('fetchStakeDetails', { stakeType });
+            })
+          );
 
-          StakingRewards.events.RewardAdded(async (err: Error, data: any) => {
-            if (err) {
-              console.error(err);
-              return;
-            }
+          subscriptions.push(
+            StakingRewards.events.RewardAdded(async (err: Error, data: any) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
 
-            console.log('RewardAdded', data);
+              console.log('RewardAdded', data);
 
-            await dispatch('fetchStakeDetails', { stakeType });
-          });
+              await dispatch('fetchStakeDetails', { stakeType });
+            })
+          );
 
-          StakingRewards.events.RewardsDurationUpdated(async (err: Error, data: any) => {
-            if (err) {
-              console.error(err);
-              return;
-            }
+          subscriptions.push(
+            StakingRewards.events.RewardsDurationUpdated(async (err: Error, data: any) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
 
-            console.log('RewardsDurationUpdated', data);
+              console.log('RewardsDurationUpdated', data);
 
-            await dispatch('fetchStakeDetails', { stakeType });
-          });
+              await dispatch('fetchStakeDetails', { stakeType });
+            })
+          );
         }
 
         setupStakingEvents('skill', state.contracts.SkillStakingRewards);
         setupStakingEvents('lp', state.contracts.LPStakingRewards);
         setupStakingEvents('lp2', state.contracts.LP2StakingRewards);
+
+        const payload: SetEventSubscriptionsPayload = { eventSubscriptions: subscriptions };
+        commit('setEventSubscriptions', payload);
       },
 
       async setUpContracts({ commit }) {
