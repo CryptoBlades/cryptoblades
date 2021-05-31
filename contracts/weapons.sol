@@ -2,27 +2,24 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./util.sol";
 
-contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable {
+contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
     using ABDKMath64x64 for uint16;
 
-    address private main;
+    bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades weapon", "CBW");
-        __Ownable_init_unchained();
-        main = address(0);
-    }
+        __AccessControl_init_unchained();
 
-    function setMain(address newMain) external onlyOwner {
-        main = newMain;
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /*
@@ -57,8 +54,7 @@ contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable {
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 level, uint16 stat1Gain, uint16 stat2Gain, uint16 stat3Gain);
 
     modifier restricted() {
-        //require(main == msg.sender, "Can only be called by main file");
-        // todo proper with accessControl
+        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
         _;
     }
 
