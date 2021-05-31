@@ -4,11 +4,11 @@
       <h1 class="error" v-if="error !== null">Error: {{ error }}</h1>
 
       <div class="combat-hints">
-        <img class="fire-icon"> {{ ">>" }}
-        <img class="earth-icon"> {{ ">>" }}
-        <img class="lightning-icon"> {{ ">>" }}
-        <img class="water-icon"> {{ ">>" }}
-        <img class="fire-icon">
+        <span class="fire-icon" /> {{ ">>" }}
+        <span class="earth-icon" /> {{ ">>" }}
+        <span class="lightning-icon" /> {{ ">>" }}
+        <span class="water-icon" /> {{ ">>" }}
+        <span class="fire-icon" />
         <Hint text="The elements affect power:<br>
           <br>Weapon vs Enemy: bonus or penalty as shown above
           <br>Character and Weapon match gives bonus" />
@@ -28,7 +28,7 @@
           <img :src="getEnemyArt(e.power)" alt="Enemy">
           <div class="encounter-element">
             <span :class="getCharacterTrait(e.trait).toLowerCase()">{{getCharacterTrait(e.trait)}}</span>
-            <img :class="getCharacterTrait(e.trait).toLowerCase()+'-icon'">
+            <span :class="getCharacterTrait(e.trait).toLowerCase()+'-icon'" />
           </div>
           <big-button
             class="encounter-button"
