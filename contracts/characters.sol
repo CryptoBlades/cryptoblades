@@ -31,8 +31,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         uint8 trait; // 2b trait, TBD
         uint64 staminaTimestamp; // standard timestamp in seconds-resolution marking regen start from 0
     }
+    struct CharacterCosmetics {
+        uint8 version;
+        uint256 seed;
+    }
 
     Character[] private tokens;
+    CharacterCosmetics[] private cosmetics;
 
     uint256 public constant maxStamina = 200;
     uint256 public constant secondsPerStamina = 300; //5 * 60
@@ -47,16 +52,19 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function get(uint256 id) public view returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
         Character memory c = tokens[id];
-        uint appearance = RandomUtil.randomSeeded(id);
+        CharacterCosmetics memory cc = cosmetics[id];
         return (c.xp, c.level, c.trait, c.staminaTimestamp,
-            // feel free to change this but beware of stack limits
-            uint16(appearance % 256), // head
-            uint16((appearance / 64) % 256), // arms
-            uint16((appearance / 4096) % 256), // torso
-            uint16((appearance / 262144) % 256), // legs
-            uint16((appearance / 16777216) % 256), // boots
-            uint16((appearance / 1073741824) % 256) // race
+            getRandomCosmetic(cc.seed, 1, 13), // head
+            getRandomCosmetic(cc.seed, 2, 45), // arms
+            getRandomCosmetic(cc.seed, 3, 61), // torso
+            getRandomCosmetic(cc.seed, 4, 41), // legs
+            getRandomCosmetic(cc.seed, 5, 22), // boots
+            getRandomCosmetic(cc.seed, 6, 2) // race
         );
+    }
+
+    function getRandomCosmetic(uint256 seed, uint256 seed2, uint16 limit) public pure returns (uint16) {
+        return uint16(RandomUtil.randomSeededMinMax(0, limit, RandomUtil.combineSeeds(seed, seed2)));
     }
 
     function mint(address minter, uint256 seed) public restricted {
@@ -68,6 +76,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         uint64 staminaTimestamp = uint64(now - getStaminaMaxWait());
 
         tokens.push(Character(xp, level, trait, staminaTimestamp));
+        cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
         _mint(minter, tokenID);
         emit NewCharacter(tokenID, minter);
     }

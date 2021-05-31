@@ -250,10 +250,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 weapons.getRandomStat(4, 200, seed, 101),
                 0, // stat2
                 0, // stat3
-                weapons.getRandomCosmetic(seed,102), // blade
-                weapons.getRandomCosmetic(seed,103), // crossguard
-                weapons.getRandomCosmetic(seed,104), // grip
-                weapons.getRandomCosmetic(seed,105) // pommel
+                RandomUtil.combineSeeds(seed,102)
             );
         }
     }

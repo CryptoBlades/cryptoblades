@@ -41,14 +41,15 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 stat2;
         uint16 stat3;
         uint8 level; // separate from stat1 because stat1 will have a pre-roll
-        // cosmetics
-        uint8 blade;
-        uint8 crossguard;
-        uint8 grip;
-        uint8 pommel;
+    }
+
+    struct WeaponCosmetics {
+        uint8 version;
+        uint256 seed;
     }
 
     Weapon[] private tokens;
+    WeaponCosmetics[] private cosmetics;
 
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 level, uint16 stat1Gain, uint16 stat2Gain, uint16 stat3Gain);
@@ -60,7 +61,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function get(uint256 id) public view returns (uint16, uint16, uint16, uint16, uint8, uint8, uint8, uint8, uint8) {
         Weapon memory w = tokens[id];
-        return (w.properties, w.stat1, w.stat2, w.stat3, w.level, w.blade, w.crossguard, w.grip, w.pommel);
+        WeaponCosmetics memory wc = cosmetics[id];
+        return (w.properties, w.stat1, w.stat2, w.stat3, w.level,
+            getRandomCosmetic(wc.seed, 1, 24),
+            getRandomCosmetic(wc.seed, 2, 24),
+            getRandomCosmetic(wc.seed, 3, 24),
+            getRandomCosmetic(wc.seed, 4, 24)
+        );
     }
 
     function mint(address minter, uint256 seed) public restricted returns(uint256) {
@@ -78,21 +85,19 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             stat1,
             stat2,
             stat3,
-            getRandomCosmetic(seed,6), // blade
-            getRandomCosmetic(seed,7), // crossguard
-            getRandomCosmetic(seed,8), // grip
-            getRandomCosmetic(seed,9) // pommel
+            RandomUtil.combineSeeds(seed,3)
         );
     }
 
     function performMintWeapon(address minter,
         uint16 properties,
         uint16 stat1, uint16 stat2, uint16 stat3,
-        uint8 blade, uint8 crossguard, uint8 grip, uint8 pommel
+        uint256 cosmeticSeed
     ) public restricted returns(uint256) {
 
         uint256 tokenID = tokens.length;
-        tokens.push(Weapon(properties, stat1, stat2, stat3, 0, blade, crossguard, grip, pommel));
+        tokens.push(Weapon(properties, stat1, stat2, stat3, 0));
+        cosmetics.push(WeaponCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);
         emit NewWeapon(tokenID, minter);
         return tokenID;
@@ -147,8 +152,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint16(RandomUtil.randomSeededMinMax(minRoll, maxRoll,RandomUtil.combineSeeds(seed, seed2)));
     }
 
-    function getRandomCosmetic(uint256 seed, uint256 seed2) public pure returns (uint8) {
-        return uint8(RandomUtil.randomSeededMinMax(0, 255, RandomUtil.combineSeeds(seed, seed2)));
+    function getRandomCosmetic(uint256 seed, uint256 seed2, uint8 limit) public pure returns (uint8) {
+        return uint8(RandomUtil.randomSeededMinMax(0, limit, RandomUtil.combineSeeds(seed, seed2)));
     }
 
     function getStatMinRoll(uint256 stars) public pure returns (uint16) {
