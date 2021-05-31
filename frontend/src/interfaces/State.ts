@@ -6,6 +6,10 @@ import { Contracts } from './Contracts';
 export type StakeType = 'skill' | 'lp' | 'lp2';
 export const allStakeTypes: StakeType[] = ['skill', 'lp', 'lp2'];
 
+export interface IWeb3EventSubscription {
+  unsubscribe(): void;
+}
+
 export interface IStakeState {
   ownBalance: string;
   stakedBalance: string;
@@ -38,6 +42,7 @@ export interface IRaidState {
 
 export interface IState {
   contracts: Contracts;
+  eventSubscriptions: IWeb3EventSubscription[];
   accounts: string[];
   defaultAccount: string | null;
   currentNetworkId: number | null;
