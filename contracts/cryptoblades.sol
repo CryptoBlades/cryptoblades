@@ -69,8 +69,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
 
-    function giveMeSkill(uint256 amount) public {
-        // TODO REMOVE; TEMPORARY FUNCITON TO TEST WITH
+    function recoverSkill(uint256 amount) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
         skillToken.transfer(msg.sender, amount);
     }
 

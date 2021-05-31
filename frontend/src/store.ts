@@ -512,10 +512,9 @@ export function createStore(web3: Web3) {
       },
 
       async addMoreSkill({ state, dispatch }, skillToAdd: string) {
-        // TODO REMOVE BEFORE LAUNCH
         if(featureFlagStakeOnly) return;
 
-        await state.contracts.CryptoBlades!.methods.giveMeSkill(skillToAdd).send({
+        await state.contracts.CryptoBlades!.methods.recoverSkill(skillToAdd).send({
           from: state.defaultAccount,
         });
 
