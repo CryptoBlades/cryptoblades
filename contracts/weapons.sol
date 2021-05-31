@@ -104,8 +104,8 @@ contract Weapons is Initializable, ERC721Upgradeable, OwnableUpgradeable {
 
     function getRandomProperties(uint256 stars, uint256 seed) public pure returns (uint16) {
         return uint16((stars & 0x7) // stars aren't randomized here!
-            | ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) << 3) & 0x3) // trait
-            | ((RandomUtil.randomSeededMinMax(0,124,RandomUtil.combineSeeds(seed,2)) << 5) & 0x7F)); // statPattern
+            | ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3) // trait
+            | ((RandomUtil.randomSeededMinMax(0,124,RandomUtil.combineSeeds(seed,2)) & 0x7F) << 5)); // statPattern
     }
 
     function getRandomStar(uint256 seed) private pure returns (uint8) {
