@@ -10,7 +10,6 @@ import "./util.sol";
 contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
-    using ABDKMath64x64 for uint256;
     using ABDKMath64x64 for uint16;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
@@ -157,35 +156,35 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getStatMinRoll(uint256 stars) public pure returns (uint16) {
-        uint16 minRoll = 1 * 4;
+        uint16 minRoll = uint16(SafeMath.mul(1, 4));
         if(stars == 1) { // 2 star
-            minRoll = 45 * 4;
+            minRoll = uint16(SafeMath.mul(45, 4));
         }
         else if(stars == 2) { // 3 star
-            minRoll = 70 * 4;
+            minRoll = uint16(SafeMath.mul(70, 4));
         }
         else if(stars == 3) { // 4 star
-            minRoll = 50 * 4;
+            minRoll = uint16(SafeMath.mul(50, 4));
         }
         else if(stars > 3) { // 5 star and above
-            minRoll = 67 * 4;
+            minRoll = uint16(SafeMath.mul(67, 4));
         }
         return minRoll;
     }
 
     function getStatMaxRoll(uint256 stars) public pure returns (uint16) {
-        uint16 maxRoll = 50 * 4;
+        uint16 maxRoll = uint16(SafeMath.mul(50, 4));
         if(stars == 1) { // 2 star
-            maxRoll = 75 * 4;
+            maxRoll = uint16(SafeMath.mul(75, 4));
         }
         else if(stars == 2) { // 3 star
-            maxRoll = 100 * 4;
+            maxRoll = uint16(SafeMath.mul(100, 4));
         }
         else if(stars == 3) { // 4 star
-            maxRoll = 100 * 4;
+            maxRoll = uint16(SafeMath.mul(100, 4));
         }
         else if(stars > 3) { // 5 star and above
-            maxRoll = 100 * 4;
+            maxRoll = uint16(SafeMath.mul(100, 4));
         }
         return maxRoll;
     }
@@ -234,11 +233,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getStat2Trait(uint8 statPattern) public pure returns (uint8) {
-        return (statPattern / 5) % 5; // 0-3 regular traits, 4 = traitless (PWR)
+        return uint8(SafeMath.div(statPattern, 5) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getStat3Trait(uint8 statPattern) public pure returns (uint8) {
-        return (statPattern / 5 / 5) % 5; // 0-3 regular traits, 4 = traitless (PWR)
+        return uint8(SafeMath.div(SafeMath.div(statPattern, 5), 5) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getLevel(uint256 id) public view returns (uint8) {
@@ -262,11 +261,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         // this function does not account for traits
         // it is used to calculate base enemy powers for targeting
         Weapon memory wep = tokens[id];
-        int128 powerPerPoint = uint256(1).divu(400); // 0.25% or x0.0025
+        int128 powerPerPoint = ABDKMath64x64.divu(1, 400); // 0.25% or x0.0025
         int128 stat1 = wep.stat1.fromUInt().mul(powerPerPoint);
         int128 stat2 = wep.stat2.fromUInt().mul(powerPerPoint);
         int128 stat3 = wep.stat3.fromUInt().mul(powerPerPoint);
-        return uint256(1).fromUInt().add(stat1).add(stat2).add(stat3);
+        return ABDKMath64x64.fromUInt(1).add(stat1).add(stat2).add(stat3);
     }
 
     function getPowerMultiplierForTrait(uint256 id, uint8 trait) public view returns(int128) {
@@ -275,11 +274,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         // This function can be used by frontend to get expected % bonus for each type
         // Making it easy to see on the market how useful it will be to you
         Weapon memory wep = tokens[id];
-        int128 powerPerPoint = uint256(1).divu(400); // 0.25% or x0.0025
-        int128 matchingPowerPerPoint = powerPerPoint.mul(uint256(107).divu(100)); // +7%
-        int128 powerPerPWRPoint = powerPerPoint.mul(uint256(103).divu(100)); // +3%
+        int128 powerPerPoint = ABDKMath64x64.divu(1, 400); // 0.25% or x0.0025
+        int128 matchingPowerPerPoint = powerPerPoint.mul(ABDKMath64x64.divu(107, 100)); // +7%
+        int128 powerPerPWRPoint = powerPerPoint.mul(ABDKMath64x64.divu(103, 100)); // +3%
         uint8 statPattern = getStatPatternFromProperties(wep.properties);
-        int128 result = uint256(1).fromUInt();
+        int128 result = ABDKMath64x64.fromUInt(1);
 
         if(getStat1Trait(statPattern) == trait)
             result = result.add(wep.stat1.fromUInt().mul(matchingPowerPerPoint));
@@ -312,22 +311,26 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 stat3 = wep.stat3;
         levelUp(reforgeID, seed);
         _burn(burnID);
-        emit Reforged(ownerOf(reforgeID), reforgeID, burnID, wep.level, wep.stat1-stat1, wep.stat2-stat2, wep.stat3-stat3);
+        emit Reforged(ownerOf(reforgeID), reforgeID, burnID, wep.level, 
+            uint16(SafeMath.sub(wep.stat1, stat1)),
+            uint16(SafeMath.sub(wep.stat2, stat2)),
+            uint16(SafeMath.sub(wep.stat3, stat3))
+        );
     }
 
     function levelUp(uint256 id, uint256 seed) private {
         Weapon storage wep = tokens[id];
 
-        wep.level = wep.level + 1;
-        wep.stat1 = wep.stat1 + 1;
+        wep.level = uint8(SafeMath.add(wep.level, 1));
+        wep.stat1 = uint16(SafeMath.add(wep.stat1, 1));
 
         uint8 stars = getStarsFromProperties(wep.properties);
 
         if(stars >= 4 && RandomUtil.randomSeededMinMax(0,1, seed) == 0) {
-            wep.stat2 = wep.stat2 + 1;
+            wep.stat2 = uint16(SafeMath.add(wep.stat2, 1));
         }
         if(stars >= 5 && RandomUtil.randomSeededMinMax(0,1, RandomUtil.combineSeeds(seed,1)) == 0) {
-            wep.stat3 = wep.stat3 + 1;
+            wep.stat3 = uint16(SafeMath.add(wep.stat3, 1));
         }
     }
 

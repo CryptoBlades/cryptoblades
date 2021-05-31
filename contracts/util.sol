@@ -1,19 +1,18 @@
 pragma solidity ^0.6.0;
 
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
+import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 
 library RandomUtil {
 
-    using ABDKMath64x64 for int128;
-    using ABDKMath64x64 for uint256;
-    using ABDKMath64x64 for uint16;
+    using SafeMath for uint256;
 
     function randomSeededMinMax(uint min, uint max, uint seed) internal pure returns (uint) {
         // inclusive,inclusive (don't use absolute min and max values of uint256)
         // deterministic based on seed provided
-        uint diff = (max-min) + 1;
-        uint randomVar = uint(keccak256(abi.encodePacked(seed))) % diff;
-        randomVar += min;
+        uint diff = max.sub(min).add(1);
+        uint randomVar = uint(keccak256(abi.encodePacked(seed))).mod(diff);
+        randomVar = randomVar.add(min);
         return randomVar;
     }
 
@@ -32,7 +31,7 @@ library RandomUtil {
         // example: (seed, 10000, 100, 25) skips last two digits of seed and gets a 0-24 from from the new end
         // WARNING: distribution of results may not be even!
         // For even distribution use whole multiples of mod for the number of decimals at work (ie 2 digits with mod 4)
-        return ((seed % slice) / div) % mod;
+        return seed.mod(slice).div(div).mod(mod);
     }
 
     function combineSeeds(uint seed1, uint seed2) internal pure returns (uint) {
@@ -48,13 +47,13 @@ library RandomUtil {
     }
 
     function plusMinus10Percent(uint256 num, uint nonce) internal view returns (uint256) {
-        uint256 tenPercent = num / 10;
-        return num - tenPercent + (randomUnsafeMinMax(0, tenPercent * 2, nonce));
+        uint256 tenPercent = num.div(10);
+        return num.sub(tenPercent.add(randomUnsafeMinMax(0, tenPercent.mul(2), nonce)));
     }
 
     function plusMinus10PercentSeeded(uint256 num, uint256 seed) internal pure returns (uint256) {
-        uint256 tenPercent = num / 10;
-        return num - tenPercent + (randomSeededMinMax(0, tenPercent * 2, seed));
+        uint256 tenPercent = num.div(10);
+        return num.sub(tenPercent.add(randomSeededMinMax(0, tenPercent.mul(2), seed)));
     }
 
     function uint2str(uint _i) internal pure returns (string memory _uintAsString) {

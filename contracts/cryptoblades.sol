@@ -2,6 +2,7 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IRandoms.sol";
@@ -12,6 +13,8 @@ import "./util.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
+    using SafeMath for uint256;
+    using SafeMath for uint64;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
@@ -73,7 +76,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getMyCharacters() public view returns(uint256[] memory) {
         uint256[] memory tokens = new uint256[](characters.balanceOf(msg.sender));
-        for(uint256 i = 0; i < tokens.length; i++) {
+        for(uint256 i = 0; i < tokens.length; i = i.add(1)) {
             tokens[i] = characters.tokenOfOwnerByIndex(msg.sender, i);
         }
         return tokens;
@@ -81,7 +84,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getMyWeapons() public view returns(uint256[] memory) {
         uint256[] memory tokens = new uint256[](weapons.balanceOf(msg.sender));
-        for(uint256 i = 0; i < tokens.length; i++) {
+        for(uint256 i = 0; i < tokens.length; i = i.add(1)) {
             tokens[i] = weapons.tokenOfOwnerByIndex(msg.sender, i);
         }
         return tokens;
@@ -126,7 +129,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function getXpGainForFight(uint256 char, uint256 wep, uint32 target) internal view returns (uint16) {
         int128 basePowerDifference = ABDKMath64x64.divu(getMonsterPower(target), getPlayerPower(char, wep));
         // base XP gain is 16 for an equal fight
-        return uint16((basePowerDifference * 16).toUInt());
+        return uint16((basePowerDifference.mul(ABDKMath64x64.fromUInt(16))).toUInt());
     }
 
     function getPlayerPowerRoll(uint256 char, uint256 wep, uint8 monsterTrait, uint256 seed) internal view returns(uint24) {
@@ -192,7 +195,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 baseSeed = RandomUtil.combineSeeds(seedArray);
 
         uint32[4] memory targets;
-        for(uint i = 0; i < targets.length; i++) {
+        for(uint i = 0; i < targets.length; i = i.add(1)) {
             // we alter seed per-index or they would be all the same
             uint256 indexSeed = RandomUtil.randomSeeded(RandomUtil.combineSeeds(baseSeed, i));
             uint24 monsterPower = uint24(RandomUtil.plusMinus10PercentSeeded(playerPower, indexSeed));
@@ -265,7 +268,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function fillStamina(uint256 character) public isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
         require(characters.isStaminaFull(character) == false, "Your stamina is already full!");
         _payContract(msg.sender, refillStaminaFee);
-        characters.setStaminaTimestamp(character, characters.getStaminaTimestamp(character) - characters.getStaminaMaxWait());
+        characters.setStaminaTimestamp(character,
+            uint64(characters.getStaminaTimestamp(character).sub(characters.getStaminaMaxWait()))
+        );
     }
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
@@ -307,7 +312,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     modifier isTargetValid(uint256 character, uint256 weapon, uint32 target) {
         bool foundMatch = false;
         uint32[4] memory targets = getTargets(character, weapon);
-        for(uint i = 0; i < targets.length; i++) {
+        for(uint i = 0; i < targets.length; i = i.add(1)) {
             if(targets[i] == target) {
                 foundMatch = true;
             }
@@ -411,7 +416,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getCurrentHour() public view returns (uint256) {
         // "now" returns unix time since 1970 Jan 1, in seconds
-        return now / (1 hours);
+        return now.div(1 hours);
     }
 
 }
