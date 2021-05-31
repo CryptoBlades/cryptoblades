@@ -48,8 +48,12 @@ module.exports = async function (deployer, network) {
 
   const game = await deployProxy(CryptoBlades, [skillToken.address, charas.address, weps.address, priceOracle.address, randoms.address], { deployer });
 
-  await charas.setMain(game.address);
-  await weps.setMain(game.address);
+  const charas_GAME_ADMIN = await charas.GAME_ADMIN();
+  await charas.grantRole(charas_GAME_ADMIN, game.address);
+
+  const weps_GAME_ADMIN = await weps.GAME_ADMIN();
+  await weps.grantRole(weps_GAME_ADMIN, game.address);
+
   if(typeof randoms.setMain === 'function') {
     await randoms.setMain(game.address);
   }
