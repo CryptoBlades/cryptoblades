@@ -30,7 +30,7 @@ export default {
 
   computed: {
     ...mapState(['maxStamina']),
-    ...mapGetters(['ownCharacters', 'getCharacterName']),
+    ...mapGetters(['ownCharacters', 'getCharacterName', 'allStaminas']),
   },
 
   methods: {
@@ -47,8 +47,6 @@ export default {
         XP ${character.xp} / ${RequiredXp(character.level)}
         <br>
         Trait: ${wrapInSpan(CharacterTrait[character.trait], CharacterTrait[character.trait])}
-        <br>
-        Stamina ${this.getStaminaPoints(character.staminaTimestamp)} / ${this.maxStamina}
       `;
     },
     getCharacterArt,

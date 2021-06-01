@@ -6,8 +6,8 @@
           Weapons
           <button class="mint-weapon"
             @click="onForgeWeapon"
-            v-tooltip="'Create new weapon'">
-            <i class="fas fa-plus"></i>
+            v-tooltip="'Forge new weapon'">
+            Forge <i class="fas fa-plus"></i>
           </button>
         </h1>
 
@@ -129,14 +129,14 @@ export default {
 
 .mint-weapon {
   height: 2.5rem;
-  width: 2.5rem;
+  width: 6rem;
   font-size: 1.3rem;
   color: rgba(255, 255, 255, 0.6);
   background: none;
   border: none;
   border-radius: 0.1em;
   margin-right: 1em;
-
+  float: right;
 }
 
 .weapon-container {

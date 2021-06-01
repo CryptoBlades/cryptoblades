@@ -1,7 +1,7 @@
 <template>
-  <div v-tooltip="tooltipHtml">
+  <span class="hint" v-tooltip="tooltipHtml">
     <i class="far fa-question-circle hint" />
-  </div>
+  </span>
 </template>
 
 <script>

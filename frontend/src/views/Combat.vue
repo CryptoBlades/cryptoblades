@@ -4,43 +4,57 @@
       <h1 class="error" v-if="error !== null">Error: {{ error }}</h1>
 
       <div class="combat-hints">
-        <span class="fire-icon" /> {{ ">>" }}
-        <span class="earth-icon" /> {{ ">>" }}
-        <span class="lightning-icon" /> {{ ">>" }}
-        <span class="water-icon" /> {{ ">>" }}
+        <span class="fire-icon" /> »
+        <span class="earth-icon" /> »
+        <span class="lightning-icon" /> »
+        <span class="water-icon" /> »
         <span class="fire-icon" />
+
         <Hint text="The elements affect power:<br>
           <br>Character vs Enemy: bonus or penalty as shown above
           <br>Character and Weapon match gives bonus" />
       </div>
-      <div class="loading-container waiting" v-if="waitingResults" margin="auto">
-        <i class="fas fa-spinner fa-spin"></i>
-        Waiting for fight results...
+
+      <div class="stamina-warning" v-if="currentCharacterStamina < 20">
+        You need 20 stamina to do battle.
       </div>
-      <CombatResults v-if="resultsAvailable" :results="fightResults" />
-      <h1>Choose a weapon:<Hint text="Your weapon multiplies your power<br>
-        <br>+Stats determine the multiplier
-        <br>Stat element match with character gives greater bonus" /></h1>
-      <weapon-grid v-model="selectedWeaponId" />
 
-      <ul class="encounter-list" v-if="targets.length > 0">
-        <li class="encounter" v-for="(e, i) in targets" :key="i">
-          <img :src="getEnemyArt(e.power)" alt="Enemy">
-          <div class="encounter-element">
-            <span :class="getCharacterTrait(e.trait).toLowerCase()">{{getCharacterTrait(e.trait)}}</span>
-            <span :class="getCharacterTrait(e.trait).toLowerCase()+'-icon'" />
-          </div>
-          <big-button
-            class="encounter-button"
-            :mainText="`Fight!`"
-            :subText="`Power ${e.power}`"
-            v-tooltip="'Cost 20 stamina'"
-            @click="onClickEncounter(e)"
-          />
-        </li>
-      </ul>
+      <div v-if="currentCharacterStamina >= 20">
+        <div class="loading-container waiting" v-if="waitingResults" margin="auto">
+          <i class="fas fa-spinner fa-spin"></i>
+          Waiting for fight results...
+        </div>
 
-      <p v-if="isLoadingTargets">Loading...</p>
+        <CombatResults v-if="resultsAvailable" :results="fightResults" />
+
+        <div class="header-row">
+          <Hint text="Your weapon multiplies your power<br>
+            <br>+Stats determine the multiplier
+            <br>Stat element match with character gives greater bonus" />
+          <h1>Choose a weapon</h1>
+        </div>
+
+        <weapon-grid v-model="selectedWeaponId" />
+
+        <ul class="encounter-list" v-if="targets.length > 0">
+          <li class="encounter" v-for="(e, i) in targets" :key="i">
+            <img :src="getEnemyArt(e.power)" alt="Enemy">
+            <div class="encounter-element">
+              <span :class="getCharacterTrait(e.trait).toLowerCase()">{{getCharacterTrait(e.trait)}}</span>
+              <span :class="getCharacterTrait(e.trait).toLowerCase()+'-icon'" />
+            </div>
+            <big-button
+              class="encounter-button"
+              :mainText="`Fight!`"
+              :subText="`Power ${e.power}`"
+              v-tooltip="'Cost 20 stamina'"
+              @click="onClickEncounter(e)"
+            />
+          </li>
+        </ul>
+
+        <p v-if="isLoadingTargets">Loading...</p>
+      </div>
     </div>
 
     <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
@@ -83,6 +97,7 @@ export default {
       'getTargetsByCharacterIdAndWeaponId',
       'ownCharacters',
       'ownWeapons',
+      'currentCharacterStamina'
     ]),
 
     targets() {
@@ -198,11 +213,40 @@ export default {
   text-align: center;
   padding: 1em;
   font-size: 2em;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.combat-hints .hint {
+  margin-left: 10px;
 }
 
 .waiting {
   font-size: 2em;
   margin: auto;
   text-align: center;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+}
+
+.header-row h1 {
+  margin-left: 10px;
+  margin-bottom: 5px;
+}
+
+.header-row .hint {
+  font-size: 2em;
+}
+
+.stamina-warning {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  font-size: 2em;
 }
 </style>

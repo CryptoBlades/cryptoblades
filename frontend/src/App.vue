@@ -130,7 +130,7 @@ export default {
 <style>
 body {
   margin: 0;
-  background: #030a12;
+  background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
 }
 
 .no-margin {
