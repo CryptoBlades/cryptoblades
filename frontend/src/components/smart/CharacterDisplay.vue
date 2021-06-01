@@ -111,7 +111,7 @@ export default {
 
 .character-data-column .subtext {
   font-size: 0.9rem;
-  opacity: 90%;
+  opacity: 0.9;
 }
 
 .character-data-column .bar {
