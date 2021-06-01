@@ -240,7 +240,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function mintCharacter() public oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
-        require(characters.balanceOf(msg.sender) <= characterLimit,
+        require(characters.balanceOf(msg.sender) < characterLimit,
             string(abi.encodePacked("You can only have ",characterLimit," characters!")));
         _payContract(msg.sender, mintCharacterFee);
 
