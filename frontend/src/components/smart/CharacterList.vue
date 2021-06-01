@@ -38,7 +38,7 @@ export default {
       if(!character) return '';
 
       const wrapInSpan = (spanClass, text) => {
-        return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}">`;
+        return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;
       };
 
       return `
