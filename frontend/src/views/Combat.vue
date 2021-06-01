@@ -10,7 +10,7 @@
         <span class="water-icon" /> {{ ">>" }}
         <span class="fire-icon" />
         <Hint text="The elements affect power:<br>
-          <br>Weapon vs Enemy: bonus or penalty as shown above
+          <br>Character vs Enemy: bonus or penalty as shown above
           <br>Character and Weapon match gives bonus" />
       </div>
       <div class="loading-container waiting" v-if="waitingResults" margin="auto">
