@@ -24,11 +24,11 @@ export function getStat1Trait(statPattern: number): number {
 }
 
 export function getStat2Trait(statPattern: number): number {
-  return ((statPattern / 5) % 5);
+  return (Math.floor(statPattern / 5) % 5);
 }
 
 export function getStat3Trait(statPattern: number): number {
-  return (((statPattern / 5) / 5) % 5);
+  return (Math.floor(Math.floor(statPattern / 5) / 5) % 5);
 }
 
 export function statNumberToName(statNum: number): string {
@@ -71,14 +71,10 @@ export function weaponFromContract(id: number, data: string[]): IWeapon {
   const stat2Value = +stat2;
   const stat3Value = +stat3;
 
-  const pattern1 = getStatPatternFromProperties(stat1Value);
-  const stat1Type = getStat1Trait(pattern1);
-
-  const pattern2 = getStatPatternFromProperties(stat2Value);
-  const stat2Type = getStat1Trait(pattern2);
-
-  const pattern3 = getStatPatternFromProperties(stat3Value);
-  const stat3Type = getStat1Trait(pattern3);
+  const statPattern = getStatPatternFromProperties(+properties);
+  const stat1Type = getStat1Trait(statPattern);
+  const stat2Type = getStat2Trait(statPattern);
+  const stat3Type = getStat3Trait(statPattern);
 
   const traitNum = getWeaponTraitFromProperties(+properties);
 
