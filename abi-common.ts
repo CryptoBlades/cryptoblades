@@ -1,5 +1,11 @@
 export interface Web3JsCallOptions {
   from: string | null;
+  gasPrice?: string;
+  gas?: string;
+}
+
+export interface Web3JsSendOptions extends Web3JsCallOptions {
+  value?: string | number;
 }
 
 export interface Web3JsTransactionResult {
@@ -11,5 +17,5 @@ type BlockNumber = number | string | 'latest' | 'earliest' | 'pending';
 
 export interface Web3JsAbiCall<R> {
   call(opts: Web3JsCallOptions, defaultBlock?: BlockNumber): Promise<R>;
-  send(opts: Web3JsCallOptions): Promise<Web3JsTransactionResult>;
+  send(opts: Web3JsSendOptions): Promise<Web3JsTransactionResult>;
 }

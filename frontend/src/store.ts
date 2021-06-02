@@ -656,7 +656,7 @@ export function createStore(web3: Web3) {
             weaponId,
             targetString
           )
-          .send({ from: state.defaultAccount });
+          .send({ from: state.defaultAccount, gas: '500000' });
 
         await dispatch('fetchTargets', { characterId, weaponId });
 
