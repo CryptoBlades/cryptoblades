@@ -278,8 +278,10 @@ export default {
         transformModel(model);
         const modelMaterial = this.baseMaterial.clone();
         if(modelPath.includes('fur') || modelPath.includes('Fur')
-        || modelPath.includes('hair') || modelPath.includes('Hair'))
+        || modelPath.includes('hair') || modelPath.includes('Hair')) {
           modelMaterial.transparent = true;
+          modelMaterial.side = Three.DoubleSide;
+        }
 
         model.traverse(child => { if(child.isMesh) { child.material = modelMaterial; } });
 
