@@ -9,7 +9,11 @@ import createRouter from './router';
 
 import App from './App.vue';
 
-import { raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly } from './feature-flags';
+import {
+  raid as featureFlagRaid,
+  stakeOnly as featureFlagStakeOnly,
+  reforging as featureFlagReforging
+} from './feature-flags';
 
 let expectedNetworkId: number | null = null;
 if(process.env.VUE_APP_EXPECTED_NETWORK_ID) {
@@ -33,7 +37,8 @@ new Vue({
   router, store,
   provide: {
     web3,
-    featureFlagStakeOnly, featureFlagRaid,
+    // maybe feature flags should just reference the feature-flags.ts module directly?
+    featureFlagStakeOnly, featureFlagRaid, featureFlagReforging,
     expectedNetworkId, expectedNetworkName
   }
 }).$mount('#app');

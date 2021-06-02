@@ -13,7 +13,7 @@
 
         <weapon-grid v-model="reforgeWeaponId" />
 
-        <div class="button-row" v-if="reforgeWeaponId">
+        <div class="button-row" v-if="featureFlagReforging && reforgeWeaponId">
           <big-button
             class="button"
             mainText="Reforge Sword"
@@ -24,7 +24,7 @@
       </div>
 
       <div class="sub-container">
-        <div v-if="showReforge">
+        <div v-if="featureFlagReforging && showReforge">
           <h1>Choose Weapon to burn</h1>
           <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" />
 
@@ -60,6 +60,8 @@ import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
 import { mapActions, mapGetters } from 'vuex';
 
+import { reforging as featureFlagReforging } from '../feature-flags';
+
 export default {
   data() {
     return {
@@ -72,7 +74,13 @@ export default {
   computed: {
     ...mapGetters(['ownWeapons']),
 
+    featureFlagReforging() {
+      return featureFlagReforging;
+    },
+
     canReforge() {
+      if(!featureFlagReforging) return false;
+
       return (
         this.reforgeWeaponId === null ||
         this.burnWeaponId === null ||
@@ -100,6 +108,8 @@ export default {
     },
 
     async onReforgeWeapon() {
+      if(!featureFlagReforging) return;
+
       try {
         await this.reforgeWeapon({
           burnWeaponId: this.burnWeaponId,

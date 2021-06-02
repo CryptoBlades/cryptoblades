@@ -14,7 +14,11 @@ import { allStakeTypes, Contracts, IStakeOverviewState, IStakeState, IState, IWe
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee } from './contract-call-utils';
 
-import { stakeOnly as featureFlagStakeOnly, raid as featureFlagRaid } from './feature-flags';
+import {
+  raid as featureFlagRaid,
+  stakeOnly as featureFlagStakeOnly,
+  reforging as featureFlagReforging
+} from './feature-flags';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -601,7 +605,7 @@ export function createStore(web3: Web3) {
       },
 
       async reforgeWeapon({ state, dispatch }, { burnWeaponId, reforgeWeaponId }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !featureFlagReforging) return;
 
         await approveFee(
           state.contracts.CryptoBlades!,
