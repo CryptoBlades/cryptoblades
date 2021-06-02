@@ -112,7 +112,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // like: if (win) { xpPool[user] += xp; } else { xpPool[user] += 0; }
         uint16 xp = 0;
         int128 tokens = 0;
-        
+
         if(playerRoll >= monsterRoll) {
             xp = getXpGainForFight(char, wep, target);
             tokens = getTokenGainForFight(target);
@@ -371,8 +371,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _payPlayerConverted(address playerAddress, uint256 convertedAmount) internal {
-        skillToken.approve(address(this), convertedAmount);
-        skillToken.transferFrom(address(this), playerAddress, convertedAmount);
+        skillToken.transfer(playerAddress, convertedAmount);
     }
 
     function _approveContractCharacterFor(uint256 characterID, address playerAddress) internal {
