@@ -229,15 +229,15 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getStat1Trait(uint8 statPattern) public pure returns (uint8) {
-        return uint8(uint256(statPattern).mod(5)); // 0-3 regular traits, 4 = traitless (PWR)
+        return uint8(uint256(statPattern) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getStat2Trait(uint8 statPattern) public pure returns (uint8) {
-        return uint8(SafeMath.div(statPattern, 5).mod(5)); // 0-3 regular traits, 4 = traitless (PWR)
+        return uint8(SafeMath.div(statPattern, 5) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getStat3Trait(uint8 statPattern) public pure returns (uint8) {
-        return uint8(SafeMath.div(statPattern, 25).mod(5)); // 0-3 regular traits, 4 = traitless (PWR)
+        return uint8(SafeMath.div(statPattern, 25) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getLevel(uint256 id) public view returns (uint8) {

@@ -100,19 +100,26 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function performFight(address user, uint256 char, uint256 wep, uint32 target) private {
-        // avg xp gain from a fight is 9 xp
-
         require(characters.drainStamina(char, staminaCostFight), "Not enough stamina!");
 
         uint256 seed = randoms.getRandomSeed(user);
         uint24 playerRoll = getPlayerPowerRoll(char, wep, uint8((target >> 24) & 0xFF)/*monster trait*/, seed);
         uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target), RandomUtil.combineSeeds(seed,1));
 
+        // TODO: change this to support payout requests for both xp and skill.
+        // To combat gas differences in win/loss:
+        // Probably wanna calculate xp and tokens for lost fights too. then just increment 0 instead of the var
+        // like: if (win) { xpPool[user] += xp; } else { xpPool[user] += 0; }
+        uint16 xp = 0;
+        int128 tokens = 0;
+        
         if(playerRoll >= monsterRoll) {
-            characters.gainXp(char, getXpGainForFight(char, wep, target));
-            _payPlayer(characters.ownerOf(char), getTokenGainForFight(target));
+            xp = getXpGainForFight(char, wep, target);
+            tokens = getTokenGainForFight(target);
+            characters.gainXp(char, xp);
+            _payPlayer(characters.ownerOf(char), tokens);
         }
-        emit FightOutcome(characters.ownerOf(char), char, wep, target, playerRoll, monsterRoll, getXpGainForFight(char, wep, target), usdToSkill(getTokenGainForFight(target)));
+        emit FightOutcome(characters.ownerOf(char), char, wep, target, playerRoll, monsterRoll, xp, usdToSkill(tokens));
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
@@ -187,20 +194,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // targets expire on the hour
         uint24 playerPower = getPlayerPower(char, wep);
 
-        uint[] memory seedArray = new uint[](5);
-        seedArray[0] = char;
-        seedArray[1] = playerPower;
-        seedArray[2] = characters.getXp(char);
-        seedArray[3] = characters.getStaminaTimestamp(char);
-        seedArray[4] = getCurrentHour();
-        uint256 baseSeed = RandomUtil.combineSeeds(seedArray);
+        uint256 baseSeed = RandomUtil.combineSeeds(characters.getStaminaTimestamp(char), getCurrentHour());
 
         uint32[4] memory targets;
         for(uint i = 0; i < targets.length; i++) {
             // we alter seed per-index or they would be all the same
-            uint256 indexSeed = RandomUtil.randomSeeded(RandomUtil.combineSeeds(baseSeed, i));
+            uint256 indexSeed = RandomUtil.combineSeeds(baseSeed, i);
             uint24 monsterPower = uint24(RandomUtil.plusMinus10PercentSeeded(playerPower, indexSeed));
-            uint256 monsterTrait = RandomUtil.randomSeededMinMax(0,3, indexSeed);
+            uint256 monsterTrait = indexSeed % 4;
             targets[i] = monsterPower | (uint32(monsterTrait) << 24);
         }
 
