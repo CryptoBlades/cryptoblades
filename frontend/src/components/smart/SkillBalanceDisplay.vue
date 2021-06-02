@@ -1,10 +1,6 @@
 <template>
   <div class="skill-balance-display">
     <div class="balance-container"><span class="bold">Balance</span>: <span class="balance">{{ formattedSkillBalance }}</span></div>
-
-    <button v-if="!featureFlagStakeOnly" class="add-button" @click="onAddMoreSkill">
-      <i class="fas fa-plus-circle"></i>
-    </button>
   </div>
 </template>
 

@@ -6,10 +6,11 @@
           <h1>
             Characters
             <button
+              v-if="ownCharacters.length < 4"
               class="mint-character"
               @click="onMintCharacter"
-              v-tooltip="'Create new character'">
-              <i class="fas fa-plus"></i>
+              v-tooltip="'Recruit new character'">
+              Recruit <i class="fas fa-plus"></i>
             </button>
           </h1>
 
@@ -140,7 +141,7 @@ export default {
 
 .character-header-wrapper .mint-character {
   height: 2.5rem;
-  width: 2.5rem;
+  width: 6rem;
   font-size: 1.3rem;
   color: rgba(255, 255, 255, 0.6);
   background: none;

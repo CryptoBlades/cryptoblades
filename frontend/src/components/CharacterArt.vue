@@ -3,6 +3,10 @@
     class="character-art"
     ref="el">
 
+    <div class="trait">
+      <span :class="trait.toLowerCase() + '-icon'"></span>
+    </div>
+
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
     </div>
@@ -19,6 +23,7 @@ import arms from '../assets/characterWardrobe_arms.json';
 import torsos from '../assets/characterWardrobe_torso.json';
 import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
+import { CharacterTrait } from '../interfaces';
 
 const headCount = 13;
 const armsCount = 45;
@@ -57,6 +62,7 @@ export default {
       modelLoader: null,
       textureLoader: null,
       body: null,
+      trait: CharacterTrait[this.character.trait]
     };
   },
 
@@ -371,18 +377,18 @@ export default {
 }
 
 .loading-container {
-  height: 96px;
-  width: 96px;
   position: absolute;
-  top: 0;
-}
-
-.loading-container {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-content: center;
+  width: 100%;
+  padding-top: 50%;
   font-size: 2rem;
   z-index: 541;
+}
+
+.trait {
+  float: right;
 }
 
 </style>

@@ -175,6 +175,10 @@ export function createStore(web3: Web3) {
         return state.currentCharacterId === null ? 0 : state.characterStaminas[state.currentCharacterId];
       },
 
+      allStaminas(state) {
+        return state.characterStaminas;
+      },
+
       stakeState(state) {
         return (stakeType: StakeType): IStakeState => state.staking[stakeType];
       },
