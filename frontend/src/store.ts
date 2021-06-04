@@ -160,7 +160,7 @@ export function createStore(web3: Web3) {
       ownCharacters(state) {
         const characters = state.ownedCharacterIds.map((id) => state.characters[id]);
         if (characters.some((w) => w === null)) return [];
-        return characters;
+        return characters.filter(Boolean);
       },
 
       ownWeapons(state) {

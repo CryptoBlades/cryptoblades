@@ -330,6 +330,11 @@ export default {
     }
   },
   mounted() {
+    if(localStorage.getItem('graphics')) {
+      this.allLoaded = true;
+      return;
+    }
+
     this.init();
     this.animate();
   }
