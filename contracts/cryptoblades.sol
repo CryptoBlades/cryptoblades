@@ -159,7 +159,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint24(
             ABDKMath64x64.fromUInt(characters.getPower(char))
                 .mul(weapons.getPowerMultiplier(wep))
-                .toUInt()
+                .toUInt().add(weapons.getBonusPower(wep))
         );
     }
 
@@ -167,10 +167,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // accounts for trait matches
         return uint24(
             ABDKMath64x64.fromUInt(characters.getPower(char))
-                .mul(
-                    weapons.getPowerMultiplierForTrait(wep, characters.getTrait(char))
-                )
-                .toUInt()
+                .mul(weapons.getPowerMultiplierForTrait(wep, characters.getTrait(char)))
+                .toUInt().add(weapons.getBonusPower(wep))
         );
     }
 
@@ -283,13 +281,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
-            oncePerBlock(msg.sender) isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
-
-        require(weapons.getLevel(reforgeID) < 127, "Weapons cannot be improved beyond level 128!");
+            isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
         _payContract(msg.sender, reforgeWeaponFee);
-
-        uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.reforge(reforgeID, burnID, seed);
+        weapons.reforge(reforgeID, burnID);
     }
 
     function migrateRandoms(IRandoms _newRandoms) external {

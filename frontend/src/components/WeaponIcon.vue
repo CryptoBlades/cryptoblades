@@ -62,9 +62,10 @@ export default {
         ID: ${this.weapon.id}
         <br>
         ${Array(this.weapon.stars + 1).fill('★').join('')}
-        <br>
-        Level ${this.weapon.level + 1}
       `;
+      if(this.weapon.level > 0) {
+        ttHtml += `<br>Level ${this.weapon.level + 1}`;
+      }
 
       if(this.weapon.element) {
         ttHtml += `<br>Element: ${wrapInSpan(this.weapon.element, this.weapon.element)}`;
@@ -80,6 +81,22 @@ export default {
 
       if(this.weapon.stat3Value) {
         ttHtml += `<br>${wrapInSpan(this.weapon.stat3, this.weapon.stat3)}: +${this.weapon.stat3Value}`;
+      }
+
+      if(this.weapon.lowStarBurnPoints > 0) {
+        ttHtml += `<br>LB: ${this.weapon.lowStarBurnPoints}/100`;
+      }
+
+      if(this.weapon.fourStarBurnPoints > 0) {
+        ttHtml += `<br>4B: ${this.weapon.fourStarBurnPoints}/25`;
+      }
+
+      if(this.weapon.fiveStarBurnPoints > 0) {
+        ttHtml += `<br>5B: ${this.weapon.fiveStarBurnPoints}/10`;
+      }
+
+      if(this.weapon.bonusPower > 0) {
+        ttHtml += `<br>Bonus power: ${this.weapon.bonusPower}`;
       }
 
       return ttHtml;

@@ -615,15 +615,6 @@ export function createStore(web3: Web3) {
           cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee()
         );
 
-        await state.contracts.Weapons!.methods
-          .approve(
-            state.contracts.CryptoBlades!.options.address,
-            burnWeaponId
-          )
-          .send({
-            from: state.defaultAccount,
-          });
-
         await state.contracts.CryptoBlades!.methods
           .reforgeWeapon(
             reforgeWeaponId,

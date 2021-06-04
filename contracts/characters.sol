@@ -133,7 +133,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         if(char.level < 255) {
             uint newXp = char.xp.add(xp);
             uint requiredToLevel = getRequiredXpForNextLevel(char.level); // technically next level
-            while(newXp > requiredToLevel) {
+            while(newXp >= requiredToLevel) {
                 newXp = newXp.sub(requiredToLevel);
                 char.level = uint8(char.level.add(1));
                 emit LevelUp(ownerOf(id), id, char.level);

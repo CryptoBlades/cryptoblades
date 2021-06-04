@@ -66,6 +66,8 @@ export function weaponFromContract(id: number, data: string[]): IWeapon {
   const crossguard = data[6];
   const grip = data[7];
   const pommel = data[8];
+  const burnPoints = +data[9];
+  const bonusPower = +data[10];
 
   const stat1Value = +stat1;
   const stat2Value = +stat2;
@@ -78,6 +80,10 @@ export function weaponFromContract(id: number, data: string[]): IWeapon {
 
   const traitNum = getWeaponTraitFromProperties(+properties);
 
+  const lowStarBurnPoints = burnPoints & 0xff;
+  const fourStarBurnPoints = (burnPoints >> 8) & 0xff;
+  const fiveStarBurnPoints = (burnPoints >> 16) & 0xff;
+
   const stars = (+properties) & 0x7;
   return {
     id, properties,
@@ -87,7 +93,11 @@ export function weaponFromContract(id: number, data: string[]): IWeapon {
     stat3: statNumberToName(stat3Type), stat3Value,
     level,
     blade, crossguard, grip, pommel,
-    stars
+    stars,
+    lowStarBurnPoints,
+    fourStarBurnPoints,
+    fiveStarBurnPoints,
+    bonusPower
   };
 }
 

@@ -9,6 +9,7 @@
     "start": "npm run serve"
   },
   "dependencies": {
+    "@types/three": "^0.129.0",
     "axios": "^0.21.1",
     "bignumber.js": "^9.0.1",
     "core-js": "^3.6.5",

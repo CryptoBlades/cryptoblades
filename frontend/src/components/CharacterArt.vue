@@ -325,14 +325,14 @@ export default {
         }
 
         // METALLIC/ROUGHNESS MAP
-        if(modelData.specular !== null && modelData.specular !== undefined) {
+        if(modelData.spec !== null && modelData.spec !== undefined) {
           this.loadCountTotal++;
-          this.textureLoader.load(modelData.specular , texture => {
+          this.textureLoader.load(modelData.spec , texture => {
             modelMaterial.roughnessMap = texture;
             modelMaterial.metalnessMap = texture;
             this.loadingProgress();
           }, undefined, function ( error ) {
-            console.error('SPEC TEXTURE ' + modelData.specular + ' : ' + error );
+            console.error('SPEC TEXTURE ' + modelData.spec + ' : ' + error );
           } );
         }
 

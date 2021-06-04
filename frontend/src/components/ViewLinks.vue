@@ -25,7 +25,7 @@
   </ul>
 </template>
 
-<script lang="ts">
+<script>
 export default {
   inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
 

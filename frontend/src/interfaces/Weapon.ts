@@ -29,4 +29,8 @@ export interface IWeapon {
   grip: string;
   pommel: string;
   stars: number;
+  lowStarBurnPoints: number;
+  fourStarBurnPoints: number;
+  fiveStarBurnPoints: number;
+  bonusPower: number;
 }
