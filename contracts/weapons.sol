@@ -19,6 +19,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    function migrateTo_e55d8c5() public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         burnPointMultiplier = 2;
         lowStarBurnPowerPerPoint = 15;
@@ -58,10 +62,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     Weapon[] private tokens;
     WeaponCosmetics[] private cosmetics;
 
-    uint burnPointMultiplier; // 2
-    uint lowStarBurnPowerPerPoint; // 15
-    uint fourStarBurnPowerPerPoint; // 30
-    uint fiveStarBurnPowerPerPoint; // 60
+    uint public burnPointMultiplier; // 2
+    uint public lowStarBurnPowerPerPoint; // 15
+    uint public fourStarBurnPowerPerPoint; // 30
+    uint public fiveStarBurnPowerPerPoint; // 60
 
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
@@ -397,29 +401,14 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function getBurnPointMultiplier() public view returns (uint) {
-        return burnPointMultiplier;
-    }
     function setBurnPointMultiplier(uint256 multiplier) public restricted {
         burnPointMultiplier = multiplier;
-    }
-
-    function getLowStarBurnPowerPerPoint() public view returns (uint) {
-        return lowStarBurnPowerPerPoint;
     }
     function setLowStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
         lowStarBurnPowerPerPoint = powerPerBurnPoint;
     }
-
-    function getFourStarBurnPowerPerPoint() public view returns (uint) {
-        return fourStarBurnPowerPerPoint;
-    }
     function setFourStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
         fourStarBurnPowerPerPoint = powerPerBurnPoint;
-    }
-
-    function getFiveStarBurnPowerPerPoint() public view returns (uint) {
-        return fiveStarBurnPowerPerPoint;
     }
     function setFiveStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
         fiveStarBurnPowerPerPoint = powerPerBurnPoint;
