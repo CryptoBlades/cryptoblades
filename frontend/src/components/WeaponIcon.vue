@@ -8,6 +8,11 @@
   >
 
     <div class="glow-container" :class="['glow-' + (weapon.stars || 0)]"></div>
+
+    <div class="trait">
+      <span :class="weapon.element.toLowerCase() + '-icon'"></span>
+    </div>
+
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
     </div>
@@ -106,7 +111,7 @@ export default {
       gripNormalTexture: null,
       gripAOTexture: null,
       pommelNormalTexture: null,
-      pommelAOTexture: null,
+      pommelAOTexture: null
     };
   },
 
@@ -358,6 +363,12 @@ export default {
   justify-content: center;
   font-size: 2rem;
   z-index: 541;
+}
+
+.trait {
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 
 .glow-0 {
