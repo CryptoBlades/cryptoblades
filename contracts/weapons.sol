@@ -49,6 +49,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 stat2;
         uint16 stat3;
         uint8 level; // separate from stat1 because stat1 will have a pre-roll
+    }
+
+    struct WeaponBurnPoints {
         uint8 lowStarBurnPoints;
         uint8 fourStarBurnPoints;
         uint8 fiveStarBurnPoints;
@@ -61,6 +64,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     Weapon[] private tokens;
     WeaponCosmetics[] private cosmetics;
+    mapping(uint256 => WeaponBurnPoints) burnPoints;
 
     uint public burnPointMultiplier; // 2
     uint public lowStarBurnPowerPerPoint; // 15
@@ -75,21 +79,40 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _;
     }
 
-    function get(uint256 id) public view returns (uint16, uint16, uint16, uint16, uint8, uint8, uint8, uint8, uint8,
-        uint24, // burn points.. got stack limits so i put them together
-        uint24 // bonus power
-    ) {
+    function getStats(uint256 id) internal view
+        returns (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level) {
+
         Weapon memory w = tokens[id];
+        return (w.properties, w.stat1, w.stat2, w.stat3, w.level);
+    }
+
+    function getCosmetics(uint256 id) internal view
+        returns (uint8 _blade, uint8 _crossguard, uint8 _grip, uint8 _pommel) {
+
         WeaponCosmetics memory wc = cosmetics[id];
-        uint24 bonusPower = getBonusPower(id);
-        return (w.properties, w.stat1, w.stat2, w.stat3, w.level,
-            getRandomCosmetic(wc.seed, 1, 24),
-            getRandomCosmetic(wc.seed, 2, 24),
-            getRandomCosmetic(wc.seed, 3, 24),
-            getRandomCosmetic(wc.seed, 4, 24),
-            uint24(w.lowStarBurnPoints) | (uint24(w.fourStarBurnPoints) << 8) | (uint24(w.fiveStarBurnPoints) << 16),
-            bonusPower
-        );
+        _blade = getRandomCosmetic(wc.seed, 1, 24);
+        _crossguard = getRandomCosmetic(wc.seed, 2, 24);
+        _grip = getRandomCosmetic(wc.seed, 3, 24);
+        _pommel = getRandomCosmetic(wc.seed, 4, 24);
+    }
+
+    function get(uint256 id) public view
+        returns (
+            uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,
+            uint8 _blade, uint8 _crossguard, uint8 _grip, uint8 _pommel,
+            uint24 _burnPoints, // burn points.. got stack limits so i put them together
+            uint24 _bonusPower // bonus power
+    ) {
+        (_properties, _stat1, _stat2, _stat3, _level) = getStats(id);
+        (_blade, _crossguard, _grip, _pommel) = getCosmetics(id);
+
+        WeaponBurnPoints memory wbp = burnPoints[id];
+        _burnPoints =
+            uint24(wbp.lowStarBurnPoints) |
+            (uint24(wbp.fourStarBurnPoints) << 8) |
+            (uint24(wbp.fiveStarBurnPoints) << 16);
+
+        _bonusPower = getBonusPower(id);
     }
 
     function mint(address minter, uint256 seed) public restricted returns(uint256) {
@@ -118,7 +141,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     ) public restricted returns(uint256) {
 
         uint256 tokenID = tokens.length;
-        tokens.push(Weapon(properties, stat1, stat2, stat3, 0, 0, 0, 0));
+        tokens.push(Weapon(properties, stat1, stat2, stat3, 0));
         cosmetics.push(WeaponCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);
         emit NewWeapon(tokenID, minter);
@@ -328,50 +351,50 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function reforge(uint256 reforgeID, uint256 burnID) public restricted {
-        Weapon storage wep = tokens[reforgeID];
+        WeaponBurnPoints storage wbp = burnPoints[reforgeID];
         Weapon storage burning = tokens[burnID];
 
         if(getStarsFromProperties(burning.properties) == 0) { // 1 star
-            require(wep.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wep.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wep.lowStarBurnPoints < 10) ? 2 : 1)
-                .add(wep.lowStarBurnPoints));
-            if(wep.lowStarBurnPoints > 100)
-                wep.lowStarBurnPoints = 100;
+            require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
+            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 10) ? 2 : 1)
+                .add(wbp.lowStarBurnPoints));
+            if(wbp.lowStarBurnPoints > 100)
+                wbp.lowStarBurnPoints = 100;
         }
         else if(getStarsFromProperties(burning.properties) == 1) { // 2 star
-            require(wep.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wep.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wep.lowStarBurnPoints < 30) ? 2 : 1)
-                .add(wep.lowStarBurnPoints));
-            if(wep.lowStarBurnPoints > 100)
-                wep.lowStarBurnPoints = 100;
+            require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
+            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 30) ? 2 : 1)
+                .add(wbp.lowStarBurnPoints));
+            if(wbp.lowStarBurnPoints > 100)
+                wbp.lowStarBurnPoints = 100;
         }
         else if(getStarsFromProperties(burning.properties) == 2) { // 3 star
-            require(wep.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wep.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wep.lowStarBurnPoints < 50) ? 4 : 2)
-                .add(wep.lowStarBurnPoints));
-            if(wep.lowStarBurnPoints > 100)
-                wep.lowStarBurnPoints = 100;
+            require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
+            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 50) ? 4 : 2)
+                .add(wbp.lowStarBurnPoints));
+            if(wbp.lowStarBurnPoints > 100)
+                wbp.lowStarBurnPoints = 100;
         }
         else if(getStarsFromProperties(burning.properties) == 3) { // 4 star
-            require(wep.fourStarBurnPoints < 25, "Four star burn points are capped");
-            wep.fourStarBurnPoints = uint8(burnPointMultiplier.add(wep.fourStarBurnPoints));
-            if(wep.fourStarBurnPoints > 25)
-                wep.fourStarBurnPoints = 25;
+            require(wbp.fourStarBurnPoints < 25, "Four star burn points are capped");
+            wbp.fourStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fourStarBurnPoints));
+            if(wbp.fourStarBurnPoints > 25)
+                wbp.fourStarBurnPoints = 25;
         }
         else if(getStarsFromProperties(burning.properties) == 4) { // 5 star
-            require(wep.fiveStarBurnPoints < 10, "Five star burn points are capped");
-            wep.fiveStarBurnPoints = uint8(burnPointMultiplier.add(wep.fiveStarBurnPoints));
-            if(wep.fiveStarBurnPoints > 10)
-                wep.fiveStarBurnPoints = 10;
+            require(wbp.fiveStarBurnPoints < 10, "Five star burn points are capped");
+            wbp.fiveStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fiveStarBurnPoints));
+            if(wbp.fiveStarBurnPoints > 10)
+                wbp.fiveStarBurnPoints = 10;
         }
         _burn(burnID);
         emit Reforged(
             ownerOf(reforgeID),
             reforgeID,
             burnID,
-            wep.lowStarBurnPoints,
-            wep.fourStarBurnPoints,
-            wep.fiveStarBurnPoints
+            wbp.lowStarBurnPoints,
+            wbp.fourStarBurnPoints,
+            wbp.fiveStarBurnPoints
         );
     }
 
@@ -394,9 +417,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function getBonusPower(uint256 id) public view returns (uint24) {
         Weapon storage wep = tokens[id];
-        return uint24(lowStarBurnPowerPerPoint.mul(wep.lowStarBurnPoints)
-            .add(fourStarBurnPowerPerPoint.mul(wep.fourStarBurnPoints))
-            .add(fiveStarBurnPowerPerPoint.mul(wep.fiveStarBurnPoints))
+        WeaponBurnPoints storage wbp = burnPoints[id];
+        return uint24(lowStarBurnPowerPerPoint.mul(wbp.lowStarBurnPoints)
+            .add(fourStarBurnPowerPerPoint.mul(wbp.fourStarBurnPoints))
+            .add(fiveStarBurnPowerPerPoint.mul(wbp.fiveStarBurnPoints))
             .add(uint256(15).mul(wep.level)) // TEMP: UNTIL WE IMPLEMENT WEAPON LEVELS
         );
     }
