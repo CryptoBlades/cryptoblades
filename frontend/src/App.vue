@@ -222,6 +222,18 @@ button {
   height: 1em;
 }
 
+.loading-container {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  width: 100%;
+  padding-top: 50%;
+  font-size: 2rem;
+  z-index: 541;
+  color: #be9a2c;
+}
+
 </style>
 <style scoped>
 .app {

@@ -12,11 +12,15 @@
         v-if="!isLoadingCharacter"
         :character="currentCharacter"
         :portrait="true" />
-      <span v-if="isLoadingCharacter">Loading...</span>
+      <span v-if="isLoadingCharacter" style="position: relative">
+        <div class="loading-container">
+          <i class="fas fa-spinner fa-spin"></i>
+        </div>
+      </span>
     </div>
 
     <div class="character-data-column dark-bg-text">
-      <span v-if="!isLoadingCharacter" class="name bold">{{
+      <span v-if="!isLoadingCharacter" class="name bold"><span :class="traits[currentCharacter.trait].toLowerCase() + '-icon'"></span> {{
         getCharacterName(currentCharacterId)
       }}</span>
       <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
@@ -42,7 +46,7 @@ import { mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import SmallBar from '../SmallBar.vue';
 import CharacterArt from '../CharacterArt.vue';
-import { CharacterPower } from '../../interfaces';
+import { CharacterPower, CharacterTrait } from '../../interfaces';
 import { RequiredXp } from '../../interfaces';
 
 export default {
@@ -61,6 +65,12 @@ export default {
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
+  },
+
+  data() {
+    return {
+      traits: CharacterTrait
+    };
   },
 
   methods: {

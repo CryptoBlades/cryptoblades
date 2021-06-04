@@ -3,7 +3,7 @@
     class="character-art"
     ref="el">
 
-    <div class="trait">
+    <div class="trait" v-if="!portrait">
       <span :class="trait.toLowerCase() + '-icon'"></span>
     </div>
 
@@ -376,17 +376,6 @@ export default {
   height: 100%;
 
   position: relative;
-}
-
-.loading-container {
-  position: absolute;
-  display: flex;
-  justify-content: center;
-  align-content: center;
-  width: 100%;
-  padding-top: 50%;
-  font-size: 2rem;
-  z-index: 541;
 }
 
 .trait {
