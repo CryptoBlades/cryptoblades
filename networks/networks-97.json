@@ -401,7 +401,7 @@
     },
     "links": {},
     "address": "0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
-    "transactionHash": "0x96d4011e92af6d82dcbb30ac9a7584f1df666413cdaf3c80c7a8d9848bdc13ff"
+    "transactionHash": "0x0b3a6d37ae28a040abdfddc97cc734e1852a0e0b7a878cea2b14c09bf9dbc38f"
   },
   "build/contracts/CryptoBlades.json": {
     "events": {
@@ -587,7 +587,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0xaf3eb79c16f1386601292808112424b130df16ac820bdba9b80d56721467ef32"
+    "transactionHash": "0x26c51d40cdfea807a2f36f5b5c70883519b8803a94d9c7a538f764b8c1adcaed"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -1011,6 +1011,6 @@
     },
     "links": {},
     "address": "0x672E4CddA311b3BfAd1e09313241C62B4eFF5782",
-    "transactionHash": "0xfa8fa88f4e63f088ab620a896b2ff6a979aaff8f72125ee0fb86dd76a87c9949"
+    "transactionHash": "0xfb9b06ac15dff1733f2de4e626762d5386e45dbbf45e0ed2cfbafd05d7143307"
   }
 }
