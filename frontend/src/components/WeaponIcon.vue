@@ -54,6 +54,8 @@ export default {
       };
 
       let ttHtml = `
+        ID: ${this.weapon.id}
+        <br>
         ${Array(this.weapon.stars + 1).fill('★').join('')}
         <br>
         Level ${this.weapon.level + 1}

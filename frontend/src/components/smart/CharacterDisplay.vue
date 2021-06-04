@@ -2,7 +2,6 @@
   <div class="root main-font">
     <div
       class="character-portrait"
-      :title="JSON.stringify(currentCharacter, null, '  ')"
     >
       <!--img
         v-if="!isLoadingCharacter"

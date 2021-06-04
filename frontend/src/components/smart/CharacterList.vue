@@ -42,6 +42,8 @@ export default {
       };
 
       return `
+        ID: ${character.id}
+        <br>
         Level ${character.level + 1}
         <br>
         XP ${character.xp} / ${RequiredXp(character.level)}
