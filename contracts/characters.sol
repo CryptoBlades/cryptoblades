@@ -186,4 +186,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function getStaminaMaxWait() public pure returns (uint64) {
         return uint64(maxStamina.mul(secondsPerStamina));
     }
+
+    function _beforeTokenTransfer(address /* from */, address to, uint256 /* tokenId */) internal override {
+        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD)) {
+            require(balanceOf(to) < 4, "Recv has too many characters");
+        }
+    }
 }

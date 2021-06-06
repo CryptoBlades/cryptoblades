@@ -92,6 +92,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target) external
+            doesNotHaveMoreThanMaxCharacters
             oncePerBlock(msg.sender)
             isCharacterOwner(char)
             isWeaponOwner(wep)
@@ -241,7 +242,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return false;
     }
 
-    function mintCharacter() public oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
+    function mintCharacter() public doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
         require(characters.balanceOf(msg.sender) < characterLimit,
             string(abi.encodePacked("You can only have ",characterLimit," characters!")));
         _payContract(msg.sender, mintCharacterFee);
@@ -261,14 +262,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeapon() public oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
+    function mintWeapon() public doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
         _payContract(msg.sender, mintWeaponFee);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         weapons.mint(msg.sender, seed);
     }
 
-    function fillStamina(uint256 character) public isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
+    function fillStamina(uint256 character) public doesNotHaveMoreThanMaxCharacters isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
         require(characters.isStaminaFull(character) == false, "Your stamina is already full!");
         _payContract(msg.sender, refillStaminaFee);
         characters.setStaminaTimestamp(character,
@@ -280,6 +281,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
+            doesNotHaveMoreThanMaxCharacters
             isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
         _payContract(msg.sender, reforgeWeaponFee);
         weapons.reforge(reforgeID, burnID);
@@ -308,6 +310,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     modifier isCharacterOwner(uint256 character) {
         require(characters.ownerOf(character) == msg.sender, "Not the character owner");
+        _;
+    }
+
+    modifier doesNotHaveMoreThanMaxCharacters() {
+        require(characters.balanceOf(msg.sender) <= characterLimit, "Too many characters owned");
         _;
     }
 

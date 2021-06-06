@@ -1,11 +1,13 @@
 const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
+const _ = require('lodash');
 
 const SkillToken = artifacts.require('SkillToken');
 const CryptoBlades = artifacts.require('CryptoBlades');
 const Characters = artifacts.require('Characters');
+Characters.numberFormat = 'String';
 const Weapons = artifacts.require('Weapons');
 const DummyRandoms = artifacts.require('DummyRandoms');
-const DummyPriceService = artifacts.require('DummyPriceService');
+const BasicPriceOracle = artifacts.require('BasicPriceOracle');
 
 function assertEventEmitted(events, eventName, ...args) {
   assert.isTrue(events.some(log => {
@@ -30,14 +32,16 @@ contract('Characters', accounts => {
 
     await characters.initialize();
 
-    await characters.setMain(accounts[0]);
+    const GAME_ADMIN = await characters.GAME_ADMIN();
+
+    await characters.grantRole(GAME_ADMIN, accounts[0]);
   });
 
   describe('getRequiredXpForLevel', () => {
     it('should work', async () => {
       const requiredXp = await characters.getRequiredXpForNextLevel(3);
 
-      assert.strictEqual(requiredXp.toNumber(), 19);
+      assert.strictEqual(requiredXp, '19');
     });
   });
 
@@ -58,6 +62,26 @@ contract('Characters', accounts => {
       assert.strictEqual(xp.toString(), '22');
     });
   });
+
+  describe('transfer', () => {
+    it('disallows recipient to have more than 4 characters', async () => {
+      await Promise.all(_.range(4).map(async idx => {
+        const { tx } = await characters.mint(accounts[0], idx);
+
+        const evt = await expectEvent.inTransaction(tx, characters, 'NewCharacter', { minter: accounts[0] });
+
+        await characters.safeTransferFrom(accounts[0], accounts[1], evt.args.character);
+      }));
+
+      assert.strictEqual(await characters.balanceOf(accounts[1]), '4');
+
+      const { tx } = await characters.mint(accounts[0], '111');
+
+      const evt = await expectEvent.inTransaction(tx, characters, 'NewCharacter', { minter: accounts[0] });
+
+      await expectRevert(characters.safeTransferFrom(accounts[0], accounts[1], evt.args.character), "Recv has too many characters");
+    });
+  });
 });
 
 contract('CryptoBlades', accounts => {
@@ -68,53 +92,26 @@ contract('CryptoBlades', accounts => {
     cryptoBlades = await CryptoBlades.new();
     characters = await Characters.new();
     weapons = await Weapons.new();
-    priceChecker = await DummyPriceService.new();
+    priceChecker = await BasicPriceOracle.new();
     randoms = await DummyRandoms.new();
+
+    const GAME_ADMIN = await cryptoBlades.GAME_ADMIN();
 
     await Promise.all([
       cryptoBlades.initialize(token.address, characters.address, weapons.address, priceChecker.address, randoms.address),
-      characters.initialize().then(() => characters.setMain(cryptoBlades.address)),
-      weapons.initialize().then(() => weapons.setMain(cryptoBlades.address)),
+      priceChecker.initialize().then(() => priceChecker.setCurrentPrice(web3.utils.toWei('0.2', 'ether'))),
+      characters.initialize().then(() => characters.grantRole(GAME_ADMIN, cryptoBlades.address)),
+      weapons.initialize().then(() => weapons.grantRole(GAME_ADMIN, cryptoBlades.address)),
       randoms.initialize().then(() => randoms.setMain(cryptoBlades.address)),
-      token.approve(cryptoBlades.address, '100' + '0'.repeat(18)),
+      token.approve(cryptoBlades.address, web3.utils.toWei('100', 'ether')),
     ]);
-  });
-
-  describe('needsRandom', () => {
-    it('causes a revert if no random seed is available', async () => {
-      assert.isFalse(await cryptoBlades.hasRandom());
-
-      await expectRevert(cryptoBlades.mintCharacter({ from: accounts[0] }), "Sender has no random seed");
-    });
-
-    it('works if the sender has a random seed', async () => {
-      await cryptoBlades.requestRandom(); // random is fulfilled immediately in dummy impl
-
-      assert.isTrue(await cryptoBlades.hasRandom());
-
-      const res = await cryptoBlades.mintCharacter({ from: accounts[0] });
-      assert.isObject(res);
-    });
   });
 
   describe('mintCharacter', () => {
     it('should work', async () => {
-      await cryptoBlades.requestRandom(); // random is fulfilled immediately in dummy impl
-
       const { tx } = await cryptoBlades.mintCharacter({ from: accounts[0] });
 
       await expectEvent.inTransaction(tx, characters, 'NewCharacter', { character: '0', minter: accounts[0] });
-    });
-
-    it('consumes random', async () => {
-      await cryptoBlades.requestRandom(); // random is fulfilled immediately in dummy impl
-
-      assert.isTrue(await cryptoBlades.hasRandom());
-
-      const res = await cryptoBlades.mintCharacter({ from: accounts[0] });
-      assert.isObject(res);
-
-      assert.isFalse(await cryptoBlades.hasRandom());
     });
   });
 });
