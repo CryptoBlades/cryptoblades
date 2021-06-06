@@ -311,7 +311,7 @@
     },
     "links": {},
     "address": "0xc6f252c2CdD4087e30608A35c022ce490B58179b",
-    "transactionHash": "0x0c41bd53187aa2b5e98857cee98640941b54e1edccbb2f20aedf6a14b1defbae"
+    "transactionHash": "0x70f5847f0074f9074ba0177ad36a0ca29528c11702092167f0fba5d2779b580f"
   },
   "build/contracts/CryptoBlades.json": {
     "events": {
@@ -448,7 +448,7 @@
     },
     "links": {},
     "address": "0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
-    "transactionHash": "0x36e815a5fd777548f95871812894b4d98e39ce27ab013d92eece723c68cf79d2"
+    "transactionHash": "0x4f75ce2aaaedbc6045c3d6b4cb6d6c5e526f3214679b03e94c089a9eddf8b87b"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
