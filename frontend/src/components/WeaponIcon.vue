@@ -353,7 +353,6 @@ export default {
     if(localStorage.getItem('graphics')) {
       this.allLoaded = true;
       this.showPlaceholder = true;
-      console.log(getWeaponArt());
       return;
     }
 

@@ -10,7 +10,7 @@
               class="mint-character"
               @click="onMintCharacter"
               v-tooltip="'Recruit new character'">
-              Recruit <i class="fas fa-plus"></i>
+              Recruit ({{ recruitCost }} SKILL) <i class="fas fa-plus"></i>
             </button>
           </h1>
 
@@ -57,6 +57,8 @@
 </template>
 
 <script>
+import BN from 'bignumber.js';
+
 import BigButton from '../components/BigButton.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import Character from '../components/Character.vue';
@@ -65,7 +67,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 
 export default {
   computed: {
-    ...mapState(['characters', 'maxStamina', 'currentCharacterId']),
+    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'contracts', 'defaultAccount']),
     ...mapGetters([
       'ownCharacters',
       'ownWeapons',
@@ -92,6 +94,12 @@ export default {
         experience: c.xp,
       };
     },
+  },
+
+  async created() {
+    const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
+    const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+    this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
   },
 
   methods: {
@@ -141,7 +149,7 @@ export default {
 
 .character-header-wrapper .mint-character {
   height: 2.5rem;
-  width: 6rem;
+  width: 14rem;
   font-size: 1.3rem;
   color: rgba(255, 255, 255, 0.6);
   background: none;

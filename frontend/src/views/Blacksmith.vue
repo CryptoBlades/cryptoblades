@@ -7,7 +7,7 @@
           <button class="mint-weapon"
             @click="onForgeWeapon"
             v-tooltip="'Forge new weapon'">
-            Forge <i class="fas fa-plus"></i>
+            Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
           </button>
         </h1>
 
@@ -31,7 +31,7 @@
           <div class="button-row">
             <big-button
               class="button"
-              mainText="Confirm Reforge"
+              :mainText="'Confirm Reforge (' + reforgeCost + ' SKILL)'"
               :disabled="canReforge"
               @click="onReforgeWeapon"
             />
@@ -56,9 +56,10 @@
 </template>
 
 <script>
+import BN from 'bignumber.js';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 export default {
   data() {
@@ -66,10 +67,13 @@ export default {
       showReforge: false,
       reforgeWeaponId: null,
       burnWeaponId: null,
+      forgeCost: 0,
+      reforgeCost: 0
     };
   },
 
   computed: {
+    ...mapState(['contracts', 'defaultAccount']),
     ...mapGetters(['ownWeapons']),
 
     canReforge() {
@@ -85,6 +89,16 @@ export default {
     reforgeWeaponId() {
       this.showReforge = false;
     }
+  },
+
+  async created() {
+    const forgeCost = await this.contracts.CryptoBlades.methods.mintWeaponFee().call({ from: this.defaultAccount });
+    const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call();
+    this.forgeCost = BN(skillForgeCost).div(BN(10).pow(18)).toFixed(4);
+
+    const reforgeCost = await this.contracts.CryptoBlades.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
+    const skillReforgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(reforgeCost).call();
+    this.reforgeCost = BN(skillReforgeCost).div(BN(10).pow(18)).toFixed(4);
   },
 
   methods: {
@@ -129,7 +143,7 @@ export default {
 
 .mint-weapon {
   height: 2.5rem;
-  width: 6rem;
+  width: 14rem;
   font-size: 1.3rem;
   color: rgba(255, 255, 255, 0.6);
   background: none;
