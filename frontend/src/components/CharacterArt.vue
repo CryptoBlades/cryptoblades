@@ -7,6 +7,8 @@
       <span :class="trait.toLowerCase() + '-icon'"></span>
     </div>
 
+    <img v-if="showPlaceholder" class="placeholder" :src="getCharacterArt(character)" />
+
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
     </div>
@@ -15,6 +17,7 @@
 </template>
 
 <script>
+import { getCharacterArt } from '../character-arts-placeholder';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import prefabs from '../assets/characterPrefabs.json';
@@ -62,11 +65,14 @@ export default {
       modelLoader: null,
       textureLoader: null,
       body: null,
-      trait: CharacterTrait[this.character.trait]
+      trait: CharacterTrait[this.character.trait],
+      showPlaceholder: false
     };
   },
 
   methods: {
+
+    getCharacterArt,
 
     init() {
       const container = this.$refs.el;
@@ -365,6 +371,7 @@ export default {
   mounted() {
     if(localStorage.getItem('graphics')) {
       this.allLoaded = true;
+      this.showPlaceholder = true;
       return;
     }
 
@@ -387,6 +394,11 @@ export default {
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+.placeholder {
+  max-width: 200px;
+  max-height: 330px;
 }
 
 </style>

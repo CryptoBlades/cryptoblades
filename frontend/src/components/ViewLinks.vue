@@ -20,7 +20,7 @@
       <router-link :to="{ name: 'select-stake-type' }"><span>Stake</span></router-link>
     </li>
     <li>
-      <a @click="toggleGraphics()"><span>Graphics: {{ hideGraphics ? 'Off' : 'On' }}</span></a>
+      <a @click="toggleGraphics()"><span>3D Graphics: {{ hideGraphics ? 'Off' : 'On' }}</span></a>
     </li>
   </ul>
 </template>
@@ -44,8 +44,6 @@ export default {
       this.hideGraphics = !this.hideGraphics;
       if(this.hideGraphics) localStorage.setItem('graphics', 'off');
       else                  localStorage.removeItem('graphics');
-
-      console.log(this.hideGraphics);
     }
   }
 };

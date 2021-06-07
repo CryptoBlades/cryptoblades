@@ -9,6 +9,8 @@
 
     <div class="glow-container" :class="['glow-' + (weapon.stars || 0)]"></div>
 
+    <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)" />
+
     <div class="trait">
       <span :class="weapon.element.toLowerCase() + '-icon'"></span>
     </div>
@@ -128,7 +130,8 @@ export default {
       gripNormalTexture: null,
       gripAOTexture: null,
       pommelNormalTexture: null,
-      pommelAOTexture: null
+      pommelAOTexture: null,
+      showPlaceholder: false
     };
   },
 
@@ -349,6 +352,8 @@ export default {
   mounted() {
     if(localStorage.getItem('graphics')) {
       this.allLoaded = true;
+      this.showPlaceholder = true;
+      console.log(getWeaponArt());
       return;
     }
 
@@ -391,6 +396,13 @@ export default {
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+.placeholder {
+  max-width: 180px;
+  max-height: 180px;
+  margin-left: 10px;
+  margin-top: 5px;
 }
 
 .glow-0 {
