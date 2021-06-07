@@ -7,7 +7,7 @@
       <span :class="trait.toLowerCase() + '-icon'"></span>
     </div>
 
-    <img v-if="showPlaceholder" class="placeholder" :src="getCharacterArt(character)" />
+    <img v-if="showPlaceholder && !portrait" class="placeholder" :src="getCharacterArt(character)" />
 
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
