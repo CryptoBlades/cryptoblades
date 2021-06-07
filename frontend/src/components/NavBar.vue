@@ -1,6 +1,8 @@
 <template>
   <div class="top-bar main-font dark-bg-text">
-    <h1 class="app-title">CryptoBlades</h1>
+    <h1 class="app-title">
+      <img class="logo" src="../assets/logo.png" />
+    </h1>
 
     <view-links class="view-links"></view-links>
 
@@ -40,5 +42,10 @@ export default {
 
 .view-links {
   flex-grow: 1;
+}
+
+.logo {
+  max-width: 130px;
+  padding-top: 7px;
 }
 </style>
