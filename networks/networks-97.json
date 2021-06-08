@@ -719,6 +719,12 @@
     "address": "0xe7d6ee7a2BCa70D23EFdA2c2cB7779B7ee245A17",
     "transactionHash": "0x3ac290015e26bd09ed13cbe757fc82cd9a8c05fe100c19126a66b46a67abb48c"
   },
+  "build/contracts/NFTMarket.json": {
+    "events": {},
+    "links": {},
+    "address": "0xA69408c97655758CBdB1bc9eeE91F1D6Ad4CD661",
+    "transactionHash": "0x73df86755f490b8ef581ea4161aea38c079310c87dfcbdb9d966d22e039c93f9"
+  },
   "build/contracts/RaidBasic.json": {
     "events": {},
     "links": {},
