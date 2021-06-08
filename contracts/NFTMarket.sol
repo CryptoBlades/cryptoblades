@@ -11,6 +11,9 @@ import "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
 
+// *****************************************************************************
+// *** NOTE: almost all uses of _tokenAddress in this contract are UNSAFE!!! ***
+// *****************************************************************************
 contract NFTMarket is
     IERC721ReceiverUpgradeable,
     Initializable,
@@ -104,44 +107,44 @@ contract NFTMarket is
         _;
     }
 
-    modifier isListed(IERC721 _unsafeTokenAddress, uint256 id) {
+    modifier isListed(IERC721 _tokenAddress, uint256 id) {
         require(
-            listedTokenTypes.contains(address(_unsafeTokenAddress)) &&
-                listedTokenIDs[_unsafeTokenAddress].contains(id),
+            listedTokenTypes.contains(address(_tokenAddress)) &&
+                listedTokenIDs[_tokenAddress].contains(id),
             "Token ID not listed"
         );
         _;
     }
 
-    modifier isNotListed(IERC721 _unsafeTokenAddress, uint256 id) {
+    modifier isNotListed(IERC721 _tokenAddress, uint256 id) {
         require(
-            !listedTokenTypes.contains(address(_unsafeTokenAddress)) ||
-                !listedTokenIDs[_unsafeTokenAddress].contains(id),
+            !listedTokenTypes.contains(address(_tokenAddress)) ||
+                !listedTokenIDs[_tokenAddress].contains(id),
             "Token ID must not be listed"
         );
         _;
     }
 
-    modifier isSeller(IERC721 _unsafeTokenAddress, uint256 id) {
+    modifier isSeller(IERC721 _tokenAddress, uint256 id) {
         require(
-            listings[_unsafeTokenAddress][id].seller == msg.sender,
+            listings[_tokenAddress][id].seller == msg.sender,
             "Access denied"
         );
         _;
     }
 
-    modifier isSellerOrAdmin(IERC721 _unsafeTokenAddress, uint256 id) {
+    modifier isSellerOrAdmin(IERC721 _tokenAddress, uint256 id) {
         require(
-            listings[_unsafeTokenAddress][id].seller == msg.sender ||
+            listings[_tokenAddress][id].seller == msg.sender ||
                 hasRole(GAME_ADMIN, msg.sender),
             "Access denied"
         );
         _;
     }
 
-    modifier tokenNotBanned(IERC721 _unsafeTokenAddress) {
+    modifier tokenNotBanned(IERC721 _tokenAddress) {
         require(
-            isTokenBanned[_unsafeTokenAddress] == false,
+            isTokenBanned[_tokenAddress] == false,
             "This type of NFT may not be traded here"
         );
         _;
@@ -152,10 +155,10 @@ contract NFTMarket is
         _;
     }
 
-    modifier isValidERC721(IERC721 _unsafeTokenAddress) {
+    modifier isValidERC721(IERC721 _tokenAddress) {
         require(
             ERC165Checker.supportsInterface(
-                address(_unsafeTokenAddress),
+                address(_tokenAddress),
                 _INTERFACE_ID_ERC721
             )
         );
@@ -175,12 +178,12 @@ contract NFTMarket is
         return tokens;
     }
 
-    function getListingIDs(IERC721 _unsafeTokenAddress)
+    function getListingIDs(IERC721 _tokenAddress)
         public
         view
         returns (uint256[] memory)
     {
-        EnumerableSet.UintSet storage set = listedTokenIDs[_unsafeTokenAddress];
+        EnumerableSet.UintSet storage set = listedTokenIDs[_tokenAddress];
         uint256[] memory tokens = new uint256[](set.length());
 
         for (uint256 i = 0; i < tokens.length; i++) {
@@ -190,76 +193,76 @@ contract NFTMarket is
     }
 
     function getNumberOfListingsBySeller(
-        IERC721 _unsafeTokenAddress,
+        IERC721 _tokenAddress,
         address _seller
     ) public view returns (uint256) {
-        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[_unsafeTokenAddress];
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[_tokenAddress];
 
         uint256 amount = 0;
         for (uint256 i = 0; i < listedTokens.length(); i++) {
             if (
-                listings[_unsafeTokenAddress][listedTokens.at(i)].seller == _seller
+                listings[_tokenAddress][listedTokens.at(i)].seller == _seller
             ) amount++;
         }
 
         return amount;
     }
 
-    function getListingIDsBySeller(IERC721 _unsafeTokenAddress, address _seller)
+    function getListingIDsBySeller(IERC721 _tokenAddress, address _seller)
         public
         view
         returns (uint256[] memory tokens)
     {
         // NOTE: listedTokens is enumerated twice (once for length calc, once for getting token IDs)
-        uint256 amount = getNumberOfListingsBySeller(_unsafeTokenAddress, _seller);
+        uint256 amount = getNumberOfListingsBySeller(_tokenAddress, _seller);
         tokens = new uint256[](amount);
 
-        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[_unsafeTokenAddress];
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[_tokenAddress];
 
         uint256 index = 0;
         for (uint256 i = 0; i < listedTokens.length(); i++) {
             uint256 id = listedTokens.at(i);
-            if (listings[_unsafeTokenAddress][id].seller == _seller)
+            if (listings[_tokenAddress][id].seller == _seller)
                 tokens[index++] = id;
         }
     }
 
-    function getNumberOfListingsForToken(IERC721 _unsafeTokenAddress)
+    function getNumberOfListingsForToken(IERC721 _tokenAddress)
         public
         view
         returns (uint256)
     {
-        return listedTokenIDs[_unsafeTokenAddress].length();
+        return listedTokenIDs[_tokenAddress].length();
     }
 
-    function getSellerPrice(IERC721 _unsafeTokenAddress, uint256 _id)
+    function getSellerPrice(IERC721 _tokenAddress, uint256 _id)
         public
         view
         returns (uint256)
     {
-        return listings[_unsafeTokenAddress][_id].price;
+        return listings[_tokenAddress][_id].price;
     }
 
-    function getFinalPrice(IERC721 _unsafeTokenAddress, uint256 _id)
+    function getFinalPrice(IERC721 _tokenAddress, uint256 _id)
         public
         view
         returns (uint256)
     {
         return
-            getSellerPrice(_unsafeTokenAddress, _id).add(
-                getTaxOnListing(_unsafeTokenAddress, _id)
+            getSellerPrice(_tokenAddress, _id).add(
+                getTaxOnListing(_tokenAddress, _id)
             );
     }
 
-    function getTaxOnListing(IERC721 _unsafeTokenAddress, uint256 _id)
+    function getTaxOnListing(IERC721 _tokenAddress, uint256 _id)
         public
         view
         returns (uint256)
     {
         return
             ABDKMath64x64.mulu(
-                tax[_unsafeTokenAddress],
-                getSellerPrice(_unsafeTokenAddress, _id)
+                tax[_tokenAddress],
+                getSellerPrice(_tokenAddress, _id)
             );
     }
 
@@ -267,76 +270,76 @@ contract NFTMarket is
     // Mutative
     // ############
     function addListing(
-        IERC721 _unsafeTokenAddress,
+        IERC721 _tokenAddress,
         uint256 _id,
         uint256 _price
     )
         public
         userNotBanned
-        tokenNotBanned(_unsafeTokenAddress)
-        isValidERC721(_unsafeTokenAddress)
-        isNotListed(_unsafeTokenAddress, _id)
+        tokenNotBanned(_tokenAddress)
+        isValidERC721(_tokenAddress)
+        isNotListed(_tokenAddress, _id)
     {
-        listings[_unsafeTokenAddress][_id] = Listing(msg.sender, _price);
-        listedTokenIDs[_unsafeTokenAddress].add(_id);
+        listings[_tokenAddress][_id] = Listing(msg.sender, _price);
+        listedTokenIDs[_tokenAddress].add(_id);
 
-        _updateListedTokenTypes(_unsafeTokenAddress);
+        _updateListedTokenTypes(_tokenAddress);
 
         // in theory the transfer and required approval already test non-owner operations
-        _unsafeTokenAddress.safeTransferFrom(msg.sender, address(this), _id);
+        _tokenAddress.safeTransferFrom(msg.sender, address(this), _id);
 
-        emit NewListing(msg.sender, _unsafeTokenAddress, _id, _price);
+        emit NewListing(msg.sender, _tokenAddress, _id, _price);
     }
 
     function changeListingPrice(
-        IERC721 _unsafeTokenAddress,
+        IERC721 _tokenAddress,
         uint256 _id,
         uint256 _newPrice
     )
         public
         userNotBanned
-        isListed(_unsafeTokenAddress, _id)
-        isSeller(_unsafeTokenAddress, _id)
+        isListed(_tokenAddress, _id)
+        isSeller(_tokenAddress, _id)
     {
-        listings[_unsafeTokenAddress][_id].price = _newPrice;
+        listings[_tokenAddress][_id].price = _newPrice;
         emit ListingPriceChange(
             msg.sender,
-            _unsafeTokenAddress,
+            _tokenAddress,
             _id,
             _newPrice
         );
     }
 
-    function cancelListing(IERC721 _unsafeTokenAddress, uint256 _id)
+    function cancelListing(IERC721 _tokenAddress, uint256 _id)
         public
         userNotBanned
-        isListed(_unsafeTokenAddress, _id)
-        isSellerOrAdmin(_unsafeTokenAddress, _id)
+        isListed(_tokenAddress, _id)
+        isSellerOrAdmin(_tokenAddress, _id)
     {
-        delete listings[_unsafeTokenAddress][_id];
-        listedTokenIDs[_unsafeTokenAddress].remove(_id);
+        delete listings[_tokenAddress][_id];
+        listedTokenIDs[_tokenAddress].remove(_id);
 
-        _updateListedTokenTypes(_unsafeTokenAddress);
+        _updateListedTokenTypes(_tokenAddress);
 
-        _unsafeTokenAddress.safeTransferFrom(address(this), msg.sender, _id);
+        _tokenAddress.safeTransferFrom(address(this), msg.sender, _id);
 
-        emit CancelledListing(msg.sender, _unsafeTokenAddress, _id);
+        emit CancelledListing(msg.sender, _tokenAddress, _id);
     }
 
     function purchaseListing(
-        IERC721 _unsafeTokenAddress,
+        IERC721 _tokenAddress,
         uint256 _id,
         uint256 _maxPrice
-    ) public userNotBanned isListed(_unsafeTokenAddress, _id) {
-        uint256 finalPrice = getFinalPrice(_unsafeTokenAddress, _id);
+    ) public userNotBanned isListed(_tokenAddress, _id) {
+        uint256 finalPrice = getFinalPrice(_tokenAddress, _id);
         require(finalPrice <= _maxPrice, "Buying price too low");
 
-        Listing memory listing = listings[_unsafeTokenAddress][_id];
-        uint256 taxAmount = getTaxOnListing(_unsafeTokenAddress, _id);
+        Listing memory listing = listings[_tokenAddress][_id];
+        uint256 taxAmount = getTaxOnListing(_tokenAddress, _id);
 
-        delete listings[_unsafeTokenAddress][_id];
-        listedTokenIDs[_unsafeTokenAddress].remove(_id);
-        _updateListedTokenTypes(_unsafeTokenAddress);
+        delete listings[_tokenAddress][_id];
+        listedTokenIDs[_tokenAddress].remove(_id);
+        _updateListedTokenTypes(_tokenAddress);
 
         skillToken.transferFrom(msg.sender, taxRecipient, taxAmount);
         skillToken.transferFrom(
@@ -344,12 +347,12 @@ contract NFTMarket is
             listing.seller,
             finalPrice.sub(taxAmount)
         );
-        _unsafeTokenAddress.safeTransferFrom(address(this), msg.sender, _id);
+        _tokenAddress.safeTransferFrom(address(this), msg.sender, _id);
 
         emit PurchasedListing(
             msg.sender,
             listing.seller,
-            _unsafeTokenAddress,
+            _tokenAddress,
             _id,
             finalPrice
         );
@@ -374,31 +377,31 @@ contract NFTMarket is
         defaultTax = ABDKMath64x64.divu(_percent, 100);
     }
 
-    function setTaxOnTokenType(IERC721 _unsafeTokenAddress, int128 _newTax)
+    function setTaxOnTokenType(IERC721 _tokenAddress, int128 _newTax)
         public
         restricted
-        isValidERC721(_unsafeTokenAddress)
+        isValidERC721(_tokenAddress)
     {
-        _setTaxOnTokenType(_unsafeTokenAddress, _newTax);
+        _setTaxOnTokenType(_tokenAddress, _newTax);
     }
 
     function setTaxOnTokenTypeAsRational(
-        IERC721 _unsafeTokenAddress,
+        IERC721 _tokenAddress,
         uint256 _numerator,
         uint256 _denominator
-    ) public restricted isValidERC721(_unsafeTokenAddress) {
+    ) public restricted isValidERC721(_tokenAddress) {
         _setTaxOnTokenType(
-            _unsafeTokenAddress,
+            _tokenAddress,
             ABDKMath64x64.divu(_numerator, _denominator)
         );
     }
 
     function setTaxOnTokenTypeAsPercent(
-        IERC721 _unsafeTokenAddress,
+        IERC721 _tokenAddress,
         uint256 _percent
-    ) public restricted isValidERC721(_unsafeTokenAddress) {
+    ) public restricted isValidERC721(_tokenAddress) {
         _setTaxOnTokenType(
-            _unsafeTokenAddress,
+            _tokenAddress,
             ABDKMath64x64.divu(_percent, 100)
         );
     }
@@ -422,11 +425,11 @@ contract NFTMarket is
         bytes calldata /* data */
     ) external override returns (bytes4) {
         // NOTE: The contract address is always the message sender.
-        address _unsafeTokenAddress = msg.sender;
+        address _tokenAddress = msg.sender;
 
         require(
-            listedTokenTypes.contains(_unsafeTokenAddress) &&
-                listedTokenIDs[IERC721(_unsafeTokenAddress)].contains(_id),
+            listedTokenTypes.contains(_tokenAddress) &&
+                listedTokenIDs[IERC721(_tokenAddress)].contains(_id),
             "Token ID not listed"
         );
 
