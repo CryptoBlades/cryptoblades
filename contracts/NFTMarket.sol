@@ -175,6 +175,10 @@ contract NFTMarket is
     // ############
     // Views
     // ############
+    function defaultTaxAsRoundedPercentRoughEstimate() public view returns (uint256) {
+        return defaultTax.mulu(100);
+    }
+
     function getListedTokenTypes() public view returns (IERC721[] memory) {
         EnumerableSet.AddressSet storage set = listedTokenTypes;
         IERC721[] memory tokens = new IERC721[](set.length());
