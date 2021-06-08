@@ -2,7 +2,8 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import "../node_modules/@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../node_modules/@openzeppelin/contracts/introspection/ERC165Checker.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -10,7 +11,11 @@ import "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
 
-contract NFTMarket is Initializable, AccessControlUpgradeable {
+contract NFTMarket is
+    IERC721ReceiverUpgradeable,
+    Initializable,
+    AccessControlUpgradeable
+{
     using SafeMath for uint256;
     using ABDKMath64x64 for int128; // kroge beware
     using EnumerableSet for EnumerableSet.UintSet;
@@ -399,6 +404,24 @@ contract NFTMarket is Initializable, AccessControlUpgradeable {
 
     function recoverSkill(uint256 amount) public restricted {
         skillToken.transfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
+    }
+
+    function onERC721Received(
+        address, /* operator */
+        address, /* from */
+        uint256 _id,
+        bytes calldata /* data */
+    ) external override returns (bytes4) {
+        // NOTE: The contract address is always the message sender.
+        address _unsafeTokenAddress = msg.sender;
+
+        require(
+            listedTokenTypes.contains(_unsafeTokenAddress) &&
+                listedTokenIDs[IERC721(_unsafeTokenAddress)].contains(_id),
+            "Token ID not listed"
+        );
+
+        return IERC721ReceiverUpgradeable.onERC721Received.selector;
     }
 
     // ############
