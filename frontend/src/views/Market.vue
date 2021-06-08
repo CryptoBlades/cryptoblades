@@ -52,6 +52,7 @@
 <script>
 
 import BigButton from '../components/BigButton.vue';
+import { mapActions, mapState } from 'vuex';
 
 export default {
   components: { BigButton },
@@ -64,11 +65,27 @@ export default {
   },
 
   computed: {
+    ...mapState(['contracts']),
   },
 
   methods: {
-    searchNFT() {
-
+    ...mapActions([
+      'fetchAllMarketNftIds', // nftContractAddr // returns bignumber array
+      'fetchMarketNftIdsBySeller', // nftContractAddr, sellerAddr // returns bignumber array
+      'fetchMarketNftPrice', // nftContractAddr, tokenId // returns wei
+      'fetchMarketTax', // nftContractAddr // returns fixed64x64
+      'addMarketListing', // nftContractAddr, tokenId, price // event unimplemented
+      'changeMarketListngPrice', // nftContractAddr, tokenId, newPrice // event unimplemented
+      'cancelMarketListing', // nftContractAddr, tokenId // event unimplemented
+      'purchaseMarketListing', // nftContractAddr, tokenId, maxPrice // event unimplemented
+    ]),
+    async searchNFT() {
+      const result = await this.fetchMarketNftPrice({
+        nftContractAddr: this.contracts.Weapons.options.address,
+        tokenId: 0,
+      });
+      console.log(result);
+      return result;
     },
 
     searchSeller() {

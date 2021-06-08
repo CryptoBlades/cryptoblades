@@ -13,6 +13,7 @@ import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/
 import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
+import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 
 import Web3 from 'web3';
 import { Contracts } from './interfaces';
@@ -63,6 +64,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as any)[networkId].address;
   const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as any)[networkId].address;
+  const marketAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (marketNetworks as any)[networkId].address;
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as any, cryptoBladesContractAddr);
   const [charactersAddr, weaponsAddr, randomsAddr] = await Promise.all([
@@ -73,6 +75,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Randoms = new web3.eth.Contract(randomsAbi as any, randomsAddr);
   const Characters = new web3.eth.Contract(charactersAbi as any, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as any, weaponsAddr);
+  const NFTMarket = new web3.eth.Contract(marketAbi as any, marketAddr);
 
   const raidContracts: RaidContracts = {};
   if(featureFlagRaid) {
@@ -81,7 +84,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   return {
     ...stakingContracts,
-    CryptoBlades, Randoms, Characters, Weapons,
+    CryptoBlades, Randoms, Characters, Weapons, NFTMarket,
     ...raidContracts
   };
 }
