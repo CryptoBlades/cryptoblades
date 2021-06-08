@@ -12,6 +12,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     using SafeMath for uint8;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+    bytes32 public constant NO_OWNED_LIMIT = keccak256("NO_OWNED_LIMIT");
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
@@ -188,7 +189,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function _beforeTokenTransfer(address /* from */, address to, uint256 /* tokenId */) internal override {
-        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD)) {
+        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to)) {
             require(balanceOf(to) < 4, "Recv has too many characters");
         }
     }
