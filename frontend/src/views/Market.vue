@@ -17,11 +17,16 @@
         </div>
 
         <div v-if="activeSell === 'weapons'">
-          weapon list
+          <weapon-grid
+            v-model="sellingWeapon"
+          />
         </div>
 
         <div v-if="activeSell === 'characters'">
-          char list
+          <character-list
+            :value="sellingCharacter"
+            @input="selectCharacterForSelling"
+          />
         </div>
       </div>
 
@@ -52,15 +57,19 @@
 <script>
 
 import BigButton from '../components/BigButton.vue';
+import CharacterList from '../components/smart/CharacterList.vue';
+import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import { mapActions, mapState } from 'vuex';
 
 export default {
-  components: { BigButton },
+  components: { BigButton, CharacterList, WeaponGrid },
 
   data() {
     return {
       activeSell: 'weapons',
-      search: ''
+      search: '',
+      sellingCharacter: null,
+      sellingWeapon: null,
     };
   },
 
@@ -79,6 +88,11 @@ export default {
       'cancelMarketListing', // nftContractAddr, tokenId // event unimplemented
       'purchaseMarketListing', // nftContractAddr, tokenId, maxPrice // event unimplemented
     ]),
+
+    selectCharacterForSelling(characterId) {
+      this.sellingCharacter = characterId;
+    },
+
     async searchNFT() {
       const result = await this.fetchMarketNftPrice({
         nftContractAddr: this.contracts.Weapons.options.address,
