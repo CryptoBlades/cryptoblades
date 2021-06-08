@@ -60,15 +60,22 @@ contract NFTMarket is
     address public taxRecipient; //game contract
     //IPriceOracle public priceOracleSkillPerUsd; // we may want this for dynamic pricing
 
-    mapping(IERC721 => mapping(uint256 => Listing)) private listings;
-    mapping(IERC721 => EnumerableSet.UintSet) private listedTokenIDs;
+    // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
+    mapping(address => mapping(uint256 => Listing)) private listings;
+    // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
+    mapping(address => EnumerableSet.UintSet) private listedTokenIDs;
+    // address is IERC721
     EnumerableSet.AddressSet private listedTokenTypes; // stored for a way to know the types we have on offer
 
-    mapping(IERC721 => bool) public isTokenBanned;
+    // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
+    mapping(address => bool) public isTokenBanned;
+    // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
     mapping(address => bool) public isUserBanned;
 
-    mapping(IERC721 => int128) public tax; // per NFT type tax
-    mapping(IERC721 => bool) private freeTax; // since tax is 0-default, this specifies it to fix an exploit
+    // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
+    mapping(address => int128) public tax; // per NFT type tax
+    // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
+    mapping(address => bool) private freeTax; // since tax is 0-default, this specifies it to fix an exploit
     int128 public defaultTax; // fallback in case we haven't specified it
 
     // ############
@@ -110,7 +117,7 @@ contract NFTMarket is
     modifier isListed(IERC721 _tokenAddress, uint256 id) {
         require(
             listedTokenTypes.contains(address(_tokenAddress)) &&
-                listedTokenIDs[_tokenAddress].contains(id),
+                listedTokenIDs[address(_tokenAddress)].contains(id),
             "Token ID not listed"
         );
         _;
@@ -119,7 +126,7 @@ contract NFTMarket is
     modifier isNotListed(IERC721 _tokenAddress, uint256 id) {
         require(
             !listedTokenTypes.contains(address(_tokenAddress)) ||
-                !listedTokenIDs[_tokenAddress].contains(id),
+                !listedTokenIDs[address(_tokenAddress)].contains(id),
             "Token ID must not be listed"
         );
         _;
@@ -127,7 +134,7 @@ contract NFTMarket is
 
     modifier isSeller(IERC721 _tokenAddress, uint256 id) {
         require(
-            listings[_tokenAddress][id].seller == msg.sender,
+            listings[address(_tokenAddress)][id].seller == msg.sender,
             "Access denied"
         );
         _;
@@ -135,7 +142,7 @@ contract NFTMarket is
 
     modifier isSellerOrAdmin(IERC721 _tokenAddress, uint256 id) {
         require(
-            listings[_tokenAddress][id].seller == msg.sender ||
+            listings[address(_tokenAddress)][id].seller == msg.sender ||
                 hasRole(GAME_ADMIN, msg.sender),
             "Access denied"
         );
@@ -144,7 +151,7 @@ contract NFTMarket is
 
     modifier tokenNotBanned(IERC721 _tokenAddress) {
         require(
-            isTokenBanned[_tokenAddress] == false,
+            isTokenBanned[address(_tokenAddress)] == false,
             "This type of NFT may not be traded here"
         );
         _;
@@ -183,7 +190,7 @@ contract NFTMarket is
         view
         returns (uint256[] memory)
     {
-        EnumerableSet.UintSet storage set = listedTokenIDs[_tokenAddress];
+        EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
         uint256[] memory tokens = new uint256[](set.length());
 
         for (uint256 i = 0; i < tokens.length; i++) {
@@ -196,12 +203,12 @@ contract NFTMarket is
         IERC721 _tokenAddress,
         address _seller
     ) public view returns (uint256) {
-        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[_tokenAddress];
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[address(_tokenAddress)];
 
         uint256 amount = 0;
         for (uint256 i = 0; i < listedTokens.length(); i++) {
             if (
-                listings[_tokenAddress][listedTokens.at(i)].seller == _seller
+                listings[address(_tokenAddress)][listedTokens.at(i)].seller == _seller
             ) amount++;
         }
 
@@ -217,12 +224,12 @@ contract NFTMarket is
         uint256 amount = getNumberOfListingsBySeller(_tokenAddress, _seller);
         tokens = new uint256[](amount);
 
-        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[_tokenAddress];
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[address(_tokenAddress)];
 
         uint256 index = 0;
         for (uint256 i = 0; i < listedTokens.length(); i++) {
             uint256 id = listedTokens.at(i);
-            if (listings[_tokenAddress][id].seller == _seller)
+            if (listings[address(_tokenAddress)][id].seller == _seller)
                 tokens[index++] = id;
         }
     }
@@ -232,7 +239,7 @@ contract NFTMarket is
         view
         returns (uint256)
     {
-        return listedTokenIDs[_tokenAddress].length();
+        return listedTokenIDs[address(_tokenAddress)].length();
     }
 
     function getSellerPrice(IERC721 _tokenAddress, uint256 _id)
@@ -240,7 +247,7 @@ contract NFTMarket is
         view
         returns (uint256)
     {
-        return listings[_tokenAddress][_id].price;
+        return listings[address(_tokenAddress)][_id].price;
     }
 
     function getFinalPrice(IERC721 _tokenAddress, uint256 _id)
@@ -261,7 +268,7 @@ contract NFTMarket is
     {
         return
             ABDKMath64x64.mulu(
-                tax[_tokenAddress],
+                tax[address(_tokenAddress)],
                 getSellerPrice(_tokenAddress, _id)
             );
     }
@@ -280,8 +287,8 @@ contract NFTMarket is
         isValidERC721(_tokenAddress)
         isNotListed(_tokenAddress, _id)
     {
-        listings[_tokenAddress][_id] = Listing(msg.sender, _price);
-        listedTokenIDs[_tokenAddress].add(_id);
+        listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price);
+        listedTokenIDs[address(_tokenAddress)].add(_id);
 
         _updateListedTokenTypes(_tokenAddress);
 
@@ -301,7 +308,7 @@ contract NFTMarket is
         isListed(_tokenAddress, _id)
         isSeller(_tokenAddress, _id)
     {
-        listings[_tokenAddress][_id].price = _newPrice;
+        listings[address(_tokenAddress)][_id].price = _newPrice;
         emit ListingPriceChange(
             msg.sender,
             _tokenAddress,
@@ -316,8 +323,8 @@ contract NFTMarket is
         isListed(_tokenAddress, _id)
         isSellerOrAdmin(_tokenAddress, _id)
     {
-        delete listings[_tokenAddress][_id];
-        listedTokenIDs[_tokenAddress].remove(_id);
+        delete listings[address(_tokenAddress)][_id];
+        listedTokenIDs[address(_tokenAddress)].remove(_id);
 
         _updateListedTokenTypes(_tokenAddress);
 
@@ -334,11 +341,11 @@ contract NFTMarket is
         uint256 finalPrice = getFinalPrice(_tokenAddress, _id);
         require(finalPrice <= _maxPrice, "Buying price too low");
 
-        Listing memory listing = listings[_tokenAddress][_id];
+        Listing memory listing = listings[address(_tokenAddress)][_id];
         uint256 taxAmount = getTaxOnListing(_tokenAddress, _id);
 
-        delete listings[_tokenAddress][_id];
-        listedTokenIDs[_tokenAddress].remove(_id);
+        delete listings[address(_tokenAddress)][_id];
+        listedTokenIDs[address(_tokenAddress)].remove(_id);
         _updateListedTokenTypes(_tokenAddress);
 
         skillToken.transferFrom(msg.sender, taxRecipient, taxAmount);
@@ -411,7 +418,7 @@ contract NFTMarket is
     }
 
     function setTokenBan(IERC721 token, bool to) public restricted {
-        isTokenBanned[token] = to;
+        isTokenBanned[address(token)] = to;
     }
 
     function recoverSkill(uint256 amount) public restricted {
@@ -429,7 +436,7 @@ contract NFTMarket is
 
         require(
             listedTokenTypes.contains(_tokenAddress) &&
-                listedTokenIDs[IERC721(_tokenAddress)].contains(_id),
+                listedTokenIDs[_tokenAddress].contains(_id),
             "Token ID not listed"
         );
 
@@ -441,12 +448,12 @@ contract NFTMarket is
     // ############
     function _setTaxOnTokenType(IERC721 tokenAddress, int128 newTax) private {
         require(newTax >= 0, "We're not running a charity here");
-        tax[tokenAddress] = newTax;
-        freeTax[tokenAddress] = newTax == 0;
+        tax[address(tokenAddress)] = newTax;
+        freeTax[address(tokenAddress)] = newTax == 0;
     }
 
     function _updateListedTokenTypes(IERC721 tokenAddress) private {
-        if (listedTokenIDs[tokenAddress].length() > 0) {
+        if (listedTokenIDs[address(tokenAddress)].length() > 0) {
             _registerTokenAddress(tokenAddress);
         } else {
             _unregisterTokenAddress(tokenAddress);
@@ -459,9 +466,9 @@ contract NFTMarket is
 
             // this prevents resetting custom tax by removing all
             if (
-                tax[tokenAddress] == 0 && // unset or intentionally free
-                freeTax[tokenAddress] == false
-            ) tax[tokenAddress] = defaultTax;
+                tax[address(tokenAddress)] == 0 && // unset or intentionally free
+                freeTax[address(tokenAddress)] == false
+            ) tax[address(tokenAddress)] = defaultTax;
         }
     }
 
