@@ -45,6 +45,18 @@
             mainText="Search Seller"
             @click="searchSeller()"
           />
+
+          <big-button
+            class="button"
+            mainText="Search Mine"
+            @click="searchMine()"
+          />
+        </div>
+
+        <div class="search-results">
+          <div v-for="result in searchResults" v-bind:key="result">
+            {{ result }}
+          </div>
         </div>
       </div>
 
@@ -68,6 +80,7 @@ export default {
     return {
       activeSell: 'weapons',
       search: '',
+      searchResults: [],
       sellingCharacter: null,
       sellingWeapon: null,
     };
@@ -96,13 +109,17 @@ export default {
     async searchNFT() {
       const result = await this.fetchMarketNftPrice({
         nftContractAddr: this.contracts.Weapons.options.address,
-        tokenId: 0,
+        tokenId: this.search,
       });
       console.log(result);
       return result;
     },
 
     searchSeller() {
+
+    },
+
+    searchMine() {
 
     }
   },

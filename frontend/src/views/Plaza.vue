@@ -102,6 +102,12 @@ export default {
     this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
   },
 
+  data() {
+    return {
+      recruitCost: this.recruitCost
+    };
+  },
+
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter']),
