@@ -6184,8 +6184,8 @@
       }
     },
     "c6780a51801fd4e3a97703a2920e51246c1c96c98461630b7f273d4a35b663f3": {
-      "address": "0x7A875DF16EaD145A08f742ed5D7C2235cB7ccCbB",
-      "txHash": "0x73df86755f490b8ef581ea4161aea38c079310c87dfcbdb9d966d22e039c93f9",
+      "address": "0xcfDCB48827b937D6391C2A0b72237EbbD024b0eC",
+      "txHash": "0x41c4c959ddc1e705c0465779a371fdb92d37fd9ad152e8db0c4972b48750ff7f",
       "layout": {
         "storage": [
           {
@@ -6209,7 +6209,7 @@
           {
             "contract": "AccessControlUpgradeable",
             "label": "_roles",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)15642_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)15724_storage)",
             "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
           },
           {
@@ -6221,76 +6221,73 @@
           {
             "contract": "NFTMarket",
             "label": "skillToken",
-            "type": "t_contract(IERC20)11552",
-            "src": "NFTMarket.sol:56"
+            "type": "t_contract(IERC20)11634",
+            "src": "NFTMarket.sol:59"
           },
           {
             "contract": "NFTMarket",
             "label": "taxRecipient",
             "type": "t_address",
-            "src": "NFTMarket.sol:57"
-          },
-          {
-            "contract": "NFTMarket",
-            "label": "listings",
-            "type": "t_mapping(t_contract(IERC721)11881,t_mapping(t_uint256,t_struct(Listing)738_storage))",
             "src": "NFTMarket.sol:60"
           },
           {
             "contract": "NFTMarket",
+            "label": "listings",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(Listing)738_storage))",
+            "src": "NFTMarket.sol:64"
+          },
+          {
+            "contract": "NFTMarket",
             "label": "listedTokenIDs",
-            "type": "t_mapping(t_contract(IERC721)11881,t_struct(UintSet)12597_storage)",
-            "src": "NFTMarket.sol:61"
+            "type": "t_mapping(t_address,t_struct(UintSet)12679_storage)",
+            "src": "NFTMarket.sol:66"
           },
           {
             "contract": "NFTMarket",
             "label": "listedTokenTypes",
-            "type": "t_struct(AddressSet)12476_storage",
-            "src": "NFTMarket.sol:62"
+            "type": "t_struct(AddressSet)12558_storage",
+            "src": "NFTMarket.sol:68"
           },
           {
             "contract": "NFTMarket",
             "label": "isTokenBanned",
-            "type": "t_mapping(t_contract(IERC721)11881,t_bool)",
-            "src": "NFTMarket.sol:64"
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "NFTMarket.sol:71"
           },
           {
             "contract": "NFTMarket",
             "label": "isUserBanned",
             "type": "t_mapping(t_address,t_bool)",
-            "src": "NFTMarket.sol:65"
+            "src": "NFTMarket.sol:73"
           },
           {
             "contract": "NFTMarket",
             "label": "tax",
-            "type": "t_mapping(t_contract(IERC721)11881,t_int128)",
-            "src": "NFTMarket.sol:67"
+            "type": "t_mapping(t_address,t_int128)",
+            "src": "NFTMarket.sol:76"
           },
           {
             "contract": "NFTMarket",
             "label": "freeTax",
-            "type": "t_mapping(t_contract(IERC721)11881,t_bool)",
-            "src": "NFTMarket.sol:68"
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "NFTMarket.sol:78"
           },
           {
             "contract": "NFTMarket",
             "label": "defaultTax",
             "type": "t_int128",
-            "src": "NFTMarket.sol:69"
+            "src": "NFTMarket.sol:79"
           }
         ],
         "types": {
-          "t_contract(IERC20)11552": {
+          "t_contract(IERC20)11634": {
             "label": "contract IERC20"
           },
           "t_address": {
             "label": "address"
           },
-          "t_mapping(t_contract(IERC721)11881,t_mapping(t_uint256,t_struct(Listing)738_storage))": {
-            "label": "mapping(contract IERC721 => mapping(uint256 => struct NFTMarket.Listing))"
-          },
-          "t_contract(IERC721)11881": {
-            "label": "contract IERC721"
+          "t_mapping(t_address,t_mapping(t_uint256,t_struct(Listing)738_storage))": {
+            "label": "mapping(address => mapping(uint256 => struct NFTMarket.Listing))"
           },
           "t_mapping(t_uint256,t_struct(Listing)738_storage)": {
             "label": "mapping(uint256 => struct NFTMarket.Listing)"
@@ -6311,19 +6308,19 @@
               }
             ]
           },
-          "t_mapping(t_contract(IERC721)11881,t_struct(UintSet)12597_storage)": {
-            "label": "mapping(contract IERC721 => struct EnumerableSet.UintSet)"
+          "t_mapping(t_address,t_struct(UintSet)12679_storage)": {
+            "label": "mapping(address => struct EnumerableSet.UintSet)"
           },
-          "t_struct(UintSet)12597_storage": {
+          "t_struct(UintSet)12679_storage": {
             "label": "struct EnumerableSet.UintSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)12211_storage"
+                "type": "t_struct(Set)12293_storage"
               }
             ]
           },
-          "t_struct(Set)12211_storage": {
+          "t_struct(Set)12293_storage": {
             "label": "struct EnumerableSet.Set",
             "members": [
               {
@@ -6345,39 +6342,36 @@
           "t_mapping(t_bytes32,t_uint256)": {
             "label": "mapping(bytes32 => uint256)"
           },
-          "t_struct(AddressSet)12476_storage": {
+          "t_struct(AddressSet)12558_storage": {
             "label": "struct EnumerableSet.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)12211_storage"
+                "type": "t_struct(Set)12293_storage"
               }
             ]
-          },
-          "t_mapping(t_contract(IERC721)11881,t_bool)": {
-            "label": "mapping(contract IERC721 => bool)"
-          },
-          "t_bool": {
-            "label": "bool"
           },
           "t_mapping(t_address,t_bool)": {
             "label": "mapping(address => bool)"
           },
-          "t_mapping(t_contract(IERC721)11881,t_int128)": {
-            "label": "mapping(contract IERC721 => int128)"
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_address,t_int128)": {
+            "label": "mapping(address => int128)"
           },
           "t_int128": {
             "label": "int128"
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)15642_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)15724_storage)": {
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
           },
-          "t_struct(RoleData)15642_storage": {
+          "t_struct(RoleData)15724_storage": {
             "label": "struct AccessControlUpgradeable.RoleData",
             "members": [
               {
                 "label": "members",
-                "type": "t_struct(AddressSet)18837_storage"
+                "type": "t_struct(AddressSet)18919_storage"
               },
               {
                 "label": "adminRole",
@@ -6385,16 +6379,16 @@
               }
             ]
           },
-          "t_struct(AddressSet)18837_storage": {
+          "t_struct(AddressSet)18919_storage": {
             "label": "struct EnumerableSetUpgradeable.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)18572_storage"
+                "type": "t_struct(Set)18654_storage"
               }
             ]
           },
-          "t_struct(Set)18572_storage": {
+          "t_struct(Set)18654_storage": {
             "label": "struct EnumerableSetUpgradeable.Set",
             "members": [
               {
