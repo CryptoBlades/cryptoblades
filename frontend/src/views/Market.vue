@@ -40,6 +40,18 @@
             mainText="Search Seller"
             @click="searchSeller()"
           />
+
+          <big-button
+            class="button"
+            mainText="Search Mine"
+            @click="searchMine()"
+          />
+        </div>
+
+        <div class="search-results">
+          <div v-for="result in searchResults" v-bind:key="result">
+            {{ result }}
+          </div>
         </div>
       </div>
 
@@ -60,7 +72,8 @@ export default {
   data() {
     return {
       activeSell: 'weapons',
-      search: ''
+      search: '',
+      searchResults: []
     };
   },
 
@@ -79,16 +92,21 @@ export default {
       'cancelMarketListing', // nftContractAddr, tokenId // event unimplemented
       'purchaseMarketListing', // nftContractAddr, tokenId, maxPrice // event unimplemented
     ]),
+
     async searchNFT() {
       const result = await this.fetchMarketNftPrice({
         nftContractAddr: this.contracts.Weapons.options.address,
-        tokenId: 0,
+        tokenId: this.search,
       });
       console.log(result);
       return result;
     },
 
     searchSeller() {
+
+    },
+
+    searchMine() {
 
     }
   },
