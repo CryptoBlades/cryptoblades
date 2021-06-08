@@ -64,7 +64,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as any)[networkId].address;
   const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as any)[networkId].address;
-  const marketAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (marketNetworks as any)[networkId].address;
+  const marketAddr = process.env.VUE_APP_MARKET_CONTRACT_ADDRESS || (marketNetworks as any)[networkId].address;
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as any, cryptoBladesContractAddr);
   const [charactersAddr, weaponsAddr, randomsAddr] = await Promise.all([
