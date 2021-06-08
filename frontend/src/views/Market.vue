@@ -2,7 +2,7 @@
   <div class="body main-font">
     <div class="row">
       <div class="col">
-        <div>
+        <div class="self-buttons">
           <big-button
             class="button"
             mainText="Sell Weapons"
@@ -14,15 +14,31 @@
             mainText="Sell Characters"
             @click="activeSell = 'characters'"
           />
+
+          <big-button
+            v-if="activeSell === 'weapons'"
+            :disabled="!sellingWeapon"
+            class="button"
+            mainText="List Weapon"
+            @click="listWeapon()"
+          />
+
+          <big-button
+            v-if="activeSell === 'characters'"
+            :disabled="!sellingCharacter"
+            class="button"
+            mainText="List Character"
+            @click="listCharacter()"
+          />
         </div>
 
-        <div v-if="activeSell === 'weapons'">
+        <div class="sell-grid" v-if="activeSell === 'weapons'">
           <weapon-grid
             v-model="sellingWeapon"
           />
         </div>
 
-        <div v-if="activeSell === 'characters'">
+        <div class="sell-grid" v-if="activeSell === 'characters'">
           <character-list
             :value="sellingCharacter"
             @input="selectCharacterForSelling"
@@ -58,9 +74,6 @@
             {{ result }}
           </div>
         </div>
-      </div>
-
-      <div class="col">
       </div>
     </div>
   </div>
@@ -106,6 +119,32 @@ export default {
       this.sellingCharacter = characterId;
     },
 
+    async listCharacter() {
+      const character = this.sellingCharacter;
+      this.sellingCharacter = null;
+
+      const sellFor = prompt('How much SKILL do you want to list this character for?', '0');
+      if(!sellFor) return;
+
+      const val = +sellFor;
+      if(isNaN(val)) return;
+
+      console.log('sell', character, sellFor);
+    },
+
+    async listWeapon() {
+      const weapon = this.sellingWeapon;
+      this.sellingWeapon = null;
+
+      const sellFor = prompt('How much SKILL do you want to list this weapon for?', '0');
+      if(!sellFor) return;
+
+      const val = +sellFor;
+      if(isNaN(val)) return;
+
+      console.log('sell', weapon, sellFor);
+    },
+
     async searchNFT() {
       const result = await this.fetchMarketNftPrice({
         nftContractAddr: this.contracts.Weapons.options.address,
@@ -148,9 +187,15 @@ export default {
   width: 100%;
 }
 
-.search-buttons {
+.search-buttons, .self-buttons {
   margin-top: 10px;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
+}
+
+.sell-grid {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 }
 </style>
