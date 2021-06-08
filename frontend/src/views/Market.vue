@@ -5,40 +5,42 @@
         <div class="self-buttons">
           <big-button
             class="button"
-            mainText="Sell Weapons"
-            @click="activeSell = 'weapons'"
+            mainText="Trade Weapons"
+            @click="setActiveSell('weapon')"
           />
 
           <big-button
             class="button"
-            mainText="Sell Characters"
-            @click="activeSell = 'characters'"
+            mainText="Trade Characters"
+            @click="setActiveSell('character')"
           />
 
           <big-button
-            v-if="activeSell === 'weapons'"
+            v-if="activeSell === 'weapon'"
             :disabled="!sellingWeapon"
             class="button"
             mainText="List Weapon"
-            @click="listWeapon()"
+            @click="listNFT()"
           />
 
           <big-button
-            v-if="activeSell === 'characters'"
+            v-if="activeSell === 'character'"
             :disabled="!sellingCharacter"
             class="button"
             mainText="List Character"
-            @click="listCharacter()"
+            @click="listNFT()"
           />
+          <Hint class="hint" text="When you list an NFT for sale, it is transferred to the
+            <br>market until someone buys it or you cancel the sale" />
         </div>
 
-        <div class="sell-grid" v-if="activeSell === 'weapons'">
+        <div class="sell-grid" v-if="activeSell === 'weapon'">
           <weapon-grid
             v-model="sellingWeapon"
           />
         </div>
 
-        <div class="sell-grid" v-if="activeSell === 'characters'">
+        <div class="sell-grid" v-if="activeSell === 'character'">
           <character-list
             :value="sellingCharacter"
             @input="selectCharacterForSelling"
@@ -47,7 +49,7 @@
       </div>
 
       <div class="col">
-        <input type="text" class="search" v-model="search" placeholder="Seller ID, NFT ID" />
+        <input type="text" class="search" v-model="search" placeholder="Seller Address, NFT ID" />
 
         <div class="search-buttons">
           <big-button
@@ -64,14 +66,19 @@
 
           <big-button
             class="button"
-            mainText="Search Mine"
+            mainText="Search My NFTs"
             @click="searchMine()"
           />
+          <Hint class="hint" text="NFT stands for Non Fungible Token.
+            <br>Weapons and Characters are NFTs of the ERC721 standard" />
         </div>
 
         <div class="search-results">
           <div v-for="result in searchResults" v-bind:key="result">
-            {{ result }}
+            {
+              <weapon-icon v-if="activeSell === 'weapon'" :weapon="lookupWeapon(result)" />
+              <CharacterArt v-if="activeSell === 'character'" :character="lookupCharacter(result)" />
+            }
           </div>
         </div>
       </div>
@@ -84,23 +91,29 @@
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
+import CharacterArt from '../components/CharacterArt.vue';
+import WeaponIcon from '../components/WeaponIcon.vue';
+import Hint from '../components/Hint.vue';
+import Web3 from 'web3';
 import { mapActions, mapState } from 'vuex';
+import { characterFromContract, weaponFromContract } from '../contract-models';
 
 export default {
-  components: { BigButton, CharacterList, WeaponGrid },
+  components: { BigButton, CharacterList, CharacterArt, WeaponGrid, WeaponIcon, Hint },
 
   data() {
     return {
-      activeSell: 'weapons',
+      activeSell: 'weapon',
       search: '',
       searchResults: [],
+      contractAddress: null, // set in mounted
       sellingCharacter: null,
       sellingWeapon: null,
     };
   },
 
   computed: {
-    ...mapState(['contracts']),
+    ...mapState(['contracts', 'defaultAccount']),
   },
 
   methods: {
@@ -119,48 +132,134 @@ export default {
       this.sellingCharacter = characterId;
     },
 
-    async listCharacter() {
-      const character = this.sellingCharacter;
-      this.sellingCharacter = null;
-
-      const sellFor = prompt('How much SKILL do you want to list this character for?', '0');
-      if(!sellFor) return;
-
-      const val = +sellFor;
-      if(isNaN(val)) return;
-
-      console.log('sell', character, sellFor);
+    setActiveSell(to) {
+      this.activeSell = to;
+      this.contractAddress = this.activeSell === 'weapon'
+        ? this.contracts.Weapons.options.address
+        : this.contracts.Characters.options.address;
     },
 
-    async listWeapon() {
-      const weapon = this.sellingWeapon;
-      this.sellingWeapon = null;
+    getNFT_ID() {
+      return this.activeSell === 'weapon' ? this.sellingWeapon : this.sellingCharacter;
+    },
 
-      const sellFor = prompt('How much SKILL do you want to list this weapon for?', '0');
+    async lookupWeapon(weaponId) {
+      // the fetch in state fucks with the player's list so i copied out the necessary part
+      console.log('HERE BE WEAPONID '+weaponId);
+      return weaponFromContract(
+        weaponId,
+        await this.contracts.Weapons.methods.get('' + weaponId).call({ from: this.defaultAccount })
+      );
+    },
+
+    async lookupCharacter(characterId) {
+      // the fetch in state fucks with the player's list so i copied out the necessary part
+      return characterFromContract(
+        characterId,
+        await this.contracts.Characters.methods.get('' + characterId).call({ from: this.defaultAccount })
+      );
+    },
+
+    async lookupNFTPrice(nftId) {
+      return await this.fetchMarketNftPrice({
+        nftContractAddr: this.contractAddress,
+        tokenId: nftId,
+      });
+    },
+
+    async listNFT() {
+
+      const sellFor = prompt('How much SKILL do you want to list this '+this.activeSell+' for?', '0');
       if(!sellFor) return;
 
       const val = +sellFor;
       if(isNaN(val)) return;
 
-      console.log('sell', weapon, sellFor);
+      this.sellingCharacter = null;
+      this.sellingWeapon = null;
+
+      await this.addMarketListing({
+        nftContractAddr: this.contractAddress,
+        tokenId: this.getNFT_ID(),
+        price: this.convertSkillToWei(sellFor)
+      });
+    },
+
+    async repriceNFT() {
+
+      const sellFor = prompt('How much SKILL should this '+this.activeSell+' cost?', '0');
+      if(!sellFor) return;
+
+      const val = +sellFor;
+      if(isNaN(val)) return;
+
+      this.sellingCharacter = null;
+      this.sellingWeapon = null;
+
+      await this.changeMarketListingPrice({
+        nftContractAddr: this.contractAddress,
+        tokenId: this.getNFT_ID(),
+        price: this.convertSkillToWei(sellFor)
+      });
+    },
+
+    async purchaseNFT(nftId) {
+
+      const price = this.lookupNFTPrice(nftId);
+
+      await this.purchaseMarketListing({
+        nftContractAddr: this.contractAddress,
+        tokenId: this.getNFT_ID(),
+        maxPrice: price
+      });
+    },
+
+    async cancelNFTListing() {
+
+      await this.cancelMarketListing({
+        nftContractAddr: this.contractAddress,
+        tokenId: this.getNFT_ID(),
+      });
     },
 
     async searchNFT() {
-      const result = await this.fetchMarketNftPrice({
-        nftContractAddr: this.contracts.Weapons.options.address,
-        tokenId: this.search,
+      //const price = lookupNFTPrice(this.search);
+      // incomplete
+    },
+
+    async searchSeller() {
+      const result = await this.fetchMarketNftIdsBySeller({
+        nftContractAddr: this.contractAddress,
+        sellerAddr: this.search,
       });
       console.log(result);
       return result;
     },
 
-    searchSeller() {
-
+    async searchMine() {
+      const result = await this.fetchMarketNftIdsBySeller({
+        nftContractAddr: this.contractAddress,
+        sellerAddr: this.defaultAccount,
+      });
+      console.log(result);
+      return result;
     },
 
-    searchMine() {
-
-    }
+    convertWeiToSkill(wei) {
+      return Web3.utils.fromWei(
+        wei,
+        'ether'
+      );
+    },
+    convertSkillToWei(wei) {
+      return Web3.utils.toWei(
+        wei,
+        'ether'
+      );
+    },
+  },
+  mounted() {
+    this.contractAddress = this.contracts.Weapons.options.address;
   },
 };
 </script>
@@ -198,4 +297,9 @@ export default {
   justify-content: center;
   flex-direction: column;
 }
+
+.hint {
+  font-size: 2em;
+}
+
 </style>
