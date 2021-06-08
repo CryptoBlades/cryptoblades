@@ -311,7 +311,7 @@
     },
     "links": {},
     "address": "0xc6f252c2CdD4087e30608A35c022ce490B58179b",
-    "transactionHash": "0x70f5847f0074f9074ba0177ad36a0ca29528c11702092167f0fba5d2779b580f"
+    "transactionHash": "0x420f6bb014e3f3dcfafb25349fa479227547b993fc719f4954357afb8ed8276b"
   },
   "build/contracts/CryptoBlades.json": {
     "events": {
