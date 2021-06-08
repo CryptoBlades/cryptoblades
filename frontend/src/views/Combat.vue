@@ -15,6 +15,8 @@
           <br>Character and Weapon match gives bonus" />
       </div>
 
+      <CombatResults v-if="resultsAvailable" :results="fightResults" />
+
       <div class="stamina-warning" v-if="currentCharacterStamina < 20">
         You need 20 stamina to do battle.
       </div>
@@ -24,8 +26,6 @@
           <i class="fas fa-spinner fa-spin"></i>
           Waiting for fight results...
         </div>
-
-        <CombatResults v-if="resultsAvailable" :results="fightResults" />
 
         <div class="header-row">
           <Hint text="Your weapon multiplies your power<br>
