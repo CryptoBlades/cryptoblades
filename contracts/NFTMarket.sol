@@ -154,7 +154,10 @@ contract NFTMarket is
 
     modifier isValidERC721(IERC721 _unsafeTokenAddress) {
         require(
-            ERC165Checker.supportsInterface(address(_unsafeTokenAddress), _INTERFACE_ID_ERC721)
+            ERC165Checker.supportsInterface(
+                address(_unsafeTokenAddress),
+                _INTERFACE_ID_ERC721
+            )
         );
         _;
     }
@@ -186,34 +189,36 @@ contract NFTMarket is
         return tokens;
     }
 
-    function getNumberOfListingsBySeller(IERC721 _unsafeTokenAddress, address _seller)
-        public
-        view
-        returns (uint256)
-    {
-        return getListingIDsBySeller(_unsafeTokenAddress, _seller).length;
+    function getNumberOfListingsBySeller(
+        IERC721 _unsafeTokenAddress,
+        address _seller
+    ) public view returns (uint256) {
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[_unsafeTokenAddress];
+
+        uint256 amount = 0;
+        for (uint256 i = 0; i < listedTokens.length(); i++) {
+            if (
+                listings[_unsafeTokenAddress][listedTokens.at(i)].seller == _seller
+            ) amount++;
+        }
+
+        return amount;
     }
 
     function getListingIDsBySeller(IERC721 _unsafeTokenAddress, address _seller)
         public
         view
-        returns (uint256[] memory)
+        returns (uint256[] memory tokens)
     {
-        uint256[] memory listedTokens = getListingIDs(_unsafeTokenAddress);
+        // NOTE: listedTokens is enumerated twice (once for length calc, once for getting token IDs)
+        uint256 amount = getNumberOfListingsBySeller(_unsafeTokenAddress, _seller);
+        tokens = new uint256[](amount);
 
-        // correct me if I'm wrong but we cant have dynamic arrays in memory?
-        // so we gotta do this double take?
-        uint256 amount = 0;
-        for (uint256 i = 0; i < listedTokens.length; i++) {
-            if (listings[_unsafeTokenAddress][listedTokens[i]].seller == _seller)
-                amount = amount.add(1);
-        }
-
-        uint256[] memory tokens = new uint256[](amount);
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[_unsafeTokenAddress];
 
         uint256 index = 0;
-        for (uint256 i = 0; i < tokens.length; i++) {
-            uint256 id = listedTokens[i];
+        for (uint256 i = 0; i < listedTokens.length(); i++) {
+            uint256 id = listedTokens.at(i);
             if (listings[_unsafeTokenAddress][id].seller == _seller)
                 tokens[index++] = id;
         }
@@ -294,7 +299,12 @@ contract NFTMarket is
         isSeller(_unsafeTokenAddress, _id)
     {
         listings[_unsafeTokenAddress][_id].price = _newPrice;
-        emit ListingPriceChange(msg.sender, _unsafeTokenAddress, _id, _newPrice);
+        emit ListingPriceChange(
+            msg.sender,
+            _unsafeTokenAddress,
+            _id,
+            _newPrice
+        );
     }
 
     function cancelListing(IERC721 _unsafeTokenAddress, uint256 _id)
@@ -360,10 +370,7 @@ contract NFTMarket is
         defaultTax = ABDKMath64x64.divu(_numerator, _denominator);
     }
 
-    function setDefaultTaxAsPercent(uint256 _percent)
-        public
-        restricted
-    {
+    function setDefaultTaxAsPercent(uint256 _percent) public restricted {
         defaultTax = ABDKMath64x64.divu(_percent, 100);
     }
 
@@ -386,12 +393,14 @@ contract NFTMarket is
         );
     }
 
-    function setTaxOnTokenTypeAsPercent(IERC721 _unsafeTokenAddress, uint256 _percent)
-        public
-        restricted
-        isValidERC721(_unsafeTokenAddress)
-    {
-        _setTaxOnTokenType(_unsafeTokenAddress, ABDKMath64x64.divu(_percent, 100));
+    function setTaxOnTokenTypeAsPercent(
+        IERC721 _unsafeTokenAddress,
+        uint256 _percent
+    ) public restricted isValidERC721(_unsafeTokenAddress) {
+        _setTaxOnTokenType(
+            _unsafeTokenAddress,
+            ABDKMath64x64.divu(_percent, 100)
+        );
     }
 
     function setUserBan(address user, bool to) public restricted {
