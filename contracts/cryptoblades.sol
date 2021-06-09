@@ -107,16 +107,22 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 playerRoll = getPlayerPowerRoll(char, wep, uint8((target >> 24) & 0xFF)/*monster trait*/, seed);
         uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target), RandomUtil.combineSeeds(seed,1));
 
-        // TODO: change this to support payout requests for both xp and skill.
-        // To combat gas differences in win/loss:
-        // Probably wanna calculate xp and tokens for lost fights too. then just increment 0 instead of the var
-        // like: if (win) { xpPool[user] += xp; } else { xpPool[user] += 0; }
         uint16 xp = 0;
         int128 tokens = 0;
+        uint256 roll = seed % 10;
 
         if(playerRoll >= monsterRoll) {
             xp = getXpGainForFight(char, wep, target);
             tokens = getTokenGainForFight(target);
+            characters.gainXp(char, xp);
+            if(roll <= 1) {
+                weapons.mint(characters.ownerOf(char), seed, true); // adds a 10% chance of rolling for an NFT on a win with half the star odds as a normal mint.
+             }  
+            _payPlayer(characters.ownerOf(char), tokens);
+        }
+        else{
+            xp = (getXpGainForFight(char, wep, target) / 2); // 1/2 the XP reward for losing the fight.
+            tokens = (getTokenGainForFight(target) / 3); // 1/3 the winnings for losing - to ease the pain.
             characters.gainXp(char, xp);
             _payPlayer(characters.ownerOf(char), tokens);
         }
@@ -262,11 +268,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeapon() public doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
+     function mintWeapon() public oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
         _payContract(msg.sender, mintWeaponFee);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.mint(msg.sender, seed);
+        weapons.mint(msg.sender, seed, false);
     }
 
     function fillStamina(uint256 character) public doesNotHaveMoreThanMaxCharacters isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
