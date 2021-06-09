@@ -1,5 +1,5 @@
 import { Contract as Web3EthContract } from 'web3-eth-contract';
-import type { IERC20, IERC721, IStakingRewards, CryptoBlades, Characters, Weapons, RaidBasic, IRandoms, NFTMarket } from '../../../build/abi-interfaces';
+import type { IERC20, IStakingRewards, CryptoBlades, Characters, Weapons, RaidBasic, IRandoms, NFTMarket } from '../../../build/abi-interfaces';
 
 interface TypeSafeContract<Abi> {
   methods: Abi;
@@ -21,5 +21,4 @@ export interface Contracts {
   Weapons?: Contract<Weapons>;
   RaidBasic?: Contract<RaidBasic>;
   NFTMarket?: Contract<NFTMarket>;
-  NFTGeneric?: Contract<IERC721>;
 }

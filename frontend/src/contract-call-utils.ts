@@ -46,8 +46,8 @@ export async function approveMarketFee( // TEMP because i did not want to change
 }
 
 export async function approveNFTMarket(
-  nftContract: Contracts['NFTGeneric'],
-  marketContract: Contracts['NFTMarket'],
+  nftContract: NonNullable<Contracts['Weapons'] | Contracts['Characters']>,
+  marketContract: NonNullable<Contracts['NFTMarket']>,
   approveOpts: Web3JsCallOptions,
   tokenId: string
 ) {
