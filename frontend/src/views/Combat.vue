@@ -18,7 +18,7 @@
       <CombatResults v-if="resultsAvailable" :results="fightResults" />
 
       <div class="stamina-warning" v-if="currentCharacterStamina < 40">
-        You need 20 stamina to do battle.
+        You need 40 stamina to do battle.
       </div>
 
       <div v-if="currentCharacterStamina >= 40">
@@ -47,7 +47,7 @@
               class="encounter-button"
               :mainText="`Fight!`"
               :subText="`Power ${e.power}`"
-              v-tooltip="'Cost 20 stamina'"
+              v-tooltip="'Cost 40 stamina'"
               @click="onClickEncounter(e)"
             />
           </li>
