@@ -1,5 +1,5 @@
 <template>
-  <div class="body main-font">
+  <div class="body main-font" @mousemove="updateTime()">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <h1 class="error" v-if="error !== null">Error: {{ error }}</h1>
 
@@ -17,11 +17,15 @@
 
       <CombatResults v-if="resultsAvailable" :results="fightResults" />
 
-      <div class="stamina-warning" v-if="currentCharacterStamina < 40">
-        You need 40 stamina to do battle.
+      <div class="message-box" v-if="currentCharacterStamina < 20">
+        You need 20 stamina to do battle.
       </div>
 
-      <div v-if="currentCharacterStamina >= 40">
+      <div class="message-box" v-if="time===59">
+        You cannot do battle during the last minute of the hour. Stand Fast!
+      </div>
+
+      <div v-if="currentCharacterStamina >= 20">
         <div class="loading-container waiting" v-if="waitingResults" margin="auto">
           <i class="fas fa-spinner fa-spin"></i>
           Waiting for fight results...
@@ -47,7 +51,8 @@
               class="encounter-button"
               :mainText="`Fight!`"
               :subText="`Power ${e.power}`"
-              v-tooltip="'Cost 40 stamina'"
+              v-tooltip="'Cost 20 stamina'"
+              :disabled="time===59"
               @click="onClickEncounter(e)"
             />
           </li>
@@ -88,6 +93,7 @@ export default {
       waitingResults: false,
       resultsAvailable: false,
       fightResults: null,
+      time: null
     };
   },
 
@@ -127,11 +133,15 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp']),
+    ...mapActions(['fetchTargets', 'doEncounter']),
     getEnemyArt,
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
     },
+    updateTime() {
+      this.time = new Date().getMinutes();
+    },
+
     async onClickEncounter(targetToFight) {
       if (!this.selectedWeaponId || !this.currentCharacterId) {
         return;
@@ -154,9 +164,6 @@ export default {
         this.resultsAvailable = true;
         // results are passed to the CombatResults element
         this.waitingResults = false;
-
-        this.fetchFightRewardSkill();
-        this.fetchFightRewardXp();
 
         /*if (success) {
           alert('Battle succeeded! You rolled '+playerRoll
@@ -246,7 +253,7 @@ export default {
   font-size: 2em;
 }
 
-.stamina-warning {
+.message-box {
   display: flex;
   justify-content: center;
   width: 100%;
