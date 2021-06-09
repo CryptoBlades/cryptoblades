@@ -17,11 +17,11 @@
 
       <CombatResults v-if="resultsAvailable" :results="fightResults" />
 
-      <div class="stamina-warning" v-if="currentCharacterStamina < 20">
+      <div class="stamina-warning" v-if="currentCharacterStamina < 40">
         You need 20 stamina to do battle.
       </div>
 
-      <div v-if="currentCharacterStamina >= 20">
+      <div v-if="currentCharacterStamina >= 40">
         <div class="loading-container waiting" v-if="waitingResults" margin="auto">
           <i class="fas fa-spinner fa-spin"></i>
           Waiting for fight results...
