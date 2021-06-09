@@ -1,5 +1,6 @@
 <template>
   <div class="body main-font">
+    <div class="outcome" v-if="marketOutcome !== null">{{ marketOutcome }}</div>
     <div class="row">
       <div class="col">
         <div class="self-buttons">
@@ -109,6 +110,7 @@ export default {
       contractAddress: null, // set in mounted
       sellingCharacter: null,
       sellingWeapon: null,
+      marketOutcome: null,
     };
   },
 
@@ -178,11 +180,15 @@ export default {
       this.sellingCharacter = null;
       this.sellingWeapon = null;
 
-      await this.addMarketListing({
+      const results = await this.addMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.getNFT_ID(),
         price: this.convertSkillToWei(sellFor)
       });
+
+      if(!results[0])
+        this.marketOutcome = 'Successfully listed '
+        +this.activeSell+' '+results[1]+' for '+this.convertWeiToSkill(results[2]);
     },
 
     async repriceNFT() {
@@ -196,30 +202,43 @@ export default {
       this.sellingCharacter = null;
       this.sellingWeapon = null;
 
-      await this.changeMarketListingPrice({
+      const results = await this.changeMarketListingPrice({
         nftContractAddr: this.contractAddress,
         tokenId: this.getNFT_ID(),
         price: this.convertSkillToWei(sellFor)
       });
+
+      if(!results[0])
+        this.marketOutcome = 'Successfully changed price for '
+        +this.activeSell+' '+results[1]+' to '+this.convertWeiToSkill(results[2]);
     },
 
     async purchaseNFT(nftId) {
 
       const price = this.lookupNFTPrice(nftId);
 
-      await this.purchaseMarketListing({
+      const results = await this.purchaseMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.getNFT_ID(),
         maxPrice: price
       });
+
+      if(!results[0])
+        this.marketOutcome = 'Successfully purchased '
+        +this.activeSell+' '+results[1]+' for '+this.convertWeiToSkill(results[2])
+          +' from '+results[0];
     },
 
     async cancelNFTListing() {
 
-      await this.cancelMarketListing({
+      const results = await this.cancelMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.getNFT_ID(),
       });
+
+      if(!results[0])
+        this.marketOutcome = 'Successfully taken '
+        +this.activeSell+' '+results[1]+' off the market.';
     },
 
     async searchNFT() {
@@ -300,6 +319,12 @@ export default {
 
 .hint {
   font-size: 2em;
+}
+
+.outcome {
+  margin: auto;
+  text-align: center;
+  font-size: 1em;
 }
 
 </style>

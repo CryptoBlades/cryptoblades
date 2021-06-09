@@ -404,6 +404,20 @@ export function createStore(web3: Web3) {
               ]);
             })
           );
+
+          subscriptions.push(
+            state.contracts.NFTMarket!.events.PurchasedListing({ filter: { seller: state.defaultAccount } }, async (err: Error, data: any) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+
+              console.log('PurchasedListing', data);
+
+              await dispatch('fetchSkillBalance');
+            })
+          );
+
         }
 
         function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias) {
@@ -505,6 +519,16 @@ export function createStore(web3: Web3) {
           ownedWeaponIds: Array.from(ownedWeaponIds)
         });
         await dispatch('fetchWeapons', ownedWeaponIds);
+      },
+
+      async updateCharacterIds({ state, dispatch, commit }) {
+        if(featureFlagStakeOnly) return;
+
+        const ownedCharacterIds = await state.contracts.CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state));
+        commit('updateUserDetails', {
+          ownedCharacterIds: Array.from(ownedCharacterIds)
+        });
+        await dispatch('fetchCharacters', ownedCharacterIds);
       },
 
       async fetchSkillBalance({ state, commit }) {
@@ -878,7 +902,7 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
-      async addMarketListing({ state }, { nftContractAddr, tokenId, price }) {
+      async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price }) {
 
         await approveNFTMarket(
           nftContractAddr,
@@ -887,24 +911,60 @@ export function createStore(web3: Web3) {
           tokenId
         );
 
+        const res =
         await state.contracts.NFTMarket!.methods.addListing(nftContractAddr, tokenId, price).send({
           from: state.defaultAccount,
         });
+
+        if(nftContractAddr === state.contracts.Weapons)
+          await dispatch('updateWeaponIds');
+        else if(nftContractAddr === state.contracts.Characters)
+          await dispatch('updateCharacterIds');
+
+        const {
+          seller,
+          nftID
+        } = res.events.NewListing.returnValues;
+
+        return [seller, nftID, price];
       },
 
       async changeMarketListngPrice({ state }, { nftContractAddr, tokenId, newPrice }) {
+
+        const res =
         await state.contracts.NFTMarket!.methods.changeListingPrice(nftContractAddr, tokenId, newPrice).send({
           from: state.defaultAccount,
         });
+
+        const {
+          seller,
+          nftID
+        } = res.events.ListingPriceChange.returnValues;
+
+        return [seller, nftID, newPrice];
       },
 
-      async cancelMarketListing({ state }, { nftContractAddr, tokenId }) {
+      async cancelMarketListing({ state, dispatch }, { nftContractAddr, tokenId }) {
+
+        const res =
         await state.contracts.NFTMarket!.methods.cancelListing(nftContractAddr, tokenId).send({
           from: state.defaultAccount,
         });
+
+        if(nftContractAddr === state.contracts.Weapons)
+          await dispatch('updateWeaponIds');
+        else if(nftContractAddr === state.contracts.Characters)
+          await dispatch('updateCharacterIds');
+
+        const {
+          seller,
+          nftID
+        } = res.events.CancelledListing.returnValues;
+
+        return [seller, nftID];
       },
 
-      async purchaseMarketListing({ state }, { nftContractAddr, tokenId, maxPrice }) {
+      async purchaseMarketListing({ state, dispatch }, { nftContractAddr, tokenId, maxPrice }) {
 
         await approveMarketFee(
           state.contracts.NFTMarket!,
@@ -913,9 +973,23 @@ export function createStore(web3: Web3) {
           maxPrice
         );
 
+        const res =
         await state.contracts.NFTMarket!.methods.purchaseListing(nftContractAddr, tokenId, maxPrice).send({
           from: state.defaultAccount,
         });
+
+        if(nftContractAddr === state.contracts.Weapons)
+          await dispatch('updateWeaponIds');
+        else if(nftContractAddr === state.contracts.Characters)
+          await dispatch('updateCharacterIds');
+
+        const {
+          seller,
+          nftID,
+          price
+        } = res.events.PurchasedListing.returnValues;
+
+        return [seller, nftID, price];
       },
     }
   });
