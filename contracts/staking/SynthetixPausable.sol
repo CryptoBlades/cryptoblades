@@ -1,4 +1,4 @@
-pragma solidity ^0.6.2;
+// SPDX-License-Identifier: MIT
 
 // Inheritance
 import "./Owned.sol";
@@ -29,7 +29,7 @@ abstract contract SynthetixPausable is Owned {
 
         // If applicable, set the last pause time.
         if (paused) {
-            lastPauseTime = now;
+            lastPauseTime = block.timestamp;
         }
 
         // Let everyone know that our pause state has changed.

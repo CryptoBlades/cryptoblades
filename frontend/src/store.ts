@@ -12,7 +12,7 @@ import {
 } from './contract-models';
 import { allStakeTypes, Contracts, IStakeOverviewState, IStakeState, IState, IWeb3EventSubscription, StakeType } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee, approveNFTMarket, approveMarketFee } from './contract-call-utils';
+import { approveFee } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
@@ -838,85 +838,7 @@ export function createStore(web3: Web3) {
         );
 
         commit('updateAllIsOwnedCharacterRaidingById', isOwnedCharacterRaiding);
-      },
-
-      async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
-        // returns an array of bignumbers (these are nft IDs)
-        return await state.contracts.NFTMarket!.methods
-          .getListingIDs(
-            nftContractAddr
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchMarketNftIdsBySeller({ state }, { nftContractAddr, sellerAddr }) {
-        // returns an array of bignumbers (these are nft IDs)
-        return await state.contracts.NFTMarket!.methods
-          .getListingIDsBySeller(
-            nftContractAddr,
-            sellerAddr
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchMarketNftPrice({ state }, { nftContractAddr, tokenId }) {
-        // returns the listing's price in skill wei
-        return await state.contracts.NFTMarket!.methods
-          .getFinalPrice(
-            nftContractAddr,
-            tokenId
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchMarketTax({ state }, { nftContractAddr }) {
-        // returns the tax on the nfts at the address in 64x64 fixed point
-        return await state.contracts.NFTMarket!.methods
-          .tax(
-            nftContractAddr
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async addMarketListing({ state }, { nftContractAddr, tokenId, price }) {
-
-        await approveNFTMarket(
-          nftContractAddr,
-          state.contracts.NFTMarket,
-          defaultCallOptions(state),
-          tokenId
-        );
-
-        await state.contracts.NFTMarket!.methods.addListing(nftContractAddr, tokenId, price).send({
-          from: state.defaultAccount,
-        });
-      },
-
-      async changeMarketListngPrice({ state }, { nftContractAddr, tokenId, newPrice }) {
-        await state.contracts.NFTMarket!.methods.changeListingPrice(nftContractAddr, tokenId, newPrice).send({
-          from: state.defaultAccount,
-        });
-      },
-
-      async cancelMarketListing({ state }, { nftContractAddr, tokenId }) {
-        await state.contracts.NFTMarket!.methods.cancelListing(nftContractAddr, tokenId).send({
-          from: state.defaultAccount,
-        });
-      },
-
-      async purchaseMarketListing({ state }, { nftContractAddr, tokenId, maxPrice }) {
-
-        await approveMarketFee(
-          state.contracts.NFTMarket!,
-          state.contracts.SkillToken,
-          defaultCallOptions(state),
-          maxPrice
-        );
-
-        await state.contracts.NFTMarket!.methods.purchaseListing(nftContractAddr, tokenId, maxPrice).send({
-          from: state.defaultAccount,
-        });
-      },
+      }
     }
   });
 }

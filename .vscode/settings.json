@@ -1,6 +1,8 @@
 {
-    "solidity.compileUsingRemoteVersion": "v0.6.5+commit.f956cc89",
+    "solidity.compileUsingRemoteVersion": "v0.8.0+commit.c7dfd78e",
     "eslint.workingDirectories": [
         "./frontend"
-    ]
+    ],
+    "solidity.defaultCompiler": "remote",
+    "solidity.validationDelay": 1000
 }

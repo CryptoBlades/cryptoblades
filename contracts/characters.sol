@@ -1,15 +1,16 @@
-pragma solidity ^0.6.0;
+// SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
+//import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./util.sol";
 
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
-    using SafeMath for uint16;
-    using SafeMath for uint8;
+    //using SafeMath for uint16;
+    //using SafeMath for uint8;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     bytes32 public constant NO_OWNED_LIMIT = keccak256("NO_OWNED_LIMIT");
@@ -19,6 +20,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    //TODO: This code was copy-pasted from here: https://forum.openzeppelin.com/t/derived-contract-must-override-function-supportsinterface/6315
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, AccessControlUpgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 
     /*
@@ -75,7 +81,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         uint16 xp = 0;
         uint8 level = 0; // 1
         uint8 trait = uint8(RandomUtil.randomSeededMinMax(0,3,seed));
-        uint64 staminaTimestamp = uint64(now.sub(getStaminaMaxWait()));
+        uint64 staminaTimestamp = uint64(block.timestamp - getStaminaMaxWait());
 
         tokens.push(Character(xp, level, trait, staminaTimestamp));
         cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
@@ -87,16 +93,17 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokens[id].level;
     }
 
+    //TODO: Check Math...
     function getRequiredXpForNextLevel(uint8 currentLevel) public pure returns (uint16) {
         uint xp = 16;
         for(uint i = 0; i < currentLevel; i++) {
             if (xp <= 112)
             {
-                xp = xp.add(xp.div(10));
+                xp = xp + (xp / 10);
             }
             else
             {
-                xp = xp.add(i.sub(14).add(1));
+                xp = xp + (i - 14) + (1);
             }
         }
         return uint16(xp);
@@ -115,9 +122,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         // 22440 at lvl 105 (~3 years)
         // 92300 at lvl 255 (heat death of the universe)
         return uint24(
-            uint256(1000)
-                .add(level.mul(10))
-                .mul(level.div(10).add(1))
+            //TODO: MATH!!!
+            uint256(1000) + level* 10 * (level / 10 + 1)
         );
     }
 
@@ -132,11 +138,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function gainXp(uint256 id, uint16 xp) public restricted {
         Character storage char = tokens[id];
         if(char.level < 255) {
-            uint newXp = char.xp.add(xp);
+            uint newXp = char.xp + xp;
             uint requiredToLevel = getRequiredXpForNextLevel(char.level); // technically next level
             while(newXp >= requiredToLevel) {
-                newXp = newXp.sub(requiredToLevel);
-                char.level = uint8(char.level.add(1));
+                newXp = newXp - requiredToLevel;
+                char.level = uint8(char.level + 1);
                 emit LevelUp(ownerOf(id), id, char.level);
                 requiredToLevel = getRequiredXpForNextLevel(char.level);
             }
@@ -154,12 +160,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function drainStamina(uint256 id, uint8 amount) public restricted returns(bool) {
         if(getStaminaPoints(id) >= amount) {
-            uint64 drainTime = uint64(amount.mul(secondsPerStamina));
+            uint64 drainTime = uint64(amount * secondsPerStamina);
             if(isStaminaFull(id)) { // if stamina full, we reset timestamp and drain from that
-                setStaminaTimestamp(id, uint64(now.sub(getStaminaMaxWait()).add(drainTime)));
+                setStaminaTimestamp(id, uint64(block.timestamp - (getStaminaMaxWait()) + (drainTime)));
             }
             else {
-                setStaminaTimestamp(id, uint64(uint256(getStaminaTimestamp(id)).add(drainTime)));
+                //TODO: MATH
+                setStaminaTimestamp(id, uint64(uint256(getStaminaTimestamp(id)) + drainTime));
             }
             return true;
         }
@@ -170,10 +177,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function getStaminaPoints(uint256 id) public view returns (uint8) {
         uint64 timestamp = getStaminaTimestamp(id);
-        if(timestamp  > now)
+        if(timestamp  > block.timestamp)
             return 0;
-
-        uint256 points = now.sub(timestamp).div(secondsPerStamina);
+        //TODO: Math
+        uint256 points = block.timestamp - (timestamp / secondsPerStamina);
         if(points > maxStamina) {
             points = maxStamina;
         }
@@ -185,7 +192,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getStaminaMaxWait() public pure returns (uint64) {
-        return uint64(maxStamina.mul(secondsPerStamina));
+        return uint64(maxStamina * (secondsPerStamina));
+    }
+
+    mapping(address => mapping(uint256 => uint256)) private ownerTokens;
+
+    function tokenOfOwnerByIndex(address _owner, uint256 _index)  public view returns (uint tokenId){
+        return ownerTokens[_owner][_index];
     }
 
     function _beforeTokenTransfer(address /* from */, address to, uint256 /* tokenId */) internal override {

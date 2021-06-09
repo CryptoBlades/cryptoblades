@@ -1,7 +1,7 @@
-pragma solidity ^0.6.2;
+// SPDX-License-Identifier: MIT
 
 // Inheritance
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/rewardsdistributionrecipient

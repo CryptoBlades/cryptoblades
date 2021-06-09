@@ -1,4 +1,4 @@
-pragma solidity ^0.6.2;
+// SPDX-License-Identifier: MIT
 
 // https://docs.synthetix.io/contracts/source/contracts/owned
 contract Owned {

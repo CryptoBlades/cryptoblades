@@ -17,9 +17,6 @@
       <router-link :to="{ name: 'raid' }"><span>Raid</span></router-link>
     </li>
     <li>
-      <router-link :to="{ name: 'market' }"><span>Market</span></router-link>
-    </li>
-    <li>
       <router-link :to="{ name: 'select-stake-type' }"><span>Stake</span></router-link>
     </li>
     <li>

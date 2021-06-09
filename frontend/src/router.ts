@@ -6,7 +6,6 @@ import Combat from './views/Combat.vue';
 import Stake from './views/Stake.vue';
 import SelectStakeType from './views/SelectStakeType.vue';
 import Raid from './views/Raid.vue';
-import Market from './views/Market.vue';
 
 import { raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly } from './feature-flags';
 
@@ -26,7 +25,6 @@ function createRouter() {
       { path: '/', name: 'plaza', component: Plaza },
       { path: '/blacksmith', name: 'blacksmith', component: Blacksmith },
       { path: '/combat', name: 'combat', component: Combat },
-      { path: '/market', name: 'market', component: Market },
       { path: '/stake', name: 'select-stake-type', component: SelectStakeType },
       { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
     ]

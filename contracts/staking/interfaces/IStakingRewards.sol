@@ -1,4 +1,4 @@
-pragma solidity >=0.4.24;
+// SPDX-License-Identifier: MIT
 
 // https://docs.synthetix.io/contracts/source/interfaces/istakingrewards
 interface IStakingRewards {

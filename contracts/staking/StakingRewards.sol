@@ -1,9 +1,9 @@
-pragma solidity ^0.6.2;
+// SPDX-License-Identifier: MIT
 
-import "../../node_modules/@openzeppelin/contracts/math/Math.sol";
-import "../../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../../node_modules/@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "../../node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
+//import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Inheritance
 import "./interfaces/IStakingRewards.sol";
@@ -19,7 +19,7 @@ contract StakingRewards is
     Failsafe,
     SynthetixPausable
 {
-    using SafeMath for uint256;
+    //using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     /* ========== STATE VARIABLES ========== */
@@ -79,44 +79,51 @@ contract StakingRewards is
             return rewardPerTokenStored;
         }
         return
-            rewardPerTokenStored.add(
+            rewardPerTokenStored + (
                 lastTimeRewardApplicable()
-                    .sub(lastUpdateTime)
-                    .mul(rewardRate)
-                    .mul(1e18)
-                    .div(_totalSupply)
+                     - (lastUpdateTime)
+                     * (rewardRate)
+                     * (1e18)
+                     / (_totalSupply)
             );
     }
 
     function earned(address account) public view override returns (uint256) {
         return
             _balances[account]
-                .mul(rewardPerToken().sub(userRewardPerTokenPaid[account]))
-                .div(1e18)
-                .add(rewards[account]);
+                 * (rewardPerToken() - (userRewardPerTokenPaid[account]))
+                 / (1e18)
+                 + (rewards[account]);
     }
 
     function getRewardForDuration() external view override returns (uint256) {
-        return rewardRate.mul(rewardsDuration);
+        return rewardRate * (rewardsDuration);
     }
 
+    //TODO: Check this logic, I had to re-write it in the SafeMath removal.
     function getStakeRewardDistributionTimeLeft()
         external
-        override
         view
+        override
         returns (uint256)
     {
-        (bool success, uint256 diff) = periodFinish.trySub(block.timestamp);
-        return success ? diff : 0;
+        //(bool success, uint256 diff) = periodFinish.trySub(block.timestamp);
+        uint256 time = periodFinish - block.timestamp;
+        if( time < 0){
+            return 0;
+        }
+        
+        return time;
     }
 
-    function getStakeUnlockTimeLeft() external override view returns (uint256) {
-        (bool success, uint256 diff) =
-            _stakeTimestamp[msg.sender].add(minimumStakeTime).trySub(
-                block.timestamp
-            );
-        return success ? diff : 0;
-    }
+    function getStakeUnlockTimeLeft() external view override returns (uint256) {
+        uint256 time = _stakeTimestamp[msg.sender] + ((minimumStakeTime) - (block.timestamp));
+            
+            if(time > 0){
+                return time;
+            }
+           return 0; 
+        }  
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
@@ -129,8 +136,8 @@ contract StakingRewards is
         updateReward(msg.sender)
     {
         require(amount > 0, "Cannot stake 0");
-        _totalSupply = _totalSupply.add(amount);
-        _balances[msg.sender] = _balances[msg.sender].add(amount);
+        _totalSupply = _totalSupply + (amount);
+        _balances[msg.sender] = _balances[msg.sender] + (amount);
         if (_stakeTimestamp[msg.sender] == 0) {
             _stakeTimestamp[msg.sender] = block.timestamp;
         }
@@ -148,12 +155,12 @@ contract StakingRewards is
         require(amount > 0, "Cannot withdraw 0");
         require(
             minimumStakeTime == 0 ||
-                block.timestamp.sub(_stakeTimestamp[msg.sender]) >=
+                block.timestamp - (_stakeTimestamp[msg.sender]) >=
                 minimumStakeTime,
             "Cannot withdraw until minimum staking time has passed"
         );
-        _totalSupply = _totalSupply.sub(amount);
-        _balances[msg.sender] = _balances[msg.sender].sub(amount);
+        _totalSupply = _totalSupply - (amount);
+        _balances[msg.sender] = _balances[msg.sender] - (amount);
         if (_balances[msg.sender] == 0) {
             _stakeTimestamp[msg.sender] = 0;
         }
@@ -170,7 +177,7 @@ contract StakingRewards is
     {
         require(
             minimumStakeTime == 0 ||
-                block.timestamp.sub(_stakeTimestamp[msg.sender]) >=
+                block.timestamp - (_stakeTimestamp[msg.sender]) >=
                 minimumStakeTime,
             "Cannot get reward until minimum staking time has passed"
         );
@@ -190,8 +197,8 @@ contract StakingRewards is
     function recoverOwnStake() external failsafeMode {
         uint256 amount = _balances[msg.sender];
         if (amount > 0) {
-            _totalSupply = _totalSupply.sub(amount);
-            _balances[msg.sender] = _balances[msg.sender].sub(amount);
+            _totalSupply = _totalSupply - (amount);
+            _balances[msg.sender] = _balances[msg.sender] - (amount);
             stakingToken.safeTransfer(msg.sender, amount);
         }
     }
@@ -206,11 +213,11 @@ contract StakingRewards is
         updateReward(address(0))
     {
         if (block.timestamp >= periodFinish) {
-            rewardRate = reward.div(rewardsDuration);
+            rewardRate = reward / (rewardsDuration);
         } else {
-            uint256 remaining = periodFinish.sub(block.timestamp);
-            uint256 leftover = remaining.mul(rewardRate);
-            rewardRate = reward.add(leftover).div(rewardsDuration);
+            uint256 remaining = periodFinish - (block.timestamp);
+            uint256 leftover = remaining * (rewardRate);
+            rewardRate = reward + (leftover) / (rewardsDuration);
         }
 
         // Ensure the provided reward amount is not more than the balance in the contract.
@@ -219,12 +226,12 @@ contract StakingRewards is
         // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
         uint256 balance = rewardsToken.balanceOf(address(this));
         require(
-            rewardRate <= balance.div(rewardsDuration),
+            rewardRate <= balance / (rewardsDuration),
             "Provided reward too high"
         );
 
         lastUpdateTime = block.timestamp;
-        periodFinish = block.timestamp.add(rewardsDuration);
+        periodFinish = block.timestamp + (rewardsDuration);
         emit RewardAdded(reward);
     }
 
@@ -290,7 +297,7 @@ contract StakingRewards is
         // stake() and withdraw() should guarantee that
         // _totalSupply <= stakingToken.balanceOf(this)
         uint256 stakingTokenAmountBelongingToOwner =
-            stakingToken.balanceOf(address(this)).sub(_totalSupply);
+            stakingToken.balanceOf(address(this)) - (_totalSupply);
 
         if (stakingTokenAmountBelongingToOwner > 0) {
             stakingToken.safeTransfer(
@@ -316,11 +323,11 @@ contract StakingRewards is
 
     /* ========== EVENTS ========== */
 
-    event RewardAdded(uint256 reward);
-    event Staked(address indexed user, uint256 amount);
-    event Withdrawn(address indexed user, uint256 amount);
-    event RewardPaid(address indexed user, uint256 reward);
-    event RewardsDurationUpdated(uint256 newDuration);
-    event MinimumStakeTimeUpdated(uint256 newMinimumStakeTime);
+    // event RewardAdded(uint256 reward);
+    // event Staked(address indexed user, uint256 amount);
+    // event Withdrawn(address indexed user, uint256 amount);
+    // event RewardPaid(address indexed user, uint256 reward);
+    // event RewardsDurationUpdated(uint256 newDuration);
+    // event MinimumStakeTimeUpdated(uint256 newMinimumStakeTime);
     event Recovered(address token, uint256 amount);
 }

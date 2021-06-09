@@ -1,4 +1,4 @@
-pragma solidity ^0.6.5;
+// SPDX-License-Identifier: MIT
 
 interface IRandoms {
     // Views

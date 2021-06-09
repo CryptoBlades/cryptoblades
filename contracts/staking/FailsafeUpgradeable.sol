@@ -1,6 +1,6 @@
-pragma solidity ^0.6.2;
+// SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 abstract contract FailsafeUpgradeable is Initializable, OwnableUpgradeable {

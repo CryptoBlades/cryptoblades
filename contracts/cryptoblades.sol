@@ -1,8 +1,8 @@
-pragma solidity ^0.6.0;
+// SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
+import "../node_modules/@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IRandoms.sol";
@@ -107,16 +107,22 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 playerRoll = getPlayerPowerRoll(char, wep, uint8((target >> 24) & 0xFF)/*monster trait*/, seed);
         uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target), RandomUtil.combineSeeds(seed,1));
 
-        // TODO: change this to support payout requests for both xp and skill.
-        // To combat gas differences in win/loss:
-        // Probably wanna calculate xp and tokens for lost fights too. then just increment 0 instead of the var
-        // like: if (win) { xpPool[user] += xp; } else { xpPool[user] += 0; }
         uint16 xp = 0;
         int128 tokens = 0;
+        uint256 roll = seed % 10;
 
         if(playerRoll >= monsterRoll) {
             xp = getXpGainForFight(char, wep, target);
             tokens = getTokenGainForFight(target);
+            characters.gainXp(char, xp);
+            if(roll <= 1) {
+                weapons.mint(characters.ownerOf(char), seed, true); // adds a 10% chance of rolling for an NFT on a win with half the star odds as a normal mint.
+             }  
+            _payPlayer(characters.ownerOf(char), tokens);
+        }
+        else{
+            xp = (getXpGainForFight(char, wep, target) / 2); // 1/2 the XP reward for losing the fight.
+            tokens = (getTokenGainForFight(target) / 3); // 1/3 the winnings for losing - to ease the pain.
             characters.gainXp(char, xp);
             _payPlayer(characters.ownerOf(char), tokens);
         }
@@ -194,7 +200,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 playerPower = getPlayerPower(char, wep);
 
         uint256 baseSeed = RandomUtil.combineSeeds(
-            RandomUtil.combineSeeds(characters.getStaminaTimestamp(char), getCurrentHour()),
+            RandomUtil.combineSeeds(characters.getStaminaTimestamp(char), block.timestamp),
             playerPower
         );
 
@@ -262,11 +268,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeapon() public doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
+    function mintWeapon() public oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
         _payContract(msg.sender, mintWeaponFee);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.mint(msg.sender, seed);
+        weapons.mint(msg.sender, seed, false);
     }
 
     function fillStamina(uint256 character) public doesNotHaveMoreThanMaxCharacters isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
@@ -421,10 +427,4 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function usdToSkill(int128 usdAmount) public view returns (uint256) {
         return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
     }
-
-    function getCurrentHour() public view returns (uint256) {
-        // "now" returns unix time since 1970 Jan 1, in seconds
-        return now.div(1 hours);
-    }
-
 }

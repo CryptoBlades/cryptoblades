@@ -1,6 +1,6 @@
-pragma solidity ^0.6.0;
+// SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./raid.sol";
 
@@ -25,6 +25,8 @@ contract RaidBasic is Initializable, Raid {
         staminaDrain = 12 * 60 * 60;
     }
 
+    uint256 raiderAddress = uint256(uint160(address(msg.sender)));
+
     function addRaider(uint256 characterID, uint256 weaponID) public override {
         require(characters.ownerOf(characterID) == msg.sender);
         require(weapons.ownerOf(weaponID) == msg.sender);
@@ -34,7 +36,7 @@ contract RaidBasic is Initializable, Raid {
         participation[characterID] = true;
         // we drain ~12h of stamina from the character
         // we may want to have a specific lockout in the future
-        characters.setStaminaTimestamp(characterID, uint64(now + (staminaDrain)));
+        characters.setStaminaTimestamp(characterID, uint64(block.timestamp + (staminaDrain)));
 
         int128 traitMultiplier = game.getPlayerTraitBonusAgainst(
             characters.getTrait(characterID),
@@ -43,7 +45,7 @@ contract RaidBasic is Initializable, Raid {
         );
         uint24 power = uint24(traitMultiplier.mulu(game.getPlayerFinalPower(characterID, weaponID)));
         totalPower += power;
-        raiders.push(Raider(uint256(msg.sender), characterID, weaponID, power));
+        raiders.push(Raider(raiderAddress, characterID, weaponID, power));
         emit RaiderJoined(msg.sender, characterID, weaponID, power);
     }
 
@@ -51,11 +53,11 @@ contract RaidBasic is Initializable, Raid {
         require(completed == false, "Raid already completed, run reset first");
         completed = true;
 
-        // TODO revisit rewards
-        for(uint i = 0; i < raiders.length; i++) {
-            emit XpReward(address(raiders[i].owner), raiders[i].charID, 96);
-            characters.gainXp(raiders[i].charID, 96);
-        }
+        // TODO revisit rewards and correct casting -> https://stackoverflow.com/questions/43318077/solidity-type-address-not-convertible-to-type-uint256
+        // for(uint i = 0; i < raiders.length; i++) {
+        //     emit XpReward(address(raiders[i].owner), raiders[i].charID, 96);
+        //     characters.gainXp(raiders[i].charID, 96);
+        // }
         /*for(uint i = 0; i < raiders.length; i++) {
             Raider memory r = raiders[i];
 
@@ -65,12 +67,12 @@ contract RaidBasic is Initializable, Raid {
             emit SkillWinner(address(r.owner), payout);
         }*/
 
-        for(uint i = 0; i < weaponDrops.length; i++) {
-            Raider memory r = raiders[RandomUtil.randomSeededMinMax(0, raiders.length-1, RandomUtil.combineSeeds(seed,i))];
-            game.approveContractWeaponFor(weaponDrops[i], address(this));
-            weapons.transferFrom(address(game), address(r.owner), weaponDrops[i]);
-            emit WeaponWinner(address(r.owner), weaponDrops[i]);
-        }
+        // for(uint i = 0; i < weaponDrops.length; i++) {
+        //     Raider memory r = raiders[RandomUtil.randomSeededMinMax(0, raiders.length-1, RandomUtil.combineSeeds(seed,i))];
+        //     game.approveContractWeaponFor(weaponDrops[i], address(this));
+        //     weapons.transferFrom(address(game), address(r.owner), weaponDrops[i]);
+        //     emit WeaponWinner(address(r.owner), weaponDrops[i]);
+        // }
 
         emit RaidCompleted();
     }

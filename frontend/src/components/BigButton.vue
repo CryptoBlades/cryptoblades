@@ -1,5 +1,5 @@
 <template>
-  <button :disabled="disabled" class="button main-font dark-bg-text" @click="$emit('click')">
+  <button class="button main-font dark-bg-text" @click="$emit('click')">
     <h1>{{ mainText }}</h1>
     <h2>{{ subText }}</h2>
   </button>
@@ -7,7 +7,7 @@
 
 <script lang="ts">
 export default {
-  props: ['mainText', 'subText', 'disabled'],
+  props: ['mainText', 'subText'],
 };
 </script>
 

@@ -1,14 +1,14 @@
-pragma solidity ^0.6.0;
+// SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/utils/EnumerableSet.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../node_modules/@openzeppelin/contracts/introspection/ERC165Checker.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+//import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
 
 // *****************************************************************************
@@ -19,7 +19,7 @@ contract NFTMarket is
     Initializable,
     AccessControlUpgradeable
 {
-    using SafeMath for uint256;
+    //using SafeMath for uint256;
     using ABDKMath64x64 for int128; // kroge beware
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -260,9 +260,7 @@ contract NFTMarket is
         returns (uint256)
     {
         return
-            getSellerPrice(_tokenAddress, _id).add(
-                getTaxOnListing(_tokenAddress, _id)
-            );
+            getSellerPrice(_tokenAddress, _id) + (getTaxOnListing(_tokenAddress, _id));
     }
 
     function getTaxOnListing(IERC721 _tokenAddress, uint256 _id)
@@ -356,7 +354,7 @@ contract NFTMarket is
         skillToken.transferFrom(
             msg.sender,
             listing.seller,
-            finalPrice.sub(taxAmount)
+            finalPrice - taxAmount
         );
         _tokenAddress.safeTransferFrom(address(this), msg.sender, _id);
 

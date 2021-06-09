@@ -1,9 +1,9 @@
-pragma solidity ^0.6.0;
+// SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
+//import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./util.sol";
 
@@ -19,6 +19,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    //TODO: This code was copy-pasted from here: https://forum.openzeppelin.com/t/derived-contract-must-override-function-supportsinterface/6315
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, AccessControlUpgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 
     function migrateTo_e55d8c5() public {
@@ -115,10 +120,35 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _bonusPower = getBonusPower(id);
     }
 
-    function mint(address minter, uint256 seed) public restricted returns(uint256) {
+function mint(address minter, uint256 seed, bool battleWon) public restricted returns(uint256) {
 
-        uint256 stars = getRandomStar(seed);
+        uint256 stars = getRandomStar(seed, battleWon);
         return mintWeaponWithStars(minter, stars, seed);
+    }
+
+    function getRandomStar(uint256 seed, bool battleWon) private pure returns (uint8) {
+        uint256 roll = seed % 100;
+
+        if(battleWon){
+            roll = seed % 200;
+        }
+                
+        // will need revision, possibly manual configuration if we support more than 5 stars
+        if(roll < 1) {
+            return 4; // 5* at 1%
+        }
+        else if(roll < 6) { // 4* at 5%
+            return 3;
+        }
+        else if(roll < 21) { // 3* at 15%
+            return 2;
+        }
+        else if(roll < 56) { // 2* at 35%
+            return 1;
+        }
+        else {
+            return 0; // 1* at 44%
+        }
     }
 
     function mintWeaponWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
@@ -202,35 +232,35 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getStatMinRoll(uint256 stars) public pure returns (uint16) {
-        uint16 minRoll = uint16(SafeMath.mul(1, 4));
+        uint16 minRoll = uint16(1 * 4);
         if(stars == 1) { // 2 star
-            minRoll = uint16(SafeMath.mul(45, 4));
+            minRoll = uint16(45 * 4);
         }
         else if(stars == 2) { // 3 star
-            minRoll = uint16(SafeMath.mul(70, 4));
+            minRoll = uint16(70 * 4);
         }
         else if(stars == 3) { // 4 star
-            minRoll = uint16(SafeMath.mul(50, 4));
+            minRoll = uint16(50 * 4);
         }
         else if(stars > 3) { // 5 star and above
-            minRoll = uint16(SafeMath.mul(67, 4));
+            minRoll = uint16(67 * 4);
         }
         return minRoll;
     }
 
     function getStatMaxRoll(uint256 stars) public pure returns (uint16) {
-        uint16 maxRoll = uint16(SafeMath.mul(50, 4));
+        uint16 maxRoll = uint16(50 * 4);
         if(stars == 1) { // 2 star
-            maxRoll = uint16(SafeMath.mul(75, 4));
+            maxRoll = uint16(75 * 4);
         }
         else if(stars == 2) { // 3 star
-            maxRoll = uint16(SafeMath.mul(100, 4));
+            maxRoll = uint16(100 * 4);
         }
         else if(stars == 3) { // 4 star
-            maxRoll = uint16(SafeMath.mul(100, 4));
+            maxRoll = uint16(100 * 4);
         }
         else if(stars > 3) { // 5 star and above
-            maxRoll = uint16(SafeMath.mul(100, 4));
+            maxRoll = uint16(100 * 4);
         }
         return maxRoll;
     }
@@ -279,11 +309,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getStat2Trait(uint8 statPattern) public pure returns (uint8) {
-        return uint8(SafeMath.div(statPattern, 5) % 5); // 0-3 regular traits, 4 = traitless (PWR)
+        return uint8((statPattern / 5) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getStat3Trait(uint8 statPattern) public pure returns (uint8) {
-        return uint8(SafeMath.div(statPattern, 25) % 5); // 0-3 regular traits, 4 = traitless (PWR)
+        return uint8((statPattern / 25) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
     function getLevel(uint256 id) public view returns (uint8) {
@@ -308,10 +338,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         // it is used to calculate base enemy powers for targeting
         Weapon memory wep = tokens[id];
         int128 powerPerPoint = ABDKMath64x64.divu(1, 400); // 0.25% or x0.0025
-        int128 stat1 = wep.stat1.fromUInt().mul(powerPerPoint);
-        int128 stat2 = wep.stat2.fromUInt().mul(powerPerPoint);
-        int128 stat3 = wep.stat3.fromUInt().mul(powerPerPoint);
-        return ABDKMath64x64.fromUInt(1).add(stat1).add(stat2).add(stat3);
+        int128 stat1 = wep.stat1.fromUInt() * (powerPerPoint);
+        int128 stat2 = wep.stat2.fromUInt() * (powerPerPoint);
+        int128 stat3 = wep.stat3.fromUInt() * (powerPerPoint);
+        return ABDKMath64x64.fromUInt(1) + (stat1) + (stat2) + (stat3);
     }
 
     function getPowerMultiplierForTrait(uint256 id, uint8 trait) public view returns(int128) {
@@ -321,31 +351,31 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         // Making it easy to see on the market how useful it will be to you
         Weapon memory wep = tokens[id];
         int128 powerPerPoint = ABDKMath64x64.divu(1, 400); // 0.25% or x0.0025
-        int128 matchingPowerPerPoint = powerPerPoint.mul(ABDKMath64x64.divu(107, 100)); // +7%
-        int128 powerPerPWRPoint = powerPerPoint.mul(ABDKMath64x64.divu(103, 100)); // +3%
+        int128 matchingPowerPerPoint = powerPerPoint * ABDKMath64x64.divu(107, 100); // +7%
+        int128 powerPerPWRPoint = powerPerPoint * ABDKMath64x64.divu(103, 100); // +3%
         uint8 statPattern = getStatPatternFromProperties(wep.properties);
         int128 result = ABDKMath64x64.fromUInt(1);
 
         if(getStat1Trait(statPattern) == trait)
-            result = result.add(wep.stat1.fromUInt().mul(matchingPowerPerPoint));
+            result = result + wep.stat1.fromUInt() * matchingPowerPerPoint;
         else if(getStat1Trait(statPattern) == 4) // PWR, traitless
-            result = result.add(wep.stat1.fromUInt().mul(powerPerPWRPoint));
+            result = result + wep.stat1.fromUInt() * powerPerPWRPoint;
         else
-            result = result.add(wep.stat1.fromUInt().mul(powerPerPoint));
+            result = result + wep.stat1.fromUInt() * powerPerPoint;
 
         if(getStat2Trait(statPattern) == trait)
-            result = result.add(wep.stat2.fromUInt().mul(matchingPowerPerPoint));
+            result = result + wep.stat2.fromUInt() * matchingPowerPerPoint;
         else if(getStat2Trait(statPattern) == 4) // PWR, traitless
-            result = result.add(wep.stat2.fromUInt().mul(powerPerPWRPoint));
+            result = result + wep.stat2.fromUInt() * powerPerPWRPoint;
         else
-            result = result.add(wep.stat2.fromUInt().mul(powerPerPoint));
+            result = result + wep.stat2.fromUInt() * powerPerPoint;
 
         if(getStat3Trait(statPattern) == trait)
-            result = result.add(wep.stat3.fromUInt().mul(matchingPowerPerPoint));
+            result = result + wep.stat3.fromUInt() * matchingPowerPerPoint;
         else if(getStat3Trait(statPattern) == 4) // PWR, traitless
-            result = result.add(wep.stat3.fromUInt().mul(powerPerPWRPoint));
+            result = result + wep.stat3.fromUInt() * powerPerPWRPoint;
         else
-            result = result.add(wep.stat3.fromUInt().mul(powerPerPoint));
+            result = result + wep.stat3.fromUInt() * powerPerPoint;
 
         return result;
     }
@@ -356,34 +386,31 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
         if(getStarsFromProperties(burning.properties) == 0) { // 1 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 10) ? 2 : 1)
-                .add(wbp.lowStarBurnPoints));
+            wbp.lowStarBurnPoints = uint8(burnPointMultiplier * ((wbp.lowStarBurnPoints < 10) ? 2 : 1) + wbp.lowStarBurnPoints);
             if(wbp.lowStarBurnPoints > 100)
                 wbp.lowStarBurnPoints = 100;
         }
         else if(getStarsFromProperties(burning.properties) == 1) { // 2 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 30) ? 2 : 1)
-                .add(wbp.lowStarBurnPoints));
+            wbp.lowStarBurnPoints = uint8(burnPointMultiplier * ((wbp.lowStarBurnPoints < 30) ? 2 : 1) + wbp.lowStarBurnPoints);
             if(wbp.lowStarBurnPoints > 100)
                 wbp.lowStarBurnPoints = 100;
         }
         else if(getStarsFromProperties(burning.properties) == 2) { // 3 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 50) ? 4 : 2)
-                .add(wbp.lowStarBurnPoints));
+            wbp.lowStarBurnPoints = uint8(burnPointMultiplier * ((wbp.lowStarBurnPoints < 50) ? 4 : 2) + wbp.lowStarBurnPoints);
             if(wbp.lowStarBurnPoints > 100)
                 wbp.lowStarBurnPoints = 100;
         }
         else if(getStarsFromProperties(burning.properties) == 3) { // 4 star
             require(wbp.fourStarBurnPoints < 25, "Four star burn points are capped");
-            wbp.fourStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fourStarBurnPoints));
+            wbp.fourStarBurnPoints = uint8(burnPointMultiplier + wbp.fourStarBurnPoints);
             if(wbp.fourStarBurnPoints > 25)
                 wbp.fourStarBurnPoints = 25;
         }
         else if(getStarsFromProperties(burning.properties) == 4) { // 5 star
             require(wbp.fiveStarBurnPoints < 10, "Five star burn points are capped");
-            wbp.fiveStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fiveStarBurnPoints));
+            wbp.fiveStarBurnPoints = uint8(burnPointMultiplier + wbp.fiveStarBurnPoints);
             if(wbp.fiveStarBurnPoints > 10)
                 wbp.fiveStarBurnPoints = 10;
         }
@@ -402,27 +429,33 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function levelUp(uint256 id, uint256 seed) private {
         Weapon storage wep = tokens[id];
 
-        wep.level = uint8(SafeMath.add(wep.level, 1));
-        wep.stat1 = uint16(SafeMath.add(wep.stat1, 1));
+        wep.level = uint8(wep.level + 1);
+        wep.stat1 = uint16(wep.stat1 + 1);
 
         uint8 stars = getStarsFromProperties(wep.properties);
 
         if(stars >= 4 && RandomUtil.randomSeededMinMax(0,1, seed) == 0) {
-            wep.stat2 = uint16(SafeMath.add(wep.stat2, 1));
+            wep.stat2 = uint16(wep.stat2 + 1);
         }
         if(stars >= 5 && RandomUtil.randomSeededMinMax(0,1, RandomUtil.combineSeeds(seed,1)) == 0) {
-            wep.stat3 = uint16(SafeMath.add(wep.stat3, 1));
+            wep.stat3 = uint16(wep.stat3 + 1);
         }
     }
 
     function getBonusPower(uint256 id) public view returns (uint24) {
         Weapon storage wep = tokens[id];
         WeaponBurnPoints storage wbp = burnPoints[id];
-        return uint24(lowStarBurnPowerPerPoint.mul(wbp.lowStarBurnPoints)
-            .add(fourStarBurnPowerPerPoint.mul(wbp.fourStarBurnPoints))
-            .add(fiveStarBurnPowerPerPoint.mul(wbp.fiveStarBurnPoints))
-            .add(uint256(15).mul(wep.level)) // TEMP: UNTIL WE IMPLEMENT WEAPON LEVELS
+        return uint24(lowStarBurnPowerPerPoint * (wbp.lowStarBurnPoints)
+             + (fourStarBurnPowerPerPoint * (wbp.fourStarBurnPoints))
+             + (fiveStarBurnPowerPerPoint * (wbp.fiveStarBurnPoints))
+             + (uint256(15) * (wep.level)) // TEMP: UNTIL WE IMPLEMENT WEAPON LEVELS
         );
+    }
+
+    mapping(address => mapping(uint256 => uint256)) private ownerTokens;
+
+    function tokenOfOwnerByIndex(address _owner, uint256 _index)  public view returns (uint tokenId){
+        return ownerTokens[_owner][_index];
     }
 
     function setBurnPointMultiplier(uint256 multiplier) public restricted {
@@ -439,4 +472,3 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
 }
-

@@ -1,6 +1,6 @@
-pragma solidity ^0.6.5;
+// SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./interfaces/IPriceOracle.sol";
 
@@ -36,7 +36,4 @@ contract BasicPriceOracle is IPriceOracle, Initializable, AccessControlUpgradeab
 
         emit CurrentPriceUpdated(_currentPrice);
     }
-
-    // Events
-    event CurrentPriceUpdated(uint256 currentPrice);
 }

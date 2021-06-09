@@ -1,5 +1,4 @@
-pragma solidity ^0.6.5;
-
+// SPDX-License-Identifier: MIT
 interface IPriceOracle {
     // Views
     function currentPrice() external view returns (uint256 price);
