@@ -1,4 +1,4 @@
-import VueRouter from 'vue-router';
+import VueRouter, { RouteConfig } from 'vue-router';
 
 import Plaza from './views/Plaza.vue';
 import Blacksmith from './views/Blacksmith.vue';
@@ -8,7 +8,7 @@ import SelectStakeType from './views/SelectStakeType.vue';
 import Raid from './views/Raid.vue';
 import Market from './views/Market.vue';
 
-import { raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly } from './feature-flags';
+import { raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly, market as featureFlagMarket } from './feature-flags';
 
 function createRouter() {
   if (featureFlagStakeOnly) {
@@ -21,12 +21,19 @@ function createRouter() {
     });
   }
 
+  let marketRoutes: RouteConfig[] = [];
+  if(featureFlagMarket) {
+    marketRoutes = [
+      { path: '/market', name: 'market', component: Market }
+    ];
+  }
+
   const router = new VueRouter({
     routes: [
       { path: '/', name: 'plaza', component: Plaza },
       { path: '/blacksmith', name: 'blacksmith', component: Blacksmith },
       { path: '/combat', name: 'combat', component: Combat },
-      { path: '/market', name: 'market', component: Market },
+      ...marketRoutes,
       { path: '/stake', name: 'select-stake-type', component: SelectStakeType },
       { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
     ]

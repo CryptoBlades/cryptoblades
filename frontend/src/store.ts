@@ -405,18 +405,20 @@ export function createStore(web3: Web3) {
             })
           );
 
-          subscriptions.push(
-            state.contracts.NFTMarket!.events.PurchasedListing({ filter: { seller: state.defaultAccount } }, async (err: Error, data: any) => {
-              if (err) {
-                console.error(err);
-                return;
-              }
+          if(state.contracts.NFTMarket) {
+            subscriptions.push(
+              state.contracts.NFTMarket.events.PurchasedListing({ filter: { seller: state.defaultAccount } }, async (err: Error, data: any) => {
+                if (err) {
+                  console.error(err);
+                  return;
+                }
 
-              console.log('PurchasedListing', data);
+                console.log('PurchasedListing', data);
 
-              await dispatch('fetchSkillBalance');
-            })
-          );
+                await dispatch('fetchSkillBalance');
+              })
+            );
+          }
 
         }
 
@@ -865,8 +867,10 @@ export function createStore(web3: Web3) {
       },
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
+        if(!state.contracts.NFTMarket) return;
+
         // returns an array of bignumbers (these are nft IDs)
-        return await state.contracts.NFTMarket!.methods
+        return await state.contracts.NFTMarket.methods
           .getListingIDs(
             nftContractAddr
           )
@@ -874,8 +878,10 @@ export function createStore(web3: Web3) {
       },
 
       async fetchMarketNftIdsBySeller({ state }, { nftContractAddr, sellerAddr }) {
+        if(!state.contracts.NFTMarket) return;
+
         // returns an array of bignumbers (these are nft IDs)
-        return await state.contracts.NFTMarket!.methods
+        return await state.contracts.NFTMarket.methods
           .getListingIDsBySeller(
             nftContractAddr,
             sellerAddr
@@ -884,8 +890,10 @@ export function createStore(web3: Web3) {
       },
 
       async fetchMarketNftPrice({ state }, { nftContractAddr, tokenId }) {
+        if(!state.contracts.NFTMarket) return;
+
         // returns the listing's price in skill wei
-        return await state.contracts.NFTMarket!.methods
+        return await state.contracts.NFTMarket.methods
           .getFinalPrice(
             nftContractAddr,
             tokenId
@@ -894,8 +902,10 @@ export function createStore(web3: Web3) {
       },
 
       async fetchMarketTax({ state }, { nftContractAddr }) {
+        if(!state.contracts.NFTMarket) return;
+
         // returns the tax on the nfts at the address in 64x64 fixed point
-        return await state.contracts.NFTMarket!.methods
+        return await state.contracts.NFTMarket.methods
           .tax(
             nftContractAddr
           )
@@ -903,6 +913,7 @@ export function createStore(web3: Web3) {
       },
 
       async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price }) {
+        if(!state.contracts.NFTMarket) return;
 
         await approveNFTMarket(
           nftContractAddr,
@@ -912,7 +923,7 @@ export function createStore(web3: Web3) {
         );
 
         const res =
-        await state.contracts.NFTMarket!.methods.addListing(nftContractAddr, tokenId, price).send({
+        await state.contracts.NFTMarket.methods.addListing(nftContractAddr, tokenId, price).send({
           from: state.defaultAccount,
         });
 
@@ -930,9 +941,10 @@ export function createStore(web3: Web3) {
       },
 
       async changeMarketListngPrice({ state }, { nftContractAddr, tokenId, newPrice }) {
+        if(!state.contracts.NFTMarket) return;
 
         const res =
-        await state.contracts.NFTMarket!.methods.changeListingPrice(nftContractAddr, tokenId, newPrice).send({
+        await state.contracts.NFTMarket.methods.changeListingPrice(nftContractAddr, tokenId, newPrice).send({
           from: state.defaultAccount,
         });
 
@@ -945,9 +957,10 @@ export function createStore(web3: Web3) {
       },
 
       async cancelMarketListing({ state, dispatch }, { nftContractAddr, tokenId }) {
+        if(!state.contracts.NFTMarket) return;
 
         const res =
-        await state.contracts.NFTMarket!.methods.cancelListing(nftContractAddr, tokenId).send({
+        await state.contracts.NFTMarket.methods.cancelListing(nftContractAddr, tokenId).send({
           from: state.defaultAccount,
         });
 
@@ -965,16 +978,17 @@ export function createStore(web3: Web3) {
       },
 
       async purchaseMarketListing({ state, dispatch }, { nftContractAddr, tokenId, maxPrice }) {
+        if(!state.contracts.NFTMarket) return;
 
         await approveMarketFee(
-          state.contracts.NFTMarket!,
+          state.contracts.NFTMarket,
           state.contracts.SkillToken,
           defaultCallOptions(state),
           maxPrice
         );
 
         const res =
-        await state.contracts.NFTMarket!.methods.purchaseListing(nftContractAddr, tokenId, maxPrice).send({
+        await state.contracts.NFTMarket.methods.purchaseListing(nftContractAddr, tokenId, maxPrice).send({
           from: state.defaultAccount,
         });
 
