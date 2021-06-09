@@ -1,5 +1,10 @@
 <template>
   <div class="skill-balance-display">
+    <big-button class="buy-button"
+      :mainText="`+`"
+      v-tooltip="'Buy SKILL'"
+      @click="onBuySkill"
+    />
     <div class="balance-container"><span class="bold">Balance</span>: <span class="balance">{{ formattedSkillBalance }}</span></div>
   </div>
 </template>
@@ -8,6 +13,7 @@
 import { mapActions, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
+import BigButton from '../BigButton.vue';
 
 export default {
   inject: ['featureFlagStakeOnly'],
@@ -40,6 +46,11 @@ export default {
         alert('Could not add SKILL; insufficient funds or transaction denied.');
       }
     },
+
+    onBuySkill() {
+      window.open('https://exchange.pancakeswap.finance/#/swap?inputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
+        '_blank');
+    },
   },
 
   watch: {
@@ -47,6 +58,10 @@ export default {
       console.log('BALANCE CHANGE:', balance, oldBalance, balance - oldBalance);
     },
   },
+
+  components: {
+    BigButton
+  }
 };
 </script>
 
@@ -69,4 +84,11 @@ export default {
 .balance {
   color: #b3b0a7;
 }
+
+.buy-button {
+  width: 2rem;
+  height: 3rem;
+  margin-right: 1rem;
+}
+
 </style>
