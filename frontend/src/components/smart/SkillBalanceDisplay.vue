@@ -1,5 +1,14 @@
 <template>
   <div class="skill-balance-display">
+    <big-button class="claim-button"
+      :mainText="`Claim`"
+      v-tooltip="'Claim Rewards'"
+      @click="onClaimRewards"
+    />
+    <span class="bold spacedReward">Rewards </span>
+    <span class="balance spacedReward">{{ formattedSkillReward }}</span>
+    <span class="spacedReward">and</span>
+    <span class="balance spacedReward">{{ xpRewards }} XP</span>
     <big-button class="buy-button"
       :mainText="`+`"
       v-tooltip="'Buy SKILL'"
@@ -18,16 +27,22 @@ import BigButton from '../BigButton.vue';
 export default {
   inject: ['featureFlagStakeOnly'],
   computed: {
-    ...mapState(['skillBalance']),
+    ...mapState(['skillBalance', 'skillRewards', 'xpRewards']),
 
     formattedSkillBalance(): string {
       const skillBalance = Web3.utils.fromWei(this.skillBalance as unknown as string, 'ether');
       return `${new BN(skillBalance).toFixed(4)} SKILL`;
     },
+
+    formattedSkillReward(): string {
+      // shitty rushed hack I'm sorry
+      const skillRewards = Web3.utils.fromWei(this.skillRewards.toString() as unknown as string, 'ether');
+      return `${new BN(skillRewards).toFixed(4)} SKILL`;
+    },
   },
 
   methods: {
-    ...mapActions(['addMoreSkill']),
+    ...mapActions(['addMoreSkill', 'claimFightRewards']),
 
     async onAddMoreSkill(): Promise<void> {
       const valueSkillToAdd = prompt('How much SKILL do you want?', '5');
@@ -51,11 +66,22 @@ export default {
       window.open('https://exchange.pancakeswap.finance/#/swap?inputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
         '_blank');
     },
+
+    async onClaimRewards() {
+      // TODO: prevent action if rewards are 0
+      await this.claimFightRewards();
+    },
   },
 
   watch: {
     skillBalance(balance: number, oldBalance: number) {
       console.log('BALANCE CHANGE:', balance, oldBalance, balance - oldBalance);
+    },
+    skillRewards(balance: number, oldBalance: number) {
+      console.log('REWARD SKILL CHANGE:', balance, oldBalance, balance - oldBalance);
+    },
+    xpRewards(balance: number, oldBalance: number) {
+      console.log('REWARD XP CHANGE:', balance, oldBalance, balance - oldBalance);
     },
   },
 
@@ -88,6 +114,16 @@ export default {
 .buy-button {
   width: 2rem;
   height: 3rem;
+  margin-right: 1rem;
+}
+
+.claim-button {
+  width: 7rem;
+  height: 3rem;
+  margin-right: 1rem;
+}
+
+.spacedReward {
   margin-right: 1rem;
 }
 

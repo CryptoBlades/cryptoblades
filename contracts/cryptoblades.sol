@@ -38,6 +38,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         characterLimit = 4;
         staminaCostFight = 20;
+        fightXpGain = 32;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         refillStaminaFee = ABDKMath64x64.divu(5, 1);//5 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
@@ -65,7 +66,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     uint256 nonce;
 
+    uint256 public fightXpGain; // multiplied based on power differences
+
     mapping(address => uint256) lastBlockNumberCalled;
+    
+    mapping(address => uint256) tokenRewards; // user adress : skill wei
+    mapping(uint256 => uint256) xpRewards; // character id : xp
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
 
@@ -107,20 +113,20 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 playerRoll = getPlayerPowerRoll(char, wep, uint8((target >> 24) & 0xFF)/*monster trait*/, seed);
         uint24 monsterRoll = getMonsterPowerRoll(getMonsterPower(target), RandomUtil.combineSeeds(seed,1));
 
-        // TODO: change this to support payout requests for both xp and skill.
-        // To combat gas differences in win/loss:
-        // Probably wanna calculate xp and tokens for lost fights too. then just increment 0 instead of the var
-        // like: if (win) { xpPool[user] += xp; } else { xpPool[user] += 0; }
-        uint16 xp = 0;
-        int128 tokens = 0;
+        uint16 xp = getXpGainForFight(char, wep, target); // could hardcode to 16 for 12k gas save
+        uint256 tokens = usdToSkill(getTokenGainForFight(target));
 
         if(playerRoll >= monsterRoll) {
-            xp = getXpGainForFight(char, wep, target);
-            tokens = getTokenGainForFight(target);
-            characters.gainXp(char, xp);
-            _payPlayer(characters.ownerOf(char), tokens);
+            tokenRewards[user] = tokenRewards[user].add(tokens);
+            xpRewards[char] = SafeMath.add(xpRewards[char], xp);
         }
-        emit FightOutcome(characters.ownerOf(char), char, wep, target, playerRoll, monsterRoll, xp, usdToSkill(tokens));
+        else {
+            // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
+            tokenRewards[user] = tokenRewards[user].add(0);
+            xpRewards[char] = SafeMath.add(xpRewards[char], 0);
+        }
+        
+        emit FightOutcome(characters.ownerOf(char), char, wep, target, playerRoll, monsterRoll, xp, tokens);
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
@@ -137,8 +143,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getXpGainForFight(uint256 char, uint256 wep, uint32 target) internal view returns (uint16) {
         int128 basePowerDifference = ABDKMath64x64.divu(getMonsterPower(target), getPlayerPower(char, wep));
-        // base XP gain is 16 for an equal fight
-        return uint16(basePowerDifference.mulu(16));
+        // base XP gain is "fightXpGain" for an equal fight
+        return uint16(basePowerDifference.mulu(fightXpGain));
     }
 
     function getPlayerPowerRoll(uint256 char, uint256 wep, uint8 monsterTrait, uint256 seed) internal view returns(uint24) {
@@ -367,7 +373,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _payContractConverted(address playerAddress, uint256 convertedAmount) internal {
         // must use requestPayFromPlayer modifier to approve on the initial function!
-        skillToken.transferFrom(playerAddress, address(this), convertedAmount);
+        if(convertedAmount <= tokenRewards[playerAddress])
+            tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(convertedAmount);
+        else
+            skillToken.transferFrom(playerAddress, address(this), convertedAmount);
     }
 
     function _payPlayer(address playerAddress, int128 baseAmount) internal {
@@ -414,6 +423,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         staminaCostFight = points;
     }
 
+    function setFightXpGain(uint256 average) public restricted {
+        fightXpGain = average;
+    }
+
     function setCharacterLimit(uint256 max) public restricted {
         characterLimit = max;
     }
@@ -425,6 +438,30 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function getCurrentHour() public view returns (uint256) {
         // "now" returns unix time since 1970 Jan 1, in seconds
         return now.div(1 hours);
+    }
+
+    function claimRewards() public {
+        // our characters go to the tavern to rest
+        // they meditate on what they've learned
+        for(uint256 i = 0; i < characters.balanceOf(msg.sender); i++) {
+            uint256 char = characters.tokenOfOwnerByIndex(msg.sender, i);
+            if(xpRewards[char] < 65536)
+                characters.gainXp(char, uint16(xpRewards[char]));
+            else
+                characters.gainXp(char, 65535);
+            xpRewards[char] = 0;
+        }
+        // and the barkeep pays them for the bounties
+        _payPlayerConverted(msg.sender, tokenRewards[msg.sender]);
+        tokenRewards[msg.sender] = 0;
+    }
+
+    function getTokenRewards() public view returns (uint256) {
+        return tokenRewards[msg.sender];
+    }
+
+    function getXpRewards(uint256 char) public view returns (uint256) {
+        return xpRewards[char];
     }
 
 }

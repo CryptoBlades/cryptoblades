@@ -127,7 +127,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp']),
     getEnemyArt,
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
@@ -154,6 +154,9 @@ export default {
         this.resultsAvailable = true;
         // results are passed to the CombatResults element
         this.waitingResults = false;
+
+        this.fetchFightRewardSkill();
+        this.fetchFightRewardXp();
 
         /*if (success) {
           alert('Battle succeeded! You rolled '+playerRoll
