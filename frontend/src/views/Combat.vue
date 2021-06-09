@@ -1,5 +1,5 @@
 <template>
-  <div class="body main-font">
+  <div class="body main-font" @mousemove="updateTime()">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <h1 class="error" v-if="error !== null">Error: {{ error }}</h1>
 
