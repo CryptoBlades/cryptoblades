@@ -2,7 +2,6 @@ import { ICharacter } from './Character';
 import { IWeapon } from './Weapon';
 import { ITarget } from './Target';
 import { Contracts } from './Contracts';
-import BN from 'bignumber.js';
 
 export type StakeType = 'skill' | 'lp' | 'lp2';
 export const allStakeTypes: StakeType[] = ['skill', 'lp', 'lp2'];
@@ -49,8 +48,8 @@ export interface IState {
   currentNetworkId: number | null;
 
   skillBalance: string;
-  skillRewards: BN;
-  xpRewards: string;
+  skillRewards: string;
+  xpRewards: Record<string, string>;
   ownedCharacterIds: number[];
   ownedWeaponIds: number[];
   maxStamina: number;

@@ -392,7 +392,7 @@ export default {
 
 .trait {
   position: absolute;
-  bottom: 10px;
+  top: 10px;
   left: 10px;
 }
 

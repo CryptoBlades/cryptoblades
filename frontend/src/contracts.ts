@@ -18,10 +18,14 @@ import { abi as marketAbi, networks as marketNetworks } from '../../build/contra
 import Web3 from 'web3';
 import { Contracts } from './interfaces';
 
-import { raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly } from './feature-flags';
+import { raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly, market as featureFlagMarket } from './feature-flags';
 
 interface RaidContracts {
   RaidBasic?: Contracts['RaidBasic'];
+}
+
+interface MarketContracts {
+  NFTMarket?: Contracts['NFTMarket'];
 }
 
 async function setUpStakingContracts(web3: Web3, networkId: string) {
@@ -63,8 +67,6 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   }
 
   const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as any)[networkId].address;
-  const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as any)[networkId].address;
-  const marketAddr = process.env.VUE_APP_MARKET_CONTRACT_ADDRESS || (marketNetworks as any)[networkId].address;
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as any, cryptoBladesContractAddr);
   const [charactersAddr, weaponsAddr, randomsAddr] = await Promise.all([
@@ -75,16 +77,25 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Randoms = new web3.eth.Contract(randomsAbi as any, randomsAddr);
   const Characters = new web3.eth.Contract(charactersAbi as any, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as any, weaponsAddr);
-  const NFTMarket = new web3.eth.Contract(marketAbi as any, marketAddr);
 
   const raidContracts: RaidContracts = {};
   if(featureFlagRaid) {
+    const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as any)[networkId].address;
+
     raidContracts.RaidBasic = new web3.eth.Contract(raidAbi as any, raidContractAddr);
+  }
+
+  const marketContracts: MarketContracts = {};
+  if(featureFlagMarket) {
+    const marketContractAddr = process.env.VUE_APP_MARKET_CONTRACT_ADDRESS || (marketNetworks as any)[networkId].address;
+
+    marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as any, marketContractAddr);
   }
 
   return {
     ...stakingContracts,
-    CryptoBlades, Randoms, Characters, Weapons, NFTMarket,
-    ...raidContracts
+    CryptoBlades, Randoms, Characters, Weapons,
+    ...raidContracts,
+    ...marketContracts
   };
 }
