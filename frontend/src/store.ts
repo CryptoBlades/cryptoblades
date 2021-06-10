@@ -83,7 +83,7 @@ const defaultStakeOverviewState: IStakeOverviewState = {
 };
 
 export function createStore(web3: Web3) {
-  return new Vuex.Store({
+  return new Vuex.Store<IState>({
     state: {
       contracts: null!,
       eventSubscriptions: [],
@@ -93,8 +93,8 @@ export function createStore(web3: Web3) {
       currentNetworkId: null,
 
       skillBalance: '0',
-      skillRewards: new BN(0),
-      xpRewards: 'n/a',
+      skillRewards: '0',
+      xpRewards: {},
       ownedCharacterIds: [],
       ownedWeaponIds: [],
       maxStamina: 0,
@@ -224,13 +224,15 @@ export function createStore(web3: Web3) {
         state.skillBalance = skillBalance;
       },
 
-      /*updateSkillRewards(state: IState, { skillRewards }) {
+      updateSkillRewards(state: IState, { skillRewards }: { skillRewards: string }) {
         state.skillRewards = skillRewards;
       },
 
-      updateXpRewards(state: IState, { xpRewards }) {
-        state.xpRewards = xpRewards;
-      },*/
+      updateXpRewards(state: IState, { xpRewards }: { xpRewards: { [characterId: string]: string } }) {
+        for(const charaId in xpRewards) {
+          Vue.set(state.xpRewards, charaId, xpRewards[charaId]);
+        }
+      },
 
       updateUserDetails(state: IState, payload) {
         const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina'];
@@ -615,82 +617,56 @@ export function createStore(web3: Web3) {
       async mintCharacter({ state, dispatch }) {
         if(featureFlagStakeOnly) return;
 
-        const feeUSD = await state.contracts.CryptoBlades!.methods
-          .mintCharacterFee()
-          .call(defaultCallOptions(state));
-        const fee = new BN(
-          await state.contracts.CryptoBlades!.methods.usdToSkill(feeUSD).call(defaultCallOptions(state))
+        await approveFee(
+          state.contracts.CryptoBlades!,
+          state.contracts.SkillToken,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee()
         );
-        const paidByRewardPool = fee <= state.skillRewards;
-
-        if(!paidByRewardPool)
-          await approveFee(
-            state.contracts.CryptoBlades!,
-            state.contracts.SkillToken,
-            defaultCallOptions(state),
-            defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee()
-          );
 
         await state.contracts.CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
 
-        if(paidByRewardPool)
-          await Promise.all([
-            dispatch('fetchFightRewardSkill'),
-            dispatch('fetchFightRewardXp')
-          ]);
+        await Promise.all([
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp')
+        ]);
       },
 
       async mintWeapon({ state, dispatch }) {
         if(featureFlagStakeOnly) return;
 
-        const feeUSD = await state.contracts.CryptoBlades!.methods
-          .mintWeaponFee()
-          .call(defaultCallOptions(state));
-        const fee = new BN(
-          await state.contracts.CryptoBlades!.methods.usdToSkill(feeUSD).call(defaultCallOptions(state))
+        await approveFee(
+          state.contracts.CryptoBlades!,
+          state.contracts.SkillToken,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
         );
-        const paidByRewardPool = fee <= state.skillRewards;
-
-        if(!paidByRewardPool)
-          await approveFee(
-            state.contracts.CryptoBlades!,
-            state.contracts.SkillToken,
-            defaultCallOptions(state),
-            defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
-          );
 
         await state.contracts.CryptoBlades!.methods.mintWeapon().send({
           from: state.defaultAccount,
         });
 
-        if(paidByRewardPool)
-          await Promise.all([
-            dispatch('fetchFightRewardSkill'),
-            dispatch('fetchFightRewardXp')
-          ]);
+        await Promise.all([
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp')
+        ]);
       },
 
       async reforgeWeapon({ state, dispatch }, { burnWeaponId, reforgeWeaponId }) {
         if(featureFlagStakeOnly || !featureFlagReforging) return;
 
-        const feeUSD = await state.contracts.CryptoBlades!.methods
-          .reforgeWeaponFee()
-          .call(defaultCallOptions(state));
-        const fee = new BN(
-          await state.contracts.CryptoBlades!.methods.usdToSkill(feeUSD).call(defaultCallOptions(state))
+        await approveFee(
+          state.contracts.CryptoBlades!,
+          state.contracts.SkillToken,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee()
         );
-        const paidByRewardPool = fee <= state.skillRewards;
-
-        if(!paidByRewardPool)
-          await approveFee(
-            state.contracts.CryptoBlades!,
-            state.contracts.SkillToken,
-            defaultCallOptions(state),
-            defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee()
-          );
 
         await state.contracts.CryptoBlades!.methods
           .reforgeWeapon(
@@ -1061,35 +1037,45 @@ export function createStore(web3: Web3) {
         return [seller, nftID, price];
       },
 
-      async fetchFightRewardSkill({ state }) {
-
-        const claimable = await state.contracts.CryptoBlades!.methods
+      async fetchFightRewardSkill({ state, commit }) {
+        const skillRewards = await state.contracts.CryptoBlades!.methods
           .getTokenRewards()
           .call(defaultCallOptions(state));
 
-        //commit('updateSkillRewards', claimableStr );// returned undefined. got no time sorry
-        state.skillRewards = new BN(claimable);
-        return claimable;
+        commit('updateSkillRewards', { skillRewards });
+        return skillRewards;
       },
 
-      async fetchFightRewardXp({ state }) {
-        const xps = [];
+      async fetchFightRewardXp({ state, commit }) {
+        if(!state.contracts.CryptoBlades) return;
+        const { CryptoBlades } = state.contracts;
 
-        for(let i = 0; i < state.ownedCharacterIds.length; i++) {
-          xps[i] = await state.contracts.CryptoBlades!.methods
-            .getXpRewards(state.ownedCharacterIds[i])
-            .call(defaultCallOptions(state));
-        }
+        const xpCharaIdPairs = await Promise.all(
+          state.ownedCharacterIds.map(async charaId => {
+            const xp = await CryptoBlades.methods
+              .getXpRewards(charaId)
+              .call(defaultCallOptions(state));
 
-        //commit('updateXpRewards', xps);// returned undefined. got no time sorry
-        state.xpRewards = xps.toString();
-        return xps;
+            return [charaId, xp];
+          })
+        );
+
+        commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
+        return xpCharaIdPairs;
       },
 
-      async claimFightRewards({ state}) {
-        await state.contracts.CryptoBlades!.methods.claimRewards().send({
+      async claimFightRewards({ state, dispatch }) {
+        if(!state.contracts.CryptoBlades) return;
+
+        await state.contracts.CryptoBlades.methods.claimRewards().send({
           from: state.defaultAccount,
         });
+
+        await Promise.all([
+          dispatch('fetchCharacters', state.ownedCharacterIds),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp')
+        ]);
       },
     }
   });

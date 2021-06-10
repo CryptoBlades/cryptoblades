@@ -8,7 +8,7 @@
     <span class="bold spacedReward">Rewards </span>
     <span class="balance spacedReward">{{ formattedSkillReward }}</span>
     <span class="spacedReward">and</span>
-    <span class="balance spacedReward">{{ xpRewards }} XP</span>
+    <span class="balance spacedReward">{{ formattedXpRewards }}</span>
     <big-button class="buy-button"
       :mainText="`+`"
       v-tooltip="'Buy SKILL'"
@@ -27,7 +27,7 @@ import BigButton from '../BigButton.vue';
 export default {
   inject: ['featureFlagStakeOnly'],
   computed: {
-    ...mapState(['skillBalance', 'skillRewards', 'xpRewards']),
+    ...mapState(['skillBalance', 'skillRewards', 'xpRewards', 'ownedCharacterIds']),
 
     formattedSkillBalance(): string {
       const skillBalance = Web3.utils.fromWei(this.skillBalance as unknown as string, 'ether');
@@ -36,9 +36,13 @@ export default {
 
     formattedSkillReward(): string {
       // shitty rushed hack I'm sorry
-      const skillRewards = Web3.utils.fromWei(this.skillRewards.toString() as unknown as string, 'ether');
+      const skillRewards = Web3.utils.fromWei(this.skillRewards as unknown as string, 'ether');
       return `${new BN(skillRewards).toFixed(4)} SKILL`;
     },
+
+    formattedXpRewards(): string {
+      return this.ownedCharacterIds.map(charaId => `${this.xpRewards[charaId] || 0} XP`).join(', ');
+    }
   },
 
   methods: {
@@ -79,10 +83,7 @@ export default {
     },
     skillRewards(balance: number, oldBalance: number) {
       console.log('REWARD SKILL CHANGE:', balance, oldBalance, balance - oldBalance);
-    },
-    xpRewards(balance: number, oldBalance: number) {
-      console.log('REWARD XP CHANGE:', balance, oldBalance, balance - oldBalance);
-    },
+    }
   },
 
   components: {

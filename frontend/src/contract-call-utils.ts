@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { Web3JsCallOptions, Web3JsAbiCall } from '../../abi-common';
 import { Contract, Contracts } from './interfaces';
 
@@ -23,11 +24,18 @@ export async function getFeeInSkillFromUsd(
 export async function approveFee(
   cryptoBladesContract: CryptoBladesAlias,
   skillToken: Contracts['SkillToken'],
+  skillRewardsAvailable: string,
   callOpts: Web3JsCallOptions,
   approveOpts: Web3JsCallOptions,
   fn: CryptoBladesMethodsFunction
 ) {
   const feeInSkill = await getFeeInSkillFromUsd(cryptoBladesContract, callOpts, fn);
+
+  const paidByRewardPool = new BigNumber(feeInSkill).lte(skillRewardsAvailable);
+
+  if(paidByRewardPool) {
+    return null;
+  }
 
   return await skillToken.methods
     .approve(cryptoBladesContract.options.address, feeInSkill)

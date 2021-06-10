@@ -38,13 +38,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         characterLimit = 4;
         staminaCostFight = 20;
-        fightXpGain = 32;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         refillStaminaFee = ABDKMath64x64.divu(5, 1);//5 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
         fightRewardGasOffset = ABDKMath64x64.divu(8, 10);//0.8 usd;
         mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
         reforgeWeaponFee = ABDKMath64x64.divu(5, 10);//0.5 usd;
+    }
+
+    function migrateTo_1ee400a() public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        fightXpGain = 32;
     }
 
     // config vars
@@ -66,10 +71,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     uint256 nonce;
 
+    mapping(address => uint256) lastBlockNumberCalled;
+
     uint256 public fightXpGain; // multiplied based on power differences
 
-    mapping(address => uint256) lastBlockNumberCalled;
-    
     mapping(address => uint256) tokenRewards; // user adress : skill wei
     mapping(uint256 => uint256) xpRewards; // character id : xp
 
@@ -125,7 +130,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             tokenRewards[user] = tokenRewards[user].add(0);
             xpRewards[char] = SafeMath.add(xpRewards[char], 0);
         }
-        
+
         emit FightOutcome(characters.ownerOf(char), char, wep, target, playerRoll, monsterRoll, xp, tokens);
     }
 
