@@ -1070,16 +1070,28 @@ export function createStore(web3: Web3) {
         return xpCharaIdPairs;
       },
 
-      async claimFightRewards({ state, dispatch }) {
+      async claimTokenRewards({ state, dispatch }) {
         if(!state.contracts.CryptoBlades) return;
 
-        await state.contracts.CryptoBlades.methods.claimRewards().send({
+        await state.contracts.CryptoBlades.methods.claimTokenRewards().send({
+          from: state.defaultAccount,
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill')
+        ]);
+      },
+
+      async claimXpRewards({ state, dispatch }) {
+        if(!state.contracts.CryptoBlades) return;
+
+        await state.contracts.CryptoBlades.methods.claimXpRewards().send({
           from: state.defaultAccount,
         });
 
         await Promise.all([
           dispatch('fetchCharacters', state.ownedCharacterIds),
-          dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp')
         ]);
       },
