@@ -1,15 +1,21 @@
 <template>
   <div class="skill-balance-display">
-    <big-button class="claim-button"
-      :mainText="`Claim`"
-      v-tooltip="'Claim Rewards'"
-      :disabled="!canClaimRewards"
-      @click="onClaimRewards"
-    />
     <span class="bold spacedReward">Rewards </span>
     <span class="balance spacedReward">{{ formattedSkillReward }}</span>
+    <small-button class="claim-button"
+      :text="`SKILL`"
+      v-tooltip="'Claim SKILL'"
+      :disabled="!canClaimTokens"
+      @click="onClaimTokens"
+    />
     <span class="spacedReward">and</span>
     <span class="balance spacedReward">{{ formattedXpRewards }}</span>
+    <small-button class="claim-button"
+      :text="`XP`"
+      v-tooltip="'Claim XP'"
+      :disabled="!canClaimXp"
+      @click="onClaimXp"
+    />
     <big-button class="buy-button"
       :mainText="`+`"
       v-tooltip="'Buy SKILL'"
@@ -26,6 +32,7 @@ import { mapActions, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
 import BigButton from '../BigButton.vue';
+import SmallButton from '../SmallButton.vue';
 
 interface StoreMappedState {
   skillBalance: string;
@@ -36,7 +43,8 @@ interface StoreMappedState {
 
 interface StoreMappedActions {
   addMoreSkill(skillToAdd: string): Promise<void>;
-  claimFightRewards(): Promise<void>;
+  claimTokenRewards(): Promise<void>;
+  claimXpRewards(): Promise<void>;
 }
 
 export default Vue.extend({
@@ -50,7 +58,7 @@ export default Vue.extend({
 
     formattedSkillReward(): string {
       const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
-      return `${new BN(skillRewards).toFixed(4)} SKILL`;
+      return `${new BN(skillRewards).toFixed(4)}`;
     },
 
     xpRewardsForOwnedCharacters(): string[] {
@@ -58,14 +66,18 @@ export default Vue.extend({
     },
 
     formattedXpRewards(): string {
-      return this.xpRewardsForOwnedCharacters.map(xp => `${xp} XP`).join(', ');
+      return this.xpRewardsForOwnedCharacters.map(xp => `${xp}`).join(', ');
     },
 
-    canClaimRewards(): boolean {
+    canClaimTokens(): boolean {
       if(new BN(this.skillRewards).lte(0)) {
         return false;
       }
 
+      return true;
+    },
+
+    canClaimXp(): boolean {
       const allXpsAreZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => new BN(xp).lte(0));
       if(allXpsAreZeroOrLess) {
         return false;
@@ -76,7 +88,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['addMoreSkill', 'claimFightRewards']) as StoreMappedActions),
+    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimXpRewards']) as StoreMappedActions),
 
     async onAddMoreSkill(): Promise<void> {
       const valueSkillToAdd = prompt('How much SKILL do you want?', '5');
@@ -101,9 +113,15 @@ export default Vue.extend({
         '_blank');
     },
 
-    async onClaimRewards() {
-      if(this.canClaimRewards) {
-        await this.claimFightRewards();
+    async onClaimTokens() {
+      if(this.canClaimTokens) {
+        await this.claimTokenRewards();
+      }
+    },
+
+    async onClaimXp() {
+      if(this.canClaimXp) {
+        await this.claimXpRewards();
       }
     },
   },
@@ -118,7 +136,8 @@ export default Vue.extend({
   },
 
   components: {
-    BigButton
+    BigButton,
+    SmallButton
   }
 });
 </script>
@@ -150,8 +169,7 @@ export default Vue.extend({
 }
 
 .claim-button {
-  width: 7rem;
-  height: 3rem;
+  height: 2rem;
   margin-right: 1rem;
 }
 

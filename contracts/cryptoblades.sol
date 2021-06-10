@@ -37,7 +37,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         randoms = _randoms;
 
         characterLimit = 4;
-        staminaCostFight = 20;
+        staminaCostFight = 40;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         refillStaminaFee = ABDKMath64x64.divu(5, 1);//5 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
@@ -445,7 +445,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return now.div(1 hours);
     }
 
-    function claimRewards() public {
+    function claimTokenRewards() public {
+        // our characters go to the tavern
+        // and the barkeep pays them for the bounties
+        _payPlayerConverted(msg.sender, tokenRewards[msg.sender]);
+        tokenRewards[msg.sender] = 0;
+    }
+
+    function claimXpRewards() public {
         // our characters go to the tavern to rest
         // they meditate on what they've learned
         for(uint256 i = 0; i < characters.balanceOf(msg.sender); i++) {
@@ -456,9 +463,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 characters.gainXp(char, 65535);
             xpRewards[char] = 0;
         }
-        // and the barkeep pays them for the bounties
-        _payPlayerConverted(msg.sender, tokenRewards[msg.sender]);
-        tokenRewards[msg.sender] = 0;
     }
 
     function getTokenRewards() public view returns (uint256) {
