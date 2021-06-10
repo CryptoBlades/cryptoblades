@@ -17,6 +17,10 @@
 
       <CombatResults v-if="resultsAvailable" :results="fightResults" />
 
+      <div class="message-box" v-if="!currentCharacter">
+        You need a character to do battle.
+      </div>
+
       <div class="message-box" v-if="currentCharacterStamina < 40">
         You need 40 stamina to do battle.
       </div>
@@ -111,6 +115,7 @@ export default {
       'getTargetsByCharacterIdAndWeaponId',
       'ownCharacters',
       'ownWeapons',
+      'currentCharacter',
       'currentCharacterStamina'
     ]),
 

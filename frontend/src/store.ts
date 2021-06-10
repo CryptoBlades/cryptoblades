@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
-import _ from 'lodash';
+import _, { isUndefined } from 'lodash';
 import BN from 'bignumber.js';
 BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
@@ -690,7 +690,7 @@ export function createStore(web3: Web3) {
       async fetchTargets({ state, commit }, { characterId, weaponId }) {
         if(featureFlagStakeOnly) return;
 
-        if (!characterId || !weaponId) {
+        if(isUndefined(characterId) || isUndefined(weaponId)) {
           commit('updateTargets', { characterId, weaponId, targets: [] });
           return;
         }
