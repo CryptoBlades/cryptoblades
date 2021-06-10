@@ -73,7 +73,7 @@ export default {
       burnWeaponId: null,
       forgeCost: 0,
       reforgeCost: 0,
-      disableForge: this.disableForge
+      disableForge: false
     };
   },
 
