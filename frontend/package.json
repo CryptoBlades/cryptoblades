@@ -30,8 +30,8 @@
   "devDependencies": {
     "@types/lodash": "^4.14.168",
     "@types/seedrandom": "^3.0.0",
-    "@typescript-eslint/eslint-plugin": "^2.34.0",
-    "@typescript-eslint/parser": "^2.34.0",
+    "@typescript-eslint/eslint-plugin": "^4.26.1",
+    "@typescript-eslint/parser": "^4.26.1",
     "@vue/cli": "^4.5.12",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",

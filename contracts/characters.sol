@@ -19,6 +19,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    function migrateTo_1ee400a() public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         experienceTable = [
             16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 33, 36, 39, 42, 46, 50, 55, 60, 66
@@ -68,7 +72,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     uint256 public constant maxStamina = 200;
     uint256 public constant secondsPerStamina = 300; //5 * 60
 
-    uint256[] experienceTable; // fastest lookup in the west
+    uint256[256] private experienceTable; // fastest lookup in the west
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);

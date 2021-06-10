@@ -16,7 +16,7 @@
     <li v-if="!featureFlagStakeOnly && featureFlagRaid">
       <router-link :to="{ name: 'raid' }"><span>Raid</span></router-link>
     </li>
-    <li>
+    <li v-if="!featureFlagStakeOnly && featureFlagMarket">
       <router-link :to="{ name: 'market' }"><span>Market</span></router-link>
     </li>
     <li>
@@ -29,11 +29,19 @@
 </template>
 
 <script>
+import { market as featureFlagMarket } from '../feature-flags';
+
 export default {
   inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
 
   created() {
     this.hideGraphics = !!localStorage.getItem('graphics');
+  },
+
+  computed: {
+    featureFlagMarket() {
+      return featureFlagMarket;
+    }
   },
 
   data() {
