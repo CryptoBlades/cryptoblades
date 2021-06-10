@@ -21,8 +21,8 @@
         You need 40 stamina to do battle.
       </div>
 
-      <div class="message-box" v-if="time === 59">
-        You cannot do battle during the last minute of the hour. Stand Fast!
+      <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">
+        You cannot do battle during the last 30seconds of the hour. Stand Fast!
       </div>
 
       <div v-if="currentCharacterStamina >= 40">
@@ -52,7 +52,7 @@
               :mainText="`Fight!`"
               :subText="`Power ${e.power}`"
               v-tooltip="'Cost 40 stamina'"
-              :disabled="time === 59"
+              :disabled="timeMinutes === 59 && timeSeconds >= 30"
               @click="onClickEncounter(e)"
             />
           </li>
@@ -93,13 +93,16 @@ export default {
       waitingResults: false,
       resultsAvailable: false,
       fightResults: null,
-      interval: null,
-      time: null
+      intervalSeconds: null,
+      intervalMinutes: null,
+      timeSeconds: null,
+      timeMinutes: null,
     };
   },
 
-    created(){
-    this.interval = setInterval(() => this.time = new Date().getMinutes(), 10000);
+  created(){
+    this.intervalSeconds = setInterval(() => this.timeSeconds = new Date().getSeconds(), 5000);
+    this.intervalMinutes = setInterval(() => this.timeMinutes = new Date().getMinutes(), 20000);
   },
 
   computed: {
