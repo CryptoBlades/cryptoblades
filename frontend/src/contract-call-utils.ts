@@ -42,28 +42,6 @@ export async function approveFee(
     .send(approveOpts);
 }
 
-export async function approveMarketFee( // TEMP because i did not want to change the above
-  marketContract: Contracts['NFTMarket'],
-  skillToken: Contracts['SkillToken'],
-  approveOpts: Web3JsCallOptions,
-  price: string
-) {
-  return await skillToken.methods
-    .approve(marketContract!.options.address, price)
-    .send(approveOpts);
-}
-
-export async function approveNFTMarket(
-  nftContract: NonNullable<Contracts['Weapons'] | Contracts['Characters']>,
-  marketContract: NonNullable<Contracts['NFTMarket']>,
-  approveOpts: Web3JsCallOptions,
-  tokenId: string
-) {
-  return await nftContract!.methods
-    .approve(marketContract!.options.address, tokenId)
-    .send(approveOpts);
-}
-
 export async function waitUntilEvent(contract: Contract<unknown>, eventName: string, opts: Record<string, unknown>): Promise<Record<string, unknown>> {
   let subscriber: any;
 
