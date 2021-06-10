@@ -4,7 +4,7 @@
     <span class="balance spacedReward">{{ formattedSkillReward }}</span>
     <small-button class="claim-button"
       :text="`SKILL`"
-      v-tooltip="'Claim SKILL'"
+      v-tooltip="'Claim SKILL<br>Early withdraw tax: 0%<br>Time since last withdraw: n/a'"
       :disabled="!canClaimTokens"
       @click="onClaimTokens"
     />
