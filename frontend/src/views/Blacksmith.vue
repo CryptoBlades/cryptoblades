@@ -6,8 +6,12 @@
           Weapons
           <button class="mint-weapon"
             @click="onForgeWeapon"
+            :disabled="disableForge"
             v-tooltip="'Forge new weapon'">
-            Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+            <span v-if="disableForge">Cooling forge...</span>
+            <span v-if="!disableForge">
+              Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+            </span>
           </button>
         </h1>
 
@@ -68,7 +72,8 @@ export default {
       reforgeWeaponId: null,
       burnWeaponId: null,
       forgeCost: 0,
-      reforgeCost: 0
+      reforgeCost: 0,
+      disableForge: this.disableForge
     };
   },
 
@@ -105,6 +110,14 @@ export default {
     ...mapActions(['mintWeapon', 'reforgeWeapon']),
 
     async onForgeWeapon() {
+      if(this.disableForge) return;
+
+      this.disableForge = true;
+
+      setTimeout(() => {
+        this.disableForge = false;
+      }, 10000);
+
       try {
         await this.mintWeapon();
       } catch (e) {
