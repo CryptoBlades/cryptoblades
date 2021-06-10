@@ -222,35 +222,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
-        if(attacker == 0 && defender == 1) {
-            return true;
-        }
-        if(attacker == 1 && defender == 2) {
-            return true;
-        }
-        if(attacker == 2 && defender == 3) {
-            return true;
-        }
-        if(attacker == 3 && defender == 0) {
-            return true;
-        }
-        return false;
+        return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
     function isTraitWeakAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
-        if(attacker == 1 && defender == 0) {
-            return true;
-        }
-        if(attacker == 2 && defender == 1) {
-            return true;
-        }
-        if(attacker == 3 && defender == 2) {
-            return true;
-        }
-        if(attacker == 0 && defender == 3) {
-            return true;
-        }
-        return false;
+        return (((defender + 1) % 4) == attacker);
     }
 
     function mintCharacter() public doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
