@@ -37,6 +37,17 @@ export async function approveFee(
     return null;
   }
 
+  const from = callOpts.from;
+  if(from !== null) {
+    const allowance = await skillToken.methods
+      .allowance(from, cryptoBladesContract.options.address)
+      .call(callOpts);
+
+    if(allowance >= feeInSkill) {
+      return null;
+    }
+  }
+
   return await skillToken.methods
     .approve(cryptoBladesContract.options.address, feeInSkill)
     .send(approveOpts);
