@@ -17,8 +17,12 @@
 
       <CombatResults v-if="resultsAvailable" :results="fightResults" />
 
-      <div class="stamina-warning" v-if="currentCharacterStamina < 40">
+      <div class="message-box" v-if="currentCharacterStamina < 40">
         You need 40 stamina to do battle.
+      </div>
+
+      <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">
+        You cannot do battle during the last 30 seconds of the hour. Stand fast!
       </div>
 
       <div v-if="currentCharacterStamina >= 40">
@@ -48,6 +52,7 @@
               :mainText="`Fight!`"
               :subText="`Power ${e.power}`"
               v-tooltip="'Cost 40 stamina'"
+              :disabled="timeMinutes === 59 && timeSeconds >= 30"
               @click="onClickEncounter(e)"
             />
           </li>
@@ -88,7 +93,16 @@ export default {
       waitingResults: false,
       resultsAvailable: false,
       fightResults: null,
+      intervalSeconds: null,
+      intervalMinutes: null,
+      timeSeconds: null,
+      timeMinutes: null,
     };
+  },
+
+  created(){
+    this.intervalSeconds = setInterval(() => this.timeSeconds = new Date().getSeconds(), 5000);
+    this.intervalMinutes = setInterval(() => this.timeMinutes = new Date().getMinutes(), 20000);
   },
 
   computed: {
@@ -246,7 +260,7 @@ export default {
   font-size: 2em;
 }
 
-.stamina-warning {
+.message-box {
   display: flex;
   justify-content: center;
   width: 100%;
