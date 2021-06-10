@@ -376,7 +376,9 @@ export function createStore(web3: Web3) {
 
                 await Promise.all([
                   dispatch('fetchCharacter', characterId),
-                  dispatch('fetchSkillBalance')
+                  dispatch('fetchSkillBalance'),
+                  dispatch('fetchFightRewardSkill'),
+                  dispatch('fetchFightRewardXp')
                 ]);
               })
           );
