@@ -946,6 +946,19 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async checkMarketItemOwnership({ state }, { nftContractAddr, tokenId }) {
+        if(!state.contracts.NFTMarket || !state.contracts.Weapons || !state.contracts.Characters) return;
+
+        const NFTContract: Contract<IERC721> =
+          nftContractAddr === state.contracts.Weapons.options.address
+            ? state.contracts.Weapons
+            : state.contracts.Characters;
+
+        return await NFTContract.methods
+          .ownerOf(tokenId)
+          .call(defaultCallOptions(state));
+      },
+
       async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price }: { nftContractAddr: string, tokenId: string, price: string }) {
         if(!state.contracts.NFTMarket || !state.contracts.Weapons || !state.contracts.Characters) return;
 

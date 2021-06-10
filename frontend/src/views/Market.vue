@@ -1,5 +1,9 @@
 <template>
   <div class="body main-font">
+    <div class="outcome" v-if="waitingMarketOutcome">
+      <i class="fas fa-spinner fa-spin"></i>
+      Loading...
+    </div>
     <div class="outcome" v-if="marketOutcome !== null">{{ marketOutcome }}</div>
     <div class="row">
       <div class="col">
@@ -18,7 +22,7 @@
 
           <big-button
             v-if="activeSell === 'weapon'"
-            :disabled="!sellingWeapon"
+            :disabled="sellingWeapon == null || sellingWeapon == undefined"
             class="button"
             mainText="List Weapon"
             @click="addListingForNft()"
@@ -26,7 +30,7 @@
 
           <big-button
             v-if="activeSell === 'character'"
-            :disabled="!sellingCharacter"
+            :disabled="sellingCharacter == null || sellingCharacter == undefined"
             class="button"
             mainText="List Character"
             @click="addListingForNft()"
@@ -69,6 +73,25 @@
             mainText="Search My NFTs"
             @click="searchOwnListings()"
           />
+
+          <big-button
+            v-if="buyableNftSelected"
+            class="button"
+            mainText="Purchase"
+            @click="purchaseNft(selectedSearchId)"
+          />
+          <big-button
+            v-if="ownListedNftSelected"
+            class="button"
+            mainText="Change price"
+            @click="updateNftListingPrice(selectedSearchId)"
+          />
+          <big-button
+            v-if="ownListedNftSelected"
+            class="button"
+            mainText="Cancel listing"
+            @click="cancelNftListing(selectedSearchId)"
+          />
           <Hint class="hint" text="NFT stands for Non Fungible Token.
             <br>Weapons and Characters are NFTs of the ERC721 standard" />
         </div>
@@ -107,9 +130,12 @@ interface Data {
   activeSell: SellType;
   search: string;
   searchResults: CharacterId[] | WeaponId[];
+  searchResultsOwned: boolean;
   sellingCharacter: CharacterId | null;
   sellingWeapon: WeaponId | null;
   marketOutcome: string | null;
+  waitingMarketOutcome: boolean;
+  selectedSearchId: string | null;
 }
 
 type StoreMappedState = Pick<IState, 'contracts' | 'defaultAccount' | 'weapons' | 'characters'>;
@@ -119,6 +145,7 @@ interface StoreMappedActions {
   fetchMarketNftIdsBySeller(payload: { nftContractAddr: string, sellerAddr: string }): Promise<string[]>;
   fetchMarketNftPrice(payload: { nftContractAddr: string, tokenId: string | number }): Promise<string>;
   fetchMarketTax(payload: { nftContractAddr: string }): Promise<string>;
+  checkMarketItemOwnership(payload: { nftContractAddr: string, tokenId: string | number}): Promise<boolean>;
   addMarketListing(payload: { nftContractAddr: string, tokenId: string, price: string }): Promise<{ seller: string, nftID: string, price: string }>;
   changeMarketListingPrice(
     payload: { nftContractAddr: string, tokenId: string, newPrice: string }
@@ -138,9 +165,12 @@ export default Vue.extend({
       activeSell: 'weapon',
       search: '',
       searchResults: [],
+      searchResultsOwned: false,
       sellingCharacter: null,
       sellingWeapon: null,
       marketOutcome: null,
+      waitingMarketOutcome: false,
+      selectedSearchId: null,
     } as Data;
   },
 
@@ -167,6 +197,18 @@ export default Vue.extend({
 
     sellingNftId(): WeaponId | CharacterId | null {
       return this.activeSell === 'weapon' ? this.sellingWeapon : this.sellingCharacter;
+    },
+
+    buyableNftSelected(): boolean {
+      return this.selectedSearchId !== null
+        && this.selectedSearchId !== undefined
+        && !this.searchResultsOwned;
+    },
+
+    ownListedNftSelected(): boolean {
+      return this.selectedSearchId !== null
+        && this.selectedSearchId !== undefined
+        && this.searchResultsOwned;
     }
   },
 
@@ -176,6 +218,7 @@ export default Vue.extend({
       'fetchMarketNftIdsBySeller',
       'fetchMarketNftPrice',
       'fetchMarketTax',
+      'checkMarketItemOwnership',
       'addMarketListing',
       'changeMarketListingPrice',
       'cancelMarketListing',
@@ -194,8 +237,22 @@ export default Vue.extend({
       });
     },
 
+    hasNftSelected() {
+      return this.sellingNftId !== null && this.sellingNftId !== undefined;
+    },
+
+    hasResultNftSelected() {
+      return this.selectedSearchId !== null && this.selectedSearchId !== undefined;
+    },
+
+    assertNftId(): string {
+      return this.sellingNftId as string;
+    },
+
     async addListingForNft() {
-      if(!this.sellingNftId) return;
+
+      this.marketOutcome = null;
+      if(!this.hasNftSelected) return;
 
       const sellFor = prompt('How much SKILL do you want to list this '+this.activeSell+' for?', '0');
       if(!sellFor) return;
@@ -203,21 +260,25 @@ export default Vue.extend({
       const val = +sellFor;
       if(isNaN(val)) return;
 
-      this.sellingCharacter = null;
-      this.sellingWeapon = null;
+      this.waitingMarketOutcome = true;
 
       const results = await this.addMarketListing({
         nftContractAddr: this.contractAddress,
-        tokenId: this.sellingNftId,
+        tokenId: this.assertNftId(),
         price: this.convertSkillToWei(sellFor)
       });
 
+      this.sellingCharacter = null;
+      this.sellingWeapon = null;
+      this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully listed '
         +this.activeSell+' '+results.nftID+' for '+this.convertWeiToSkill(results.price);
     },
 
-    async updateNftListingPrice() {
-      if(!this.sellingNftId) return;
+    async updateNftListingPrice(nftId: WeaponId | CharacterId) {
+
+      this.marketOutcome = null;
+      if(!this.hasResultNftSelected) return;
 
       const sellFor = prompt('How much SKILL should this '+this.activeSell+' cost?', '0');
       if(!sellFor) return;
@@ -225,22 +286,30 @@ export default Vue.extend({
       const val = +sellFor;
       if(isNaN(val)) return;
 
-      this.sellingCharacter = null;
-      this.sellingWeapon = null;
+      this.waitingMarketOutcome = true;
 
       const results = await this.changeMarketListingPrice({
         nftContractAddr: this.contractAddress,
-        tokenId: this.sellingNftId,
+        tokenId: nftId,
         newPrice: this.convertSkillToWei(sellFor)
       });
 
+      this.sellingCharacter = null;
+      this.sellingWeapon = null;
+      this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully changed price for '
         +this.activeSell+' '+results.nftID+' to '+this.convertWeiToSkill(results.newPrice);
     },
 
     async purchaseNft(nftId: WeaponId | CharacterId) {
+
+      this.marketOutcome = null;
+      if(!this.hasResultNftSelected) return;
+
       const price = await this.lookupNftPrice(nftId);
       if(!price) return;
+
+      this.waitingMarketOutcome = true;
 
       const results = await this.purchaseMarketListing({
         nftContractAddr: this.contractAddress,
@@ -248,49 +317,78 @@ export default Vue.extend({
         maxPrice: price
       });
 
+      this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully purchased '
         +this.activeSell+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)
           +' from '+results.seller;
     },
 
-    async cancelNftListing() {
-      if(!this.sellingNftId) return;
+    async cancelNftListing(nftId: WeaponId | CharacterId) {
+
+      this.marketOutcome = null;
+      if(!this.hasResultNftSelected) return;
+
+      this.waitingMarketOutcome = true;
 
       const results = await this.cancelMarketListing({
         nftContractAddr: this.contractAddress,
-        tokenId: this.sellingNftId,
+        tokenId: nftId,
       });
 
+      this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully taken '
         +this.activeSell+' '+results.nftID+' off the market.';
     },
 
     async searchListingsByNftId() {
-      //const price = lookupNftPrice(this.search);
-      // incomplete
-      this.searchResults = [];
+      this.marketOutcome = null;
+      this.waitingMarketOutcome = true;
+      this.searchResultsOwned = await this.checkMarketItemOwnership({
+        nftContractAddr: this.contractAddress,
+        tokenId: this.search
+      });
+      const price = this.lookupNftPrice(this.search);
+      if(+price > 0)
+        this.searchResults = [this.search];
+      else
+        this.searchResults = [];
+      this.waitingMarketOutcome = false;
+      this.marketOutcome = null;
     },
 
     async searchListingsBySeller() {
+
+      this.marketOutcome = null;
+      this.waitingMarketOutcome = true;
+      this.searchResultsOwned = this.search === this.defaultAccount;
+
       const result = await this.fetchMarketNftIdsBySeller({
         nftContractAddr: this.contractAddress,
         sellerAddr: this.search,
       });
       console.log(result);
+      this.waitingMarketOutcome = false;
       this.searchResults = result;
     },
 
     async searchOwnListings() {
+
+      this.marketOutcome = null;
+
       if(!this.defaultAccount) {
         this.searchResults = [];
         return;
       }
+
+      this.waitingMarketOutcome = true;
 
       const result = await this.fetchMarketNftIdsBySeller({
         nftContractAddr: this.contractAddress,
         sellerAddr: this.defaultAccount,
       });
       console.log(result);
+      this.searchResultsOwned = true;
+      this.waitingMarketOutcome = false;
       this.searchResults = result;
     },
 
