@@ -115,35 +115,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _bonusPower = getBonusPower(id);
     }
 
-    function mint(address minter, uint256 seed, bool battleWon) public restricted returns(uint256) {
+    function mint(address minter, uint256 seed) public restricted returns(uint256) {
 
-        uint256 stars = getRandomStar(seed, battleWon);
+        uint256 stars = getRandomStar(seed);
         return mintWeaponWithStars(minter, stars, seed);
-    }
-
-    function getRandomStar(uint256 seed, bool battleWon) private pure returns (uint8) {
-        uint256 roll = seed % 100;
-
-        if(battleWon){
-            roll = seed % 200;
-        }
-                
-        // will need revision, possibly manual configuration if we support more than 5 stars
-        if(roll < 1) {
-            return 4; // 5* at 1%
-        }
-        else if(roll < 6) { // 4* at 5%
-            return 3;
-        }
-        else if(roll < 21) { // 3* at 15%
-            return 2;
-        }
-        else if(roll < 56) { // 2* at 35%
-            return 1;
-        }
-        else {
-            return 0; // 1* at 44%
-        }
     }
 
     function mintWeaponWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {

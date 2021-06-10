@@ -268,11 +268,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-     function mintWeapon() public oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
+    function mintWeapon() public doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
         _payContract(msg.sender, mintWeaponFee);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.mint(msg.sender, seed, false);
+        weapons.mint(msg.sender, seed);
     }
 
     function fillStamina(uint256 character) public doesNotHaveMoreThanMaxCharacters isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
