@@ -49,7 +49,7 @@
             </div>
             <big-button
               class="encounter-button"
-              :mainText="`Fight! ${time}`"
+              :mainText="`Fight!`"
               :subText="`Power ${e.power}`"
               v-tooltip="'Cost 40 stamina'"
               :disabled="time === 59"
@@ -138,12 +138,11 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp']),
     getEnemyArt,
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
     },
-
     async onClickEncounter(targetToFight) {
       if (!this.selectedWeaponId || !this.currentCharacterId) {
         return;
@@ -166,6 +165,9 @@ export default {
         this.resultsAvailable = true;
         // results are passed to the CombatResults element
         this.waitingResults = false;
+
+        this.fetchFightRewardSkill();
+        this.fetchFightRewardXp();
 
         /*if (success) {
           alert('Battle succeeded! You rolled '+playerRoll
