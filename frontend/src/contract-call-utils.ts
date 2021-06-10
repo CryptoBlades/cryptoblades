@@ -64,11 +64,11 @@ export async function approveNFTMarket(
     .send(approveOpts);
 }
 
-export async function waitUntilEvent(contract: Contract<unknown>, eventName: string, opts: object): Promise<object> {
+export async function waitUntilEvent(contract: Contract<unknown>, eventName: string, opts: Record<string, unknown>): Promise<Record<string, unknown>> {
   let subscriber: any;
 
-  const data = await new Promise<object>((resolve, reject) => {
-    subscriber = contract.events[eventName](opts, (err: Error | null, data: object | null) => {
+  const data = await new Promise<Record<string, unknown>>((resolve, reject) => {
+    subscriber = contract.events[eventName](opts, (err: Error | null, data: Record<string, unknown> | null) => {
       if(err) reject(err);
       else resolve(data!);
     });
