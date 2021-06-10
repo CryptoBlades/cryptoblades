@@ -22,7 +22,7 @@
       </div>
 
       <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">
-        You cannot do battle during the last 30seconds of the hour. Stand Fast!
+        You cannot do battle during the last 30 seconds of the hour. Stand fast!
       </div>
 
       <div v-if="currentCharacterStamina >= 40">
