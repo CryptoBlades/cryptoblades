@@ -187,7 +187,7 @@ export default {
 
 .character-sub {
   margin-top: 0;
-  opacity: 80%;
+  opacity: 0.8;
 }
 
 .character-inner {
