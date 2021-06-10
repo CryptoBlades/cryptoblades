@@ -1,5 +1,5 @@
 <template>
-  <div class="body main-font" @mousemove="updateTime()">
+  <div class="body main-font">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <h1 class="error" v-if="error !== null">Error: {{ error }}</h1>
 
@@ -49,7 +49,7 @@
             </div>
             <big-button
               class="encounter-button"
-              :mainText="`Fight!`"
+              :mainText="`Fight! ${time}`"
               :subText="`Power ${e.power}`"
               v-tooltip="'Cost 40 stamina'"
               :disabled="time === 59"
