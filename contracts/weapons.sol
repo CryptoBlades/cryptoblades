@@ -228,14 +228,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getStatCount(uint256 stars) public pure returns (uint8) {
-        uint8 statCount = 1;
-        if(stars == 3) { // 4 star
-            statCount = 2;
-        }
-        else if(stars > 3) { // 5 star and above
-            statCount = 3;
-        }
-        return statCount;
+        // 1-2 star
+        if (stars < 3) return 1;
+        // 3+ star
+        return uint8(stars)-1;
     }
 
     function getProperties(uint256 id) public view returns (uint16) {
