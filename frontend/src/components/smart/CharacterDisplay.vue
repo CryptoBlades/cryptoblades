@@ -27,12 +27,22 @@
       <span v-if="!isLoadingCharacter" class="subtext">
         Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level)}} XP)
       </span>
-      <span v-if="!isLoadingCharacter" class="subtext">Power: {{CharacterPower(currentCharacter.level)}}</span>
+      <span v-if="!isLoadingCharacter" class="subtext">
+        Power: {{CharacterPower(currentCharacter.level)}}
+        <Hint class="power-hint" text="Power increases by 10 every level up,
+          <br>and multiplied every 10 level ups
+          <br>Level 1: 1000
+          <br>Level 10: 1090
+          <br>Level 11: 2200
+          <br>Level 20: 2380
+          <br>Level 21: 3600" />
+      </span>
       <small-bar
         v-if="!isLoadingCharacter"
         class="bar stamina"
         :current="currentCharacterStamina"
         :max="maxStamina"
+        v-tooltip="'Regenerates 1 point every 5 minutes'"
         faIcon="fa-bolt"
         primaryColor="#ec4b4b"
         altText="Stamina"
@@ -48,11 +58,13 @@ import SmallBar from '../SmallBar.vue';
 import CharacterArt from '../CharacterArt.vue';
 import { CharacterPower, CharacterTrait } from '../../interfaces';
 import { RequiredXp } from '../../interfaces';
+import Hint from '../Hint.vue';
 
 export default {
   components: {
     CharacterArt,
     SmallBar,
+    Hint,
   },
 
   computed: {
@@ -125,5 +137,9 @@ export default {
 
 .character-data-column .bar {
   height: 1rem;
+}
+
+.power-hint {
+  font-size: 1.3rem;
 }
 </style>

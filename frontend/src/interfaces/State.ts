@@ -47,6 +47,9 @@ export interface IState {
   defaultAccount: string | null;
   currentNetworkId: number | null;
 
+  fightGasOffset: string;
+  fightBaseline: string;
+
   skillBalance: string;
   skillRewards: string;
   xpRewards: Record<string, string>;

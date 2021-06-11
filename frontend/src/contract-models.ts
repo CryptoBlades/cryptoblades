@@ -1,10 +1,21 @@
 
 import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement } from './interfaces';
 
+export function traitNumberToName(traitNum: number): string {
+  switch(traitNum) {
+  case WeaponElement.Fire:        return 'Fire';
+  case WeaponElement.Earth:       return 'Earth';
+  case WeaponElement.Water:       return 'Water';
+  case WeaponElement.Lightning:   return 'Lightning';
+  default:                        return '???';
+  }
+}
+
 export function characterFromContract(id: string | number, data: string[]): ICharacter {
   const xp = data[0];
   const level = parseInt(data[1], 10);
   const trait = data[2];
+  const traitName = traitNumberToName(+data[2]);
   const staminaTimestamp = data[3];
   const head = data[4];
   const arms = data[5];
@@ -12,7 +23,7 @@ export function characterFromContract(id: string | number, data: string[]): ICha
   const legs = data[7];
   const boots = data[8];
   const race = data[9];
-  return { id: +id, xp, level, trait, staminaTimestamp, head, arms, torso, legs, boots, race };
+  return { id: +id, xp, level, trait, traitName, staminaTimestamp, head, arms, torso, legs, boots, race };
 }
 
 export function getStatPatternFromProperties(properties: number): number {
@@ -44,16 +55,6 @@ export function statNumberToName(statNum: number): string {
 
 export function getWeaponTraitFromProperties(properties: number): number {
   return (properties >> 3) & 0x3;
-}
-
-export function traitNumberToName(traitNum: number): string {
-  switch(traitNum) {
-  case WeaponElement.Fire:        return 'Fire';
-  case WeaponElement.Earth:       return 'Earth';
-  case WeaponElement.Water:       return 'Water';
-  case WeaponElement.Lightning:   return 'Lightning';
-  default:                        return '???';
-  }
 }
 
 export function weaponFromContract(id: string | number, data: string[]): IWeapon {
@@ -88,9 +89,9 @@ export function weaponFromContract(id: string | number, data: string[]): IWeapon
   return {
     id: +id, properties,
     element: traitNumberToName(traitNum),
-    stat1: statNumberToName(stat1Type), stat1Value,
-    stat2: statNumberToName(stat2Type), stat2Value,
-    stat3: statNumberToName(stat3Type), stat3Value,
+    stat1: statNumberToName(stat1Type), stat1Value, stat1Type,
+    stat2: statNumberToName(stat2Type), stat2Value, stat2Type,
+    stat3: statNumberToName(stat3Type), stat3Value, stat3Type,
     level,
     blade, crossguard, grip, pommel,
     stars,

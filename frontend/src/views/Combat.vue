@@ -3,6 +3,8 @@
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <h1 class="error" v-if="error !== null">Error: {{ error }}</h1>
 
+      <div class="payout-info">{{getPayoutString()}}</div>
+
       <div class="combat-hints">
         <span class="fire-icon" /> »
         <span class="earth-icon" /> »
@@ -86,6 +88,8 @@ import { getEnemyArt } from '../enemy-art';
 import { CharacterTrait } from '../interfaces';
 import Hint from '../components/Hint.vue';
 import CombatResults from '../components/CombatResults.vue';
+import Web3 from 'web3';
+import BN from 'bignumber.js';
 
 import { mapActions, mapGetters, mapState } from 'vuex';
 
@@ -116,7 +120,9 @@ export default {
       'ownCharacters',
       'ownWeapons',
       'currentCharacter',
-      'currentCharacterStamina'
+      'currentCharacterStamina',
+      'fightGasOffset',
+      'fightBaseline',
     ]),
 
     targets() {
@@ -150,6 +156,11 @@ export default {
     getEnemyArt,
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
+    },
+    getPayoutString() {
+      return 'Earnings on victory: '
+        +this.formattedSkill(this.fightGasOffset) + ' gas offset + '
+        +this.formattedSkill(this.fightBaseline)+' per 1000 power';
     },
     async onClickEncounter(targetToFight) {
       if (!this.selectedWeaponId || !this.currentCharacterId) {
@@ -191,6 +202,10 @@ export default {
         this.error = e.message;
       }
     },
+    formattedSkill(skill) {
+      const skillBalance = Web3.utils.fromWei(skill, 'ether');
+      return `${new BN(skillBalance).toFixed(6)} SKILL`;
+    },
   },
 
   components: {
@@ -230,10 +245,23 @@ export default {
   font-size: 2em;
 }
 
+.payout-info {
+  margin: auto;
+  text-align: center;
+  padding-top: 1em;
+  font-size: 1.5em;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .combat-hints {
   margin: auto;
   text-align: center;
-  padding: 1em;
+  padding-right: 1em;
+  padding-left: 1em;
+  padding-bottom: 1em;
   font-size: 2em;
 
   display: flex;

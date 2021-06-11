@@ -4,6 +4,7 @@ export interface ICharacter {
   xp: string;
   level: number;
   trait: string;
+  traitName: string;
   staminaTimestamp: string;
   head: string;
   arms: string;

@@ -28,6 +28,12 @@ import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import swordspecs from '../assets/swordspecs.json';
 import maskChroma from '../shaders/maskchroma_frag.glsl.js';
+import { Stat1PercentForChar,
+  Stat2PercentForChar,
+  Stat3PercentForChar
+} from '../interfaces';
+
+import { mapGetters } from 'vuex';
 
 const bladeCount = 24;
 const crossGuardCount = 24;
@@ -53,11 +59,18 @@ export default {
   props: ['weapon'],
 
   computed: {
+    ...mapGetters([
+      'currentCharacter',
+    ]),
     tooltipHtml() {
       if(!this.weapon) return '';
 
       const wrapInSpan = (spanClass, text) => {
         return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;
+      };
+
+      const wrapInSpanTextOnly = (spanClass, text) => {
+        return `<span class="${spanClass.toLowerCase()}">${text}</span>`;
       };
 
       let ttHtml = `
@@ -75,14 +88,32 @@ export default {
 
       if(this.weapon.stat1Value) {
         ttHtml += `<br>${wrapInSpan(this.weapon.stat1, this.weapon.stat1)}: +${this.weapon.stat1Value}`;
+        if(this.currentCharacter) {
+          ttHtml += ` (${wrapInSpanTextOnly(
+            this.currentCharacter.traitName,
+            '+'+Stat1PercentForChar(this.weapon, this.currentCharacter.trait)+'%')
+          })`;
+        }
       }
 
       if(this.weapon.stat2Value) {
         ttHtml += `<br>${wrapInSpan(this.weapon.stat2, this.weapon.stat2)}: +${this.weapon.stat2Value}`;
+        if(this.currentCharacter) {
+          ttHtml += ` (${wrapInSpanTextOnly(
+            this.currentCharacter.traitName,
+            '+'+Stat2PercentForChar(this.weapon, this.currentCharacter.trait)+'%')
+          })`;
+        }
       }
 
       if(this.weapon.stat3Value) {
         ttHtml += `<br>${wrapInSpan(this.weapon.stat3, this.weapon.stat3)}: +${this.weapon.stat3Value}`;
+        if(this.currentCharacter) {
+          ttHtml += ` (${wrapInSpanTextOnly(
+            this.currentCharacter.traitName,
+            '+'+Stat3PercentForChar(this.weapon, this.currentCharacter.trait)+'%')
+          })`;
+        }
       }
 
       if(this.weapon.lowStarBurnPoints > 0) {

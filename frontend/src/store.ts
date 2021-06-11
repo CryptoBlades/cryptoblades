@@ -12,7 +12,7 @@ import {
 } from './contract-models';
 import { allStakeTypes, Contract, Contracts, IStakeOverviewState, IStakeState, IState, IWeb3EventSubscription, StakeType } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee } from './contract-call-utils';
+import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
@@ -92,6 +92,9 @@ export function createStore(web3: Web3) {
       accounts: [],
       defaultAccount: null,
       currentNetworkId: null,
+
+      fightGasOffset: '0',
+      fightBaseline: '0',
 
       skillBalance: '0',
       skillRewards: '0',
@@ -194,7 +197,15 @@ export function createStore(web3: Web3) {
         if(!featureFlagRaid) return false;
 
         return (characterId: number): boolean => state.raid.isOwnedCharacterRaidingById[characterId] || false;
-      }
+      },
+
+      fightGasOffset(state) {
+        return state.fightGasOffset;
+      },
+
+      fightBaseline(state) {
+        return state.fightBaseline;
+      },
     },
 
     mutations: {
@@ -233,6 +244,14 @@ export function createStore(web3: Web3) {
         for(const charaId in xpRewards) {
           Vue.set(state.xpRewards, charaId, xpRewards[charaId]);
         }
+      },
+
+      updateFightGasOffset(state: IState, { fightGasOffset }: { fightGasOffset: string }) {
+        state.fightGasOffset = fightGasOffset;
+      },
+
+      updateFightBaseline(state: IState, { fightBaseline }: { fightBaseline: string }) {
+        state.fightBaseline = fightBaseline;
       },
 
       updateUserDetails(state: IState, payload) {
@@ -526,7 +545,9 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacters', ownedCharacterIds),
           dispatch('fetchWeapons', ownedWeaponIds),
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp')
+          dispatch('fetchFightRewardXp'),
+          dispatch('fetchFightGasOffset'),
+          dispatch('fetchFightBaseline'),
         ]);
       },
 
@@ -1054,6 +1075,30 @@ export function createStore(web3: Web3) {
         } = res.events.PurchasedListing.returnValues;
 
         return { seller, nftID, price } as { seller: string, nftID: string, price: string };
+      },
+
+      async fetchFightGasOffset({ state, commit }) {
+
+        const fightGasOffset = await getFeeInSkillFromUsd(
+          state.contracts.CryptoBlades!,
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.fightRewardGasOffset()
+        );
+
+        commit('updateFightGasOffset', { fightGasOffset });
+        return fightGasOffset;
+      },
+
+      async fetchFightBaseline({ state, commit }) {
+
+        const fightBaseline = await getFeeInSkillFromUsd(
+          state.contracts.CryptoBlades!,
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.fightRewardBaseline()
+        );
+
+        commit('updateFightBaseline', { fightBaseline });
+        return fightBaseline;
       },
 
       async fetchFightRewardSkill({ state, commit }) {
