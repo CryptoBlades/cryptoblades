@@ -219,20 +219,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getStatMaxRoll(uint256 stars) public pure returns (uint16) {
-        uint16 maxRoll = uint16(SafeMath.mul(50, 4));
-        if(stars == 1) { // 2 star
-            maxRoll = uint16(SafeMath.mul(75, 4));
-        }
-        else if(stars == 2) { // 3 star
-            maxRoll = uint16(SafeMath.mul(100, 4));
-        }
-        else if(stars == 3) { // 4 star
-            maxRoll = uint16(SafeMath.mul(100, 4));
-        }
-        else if(stars > 3) { // 5 star and above
-            maxRoll = uint16(SafeMath.mul(100, 4));
-        }
-        return maxRoll;
+        // 3+ star
+        if (stars > 1) return 400;
+        // 2 star
+        if (stars > 0) return 300;
+        // 1 star
+        return 200;
     }
 
     function getStatCount(uint256 stars) public pure returns (uint8) {
