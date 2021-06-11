@@ -192,7 +192,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if(isTraitEffectiveAgainst(characterTrait, monsterTrait)) {
             traitBonus = traitBonus.add(oneBonus);
         }
-        else if(isTraitWeakAgainst(characterTrait, monsterTrait)) {
+        else if(isTraitEffectiveAgainst(monsterTrait, characterTrait)) {
             traitBonus = traitBonus.sub(oneBonus);
         }
         return traitBonus;
@@ -223,10 +223,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
-    }
-
-    function isTraitWeakAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
-        return (((defender + 1) % 4) == attacker);
     }
 
     function mintCharacter() public doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
