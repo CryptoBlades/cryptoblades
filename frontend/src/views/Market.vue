@@ -98,8 +98,15 @@
 
         <div class="search-results">
           <div v-for="result in searchResults" v-bind:key="result">
-            <weapon-icon v-if="activeSell === 'weapon' && weapons[result]" :weapon="weapons[result]" />
-            <CharacterArt v-if="activeSell === 'character' && characters[result]" :character="characters[result]" />
+            <li
+              class="result-item"
+              :class="{ 'result-selected': result === selectedSearchId }"
+              @click="onSelectResult(result)"
+            >
+
+              <weapon-icon v-if="activeSell === 'weapon' && weapons[result]" :weapon="weapons[result]" />
+              <CharacterArt v-if="activeSell === 'character' && characters[result]" :character="characters[result]" />
+            </li>
           </div>
         </div>
       </div>
@@ -249,6 +256,11 @@ export default Vue.extend({
       return this.sellingNftId as string;
     },
 
+    onSelectResult(selected: string) {
+      console.log('SELECTED '+selected);
+      this.selectedSearchId = selected;
+    },
+
     async addListingForNft() {
 
       this.marketOutcome = null;
@@ -272,7 +284,7 @@ export default Vue.extend({
       this.sellingWeapon = null;
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully listed '
-        +this.activeSell+' '+results.nftID+' for '+this.convertWeiToSkill(results.price);
+        +this.activeSell+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL';
     },
 
     async updateNftListingPrice(nftId: WeaponId | CharacterId) {
@@ -298,7 +310,7 @@ export default Vue.extend({
       this.sellingWeapon = null;
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully changed price for '
-        +this.activeSell+' '+results.nftID+' to '+this.convertWeiToSkill(results.newPrice);
+        +this.activeSell+' '+results.nftID+' to '+this.convertWeiToSkill(results.newPrice)+' SKILL';
     },
 
     async purchaseNft(nftId: WeaponId | CharacterId) {
@@ -319,7 +331,7 @@ export default Vue.extend({
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully purchased '
-        +this.activeSell+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)
+        +this.activeSell+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL'
           +' from '+results.seller;
     },
 
@@ -458,6 +470,14 @@ export default Vue.extend({
   margin-top: 10px;
   display: flex;
   justify-content: space-around;
+}
+
+.result-item {
+  max-width: 12em;
+}
+
+.result-selected {
+  outline: solid currentcolor 2px;
 }
 
 .sell-grid {
