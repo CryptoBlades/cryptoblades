@@ -29,9 +29,9 @@ export async function approveFee(
   approveOpts: Web3JsCallOptions,
   fn: CryptoBladesMethodsFunction
 ) {
-  const feeInSkill = await getFeeInSkillFromUsd(cryptoBladesContract, callOpts, fn);
+  const feeInSkill = new BigNumber(await getFeeInSkillFromUsd(cryptoBladesContract, callOpts, fn));
 
-  const paidByRewardPool = new BigNumber(feeInSkill).lte(skillRewardsAvailable);
+  const paidByRewardPool = feeInSkill.lte(skillRewardsAvailable);
 
   if(paidByRewardPool) {
     return null;
@@ -43,13 +43,13 @@ export async function approveFee(
       .allowance(from, cryptoBladesContract.options.address)
       .call(callOpts);
 
-    if(allowance >= feeInSkill) {
+    if(feeInSkill.lte(allowance)) {
       return null;
     }
   }
 
   return await skillToken.methods
-    .approve(cryptoBladesContract.options.address, feeInSkill)
+    .approve(cryptoBladesContract.options.address, feeInSkill.toString())
     .send(approveOpts);
 }
 

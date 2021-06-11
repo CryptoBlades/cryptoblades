@@ -55,8 +55,13 @@ async function main() {
             default: [],
             array: true
         })
+        .option('force-lookup', {
+            alias: ['L'],
+            default: false,
+            boolean: true
+        })
         .argv;
-    const { network, knownProxyContractName } = argv;
+    const { network, knownProxyContractName, forceLookup } = argv;
 
     const truffleConfig = TruffleConfig.detect();
     const truffleProvider = TruffleProvider.create(truffleConfig.networks[network]);
@@ -94,7 +99,7 @@ async function main() {
             const { address: proxyAddress, transactionHash: proxyTransactionHash } = network;
             let implAddress = txHashToImplAddressMap[proxyTransactionHash];
 
-            if (!implAddress && proxyAddress && knownProxyContractName.includes(contractName)) {
+            if ((!implAddress || forceLookup) && proxyAddress && knownProxyContractName.includes(contractName)) {
                 implAddress = await admin.methods.getProxyImplementation(proxyAddress).call();
             }
 

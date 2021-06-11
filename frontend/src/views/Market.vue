@@ -145,7 +145,7 @@ interface StoreMappedActions {
   fetchMarketNftIdsBySeller(payload: { nftContractAddr: string, sellerAddr: string }): Promise<string[]>;
   fetchMarketNftPrice(payload: { nftContractAddr: string, tokenId: string | number }): Promise<string>;
   fetchMarketTax(payload: { nftContractAddr: string }): Promise<string>;
-  checkMarketItemOwnership(payload: { nftContractAddr: string, tokenId: string | number}): Promise<boolean>;
+  checkMarketItemOwnership(payload: { nftContractAddr: string, tokenId: string | number}): Promise<string>;
   addMarketListing(payload: { nftContractAddr: string, tokenId: string, price: string }): Promise<{ seller: string, nftID: string, price: string }>;
   changeMarketListingPrice(
     payload: { nftContractAddr: string, tokenId: string, newPrice: string }
@@ -343,12 +343,13 @@ export default Vue.extend({
     async searchListingsByNftId() {
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
-      this.searchResultsOwned = await this.checkMarketItemOwnership({
+      const nftOwner = await this.checkMarketItemOwnership({
         nftContractAddr: this.contractAddress,
         tokenId: this.search
       });
-      const price = this.lookupNftPrice(this.search);
-      if(+price > 0)
+      this.searchResultsOwned = nftOwner === this.defaultAccount;
+      const price = await this.lookupNftPrice(this.search);
+      if(price !== '0')
         this.searchResults = [this.search];
       else
         this.searchResults = [];
