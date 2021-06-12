@@ -1,14 +1,10 @@
 <template>
   <ul class="link-list bold dark-bg-text">
     <li v-if="!featureFlagStakeOnly">
-      <router-link :to="{ name: 'plaza' }" exact
-        ><span>Plaza</span></router-link
-      >
+      <router-link :to="{ name: 'plaza' }" exact><span>Plaza</span></router-link      >
     </li>
     <li v-if="!featureFlagStakeOnly">
-      <router-link :to="{ name: 'blacksmith' }"
-        ><span>Blacksmith</span></router-link
-      >
+      <router-link :to="{ name: 'blacksmith' }"><span>Blacksmith</span></router-link>
     </li>
     <li v-if="!featureFlagStakeOnly">
       <router-link :to="{ name: 'combat' }"><span>Combat</span></router-link>
@@ -22,6 +18,9 @@
     <li>
       <router-link :to="{ name: 'select-stake-type' }"><span>Stake</span></router-link>
     </li>
+    <li v-if="!featureFlagStakeOnly /*&& featureFlagPortal*/">
+      <router-link :to="{ name: 'portal' }"><span>Portal</span></router-link>
+    </li>
     <li>
       <a @click="toggleGraphics()"><span>3D Graphics: {{ hideGraphics ? 'Off' : 'On' }}</span></a>
     </li>
@@ -30,6 +29,7 @@
 
 <script>
 import { market as featureFlagMarket } from '../feature-flags';
+import { portal as featureFlagPortal } from '../feature-flags';
 
 export default {
   inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
@@ -41,6 +41,9 @@ export default {
   computed: {
     featureFlagMarket() {
       return featureFlagMarket;
+    },
+    featureFlagPortal() {
+      return featureFlagPortal;
     }
   },
 

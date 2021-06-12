@@ -12,7 +12,9 @@ import App from './App.vue';
 import {
   raid as featureFlagRaid,
   stakeOnly as featureFlagStakeOnly,
-  reforging as featureFlagReforging
+  reforging as featureFlagReforging,
+  market as featureFlagMarket,
+  portal as featureFlagPortal
 } from './feature-flags';
 
 let expectedNetworkId: number | null = null;
@@ -38,7 +40,6 @@ new Vue({
   provide: {
     web3,
     // maybe feature flags should just reference the feature-flags.ts module directly?
-    featureFlagStakeOnly, featureFlagRaid, featureFlagReforging,
-    expectedNetworkId, expectedNetworkName
+    featureFlagStakeOnly, featureFlagRaid, featureFlagReforging, featureFlagMarket, featureFlagPortal, expectedNetworkId, expectedNetworkName
   }
 }).$mount('#app');
