@@ -1089,6 +1089,17 @@ export function createStore(web3: Web3) {
         return { seller, nftID, price } as { seller: string, nftID: string, price: string };
       },
 
+      async fetchSellerOfNft({ state }, { nftContractAddr, tokenId }: { nftContractAddr: string, tokenId: string }) {
+        // getSellerOfNftID
+        if(!state.contracts.NFTMarket) return;
+
+        const sellerAddr = await state.contracts.NFTMarket.methods
+          .getSellerOfNftID(nftContractAddr, tokenId)
+          .call(defaultCallOptions(state));
+
+        return sellerAddr;
+      },
+
       async fetchFightGasOffset({ state, commit }) {
 
         const fightGasOffset = await getFeeInSkillFromUsd(

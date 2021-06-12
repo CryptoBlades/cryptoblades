@@ -175,6 +175,18 @@ contract NFTMarket is
     // ############
     // Views
     // ############
+    function getSellerOfNftID(IERC721 _tokenAddress, uint256 _tokenId) public view returns (address) {
+        if(!listedTokenTypes.contains(address(_tokenAddress))) {
+            return address(0);
+        }
+
+        if(!listedTokenIDs[address(_tokenAddress)].contains(_tokenId)) {
+            return address(0);
+        }
+
+        return listings[address(_tokenAddress)][_tokenId].seller;
+    }
+
     function defaultTaxAsRoundedPercentRoughEstimate() public view returns (uint256) {
         return defaultTax.mulu(100);
     }
