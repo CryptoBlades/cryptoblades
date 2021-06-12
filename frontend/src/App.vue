@@ -91,7 +91,7 @@ export default {
     try {
       await this.initializeStore();
     } catch(e) {
-      this.errorMessage = 'Error: Out of gas or ABI error.';
+      this.errorMessage = 'Error: Out of gas or ABI error. Check BNB and SKILL balance.';
 
       if(e.code === 4001) {
         this.errorMessage = 'Error: MetaMask could not get permissions.';

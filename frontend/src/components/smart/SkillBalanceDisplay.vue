@@ -2,7 +2,8 @@
   <div class="skill-balance-display">
     <span class="bold spacedReward">Rewards </span>
     <span class="balance spacedReward">{{ formattedSkillReward }}</span>
-    <small-button class="claim-button"
+    <small-button
+      class="claim-button"
       :text="`SKILL`"
       v-tooltip="'Claim SKILL<br>Early withdraw tax: 0%<br>Time since last withdraw: n/a'"
       :disabled="!canClaimTokens"
@@ -10,18 +11,11 @@
     />
     <span class="spacedReward">and</span>
     <span class="balance spacedReward">{{ formattedXpRewards }}</span>
-    <small-button class="claim-button"
-      :text="`XP`"
-      v-tooltip="'Claim XP'"
-      :disabled="!canClaimXp"
-      @click="onClaimXp"
-    />
-    <big-button class="buy-button"
-      :mainText="`+`"
-      v-tooltip="'Buy SKILL'"
-      @click="onBuySkill"
-    />
-    <div class="balance-container"><span class="bold">Balance</span>: <span class="balance">{{ formattedSkillBalance }}</span></div>
+    <small-button class="claim-button" :text="`XP`" v-tooltip="'Claim XP'" :disabled="!canClaimXp" @click="onClaimXp" />
+    <div class="balance-container">
+      <span class="bold">Balance</span>: <span class="balance">{{ formattedSkillBalance }}</span>
+    </div>
+    <small-button class="buy-button" :text="'+'" v-tooltip="'Buy SKILL'" @click="onBuySkill" />
   </div>
 </template>
 
@@ -31,7 +25,6 @@ import { Accessors } from 'vue/types/options';
 import { mapActions, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
-import BigButton from '../BigButton.vue';
 import SmallButton from '../SmallButton.vue';
 
 interface StoreMappedState {
@@ -62,15 +55,15 @@ export default Vue.extend({
     },
 
     xpRewardsForOwnedCharacters(): string[] {
-      return this.ownedCharacterIds.map(charaId => this.xpRewards[charaId] || '0');
+      return this.ownedCharacterIds.map((charaId) => this.xpRewards[charaId] || '0');
     },
 
     formattedXpRewards(): string {
-      return this.xpRewardsForOwnedCharacters.map(xp => `${xp}`).join(', ');
+      return this.xpRewardsForOwnedCharacters.map((xp) => `${xp}`).join(', ');
     },
 
     canClaimTokens(): boolean {
-      if(new BN(this.skillRewards).lte(0)) {
+      if (new BN(this.skillRewards).lte(0)) {
         return false;
       }
 
@@ -78,13 +71,13 @@ export default Vue.extend({
     },
 
     canClaimXp(): boolean {
-      const allXpsAreZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => new BN(xp).lte(0));
-      if(allXpsAreZeroOrLess) {
+      const allXpsAreZeroOrLess = this.xpRewardsForOwnedCharacters.every((xp) => new BN(xp).lte(0));
+      if (allXpsAreZeroOrLess) {
         return false;
       }
 
       return true;
-    }
+    },
   },
 
   methods: {
@@ -92,12 +85,9 @@ export default Vue.extend({
 
     async onAddMoreSkill(): Promise<void> {
       const valueSkillToAdd = prompt('How much SKILL do you want?', '5');
-      if(!valueSkillToAdd) return;
+      if (!valueSkillToAdd) return;
 
-      const skillToAdd = Web3.utils.toWei(
-        valueSkillToAdd,
-        'ether'
-      );
+      const skillToAdd = Web3.utils.toWei(valueSkillToAdd, 'ether');
 
       try {
         await this.addMoreSkill(skillToAdd);
@@ -109,18 +99,17 @@ export default Vue.extend({
     },
 
     onBuySkill() {
-      window.open('https://exchange.pancakeswap.finance/#/swap?inputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
-        '_blank');
+      window.open('https://exchange.pancakeswap.finance/#/swap?inputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab', '_blank');
     },
 
     async onClaimTokens() {
-      if(this.canClaimTokens) {
+      if (this.canClaimTokens) {
         await this.claimTokenRewards();
       }
     },
 
     async onClaimXp() {
-      if(this.canClaimXp) {
+      if (this.canClaimXp) {
         await this.claimXpRewards();
       }
     },
@@ -132,13 +121,12 @@ export default Vue.extend({
     },
     skillRewards(balance: number, oldBalance: number) {
       console.log('REWARD SKILL CHANGE:', balance, oldBalance, balance - oldBalance);
-    }
+    },
   },
 
   components: {
-    BigButton,
-    SmallButton
-  }
+    SmallButton,
+  },
 });
 </script>
 
@@ -164,7 +152,7 @@ export default Vue.extend({
 
 .buy-button {
   width: 2rem;
-  height: 3rem;
+  height: 2rem;
   margin-right: 1rem;
 }
 
@@ -176,5 +164,4 @@ export default Vue.extend({
 .spacedReward {
   margin-right: 1rem;
 }
-
 </style>
