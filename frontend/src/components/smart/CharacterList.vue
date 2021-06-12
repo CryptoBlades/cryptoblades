@@ -19,35 +19,51 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import { CharacterTrait } from '../../interfaces';
 import { RequiredXp } from '../../interfaces';
 import CharacterArt from '../CharacterArt.vue';
 
 export default {
-  props: ['value', 'showGivenCharacterIds', 'characterIds'],
+  props: {
+    value: {},
+    showGivenCharacterIds: {
+      type: Boolean,
+      default: false
+    },
+    characterIds: {
+      type: Array,
+      default() { return []; }
+    }
+  },
 
   computed: {
-    ...mapState(['maxStamina']),
-    ...mapGetters(['ownCharacters', 'getCharacterName', 'allStaminas', 'charactersWithIds']),
+    ...mapState(['maxStamina', 'ownedCharacterIds']),
+    ...mapGetters(['getCharacterName', 'allStaminas', 'charactersWithIds']),
 
-    givenCharacters() {
-      if(!this.showGivenCharacterIds) return [];
+    characterIdsToDisplay() {
+      if(this.showGivenCharacterIds) {
+        return this.characterIds;
+      }
 
-      return this.charactersWithIds(this.characterIds);
+      return this.ownedCharacterIds;
     },
 
     displayCharacters() {
-      if(this.showGivenCharacterIds) {
-        return this.givenCharacters;
-      }
+      return this.charactersWithIds(this.characterIdsToDisplay).filter(Boolean);
+    }
+  },
 
-      return this.ownCharacters;
+  watch: {
+    async characterIdsToDisplay(characterIds) {
+      await this.fetchCharacters(characterIds);
     }
   },
 
   methods: {
+    ...mapActions(['fetchCharacters']),
+
     tooltipHtml(character) {
       if(!character) return '';
 

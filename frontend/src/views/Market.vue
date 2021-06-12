@@ -159,9 +159,6 @@ interface StoreMappedActions {
   cancelMarketListing(payload: { nftContractAddr: string, tokenId: string }): Promise<{ seller: string, nftID: string }>;
   purchaseMarketListing(payload: { nftContractAddr: string, tokenId: string, maxPrice: string }): Promise<{ seller: string, nftID: string, price: string }>;
   fetchSellerOfNft(payload: { nftContractAddr: string, tokenId: string }): Promise<string>;
-
-  fetchCharacters(characterIds: CharacterId[]): Promise<void>;
-  fetchWeapons(weaponIds: WeaponId[]): Promise<void>;
 }
 
 export default Vue.extend({
@@ -226,9 +223,6 @@ export default Vue.extend({
       'cancelMarketListing',
       'purchaseMarketListing',
       'fetchSellerOfNft',
-
-      'fetchCharacters',
-      'fetchWeapons',
     ]) as StoreMappedActions),
 
     async lookupNftPrice(nftId: NftId) {
@@ -406,14 +400,8 @@ export default Vue.extend({
       this.selectedSellingNftId = null;
     },
 
-    async searchResults(newSearchResults: Data['searchResults']) {
+    async searchResults() {
       this.selectedSearchNftId = null;
-
-      await (
-        this.activeSell === 'weapon'
-          ? this.fetchWeapons(newSearchResults)
-          : this.fetchCharacters(newSearchResults)
-      );
     }
   },
 

@@ -15,14 +15,19 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
-import { mapGetters } from 'vuex';
-import { IWeapon } from '../../interfaces';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import { IState, IWeapon } from '../../interfaces';
 
 import WeaponIcon from '../WeaponIcon.vue';
 
+type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
+
 interface StoreMappedGetters {
-  ownWeapons: IWeapon[];
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
+}
+
+interface StoreMappedActions {
+  fetchWeapons(weaponIds: string[]): Promise<void>;
 }
 
 export default Vue.extend({
@@ -60,26 +65,37 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapGetters(['ownWeapons', 'weaponsWithIds']) as Accessors<StoreMappedGetters>),
+    ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
+    ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
 
-    givenWeapons(): IWeapon[] {
-      return this.weaponsWithIds(this.weaponIds);
+    weaponIdsToDisplay(): string[] {
+      if(this.showGivenWeaponIds) {
+        return this.weaponIds;
+      }
+
+      return this.ownedWeaponIds.map(id => id.toString());
     },
 
     displayWeapons(): IWeapon[] {
-      if(this.showGivenWeaponIds) {
-        return this.givenWeapons;
-      }
-
-      return this.ownWeapons;
+      return this.weaponsWithIds(this.weaponIdsToDisplay).filter(Boolean);
     },
 
     nonIgnoredWeapons(): IWeapon[] {
       const ignore = this.ignore;
       if(ignore === null) return this.displayWeapons;
 
-      return this.displayWeapons.filter(Boolean).filter(x => x.id.toString() !== ignore.toString());
+      return this.displayWeapons.filter(x => x.id.toString() !== ignore.toString());
     }
+  },
+
+  watch: {
+    async weaponIdsToDisplay(newWeaponIds: string[]) {
+      await this.fetchWeapons(newWeaponIds);
+    }
+  },
+
+  methods: {
+    ...(mapActions(['fetchWeapons']) as StoreMappedActions)
   },
 });
 </script>
