@@ -17,7 +17,7 @@
 
         <weapon-grid v-model="reforgeWeaponId" />
 
-        <div class="button-row" v-if="reforgeWeaponId">
+        <div class="button-row" v-if="reforgeWeaponId !== null">
           <big-button
             class="button"
             mainText="Reforge Sword"

@@ -188,7 +188,7 @@ export function createStore(web3: Web3) {
       },
 
       currentCharacter(state) {
-        if (!state.currentCharacterId) return null;
+        if (state.currentCharacterId === null) return null;
 
         return state.characters[state.currentCharacterId];
       },

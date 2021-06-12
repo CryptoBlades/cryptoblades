@@ -163,7 +163,7 @@ export default {
         +this.formattedSkill(this.fightBaseline)+' per 1000 power';
     },
     async onClickEncounter(targetToFight) {
-      if (!this.selectedWeaponId || !this.currentCharacterId) {
+      if (this.selectedWeaponId === null || this.currentCharacterId === null) {
         return;
       }
 
