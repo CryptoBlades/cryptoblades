@@ -3,7 +3,7 @@
     <li
       class="character"
       :class="{ selected: value === c.id }"
-      v-for="c in ownCharacters"
+      v-for="c in displayCharacters"
       :key="c.id"
       v-tooltip="tooltipHtml(c)"
       @click="$emit('input', c.id)"
@@ -19,21 +19,51 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import { CharacterTrait } from '../../interfaces';
 import { RequiredXp } from '../../interfaces';
 import CharacterArt from '../CharacterArt.vue';
 
 export default {
-  props: ['value'],
+  props: {
+    value: {},
+    showGivenCharacterIds: {
+      type: Boolean,
+      default: false
+    },
+    characterIds: {
+      type: Array,
+      default() { return []; }
+    }
+  },
 
   computed: {
-    ...mapState(['maxStamina']),
-    ...mapGetters(['ownCharacters', 'getCharacterName', 'allStaminas']),
+    ...mapState(['maxStamina', 'ownedCharacterIds']),
+    ...mapGetters(['getCharacterName', 'allStaminas', 'charactersWithIds']),
+
+    characterIdsToDisplay() {
+      if(this.showGivenCharacterIds) {
+        return this.characterIds;
+      }
+
+      return this.ownedCharacterIds;
+    },
+
+    displayCharacters() {
+      return this.charactersWithIds(this.characterIdsToDisplay).filter(Boolean);
+    }
+  },
+
+  watch: {
+    async characterIdsToDisplay(characterIds) {
+      await this.fetchCharacters(characterIds);
+    }
   },
 
   methods: {
+    ...mapActions(['fetchCharacters']),
+
     tooltipHtml(character) {
       if(!character) return '';
 

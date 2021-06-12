@@ -2,8 +2,8 @@
   <ul class="weapon-grid">
     <li
       class="weapon"
-      :class="{ selected: weapon.id === highlight }"
-      v-for="weapon in displayWeapons"
+      :class="{ selected: highlight !== null && weapon.id === highlight }"
+      v-for="weapon in nonIgnoredWeapons"
       :key="weapon.id"
       @click="$emit('choose-weapon', weapon.id)"
     >
@@ -13,31 +13,91 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex';
-import { IWeapon } from '../../interfaces';
+import Vue from 'vue';
+import { Accessors, PropType } from 'vue/types/options';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import { IState, IWeapon } from '../../interfaces';
 
 import WeaponIcon from '../WeaponIcon.vue';
 
-export default {
+type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
+
+interface StoreMappedGetters {
+  weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
+}
+
+interface StoreMappedActions {
+  fetchWeapons(weaponIds: string[]): Promise<void>;
+}
+
+export default Vue.extend({
   model: {
     prop: 'highlight',
     event: 'choose-weapon'
   },
-  props: ['highlight', 'ignore'],
+  props: {
+    highlight: {
+      // this forces Typescript to consider a prop a certain type
+      // without us specifying a "type" property;
+      // Vue's "type" property is not as flexible as we need it here
+      validator(x: string | number | null) { void x; return true; },
+      default: null
+    },
+    ignore: {
+      // this forces Typescript to consider a prop a certain type
+      // without us specifying a "type" property;
+      // Vue's "type" property is not as flexible as we need it here
+      validator(x: string | number | null) { void x; return true; },
+      default: null
+    },
+    showGivenWeaponIds: {
+      type: Boolean,
+      default: false
+    },
+    weaponIds: {
+      type: Array as PropType<string[]>,
+      default() { return []; }
+    }
+  },
 
   components: {
     WeaponIcon,
   },
 
   computed: {
-    ...mapGetters(['ownWeapons']),
+    ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
+    ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
+
+    weaponIdsToDisplay(): string[] {
+      if(this.showGivenWeaponIds) {
+        return this.weaponIds;
+      }
+
+      return this.ownedWeaponIds.map(id => id.toString());
+    },
 
     displayWeapons(): IWeapon[] {
-      if(!this.ownWeapons) return [];
-      return (this.ownWeapons as unknown as IWeapon[]).filter(Boolean).filter((x: IWeapon) => x.id !== (this as any).ignore);
+      return this.weaponsWithIds(this.weaponIdsToDisplay).filter(Boolean);
+    },
+
+    nonIgnoredWeapons(): IWeapon[] {
+      const ignore = this.ignore;
+      if(ignore === null) return this.displayWeapons;
+
+      return this.displayWeapons.filter(x => x.id.toString() !== ignore.toString());
     }
   },
-};
+
+  watch: {
+    async weaponIdsToDisplay(newWeaponIds: string[]) {
+      await this.fetchWeapons(newWeaponIds);
+    }
+  },
+
+  methods: {
+    ...(mapActions(['fetchWeapons']) as StoreMappedActions)
+  },
+});
 </script>
 
 <style scoped>
