@@ -3,7 +3,7 @@
     <li
       class="character"
       :class="{ selected: value === c.id }"
-      v-for="c in ownCharacters"
+      v-for="c in displayCharacters"
       :key="c.id"
       v-tooltip="tooltipHtml(c)"
       @click="$emit('input', c.id)"
@@ -26,11 +26,25 @@ import { RequiredXp } from '../../interfaces';
 import CharacterArt from '../CharacterArt.vue';
 
 export default {
-  props: ['value'],
+  props: ['value', 'showGivenCharacterIds', 'characterIds'],
 
   computed: {
     ...mapState(['maxStamina']),
-    ...mapGetters(['ownCharacters', 'getCharacterName', 'allStaminas']),
+    ...mapGetters(['ownCharacters', 'getCharacterName', 'allStaminas', 'charactersWithIds']),
+
+    givenCharacters() {
+      if(!this.showGivenCharacterIds) return [];
+
+      return this.charactersWithIds(this.characterIds);
+    },
+
+    displayCharacters() {
+      if(this.showGivenCharacterIds) {
+        return this.givenCharacters;
+      }
+
+      return this.ownCharacters;
+    }
   },
 
   methods: {

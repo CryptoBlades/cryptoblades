@@ -163,16 +163,28 @@ export function createStore(web3: Web3) {
         };
       },
 
-      ownCharacters(state) {
-        const characters = state.ownedCharacterIds.map((id) => state.characters[id]);
-        if (characters.some((w) => w === null)) return [];
-        return characters.filter(Boolean);
+      ownCharacters(state, getters) {
+        return getters.charactersWithIds(state.ownedCharacterIds);
       },
 
-      ownWeapons(state) {
-        const weapons = state.ownedWeaponIds.map((id) => state.weapons[id]);
-        if (weapons.some((w) => w === null)) return [];
-        return weapons;
+      charactersWithIds(state) {
+        return (characterIds: (string | number)[]) => {
+          const characters = characterIds.map((id) => state.characters[+id]);
+          if (characters.some((w) => w === null)) return [];
+          return characters.filter(Boolean);
+        };
+      },
+
+      ownWeapons(state, getters) {
+        return getters.weaponsWithIds(state.ownedWeaponIds);
+      },
+
+      weaponsWithIds(state) {
+        return (weaponIds: (string | number)[]) => {
+          const weapons = weaponIds.map(id => state.weapons[+id]);
+          if (weapons.some((w) => w === null)) return [];
+          return weapons;
+        };
       },
 
       currentCharacter(state) {

@@ -2,8 +2,8 @@
   <ul class="weapon-grid">
     <li
       class="weapon"
-      :class="{ selected: weapon.id === highlight }"
-      v-for="weapon in displayWeapons"
+      :class="{ selected: highlight !== null && weapon.id === highlight }"
+      v-for="weapon in nonIgnoredWeapons"
       :key="weapon.id"
       @click="$emit('choose-weapon', weapon.id)"
     >
@@ -13,31 +13,75 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue';
+import { Accessors, PropType } from 'vue/types/options';
 import { mapGetters } from 'vuex';
 import { IWeapon } from '../../interfaces';
 
 import WeaponIcon from '../WeaponIcon.vue';
 
-export default {
+interface StoreMappedGetters {
+  ownWeapons: IWeapon[];
+  weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
+}
+
+export default Vue.extend({
   model: {
     prop: 'highlight',
     event: 'choose-weapon'
   },
-  props: ['highlight', 'ignore'],
+  props: {
+    highlight: {
+      // this forces Typescript to consider a prop a certain type
+      // without us specifying a "type" property;
+      // Vue's "type" property is not as flexible as we need it here
+      validator(x: string | number | null) { void x; return true; },
+      default: null
+    },
+    ignore: {
+      // this forces Typescript to consider a prop a certain type
+      // without us specifying a "type" property;
+      // Vue's "type" property is not as flexible as we need it here
+      validator(x: string | number | null) { void x; return true; },
+      default: null
+    },
+    showGivenWeaponIds: {
+      type: Boolean,
+      default: false
+    },
+    weaponIds: {
+      type: Array as PropType<string[]>,
+      default() { return []; }
+    }
+  },
 
   components: {
     WeaponIcon,
   },
 
   computed: {
-    ...mapGetters(['ownWeapons']),
+    ...(mapGetters(['ownWeapons', 'weaponsWithIds']) as Accessors<StoreMappedGetters>),
+
+    givenWeapons(): IWeapon[] {
+      return this.weaponsWithIds(this.weaponIds);
+    },
 
     displayWeapons(): IWeapon[] {
-      if(!this.ownWeapons) return [];
-      return (this.ownWeapons as unknown as IWeapon[]).filter(Boolean).filter((x: IWeapon) => x.id !== (this as any).ignore);
+      if(this.showGivenWeaponIds) {
+        return this.givenWeapons;
+      }
+
+      return this.ownWeapons;
+    },
+
+    nonIgnoredWeapons(): IWeapon[] {
+      const ignore = this.ignore;
+      if(ignore === null) return this.displayWeapons;
+
+      return this.displayWeapons.filter(Boolean).filter(x => x.id.toString() !== ignore.toString());
     }
   },
-};
+});
 </script>
 
 <style scoped>

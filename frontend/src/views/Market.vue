@@ -97,17 +97,18 @@
         </div>
 
         <div class="search-results">
-          <div v-for="result in searchResults" v-bind:key="result">
-            <li
-              class="result-item"
-              :class="{ 'result-selected': result === selectedSearchId }"
-              @click="onSelectResult(result)"
-            >
+          <weapon-grid
+            v-if="activeSell === 'weapon'"
+            :showGivenWeaponIds="true"
+            :weaponIds="searchResults"
+            v-model="selectedSearchId" />
 
-              <weapon-icon v-if="activeSell === 'weapon' && weapons[result]" :weapon="weapons[result]" />
-              <CharacterArt v-if="activeSell === 'character' && characters[result]" :character="characters[result]" />
-            </li>
-          </div>
+          <character-list
+            v-if="activeSell === 'character'"
+            :showGivenCharacterIds="true"
+            :characterIds="searchResults"
+            v-model="selectedSearchId"
+            />
         </div>
       </div>
     </div>
@@ -120,8 +121,6 @@ import Vue from 'vue';
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
-import CharacterArt from '../components/CharacterArt.vue';
-import WeaponIcon from '../components/WeaponIcon.vue';
 import Hint from '../components/Hint.vue';
 import Web3 from 'web3';
 import { mapActions, mapState } from 'vuex';
@@ -165,7 +164,7 @@ interface StoreMappedActions {
 }
 
 export default Vue.extend({
-  components: { BigButton, CharacterList, CharacterArt, WeaponGrid, WeaponIcon, Hint },
+  components: { BigButton, CharacterList, WeaponGrid, Hint },
 
   data() {
     return {
@@ -254,11 +253,6 @@ export default Vue.extend({
 
     assertNftId(): string {
       return this.sellingNftId as string;
-    },
-
-    onSelectResult(selected: string) {
-      console.log('SELECTED '+selected);
-      this.selectedSearchId = selected;
     },
 
     async addListingForNft() {
@@ -422,6 +416,9 @@ export default Vue.extend({
   watch: {
     activeSell(newActiveSell: Data['activeSell'], oldActiveSell: Data['activeSell']) {
       if(newActiveSell === oldActiveSell) return;
+
+      this.searchResults = [];
+      this.selectedSearchId = null;
 
       switch(newActiveSell) {
       case 'weapon': this.sellingCharacter = null; break;
