@@ -402,7 +402,7 @@ export default {
   position: relative;
 }
 
-.glow-container, .loading-container {
+.glow-container {
   height: 100%;
   width: 100%;
   position: absolute;

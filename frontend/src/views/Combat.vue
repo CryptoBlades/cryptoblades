@@ -32,7 +32,7 @@
       </div>
 
       <div v-if="currentCharacterStamina >= 40">
-        <div class="loading-container waiting" v-if="waitingResults" margin="auto">
+        <div class="waiting" v-if="waitingResults" margin="auto">
           <i class="fas fa-spinner fa-spin"></i>
           Waiting for fight results...
         </div>
