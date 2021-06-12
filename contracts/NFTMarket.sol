@@ -67,8 +67,9 @@ contract NFTMarket is
     // address is IERC721
     EnumerableSet.AddressSet private listedTokenTypes; // stored for a way to know the types we have on offer
 
-    // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(address => bool) public isTokenBanned;
+
     // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
     mapping(address => bool) public isUserBanned;
 
@@ -77,6 +78,9 @@ contract NFTMarket is
     // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
     mapping(address => bool) private freeTax; // since tax is 0-default, this specifies it to fix an exploit
     int128 public defaultTax; // fallback in case we haven't specified it
+
+    // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
+    EnumerableSet.AddressSet private allowedTokenTypes;
 
     // ############
     // Events
@@ -151,7 +155,7 @@ contract NFTMarket is
 
     modifier tokenNotBanned(IERC721 _tokenAddress) {
         require(
-            isTokenBanned[address(_tokenAddress)] == false,
+            isTokenAllowed(_tokenAddress),
             "This type of NFT may not be traded here"
         );
         _;
@@ -175,6 +179,20 @@ contract NFTMarket is
     // ############
     // Views
     // ############
+    function isTokenAllowed(IERC721 _tokenAddress) public view returns (bool) {
+        return allowedTokenTypes.contains(address(_tokenAddress));
+    }
+
+    function getAllowedTokenTypes() public view returns (IERC721[] memory) {
+        EnumerableSet.AddressSet storage set = allowedTokenTypes;
+        IERC721[] memory tokens = new IERC721[](set.length());
+
+        for (uint256 i = 0; i < tokens.length; i++) {
+            tokens[i] = IERC721(set.at(i));
+        }
+        return tokens;
+    }
+
     function getSellerOfNftID(IERC721 _tokenAddress, uint256 _tokenId) public view returns (address) {
         if(!listedTokenTypes.contains(address(_tokenAddress))) {
             return address(0);
@@ -433,8 +451,12 @@ contract NFTMarket is
         isUserBanned[user] = to;
     }
 
-    function setTokenBan(IERC721 token, bool to) public restricted {
-        isTokenBanned[address(token)] = to;
+    function allowToken(IERC721 _tokenAddress) public restricted isValidERC721(_tokenAddress) {
+        allowedTokenTypes.add(address(_tokenAddress));
+    }
+
+    function disallowToken(IERC721 _tokenAddress) public restricted {
+        allowedTokenTypes.remove(address(_tokenAddress));
     }
 
     function recoverSkill(uint256 amount) public restricted {
