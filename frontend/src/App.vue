@@ -2,7 +2,7 @@
   <div class="app">
     <nav-bar />
 
-    <character-bar v-if="!featureFlagStakeOnly && currentCharacterId" />
+    <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
 
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
@@ -81,7 +81,7 @@ export default {
     async updateCurrentCharacterStamina() {
       if(this.featureFlagStakeOnly) return;
 
-      if (this.currentCharacterId) {
+      if (this.currentCharacterId !== null) {
         await this.fetchCharacterStamina(this.currentCharacterId);
       }
     },
