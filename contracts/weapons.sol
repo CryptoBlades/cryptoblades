@@ -178,7 +178,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
             return 0; // 1* at 44%
         }
  
-        require(stars < 8, "Stars parameter too high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
         return performMintWeapon(minter,
