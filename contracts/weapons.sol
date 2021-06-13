@@ -159,8 +159,25 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
     }
 
     function mint(address minter, uint256 seed) public restricted returns(uint256) {
-
-        uint256 stars = getRandomStar(seed);
+        uint256 stars;
+        uint256 roll = seed % 100;
+        // will need revision, possibly manual configuration if we support more than 5 stars
+        if(roll < 1) {
+            return 4; // 5* at 1%
+        }
+        else if(roll < 6) { // 4* at 5%
+            return 3;
+        }
+        else if(roll < 21) { // 3* at 15%
+            return 2;
+        }
+        else if(roll < 56) { // 2* at 35%
+            return 1;
+        }
+        else {
+            return 0; // 1* at 44%
+        }
+ 
         return mintWeaponWithStars(minter, stars, seed);
     }
 
@@ -195,26 +212,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         return uint16((stars & 0x7) // stars aren't randomized here!
             | ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3) // trait
             | ((RandomUtil.randomSeededMinMax(0,124,RandomUtil.combineSeeds(seed,2)) & 0x7F) << 5)); // statPattern
-    }
-
-    function getRandomStar(uint256 seed) private pure returns (uint8) {
-        uint256 roll = seed % 100;
-        // will need revision, possibly manual configuration if we support more than 5 stars
-        if(roll < 1) {
-            return 4; // 5* at 1%
-        }
-        else if(roll < 6) { // 4* at 5%
-            return 3;
-        }
-        else if(roll < 21) { // 3* at 15%
-            return 2;
-        }
-        else if(roll < 56) { // 2* at 35%
-            return 1;
-        }
-        else {
-            return 0; // 1* at 44%
-        }
     }
 
     function getStatRolls(uint256 stars, uint256 seed) private pure returns (uint16, uint16, uint16) {
