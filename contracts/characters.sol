@@ -113,16 +113,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         emit NewCharacter(tokenID, minter);
     }
 
-    function getLevel(uint256 id) public view returns (uint8) {
-        return tokens[id].level;
-    }
-
     function getRequiredXpForNextLevel(uint8 currentLevel) public view returns (uint16) {
         return uint16(experienceTable[currentLevel]);
     }
 
     function getPower(uint256 id) public view returns (uint24) {
-        return getPowerAtLevel(getLevel(id));
+        return getPowerAtLevel(tokens[id].level);
     }
 
     function getPowerAtLevel(uint8 level) public pure returns (uint24) {
