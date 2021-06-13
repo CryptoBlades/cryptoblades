@@ -60,18 +60,21 @@
             class="button"
             mainText="Search NFT"
             @click="searchListingsByNftId()"
+            :disabled="!search"
           />
 
           <big-button
             class="button"
             mainText="Search Seller"
             @click="searchListingsBySeller()"
+            :disabled="!search"
           />
 
           <big-button
             class="button"
             mainText="Search My NFTs"
             @click="searchOwnListings()"
+            :disabled="!search"
           />
 
           <big-button
@@ -334,10 +337,11 @@ export default Vue.extend({
       this.searchResultsOwned = nftSeller === this.defaultAccount;
 
       const price = await this.lookupNftPrice(this.search);
-      if(price !== '0')
+      if(price !== '0') {
         this.searchResults = [this.search];
-      else
+      } else {
         this.searchResults = [];
+      }
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = null;
