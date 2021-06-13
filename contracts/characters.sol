@@ -168,13 +168,14 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function drainStamina(uint256 id, uint8 amount) public restricted returns(bool) {
         if(getStaminaPoints(id) >= amount) {
-            uint64 drainTime = uint64(amount.mul(secondsPerStamina));
+            uint64 newTimestamp = uint64(amount * secondsPerStamina);
             if(isStaminaFull(id)) { // if stamina full, we reset timestamp and drain from that
-                setStaminaTimestamp(id, uint64(now.sub(getStaminaMaxWait()).add(drainTime)));
+                newTimestamp += uint64(now - getStaminaMaxWait());
             }
             else {
-                setStaminaTimestamp(id, uint64(uint256(getStaminaTimestamp(id)).add(drainTime)));
+                newTimestamp += getStaminaTimestamp(id);
             }
+            setStaminaTimestamp(id, newTimestamp);
             return true;
         }
         else {
