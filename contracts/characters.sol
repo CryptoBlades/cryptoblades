@@ -188,7 +188,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         if(timestamp  > now)
             return 0;
 
-        uint256 points = now.sub(timestamp).div(secondsPerStamina);
+        uint256 points = (now - timestamp) / secondsPerStamina;
         if(points > maxStamina) {
             points = maxStamina;
         }
