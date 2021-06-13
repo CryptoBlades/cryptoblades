@@ -117,10 +117,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokens[id].level;
     }
 
-    function getRequiredXpForNextLevel(uint8 currentLevel) public view returns (uint16) {
-        return uint16(experienceTable[currentLevel]);
-    }
-
     function getPower(uint256 id) public view returns (uint24) {
         return getPowerAtLevel(getLevel(id));
     }
@@ -152,13 +148,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         Character storage char = tokens[id];
         if(char.level < 255) {
             uint newXp = char.xp.add(xp);
-            uint requiredToLevel = getRequiredXpForNextLevel(char.level); // technically next level
+            uint requiredToLevel = experienceTable[char.level]; // technically next level
             while(newXp >= requiredToLevel) {
                 newXp = newXp.sub(requiredToLevel);
-                char.level = uint8(char.level.add(1));
+                char.level += 1;
                 emit LevelUp(ownerOf(id), id, char.level);
                 if(char.level < 255)
-                    requiredToLevel = getRequiredXpForNextLevel(char.level);
+                    requiredToLevel = experienceTable[char.level];
                 else
                     newXp = 0;
             }
