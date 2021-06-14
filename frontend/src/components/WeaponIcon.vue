@@ -92,7 +92,7 @@ export default {
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
             this.currentCharacter.traitName,
-            '+'+Stat1PercentForChar(this.weapon, this.currentCharacter.trait)+'%')
+            '+'+Stat1PercentForChar(this.weapon, +this.currentCharacter.trait)+'%')
           })`;
         }
       }
@@ -102,7 +102,7 @@ export default {
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
             this.currentCharacter.traitName,
-            '+'+Stat2PercentForChar(this.weapon, this.currentCharacter.trait)+'%')
+            '+'+Stat2PercentForChar(this.weapon, +this.currentCharacter.trait)+'%')
           })`;
         }
       }
@@ -112,7 +112,7 @@ export default {
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
             this.currentCharacter.traitName,
-            '+'+Stat3PercentForChar(this.weapon, this.currentCharacter.trait)+'%')
+            '+'+Stat3PercentForChar(this.weapon, +this.currentCharacter.trait)+'%')
           })`;
         }
       }
