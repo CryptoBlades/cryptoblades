@@ -178,6 +178,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
             stars = 0; // 1* at 44%
         }
 
+        return mintWeaponWithStars(minter, stars, seed);
+    }
+
+    function mintWeaponWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
+        require(stars < 8, "Stars parameter too high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
         return performMintWeapon(minter,
