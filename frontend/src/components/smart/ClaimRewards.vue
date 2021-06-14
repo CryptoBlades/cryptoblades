@@ -30,6 +30,7 @@ interface StoreMappedState {
 }
 
 interface StoreMappedActions {
+  addMoreSkill(skillToAdd: string): Promise<void>;
   claimTokenRewards(): Promise<void>;
   claimXpRewards(): Promise<void>;
 }
