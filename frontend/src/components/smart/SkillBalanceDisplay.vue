@@ -38,25 +38,6 @@ export default Vue.extend({
   methods: {
     ...(mapActions(['addMoreSkill']) as StoreMappedActions),
 
-    async onAddMoreSkill(): Promise<void> {
-
-      const valueSkillToAdd = await (this as any).$dialog.prompt({ title: 'Get SKILL', text: 'How much SKILL do you want?' });
-      if(!valueSkillToAdd) return;
-
-      const skillToAdd = Web3.utils.toWei(
-        valueSkillToAdd,
-        'ether'
-      );
-
-      try {
-        await this.addMoreSkill(skillToAdd);
-        (this as any).$dialog.alert(`Successfully added ${valueSkillToAdd} SKILL to your balance!`);
-      } catch (e) {
-        console.error(e);
-        (this as any).$dialog.alert('Could not add SKILL; insufficient funds or transaction denied.');
-      }
-    },
-
     onBuySkill() {
       window.open('https://exchange.pancakeswap.finance/#/swap?inputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
         '_blank');
