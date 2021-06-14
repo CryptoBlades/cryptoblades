@@ -74,7 +74,6 @@
             class="button"
             mainText="Search My NFTs"
             @click="searchOwnListings()"
-            :disabled="!search"
           />
 
           <big-button
