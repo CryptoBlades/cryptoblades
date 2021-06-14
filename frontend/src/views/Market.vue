@@ -74,7 +74,6 @@
             class="button"
             mainText="Search My NFTs"
             @click="searchOwnListings()"
-            :disabled="!search"
           />
 
           <big-button
@@ -104,14 +103,31 @@
             v-if="activeSell === 'weapon'"
             :showGivenWeaponIds="true"
             :weaponIds="searchResults"
-            v-model="selectedSearchNftId" />
+            v-model="selectedSearchNftId">
+
+            <template #above="{ weapon: { id } }">
+              <span class="d-block text-center" v-if="nftPricesById[id]">
+                <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+              </span>
+              <span class="d-block text-center" v-else>Loading price...</span>
+            </template>
+
+          </weapon-grid>
 
           <character-list
             v-if="activeSell === 'character'"
             :showGivenCharacterIds="true"
             :characterIds="searchResults"
-            v-model="selectedSearchNftId"
-            />
+            v-model="selectedSearchNftId">
+
+            <template #above="{ character: { id } }">
+              <span class="d-block text-center" v-if="nftPricesById[id]">
+                <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+              </span>
+              <span class="d-block text-center" v-else>Loading price...</span>
+            </template>
+
+          </character-list>
         </div>
       </div>
     </div>
@@ -130,6 +146,7 @@ import { mapActions, mapState } from 'vuex';
 import { Accessors } from 'vue/types/options';
 import { Contract, IState } from '../interfaces';
 import { Characters, Weapons } from '../../../build/abi-interfaces';
+import BigNumber from 'bignumber.js';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -145,6 +162,7 @@ interface Data {
   marketOutcome: string | null;
   waitingMarketOutcome: boolean;
   selectedSearchNftId: NftId | null;
+  nftPricesById: Record<string, string>;
 }
 
 type StoreMappedState = Pick<IState, 'contracts' | 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -177,6 +195,7 @@ export default Vue.extend({
       marketOutcome: null,
       waitingMarketOutcome: false,
       selectedSearchNftId: null,
+      nftPricesById: {},
     } as Data;
   },
 
@@ -235,6 +254,17 @@ export default Vue.extend({
         nftContractAddr: this.contractAddress,
         tokenId: nftId,
       });
+    },
+
+    async fetchNftPrices(nftIds: NftId[]) {
+      if(!this.contractAddress) return;
+
+      await Promise.all(nftIds.map(async nftId => {
+        const price = (await this.lookupNftPrice(nftId))!;
+
+        void price;
+        this.nftPricesById[nftId] = price;
+      }));
     },
 
     async addListingForNft() {
@@ -404,8 +434,16 @@ export default Vue.extend({
       this.selectedSellingNftId = null;
     },
 
-    async searchResults() {
+    async searchResults(nftIds: CharacterId[] | WeaponId[]) {
       this.selectedSearchNftId = null;
+
+      await this.fetchNftPrices(nftIds);
+    }
+  },
+
+  filters: {
+    maxDecimals(val: string, maxDecimals: number) {
+      return new BigNumber(val).toFixed(maxDecimals);
     }
   },
 

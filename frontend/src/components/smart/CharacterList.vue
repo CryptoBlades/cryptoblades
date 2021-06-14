@@ -8,6 +8,9 @@
       v-tooltip="tooltipHtml(c)"
       @click="$emit('input', c.id)"
     >
+      <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+        <slot name="above" :character="c"></slot>
+      </div>
       <div class="art">
         <CharacterArt :character="c" />
       </div>
@@ -117,11 +120,11 @@ export default {
 
 .character {
   width: 12em;
-  height: 20em;
+  /* height: 20em; */
   background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 4px #ffffff38;
   border-radius: 5px;
-  padding: 0.5em;
+  padding: 0.5rem;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -131,7 +134,8 @@ export default {
 
 .character .art {
   width: 100%;
-  height: 100%;
+  min-height: 0;
+  height: 18rem;
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
@@ -139,13 +143,6 @@ export default {
 
 .valign-middle {
   vertical-align: middle;
-}
-
-.character .name-wrapper {
-  height: 3em;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .character .name {
@@ -159,5 +156,9 @@ export default {
 
 .character.selected {
   outline: solid currentcolor 2px;
+}
+
+.above-wrapper {
+  padding-bottom: 0.5rem;
 }
 </style>
