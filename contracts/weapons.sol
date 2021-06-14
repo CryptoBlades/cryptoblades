@@ -163,21 +163,21 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         uint256 roll = seed % 100;
         // will need revision, possibly manual configuration if we support more than 5 stars
         if(roll < 1) {
-            return 4; // 5* at 1%
+            stars = 4; // 5* at 1%
         }
         else if(roll < 6) { // 4* at 5%
-            return 3;
+            stars = 3;
         }
         else if(roll < 21) { // 3* at 15%
-            return 2;
+            stars = 2;
         }
         else if(roll < 56) { // 2* at 35%
-            return 1;
+            stars = 1;
         }
         else {
-            return 0; // 1* at 44%
+            stars = 0; // 1* at 44%
         }
- 
+
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
         return performMintWeapon(minter,
