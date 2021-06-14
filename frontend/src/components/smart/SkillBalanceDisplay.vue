@@ -99,7 +99,7 @@ export default Vue.extend({
     },
 
     onBuySkill() {
-      window.open('https://exchange.pancakeswap.finance/#/swap?inputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab', '_blank');
+      window.open('https://dex.apeswap.finance/#/swap?inputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab', '_blank');
     },
 
     async onClaimTokens() {

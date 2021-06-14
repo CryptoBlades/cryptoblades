@@ -1,15 +1,34 @@
 <template>
-  <ul class="weapon-grid">
-    <li
-      class="weapon"
-      :class="{ selected: highlight !== null && weapon.id === highlight }"
-      v-for="weapon in nonIgnoredWeapons"
-      :key="weapon.id"
-      @click="$emit('choose-weapon', weapon.id)"
-    >
-      <weapon-icon :weapon="weapon" />
-    </li>
-  </ul>
+  <div class="body main-font">
+    <select v-model="starFilterValue">
+      <option disabled selected value=null>Star Filter</option>
+      <option>none</option>
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+      <option>4</option>
+      <option>5</option>
+    </select>
+    <select v-model="elementFilterValue">
+      <option disabled selected value=null>Element Filter</option>
+      <option>none</option>
+      <option>Fire</option>
+      <option>Earth</option>
+      <option>Lightning</option>
+      <option>Water</option>
+    </select>
+    <ul class="weapon-grid">
+      <li
+        class="weapon"
+        :class="{ selected: highlight !== null && weapon.id === highlight }"
+        v-for="weapon in combinedFilter"
+        :key="weapon.id"
+        @click="$emit('choose-weapon', weapon.id)"
+      >
+        <weapon-icon :weapon="weapon" />
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script lang="ts">
@@ -33,31 +52,46 @@ interface StoreMappedActions {
 export default Vue.extend({
   model: {
     prop: 'highlight',
-    event: 'choose-weapon'
+    event: 'choose-weapon',
   },
   props: {
     highlight: {
       // this forces Typescript to consider a prop a certain type
       // without us specifying a "type" property;
       // Vue's "type" property is not as flexible as we need it here
-      validator(x: string | number | null) { void x; return true; },
-      default: null
+      validator(x: string | number | null) {
+        void x;
+        return true;
+      },
+      default: null,
     },
     ignore: {
       // this forces Typescript to consider a prop a certain type
       // without us specifying a "type" property;
       // Vue's "type" property is not as flexible as we need it here
-      validator(x: string | number | null) { void x; return true; },
-      default: null
+      validator(x: string | number | null) {
+        void x;
+        return true;
+      },
+      default: null,
     },
     showGivenWeaponIds: {
       type: Boolean,
-      default: false
+      default: false,
     },
     weaponIds: {
       type: Array as PropType<string[]>,
-      default() { return []; }
-    }
+      default() {
+        return [];
+      },
+    },
+  },
+
+  data() {
+    return {
+      starFilterValue: null,
+      elementFilterValue: '' || null,
+    };
   },
 
   components: {
@@ -69,33 +103,43 @@ export default Vue.extend({
     ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
 
     weaponIdsToDisplay(): string[] {
-      if(this.showGivenWeaponIds) {
+      if (this.showGivenWeaponIds) {
         return this.weaponIds;
       }
 
-      return this.ownedWeaponIds.map(id => id.toString());
+      return this.ownedWeaponIds.map((id) => id.toString());
     },
 
     displayWeapons(): IWeapon[] {
       return this.weaponsWithIds(this.weaponIdsToDisplay).filter(Boolean);
     },
 
-    nonIgnoredWeapons(): IWeapon[] {
-      const ignore = this.ignore;
-      if(ignore === null) return this.displayWeapons;
+    combinedFilter(): IWeapon[] {
+      const hasStars = this.starFilterValue !== 'none' && this.starFilterValue !== null;
+      const hasElements = this.elementFilterValue !== 'none' && this.elementFilterValue !== null;
 
-      return this.displayWeapons.filter(x => x.id.toString() !== ignore.toString());
-    }
+      if (!hasStars && !hasElements) {
+        return this.displayWeapons;
+      }
+
+      if (hasStars && hasElements) {
+        return this.displayWeapons.filter((item) => item.stars === this.starFilterValue! - 1 && item.element.includes(this.elementFilterValue!));
+      }
+
+      if (hasElements) return this.displayWeapons.filter((item) => item.element.includes(this.elementFilterValue!));
+
+      return this.displayWeapons.filter((item) => item.stars === this.starFilterValue! - 1);
+    },
   },
 
   watch: {
     async weaponIdsToDisplay(newWeaponIds: string[]) {
       await this.fetchWeapons(newWeaponIds);
-    }
+    },
   },
 
   methods: {
-    ...(mapActions(['fetchWeapons']) as StoreMappedActions)
+    ...(mapActions(['fetchWeapons']) as StoreMappedActions),
   },
 });
 </script>
