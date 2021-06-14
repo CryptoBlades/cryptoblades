@@ -8,7 +8,7 @@
 
     <skill-balance-display class="ml-auto" />
 
-    <claim-rewards />
+    <claim-rewards  v-if="!canShowRewardsBar" />
 
     <options />
   </b-navbar>
@@ -20,12 +20,32 @@ import Options from './Options.vue';
 import SkillBalanceDisplay from './smart/SkillBalanceDisplay.vue';
 import ClaimRewards from './smart/ClaimRewards.vue';
 
+import Events from '../events';
+
+
 export default {
   components: {
     ViewLinks,
     SkillBalanceDisplay,
     ClaimRewards,
     Options
+  },
+
+
+  data: () => ({
+    canShowRewardsBar: true
+  }),
+
+  methods: {
+    checkStorage() {
+      this.canShowRewardsBar = !localStorage.getItem('rewards');
+    }
+  },
+
+  mounted() {
+    this.checkStorage();
+
+    Events.$on('setting:rewards', () => this.checkStorage());
   },
 };
 </script>

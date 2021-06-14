@@ -4,7 +4,9 @@
       <i class="fa fa-plus"></i>
     </b-button>
 
-    <div class="balance-container"><span class="bold">Balance</span>: <span class="balance">{{ formattedSkillBalance }}</span></div>
+    <div class="balance-container">
+      <strong class="mr-2">Balance</strong>
+      <span class="balance">{{ formattedSkillBalance }}</span></div>
   </div>
 </template>
 

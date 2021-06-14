@@ -1,24 +1,22 @@
 <template>
-  <b-navbar-nav>
-    <b-nav-item-dropdown right>
-      <template #button-content>
-        Rewards
-      </template>
+  <b-navbar>
+    <b-nav-item><strong>Rewards</strong></b-nav-item>
 
-      <b-dropdown-item
-        :disabled="!canClaimTokens"
-        @click="onClaimTokens">
-          SKILL
-          <div class="pl-3">{{ formattedSkillReward }}</div>
-      </b-dropdown-item>
+    <b-nav-item
+      class="ml-3"
+      :disabled="!canClaimTokens"
+      @click="onClaimTokens">
+        <strong>SKILL</strong> {{ formattedSkillReward }}
+    </b-nav-item>
 
-      <b-dropdown-item
-        :disabled="!canClaimXp"
-        @click="onClaimXp">
-          XP <div class="pl-3" v-for="(reward, index) in formattedXpRewards" :key="index">{{ reward }}</div>
-        </b-dropdown-item>
-    </b-nav-item-dropdown>
-  </b-navbar-nav>
+    <b-nav-item
+      class="ml-3"
+      :disabled="!canClaimXp"
+      @click="onClaimXp">
+
+        <strong>XP</strong> {{ formattedXpRewards }}
+    </b-nav-item>
+  </b-navbar>
 </template>
 
 <script lang="ts">
@@ -54,12 +52,8 @@ export default Vue.extend({
       return this.ownedCharacterIds.map(charaId => this.xpRewards[charaId] || '0');
     },
 
-    formattedXpRewards(): string[] {
-      return this.xpRewardsForOwnedCharacters.map((xp, i) => {
-        if(!this.ownCharacters[i]) return xp;
-
-        return `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}`;
-      });
+    formattedXpRewards(): string {
+      return this.xpRewardsForOwnedCharacters.map((xp, i) => `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}`).join(', ');
     },
 
     canClaimTokens(): boolean {
@@ -94,16 +88,22 @@ export default Vue.extend({
         await this.claimXpRewards();
       }
     },
-  },
-
-  watch: {
-    skillRewards(balance: number, oldBalance: number) {
-      console.log('REWARD SKILL CHANGE:', balance, oldBalance, balance - oldBalance);
-    }
   }
 });
 </script>
 
 <style scoped>
 
+.navbar {
+  background: rgb(20,20,20);
+  background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
+}
+
+.nav-item {
+  margin-top: -24px;
+}
+
+.nav-item a {
+  padding: 0;
+}
 </style>

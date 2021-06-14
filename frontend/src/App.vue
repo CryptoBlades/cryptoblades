@@ -2,6 +2,8 @@
   <div class="app">
     <nav-bar />
 
+    <claim-rewards-bar v-if="canShowRewardsBar" />
+
     <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
 
     <div class="content dark-bg-text">
@@ -34,18 +36,23 @@
 import { mapState, mapActions } from 'vuex';
 import _ from 'lodash';
 
+import Events from './events';
+
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+import ClaimRewardsBar from './components/smart/ClaimRewardsBar.vue';
 
 export default {
   inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
     CharacterBar,
+    ClaimRewardsBar
   },
 
   data: () => ({
-    errorMessage: ''
+    errorMessage: '',
+    canShowRewardsBar: true
   }),
 
   computed: {
@@ -85,6 +92,16 @@ export default {
         await this.fetchCharacterStamina(this.currentCharacterId);
       }
     },
+
+    checkStorage() {
+      this.canShowRewardsBar = !localStorage.getItem('rewards');
+    }
+  },
+
+  mounted() {
+    this.checkStorage();
+
+    Events.$on('setting:rewards', () => this.checkStorage());
   },
 
   async created() {
