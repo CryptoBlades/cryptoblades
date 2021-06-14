@@ -2,21 +2,22 @@
   <div
     class="weapon-icon"
     v-tooltip="tooltipHtml"
-    ref="el"
     @mouseover="hover = true"
     @mouseleave="hover = false"
   >
 
-    <div class="glow-container" :class="['glow-' + (weapon.stars || 0)]"></div>
-
-    <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)" />
-
-    <div class="trait">
-      <span :class="weapon.element.toLowerCase() + '-icon'"></span>
-    </div>
-
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
+    </div>
+
+    <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
+
+      <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)" />
+
+      <div class="trait">
+        <span :class="weapon.element.toLowerCase() + '-icon'"></span>
+      </div>
+
     </div>
 
   </div>
@@ -396,17 +397,14 @@ export default {
 
 <style scoped>
 .weapon-icon {
-  width: 100%;
   height: 100%;
-
+  width: 100%;
   position: relative;
 }
 
 .glow-container {
   height: 100%;
   width: 100%;
-  position: absolute;
-  top: 0;
 }
 
 .glow-container {
@@ -415,11 +413,13 @@ export default {
 }
 
 .loading-container {
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
   z-index: 541;
+  padding: 0;
 }
 
 .trait {

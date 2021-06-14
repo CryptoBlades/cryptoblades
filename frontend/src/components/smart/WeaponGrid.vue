@@ -7,7 +7,12 @@
       :key="weapon.id"
       @click="$emit('choose-weapon', weapon.id)"
     >
-      <weapon-icon :weapon="weapon" />
+      <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+        <slot name="above" :weapon="weapon"></slot>
+      </div>
+      <div class="weapon-icon-wrapper">
+        <weapon-icon class="weapon-icon" :weapon="weapon" />
+      </div>
     </li>
   </ul>
 </template>
@@ -113,18 +118,21 @@ export default Vue.extend({
 
 .weapon {
   width: 12em;
-  height: 12em;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
   cursor: pointer;
 }
 
-.weapon img {
-  max-width: 100%;
-  max-height: 100%;
-}
-
 .weapon.selected {
   outline: solid currentcolor 2px;
+}
+
+.weapon-icon-wrapper {
+  width: 12em;
+  height: 12em;
+}
+
+.above-wrapper {
+  padding: 0.5rem;
 }
 </style>
