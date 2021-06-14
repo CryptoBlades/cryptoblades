@@ -197,6 +197,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getTokenGainForFight(uint24 monsterPower) internal view returns (int128) {
         return ABDKMath64x64.add(
+            // Performance optimization: 1000 = getPowerAtLevel(0)
             ABDKMath64x64.divu(monsterPower, 1000).mul(fightRewardBaseline),
             fightRewardGasOffset
         );

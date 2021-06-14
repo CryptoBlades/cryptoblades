@@ -386,19 +386,22 @@ export default {
 .character-art {
   width: 100%;
   height: 100%;
-
   position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .trait {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 5px;
+  left: 5px;
 }
 
 .placeholder {
-  max-width: 200px;
-  max-height: 330px;
+  padding: 10px;
+  max-width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 </style>

@@ -2,6 +2,8 @@
   <div class="app">
     <nav-bar />
 
+    <claim-rewards-bar v-if="canShowRewardsBar" />
+
     <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
 
     <div class="content dark-bg-text">
@@ -34,18 +36,23 @@
 import { mapState, mapActions } from 'vuex';
 import _ from 'lodash';
 
+import Events from './events';
+
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+import ClaimRewardsBar from './components/smart/ClaimRewardsBar.vue';
 
 export default {
   inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
     CharacterBar,
+    ClaimRewardsBar
   },
 
   data: () => ({
-    errorMessage: ''
+    errorMessage: '',
+    canShowRewardsBar: true
   }),
 
   computed: {
@@ -85,6 +92,16 @@ export default {
         await this.fetchCharacterStamina(this.currentCharacterId);
       }
     },
+
+    checkStorage() {
+      this.canShowRewardsBar = !localStorage.getItem('rewards');
+    }
+  },
+
+  mounted() {
+    this.checkStorage();
+
+    Events.$on('setting:rewards', () => this.checkStorage());
   },
 
   async created() {
@@ -232,6 +249,37 @@ button {
   font-size: 2rem;
   z-index: 541;
   color: #be9a2c;
+}
+
+button.close {
+  color: #9e8a57 !important;
+}
+
+.btn {
+  border: 2px solid #6c5f38 !important;
+  border-radius: 0.1em !important;
+}
+
+.btn:not(.disabled):hover {
+  border: 2px solid #9e8a57 !important;
+  background: rgb(61, 61, 64);
+  background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
+}
+
+.btn-primary {
+  color: #9e8a57 !important;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+}
+
+.btn-outline-primary {
+  color: #9e8a57 !important;
+}
+
+.modal-body {
+  color: #9e8a57 !important;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
 
 </style>
