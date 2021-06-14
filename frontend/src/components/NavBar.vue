@@ -32,9 +32,11 @@ export default {
   },
 
 
-  data: () => ({
-    canShowRewardsBar: true
-  }),
+  data() {
+    return {
+      canShowRewardsBar: true
+    };
+  },
 
   methods: {
     checkStorage() {
