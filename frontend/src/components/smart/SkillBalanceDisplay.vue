@@ -39,7 +39,8 @@ export default Vue.extend({
     ...(mapActions(['addMoreSkill']) as StoreMappedActions),
 
     async onAddMoreSkill(): Promise<void> {
-      const valueSkillToAdd = prompt('How much SKILL do you want?', '5');
+
+      const valueSkillToAdd = await (this as any).$dialog.prompt({ title: 'Get SKILL', text: 'How much SKILL do you want?' });
       if(!valueSkillToAdd) return;
 
       const skillToAdd = Web3.utils.toWei(
@@ -49,10 +50,10 @@ export default Vue.extend({
 
       try {
         await this.addMoreSkill(skillToAdd);
-        alert(`Successfully added ${valueSkillToAdd} SKILL to your balance!`);
+        (this as any).$dialog.alert(`Successfully added ${valueSkillToAdd} SKILL to your balance!`);
       } catch (e) {
         console.error(e);
-        alert('Could not add SKILL; insufficient funds or transaction denied.');
+        (this as any).$dialog.alert('Could not add SKILL; insufficient funds or transaction denied.');
       }
     },
 

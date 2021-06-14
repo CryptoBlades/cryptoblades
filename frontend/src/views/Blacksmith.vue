@@ -123,7 +123,7 @@ export default {
         await this.mintWeapon();
       } catch (e) {
         console.error(e);
-        alert('Could not forge sword: insuffucient funds or transaction denied.');
+        this.$dialog.alert('Could not forge sword: insuffucient funds or transaction denied.');
       }
     },
 
@@ -137,7 +137,7 @@ export default {
         this.burnWeaponId = null;
       } catch (e) {
         console.error(e);
-        alert('Could not forge sword: insufficient funds or transaction denied.');
+        this.$dialog.alert('Could not forge sword: insuffucient funds or transaction denied.');
       }
     }
   },

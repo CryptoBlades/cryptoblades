@@ -241,8 +241,7 @@ export default Vue.extend({
       this.marketOutcome = null;
       if(this.selectedSellingNftId === null) return;
 
-      const sellFor = prompt('How much SKILL do you want to list this '+this.activeSell+' for?', '0');
-      if(!sellFor) return;
+      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeSell}`, text: 'Sell Price (SKILL)' });
 
       const val = +sellFor;
       if(isNaN(val)) return;
@@ -266,7 +265,8 @@ export default Vue.extend({
       this.marketOutcome = null;
       if(this.selectedSearchNftId === null) return;
 
-      const sellFor = prompt('How much SKILL should this '+this.activeSell+' cost?', '0');
+
+      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeSell}`, text: 'Sell Price (SKILL)' });
       if(!sellFor) return;
 
       const val = +sellFor;

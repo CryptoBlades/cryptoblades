@@ -98,7 +98,7 @@ export default {
       try {
         await this.mintCharacter();
       } catch (e) {
-        alert('Could not mint character: insufficient funds or transaction denied.');
+        this.$dialog.alert('Could not mint character: insufficient funds or transaction denied.');
       }
     },
   },
