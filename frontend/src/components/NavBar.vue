@@ -15,6 +15,8 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue';
+
 import ViewLinks from './ViewLinks.vue';
 import Options from './Options.vue';
 import SkillBalanceDisplay from './smart/SkillBalanceDisplay.vue';
@@ -22,8 +24,7 @@ import ClaimRewards from './smart/ClaimRewards.vue';
 
 import Events from '../events';
 
-
-export default {
+export default Vue.extend({
   components: {
     ViewLinks,
     SkillBalanceDisplay,
@@ -39,7 +40,7 @@ export default {
   },
 
   methods: {
-    checkStorage() {
+    checkStorage(): void {
       this.canShowRewardsBar = !localStorage.getItem('rewards');
     }
   },
@@ -49,7 +50,7 @@ export default {
 
     Events.$on('setting:rewards', () => this.checkStorage());
   },
-};
+});
 </script>
 
 <style>
