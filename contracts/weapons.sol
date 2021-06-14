@@ -19,11 +19,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        
-        oneFrac = ABDKMath64x64.fromUInt(1);
-        powerMultPerPointBasic =  ABDKMath64x64.divu(1, 400);// 0.25%
-        powerMultPerPointPWR = powerMultPerPointBasic.mul(ABDKMath64x64.divu(103, 100)); // 0.2575% (+3%)
-        powerMultPerPointMatching = powerMultPerPointBasic.mul(ABDKMath64x64.divu(107, 100)); // 0.2675% (+7%)
     }
 
     function migrateTo_e55d8c5() public {
@@ -33,6 +28,15 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         lowStarBurnPowerPerPoint = 15;
         fourStarBurnPowerPerPoint = 30;
         fiveStarBurnPowerPerPoint = 60;
+    }
+
+    function migrateTo_aa9da90() public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        oneFrac = ABDKMath64x64.fromUInt(1);
+        powerMultPerPointBasic =  ABDKMath64x64.divu(1, 400);// 0.25%
+        powerMultPerPointPWR = powerMultPerPointBasic.mul(ABDKMath64x64.divu(103, 100)); // 0.2575% (+3%)
+        powerMultPerPointMatching = powerMultPerPointBasic.mul(ABDKMath64x64.divu(107, 100)); // 0.2675% (+7%)
     }
 
     /*

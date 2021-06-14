@@ -44,15 +44,19 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         fightRewardGasOffset = ABDKMath64x64.divu(8, 10);//0.8 usd;
         mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
         reforgeWeaponFee = ABDKMath64x64.divu(5, 10);//0.5 usd;
-
-        oneFrac = ABDKMath64x64.fromUInt(1);
-        fightTraitBonus = ABDKMath64x64.divu(75, 1000);
     }
 
     function migrateTo_1ee400a() public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         fightXpGain = 32;
+    }
+
+    function migrateTo_aa9da90() public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        oneFrac = ABDKMath64x64.fromUInt(1);
+        fightTraitBonus = ABDKMath64x64.divu(75, 1000);
     }
 
     // config vars
@@ -80,7 +84,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     mapping(address => uint256) tokenRewards; // user adress : skill wei
     mapping(uint256 => uint256) xpRewards; // character id : xp
-    
+
     int128 public oneFrac; // 1.0
     int128 public fightTraitBonus; // 7.5%
 
@@ -147,7 +151,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 hour,
         uint32 target
     ) public pure {
-        
+
         uint32[4] memory targets = getTargetsInternal(
             getPlayerPower(playerBasePower, wepMultiplier, wepBonusPower),
             staminaTimestamp,
