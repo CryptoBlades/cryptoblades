@@ -113,16 +113,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         emit NewCharacter(tokenID, minter);
     }
 
-    function getLevel(uint256 id) public view returns (uint8) {
-        return tokens[id].level;
-    }
-
-    function getRequiredXpForNextLevel(uint8 currentLevel) public view returns (uint16) {
-        return uint16(experienceTable[currentLevel]);
-    }
-
     function getPower(uint256 id) public view returns (uint24) {
-        return getPowerAtLevel(getLevel(id));
+        return getPowerAtLevel(tokens[id].level);
     }
 
     function getPowerAtLevel(uint8 level) public pure returns (uint24) {
@@ -152,13 +144,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         Character storage char = tokens[id];
         if(char.level < 255) {
             uint newXp = char.xp.add(xp);
-            uint requiredToLevel = getRequiredXpForNextLevel(char.level); // technically next level
+            uint requiredToLevel = experienceTable[char.level]; // technically next level
             while(newXp >= requiredToLevel) {
                 newXp = newXp.sub(requiredToLevel);
-                char.level = uint8(char.level.add(1));
+                char.level += 1;
                 emit LevelUp(ownerOf(id), id, char.level);
                 if(char.level < 255)
-                    requiredToLevel = getRequiredXpForNextLevel(char.level);
+                    requiredToLevel = experienceTable[char.level];
                 else
                     newXp = 0;
             }
@@ -176,13 +168,14 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function drainStamina(uint256 id, uint8 amount) public restricted returns(bool) {
         if(getStaminaPoints(id) >= amount) {
-            uint64 drainTime = uint64(amount.mul(secondsPerStamina));
+            uint64 newTimestamp = uint64(amount * secondsPerStamina);
             if(isStaminaFull(id)) { // if stamina full, we reset timestamp and drain from that
-                setStaminaTimestamp(id, uint64(now.sub(getStaminaMaxWait()).add(drainTime)));
+                newTimestamp += uint64(now - getStaminaMaxWait());
             }
             else {
-                setStaminaTimestamp(id, uint64(uint256(getStaminaTimestamp(id)).add(drainTime)));
+                newTimestamp += getStaminaTimestamp(id);
             }
+            setStaminaTimestamp(id, newTimestamp);
             return true;
         }
         else {
@@ -195,7 +188,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         if(timestamp  > now)
             return 0;
 
-        uint256 points = now.sub(timestamp).div(secondsPerStamina);
+        uint256 points = (now - timestamp) / secondsPerStamina;
         if(points > maxStamina) {
             points = maxStamina;
         }
