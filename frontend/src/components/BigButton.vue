@@ -1,8 +1,8 @@
 <template>
-  <button :disabled="disabled" class="button main-font dark-bg-text" @click="$emit('click')">
+  <b-button variant="primary" :disabled="disabled" class="button main-font dark-bg-text" @click="$emit('click')">
     <h1>{{ mainText }}</h1>
     <h2>{{ subText }}</h2>
-  </button>
+  </b-button>
 </template>
 
 <script lang="ts">

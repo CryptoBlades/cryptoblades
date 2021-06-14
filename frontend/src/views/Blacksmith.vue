@@ -1,19 +1,32 @@
 <template>
   <div class="body main-font">
-    <div v-if="ownWeapons.length > 0" class="weapon-container">
-      <div class="sub-container">
-        <h1>
-          Weapons
-          <button class="mint-weapon"
+
+    <div class="blank-slate" v-if="ownWeapons.length === 0">
+      You do not currently have any weapons.
+      <br>
+      You can forge one by clicking the button below.
+      <br>
+      <br>
+      <big-button
+        class="button"
+        mainText="Forge sword"
+        @click="onForgeWeapon"
+      />
+    </div>
+
+    <div class="row mt-3" v-if="ownWeapons.length > 0">
+      <div class="col-6">
+        <div class="d-flex justify-content-space-between">
+          <h1>Weapons</h1>
+
+          <b-button
+            variant="primary"
+            class="ml-auto"
             @click="onForgeWeapon"
-            :disabled="disableForge"
             v-tooltip="'Forge new weapon'">
-            <span v-if="disableForge">Cooling forge...</span>
-            <span v-if="!disableForge">
-              Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
-            </span>
-          </button>
-        </h1>
+            Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+          </b-button>
+        </div>
 
         <weapon-grid v-model="reforgeWeaponId" />
 
@@ -21,14 +34,15 @@
           <big-button
             class="button"
             mainText="Reforge Sword"
+            v-if="ownWeapons.length > 1"
             v-tooltip="'Gain stats by burning a different weapon'"
             @click="showReforge = true"
           />
         </div>
       </div>
 
-      <div class="sub-container">
-        <div v-if="showReforge">
+      <div class="col-6">
+        <div v-if="showReforge && ownWeapons.length > 1">
           <h1>Choose Weapon to burn</h1>
           <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" />
 
@@ -42,19 +56,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="blank-slate" v-if="ownWeapons.length === 0">
-      You do not currently have any weapons.
-      <br>
-      You can forge one by clicking the button below.
-      <br>
-      <br>
-      <big-button
-        class="button"
-        mainText="Forge sword"
-        @click="onForgeWeapon"
-      />
     </div>
   </div>
 </template>

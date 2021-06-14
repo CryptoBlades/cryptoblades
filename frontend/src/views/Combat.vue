@@ -1,70 +1,105 @@
 <template>
   <div class="body main-font">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
-      <h1 class="error" v-if="error !== null">Error: {{ error }}</h1>
-
-      <div class="payout-info">{{getPayoutString()}}</div>
-
-      <div class="combat-hints">
-        <span class="fire-icon" /> »
-        <span class="earth-icon" /> »
-        <span class="lightning-icon" /> »
-        <span class="water-icon" /> »
-        <span class="fire-icon" />
-
-        <Hint text="The elements affect power:<br>
-          <br>Character vs Enemy: bonus or penalty as shown above
-          <br>Character and Weapon match gives bonus" />
+      <div class="row" v-if="error !== null">
+        <div class="col error">Error: {{ error }}</div>
       </div>
 
-      <CombatResults v-if="resultsAvailable" :results="fightResults" />
-
-      <div class="message-box" v-if="!currentCharacter">
-        You need a character to do battle.
-      </div>
-
-      <div class="message-box" v-if="currentCharacter && currentCharacterStamina < 40">
-        You need 40 stamina to do battle.
-      </div>
-
-      <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">
-        You cannot do battle during the last 30 seconds of the hour. Stand fast!
-      </div>
-
-      <div v-if="currentCharacterStamina >= 40">
-        <div class="waiting" v-if="waitingResults" margin="auto">
-          <i class="fas fa-spinner fa-spin"></i>
-          Waiting for fight results...
+      <div class="row">
+        <div class="col">
+          <div class="payout-info">{{getPayoutString()}}</div>
         </div>
+      </div>
 
-        <div class="header-row">
-          <Hint text="Your weapon multiplies your power<br>
-            <br>+Stats determine the multiplier
-            <br>Stat element match with character gives greater bonus" />
-          <h1>Choose a weapon</h1>
+      <div class="row">
+        <div class="col text-center">
+          <div class="combat-hints">
+            <span class="fire-icon" /> »
+            <span class="earth-icon" /> »
+            <span class="lightning-icon" /> »
+            <span class="water-icon" /> »
+            <span class="fire-icon" />
+
+            <Hint text="The elements affect power:<br>
+              <br>Character vs Enemy: bonus or penalty as shown above
+              <br>Character and Weapon match gives bonus" />
+          </div>
         </div>
+      </div>
 
-        <weapon-grid v-model="selectedWeaponId" />
+      <div class="row" v-if="resultsAvailable">
+        <div class="col">
+          <CombatResults v-if="resultsAvailable" :results="fightResults" />
+        </div>
+      </div>
 
-        <ul class="encounter-list" v-if="targets.length > 0">
-          <li class="encounter" v-for="(e, i) in targets" :key="i">
-            <img :src="getEnemyArt(e.power)" alt="Enemy">
-            <div class="encounter-element">
-              <span :class="getCharacterTrait(e.trait).toLowerCase()">{{getCharacterTrait(e.trait)}}</span>
-              <span :class="getCharacterTrait(e.trait).toLowerCase()+'-icon'" />
+      <div class="row">
+        <div class="col">
+          <div class="message-box" v-if="!currentCharacter">
+            You need a character to do battle.
+          </div>
+
+          <div class="message-box" v-if="currentCharacter && currentCharacterStamina < 40">
+            You need 40 stamina to do battle.
+          </div>
+
+          <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">
+            You cannot do battle during the last 30 seconds of the hour. Stand fast!
+          </div>
+        </div>
+      </div>
+
+      <div class="row" v-if="currentCharacterStamina >= 40">
+        <div class="col">
+
+          <div class="row">
+            <div class="col">
+              <div class="waiting" v-if="waitingResults" margin="auto">
+                <i class="fas fa-spinner fa-spin"></i>
+                Waiting for fight results...
+              </div>
             </div>
-            <big-button
-              class="encounter-button"
-              :mainText="`Fight!`"
-              :subText="`Power ${e.power}`"
-              v-tooltip="'Cost 40 stamina'"
-              :disabled="timeMinutes === 59 && timeSeconds >= 30"
-              @click="onClickEncounter(e)"
-            />
-          </li>
-        </ul>
+          </div>
 
-        <p v-if="isLoadingTargets">Loading...</p>
+          <div class="row">
+            <div class="col">
+              <div class="header-row">
+                <Hint text="Your weapon multiplies your power<br>
+                  <br>+Stats determine the multiplier
+                  <br>Stat element match with character gives greater bonus" />
+                <h1>Choose a weapon</h1>
+              </div>
+
+              <weapon-grid v-model="selectedWeaponId" />
+            </div>
+          </div>
+
+          <div class="row" v-if="targets.length > 0">
+            <div class="col encounter text-center d-flex flex-column justify-content-center" v-for="(e, i) in targets" :key="i">
+              <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy">
+
+              <div class="encounter-element">
+                <span :class="getCharacterTrait(e.trait).toLowerCase()">{{getCharacterTrait(e.trait)}}</span>
+                <span :class="getCharacterTrait(e.trait).toLowerCase()+'-icon'" />
+              </div>
+
+              <big-button
+                class="encounter-button"
+                :mainText="`Fight!`"
+                :subText="`Power ${e.power}`"
+                v-tooltip="'Cost 40 stamina'"
+                :disabled="timeMinutes === 59 && timeSeconds >= 30"
+                @click="onClickEncounter(e)"
+              />
+
+              <p v-if="isLoadingTargets">Loading...</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div>
       </div>
     </div>
 
@@ -219,26 +254,9 @@ export default {
 </script>
 
 <style scoped>
-.encounter-list {
-  list-style-type: none;
-  display: flex;
-  margin: 0;
-  padding: 0;
-  justify-content: space-around;
-}
-
-.encounter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
 
 .encounter img {
-  max-width: 19rem;
-}
-
-.encounter-button {
-  width: 19rem;
+  max-width: 15vw;
 }
 
 .encounter-element {

@@ -399,6 +399,7 @@ export default {
 .placeholder {
   max-width: 200px;
   max-height: 330px;
+  transform: scale(0.75);
 }
 
 </style>

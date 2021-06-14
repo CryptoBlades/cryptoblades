@@ -234,6 +234,17 @@ button {
   color: #be9a2c;
 }
 
+.btn {
+  border: 2px solid #6c5f38 !important;
+  border-radius: 0.1em !important;
+}
+
+.btn-primary {
+  color: #9e8a57 !important;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+}
+
 </style>
 <style scoped>
 .app {
