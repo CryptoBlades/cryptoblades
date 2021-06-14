@@ -7,11 +7,16 @@
 
       <b-dropdown-item
         :disabled="!canClaimTokens"
-        @click="onClaimTokens">SKILL {{ formattedSkillReward }}</b-dropdown-item>
+        @click="onClaimTokens">
+          SKILL
+          <div class="pl-3">{{ formattedSkillReward }}</div>
+      </b-dropdown-item>
 
       <b-dropdown-item
         :disabled="!canClaimXp"
-        @click="onClaimXp">XP {{ formattedXpRewards }}</b-dropdown-item>
+        @click="onClaimXp">
+          XP <div class="pl-3" v-for="reward in formattedXpRewards" :key="reward">{{ reward }}</div>
+        </b-dropdown-item>
     </b-nav-item-dropdown>
   </b-navbar-nav>
 </template>
@@ -19,9 +24,10 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Accessors } from 'vue/types/options';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
+import { getCharacterNameFromSeed } from '../../character-name';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -38,6 +44,7 @@ interface StoreMappedActions {
 export default Vue.extend({
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds']) as Accessors<StoreMappedState>),
+    ...(mapGetters(['ownCharacters'])),
 
     formattedSkillReward(): string {
       const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
@@ -48,8 +55,8 @@ export default Vue.extend({
       return this.ownedCharacterIds.map(charaId => this.xpRewards[charaId] || '0');
     },
 
-    formattedXpRewards(): string {
-      return this.xpRewardsForOwnedCharacters.map(xp => `${xp}`).join(', ');
+    formattedXpRewards(): string[] {
+      return this.xpRewardsForOwnedCharacters.map((xp, i) => `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}`);
     },
 
     canClaimTokens(): boolean {
