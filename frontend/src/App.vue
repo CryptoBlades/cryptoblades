@@ -239,6 +239,12 @@ button {
   border-radius: 0.1em !important;
 }
 
+.btn:not(.disabled):hover {
+  border: 2px solid #9e8a57 !important;
+  background: rgb(61, 61, 64);
+  background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
+}
+
 .btn-primary {
   color: #9e8a57 !important;
   background: rgb(31, 31, 34);
