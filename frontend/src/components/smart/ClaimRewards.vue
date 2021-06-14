@@ -1,5 +1,4 @@
 <template>
-
   <b-navbar-nav>
     <b-nav-item-dropdown right>
       <template #button-content>
@@ -73,24 +72,6 @@ export default Vue.extend({
   methods: {
     ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimXpRewards']) as StoreMappedActions),
 
-    async onAddMoreSkill(): Promise<void> {
-      const valueSkillToAdd = prompt('How much SKILL do you want?', '5');
-      if(!valueSkillToAdd) return;
-
-      const skillToAdd = Web3.utils.toWei(
-        valueSkillToAdd,
-        'ether'
-      );
-
-      try {
-        await this.addMoreSkill(skillToAdd);
-        alert(`Successfully added ${valueSkillToAdd} SKILL to your balance!`);
-      } catch (e) {
-        console.error(e);
-        alert('Could not add SKILL; insufficient funds or transaction denied.');
-      }
-    },
-
     onBuySkill() {
       window.open('https://exchange.pancakeswap.finance/#/swap?inputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
         '_blank');
@@ -110,9 +91,6 @@ export default Vue.extend({
   },
 
   watch: {
-    skillBalance(balance: number, oldBalance: number) {
-      console.log('BALANCE CHANGE:', balance, oldBalance, balance - oldBalance);
-    },
     skillRewards(balance: number, oldBalance: number) {
       console.log('REWARD SKILL CHANGE:', balance, oldBalance, balance - oldBalance);
     }
@@ -121,38 +99,5 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.skill-balance-display {
-  display: flex;
-  align-items: center;
-  font-size: 1.1rem;
-}
-
-.add-more-skill:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.balance-container {
-  margin-right: 5px;
-}
-
-.balance {
-  color: #b3b0a7;
-}
-
-.buy-button {
-  width: 2rem;
-  height: 3rem;
-  margin-right: 1rem;
-}
-
-.claim-button {
-  height: 2rem;
-  margin-right: 1rem;
-}
-
-.spacedReward {
-  margin-right: 1rem;
-}
 
 </style>
