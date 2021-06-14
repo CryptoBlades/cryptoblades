@@ -154,7 +154,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             uint newXp = char.xp.add(xp);
             uint requiredToLevel = experienceTable[char.level]; // technically next level
             while(newXp >= requiredToLevel) {
-                newXp = newXp.sub(requiredToLevel);
+                newXp = newXp - requiredToLevel;
                 char.level += 1;
                 emit LevelUp(ownerOf(id), id, char.level);
                 if(char.level < 255)
@@ -174,25 +174,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         tokens[id].staminaTimestamp = timestamp;
     }
 
-    function drainStamina(uint256 id, uint8 amount) public restricted returns(bool) {
-        if(getStaminaPoints(id) >= amount) {
-            uint64 newTimestamp = uint64(amount * secondsPerStamina);
-            if(isStaminaFull(id)) { // if stamina full, we reset timestamp and drain from that
-                newTimestamp += uint64(now - getStaminaMaxWait());
-            }
-            else {
-                newTimestamp += getStaminaTimestamp(id);
-            }
-            setStaminaTimestamp(id, newTimestamp);
-            return true;
-        }
-        else {
-            return false;
-        }
+    function getStaminaPoints(uint256 id) public view returns (uint8) {
+        return getStaminaPointsFromTimestamp(tokens[id].staminaTimestamp);
     }
 
-    function getStaminaPoints(uint256 id) public view returns (uint8) {
-        uint64 timestamp = getStaminaTimestamp(id);
+    function getStaminaPointsFromTimestamp(uint64 timestamp) public view returns (uint8) {
         if(timestamp  > now)
             return 0;
 
@@ -208,7 +194,24 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getStaminaMaxWait() public pure returns (uint64) {
-        return uint64(maxStamina.mul(secondsPerStamina));
+        return uint64(maxStamina * secondsPerStamina);
+    }
+
+    function getFightDataAndDrainStamina(uint256 id, uint8 amount) public restricted returns(uint96) {
+        Character storage char = tokens[id];
+        uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
+        require(staminaPoints >= amount, "Not enough stamina!");
+
+        uint64 drainTime = uint64(amount * secondsPerStamina);
+        uint64 preTimestamp = char.staminaTimestamp;
+        if(staminaPoints >= maxStamina) { // if stamina full, we reset timestamp and drain from that
+            char.staminaTimestamp = uint64(now - getStaminaMaxWait() + drainTime);
+        }
+        else {
+            char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
+        }
+        // bitwise magic to avoid stacking limitations later on
+        return uint96(char.trait | (getPowerAtLevel(char.level) << 8) | (preTimestamp << 32));
     }
 
     function _beforeTokenTransfer(address /* from */, address to, uint256 /* tokenId */) internal override {
