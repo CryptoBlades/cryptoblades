@@ -308,43 +308,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return ABDKMath64x64.fromUInt(1).add(stat1).add(stat2).add(stat3);
     }
 
-    function getPowerMultiplierForTrait(uint256 id, uint8 trait) public view returns(int128) {
-        // Does not include character trait to weapon trait match
-        // Only counts arbitrary trait to weapon stat trait
-        // This function can be used by frontend to get expected % bonus for each type
-        // Making it easy to see on the market how useful it will be to you
-        Weapon memory wep = tokens[id];
-        int128 powerPerPoint = ABDKMath64x64.divu(1, 400); // 0.25% or x0.0025
-        int128 matchingPowerPerPoint = powerPerPoint.mul(ABDKMath64x64.divu(107, 100)); // +7%
-        int128 powerPerPWRPoint = powerPerPoint.mul(ABDKMath64x64.divu(103, 100)); // +3%
-        uint8 statPattern = getStatPatternFromProperties(wep.properties);
-        int128 result = ABDKMath64x64.fromUInt(1);
-
-        if(getStat1Trait(statPattern) == trait)
-            result = result.add(wep.stat1.fromUInt().mul(matchingPowerPerPoint));
-        else if(getStat1Trait(statPattern) == 4) // PWR, traitless
-            result = result.add(wep.stat1.fromUInt().mul(powerPerPWRPoint));
-        else
-            result = result.add(wep.stat1.fromUInt().mul(powerPerPoint));
-
-        if(getStat2Trait(statPattern) == trait)
-            result = result.add(wep.stat2.fromUInt().mul(matchingPowerPerPoint));
-        else if(getStat2Trait(statPattern) == 4) // PWR, traitless
-            result = result.add(wep.stat2.fromUInt().mul(powerPerPWRPoint));
-        else
-            result = result.add(wep.stat2.fromUInt().mul(powerPerPoint));
-
-        if(getStat3Trait(statPattern) == trait)
-            result = result.add(wep.stat3.fromUInt().mul(matchingPowerPerPoint));
-        else if(getStat3Trait(statPattern) == 4) // PWR, traitless
-            result = result.add(wep.stat3.fromUInt().mul(powerPerPWRPoint));
-        else
-            result = result.add(wep.stat3.fromUInt().mul(powerPerPoint));
-
-        return result;
-    }
-
-    function getPowerMultiplierForFight(
+    function getPowerMultiplierForTrait(
         uint16 properties,
         uint16 stat1,
         uint16 stat2,
@@ -469,14 +433,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function getFightData(uint256 id, uint8 charTrait) public view returns (int128, int128, uint24, uint8) {
         Weapon storage wep = tokens[id];
         return (
-            oneFrac.add(
-                powerMultPerPointBasic.mul(
+            oneFrac.add(powerMultPerPointBasic.mul(
                     ABDKMath64x64.fromUInt(
                         SafeMath.add(wep.stat1, wep.stat2).add(wep.stat3)
                     )
-                )
-            ),//targetMult
-            getPowerMultiplierForFight(wep.properties, wep.stat1, wep.stat2, wep.stat3, charTrait),
+            )),//targetMult
+            getPowerMultiplierForTrait(wep.properties, wep.stat1, wep.stat2, wep.stat3, charTrait),
             getBonusPowerForFight(id, wep.level),
             getTraitFromProperties(wep.properties)
         );

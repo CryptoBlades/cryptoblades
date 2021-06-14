@@ -35,13 +35,13 @@ contract RaidBasic is Initializable, Raid {
         // we drain ~12h of stamina from the character
         // we may want to have a specific lockout in the future
         characters.setStaminaTimestamp(characterID, uint64(now + (staminaDrain)));
-
-        int128 traitMultiplier = game.getPlayerTraitBonusAgainst(
+        // TODO fix raids
+        int128 traitMultiplier = 0;/*game.getPlayerTraitBonusAgainst(
             characters.getTrait(characterID),
             weapons.getTrait(weaponID),
             bossTrait
-        );
-        uint24 power = uint24(traitMultiplier.mulu(game.getPlayerFinalPower(characterID, weaponID)));
+        );*/
+        uint24 power = 0;//uint24(traitMultiplier.mulu(game.getPlayerFinalPower(characterID, weaponID)));
         totalPower += power;
         raiders.push(Raider(uint256(msg.sender), characterID, weaponID, power));
         emit RaiderJoined(msg.sender, characterID, weaponID, power);

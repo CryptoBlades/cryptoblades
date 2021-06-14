@@ -122,7 +122,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getPower(uint256 id) public view returns (uint24) {
-        return getPowerAtLevel(getLevel(id));
+        return getPowerAtLevel(tokens[id].level);
     }
 
     function getPowerAtLevel(uint8 level) public pure returns (uint24) {
@@ -152,13 +152,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         Character storage char = tokens[id];
         if(char.level < 255) {
             uint newXp = char.xp.add(xp);
-            uint requiredToLevel = getRequiredXpForNextLevel(char.level); // technically next level
+            uint requiredToLevel = experienceTable[char.level]; // technically next level
             while(newXp >= requiredToLevel) {
-                newXp = newXp.sub(requiredToLevel);
-                char.level = uint8(char.level.add(1));
+                newXp = newXp - requiredToLevel;
+                char.level += 1;
                 emit LevelUp(ownerOf(id), id, char.level);
                 if(char.level < 255)
-                    requiredToLevel = getRequiredXpForNextLevel(char.level);
+                    requiredToLevel = experienceTable[char.level];
                 else
                     newXp = 0;
             }
@@ -174,31 +174,15 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         tokens[id].staminaTimestamp = timestamp;
     }
 
-    function drainStamina(uint256 id, uint8 amount) public restricted returns(bool) {
-        if(getStaminaPoints(id) >= amount) {
-            uint64 drainTime = uint64(amount.mul(secondsPerStamina));
-            if(isStaminaFull(id)) { // if stamina full, we reset timestamp and drain from that
-                setStaminaTimestamp(id, uint64(now.sub(getStaminaMaxWait()).add(drainTime)));
-            }
-            else {
-                setStaminaTimestamp(id, uint64(uint256(getStaminaTimestamp(id)).add(drainTime)));
-            }
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
     function getStaminaPoints(uint256 id) public view returns (uint8) {
-        return getStaminaPointsFromTimestamp(getStaminaTimestamp(id));
+        return getStaminaPointsFromTimestamp(tokens[id].staminaTimestamp);
     }
 
     function getStaminaPointsFromTimestamp(uint64 timestamp) public view returns (uint8) {
         if(timestamp  > now)
             return 0;
 
-        uint256 points = now.sub(timestamp) / secondsPerStamina;
+        uint256 points = (now - timestamp) / secondsPerStamina;
         if(points > maxStamina) {
             points = maxStamina;
         }
@@ -210,7 +194,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getStaminaMaxWait() public pure returns (uint64) {
-        return uint64(maxStamina.mul(secondsPerStamina));
+        return uint64(maxStamina * secondsPerStamina);
     }
 
     function getFightDataAndDrainStamina(uint256 id, uint8 amount) public restricted returns(uint96) {
@@ -218,15 +202,15 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
         require(staminaPoints >= amount, "Not enough stamina!");
 
-        uint64 drainTime = uint64(amount.mul(secondsPerStamina));
+        uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;
         if(staminaPoints >= maxStamina) { // if stamina full, we reset timestamp and drain from that
-            char.staminaTimestamp = uint64(now.sub(getStaminaMaxWait()).add(drainTime));
+            char.staminaTimestamp = uint64(now - getStaminaMaxWait() + drainTime);
         }
         else {
-            char.staminaTimestamp = uint64(uint256(getStaminaTimestamp(id)).add(drainTime));
+            char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
-        // bitwise magic to avoid stacking limitations
+        // bitwise magic to avoid stacking limitations later on
         return uint96(char.trait | (getPowerAtLevel(char.level) << 8) | (preTimestamp << 32));
     }
 
