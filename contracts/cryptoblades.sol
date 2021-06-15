@@ -112,34 +112,57 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return tokens;
     }
 
+    function unpackFightDataAndDrainStamina(uint96 playerData)
+        public pure returns (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) {
+
+        charTrait = uint8(playerData & 0xFF);
+        basePowerLevel = uint24((playerData >> 8) & 0xFFFFFF);
+        timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
+    }
+
     function fight(uint256 char, uint256 wep, uint32 target) external
             doesNotHaveMoreThanMaxCharacters
             oncePerBlock(msg.sender)
             isCharacterOwner(char)
             isWeaponOwner(wep) {
-        // excuse the bit packing, this function is stack limited
-        // 8b trait | 24b basePowerLevel | 64b timestamp
-        uint96 playerData = characters.getFightDataAndDrainStamina(char, staminaCostFight);
+        (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
+            unpackFightDataAndDrainStamina(characters.getFightDataAndDrainStamina(char, staminaCostFight));
+
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightData(wep, uint8(playerData & 0xFF)/*charTrait*/);
+            uint8 weaponTrait) = weapons.getFightData(wep, charTrait);
 
-        verifyFight(
-            uint24((playerData >> 8) & 0xFFFFFF), // playerBasePower
+        _verifyFight(
+            basePowerLevel,
             weaponMultTarget,
             weaponBonusPower,
-            uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF), // staminaTimestamp
-            getCurrentHour(),
+            timestamp,
             target
         );
         performFight(
-            msg.sender,
             char,
             wep,
-            getPlayerPower(uint24((playerData >> 8) & 0xFFFFFF), weaponMultFight, weaponBonusPower),
-            uint24((playerData & 0xFF/*charTrait*/) | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
+            getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
+            uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
             uint24(target & 0xFFFFFF)
+        );
+    }
+
+    function _verifyFight(
+        uint24 basePowerLevel,
+        int128 weaponMultTarget,
+        uint24 weaponBonusPower,
+        uint64 timestamp,
+        uint32 target
+    ) internal view {
+        verifyFight(
+            basePowerLevel,
+            weaponMultTarget,
+            weaponBonusPower,
+            timestamp,
+            getCurrentHour(),
+            target
         );
     }
 
@@ -168,14 +191,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function performFight(
-        address user,
         uint256 char,
         uint256 wep,
         uint24 playerFightPower,
         uint24 traitsCWE, // could fit into uint8 since each trait is only stored on 2 bits (TODO)
         uint24 targetPower
     ) private {
-        uint256 seed = randoms.getRandomSeed(user);
+        uint256 seed = randoms.getRandomSeed(msg.sender);
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
@@ -183,16 +205,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 tokens = usdToSkill(getTokenGainForFight(targetPower));
 
         if(playerRoll >= monsterRoll) {
-            tokenRewards[user] = tokenRewards[user].add(tokens);
+            tokenRewards[msg.sender] = tokenRewards[msg.sender].add(tokens);
             xpRewards[char] = SafeMath.add(xpRewards[char], xp);
         }
         else {
             // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
-            tokenRewards[user] = tokenRewards[user].add(0);
+            tokenRewards[msg.sender] = tokenRewards[msg.sender].add(0);
             xpRewards[char] = SafeMath.add(xpRewards[char], 0);
         }
 
-        emit FightOutcome(user, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
+        emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
