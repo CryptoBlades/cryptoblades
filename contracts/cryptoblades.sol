@@ -138,7 +138,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             char,
             wep,
             getPlayerPower(uint24((playerData >> 8) & 0xFFFFFF), weaponMultFight, weaponBonusPower),
-            uint8((playerData & 0xFF/*charTrait*/) | uint24(weaponTrait << 8) | uint24((target >> 24) & 0xFF)),
+            uint24((playerData & 0xFF/*charTrait*/) | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
             uint24(target & 0xFFFFFF)
         );
     }
@@ -192,7 +192,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             xpRewards[char] = SafeMath.add(xpRewards[char], 0);
         }
 
-        emit FightOutcome(user, char, wep, (targetPower | ((traitsCWE << 8) & 0xFF0000)), playerRoll, monsterRoll, xp, tokens);
+        emit FightOutcome(user, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
@@ -237,13 +237,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function getPlayerTraitBonusAgainst(uint24 traitsCWE) public view returns (int128) {
         int128 traitBonus = oneFrac;
         uint8 characterTrait = uint8(traitsCWE & 0xFF);
-        if(characterTrait == uint8((traitsCWE >> 8) & 0xFF)/*wepTrait*/) {
+        if(characterTrait == (traitsCWE >> 8) & 0xFF/*wepTrait*/) {
             traitBonus = traitBonus.add(fightTraitBonus);
         }
-        if(isTraitEffectiveAgainst(characterTrait, uint8((traitsCWE >> 16) & 0xFF))) {
+        if(isTraitEffectiveAgainst(characterTrait, uint8(traitsCWE >> 16)/*enemy*/)) {
             traitBonus = traitBonus.add(fightTraitBonus);
         }
-        else if(isTraitEffectiveAgainst(uint8((traitsCWE >> 16) & 0xFF), characterTrait)) {
+        else if(isTraitEffectiveAgainst(uint8(traitsCWE >> 16)/*enemy*/, characterTrait)) {
             traitBonus = traitBonus.sub(fightTraitBonus);
         }
         return traitBonus;
