@@ -2,13 +2,13 @@
   <div>
     <div class="filters row mt-2 pl-2" v-if="displayWeapons.length > 0">
       <div class="col-2">
-        <select class="form-control" v-model="starFilter">
+        <select class="form-control" v-model="starFilter" @change="saveFilters()">
           <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'None' }}</option>
         </select>
       </div>
 
       <div class="col-2">
-        <select class="form-control" v-model="elementFilter">
+        <select class="form-control" v-model="elementFilter" @change="saveFilters()">
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'None' }}</option>
         </select>
       </div>
@@ -135,8 +135,18 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['fetchWeapons']) as StoreMappedActions)
+    ...(mapActions(['fetchWeapons']) as StoreMappedActions),
+
+    saveFilters() {
+      localStorage.setItem('weapon-starfilter', this.starFilter);
+      localStorage.setItem('weapon-elementfilter', this.elementFilter);
+    }
   },
+
+  mounted() {
+    this.starFilter = localStorage.getItem('weapon-starfilter') || '';
+    this.elementFilter = localStorage.getItem('weapon-elementfilter') || '';
+  }
 });
 </script>
 
