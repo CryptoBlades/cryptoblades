@@ -106,7 +106,7 @@
             <div class="row">
               <div class="col"></div>
               <div class="col">
-                <input class="form-control search" type="text" v-model="search" placeholder="Seller Address, NFT ID" />
+                <input class="form-control search" type="text" v-model.trim="search" placeholder="Seller Address, NFT ID" />
               </div>
               <div class="col"></div>
             </div>
