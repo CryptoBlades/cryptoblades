@@ -31,20 +31,6 @@
                   @click="purchaseNft()">Purchase</b-button>
               </div>
 
-              <div class="col">
-                <b-button
-                  variant="primary"
-                  v-if="ownListedNftSelected"
-                  @click="updateNftListingPrice()">Change Price</b-button>
-              </div>
-
-              <div class="col">
-                <b-button
-                  variant="primary"
-                  v-if="ownListedNftSelected"
-                  @click="cancelNftListing()">Cancel Listing</b-button>
-              </div>
-
               <div class="col"></div>
             </div>
 
@@ -137,14 +123,19 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchOwnListings()">Search My NFTs</b-button>
+                  @click="searchOwnListings('weapon')">Search My Weapons</b-button>
+              </div>
+
+              <div class="col">
+                <b-button
+                  variant="primary"
+                  @click="searchOwnListings('character')">Search My Characters</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   v-if="buyableNftSelected"
-                  :disabled="!search"
                   @click="purchaseNft()">Purchase</b-button>
               </div>
 
@@ -152,7 +143,6 @@
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
-                  :disabled="!search"
                   @click="updateNftListingPrice()">Change Price</b-button>
               </div>
 
@@ -160,7 +150,6 @@
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
-                  :disabled="!search"
                   @click="cancelNftListing()">Cancel Listing</b-button>
               </div>
             </div>
@@ -507,7 +496,7 @@ export default Vue.extend({
       this.marketOutcome = 'Successfully taken '
         +this.activeSell+' '+results.nftID+' off the market.';
 
-      await this.searchOwnListings();
+      await this.searchOwnListings(this.activeSell);
     },
 
     async searchAllListingsByType(type: SellType) {
@@ -576,8 +565,9 @@ export default Vue.extend({
       }
     },
 
-    async searchOwnListings() {
+    async searchOwnListings(type: SellType) {
       this.marketOutcome = null;
+      this.activeSearch = type;
 
       if(!this.defaultAccount) {
         this.searchResults = [];
