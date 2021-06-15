@@ -5,6 +5,19 @@
       <b-tab title="Browse">
         <div class="row mt-3">
           <div class="col">
+
+            <big-button
+              class="button"
+              mainText="Browse Characters"
+              @click="searchAllListingsByType('character')"
+            />
+
+            <big-button
+              class="button"
+              mainText="Browse Weapons"
+              @click="searchAllListingsByType('weapon')"
+            />
+
           </div>
         </div>
 
@@ -407,6 +420,24 @@ export default Vue.extend({
         +this.activeSell+' '+results.nftID+' off the market.';
 
       await this.searchOwnListings();
+    },
+
+    async searchAllListingsByType(type: SellType) {
+      this.activeSearch = type;
+      this.marketOutcome = null;
+      this.waitingMarketOutcome = true;
+
+      const results = await this.fetchAllMarketNftIds({
+        nftContractAddr: this.contractAddress
+      });
+      // searchResultsOwned does not mesh with this function
+      // will need per-result checking of it, OR filtering out own NFTs
+      //this.searchResultsOwned = nftSeller === this.defaultAccount;
+
+      this.searchResults = results;
+
+      this.waitingMarketOutcome = false;
+      this.marketOutcome = null;
     },
 
     async searchListingsByNftId(type: SellType) {
