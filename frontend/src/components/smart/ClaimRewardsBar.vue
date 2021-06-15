@@ -1,6 +1,6 @@
 <template>
   <b-navbar>
-    <b-nav-item><strong>Rewards</strong></b-nav-item>
+    <b-nav-item disabled><strong>Rewards</strong></b-nav-item>
 
     <b-nav-item
       class="ml-3"
