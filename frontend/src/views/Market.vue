@@ -53,7 +53,7 @@
       </div>
 
       <div class="col">
-        <input type="text" class="search" v-model="search" placeholder="Seller Address, NFT ID" />
+        <input type="text" class="search" v-model.trim="search" placeholder="Seller Address, NFT ID" />
 
         <div class="search-buttons">
           <big-button
