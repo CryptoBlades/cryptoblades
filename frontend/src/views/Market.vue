@@ -510,6 +510,7 @@ export default Vue.extend({
     },
 
     async searchAllListingsByType(type: SellType) {
+      this.activeSell = type; // this is required to refresh this.contractAddress
       this.activeSearch = type;
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
@@ -520,7 +521,7 @@ export default Vue.extend({
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
-
+      this.searchResultsOwned = false; // temp
       this.allSearchResults = results;
 
       this.waitingMarketOutcome = false;
@@ -614,6 +615,12 @@ export default Vue.extend({
     },
 
     async searchResults(nftIds: CharacterId[] | WeaponId[]) {
+      this.selectedSearchNftId = null;
+
+      await this.fetchNftPrices(nftIds);
+    },
+
+    async allSearchResults(nftIds: CharacterId[] | WeaponId[]) {
       this.selectedSearchNftId = null;
 
       await this.fetchNftPrices(nftIds);
