@@ -1,136 +1,187 @@
 <template>
   <div class="body main-font">
-    <div class="outcome" v-if="waitingMarketOutcome">
-      <i class="fas fa-spinner fa-spin"></i>
-      Loading...
-    </div>
-    <div class="outcome" v-if="marketOutcome !== null">{{ marketOutcome }}</div>
-    <div class="row">
-      <div class="col">
-        <div class="self-buttons">
-          <big-button
-            class="button"
-            mainText="Trade Weapons"
-            @click="activeSell = 'weapon'"
-          />
 
-          <big-button
-            class="button"
-            mainText="Trade Characters"
-            @click="activeSell = 'character'"
-          />
-
-          <big-button
-            v-if="activeSell === 'weapon'"
-            :disabled="selectedSellingNftId === null"
-            class="button"
-            mainText="List Weapon"
-            @click="addListingForNft()"
-          />
-
-          <big-button
-            v-if="activeSell === 'character'"
-            :disabled="selectedSellingNftId === null"
-            class="button"
-            mainText="List Character"
-            @click="addListingForNft()"
-          />
-          <Hint class="hint" text="When you list an NFT for sale, it is transferred to the
-            <br>market until someone buys it or you cancel the sale" />
+    <b-tabs justified>
+      <b-tab title="Browse">
+        <div class="row mt-3">
+          <div class="col">
+          </div>
         </div>
 
-        <div class="sell-grid" v-if="activeSell === 'weapon'">
-          <weapon-grid
-            v-model="selectedSellingNftId"
-          />
+        <div class="row">
+          <div class="col">
+            <div class="outcome" v-if="waitingMarketOutcome">
+              <i class="fas fa-spinner fa-spin"></i>
+              Loading...
+            </div>
+
+            <div class="outcome" v-if="marketOutcome !== null">{{ marketOutcome }}</div>
+          </div>
+        </div>
+      </b-tab>
+
+      <b-tab title="Search">
+        <div class="row mt-3">
+          <div class="col">
+            <input type="text" class="search" v-model="search" placeholder="Seller Address, NFT ID" />
+
+            <div class="search-buttons">
+              <big-button
+                class="button"
+                mainText="Search Characters"
+                @click="searchListingsByNftId('character')"
+                :disabled="!search"
+              />
+
+              <big-button
+                class="button"
+                mainText="Search Weapons"
+                @click="searchListingsByNftId('weapon')"
+                :disabled="!search"
+              />
+
+              <big-button
+                class="button"
+                mainText="Search Seller"
+                @click="searchListingsBySeller()"
+                :disabled="!search"
+              />
+
+              <big-button
+                class="button"
+                mainText="Search My NFTs"
+                @click="searchOwnListings()"
+              />
+
+              <big-button
+                v-if="buyableNftSelected"
+                class="button"
+                mainText="Purchase"
+                @click="purchaseNft()"
+              />
+              <big-button
+                v-if="ownListedNftSelected"
+                class="button"
+                mainText="Change price"
+                @click="updateNftListingPrice()"
+              />
+              <big-button
+                v-if="ownListedNftSelected"
+                class="button"
+                mainText="Cancel listing"
+                @click="cancelNftListing()"
+              />
+              <hint class="hint" text="NFT stands for Non Fungible Token.
+                <br>Weapons and Characters are NFTs of the ERC721 standard" />
+            </div>
+
+            <div class="search-results">
+              <weapon-grid
+                v-if="activeSearch === 'weapon'"
+                :showGivenWeaponIds="true"
+                :weaponIds="searchResults"
+                v-model="selectedSearchNftId">
+
+                <template #above="{ weapon: { id } }">
+                  <span class="d-block text-center" v-if="nftPricesById[id]">
+                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                  </span>
+                  <span class="d-block text-center" v-else>Loading price...</span>
+                </template>
+
+              </weapon-grid>
+
+              <character-list
+                v-if="activeSearch === 'character'"
+                :showGivenCharacterIds="true"
+                :characterIds="searchResults"
+                v-model="selectedSearchNftId">
+
+                <template #above="{ character: { id } }">
+                  <span class="d-block text-center" v-if="nftPricesById[id]">
+                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                  </span>
+                  <span class="d-block text-center" v-else>Loading price...</span>
+                </template>
+
+              </character-list>
+            </div>
+          </div>
         </div>
 
-        <div class="sell-grid" v-if="activeSell === 'character'">
-          <character-list
-            v-model="selectedSellingNftId"
-          />
+        <div class="row">
+          <div class="col">
+            <div class="outcome" v-if="waitingMarketOutcome">
+              <i class="fas fa-spinner fa-spin"></i>
+              Loading...
+            </div>
+
+            <div class="outcome" v-if="marketOutcome !== null">{{ marketOutcome }}</div>
+          </div>
         </div>
-      </div>
+      </b-tab>
 
-      <div class="col">
-        <input type="text" class="search" v-model="search" placeholder="Seller Address, NFT ID" />
+      <b-tab title="List">
+        <div class="row mt-3">
+          <div class="col">
+            <div class="self-buttons">
+              <big-button
+                class="button"
+                mainText="Show Weapons"
+                @click="activeSell = 'weapon'"
+              />
 
-        <div class="search-buttons">
-          <big-button
-            class="button"
-            mainText="Search NFT"
-            @click="searchListingsByNftId()"
-            :disabled="!search"
-          />
+              <big-button
+                class="button"
+                mainText="Show Characters"
+                @click="activeSell = 'character'"
+              />
 
-          <big-button
-            class="button"
-            mainText="Search Seller"
-            @click="searchListingsBySeller()"
-            :disabled="!search"
-          />
+              <big-button
+                v-if="activeSell === 'weapon'"
+                :disabled="selectedSellingNftId === null"
+                class="button"
+                mainText="List Weapon"
+                @click="addListingForNft()"
+              />
 
-          <big-button
-            class="button"
-            mainText="Search My NFTs"
-            @click="searchOwnListings()"
-          />
+              <big-button
+                v-if="activeSell === 'character'"
+                :disabled="selectedSellingNftId === null"
+                class="button"
+                mainText="List Character"
+                @click="addListingForNft()"
+              />
+              <Hint class="hint" text="When you list an NFT for sale, it is transferred to the
+                <br>market until someone buys it or you cancel the sale" />
+            </div>
 
-          <big-button
-            v-if="buyableNftSelected"
-            class="button"
-            mainText="Purchase"
-            @click="purchaseNft()"
-          />
-          <big-button
-            v-if="ownListedNftSelected"
-            class="button"
-            mainText="Change price"
-            @click="updateNftListingPrice()"
-          />
-          <big-button
-            v-if="ownListedNftSelected"
-            class="button"
-            mainText="Cancel listing"
-            @click="cancelNftListing()"
-          />
-          <Hint class="hint" text="NFT stands for Non Fungible Token.
-            <br>Weapons and Characters are NFTs of the ERC721 standard" />
+            <div class="sell-grid" v-if="activeSell === 'weapon'">
+              <weapon-grid
+                v-model="selectedSellingNftId"
+              />
+            </div>
+
+            <div class="sell-grid" v-if="activeSell === 'character'">
+              <character-list
+                v-model="selectedSellingNftId"
+              />
+            </div>
+          </div>
         </div>
 
-        <div class="search-results">
-          <weapon-grid
-            v-if="activeSell === 'weapon'"
-            :showGivenWeaponIds="true"
-            :weaponIds="searchResults"
-            v-model="selectedSearchNftId">
+        <div class="row">
+          <div class="col">
+            <div class="outcome" v-if="waitingMarketOutcome">
+              <i class="fas fa-spinner fa-spin"></i>
+              Loading...
+            </div>
 
-            <template #above="{ weapon: { id } }">
-              <span class="d-block text-center" v-if="nftPricesById[id]">
-                <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-              </span>
-              <span class="d-block text-center" v-else>Loading price...</span>
-            </template>
-
-          </weapon-grid>
-
-          <character-list
-            v-if="activeSell === 'character'"
-            :showGivenCharacterIds="true"
-            :characterIds="searchResults"
-            v-model="selectedSearchNftId">
-
-            <template #above="{ character: { id } }">
-              <span class="d-block text-center" v-if="nftPricesById[id]">
-                <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-              </span>
-              <span class="d-block text-center" v-else>Loading price...</span>
-            </template>
-
-          </character-list>
+            <div class="outcome" v-if="marketOutcome !== null">{{ marketOutcome }}</div>
+          </div>
         </div>
-      </div>
-    </div>
+      </b-tab>
+    </b-tabs>
   </div>
 </template>
 
@@ -155,6 +206,7 @@ type NftId = WeaponId | CharacterId;
 
 interface Data {
   activeSell: SellType;
+  activeSearch: SellType;
   search: string;
   searchResults: CharacterId[] | WeaponId[];
   searchResultsOwned: boolean;
@@ -188,6 +240,7 @@ export default Vue.extend({
   data() {
     return {
       activeSell: 'weapon',
+      activeSearch: 'weapon',
       search: '',
       searchResults: [],
       searchResultsOwned: false,
@@ -356,7 +409,8 @@ export default Vue.extend({
       await this.searchOwnListings();
     },
 
-    async searchListingsByNftId() {
+    async searchListingsByNftId(type: SellType) {
+      this.activeSearch = type;
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
 

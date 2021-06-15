@@ -282,6 +282,19 @@ button.close {
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
 
+.nav-tabs {
+  border-bottom: 2px solid #9e8a57 !important;
+}
+
+.nav-tabs .nav-link.active {
+  border: 2px solid #9e8a57 !important;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+}
+
+.nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
+  border-color: #9e8a57 #9e8a57 #9e8a57 !important;
+}
+
 </style>
 <style scoped>
 .app {
