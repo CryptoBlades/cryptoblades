@@ -49,7 +49,7 @@
             </div>
 
             <div class="search-results">
-              <span v-if="allSearchResults.length >= 40"><h2>More than 40 results, try using the filters</h2></span>
+              <span v-if="allSearchResults.length >= 40"><h4>More than 40 results, try using the filters</h4></span>
               <weapon-grid
                 v-if="activeSearch === 'weapon'"
                 :showGivenWeaponIds="true"
