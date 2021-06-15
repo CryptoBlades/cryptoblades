@@ -1,24 +1,42 @@
 <template>
-  <ul class="character-list">
-    <li
-      class="character"
-      :class="{ selected: value === c.id }"
-      v-for="c in displayCharacters"
-      :key="c.id"
-      v-tooltip="tooltipHtml(c)"
-      @click="$emit('input', c.id)"
-    >
-      <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
-        <slot name="above" :character="c"></slot>
+  <div>
+    <div class="filters row mt-2 pl-2" v-if="displayCharacters.length > 4">
+      <div class="col-2">
+        <select class="form-control" v-model="levelFilter" @change="saveFilters()">
+          <option v-for="x in ['', 1, 11, 21, 31, 41]" :value="x" :key="x">
+            {{ x ? `${x} - ${x + 9}` : 'None' }}
+          </option>
+        </select>
       </div>
-      <div class="art">
-        <CharacterArt :character="c" />
+
+      <div class="col-2">
+        <select class="form-control" v-model="elementFilter" @change="saveFilters()">
+          <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'None' }}</option>
+        </select>
       </div>
-      <div class="name-wrapper">
-        <span class="name">{{ getCharacterName(c.id) }}</span>
-      </div>
-    </li>
-  </ul>
+    </div>
+
+    <ul class="character-list">
+      <li
+        class="character"
+        :class="{ selected: value === c.id }"
+        v-for="c in filteredCharacters"
+        :key="c.id"
+        v-tooltip="tooltipHtml(c)"
+        @click="$emit('input', c.id)"
+      >
+        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+          <slot name="above" :character="c"></slot>
+        </div>
+        <div class="art">
+          <CharacterArt :character="c" />
+        </div>
+        <div class="name-wrapper">
+          <span class="name">{{ getCharacterName(c.id) }}</span>
+        </div>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script>
@@ -41,6 +59,13 @@ export default {
     }
   },
 
+  data() {
+    return {
+      levelFilter: '',
+      elementFilter: ''
+    };
+  },
+
   computed: {
     ...mapState(['maxStamina', 'ownedCharacterIds']),
     ...mapGetters(['getCharacterName', 'allStaminas', 'charactersWithIds']),
@@ -55,6 +80,20 @@ export default {
 
     displayCharacters() {
       return this.charactersWithIds(this.characterIdsToDisplay).filter(Boolean);
+    },
+
+    filteredCharacters() {
+      let items = this.displayCharacters;
+
+      if(this.elementFilter) {
+        items = items.filter(x => x.traitName.includes(this.elementFilter));
+      }
+
+      if(this.levelFilter) {
+        items = items.filter(x => x.level >= this.levelFilter - 1 && x.level <= this.levelFilter + 10);
+      }
+
+      return items;
     }
   },
 
@@ -98,11 +137,21 @@ export default {
         points = 200;
       }
       return points;
+    },
+
+    saveFilters() {
+      localStorage.setItem('character-levelfilter', this.levelFilter);
+      localStorage.setItem('character-elementfilter', this.elementFilter);
     }
   },
 
   components: {
     CharacterArt,
+  },
+
+  mounted() {
+    this.levelFilter = localStorage.getItem('character-levelfilter') || '';
+    this.elementFilter = localStorage.getItem('character-elementfilter') || '';
   }
 };
 </script>
