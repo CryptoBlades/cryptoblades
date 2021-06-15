@@ -1,26 +1,43 @@
 <template>
-  <ul class="weapon-grid">
-    <li
-      class="weapon"
-      :class="{ selected: highlight !== null && weapon.id === highlight }"
-      v-for="weapon in nonIgnoredWeapons"
-      :key="weapon.id"
-      @click="$emit('choose-weapon', weapon.id)"
-    >
-      <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
-        <slot name="above" :weapon="weapon"></slot>
+  <div>
+    <div class="filters row mt-2 pl-2" v-if="displayWeapons.length > 0">
+      <div class="col-2">
+        <select class="form-control" v-model="starFilter">
+          <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'None' }}</option>
+        </select>
       </div>
-      <div class="weapon-icon-wrapper">
-        <weapon-icon class="weapon-icon" :weapon="weapon" />
+
+      <div class="col-2">
+        <select class="form-control" v-model="elementFilter">
+          <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'None' }}</option>
+        </select>
       </div>
-    </li>
-  </ul>
+    </div>
+
+    <ul class="weapon-grid">
+      <li
+        class="weapon"
+        :class="{ selected: highlight !== null && weapon.id === highlight }"
+        v-for="weapon in nonIgnoredWeapons"
+        :key="weapon.id"
+        @click="$emit('choose-weapon', weapon.id)"
+      >
+        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+          <slot name="above" :weapon="weapon"></slot>
+        </div>
+        <div class="weapon-icon-wrapper">
+          <weapon-icon class="weapon-icon" :weapon="weapon" />
+        </div>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
+
 import { IState, IWeapon } from '../../interfaces';
 
 import WeaponIcon from '../WeaponIcon.vue';
@@ -65,6 +82,13 @@ export default Vue.extend({
     }
   },
 
+  data() {
+    return {
+      starFilter: '',
+      elementFilter: ''
+    };
+  },
+
   components: {
     WeaponIcon,
   },
@@ -86,10 +110,21 @@ export default Vue.extend({
     },
 
     nonIgnoredWeapons(): IWeapon[] {
-      const ignore = this.ignore;
-      if(ignore === null) return this.displayWeapons;
+      let items = this.displayWeapons;
 
-      return this.displayWeapons.filter(x => x.id.toString() !== ignore.toString());
+      if(this.ignore) {
+        items = items.filter(x => x.id.toString() !== (this.ignore || '').toString());
+      }
+
+      if(this.starFilter) {
+        items = items.filter(x => x.stars === (+this.starFilter - 1));
+      }
+
+      if(this.elementFilter) {
+        items = items.filter(x => x.element.includes(this.elementFilter));
+      }
+
+      return items;
     }
   },
 

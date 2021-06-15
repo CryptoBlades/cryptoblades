@@ -53,7 +53,10 @@ export default Vue.extend({
     },
 
     formattedXpRewards(): string {
-      return this.xpRewardsForOwnedCharacters.map((xp, i) => `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}`).join(', ');
+      return this.xpRewardsForOwnedCharacters.map((xp, i) => {
+        if(!this.ownCharacters[i]) return `${xp}`;
+        return `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}`;
+      }).join(', ');
     },
 
     canClaimTokens(): boolean {
