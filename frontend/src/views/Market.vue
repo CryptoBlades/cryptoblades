@@ -136,7 +136,6 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  :disabled="!search"
                   @click="searchOwnListings()">Search My NFTs</b-button>
               </div>
 
