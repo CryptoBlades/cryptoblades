@@ -35,11 +35,11 @@
             </div>
 
             <div class="search-results">
-              <span v-if="allSearchResults.length >= 40"><h4>More than 40 results, try using the filters</h4></span>
               <weapon-grid
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :weaponIds="allSearchResults"
+                :showLimit="60"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
@@ -55,6 +55,7 @@
                 v-if="activeType === 'character'"
                 :showGivenCharacterIds="true"
                 :characterIds="allSearchResults"
+                :showLimit="40"
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
@@ -519,12 +520,9 @@ export default Vue.extend({
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
 
-      let results = await this.fetchAllMarketNftIds({
+      const results = await this.fetchAllMarketNftIds({
         nftContractAddr: this.contractAddress
       });
-
-      if(results.length > 40) // temp hard limit
-        results = results.slice(0,40);
 
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs

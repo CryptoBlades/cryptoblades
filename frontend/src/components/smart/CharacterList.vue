@@ -1,5 +1,8 @@
 <template>
   <div>
+    <span v-if="showLimit > 0 && filteredCharacters.length >= showLimit">
+      <h4>More than {{showLimit}} results, try adjusting the filters</h4>
+    </span>
     <div class="filters row mt-2 pl-2" v-if="displayCharacters.length > 4">
       <div class="col-2">
         Level:
@@ -58,6 +61,10 @@ export default {
     characterIds: {
       type: Array,
       default() { return []; }
+    },
+    showLimit: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -87,12 +94,18 @@ export default {
     filteredCharacters() {
       let items = this.displayCharacters;
 
-      if(this.elementFilter) {
-        items = items.filter(x => x.traitName.includes(this.elementFilter));
-      }
+      if(items.length > 4) {
+        if(this.elementFilter) {
+          items = items.filter(x => x.traitName.includes(this.elementFilter));
+        }
 
-      if(this.levelFilter) {
-        items = items.filter(x => x.level >= this.levelFilter - 1 && x.level <= this.levelFilter + 10);
+        if(this.levelFilter) {
+          items = items.filter(x => x.level >= this.levelFilter - 1 && x.level <= this.levelFilter + 10);
+        }
+
+        if(this.showLimit > 0 && items.length > this.showLimit) {
+          items = items.slice(0, this.showLimit);
+        }
       }
 
       return items;

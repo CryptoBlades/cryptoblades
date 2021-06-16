@@ -1,5 +1,8 @@
 <template>
   <div>
+    <span v-if="showLimit > 0 && nonIgnoredWeapons.length >= showLimit">
+      <h4>More than {{showLimit}} results, try adjusting the filters</h4>
+    </span>
     <div class="filters row mt-2 pl-2" v-if="displayWeapons.length > 0">
       <div class="col-2">
         Stars:
@@ -81,6 +84,10 @@ export default Vue.extend({
     weaponIds: {
       type: Array as PropType<string[]>,
       default() { return []; }
+    },
+    showLimit: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -124,6 +131,10 @@ export default Vue.extend({
 
       if(this.elementFilter) {
         items = items.filter(x => x.element.includes(this.elementFilter));
+      }
+
+      if(this.showLimit > 0 && items.length > this.showLimit) {
+        items = items.slice(0, this.showLimit);
       }
 
       return items;
