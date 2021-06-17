@@ -7,6 +7,8 @@
       :disabled="!canClaimTokens"
       @click="onClaimTokens">
         <strong>SKILL</strong> {{ formattedSkillReward }}
+        <strong>Early Withdraw Tax</strong> 0%
+        <strong>Time since last withdraw</strong> n/a
     </b-nav-item>
 
     <b-nav-item
