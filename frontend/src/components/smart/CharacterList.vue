@@ -28,7 +28,6 @@
         :class="{ selected: value === c.id }"
         v-for="c in filteredCharacters"
         :key="c.id"
-        v-tooltip="tooltipHtml(c)"
         @click="$emit('input', c.id)"
       >
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
@@ -36,9 +35,6 @@
         </div>
         <div class="art">
           <CharacterArt :character="c" />
-        </div>
-        <div class="name-wrapper">
-          <span class="name">{{ getCharacterName(c.id) }}</span>
         </div>
       </li>
     </ul>
@@ -48,8 +44,6 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
-import { CharacterTrait } from '../../interfaces';
-import { RequiredXp } from '../../interfaces';
 import CharacterArt from '../CharacterArt.vue';
 
 export default {
@@ -126,23 +120,6 @@ export default {
   methods: {
     ...mapActions(['fetchCharacters']),
 
-    tooltipHtml(character) {
-      if(!character) return '';
-
-      const wrapInSpan = (spanClass, text) => {
-        return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;
-      };
-
-      return `
-        ID: ${character.id}
-        <br>
-        Level ${character.level + 1}
-        <br>
-        XP ${character.xp} / ${RequiredXp(character.level)}
-        <br>
-        Trait: ${wrapInSpan(CharacterTrait[character.trait], CharacterTrait[character.trait])}
-      `;
-    },
     getCharacterArt,
 
     getStaminaPoints(timestamp_str) {
@@ -212,11 +189,6 @@ export default {
 
 .valign-middle {
   vertical-align: middle;
-}
-
-.character .name {
-  font-size: 0.9em;
-  text-align: center;
 }
 
 .character img {

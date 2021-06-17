@@ -32,8 +32,15 @@
               variant="primary"
               class="ml-3"
               @click="onForgeWeapon"
+              :disabled="disableForge"
               v-tooltip="'Forge new weapon'">
-              Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+              <span v-if="disableForge">
+                Cooling forge...
+              </span>
+
+              <span v-if="!disableForge">
+                Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+              </span>
             </b-button>
           </div>
         </div>

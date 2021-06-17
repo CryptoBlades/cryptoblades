@@ -20,6 +20,23 @@
 
     </div>
 
+    <div class="id" v-if="advancedUI">ID {{ weapon.id }}</div>
+
+    <div class="stats" v-if="advancedUI">
+      <div v-if="weapon.stat1Value">
+        <span :class="weapon.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
+        <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1 }} +{{ weapon.stat1Value }}</span>
+      </div>
+      <div v-if="weapon.stat2Value">
+        <span :class="weapon.stat2.toLowerCase() + '-icon'" class="mr-1 icon"></span>
+        <span :class="weapon.stat2.toLowerCase()">{{ weapon.stat2 }} +{{ weapon.stat2Value }}</span>
+      </div>
+      <div v-if="weapon.stat3Value">
+        <span :class="weapon.stat3.toLowerCase() + '-icon'" class="mr-1 icon"></span>
+        <span :class="weapon.stat3.toLowerCase()">{{ weapon.stat3 }} +{{ weapon.stat3Value }}</span>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -163,7 +180,8 @@ export default {
       gripAOTexture: null,
       pommelNormalTexture: null,
       pommelAOTexture: null,
-      showPlaceholder: false
+      showPlaceholder: false,
+      advancedUI: this.advancedUI
     };
   },
 
@@ -382,6 +400,8 @@ export default {
     }
   },
   mounted() {
+    this.advancedUI = !localStorage.getItem('advanced');
+
     if(localStorage.getItem('graphics')) {
       this.allLoaded = true;
       this.showPlaceholder = true;
@@ -422,10 +442,29 @@ export default {
   padding: 0;
 }
 
-.trait {
+.id, .trait, .stats {
   position: absolute;
+}
+
+.trait {
   top: 10px;
   left: 10px;
+}
+
+.id {
+  top: 10px;
+  right: 10px;
+  font-style: italic;
+}
+
+.stats {
+  top: 35px;
+  left: 10px;
+}
+
+.icon {
+  display: inline-block;
+  min-width: 18px;
 }
 
 .placeholder {
@@ -433,6 +472,8 @@ export default {
   max-height: 180px;
   margin-left: 10px;
   margin-top: 5px;
+
+  transform: scale(0.7);
 }
 
 .glow-0 {
