@@ -5,14 +5,14 @@
     </span>
     <div class="filters row mt-2 pl-2" v-if="displayWeapons.length > 0">
       <div class="col-2">
-        Stars:
+        <strong>Stars</strong>
         <select class="form-control" v-model="starFilter" @change="saveFilters()">
           <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
 
       <div class="col-2">
-        Element:
+        <strong>Element</strong>
         <select class="form-control" v-model="elementFilter" @change="saveFilters()">
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>

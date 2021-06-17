@@ -15,46 +15,56 @@
     </div>
 
     <div class="row mt-3" v-if="ownWeapons.length > 0">
-      <div class="col-6">
+      <div class="col">
         <div class="d-flex justify-content-space-between">
-          <h1>Weapons</h1>
+          <h1>Weapons ({{ ownWeapons.length }})</h1>
 
-          <b-button
-            variant="primary"
-            class="ml-auto"
-            @click="onForgeWeapon"
-            v-tooltip="'Forge new weapon'">
-            Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
-          </b-button>
+          <div class="d-flex justify-content-flex-end ml-auto">
+            <b-button
+              variant="primary"
+              v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
+              @click="showReforge = true"
+              v-tooltip="'Burn weapons to buff selected weapon'">
+              Reforge
+            </b-button>
+
+            <b-button
+              variant="primary"
+              class="ml-3"
+              @click="onForgeWeapon"
+              :disabled="disableForge"
+              v-tooltip="'Forge new weapon'">
+              <span v-if="disableForge">
+                Cooling forge...
+              </span>
+
+              <span v-if="!disableForge">
+                Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+              </span>
+            </b-button>
+          </div>
         </div>
 
         <weapon-grid v-model="reforgeWeaponId" />
-
-        <div class="button-row" v-if="reforgeWeaponId !== null">
-          <big-button
-            class="button"
-            mainText="Reforge Sword"
-            v-if="ownWeapons.length > 1"
-            v-tooltip="'Gain stats by burning a different weapon'"
-            @click="showReforge = true"
-          />
-        </div>
       </div>
 
-      <div class="col-6">
-        <div v-if="showReforge && ownWeapons.length > 1">
-          <h1>Choose Weapon to burn</h1>
-          <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" />
+      <div class="col-6" v-if="showReforge">
+        <div class="d-flex justify-content-space-between">
+          <h1>Choose Burn Weapon</h1>
 
-          <div class="button-row">
-            <big-button
-              class="button"
-              :mainText="'Confirm Reforge (' + reforgeCost + ' SKILL)'"
-              :disabled="canReforge"
+          <div class="d-flex justify-content-flex-end ml-auto">
+            <b-button
+              variant="primary"
+              class="ml-3"
               @click="onReforgeWeapon"
-            />
+              :disabled="canReforge"
+              v-tooltip="'Forge new weapon'">
+              Confirm Reforge ({{ reforgeCost }} SKILL)
+            </b-button>
           </div>
         </div>
+
+        <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" />
       </div>
     </div>
   </div>

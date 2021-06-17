@@ -11,6 +11,9 @@
       <b-dropdown-item
         @click="toggleRewards()">Reward Bar: {{ hideRewards ? 'Off' : 'On' }}</b-dropdown-item>
 
+      <b-dropdown-item
+        @click="toggleAdvanced()">Advanced UI: {{ hideAdvanced ? 'Off' : 'On' }}</b-dropdown-item>
+
     </b-nav-item-dropdown>
   </b-navbar-nav>
 </template>
@@ -24,12 +27,14 @@ export default {
   created() {
     this.hideGraphics = !!localStorage.getItem('graphics');
     this.hideRewards = !!localStorage.getItem('rewards');
+    this.hideAdvanced = !!localStorage.getItem('advanced');
   },
 
   data() {
     return {
       hideGraphics: this.hideGraphics,
-      hideRewards: this.hideRewards
+      hideRewards: this.hideRewards,
+      hideAdvanced: this.hideAdvanced
     };
   },
 
@@ -48,7 +53,15 @@ export default {
       else                 localStorage.removeItem('rewards');
 
       Events.$emit('setting:rewards', { value: this.hideRewards });
-    }
+    },
+
+    toggleAdvanced() {
+      this.hideAdvanced = !this.hideAdvanced;
+      if(this.hideAdvanced) localStorage.setItem('advanced', 'off');
+      else                  localStorage.removeItem('advanced');
+
+      Events.$emit('setting:advanced', { value: this.hideAdvanced });
+    },
   }
 };
 </script>

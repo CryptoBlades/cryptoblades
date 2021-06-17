@@ -295,6 +295,15 @@ button.close {
   border-color: #9e8a57 #9e8a57 #9e8a57 !important;
 }
 
+.outline {
+  color: #000;
+  text-shadow: -1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff;
+}
+
+div.bg-success {
+  background-color: #19682b !important;
+}
+
 </style>
 <style scoped>
 .app {

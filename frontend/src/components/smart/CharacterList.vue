@@ -1,11 +1,12 @@
 <template>
   <div>
-    <span v-if="showLimit > 0 && filteredCharacters.length >= showLimit">
+    <span v-if="showFilters && showLimit > 0 && filteredCharacters.length >= showLimit">
       <h4>More than {{showLimit}} results, try adjusting the filters</h4>
     </span>
-    <div class="filters row mt-2 pl-2" v-if="displayCharacters.length > 4">
+
+    <div class="filters row mt-2 pl-2" v-if="showFilters">
       <div class="col-2">
-        Level:
+        <strong>Level</strong>
         <select class="form-control" v-model="levelFilter" @change="saveFilters()">
           <option v-for="x in ['', 1, 11, 21, 31, 41]" :value="x" :key="x">
             {{ x ? `${x} - ${x + 9}` : 'Any' }}
@@ -14,7 +15,7 @@
       </div>
 
       <div class="col-2">
-        Element:
+        <strong>Element</strong>
         <select class="form-control" v-model="elementFilter" @change="saveFilters()">
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
@@ -27,7 +28,6 @@
         :class="{ selected: value === c.id }"
         v-for="c in filteredCharacters"
         :key="c.id"
-        v-tooltip="tooltipHtml(c)"
         @click="$emit('input', c.id)"
       >
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
@@ -35,9 +35,6 @@
         </div>
         <div class="art">
           <CharacterArt :character="c" />
-        </div>
-        <div class="name-wrapper">
-          <span class="name">{{ getCharacterName(c.id) }}</span>
         </div>
       </li>
     </ul>
@@ -47,14 +44,16 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
-import { CharacterTrait } from '../../interfaces';
-import { RequiredXp } from '../../interfaces';
 import CharacterArt from '../CharacterArt.vue';
 
 export default {
   props: {
     value: {},
     showGivenCharacterIds: {
+      type: Boolean,
+      default: false
+    },
+    showFilters: {
       type: Boolean,
       default: false
     },
@@ -94,13 +93,13 @@ export default {
     filteredCharacters() {
       let items = this.displayCharacters;
 
-      if(items.length > 4) {
+      if(this.showFilters) {
         if(this.elementFilter) {
           items = items.filter(x => x.traitName.includes(this.elementFilter));
         }
 
         if(this.levelFilter) {
-          items = items.filter(x => x.level >= this.levelFilter - 1 && x.level <= this.levelFilter + 10);
+          items = items.filter(x => x.level >= this.levelFilter - 1 && x.level <= this.levelFilter + 9);
         }
 
         if(this.showLimit > 0 && items.length > this.showLimit) {
@@ -121,23 +120,6 @@ export default {
   methods: {
     ...mapActions(['fetchCharacters']),
 
-    tooltipHtml(character) {
-      if(!character) return '';
-
-      const wrapInSpan = (spanClass, text) => {
-        return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;
-      };
-
-      return `
-        ID: ${character.id}
-        <br>
-        Level ${character.level + 1}
-        <br>
-        XP ${character.xp} / ${RequiredXp(character.level)}
-        <br>
-        Trait: ${wrapInSpan(CharacterTrait[character.trait], CharacterTrait[character.trait])}
-      `;
-    },
     getCharacterArt,
 
     getStaminaPoints(timestamp_str) {
@@ -207,11 +189,6 @@ export default {
 
 .valign-middle {
   vertical-align: middle;
-}
-
-.character .name {
-  font-size: 0.9em;
-  text-align: center;
 }
 
 .character img {

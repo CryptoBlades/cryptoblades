@@ -53,6 +53,7 @@
 
               <character-list
                 v-if="activeType === 'character'"
+                :showFilters="true"
                 :showGivenCharacterIds="true"
                 :characterIds="allSearchResults"
                 :showLimit="40"
@@ -179,6 +180,7 @@
               </weapon-grid>
 
               <character-list
+                :showFilters="true"
                 v-if="activeType === 'character'"
                 :showGivenCharacterIds="true"
                 :characterIds="searchResults"
@@ -260,6 +262,7 @@
 
             <div class="sell-grid" v-if="activeType === 'character'">
               <character-list
+                :showFilters="true"
                 v-model="selectedNftId"
               />
             </div>

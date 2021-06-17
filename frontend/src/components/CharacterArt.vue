@@ -1,6 +1,7 @@
 <template>
   <div
     class="character-art"
+    v-tooltip="tooltipHtml(character)"
     ref="el">
 
     <div class="trait" v-if="!portrait">
@@ -11,6 +12,19 @@
 
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
+    </div>
+
+    <div class="id" v-if="advancedUI && !portrait">ID {{ character.id }}</div>
+
+    <div class="name">
+      {{ getCharacterName(character.id) }} Lv.{{ character.level + 1 }}
+    </div>
+
+    <div class="xp" v-if="advancedUI && !portrait">
+      <b-progress :max="RequiredXp(character.level)" variant="success">
+        <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} XP</strong>
+        <b-progress-bar :value="5"></b-progress-bar>
+      </b-progress>
     </div>
 
   </div>
@@ -26,7 +40,8 @@ import arms from '../assets/characterWardrobe_arms.json';
 import torsos from '../assets/characterWardrobe_torso.json';
 import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
-import { CharacterTrait } from '../interfaces';
+import { CharacterTrait, RequiredXp } from '../interfaces';
+import { mapGetters } from 'vuex';
 
 const headCount = 13;
 const armsCount = 45;
@@ -66,11 +81,36 @@ export default {
       textureLoader: null,
       body: null,
       trait: CharacterTrait[this.character.trait],
-      showPlaceholder: false
+      showPlaceholder: false,
+      advancedUI: this.advancedUI
     };
   },
 
+  computed: {
+    ...mapGetters(['getCharacterName']),
+  },
+
   methods: {
+
+    RequiredXp,
+
+    tooltipHtml(character) {
+      if(!character) return '';
+
+      const wrapInSpan = (spanClass, text) => {
+        return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;
+      };
+
+      return `
+        ID: ${character.id}
+        <br>
+        Level ${character.level + 1}
+        <br>
+        XP ${character.xp} / ${RequiredXp(character.level)}
+        <br>
+        Trait: ${wrapInSpan(CharacterTrait[character.trait], CharacterTrait[character.trait])}
+      `;
+    },
 
     getCharacterArt,
 
@@ -369,6 +409,8 @@ export default {
     }
   },
   mounted() {
+    this.advancedUI = !localStorage.getItem('advanced');
+
     if(localStorage.getItem('graphics')) {
       this.allLoaded = true;
       this.showPlaceholder = true;
@@ -383,6 +425,7 @@ export default {
 </script>
 
 <style scoped>
+
 .character-art {
   width: 100%;
   height: 100%;
@@ -391,16 +434,47 @@ export default {
   justify-content: center;
 }
 
-.trait {
+.trait, .id, .name, .xp {
   position: absolute;
+}
+
+.trait {
   top: 5px;
   left: 5px;
+}
+
+.id {
+  top: 5px;
+  right: 5px;
+  font-style: italic;
+}
+
+.name {
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.xp {
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.xp-text {
+  padding-top: 7px;
+  width: 100%;
+  text-align: center;
+  position: absolute;
 }
 
 .placeholder {
   padding: 10px;
   max-width: 100%;
-  height: 100%;
+  height: 90%;
+  padding-top: 10%;
   object-fit: contain;
 }
 
