@@ -1,9 +1,10 @@
 <template>
   <div>
-    <span v-if="showLimit > 0 && filteredCharacters.length >= showLimit">
+    <span v-if="showFilters && showLimit > 0 && filteredCharacters.length >= showLimit">
       <h4>More than {{showLimit}} results, try adjusting the filters</h4>
     </span>
-    <div class="filters row mt-2 pl-2" v-if="displayCharacters.length > 4">
+
+    <div class="filters row mt-2 pl-2" v-if="showFilters">
       <div class="col-2">
         <strong>Level</strong>
         <select class="form-control" v-model="levelFilter" @change="saveFilters()">
@@ -58,6 +59,10 @@ export default {
       type: Boolean,
       default: false
     },
+    showFilters: {
+      type: Boolean,
+      default: false
+    },
     characterIds: {
       type: Array,
       default() { return []; }
@@ -94,7 +99,7 @@ export default {
     filteredCharacters() {
       let items = this.displayCharacters;
 
-      if(items.length > 4) {
+      if(this.showFilters) {
         if(this.elementFilter) {
           items = items.filter(x => x.traitName.includes(this.elementFilter));
         }
