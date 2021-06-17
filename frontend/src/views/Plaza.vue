@@ -18,7 +18,7 @@
       <div class="col">
         <div v-if="ownCharacters.length > 0">
           <div class="d-flex justify-content-space-between">
-            <h1>Characters</h1>
+            <h1>Characters ({{ ownCharacters.length }} / 4)</h1>
 
             <b-button
               v-if="ownCharacters.length < 4"

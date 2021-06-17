@@ -17,7 +17,7 @@
     <div class="row mt-3" v-if="ownWeapons.length > 0">
       <div class="col-6">
         <div class="d-flex justify-content-space-between">
-          <h1>Weapons</h1>
+          <h1>Weapons ({{ ownWeapons.length }})</h1>
 
           <b-button
             variant="primary"
