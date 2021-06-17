@@ -1,15 +1,20 @@
 <template>
   <div>
+    <span v-if="showLimit > 0 && nonIgnoredWeapons.length >= showLimit">
+      <h4>More than {{showLimit}} results, try adjusting the filters</h4>
+    </span>
     <div class="filters row mt-2 pl-2" v-if="displayWeapons.length > 0">
       <div class="col-2">
+        Stars:
         <select class="form-control" v-model="starFilter" @change="saveFilters()">
-          <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'None' }}</option>
+          <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
 
       <div class="col-2">
+        Element:
         <select class="form-control" v-model="elementFilter" @change="saveFilters()">
-          <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'None' }}</option>
+          <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
     </div>
@@ -79,6 +84,10 @@ export default Vue.extend({
     weaponIds: {
       type: Array as PropType<string[]>,
       default() { return []; }
+    },
+    showLimit: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -122,6 +131,10 @@ export default Vue.extend({
 
       if(this.elementFilter) {
         items = items.filter(x => x.element.includes(this.elementFilter));
+      }
+
+      if(this.showLimit > 0 && items.length > this.showLimit) {
+        items = items.slice(0, this.showLimit);
       }
 
       return items;

@@ -2,7 +2,7 @@
   <div class="body main-font">
 
     <b-tabs justified>
-      <b-tab>
+      <b-tab @click="clearData()">
         <template #title>
           Browse NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -31,29 +31,16 @@
                   @click="purchaseNft()">Purchase</b-button>
               </div>
 
-              <div class="col">
-                <b-button
-                  variant="primary"
-                  v-if="ownListedNftSelected"
-                  @click="updateNftListingPrice()">Change Price</b-button>
-              </div>
-
-              <div class="col">
-                <b-button
-                  variant="primary"
-                  v-if="ownListedNftSelected"
-                  @click="cancelNftListing()">Cancel Listing</b-button>
-              </div>
-
               <div class="col"></div>
             </div>
 
             <div class="search-results">
               <weapon-grid
-                v-if="activeSearch === 'weapon'"
+                v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :weaponIds="allSearchResults"
-                v-model="selectedSearchNftId">
+                :showLimit="60"
+                v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
                   <span class="d-block text-center" v-if="nftPricesById[id]">
@@ -65,10 +52,11 @@
               </weapon-grid>
 
               <character-list
-                v-if="activeSearch === 'character'"
+                v-if="activeType === 'character'"
                 :showGivenCharacterIds="true"
                 :characterIds="allSearchResults"
-                v-model="selectedSearchNftId">
+                :showLimit="40"
+                v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
                   <span class="d-block text-center" v-if="nftPricesById[id]">
@@ -95,7 +83,7 @@
         </div>
       </b-tab>
 
-      <b-tab>
+      <b-tab @click="clearData()">
         <template #title>
           Search NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -116,34 +104,46 @@
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsByNftId('character')">Search Characters</b-button>
+                  @click="searchListingsByNftId('character')">Search Character ID</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsByNftId('weapon')">Search Weapons</b-button>
+                  @click="searchListingsByNftId('weapon')">Search Weapon ID</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsBySeller()">Search Seller</b-button>
+                  @click="searchListingsBySeller('weapon')">Weapons by Seller</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchOwnListings()">Search My NFTs</b-button>
+                  :disabled="!search"
+                  @click="searchListingsBySeller('character')">Characters by Seller</b-button>
+              </div>
+
+              <div class="col">
+                <b-button
+                  variant="primary"
+                  @click="searchOwnListings('weapon')">Search My Weapons</b-button>
+              </div>
+
+              <div class="col">
+                <b-button
+                  variant="primary"
+                  @click="searchOwnListings('character')">Search My Characters</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   v-if="buyableNftSelected"
-                  :disabled="!search"
                   @click="purchaseNft()">Purchase</b-button>
               </div>
 
@@ -151,7 +151,6 @@
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
-                  :disabled="!search"
                   @click="updateNftListingPrice()">Change Price</b-button>
               </div>
 
@@ -159,17 +158,16 @@
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
-                  :disabled="!search"
                   @click="cancelNftListing()">Cancel Listing</b-button>
               </div>
             </div>
 
             <div class="search-results">
               <weapon-grid
-                v-if="activeSearch === 'weapon'"
+                v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :weaponIds="searchResults"
-                v-model="selectedSearchNftId">
+                v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
                   <span class="d-block text-center" v-if="nftPricesById[id]">
@@ -181,10 +179,10 @@
               </weapon-grid>
 
               <character-list
-                v-if="activeSearch === 'character'"
+                v-if="activeType === 'character'"
                 :showGivenCharacterIds="true"
                 :characterIds="searchResults"
-                v-model="selectedSearchNftId">
+                v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
                   <span class="d-block text-center" v-if="nftPricesById[id]">
@@ -210,7 +208,7 @@
         </div>
       </b-tab>
 
-      <b-tab>
+      <b-tab @click="clearData()">
         <template #title>
           List NFTs
           <hint class="hint" text="When you list an NFT for sale, it is transferred to the<br>market until someone buys it or you cancel the sale" />
@@ -222,25 +220,25 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="activeSell = 'weapon'">Show Weapons</b-button>
+                  @click="activeType = 'weapon'">Show Weapons</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="activeSell = 'character'">Show Characters</b-button>
+                  @click="activeType = 'character'">Show Characters</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  v-if="activeSell === 'weapon'"
-                  :disabled="selectedSellingNftId === null"
+                  v-if="activeType === 'weapon'"
+                  :disabled="selectedNftId === null"
                   @click="addListingForNft()">List Weapon</b-button>
                 <b-button
                   variant="primary"
-                  v-if="activeSell === 'character'"
-                  :disabled="selectedSellingNftId === null"
+                  v-if="activeType === 'character'"
+                  :disabled="selectedNftId === null"
                   @click="addListingForNft()">List Character</b-button>
               </div>
 
@@ -254,15 +252,15 @@
               </div>
             </div>
 
-            <div class="sell-grid" v-if="activeSell === 'weapon'">
+            <div class="sell-grid" v-if="activeType === 'weapon'">
               <weapon-grid
-                v-model="selectedSellingNftId"
+                v-model="selectedNftId"
               />
             </div>
 
-            <div class="sell-grid" v-if="activeSell === 'character'">
+            <div class="sell-grid" v-if="activeType === 'character'">
               <character-list
-                v-model="selectedSellingNftId"
+                v-model="selectedNftId"
               />
             </div>
           </div>
@@ -302,16 +300,14 @@ type CharacterId = string;
 type NftId = WeaponId | CharacterId;
 
 interface Data {
-  activeSell: SellType;
-  activeSearch: SellType;
+  activeType: SellType;
   search: string;
   searchResults: CharacterId[] | WeaponId[];
   allSearchResults: CharacterId[] | WeaponId[];
   searchResultsOwned: boolean;
-  selectedSellingNftId: NftId | null;
+  selectedNftId: NftId | null;
   marketOutcome: string | null;
   waitingMarketOutcome: boolean;
-  selectedSearchNftId: NftId | null;
   nftPricesById: Record<string, string>;
 }
 
@@ -337,16 +333,14 @@ export default Vue.extend({
 
   data() {
     return {
-      activeSell: 'weapon',
-      activeSearch: 'weapon',
+      activeType: 'weapon',
       search: '',
       searchResults: [],
       allSearchResults: [],
       searchResultsOwned: false,
-      selectedSellingNftId: null,
+      selectedNftId: null,
       marketOutcome: null,
       waitingMarketOutcome: false,
-      selectedSearchNftId: null,
       nftPricesById: {},
     } as Data;
   },
@@ -369,18 +363,18 @@ export default Vue.extend({
     },
 
     contractAddress(): string {
-      return this.activeSell === 'weapon'
+      return this.activeType === 'weapon'
         ? this.Weapons.options.address
         : this.Characters.options.address;
     },
 
     buyableNftSelected(): boolean {
-      return this.selectedSearchNftId !== null
+      return this.selectedNftId !== null
         && !this.searchResultsOwned;
     },
 
     ownListedNftSelected(): boolean {
-      return this.selectedSearchNftId !== null
+      return this.selectedNftId !== null
         && this.searchResultsOwned;
     }
   },
@@ -398,6 +392,18 @@ export default Vue.extend({
       'purchaseMarketListing',
       'fetchSellerOfNft',
     ]) as StoreMappedActions),
+
+    clearData() {
+      this.activeType = 'weapon';
+      this.search = '';
+      this.searchResults = [];
+      this.allSearchResults = [];
+      this.searchResultsOwned = false;
+      this.selectedNftId = null;
+      this.marketOutcome = null;
+      this.waitingMarketOutcome = false;
+      this.nftPricesById = {};
+    },
 
     async lookupNftPrice(nftId: NftId) {
       if(!this.contractAddress) return;
@@ -421,9 +427,9 @@ export default Vue.extend({
 
     async addListingForNft() {
       this.marketOutcome = null;
-      if(this.selectedSellingNftId === null) return;
+      if(this.selectedNftId === null) return;
 
-      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeSell}`, text: 'Sell Price (SKILL)' });
+      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeType}`, text: 'Sell Price (SKILL)' });
       if(!sellFor) return;
 
       const val = +sellFor;
@@ -433,23 +439,23 @@ export default Vue.extend({
 
       const results = await this.addMarketListing({
         nftContractAddr: this.contractAddress,
-        tokenId: this.selectedSellingNftId,
+        tokenId: this.selectedNftId,
         price: this.convertSkillToWei(sellFor)
       });
 
-      this.selectedSellingNftId = null;
+      this.selectedNftId = null;
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully listed '
-        +this.activeSell+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL';
+        +this.activeType+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL';
     },
 
     async updateNftListingPrice() {
 
       this.marketOutcome = null;
-      if(this.selectedSearchNftId === null) return;
+      if(this.selectedNftId === null) return;
 
 
-      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeSell}`, text: 'Sell Price (SKILL)' });
+      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeType}`, text: 'Sell Price (SKILL)' });
       if(!sellFor) return;
 
       const val = +sellFor;
@@ -459,65 +465,65 @@ export default Vue.extend({
 
       const results = await this.changeMarketListingPrice({
         nftContractAddr: this.contractAddress,
-        tokenId: this.selectedSearchNftId,
+        tokenId: this.selectedNftId,
         newPrice: this.convertSkillToWei(sellFor)
       });
 
-      this.selectedSellingNftId = null;
+      this.selectedNftId = null;
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully changed price for '
-        +this.activeSell+' '+results.nftID+' to '+this.convertWeiToSkill(results.newPrice)+' SKILL';
+        +this.activeType+' '+results.nftID+' to '+this.convertWeiToSkill(results.newPrice)+' SKILL';
     },
 
     async purchaseNft() {
       this.marketOutcome = null;
-      if(this.selectedSearchNftId === null) return;
+      if(this.selectedNftId === null) return;
 
-      const price = await this.lookupNftPrice(this.selectedSearchNftId);
+      const price = await this.lookupNftPrice(this.selectedNftId);
       if(!price) return;
 
       this.waitingMarketOutcome = true;
 
       const results = await this.purchaseMarketListing({
         nftContractAddr: this.contractAddress,
-        tokenId: this.selectedSearchNftId,
+        tokenId: this.selectedNftId,
         maxPrice: price
       });
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully purchased '
-        +this.activeSell+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL'
+        +this.activeType+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL'
           +' from '+results.seller;
     },
 
     async cancelNftListing() {
       this.marketOutcome = null;
 
-      if(this.selectedSearchNftId === null) return;
+      if(this.selectedNftId === null) return;
 
       this.waitingMarketOutcome = true;
 
       const results = await this.cancelMarketListing({
         nftContractAddr: this.contractAddress,
-        tokenId: this.selectedSearchNftId,
+        tokenId: this.selectedNftId,
       });
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully taken '
-        +this.activeSell+' '+results.nftID+' off the market.';
+        +this.activeType+' '+results.nftID+' off the market.';
 
-      await this.searchOwnListings();
+      await this.searchOwnListings(this.activeType);
     },
 
     async searchAllListingsByType(type: SellType) {
-      this.activeSell = type; // this is required to refresh this.contractAddress
-      this.activeSearch = type;
+      this.activeType = type;
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
 
       const results = await this.fetchAllMarketNftIds({
         nftContractAddr: this.contractAddress
       });
+
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
@@ -529,7 +535,7 @@ export default Vue.extend({
     },
 
     async searchListingsByNftId(type: SellType) {
-      this.activeSearch = type;
+      this.activeType = type;
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
 
@@ -550,7 +556,8 @@ export default Vue.extend({
       this.marketOutcome = null;
     },
 
-    async searchListingsBySeller() {
+    async searchListingsBySeller(type: SellType) {
+      this.activeType = type;
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
 
@@ -571,8 +578,9 @@ export default Vue.extend({
       }
     },
 
-    async searchOwnListings() {
+    async searchOwnListings(type: SellType) {
       this.marketOutcome = null;
+      this.activeType = type;
 
       if(!this.defaultAccount) {
         this.searchResults = [];
@@ -605,23 +613,15 @@ export default Vue.extend({
   },
 
   watch: {
-    activeSell(newActiveSell: Data['activeSell'], oldActiveSell: Data['activeSell']) {
-      if(newActiveSell === oldActiveSell) return;
-
-      this.search = '';
-      this.searchResults = [];
-      this.selectedSearchNftId = null;
-      this.selectedSellingNftId = null;
-    },
 
     async searchResults(nftIds: CharacterId[] | WeaponId[]) {
-      this.selectedSearchNftId = null;
+      this.selectedNftId = null;
 
       await this.fetchNftPrices(nftIds);
     },
 
     async allSearchResults(nftIds: CharacterId[] | WeaponId[]) {
-      this.selectedSearchNftId = null;
+      this.selectedNftId = null;
 
       await this.fetchNftPrices(nftIds);
     }
