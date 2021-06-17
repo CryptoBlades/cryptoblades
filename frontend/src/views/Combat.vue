@@ -68,13 +68,22 @@
                   <br>+Stats determine the multiplier
                   <br>Stat element match with character gives greater bonus" />
                 <h1>Choose a weapon</h1>
+
+                <b-button
+                  v-if="selectedWeaponId"
+                  variant="primary"
+                  class="ml-3"
+                  @click="selectedWeaponId = null">
+                  Choose New Weapon
+                </b-button>
               </div>
 
-              <weapon-grid v-model="selectedWeaponId" />
+              <weapon-grid v-if="!selectedWeaponId"
+                           v-model="selectedWeaponId" />
             </div>
           </div>
 
-          <div class="row" v-if="targets.length > 0">
+          <div class="row mb-3" v-if="targets.length > 0">
             <div class="col encounter text-center d-flex flex-column justify-content-center" v-for="(e, i) in targets" :key="i">
               <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy">
 
