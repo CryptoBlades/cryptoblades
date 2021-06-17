@@ -5,7 +5,7 @@
     </span>
     <div class="filters row mt-2 pl-2" v-if="displayCharacters.length > 4">
       <div class="col-2">
-        Level:
+        <strong>Level</strong>
         <select class="form-control" v-model="levelFilter" @change="saveFilters()">
           <option v-for="x in ['', 1, 11, 21, 31, 41]" :value="x" :key="x">
             {{ x ? `${x} - ${x + 9}` : 'Any' }}
@@ -14,7 +14,7 @@
       </div>
 
       <div class="col-2">
-        Element:
+        <strong>Element</strong>
         <select class="form-control" v-model="elementFilter" @change="saveFilters()">
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
