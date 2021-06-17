@@ -36,7 +36,7 @@
       <div class="row">
         <div class="col">
           <div class="message-box" v-if="!currentCharacter">
-            You need a character to do battle.
+            You need to select a character to do battle.
           </div>
 
           <div class="message-box" v-if="currentCharacter && currentCharacterStamina < 40">
