@@ -53,7 +53,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         ];
     }
 
-    function migrateTo_PLACEHOLDER() public {
+    function migrateTo_951a020() public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         _registerInterface(TransferCooldownableInterfaceId.interfaceId());

@@ -43,7 +43,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         powerMultPerPointMatching = powerMultPerPointBasic.mul(ABDKMath64x64.divu(107, 100)); // 0.2675% (+7%)
     }
 
-    function migrateTo_PLACEHOLDER() public {
+    function migrateTo_951a020() public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         _registerInterface(TransferCooldownableInterfaceId.interfaceId());
