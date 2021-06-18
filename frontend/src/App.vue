@@ -84,7 +84,12 @@ export default {
 
   methods: {
     ...mapActions({ initializeStore: 'initialize' }),
-    ...mapActions(['fetchCharacterStamina', 'pollAccountsAndNetwork']),
+    ...mapActions([
+      'fetchCharacterStamina',
+      'pollAccountsAndNetwork',
+      'fetchWeaponTransferCooldownForOwnWeapons',
+      'fetchCharacterTransferCooldownForOwnCharacters'
+    ]),
 
     async updateCurrentCharacterStamina() {
       if(this.featureFlagStakeOnly) return;
@@ -123,6 +128,13 @@ export default {
       await this.updateCurrentCharacterStamina();
     }, 3000);
 
+    this.weaponTransferCooldownPollIntervalId = setInterval(async () => {
+      await Promise.all([
+        this.fetchCharacterTransferCooldownForOwnCharacters(),
+        this.fetchWeaponTransferCooldownForOwnWeapons()
+      ]);
+    }, 10 * 1000);
+
     this.doPollAccounts = true;
     const pollAccounts = async () => {
       if(!this.doPollAccounts) return;
@@ -141,6 +153,7 @@ export default {
   beforeDestroy() {
     this.doPollAccounts = false;
     clearInterval(this.pollCharacterStaminaIntervalId);
+    clearInterval(this.weaponTransferCooldownPollIntervalId);
   },
 };
 </script>

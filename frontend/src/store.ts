@@ -6,11 +6,14 @@ import BN from 'bignumber.js';
 BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 
-import { setUpContracts } from './contracts';
+import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
 import {
   characterFromContract, targetFromContract, weaponFromContract
 } from './contract-models';
-import { allStakeTypes, Contract, Contracts, IStakeOverviewState, IStakeState, IState, IWeb3EventSubscription, StakeType } from './interfaces';
+import {
+  allStakeTypes, Contract, Contracts, IStakeOverviewState,
+  IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType
+} from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
 
@@ -110,6 +113,9 @@ export function createStore(web3: Web3) {
 
       targetsByCharacterIdAndWeaponId: {},
 
+      characterTransferCooldowns: {},
+      weaponTransferCooldowns: {},
+
       staking: {
         skill: { ...defaultStakeState },
         lp: { ...defaultStakeState },
@@ -190,6 +196,34 @@ export function createStore(web3: Web3) {
           const weapons = weaponIds.map(id => state.weapons[+id]);
           if (weapons.some((w) => w === null)) return [];
           return weapons;
+        };
+      },
+
+      transferCooldownOfCharacterId(state) {
+        return (characterId: string | number, now: number | null = null) => {
+          const transferCooldown = state.characterTransferCooldowns[+characterId];
+          if(!transferCooldown) return 0;
+
+          const deltaFromLastUpdated =
+            now === null
+              ? 0
+              : (now - transferCooldown.lastUpdatedTimestamp);
+
+          return Math.max(Math.floor(transferCooldown.secondsLeft - deltaFromLastUpdated), 0);
+        };
+      },
+
+      transferCooldownOfWeaponId(state) {
+        return (weaponId: string | number, now: number | null = null) => {
+          const transferCooldown = state.weaponTransferCooldowns[+weaponId];
+          if(!transferCooldown) return 0;
+
+          const deltaFromLastUpdated =
+            now === null
+              ? 0
+              : (now - transferCooldown.lastUpdatedTimestamp);
+
+          return Math.max(Math.floor(transferCooldown.secondsLeft - deltaFromLastUpdated), 0);
         };
       },
 
@@ -313,8 +347,22 @@ export function createStore(web3: Web3) {
         Vue.set(state.characters, characterId, character);
       },
 
+      updateCharacterTransferCooldown(
+        state: IState,
+        { characterId, transferCooldown }: { characterId: number, transferCooldown: ITransferCooldown }
+      ) {
+        Vue.set(state.characterTransferCooldowns, characterId, transferCooldown);
+      },
+
       updateWeapon(state: IState, { weaponId, weapon }) {
         Vue.set(state.weapons, weaponId, weapon);
+      },
+
+      updateWeaponTransferCooldown(
+        state: IState,
+        { weaponId, transferCooldown }: { weaponId: number, transferCooldown: ITransferCooldown }
+      ) {
+        Vue.set(state.weaponTransferCooldowns, weaponId, transferCooldown);
       },
 
       updateCharacterStamina(state: IState, { characterId, stamina }) {
@@ -619,32 +667,110 @@ export function createStore(web3: Web3) {
         await dispatch('fetchOwnedCharacterRaidStatus');
       },
 
-      async fetchCharacter({ state, commit }, characterId: string | number) {
+      async fetchCharacter({ state, commit, dispatch }, characterId: string | number) {
         const { Characters } = state.contracts();
         if(!Characters) return;
 
-        const character = characterFromContract(
-          characterId,
-          await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
-        );
+        await Promise.all([
+          (async () => {
+            const character = characterFromContract(
+              characterId,
+              await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
+            );
 
-        commit('updateCharacter', { characterId, character });
+            commit('updateCharacter', { characterId, character });
+          })(),
+          dispatch('fetchCharacterTransferCooldown', characterId)
+        ]);
+      },
+
+      async fetchCharacterTransferCooldownForOwnCharacters({ state, dispatch }) {
+        await Promise.all(
+          state.ownedCharacterIds.map(weaponId =>
+            dispatch('fetchCharacterTransferCooldown', weaponId)
+          )
+        );
+      },
+
+      async fetchCharacterTransferCooldown({ state, commit }, characterId: string | number) {
+        const { Characters } = state.contracts();
+        if(!Characters) return;
+
+        const supportsTransferCooldownable = await Characters.methods
+          .supportsInterface(INTERFACE_ID_TRANSFER_COOLDOWNABLE)
+          .call(defaultCallOptions(state));
+        if(!supportsTransferCooldownable) return;
+
+        const lastUpdatedTimestamp = Date.now();
+        const secondsLeft = await Characters.methods
+          .transferCooldownLeft(characterId)
+          .call(defaultCallOptions(state));
+
+        const payload: {
+          characterId: number,
+          characterTransferCooldown: ITransferCooldown
+        } = {
+          characterId: +characterId,
+          characterTransferCooldown: { lastUpdatedTimestamp, secondsLeft: +secondsLeft }
+        };
+        if(!_.isEqual(state.characterTransferCooldowns[+characterId], payload)) {
+          commit('updateCharacterTransferCooldown', payload);
+        }
       },
 
       async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {
         await Promise.all(weaponIds.map(id => dispatch('fetchWeapon', id)));
       },
 
-      async fetchWeapon({ state, commit }, weaponId: string | number) {
+      async fetchWeapon({ state, commit, dispatch }, weaponId: string | number) {
         const { Weapons } = state.contracts();
         if(!Weapons) return;
 
-        const weapon = weaponFromContract(
-          weaponId,
-          await Weapons.methods.get('' + weaponId).call(defaultCallOptions(state))
-        );
+        await Promise.all([
+          (async () => {
+            const weapon = weaponFromContract(
+              weaponId,
+              await Weapons.methods.get('' + weaponId).call(defaultCallOptions(state))
+            );
 
-        commit('updateWeapon', { weaponId, weapon });
+            commit('updateWeapon', { weaponId, weapon });
+          })(),
+          dispatch('fetchWeaponTransferCooldown', weaponId)
+        ]);
+      },
+
+      async fetchWeaponTransferCooldownForOwnWeapons({ state, dispatch }) {
+        await Promise.all(
+          state.ownedWeaponIds.map(weaponId =>
+            dispatch('fetchWeaponTransferCooldown', weaponId)
+          )
+        );
+      },
+
+      async fetchWeaponTransferCooldown({ state, commit }, weaponId: string | number) {
+        const { Weapons } = state.contracts();
+        if(!Weapons) return;
+
+        const supportsTransferCooldownable = await Weapons.methods
+          .supportsInterface(INTERFACE_ID_TRANSFER_COOLDOWNABLE)
+          .call(defaultCallOptions(state));
+        if(!supportsTransferCooldownable) return;
+
+        const lastUpdatedTimestamp = Date.now();
+        const secondsLeft = await Weapons.methods
+          .transferCooldownLeft(weaponId)
+          .call(defaultCallOptions(state));
+
+        const payload: {
+          weaponId: number,
+          weaponTransferCooldown: ITransferCooldown
+        } = {
+          weaponId: +weaponId,
+          weaponTransferCooldown: { lastUpdatedTimestamp, secondsLeft: +secondsLeft }
+        };
+        if(!_.isEqual(state.weaponTransferCooldowns[+weaponId], payload)) {
+          commit('updateWeaponTransferCooldown', payload);
+        }
       },
 
       async fetchCharacterStamina({ state, commit }, characterId: number) {

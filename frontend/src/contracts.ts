@@ -107,3 +107,5 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     ...marketContracts
   };
 }
+
+export const INTERFACE_ID_TRANSFER_COOLDOWNABLE = '0xe62e6974';
