@@ -199,7 +199,7 @@ export default {
     unlockTimeLeftInternal() { return this.stakeData.unlockTimeLeft; },
 
     stakingTokenName() {
-      return this.stakeType === 'skill' ? 'SKILL' : 'SKILL-BNB';
+      return this.stakeType === 'skill' ? 'SKILL' : 'SKILL-WBNB';
     },
 
     minimumStakeTimeFormatted() {
