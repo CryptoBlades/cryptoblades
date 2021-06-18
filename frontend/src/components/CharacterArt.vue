@@ -23,7 +23,7 @@
     <div class="xp" v-if="advancedUI && !portrait">
       <b-progress :max="RequiredXp(character.level)" variant="success">
         <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} XP</strong>
-        <b-progress-bar :value="5"></b-progress-bar>
+        <b-progress-bar :value="character.xp || 0"></b-progress-bar>
       </b-progress>
     </div>
 
