@@ -461,6 +461,11 @@
     "address": "0x06c0B596a0818d5Bc791e1de78b0e8d1112F6234",
     "transactionHash": "0x6637a0e0736d3c59adf49135054f9125fb6a1f471eb26dc3bf809ca85c1ccc46"
   },
+  "build/contracts/LPStakingRewardsUpgradeable.json": {
+    "events": {},
+    "links": {},
+    "address": "0x39e0D6D95E035e2F8a2392788e0c53b7BA7d9B83"
+  },
   "build/contracts/Migrations.json": {
     "events": {},
     "links": {},
