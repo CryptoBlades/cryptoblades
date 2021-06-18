@@ -2,7 +2,10 @@
   <div class="results-panel">
     <span class="outcome">{{ getSuccessText() }}</span>
     <span class="roll">{{ "You rolled "+results[1]+", Enemy rolled "+results[2] }}</span>
-    <span v-if="results[0]" class="reward">{{ "You earned "+results[3]+" xp and "+convertWei(results[4])+" SKILL" }}
+    <span v-if="results[0]" class="reward">
+      {{ "You earned "+results[3]+" xp"}}
+      <br>
+      <span v-tooltip="convertWei(results[4])+' SKILL'">{{"and "+formattedSkill}}</span>
         <Hint text="SKILL earned is based on gas costs of the network plus a factor of your power" />
     </span>
   </div>
@@ -10,10 +13,18 @@
 
 <script>
 import Web3 from 'web3';
+import BN from 'bignumber.js';
 import Hint from '../components/Hint.vue';
 
 export default {
   props: ['results'],
+
+  computed: {
+    formattedSkill() {
+      const skillBalance = Web3.utils.fromWei(this.results[4], 'ether');
+      return `${new BN(skillBalance).toFixed(6)} SKILL`;
+    }
+  },
 
   methods: {
     getSuccessText() {
@@ -36,7 +47,7 @@ export default {
 <style>
 .results-panel {
   width: 25em;
-  height: 10em;
+  height: 11em;
   background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 4px #ffffff38;
   border-radius: 5px;
