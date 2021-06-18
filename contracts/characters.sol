@@ -244,11 +244,14 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             require(balanceOf(to) < 4, "Recv has too many characters");
         }
 
-        // when not minting (and when market isn't the recipient)...
-        if(from != address(0) && !hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to)) {
+        // when not minting...
+        if(from != address(0)) {
             // only allow transferring a particular token every TRANSFER_COOLDOWN seconds
             require(lastTransferTimestamp[tokenId] < block.timestamp.sub(TRANSFER_COOLDOWN), "Transfer cooldown");
-            lastTransferTimestamp[tokenId] = block.timestamp;
+
+            if(!hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to)) {
+                lastTransferTimestamp[tokenId] = block.timestamp;
+            }
         }
     }
 }
