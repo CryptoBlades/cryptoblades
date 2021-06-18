@@ -41,9 +41,9 @@ export default {
         },
         {
           stakeType: 'lp',
-          stakeTokenName: 'SKILL-BNB',
+          stakeTokenName: 'SKILL-WBNB',
           rewardTokenName: 'SKILL',
-          stakeTitle: 'SKILL-BNB for SKILL V1'
+          stakeTitle: 'SKILL-WBNB for SKILL'
         },
         {
           stakeType: 'lp2',
