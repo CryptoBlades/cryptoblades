@@ -6,6 +6,10 @@ import { Contracts } from './Contracts';
 export type StakeType = 'skill' | 'lp' | 'lp2';
 export const allStakeTypes: StakeType[] = ['skill', 'lp', 'lp2'];
 
+export function isStakeType(stakeType: string): stakeType is StakeType {
+  return allStakeTypes.includes(stakeType as StakeType);
+}
+
 export interface IWeb3EventSubscription {
   unsubscribe(): void;
 }
