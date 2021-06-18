@@ -23,11 +23,15 @@
     <b-nav-item>
       <router-link :to="{ name: 'select-stake-type' }" exact><span>Stake</span></router-link>
     </b-nav-item>
+
+    <b-nav-item>
+      <router-link :to="{ name: 'portal' }" exact><span>Portal</span></router-link>
+    </b-nav-item>
   </b-navbar-nav>
 </template>
 
 <script>
-import { market as featureFlagMarket } from '../feature-flags';
+import { market as featureFlagMarket, portal as featureFlagPortal } from '../feature-flags';
 
 export default {
   inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
@@ -35,6 +39,9 @@ export default {
   computed: {
     featureFlagMarket() {
       return featureFlagMarket;
+    },
+    featureFlagPortal() {
+      return featureFlagPortal;
     }
   },
 };
