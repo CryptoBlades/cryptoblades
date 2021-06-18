@@ -134,7 +134,9 @@ export function createStore(web3: Web3) {
 
     getters: {
       contracts(state: IState) {
-        return state.contracts();
+        // our root component prevents the app from being active if contracts
+        // are not set up, so we never need to worry about it being null anywhere else
+        return _.isFunction(state.contracts) ? state.contracts() : null!;
       },
 
       availableStakeTypes(state: IState) {

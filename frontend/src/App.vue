@@ -60,7 +60,7 @@ export default {
     ...mapGetters(['contracts']),
 
     canShowApp() {
-      return !_.isEmpty(this.contracts) && !this.showNetworkError;
+      return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
     },
 
     showMetamaskWarning() {
