@@ -49,8 +49,9 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 
 export default {
   computed: {
-    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'contracts', 'defaultAccount']),
+    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount']),
     ...mapGetters([
+      'contracts',
       'ownCharacters',
       'ownWeapons',
       'currentCharacter',

@@ -89,8 +89,8 @@ export default {
   },
 
   computed: {
-    ...mapState(['contracts', 'defaultAccount']),
-    ...mapGetters(['ownWeapons']),
+    ...mapState(['defaultAccount']),
+    ...mapGetters(['contracts', 'ownWeapons']),
 
     canReforge() {
       return (

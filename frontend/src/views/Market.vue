@@ -291,9 +291,9 @@ import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import Hint from '../components/Hint.vue';
 import Web3 from 'web3';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { Accessors } from 'vue/types/options';
-import { Contract, IState } from '../interfaces';
+import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons } from '../../../build/abi-interfaces';
 import BigNumber from 'bignumber.js';
 
@@ -314,7 +314,11 @@ interface Data {
   nftPricesById: Record<string, string>;
 }
 
-type StoreMappedState = Pick<IState, 'contracts' | 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
+type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
+
+interface StoreMappedGetters {
+  contracts: Contracts;
+}
 
 interface StoreMappedActions {
   fetchAllMarketNftIds(payload: { nftContractAddr: string }): Promise<string[]>;
@@ -350,8 +354,11 @@ export default Vue.extend({
 
   computed: {
     ...(mapState([
-      'contracts', 'defaultAccount', 'weapons', 'characters', 'ownedCharacterIds', 'ownedWeaponIds'
+      'defaultAccount', 'weapons', 'characters', 'ownedCharacterIds', 'ownedWeaponIds'
     ]) as Accessors<StoreMappedState>),
+    ...(mapGetters([
+      'contracts'
+    ]) as Accessors<StoreMappedGetters>),
 
     Weapons(): Contract<Weapons> {
       // we use x! here because we assert that they're set already in created()

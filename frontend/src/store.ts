@@ -24,7 +24,7 @@ import { IERC721 } from '../../build/abi-interfaces';
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
 interface SetEventSubscriptionsPayload {
-  eventSubscriptions: IWeb3EventSubscription[];
+  eventSubscriptions: () => IWeb3EventSubscription[];
 }
 
 type StakingRewardsAlias = Contracts['LPStakingRewards'] | Contracts['LP2StakingRewards'] | Contracts['SkillStakingRewards'];
@@ -87,7 +87,7 @@ export function createStore(web3: Web3) {
   return new Vuex.Store<IState>({
     state: {
       contracts: null!,
-      eventSubscriptions: [],
+      eventSubscriptions: () => [],
 
       accounts: [],
       defaultAccount: null,
@@ -133,14 +133,18 @@ export function createStore(web3: Web3) {
     },
 
     getters: {
+      contracts(state: IState) {
+        return state.contracts();
+      },
+
       availableStakeTypes(state: IState) {
         const out: StakeType[] = ['skill'];
 
-        if(state.contracts.LPStakingRewards) {
+        if(state.contracts().LPStakingRewards) {
           out.push('lp');
         }
 
-        if(state.contracts.LP2StakingRewards) {
+        if(state.contracts().LP2StakingRewards) {
           out.push('lp2');
         }
 
@@ -379,9 +383,9 @@ export function createStore(web3: Web3) {
       },
 
       setUpContractEvents({ state, dispatch, commit }) {
-        state.eventSubscriptions.forEach(sub => sub.unsubscribe());
+        state.eventSubscriptions().forEach(sub => sub.unsubscribe());
 
-        const emptySubsPayload: SetEventSubscriptionsPayload = { eventSubscriptions: [] };
+        const emptySubsPayload: SetEventSubscriptionsPayload = { eventSubscriptions: () => [] };
         commit('setEventSubscriptions', emptySubsPayload);
 
         if(!state.defaultAccount) return;
@@ -392,7 +396,7 @@ export function createStore(web3: Web3) {
           console.log('setting up events for:', state.defaultAccount);
 
           subscriptions.push(
-            state.contracts.Characters!.events.NewCharacter(
+            state.contracts().Characters!.events.NewCharacter(
               { filter: { minter: state.defaultAccount } },
               async (err: Error, data: any) => {
                 if (err) {
@@ -416,7 +420,7 @@ export function createStore(web3: Web3) {
           );
 
           subscriptions.push(
-            state.contracts.Weapons!.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
+            state.contracts().Weapons!.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
               if (err) {
                 console.error(err);
                 return;
@@ -436,7 +440,7 @@ export function createStore(web3: Web3) {
           );
 
           subscriptions.push(
-            state.contracts.CryptoBlades!.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
+            state.contracts().CryptoBlades!.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
               if (err) {
                 console.error(err);
                 return;
@@ -451,9 +455,11 @@ export function createStore(web3: Web3) {
             })
           );
 
-          if(state.contracts.NFTMarket) {
+          const { NFTMarket } = state.contracts();
+
+          if(NFTMarket) {
             subscriptions.push(
-              state.contracts.NFTMarket.events.PurchasedListing({ filter: { seller: state.defaultAccount } }, async (err: Error, data: any) => {
+              NFTMarket.events.PurchasedListing({ filter: { seller: state.defaultAccount } }, async (err: Error, data: any) => {
                 if (err) {
                   console.error(err);
                   return;
@@ -511,17 +517,17 @@ export function createStore(web3: Web3) {
           );
         }
 
-        setupStakingEvents('skill', state.contracts.SkillStakingRewards);
-        setupStakingEvents('lp', state.contracts.LPStakingRewards);
-        setupStakingEvents('lp2', state.contracts.LP2StakingRewards);
+        setupStakingEvents('skill', state.contracts().SkillStakingRewards);
+        setupStakingEvents('lp', state.contracts().LPStakingRewards);
+        setupStakingEvents('lp2', state.contracts().LP2StakingRewards);
 
-        const payload: SetEventSubscriptionsPayload = { eventSubscriptions: subscriptions };
+        const payload: SetEventSubscriptionsPayload = { eventSubscriptions: () => subscriptions };
         commit('setEventSubscriptions', payload);
       },
 
       async setUpContracts({ commit }) {
         const contracts = await setUpContracts(web3);
-        commit('setContracts', contracts);
+        commit('setContracts', () => contracts);
       },
 
       async fetchUserDetails({ dispatch }) {
@@ -542,9 +548,9 @@ export function createStore(web3: Web3) {
           ownedWeaponIds,
           maxStamina,
         ] = await Promise.all([
-          state.contracts.CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
-          state.contracts.CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
-          state.contracts.Characters!.methods.maxStamina().call(defaultCallOptions(state)),
+          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
+          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
+          state.contracts().Characters!.methods.maxStamina().call(defaultCallOptions(state)),
         ]);
 
         commit('updateUserDetails', {
@@ -566,7 +572,7 @@ export function createStore(web3: Web3) {
       async updateWeaponIds({ state, dispatch, commit }) {
         if(featureFlagStakeOnly) return;
 
-        const ownedWeaponIds = await state.contracts.CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state));
+        const ownedWeaponIds = await state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state));
         commit('updateUserDetails', {
           ownedWeaponIds: Array.from(ownedWeaponIds)
         });
@@ -576,7 +582,7 @@ export function createStore(web3: Web3) {
       async updateCharacterIds({ state, dispatch, commit }) {
         if(featureFlagStakeOnly) return;
 
-        const ownedCharacterIds = await state.contracts.CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state));
+        const ownedCharacterIds = await state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state));
         commit('updateUserDetails', {
           ownedCharacterIds: Array.from(ownedCharacterIds)
         });
@@ -586,7 +592,7 @@ export function createStore(web3: Web3) {
       async fetchSkillBalance({ state, commit }) {
         if(!state.defaultAccount) return;
 
-        const skillBalance = await state.contracts.SkillToken.methods
+        const skillBalance = await state.contracts().SkillToken.methods
           .balanceOf(state.defaultAccount)
           .call(defaultCallOptions(state));
 
@@ -598,7 +604,7 @@ export function createStore(web3: Web3) {
       async addMoreSkill({ state, dispatch }, skillToAdd: string) {
         if(featureFlagStakeOnly) return;
 
-        await state.contracts.CryptoBlades!.methods.recoverSkill(skillToAdd).send({
+        await state.contracts().CryptoBlades!.methods.recoverSkill(skillToAdd).send({
           from: state.defaultAccount,
         });
 
@@ -612,11 +618,12 @@ export function createStore(web3: Web3) {
       },
 
       async fetchCharacter({ state, commit }, characterId: string | number) {
-        if(!state.contracts.Characters) return;
+        const { Characters } = state.contracts();
+        if(!Characters) return;
 
         const character = characterFromContract(
           characterId,
-          await state.contracts.Characters.methods.get('' + characterId).call(defaultCallOptions(state))
+          await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
         );
 
         commit('updateCharacter', { characterId, character });
@@ -627,11 +634,12 @@ export function createStore(web3: Web3) {
       },
 
       async fetchWeapon({ state, commit }, weaponId: string | number) {
-        if(!state.contracts.Weapons) return;
+        const { Weapons } = state.contracts();
+        if(!Weapons) return;
 
         const weapon = weaponFromContract(
           weaponId,
-          await state.contracts.Weapons.methods.get('' + weaponId).call(defaultCallOptions(state))
+          await Weapons.methods.get('' + weaponId).call(defaultCallOptions(state))
         );
 
         commit('updateWeapon', { weaponId, weapon });
@@ -640,7 +648,7 @@ export function createStore(web3: Web3) {
       async fetchCharacterStamina({ state, commit }, characterId: number) {
         if(featureFlagStakeOnly) return;
 
-        const staminaString = await state.contracts.Characters!.methods
+        const staminaString = await state.contracts().Characters!.methods
           .getStaminaPoints('' + characterId)
           .call(defaultCallOptions(state));
 
@@ -654,15 +662,15 @@ export function createStore(web3: Web3) {
         if(featureFlagStakeOnly) return;
 
         await approveFee(
-          state.contracts.CryptoBlades!,
-          state.contracts.SkillToken,
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
           cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee()
         );
 
-        await state.contracts.CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
+        await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
@@ -674,15 +682,15 @@ export function createStore(web3: Web3) {
         if(featureFlagStakeOnly) return;
 
         await approveFee(
-          state.contracts.CryptoBlades!,
-          state.contracts.SkillToken,
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
           cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
         );
 
-        await state.contracts.CryptoBlades!.methods.mintWeapon().send({
+        await state.contracts().CryptoBlades!.methods.mintWeapon().send({
           from: state.defaultAccount,
         });
 
@@ -696,15 +704,15 @@ export function createStore(web3: Web3) {
         if(featureFlagStakeOnly || !featureFlagReforging) return;
 
         await approveFee(
-          state.contracts.CryptoBlades!,
-          state.contracts.SkillToken,
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
           cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee()
         );
 
-        await state.contracts.CryptoBlades!.methods
+        await state.contracts().CryptoBlades!.methods
           .reforgeWeapon(
             reforgeWeaponId,
             burnWeaponId
@@ -728,7 +736,7 @@ export function createStore(web3: Web3) {
           return;
         }
 
-        const targets = await state.contracts.CryptoBlades!.methods
+        const targets = await state.contracts().CryptoBlades!.methods
           .getTargets(characterId, weaponId)
           .call(defaultCallOptions(state));
 
@@ -738,7 +746,7 @@ export function createStore(web3: Web3) {
       async doEncounter({ state, dispatch }, { characterId, weaponId, targetString }) {
         if(featureFlagStakeOnly) return;
 
-        const res = await state.contracts.CryptoBlades!.methods
+        const res = await state.contracts().CryptoBlades!.methods
           .fight(
             characterId,
             weaponId,
@@ -777,7 +785,7 @@ export function createStore(web3: Web3) {
       },
 
       async fetchStakeOverviewDataPartial({ state, commit }, { stakeType }: { stakeType: StakeType }) {
-        const { StakingRewards } = getStakingContracts(state.contracts, stakeType);
+        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
         if(!StakingRewards) return;
 
         const [
@@ -804,7 +812,7 @@ export function createStore(web3: Web3) {
       async fetchStakeDetails({ state, commit }, { stakeType }: { stakeType: StakeType }) {
         if(!state.defaultAccount) return;
 
-        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts, stakeType);
+        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
         if(!StakingRewards || !StakingToken) return;
 
         const [
@@ -847,7 +855,7 @@ export function createStore(web3: Web3) {
       },
 
       async stake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
-        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts, stakeType);
+        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
         if(!StakingRewards || !StakingToken) return;
 
         await StakingToken.methods.approve(StakingRewards.options.address, amount).send({
@@ -862,7 +870,7 @@ export function createStore(web3: Web3) {
       },
 
       async unstake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
-        const { StakingRewards } = getStakingContracts(state.contracts, stakeType);
+        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
         if(!StakingRewards) return;
 
         await StakingRewards.methods.withdraw(amount).send({
@@ -873,7 +881,7 @@ export function createStore(web3: Web3) {
       },
 
       async claimReward({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
-        const { StakingRewards } = getStakingContracts(state.contracts, stakeType);
+        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
         if(!StakingRewards) return;
 
         await StakingRewards.methods.getReward().send({
@@ -886,7 +894,7 @@ export function createStore(web3: Web3) {
       async fetchRaidData({ state, commit }) {
         if(featureFlagStakeOnly || !featureFlagRaid) return;
 
-        const RaidBasic = state.contracts.RaidBasic!;
+        const RaidBasic = state.contracts().RaidBasic!;
 
         const [
           expectedFinishTime,
@@ -918,7 +926,7 @@ export function createStore(web3: Web3) {
       async fetchOwnedCharacterRaidStatus({ state, commit }) {
         if(featureFlagStakeOnly || !featureFlagRaid) return;
 
-        const RaidBasic = state.contracts.RaidBasic!;
+        const RaidBasic = state.contracts().RaidBasic!;
 
         const ownedCharacterIds = _.clone(state.ownedCharacterIds);
         const characterIsRaidingRes = await Promise.all(
@@ -934,10 +942,11 @@ export function createStore(web3: Web3) {
       },
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
-        if(!state.contracts.NFTMarket) return;
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
 
         // returns an array of bignumbers (these are nft IDs)
-        return await state.contracts.NFTMarket.methods
+        return await NFTMarket.methods
           .getListingIDs(
             nftContractAddr
           )
@@ -945,10 +954,11 @@ export function createStore(web3: Web3) {
       },
 
       async fetchMarketNftIdsBySeller({ state }, { nftContractAddr, sellerAddr }) {
-        if(!state.contracts.NFTMarket) return;
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
 
         // returns an array of bignumbers (these are nft IDs)
-        return await state.contracts.NFTMarket.methods
+        return await NFTMarket.methods
           .getListingIDsBySeller(
             nftContractAddr,
             sellerAddr
@@ -957,10 +967,11 @@ export function createStore(web3: Web3) {
       },
 
       async fetchMarketNftPrice({ state }, { nftContractAddr, tokenId }) {
-        if(!state.contracts.NFTMarket) return;
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
 
         // returns the listing's price in skill wei
-        return await state.contracts.NFTMarket.methods
+        return await NFTMarket.methods
           .getFinalPrice(
             nftContractAddr,
             tokenId
@@ -969,10 +980,11 @@ export function createStore(web3: Web3) {
       },
 
       async fetchMarketTax({ state }, { nftContractAddr }) {
-        if(!state.contracts.NFTMarket) return;
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
 
         // returns the tax on the nfts at the address in 64x64 fixed point
-        return await state.contracts.NFTMarket.methods
+        return await NFTMarket.methods
           .tax(
             nftContractAddr
           )
@@ -980,12 +992,13 @@ export function createStore(web3: Web3) {
       },
 
       async checkMarketItemOwnership({ state }, { nftContractAddr, tokenId }) {
-        if(!state.contracts.NFTMarket || !state.contracts.Weapons || !state.contracts.Characters) return;
+        const { NFTMarket, Weapons, Characters } = state.contracts();
+        if(!NFTMarket || !Weapons || !Characters) return;
 
         const NFTContract: Contract<IERC721> =
-          nftContractAddr === state.contracts.Weapons.options.address
-            ? state.contracts.Weapons
-            : state.contracts.Characters;
+          nftContractAddr === Weapons.options.address
+            ? Weapons
+            : Characters;
 
         return await NFTContract.methods
           .ownerOf(tokenId)
@@ -993,26 +1006,27 @@ export function createStore(web3: Web3) {
       },
 
       async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price }: { nftContractAddr: string, tokenId: string, price: string }) {
-        if(!state.contracts.NFTMarket || !state.contracts.Weapons || !state.contracts.Characters) return;
+        const { NFTMarket, Weapons, Characters } = state.contracts();
+        if(!NFTMarket || !Weapons || !Characters) return;
 
         const NFTContract: Contract<IERC721> =
-          nftContractAddr === state.contracts.Weapons.options.address
-            ? state.contracts.Weapons
-            : state.contracts.Characters;
+          nftContractAddr === Weapons.options.address
+            ? Weapons
+            : Characters;
 
         await NFTContract.methods
-          .approve(state.contracts.NFTMarket.options.address, tokenId)
+          .approve(NFTMarket.options.address, tokenId)
           .send(defaultCallOptions(state));
 
-        const res = await state.contracts.NFTMarket.methods
+        const res = await NFTMarket.methods
           .addListing(nftContractAddr, tokenId, price)
           .send({
             from: state.defaultAccount,
           });
 
-        if(nftContractAddr === state.contracts.Weapons.options.address)
+        if(nftContractAddr === Weapons.options.address)
           await dispatch('updateWeaponIds');
-        else if(nftContractAddr === state.contracts.Characters.options.address)
+        else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
 
         const {
@@ -1024,9 +1038,10 @@ export function createStore(web3: Web3) {
       },
 
       async changeMarketListingPrice({ state }, { nftContractAddr, tokenId, newPrice }: { nftContractAddr: string, tokenId: string, newPrice: string }) {
-        if(!state.contracts.NFTMarket) return;
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
 
-        const res = await state.contracts.NFTMarket.methods
+        const res = await NFTMarket.methods
           .changeListingPrice(nftContractAddr, tokenId, newPrice)
           .send({
             from: state.defaultAccount,
@@ -1041,17 +1056,18 @@ export function createStore(web3: Web3) {
       },
 
       async cancelMarketListing({ state, dispatch }, { nftContractAddr, tokenId }: { nftContractAddr: string, tokenId: string }) {
-        if(!state.contracts.NFTMarket || !state.contracts.Weapons || !state.contracts.Characters) return;
+        const { NFTMarket, Weapons, Characters } = state.contracts();
+        if(!NFTMarket || !Weapons || !Characters) return;
 
-        const res = await state.contracts.NFTMarket.methods
+        const res = await NFTMarket.methods
           .cancelListing(nftContractAddr, tokenId)
           .send({
             from: state.defaultAccount,
           });
 
-        if(nftContractAddr === state.contracts.Weapons.options.address)
+        if(nftContractAddr === Weapons.options.address)
           await dispatch('updateWeaponIds');
-        else if(nftContractAddr === state.contracts.Characters.options.address)
+        else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
 
         const {
@@ -1063,21 +1079,22 @@ export function createStore(web3: Web3) {
       },
 
       async purchaseMarketListing({ state, dispatch }, { nftContractAddr, tokenId, maxPrice }: { nftContractAddr: string, tokenId: string, maxPrice: string }) {
-        if(!state.contracts.NFTMarket || !state.contracts.Weapons || !state.contracts.Characters) return;
+        const { SkillToken, NFTMarket, Weapons, Characters } = state.contracts();
+        if(!NFTMarket || !Weapons || !Characters) return;
 
-        await state.contracts.SkillToken.methods
-          .approve(state.contracts.NFTMarket.options.address, maxPrice)
+        await SkillToken.methods
+          .approve(NFTMarket.options.address, maxPrice)
           .send(defaultCallOptions(state));
 
-        const res = await state.contracts.NFTMarket.methods
+        const res = await NFTMarket.methods
           .purchaseListing(nftContractAddr, tokenId, maxPrice)
           .send({
             from: state.defaultAccount,
           });
 
-        if(nftContractAddr === state.contracts.Weapons.options.address)
+        if(nftContractAddr === Weapons.options.address)
           await dispatch('updateWeaponIds');
-        else if(nftContractAddr === state.contracts.Characters.options.address)
+        else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
 
         const {
@@ -1091,9 +1108,10 @@ export function createStore(web3: Web3) {
 
       async fetchSellerOfNft({ state }, { nftContractAddr, tokenId }: { nftContractAddr: string, tokenId: string }) {
         // getSellerOfNftID
-        if(!state.contracts.NFTMarket) return;
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
 
-        const sellerAddr = await state.contracts.NFTMarket.methods
+        const sellerAddr = await NFTMarket.methods
           .getSellerOfNftID(nftContractAddr, tokenId)
           .call(defaultCallOptions(state));
 
@@ -1101,9 +1119,11 @@ export function createStore(web3: Web3) {
       },
 
       async fetchFightGasOffset({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
 
         const fightGasOffset = await getFeeInSkillFromUsd(
-          state.contracts.CryptoBlades!,
+          CryptoBlades,
           defaultCallOptions(state),
           cryptoBladesMethods => cryptoBladesMethods.fightRewardGasOffset()
         );
@@ -1113,9 +1133,11 @@ export function createStore(web3: Web3) {
       },
 
       async fetchFightBaseline({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
 
         const fightBaseline = await getFeeInSkillFromUsd(
-          state.contracts.CryptoBlades!,
+          CryptoBlades,
           defaultCallOptions(state),
           cryptoBladesMethods => cryptoBladesMethods.fightRewardBaseline()
         );
@@ -1125,7 +1147,7 @@ export function createStore(web3: Web3) {
       },
 
       async fetchFightRewardSkill({ state, commit }) {
-        const skillRewards = await state.contracts.CryptoBlades!.methods
+        const skillRewards = await state.contracts().CryptoBlades!.methods
           .getTokenRewards()
           .call(defaultCallOptions(state));
 
@@ -1134,8 +1156,8 @@ export function createStore(web3: Web3) {
       },
 
       async fetchFightRewardXp({ state, commit }) {
-        if(!state.contracts.CryptoBlades) return;
-        const { CryptoBlades } = state.contracts;
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
 
         const xpCharaIdPairs = await Promise.all(
           state.ownedCharacterIds.map(async charaId => {
@@ -1152,9 +1174,10 @@ export function createStore(web3: Web3) {
       },
 
       async claimTokenRewards({ state, dispatch }) {
-        if(!state.contracts.CryptoBlades) return;
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
 
-        await state.contracts.CryptoBlades.methods.claimTokenRewards().send({
+        await CryptoBlades.methods.claimTokenRewards().send({
           from: state.defaultAccount,
         });
 
@@ -1165,9 +1188,10 @@ export function createStore(web3: Web3) {
       },
 
       async claimXpRewards({ state, dispatch }) {
-        if(!state.contracts.CryptoBlades) return;
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
 
-        await state.contracts.CryptoBlades.methods.claimXpRewards().send({
+        await CryptoBlades.methods.claimXpRewards().send({
           from: state.defaultAccount,
         });
 

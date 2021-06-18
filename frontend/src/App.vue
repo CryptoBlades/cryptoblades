@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import _ from 'lodash';
 
 import Events from './events';
@@ -56,7 +56,8 @@ export default {
   }),
 
   computed: {
-    ...mapState(['defaultAccount', 'currentNetworkId', 'currentCharacterId', 'contracts']),
+    ...mapState(['defaultAccount', 'currentNetworkId', 'currentCharacterId']),
+    ...mapGetters(['contracts']),
 
     canShowApp() {
       return !_.isEmpty(this.contracts) && !this.showNetworkError;

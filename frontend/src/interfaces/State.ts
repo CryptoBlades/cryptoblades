@@ -41,8 +41,8 @@ export interface IRaidState {
 }
 
 export interface IState {
-  contracts: Contracts;
-  eventSubscriptions: IWeb3EventSubscription[];
+  contracts: () => Contracts;
+  eventSubscriptions: () => IWeb3EventSubscription[];
   accounts: string[];
   defaultAccount: string | null;
   currentNetworkId: number | null;
