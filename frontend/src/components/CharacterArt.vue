@@ -87,7 +87,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['getCharacterName']),
+    ...mapGetters(['getCharacterName', 'transferCooldownOfCharacterId']),
   },
 
   methods: {
@@ -101,7 +101,7 @@ export default {
         return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;
       };
 
-      return `
+      let ttHtml = `
         ID: ${character.id}
         <br>
         Level ${character.level + 1}
@@ -110,6 +110,16 @@ export default {
         <br>
         Trait: ${wrapInSpan(CharacterTrait[character.trait], CharacterTrait[character.trait])}
       `;
+
+      const cooldown = this.transferCooldownOfCharacterId(this.character.id);
+      if(cooldown) {
+        if(cooldown === 86400) // edge case for when it's exactly 1 day and the iso string cant display
+          ttHtml += '<br>May not be traded for: 1 day';
+        else
+          ttHtml += `<br>May not be traded for: ${new Date(cooldown * 1000).toISOString().substr(11, 8)}`;
+      }
+
+      return ttHtml;
     },
 
     getCharacterArt,

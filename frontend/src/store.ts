@@ -349,9 +349,9 @@ export function createStore(web3: Web3) {
 
       updateCharacterTransferCooldown(
         state: IState,
-        { characterId, transferCooldown }: { characterId: number, transferCooldown: ITransferCooldown }
+        { characterId, characterTransferCooldown }: { characterId: number, characterTransferCooldown: ITransferCooldown }
       ) {
-        Vue.set(state.characterTransferCooldowns, characterId, transferCooldown);
+        Vue.set(state.characterTransferCooldowns, characterId, characterTransferCooldown);
       },
 
       updateWeapon(state: IState, { weaponId, weapon }) {
@@ -360,9 +360,9 @@ export function createStore(web3: Web3) {
 
       updateWeaponTransferCooldown(
         state: IState,
-        { weaponId, transferCooldown }: { weaponId: number, transferCooldown: ITransferCooldown }
+        { weaponId, weaponTransferCooldown }: { weaponId: number, weaponTransferCooldown: ITransferCooldown }
       ) {
-        Vue.set(state.weaponTransferCooldowns, weaponId, transferCooldown);
+        Vue.set(state.weaponTransferCooldowns, weaponId, weaponTransferCooldown);
       },
 
       updateCharacterStamina(state: IState, { characterId, stamina }) {
