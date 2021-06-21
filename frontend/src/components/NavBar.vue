@@ -1,16 +1,22 @@
 <template>
-  <b-navbar toggleable="sm" type="dark" variant="dark">
+  <b-navbar class="main-nav" toggleable="sm" type="dark" variant="dark">
     <b-navbar-brand href="#">
       <img src="../assets/logo.png" class="logo d-inline-block align-top" alt="Logo">
     </b-navbar-brand>
 
     <view-links></view-links>
 
-    <skill-balance-display class="ml-auto" />
+    <skill-balance-display class="ml-auto d-none d-sm-flex" />
 
     <claim-rewards  v-if="!canShowRewardsBar" />
 
-    <options />
+    <options class="d-none d-sm-flex"/>
+
+    <!-- Render only on mobile view -->
+    <div class="d-flex d-sm-none">
+      <skill-balance-display class="skill-display-mobile" />
+      <options class="options-display-mobile"/>
+    </div>
   </b-navbar>
 </template>
 
@@ -54,6 +60,8 @@ export default Vue.extend({
 </script>
 
 <style>
+
+/** Suggest to move this to atomic folder structure like assets/css **/
 a {
   text-decoration: none;
   user-select: none;
@@ -76,6 +84,27 @@ a.router-link-active {
 .dropdown-menu li a:hover {
   background: transparent !important;
 }
+
+@media (max-width: 576px) {
+  .main-nav {
+    align-items: normal !important; /** force only for mobile to manually set alignments **/
+    flex-direction: column;
+  }
+  .main-nav > .navbar-brand {
+    align-self: center;
+  }
+  .main-nav > .navbar-nav {
+    flex-direction : row;
+    justify-content: space-evenly;
+  }
+  .skill-display-mobile  {
+    flex :5;
+  }
+  .options-display-mobile {
+    flex :1;
+    align-items: flex-end;
+  }
+}
 </style>
 
 <style scoped>
@@ -89,3 +118,5 @@ a.router-link-active {
   background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
 }
 </style>
+
+
