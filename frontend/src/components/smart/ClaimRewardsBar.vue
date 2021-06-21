@@ -1,9 +1,9 @@
 <template>
   <b-navbar>
-    <b-nav-item disabled><strong>Rewards</strong></b-nav-item>
-
     <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
-      variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'"/>
+    variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'"/>
+
+    <b-nav-item disabled><strong>Rewards</strong></b-nav-item>
 
     <b-nav-item
       class="ml-3"
@@ -119,7 +119,6 @@ export default Vue.extend({
 }
 
 .rewards-claimable-icon {
-  margin-left: 5px;
-  margin-right: -10px;
+  margin-right: 5px;
 }
 </style>
