@@ -62,3 +62,7 @@ export function Stat2PercentForChar(wep: IWeapon, trait: number) {
 export function Stat3PercentForChar(wep: IWeapon, trait: number) {
   return MultiplierPerEffectiveStat(AdjustStatForTrait(wep.stat3Value, wep.stat3Type, trait));
 }
+
+export function GetTotalMultiplierForTrait(wep: IWeapon, trait: number) {
+  return 1 + (0.01 * (Stat1PercentForChar(wep, trait) + Stat2PercentForChar(wep, trait) + Stat3PercentForChar(wep, trait)));
+}
