@@ -159,6 +159,7 @@
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
+                  v-tooltip="'Cancelled sales cannot be re-listed for 24 hours!'"
                   @click="cancelNftListing()">Cancel Listing</b-button>
               </div>
             </div>
@@ -235,12 +236,12 @@
                 <b-button
                   variant="primary"
                   v-if="activeType === 'weapon'"
-                  :disabled="selectedNftId === null"
+                  :disabled="selectedNftId === null || selectedNftOnCooldown"
                   @click="addListingForNft()">List Weapon</b-button>
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
-                  :disabled="selectedNftId === null"
+                  :disabled="selectedNftId === null || selectedNftOnCooldown"
                   @click="addListingForNft()">List Character</b-button>
               </div>
 
@@ -359,6 +360,7 @@ export default Vue.extend({
     ...(mapGetters([
       'contracts'
     ]) as Accessors<StoreMappedGetters>),
+    ...mapGetters(['transferCooldownOfWeaponId', 'transferCooldownOfCharacterId']),
 
     Weapons(): Contract<Weapons> {
       // we use x! here because we assert that they're set already in created()
@@ -386,6 +388,13 @@ export default Vue.extend({
     ownListedNftSelected(): boolean {
       return this.selectedNftId !== null
         && this.searchResultsOwned;
+    },
+
+    selectedNftOnCooldown(): boolean {
+      return this.selectedNftId !== null
+      && (this.activeType === 'weapon'
+        ? (this.transferCooldownOfWeaponId(+this.selectedNftId) > 0)
+        : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
     }
   },
 

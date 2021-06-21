@@ -401,7 +401,7 @@
     },
     "links": {},
     "address": "0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
-    "transactionHash": "0xa3b2be1d16c19af875a00e6d952e7b4f0bfc96cdf278813d0b58961b477f3539"
+    "transactionHash": "0x12a3b2ab1ce069ca4b3bc8ccac806f3b4796f32a5e39c15f01ead413f4269db5"
   },
   "build/contracts/CryptoBlades.json": {
     "events": {
@@ -1213,10 +1213,53 @@
         ],
         "name": "Transfer",
         "type": "event"
+      },
+      "0xd1b1d9a936fc3409b20503a5fd66b94b1c2a8b4986d01def5b9ef60272896e3c": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "reforged",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "burned",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "lowPoints",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "fourPoints",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "fivePoints",
+            "type": "uint8"
+          }
+        ],
+        "name": "Reforged",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0x672E4CddA311b3BfAd1e09313241C62B4eFF5782",
-    "transactionHash": "0x02f0ab2ea4e0743ab64cf4c17f867449c51a93ae7906d96b58099a0e445452bc"
+    "transactionHash": "0x8a35178b8240954bf4b10dc082903c0017b31ef1678c0f2154dc02b01740b21f"
   }
 }
