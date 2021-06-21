@@ -94,14 +94,14 @@ a.router-link-active {
     align-self: center;
   }
   .main-nav > .navbar-nav {
-    flex-direction : row;
+    flex-direction: row;
     justify-content: space-evenly;
   }
   .skill-display-mobile  {
-    flex :5;
+    flex: 5;
   }
   .options-display-mobile {
-    flex :1;
+    flex: 1;
     align-items: flex-end;
   }
 }
