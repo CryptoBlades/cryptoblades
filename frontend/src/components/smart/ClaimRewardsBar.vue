@@ -1,5 +1,8 @@
 <template>
   <b-navbar>
+    <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
+    variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'"/>
+
     <b-nav-item disabled><strong>Rewards</strong></b-nav-item>
 
     <b-nav-item
@@ -23,11 +26,14 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { BootstrapVueIcons } from 'bootstrap-vue';
 import { Accessors } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
 import { getCharacterNameFromSeed } from '../../character-name';
+
+Vue.use(BootstrapVueIcons);
 
 interface StoreMappedState {
   skillRewards: string;
@@ -110,5 +116,9 @@ export default Vue.extend({
 
 .nav-item a {
   padding: 0;
+}
+
+.rewards-claimable-icon {
+  margin-right: 5px;
 }
 </style>
