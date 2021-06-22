@@ -1,9 +1,9 @@
 <template>
   <div
     class="weapon-icon"
-    v-tooltip="tooltipHtml"
-    @mouseover="hover = true"
-    @mouseleave="hover = false"
+    v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
+    @mouseover="hover = !isMobile() || true"
+    @mouseleave="hover = !isMobile() || false"
   >
 
     <div class="loading-container" v-if="!allLoaded">
@@ -405,6 +405,14 @@ export default {
           this.group.rotation.y = 0;
           this.renderer.render(this.scene, this.camera);
         }
+      }
+    },
+    isMobile() {
+      if( screen.width <= 576 ) {
+        return true;
+      }
+      else {
+        return false;
       }
     }
   },
