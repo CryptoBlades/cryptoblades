@@ -16,14 +16,6 @@ library RandomUtil {
         return randomVar;
     }
 
-    function sliceSeed(uint seed, uint slice, uint div, uint mod) internal pure returns (uint) {
-        // a way to cheaply extract more results from a seed without re-rolling it
-        // example: (seed, 10000, 100, 25) skips last two digits of seed and gets a 0-24 from from the new end
-        // WARNING: distribution of results may not be even!
-        // For even distribution use whole multiples of mod for the number of decimals at work (ie 2 digits with mod 4)
-        return seed.mod(slice).div(div).mod(mod);
-    }
-
     function combineSeeds(uint seed1, uint seed2) internal pure returns (uint) {
         return uint(keccak256(abi.encodePacked(seed1, seed2)));
     }
