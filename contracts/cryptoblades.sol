@@ -535,4 +535,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return xpRewards[char];
     }
 
+    function getTokenRewardsFor(address wallet) public view returns (uint256) {
+        return tokenRewards[wallet];
+    }
+
+    function getTotalSkillOwnedBy(address wallet) public view returns (uint256) {
+        return getTokenRewardsFor(wallet) + skillToken.balanceOf(wallet);
+    }
+
 }
