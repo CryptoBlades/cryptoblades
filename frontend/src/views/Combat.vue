@@ -221,8 +221,8 @@ export default {
       const enemyRange = (enemyMax - enemyMin);
       let rollingTotal = 0;
       // shortcut: if it is impossible for one side to win, just say so
-      if (playerMin > enemyMax) return 100;
-      if (playerMax < enemyMin) return 0;
+      if (playerMin > enemyMax) return 'Very Likely';
+      if (playerMax < enemyMin) return 'Unlikely';
 
       // case 1: player power is higher than enemy power
       if (playerMin >= enemyMin){
