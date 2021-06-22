@@ -468,7 +468,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         return (
             oneFrac.add(powerMultPerPointBasic.mul(
                     ABDKMath64x64.fromUInt(
-                        SafeMath.add(wep.stat1, wep.stat2).add(wep.stat3)
+                        wep.stat1 + wep.stat2 + wep.stat3
                     )
             )),//targetMult
             getPowerMultiplierForTrait(wep.properties, wep.stat1, wep.stat2, wep.stat3, charTrait),
