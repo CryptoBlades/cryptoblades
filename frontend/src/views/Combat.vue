@@ -95,7 +95,7 @@
               <big-button
                 class="encounter-button"
                 :mainText="`Fight!`"
-                :subText="`Power ${e.power}\nChance of Victory: ${getWinChance(e.power)}%`"
+                :subText="`Power ${e.power}\nChance of Victory: ${getWinChance(e.power)}`"
                 v-tooltip="'Cost 40 stamina'"
                 :disabled="timeMinutes === 59 && timeSeconds >= 30"
                 @click="onClickEncounter(e)"
@@ -243,7 +243,10 @@ export default {
         //since this is chance the enemy wins, we negate it
         rollingTotal = (1 - rollingTotal);
       }
-      return (Math.floor(rollingTotal * 10000)/100);
+      if (rollingTotal <= 0.30) return 'Unlikely';
+      else if (rollingTotal <= 0.50) return 'Possible';
+      else if (rollingTotal <= 0.70) return 'Likely';
+      else return 'Very Likely';
     },
     getElementAdvantage(playerElement, enemyElement){
       if (((playerElement+1)%4) === enemyElement)
