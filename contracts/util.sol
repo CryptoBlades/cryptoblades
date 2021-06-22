@@ -46,11 +46,6 @@ library RandomUtil {
         return randomSeeded(combineSeeds(now, nonce));
     }
 
-    function plusMinus10Percent(uint256 num, uint nonce) internal view returns (uint256) {
-        uint256 tenPercent = num.div(10);
-        return num.sub(tenPercent).add(randomUnsafeMinMax(0, tenPercent.mul(2), nonce));
-    }
-
     function plusMinus10PercentSeeded(uint256 num, uint256 seed) internal pure returns (uint256) {
         uint256 tenPercent = num.div(10);
         return num.sub(tenPercent).add(randomSeededMinMax(0, tenPercent.mul(2), seed));
