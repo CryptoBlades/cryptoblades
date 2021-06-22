@@ -46,6 +46,7 @@ import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import swordspecs from '../assets/swordspecs.json';
 import maskChroma from '../shaders/maskchroma_frag.glsl.js';
+import '@/mixins/general';
 import { Stat1PercentForChar,
   Stat2PercentForChar,
   Stat3PercentForChar
@@ -405,14 +406,6 @@ export default {
           this.group.rotation.y = 0;
           this.renderer.render(this.scene, this.camera);
         }
-      }
-    },
-    isMobile() {
-      if( screen.width <= 576 ) {
-        return true;
-      }
-      else {
-        return false;
       }
     }
   },
