@@ -244,9 +244,9 @@ export default {
         rollingTotal = (1 - rollingTotal);
       }
       if (rollingTotal <= 0.30) return 'Unlikely';
-      else if (rollingTotal <= 0.50) return 'Possible';
-      else if (rollingTotal <= 0.70) return 'Likely';
-      else return 'Very Likely';
+      if (rollingTotal <= 0.50) return 'Possible';
+      if (rollingTotal <= 0.70) return 'Likely';
+      return 'Very Likely';
     },
     getElementAdvantage(playerElement, enemyElement){
       if (((playerElement+1)%4) === enemyElement)
