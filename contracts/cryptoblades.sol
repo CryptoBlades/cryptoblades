@@ -205,13 +205,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 tokens = usdToSkill(getTokenGainForFight(targetPower));
 
         if(playerRoll >= monsterRoll) {
-            tokenRewards[msg.sender] = tokenRewards[msg.sender].add(tokens);
-            xpRewards[char] = SafeMath.add(xpRewards[char], xp);
+            tokenRewards[msg.sender] += tokens;
+            xpRewards[char] += xp;
         }
         else {
             // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
-            tokenRewards[msg.sender] = tokenRewards[msg.sender].add(0);
-            xpRewards[char] = SafeMath.add(xpRewards[char], 0);
+            tokenRewards[msg.sender] += 0;
+            xpRewards[char] += 0;
         }
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
