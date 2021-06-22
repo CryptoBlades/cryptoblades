@@ -43,5 +43,10 @@ export default {
 <style scoped>
 a {
   font-weight: bold;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  padding: 5px;
+  margin: -5px;
 }
 </style>
