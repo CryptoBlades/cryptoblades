@@ -209,8 +209,9 @@ export default {
     getWinChance(enemyPower, enemyElement) {
       const characterPower = CharacterPower(this.currentCharacter.level).replace(',', '');
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const weaponElement = parseInt(WeaponElement[this.ownWeapons[this.selectedWeaponId].element], 10);
-      const weaponMultiplier = GetTotalMultiplierForTrait(this.ownWeapons[this.selectedWeaponId], playerElement);
+      const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id ===this.selectedWeaponId);
+      const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
+      const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
       const totalPower = characterPower * weaponMultiplier;
       const totalMultiplier = 1 + 0.075 * ((weaponElement === playerElement ? 1 : 0) + this.getElementAdvantage(playerElement, enemyElement));
       const playerMin = (totalPower * totalMultiplier) * 0.9;
