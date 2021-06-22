@@ -13,7 +13,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Accessors } from 'vue/types/options';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
 
@@ -28,6 +28,9 @@ interface StoreMappedActions {
 export default Vue.extend({
   computed: {
     ...(mapState(['skillBalance', 'skillRewards', 'xpRewards', 'ownedCharacterIds']) as Accessors<StoreMappedState>),
+    ...mapGetters([
+      'getExchangeUrl'
+    ]),
 
     formattedSkillBalance(): string {
       const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
@@ -39,8 +42,7 @@ export default Vue.extend({
     ...(mapActions(['addMoreSkill']) as StoreMappedActions),
 
     onBuySkill() {
-      window.open('https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
-        '_blank');
+      window.open(this.getExchangeUrl, '_blank');
     },
 
   },
