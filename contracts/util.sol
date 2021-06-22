@@ -16,10 +16,6 @@ library RandomUtil {
         return randomVar;
     }
 
-    function randomUnsafeMinMax(uint min, uint max, uint nonce) internal view returns (uint) {
-        return randomSeededMinMax(min, max, unsafeRandom(nonce));
-    }
-
     function randomSeeded(uint seed) internal pure returns (uint) {
         // deterministic
         // you can combine seeds before passing to get pseudorandom
