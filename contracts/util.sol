@@ -16,12 +16,6 @@ library RandomUtil {
         return randomVar;
     }
 
-    function randomSeeded(uint seed) internal pure returns (uint) {
-        // deterministic
-        // you can combine seeds before passing to get pseudorandom
-        return uint(keccak256(abi.encodePacked(seed)));
-    }
-
     function sliceSeed(uint seed, uint slice, uint div, uint mod) internal pure returns (uint) {
         // a way to cheaply extract more results from a seed without re-rolling it
         // example: (seed, 10000, 100, 25) skips last two digits of seed and gets a 0-24 from from the new end
