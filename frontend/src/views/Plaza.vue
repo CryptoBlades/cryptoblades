@@ -9,11 +9,14 @@
       <br>
       <big-button
         class="button"
-        mainText="Recruit character"
+        :mainText="`Recruit character for ${recruitCost} SKILL`"
         @click="onMintCharacter"
       />
+      <div v-if="formatSkill() < recruitCost" >
+        <br>
+        You can buy more SKILL from <a v-bind:href="`${getExchangeUrl}`" target="_blank">here</a>.
+      </div>
     </div>
-
     <div class="row mt-3" v-if="ownCharacters.length > 0">
       <div class="col">
         <div v-if="ownCharacters.length > 0">
@@ -46,10 +49,11 @@ import BN from 'bignumber.js';
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
+import Web3 from 'web3';
 
 export default {
   computed: {
-    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount']),
+    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
     ...mapGetters([
       'contracts',
       'ownCharacters',
@@ -57,6 +61,7 @@ export default {
       'currentCharacter',
       'currentCharacterStamina',
       'getCharacterName',
+      'getExchangeUrl',
     ]),
 
     character() {
@@ -78,6 +83,7 @@ export default {
       };
     },
   },
+
 
   async created() {
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
@@ -101,6 +107,9 @@ export default {
       } catch (e) {
         this.$dialog.alert('Could not mint character: insufficient funds or transaction denied.');
       }
+    },
+    formatSkill() {
+      return Web3.utils.fromWei(this.skillBalance, 'ether');
     },
   },
 
