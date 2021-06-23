@@ -95,7 +95,7 @@
               <big-button
                 class="encounter-button"
                 :mainText="`Fight!`"
-                :subText="`Power ${e.power}\nChance of Victory: ${getWinChance(e.power)}`"
+                :subText="`Power ${e.power}\nChance of Victory: ${getWinChance(e.power, e.trait)}`"
                 v-tooltip="'Cost 40 stamina'"
                 :disabled="timeMinutes === 59 && timeSeconds >= 30"
                 @click="onClickEncounter(e)"
@@ -216,7 +216,7 @@ export default {
       const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id ===this.selectedWeaponId);
       const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
-      const totalPower = characterPower * weaponMultiplier;
+      const totalPower = ((characterPower * weaponMultiplier) + selectedWeapon.bonusPower);
       const totalMultiplier = 1 + 0.075 * ((weaponElement === playerElement ? 1 : 0) + this.getElementAdvantage(playerElement, enemyElement));
       const playerMin = (totalPower * totalMultiplier) * 0.9;
       const playerMax = (totalPower * totalMultiplier) * 1.1;
