@@ -112,7 +112,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return tokens;
     }
 
-    function unpackFightDataAndDrainStamina(uint96 playerData)
+    function unpackFightData(uint96 playerData)
         public pure returns (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) {
 
         charTrait = uint8(playerData & 0xFF);
@@ -126,7 +126,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             isCharacterOwner(char)
             isWeaponOwner(wep) {
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightDataAndDrainStamina(characters.getFightDataAndDrainStamina(char, staminaCostFight));
+            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
