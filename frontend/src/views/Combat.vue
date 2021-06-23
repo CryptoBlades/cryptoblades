@@ -191,6 +191,10 @@ export default {
 
   watch: {
     async selections([characterId, weaponId]) {
+      if(!this.ownWeapons.find((weapon) => weapon.id === weaponId)) {
+        console.log('clearing weapon');
+        this.selectedWeaponId = null;
+      }
       await this.fetchTargets({ characterId, weaponId });
     },
   },
