@@ -491,8 +491,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
-        // when not minting...
-        if(from != address(0)) {
+        // when not minting or burning...
+        if(from != address(0) && to != address(0)) {
             // only allow transferring a particular token every TRANSFER_COOLDOWN seconds
             require(lastTransferTimestamp[tokenId] < block.timestamp.sub(TRANSFER_COOLDOWN), "Transfer cooldown");
 
