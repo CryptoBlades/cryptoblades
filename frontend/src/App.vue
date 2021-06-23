@@ -26,13 +26,14 @@
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>
-            Follow these simple steps to start earning in 10 minutes or less!
-            There are a few methods for filling your Metamask account with BNB,
-            depending on your situation.
+            Get Started in less than 10 minutes!
+            To Recruit your first character you need 5 Skill and .001 BNB.
+            You also need .0015 BNB to do your first battles. But don't worry.
+            You earn the battle fees back in SKILL rewards immediately!
           </p>
         <ul class="unstyled-list">
           <li>1. How Buy BNB w/ fiat <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a> </li>
-          <li>2. If you already have BNB, ApeSwap is a way for us to create a SKILL for BNB go to :<br/> <a href="https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab">https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab</a></li>
+          <li>2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br/> <a href="https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab">https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab</a></li>
           <li>3. Read the alert and Select “I understand” and “Continue”</li>
           <li>4. Then follow the following tutorial to swap BNB for SKILL! <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
           <li>5. That's it! Now you can create your first Character (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">Watch Getting Started</a>)</li>
@@ -136,7 +137,7 @@ export default {
     try {
       await this.initializeStore();
     } catch(e) {
-      this.errorMessage = 'Uh oh! Seems like you don\'t have any Skills or BNB yet';
+      this.errorMessage = 'Welcome to CryptoBlades. Here\'s how you can get started.';
       if(e.code === 4001) {
         this.errorMessage = 'Error: MetaMask could not get permissions.';
       }
