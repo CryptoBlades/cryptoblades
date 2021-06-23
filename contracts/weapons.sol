@@ -446,12 +446,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
 
     function getBonusPower(uint256 id) public view returns (uint24) {
         Weapon storage wep = tokens[id];
-        WeaponBurnPoints storage wbp = burnPoints[id];
-        return uint24(lowStarBurnPowerPerPoint.mul(wbp.lowStarBurnPoints)
-            .add(fourStarBurnPowerPerPoint.mul(wbp.fourStarBurnPoints))
-            .add(fiveStarBurnPowerPerPoint.mul(wbp.fiveStarBurnPoints))
-            .add(uint256(15).mul(wep.level)) // TEMP: UNTIL WE IMPLEMENT WEAPON LEVELS
-        );
+        return getBonusPowerForFight(id, wep.level);
     }
 
     function getBonusPowerForFight(uint256 id, uint8 level) public view returns (uint24) {
@@ -468,7 +463,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         return (
             oneFrac.add(powerMultPerPointBasic.mul(
                     ABDKMath64x64.fromUInt(
-                        SafeMath.add(wep.stat1, wep.stat2).add(wep.stat3)
+                        wep.stat1 + wep.stat2 + wep.stat3
                     )
             )),//targetMult
             getPowerMultiplierForTrait(wep.properties, wep.stat1, wep.stat2, wep.stat3, charTrait),

@@ -120,7 +120,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         );
     }
 
-    function getRandomCosmetic(uint256 seed, uint256 seed2, uint16 limit) public pure returns (uint16) {
+    function getRandomCosmetic(uint256 seed, uint256 seed2, uint16 limit) private pure returns (uint16) {
         return uint16(RandomUtil.randomSeededMinMax(0, limit, RandomUtil.combineSeeds(seed, seed2)));
     }
 
