@@ -266,12 +266,12 @@ export default {
       }
 
       try {
-        this.waitingResults = true;
         const results = await this.doEncounter({
           characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
           targetString: targetToFight.original,
         });
+        this.waitingResults = true;
         /*const success = results[0];
         const playerRoll = results[1];
         const enemyRoll = results[2];
