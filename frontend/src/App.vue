@@ -369,8 +369,8 @@ div.bg-success {
 }
 
 .starter-panel {
-  width: 25em;
-  height: 10.5em;
+  width: 100%;
+  max-width: 28em;
   background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 4px #ffffff38;
   border :1px solid #9e8a57;
@@ -378,6 +378,7 @@ div.bg-success {
   padding: 0.5em;
   margin: auto;
   text-align: center;
+  overflow: auto auto;
 }
 
 .starter-panel-heading {
