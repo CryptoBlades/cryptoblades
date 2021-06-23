@@ -244,8 +244,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             require(balanceOf(to) < 4, "Recv has too many characters");
         }
 
-        // when not minting...
-        if(from != address(0)) {
+        // when not minting or burning...
+        if(from != address(0) && to != address(0)) {
             // only allow transferring a particular token every TRANSFER_COOLDOWN seconds
             require(lastTransferTimestamp[tokenId] < block.timestamp.sub(TRANSFER_COOLDOWN), "Transfer cooldown");
 
