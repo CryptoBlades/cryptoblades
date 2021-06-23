@@ -26,20 +26,20 @@
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>
-            Get Started in less than 10 minutes!
-            To Recruit your first character you need 5 Skill and .001 BNB.
-            You also need .0015 BNB to do your first battles. But don't worry.
-            You earn the battle fees back in SKILL rewards immediately!
+            Get started in less than 10 minutes!
+            To recruit your first character you need 5 Skill and .001 BNB for gas.
+            You will also need .0015 BNB to do your first few battles, but don't worry,
+            you earn the battle fees back in SKILL rewards immediately!
           </p>
         <ul class="unstyled-list">
-          <li>1. How Buy BNB w/ fiat <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a> </li>
-          <li>2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br/> <a href="https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab">https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab</a></li>
-          <li>3. Read the alert and Select “I understand” and “Continue”</li>
-          <li>4. Then follow the following tutorial to swap BNB for SKILL! <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
-          <li>5. That's it! Now you can create your first Character (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">Watch Getting Started</a>)</li>
+          <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a> </li>
+          <li>2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br/> <a href="https://app.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab">Trade SKILL/BNB</a></li>
+          <li>3. Read the alert and select “I understand” and “Continue”</li>
+          <li>4. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
+          <li>5. That's it! Now you can create your first character: (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">Watch 'Getting Started' Video</a>)</li>
         </ul>
 
-        <p>If you have any questions at all, talk to us on our Discord at: <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a></p>
+        <p>If you have any questions, please join our Discord: <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a></p>
         </div>
       </div>
     </div>
