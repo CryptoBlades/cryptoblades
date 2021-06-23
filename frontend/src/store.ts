@@ -176,7 +176,7 @@ export function createStore(web3: Web3) {
       },
 
       getExchangeUrl() {
-        return 'https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
+        return 'https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
       },
 
       ownCharacters(state, getters) {
