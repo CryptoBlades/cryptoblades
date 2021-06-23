@@ -18,7 +18,29 @@
     </div>
 
     <div class="fullscreen-warning" v-if="errorMessage">
-      {{ errorMessage }}
+      <div class="starter-panel">
+          <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
+          <span class="starter-panel-heading">{{errorMessage}}
+        </span>
+         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
+        <div class="seperator"></div>
+        <div class="instructions-list">
+          <p>
+            Follow these simple steps to start earning in 10 minutes or less!
+            There are a few methods for filling your Metamask account with BNB,
+            depending on your situation.
+          </p>
+        <ul class="unstyled-list">
+          <li>1. How Buy BNB w/ fiat <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a> </li>
+          <li>2. If you already have BNB, ApeSwap is a way for us to create a SKILL for BNB go to :<br/> <a href="https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab">https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab</a></li>
+          <li>3. Read the alert and Select “I understand” and “Continue”</li>
+          <li>4. Then follow the following tutorial to swap BNB for SKILL! <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
+          <li>5. That's it! Now you can create your first Character (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">Watch Getting Started</a>)</li>
+        </ul>
+
+        <p>If you have any questions at all, talk to us on our Discord at: <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a></p>
+        </div>
+      </div>
     </div>
 
     <div class="fullscreen-warning" v-if="showNetworkError">
@@ -114,8 +136,7 @@ export default {
     try {
       await this.initializeStore();
     } catch(e) {
-      this.errorMessage = 'Error: Out of gas or ABI error. Check SKILL and BNB balances.';
-
+      this.errorMessage = 'Uh oh! Seems like you don\'t have any Skills or BNB yet';
       if(e.code === 4001) {
         this.errorMessage = 'Error: MetaMask could not get permissions.';
       }
@@ -344,5 +365,46 @@ div.bg-success {
   flex-direction: column;
   font-size: 3rem;
   color: #fff;
+}
+
+.starter-panel {
+  width: 25em;
+  height: 10.5em;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px #ffffff38;
+  border :1px solid #9e8a57;
+  border-radius: 5px;
+  padding: 0.5em;
+  margin: auto;
+  text-align: center;
+}
+
+.starter-panel-heading {
+  margin-left : 15px;
+  font-size : 45px;
+}
+
+.starter-msg {
+  font-size: 0.85em;
+}
+.instructions-list {
+  text-align: start;
+  padding : 15px;
+  font-size : 0.5em;
+}
+
+.unstyled-list {
+  list-style-type: none;
+}
+.seperator {
+  border: 1px solid #9e8a57;
+  border-radius: 3px;
+  width : 100%;
+}
+
+.mini-icon-starter {
+  height: 1.2em;
+  width: 1.2em;
+  margin : 5px;
 }
 </style>
