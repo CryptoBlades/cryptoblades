@@ -97,7 +97,7 @@
                 :mainText="`Fight!`"
                 :subText="`Power ${e.power}\nChance of Victory: ${getWinChance(e.power, e.trait)}`"
                 v-tooltip="'Cost 40 stamina'"
-                :disabled="timeMinutes === 59 && timeSeconds >= 30"
+                :disabled="(timeMinutes === 59 && timeSeconds >= 30) || isLoadingTargets"
                 @click="onClickEncounter(e)"
               />
 
@@ -192,7 +192,6 @@ export default {
   watch: {
     async selections([characterId, weaponId]) {
       if(!this.ownWeapons.find((weapon) => weapon.id === weaponId)) {
-        console.log('clearing weapon');
         this.selectedWeaponId = null;
       }
       await this.fetchTargets({ characterId, weaponId });
@@ -265,6 +264,12 @@ export default {
         return;
       }
 
+      // Force a quick refresh of targets
+      await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
+      // If the targets list no longer contains the chosen target, return so a new target can be chosen
+      if (!this.targets.find((target) => target.original === targetToFight.original)) {
+        return;
+      }
       try {
         this.waitingResults = true;
         const results = await this.doEncounter({
