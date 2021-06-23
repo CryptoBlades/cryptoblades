@@ -285,7 +285,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function getTargetsInternal(uint24 playerPower,
         uint64 staminaTimestamp,
         uint256 currentHour
-    ) public pure returns (uint32[4] memory) {
+    ) private pure returns (uint32[4] memory) {
         // 4 targets, roll powers based on character + weapon power
         // trait bonuses not accounted for
         // targets expire on the hour
