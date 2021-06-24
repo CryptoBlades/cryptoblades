@@ -6,24 +6,34 @@
 
     <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
 
+    {{ typeof skillBalance }}
+
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
 
     <div class="fullscreen-warning" v-if="showMetamaskWarning">
-      <div>
-        You need Metamask installed to use this app.
+      <div class="starter-panel">
+        <span class="starter-panel-heading">Metamask Not Detected</span>
+
+        <div class="seperator"></div>
+
+        <div class="instructions-list">
+          <p>
+            You need Metamask installed to use this app. <a target="_blank" href="https://stakingbits.com/setting-up-metamask-for-binance-smart-chain-bsc-921d9a2625fd">You can find instructions on how to set it up here.</a>
+          </p>
+        </div>
       </div>
-      <a href="https://metamask.io/" target="_blank">Get it here.</a>
     </div>
 
-    <div class="fullscreen-warning" v-if="errorMessage">
+    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || skillBalance === '0')">
       <div class="starter-panel">
-          <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
-          <span class="starter-panel-heading">{{errorMessage}}
-        </span>
-         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
+        <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
+        <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
+        <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
+
         <div class="seperator"></div>
+
         <div class="instructions-list">
           <p>
             Get started in less than 10 minutes!
@@ -31,15 +41,15 @@
             You will also need .0015 BNB to do your first few battles, but don't worry,
             you earn the battle fees back in SKILL rewards immediately!
           </p>
-        <ul class="unstyled-list">
-          <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a> </li>
-          <li>2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br/> <a href="https://app.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab">Trade SKILL/BNB</a></li>
-          <li>3. Read the alert and select “I understand” and “Continue”</li>
-          <li>4. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
-          <li>5. That's it! Now you can create your first character: (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">Watch 'Getting Started' Video</a>)</li>
-        </ul>
+          <ul class="unstyled-list">
+            <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a> </li>
+            <li>2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br/> <a href="https://app.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab">Trade SKILL/BNB</a></li>
+            <li>3. Read the alert and select “I understand” and “Continue”</li>
+            <li>4. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
+            <li>5. That's it! Now you can create your first character: (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">Watch 'Getting Started' Video</a>)</li>
+          </ul>
 
-        <p>If you have any questions, please join our Discord: <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a></p>
+          <p>If you have any questions, please join our Discord: <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a></p>
         </div>
       </div>
     </div>
@@ -79,7 +89,7 @@ export default {
   }),
 
   computed: {
-    ...mapState(['defaultAccount', 'currentNetworkId', 'currentCharacterId']),
+    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId']),
     ...mapGetters(['contracts']),
 
     canShowApp() {
@@ -371,7 +381,7 @@ div.bg-success {
 .starter-panel {
   width: 100%;
   max-width: 28em;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 1);
   box-shadow: 0 2px 4px #ffffff38;
   border :1px solid #9e8a57;
   border-radius: 5px;
