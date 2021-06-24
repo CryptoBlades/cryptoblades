@@ -290,10 +290,24 @@ button.close {
   color: #9e8a57 !important;
 }
 
+.modal-header {
+  color: #9e8a57 !important;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  border-color: #9e8a57 !important;
+}
+
 .modal-body {
   color: #9e8a57 !important;
   background: rgb(31, 31, 34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+}
+
+.modal-footer {
+  color: #9e8a57 !important;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  border-color: #9e8a57 !important;
 }
 
 .nav-tabs {
