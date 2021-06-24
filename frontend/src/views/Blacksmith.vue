@@ -56,13 +56,33 @@
             <b-button
               variant="primary"
               class="ml-3"
-              @click="onReforgeWeapon"
+              @click="showReforgeConfirmation"
               :disabled="canReforge"
               v-tooltip="'Forge new weapon'">
               Confirm Reforge ({{ reforgeCost }} SKILL)
             </b-button>
           </div>
         </div>
+
+        <b-modal class="centered-modal" ref="reforge-confirmation-modal" title="Reforge Confirmation"
+          @ok="onReforgeWeapon">
+          <div class="text-center" v-text="'Are you sure you want to reforge with this weapon?'" />
+          <div class="weapon" :hidden="burnWeaponId == null">
+            <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+              <slot name="above" :weapon="getWeaponToBurn()"></slot>
+            </div>
+            <div class="weapon-icon-wrapper">
+              <weapon-icon class="weapon-icon" :weapon="getWeaponToBurn()" />
+            </div>
+          </div>
+          <div class="text-center" :hidden="burnWeaponId == null || !isWeaponRare()">
+            <b-icon icon="exclamation-circle" variant="danger" /> This is a rare weapon!
+          </div>
+          <div class="text-center" :hidden="burnWeaponId == null || !isWeaponReforged()">
+            <b-icon icon="exclamation-circle" variant="danger" />
+            This item has been previously reforged and LBs will not carry over!
+          </div>
+        </b-modal>
 
         <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" />
       </div>
@@ -75,6 +95,7 @@ import BN from 'bignumber.js';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
+import WeaponIcon from '../components/WeaponIcon.vue';
 
 export default {
   data() {
@@ -84,7 +105,7 @@ export default {
       burnWeaponId: null,
       forgeCost: 0,
       reforgeCost: 0,
-      disableForge: false
+      disableForge: false,
     };
   },
 
@@ -104,6 +125,7 @@ export default {
   watch: {
     reforgeWeaponId() {
       this.showReforge = false;
+      this.burnWeaponId = null;
     }
   },
 
@@ -137,6 +159,22 @@ export default {
       }
     },
 
+    showReforgeConfirmation() {
+      this.$refs['reforge-confirmation-modal'].show();
+    },
+
+    isWeaponRare() {
+      return this.getWeaponToBurn().stars >= 3;
+    },
+
+    isWeaponReforged() {
+      return this.getWeaponToBurn().bonusPower > 0;
+    },
+
+    getWeaponToBurn() {
+      return this.ownWeapons.find(x => x.id === this.burnWeaponId);
+    },
+
     async onReforgeWeapon() {
       try {
         await this.reforgeWeapon({
@@ -155,6 +193,7 @@ export default {
   components: {
     WeaponGrid,
     BigButton,
+    WeaponIcon,
   },
 };
 </script>
@@ -186,4 +225,18 @@ export default {
 .sub-container {
   flex: 1;
 }
+
+.weapon {
+  width: 12em;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.centered-modal {
+  justify-content: center;
+}
+
 </style>

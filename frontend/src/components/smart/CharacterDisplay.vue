@@ -86,7 +86,7 @@ export default {
     ...mapGetters([
       'currentCharacter',
       'currentCharacterStamina',
-      'getCharacterName', 'charactersWithIds'
+      'getCharacterName', 'charactersWithIds', 'timeUntilCurrentCharacterHasMaxStamina'
     ]),
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
@@ -121,6 +121,10 @@ export default {
 
       items = items.filter(x => x.id !== this.currentCharacter.id);
       return items;
+    },
+
+    toolTipHtml(): string {
+      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + this.timeUntilCurrentCharacterHasMaxStamina;
     }
   },
 

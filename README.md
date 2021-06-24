@@ -24,12 +24,7 @@ You should now have 100 fake eth! You're now fake rich.
 
 1. `npm run contract:deploy` (this deploys your contracts to your local blockchain)
 
-You can also create a `.env` file in `frontend` with the following values:
-
-- `VUE_APP_NETWORK_ID` - the network ID to use for each contract (default: `5777`)
-- `VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS`
-- `VUE_APP_STAKING_REWARDS_CONTRACT_ADDRESS`
-- `VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS`
+You will also need to create a `.env` file alongside `.env.mainnet` and `.env.testnet`. Inside this file you should only copy the feature flags from either other file. All addresses and other variables are set correctly for local development. **If you don't create a `.env` file, you're going to be missing a lot of the UI.**
 
 But if not specified, the deployed contracts will be pulled in automatically.
 
