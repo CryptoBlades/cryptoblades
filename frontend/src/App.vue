@@ -26,7 +26,7 @@
       </div>
     </div>
 
-    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || skillBalance === '0')">
+    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || ownCharacters.length === 0)">
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
@@ -89,8 +89,8 @@ export default {
   }),
 
   computed: {
-    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId']),
-    ...mapGetters(['contracts']),
+    ...mapState(['defaultAccount', 'currentNetworkId', 'currentCharacterId']),
+    ...mapGetters(['contracts', 'ownCharacters']),
 
     canShowApp() {
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
