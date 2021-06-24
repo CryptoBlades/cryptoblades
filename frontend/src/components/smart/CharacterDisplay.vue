@@ -42,17 +42,31 @@
         class="bar stamina"
         :current="currentCharacterStamina"
         :max="maxStamina"
-        v-tooltip="toolTipHtml"
+        v-tooltip="'Regenerates 1 point every 5 minutes'"
         faIcon="fa-bolt"
         primaryColor="#ec4b4b"
         altText="Stamina"
       />
     </div>
+	<div class="character-list">
+    <ul class="character-list">
+<!--:class="{ selected: value === c.id }"-->
+      <li
+        class="character"
+        v-for="c in filteredCharactersForList"
+        :key="c.id"
+        @click="setCurrentCharacter(c.id)"
+      >
+      <div class="name-list"
+      >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
+      </li>
+    </ul>
+	</div>
   </div>
 </template>
 
 <script lang="ts">
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters, mapState, mapMutations } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import SmallBar from '../SmallBar.vue';
 import CharacterArt from '../CharacterArt.vue';
@@ -68,16 +82,47 @@ export default {
   },
 
   computed: {
-    ...mapState(['maxStamina', 'currentCharacterId']),
+    ...mapState(['maxStamina', 'currentCharacterId', 'ownedCharacterIds']),
     ...mapGetters([
       'currentCharacter',
       'currentCharacterStamina',
-      'getCharacterName',
-      'timeUntilCurrentCharacterHasMaxStamina'
+      'getCharacterName', 'charactersWithIds', 'timeUntilCurrentCharacterHasMaxStamina'
     ]),
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
+    displayCharacters() {
+      return this.charactersWithIds(this.ownedCharacterIds).filter(Boolean);
+    },
+
+    filteredCharacters() {
+      let items = this.displayCharacters;
+
+      if(this.showFilters) {
+
+        if(this.elementFilter) {
+          items = items.filter(x => x.traitName.includes(this.elementFilter));
+        }
+
+        if(this.levelFilter) {
+          items = items.filter(x => x.level >= this.levelFilter - 1 && x.level <= this.levelFilter + 9);
+        }
+
+        if(this.showLimit > 0 && items.length > this.showLimit) {
+          items = items.slice(0, this.showLimit);
+        }
+      }
+
+      return items;
+    },
+
+    filteredCharactersForList() {
+      let items = this.displayCharacters;
+
+      items = items.filter(x => x.id !== this.currentCharacter.id);
+      return items;
+    },
+
     toolTipHtml(): string {
       return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + this.timeUntilCurrentCharacterHasMaxStamina;
     }
@@ -90,9 +135,14 @@ export default {
   },
 
   methods: {
+    ...mapMutations(['setCurrentCharacter']),
     getCharacterArt,
     CharacterPower,
     RequiredXp,
+    say(id, variable) {
+      //alert(message);
+      this[variable] = id;
+    },
   },
 };
 </script>
@@ -100,6 +150,7 @@ export default {
 <style scoped>
 .root {
   display: inline-flex;
+  width: 100%;
 }
 
 .character-portrait {
@@ -145,5 +196,30 @@ export default {
 
 .power-hint {
   font-size: 1.3rem;
+}
+
+div.character-list{
+  width: 70%;
+}
+
+ul.character-list{
+  float: right;
+  margin: 0px;
+}
+
+li.character{
+    background: rgba(255, 255, 255, 0.1);
+    padding: 7px 4px 2px;
+    margin: 5px;
+    vertical-align: middle;
+}
+
+.name-list {
+  bottom: 20px;
+  margin: auto;
+  float: left;
+  font-size: 0.9em;
+  text-align: center;
+  color: #9e8a57;
 }
 </style>
