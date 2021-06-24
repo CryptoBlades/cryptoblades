@@ -95,9 +95,9 @@
               <big-button
                 class="encounter-button"
                 :mainText="`Fight!`"
-                :subText="`Power ${e.power}`"
+                :subText="`Power ${e.power}\nChance of Victory: ${getWinChance(e.power, e.trait)}`"
                 v-tooltip="'Cost 40 stamina'"
-                :disabled="timeMinutes === 59 && timeSeconds >= 30"
+                :disabled="(timeMinutes === 59 && timeSeconds >= 30) || isLoadingTargets"
                 @click="onClickEncounter(e)"
               />
 
@@ -129,7 +129,7 @@
 import BigButton from '../components/BigButton.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import { getEnemyArt } from '../enemy-art';
-import { CharacterTrait } from '../interfaces';
+import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, WeaponElement } from '../interfaces';
 import Hint from '../components/Hint.vue';
 import CombatResults from '../components/CombatResults.vue';
 import Web3 from 'web3';
@@ -191,6 +191,9 @@ export default {
 
   watch: {
     async selections([characterId, weaponId]) {
+      if(!this.ownWeapons.find((weapon) => weapon.id === weaponId)) {
+        this.selectedWeaponId = null;
+      }
       await this.fetchTargets({ characterId, weaponId });
     },
   },
@@ -206,11 +209,67 @@ export default {
         +this.formattedSkill(this.fightGasOffset) + ' gas offset + '
         +this.formattedSkill(this.fightBaseline)+' per 1000 power';
     },
+    getWinChance(enemyPower, enemyElement) {
+      const characterPower = CharacterPower(this.currentCharacter.level).replace(',', '');
+      const playerElement = parseInt(this.currentCharacter.trait, 10);
+      const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id ===this.selectedWeaponId);
+      const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
+      const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
+      const totalPower = ((characterPower * weaponMultiplier) + selectedWeapon.bonusPower);
+      const totalMultiplier = 1 + 0.075 * ((weaponElement === playerElement ? 1 : 0) + this.getElementAdvantage(playerElement, enemyElement));
+      const playerMin = (totalPower * totalMultiplier) * 0.9;
+      const playerMax = (totalPower * totalMultiplier) * 1.1;
+      const playerRange = (playerMax - playerMin);
+      const enemyMin = (enemyPower * 0.9);
+      const enemyMax = (enemyPower * 1.1);
+      const enemyRange = (enemyMax - enemyMin);
+      let rollingTotal = 0;
+      // shortcut: if it is impossible for one side to win, just say so
+      if (playerMin > enemyMax) return 'Very Likely';
+      if (playerMax < enemyMin) return 'Unlikely';
+
+      // case 1: player power is higher than enemy power
+      if (playerMin >= enemyMin){
+        // case 1: enemy roll is lower than player's minimum
+        rollingTotal = ((playerMin - enemyMin)/enemyRange);
+        // case 2: 1 is not true, and player roll is higher than enemy maximum
+        rollingTotal += ((1-rollingTotal) * ((playerMax-enemyMax)/playerRange));
+        // case 3: 1 and 2 are not true, both values are in the overlap range. Since values are basically continuous, we assume 50%
+        rollingTotal += ((1-rollingTotal) * 0.5);
+      } // otherwise, enemy power is higher
+      else {
+        // case 1: player rolls below enemy minimum
+        rollingTotal = ((enemyMin - playerMin) / playerRange);
+        // case 2: enemy rolls above player maximum
+        rollingTotal += ((1 - rollingTotal) * ((enemyMax - playerMax)/enemyRange));
+        // case 3: 1 and 2 are not true, both values are in the overlap range
+        rollingTotal += ((1 - rollingTotal) * 0.5);
+        //since this is chance the enemy wins, we negate it
+        rollingTotal = (1 - rollingTotal);
+      }
+      if (rollingTotal <= 0.30) return 'Unlikely';
+      if (rollingTotal <= 0.50) return 'Possible';
+      if (rollingTotal <= 0.70) return 'Likely';
+      return 'Very Likely';
+    },
+    getElementAdvantage(playerElement, enemyElement){
+      if (((playerElement+1)%4) === enemyElement)
+        return 1;
+      if (((enemyElement+1)%4) === playerElement)
+        return -1;
+      return 0;
+    },
     async onClickEncounter(targetToFight) {
       if (this.selectedWeaponId === null || this.currentCharacterId === null) {
         return;
       }
 
+      // Force a quick refresh of targets
+      await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
+      // If the targets list no longer contains the chosen target, return so a new target can be chosen
+      if (!this.targets.find((target) => target.original === targetToFight.original)) {
+        return;
+      }
       try {
         this.waitingResults = true;
         const results = await this.doEncounter({

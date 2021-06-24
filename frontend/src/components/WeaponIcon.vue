@@ -1,9 +1,9 @@
 <template>
   <div
     class="weapon-icon"
-    v-tooltip="tooltipHtml"
-    @mouseover="hover = true"
-    @mouseleave="hover = false"
+    v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
+    @mouseover="hover = !isMobile() || true"
+    @mouseleave="hover = !isMobile() || false"
   >
 
     <div class="loading-container" v-if="!allLoaded">
@@ -46,6 +46,7 @@ import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import swordspecs from '../assets/swordspecs.json';
 import maskChroma from '../shaders/maskchroma_frag.glsl.js';
+import '@/mixins/general';
 import { Stat1PercentForChar,
   Stat2PercentForChar,
   Stat3PercentForChar

@@ -34,4 +34,8 @@ h1 {
   margin-top: 0;
   padding-top: 10px;
 }
+
+h2 {
+  white-space: pre;
+}
 </style>
