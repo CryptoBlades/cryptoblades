@@ -48,11 +48,24 @@
         altText="Stamina"
       />
     </div>
+	<div class="character-list">
+    <ul class="character-list">
+      <li
+        class="character"
+        v-for="c in filteredCharactersForList"
+        :key="c.id"
+        @click="setCurrentCharacter(c.id)"
+      >
+      <div class="name-list"
+      >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
+      </li>
+    </ul>
+	</div>
   </div>
 </template>
 
 <script lang="ts">
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters, mapState, mapMutations } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import SmallBar from '../SmallBar.vue';
 import CharacterArt from '../CharacterArt.vue';
@@ -68,11 +81,12 @@ export default {
   },
 
   computed: {
-    ...mapState(['maxStamina', 'currentCharacterId']),
+    ...mapState(['maxStamina', 'currentCharacterId', 'ownedCharacterIds']),
     ...mapGetters([
       'currentCharacter',
       'currentCharacterStamina',
       'getCharacterName',
+      'charactersWithIds',
       'timeUntilCurrentCharacterHasMaxStamina'
     ]),
     isLoadingCharacter(): boolean {
@@ -80,6 +94,13 @@ export default {
     },
     toolTipHtml(): string {
       return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + this.timeUntilCurrentCharacterHasMaxStamina;
+    },
+
+    filteredCharactersForList() {
+      let items = this.displayCharacters;
+
+      items = items.filter(x => x.id !== this.currentCharacter.id);
+      return items;
     }
   },
 
@@ -90,6 +111,7 @@ export default {
   },
 
   methods: {
+    ...mapMutations(['setCurrentCharacter']),
     getCharacterArt,
     CharacterPower,
     RequiredXp,
