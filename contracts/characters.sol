@@ -120,7 +120,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         );
     }
 
-    function getRandomCosmetic(uint256 seed, uint256 seed2, uint16 limit) public pure returns (uint16) {
+    function getRandomCosmetic(uint256 seed, uint256 seed2, uint16 limit) private pure returns (uint16) {
         return uint16(RandomUtil.randomSeededMinMax(0, limit, RandomUtil.combineSeeds(seed, seed2)));
     }
 
@@ -244,8 +244,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             require(balanceOf(to) < 4, "Recv has too many characters");
         }
 
-        // when not minting...
-        if(from != address(0)) {
+        // when not minting or burning...
+        if(from != address(0) && to != address(0)) {
             // only allow transferring a particular token every TRANSFER_COOLDOWN seconds
             require(lastTransferTimestamp[tokenId] < block.timestamp.sub(TRANSFER_COOLDOWN), "Transfer cooldown");
 

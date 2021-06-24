@@ -112,7 +112,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return tokens;
     }
 
-    function unpackFightDataAndDrainStamina(uint96 playerData)
+    function unpackFightData(uint96 playerData)
         public pure returns (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) {
 
         charTrait = uint8(playerData & 0xFF);
@@ -126,7 +126,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             isCharacterOwner(char)
             isWeaponOwner(wep) {
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightDataAndDrainStamina(characters.getFightDataAndDrainStamina(char, staminaCostFight));
+            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
@@ -204,15 +204,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint16 xp = getXpGainForFight(playerFightPower, targetPower);
         uint256 tokens = usdToSkill(getTokenGainForFight(targetPower));
 
-        if(playerRoll >= monsterRoll) {
-            tokenRewards[msg.sender] = tokenRewards[msg.sender].add(tokens);
-            xpRewards[char] = SafeMath.add(xpRewards[char], xp);
+        if(playerRoll < monsterRoll) {
+            tokens = 0;
+            xp = 0;
         }
-        else {
-            // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
-            tokenRewards[msg.sender] = tokenRewards[msg.sender].add(0);
-            xpRewards[char] = SafeMath.add(xpRewards[char], 0);
-        }
+
+        // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
+        tokenRewards[msg.sender] += tokens;
+        xpRewards[char] += xp;
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
@@ -286,7 +285,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function getTargetsInternal(uint24 playerPower,
         uint64 staminaTimestamp,
         uint256 currentHour
-    ) public pure returns (uint32[4] memory) {
+    ) private pure returns (uint32[4] memory) {
         // 4 targets, roll powers based on character + weapon power
         // trait bonuses not accounted for
         // targets expire on the hour

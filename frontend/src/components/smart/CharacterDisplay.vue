@@ -42,7 +42,7 @@
         class="bar stamina"
         :current="currentCharacterStamina"
         :max="maxStamina"
-        v-tooltip="'Regenerates 1 point every 5 minutes'"
+        v-tooltip="toolTipHtml"
         faIcon="fa-bolt"
         primaryColor="#ec4b4b"
         altText="Stamina"
@@ -73,10 +73,14 @@ export default {
       'currentCharacter',
       'currentCharacterStamina',
       'getCharacterName',
+      'timeUntilCurrentCharacterHasMaxStamina'
     ]),
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
+    toolTipHtml(): string {
+      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + this.timeUntilCurrentCharacterHasMaxStamina;
+    }
   },
 
   data() {

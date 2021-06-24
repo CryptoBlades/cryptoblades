@@ -176,7 +176,7 @@ export function createStore(web3: Web3) {
       },
 
       getExchangeUrl() {
-        return 'https://dex.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
+        return 'https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
       },
 
       ownCharacters(state, getters) {
@@ -239,6 +239,27 @@ export function createStore(web3: Web3) {
 
       currentCharacterStamina(state) {
         return state.currentCharacterId === null ? 0 : state.characterStaminas[state.currentCharacterId];
+      },
+
+      timeUntilCurrentCharacterHasMaxStamina(state, getters) {
+        const currentStamina = getters.currentCharacterStamina;
+        if (!currentStamina) {
+          return '';
+        }
+        const date = new Date();
+
+        if (state.maxStamina !== currentStamina) {
+          date.setTime(date.getTime() + ((state.maxStamina - currentStamina) * (5 * 60000)));
+        }
+
+        return(`${
+          (date.getMonth()+1).toString().padStart(2, '0')}/${
+          date.getDate().toString().padStart(2, '0')}/${
+          date.getFullYear().toString().padStart(4, '0')} ${
+          date.getHours().toString().padStart(2, '0')}:${
+          date.getMinutes().toString().padStart(2, '0')}:${
+          date.getSeconds().toString().padStart(2, '0')}`
+        );
       },
 
       allStaminas(state) {

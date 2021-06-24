@@ -95,9 +95,9 @@
               <big-button
                 class="encounter-button"
                 :mainText="`Fight!`"
-                :subText="`Power ${e.power}\nChance of Victory: ${getWinChance(e.power)}`"
+                :subText="`Power ${e.power}\nChance of Victory: ${getWinChance(e.power, e.trait)}`"
                 v-tooltip="'Cost 40 stamina'"
-                :disabled="timeMinutes === 59 && timeSeconds >= 30"
+                :disabled="(timeMinutes === 59 && timeSeconds >= 30) || isLoadingTargets"
                 @click="onClickEncounter(e)"
               />
 
@@ -191,6 +191,9 @@ export default {
 
   watch: {
     async selections([characterId, weaponId]) {
+      if(!this.ownWeapons.find((weapon) => weapon.id === weaponId)) {
+        this.selectedWeaponId = null;
+      }
       await this.fetchTargets({ characterId, weaponId });
     },
   },
@@ -209,9 +212,10 @@ export default {
     getWinChance(enemyPower, enemyElement) {
       const characterPower = CharacterPower(this.currentCharacter.level).replace(',', '');
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const weaponElement = parseInt(WeaponElement[this.ownWeapons[this.selectedWeaponId].element], 10);
-      const weaponMultiplier = GetTotalMultiplierForTrait(this.ownWeapons[this.selectedWeaponId], playerElement);
-      const totalPower = characterPower * weaponMultiplier;
+      const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id ===this.selectedWeaponId);
+      const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
+      const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
+      const totalPower = ((characterPower * weaponMultiplier) + selectedWeapon.bonusPower);
       const totalMultiplier = 1 + 0.075 * ((weaponElement === playerElement ? 1 : 0) + this.getElementAdvantage(playerElement, enemyElement));
       const playerMin = (totalPower * totalMultiplier) * 0.9;
       const playerMax = (totalPower * totalMultiplier) * 1.1;
@@ -221,8 +225,8 @@ export default {
       const enemyRange = (enemyMax - enemyMin);
       let rollingTotal = 0;
       // shortcut: if it is impossible for one side to win, just say so
-      if (playerMin > enemyMax) return 100;
-      if (playerMax < enemyMin) return 0;
+      if (playerMin > enemyMax) return 'Very Likely';
+      if (playerMax < enemyMin) return 'Unlikely';
 
       // case 1: player power is higher than enemy power
       if (playerMin >= enemyMin){
@@ -260,6 +264,12 @@ export default {
         return;
       }
 
+      // Force a quick refresh of targets
+      await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
+      // If the targets list no longer contains the chosen target, return so a new target can be chosen
+      if (!this.targets.find((target) => target.original === targetToFight.original)) {
+        return;
+      }
       try {
         this.waitingResults = true;
         const results = await this.doEncounter({
