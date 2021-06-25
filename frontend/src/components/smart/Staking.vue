@@ -120,7 +120,7 @@
             <!-- <ImageVue :src="'loading.svg'" :size="'45px'" /> -->
             Loading...
           </span>
-          <span v-else>
+          <span class="gold-text" v-else>
             {{ submitButtonLabel }}
           </span>
         </button>
@@ -775,4 +775,9 @@ export default {
 .height-minimized {
   height: 0;
 }
+
+.gold-text {
+  color: #9e8a57;
+}
+
 </style>
