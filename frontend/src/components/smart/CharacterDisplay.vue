@@ -87,19 +87,25 @@ export default {
       'currentCharacterStamina',
       'getCharacterName',
       'charactersWithIds',
+      'ownCharacters',
       'timeUntilCurrentCharacterHasMaxStamina'
     ]),
+
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
+
     toolTipHtml(): string {
       return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + this.timeUntilCurrentCharacterHasMaxStamina;
     },
 
-    filteredCharactersForList() {
-      let items = this.displayCharacters;
+    filteredCharactersForList(): any {
+      let items: any  = this.ownCharacters;
 
-      items = items.filter(x => x.id !== this.currentCharacter.id);
+      items = items.filter((x: any) => x.id !== this.currentCharacterId);
+
+      if (items.length >= 4) items = items.filter((x: any) => x.id !== 0);
+
       return items;
     }
   },
@@ -122,6 +128,7 @@ export default {
 <style scoped>
 .root {
   display: inline-flex;
+  width: 100%;
 }
 
 .character-portrait {
@@ -167,5 +174,30 @@ export default {
 
 .power-hint {
   font-size: 1.3rem;
+}
+
+div.character-list{
+  width: 70%;
+}
+
+ul.character-list{
+  float: right;
+  margin: 0px;
+}
+
+li.character{
+  background: rgba(255, 255, 255, 0.1);
+  padding: 7px 4px 2px;
+  margin: 5px;
+  vertical-align: middle;
+}
+
+.name-list {
+  bottom: 20px;
+  margin: auto;
+  float: left;
+  font-size: 0.9em;
+  text-align: center;
+  color: #9e8a57;
 }
 </style>
