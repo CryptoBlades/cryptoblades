@@ -1,9 +1,5 @@
 <template>
   <div>
-    <span v-if="showFilters && showLimit > 0 && filteredCharacters.length >= showLimit">
-      <h4>More than {{showLimit}} results, try adjusting the filters</h4>
-    </span>
-
     <div class="filters row mt-2 pl-2" v-if="showFilters">
       <div class="col-2">
         <strong>Level</strong>
@@ -43,8 +39,12 @@
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
+import Vue from 'vue';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
+
+Vue.directive('visible', (el, bind) => {
+  el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
 
 export default {
   props: {
@@ -139,6 +139,7 @@ export default {
     saveFilters() {
       localStorage.setItem('character-levelfilter', this.levelFilter);
       localStorage.setItem('character-elementfilter', this.elementFilter);
+      window.dispatchEvent(new CustomEvent('character-filters-changed', {}));
     }
   },
 

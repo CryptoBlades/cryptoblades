@@ -10,6 +10,8 @@ import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
+import "./cryptoblades.sol";
+import "./weapons.sol";
 
 // *****************************************************************************
 // *** NOTE: almost all uses of _tokenAddress in this contract are UNSAFE!!! ***
@@ -28,16 +30,25 @@ contract NFTMarket is
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
+    CryptoBlades internal game;
+    Weapons internal weapons;
+    Characters internal characters;
+
     // ############
     // Initializer
     // ############
-    function initialize(IERC20 _skillToken, address _taxRecipient)
+    function initialize(IERC20 _skillToken, address _taxRecipient, address _gameContract)
         public
         initializer
     {
         __AccessControl_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        game = CryptoBlades(_gameContract);
+        // maybe just use extra params for NFT addresses?
+        characters = Characters(game.characters());
+        weapons = Weapons(game.weapons());
 
         skillToken = _skillToken;
 
@@ -233,6 +244,66 @@ contract NFTMarket is
         return tokens;
     }
 
+    function getWeaponListingIDsPage(IERC721 _tokenAddress, uint8 _limit, uint256 _pageNumber, uint8 _trait, uint8 _stars)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
+        uint256 matchingWeaponsAmount = getNumberOfWeaponListings(_tokenAddress, _trait, _stars);
+        uint256 limit = _limit * (_pageNumber + 1);
+        uint256 tokensSize = matchingWeaponsAmount >= limit ? _limit : matchingWeaponsAmount - (_limit * _pageNumber);
+        uint256[] memory tokens = new uint256[](tokensSize);
+
+        uint8 weaponTrait;
+        uint8 weaponStars;        
+        uint256 counter = 0;
+        uint8 tokenIterator = 0;
+        for (uint256 i = 0; i < set.length() && counter < limit; i++) {
+            weaponTrait = weapons.getTrait(set.at(i));
+            weaponStars = weapons.getStars(set.at(i));
+            if((_trait == 255 || weaponTrait == _trait) && (_stars == 255 || weaponStars == _stars)) {
+                if(counter >= limit - _limit) {
+                    tokens[tokenIterator] = set.at(i);
+                    tokenIterator++;
+                }
+                counter++;
+            }
+        }
+        
+        return tokens;
+    }
+
+    function getCharacterListingIDsPage(IERC721 _tokenAddress, uint8 _limit, uint256 _pageNumber, uint8 _trait, uint8 _minLevel, uint8 _maxLevel)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
+        uint256 matchingCharactersAmount = getNumberOfCharacterListings(_tokenAddress, _trait, _minLevel, _maxLevel);
+        uint256 limit = _limit * (_pageNumber + 1);
+        uint256 tokensSize = matchingCharactersAmount >= limit ? _limit : matchingCharactersAmount - (_limit * _pageNumber);
+        uint256[] memory tokens = new uint256[](tokensSize);
+
+        uint8 characterTrait;
+        uint8 characterLevel;        
+        uint256 counter = 0;
+        uint8 tokenIterator = 0;
+        for (uint256 i = 0; i < set.length() && counter < limit; i++) {
+            characterTrait = characters.getTrait(set.at(i));
+            characterLevel = characters.getLevel(set.at(i));
+             if((_trait == 255 || characterTrait == _trait) && (_minLevel == 255 || _maxLevel == 255 || (characterLevel >= _minLevel && characterLevel <= _maxLevel))) {
+                if(counter >= limit - _limit) {
+                    tokens[tokenIterator] = set.at(i);
+                    tokenIterator++;
+                }
+                counter++;
+            }
+        }
+        
+        return tokens;
+    }
+
     function getNumberOfListingsBySeller(
         IERC721 _tokenAddress,
         address _seller
@@ -274,6 +345,44 @@ contract NFTMarket is
         returns (uint256)
     {
         return listedTokenIDs[address(_tokenAddress)].length();
+    }
+
+    function getNumberOfCharacterListings(IERC721 _tokenAddress, uint8 _trait, uint8 _minLevel, uint8 _maxLevel)
+        public
+        view
+        returns (uint256)
+    {
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[address(_tokenAddress)];
+        uint256 counter = 0;
+        uint8 characterLevel;
+        uint8 characterTrait;
+        for(uint256 i = 0; i < listedTokens.length(); i++) {
+            characterLevel = characters.getLevel(listedTokens.at(i));
+            characterTrait = characters.getTrait(listedTokens.at(i));
+            if((_trait == 255 || characterTrait == _trait) && (_minLevel == 255 || _maxLevel == 255 || (characterLevel >= _minLevel && characterLevel <= _maxLevel))) {
+                counter++;
+            }
+        }
+        return counter;
+    }
+
+    function getNumberOfWeaponListings(IERC721 _tokenAddress, uint8 _trait, uint8 _stars)
+        public
+        view
+        returns (uint256)
+    {
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[address(_tokenAddress)];
+        uint256 counter = 0;
+        uint8 weaponTrait;
+        uint8 weaponStars;
+        for(uint256 i = 0; i < listedTokens.length(); i++) {
+            weaponTrait = weapons.getTrait(listedTokens.at(i));
+            weaponStars = weapons.getStars(listedTokens.at(i));
+            if((_trait == 255 || weaponTrait == _trait) && (_stars == 255 || weaponStars == _stars)) {
+                counter++;
+            }
+        }
+        return counter;
     }
 
     function getSellerPrice(IERC721 _tokenAddress, uint256 _id)

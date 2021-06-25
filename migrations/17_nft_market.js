@@ -13,5 +13,5 @@ module.exports = async function (deployer, network) {
     skillTokenAddress = SkillToken.address;
   }
 
-  await deployProxy(NFTMarket, [skillTokenAddress, CryptoBlades.address], { deployer });
+  await deployProxy(NFTMarket, [skillTokenAddress, CryptoBlades.address, CryptoBlades.address], { deployer });
 };

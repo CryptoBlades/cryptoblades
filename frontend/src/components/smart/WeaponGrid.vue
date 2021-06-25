@@ -1,9 +1,6 @@
 <template>
   <div>
-    <span v-if="showLimit > 0 && nonIgnoredWeapons.length >= showLimit">
-      <h4>More than {{showLimit}} results, try adjusting the filters</h4>
-    </span>
-    <div class="filters row mt-2 pl-2" v-if="displayWeapons.length > 0">
+    <div class="filters row mt-2 pl-2">
       <div class="col-sm-6 col-md-2">
         <strong>Stars</strong>
         <select class="form-control" v-model="starFilter" @change="saveFilters()">
@@ -56,6 +53,9 @@ interface StoreMappedGetters {
 interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
 }
+
+Vue.directive('visible', (el, bind) => {
+  el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
 
 export default Vue.extend({
   model: {
@@ -153,6 +153,7 @@ export default Vue.extend({
     saveFilters() {
       localStorage.setItem('weapon-starfilter', this.starFilter);
       localStorage.setItem('weapon-elementfilter', this.elementFilter);
+      window.dispatchEvent(new CustomEvent('weapon-filters-changed', {}));
     }
   },
 
