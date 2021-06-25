@@ -11,7 +11,7 @@
       <div class="starter-panel">
         <span class="starter-panel-heading">Metamask Not Detected</span>
         <div class="center">
-          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnbording" />
+          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" />
         </div>
       </div>
     </div>
@@ -31,7 +31,7 @@
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
             <li>
               2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br />
-              <a href="https://app.apeswap.finance/#/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab">Trade SKILL/BNB</a>
+              <a href="this.getExchangeUrl">Trade SKILL/BNB</a>
             </li>
             <li>3. Read the alert and select “I understand” and “Continue”</li>
             <li>
@@ -88,7 +88,7 @@ export default {
 
   computed: {
     ...mapState(['defaultAccount', 'currentNetworkId', 'currentCharacterId']),
-    ...mapGetters(['contracts', 'ownCharacters']),
+    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl']),
 
     canShowApp() {
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
@@ -133,7 +133,7 @@ export default {
     checkStorage() {
       this.canShowRewardsBar = !localStorage.getItem('rewards');
     },
-    async startOnbording() {
+    async startOnboarding() {
       const onboarding = new MetaMaskOnboarding();
       onboarding.startOnboarding();
     },
@@ -164,7 +164,7 @@ export default {
             ],
           });
         } catch (addError) {
-          console.log(addError);
+          console.error(addError);
         }
       }
 
@@ -177,18 +177,12 @@ export default {
               address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
               symbol: 'SKILL',
               decimals: 18,
-              image: 'http://placekitten.com/200/300',
+              image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
             },
           },
         });
-
-        if (wasAdded) {
-          console.log('Prepare thyself!');
-        } else {
-          console.log('Token not added!');
-        }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     },
   },
