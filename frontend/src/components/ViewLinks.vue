@@ -39,7 +39,7 @@
 
     <router-link :to="{ name: 'portal' }" exact class="nav-link">
       <li class="nav-item">
-        <span>Stake</span>
+        <span>Portal</span>
       </li>
     </router-link>
 
