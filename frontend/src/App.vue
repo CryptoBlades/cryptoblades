@@ -15,7 +15,7 @@
         </div>
       </div>
     </div>
-    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || ownCharacters.length === 0)">
+    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0'))">
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
