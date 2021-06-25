@@ -25,7 +25,7 @@
       }}</span>
       <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
       <span v-if="!isLoadingCharacter" class="subtext">
-        Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level)}} XP)
+        Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP)
       </span>
       <span v-if="!isLoadingCharacter" class="subtext">
         Power: {{CharacterPower(currentCharacter.level).toLocaleString()}}

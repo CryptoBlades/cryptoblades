@@ -35,5 +35,5 @@ export function RequiredXp(level: number) {
       xp += Math.floor((i-14) + 1);
     }
   }
-  return xp.toLocaleString();
+  return xp;
 }
