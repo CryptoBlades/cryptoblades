@@ -31,7 +31,7 @@
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
             <li>
               2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br />
-              <a href="this.getExchangeUrl">Trade SKILL/BNB</a>
+              <a href="getExchangeUrl">Trade SKILL/BNB</a>
             </li>
             <li>3. Read the alert and select “I understand” and “Continue”</li>
             <li>
@@ -169,7 +169,7 @@ export default {
       }
 
       try {
-        const wasAdded = await web3.request({
+        await web3.request({
           method: 'wallet_watchAsset',
           params: {
             type: 'ERC20',
