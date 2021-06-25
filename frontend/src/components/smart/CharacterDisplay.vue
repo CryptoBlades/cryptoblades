@@ -28,7 +28,7 @@
         Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level)}} XP)
       </span>
       <span v-if="!isLoadingCharacter" class="subtext">
-        Power: {{CharacterPower(currentCharacter.level)}}
+        Power: {{CharacterPower(currentCharacter.level).toLocaleString()}}
         <Hint class="power-hint" text="Power increases by 10 every level up,
           <br>and multiplied every 10 level ups
           <br>Level 1: 1000

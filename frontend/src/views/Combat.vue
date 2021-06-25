@@ -97,7 +97,7 @@
                 :mainText="`Fight!`"
                 :subText="`Power ${e.power}\nChance of Victory: ${getWinChance(e.power, e.trait)}`"
                 v-tooltip="'Cost 40 stamina'"
-                :disabled="(timeMinutes === 59 && timeSeconds >= 30) || isLoadingTargets"
+                :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
                 @click="onClickEncounter(e)"
               />
 
@@ -210,7 +210,8 @@ export default {
         +this.formattedSkill(this.fightBaseline)+' per 1000 power';
     },
     getWinChance(enemyPower, enemyElement) {
-      const characterPower = CharacterPower(this.currentCharacter.level).replace(',', '');
+      const characterPower = CharacterPower(this.currentCharacter.level);
+      console.log(characterPower);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
       const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id ===this.selectedWeaponId);
       const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
