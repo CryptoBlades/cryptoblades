@@ -113,6 +113,15 @@ export default {
     async currentCharacterId() {
       await this.updateCurrentCharacterStamina();
     },
+    $route(to) {
+      // react to route changes
+      window.gtag('event', 'page_view', {
+        page_title:  to.name,
+        page_location: to.fullPath,
+        page_path: to.path,
+        send_to: 'G-C5RLX74PEW'
+      });
+    }
   },
 
   methods: {
@@ -141,6 +150,12 @@ export default {
     this.checkStorage();
 
     Events.$on('setting:rewards', () => this.checkStorage());
+
+    document.body.addEventListener('click', (e) => {
+      if(e.target.nodeName==='BUTTON') {
+        window.gtag('event', 'button_clicked', {method: 'Google'});
+      }
+    });
   },
 
   async created() {
