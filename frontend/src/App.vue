@@ -7,11 +7,12 @@
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
-    <div class="fullscreen-warning" v-if="showMetamaskWarning">
+    <div class="fullscreen-warning" v-if="showMetamaskWarning || showNetworkError">
       <div class="starter-panel">
-        <span class="starter-panel-heading">Metamask Not Detected</span>
+        <span class="starter-panel-heading">Metamask Not Detected Or Incorrect Network</span>
         <div class="center">
-          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" />
+          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning"/>
+          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError"/>
         </div>
       </div>
     </div>
@@ -20,7 +21,7 @@
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
-        <big-button class="button" :mainText="`Add SKILL Tokens to MetaMask`" @click="configureMetaMask" />
+        <big-button class="button" :mainText="`Configure MetaMask`" @click="configureMetaMask" />
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>
@@ -48,15 +49,6 @@
             <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a>
           </p>
         </div>
-      </div>
-    </div>
-    <div class="fullscreen-warning" v-if="showNetworkError">
-      <div>
-        You are currently on the incorrect network.
-      </div>
-      <div>
-        Please switch to <span class="bold">{{ expectedNetworkName }}</span
-        >.
       </div>
     </div>
   </div>
