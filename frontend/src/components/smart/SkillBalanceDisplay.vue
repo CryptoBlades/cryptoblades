@@ -6,7 +6,13 @@
 
     <div class="balance-container">
       <strong class="mr-2">Balance</strong>
-      <span class="balance">{{ formattedSkillBalance }}</span></div>
+      <span class="balance">{{ formattedSkillBalance }}</span>
+    </div>
+
+    <div class="balance-container">
+      <strong class="mr-2">In-Game-Only Funds</strong>
+      <span class="balance">{{ formattedInGameOnlyFunds }}</span>
+    </div>
   </div>
 </template>
 
@@ -16,10 +22,9 @@ import { Accessors } from 'vue/types/options';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
+import { IState } from '@/interfaces';
 
-interface StoreMappedState {
-  skillBalance: string;
-}
+type StoreMappedState = Pick<IState, 'skillBalance' | 'skillRewards' | 'xpRewards' | 'inGameOnlyFunds' | 'ownedCharacterIds'>;
 
 interface StoreMappedActions {
   addMoreSkill(skillToAdd: string): Promise<void>;
@@ -27,13 +32,21 @@ interface StoreMappedActions {
 
 export default Vue.extend({
   computed: {
-    ...(mapState(['skillBalance', 'skillRewards', 'xpRewards', 'ownedCharacterIds']) as Accessors<StoreMappedState>),
+    ...(mapState([
+      'skillBalance', 'skillRewards', 'xpRewards',
+      'inGameOnlyFunds', 'ownedCharacterIds'
+    ]) as Accessors<StoreMappedState>),
     ...mapGetters([
       'getExchangeUrl'
     ]),
 
     formattedSkillBalance(): string {
       const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
+      return `${new BN(skillBalance).toFixed(4)} SKILL`;
+    },
+
+    formattedInGameOnlyFunds(): string {
+      const skillBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
       return `${new BN(skillBalance).toFixed(4)} SKILL`;
     }
   },

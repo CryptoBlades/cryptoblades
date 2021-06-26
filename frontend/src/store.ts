@@ -102,6 +102,7 @@ export function createStore(web3: Web3) {
       skillBalance: '0',
       skillRewards: '0',
       xpRewards: {},
+      inGameOnlyFunds: '0',
       ownedCharacterIds: [],
       ownedWeaponIds: [],
       maxStamina: 0,
@@ -323,6 +324,10 @@ export function createStore(web3: Web3) {
         }
       },
 
+      updateInGameOnlyFunds(state, { inGameOnlyFunds }: Pick<IState, 'inGameOnlyFunds'>) {
+        state.inGameOnlyFunds = inGameOnlyFunds;
+      },
+
       updateFightGasOffset(state: IState, { fightGasOffset }: { fightGasOffset: string }) {
         state.fightGasOffset = fightGasOffset;
       },
@@ -530,6 +535,21 @@ export function createStore(web3: Web3) {
             })
           );
 
+          subscriptions.push(
+            state.contracts().CryptoBlades!.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+
+              console.log('InGameOnlyFundsGiven', data);
+
+              await Promise.all([
+                dispatch('fetchInGameOnlyFunds')
+              ]);
+            })
+          );
+
           const { NFTMarket } = state.contracts();
 
           if(NFTMarket) {
@@ -664,16 +684,34 @@ export function createStore(web3: Web3) {
         await dispatch('fetchCharacters', ownedCharacterIds);
       },
 
-      async fetchSkillBalance({ state, commit }) {
-        if(!state.defaultAccount) return;
+      async fetchSkillBalance({ state, commit, dispatch }) {
+        const { defaultAccount } = state;
+        if(!defaultAccount) return;
 
-        const skillBalance = await state.contracts().SkillToken.methods
-          .balanceOf(state.defaultAccount)
+        await Promise.all([
+          (async () => {
+            const skillBalance = await state.contracts().SkillToken.methods
+              .balanceOf(defaultAccount)
+              .call(defaultCallOptions(state));
+
+            if(state.skillBalance !== skillBalance) {
+              commit('updateSkillBalance', { skillBalance });
+            }
+          })(),
+          dispatch('fetchInGameOnlyFunds')
+        ]);
+      },
+
+      async fetchInGameOnlyFunds({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const inGameOnlyFunds = await CryptoBlades.methods
+          .inGameOnlyFunds(state.defaultAccount)
           .call(defaultCallOptions(state));
 
-        if(state.skillBalance !== skillBalance) {
-          commit('updateSkillBalance', { skillBalance });
-        }
+        const payload: Pick<IState, 'inGameOnlyFunds'> = { inGameOnlyFunds };
+        commit('updateInGameOnlyFunds', payload);
       },
 
       async addMoreSkill({ state, dispatch }, skillToAdd: string) {
@@ -812,11 +850,12 @@ export function createStore(web3: Web3) {
       },
 
       async mintCharacter({ state, dispatch }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         await approveFee(
           state.contracts().CryptoBlades!,
           state.contracts().SkillToken,
+          state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
@@ -832,11 +871,12 @@ export function createStore(web3: Web3) {
       },
 
       async mintWeapon({ state, dispatch }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         await approveFee(
           state.contracts().CryptoBlades!,
           state.contracts().SkillToken,
+          state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
@@ -854,11 +894,12 @@ export function createStore(web3: Web3) {
       },
 
       async reforgeWeapon({ state, dispatch }, { burnWeaponId, reforgeWeaponId }) {
-        if(featureFlagStakeOnly || !featureFlagReforging) return;
+        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
 
         await approveFee(
           state.contracts().CryptoBlades!,
           state.contracts().SkillToken,
+          state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
