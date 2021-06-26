@@ -210,7 +210,7 @@ export default {
         +this.formattedSkill(this.fightBaseline)+' per 1000 power';
     },
     getWinChance(enemyPower, enemyElement) {
-      const characterPower = CharacterPower(this.currentCharacter.level).replace(',', '');
+      const characterPower = CharacterPower(this.currentCharacter.level);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
       const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id ===this.selectedWeaponId);
       const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);

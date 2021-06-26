@@ -25,10 +25,10 @@
       }}</span>
       <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
       <span v-if="!isLoadingCharacter" class="subtext">
-        Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level)}} XP)
+        Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP)
       </span>
       <span v-if="!isLoadingCharacter" class="subtext">
-        Power: {{CharacterPower(currentCharacter.level)}}
+        Power: {{CharacterPower(currentCharacter.level).toLocaleString()}}
         <Hint class="power-hint" text="Power increases by 10 every level up,
           <br>and multiplied every 10 level ups
           <br>Level 1: 1000
@@ -42,17 +42,30 @@
         class="bar stamina"
         :current="currentCharacterStamina"
         :max="maxStamina"
-        v-tooltip="'Regenerates 1 point every 5 minutes'"
+        v-tooltip="toolTipHtml"
         faIcon="fa-bolt"
         primaryColor="#ec4b4b"
         altText="Stamina"
       />
     </div>
+	<div class="character-list">
+    <ul class="character-list">
+      <li
+        class="character"
+        v-for="c in filteredCharactersForList"
+        :key="c.id"
+        @click="setCurrentCharacter(c.id)"
+      >
+      <div class="name-list"
+      >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
+      </li>
+    </ul>
+	</div>
   </div>
 </template>
 
 <script lang="ts">
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters, mapState, mapMutations } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import SmallBar from '../SmallBar.vue';
 import CharacterArt from '../CharacterArt.vue';
@@ -68,15 +81,33 @@ export default {
   },
 
   computed: {
-    ...mapState(['maxStamina', 'currentCharacterId']),
+    ...mapState(['maxStamina', 'currentCharacterId', 'ownedCharacterIds']),
     ...mapGetters([
       'currentCharacter',
       'currentCharacterStamina',
       'getCharacterName',
+      'charactersWithIds',
+      'ownCharacters',
+      'timeUntilCurrentCharacterHasMaxStamina'
     ]),
+
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
+
+    toolTipHtml(): string {
+      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + this.timeUntilCurrentCharacterHasMaxStamina;
+    },
+
+    filteredCharactersForList(): any {
+      let items: any  = this.ownCharacters;
+
+      items = items.filter((x: any) => x.id !== this.currentCharacterId);
+
+      if (items.length >= 4) items = items.filter((x: any) => x.id !== 0);
+
+      return items;
+    }
   },
 
   data() {
@@ -86,6 +117,7 @@ export default {
   },
 
   methods: {
+    ...mapMutations(['setCurrentCharacter']),
     getCharacterArt,
     CharacterPower,
     RequiredXp,
@@ -96,6 +128,7 @@ export default {
 <style scoped>
 .root {
   display: inline-flex;
+  width: 100%;
 }
 
 .character-portrait {
@@ -141,5 +174,31 @@ export default {
 
 .power-hint {
   font-size: 1.3rem;
+}
+
+div.character-list{
+  width: 70%;
+}
+
+ul.character-list{
+  float: right;
+  margin: 0px;
+}
+
+li.character{
+  background: rgba(255, 255, 255, 0.1);
+  padding: 7px 4px 2px;
+  margin: 5px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.name-list {
+  bottom: 20px;
+  margin: auto;
+  float: left;
+  font-size: 0.9em;
+  text-align: center;
+  color: #9e8a57;
 }
 </style>

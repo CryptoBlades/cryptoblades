@@ -211,7 +211,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData()">
+      <b-tab @click="clearData();loadMarketTaxes()">
         <template #title>
           List NFTs
           <hint class="hint" text="When you list an NFT for sale, it is transferred to the<br>market until someone buys it or you cancel the sale" />
@@ -237,12 +237,14 @@
                   variant="primary"
                   v-if="activeType === 'weapon'"
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
-                  @click="addListingForNft()">List Weapon</b-button>
+                  @click="addListingForNft()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
+                  v-tooltip.bottom="weaponMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
-                  @click="addListingForNft()">List Character</b-button>
+                  @click="addListingForNft()">List Character <b-icon-question-circle :hidden=!characterMarketTax
+                  v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
               </div>
 
               <div class="col">
@@ -288,6 +290,7 @@
 <script lang="ts">
 import assert from 'assert';
 import Vue from 'vue';
+import { BootstrapVueIcons } from 'bootstrap-vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import Hint from '../components/Hint.vue';
@@ -303,6 +306,8 @@ type WeaponId = string;
 type CharacterId = string;
 type NftId = WeaponId | CharacterId;
 
+Vue.use(BootstrapVueIcons);
+
 interface Data {
   activeType: SellType;
   search: string;
@@ -313,6 +318,8 @@ interface Data {
   marketOutcome: string | null;
   waitingMarketOutcome: boolean;
   nftPricesById: Record<string, string>;
+  characterMarketTax: string;
+  weaponMarketTax: string ;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -350,6 +357,8 @@ export default Vue.extend({
       marketOutcome: null,
       waitingMarketOutcome: false,
       nftPricesById: {},
+      characterMarketTax: '',
+      weaponMarketTax: '',
     } as Data;
   },
 
@@ -422,6 +431,19 @@ export default Vue.extend({
       this.marketOutcome = null;
       this.waitingMarketOutcome = false;
       this.nftPricesById = {};
+    },
+
+    async loadMarketTaxes() {
+      this.characterMarketTax = this.characterMarketTax || await this.getMarketTax(this.Characters.options.address) as string;
+      this.weaponMarketTax = this.weaponMarketTax || await this.getMarketTax(this.Weapons.options.address) as string;
+    },
+
+    async getMarketTax(contractAddress: string) {
+      if(!contractAddress) return;
+
+      return await this.fetchMarketTax({
+        nftContractAddr: contractAddress,
+      });
     },
 
     async lookupNftPrice(nftId: NftId) {
@@ -503,11 +525,19 @@ export default Vue.extend({
 
       this.waitingMarketOutcome = true;
 
-      const results = await this.purchaseMarketListing({
+      const results: any = await this.purchaseMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
         maxPrice: price
       });
+
+      const results2: any  = await this.fetchAllMarketNftIds({
+        nftContractAddr: this.contractAddress
+      });
+
+      this.allSearchResults = results2;
+
+      this.allSearchResults = Array.from(this.allSearchResults).filter((x: any) => x.id !== this.selectedNftId);
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully purchased '
