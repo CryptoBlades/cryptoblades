@@ -391,7 +391,7 @@ div.encounter.text-center{
   width: 50%;
 }
 
-@media only screen and (max-width: 960px) {
+@media only screen and (max-width: 900px) {
 
   div.encounter.text-center{
     flex-basis: 0 !important;
