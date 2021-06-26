@@ -47,6 +47,7 @@
               ></b-pagination>
 
               <weapon-grid
+                v-on:weapon-filters-changed="searchAllWeaponListings(0)"
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :weaponIds="allSearchResults"
@@ -63,6 +64,7 @@
               </weapon-grid>
 
               <character-list
+                v-on:character-filters-changed="searchAllCharacterListings(0)"
                 v-if="activeType === 'character'"
                 :showFilters="true"
                 :showGivenCharacterIds="true"
@@ -349,11 +351,6 @@ interface Data {
   weaponShowLimit: number;
   allListingsAmount: number;
   currentPage: number;
-  weaponTraitFilter: number;
-  weaponStarsFilter: number;
-  characterTraitFilter: number;
-  characterMinLevelFilter: number;
-  characterMaxLevelFilter: number;
   browseTabActive: boolean;}
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -407,11 +404,6 @@ export default Vue.extend({
       weaponShowLimit: 60,
       allListingsAmount: 0,
       currentPage: 1,
-      weaponTraitFilter: 255,
-      weaponStarsFilter: 255,
-      characterTraitFilter: 255,
-      characterMinLevelFilter: 255,
-      characterMaxLevelFilter: 255,
       browseTabActive: true    } as Data;
   },
 
@@ -458,14 +450,6 @@ export default Vue.extend({
         ? (this.transferCooldownOfWeaponId(+this.selectedNftId) > 0)
         : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
     },
-
-    characterLevelFilter() {
-      return localStorage.getItem('character-levelFilter');
-    },
-
-    characterElementFilter() {
-      return localStorage.getItem('character-elementFilter');
-    }
   },
 
   methods: {
@@ -639,18 +623,18 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
       this.allListingsAmount = await this.fetchNumberOfCharacterListings({
         nftContractAddr: this.contractAddress,
-        trait: traitNameToNumber(localStorage.getItem('character-elementfilter') as string),
-        minLevel: localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) - 1: 255,
-        maxLevel: localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) + 8 : 255,
+        trait: this.characterTraitFilter(),
+        minLevel: this.characterMinLevelFilter(),
+        maxLevel: this.characterMaxLevelFilter()
       });
 
       const results = await this.fetchAllMarketCharacterNftIdsPage({
         nftContractAddr: this.contractAddress,
         limit: this.characterShowLimit || defaultLimit,
         pageNumber: page,
-        trait: traitNameToNumber(localStorage.getItem('character-elementfilter') as string),
-        minLevel: localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) - 1 : 255,
-        maxLevel: localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) + 8 : 255,
+        trait: this.characterTraitFilter(),
+        minLevel: this.characterMinLevelFilter(),
+        maxLevel: this.characterMaxLevelFilter()
       });
 
       // searchResultsOwned does not mesh with this function
@@ -658,6 +642,7 @@ export default Vue.extend({
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
       this.searchResultsOwned = false; // temp
       this.allSearchResults = results;
+      console.log(this.allSearchResults.length);
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = null;
@@ -669,16 +654,16 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
       this.allListingsAmount = await this.fetchNumberOfWeaponListings({
         nftContractAddr: this.contractAddress,
-        trait: traitNameToNumber(localStorage.getItem('weapon-elementfilter') as string),
-        stars: localStorage.getItem('weapon-starfilter') ? +(localStorage.getItem('weapon-starfilter') as string) - 1 : 255
+        trait: this.weaponTratFilter(),
+        stars: this.weaponStarFilter()
       });
 
       const results = await this.fetchAllMarketWeaponNftIdsPage({
         nftContractAddr: this.contractAddress,
         limit: this.weaponShowLimit || defaultLimit,
         pageNumber: page,
-        trait: traitNameToNumber(localStorage.getItem('weapon-elementfilter') as string),
-        stars: localStorage.getItem('weapon-starfilter') ? +(localStorage.getItem('weapon-starfilter') as string) - 1 : 255
+        trait: this.weaponTratFilter(),
+        stars: this.weaponStarFilter()
       });
 
       // searchResultsOwned does not mesh with this function
@@ -767,15 +752,25 @@ export default Vue.extend({
         'ether'
       );
     },
-    characterFilterChangedHandler() {
-      if(this.browseTabActive) {
-        this.searchAllCharacterListings(0);
-      }
+
+    characterMinLevelFilter(): number {
+      return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) - 1 : 255;
     },
-    weaponFilterChangedHandler() {
-      if(this.browseTabActive) {
-        this.searchAllWeaponListings(0);
-      }
+
+    characterMaxLevelFilter(): number {
+      return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) + 8 : 255;
+    },
+
+    characterTraitFilter(): number {
+      return traitNameToNumber(localStorage.getItem('character-elementfilter') as string);
+    },
+
+    weaponTratFilter(): number {
+      return traitNameToNumber(localStorage.getItem('weapon-elementfilter') as string);
+    },
+
+    weaponStarFilter(): number {
+      return localStorage.getItem('weapon-starfilter') ? +(localStorage.getItem('weapon-starfilter') as string) - 1 : 255;
     }
   },
 
@@ -802,14 +797,7 @@ export default Vue.extend({
 
   mounted() {
     assert.ok(this.contracts.Weapons && this.contracts.Characters, 'Expected required contracts to be available');
-    window.addEventListener('weapon-filters-changed', this.weaponFilterChangedHandler);
-    window.addEventListener('character-filters-changed', this.characterFilterChangedHandler);
   },
-
-  beforeDestroy() {
-    window.removeEventListener('weapon-filters-changed', this.weaponFilterChangedHandler);
-    window.removeEventListener('character-filters-changed', this.characterFilterChangedHandler);
-  }
 });
 </script>
 

@@ -139,7 +139,7 @@ export default {
     saveFilters() {
       localStorage.setItem('character-levelfilter', this.levelFilter);
       localStorage.setItem('character-elementfilter', this.elementFilter);
-      window.dispatchEvent(new CustomEvent('character-filters-changed', {}));
+      this.$emit('character-filters-changed');
     }
   },
 

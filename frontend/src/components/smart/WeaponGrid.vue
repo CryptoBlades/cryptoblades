@@ -153,7 +153,7 @@ export default Vue.extend({
     saveFilters() {
       localStorage.setItem('weapon-starfilter', this.starFilter);
       localStorage.setItem('weapon-elementfilter', this.elementFilter);
-      window.dispatchEvent(new CustomEvent('weapon-filters-changed', {}));
+      this.$emit('weapon-filters-changed');
     }
   },
 
