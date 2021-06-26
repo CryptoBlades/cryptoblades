@@ -95,7 +95,8 @@
               <big-button
                 class="encounter-button"
                 :mainText="`Fight!`"
-                :subText="`Power ${e.power}\nChance of Victory: ${getWinChance(e.power, e.trait)}`"
+                :subText="`Power: ${e.power}`"
+				:subText2="`Chance to Win: ${getWinChance(e.power, e.trait)}`"
                 v-tooltip="'Cost 40 stamina'"
                 :disabled="(timeMinutes === 59 && timeSeconds >= 30) || isLoadingTargets"
                 @click="onClickEncounter(e)"
@@ -389,4 +390,5 @@ export default {
 div.encounter.text-center{
   flex-basis: auto !important;
 }
+
 </style>
