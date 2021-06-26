@@ -84,7 +84,7 @@
           </div>
 
           <div class="row mb-3" v-if="targets.length > 0">
-            <div class="col encounter text-center d-flex flex-column justify-content-center" v-for="(e, i) in targets" :key="i">
+            <div class="col-md-3 col-sm-12 encounter text-center d-flex flex-column justify-content-center" v-for="(e, i) in targets" :key="i">
               <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy">
 
               <div class="encounter-element">
@@ -384,11 +384,6 @@ export default {
   justify-content: center;
   width: 100%;
   font-size: 2em;
-}
-
-div.encounter.text-center{
-  flex-basis: auto !important;
-  width: 50%;
 }
 
 @media only screen and (max-width: 900px) {
