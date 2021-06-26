@@ -385,4 +385,19 @@ export default {
   width: 100%;
   font-size: 2em;
 }
+
+div.encounter.text-center{
+  flex-basis: auto !important;
+  width: 50%;
+}
+
+@media only screen and (max-width: 960px) {
+
+  div.encounter.text-center{
+    flex-basis: 0 !important;
+    width: 100%;
+  }
+
+}
+
 </style>
