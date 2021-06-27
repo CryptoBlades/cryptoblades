@@ -128,8 +128,7 @@ export default {
 
   data() {
     return {
-      traits: CharacterTrait,
-      isPlaza : false
+      traits: CharacterTrait
     };
   },
   methods: {
