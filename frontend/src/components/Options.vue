@@ -26,7 +26,7 @@
         Need Gas? Try our WAX Bridge, which will pay you .5% under market rate to sell your WAX for BNB!
     </b-modal>
     <b-modal class="centered-modal" ref="stake-suggestion-modal" title="Stake Skill"
-      @ok="goToStake()" ok-only ok-title="Go to Stake" >
+      @ok="$router.push('/stake')" ok-only ok-title="Go to Stake" >
         If you stake your SKILL now, we will give you a 10% bonus in SKILL that you can use in-game right away!
       <a href="#" @click="claimSkill(2)"> <br>No thanks, I'd rather {{ (this.currentWithdrawTax > 0)?"pay " +
         this.formattedTaxAmount + " in taxes and " : ""  }}forfeit my bonus </a>
@@ -45,7 +45,6 @@
 
 import Events from '../events';
 import { mapActions, mapState } from 'vuex';
-import createRouter from '@/router';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
 import { Accessors } from 'vue/types/options';
@@ -133,11 +132,6 @@ export default Vue.extend({
       else                  localStorage.removeItem('advanced');
 
       Events.$emit('setting:advanced', { value: this.hideAdvanced });
-    },
-
-    async goToStake() {
-      const router = createRouter();
-      router.push('/stake');
     },
 
     async onClaimTokens() {
