@@ -98,7 +98,7 @@
                 :subText="`Power: ${e.power}`"
 				:subText2="`Chance to Win: ${getWinChance(e.power, e.trait)}`"
                 v-tooltip="'Cost 40 stamina'"
-                :disabled="(timeMinutes === 59 && timeSeconds >= 30) || isLoadingTargets"
+                :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
                 @click="onClickEncounter(e)"
               />
 
