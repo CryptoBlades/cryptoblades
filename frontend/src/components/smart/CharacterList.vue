@@ -99,7 +99,7 @@ export default {
         }
 
         if(this.levelFilter) {
-          items = items.filter(x => x.level >= this.levelFilter - 1 && x.level <= this.levelFilter + 9);
+          items = items.filter(x => x.level >= this.levelFilter - 1 && x.level <= this.levelFilter + 8);
         }
 
         if(this.showLimit > 0 && items.length > this.showLimit) {
@@ -201,5 +201,14 @@ export default {
 
 .above-wrapper {
   padding-bottom: 0.5rem;
+}
+
+@media (max-width: 576px) {
+  .character-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 }
 </style>

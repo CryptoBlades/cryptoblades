@@ -2,12 +2,13 @@
   <b-button variant="primary" :disabled="disabled" class="button main-font dark-bg-text" @click="$emit('click')">
     <h1>{{ mainText }}</h1>
     <h2>{{ subText }}</h2>
+	<h3>{{ subText2 }}</h3>
   </b-button>
 </template>
 
 <script lang="ts">
 export default {
-  props: ['mainText', 'subText', 'disabled'],
+  props: ['mainText', 'subText', 'subText2', 'disabled'],
 };
 </script>
 
@@ -37,5 +38,16 @@ h1 {
 
 h2 {
   white-space: pre;
+}
+
+@media only screen and (min-width: 768px) {
+  div.encounter.text-center button h2{
+    font-size: x-large;
+  }
+}
+@media only screen and (min-width: 992px) {
+  div.encounter.text-center button h2{
+    font-size: xx-large;
+  }
 }
 </style>
