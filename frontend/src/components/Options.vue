@@ -66,7 +66,7 @@ interface Data {
   hideGraphics: boolean;
   hideRewards: boolean;
   hideAdvanced: boolean;
-  currentWithdrawTax: 0.14;
+  currentWithdrawTax: number;
 }
 
 
