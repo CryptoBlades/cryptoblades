@@ -202,4 +202,13 @@ export default {
 .above-wrapper {
   padding-bottom: 0.5rem;
 }
+
+@media (max-width: 576px) {
+  .character-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+}
 </style>
