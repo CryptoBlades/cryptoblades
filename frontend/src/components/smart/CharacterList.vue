@@ -99,7 +99,7 @@ export default {
         }
 
         if(this.levelFilter) {
-          items = items.filter(x => x.level >= this.levelFilter - 1 && x.level <= this.levelFilter + 9);
+          items = items.filter(x => x.level >= this.levelFilter - 1 && x.level <= this.levelFilter + 8);
         }
 
         if(this.showLimit > 0 && items.length > this.showLimit) {
