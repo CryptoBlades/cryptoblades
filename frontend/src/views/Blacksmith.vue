@@ -24,6 +24,7 @@
               variant="primary"
               v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
               @click="showReforge = true"
+              tagname="reforge_weapon"
               v-tooltip="'Burn weapons to buff selected weapon'">
               Reforge
             </b-button>
@@ -38,7 +39,7 @@
                 Cooling forge...
               </span>
 
-              <span v-if="!disableForge">
+              <span v-if="!disableForge" id="gtag-link-others" tagname="forge_weapon">
                 Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
               </span>
             </b-button>
@@ -56,6 +57,7 @@
             <b-button
               variant="primary"
               class="ml-3"
+              tagname="confirm_forge_weapon"
               @click="showReforgeConfirmation"
               :disabled="canReforge"
               v-tooltip="'Forge new weapon'">

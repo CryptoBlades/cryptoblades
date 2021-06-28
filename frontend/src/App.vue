@@ -153,7 +153,11 @@ export default {
 
     document.body.addEventListener('click', (e) => {
       if(e.target.nodeName==='BUTTON') {
-        window.gtag('event', 'button_clicked', {method: 'Google'});
+        window.gtag('event', 'button_clicked', {clickInfo: e.target.getAttribute('tagname')});
+      }
+
+      if (e.target.id === 'gtag-link-others') { // capture clickable elements
+        window.gtag('event', 'button_clicked', {clickInfo: e.target.getAttribute('tagname') });
       }
     });
   },

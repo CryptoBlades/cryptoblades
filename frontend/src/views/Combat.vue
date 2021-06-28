@@ -73,7 +73,7 @@
                   v-if="selectedWeaponId"
                   variant="primary"
                   class="ml-3"
-                  @click="selectedWeaponId = null">
+                  @click="selectedWeaponId = null"  id="gtag-link-others" tagname="choose_weapon">
                   Choose New Weapon
                 </b-button>
               </div>

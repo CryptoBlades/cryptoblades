@@ -8,18 +8,20 @@
     <b-nav-item
       class="ml-3"
       :disabled="!canClaimTokens"
-      @click="onClaimTokens">
+      @click="onClaimTokens"><!-- moved gtag-link below b-nav-item -->
+      <span id="gtag-link-others" tagname="claim_skill">
         <strong>SKILL</strong> {{ formattedSkillReward }}
         <strong>Early Withdraw Tax</strong> 0%
         <strong>Time since last withdraw</strong> n/a
+      </span>
     </b-nav-item>
 
     <b-nav-item
       class="ml-3"
       :disabled="!canClaimXp"
       @click="onClaimXp">
-
-        <strong>XP</strong> {{ formattedXpRewards }}
+        <span id="gtag-link-others" tagname="claim_xp">
+        <strong>XP</strong> {{ formattedXpRewards }}</span>
     </b-nav-item>
   </b-navbar>
 </template>

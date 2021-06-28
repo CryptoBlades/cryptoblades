@@ -1,7 +1,7 @@
 <template>
   <b-navbar-nav>
     <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
-    variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'"/>
+    variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'" />
 
     <b-nav-item-dropdown right>
       <template #button-content>
@@ -10,7 +10,7 @@
 
       <b-dropdown-item
         :disabled="!canClaimTokens"
-        @click="onClaimTokens">
+        @click="onClaimTokens" id="gtag-link-others" tagname="claim_skill">
           SKILL
           <div class="pl-3">{{ formattedSkillReward }}</div>
           <div class="pl-3">Early withdraw tax: 0%</div>
@@ -19,7 +19,7 @@
 
       <b-dropdown-item
         :disabled="!canClaimXp"
-        @click="onClaimXp">
+        @click="onClaimXp" id="gtag-link-others" tagname="claim_xp">
           XP <div class="pl-3" v-for="(reward, index) in formattedXpRewards" :key="index">{{ reward }}</div>
         </b-dropdown-item>
     </b-nav-item-dropdown>
