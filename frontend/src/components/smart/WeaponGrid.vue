@@ -246,8 +246,6 @@ export default Vue.extend({
   background: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
   cursor: pointer;
-  justify-content: right;
-  justify-items: right;
   position: relative
 }
 
