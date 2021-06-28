@@ -17,6 +17,11 @@
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
+
+      <div v-if="showReforgedToggle" class="show-reforged">
+        <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
+        <strong>Show reforged</strong>
+      </div>
     </div>
 
     <ul class="weapon-grid">
@@ -88,13 +93,18 @@ export default Vue.extend({
     showLimit: {
       type: Number,
       default: 0
+    },
+    showReforgedToggle: {
+      type: Boolean,
+      default: true
     }
   },
 
   data() {
     return {
       starFilter: '',
-      elementFilter: ''
+      elementFilter: '',
+      showReforgedWeapons: true
     };
   },
 
@@ -131,6 +141,10 @@ export default Vue.extend({
 
       if(this.elementFilter) {
         items = items.filter(x => x.element.includes(this.elementFilter));
+      }
+
+      if(!this.showReforgedWeapons) {
+        items = items.filter(x => x.bonusPower === 0);
       }
 
       if(this.showLimit > 0 && items.length > this.showLimit) {
@@ -192,6 +206,20 @@ export default Vue.extend({
 
 .above-wrapper {
   padding: 0.5rem;
+}
+
+.toggle-button {
+  align-self: stretch;
+}
+
+.show-reforged {
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+}
+
+.show-reforged-checkbox {
+  margin-left: 5px;
 }
 
 @media (max-width: 576px) {
