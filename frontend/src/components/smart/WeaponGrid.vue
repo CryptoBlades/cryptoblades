@@ -68,7 +68,7 @@ interface Data {
   starFilter: string;
   elementFilter: string;
   showReforgedWeapons: boolean;
-  favorites: number[];
+  favorites: Record<number, boolean>
 }
 
 export default Vue.extend({
@@ -118,7 +118,7 @@ export default Vue.extend({
       starFilter: '',
       elementFilter: '',
       showReforgedWeapons: true,
-      favorites: []
+      favorites: {}
     } as Data;
   },
 
@@ -167,13 +167,13 @@ export default Vue.extend({
       }
 
       const favoriteWeapons: IWeapon[] = [];
-      this.favorites.forEach(x => {
-        const i = items.findIndex(y => y.id === x);
+      for(const key in this.favorites) {
+        const i = items.findIndex(y => y.id === +key);
         if(i !== -1) {
           favoriteWeapons.push(items[i]);
           items.splice(i, 1);
         }
-      });
+      }
 
       return favoriteWeapons.concat(items);
     }
@@ -195,37 +195,38 @@ export default Vue.extend({
 
     toggleFavorite(e: Event, weaponId: number) {
       e.preventDefault();
-      if(!this.isFavorite(weaponId)) {
-        this.favorites.push(weaponId);
+      if(this.favorites[weaponId]) {
+        this.$delete(this.favorites, weaponId);
+      } else {
+        this.$set(this.favorites, weaponId, true);
       }
-      else {
-        const unfavoriteId = this.favorites.findIndex(x => x === weaponId);
-        this.favorites.splice(unfavoriteId, 1);
-      }
+
       localStorage.setItem('favorites', this.getFavoritesString(this.favorites));
     },
 
-    getFavoritesString(favorites: number[]): string {
-      return favorites.join(',');
+    getFavoritesString(favorites: Record<number, boolean>): string {
+      return JSON.stringify(favorites);
     },
 
-    getFavoritesArray(favorites: string): number[] {
+    getFavoritesMap(favorites: string): Record<number, boolean> {
       if(!favorites) {
-        return [];
+        return {};
       }
-      return favorites.split(',').map(x => +x);
+
+      const favoritesMap: Record<number, boolean> = {};
+      favorites.split(',').forEach(x => favoritesMap[+x] = true);
+      return favoritesMap;
     },
 
     isFavorite(weaponId: number): boolean {
-      const found = this.favorites.find(x => x === weaponId);
-      return found !== null && found !== undefined;
+      return this.favorites[weaponId];
     }
   },
 
   mounted() {
     this.starFilter = localStorage.getItem('weapon-starfilter') || '';
     this.elementFilter = localStorage.getItem('weapon-elementfilter') || '';
-    this.favorites = this.getFavoritesArray(localStorage.getItem('favorites') as string);
+    this.favorites = JSON.parse(localStorage.getItem('favorites') as string);
   }
 });
 </script>
