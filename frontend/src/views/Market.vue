@@ -527,11 +527,19 @@ export default Vue.extend({
 
       this.waitingMarketOutcome = true;
 
-      const results = await this.purchaseMarketListing({
+      const results: any = await this.purchaseMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
         maxPrice: price
       });
+
+      const results2: any  = await this.fetchAllMarketNftIds({
+        nftContractAddr: this.contractAddress
+      });
+
+      this.allSearchResults = results2;
+
+      this.allSearchResults = Array.from(this.allSearchResults).filter((x: any) => x.id !== this.selectedNftId);
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully purchased '

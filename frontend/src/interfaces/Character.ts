@@ -22,7 +22,7 @@ export enum CharacterTrait {
 }
 
 export function CharacterPower(level: number) {
-  return ((1000 + level * 10) * (Math.floor(level / 10) + 1)).toLocaleString();
+  return ((1000 + level * 10) * (Math.floor(level / 10) + 1));
 }
 
 export function RequiredXp(level: number) {
@@ -35,5 +35,5 @@ export function RequiredXp(level: number) {
       xp += Math.floor((i-14) + 1);
     }
   }
-  return xp.toLocaleString();
+  return xp;
 }
