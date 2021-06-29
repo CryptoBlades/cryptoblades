@@ -30,7 +30,7 @@ But if not specified, the deployed contracts will be pulled in automatically.
 
 ### VSCode Setup
 
-If you're using VSCode, we extend these extensions: Auto Rename Tag, EditorConfig for VSCode, Eslint, Github Pull Requests, Gitlens, Javascript and Typescript, Live Share, Solidity, Typescript Hero, Vetur
+If you're using VSCode, we recommend these extensions: Auto Rename Tag, EditorConfig for VSCode, Eslint, Github Pull Requests, Gitlens, Javascript and Typescript, Live Share, Solidity, Typescript Hero, Vetur
 
 ## Truffle Environment Variables
 
