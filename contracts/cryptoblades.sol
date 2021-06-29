@@ -19,6 +19,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
+    int128 public constant REWARDS_CLAIM_TAX_MAX = 2767011611056432742; // = ~0.15 = ~15%
+    uint256 public constant REWARDS_CLAIM_TAX_DURATION = 15 days;
+
     Characters public characters;
     Weapons public weapons;
     IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
@@ -99,6 +102,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public totalInGameOnlyFunds;
 
     Promos public promos;
+
+    mapping(address => uint256) private _rewardsClaimTaxTimerStart;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -252,6 +257,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if(playerRoll < monsterRoll) {
             tokens = 0;
             xp = 0;
+        }
+
+        if(tokenRewards[msg.sender] == 0 && tokens > 0) {
+            _startRewardsClaimTaxTimer(msg.sender);
         }
 
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
@@ -594,8 +603,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function claimTokenRewards() public {
         // our characters go to the tavern
         // and the barkeep pays them for the bounties
-        _payPlayerConverted(msg.sender, tokenRewards[msg.sender]);
+        uint256 _tokenRewards = tokenRewards[msg.sender];
         tokenRewards[msg.sender] = 0;
+
+        uint256 _tokenRewardsToPayOut = _tokenRewards.sub(
+            _getRewardsClaimTax(msg.sender).mulu(_tokenRewards)
+        );
+
+        // Tax goes to game contract itself, which would mean
+        // transferring from the game contract to ...itself.
+        // So we don't need to do anything with the tax part of the rewards.
+
+        _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
     }
 
     function claimXpRewards() public {
@@ -626,6 +645,28 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getTotalSkillOwnedBy(address wallet) public view returns (uint256) {
         return getTokenRewardsFor(wallet) + skillToken.balanceOf(wallet);
+    }
+
+    function _getRewardsClaimTax(address playerAddress) internal view returns (int128) {
+        assert(_rewardsClaimTaxTimerStart[playerAddress] <= block.timestamp);
+
+        uint256 rewardsClaimTaxTimerEnd = _rewardsClaimTaxTimerStart[playerAddress].add(REWARDS_CLAIM_TAX_DURATION);
+
+        (, uint256 durationUntilNoTax) = rewardsClaimTaxTimerEnd.trySub(block.timestamp);
+
+        assert(0 <= durationUntilNoTax && durationUntilNoTax <= REWARDS_CLAIM_TAX_DURATION);
+
+        int128 frac = ABDKMath64x64.divu(durationUntilNoTax, REWARDS_CLAIM_TAX_DURATION);
+
+        return REWARDS_CLAIM_TAX_MAX.mul(frac);
+    }
+
+    function getOwnRewardsClaimTax() public view returns (int128) {
+        return _getRewardsClaimTax(msg.sender);
+    }
+
+    function _startRewardsClaimTaxTimer(address playerAddress) internal {
+        _rewardsClaimTaxTimerStart[playerAddress] = block.timestamp;
     }
 
 }

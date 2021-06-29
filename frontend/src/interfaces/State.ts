@@ -61,6 +61,8 @@ export interface IState {
 
   skillBalance: string;
   skillRewards: string;
+  maxRewardsClaimTax: string;
+  rewardsClaimTax: string;
   xpRewards: Record<string, string>;
   inGameOnlyFunds: string;
   ownedCharacterIds: number[];

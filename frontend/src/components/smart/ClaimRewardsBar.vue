@@ -11,9 +11,7 @@
       @click="onClaimTokens"><!-- moved gtag-link below b-nav-item -->
       <span class="gtag-link-others" tagname="claim_skill">
         <strong>SKILL</strong> {{ formattedSkillReward }}
-        <strong>Early Withdraw Tax</strong> 0%
-        <strong>Time since last withdraw</strong> n/a
-      </span>
+        <strong>Early Withdraw Tax</strong> {{ formattedRewardsClaimTax }}
     </b-nav-item>
 
     <b-nav-item
@@ -33,12 +31,20 @@ import BN from 'bignumber.js';
 import Web3 from 'web3';
 import { getCharacterNameFromSeed } from '../../character-name';
 import { RequiredXp } from '../../interfaces';
+import { ICharacter } from '@/interfaces';
 
 
 interface StoreMappedState {
   skillRewards: string;
   xpRewards: Record<string, string>;
   ownedCharacterIds: string[]
+}
+
+interface StoreMappedGetters {
+  ownCharacters: ICharacter[];
+  currentCharacter: ICharacter | null;
+  maxRewardsClaimTaxAsFactorBN: BN;
+  rewardsClaimTaxAsFactorBN: BN;
 }
 
 interface StoreMappedActions {
@@ -49,11 +55,22 @@ interface StoreMappedActions {
 export default Vue.extend({
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['ownCharacters', 'currentCharacter'])),
+    ...(mapGetters([
+      'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN'
+    ]) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
       const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
       return `${new BN(skillRewards).toFixed(4)}`;
+    },
+
+    formattedRewardsClaimTax(): string {
+      const frac =
+        this.skillRewards === '0'
+          ? this.maxRewardsClaimTaxAsFactorBN
+          : this.rewardsClaimTaxAsFactorBN;
+
+      return `${frac.multipliedBy(100).decimalPlaces(0, BN.ROUND_HALF_UP)}%`;
     },
 
     xpRewardsForOwnedCharacters(): string[] {
@@ -62,12 +79,13 @@ export default Vue.extend({
 
     formattedXpRewards(): string {
       return this.xpRewardsForOwnedCharacters.map((xp, i) => {
+        const currentCharacter = this.currentCharacter || { id: null };
         if(!this.ownCharacters[i]) return `${xp}`;
-        return  `${this.ownCharacters[i].id === this.currentCharacter.id ? '<b>' : ''}` +
+        return  `${this.ownCharacters[i].id === currentCharacter.id ? '<b>' : ''}` +
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '<u>' : ''}` +
                 `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}` +
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '</u>' : ''}` +
-                `${this.ownCharacters[i].id === this.currentCharacter.id ? '</b>' : ''}`;
+                `${this.ownCharacters[i].id === currentCharacter.id ? '</b>' : ''}`;
       }).join(', ');
     },
 
