@@ -226,7 +226,11 @@ export default Vue.extend({
   mounted() {
     this.starFilter = localStorage.getItem('weapon-starfilter') || '';
     this.elementFilter = localStorage.getItem('weapon-elementfilter') || '';
-    this.favorites = JSON.parse(localStorage.getItem('favorites') as string);
+
+    const favoritesFromStorage = localStorage.getItem('favorites');
+    if(favoritesFromStorage) {
+      this.favorites = JSON.parse(favoritesFromStorage);
+    }
   }
 });
 </script>
