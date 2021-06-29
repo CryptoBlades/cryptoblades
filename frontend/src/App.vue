@@ -79,7 +79,7 @@ export default {
   }),
 
   computed: {
-    ...mapState(['defaultAccount', 'currentNetworkId', 'currentCharacterId']),
+    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId']),
     ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl']),
 
     canShowApp() {

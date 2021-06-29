@@ -17,6 +17,11 @@
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
+
+      <div v-if="showReforgedToggle" class="show-reforged">
+        <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
+        <strong>Show reforged</strong>
+      </div>
     </div>
 
     <ul class="weapon-grid">
@@ -26,7 +31,9 @@
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
         @click="$emit('choose-weapon', weapon.id)"
+        @contextmenu="canFavorite && toggleFavorite($event,weapon.id)"
       >
+        <b-icon v-if="isFavorite(weapon.id) === true" class="favorite-star" icon="star-fill" variant="warning" />
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :weapon="weapon"></slot>
         </div>
@@ -55,6 +62,13 @@ interface StoreMappedGetters {
 
 interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
+}
+
+interface Data {
+  starFilter: string;
+  elementFilter: string;
+  showReforgedWeapons: boolean;
+  favorites: Record<number, boolean>
 }
 
 export default Vue.extend({
@@ -88,14 +102,24 @@ export default Vue.extend({
     showLimit: {
       type: Number,
       default: 0
+    },
+    showReforgedToggle: {
+      type: Boolean,
+      default: true
+    },
+    canFavorite: {
+      type: Boolean,
+      default: true
     }
   },
 
   data() {
     return {
       starFilter: '',
-      elementFilter: ''
-    };
+      elementFilter: '',
+      showReforgedWeapons: true,
+      favorites: {}
+    } as Data;
   },
 
   components: {
@@ -111,7 +135,7 @@ export default Vue.extend({
         return this.weaponIds;
       }
 
-      return this.ownedWeaponIds.map(id => id.toString());
+      return this.ownedWeaponIds?.map(id => id.toString());
     },
 
     displayWeapons(): IWeapon[] {
@@ -119,7 +143,8 @@ export default Vue.extend({
     },
 
     nonIgnoredWeapons(): IWeapon[] {
-      let items = this.displayWeapons;
+      let items: IWeapon[] = [];
+      this.displayWeapons.forEach(x => items.push(x));
 
       if(this.ignore) {
         items = items.filter(x => x.id.toString() !== (this.ignore || '').toString());
@@ -133,11 +158,24 @@ export default Vue.extend({
         items = items.filter(x => x.element.includes(this.elementFilter));
       }
 
+      if(!this.showReforgedWeapons) {
+        items = items.filter(x => x.bonusPower === 0);
+      }
+
       if(this.showLimit > 0 && items.length > this.showLimit) {
         items = items.slice(0, this.showLimit);
       }
 
-      return items;
+      const favoriteWeapons: IWeapon[] = [];
+      for(const key in this.favorites) {
+        const i = items.findIndex(y => y.id === +key);
+        if(i !== -1) {
+          favoriteWeapons.push(items[i]);
+          items.splice(i, 1);
+        }
+      }
+
+      return favoriteWeapons.concat(items);
     }
   },
 
@@ -153,12 +191,46 @@ export default Vue.extend({
     saveFilters() {
       localStorage.setItem('weapon-starfilter', this.starFilter);
       localStorage.setItem('weapon-elementfilter', this.elementFilter);
+    },
+
+    toggleFavorite(e: Event, weaponId: number) {
+      e.preventDefault();
+      if(this.favorites[weaponId]) {
+        this.$delete(this.favorites, weaponId);
+      } else {
+        this.$set(this.favorites, weaponId, true);
+      }
+
+      localStorage.setItem('favorites', this.getFavoritesString(this.favorites));
+    },
+
+    getFavoritesString(favorites: Record<number, boolean>): string {
+      return JSON.stringify(favorites);
+    },
+
+    getFavoritesMap(favorites: string): Record<number, boolean> {
+      if(!favorites) {
+        return {};
+      }
+
+      const favoritesMap: Record<number, boolean> = {};
+      favorites.split(',').forEach(x => favoritesMap[+x] = true);
+      return favoritesMap;
+    },
+
+    isFavorite(weaponId: number): boolean {
+      return this.favorites[weaponId];
     }
   },
 
   mounted() {
     this.starFilter = localStorage.getItem('weapon-starfilter') || '';
     this.elementFilter = localStorage.getItem('weapon-elementfilter') || '';
+
+    const favoritesFromStorage = localStorage.getItem('favorites');
+    if(favoritesFromStorage) {
+      this.favorites = JSON.parse(favoritesFromStorage);
+    }
   }
 });
 </script>
@@ -179,6 +251,7 @@ export default Vue.extend({
   background: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
   cursor: pointer;
+  position: relative
 }
 
 .weapon.selected {
@@ -192,6 +265,26 @@ export default Vue.extend({
 
 .above-wrapper {
   padding: 0.5rem;
+}
+
+.toggle-button {
+  align-self: stretch;
+}
+
+.show-reforged {
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+}
+
+.show-reforged-checkbox {
+  margin-left: 5px;
+}
+
+.favorite-star {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
 }
 
 @media (max-width: 576px) {
