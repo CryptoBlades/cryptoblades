@@ -56,17 +56,21 @@
           <div class="row">
             <div class="col">
               <div class="header-row">
+                <h1>Choose a weapon</h1>
                 <Hint
                   text="Your weapon multiplies your power<br>
                   <br>+Stats determine the multiplier
                   <br>Stat element match with character gives greater bonus"
                 />
-                <h1>Choose a weapon</h1>
-
-                <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null"
-                id="gtag-link-others" tagname="choose_weapon"> Choose New Weapon </b-button>
               </div>
-
+              <div class="header-row">
+                <div v-if="selectedWeaponId" class="weapon-icon-wrapper">
+                  <weapon-icon class="weapon-icon" :weapon="selectedWeapon" />
+                </div>
+                <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-link-others" tagname="choose_weapon">
+                  Choose New Weapon
+                </b-button>
+              </div>
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" />
             </div>
           </div>
@@ -117,6 +121,7 @@ import Hint from '../components/Hint.vue';
 import CombatResults from '../components/CombatResults.vue';
 import Web3 from 'web3';
 import BN from 'bignumber.js';
+import WeaponIcon from '../components/WeaponIcon.vue';
 
 import { mapActions, mapGetters, mapState } from 'vuex';
 
@@ -132,6 +137,7 @@ export default {
       intervalMinutes: null,
       timeSeconds: null,
       timeMinutes: null,
+      selectedWeapon: null,
     };
   },
 
@@ -198,6 +204,7 @@ export default {
       const characterPower = CharacterPower(this.currentCharacter.level);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
       const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id === this.selectedWeaponId);
+      this.selectedWeapon = selectedWeapon;
       const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
       const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
@@ -287,6 +294,7 @@ export default {
     WeaponGrid,
     Hint,
     CombatResults,
+    WeaponIcon,
   },
 };
 </script>
@@ -357,5 +365,11 @@ export default {
 
 div.encounter.text-center {
   flex-basis: auto !important;
+}
+
+.weapon-icon-wrapper {
+  background: rgba(255, 255, 255, 0.1);
+  width: 12em;
+  height: 12em;
 }
 </style>
