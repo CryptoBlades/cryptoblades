@@ -27,9 +27,9 @@
             <b-button
               v-if="ownCharacters.length < 4"
               variant="primary"
-              class="ml-auto"
+              class="ml-auto gtag-link-others"
               @click="onMintCharacter"
-              v-tooltip="'Recruit new character'" id="gtag-link-others" tagname="recruit_character">
+              v-tooltip="'Recruit new character'" tagname="recruit_character">
               Recruit ({{ recruitCost }} SKILL) <i class="fas fa-plus"></i>
             </b-button>
           </div>

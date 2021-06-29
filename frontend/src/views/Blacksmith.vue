@@ -39,7 +39,7 @@
                 Cooling forge...
               </span>
 
-              <span v-if="!disableForge" id="gtag-link-others" tagname="forge_weapon">
+              <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                 Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
               </span>
             </b-button>

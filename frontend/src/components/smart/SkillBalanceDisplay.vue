@@ -1,7 +1,7 @@
 <template>
   <div class="skill-balance-display">
     <b-button size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="'Buy SKILL'" @click="onBuySkill">
-      <i class="fa fa-plus" id="gtag-link-others" tagname="buy_skill"></i>
+      <i class="fa fa-plus gtag-link-others" tagname="buy_skill"></i>
     </b-button>
 
     <div class="balance-container">
