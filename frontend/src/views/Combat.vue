@@ -63,7 +63,8 @@
                 />
                 <h1>Choose a weapon</h1>
 
-                <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null"> Choose New Weapon </b-button>
+                <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null"
+                id="gtag-link-others" tagname="choose_weapon"> Choose New Weapon </b-button>
               </div>
 
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" />
