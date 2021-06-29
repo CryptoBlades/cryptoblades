@@ -381,7 +381,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
 
     function reforge(uint256 reforgeID, uint256 burnID) public restricted {
         WeaponBurnPoints storage wbp = burnPoints[reforgeID];
+        WeaponBurnPoints storage burningbp = burnPoints[burnID];
         Weapon storage burning = tokens[burnID];
+
+        uint carriedLowStarBurnPoints = (burningbp.lowStarBurnPoints + 1) / 2;
+        uint carriedFourStarBurnPoints = (burningbp.fourStarBurnPoints + 1) / 2;
+        uint carriedFiveStarBurnPoints = (burningbp.fiveStarBurnPoints + 1) / 2;
 
         if(getStarsFromProperties(burning.properties) == 0) { // 1 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
@@ -416,6 +421,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
             if(wbp.fiveStarBurnPoints > 10)
                 wbp.fiveStarBurnPoints = 10;
         }
+        wbp.lowStarBurnPoints = uint8(carriedLowStarBurnPoints.add(wbp.lowStarBurnPoints));
+        wbp.fourStarBurnPoints = uint8(carriedFourStarBurnPoints.add(wbp.fourStarBurnPoints));
+        wbp.fiveStarBurnPoints = uint8(carriedFiveStarBurnPoints.add(wbp.fiveStarBurnPoints));
+
         _burn(burnID);
         emit Reforged(
             ownerOf(reforgeID),
