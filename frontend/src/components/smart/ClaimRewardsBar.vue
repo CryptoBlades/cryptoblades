@@ -40,8 +40,7 @@ Vue.use(BootstrapVueIcons);
 interface StoreMappedState {
   skillRewards: string;
   xpRewards: Record<string, string>;
-  ownedCharacterIds: string[];
-  currentCharacterId: number
+  ownedCharacterIds: string[]
 }
 
 interface StoreMappedActions {
@@ -51,8 +50,8 @@ interface StoreMappedActions {
 
 export default Vue.extend({
   computed: {
-    ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'currentCharacterId']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['ownCharacters'])),
+    ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds']) as Accessors<StoreMappedState>),
+    ...(mapGetters(['ownCharacters', 'currentCharacter'])),
 
     formattedSkillReward(): string {
       const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
@@ -66,11 +65,11 @@ export default Vue.extend({
     formattedXpRewards(): string {
       return this.xpRewardsForOwnedCharacters.map((xp, i) => {
         if(!this.ownCharacters[i]) return `${xp}`;
-        return  `${this.ownCharacters[i].id === this.currentCharacterId ? '<b>' : ''}` +
+        return  `${this.ownCharacters[i].id === this.currentCharacter.id ? '<b>' : ''}` +
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '<u>' : ''}` +
                 `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}` +
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '</u>' : ''}` +
-                `${this.ownCharacters[i].id === this.currentCharacterId ? '</b>' : ''}`;
+                `${this.ownCharacters[i].id === this.currentCharacter.id ? '</b>' : ''}`;
       }).join(', ');
     },
 
