@@ -123,7 +123,7 @@ import Web3 from 'web3';
 import BN from 'bignumber.js';
 import WeaponIcon from '../components/WeaponIcon.vue';
 
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 
 export default {
   data() {
@@ -186,11 +186,13 @@ export default {
     async updateResults([fightResults, error]) {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
+      this.setIsInCombat(this.waitingResults);
     },
   },
 
   methods: {
     ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp']),
+    ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
@@ -264,6 +266,7 @@ export default {
       this.fightResults = null;
       this.error = null;
       this.waitingResults = true;
+      this.setIsInCombat(this.waitingResults);
 
       try {
         const results = await this.doEncounter({
