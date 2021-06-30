@@ -297,8 +297,6 @@ export default {
     },
 
     onChooseWeapon(targetToFight) {
-      //alert('tets');
-      //this.fetchFightRewardXp();
 
       const characterPower = CharacterPower(this.currentCharacter.level);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
