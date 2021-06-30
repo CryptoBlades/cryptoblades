@@ -3,7 +3,6 @@
     <nav-bar />
     <claim-rewards-bar v-if="canShowRewardsBar" />
     <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
-    {{ typeof skillBalance }}
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
