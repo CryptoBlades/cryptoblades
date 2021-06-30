@@ -351,7 +351,8 @@ interface Data {
   weaponShowLimit: number;
   allListingsAmount: number;
   currentPage: number;
-  browseTabActive: boolean;}
+  browseTabActive: boolean;
+}
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
 
@@ -363,12 +364,10 @@ interface StoreMappedGetters {
 
 interface StoreMappedActions {
   fetchAllMarketNftIds(payload: { nftContractAddr: string }): Promise<string[]>;
-  fetchAllMarketNftIdsPage(payload: { nftContractAddr: string, limit: number, pageNumber: number }): Promise<string[]>;
   fetchAllMarketCharacterNftIdsPage(payload: {
     nftContractAddr: string, limit: number, pageNumber: number, trait: number, minLevel: number, maxLevel: number
   }): Promise<string[]>;
   fetchAllMarketWeaponNftIdsPage(payload: { nftContractAddr: string, limit: number, pageNumber: number, trait: number, stars: number }): Promise<string[]>;
-  fetchNumberOfListings(payload: { nftContractAddr: string }): Promise<number>;
   fetchNumberOfWeaponListings(payload: { nftContractAddr: string, trait: number, stars: number }): Promise<number>;
   fetchNumberOfCharacterListings(payload: { nftContractAddr: string, trait: number, minLevel: number, maxLevel: number}): Promise<number>;
   fetchMarketNftIdsBySeller(payload: { nftContractAddr: string, sellerAddr: string }): Promise<string[]>;
@@ -404,7 +403,8 @@ export default Vue.extend({
       weaponShowLimit: 60,
       allListingsAmount: 0,
       currentPage: 1,
-      browseTabActive: true    } as Data;
+      browseTabActive: true
+    } as Data;
   },
 
   computed: {
@@ -455,10 +455,8 @@ export default Vue.extend({
   methods: {
     ...(mapActions([
       'fetchAllMarketNftIds',
-      'fetchAllMarketNftIdsPage',
       'fetchAllMarketCharacterNftIdsPage',
       'fetchAllMarketWeaponNftIdsPage',
-      'fetchNumberOfListings',
       'fetchNumberOfWeaponListings',
       'fetchNumberOfCharacterListings',
       'fetchMarketNftIdsBySeller',

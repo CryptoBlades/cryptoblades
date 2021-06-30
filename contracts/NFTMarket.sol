@@ -10,7 +10,7 @@ import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
-import "./cryptoblades.sol";
+import "./characters.sol";
 import "./weapons.sol";
 
 // *****************************************************************************
@@ -30,25 +30,22 @@ contract NFTMarket is
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    CryptoBlades internal game;
     Weapons internal weapons;
     Characters internal characters;
 
     // ############
     // Initializer
     // ############
-    function initialize(IERC20 _skillToken, address _taxRecipient, address _gameContract)
+    function initialize(IERC20 _skillToken, address _taxRecipient, address _charactersContract, address _weaponsContract)
         public
         initializer
     {
         __AccessControl_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-
-        game = CryptoBlades(_gameContract);
         // maybe just use extra params for NFT addresses?
-        characters = Characters(game.characters());
-        weapons = Weapons(game.weapons());
+        characters = Characters(_charactersContract);
+        weapons = Weapons(_weaponsContract);
 
         skillToken = _skillToken;
 
@@ -255,13 +252,11 @@ contract NFTMarket is
         uint256 tokensSize = matchingWeaponsAmount >= limit ? _limit : matchingWeaponsAmount - (_limit * _pageNumber);
         uint256[] memory tokens = new uint256[](tokensSize);
 
-        uint8 weaponTrait;
-        uint8 weaponStars;        
         uint256 counter = 0;
         uint8 tokenIterator = 0;
         for (uint256 i = 0; i < set.length() && counter < limit; i++) {
-            weaponTrait = weapons.getTrait(set.at(i));
-            weaponStars = weapons.getStars(set.at(i));
+            uint8 weaponTrait = weapons.getTrait(set.at(i));
+            uint8 weaponStars = weapons.getStars(set.at(i));
             if((_trait == 255 || weaponTrait == _trait) && (_stars == 255 || weaponStars == _stars)) {
                 if(counter >= limit - _limit) {
                     tokens[tokenIterator] = set.at(i);
@@ -285,13 +280,11 @@ contract NFTMarket is
         uint256 tokensSize = matchingCharactersAmount >= limit ? _limit : matchingCharactersAmount - (_limit * _pageNumber);
         uint256[] memory tokens = new uint256[](tokensSize);
 
-        uint8 characterTrait;
-        uint8 characterLevel;        
         uint256 counter = 0;
         uint8 tokenIterator = 0;
         for (uint256 i = 0; i < set.length() && counter < limit; i++) {
-            characterTrait = characters.getTrait(set.at(i));
-            characterLevel = characters.getLevel(set.at(i));
+            uint8 characterTrait = characters.getTrait(set.at(i));
+            uint8 characterLevel = characters.getLevel(set.at(i));
              if((_trait == 255 || characterTrait == _trait) && (_minLevel == 255 || _maxLevel == 255 || (characterLevel >= _minLevel && characterLevel <= _maxLevel))) {
                 if(counter >= limit - _limit) {
                     tokens[tokenIterator] = set.at(i);
