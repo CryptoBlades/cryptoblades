@@ -91,7 +91,7 @@
                 class="encounter-button"
                 :mainText="`Fight!`"
                 :subText="`Power: ${e.power}`"
-                :subText1="`XP Gain if Win: ${onChooseWeapon(e)}`"
+                :subText1="`XP Gain if Win: ${getPotentialXp(e)}`"
                 :subText2="`Chance to Win: ${getWinChance(e.power, e.trait)}`"
                 v-tooltip="'Cost 40 stamina'"
                 :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
@@ -296,7 +296,7 @@ export default {
       return `${new BN(skillBalance).toFixed(6)} SKILL`;
     },
 
-    onChooseWeapon(targetToFight) {
+    getPotentialXp(targetToFight) {
 
       const characterPower = CharacterPower(this.currentCharacter.level);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
