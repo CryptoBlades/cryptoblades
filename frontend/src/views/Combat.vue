@@ -80,6 +80,7 @@
 
               <weapon-grid v-if="!selectedWeaponId"
                            v-model="selectedWeaponId" />
+
             </div>
           </div>
 
@@ -96,7 +97,8 @@
                 class="encounter-button"
                 :mainText="`Fight!`"
                 :subText="`Power: ${e.power}`"
-				:subText2="`Chance to Win: ${getWinChance(e.power, e.trait)}`"
+                :subText1="`XP Gain if Win: ${onChooseWeapon(e)}`"
+                :subText2="`Chance to Win: ${getWinChance(e.power, e.trait)}`"
                 v-tooltip="'Cost 40 stamina'"
                 :disabled="(timeMinutes === 59 && timeSeconds >= 30) || isLoadingTargets"
                 @click="onClickEncounter(e)"
@@ -137,6 +139,7 @@ import Web3 from 'web3';
 import BN from 'bignumber.js';
 
 import { mapActions, mapGetters, mapState } from 'vuex';
+//import func from 'vue-editor-bridge';
 
 export default {
   data() {
@@ -150,6 +153,7 @@ export default {
       intervalMinutes: null,
       timeSeconds: null,
       timeMinutes: null,
+      fightXpGain: 32,
     };
   },
 
@@ -167,7 +171,7 @@ export default {
       'currentCharacter',
       'currentCharacterStamina',
       'fightGasOffset',
-      'fightBaseline',
+      'fightBaseline'
     ]),
 
     targets() {
@@ -200,7 +204,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
     getEnemyArt,
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
@@ -306,9 +310,25 @@ export default {
         this.error = e.message;
       }
     },
+
     formattedSkill(skill) {
       const skillBalance = Web3.utils.fromWei(skill, 'ether');
       return `${new BN(skillBalance).toFixed(6)} SKILL`;
+    },
+
+    onChooseWeapon(targetToFight) {
+      //alert('tets');
+      //this.fetchFightRewardXp();
+
+      const characterPower = CharacterPower(this.currentCharacter.level);
+      const playerElement = parseInt(this.currentCharacter.trait, 10);
+      const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id ===this.selectedWeaponId);
+      const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
+      const totalPower = ((characterPower * weaponMultiplier) + selectedWeapon.bonusPower);
+
+      //Formula taken from getXpGainForFight funtion of cryptoblades.sol
+      return Math.floor((targetToFight.power /totalPower) *  this.fightXpGain);
+
     },
   },
 

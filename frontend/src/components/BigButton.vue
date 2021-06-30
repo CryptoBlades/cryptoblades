@@ -1,6 +1,6 @@
 <template>
   <b-button variant="primary" :disabled="disabled" class="button main-font dark-bg-text" @click="$emit('click')">
-    <h1>{{ mainText }}</h1>
+    <h1>{{ mainText }}</h1><h5>{{ subText1 }}</h5>
     <h2>{{ subText }}</h2>
 	<h3>{{ subText2 }}</h3>
   </b-button>
@@ -8,7 +8,7 @@
 
 <script lang="ts">
 export default {
-  props: ['mainText', 'subText', 'subText2', 'disabled'],
+  props: ['mainText', 'subText', 'subText1', 'subText2', 'disabled'],
 };
 </script>
 
