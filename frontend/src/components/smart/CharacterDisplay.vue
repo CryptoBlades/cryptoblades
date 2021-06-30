@@ -50,12 +50,13 @@
         />
       </div>
       <div class="character-list d-none d-sm-block">
-      <ul class="character-list">
+      <ul class="character-list"
+          v-bind:class="getIsInCombat ? 'disabled-li' : ''">
         <li
           class="character"
           v-for="c in filteredCharactersForList"
           :key="c.id"
-          @click="setCurrentCharacter(c.id)"
+          @click="!getIsInCombat && setCurrentCharacter(c.id)"
         >
         <div class="name-list"
         >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
@@ -70,7 +71,7 @@
           class="character"
           v-for="c in filteredCharactersForList"
           :key="c.id"
-          @click="setCurrentCharacter(c.id)"
+          @click="!getIsInCombat && setCurrentCharacter(c.id)"
         >
         <div class="name-list"
         >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
@@ -104,7 +105,8 @@ export default {
       'getCharacterName',
       'charactersWithIds',
       'ownCharacters',
-      'timeUntilCurrentCharacterHasMaxStamina'
+      'timeUntilCurrentCharacterHasMaxStamina',
+      'getIsInCombat'
     ]),
 
     isLoadingCharacter(): boolean {
@@ -234,5 +236,9 @@ li.character{
 .character-list-mobile > ul > li{
   justify-content: center;
   display: flex;
+}
+.disabled-li {
+  pointer-events: none;
+  opacity: 0.6;
 }
 </style>
