@@ -24,6 +24,7 @@
               variant="primary"
               v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
               @click="showReforge = true"
+              tagname="reforge_weapon"
               v-tooltip="'Burn weapons to buff selected weapon'">
               Reforge
             </b-button>
@@ -38,10 +39,31 @@
                 Cooling forge...
               </span>
 
-              <span v-if="!disableForge">
+              <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                 Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
               </span>
             </b-button>
+
+            <b-icon-question-circle class="centered-icon" scale="1.5"
+              v-on:click="onShowForgeDetails" v-tooltip.bottom="'Click for forge percentages'"/>
+
+            <b-modal hide-footer ref="forge-details-modal" title="Forge Percentages">
+              <div>
+                5+ star @ 1% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
+              </div>
+              <div>
+                4+ star @ 6% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
+              </div>
+              <div>
+                3+ star @ 21% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
+              </div>
+              <div>
+                2+ star @ 56% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
+              </div>
+              <div>
+                1+ star @ 100% chance.
+              </div>
+            </b-modal>
           </div>
         </div>
 
@@ -56,6 +78,7 @@
             <b-button
               variant="primary"
               class="ml-3"
+              tagname="confirm_forge_weapon"
               @click="showReforgeConfirmation"
               :disabled="canReforge"
               v-tooltip="'Forge new weapon'">
@@ -94,8 +117,12 @@
 import BN from 'bignumber.js';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
+import Vue from 'vue';
+import { BootstrapVueIcons } from 'bootstrap-vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import WeaponIcon from '../components/WeaponIcon.vue';
+
+Vue.use(BootstrapVueIcons);
 
 export default {
   data() {
@@ -157,6 +184,10 @@ export default {
         console.error(e);
         this.$dialog.alert('Could not forge sword: insuffucient funds or transaction denied.');
       }
+    },
+
+    onShowForgeDetails() {
+      this.$refs['forge-details-modal'].show();
     },
 
     showReforgeConfirmation() {
@@ -237,6 +268,11 @@ export default {
 
 .centered-modal {
   justify-content: center;
+}
+
+.centered-icon {
+  align-self: center;
+  margin-left: 5px;
 }
 
 </style>

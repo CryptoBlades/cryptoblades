@@ -80,4 +80,6 @@ export interface IState {
   stakeOverviews: Record<StakeType, IStakeOverviewState>;
 
   raid: IRaidState;
+
+  isInCombat: boolean;
 }

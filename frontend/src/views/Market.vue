@@ -15,20 +15,20 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchAllListingsByType('character')">Browse Characters</b-button>
+                  @click="searchAllListingsByType('character')"  class="gtag-link-others" tagname="browse_characters">Browse Characters</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchAllListingsByType('weapon')">Browse Weapons</b-button>
+                  @click="searchAllListingsByType('weapon')"  class="gtag-link-others" tagname="browse_weapons">Browse Weapons</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   v-if="buyableNftSelected"
-                  @click="purchaseNft()">Purchase</b-button>
+                  @click="purchaseNft()"  class="gtag-link-others" tagname="confirm_purchase">Purchase</b-button>
               </div>
 
               <div class="col"></div>
@@ -40,6 +40,8 @@
                 :showGivenWeaponIds="true"
                 :weaponIds="allSearchResults"
                 :showLimit="60"
+                :showReforgedToggle="false"
+                :canFavorite="false"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
@@ -105,54 +107,54 @@
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsByNftId('character')">Search Character ID</b-button>
+                  @click="searchListingsByNftId('character')"  class="gtag-link-others" tagname="search_character_id">Search Character ID</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsByNftId('weapon')">Search Weapon ID</b-button>
+                  @click="searchListingsByNftId('weapon')"  class="gtag-link-others" tagname="search_weapon_id">Search Weapon ID</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsBySeller('weapon')">Weapons by Seller</b-button>
+                  @click="searchListingsBySeller('weapon')"  class="gtag-link-others" tagname="weapons_seller">Weapons by Seller</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsBySeller('character')">Characters by Seller</b-button>
+                  @click="searchListingsBySeller('character')"  class="gtag-link-others" tagname="characters_seller">Characters by Seller</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchOwnListings('weapon')">Search My Weapons</b-button>
+                  @click="searchOwnListings('weapon')"  class="gtag-link-others" tagname="search_own_weapons">Search My Weapons</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchOwnListings('character')">Search My Characters</b-button>
+                  @click="searchOwnListings('character')"  class="gtag-link-others" tagname="search_own_characters">Search My Characters</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   v-if="buyableNftSelected"
-                  @click="purchaseNft()">Purchase</b-button>
+                  @click="purchaseNft()"  class="gtag-link-others" tagname="confirm_purchase">Purchase</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
-                  @click="updateNftListingPrice()">Change Price</b-button>
+                  @click="updateNftListingPrice()"  class="gtag-link-others" tagname="change_price">Change Price</b-button>
               </div>
 
               <div class="col">
@@ -160,7 +162,7 @@
                   variant="primary"
                   v-if="ownListedNftSelected"
                   v-tooltip="'Cancelled sales cannot be re-listed for 24 hours!'"
-                  @click="cancelNftListing()">Cancel Listing</b-button>
+                  @click="cancelNftListing()"  class="gtag-link-others" tagname="cancel_listing">Cancel Listing</b-button>
               </div>
             </div>
 
@@ -168,6 +170,8 @@
               <weapon-grid
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
+                :showReforgedToggle="false"
+                :canFavorite="false"
                 :weaponIds="searchResults"
                 v-model="selectedNftId">
 
@@ -223,19 +227,20 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="activeType = 'weapon'">Show Weapons</b-button>
+                  @click="activeType = 'weapon'"  class="gtag-link-others" tagname="show_weapons_market">Show Weapons</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="activeType = 'character'">Show Characters</b-button>
+                  @click="activeType = 'character'"  class="gtag-link-others" tagname="show_characters_market">Show Characters</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   v-if="activeType === 'weapon'"
+                   class="gtag-link-others" tagname="add_listing_weapon"
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
                   @click="addListingForNft()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
                   v-tooltip.bottom="weaponMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
@@ -243,6 +248,7 @@
                   variant="primary"
                   v-if="activeType === 'character'"
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
+                   class="gtag-link-others" tagname="add_listing_character"
                   @click="addListingForNft()">List Character <b-icon-question-circle :hidden=!characterMarketTax
                   v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
               </div>
@@ -260,6 +266,8 @@
             <div class="sell-grid" v-if="activeType === 'weapon'">
               <weapon-grid
                 v-model="selectedNftId"
+                :showReforgedToggle="false"
+                :canFavorite="false"
               />
             </div>
 
@@ -434,8 +442,18 @@ export default Vue.extend({
     },
 
     async loadMarketTaxes() {
-      this.characterMarketTax = this.characterMarketTax || await this.getMarketTax(this.Characters.options.address) as string;
-      this.weaponMarketTax = this.weaponMarketTax || await this.getMarketTax(this.Weapons.options.address) as string;
+      if(!this.characterMarketTax) {
+        const tax = await this.getMarketTax(this.Characters.options.address) as string;
+        this.characterMarketTax = this.convertMarketTax(tax);
+      }
+      if(!this.weaponMarketTax) {
+        const tax = await this.getMarketTax(this.Weapons.options.address) as string;
+        this.weaponMarketTax = this.convertMarketTax(tax);
+      }
+    },
+
+    convertMarketTax(tax: string): string {
+      return new BigNumber(tax).div(new BigNumber(2).pow(64)).multipliedBy(100).integerValue(BigNumber.ROUND_CEIL).toString();
     },
 
     async getMarketTax(contractAddress: string) {
@@ -525,11 +543,19 @@ export default Vue.extend({
 
       this.waitingMarketOutcome = true;
 
-      const results = await this.purchaseMarketListing({
+      const results: any = await this.purchaseMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
         maxPrice: price
       });
+
+      const results2: any  = await this.fetchAllMarketNftIds({
+        nftContractAddr: this.contractAddress
+      });
+
+      this.allSearchResults = results2;
+
+      this.allSearchResults = Array.from(this.allSearchResults).filter((x: any) => x.id !== this.selectedNftId);
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully purchased '

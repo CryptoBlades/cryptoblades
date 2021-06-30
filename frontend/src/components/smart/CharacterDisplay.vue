@@ -1,66 +1,83 @@
 <template>
-  <div class="root main-font">
-    <div
-      class="character-portrait"
-    >
-      <!--img
-        v-if="!isLoadingCharacter"
-        :src="getCharacterArt(currentCharacter)"
-        alt="Placeholder character"
-      /-->
-      <CharacterArt
-        v-if="!isLoadingCharacter"
-        :character="currentCharacter"
-        :portrait="true" />
-      <span v-if="isLoadingCharacter" style="position: relative">
-        <div class="loading-container">
-          <i class="fas fa-spinner fa-spin"></i>
-        </div>
-      </span>
+  <div class="character-display-container">
+    <div class="root main-font">
+      <div
+        class="character-portrait"
+      >
+        <!--img
+          v-if="!isLoadingCharacter"
+          :src="getCharacterArt(currentCharacter)"
+          alt="Placeholder character"
+        /-->
+        <CharacterArt
+          v-if="!isLoadingCharacter"
+          :character="currentCharacter"
+          :portrait="true" />
+        <span v-if="isLoadingCharacter" style="position: relative">
+          <div class="loading-container">
+            <i class="fas fa-spinner fa-spin"></i>
+          </div>
+        </span>
+      </div>
+
+      <div class="character-data-column dark-bg-text">
+        <span v-if="!isLoadingCharacter" class="name bold"><span :class="traits[currentCharacter.trait].toLowerCase() + '-icon'"></span> {{
+          getCharacterName(currentCharacterId)
+        }}</span>
+        <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
+        <span v-if="!isLoadingCharacter" class="subtext">
+          Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP)
+        </span>
+        <span v-if="!isLoadingCharacter" class="subtext">
+          Power: {{CharacterPower(currentCharacter.level).toLocaleString()}}
+          <Hint class="power-hint" text="Power increases by 10 every level up,
+            <br>and multiplied every 10 level ups
+            <br>Level 1: 1000
+            <br>Level 10: 1090
+            <br>Level 11: 2200
+            <br>Level 20: 2380
+            <br>Level 21: 3600" />
+        </span>
+        <small-bar
+          v-if="!isLoadingCharacter"
+          class="bar stamina"
+          :current="currentCharacterStamina"
+          :max="maxStamina"
+          v-tooltip="toolTipHtml"
+          faIcon="fa-bolt"
+          primaryColor="#ec4b4b"
+          altText="Stamina"
+        />
+      </div>
+      <div class="character-list d-none d-sm-block">
+      <ul class="character-list"
+          v-bind:class="getIsInCombat ? 'disabled-li' : ''">
+        <li
+          class="character"
+          v-for="c in filteredCharactersForList"
+          :key="c.id"
+          @click="!getIsInCombat && setCurrentCharacter(c.id)"
+        >
+        <div class="name-list"
+        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
+        </li>
+      </ul>
+      </div>
     </div>
 
-    <div class="character-data-column dark-bg-text">
-      <span v-if="!isLoadingCharacter" class="name bold"><span :class="traits[currentCharacter.trait].toLowerCase() + '-icon'"></span> {{
-        getCharacterName(currentCharacterId)
-      }}</span>
-      <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
-      <span v-if="!isLoadingCharacter" class="subtext">
-        Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP)
-      </span>
-      <span v-if="!isLoadingCharacter" class="subtext">
-        Power: {{CharacterPower(currentCharacter.level).toLocaleString()}}
-        <Hint class="power-hint" text="Power increases by 10 every level up,
-          <br>and multiplied every 10 level ups
-          <br>Level 1: 1000
-          <br>Level 10: 1090
-          <br>Level 11: 2200
-          <br>Level 20: 2380
-          <br>Level 21: 3600" />
-      </span>
-      <small-bar
-        v-if="!isLoadingCharacter"
-        class="bar stamina"
-        :current="currentCharacterStamina"
-        :max="maxStamina"
-        v-tooltip="toolTipHtml"
-        faIcon="fa-bolt"
-        primaryColor="#ec4b4b"
-        altText="Stamina"
-      />
-    </div>
-	<div class="character-list">
-    <ul class="character-list">
-      <li
-        class="character"
-        v-for="c in filteredCharactersForList"
-        :key="c.id"
-        @click="setCurrentCharacter(c.id)"
-      >
-      <div class="name-list"
-      >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
-      </li>
-    </ul>
-	</div>
+    <div class="character-list-mobile" v-if="isMobile()">
+      <ul>
+        <li
+          class="character"
+          v-for="c in filteredCharactersForList"
+          :key="c.id"
+          @click="!getIsInCombat && setCurrentCharacter(c.id)"
+        >
+        <div class="name-list"
+        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
+        </li>
+      </ul>
+      </div>
   </div>
 </template>
 
@@ -88,7 +105,8 @@ export default {
       'getCharacterName',
       'charactersWithIds',
       'ownCharacters',
-      'timeUntilCurrentCharacterHasMaxStamina'
+      'timeUntilCurrentCharacterHasMaxStamina',
+      'getIsInCombat'
     ]),
 
     isLoadingCharacter(): boolean {
@@ -112,10 +130,10 @@ export default {
 
   data() {
     return {
-      traits: CharacterTrait
+      traits: CharacterTrait,
+      isPlaza : false
     };
   },
-
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     getCharacterArt,
@@ -190,6 +208,7 @@ li.character{
   padding: 7px 4px 2px;
   margin: 5px;
   vertical-align: middle;
+  cursor: pointer;
 }
 
 .name-list {
@@ -199,5 +218,27 @@ li.character{
   font-size: 0.9em;
   text-align: center;
   color: #9e8a57;
+}
+
+.character-list-mobile {
+  border-top: 3px solid #9e8a57;
+  margin-top : 15px;
+  padding-top: 15px;
+  display :flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: stretch;
+}
+
+.character-list-mobile > ul{
+  padding :0px;
+}
+.character-list-mobile > ul > li{
+  justify-content: center;
+  display: flex;
+}
+.disabled-li {
+  pointer-events: none;
+  opacity: 0.6;
 }
 </style>
