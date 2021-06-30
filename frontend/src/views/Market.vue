@@ -326,9 +326,6 @@ import { Characters, Weapons } from '../../../build/abi-interfaces';
 import BigNumber from 'bignumber.js';
 import { traitNameToNumber } from '@/contract-models';
 
-Vue.directive('visible', (el, bind) => {
-  el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
-
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
 type CharacterId = string;

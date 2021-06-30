@@ -13,10 +13,10 @@ export function traitNumberToName(traitNum: number): string {
 
 export function traitNameToNumber(traitName: string): number {
   switch(traitName) {
-  case 'Fire':        return 0;
-  case 'Earth':       return 1;
-  case 'Lightning':   return 2;
-  case 'Water':       return 3;
+  case 'Fire':        return WeaponElement.Fire;
+  case 'Earth':       return WeaponElement.Earth;
+  case 'Lightning':   return WeaponElement.Lightning;
+  case 'Water':       return WeaponElement.Water;
   default:            return 255;
   }
 }

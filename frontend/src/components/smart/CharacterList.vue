@@ -39,12 +39,8 @@
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import Vue from 'vue';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
-
-Vue.directive('visible', (el, bind) => {
-  el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
 
 export default {
   props: {

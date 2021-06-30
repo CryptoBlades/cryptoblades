@@ -54,9 +54,6 @@ interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
 }
 
-Vue.directive('visible', (el, bind) => {
-  el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
-
 export default Vue.extend({
   model: {
     prop: 'highlight',

@@ -57,12 +57,16 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
 import _ from 'lodash';
+import Vue from 'vue';
 import Events from './events';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import BigButton from './components/BigButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import ClaimRewardsBar from './components/smart/ClaimRewardsBar.vue';
+
+Vue.directive('visible', (el, bind) => {
+  el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
 
 export default {
   inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
