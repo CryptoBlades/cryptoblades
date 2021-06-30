@@ -10,12 +10,12 @@
       <div class="starter-panel">
         <span class="starter-panel-heading">Metamask Not Detected Or Incorrect Network</span>
         <div class="center">
-          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning"/>
-          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError"/>
+          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning" />
+          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError" />
         </div>
       </div>
     </div>
-    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0'))">
+    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))">
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
@@ -78,8 +78,8 @@ export default {
   }),
 
   computed: {
-    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId']),
-    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl']),
+    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
+    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes']),
 
     canShowApp() {
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
@@ -105,12 +105,12 @@ export default {
     $route(to) {
       // react to route changes
       window.gtag('event', 'page_view', {
-        page_title:  to.name,
+        page_title: to.name,
         page_location: to.fullPath,
         page_path: to.path,
-        send_to: 'G-C5RLX74PEW'
+        send_to: 'G-C5RLX74PEW',
       });
-    }
+    },
   },
 
   methods: {
@@ -120,6 +120,7 @@ export default {
       'pollAccountsAndNetwork',
       'fetchWeaponTransferCooldownForOwnWeapons',
       'fetchCharacterTransferCooldownForOwnCharacters',
+      'fetchStakeDetails',
     ]),
 
     async updateCurrentCharacterStamina() {
@@ -128,6 +129,12 @@ export default {
       if (this.currentCharacterId !== null) {
         await this.fetchCharacterStamina(this.currentCharacterId);
       }
+    },
+
+    async hasStakedBalance() {
+      const stakedBalance = this.staking.skill.stakedBalance + this.staking.lp.stakedBalance + this.staking.lp2.stakedBalance;
+
+      return stakedBalance !== 0;
     },
 
     checkStorage() {
@@ -193,12 +200,13 @@ export default {
     Events.$on('setting:rewards', () => this.checkStorage());
 
     document.body.addEventListener('click', (e) => {
-      if(e.target.nodeName==='BUTTON') {
-        window.gtag('event', 'button_clicked', {clickInfo: e.target.getAttribute('tagname')});
+      if (e.target.nodeName === 'BUTTON') {
+        window.gtag('event', 'button_clicked', { clickInfo: e.target.getAttribute('tagname') });
       }
 
-      if (e.target.className.includes('gtag-link-others')) { // capture clickable elements
-        window.gtag('event', 'button_clicked', {clickInfo: e.target.getAttribute('tagname') });
+      if (e.target.className.includes('gtag-link-others')) {
+        // capture clickable elements
+        window.gtag('event', 'button_clicked', { clickInfo: e.target.getAttribute('tagname') });
       }
     });
   },
@@ -207,7 +215,7 @@ export default {
     try {
       await this.initializeStore();
     } catch (e) {
-      this.errorMessage = 'Welcome to CryptoBlades. Here\'s how you can get started.';
+      this.errorMessage = 'Welcome to CryptoBlades. Here is how you can get started.';
       if (e.code === 4001) {
         this.errorMessage = 'Error: MetaMask could not get permissions.';
       }
@@ -219,6 +227,10 @@ export default {
     this.pollCharacterStaminaIntervalId = setInterval(async () => {
       await this.updateCurrentCharacterStamina();
     }, 3000);
+
+    this.availableStakeTypes.forEach((item) => {
+      this.fetchStakeDetails({ stakeType: item });
+    });
 
     this.weaponTransferCooldownPollIntervalId = setInterval(async () => {
       await Promise.all([this.fetchCharacterTransferCooldownForOwnCharacters(), this.fetchWeaponTransferCooldownForOwnWeapons()]);
