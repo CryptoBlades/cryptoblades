@@ -200,13 +200,22 @@ export default {
     Events.$on('setting:rewards', () => this.checkStorage());
 
     document.body.addEventListener('click', (e) => {
+
+      const tagname = e.target.getAttribute('tagname');
+      if(!tagname) return;
+
       if (e.target.nodeName === 'BUTTON') {
-        window.gtag('event', 'button_clicked', { clickInfo: e.target.getAttribute('tagname') });
+        window.gtag('event', 'button_clicked', {
+          value: tagname
+        });
       }
 
       if (e.target.className.includes('gtag-link-others')) {
-        // capture clickable elements
-        window.gtag('event', 'button_clicked', { clickInfo: e.target.getAttribute('tagname') });
+        window.gtag('event', 'nav', {
+          event_category: 'navigation',
+          event_label: 'navbar',
+          value: tagname
+        });
       }
     });
   },

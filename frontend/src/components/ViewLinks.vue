@@ -1,45 +1,40 @@
 <template>
   <b-navbar-nav>
 
-    <router-link :to="{ name: 'plaza' }" exact class="nav-link gtag-link-others"
-    v-if="!featureFlagStakeOnly" tagname="plaza_screen">
+    <router-link :to="{ name: 'plaza' }" exact class="nav-link"
+    v-if="!featureFlagStakeOnly">
       <li class="nav-item">
-        <span>Plaza</span>
+        <span class="gtag-link-others" tagname="plaza_screen">Plaza</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'blacksmith' }" exact class="nav-link gtag-link-others"   v-if="!featureFlagStakeOnly"
-     tagname="blacksmith_screen">
+    <router-link :to="{ name: 'blacksmith' }" exact class="nav-link"   v-if="!featureFlagStakeOnly">
       <li class="nav-item" >
-        <span>Blacksmith</span>
+        <span class="gtag-link-others" tagname="blacksmith_screen">Blacksmith</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'combat' }" exact class="nav-link gtag-link-others"  v-if="!featureFlagStakeOnly"
-      tagname="combat_screen">
+    <router-link :to="{ name: 'combat' }" exact class="nav-link"  v-if="!featureFlagStakeOnly">
       <li class="nav-item" >
-        <span>Combat</span>
+        <span class="gtag-link-others" tagname="combat_screen">Combat</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'raid' }" exact class="nav-link gtag-link-others"  v-if="!featureFlagStakeOnly && featureFlagRaid"
-      tagname="raid_screen">
+    <router-link :to="{ name: 'raid' }" exact class="nav-link"  v-if="!featureFlagStakeOnly && featureFlagRaid">
       <li class="nav-item">
-        <span>Raid</span>
+        <span class="gtag-link-others" tagname="raid_screen">Raid</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'market' }" exact class="nav-link gtag-link-others" v-if="!featureFlagStakeOnly && featureFlagMarket"
-      tagname="market_screen">
+    <router-link :to="{ name: 'market' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagMarket">
       <li class="nav-item">
-        <span>Market</span>
+        <span class="gtag-link-others" tagname="market_screen">Market</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link gtag-link-others"
-      tagname="stake_screen">
+    <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link">
       <li class="nav-item">
-        <span>Stake</span>
+        <span class="gtag-link-others" tagname="stake_screen">Stake</span>
       </li>
     </router-link>
 
