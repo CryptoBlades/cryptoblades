@@ -81,7 +81,7 @@
             <div class="col-md-3 col-sm-12 col-xs-12 encounter text-center d-flex flex-column justify-content-center" v-for="(e, i) in targets" :key="i">
 
               <div class="xp-gain">
-                XP if not REkT: {{getPotentialXp(e)}}
+                +{{getPotentialXp(e)}} XP
               </div>
 
               <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
