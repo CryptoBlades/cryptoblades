@@ -15,7 +15,7 @@
           </p>
           <p class="center-text">to be claimed.</p>
           <button
-            class="StakeButton"
+            class="StakeButton claim-button"
             :class="{
               switch_active: rewardClaimState === 'ok',
             }"
@@ -26,7 +26,7 @@
         </div>
       </div>
       <div class="chooser">
-        <div class="navbar">
+        <div class="navbar-staking">
           <button
             class="switch"
             :class="{ switch_active: isDeposit }"
@@ -552,7 +552,7 @@ export default {
   justify-content: center;
   padding: 0 16px;
 }
-.navbar {
+.navbar-staking {
   display: flex;
   border: 1px solid #3c3c3c;
   box-sizing: border-box;
@@ -631,6 +631,10 @@ export default {
   border-radius: 0.1em;
   background: rgb(31,31,34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+}
+.claim-button {
+  display: block;
+  margin: 0 auto;
 }
 .switch_active {
   border: 2px solid rgb(37, 167, 219);
@@ -743,7 +747,7 @@ export default {
 }
 
 .reward-claim-section {
-  height: 14.5rem;
+  height: fit-content;
   overflow: hidden;
   /* padding: 10px; */
   transition: height 0.7s cubic-bezier(0.645, 0.045, 0.355, 1);
