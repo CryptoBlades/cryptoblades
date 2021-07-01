@@ -80,28 +80,37 @@
           <div class="row mb-3" v-if="targets.length > 0">
             <div class="col-md-3 col-sm-12 col-xs-12 encounter text-center d-flex flex-column justify-content-center" v-for="(e, i) in targets" :key="i">
 
-              <div class="xp-gain">
-                +{{getPotentialXp(e)}} XP
+              <div class="encounter-container">
+
+                <div class="encounter-element">
+                  <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
+                  <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
+                </div>
+
+                <div class="encounter-power">
+                  {{ e.power }} Power
+                </div>
+
+                <div class="xp-gain">
+                  +{{getPotentialXp(e)}} XP
+                </div>
+
+                <div class="victory-chance">
+                  {{ getWinChance(e.power, e.trait) }} Victory
+                </div>
+
+                <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
+
+                <big-button
+                  class="encounter-button"
+                  :mainText="`Fight!`"
+                  v-tooltip="'Cost 40 stamina'"
+                  :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                  @click="onClickEncounter(e)"
+                />
+
+                <p v-if="isLoadingTargets">Loading...</p>
               </div>
-
-              <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
-
-              <div class="encounter-element">
-                <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
-                <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
-              </div>
-
-              <big-button
-                class="encounter-button"
-                :mainText="`Fight!`"
-                :subText="`Power: ${e.power}`"
-                :subText2="`Chance to Win: ${getWinChance(e.power, e.trait)}`"
-                v-tooltip="'Cost 40 stamina'"
-                :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-                @click="onClickEncounter(e)"
-              />
-
-              <p v-if="isLoadingTargets">Loading...</p>
             </div>
           </div>
         </div>
@@ -328,10 +337,6 @@ export default {
   max-width: 15vw;
 }
 
-.encounter-element {
-  font-size: 2em;
-}
-
 .payout-info {
   margin: auto;
   text-align: center;
@@ -397,10 +402,36 @@ div.encounter.text-center {
   height: 12em;
 }
 
-div.xp-gain{
+.encounter-container {
+  position: relative;
+}
+
+.xp-gain, .encounter-power{
   color: #9e8a57 !important;
-  margin-top: -24em;
-  font-size: x-large;
+}
+
+.xp-gain, .encounter-power, .encounter-element, .victory-chance  {
   position: absolute;
+  font-size: x-large;
+}
+
+.encounter-element {
+  top: 40px;
+}
+
+.encounter-power {
+  top: 70px;
+}
+
+.victory-chance {
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+}
+
+.xp-gain {
+  top: 100px;
 }
 </style>
