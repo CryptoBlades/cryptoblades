@@ -7,9 +7,11 @@
 </template>
 
 <script lang="ts">
+
 export default {
-  props: ['mainText', 'subText', 'subText2', 'disabled'],
+  props: ['mainText', 'subText', 'subText1', 'disabled'],
 };
+
 </script>
 
 <style>
