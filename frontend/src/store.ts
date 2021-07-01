@@ -170,9 +170,14 @@ export function createStore(web3: Web3) {
       },
 
       getCharacterName() {
-
         return (characterId: number) => {
           return getCharacterNameFromSeed(characterId);
+        };
+      },
+
+      getCharacterUnclaimedXp(state: IState) {
+        return (characterId: number) => {
+          return state.xpRewards[characterId];
         };
       },
 
