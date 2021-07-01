@@ -114,6 +114,7 @@
           :class="{
             switch_active: !loading && currentState === 'ok',
           }"
+          tagname="stake"
           @click="onSubmit"
         >
           <span v-if="loading">
