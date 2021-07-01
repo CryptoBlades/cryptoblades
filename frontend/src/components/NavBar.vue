@@ -47,14 +47,13 @@ export default Vue.extend({
 
   methods: {
     checkStorage(): void {
-      this.canShowRewardsBar = !localStorage.getItem('rewards');
+      this.canShowRewardsBar = localStorage.getItem('hideRewards') === 'false';
     }
   },
 
   mounted() {
     this.checkStorage();
-
-    Events.$on('setting:rewards', () => this.checkStorage());
+    Events.$on('setting:hideRewards', () => this.checkStorage());
   },
 });
 </script>

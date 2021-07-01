@@ -138,7 +138,7 @@ export default {
     },
 
     checkStorage() {
-      this.canShowRewardsBar = !localStorage.getItem('rewards');
+      this.canShowRewardsBar = localStorage.getItem('hideRewards') === 'false';
     },
     async startOnboarding() {
       const onboarding = new MetaMaskOnboarding();
@@ -197,16 +197,17 @@ export default {
   mounted() {
     this.checkStorage();
 
-    Events.$on('setting:rewards', () => this.checkStorage());
+    Events.$on('setting:hideRewards',() => this.checkStorage());
+    Events.$on('setting:hideAdvanced',() => this.checkStorage());
+    Events.$on('setting:useGraphics',() => this.checkStorage());
 
     document.body.addEventListener('click', (e) => {
-
       const tagname = e.target.getAttribute('tagname');
-      if(!tagname) return;
+      if (!tagname) return;
 
       if (e.target.nodeName === 'BUTTON') {
         window.gtag('event', 'button_clicked', {
-          value: tagname
+          value: tagname,
         });
       }
 
@@ -214,7 +215,7 @@ export default {
         window.gtag('event', 'nav', {
           event_category: 'navigation',
           event_label: 'navbar',
-          value: tagname
+          value: tagname,
         });
       }
     });
@@ -258,6 +259,10 @@ export default {
       setTimeout(pollAccounts, 200);
     };
     pollAccounts();
+
+    if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
+    if (!localStorage.getItem('hideAdvanced')) localStorage.setItem('hideAdvanced', 'false');
+    if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
   },
 
   beforeDestroy() {
