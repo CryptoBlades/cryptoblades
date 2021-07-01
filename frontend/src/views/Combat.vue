@@ -80,6 +80,10 @@
           <div class="row mb-3" v-if="targets.length > 0">
             <div class="col-md-3 col-sm-12 col-xs-12 encounter text-center d-flex flex-column justify-content-center" v-for="(e, i) in targets" :key="i">
 
+              <div class="xp-gain">
+                XP if not REkT: {{getPotentialXp(e)}}
+              </div>
+
               <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
 
               <div class="encounter-element">
@@ -91,7 +95,6 @@
                 class="encounter-button"
                 :mainText="`Fight!`"
                 :subText="`Power: ${e.power}`"
-                :subText1="`XP Gain if Win: ${getPotentialXp(e)}`"
                 :subText2="`Chance to Win: ${getWinChance(e.power, e.trait)}`"
                 v-tooltip="'Cost 40 stamina'"
                 :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
@@ -392,5 +395,12 @@ div.encounter.text-center {
   background: rgba(255, 255, 255, 0.1);
   width: 12em;
   height: 12em;
+}
+
+div.xp-gain{
+  color: #9e8a57 !important;
+  margin-top: -24em;
+  font-size: x-large;
+  position: absolute;
 }
 </style>
