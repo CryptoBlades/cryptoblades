@@ -11,6 +11,7 @@
         class="button"
         :mainText="`Recruit character for ${recruitCost} SKILL`"
         @click="onMintCharacter"
+        tagname="recruit_character"
       />
       <div v-if="formatSkill() < recruitCost" >
         <br>
@@ -26,9 +27,9 @@
             <b-button
               v-if="ownCharacters.length < 4"
               variant="primary"
-              class="ml-auto"
+              class="ml-auto gtag-link-others"
               @click="onMintCharacter"
-              v-tooltip="'Recruit new character'">
+              v-tooltip="'Recruit new character'" tagname="recruit_character">
               Recruit ({{ recruitCost }} SKILL) <i class="fas fa-plus"></i>
             </b-button>
           </div>

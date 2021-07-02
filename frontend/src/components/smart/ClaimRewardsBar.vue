@@ -8,18 +8,19 @@
     <b-nav-item
       class="ml-3"
       :disabled="!canClaimTokens"
-      @click="onClaimTokens">
+      @click="onClaimTokens"><!-- moved gtag-link below b-nav-item -->
+      <span class="gtag-link-others" tagname="claim_skill">
         <strong>SKILL</strong> {{ formattedSkillReward }}
         <strong>Early Withdraw Tax</strong> 0%
         <strong>Time since last withdraw</strong> n/a
+      </span>
     </b-nav-item>
 
     <b-nav-item
       class="ml-3"
       :disabled="!canClaimXp"
       @click="onClaimXp">
-
-        <strong>XP</strong> {{ formattedXpRewards }}
+        <div class="gtag-link-others" v-html="`<strong>XP</strong> ${formattedXpRewards}`"></div>
     </b-nav-item>
   </b-navbar>
 </template>
@@ -32,13 +33,15 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
 import { getCharacterNameFromSeed } from '../../character-name';
+import { RequiredXp } from '../../interfaces';
+
 
 Vue.use(BootstrapVueIcons);
 
 interface StoreMappedState {
   skillRewards: string;
   xpRewards: Record<string, string>;
-  ownedCharacterIds: string[];
+  ownedCharacterIds: string[]
 }
 
 interface StoreMappedActions {
@@ -49,7 +52,7 @@ interface StoreMappedActions {
 export default Vue.extend({
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['ownCharacters'])),
+    ...(mapGetters(['ownCharacters', 'currentCharacter'])),
 
     formattedSkillReward(): string {
       const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
@@ -63,7 +66,11 @@ export default Vue.extend({
     formattedXpRewards(): string {
       return this.xpRewardsForOwnedCharacters.map((xp, i) => {
         if(!this.ownCharacters[i]) return `${xp}`;
-        return `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}`;
+        return  `${this.ownCharacters[i].id === this.currentCharacter.id ? '<b>' : ''}` +
+                `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '<u>' : ''}` +
+                `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}` +
+                `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '</u>' : ''}` +
+                `${this.ownCharacters[i].id === this.currentCharacter.id ? '</b>' : ''}`;
       }).join(', ');
     },
 
@@ -120,5 +127,6 @@ export default Vue.extend({
 
 .rewards-claimable-icon {
   margin-right: 5px;
+  align-self: center;
 }
 </style>

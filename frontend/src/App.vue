@@ -3,7 +3,6 @@
     <nav-bar />
     <claim-rewards-bar v-if="canShowRewardsBar" />
     <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
-    {{ typeof skillBalance }}
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
@@ -11,12 +10,12 @@
       <div class="starter-panel">
         <span class="starter-panel-heading">Metamask Not Detected Or Incorrect Network</span>
         <div class="center">
-          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning"/>
-          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError"/>
+          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning" />
+          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError" />
         </div>
       </div>
     </div>
-    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0'))">
+    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))">
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
@@ -32,7 +31,7 @@
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
             <li>
               2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br />
-              <a href="getExchangeUrl">Trade SKILL/BNB</a>
+             <a v-bind:href="`${getExchangeUrl}`" target="_blank">Trade SKILL/BNB</a>
             </li>
             <li>3. Read the alert and select “I understand” and “Continue”</li>
             <li>
@@ -79,8 +78,8 @@ export default {
   }),
 
   computed: {
-    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId']),
-    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl']),
+    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
+    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes']),
 
     canShowApp() {
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
@@ -103,6 +102,15 @@ export default {
     async currentCharacterId() {
       await this.updateCurrentCharacterStamina();
     },
+    $route(to) {
+      // react to route changes
+      window.gtag('event', 'page_view', {
+        page_title: to.name,
+        page_location: to.fullPath,
+        page_path: to.path,
+        send_to: 'G-C5RLX74PEW',
+      });
+    },
   },
 
   methods: {
@@ -112,6 +120,7 @@ export default {
       'pollAccountsAndNetwork',
       'fetchWeaponTransferCooldownForOwnWeapons',
       'fetchCharacterTransferCooldownForOwnCharacters',
+      'fetchStakeDetails',
     ]),
 
     async updateCurrentCharacterStamina() {
@@ -122,8 +131,14 @@ export default {
       }
     },
 
+    async hasStakedBalance() {
+      const stakedBalance = this.staking.skill.stakedBalance + this.staking.lp.stakedBalance + this.staking.lp2.stakedBalance;
+
+      return stakedBalance !== 0;
+    },
+
     checkStorage() {
-      this.canShowRewardsBar = !localStorage.getItem('rewards');
+      this.canShowRewardsBar = localStorage.getItem('hideRewards') === 'false';
     },
     async startOnboarding() {
       const onboarding = new MetaMaskOnboarding();
@@ -182,14 +197,35 @@ export default {
   mounted() {
     this.checkStorage();
 
-    Events.$on('setting:rewards', () => this.checkStorage());
+    Events.$on('setting:hideRewards',() => this.checkStorage());
+    Events.$on('setting:hideAdvanced',() => this.checkStorage());
+    Events.$on('setting:useGraphics',() => this.checkStorage());
+
+    document.body.addEventListener('click', (e) => {
+      const tagname = e.target.getAttribute('tagname');
+      if (!tagname) return;
+
+      if (e.target.nodeName === 'BUTTON') {
+        window.gtag('event', 'button_clicked', {
+          value: tagname,
+        });
+      }
+
+      if (e.target.className.includes('gtag-link-others')) {
+        window.gtag('event', 'nav', {
+          event_category: 'navigation',
+          event_label: 'navbar',
+          value: tagname,
+        });
+      }
+    });
   },
 
   async created() {
     try {
       await this.initializeStore();
     } catch (e) {
-      this.errorMessage = 'Welcome to CryptoBlades. Here\'s how you can get started.';
+      this.errorMessage = 'Welcome to CryptoBlades. Here is how you can get started.';
       if (e.code === 4001) {
         this.errorMessage = 'Error: MetaMask could not get permissions.';
       }
@@ -201,6 +237,10 @@ export default {
     this.pollCharacterStaminaIntervalId = setInterval(async () => {
       await this.updateCurrentCharacterStamina();
     }, 3000);
+
+    this.availableStakeTypes.forEach((item) => {
+      this.fetchStakeDetails({ stakeType: item });
+    });
 
     this.weaponTransferCooldownPollIntervalId = setInterval(async () => {
       await Promise.all([this.fetchCharacterTransferCooldownForOwnCharacters(), this.fetchWeaponTransferCooldownForOwnWeapons()]);
@@ -219,6 +259,10 @@ export default {
       setTimeout(pollAccounts, 200);
     };
     pollAccounts();
+
+    if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
+    if (!localStorage.getItem('hideAdvanced')) localStorage.setItem('hideAdvanced', 'false');
+    if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
   },
 
   beforeDestroy() {

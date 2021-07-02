@@ -410,9 +410,8 @@ export default {
     }
   },
   mounted() {
-    this.advancedUI = !localStorage.getItem('advanced');
-
-    if(localStorage.getItem('graphics')) {
+    this.advancedUI = localStorage.getItem('hideAdvanced') === 'false';
+    if(localStorage.getItem('useGraphics') === 'false') {
       this.allLoaded = true;
       this.showPlaceholder = true;
       return;

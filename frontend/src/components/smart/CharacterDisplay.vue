@@ -50,12 +50,13 @@
         />
       </div>
       <div class="character-list d-none d-sm-block">
-      <ul class="character-list">
+      <ul class="character-list"
+          v-bind:class="getIsInCombat ? 'disabled-li' : ''">
         <li
-          class="character"
+          :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
           v-for="c in filteredCharactersForList"
           :key="c.id"
-          @click="setCurrentCharacter(c.id)"
+          @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
         >
         <div class="name-list"
         >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
@@ -67,10 +68,10 @@
     <div class="character-list-mobile" v-if="isMobile()">
       <ul>
         <li
-          class="character"
+          class="{selectedCharactersLiClass}"
           v-for="c in filteredCharactersForList"
           :key="c.id"
-          @click="setCurrentCharacter(c.id)"
+          @click="!getIsInCombat && setCurrentCharacter(c.id)"
         >
         <div class="name-list"
         >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
@@ -104,7 +105,8 @@ export default {
       'getCharacterName',
       'charactersWithIds',
       'ownCharacters',
-      'timeUntilCurrentCharacterHasMaxStamina'
+      'timeUntilCurrentCharacterHasMaxStamina',
+      'getIsInCombat'
     ]),
 
     isLoadingCharacter(): boolean {
@@ -116,12 +118,7 @@ export default {
     },
 
     filteredCharactersForList(): any {
-      let items: any  = this.ownCharacters;
-
-      items = items.filter((x: any) => x.id !== this.currentCharacterId);
-
-      if (items.length >= 4) items = items.filter((x: any) => x.id !== 0);
-
+      const items: any  = this.ownCharacters;
       return items;
     }
   },
@@ -137,6 +134,14 @@ export default {
     getCharacterArt,
     CharacterPower,
     RequiredXp,
+
+    setListClassForSelChar(id: string, currentCharId: string): any {
+      if (id === currentCharId){
+        return 'character-highlight';
+      }
+
+      else return 'character';
+    }
   },
 };
 </script>
@@ -209,6 +214,16 @@ li.character{
   cursor: pointer;
 }
 
+li.character-highlight{
+  outline: solid #9e8a57 3px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 7px 4px 2px;
+  margin: 5px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
 .name-list {
   bottom: 20px;
   margin: auto;
@@ -234,5 +249,9 @@ li.character{
 .character-list-mobile > ul > li{
   justify-content: center;
   display: flex;
+}
+.disabled-li {
+  pointer-events: none;
+  opacity: 0.6;
 }
 </style>
