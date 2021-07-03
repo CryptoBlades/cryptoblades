@@ -29,7 +29,7 @@ export default {
 }
 
 .button:disabled {
-  opacity: 40%;
+  opacity: 40% !important;
 }
 
 h1 {
