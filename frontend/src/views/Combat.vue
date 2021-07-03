@@ -71,30 +71,46 @@
                   Choose New Weapon
                 </b-button>
               </div>
+
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" />
+
             </div>
           </div>
 
           <div class="row mb-3" v-if="targets.length > 0">
             <div class="col-md-3 col-sm-12 col-xs-12 encounter text-center d-flex flex-column justify-content-center" v-for="(e, i) in targets" :key="i">
-              <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
 
-              <div class="encounter-element">
-                <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
-                <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
+              <div class="encounter-container">
+
+                <div class="encounter-element">
+                  <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
+                  <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
+                </div>
+
+                <div class="encounter-power">
+                  {{ e.power }} Power
+                </div>
+
+                <div class="xp-gain">
+                  +{{getPotentialXp(e)}} XP
+                </div>
+
+                <div class="victory-chance">
+                  {{ getWinChance(e.power, e.trait) }} Victory
+                </div>
+
+                <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
+
+                <big-button
+                  class="encounter-button"
+                  :mainText="`Fight!`"
+                  v-tooltip="'Cost 40 stamina'"
+                  :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                  @click="onClickEncounter(e)"
+                />
+
+                <p v-if="isLoadingTargets">Loading...</p>
               </div>
-
-              <big-button
-                class="encounter-button"
-                :mainText="`Fight!`"
-                :subText="`Power: ${e.power}`"
-                :subText2="`Chance to Win: ${getWinChance(e.power, e.trait)}`"
-                v-tooltip="'Cost 40 stamina'"
-                :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-                @click="onClickEncounter(e)"
-              />
-
-              <p v-if="isLoadingTargets">Loading...</p>
             </div>
           </div>
         </div>
@@ -122,8 +138,7 @@ import CombatResults from '../components/CombatResults.vue';
 import Web3 from 'web3';
 import BN from 'bignumber.js';
 import WeaponIcon from '../components/WeaponIcon.vue';
-
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 
 export default {
   data() {
@@ -137,6 +152,7 @@ export default {
       intervalMinutes: null,
       timeSeconds: null,
       timeMinutes: null,
+      fightXpGain: 32,
       selectedWeapon: null,
     };
   },
@@ -155,7 +171,7 @@ export default {
       'currentCharacter',
       'currentCharacterStamina',
       'fightGasOffset',
-      'fightBaseline',
+      'fightBaseline'
     ]),
 
     targets() {
@@ -186,11 +202,13 @@ export default {
     async updateResults([fightResults, error]) {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
+      this.setIsInCombat(this.waitingResults);
     },
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
+    ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
@@ -264,6 +282,7 @@ export default {
       this.fightResults = null;
       this.error = null;
       this.waitingResults = true;
+      this.setIsInCombat(this.waitingResults);
 
       try {
         const results = await this.doEncounter({
@@ -283,9 +302,23 @@ export default {
         this.error = e.message;
       }
     },
+
     formattedSkill(skill) {
       const skillBalance = Web3.utils.fromWei(skill, 'ether');
       return `${new BN(skillBalance).toFixed(6)} SKILL`;
+    },
+
+    getPotentialXp(targetToFight) {
+
+      const characterPower = CharacterPower(this.currentCharacter.level);
+      const playerElement = parseInt(this.currentCharacter.trait, 10);
+      const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id ===this.selectedWeaponId);
+      const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
+      const totalPower = ((characterPower * weaponMultiplier) + selectedWeapon.bonusPower);
+
+      //Formula taken from getXpGainForFight funtion of cryptoblades.sol
+      return Math.floor((targetToFight.power /totalPower) *  this.fightXpGain);
+
     },
   },
 
@@ -302,10 +335,6 @@ export default {
 <style scoped>
 .encounter img {
   max-width: 15vw;
-}
-
-.encounter-element {
-  font-size: 2em;
 }
 
 .payout-info {
@@ -371,5 +400,38 @@ div.encounter.text-center {
   background: rgba(255, 255, 255, 0.1);
   width: 12em;
   height: 12em;
+}
+
+.encounter-container {
+  position: relative;
+}
+
+.xp-gain, .encounter-power{
+  color: #9e8a57 !important;
+}
+
+.xp-gain, .encounter-power, .encounter-element, .victory-chance  {
+  position: absolute;
+  font-size: x-large;
+}
+
+.encounter-element {
+  top: 40px;
+}
+
+.encounter-power {
+  top: 70px;
+}
+
+.victory-chance {
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+}
+
+.xp-gain {
+  top: 100px;
 }
 </style>

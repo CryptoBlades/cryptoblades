@@ -518,11 +518,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // they meditate on what they've learned
         for(uint256 i = 0; i < characters.balanceOf(msg.sender); i++) {
             uint256 char = characters.tokenOfOwnerByIndex(msg.sender, i);
-            if(xpRewards[char] < 65536)
-                characters.gainXp(char, uint16(xpRewards[char]));
-            else
-                characters.gainXp(char, 65535);
+            uint256 xpRewardsToClaim = xpRewards[char];
             xpRewards[char] = 0;
+            if (xpRewardsToClaim > 65535) {
+                xpRewardsToClaim = 65535;
+            }
+            characters.gainXp(char, uint16(xpRewardsToClaim));
         }
     }
 

@@ -110,6 +110,7 @@ export function createStore(web3: Web3) {
       characters: {},
       characterStaminas: {},
       weapons: {},
+      isInCombat: false,
 
       targetsByCharacterIdAndWeaponId: {},
 
@@ -169,9 +170,14 @@ export function createStore(web3: Web3) {
       },
 
       getCharacterName() {
-
         return (characterId: number) => {
           return getCharacterNameFromSeed(characterId);
+        };
+      },
+
+      getCharacterUnclaimedXp(state: IState) {
+        return (characterId: number) => {
+          return state.xpRewards[characterId];
         };
       },
 
@@ -283,6 +289,10 @@ export function createStore(web3: Web3) {
       fightBaseline(state) {
         return state.fightBaseline;
       },
+
+      getIsInCombat(state: IState): boolean {
+        return state.isInCombat;
+      },
     },
 
     mutations: {
@@ -354,6 +364,10 @@ export function createStore(web3: Web3) {
 
       setCurrentCharacter(state: IState, characterId: number) {
         state.currentCharacterId = characterId;
+      },
+
+      setIsInCombat(state: IState, isInCombat: boolean) {
+        state.isInCombat = isInCombat;
       },
 
       addNewOwnedCharacterId(state: IState, characterId: number) {

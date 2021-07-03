@@ -442,8 +442,18 @@ export default Vue.extend({
     },
 
     async loadMarketTaxes() {
-      this.characterMarketTax = this.characterMarketTax || await this.getMarketTax(this.Characters.options.address) as string;
-      this.weaponMarketTax = this.weaponMarketTax || await this.getMarketTax(this.Weapons.options.address) as string;
+      if(!this.characterMarketTax) {
+        const tax = await this.getMarketTax(this.Characters.options.address) as string;
+        this.characterMarketTax = this.convertMarketTax(tax);
+      }
+      if(!this.weaponMarketTax) {
+        const tax = await this.getMarketTax(this.Weapons.options.address) as string;
+        this.weaponMarketTax = this.convertMarketTax(tax);
+      }
+    },
+
+    convertMarketTax(tax: string): string {
+      return new BigNumber(tax).div(new BigNumber(2).pow(64)).multipliedBy(100).integerValue(BigNumber.ROUND_CEIL).toString();
     },
 
     async getMarketTax(contractAddress: string) {
