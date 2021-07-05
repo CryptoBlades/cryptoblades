@@ -2,72 +2,101 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 
-contract CryptoBlades is Initializable, AccessControlUpgradeable {
-    
+contract WaxBridge is Initializable, AccessControlUpgradeable {
+
     using ABDKMath64x64 for int128;
+    using SafeMath for uint256;
+
+    bytes32 public constant WAX_BRIDGE = keccak256("WAX_BRIDGE");
+
+    uint256 public constant LIMIT_PERIOD = 1 days;
 
     function initialize() public initializer {
         __AccessControl_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
-        waxWeiPerBnb = 2668232029457282000000;//2668.232029457282000000
-        dailyBnbWeiLimit = 35779455436688300;// 0.03577 or about $10
+        latestWaxChainBlockNumberProcessed = 0;
+        totalOwedBnb = 0;
+        bnbLimitPerPeriod = 35779455436688300;// 0.03577 or about $10
     }
 
-    uint256 public waxWeiPerBnb;
-    uint256 public dailyBnbWeiLimit;
-    mapping(address => uint256) bnbPaidTowardsLimit;
-    mapping(address => uint256) bnbLimitTimestamp; // time of first exchange after 24h expired
+    uint256 public latestWaxChainBlockNumberProcessed;
+    uint256 public totalOwedBnb;
+    uint256 public bnbLimitPerPeriod;
+    mapping(address => uint256) public bnbLimitTimestamp;
+    mapping(address => uint256) public withdrawableBnb;
+    mapping(address => uint256) private withdrawnBnbDuringPeriod;
 
-    function setDailyBnbWeiLimit(uint256 _dailyBnbWeiLimit) public restricted {
-        dailyBnbWeiLimit = _dailyBnbWeiLimit;
-    }
-
-    function setWaxWeiPerBnb(uint256 _waxWeiPerBnb) public restricted {
-        waxWeiPerBnb = _waxWeiPerBnb;
-    }
-
-    function updateValues(uint256 _dailyBnbWeiLimit, uint256 _waxWeiPerBnb) public restricted {
-        dailyBnbWeiLimit = _dailyBnbWeiLimit;
-        waxWeiPerBnb = _waxWeiPerBnb;
-    }
-
-    function getBnbForWax(uint256 waxInWei) public view returns(uint256) {
-        return ABDKMath64x64.divu(waxInWei,waxWeiPerBnb).mulu(1 ether);
-    }
-
-    function getRemainingBnbToday() public view returns(uint256) {
-        if(bnbPaidTowardsLimit[msg.sender] >= dailyBnbWeiLimit)
+    function getWithdrawnBnbDuringPeriod() public view returns (uint256) {
+        if(bnbLimitTimestamp[msg.sender] + LIMIT_PERIOD < block.timestamp) {
             return 0;
-        return dailyBnbWeiLimit - bnbPaidTowardsLimit[msg.sender];
+        }
+
+        return withdrawnBnbDuringPeriod[msg.sender];
     }
 
-    function timeUntilLimitExpires() public view returns(uint256) {
-        uint256 time = bnbLimitTimestamp[msg.sender] + 1 days;
-        if(time < now)
-            return 0;
-        return time - now;
+    function getRemainingWithdrawableBnbDuringPeriod() external view returns(uint256) {
+        return bnbLimitPerPeriod.sub(getWithdrawnBnbDuringPeriod());
     }
 
-    function onWaxReceived(address payable from, uint256 waxInWei) public restricted {
-        // at this point we assume they're holding enough skill (bot will check through main contract)
-        // and that the parameter here won't exceed their daily limit (bot will check ahead of time)
-        // bot should track any extra it received and let the user claim the next day
-        // so the argument passed should always be <= dailyLimit
-        uint256 amount = ABDKMath64x64.divu(waxInWei, waxWeiPerBnb).mulu(1 ether);
+    function getTimeUntilLimitExpires() external view returns(uint256) {
+        uint256 limitExpirationTime = bnbLimitTimestamp[msg.sender] + LIMIT_PERIOD;
+        (, uint256 result) = limitExpirationTime.trySub(block.timestamp);
+        return result;
+    }
 
-        if(bnbLimitTimestamp[from] < now - 1 days) {
-            bnbLimitTimestamp[from] = now;
-            bnbPaidTowardsLimit[from] = amount;
+    function setDailyBnbWeiLimit(uint256 _dailyBnbWeiLimit) external restricted {
+        bnbLimitPerPeriod = _dailyBnbWeiLimit;
+    }
+
+    function processWaxConversions(uint256 _latestWaxChainBlockNumberProcessed, address[] calldata _to, uint256[] calldata _value) external payable {
+        require(hasRole(WAX_BRIDGE, msg.sender), "Missing WAX_BRIDGE role");
+        require(_latestWaxChainBlockNumberProcessed > latestWaxChainBlockNumberProcessed, "WAX chain block num must be gt");
+        require(_to.length == _value.length, "Mismatched array lengths");
+        require(_to.length < 100, "Too many recipients");
+
+        // assume they're holding enough skill (bot will check through main contract)
+
+        latestWaxChainBlockNumberProcessed = _latestWaxChainBlockNumberProcessed;
+
+        uint256 _totalOwedBnb = 0;
+        for (uint256 i = 0; i < _to.length; i++) {
+            _totalOwedBnb = _totalOwedBnb.add(_value[i]);
+            withdrawableBnb[_to[i]] = withdrawableBnb[_to[i]].add(_value[i]);
         }
-        else {
-            bnbPaidTowardsLimit[from] += amount;
+
+        totalOwedBnb = totalOwedBnb.add(_totalOwedBnb);
+    }
+
+    function withdraw(uint256 _maxAmount) external returns (uint256) {
+        if(bnbLimitTimestamp[msg.sender] + LIMIT_PERIOD < block.timestamp) {
+            bnbLimitTimestamp[msg.sender] = block.timestamp;
+            withdrawnBnbDuringPeriod[msg.sender] = 0;
         }
+
+        uint256 withdrawableBnbDuringPeriod = bnbLimitPerPeriod.sub(withdrawnBnbDuringPeriod[msg.sender]);
+
+        uint256 bnbToSend = _maxAmount;
+        if(bnbToSend > withdrawableBnb[msg.sender]) {
+            bnbToSend = withdrawableBnb[msg.sender];
+        }
+        if(bnbToSend > withdrawableBnbDuringPeriod) {
+            bnbToSend = withdrawableBnbDuringPeriod;
+        }
+
+        // because of if statement above, 'bnbToSend' is guaranteed to be lte 'withdrawableBnb[msg.sender]'
+        // this saves gas
+        withdrawableBnb[msg.sender] -= bnbToSend;
+        totalOwedBnb -= bnbToSend;
+        withdrawnBnbDuringPeriod[msg.sender] = withdrawnBnbDuringPeriod[msg.sender].add(bnbToSend);
+
         // supposedly, send and transfer are discouraged since ether istanbul update
-        from.call{value: amount}("");
+        (bool sent,) = msg.sender.call{value: bnbToSend}("");
+        require(sent, "Failed to send BNB");
     }
 
     modifier restricted() {
