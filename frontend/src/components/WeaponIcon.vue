@@ -18,6 +18,10 @@
         <span :class="weapon.element.toLowerCase() + '-icon'"></span>
       </div>
 
+      <div class="name">
+        {{ getWeaponNameFromSeed(weapon.id, weapon.stars) }}
+      </div>
+
     </div>
 
     <div class="id" v-if="advancedUI">ID {{ weapon.id }}</div>
@@ -42,6 +46,7 @@
 
 <script>
 import { getWeaponArt } from '../weapon-arts-placeholder';
+import { getWeaponNameFromSeed } from '../weapon-name';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import swordspecs from '../assets/swordspecs.json';
@@ -196,6 +201,7 @@ export default {
   },
 
   methods: {
+    getWeaponNameFromSeed,
     getWeaponArt,
 
     init() {
@@ -483,6 +489,14 @@ export default {
   margin-top: 5px;
 
   transform: scale(0.7);
+}
+
+.name {
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  right: 0;
+  text-align: center;
 }
 
 .glow-0 {
