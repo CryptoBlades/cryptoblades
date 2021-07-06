@@ -39,9 +39,11 @@
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :weaponIds="allSearchResults"
+                :sortAscending="false"
                 :showLimit="60"
                 :showReforgedToggle="false"
                 :canFavorite="false"
+                @change="onSortChange"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
@@ -173,6 +175,8 @@
                 :showReforgedToggle="false"
                 :canFavorite="false"
                 :weaponIds="searchResults"
+                :sortAscending="false"
+                @change="onSortChange"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
@@ -441,6 +445,17 @@ export default Vue.extend({
       this.nftPricesById = {};
     },
 
+    onSortChange( e: any) {
+      if (e === 'Ascending Price') {
+        this.allSearchResults = this.sortList(this.nftPricesById,'Ascending');
+        this.searchResults = this.sortList(this.nftPricesById,'Ascending');
+      }
+      else {
+        this.allSearchResults = this.sortList(this.nftPricesById,'Descending');
+        this.searchResults = this.sortList(this.nftPricesById,'Descending');
+      }
+    },
+
     async loadMarketTaxes() {
       if(!this.characterMarketTax) {
         const tax = await this.getMarketTax(this.Characters.options.address) as string;
@@ -478,10 +493,18 @@ export default Vue.extend({
 
       await Promise.all(nftIds.map(async nftId => {
         const price = (await this.lookupNftPrice(nftId))!;
-
         void price;
         this.nftPricesById[nftId] = price;
       }));
+
+    },
+
+    sortList( List:  Record<any, any>, direction: string): any {
+      let temp: string[];
+      if (direction.includes('Ascending'))
+        temp = Object.keys(List).sort(function(a,b){return List[parseInt(a,10)] - List[parseInt(b,10)];});
+      else temp = Object.keys(List).sort(function(a,b){return List[parseInt(b,10)] - List[parseInt(a,10)];});
+      return temp;
     },
 
     async addListingForNft() {
