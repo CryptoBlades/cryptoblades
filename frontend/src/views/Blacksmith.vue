@@ -9,7 +9,7 @@
       <br>
       <big-button
         class="button"
-        mainText="Forge sword"
+        :mainText="`Forge sword for ${forgeCost} SKILL`"
         @click="onForgeWeapon"
       />
     </div>
