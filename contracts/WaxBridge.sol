@@ -53,6 +53,9 @@ contract WaxBridge is Initializable, AccessControlUpgradeable {
         bnbLimitPerPeriod = _dailyBnbWeiLimit;
     }
 
+    fallback() external payable restricted {
+    }
+
     function processWaxConversions(uint256 _latestWaxChainBlockNumberProcessed, address[] calldata _to, uint256[] calldata _value) external payable {
         require(hasRole(WAX_BRIDGE, msg.sender), "Missing WAX_BRIDGE role");
         require(_latestWaxChainBlockNumberProcessed > latestWaxChainBlockNumberProcessed, "WAX chain block num must be gt");
