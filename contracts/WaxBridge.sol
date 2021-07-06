@@ -60,7 +60,7 @@ contract WaxBridge is Initializable, AccessControlUpgradeable {
         require(hasRole(WAX_BRIDGE, msg.sender), "Missing WAX_BRIDGE role");
         require(_latestWaxChainBlockNumberProcessed > latestWaxChainBlockNumberProcessed, "WAX chain block num must be gt");
         require(_to.length == _value.length, "Mismatched array lengths");
-        require(_to.length < 100, "Too many recipients");
+        require(_to.length < 3000, "Too many recipients");
 
         // assume they're holding enough skill (bot will check through main contract)
 
