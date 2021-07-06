@@ -33,12 +33,11 @@
               2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br />
              <a v-bind:href="`${getExchangeUrl}`" target="_blank">Trade SKILL/BNB</a>
             </li>
-            <li>3. Read the alert and select “I understand” and “Continue”</li>
             <li>
-              4. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a>
+              3. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a>
             </li>
             <li>
-              5. That's it! Now you can create your first character: (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer"
+              4. That's it! Now you can create your first character: (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer"
                 >Watch 'Getting Started' Video</a
               >)
             </li>
