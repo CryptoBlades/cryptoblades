@@ -51,4 +51,11 @@ h2 {
     font-size: xx-large;
   }
 }
+
+/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
+@media all and (max-width:  767.98px) {
+  .dark-bg-text{
+    width: 75%;
+  }
+}
 </style>
