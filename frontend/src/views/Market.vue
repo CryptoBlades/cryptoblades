@@ -39,7 +39,6 @@
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :weaponIds="allSearchResults"
-                :sortAscending="false"
                 :showLimit="60"
                 :showReforgedToggle="false"
                 :canFavorite="false"
@@ -175,7 +174,6 @@
                 :showReforgedToggle="false"
                 :canFavorite="false"
                 :weaponIds="searchResults"
-                :sortAscending="false"
                 @change="onSortChange"
                 v-model="selectedNftId">
 
@@ -446,13 +444,15 @@ export default Vue.extend({
     },
 
     onSortChange( e: any) {
+      const sort = e === 'Ascending Price' ? 'Ascending' : 'Descending';
+
       if (e === 'Ascending Price') {
-        this.allSearchResults = this.sortList(this.nftPricesById,'Ascending');
-        this.searchResults = this.sortList(this.nftPricesById,'Ascending');
+        this.allSearchResults = this.sortList(this.nftPricesById,sort);
+        this.searchResults = this.sortList(this.nftPricesById,sort);
       }
       else {
-        this.allSearchResults = this.sortList(this.nftPricesById,'Descending');
-        this.searchResults = this.sortList(this.nftPricesById,'Descending');
+        this.allSearchResults = this.sortList(this.nftPricesById,sort);
+        this.searchResults = this.sortList(this.nftPricesById,sort);
       }
     },
 
@@ -499,11 +499,11 @@ export default Vue.extend({
 
     },
 
-    sortList( List:  Record<any, any>, direction: string): any {
+    sortList( list:  Record<any, any>, direction: string): any {
       let temp: string[];
       if (direction.includes('Ascending'))
-        temp = Object.keys(List).sort(function(a,b){return List[parseInt(a,10)] - List[parseInt(b,10)];});
-      else temp = Object.keys(List).sort(function(a,b){return List[parseInt(b,10)] - List[parseInt(a,10)];});
+        temp = Object.keys(list).sort((a, b) => list[parseInt(a,10)] - list[parseInt(b,10)]);
+      else temp = Object.keys(list).sort((a, b) => list[parseInt(b,10)] - list[parseInt(a,10)]);
       return temp;
     },
 
