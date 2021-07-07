@@ -49,7 +49,9 @@
           altText="Stamina"
         />
       </div>
-      <div class="character-list d-none d-sm-block">
+    </div>
+
+    <div class="character-full-list" v-if="!isMobile()">
       <ul class="character-list"
           v-bind:class="getIsInCombat ? 'disabled-li' : ''">
         <li
@@ -58,11 +60,17 @@
           :key="c.id"
           @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
         >
-        <div class="name-list"
-        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
+          <div class="name-list"
+          >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+            <small-bar
+              :showMinimalVersion="true"
+              v-if="!isLoadingCharacter"
+              :current="getCharacterStamina(c.id)"
+              :max="maxStamina"
+            />
+          </div>
         </li>
       </ul>
-      </div>
     </div>
 
     <div class="character-list-mobile" v-if="isMobile()">
@@ -74,7 +82,14 @@
           @click="!getIsInCombat && setCurrentCharacter(c.id)"
         >
         <div class="name-list"
-        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
+        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+          <small-bar
+            :showMinimalVersion="true"
+            v-if="!isLoadingCharacter"
+            :current="getCharacterStamina(c.id)"
+            :max="maxStamina"
+          />
+        </div>
         </li>
       </ul>
       </div>
@@ -103,6 +118,7 @@ export default {
       'currentCharacter',
       'currentCharacterStamina',
       'getCharacterName',
+      'getCharacterStamina',
       'charactersWithIds',
       'ownCharacters',
       'timeUntilCurrentCharacterHasMaxStamina',
@@ -241,6 +257,24 @@ li.character-highlight{
   flex-direction: column;
   justify-content: space-around;
   align-items: stretch;
+}
+
+.character-full-list {
+  padding-top: 15px;
+  display :flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: stretch;
+}
+
+.character-full-list > ul {
+  display: flex;
+  padding-left: 0px;
+}
+
+.character-full-list .character, .character-full-list .character-highlight {
+  width: 220px;
+  margin: 0 20px 0 0;
 }
 
 .character-list-mobile > ul{
