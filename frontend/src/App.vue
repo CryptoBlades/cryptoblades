@@ -33,12 +33,11 @@
               2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br />
              <a v-bind:href="`${getExchangeUrl}`" target="_blank">Trade SKILL/BNB</a>
             </li>
-            <li>3. Read the alert and select “I understand” and “Continue”</li>
             <li>
-              4. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a>
+              3. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a>
             </li>
             <li>
-              5. That's it! Now you can create your first character: (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer"
+              4. That's it! Now you can create your first character: (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer"
                 >Watch 'Getting Started' Video</a
               >)
             </li>
@@ -303,7 +302,7 @@ body {
   max-height: calc(100vh - 56px - 160px);
 }
 
-button {
+button, .pointer {
   cursor: pointer;
 }
 
@@ -455,6 +454,20 @@ button.close {
 
 div.bg-success {
   background-color: #19682b !important;
+}
+
+.nav.nav-pills .nav-link {
+  color: #9e8a57 !important;
+  border: 2px solid #6c5f38;
+  border-radius: 0.1em;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+}
+
+.nav.nav-pills .nav-link.active {
+  border: 2px solid #9e8a57 !important;
+  background: rgb(61, 61, 64);
+  background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
 }
 </style>
 <style scoped>
