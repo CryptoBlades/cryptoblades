@@ -13697,6 +13697,147 @@
           }
         }
       }
+    },
+    "c1009c3de4d06ffe5f5d5ee4601d916e4c0d6414ddf0237c12a167957eee273e": {
+      "address": "0x9de48972261924Cd0652D357a9700D615Dd6c05B",
+      "txHash": "0x1c72808f12799b2b39a5904a9c719d5f22f5e9623c2b0687ee0abb2356b9a988",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)16928_storage)",
+            "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "WaxBridge",
+            "label": "latestWaxChainBlockNumberProcessed",
+            "type": "t_uint256",
+            "src": "WaxBridge.sol:27"
+          },
+          {
+            "contract": "WaxBridge",
+            "label": "totalOwedBnb",
+            "type": "t_uint256",
+            "src": "WaxBridge.sol:28"
+          },
+          {
+            "contract": "WaxBridge",
+            "label": "bnbLimitPerPeriod",
+            "type": "t_uint256",
+            "src": "WaxBridge.sol:29"
+          },
+          {
+            "contract": "WaxBridge",
+            "label": "bnbLimitTimestamp",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "WaxBridge.sol:30"
+          },
+          {
+            "contract": "WaxBridge",
+            "label": "withdrawableBnb",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "WaxBridge.sol:31"
+          },
+          {
+            "contract": "WaxBridge",
+            "label": "withdrawnBnbDuringPeriod",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "WaxBridge.sol:32"
+          }
+        ],
+        "types": {
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)16928_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)16928_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)20123_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)20123_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)19858_storage"
+              }
+            ]
+          },
+          "t_struct(Set)19858_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
     }
   },
   "admin": {
