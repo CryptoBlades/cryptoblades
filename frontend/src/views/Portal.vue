@@ -72,9 +72,9 @@ export default {
                 ],
                 data: {
                   from: wax.userAccount, //user's BSC Address
-                  to: 'snoui.wam', //CB Wallet Address
-                  quantity: this.WAXAmount + 'WAX', //WAX *needs* to be here.
-                  memo: this.defaultAccount + ' : ' + this.WAXAmount,
+                  to: process.env.VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS, //CB Wallet Address
+                  quantity: this.WAXAmount + ' WAX', //WAX *needs* to be here.
+                  memo: this.defaultAccount,
                 },
               },
             ],
