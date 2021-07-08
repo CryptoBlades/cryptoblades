@@ -83,28 +83,28 @@
               <div class="encounter-container">
 
                 <div class="mobile-divider-wrapper">
-                <div class="mobile-divider">
-                <div class="encounter-element">
-                  <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
-                  <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
-                </div>
+                  <div class="mobile-divider">
+                  <div class="encounter-element">
+                    <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
+                    <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
+                  </div>
 
-                <div class="encounter-power">
-                  {{ e.power }} Power
-                </div>
+                  <div class="encounter-power">
+                    {{ e.power }} Power
+                  </div>
 
-                <div class="xp-gain">
-                  +{{getPotentialXp(e)}} XP
-                </div>
+                  <div class="xp-gain">
+                    +{{getPotentialXp(e)}} XP
+                  </div>
 
-                <div class="victory-chance">
-                  {{ getWinChance(e.power, e.trait) }} Victory
-                </div>
-                </div>
+                  <div class="victory-chance">
+                    {{ getWinChance(e.power, e.trait) }} Victory
+                  </div>
+                  </div>
 
-                <div class="mobile-divider mobile-img-adjustment">
-                <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
-                </div>
+                  <div class="mobile-divider mobile-img-adjustment">
+                  <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
+                  </div>
                 </div>
 
                 <big-button
