@@ -37,7 +37,7 @@
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'portal' }" exact class="nav-link">
+    <router-link :to="{ name: 'portal' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagPortal">
       <li class="nav-item">
         <span>Portal</span>
       </li>
