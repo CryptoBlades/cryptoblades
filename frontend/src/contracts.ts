@@ -14,11 +14,17 @@ import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
+import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
 
 import Web3 from 'web3';
 import { allStakeTypes, Contracts, isStakeType } from './interfaces';
 
-import { raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly, market as featureFlagMarket } from './feature-flags';
+import {
+  raid as featureFlagRaid,
+  stakeOnly as featureFlagStakeOnly,
+  market as featureFlagMarket,
+  portal as featureFlagPortal,
+} from './feature-flags';
 
 interface RaidContracts {
   RaidBasic?: Contracts['RaidBasic'];
@@ -27,6 +33,8 @@ interface RaidContracts {
 interface MarketContracts {
   NFTMarket?: Contracts['NFTMarket'];
 }
+
+type WaxBridgeContracts = Pick<Contracts, 'WaxBridge'>;
 
 async function setUpStakingContracts(web3: Web3, networkId: string) {
   let availableStakingContracts = allStakeTypes;
@@ -100,11 +108,19 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as any, marketContractAddr);
   }
 
+  const waxBridgeContracts: WaxBridgeContracts = {};
+  if(featureFlagPortal) {
+    const waxBridgeContractAddr = process.env.VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS || (waxBridgeNetworks as any)[networkId].address;
+
+    waxBridgeContracts.WaxBridge = new web3.eth.Contract(waxBridgeAbi as any, waxBridgeContractAddr);
+  }
+
   return {
     ...stakingContracts,
     CryptoBlades, Randoms, Characters, Weapons,
     ...raidContracts,
-    ...marketContracts
+    ...marketContracts,
+    ...waxBridgeContracts,
   };
 }
 
