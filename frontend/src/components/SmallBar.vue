@@ -1,5 +1,5 @@
 <template>
-  <div class="bar-section" :title="altText">
+  <div class="bar-section" :title="altText" v-if="!showMinimalVersion">
     <i
       class="icon fas"
       :style="{ color: primaryColor }"
@@ -13,11 +13,13 @@
     </div>
     <span class="bar-text">{{ current }} / {{ max }}</span>
   </div>
+
+  <span v-else>({{ current }} / {{ max }})</span>
 </template>
 
 <script lang="ts">
 export default {
-  props: ['current', 'max', 'faIcon', 'primaryColor', 'altText'],
+  props: ['current', 'max', 'faIcon', 'primaryColor', 'altText', 'showMinimalVersion'],
 
   computed: {
     factor(): number {
