@@ -28,9 +28,9 @@ const material = (rng: any): string => {
   return `${prefix} ${material} ${type}`;
 };
 
-// special weapon (SPC)
+// special weapon (SPEC)
 const special = (rng: any): string => {
-  return getRandom(rng, names.special);
+  return getRandom(rng, names.specialtype);
 };
 
 // super special weapon (OWN, SPEC SUFF)

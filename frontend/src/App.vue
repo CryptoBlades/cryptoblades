@@ -455,6 +455,20 @@ button.close {
 div.bg-success {
   background-color: #19682b !important;
 }
+
+.nav.nav-pills .nav-link {
+  color: #9e8a57 !important;
+  border: 2px solid #6c5f38;
+  border-radius: 0.1em;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+}
+
+.nav.nav-pills .nav-link.active {
+  border: 2px solid #9e8a57 !important;
+  background: rgb(61, 61, 64);
+  background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
+}
 </style>
 <style scoped>
 .app {

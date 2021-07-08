@@ -175,6 +175,12 @@ export function createStore(web3: Web3) {
         };
       },
 
+      getCharacterStamina(state: IState) {
+        return (characterId: number) => {
+          return state.characterStaminas[characterId];
+        };
+      },
+
       getCharacterUnclaimedXp(state: IState) {
         return (characterId: number) => {
           return state.xpRewards[characterId];
@@ -445,6 +451,8 @@ export function createStore(web3: Web3) {
         await dispatch('setUpContractEvents');
 
         await dispatch('pollAccountsAndNetwork');
+
+        await dispatch('setupCharacterStaminas');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -812,6 +820,18 @@ export function createStore(web3: Web3) {
         }
       },
 
+      async setupCharacterStaminas({ state, dispatch }) {
+        const [
+          ownedCharacterIds
+        ] = await Promise.all([
+          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state))
+        ]);
+
+        for (const charId of ownedCharacterIds) {
+          dispatch('fetchCharacterStamina', charId);
+        }
+      },
+
       async fetchCharacterStamina({ state, commit }, characterId: number) {
         if(featureFlagStakeOnly) return;
 
@@ -841,7 +861,8 @@ export function createStore(web3: Web3) {
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp')
+          dispatch('fetchFightRewardXp'),
+          dispatch('setupCharacterStaminas')
         ]);
       },
 
