@@ -14,7 +14,7 @@
                            class="pointer"
                            variant="success"
                            :click="onWithdrawBNB"
-                           v-tooltip.bottom="availableBNB + ' BNB claimable via bridge'" />
+                           v-tooltip.bottom="availableBNB + ' BNB claimable via portal'" />
     </div>
   </div>
 </template>
