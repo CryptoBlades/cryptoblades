@@ -9,7 +9,8 @@ import Raid from './views/Raid.vue';
 import Market from './views/Market.vue';
 import Portal from './views/Portal.vue';
 
-import { raid as featureFlagRaid,
+import {
+  raid as featureFlagRaid,
   stakeOnly as featureFlagStakeOnly,
   market as featureFlagMarket,
   portal as featureFlagPortal
