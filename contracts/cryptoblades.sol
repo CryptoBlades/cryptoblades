@@ -59,11 +59,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         oneFrac = ABDKMath64x64.fromUInt(1);
         fightTraitBonus = ABDKMath64x64.divu(75, 1000);
     }
-    
-    function migrateTo_x(address promosAddress) public {
+
+    function migrateTo_ef994e2(Promos _promos) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
-        promos = Promos(promosAddress);
+        promos = _promos;
     }
 
     // config vars

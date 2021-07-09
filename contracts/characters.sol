@@ -60,10 +60,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         _registerInterface(TransferCooldownableInterfaceId.interfaceId());
     }
 
-    function migrateTo_x(address promosAddress) public {
+    function migrateTo_ef994e2(Promos _promos) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
-        promos = Promos(promosAddress);
+        promos = _promos;
     }
 
     /*
