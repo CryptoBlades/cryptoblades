@@ -11,6 +11,4 @@ if(shell.test('-f', '.env.production.local') && shell.cat('.env.production.local
 
 shell.cp('.env.mainnet', '.env.production.local');
 
-shell.exec('npm run build');
-
 shell.popd();
