@@ -7,6 +7,7 @@ const ChainlinkRandoms = artifacts.require("ChainlinkRandoms");
 
 const SkillToken = artifacts.require("SkillToken");
 const IERC20 = artifacts.require("IERC20");
+const Promos = artifacts.require("Promos");
 const Characters = artifacts.require("Characters");
 const Weapons = artifacts.require("Weapons");
 const CryptoBlades = artifacts.require("CryptoBlades");
@@ -42,11 +43,16 @@ module.exports = async function (deployer, network) {
 
   const priceOracle = await deployProxy(BasicPriceOracle, [], { deployer });
 
+  const promos = await deployProxy(Promos, [], { deployer });
+
   const charas = await deployProxy(Characters, [], { deployer });
 
   const weps = await deployProxy(Weapons, [], { deployer });
 
   const game = await deployProxy(CryptoBlades, [skillToken.address, charas.address, weps.address, priceOracle.address, randoms.address], { deployer });
+
+  const promos_GAME_ADMIN = await promos.GAME_ADMIN();
+  await promos.grantRole(promos_GAME_ADMIN, charas.address);
 
   const charas_GAME_ADMIN = await charas.GAME_ADMIN();
   await charas.grantRole(charas_GAME_ADMIN, game.address);

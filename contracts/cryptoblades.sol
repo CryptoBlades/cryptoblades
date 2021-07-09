@@ -8,6 +8,7 @@ import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IRandoms.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
+import "./Promos.sol";
 import "./weapons.sol";
 import "./util.sol";
 
@@ -58,6 +59,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         oneFrac = ABDKMath64x64.fromUInt(1);
         fightTraitBonus = ABDKMath64x64.divu(75, 1000);
     }
+    
+    function migrateTo_x(address promosAddress) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        promos = Promos(promosAddress);
+    }
 
     // config vars
     uint characterLimit;
@@ -90,6 +97,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     mapping(address => uint256) public inGameOnlyFunds;
     uint256 public totalInGameOnlyFunds;
+
+    Promos public promos;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -354,6 +363,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             string(abi.encodePacked("You can only have ",characterLimit," characters!")));
         _payContract(msg.sender, mintCharacterFee);
 
+        if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
+            giveInGameOnlyFundsFromContractBalance(msg.sender, 5 ether);
+        }
+
         uint256 seed = randoms.getRandomSeed(msg.sender);
         characters.mint(msg.sender, seed);
 
@@ -558,7 +571,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         emit InGameOnlyFundsGiven(to, skillAmount);
     }
 
-    function giveInGameOnlyFundsFromContractBalance(address to, uint256 skillAmount) external restricted {
+    function giveInGameOnlyFundsFromContractBalance(address to, uint256 skillAmount) public restricted {
         totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
         inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
 

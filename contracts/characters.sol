@@ -4,6 +4,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
+import "./Promos.sol";
 import "./util.sol";
 import "./interfaces/ITransferCooldownable.sol";
 
@@ -59,6 +60,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         _registerInterface(TransferCooldownableInterfaceId.interfaceId());
     }
 
+    function migrateTo_x(address promosAddress) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        promos = Promos(promosAddress);
+    }
+
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-256
@@ -85,6 +92,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     uint256[256] private experienceTable; // fastest lookup in the west
 
     mapping(uint256 => uint256) public override lastTransferTimestamp;
+
+    Promos public promos;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -253,5 +262,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
                 lastTransferTimestamp[tokenId] = block.timestamp;
             }
         }
+
+        promos.setBit(from, promos.BIT_FIRST_CHARACTER());
+        promos.setBit(to, promos.BIT_FIRST_CHARACTER());
     }
 }
