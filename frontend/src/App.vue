@@ -146,7 +146,7 @@ export default {
     },
     async configureMetaMask() {
       const web3 = this.web3.currentProvider;
-      if (this.currentNetworkId === '0x61') {
+      if (this.currentNetworkId === 97) {
         try {
           await web3.request({
             method: 'wallet_switchEthereumChain',
