@@ -32,6 +32,13 @@ jobs:
 
       - run: npm run build:frontend
 
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: frontend/dist/
+          retention-days: 1
+
   deploy-testnet:
     name: Deploy testnet frontend
     needs: build
@@ -39,6 +46,11 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/testnet' }}
 
     steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: frontend/dist
+
       - name: Deploy
         uses: netlify/actions/cli@master
         with:
@@ -54,6 +66,11 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/production' }}
 
     steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: frontend/dist
+
       - name: Deploy (must be published manually in Netlify UI)
         uses: netlify/actions/cli@master
         with:
