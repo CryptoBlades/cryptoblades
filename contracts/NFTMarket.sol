@@ -60,6 +60,7 @@ contract NFTMarket is
         address seller;
         uint256 price;
         //int128 usdTether; // this would be to "tether" price dynamically to our oracle
+        address targetBuyer;
     }
 
     // ############
@@ -101,13 +102,20 @@ contract NFTMarket is
         address indexed seller,
         IERC721 indexed nftAddress,
         uint256 indexed nftID,
-        uint256 price
+        uint256 price,
+        address targetBuyer
     );
     event ListingPriceChange(
         address indexed seller,
         IERC721 indexed nftAddress,
         uint256 indexed nftID,
         uint256 newPrice
+    );
+    event ListingTargetBuyerChange(
+        address indexed seller,
+        IERC721 indexed nftAddress,
+        uint256 indexed nftID,
+        address newTargetBuyer
     );
     event CancelledListing(
         address indexed seller,
@@ -175,6 +183,11 @@ contract NFTMarket is
 
     modifier userNotBanned() {
         require(isUserBanned[msg.sender] == false, "Forbidden access");
+        _;
+    }
+
+    modifier userAllowedToPurchase(IERC721 _tokenAddress, uint256 id) {
+        require(listings[address(_tokenAddress)][id].targetBuyer == address(0) || listings[address(_tokenAddress)][id].targetBuyer == msg.sender, "Not target buyer");
         _;
     }
 
@@ -413,13 +426,22 @@ contract NFTMarket is
             );
     }
 
+    function getTargetBuyer(IERC721 _tokenAddress, uint256 _id)
+        public
+        view
+        returns (address)
+    {
+        return listings[address(_tokenAddress)][_id].targetBuyer;
+    }
+
     // ############
     // Mutative
     // ############
     function addListing(
         IERC721 _tokenAddress,
         uint256 _id,
-        uint256 _price
+        uint256 _price,
+        address _targetBuyer
     )
         public
         userNotBanned
@@ -427,7 +449,7 @@ contract NFTMarket is
         isValidERC721(_tokenAddress)
         isNotListed(_tokenAddress, _id)
     {
-        listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price);
+        listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price, _targetBuyer);
         listedTokenIDs[address(_tokenAddress)].add(_id);
 
         _updateListedTokenTypes(_tokenAddress);
@@ -435,7 +457,7 @@ contract NFTMarket is
         // in theory the transfer and required approval already test non-owner operations
         _tokenAddress.safeTransferFrom(msg.sender, address(this), _id);
 
-        emit NewListing(msg.sender, _tokenAddress, _id, _price);
+        emit NewListing(msg.sender, _tokenAddress, _id, _price, _targetBuyer);
     }
 
     function changeListingPrice(
@@ -454,6 +476,25 @@ contract NFTMarket is
             _tokenAddress,
             _id,
             _newPrice
+        );
+    }
+
+    function changeListingTargetBuyer(
+        IERC721 _tokenAddress,
+        uint256 _id,
+        address _newTargetBuyer
+    )
+        public
+        userNotBanned
+        isListed(_tokenAddress, _id)
+        isSeller(_tokenAddress, _id)
+    {
+        listings[address(_tokenAddress)][_id].targetBuyer = _newTargetBuyer;
+        emit ListingTargetBuyerChange(
+            msg.sender,
+            _tokenAddress,
+            _id,
+            _newTargetBuyer
         );
     }
 
@@ -477,7 +518,7 @@ contract NFTMarket is
         IERC721 _tokenAddress,
         uint256 _id,
         uint256 _maxPrice
-    ) public userNotBanned isListed(_tokenAddress, _id) {
+    ) public userNotBanned isListed(_tokenAddress, _id) userAllowedToPurchase(_tokenAddress, _id) {
         uint256 finalPrice = getFinalPrice(_tokenAddress, _id);
         require(finalPrice <= _maxPrice, "Buying price too low");
 

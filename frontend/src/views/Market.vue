@@ -197,6 +197,13 @@
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
+                  @click="updateNftListingTargetBuyer()"  class="gtag-link-others" tagname="change_price">Change Target Buyer</b-button>
+              </div>
+
+              <div class="col">
+                <b-button
+                  variant="primary"
+                  v-if="ownListedNftSelected"
                   v-tooltip="'Cancelled sales cannot be re-listed for 24 hours!'"
                   @click="cancelNftListing()"  class="gtag-link-others" tagname="cancel_listing">Cancel Listing</b-button>
               </div>
@@ -299,7 +306,7 @@
                   </template>
                   <b-form-input type="number" :max="10000"
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
-
+                  <b-form-input class="modal-input" v-model="listingTargetBuyer" placeholder="Target Buyer Address (optional)" />
                   <span v-if="listingSellPrice">Do you want to sell your {{activeType}} for {{Math.min(+listingSellPrice, 10000)}} SKILL?<br>
                   <i>The buyer will pay an extra {{activeListingMarketTax()}}% market fee for a total of
                   {{calculatedBuyerCost(Math.min(+listingSellPrice, 10000))}} SKILL</i></span>
@@ -351,6 +358,7 @@
 <script lang="ts">
 import assert from 'assert';
 import Vue from 'vue';
+import { BModal } from 'bootstrap-vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import Hint from '../components/Hint.vue';
@@ -367,6 +375,7 @@ type SellType = 'weapon' | 'character';
 type WeaponId = string;
 type CharacterId = string;
 type NftId = WeaponId | CharacterId;
+const defaultTargetBuyer = '0x0000000000000000000000000000000000000000';
 
 interface Data {
   activeType: SellType;
@@ -378,13 +387,16 @@ interface Data {
   marketOutcome: string | null;
   waitingMarketOutcome: boolean;
   nftPricesById: Record<string, string>;
+  nftTargetBuyersById: Record<string, string>;
   characterMarketTax: string;
-  weaponMarketTax: string ;  characterShowLimit: number;
+  weaponMarketTax: string;
+  characterShowLimit: number;
   weaponShowLimit: number;
   allListingsAmount: number;
   currentPage: number;
   browseTabActive: boolean;
   listingSellPrice: string;
+  listingTargetBuyer: string;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -406,12 +418,18 @@ interface StoreMappedActions {
   fetchNumberOfCharacterListings(payload: { nftContractAddr: string, trait: number, minLevel: number, maxLevel: number}): Promise<number>;
   fetchMarketNftIdsBySeller(payload: { nftContractAddr: string, sellerAddr: string }): Promise<string[]>;
   fetchMarketNftPrice(payload: { nftContractAddr: string, tokenId: string | number }): Promise<string>;
+  fetchMarketNftTargetBuyer(payload: { nftContractAddr: string, tokenId: string | number }): Promise<string>;
   fetchMarketTax(payload: { nftContractAddr: string }): Promise<string>;
   checkMarketItemOwnership(payload: { nftContractAddr: string, tokenId: string | number}): Promise<string>;
-  addMarketListing(payload: { nftContractAddr: string, tokenId: string, price: string }): Promise<{ seller: string, nftID: string, price: string }>;
+  addMarketListing(
+    payload: { nftContractAddr: string, tokenId: string, price: string, targetBuyer: string }
+  ): Promise<{ seller: string, nftID: string, price: string, targetBuyer: string }>;
   changeMarketListingPrice(
     payload: { nftContractAddr: string, tokenId: string, newPrice: string }
   ): Promise<{ seller: string, nftID: string, newPrice: string }>;
+  changeMarketListingTargetBuyer(
+    payload: { nftContractAddr: string, tokenId: string, newTargetBuyer: string }
+  ): Promise<{ seller: string, nftID: string, newTargetBuyer: string }>;
   cancelMarketListing(payload: { nftContractAddr: string, tokenId: string }): Promise<{ seller: string, nftID: string }>;
   purchaseMarketListing(payload: { nftContractAddr: string, tokenId: string, maxPrice: string }): Promise<{ seller: string, nftID: string, price: string }>;
   fetchSellerOfNft(payload: { nftContractAddr: string, tokenId: string }): Promise<string>;
@@ -431,6 +449,7 @@ export default Vue.extend({
       marketOutcome: null,
       waitingMarketOutcome: false,
       nftPricesById: {},
+      nftTargetBuyersById: {},
       characterMarketTax: '',
       weaponMarketTax: '',
       characterShowLimit: 40,
@@ -439,6 +458,7 @@ export default Vue.extend({
       currentPage: 1,
       browseTabActive: true,
       listingSellPrice: ''
+      listingTargetBuyer: '',
     } as Data;
   },
 
@@ -500,10 +520,12 @@ export default Vue.extend({
       'fetchNumberOfCharacterListings',
       'fetchMarketNftIdsBySeller',
       'fetchMarketNftPrice',
+      'fetchMarketNftTargetBuyer',
       'fetchMarketTax',
       'checkMarketItemOwnership',
       'addMarketListing',
       'changeMarketListingPrice',
+      'changeMarketListingTargetBuyer',
       'cancelMarketListing',
       'purchaseMarketListing',
       'fetchSellerOfNft',
@@ -522,6 +544,13 @@ export default Vue.extend({
       this.allListingsAmount = 0;
       this.currentPage = 1;
       this.listingSellPrice = '';
+      this.listingTargetBuyer = '';
+      this.nftTargetBuyersById = {};
+    },
+
+    showListingSetupModal() {
+      this.clearInputs();
+      (this.$refs['listing-setup-modal'] as BModal).show();
     },
 
     async loadMarketTaxes() {
@@ -556,6 +585,15 @@ export default Vue.extend({
       });
     },
 
+    async lookupNftTargetBuyer(nftId: NftId) {
+      if(!this.contractAddress) return;
+
+      return await this.fetchMarketNftTargetBuyer({
+        nftContractAddr: this.contractAddress,
+        tokenId: nftId,
+      });
+    },
+
     async fetchNftPrices(nftIds: NftId[]) {
       if(!this.contractAddress) return;
 
@@ -564,6 +602,17 @@ export default Vue.extend({
 
         void price;
         this.nftPricesById[nftId] = price;
+      }));
+    },
+
+    async fetchNftTargetBuyers(nftIds: NftId[]) {
+      if(!this.contractAddress) return;
+
+      await Promise.all(nftIds.map(async nftId => {
+        const targetBuyer = (await this.lookupNftTargetBuyer(nftId))!;
+
+        void targetBuyer;
+        this.nftTargetBuyersById[nftId] = targetBuyer;
       }));
     },
 
@@ -581,6 +630,7 @@ export default Vue.extend({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
         price: this.convertSkillToWei(this.listingSellPrice),
+        targetBuyer: this.listingTargetBuyer || defaultTargetBuyer
       });
 
       this.selectedNftId = null;
@@ -615,6 +665,28 @@ export default Vue.extend({
         +this.activeType+' '+results.nftID+' to '+this.convertWeiToSkill(results.newPrice)+' SKILL';
     },
 
+    async updateNftListingTargetBuyer() {
+
+      this.marketOutcome = null;
+      if(this.selectedNftId === null) return;
+
+      let targetBuyer = await (this as any).$dialog.prompt({ title: `Sell ${this.activeType}`, text: 'Target Buyer Address (optional)' });
+      if(!targetBuyer) targetBuyer = defaultTargetBuyer;
+
+      this.waitingMarketOutcome = true;
+
+      const results = await this.changeMarketListingTargetBuyer({
+        nftContractAddr: this.contractAddress,
+        tokenId: this.selectedNftId,
+        newTargetBuyer: targetBuyer
+      });
+
+      this.selectedNftId = null;
+      this.waitingMarketOutcome = false;
+      this.marketOutcome = 'Successfully changed target buyer for '
+        +this.activeType+' '+results.nftID+' to '+results.newTargetBuyer;
+    },
+
     async purchaseNft() {
       this.marketOutcome = null;
       if(this.selectedNftId === null) return;
@@ -642,7 +714,7 @@ export default Vue.extend({
         nftContractAddr: this.contractAddress
       });
 
-      this.allSearchResults = results2;
+      this.allSearchResults = await this.filterOutTargetBuyers(results2) as string[];
 
       this.allSearchResults = Array.from(this.allSearchResults).filter((x: any) => x.id !== this.selectedNftId);
 
@@ -721,6 +793,7 @@ export default Vue.extend({
         minLevel: this.characterMinLevelFilter(),
         maxLevel: this.characterMaxLevelFilter()
       });
+      await this.fetchNftTargetBuyers(results);
 
       this.allSearchResults = await this.fetchAllMarketCharacterNftIdsPage({
         nftContractAddr: this.contractAddress,
@@ -747,6 +820,7 @@ export default Vue.extend({
       // will need per-result checking of it, OR filtering out own NFTs
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
       this.searchResultsOwned = false; // temp
+      // deleted here this.allSearchResults = await this.filterOutTargetBuyers(results) as string[];
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = null;
@@ -802,7 +876,7 @@ export default Vue.extend({
 
       const price = await this.lookupNftPrice(this.search);
       if(price !== '0') {
-        this.searchResults = [this.search];
+        this.searchResults = await this.filterOutTargetBuyers([this.search]) as string[];
       } else {
         this.searchResults = [];
       }
@@ -839,6 +913,7 @@ export default Vue.extend({
       });
 
       this.searchResultsOwned = this.search === this.defaultAccount;
+      this.searchResults = await this.filterOutTargetBuyers(searchResults) as string[];
     },
 
     async searchListingsBySellerThroughAPI(){
@@ -918,6 +993,25 @@ export default Vue.extend({
       const weaponsData = await fetch(url.toString());
       const weapons = await weaponsData.json();
       return weapons.idResults;
+    },
+
+    async filterOutTargetBuyers(nftIds: NftId[]) {
+      if(!this.contractAddress) return;
+      const results: string[] = [];
+
+      await Promise.all(nftIds.map(async nftId => {
+        const targetBuyer = (await this.lookupNftTargetBuyer(nftId))!;
+        if(targetBuyer === defaultTargetBuyer || targetBuyer === this.defaultAccount) {
+          results.push(nftId);
+        }
+      }));
+
+      return results;
+    },
+
+    clearInputs() {
+      this.listingSellPrice = '';
+      this.listingTargetBuyer = '';
     },
 
     showListingSetupModal() {
