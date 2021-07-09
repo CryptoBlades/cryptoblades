@@ -120,6 +120,7 @@ export default {
       'fetchWeaponTransferCooldownForOwnWeapons',
       'fetchCharacterTransferCooldownForOwnCharacters',
       'fetchStakeDetails',
+      'fetchWaxBridgeDetails',
     ]),
 
     async updateCurrentCharacterStamina() {
@@ -290,7 +291,11 @@ export default {
     });
 
     this.weaponTransferCooldownPollIntervalId = setInterval(async () => {
-      await Promise.all([this.fetchCharacterTransferCooldownForOwnCharacters(), this.fetchWeaponTransferCooldownForOwnWeapons()]);
+      await Promise.all([
+        this.fetchCharacterTransferCooldownForOwnCharacters(),
+        this.fetchWeaponTransferCooldownForOwnWeapons(),
+        this.fetchWaxBridgeDetails(),
+      ]);
     }, 10 * 1000);
 
     this.doPollAccounts = true;
