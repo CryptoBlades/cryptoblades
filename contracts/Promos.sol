@@ -8,14 +8,14 @@ contract Promos is Initializable, AccessControlUpgradeable {
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     function initialize () public initializer {
-        __AccessControl_init_unchained();
+        __AccessControl_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     mapping(address => uint256) public bits;
     uint256 public constant BIT_FIRST_CHARACTER = 1;
-    
+
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
         _;
