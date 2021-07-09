@@ -6,7 +6,16 @@
 
     <div class="balance-container">
       <strong class="mr-2">Balance</strong>
-      <span class="balance">{{ formattedSkillBalance }}</span></div>
+      <span class="balance">{{ formattedSkillBalance }}</span>
+    </div>
+
+    <div class="bnb-withdraw-container mx-3" v-if="availableBNB > 0">
+      <b-icon-diamond-half scale="1.2"
+                           class="pointer"
+                           variant="success"
+                           :click="onWithdrawBNB"
+                           v-tooltip.bottom="availableBNB + ' BNB claimable via portal'" />
+    </div>
   </div>
 </template>
 
@@ -35,6 +44,10 @@ export default Vue.extend({
     formattedSkillBalance(): string {
       const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
       return `${new BN(skillBalance).toFixed(4)} SKILL`;
+    },
+
+    availableBNB(): number {
+      return 1;
     }
   },
 
@@ -44,6 +57,10 @@ export default Vue.extend({
     onBuySkill() {
       window.open(this.getExchangeUrl, '_blank');
     },
+
+    onWithdrawBNB() {
+
+    }
 
   },
 

@@ -117,12 +117,8 @@
 import BN from 'bignumber.js';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
-import Vue from 'vue';
-import { BootstrapVueIcons } from 'bootstrap-vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import WeaponIcon from '../components/WeaponIcon.vue';
-
-Vue.use(BootstrapVueIcons);
 
 export default {
   data() {
