@@ -635,9 +635,8 @@ export default Vue.extend({
 
       this.selectedNftId = null;
       this.waitingMarketOutcome = false;
-      this.marketOutcome = 'Successfully listed '
-        +this.activeType+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL'
-        +(this.listingTargetBuyer !== defaultTargetBuyer ? 'for ' + this.listingTargetBuyer : '');
+      this.marketOutcome = `Successfully listed ${this.activeType} ${results.nftID} for ${this.convertWeiToSkill(results.price)} SKILL`
+        +(this.listingTargetBuyer !== defaultTargetBuyer ? ` for ${this.listingTargetBuyer}` : '');
     },
 
     async updateNftListingPrice() {
@@ -662,8 +661,7 @@ export default Vue.extend({
 
       this.selectedNftId = null;
       this.waitingMarketOutcome = false;
-      this.marketOutcome = 'Successfully changed price for '
-        +this.activeType+' '+results.nftID+' to '+this.convertWeiToSkill(results.newPrice)+' SKILL';
+      this.marketOutcome = `Successfully changed price for ${this.activeType} ${results.nftID} to ${this.convertWeiToSkill(results.newPrice)} SKILL`;
     },
 
     async updateNftListingTargetBuyer() {
@@ -684,8 +682,7 @@ export default Vue.extend({
 
       this.selectedNftId = null;
       this.waitingMarketOutcome = false;
-      this.marketOutcome = 'Successfully changed target buyer for '
-        +this.activeType+' '+results.nftID+' to '+results.newTargetBuyer;
+      this.marketOutcome = `Successfully changed target buyer for ${this.activeType} ${results.nftID} to ${results.newTargetBuyer}`;
     },
 
     async purchaseNft() {
