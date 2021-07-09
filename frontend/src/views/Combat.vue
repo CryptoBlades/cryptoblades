@@ -434,4 +434,11 @@ div.encounter.text-center {
 .xp-gain {
   top: 100px;
 }
+
+.encounter-button {
+  display: block;
+  margin: 0 auto;
+  height: 5em;
+  width: 13em;
+}
 </style>
