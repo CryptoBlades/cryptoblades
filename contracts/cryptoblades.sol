@@ -447,7 +447,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 skillAmount
             );
 
-        require(skillToken.balanceOf(msg.sender) >= skillAmount,
+        require(skillToken.balanceOf(msg.sender) >= fromUserWallet,
             string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(skillAmount))));
         _;
     }
