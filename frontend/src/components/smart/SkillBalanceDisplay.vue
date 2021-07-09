@@ -16,6 +16,11 @@
                            @click="onWithdrawBNB"
                            v-tooltip.bottom="bnbClaimTooltip" />
     </div>
+
+    <div class="balance-container">
+      <strong class="mr-2">In-Game-Only Funds</strong>
+      <span class="balance">{{ formattedInGameOnlyFunds }}</span>
+    </div>
   </div>
 </template>
 
@@ -28,7 +33,7 @@ import Web3 from 'web3';
 import { IState } from '@/interfaces';
 import { formatDurationFromSeconds } from '@/utils/date-time';
 
-type StoreMappedState = Pick<IState, 'skillBalance' | 'waxBridgeWithdrawableBnb' | 'waxBridgeTimeUntilLimitExpires'>;
+type StoreMappedState = Pick<IState, 'skillBalance' | 'inGameOnlyFunds' | 'waxBridgeWithdrawableBnb' | 'waxBridgeTimeUntilLimitExpires'>;
 
 interface StoreMappedGetters {
   getExchangeUrl: string;
@@ -42,7 +47,7 @@ interface StoreMappedActions {
 
 export default Vue.extend({
   computed: {
-    ...(mapState(['skillBalance', 'waxBridgeWithdrawableBnb', 'waxBridgeTimeUntilLimitExpires']) as Accessors<StoreMappedState>),
+    ...(mapState(['skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb', 'waxBridgeTimeUntilLimitExpires']) as Accessors<StoreMappedState>),
     ...(mapGetters({
       availableBNB: 'waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod',
       getExchangeUrl: 'getExchangeUrl'
@@ -84,6 +89,10 @@ export default Vue.extend({
 
       return `${this.formattedBnbThatCanBeWithdrawn} of ${this.formattedTotalAvailableBnb} withdrawable from the portal`;
     },
+    formattedInGameOnlyFunds(): string {
+      const skillBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
+      return `${new BN(skillBalance).toFixed(4)} SKILL`;
+    }
   },
 
   methods: {

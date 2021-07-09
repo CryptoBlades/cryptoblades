@@ -62,6 +62,7 @@ export interface IState {
   skillBalance: string;
   skillRewards: string;
   xpRewards: Record<string, string>;
+  inGameOnlyFunds: string;
   ownedCharacterIds: number[];
   ownedWeaponIds: number[];
   maxStamina: number;

@@ -88,12 +88,48 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     int128 public oneFrac; // 1.0
     int128 public fightTraitBonus; // 7.5%
 
+    mapping(address => uint256) public inGameOnlyFunds;
+    uint256 public totalInGameOnlyFunds;
+
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
+    event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
 
     function recoverSkill(uint256 amount) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         skillToken.transfer(msg.sender, amount);
+    }
+
+    function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _skillNeeded)
+        public
+        pure
+        returns (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromUserWallet) {
+
+        if(_skillNeeded <= _inGameOnlyFunds) {
+            return (_skillNeeded, 0, 0);
+        }
+
+        _skillNeeded -= _inGameOnlyFunds;
+
+        if(_skillNeeded <= _tokenRewards) {
+            return (_inGameOnlyFunds, _skillNeeded, 0);
+        }
+
+        _skillNeeded -= _tokenRewards;
+
+        return (_inGameOnlyFunds, _tokenRewards, _skillNeeded);
+    }
+
+    function getSkillNeededFromUserWallet(address playerAddress, uint256 skillNeeded)
+        public
+        view
+        returns (uint256 skillNeededFromUserWallet) {
+
+        (,, skillNeededFromUserWallet) = getSkillToSubtract(
+            inGameOnlyFunds[playerAddress],
+            tokenRewards[playerAddress],
+            skillNeeded
+        );
     }
 
     function getMyCharacters() public view returns(uint256[] memory) {
@@ -403,8 +439,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     modifier requestPayFromPlayer(int128 usdAmount) {
         uint256 skillAmount = usdToSkill(usdAmount);
-        require(tokenRewards[msg.sender] >= skillAmount
-            || skillToken.balanceOf(msg.sender) >= skillAmount,
+
+        (,, uint256 fromUserWallet) =
+            getSkillToSubtract(
+                inGameOnlyFunds[msg.sender],
+                tokenRewards[msg.sender],
+                skillAmount
+            );
+
+        require(skillToken.balanceOf(msg.sender) >= skillAmount,
             string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(skillAmount))));
         _;
     }
@@ -438,11 +481,20 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _payContractConverted(address playerAddress, uint256 convertedAmount) internal {
+
+        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromUserWallet) =
+            getSkillToSubtract(
+                inGameOnlyFunds[playerAddress],
+                tokenRewards[playerAddress],
+                convertedAmount
+            );
+
         // must use requestPayFromPlayer modifier to approve on the initial function!
-        if(convertedAmount <= tokenRewards[playerAddress])
-            tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(convertedAmount);
-        else
-            skillToken.transferFrom(playerAddress, address(this), convertedAmount);
+        totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
+        inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
+
+        tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
+        skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
     }
 
     function _payPlayer(address playerAddress, int128 baseAmount) internal {
@@ -495,6 +547,22 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function setCharacterLimit(uint256 max) public restricted {
         characterLimit = max;
+    }
+
+    function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {
+        totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
+        inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
+
+        skillToken.transferFrom(msg.sender, address(this), skillAmount);
+
+        emit InGameOnlyFundsGiven(to, skillAmount);
+    }
+
+    function giveInGameOnlyFundsFromContractBalance(address to, uint256 skillAmount) external restricted {
+        totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
+        inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
+
+        emit InGameOnlyFundsGiven(to, skillAmount);
     }
 
     function usdToSkill(int128 usdAmount) public view returns (uint256) {

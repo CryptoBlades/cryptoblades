@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { Web3JsCallOptions, Web3JsAbiCall } from '../../abi-common';
+import { Web3JsCallOptions, Web3JsAbiCall, Web3JsSendOptions } from '../../abi-common';
 import { Contract, Contracts } from './interfaces';
 
 export type CryptoBladesAlias = NonNullable<Contracts['CryptoBlades']>;
@@ -21,36 +21,53 @@ export async function getFeeInSkillFromUsd(
   return feeInSkill;
 }
 
+type WithOptionalFrom<T extends { from: unknown }> = Omit<T, 'from'> & Partial<Pick<T, 'from'>>;
+
 export async function approveFee(
   cryptoBladesContract: CryptoBladesAlias,
   skillToken: Contracts['SkillToken'],
+  from: NonNullable<Web3JsCallOptions['from']>,
   skillRewardsAvailable: string,
-  callOpts: Web3JsCallOptions,
-  approveOpts: Web3JsCallOptions,
+  callOpts: WithOptionalFrom<Web3JsCallOptions>,
+  approveOpts: WithOptionalFrom<Web3JsSendOptions>,
   fn: CryptoBladesMethodsFunction
 ) {
-  const feeInSkill = new BigNumber(await getFeeInSkillFromUsd(cryptoBladesContract, callOpts, fn));
+  const callOptsWithFrom: Web3JsCallOptions = { from, ...callOpts };
+  const approveOptsWithFrom: Web3JsSendOptions = { from, ...approveOpts };
 
-  const paidByRewardPool = feeInSkill.lte(skillRewardsAvailable);
+  let feeInSkill = new BigNumber(await getFeeInSkillFromUsd(cryptoBladesContract, callOptsWithFrom, fn));
 
-  if(paidByRewardPool) {
-    return null;
+  try {
+    console.log(`trying getSkillNeededFromUserWallet(${from}, ${feeInSkill.toString()})`);
+    const origFee = feeInSkill.toString();
+
+    feeInSkill = await cryptoBladesContract.methods
+      .getSkillNeededFromUserWallet(from, feeInSkill.toString())
+      .call(callOptsWithFrom)
+      .then(n => new BigNumber(n));
+
+    console.log(`success; getSkillNeededFromUserWallet(${from}, ${origFee}) = ${feeInSkill.toString()}`);
   }
+  catch(err) {
+    console.log('failed to use getSkillNeededFromUserWallet; falling back to old behavior');
+    const paidByRewardPool = feeInSkill.lte(skillRewardsAvailable);
 
-  const from = callOpts.from;
-  if(from !== null) {
-    const allowance = await skillToken.methods
-      .allowance(from, cryptoBladesContract.options.address)
-      .call(callOpts);
-
-    if(feeInSkill.lte(allowance)) {
+    if(paidByRewardPool) {
       return null;
     }
   }
 
+  const allowance = await skillToken.methods
+    .allowance(from, cryptoBladesContract.options.address)
+    .call(callOptsWithFrom);
+
+  if(feeInSkill.lte(allowance)) {
+    return null;
+  }
+
   return await skillToken.methods
     .approve(cryptoBladesContract.options.address, feeInSkill.toString())
-    .send(approveOpts);
+    .send(approveOptsWithFrom);
 }
 
 export async function waitUntilEvent(contract: Contract<unknown>, eventName: string, opts: Record<string, unknown>): Promise<Record<string, unknown>> {
