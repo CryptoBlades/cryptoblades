@@ -636,7 +636,8 @@ export default Vue.extend({
       this.selectedNftId = null;
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully listed '
-        +this.activeType+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL';
+        +this.activeType+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL'
+        +(this.listingTargetBuyer !== defaultTargetBuyer ? 'for ' + this.listingTargetBuyer : '');
     },
 
     async updateNftListingPrice() {

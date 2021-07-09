@@ -334,10 +334,6 @@ export function createStore(web3: Web3) {
       waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod(state): string {
         return BN.minimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
       },
-
-      getWalletAddress(state): string {
-        return state.defaultAccount || '';
-      },
     },
 
     mutations: {
