@@ -32,47 +32,18 @@ jobs:
 
       - run: npm run build:frontend
 
-      - name: Archive build artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: dist
-          path: frontend/dist/
-          retention-days: 1
-
-  deploy-testnet:
-    name: Deploy testnet frontend
-    needs: build
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/testnet' }}
-
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: dist
-          path: frontend/dist
-
-      - name: Deploy
+      - name: Deploy testnet frontend
         uses: netlify/actions/cli@master
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/testnet' }}
         with:
           args: deploy --dir=frontend/dist --prod
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_TESTNET_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
 
-  deploy-mainnet:
-    name: Deploy mainnet frontend
-    needs: build
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/production' }}
-
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: dist
-          path: frontend/dist
-
-      - name: Deploy (must be published manually in Netlify UI)
+      - name: Deploy mainnet frontend (must be published manually in Netlify UI)
         uses: netlify/actions/cli@master
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/production' }}
         with:
           args: deploy --dir=frontend/dist
         env:
