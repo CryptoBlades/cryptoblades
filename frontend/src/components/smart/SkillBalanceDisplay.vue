@@ -76,13 +76,13 @@ export default Vue.extend({
     bnbClaimTooltip(): string {
       if(!this.canWithdrawBnb) {
         return `
-          You have reached your limit for withdrawing BNB from portal for this period,
+          You have reached your limit for withdrawing BNB from the portal for this period,
           please wait about ${this.durationUntilLimitPeriodOver}
           (${this.formattedTotalAvailableBnb} left)
         `;
       }
 
-      return `${this.formattedBnbThatCanBeWithdrawn} of ${this.formattedTotalAvailableBnb} withdrawable from portal`;
+      return `${this.formattedBnbThatCanBeWithdrawn} of ${this.formattedTotalAvailableBnb} withdrawable from the portal`;
     },
   },
 
