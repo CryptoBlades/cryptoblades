@@ -67,6 +67,10 @@ interface RaidData {
   staminaDrainSeconds: number;
 }
 
+type WaxBridgeDetailsPayload = Pick<
+IState, 'waxBridgeWithdrawableBnb' | 'waxBridgeRemainingWithdrawableBnbDuringPeriod' | 'waxBridgeTimeUntilLimitExpires'
+>;
+
 const defaultStakeState: IStakeState = {
   ownBalance: '0',
   stakedBalance: '0',
@@ -136,7 +140,11 @@ export function createStore(web3: Web3) {
         weaponDrops: [],
         staminaDrainSeconds: 0,
         isOwnedCharacterRaidingById: {}
-      }
+      },
+
+      waxBridgeWithdrawableBnb: '0',
+      waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
+      waxBridgeTimeUntilLimitExpires: 0,
     },
 
     getters: {
@@ -299,6 +307,10 @@ export function createStore(web3: Web3) {
       getIsInCombat(state: IState): boolean {
         return state.isInCombat;
       },
+
+      waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod(state): string {
+        return BN.minimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
+      }
     },
 
     mutations: {
@@ -442,6 +454,12 @@ export function createStore(web3: Web3) {
 
       updateAllIsOwnedCharacterRaidingById(state, payload: Record<number, boolean>) {
         state.raid.isOwnedCharacterRaidingById = payload;
+      },
+
+      updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
+        state.waxBridgeWithdrawableBnb = payload.waxBridgeWithdrawableBnb;
+        state.waxBridgeRemainingWithdrawableBnbDuringPeriod = payload.waxBridgeRemainingWithdrawableBnbDuringPeriod;
+        state.waxBridgeTimeUntilLimitExpires = payload.waxBridgeTimeUntilLimitExpires;
       }
     },
 
@@ -628,7 +646,7 @@ export function createStore(web3: Web3) {
       },
 
       async fetchUserDetails({ dispatch }) {
-        const promises = [dispatch('fetchSkillBalance')];
+        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails')];
 
         if (!featureFlagStakeOnly) {
           promises.push(dispatch('fetchUserGameDetails'));
@@ -1388,6 +1406,37 @@ export function createStore(web3: Web3) {
           dispatch('fetchFightRewardXp')
         ]);
       },
+
+      async fetchWaxBridgeDetails({ state, commit }) {
+        const { WaxBridge } = state.contracts();
+        if(!WaxBridge || !state.defaultAccount) return;
+
+        const [
+          waxBridgeWithdrawableBnb,
+          waxBridgeRemainingWithdrawableBnbDuringPeriod,
+          waxBridgeTimeUntilLimitExpires
+        ] = await Promise.all([
+          WaxBridge.methods.withdrawableBnb(state.defaultAccount).call(defaultCallOptions(state)),
+          WaxBridge.methods.getRemainingWithdrawableBnbDuringPeriod().call(defaultCallOptions(state)),
+          WaxBridge.methods.getTimeUntilLimitExpires().call(defaultCallOptions(state)),
+        ]);
+
+        const payload: WaxBridgeDetailsPayload = {
+          waxBridgeWithdrawableBnb,
+          waxBridgeRemainingWithdrawableBnbDuringPeriod,
+          waxBridgeTimeUntilLimitExpires: +waxBridgeTimeUntilLimitExpires
+        };
+        commit('updateWaxBridgeDetails', payload);
+      },
+
+      async withdrawBnbFromWaxBridge({ state, dispatch }) {
+        const { WaxBridge } = state.contracts();
+        if(!WaxBridge || !state.defaultAccount) return;
+
+        await WaxBridge.methods.withdraw(state.waxBridgeWithdrawableBnb).send(defaultCallOptions(state));
+
+        await dispatch('fetchWaxBridgeDetails');
+      }
     }
   });
 }

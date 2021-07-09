@@ -81,5 +81,9 @@ export interface IState {
 
   raid: IRaidState;
 
+  waxBridgeWithdrawableBnb: string;
+  waxBridgeRemainingWithdrawableBnbDuringPeriod: string;
+  waxBridgeTimeUntilLimitExpires: number;
+
   isInCombat: boolean;
 }
