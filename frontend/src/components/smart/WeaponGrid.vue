@@ -1,7 +1,7 @@
 <template>
   <div>
     <span v-if="showLimit > 0 && nonIgnoredWeapons.length >= showLimit">
-      <h4>More than {{showLimit}} results, try adjusting the filters</h4>
+      <h4>More than {{ showLimit }} results, try adjusting the filters</h4>
     </span>
     <div class="filters row mt-2 pl-2" v-if="displayWeapons.length > 0">
       <div class="col-sm-6 col-md-2">
@@ -21,6 +21,7 @@
       <div v-if="showReforgedToggle" class="show-reforged">
         <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
         <strong>Show reforged</strong>
+        <small-button class="button" :text="'Clear Filters'" @click="clearFilters" />
       </div>
     </div>
 
@@ -31,7 +32,7 @@
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
         @click="$emit('choose-weapon', weapon.id)"
-        @contextmenu="canFavorite && toggleFavorite($event,weapon.id)"
+        @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
         <b-icon v-if="isFavorite(weapon.id) === true" class="favorite-star" icon="star-fill" variant="warning" />
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
@@ -49,10 +50,9 @@
 import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
-
 import { IState, IWeapon } from '../../interfaces';
-
 import WeaponIcon from '../WeaponIcon.vue';
+import SmallButton from '../SmallButton.vue';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 
@@ -68,49 +68,57 @@ interface Data {
   starFilter: string;
   elementFilter: string;
   showReforgedWeapons: boolean;
-  favorites: Record<number, boolean>
+  favorites: Record<number, boolean>;
 }
 
 export default Vue.extend({
   model: {
     prop: 'highlight',
-    event: 'choose-weapon'
+    event: 'choose-weapon',
   },
   props: {
     highlight: {
       // this forces Typescript to consider a prop a certain type
       // without us specifying a "type" property;
       // Vue's "type" property is not as flexible as we need it here
-      validator(x: string | number | null) { void x; return true; },
-      default: null
+      validator(x: string | number | null) {
+        void x;
+        return true;
+      },
+      default: null,
     },
     ignore: {
       // this forces Typescript to consider a prop a certain type
       // without us specifying a "type" property;
       // Vue's "type" property is not as flexible as we need it here
-      validator(x: string | number | null) { void x; return true; },
-      default: null
+      validator(x: string | number | null) {
+        void x;
+        return true;
+      },
+      default: null,
     },
     showGivenWeaponIds: {
       type: Boolean,
-      default: false
+      default: false,
     },
     weaponIds: {
       type: Array as PropType<string[]>,
-      default() { return []; }
+      default() {
+        return [];
+      },
     },
     showLimit: {
       type: Number,
-      default: 0
+      default: 0,
     },
     showReforgedToggle: {
       type: Boolean,
-      default: true
+      default: true,
     },
     canFavorite: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
 
   data() {
@@ -118,12 +126,13 @@ export default Vue.extend({
       starFilter: '',
       elementFilter: '',
       showReforgedWeapons: true,
-      favorites: {}
+      favorites: {},
     } as Data;
   },
 
   components: {
     WeaponIcon,
+    SmallButton
   },
 
   computed: {
@@ -131,11 +140,11 @@ export default Vue.extend({
     ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
 
     weaponIdsToDisplay(): string[] {
-      if(this.showGivenWeaponIds) {
+      if (this.showGivenWeaponIds) {
         return this.weaponIds;
       }
 
-      return this.ownedWeaponIds?.map(id => id.toString());
+      return this.ownedWeaponIds?.map((id) => id.toString());
     },
 
     displayWeapons(): IWeapon[] {
@@ -144,58 +153,58 @@ export default Vue.extend({
 
     nonIgnoredWeapons(): IWeapon[] {
       let items: IWeapon[] = [];
-      this.displayWeapons.forEach(x => items.push(x));
+      this.displayWeapons.forEach((x) => items.push(x));
 
-      if(this.ignore) {
-        items = items.filter(x => x.id.toString() !== (this.ignore || '').toString());
+      if (this.ignore) {
+        items = items.filter((x) => x.id.toString() !== (this.ignore || '').toString());
       }
 
-      if(this.starFilter) {
-        items = items.filter(x => x.stars === (+this.starFilter - 1));
+      if (this.starFilter) {
+        items = items.filter((x) => x.stars === +this.starFilter - 1);
       }
 
-      if(this.elementFilter) {
-        items = items.filter(x => x.element.includes(this.elementFilter));
+      if (this.elementFilter) {
+        items = items.filter((x) => x.element.includes(this.elementFilter));
       }
 
-      if(!this.showReforgedWeapons) {
-        items = items.filter(x => x.bonusPower === 0);
+      if (!this.showReforgedWeapons) {
+        items = items.filter((x) => x.bonusPower === 0);
       }
 
-      if(this.showLimit > 0 && items.length > this.showLimit) {
+      if (this.showLimit > 0 && items.length > this.showLimit) {
         items = items.slice(0, this.showLimit);
       }
 
       const favoriteWeapons: IWeapon[] = [];
-      for(const key in this.favorites) {
-        const i = items.findIndex(y => y.id === +key);
-        if(i !== -1) {
+      for (const key in this.favorites) {
+        const i = items.findIndex((y) => y.id === +key);
+        if (i !== -1) {
           favoriteWeapons.push(items[i]);
           items.splice(i, 1);
         }
       }
 
       return favoriteWeapons.concat(items);
-    }
+    },
   },
 
   watch: {
     async weaponIdsToDisplay(newWeaponIds: string[]) {
       await this.fetchWeapons(newWeaponIds);
-    }
+    },
   },
 
   methods: {
     ...(mapActions(['fetchWeapons']) as StoreMappedActions),
 
     saveFilters() {
-      localStorage.setItem('weapon-starfilter', this.starFilter);
-      localStorage.setItem('weapon-elementfilter', this.elementFilter);
+      sessionStorage.setItem('weapon-starfilter', this.starFilter);
+      sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
     },
 
     toggleFavorite(e: Event, weaponId: number) {
       e.preventDefault();
-      if(this.favorites[weaponId]) {
+      if (this.favorites[weaponId]) {
         this.$delete(this.favorites, weaponId);
       } else {
         this.$set(this.favorites, weaponId, true);
@@ -209,29 +218,36 @@ export default Vue.extend({
     },
 
     getFavoritesMap(favorites: string): Record<number, boolean> {
-      if(!favorites) {
+      if (!favorites) {
         return {};
       }
 
       const favoritesMap: Record<number, boolean> = {};
-      favorites.split(',').forEach(x => favoritesMap[+x] = true);
+      favorites.split(',').forEach((x) => (favoritesMap[+x] = true));
       return favoritesMap;
     },
 
     isFavorite(weaponId: number): boolean {
       return this.favorites[weaponId];
-    }
+    },
+
+    clearFilters() {
+      sessionStorage.clear();
+
+      this.elementFilter = '';
+      this.starFilter = '';
+    },
   },
 
   mounted() {
-    this.starFilter = localStorage.getItem('weapon-starfilter') || '';
-    this.elementFilter = localStorage.getItem('weapon-elementfilter') || '';
+    this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
+    this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
 
     const favoritesFromStorage = localStorage.getItem('favorites');
-    if(favoritesFromStorage) {
+    if (favoritesFromStorage) {
       this.favorites = JSON.parse(favoritesFromStorage);
     }
-  }
+  },
 });
 </script>
 
@@ -251,7 +267,7 @@ export default Vue.extend({
   background: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
   cursor: pointer;
-  position: relative
+  position: relative;
 }
 
 .weapon.selected {
@@ -290,20 +306,19 @@ export default Vue.extend({
 @media (max-width: 576px) {
   .weapon-grid {
     justify-content: center;
-    margin-top : 10px;
+    margin-top: 10px;
   }
 }
 
 /* Needed to adjust weapon list */
-@media all and (max-width:  767.98px) {
+@media all and (max-width: 767.98px) {
   .weapon-grid {
     padding-left: 2em;
   }
 
-  li.weapon  {
+  li.weapon {
     display: inline-block;
     margin: auto;
   }
-
 }
 </style>
