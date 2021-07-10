@@ -31,7 +31,7 @@
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
             <li>
               2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br />
-             <a v-bind:href="`${getExchangeUrl}`" target="_blank">Trade SKILL/BNB</a>
+              <a v-bind:href="`${getExchangeUrl}`" target="_blank">Trade SKILL/BNB</a>
             </li>
             <li>
               3. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a>
@@ -120,6 +120,8 @@ export default {
       'fetchWeaponTransferCooldownForOwnWeapons',
       'fetchCharacterTransferCooldownForOwnCharacters',
       'fetchStakeDetails',
+      'fetchWaxBridgeDetails',
+      'fetchRewardsClaimTax',
     ]),
 
     async updateCurrentCharacterStamina() {
@@ -145,50 +147,98 @@ export default {
     },
     async configureMetaMask() {
       const web3 = this.web3.currentProvider;
-
-      try {
-        await web3.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x38' }],
-        });
-      } catch (switchError) {
+      if (this.currentNetworkId === 97) {
         try {
           await web3.request({
-            method: 'wallet_addEthereumChain',
-            params: [
-              {
-                chainId: '0x38',
-                chainName: 'Binance Smart Chain Mainnet',
-                nativeCurrency: {
-                  name: 'Binance Coin',
-                  symbol: 'BNB',
-                  decimals: 18,
-                },
-                rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                blockExplorerUrls: ['https://bscscan.com/'],
-              },
-            ],
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x61' }],
           });
-        } catch (addError) {
-          console.error(addError);
+        } catch (switchError) {
+          try {
+            await web3.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x61',
+                  chainName: 'Binance Smart Chain Testnet',
+                  nativeCurrency: {
+                    name: 'Binance Coin',
+                    symbol: 'BNB',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+                  blockExplorerUrls: ['https://testnet.bscscan.com'],
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error(addError);
+          }
         }
-      }
 
-      try {
-        await web3.request({
-          method: 'wallet_watchAsset',
-          params: {
-            type: 'ERC20',
-            options: {
-              address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
-              symbol: 'SKILL',
-              decimals: 18,
-              image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+        try {
+          await web3.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: '0xcaf53066e36eef55ed0663419adff6e503bd134f',
+                symbol: 'SKILL',
+                decimals: 18,
+                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+              },
             },
-          },
-        });
-      } catch (error) {
-        console.error(error);
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      } else {
+        {
+          try {
+            await web3.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x38' }],
+            });
+          } catch (switchError) {
+            try {
+              await web3.request({
+                method: 'wallet_addEthereumChain',
+                params: [
+                  {
+                    chainId: '0x38',
+                    chainName: 'Binance Smart Chain Mainnet',
+                    nativeCurrency: {
+                      name: 'Binance Coin',
+                      symbol: 'BNB',
+                      decimals: 18,
+                    },
+                    rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                    blockExplorerUrls: ['https://bscscan.com/'],
+                  },
+                ],
+              });
+            } catch (addError) {
+              console.error(addError);
+            }
+          }
+
+          try {
+            await web3.request({
+              method: 'wallet_watchAsset',
+              params: {
+                type: 'ERC20',
+                options: {
+                  address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
+                  symbol: 'SKILL',
+                  decimals: 18,
+                  image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+                },
+              },
+            });
+          } catch (error) {
+            console.error(error);
+          }
+        }
       }
     },
   },
@@ -196,9 +246,9 @@ export default {
   mounted() {
     this.checkStorage();
 
-    Events.$on('setting:hideRewards',() => this.checkStorage());
-    Events.$on('setting:hideAdvanced',() => this.checkStorage());
-    Events.$on('setting:useGraphics',() => this.checkStorage());
+    Events.$on('setting:hideRewards', () => this.checkStorage());
+    Events.$on('setting:hideAdvanced', () => this.checkStorage());
+    Events.$on('setting:useGraphics', () => this.checkStorage());
 
     document.body.addEventListener('click', (e) => {
       const tagname = e.target.getAttribute('tagname');
@@ -241,8 +291,13 @@ export default {
       this.fetchStakeDetails({ stakeType: item });
     });
 
-    this.weaponTransferCooldownPollIntervalId = setInterval(async () => {
-      await Promise.all([this.fetchCharacterTransferCooldownForOwnCharacters(), this.fetchWeaponTransferCooldownForOwnWeapons()]);
+    this.slowPollIntervalId = setInterval(async () => {
+      await Promise.all([
+        this.fetchCharacterTransferCooldownForOwnCharacters(),
+        this.fetchWeaponTransferCooldownForOwnWeapons(),
+        this.fetchWaxBridgeDetails(),
+        this.fetchRewardsClaimTax(),
+      ]);
     }, 10 * 1000);
 
     this.doPollAccounts = true;
@@ -267,7 +322,7 @@ export default {
   beforeDestroy() {
     this.doPollAccounts = false;
     clearInterval(this.pollCharacterStaminaIntervalId);
-    clearInterval(this.weaponTransferCooldownPollIntervalId);
+    clearInterval(this.slowPollIntervalId);
   },
 };
 </script>
@@ -302,7 +357,8 @@ body {
   max-height: calc(100vh - 56px - 160px);
 }
 
-button, .pointer {
+button,
+.pointer {
   cursor: pointer;
 }
 
@@ -480,6 +536,7 @@ div.bg-success {
   height: calc(100vh - 56px);
   background: rgb(20, 20, 20);
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  margin: auto;
 }
 
 .fullscreen-warning {
