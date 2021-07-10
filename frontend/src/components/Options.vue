@@ -42,10 +42,8 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
 import { Accessors } from 'vue/types/options';
-import { BootstrapVueIcons } from 'bootstrap-vue';
 import Vue from 'vue';
 
-Vue.use(BootstrapVueIcons);
 interface StoreMappedState {
   skillRewards: string;
   directStakeBonusPercent: number;
@@ -136,9 +134,6 @@ export default Vue.extend({
       }
     },
     async claimSkill(stage: number) {
-      console.log(`claimTax = ${this.rewardsClaimTaxAsFactorBN}`);
-      console.log(`claimTax = ${this.rewardsClaimTaxAsFactorBN}`);
-      console.log(`formtax = ${this.formattedTaxAmount}`);
       if(stage === 0) {
         (this.$refs['need-gas-modal'] as any).show();
       }
