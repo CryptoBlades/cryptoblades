@@ -1,11 +1,12 @@
 <template>
   <div class="skill-balance-display">
-    <b-button size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="'Buy SKILL'" @click="onBuySkill">
-      <i class="fa fa-plus gtag-link-others" tagname="buy_skill"></i>
-    </b-button>
+    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="'Buy SKILL'" @click="onBuySkill">
+      <!-- <i class="fa fa-plus gtag-link-others" tagname="buy_skill"></i> -->
+      <img src="../../assets/addButton.png" class="add-button gtag-link-others"  tagname="buy_skill">
+    </div>
 
     <div class="balance-container">
-      <strong class="mr-2">Balance</strong>
+      <strong class="mr-2 balance-text">Balance</strong>
       <span class="balance">{{ formattedSkillBalance }}</span>
     </div>
 
@@ -18,7 +19,7 @@
     </div>
 
     <div class="balance-container">
-      <strong class="mr-2">In-Game-Only Funds</strong>
+      <strong class="mr-2 balance-text">In-Game-Only Funds</strong>
       <span class="balance">{{ formattedInGameOnlyFunds }}</span>
     </div>
   </div>
@@ -137,4 +138,14 @@ export default Vue.extend({
   color: #b3b0a7;
 }
 
+.balance-text {
+  color : #BFA765;
+}
+.add-button {
+  width : 30px;
+  height: 100%;
+}
+.add-button:hover {
+  cursor: pointer;
+}
 </style>
