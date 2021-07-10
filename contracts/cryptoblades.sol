@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./interfaces/IStakeFromGame.sol";
 import "./interfaces/IRandoms.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
@@ -69,6 +70,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         promos = _promos;
     }
 
+    function migrateTo_X(IStakeFromGame _stakeFromGame) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        stakeFromGameImpl = _stakeFromGame;
+    }
+
     // config vars
     uint characterLimit;
     uint8 staminaCostFight;
@@ -104,6 +111,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     Promos public promos;
 
     mapping(address => uint256) private _rewardsClaimTaxTimerStart;
+
+    IStakeFromGame public stakeFromGameImpl;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -615,6 +624,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // So we don't need to do anything with the tax part of the rewards.
 
         _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
+    }
+
+    function stakeUnclaimedRewards() external {
+        uint256 _tokenRewards = tokenRewards[msg.sender];
+        tokenRewards[msg.sender] = 0;
+
+        _giveInGameOnlyFundsFromContractBalance(msg.sender, _tokenRewards / 10);
+
+        skillToken.approve(address(stakeFromGameImpl), _tokenRewards);
+        stakeFromGameImpl.stakeFromGame(msg.sender, _tokenRewards);
     }
 
     function claimXpRewards() public {
