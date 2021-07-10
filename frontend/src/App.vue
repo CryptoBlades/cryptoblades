@@ -6,16 +6,20 @@
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
-    <div class="fullscreen-warning" v-if="showMetamaskWarning || showNetworkError">
+    <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
         <span class="starter-panel-heading">Metamask Not Detected Or Incorrect Network</span>
         <div class="center">
           <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning" />
           <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError" />
+          <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
         </div>
       </div>
     </div>
-    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))">
+    <div
+      class="fullscreen-warning"
+      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))"
+    >
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
@@ -47,6 +51,8 @@
             <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a>
           </p>
         </div>
+        <div class="seperator"></div>
+        <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
       </div>
     </div>
   </div>
@@ -58,6 +64,7 @@ import _ from 'lodash';
 import Events from './events';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import BigButton from './components/BigButton.vue';
+import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import ClaimRewardsBar from './components/smart/ClaimRewardsBar.vue';
@@ -69,11 +76,13 @@ export default {
     CharacterBar,
     ClaimRewardsBar,
     BigButton,
+    SmallButton,
   },
 
   data: () => ({
     errorMessage: '',
     canShowRewardsBar: true,
+    hideWalletWarning: false,
   }),
 
   computed: {
@@ -81,6 +90,8 @@ export default {
     ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes']),
 
     canShowApp() {
+      if (this.hideWalletWarning) return true;
+
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
     },
 
@@ -140,6 +151,7 @@ export default {
 
     checkStorage() {
       this.canShowRewardsBar = localStorage.getItem('hideRewards') === 'false';
+      this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     },
     async startOnboarding() {
       const onboarding = new MetaMaskOnboarding();
@@ -241,6 +253,14 @@ export default {
         }
       }
     },
+
+    toggleHideWalletWarning() {
+      this.hideWalletWarning = !this.hideWalletWarning;
+      if (this.hideWalletWarning) localStorage.setItem('hideWalletWarning', 'true');
+      else localStorage.setItem('hideWalletWarning', 'false');
+
+      Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
+    },
   },
 
   mounted() {
@@ -249,6 +269,7 @@ export default {
     Events.$on('setting:hideRewards', () => this.checkStorage());
     Events.$on('setting:hideAdvanced', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
+    Events.$on('setting:hideWalletWarning', () => this.checkStorage());
 
     document.body.addEventListener('click', (e) => {
       const tagname = e.target.getAttribute('tagname');
@@ -317,6 +338,7 @@ export default {
     if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
     if (!localStorage.getItem('hideAdvanced')) localStorage.setItem('hideAdvanced', 'false');
     if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
+    if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
   },
 
   beforeDestroy() {

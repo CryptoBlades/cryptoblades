@@ -4,12 +4,10 @@
       <template #button-content>
         <i class="fa fa-cog"></i>
       </template>
-
       <b-dropdown-item @click="toggleGraphics()">3D Graphics: {{ showGraphics ? 'On' : 'Off' }}</b-dropdown-item>
-
       <b-dropdown-item @click="toggleRewards()">Reward Bar: {{ hideRewards ? 'Off' : 'On' }}</b-dropdown-item>
-
       <b-dropdown-item @click="toggleAdvanced()">Advanced UI: {{ hideAdvanced ? 'Off' : 'On' }}</b-dropdown-item>
+      <b-dropdown-item @click="toggleHideWalletWarning()">Hide Wallet Warning: {{ hideWalletWarning ? 'On' : 'Off' }}</b-dropdown-item>
     </b-nav-item-dropdown>
   </b-navbar-nav>
 </template>
@@ -22,6 +20,7 @@ export default {
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
+    this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
   },
 
   data() {
@@ -29,6 +28,7 @@ export default {
       showGraphics: this.showGraphics,
       hideRewards: this.hideRewards,
       hideAdvanced: this.hideAdvanced,
+      hideWalletWarning: this.hideWalletWarning,
     };
   },
 
@@ -55,6 +55,14 @@ export default {
       else localStorage.setItem('hideAdvanced', 'false');
 
       Events.$emit('setting:hideAdvanced', { value: this.hideAdvanced });
+    },
+
+    toggleHideWalletWarning() {
+      this.hideWalletWarning = !this.hideWalletWarning;
+      if (this.hideWalletWarning) localStorage.setItem('hideWalletWarning', 'true');
+      else localStorage.setItem('hideWalletWarning', 'false');
+
+      Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
     },
   },
 };
