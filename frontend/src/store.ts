@@ -105,6 +105,8 @@ export function createStore(web3: Web3) {
 
       skillBalance: '0',
       skillRewards: '0',
+      maxRewardsClaimTax: '0',
+      rewardsClaimTax: '0',
       xpRewards: {},
       inGameOnlyFunds: '0',
       directStakeBonusPercent: 10,
@@ -288,6 +290,14 @@ export function createStore(web3: Web3) {
         return state.characterStaminas;
       },
 
+      maxRewardsClaimTaxAsFactorBN(state) {
+        return new BN(state.maxRewardsClaimTax).dividedBy(new BN(2).exponentiatedBy(64));
+      },
+
+      rewardsClaimTaxAsFactorBN(state) {
+        return new BN(state.rewardsClaimTax).dividedBy(new BN(2).exponentiatedBy(64));
+      },
+
       stakeState(state) {
         return (stakeType: StakeType): IStakeState => state.staking[stakeType];
       },
@@ -345,6 +355,14 @@ export function createStore(web3: Web3) {
 
       updateSkillRewards(state: IState, { skillRewards }: { skillRewards: string }) {
         state.skillRewards = skillRewards;
+      },
+
+      updateRewardsClaimTax(
+        state,
+        { maxRewardsClaimTax, rewardsClaimTax }: { maxRewardsClaimTax: string, rewardsClaimTax: string }
+      ) {
+        state.maxRewardsClaimTax = maxRewardsClaimTax;
+        state.rewardsClaimTax = rewardsClaimTax;
       },
 
       updateXpRewards(state: IState, { xpRewards }: { xpRewards: { [characterId: string]: string } }) {
@@ -1394,13 +1412,40 @@ export function createStore(web3: Web3) {
         return fightBaseline;
       },
 
-      async fetchFightRewardSkill({ state, commit }) {
-        const skillRewards = await state.contracts().CryptoBlades!.methods
-          .getTokenRewards()
-          .call(defaultCallOptions(state));
+      async fetchFightRewardSkill({ state, commit, dispatch }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
 
-        commit('updateSkillRewards', { skillRewards });
+        const [skillRewards] = await Promise.all([
+          (async () => {
+            const skillRewards = await CryptoBlades.methods
+              .getTokenRewards()
+              .call(defaultCallOptions(state));
+
+            commit('updateSkillRewards', { skillRewards });
+
+            return skillRewards;
+          })(),
+          dispatch('fetchRewardsClaimTax')
+        ]);
+
         return skillRewards;
+      },
+
+      async fetchRewardsClaimTax({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        const [rewardsClaimTax, maxRewardsClaimTax] = await Promise.all([
+          CryptoBlades.methods
+            .getOwnRewardsClaimTax()
+            .call(defaultCallOptions(state)),
+          CryptoBlades.methods
+            .REWARDS_CLAIM_TAX_MAX()
+            .call(defaultCallOptions(state))
+        ]);
+
+        commit('updateRewardsClaimTax', { maxRewardsClaimTax, rewardsClaimTax });
       },
 
       async fetchFightRewardXp({ state, commit }) {

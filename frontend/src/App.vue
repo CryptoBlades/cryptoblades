@@ -121,6 +121,7 @@ export default {
       'fetchCharacterTransferCooldownForOwnCharacters',
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
+      'fetchRewardsClaimTax',
     ]),
 
     async updateCurrentCharacterStamina() {
@@ -290,11 +291,12 @@ export default {
       this.fetchStakeDetails({ stakeType: item });
     });
 
-    this.weaponTransferCooldownPollIntervalId = setInterval(async () => {
+    this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
         this.fetchCharacterTransferCooldownForOwnCharacters(),
         this.fetchWeaponTransferCooldownForOwnWeapons(),
         this.fetchWaxBridgeDetails(),
+        this.fetchRewardsClaimTax(),
       ]);
     }, 10 * 1000);
 
@@ -320,7 +322,7 @@ export default {
   beforeDestroy() {
     this.doPollAccounts = false;
     clearInterval(this.pollCharacterStaminaIntervalId);
-    clearInterval(this.weaponTransferCooldownPollIntervalId);
+    clearInterval(this.slowPollIntervalId);
   },
 };
 </script>
