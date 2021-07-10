@@ -114,11 +114,13 @@ export function createStore(web3: Web3) {
 
       staking: {
         skill: { ...defaultStakeState },
+        skill2: { ...defaultStakeState },
         lp: { ...defaultStakeState },
         lp2: { ...defaultStakeState }
       },
       stakeOverviews: {
         skill: { ...defaultStakeOverviewState },
+        skill2: { ...defaultStakeOverviewState },
         lp: { ...defaultStakeOverviewState },
         lp2: { ...defaultStakeOverviewState }
       },
@@ -150,6 +152,8 @@ export function createStore(web3: Web3) {
       },
 
       hasStakedBalance(state) {
+        if(!state.contracts) return false;
+
         const staking = state.contracts().staking;
         for(const stakeType of Object.keys(staking).filter(isStakeType)) {
           if(state.staking[stakeType].stakedBalance !== '0') {

@@ -20,6 +20,13 @@ export const stakingContractsInfo: Partial<Record<StakeType, Partial<StakingCont
   }
 };
 
+if(availableStakingContracts.includes('skill2')) {
+  stakingContractsInfo.skill2 = {
+    stakingRewardsAddress: process.env.VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS,
+    stakingTokenAddress: process.env.VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS
+  };
+}
+
 if(availableStakingContracts.includes('lp')) {
   stakingContractsInfo.lp = {
     stakingRewardsAddress: process.env.VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS,
@@ -42,6 +49,11 @@ interface HumanReadableDetailsForStakeType {
 
 const defaultHumanReadableDetailsForStakeTypes: Record<StakeType, HumanReadableDetailsForStakeType> = {
   skill: {
+    stakeTokenName: 'SKILL',
+    rewardTokenName: 'SKILL',
+    stakeTitle: 'SKILL for SKILL (Old)'
+  },
+  skill2: {
     stakeTokenName: 'SKILL',
     rewardTokenName: 'SKILL',
     stakeTitle: 'SKILL for SKILL'

@@ -37,7 +37,7 @@ interface MarketContracts {
 
 const networkId = process.env.VUE_APP_NETWORK_ID || '5777';
 
-const stakingContractAddressesFromBuild: Record<StakeType, StakingContractEntry> = {
+const stakingContractAddressesFromBuild: Partial<Record<StakeType, Partial<StakingContractEntry>>> = {
   skill: {
     stakingRewardsAddress: (skillStakingRewardsNetworks as any)[networkId].address,
     stakingTokenAddress: (skillTokenNetworks as any)[networkId].address
@@ -52,8 +52,8 @@ const stakingContractAddressesFromBuild: Record<StakeType, StakingContractEntry>
   }
 };
 
-function getStakingContractsInfoWithDefaults(): Partial<Record<StakeType, StakingContractEntry>> {
-  const out: Partial<Record<StakeType, StakingContractEntry>> = {};
+function getStakingContractsInfoWithDefaults(): Partial<Record<StakeType, Partial<StakingContractEntry>>> {
+  const out: Partial<Record<StakeType, Partial<StakingContractEntry>>> = {};
 
   for(const stakeType of Object.keys(stakingContractsInfo).filter(isStakeType)) {
     const stakingContractInfo = stakingContractsInfo[stakeType]!;
@@ -68,6 +68,8 @@ function getStakingContractsInfoWithDefaults(): Partial<Record<StakeType, Stakin
     }
   }
 
+  console.log(out);
+
   return out;
 }
 
@@ -78,6 +80,8 @@ async function setUpStakingContracts(web3: Web3) {
 
   for(const stakeType of Object.keys(stakingContractsInfo).filter(isStakeType)) {
     const stakingContractInfo = stakingContractsInfo[stakeType]!;
+
+    if(!stakingContractInfo.stakingRewardsAddress || !stakingContractInfo.stakingTokenAddress) continue;
 
     staking[stakeType] = {
       StakingRewards: new web3.eth.Contract(stakingRewardsAbi as any, stakingContractInfo.stakingRewardsAddress),
