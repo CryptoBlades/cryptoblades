@@ -12,19 +12,19 @@
 
         <b-dropdown-item @click="toggleAdvanced()">Advanced UI: {{ hideAdvanced ? 'Off' : 'On' }}</b-dropdown-item>
 
-        <b-dropdown-item @click="claimSkill(0)">Claim Skill </b-dropdown-item>
+        <b-dropdown-item @click="claimSkill(ClaimStage.WaxBridge)">Claim Skill </b-dropdown-item>
 
       </b-nav-item-dropdown>
     </b-navbar-nav>
 
     <b-modal class="centered-modal" ref="need-gas-modal" title="Need Gas?"
-      @ok="claimSkill(1)" ok-title="Next" @cancel="$router.push('/portal')" cancel-title="Go to WAX Bridge" >
+      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push('/portal')" cancel-title="Go to WAX Bridge" >
         Need Gas? Try our WAX Bridge, which will pay you .5% under market rate to sell your WAX for BNB!
     </b-modal>
     <b-modal class="centered-modal" ref="stake-suggestion-modal" title="Stake Skill"
       @ok="$router.push('/stake')" ok-only ok-title="Go to Stake" >
         If you stake your SKILL now, we will give you a 10% bonus in SKILL that you can use in-game right away!
-      <a href="#" @click="claimSkill(2)"> <br>No thanks, I'd rather {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " +
+      <a href="#" @click="claimSkill(ClaimStage.Claim)"> <br>No thanks, I'd rather {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " +
         this.formattedTaxAmount + " in taxes and " : ""  }}forfeit my bonus </a>
     </b-modal>
     <b-modal class="centered-modal" ref="claim-confirmation-modal" title="Claim Skill" ok-title="I am sure"
@@ -58,10 +58,17 @@ interface Data {
   hideAdvanced: boolean;
   currentWithdrawTax: number;
   directStakeBonusPercent: number;
+  ClaimStage: ClaimStage;
 }
 
 interface StoreMappedGetters {
   rewardsClaimTaxAsFactorBN: BN;
+}
+
+enum ClaimStage {
+  WaxBridge = 0,
+  Stake = 1,
+  Claim = 2
 }
 
 export default Vue.extend({
@@ -75,7 +82,8 @@ export default Vue.extend({
     return {
       showGraphics: false,
       hideRewards: false,
-      hideAdvanced: false
+      hideAdvanced: false,
+      ClaimStage
     } as Data;
   },
 
@@ -133,14 +141,14 @@ export default Vue.extend({
         await this.claimTokenRewards();
       }
     },
-    async claimSkill(stage: number) {
-      if(stage === 0) {
+    async claimSkill(stage: ClaimStage) {
+      if(stage === ClaimStage.WaxBridge) {
         (this.$refs['need-gas-modal'] as any).show();
       }
-      if(stage === 1) {
+      if(stage === ClaimStage.Stake) {
         (this.$refs['stake-suggestion-modal'] as any).show();
       }
-      if(stage === 2) {
+      if(stage === ClaimStage.Claim) {
         (this.$refs['stake-suggestion-modal'] as any).hide();
         (this.$refs['claim-confirmation-modal'] as any).show();
       }
