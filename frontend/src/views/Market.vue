@@ -298,7 +298,6 @@
 <script lang="ts">
 import assert from 'assert';
 import Vue from 'vue';
-import { BootstrapVueIcons } from 'bootstrap-vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import Hint from '../components/Hint.vue';
@@ -313,8 +312,6 @@ type SellType = 'weapon' | 'character';
 type WeaponId = string;
 type CharacterId = string;
 type NftId = WeaponId | CharacterId;
-
-Vue.use(BootstrapVueIcons);
 
 interface Data {
   activeType: SellType;

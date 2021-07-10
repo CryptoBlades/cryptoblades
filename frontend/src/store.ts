@@ -67,6 +67,10 @@ interface RaidData {
   staminaDrainSeconds: number;
 }
 
+type WaxBridgeDetailsPayload = Pick<
+IState, 'waxBridgeWithdrawableBnb' | 'waxBridgeRemainingWithdrawableBnbDuringPeriod' | 'waxBridgeTimeUntilLimitExpires'
+>;
+
 const defaultStakeState: IStakeState = {
   ownBalance: '0',
   stakedBalance: '0',
@@ -101,7 +105,10 @@ export function createStore(web3: Web3) {
 
       skillBalance: '0',
       skillRewards: '0',
+      maxRewardsClaimTax: '0',
+      rewardsClaimTax: '0',
       xpRewards: {},
+      inGameOnlyFunds: '0',
       ownedCharacterIds: [],
       ownedWeaponIds: [],
       maxStamina: 0,
@@ -136,7 +143,11 @@ export function createStore(web3: Web3) {
         weaponDrops: [],
         staminaDrainSeconds: 0,
         isOwnedCharacterRaidingById: {}
-      }
+      },
+
+      waxBridgeWithdrawableBnb: '0',
+      waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
+      waxBridgeTimeUntilLimitExpires: 0,
     },
 
     getters: {
@@ -278,6 +289,14 @@ export function createStore(web3: Web3) {
         return state.characterStaminas;
       },
 
+      maxRewardsClaimTaxAsFactorBN(state) {
+        return new BN(state.maxRewardsClaimTax).dividedBy(new BN(2).exponentiatedBy(64));
+      },
+
+      rewardsClaimTaxAsFactorBN(state) {
+        return new BN(state.rewardsClaimTax).dividedBy(new BN(2).exponentiatedBy(64));
+      },
+
       stakeState(state) {
         return (stakeType: StakeType): IStakeState => state.staking[stakeType];
       },
@@ -299,6 +318,10 @@ export function createStore(web3: Web3) {
       getIsInCombat(state: IState): boolean {
         return state.isInCombat;
       },
+
+      waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod(state): string {
+        return BN.minimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
+      }
     },
 
     mutations: {
@@ -333,10 +356,22 @@ export function createStore(web3: Web3) {
         state.skillRewards = skillRewards;
       },
 
+      updateRewardsClaimTax(
+        state,
+        { maxRewardsClaimTax, rewardsClaimTax }: { maxRewardsClaimTax: string, rewardsClaimTax: string }
+      ) {
+        state.maxRewardsClaimTax = maxRewardsClaimTax;
+        state.rewardsClaimTax = rewardsClaimTax;
+      },
+
       updateXpRewards(state: IState, { xpRewards }: { xpRewards: { [characterId: string]: string } }) {
         for(const charaId in xpRewards) {
           Vue.set(state.xpRewards, charaId, xpRewards[charaId]);
         }
+      },
+
+      updateInGameOnlyFunds(state, { inGameOnlyFunds }: Pick<IState, 'inGameOnlyFunds'>) {
+        state.inGameOnlyFunds = inGameOnlyFunds;
       },
 
       updateFightGasOffset(state: IState, { fightGasOffset }: { fightGasOffset: string }) {
@@ -442,6 +477,12 @@ export function createStore(web3: Web3) {
 
       updateAllIsOwnedCharacterRaidingById(state, payload: Record<number, boolean>) {
         state.raid.isOwnedCharacterRaidingById = payload;
+      },
+
+      updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
+        state.waxBridgeWithdrawableBnb = payload.waxBridgeWithdrawableBnb;
+        state.waxBridgeRemainingWithdrawableBnbDuringPeriod = payload.waxBridgeRemainingWithdrawableBnbDuringPeriod;
+        state.waxBridgeTimeUntilLimitExpires = payload.waxBridgeTimeUntilLimitExpires;
       }
     },
 
@@ -552,6 +593,21 @@ export function createStore(web3: Web3) {
             })
           );
 
+          subscriptions.push(
+            state.contracts().CryptoBlades!.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+
+              console.log('InGameOnlyFundsGiven', data);
+
+              await Promise.all([
+                dispatch('fetchInGameOnlyFunds')
+              ]);
+            })
+          );
+
           const { NFTMarket } = state.contracts();
 
           if(NFTMarket) {
@@ -628,7 +684,7 @@ export function createStore(web3: Web3) {
       },
 
       async fetchUserDetails({ dispatch }) {
-        const promises = [dispatch('fetchSkillBalance')];
+        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails')];
 
         if (!featureFlagStakeOnly) {
           promises.push(dispatch('fetchUserGameDetails'));
@@ -686,16 +742,34 @@ export function createStore(web3: Web3) {
         await dispatch('fetchCharacters', ownedCharacterIds);
       },
 
-      async fetchSkillBalance({ state, commit }) {
-        if(!state.defaultAccount) return;
+      async fetchSkillBalance({ state, commit, dispatch }) {
+        const { defaultAccount } = state;
+        if(!defaultAccount) return;
 
-        const skillBalance = await state.contracts().SkillToken.methods
-          .balanceOf(state.defaultAccount)
+        await Promise.all([
+          (async () => {
+            const skillBalance = await state.contracts().SkillToken.methods
+              .balanceOf(defaultAccount)
+              .call(defaultCallOptions(state));
+
+            if(state.skillBalance !== skillBalance) {
+              commit('updateSkillBalance', { skillBalance });
+            }
+          })(),
+          dispatch('fetchInGameOnlyFunds')
+        ]);
+      },
+
+      async fetchInGameOnlyFunds({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const inGameOnlyFunds = await CryptoBlades.methods
+          .inGameOnlyFunds(state.defaultAccount)
           .call(defaultCallOptions(state));
 
-        if(state.skillBalance !== skillBalance) {
-          commit('updateSkillBalance', { skillBalance });
-        }
+        const payload: Pick<IState, 'inGameOnlyFunds'> = { inGameOnlyFunds };
+        commit('updateInGameOnlyFunds', payload);
       },
 
       async addMoreSkill({ state, dispatch }, skillToAdd: string) {
@@ -846,11 +920,12 @@ export function createStore(web3: Web3) {
       },
 
       async mintCharacter({ state, dispatch }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         await approveFee(
           state.contracts().CryptoBlades!,
           state.contracts().SkillToken,
+          state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
@@ -867,11 +942,12 @@ export function createStore(web3: Web3) {
       },
 
       async mintWeapon({ state, dispatch }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         await approveFee(
           state.contracts().CryptoBlades!,
           state.contracts().SkillToken,
+          state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
@@ -889,11 +965,12 @@ export function createStore(web3: Web3) {
       },
 
       async reforgeWeapon({ state, dispatch }, { burnWeaponId, reforgeWeaponId }) {
-        if(featureFlagStakeOnly || !featureFlagReforging) return;
+        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
 
         await approveFee(
           state.contracts().CryptoBlades!,
           state.contracts().SkillToken,
+          state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
@@ -1334,13 +1411,40 @@ export function createStore(web3: Web3) {
         return fightBaseline;
       },
 
-      async fetchFightRewardSkill({ state, commit }) {
-        const skillRewards = await state.contracts().CryptoBlades!.methods
-          .getTokenRewards()
-          .call(defaultCallOptions(state));
+      async fetchFightRewardSkill({ state, commit, dispatch }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
 
-        commit('updateSkillRewards', { skillRewards });
+        const [skillRewards] = await Promise.all([
+          (async () => {
+            const skillRewards = await CryptoBlades.methods
+              .getTokenRewards()
+              .call(defaultCallOptions(state));
+
+            commit('updateSkillRewards', { skillRewards });
+
+            return skillRewards;
+          })(),
+          dispatch('fetchRewardsClaimTax')
+        ]);
+
         return skillRewards;
+      },
+
+      async fetchRewardsClaimTax({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        const [rewardsClaimTax, maxRewardsClaimTax] = await Promise.all([
+          CryptoBlades.methods
+            .getOwnRewardsClaimTax()
+            .call(defaultCallOptions(state)),
+          CryptoBlades.methods
+            .REWARDS_CLAIM_TAX_MAX()
+            .call(defaultCallOptions(state))
+        ]);
+
+        commit('updateRewardsClaimTax', { maxRewardsClaimTax, rewardsClaimTax });
       },
 
       async fetchFightRewardXp({ state, commit }) {
@@ -1388,6 +1492,37 @@ export function createStore(web3: Web3) {
           dispatch('fetchFightRewardXp')
         ]);
       },
+
+      async fetchWaxBridgeDetails({ state, commit }) {
+        const { WaxBridge } = state.contracts();
+        if(!WaxBridge || !state.defaultAccount) return;
+
+        const [
+          waxBridgeWithdrawableBnb,
+          waxBridgeRemainingWithdrawableBnbDuringPeriod,
+          waxBridgeTimeUntilLimitExpires
+        ] = await Promise.all([
+          WaxBridge.methods.withdrawableBnb(state.defaultAccount).call(defaultCallOptions(state)),
+          WaxBridge.methods.getRemainingWithdrawableBnbDuringPeriod().call(defaultCallOptions(state)),
+          WaxBridge.methods.getTimeUntilLimitExpires().call(defaultCallOptions(state)),
+        ]);
+
+        const payload: WaxBridgeDetailsPayload = {
+          waxBridgeWithdrawableBnb,
+          waxBridgeRemainingWithdrawableBnbDuringPeriod,
+          waxBridgeTimeUntilLimitExpires: +waxBridgeTimeUntilLimitExpires
+        };
+        commit('updateWaxBridgeDetails', payload);
+      },
+
+      async withdrawBnbFromWaxBridge({ state, dispatch }) {
+        const { WaxBridge } = state.contracts();
+        if(!WaxBridge || !state.defaultAccount) return;
+
+        await WaxBridge.methods.withdraw(state.waxBridgeWithdrawableBnb).send(defaultCallOptions(state));
+
+        await dispatch('fetchWaxBridgeDetails');
+      }
     }
   });
 }

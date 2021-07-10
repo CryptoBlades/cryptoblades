@@ -28,14 +28,11 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { BootstrapVueIcons } from 'bootstrap-vue';
 import { Accessors } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
 import { getCharacterNameFromSeed } from '../../character-name';
-
-Vue.use(BootstrapVueIcons);
 
 interface StoreMappedState {
   skillRewards: string;

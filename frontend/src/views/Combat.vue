@@ -466,6 +466,11 @@ div.encounter.text-center {
     position: inherit;
     font-size: x-large;
   }
-
+}
+.encounter-button {
+  display: block;
+  margin: 0 auto;
+  height: 5em;
+  width: 13em;
 }
 </style>
