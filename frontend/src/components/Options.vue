@@ -30,8 +30,8 @@
     <b-modal class="centered-modal" ref="claim-confirmation-modal" title="Claim Skill" ok-title="I am sure"
       @ok="onClaimTokens()"> You are about to {{ (this.currentWithdrawTax > 0)?"pay " + this.currentWithdrawTax +
       " tax for early withdrawal, costing you " + this.formattedTaxAmount + " SKILL. You will also " : "" }}
-      forfeit all bonus SKILL earnings for 3 days. Are you sure you wish to continue?
-      <b>This action cannot be undone.</b>
+      forfeit all bonus SKILL earnings for 3 days, costing {{formattedBonusLost}} bonus SKILL. Are you sure
+      you wish to continue? <b>This action cannot be undone.</b>
     </b-modal>
   </div>
 </template>
@@ -48,6 +48,7 @@ import Vue from 'vue';
 Vue.use(BootstrapVueIcons);
 interface StoreMappedState {
   skillRewards: string;
+  directStakeBonusPercent: number;
 }
 
 interface StoreMappedActions {
@@ -58,6 +59,7 @@ interface Data {
   hideRewards: boolean;
   hideAdvanced: boolean;
   currentWithdrawTax: number;
+  directStakeBonusPercent: number;
 }
 
 export default Vue.extend({
@@ -77,7 +79,7 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['skillRewards') as Accessors<StoreMappedState>),
+    ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
     formattedSkillReward(): string {
       const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
       return `${new BN(skillRewards).toFixed(4)}`;
@@ -85,6 +87,10 @@ export default Vue.extend({
     formattedTaxAmount(): string {
       const skillRewards = Web3.utils.fromWei((parseFloat(this.skillRewards)*this.currentWithdrawTax).toString(), 'ether');
       return `${new BN(skillRewards).toFixed(4)}`;
+    },
+    formattedBonusLost(): string {
+      const skillLost = Web3.utils.fromWei((parseFloat(this.skillRewards)*this.directStakeBonusPercent/100).toString(), 'ether');
+      return `${new BN(skillLost).toFixed(4)}`;
     },
     canClaimTokens(): boolean {
       if(new BN(this.skillRewards).lte(0)) {

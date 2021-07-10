@@ -107,6 +107,7 @@ export function createStore(web3: Web3) {
       skillRewards: '0',
       xpRewards: {},
       inGameOnlyFunds: '0',
+      directStakeBonusPercent: 10,
       ownedCharacterIds: [],
       ownedWeaponIds: [],
       maxStamina: 0,
