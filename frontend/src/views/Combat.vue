@@ -467,6 +467,7 @@ div.encounter.text-center {
     font-size: x-large;
   }
 }
+
 .encounter-button {
   display: block;
   margin: 0 auto;
