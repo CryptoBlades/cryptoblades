@@ -78,7 +78,7 @@ export default {
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes']),
+    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
@@ -130,12 +130,6 @@ export default {
       if (this.currentCharacterId !== null) {
         await this.fetchCharacterStamina(this.currentCharacterId);
       }
-    },
-
-    async hasStakedBalance() {
-      const stakedBalance = this.staking.skill.stakedBalance + this.staking.lp.stakedBalance + this.staking.lp2.stakedBalance;
-
-      return stakedBalance !== 0;
     },
 
     checkStorage() {

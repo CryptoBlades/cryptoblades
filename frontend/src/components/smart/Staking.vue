@@ -137,7 +137,7 @@ BN.config({ EXPONENTIAL_AT: 100 });
 import { mapActions, mapState } from 'vuex';
 
 import { formatDurationFromSeconds } from '../../utils/date-time';
-import { allStakeTypes } from '../../interfaces/State';
+import { isStakeType } from '../../interfaces/State';
 
 const connectToWalletButtonLabel = 'Connect to wallet ↗';
 const amountIsTooBigButtonLabel = 'Amount is too big';
@@ -155,7 +155,7 @@ export default {
     stakeType: {
       type: String,
       validator(type) {
-        return allStakeTypes.includes(type);
+        return isStakeType(type);
       }
     }
   },
