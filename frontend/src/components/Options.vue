@@ -28,7 +28,7 @@
         this.formattedTaxAmount + " in taxes and " : ""  }}forfeit my bonus </a>
     </b-modal>
     <b-modal class="centered-modal" ref="claim-confirmation-modal" title="Claim Skill" ok-title="I am sure"
-      @ok="onClaimTokens()"> You are about to {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " + this.currentWithdrawTax +
+      @ok="onClaimTokens()"> You are about to {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " + formattedTaxAmount +
       " tax for early withdrawal, costing you " + this.formattedTaxAmount + " SKILL. You will also " : "" }}
       forfeit all bonus SKILL earnings for 3 days, costing {{formattedBonusLost}} bonus SKILL. Are you sure
       you wish to continue? <b>This action cannot be undone.</b>
@@ -56,9 +56,6 @@ interface Data {
   showGraphics: boolean;
   hideRewards: boolean;
   hideAdvanced: boolean;
-  currentWithdrawTax: number;
-  directStakeBonusPercent: number;
-  ClaimStage: ClaimStage;
 }
 
 interface StoreMappedGetters {
