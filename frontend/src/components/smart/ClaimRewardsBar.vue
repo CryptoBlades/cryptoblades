@@ -12,6 +12,7 @@
       <span class="gtag-link-others" tagname="claim_skill">
         <strong>SKILL</strong> {{ formattedSkillReward }}
         <strong>Early Withdraw Tax</strong> {{ formattedRewardsClaimTax }}
+      </span>
     </b-nav-item>
 
     <b-nav-item

@@ -24,11 +24,11 @@
     <b-modal class="centered-modal" ref="stake-suggestion-modal" title="Stake Skill"
       @ok="$router.push('/stake')" ok-only ok-title="Go to Stake" >
         If you stake your SKILL now, we will give you a 10% bonus in SKILL that you can use in-game right away!
-      <a href="#" @click="claimSkill(2)"> <br>No thanks, I'd rather {{ (this.currentWithdrawTax > 0)?"pay " +
+      <a href="#" @click="claimSkill(2)"> <br>No thanks, I'd rather {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " +
         this.formattedTaxAmount + " in taxes and " : ""  }}forfeit my bonus </a>
     </b-modal>
     <b-modal class="centered-modal" ref="claim-confirmation-modal" title="Claim Skill" ok-title="I am sure"
-      @ok="onClaimTokens()"> You are about to {{ (this.currentWithdrawTax > 0)?"pay " + this.currentWithdrawTax +
+      @ok="onClaimTokens()"> You are about to {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " + this.currentWithdrawTax +
       " tax for early withdrawal, costing you " + this.formattedTaxAmount + " SKILL. You will also " : "" }}
       forfeit all bonus SKILL earnings for 3 days, costing {{formattedBonusLost}} bonus SKILL. Are you sure
       you wish to continue? <b>This action cannot be undone.</b>
@@ -38,7 +38,7 @@
 
 <script lang="ts">
 import Events from '../events';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import Web3 from 'web3';
 import { Accessors } from 'vue/types/options';
@@ -62,12 +62,15 @@ interface Data {
   directStakeBonusPercent: number;
 }
 
+interface StoreMappedGetters {
+  rewardsClaimTaxAsFactorBN: BN;
+}
+
 export default Vue.extend({
   created() {
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
-    this.currentWithdrawTax = 0.14;
   },
 
   data() {
@@ -80,12 +83,14 @@ export default Vue.extend({
 
   computed: {
     ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
+    ...(mapGetters(['rewardsClaimTaxAsFactorBN']) as Accessors<StoreMappedGetters>),
+
     formattedSkillReward(): string {
       const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
       return `${new BN(skillRewards).toFixed(4)}`;
     },
     formattedTaxAmount(): string {
-      const skillRewards = Web3.utils.fromWei((parseFloat(this.skillRewards)*this.currentWithdrawTax).toString(), 'ether');
+      const skillRewards = Web3.utils.fromWei((parseFloat(this.skillRewards)* parseFloat(String(this.rewardsClaimTaxAsFactorBN))).toString(), 'ether');
       return `${new BN(skillRewards).toFixed(4)}`;
     },
     formattedBonusLost(): string {
@@ -131,6 +136,9 @@ export default Vue.extend({
       }
     },
     async claimSkill(stage: number) {
+      console.log(`claimTax = ${this.rewardsClaimTaxAsFactorBN}`);
+      console.log(`claimTax = ${this.rewardsClaimTaxAsFactorBN}`);
+      console.log(`formtax = ${this.formattedTaxAmount}`);
       if(stage === 0) {
         (this.$refs['need-gas-modal'] as any).show();
       }
