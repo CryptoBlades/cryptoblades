@@ -21,8 +21,12 @@
       <div v-if="showReforgedToggle" class="show-reforged">
         <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
         <strong>Show reforged</strong>
-        <small-button class="button" :text="'Clear Filters'" @click="clearFilters" />
       </div>
+       <b-button variant="primary" class="ml-3 clear-filters-button" @click="clearFilters" >
+          <span>
+            Clear Filters
+          </span>
+        </b-button>
     </div>
 
     <ul class="weapon-grid">
@@ -52,7 +56,6 @@ import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
 import WeaponIcon from '../WeaponIcon.vue';
-import SmallButton from '../SmallButton.vue';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 
@@ -131,8 +134,7 @@ export default Vue.extend({
   },
 
   components: {
-    WeaponIcon,
-    SmallButton
+    WeaponIcon
   },
 
   computed: {
@@ -295,6 +297,11 @@ export default Vue.extend({
 
 .show-reforged-checkbox {
   margin-left: 5px;
+}
+
+.clear-filters-button {
+  align-self: flex-end;
+  height: fit-content;
 }
 
 .favorite-star {
