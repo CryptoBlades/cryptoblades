@@ -17,15 +17,6 @@ import {
 } from './feature-flags';
 
 function createRouter() {
-  // if (featureFlagStakeOnly) {
-  //   return new VueRouter({
-  //     routes: [
-  //       { path: '/', redirect: 'stake' },
-  //       { path: '/stake', name: 'select-stake-type', component: SelectStakeType },
-  //       { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
-  //     ]
-  //   });
-  // }
 
   let marketRoutes: RouteConfig[] = [];
   if(featureFlagMarket) {
