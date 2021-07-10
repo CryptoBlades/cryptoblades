@@ -364,7 +364,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _payContract(msg.sender, mintCharacterFee);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
-            giveInGameOnlyFundsFromContractBalance(msg.sender, 5 ether);
+            _giveInGameOnlyFundsFromContractBalance(msg.sender, 5 ether);
         }
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
@@ -571,11 +571,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         emit InGameOnlyFundsGiven(to, skillAmount);
     }
 
-    function giveInGameOnlyFundsFromContractBalance(address to, uint256 skillAmount) public restricted {
+    function _giveInGameOnlyFundsFromContractBalance(address to, uint256 skillAmount) internal {
         totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
         inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
 
         emit InGameOnlyFundsGiven(to, skillAmount);
+    }
+
+    function giveInGameOnlyFundsFromContractBalance(address to, uint256 skillAmount) external restricted {
+        _giveInGameOnlyFundsFromContractBalance(to, skillAmount);
     }
 
     function usdToSkill(int128 usdAmount) public view returns (uint256) {
