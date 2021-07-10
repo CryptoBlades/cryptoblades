@@ -536,6 +536,7 @@ div.bg-success {
   height: calc(100vh - 56px);
   background: rgb(20, 20, 20);
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  margin: auto;
 }
 
 .fullscreen-warning {

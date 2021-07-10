@@ -82,24 +82,30 @@
 
               <div class="encounter-container">
 
-                <div class="encounter-element">
-                  <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
-                  <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
-                </div>
+                <div class="mobile-divider-wrapper">
+                  <div class="mobile-divider">
+                    <div class="encounter-element">
+                      <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
+                      <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
+                    </div>
 
-                <div class="encounter-power">
-                  {{ e.power }} Power
-                </div>
+                    <div class="encounter-power">
+                      {{ e.power }} Power
+                    </div>
 
-                <div class="xp-gain">
-                  +{{getPotentialXp(e)}} XP
-                </div>
+                    <div class="xp-gain">
+                      +{{getPotentialXp(e)}} XP
+                    </div>
 
-                <div class="victory-chance">
-                  {{ getWinChance(e.power, e.trait) }} Victory
-                </div>
+                    <div class="victory-chance">
+                      {{ getWinChance(e.power, e.trait) }} Victory
+                    </div>
+                  </div>
 
-                <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
+                  <div class="mobile-divider mobile-img-adjustment">
+                  <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
+                  </div>
+                </div>
 
                 <big-button
                   class="encounter-button"
@@ -433,6 +439,33 @@ div.encounter.text-center {
 
 .xp-gain {
   top: 100px;
+}
+
+/* Mobile Support Classes*/
+.mobile-divider-wrapper {
+  width: 100%;
+  display: flex;
+}
+
+.mobile-divider{
+  max-width: 50%;
+  margin: auto;
+}
+
+.mobile-img-adjustment{
+  padding-bottom: 25px;
+}
+
+/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
+@media all and (max-width:  767.98px) {
+  .encounter img {
+    max-width: 30vw;
+  }
+
+  .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
+    position: inherit;
+    font-size: x-large;
+  }
 }
 
 .encounter-button {

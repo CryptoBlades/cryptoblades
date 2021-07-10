@@ -293,4 +293,17 @@ export default Vue.extend({
     margin-top : 10px;
   }
 }
+
+/* Needed to adjust weapon list */
+@media all and (max-width:  767.98px) {
+  .weapon-grid {
+    padding-left: 2em;
+  }
+
+  li.weapon  {
+    display: inline-block;
+    margin: auto;
+  }
+
+}
 </style>
