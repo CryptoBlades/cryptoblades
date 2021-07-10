@@ -28,7 +28,7 @@
         this.formattedTaxAmount + " in taxes and " : ""  }}forfeit my bonus </a>
     </b-modal>
     <b-modal class="centered-modal" ref="claim-confirmation-modal" title="Claim Skill" ok-title="I am sure"
-      @ok="onClaimTokens()"> You are about to {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " + formattedTaxAmount +
+      @ok="onClaimTokens()"> You are about to {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " + formattedRewardsClaimTax +
       " tax for early withdrawal, costing you " + this.formattedTaxAmount + " SKILL. You will also " : "" }}
       forfeit all bonus SKILL earnings for 3 days, costing {{formattedBonusLost}} bonus SKILL. Are you sure
       you wish to continue? <b>This action cannot be undone.</b>
@@ -60,6 +60,7 @@ interface Data {
 
 interface StoreMappedGetters {
   rewardsClaimTaxAsFactorBN: BN;
+  maxRewardsClaimTaxAsFactorBN: BN;
 }
 
 enum ClaimStage {
@@ -86,7 +87,7 @@ export default Vue.extend({
 
   computed: {
     ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['rewardsClaimTaxAsFactorBN']) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN']) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
       const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
@@ -95,6 +96,14 @@ export default Vue.extend({
     formattedTaxAmount(): string {
       const skillRewards = Web3.utils.fromWei((parseFloat(this.skillRewards)* parseFloat(String(this.rewardsClaimTaxAsFactorBN))).toString(), 'ether');
       return `${new BN(skillRewards).toFixed(4)}`;
+    },
+    formattedRewardsClaimTax(): string {
+      const frac =
+        this.skillRewards === '0'
+          ? this.maxRewardsClaimTaxAsFactorBN
+          : this.rewardsClaimTaxAsFactorBN;
+
+      return `${frac.multipliedBy(100).decimalPlaces(0, BN.ROUND_HALF_UP)}%`;
     },
     formattedBonusLost(): string {
       const skillLost = Web3.utils.fromWei((parseFloat(this.skillRewards)*this.directStakeBonusPercent/100).toString(), 'ether');
