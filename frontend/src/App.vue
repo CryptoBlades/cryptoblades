@@ -6,16 +6,20 @@
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
-    <div class="fullscreen-warning" v-if="showMetamaskWarning || showNetworkError">
+    <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
         <span class="starter-panel-heading">Metamask Not Detected Or Incorrect Network</span>
         <div class="center">
           <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning" />
           <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError" />
+          <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
         </div>
       </div>
     </div>
-    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))">
+    <div
+      class="fullscreen-warning"
+      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))"
+    >
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
@@ -47,6 +51,8 @@
             <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a>
           </p>
         </div>
+        <div class="seperator"></div>
+        <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
       </div>
     </div>
   </div>
@@ -58,6 +64,7 @@ import _ from 'lodash';
 import Events from './events';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import BigButton from './components/BigButton.vue';
+import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import ClaimRewardsBar from './components/smart/ClaimRewardsBar.vue';
@@ -69,18 +76,22 @@ export default {
     CharacterBar,
     ClaimRewardsBar,
     BigButton,
+    SmallButton,
   },
 
   data: () => ({
     errorMessage: '',
     canShowRewardsBar: true,
+    hideWalletWarning: false,
   }),
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes']),
+    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
+      if (this.hideWalletWarning) return true;
+
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
     },
 
@@ -132,14 +143,9 @@ export default {
       }
     },
 
-    async hasStakedBalance() {
-      const stakedBalance = this.staking.skill.stakedBalance + this.staking.lp.stakedBalance + this.staking.lp2.stakedBalance;
-
-      return stakedBalance !== 0;
-    },
-
     checkStorage() {
       this.canShowRewardsBar = localStorage.getItem('hideRewards') === 'false';
+      this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     },
     async startOnboarding() {
       const onboarding = new MetaMaskOnboarding();
@@ -241,6 +247,14 @@ export default {
         }
       }
     },
+
+    toggleHideWalletWarning() {
+      this.hideWalletWarning = !this.hideWalletWarning;
+      if (this.hideWalletWarning) localStorage.setItem('hideWalletWarning', 'true');
+      else localStorage.setItem('hideWalletWarning', 'false');
+
+      Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
+    },
   },
 
   mounted() {
@@ -249,6 +263,7 @@ export default {
     Events.$on('setting:hideRewards', () => this.checkStorage());
     Events.$on('setting:hideAdvanced', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
+    Events.$on('setting:hideWalletWarning', () => this.checkStorage());
 
     document.body.addEventListener('click', (e) => {
       const tagname = e.target.getAttribute('tagname');
@@ -317,6 +332,7 @@ export default {
     if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
     if (!localStorage.getItem('hideAdvanced')) localStorage.setItem('hideAdvanced', 'false');
     if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
+    if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
   },
 
   beforeDestroy() {
@@ -452,7 +468,11 @@ button.close {
   border-radius: 0.1em !important;
 }
 
-.btn:not(.disabled):hover {
+.btn.disabled, .btn:disabled {
+  cursor: auto;
+}
+
+.btn:not(.disabled):not(:disabled):hover {
   border: 2px solid #9e8a57 !important;
   background: rgb(61, 61, 64);
   background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
@@ -536,6 +556,7 @@ div.bg-success {
   height: calc(100vh - 56px);
   background: rgb(20, 20, 20);
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  margin: auto;
 }
 
 .fullscreen-warning {

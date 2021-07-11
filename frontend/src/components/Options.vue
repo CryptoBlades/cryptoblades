@@ -12,6 +12,8 @@
 
         <b-dropdown-item @click="toggleAdvanced()">Advanced UI: {{ hideAdvanced ? 'Off' : 'On' }}</b-dropdown-item>
 
+        <b-dropdown-item @click="toggleHideWalletWarning()">Hide Wallet Warning: {{ hideWalletWarning ? 'On' : 'Off' }}</b-dropdown-item>
+
         <b-dropdown-item @click="claimSkill(ClaimStage.WaxBridge)">Claim Skill </b-dropdown-item>
 
       </b-nav-item-dropdown>
@@ -56,6 +58,7 @@ interface Data {
   showGraphics: boolean;
   hideRewards: boolean;
   hideAdvanced: boolean;
+  hideWalletWarning: boolean;
 }
 
 interface StoreMappedGetters {
@@ -74,6 +77,7 @@ export default Vue.extend({
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
+    this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
   },
 
   data() {
@@ -81,6 +85,7 @@ export default Vue.extend({
       showGraphics: false,
       hideRewards: false,
       hideAdvanced: false,
+      hideWalletWarning: false,
       ClaimStage
     } as Data;
   },
@@ -158,7 +163,15 @@ export default Vue.extend({
         (this.$refs['stake-suggestion-modal'] as any).hide();
         (this.$refs['claim-confirmation-modal'] as any).show();
       }
-    }
+    },
+
+    toggleHideWalletWarning() {
+      this.hideWalletWarning = !this.hideWalletWarning;
+      if (this.hideWalletWarning) localStorage.setItem('hideWalletWarning', 'true');
+      else localStorage.setItem('hideWalletWarning', 'false');
+
+      Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
+    },
   }
 });
 </script>

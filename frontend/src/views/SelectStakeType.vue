@@ -25,34 +25,11 @@ BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import StakeSelectorItem from '../components/StakeSelectorItem.vue';
 
+import { humanReadableDetailsForStakeTypes } from '../stake-types';
+
 export default {
   components: {
     StakeSelectorItem,
-  },
-
-  data() {
-    return {
-      allEntries: [
-        {
-          stakeType: 'skill',
-          stakeTokenName: 'SKILL',
-          rewardTokenName: 'SKILL',
-          stakeTitle: 'SKILL for SKILL'
-        },
-        {
-          stakeType: 'lp',
-          stakeTokenName: 'SKILL-WBNB',
-          rewardTokenName: 'SKILL',
-          stakeTitle: 'SKILL-WBNB for SKILL'
-        },
-        {
-          stakeType: 'lp2',
-          stakeTokenName: 'SKILL-BNB',
-          rewardTokenName: 'SKILL',
-          stakeTitle: 'SKILL-BNB for SKILL V2'
-        },
-      ],
-    };
   },
 
   computed: {
@@ -60,7 +37,9 @@ export default {
     ...mapGetters(['availableStakeTypes']),
 
     entries() {
-      return this.allEntries.filter(e => this.availableStakeTypes.includes(e.stakeType));
+      return this.availableStakeTypes.map(stakeType => ({
+        stakeType, ...humanReadableDetailsForStakeTypes[stakeType]
+      }));
     },
 
     estimatedYields() {

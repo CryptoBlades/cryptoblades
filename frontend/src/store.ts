@@ -11,7 +11,7 @@ import {
   characterFromContract, targetFromContract, weaponFromContract
 } from './contract-models';
 import {
-  allStakeTypes, Contract, Contracts, IStakeOverviewState,
+  Contract, Contracts, isStakeType, IStakeOverviewState,
   IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
@@ -22,7 +22,8 @@ import {
   stakeOnly as featureFlagStakeOnly,
   reforging as featureFlagReforging
 } from './feature-flags';
-import { IERC721 } from '../../build/abi-interfaces';
+import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
+import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -30,32 +31,20 @@ interface SetEventSubscriptionsPayload {
   eventSubscriptions: () => IWeb3EventSubscription[];
 }
 
-type StakingRewardsAlias = Contracts['LPStakingRewards'] | Contracts['LP2StakingRewards'] | Contracts['SkillStakingRewards'];
+type StakingRewardsAlias = Contract<IStakingRewards> | null;
 
 interface StakingContracts {
   StakingRewards: StakingRewardsAlias,
-  StakingToken: Contracts['LPToken'] | Contracts['LP2Token'] | Contracts['SkillToken'],
+  StakingToken: Contract<IERC20> | null,
   RewardToken: Contracts['SkillToken'],
 }
 
 function getStakingContracts(contracts: Contracts, stakeType: StakeType): StakingContracts {
-  switch(stakeType) {
-  case 'skill': return {
-    StakingRewards: contracts.SkillStakingRewards,
-    StakingToken: contracts.SkillToken,
+  return {
+    StakingRewards: contracts.staking[stakeType]?.StakingRewards || null,
+    StakingToken: contracts.staking[stakeType]?.StakingToken || null,
     RewardToken: contracts.SkillToken
   };
-  case 'lp': return {
-    StakingRewards: contracts.LPStakingRewards,
-    StakingToken: contracts.LPToken,
-    RewardToken: contracts.SkillToken
-  };
-  case 'lp2': return {
-    StakingRewards: contracts.LP2StakingRewards,
-    StakingToken: contracts.LP2Token,
-    RewardToken: contracts.SkillToken
-  };
-  }
 }
 
 interface RaidData {
@@ -127,11 +116,13 @@ export function createStore(web3: Web3) {
 
       staking: {
         skill: { ...defaultStakeState },
+        skill2: { ...defaultStakeState },
         lp: { ...defaultStakeState },
         lp2: { ...defaultStakeState }
       },
       stakeOverviews: {
         skill: { ...defaultStakeOverviewState },
+        skill2: { ...defaultStakeOverviewState },
         lp: { ...defaultStakeOverviewState },
         lp2: { ...defaultStakeOverviewState }
       },
@@ -159,17 +150,19 @@ export function createStore(web3: Web3) {
       },
 
       availableStakeTypes(state: IState) {
-        const out: StakeType[] = ['skill'];
+        return Object.keys(state.contracts().staking).filter(isStakeType);
+      },
 
-        if(state.contracts().LPStakingRewards) {
-          out.push('lp');
+      hasStakedBalance(state) {
+        if(!state.contracts) return false;
+
+        const staking = state.contracts().staking;
+        for(const stakeType of Object.keys(staking).filter(isStakeType)) {
+          if(state.staking[stakeType].stakedBalance !== '0') {
+            return true;
+          }
         }
-
-        if(state.contracts().LP2StakingRewards) {
-          out.push('lp2');
-        }
-
-        return out;
+        return false;
       },
 
       getTargetsByCharacterIdAndWeaponId(state: IState) {
@@ -671,9 +664,13 @@ export function createStore(web3: Web3) {
           );
         }
 
-        setupStakingEvents('skill', state.contracts().SkillStakingRewards);
-        setupStakingEvents('lp', state.contracts().LPStakingRewards);
-        setupStakingEvents('lp2', state.contracts().LP2StakingRewards);
+        const staking = state.contracts().staking;
+        for(const stakeType of Object.keys(staking).filter(isStakeType)) {
+          const stakingEntry = staking[stakeType]!;
+
+          console.log('setting up events for staking rewards type', stakeType);
+          setupStakingEvents(stakeType, stakingEntry.StakingRewards);
+        }
 
         const payload: SetEventSubscriptionsPayload = { eventSubscriptions: () => subscriptions };
         commit('setEventSubscriptions', payload);
@@ -1041,9 +1038,9 @@ export function createStore(web3: Web3) {
         ];
       },
 
-      async fetchStakeOverviewData({ dispatch }) {
+      async fetchStakeOverviewData({ getters, dispatch }) {
         await Promise.all(
-          allStakeTypes
+          (getters.availableStakeTypes as StakeType[])
             .map(stakeType =>
               dispatch('fetchStakeOverviewDataPartial', { stakeType })
             )
@@ -1144,6 +1141,23 @@ export function createStore(web3: Web3) {
         });
 
         await dispatch('fetchStakeDetails', { stakeType });
+      },
+
+      async stakeUnclaimedRewards({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
+        if(stakeType !== stakeTypeThatCanHaveUnclaimedRewardsStakedTo) return;
+
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        await CryptoBlades.methods
+          .stakeUnclaimedRewards()
+          .send(defaultCallOptions(state));
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchStakeDetails', { stakeType }),
+          dispatch('fetchFightRewardSkill'),
+        ]);
       },
 
       async claimReward({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {

@@ -17,7 +17,9 @@ import { abi as marketAbi, networks as marketNetworks } from '../../build/contra
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
 
 import Web3 from 'web3';
-import { allStakeTypes, Contracts, isStakeType } from './interfaces';
+import { Contracts, isStakeType, StakeType, StakingContracts } from './interfaces';
+
+import { StakingContractEntry, stakingContractsInfo } from './stake-types';
 
 import {
   raid as featureFlagRaid,
@@ -33,47 +35,72 @@ interface MarketContracts {
   NFTMarket?: Contracts['NFTMarket'];
 }
 
-async function setUpStakingContracts(web3: Web3, networkId: string) {
-  let availableStakingContracts = allStakeTypes;
+const networkId = process.env.VUE_APP_NETWORK_ID || '5777';
 
-  if(process.env.VUE_APP_STAKE_TYPES_AVAILABLE) {
-    availableStakingContracts = process.env.VUE_APP_STAKE_TYPES_AVAILABLE
-      .split(',')
-      .filter(isStakeType);
+const stakingContractAddressesFromBuild: Partial<Record<StakeType, Partial<StakingContractEntry>>> = {
+  skill: {
+    stakingRewardsAddress: (skillStakingRewardsNetworks as any)[networkId].address,
+    stakingTokenAddress: (skillTokenNetworks as any)[networkId].address
+  },
+  lp: {
+    stakingRewardsAddress: (lpStakingRewardsNetworks as any)[networkId].address,
+    stakingTokenAddress: (lpTokenNetworks as any)[networkId].address
+  },
+  lp2: {
+    stakingRewardsAddress: (lp2StakingRewardsNetworks as any)[networkId].address,
+    stakingTokenAddress: (lp2TokenNetworks as any)[networkId].address
+  }
+};
+
+function getStakingContractsInfoWithDefaults(): Partial<Record<StakeType, Partial<StakingContractEntry>>> {
+  const out: Partial<Record<StakeType, Partial<StakingContractEntry>>> = {};
+
+  for(const stakeType of Object.keys(stakingContractsInfo).filter(isStakeType)) {
+    const stakingContractInfo = stakingContractsInfo[stakeType]!;
+    if(stakingContractInfo.stakingRewardsAddress && stakingContractInfo.stakingTokenAddress) {
+      out[stakeType] = {
+        stakingRewardsAddress: stakingContractInfo.stakingRewardsAddress,
+        stakingTokenAddress: stakingContractInfo.stakingTokenAddress
+      };
+    }
+    else {
+      out[stakeType] = Object.assign({}, stakingContractInfo, stakingContractAddressesFromBuild[stakeType]);
+    }
   }
 
-  const skillStakingRewardsContractAddr = process.env.VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS || (skillStakingRewardsNetworks as any)[networkId].address;
-  const lpStakingRewardsContractAddr = process.env.VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS || (lpStakingRewardsNetworks as any)[networkId]?.address;
-  const lp2StakingRewardsContractAddr = process.env.VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS || (lp2StakingRewardsNetworks as any)[networkId]?.address;
+  console.log(out);
 
-  const skillTokenContractAddr = process.env.VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS || (skillTokenNetworks as any)[networkId].address;
-  const lpTokenContractAddr = process.env.VUE_APP_LP_TOKEN_CONTRACT_ADDRESS || (lpTokenNetworks as any)[networkId]?.address;
-  const lp2TokenContractAddr = process.env.VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS || (lp2TokenNetworks as any)[networkId]?.address;
+  return out;
+}
 
-  const SkillStakingRewards = new web3.eth.Contract(stakingRewardsAbi as any, skillStakingRewardsContractAddr);
-  const SkillToken = new web3.eth.Contract(erc20Abi as any, skillTokenContractAddr);
+async function setUpStakingContracts(web3: Web3) {
+  const stakingContractsInfo = getStakingContractsInfoWithDefaults();
 
-  let LPStakingRewards = null;
-  let LPToken = null;
-  if(availableStakingContracts.includes('lp') && lpStakingRewardsContractAddr) {
-    LPStakingRewards = new web3.eth.Contract(stakingRewardsAbi as any, lpStakingRewardsContractAddr);
-    LPToken = new web3.eth.Contract(erc20Abi as any, lpTokenContractAddr);
+  const staking: StakingContracts = {};
+
+  for(const stakeType of Object.keys(stakingContractsInfo).filter(isStakeType)) {
+    const stakingContractInfo = stakingContractsInfo[stakeType]!;
+
+    if(!stakingContractInfo.stakingRewardsAddress || !stakingContractInfo.stakingTokenAddress) continue;
+
+    staking[stakeType] = {
+      StakingRewards: new web3.eth.Contract(stakingRewardsAbi as any, stakingContractInfo.stakingRewardsAddress),
+      StakingToken: new web3.eth.Contract(erc20Abi as any, stakingContractInfo.stakingTokenAddress)
+    };
   }
 
-  let LP2StakingRewards = null;
-  let LP2Token = null;
-  if(availableStakingContracts.includes('lp2') && lp2StakingRewardsContractAddr) {
-    LP2StakingRewards = new web3.eth.Contract(stakingRewardsAbi as any, lp2StakingRewardsContractAddr);
-    LP2Token = new web3.eth.Contract(erc20Abi as any, lp2TokenContractAddr);
-  }
+  const skillTokenAddress = process.env.VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS || (skillTokenNetworks as any)[networkId].address;
+  const SkillToken = new web3.eth.Contract(erc20Abi as any, skillTokenAddress);
 
-  return { SkillStakingRewards, LPStakingRewards, LP2StakingRewards, SkillToken, LPToken, LP2Token };
+  return {
+    SkillToken,
+
+    staking
+  };
 }
 
 export async function setUpContracts(web3: Web3): Promise<Contracts> {
-  const networkId = process.env.VUE_APP_NETWORK_ID || '5777';
-
-  const stakingContracts = await setUpStakingContracts(web3, networkId);
+  const stakingContracts = await setUpStakingContracts(web3);
 
   if (featureFlagStakeOnly) {
     return stakingContracts;
