@@ -18,11 +18,11 @@
     </b-navbar-nav>
 
     <b-modal class="centered-modal" ref="need-gas-modal" title="Need Gas?"
-      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push('/portal')" cancel-title="Go to WAX Bridge" >
+      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Bridge" >
         Need Gas? Try our WAX Bridge, which will pay you .5% under market rate to sell your WAX for BNB!
     </b-modal>
     <b-modal class="centered-modal" ref="stake-suggestion-modal" title="Stake Skill"
-      @ok="$router.push('/stake')" ok-only ok-title="Go to Stake" >
+      @ok="$router.push({ name: 'select-stake-type' })" ok-only ok-title="Go to Stake" >
         If you stake your SKILL now, we will give you a 10% bonus in SKILL that you can use in-game right away!
       <a href="#" @click="claimSkill(ClaimStage.Claim)"> <br>No thanks, I'd rather {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " +
         this.formattedTaxAmount + " in taxes and " : ""  }}forfeit my bonus </a>
