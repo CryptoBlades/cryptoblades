@@ -65,6 +65,7 @@ export interface IState {
   rewardsClaimTax: string;
   xpRewards: Record<string, string>;
   inGameOnlyFunds: string;
+  directStakeBonusPercent: number;
   ownedCharacterIds: number[];
   ownedWeaponIds: number[];
   maxStamina: number;
