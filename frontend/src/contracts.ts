@@ -37,18 +37,22 @@ interface MarketContracts {
 
 const networkId = process.env.VUE_APP_NETWORK_ID || '5777';
 
+type Networks = Partial<Record<string, { address: string }>>;
+
+type Abi = any[];
+
 const stakingContractAddressesFromBuild: Partial<Record<StakeType, Partial<StakingContractEntry>>> = {
   skill: {
-    stakingRewardsAddress: (skillStakingRewardsNetworks as any)[networkId].address,
-    stakingTokenAddress: (skillTokenNetworks as any)[networkId].address
+    stakingRewardsAddress: (skillStakingRewardsNetworks as Networks)[networkId]?.address,
+    stakingTokenAddress: (skillTokenNetworks as Networks)[networkId]?.address
   },
   lp: {
-    stakingRewardsAddress: (lpStakingRewardsNetworks as any)[networkId].address,
-    stakingTokenAddress: (lpTokenNetworks as any)[networkId].address
+    stakingRewardsAddress: (lpStakingRewardsNetworks as Networks)[networkId]?.address,
+    stakingTokenAddress: (lpTokenNetworks as Networks)[networkId]?.address
   },
   lp2: {
-    stakingRewardsAddress: (lp2StakingRewardsNetworks as any)[networkId].address,
-    stakingTokenAddress: (lp2TokenNetworks as any)[networkId].address
+    stakingRewardsAddress: (lp2StakingRewardsNetworks as Networks)[networkId]?.address,
+    stakingTokenAddress: (lp2TokenNetworks as Networks)[networkId]?.address
   }
 };
 
@@ -84,13 +88,13 @@ async function setUpStakingContracts(web3: Web3) {
     if(!stakingContractInfo.stakingRewardsAddress || !stakingContractInfo.stakingTokenAddress) continue;
 
     staking[stakeType] = {
-      StakingRewards: new web3.eth.Contract(stakingRewardsAbi as any, stakingContractInfo.stakingRewardsAddress),
-      StakingToken: new web3.eth.Contract(erc20Abi as any, stakingContractInfo.stakingTokenAddress)
+      StakingRewards: new web3.eth.Contract(stakingRewardsAbi as Abi, stakingContractInfo.stakingRewardsAddress),
+      StakingToken: new web3.eth.Contract(erc20Abi as Abi, stakingContractInfo.stakingTokenAddress)
     };
   }
 
-  const skillTokenAddress = process.env.VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS || (skillTokenNetworks as any)[networkId].address;
-  const SkillToken = new web3.eth.Contract(erc20Abi as any, skillTokenAddress);
+  const skillTokenAddress = process.env.VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS || (skillTokenNetworks as Networks)[networkId]!.address;
+  const SkillToken = new web3.eth.Contract(erc20Abi as Abi, skillTokenAddress);
 
   return {
     SkillToken,
@@ -106,34 +110,34 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     return stakingContracts;
   }
 
-  const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as any)[networkId].address;
+  const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as Networks)[networkId]!.address;
 
-  const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as any, cryptoBladesContractAddr);
+  const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as Abi, cryptoBladesContractAddr);
   const [charactersAddr, weaponsAddr, randomsAddr] = await Promise.all([
     CryptoBlades.methods.characters().call(),
     CryptoBlades.methods.weapons().call(),
     CryptoBlades.methods.randoms().call(),
   ]);
-  const Randoms = new web3.eth.Contract(randomsAbi as any, randomsAddr);
-  const Characters = new web3.eth.Contract(charactersAbi as any, charactersAddr);
-  const Weapons = new web3.eth.Contract(weaponsAbi as any, weaponsAddr);
+  const Randoms = new web3.eth.Contract(randomsAbi as Abi, randomsAddr);
+  const Characters = new web3.eth.Contract(charactersAbi as Abi, charactersAddr);
+  const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
 
   const raidContracts: RaidContracts = {};
   if(featureFlagRaid) {
-    const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as any)[networkId].address;
+    const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as Networks)[networkId]!.address;
 
-    raidContracts.RaidBasic = new web3.eth.Contract(raidAbi as any, raidContractAddr);
+    raidContracts.RaidBasic = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
   }
 
   const marketContracts: MarketContracts = {};
   if(featureFlagMarket) {
-    const marketContractAddr = process.env.VUE_APP_MARKET_CONTRACT_ADDRESS || (marketNetworks as any)[networkId].address;
+    const marketContractAddr = process.env.VUE_APP_MARKET_CONTRACT_ADDRESS || (marketNetworks as Networks)[networkId]!.address;
 
-    marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as any, marketContractAddr);
+    marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as Abi, marketContractAddr);
   }
 
-  const waxBridgeContractAddr = process.env.VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS || (waxBridgeNetworks as any)[networkId].address;
-  const WaxBridge = new web3.eth.Contract(waxBridgeAbi as any, waxBridgeContractAddr);
+  const waxBridgeContractAddr = process.env.VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS || (waxBridgeNetworks as Networks)[networkId]!.address;
+  const WaxBridge = new web3.eth.Contract(waxBridgeAbi as Abi, waxBridgeContractAddr);
 
   return {
     ...stakingContracts,
