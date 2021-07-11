@@ -13,6 +13,6 @@ module.exports = async function (deployer, network, accounts) {
 
   const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
 
-  await game.migrateTo_X(skillStakingRewards.address);
-  await skillStakingRewards.migrateTo_X(game.address);
+  await game.migrateTo_23b3a8b(skillStakingRewards.address);
+  await skillStakingRewards.migrateTo_23b3a8b(game.address);
 };

@@ -11,7 +11,7 @@ contract SkillStakingRewardsUpgradeable is IStakeFromGame, StakingRewardsUpgrade
 
     /* ========== RESTRICTED FUNCTIONS ========== */
 
-    function migrateTo_X(CryptoBlades _game) external onlyOwner {
+    function migrateTo_23b3a8b(CryptoBlades _game) external onlyOwner {
         game = _game;
     }
 
