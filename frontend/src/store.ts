@@ -23,6 +23,7 @@ import {
   reforging as featureFlagReforging
 } from './feature-flags';
 import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
+import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -1139,6 +1140,23 @@ export function createStore(web3: Web3) {
         });
 
         await dispatch('fetchStakeDetails', { stakeType });
+      },
+
+      async stakeUnclaimedRewards({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
+        if(stakeType !== stakeTypeThatCanHaveUnclaimedRewardsStakedTo) return;
+
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        await CryptoBlades.methods
+          .stakeUnclaimedRewards()
+          .send(defaultCallOptions(state));
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchStakeDetails', { stakeType }),
+          dispatch('fetchFightRewardSkill'),
+        ]);
       },
 
       async claimReward({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {

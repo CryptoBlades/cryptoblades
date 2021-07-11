@@ -110,10 +110,8 @@
         </p>
 
         <button
-          class="StakeButton spacing-top"
-          :class="{
-            switch_active: !loading && currentState === 'ok',
-          }"
+          class="btn btn-primary spacing-top"
+          :disabled="!(!loading && currentState === 'ok')"
           tagname="stake"
           @click="onSubmit"
         >
@@ -123,6 +121,25 @@
           </span>
           <span class="gold-text" v-else>
             {{ submitButtonLabel }}
+          </span>
+        </button>
+
+        <button
+          v-if="stakeUnclaimedRewardsButtonShown"
+          class="btn btn-primary spacing-top"
+          :disabled="!canStakeUnclaimedRewards"
+          tagname="stake"
+          @click="onStakeUnclaimedRewards"
+        >
+          <span v-if="loading">
+            <!-- <ImageVue :src="'loading.svg'" :size="'45px'" /> -->
+            Loading...
+          </span>
+          <span class="gold-text" v-else-if="canStakeUnclaimedRewards">
+            Stake all of unclaimed rewards ({{ formattedSkillRewards }} SKILL)
+          </span>
+          <span class="gold-text" v-else>
+            No unclaimed rewards to stake
           </span>
         </button>
       </div>
@@ -138,6 +155,7 @@ import { mapActions, mapState } from 'vuex';
 
 import { formatDurationFromSeconds } from '../../utils/date-time';
 import { isStakeType } from '../../interfaces/State';
+import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from '../../stake-types';
 
 const connectToWalletButtonLabel = 'Connect to wallet ↗';
 const amountIsTooBigButtonLabel = 'Amount is too big';
@@ -190,7 +208,7 @@ export default {
     clearInterval(this.stakeRewardProgressInterval);
   },
   computed: {
-    ...mapState(['defaultAccount', 'staking']),
+    ...mapState(['defaultAccount', 'staking', 'skillRewards']),
 
     stakeData() {
       return this.staking[this.stakeType];
@@ -372,12 +390,28 @@ export default {
         this.textAmount = newBnAmount.dividedBy(1e18);
       },
     },
+
+    stakeUnclaimedRewardsButtonShown() {
+      return stakeTypeThatCanHaveUnclaimedRewardsStakedTo === this.stakeType && this.isDeposit;
+      // return true;
+    },
+
+    canStakeUnclaimedRewards() {
+      return !this.loading && new BN(this.skillRewards).gt(0);
+      // return true;
+    },
+
+    formattedSkillRewards() {
+      const b = new BN(this.skillRewards);
+      return b.dividedBy(1e18).toFixed(4);
+    },
   },
   methods: {
     ...mapActions([
       'fetchStakeDetails',
       'stake',
       'unstake',
+      'stakeUnclaimedRewards',
       'claimReward',
     ]),
 
@@ -435,6 +469,19 @@ export default {
           //unstake
           await this.unstake({ amount, stakeType: this.stakeType });
         }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.loading = false;
+      }
+    },
+    async onStakeUnclaimedRewards() {
+      if (this.loading || !this.canStakeUnclaimedRewards) return;
+
+      try {
+        this.loading = true;
+
+        await this.stakeUnclaimedRewards({ stakeType: this.stakeType });
       } catch (e) {
         console.error(e);
       } finally {
@@ -638,7 +685,6 @@ export default {
 }
 .switch_active {
   border: 2px solid rgb(37, 167, 219);
-  border-radius: 100px;
   color: #fff;
   cursor: pointer;
   font-weight: bold;

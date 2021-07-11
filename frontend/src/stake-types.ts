@@ -71,3 +71,10 @@ const defaultHumanReadableDetailsForStakeTypes: Record<StakeType, HumanReadableD
 };
 
 export const humanReadableDetailsForStakeTypes = defaultHumanReadableDetailsForStakeTypes;
+
+const stakeTypeForUnclaimedRewards = process.env.VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS;
+
+export const stakeTypeThatCanHaveUnclaimedRewardsStakedTo: StakeType =
+  stakeTypeForUnclaimedRewards && isStakeType(stakeTypeForUnclaimedRewards)
+    ? stakeTypeForUnclaimedRewards
+    : 'skill';
