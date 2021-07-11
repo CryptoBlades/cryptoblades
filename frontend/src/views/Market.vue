@@ -538,6 +538,14 @@ export default Vue.extend({
       const price = await this.lookupNftPrice(this.selectedNftId);
       if(!price) return;
 
+      const skillChainPrice = this.convertStringToDecimal(this.convertWeiToSkill(price), 2);
+      const skillUIPrice = this.convertStringToDecimal(this.convertWeiToSkill(this.nftPricesById[this.selectedNftId]), 2);
+
+      if(skillChainPrice !== skillUIPrice) {
+        (this as any).$dialog.alert('The price of the listing has changed. Please refresh listing and try again');
+        return;
+      }
+
       this.waitingMarketOutcome = true;
 
       const results: any = await this.purchaseMarketListing({
@@ -674,6 +682,9 @@ export default Vue.extend({
         'ether'
       );
     },
+    convertStringToDecimal(val: string, maxDecimals: number) {
+      return new BigNumber(val).toFixed(maxDecimals);
+    }
   },
 
   watch: {
