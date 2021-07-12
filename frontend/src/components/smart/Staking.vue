@@ -153,7 +153,7 @@ BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import { mapActions, mapState } from 'vuex';
 
-import { formatDurationFromSeconds } from '../../utils/date-time';
+import { formatDurationFromSeconds, secondsToDDHHMMSS } from '../../utils/date-time';
 import { isStakeType } from '../../interfaces/State';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from '../../stake-types';
 
@@ -226,7 +226,7 @@ export default {
     },
 
     estimatedUnlockTimeLeftFormatted() {
-      return formatDurationFromSeconds(this.stakeUnlockTimeLeftCurrentEstimate);
+      return secondsToDDHHMMSS(this.stakeUnlockTimeLeftCurrentEstimate);
     },
 
     showRewardClaimSection() {
