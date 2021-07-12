@@ -13,6 +13,7 @@
         <span class="gtag-link-others" tagname="claim_skill">
           <strong>SKILL</strong> {{ formattedSkillReward }}
           <strong>Early Withdraw Tax</strong> {{ formattedRewardsClaimTax }}
+          <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="'Tax is being reduced by 1% per day'"/>
         </span>
       </b-nav-item>
 

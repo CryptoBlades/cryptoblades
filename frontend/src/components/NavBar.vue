@@ -19,6 +19,7 @@
         <options class="options-display-mobile"/>
       </div>
     </b-navbar>
+    <claim-rewards-bar v-if="canShowRewardsBar" />
     <img src="../assets/infoDivider.png" class="info-divider">
   </div>
 </template>
@@ -30,6 +31,7 @@ import ViewLinks from './ViewLinks.vue';
 import Options from './Options.vue';
 import SkillBalanceDisplay from './smart/SkillBalanceDisplay.vue';
 import ClaimRewards from './smart/ClaimRewards.vue';
+import ClaimRewardsBar from './smart/ClaimRewardsBar.vue';
 
 import Events from '../events';
 
@@ -38,6 +40,7 @@ export default Vue.extend({
     ViewLinks,
     SkillBalanceDisplay,
     ClaimRewards,
+    ClaimRewardsBar,
     Options
   },
 

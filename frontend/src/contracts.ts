@@ -23,7 +23,6 @@ import { StakingContractEntry, stakingContractsInfo } from './stake-types';
 
 import {
   raid as featureFlagRaid,
-  stakeOnly as featureFlagStakeOnly,
   market as featureFlagMarket,
 } from './feature-flags';
 
@@ -106,9 +105,9 @@ async function setUpStakingContracts(web3: Web3) {
 export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const stakingContracts = await setUpStakingContracts(web3);
 
-  if (featureFlagStakeOnly) {
-    return stakingContracts;
-  }
+  // if (featureFlagStakeOnly) {
+  //   return stakingContracts;
+  // }
 
   const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as Networks)[networkId]!.address;
 

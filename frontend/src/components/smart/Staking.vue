@@ -615,7 +615,7 @@ export default {
   justify-content: center;
   width: 100%;
   border-color: transparent;
-  color: #fff;
+  color: #9e8a57;
   border-radius: 100px;
   line-height: 24px;
   box-sizing: border-box;
@@ -627,7 +627,7 @@ export default {
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   user-select: none;
   touch-action: manipulation;
-  background: transparent;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
 
 .stakePage {
@@ -675,6 +675,7 @@ export default {
 }
 .StakeButton {
   border: 2px solid #6c5f38;
+  color: #9e8a57;
   border-radius: 0.1em;
   background: rgb(31,31,34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
@@ -685,9 +686,10 @@ export default {
 }
 .switch_active {
   border: 2px solid rgb(37, 167, 219);
-  color: #fff;
+  color: #9e8a57;
   cursor: pointer;
   font-weight: bold;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
 .switch_active:hover,
 .switch:hover {
