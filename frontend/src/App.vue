@@ -1,7 +1,6 @@
 <template>
   <div class="app">
     <nav-bar />
-    <claim-rewards-bar v-if="canShowRewardsBar" />
     <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
@@ -67,21 +66,18 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
-import ClaimRewardsBar from './components/smart/ClaimRewardsBar.vue';
 
 export default {
   inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
     CharacterBar,
-    ClaimRewardsBar,
     BigButton,
     SmallButton,
   },
 
   data: () => ({
     errorMessage: '',
-    canShowRewardsBar: true,
     hideWalletWarning: false,
   }),
 
@@ -144,7 +140,6 @@ export default {
     },
 
     checkStorage() {
-      this.canShowRewardsBar = localStorage.getItem('hideRewards') === 'false';
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     },
     async startOnboarding() {
