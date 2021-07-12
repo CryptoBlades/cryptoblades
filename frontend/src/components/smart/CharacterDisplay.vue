@@ -56,12 +56,13 @@
           v-bind:class="getIsInCombat ? 'disabled-li' : ''">
         <li
           :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
+          :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
           v-for="c in filteredCharactersForList"
           :key="c.id"
           @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
         >
           <div class="name-list"
-          >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+          >{{ getCharacterName(c.id) }}<br>Lv.{{ c.level + 1}}
             <small-bar
               :showMinimalVersion="true"
               v-if="!isLoadingCharacter"
@@ -223,7 +224,7 @@ ul.character-list{
 }
 
 li.character{
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(to right, rgb(236, 75, 75, 0.35) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
   padding: 7px 4px 2px;
   margin: 5px;
   vertical-align: middle;
@@ -233,17 +234,15 @@ li.character{
 li.character-highlight{
   outline: solid #9e8a57 3px;
   font-weight: 800;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 7px 4px 2px;
+  background: linear-gradient(to right, rgb(236, 75, 75, 0.35) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+  padding: 5px;
   margin: 5px;
   vertical-align: middle;
   cursor: pointer;
 }
 
 .name-list {
-  bottom: 20px;
   margin: auto;
-  float: left;
   font-size: 0.9em;
   text-align: center;
   color: #9e8a57;
