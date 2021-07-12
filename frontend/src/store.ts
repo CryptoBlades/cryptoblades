@@ -523,100 +523,6 @@ export function createStore(web3: Web3) {
 
         const subscriptions: IWeb3EventSubscription[] = [];
 
-        console.log('setting up events for:', state.defaultAccount);
-
-        subscriptions.push(
-          state.contracts().Characters!.events.NewCharacter(
-            { filter: { minter: state.defaultAccount } },
-            async (err: Error, data: any) => {
-              if (err) {
-                console.error(err);
-                return;
-              }
-
-              console.log('NewCharacter', data);
-
-              const characterId = data.returnValues.character;
-
-              commit('addNewOwnedCharacterId', characterId);
-
-              await Promise.all([
-                dispatch('fetchCharacter', characterId),
-                dispatch('fetchSkillBalance'),
-                dispatch('fetchFightRewardSkill'),
-                dispatch('fetchFightRewardXp')
-              ]);
-            })
-        );
-
-        subscriptions.push(
-          state.contracts().Weapons!.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
-            if (err) {
-              console.error(err);
-              return;
-            }
-
-            console.log('NewWeapon', data);
-
-            const weaponId = data.returnValues.weapon;
-
-            commit('addNewOwnedWeaponId', weaponId);
-
-            await Promise.all([
-              dispatch('fetchWeapon', weaponId),
-              dispatch('fetchSkillBalance')
-            ]);
-          })
-        );
-
-        subscriptions.push(
-          state.contracts().CryptoBlades!.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
-            if (err) {
-              console.error(err);
-              return;
-            }
-
-            console.log('FightOutcome', data);
-
-            await Promise.all([
-              dispatch('fetchCharacter', data.returnValues.character),
-              dispatch('fetchSkillBalance')
-            ]);
-          })
-        );
-
-        subscriptions.push(
-          state.contracts().CryptoBlades!.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
-            if (err) {
-              console.error(err);
-              return;
-            }
-
-            console.log('InGameOnlyFundsGiven', data);
-
-            await Promise.all([
-              dispatch('fetchInGameOnlyFunds')
-            ]);
-          })
-        );
-
-        const { NFTMarket } = state.contracts();
-
-        if(NFTMarket) {
-          subscriptions.push(
-            NFTMarket.events.PurchasedListing({ filter: { seller: state.defaultAccount } }, async (err: Error, data: any) => {
-              if (err) {
-                console.error(err);
-                return;
-              }
-
-              console.log('PurchasedListing', data);
-
-              await dispatch('fetchSkillBalance');
-            })
-          );
-        }
-
         function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias) {
           if(!StakingRewards) return;
 
@@ -678,7 +584,8 @@ export function createStore(web3: Web3) {
       },
 
       async fetchUserDetails({ dispatch }) {
-        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails'), dispatch('fetchUserGameDetails')];
+        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails')];
+
         await Promise.all([promises]);
       },
 
