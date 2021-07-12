@@ -18,6 +18,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css';
 
 import {
   raid as featureFlagRaid,
+  stakeOnly as featureFlagStakeOnly,
   reforging as featureFlagReforging
 } from './feature-flags';
 
@@ -48,7 +49,7 @@ new Vue({
   provide: {
     web3,
     // maybe feature flags should just reference the feature-flags.ts module directly?
-    featureFlagRaid, featureFlagReforging,
+    featureFlagStakeOnly, featureFlagRaid, featureFlagReforging,
     expectedNetworkId, expectedNetworkName
   }
 }).$mount('#app');
