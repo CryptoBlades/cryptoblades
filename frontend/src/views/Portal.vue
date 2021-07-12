@@ -16,8 +16,7 @@
         <big-button class="button" v-if="userAccount === null" mainText="WAX Login" @click="waxLogin" />
       </div>
       <div class="blank-slate" v-if="userAccount != null">
-        How much WAX do you want to transfer?
-        You have: {{ waxBalance }}.
+        How much WAX do you want to transfer? You have: {{ waxBalance }}.
         <input v-model="WAXAmount" placeholder="How much WAX?" @input="change($event)" @change="change($event)" />
         <div class="error" v-if="!isValid">Invalid WAX amount. Please use the format: "X.xxxxxxxx" (8 decimals).</div>
         <br />
