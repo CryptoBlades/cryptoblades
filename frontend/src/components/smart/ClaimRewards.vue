@@ -14,7 +14,7 @@
           @click="claimSkill(ClaimStage.WaxBridge)" class="gtag-link-others" tagname="claim_skill">
             SKILL
             <div class="pl-3">{{ formattedSkillReward }}</div>
-            <div class="pl-3">Early withdraw tax: 0%</div>
+            <div class="pl-3">Early withdraw tax: {{ formattedRewardsClaimTax }}</div>
             <div class="pl-3">Time since last withdraw: n/a</div>
         </b-dropdown-item>
 
