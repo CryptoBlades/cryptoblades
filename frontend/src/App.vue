@@ -276,6 +276,15 @@ export default {
         });
       }
     });
+
+    if (this.hideWalletWarning && (this.showMetamaskWarning || this.showNetworkError || this.errorMessage !== '')) {
+      this.$dialog.notify.warning(
+        'You have hidden the wallet warning and are on the wrong network. If this was not your intention, please change networks or disable the option.',
+        {
+          timeout: 0,
+        },
+      );
+    }
   },
 
   async created() {
@@ -461,7 +470,8 @@ button.close {
   border-radius: 0.1em !important;
 }
 
-.btn.disabled, .btn:disabled {
+.btn.disabled,
+.btn:disabled {
   cursor: auto;
 }
 
