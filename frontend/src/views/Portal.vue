@@ -118,7 +118,7 @@ export default {
     async isNumberValid(inputNumber) {
       this.isValid = this.regex.test(inputNumber);
     },
-    
+
     async getWaxBalance() {
       this.waxBalance = await wax.api.rpc.get_currency_balance('eosio.token', this.userAccount, 'WAX');
     },
