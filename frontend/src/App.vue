@@ -523,6 +523,10 @@ button.close {
   text-shadow: -1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff;
 }
 
+.black-outline {
+  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+}
+
 div.bg-success {
   background-color: #19682b !important;
 }
