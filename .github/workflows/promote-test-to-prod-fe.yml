@@ -9,10 +9,10 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Merge test -> prod
-        uses: devmasx/merge-branch@v1.3.1
+        uses: everlytic/branch-merge@1.1.2
         with:
-          type: now
-          from_branch: testnet
+          commit_message_template: '[Automatic] Merged testnet into production'
+          source_ref: testnet
           target_branch: production
           github_token: ${{ github.token }}
 
