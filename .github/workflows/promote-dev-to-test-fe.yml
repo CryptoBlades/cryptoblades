@@ -14,4 +14,4 @@ jobs:
           type: now
           from_branch: main
           target_branch: testnet
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.MERGE_PERSONAL_ACCESS_TOKEN }}
