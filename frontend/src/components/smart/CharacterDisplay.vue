@@ -21,15 +21,15 @@
       </div>
 
       <div class="character-data-column dark-bg-text">
-        <span v-if="!isLoadingCharacter" class="name bold"><span :class="traits[currentCharacter.trait].toLowerCase() + '-icon'"></span> {{
+        <span v-if="!isLoadingCharacter" class="name bold character-name">{{
           getCharacterName(currentCharacterId)
-        }}</span>
+        }} <span :class="traits[currentCharacter.trait].toLowerCase() + '-icon trait-icon'"></span></span>
         <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
-        <span v-if="!isLoadingCharacter" class="subtext">
-          Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP)
+        <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
+          <b>Level</b> <span>{{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP) </span>
         </span>
-        <span v-if="!isLoadingCharacter" class="subtext">
-          Power: {{CharacterPower(currentCharacter.level).toLocaleString()}}
+        <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
+          <b>Power:</b> <span>{{CharacterPower(currentCharacter.level).toLocaleString()}}</span>
           <Hint class="power-hint" text="Power increases by 10 every level up,
             <br>and multiplied every 10 level ups
             <br>Level 1: 1000
@@ -170,8 +170,8 @@ export default {
 }
 
 .character-portrait {
-  width: 7.5em;
-  height: 7.5em;
+  width: 8.5em;
+  height: 8.5em;
   background: gray;
   display: flex;
   justify-content: center;
@@ -198,7 +198,7 @@ export default {
 }
 
 .character-data-column .name {
-  font-size: 1.1rem;
+  font-size: 1.5rem;
 }
 
 .character-data-column .subtext {
@@ -224,18 +224,19 @@ ul.character-list{
 }
 
 li.character{
-  background: linear-gradient(to right, rgb(236, 75, 75, 0.35) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
   padding: 7px 4px 2px;
   margin: 5px;
   vertical-align: middle;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 li.character-highlight{
   outline: solid #9e8a57 3px;
   font-weight: 800;
-  background: linear-gradient(to right, rgb(236, 75, 75, 0.35) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
   padding: 5px;
+  border-radius: 5px;
   margin: 5px;
   vertical-align: middle;
   cursor: pointer;
@@ -264,6 +265,7 @@ li.character-highlight{
   flex-direction: column;
   justify-content: space-around;
   align-items: stretch;
+  margin-bottom: 15px;
 }
 
 .character-full-list > ul {
@@ -286,5 +288,36 @@ li.character-highlight{
 .disabled-li {
   pointer-events: none;
   opacity: 0.6;
+}
+
+.trait-icon {
+  position: relative;
+  border: 1px solid rgb(236, 236, 236);
+  border-radius: 15px;
+  top: 5px;
+  left: 10px;
+}
+
+.character-name {
+  color: #dabf75; /* little lighter to emboss */
+  font-family: serif;
+}
+
+.subtext-stats {
+  border: 1px solid;
+  border-radius: 5px;
+  width: 50%;
+  padding: 5px;
+  margin-bottom: 2px;
+}
+
+.subtext-stats > b {
+  font-size: 1.2em;
+}
+
+.subtext-stats > span {
+  color: rgb(230, 230, 230);
+  font-size: 1.1em;
+  margin-right: 2px;
 }
 </style>

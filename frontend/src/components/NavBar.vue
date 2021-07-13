@@ -132,12 +132,6 @@ a.router-link-active {
   flex : 0.5;
 }
 
-.info-divider {
-  width: 100%;
-  position: relative;
-  top: -10px;
-}
-
 </style>
 
 
