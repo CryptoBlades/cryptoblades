@@ -9,6 +9,7 @@
     "start": "npm run serve"
   },
   "dependencies": {
+    "@metamask/onboarding": "^1.0.1",
     "@types/three": "^0.129.0",
     "@waxio/waxjs": "^0.0.15",
     "axios": "^0.21.1",
