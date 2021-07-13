@@ -12,7 +12,7 @@ jobs:
         uses: devmasx/merge-branch@v1.3.1
         with:
           type: now
-          from_branch: main
+          head_to_merge: main
           target_branch: testnet
           github_token: ${{ github.token }}
 
