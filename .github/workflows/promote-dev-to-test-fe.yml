@@ -8,6 +8,8 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
+      - run: npm run lint
+
       - name: Merge dev -> test
         uses: ad-m/github-push-action@master
         with:
