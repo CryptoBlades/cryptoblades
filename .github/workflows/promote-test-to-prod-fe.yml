@@ -7,14 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+        ref: testnet
 
       - name: Merge test -> prod
-        uses: everlytic/branch-merge@1.1.2
+        uses: ad-m/github-push-action@master
         with:
-          commit_message_template: '[Automatic] Merged testnet into production'
-          source_ref: testnet
-          target_branch: production
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: production
+          force: true
 
       - run: npm install
 
