@@ -16,10 +16,14 @@ jobs:
           target_branch: testnet
           github_token: ${{ github.token }}
 
+      - run: cd frontend && npm install
+
+      - run: cd frontend && npm run build
+
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v1.1
         with:
-          publish-dir: './client/dist'
+          publish-dir: './frontend/dist'
           production-branch: master
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: "Deploy from GitHub Actions"
