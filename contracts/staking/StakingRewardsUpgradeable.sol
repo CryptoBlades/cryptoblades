@@ -166,6 +166,8 @@ contract StakingRewardsUpgradeable is
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
         if (_balances[msg.sender] == 0) {
             _stakeTimestamp[msg.sender] = 0;
+        } else {
+            _stakeTimestamp[msg.sender] = block.timestamp;
         }
         stakingToken.safeTransfer(msg.sender, amount);
         emit Withdrawn(msg.sender, amount);
