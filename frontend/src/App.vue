@@ -248,6 +248,24 @@ export default {
 
       Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
     },
+
+    async showWarningDialog() {
+      await new Promise((resolve) => setTimeout(resolve, 7500));
+
+      if (
+        this.hideWalletWarning &&
+        !this.showMetamaskWarning &&
+        (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
+      ) {
+        this.$dialog.notify.warning(
+          `You have hidden the wallet warning and it would now be displayed. If you are trying to play, 
+        please disable the option and follow the instructions, otherwise close and ignore.`,
+          {
+            timeout: 0,
+          },
+        );
+      }
+    },
   },
 
   mounted() {
@@ -277,19 +295,7 @@ export default {
       }
     });
 
-    if (
-      this.hideWalletWarning &&
-      !this.showMetamaskWarning &&
-      (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
-    ) {
-      this.$dialog.notify.warning(
-        `You have hidden the wallet warning and it would now be displayed. If you are trying to play, 
-        please disable the option and follow the instructions, otherwise close and ignore.`,
-        {
-          timeout: 0,
-        },
-      );
-    }
+    this.showWarningDialog();
   },
 
   async created() {
