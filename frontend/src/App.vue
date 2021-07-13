@@ -86,8 +86,6 @@ export default {
     ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
-      if (this.hideWalletWarning) return true;
-
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
     },
 
