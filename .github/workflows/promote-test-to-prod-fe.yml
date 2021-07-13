@@ -7,7 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-        ref: testnet
+        with:
+          ref: testnet
 
       - name: Merge test -> prod
         uses: ad-m/github-push-action@master
