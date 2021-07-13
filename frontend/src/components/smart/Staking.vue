@@ -121,6 +121,8 @@
           </span>
           <span class="gold-text" v-else>
             {{ submitButtonLabel }}
+            <b-icon-exclamation-circle class="centered-icon" scale="0.9" v-if="tryingToUnstake"
+              v-tooltip="`Unstaking will lock remaining funds for another ${minimumStakeTimeFormatted}`"/>
           </span>
         </button>
 
@@ -355,6 +357,10 @@ export default {
       default:
         return connectToWalletButtonLabel;
       }
+    },
+
+    tryingToUnstake() {
+      return this.currentState === 'ok' && !this.isDeposit;
     },
 
     rewardClaimState() {
