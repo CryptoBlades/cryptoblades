@@ -9,8 +9,6 @@ jobs:
       - uses: actions/checkout@master
         ref: testnet
 
-      - run: npm run lint
-
       - name: Merge test -> prod
         uses: ad-m/github-push-action@master
         with:
@@ -19,6 +17,8 @@ jobs:
           force: true
 
       - run: npm install
+
+      - run: npm run lint
 
       - run: npm run build:frontend
 
