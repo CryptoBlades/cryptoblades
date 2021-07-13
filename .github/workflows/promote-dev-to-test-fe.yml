@@ -9,12 +9,11 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Merge dev -> test
-        uses: everlytic/branch-merge@1.1.2
+        uses: ad-m/github-push-action@master
         with:
-          commit_message_template: '[Automatic] Merged main into testnet'
-          source_ref: main
-          target_branch: testnet
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: testnet
+          force: true
 
       - run: npm install
 
