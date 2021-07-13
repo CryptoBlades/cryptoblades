@@ -16,9 +16,9 @@ jobs:
           target_branch: testnet
           github_token: ${{ github.token }}
 
-      - run: cd frontend && npm install
+      - run: npm install
 
-      - run: cd frontend && npm run build
+      - run: npm run build:frontend
 
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v1.1
