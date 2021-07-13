@@ -7,11 +7,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+        ref: testnet
+
+      - run: npm run lint
 
       - name: Merge test -> prod
-        uses: devmasx/merge-branch@v1.3.1
+        uses: ad-m/github-push-action@master
         with:
-          type: now
-          from_branch: testnet
-          target_branch: production
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: production
+          force: true
+
+      - run: npm install
+
+      - run: npm run build:frontend
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v1.1
+        with:
+          publish-dir: './client/dist'
+          production-branch: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions"
+          enable-pull-request-comment: false
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_MAINNET_SITE_ID }}

@@ -10,11 +10,7 @@
         <i class="fas fa-spinner fa-spin"></i>
         Waiting for transaction results...
       </div>
-      <div class="blank-slate" v-if="userAccount === null && !has5SkillBalance">
-        In order to use the Portal, you will need at least <b>5 SKILL!</b> Please add some here:
-        <a v-bind:href="`${getExchangeUrl}`" target="_blank">Swap SKILL/BNB</a>
-      </div>
-      <div class="blank-slate" v-if="userAccount === null && has5SkillBalance">
+      <div class="blank-slate" v-if="userAccount === null">
         Connect WAX wallet
         <br />
         <big-button class="button" v-if="userAccount === null" mainText="WAX Login" @click="waxLogin" />
@@ -33,10 +29,9 @@
 <script>
 import BigButton from '../components/BigButton.vue';
 import * as waxjs from '@waxio/waxjs/dist';
-import { mapGetters, mapState } from 'vuex';
+import { mapState } from 'vuex';
 const wax = new waxjs.WaxJS('https://wax.greymass.com', null, null, false);
 import BN from 'bignumber.js';
-import Web3 from 'web3';
 
 export default {
   data() {
@@ -52,12 +47,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['defaultAccount', 'skillBalance', 'inGameOnlyFunds']),
-    ...mapGetters(['getExchangeUrl', 'hasStakedBalance']),
-
-    has5SkillBalance() {
-      return Web3.utils.fromWei(this.skillBalance, 'ether') >= 5 || Web3.utils.fromWei(this.inGameOnlyFunds, 'ether') >= 5 || this.hasStakedBalance;
-    },
+    ...mapState(['defaultAccount']),
   },
   methods: {
     async connectWaxWallet() {},

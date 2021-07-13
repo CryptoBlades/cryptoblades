@@ -121,6 +121,8 @@
           </span>
           <span class="gold-text" v-else>
             {{ submitButtonLabel }}
+            <b-icon-exclamation-circle class="centered-icon" scale="0.9" v-if="tryingToUnstake"
+              v-tooltip="`Unstaking will lock remaining funds for another ${minimumStakeTimeFormatted}`"/>
           </span>
         </button>
 
@@ -153,7 +155,7 @@ BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import { mapActions, mapState } from 'vuex';
 
-import { formatDurationFromSeconds } from '../../utils/date-time';
+import { formatDurationFromSeconds, secondsToDDHHMMSS } from '../../utils/date-time';
 import { isStakeType } from '../../interfaces/State';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from '../../stake-types';
 
@@ -218,7 +220,7 @@ export default {
     unlockTimeLeftInternal() { return this.stakeData.unlockTimeLeft; },
 
     stakingTokenName() {
-      return this.stakeType === 'skill' ? 'SKILL' : 'SKILL-WBNB';
+      return this.stakeType === 'skill' || this.stakeType === 'skill2' ? 'SKILL' : 'SKILL-WBNB';
     },
 
     minimumStakeTimeFormatted() {
@@ -226,7 +228,7 @@ export default {
     },
 
     estimatedUnlockTimeLeftFormatted() {
-      return formatDurationFromSeconds(this.stakeUnlockTimeLeftCurrentEstimate);
+      return secondsToDDHHMMSS(this.stakeUnlockTimeLeftCurrentEstimate);
     },
 
     showRewardClaimSection() {
@@ -355,6 +357,10 @@ export default {
       default:
         return connectToWalletButtonLabel;
       }
+    },
+
+    tryingToUnstake() {
+      return this.currentState === 'ok' && !this.isDeposit;
     },
 
     rewardClaimState() {

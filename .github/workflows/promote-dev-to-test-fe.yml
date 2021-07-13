@@ -8,10 +8,11 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
+      - run: npm run lint
+
       - name: Merge dev -> test
-        uses: devmasx/merge-branch@v1.3.1
+        uses: ad-m/github-push-action@master
         with:
-          type: now
-          from_branch: main
-          target_branch: testnet
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: testnet
+          force: true

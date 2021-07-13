@@ -47,7 +47,7 @@
           </ul>
           <p>
             If you have any questions, please join our Discord:
-            <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a>
+            <a href="https://discord.gg/cryptoblades" target="_blank" rel="noopener noreferrer">https://discord.gg/cryptoblades</a>
           </p>
         </div>
         <div class="seperator"></div>
@@ -86,8 +86,6 @@ export default {
     ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
-      if (this.hideWalletWarning) return true;
-
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
     },
 
@@ -521,6 +519,10 @@ button.close {
 .outline {
   color: #000;
   text-shadow: -1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff;
+}
+
+.black-outline {
+  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
 }
 
 div.bg-success {

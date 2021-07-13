@@ -10,9 +10,11 @@
       <i class="fas fa-spinner fa-spin"></i>
     </div>
 
-    <div class="id" v-if="advancedUI && !portrait">ID {{ character.id }}</div>
+    <div class="id black-outline" v-if="advancedUI && !portrait">ID {{ character.id }}</div>
 
-    <div class="name">{{ getCharacterName(character.id) }} Lv.{{ character.level + 1 }}</div>
+    <div class="hero-score black-outline">Score {{ heroScore.toLocaleString() }}</div>
+
+    <div class="name black-outline">{{ getCharacterName(character.id) }} Lv.{{ character.level + 1 }}</div>
 
     <div class="xp" v-if="advancedUI && !portrait">
       <b-progress :max="RequiredXp(character.level)" variant="success">
@@ -76,6 +78,7 @@ export default {
       trait: CharacterTrait[this.character.trait],
       showPlaceholder: false,
       advancedUI: this.advancedUI,
+      heroScore: 0
     };
   },
 
@@ -89,20 +92,8 @@ export default {
     tooltipHtml(character) {
       if (!character) return '';
 
-      const wrapInSpan = (spanClass, text) => {
-        return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase() + '-icon'}"></span>`;
-      };
-
       let ttHtml = `
-        ID: ${character.id}
-        <br>
-        Level ${character.level + 1}
-        <br>
-        XP ${character.xp} / ${RequiredXp(character.level)}
-        <br>
         Claimable XP ${this.getCharacterUnclaimedXp(character.id)}
-        <br>
-        Trait: ${wrapInSpan(CharacterTrait[character.trait], CharacterTrait[character.trait])}
       `;
 
       const cooldown = this.transferCooldownOfCharacterId(this.character.id);
@@ -471,8 +462,21 @@ export default {
         this.renderer.render(this.scene, this.camera);
       }
     },
+
+    async fetchScore() {
+      console.log('rpre');
+      try {
+        const scoreData = await fetch(`https://cryptoblades-api.herokuapp.com/static/character/score/${this.character.id}`);
+        const { score } = await scoreData.json();
+        this.heroScore = score;
+      } catch {
+        console.error(`Could not fetch score for ID ${this.character.id}`);
+      }
+    }
   },
   mounted() {
+    this.fetchScore();
+
     this.advancedUI = localStorage.getItem('hideAdvanced') === 'false';
     if(localStorage.getItem('useGraphics') === 'false') {
       this.allLoaded = true;
@@ -498,6 +502,7 @@ export default {
 .trait,
 .id,
 .name,
+.hero-score,
 .xp {
   position: absolute;
 }
@@ -509,6 +514,12 @@ export default {
 
 .id {
   top: 5px;
+  right: 5px;
+  font-style: italic;
+}
+
+.hero-score {
+  top: 25px;
   right: 5px;
   font-style: italic;
 }
