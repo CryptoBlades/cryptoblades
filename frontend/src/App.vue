@@ -277,9 +277,14 @@ export default {
       }
     });
 
-    if (this.hideWalletWarning && (this.showMetamaskWarning || this.showNetworkError || this.errorMessage !== '')) {
+    if (
+      this.hideWalletWarning &&
+      !this.showMetamaskWarning &&
+      (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
+    ) {
       this.$dialog.notify.warning(
-        'You have hidden the wallet warning and are on the wrong network. If this was not your intention, please change networks or disable the option.',
+        `You have hidden the wallet warning and it would now be displayed. If you are trying to play, 
+        please disable the option and follow the instructions, otherwise close and ignore.`,
         {
           timeout: 0,
         },
