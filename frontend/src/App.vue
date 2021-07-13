@@ -47,7 +47,7 @@
           </ul>
           <p>
             If you have any questions, please join our Discord:
-            <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a>
+            <a href="https://discord.gg/cryptoblades" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a>
           </p>
         </div>
         <div class="seperator"></div>
