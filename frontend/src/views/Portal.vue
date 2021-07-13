@@ -54,10 +54,10 @@ export default {
   computed: {
     ...mapState(['defaultAccount', 'skillBalance', 'inGameOnlyFunds']),
     ...mapGetters(['getExchangeUrl', 'hasStakedBalance']),
-  },
 
-  has5SkillBalance() {
-    return Web3.utils.fromWei(this.skillBalance, 'ether') >= 5 || Web3.utils.fromWei(this.inGameOnlyFunds, 'ether') >= 5 || this.hasStakedBalance;
+    has5SkillBalance() {
+      return Web3.utils.fromWei(this.skillBalance, 'ether') >= 5 || Web3.utils.fromWei(this.inGameOnlyFunds, 'ether') >= 5 || this.hasStakedBalance;
+    },
   },
 
   methods: {
