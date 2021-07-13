@@ -16,6 +16,10 @@ jobs:
           target_branch: production
           github_token: ${{ github.token }}
 
+      - run: npm install
+
+      - run: npm run build:frontend
+
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v1.1
         with:
