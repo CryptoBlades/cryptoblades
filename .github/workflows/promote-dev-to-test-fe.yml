@@ -9,10 +9,10 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Merge dev -> test
-        uses: devmasx/merge-branch@v1.3.1
+        uses: everlytic/branch-merge@1.1.2
         with:
-          type: now
-          head_to_merge: main
+          commit_message_template: '[Automatic] Merged main into testnet'
+          source_ref: main
           target_branch: testnet
           github_token: ${{ github.token }}
 
