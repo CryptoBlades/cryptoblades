@@ -279,7 +279,7 @@ export default {
 
     if (this.hideWalletWarning) {
       this.$dialog.notify.warning(
-        'You have Hidden the Wallet Warning and are on the wrong network. If this was not your intention, please change networks or disable the option.',
+        'You have hidden the wallet warning and are on the wrong network. If this was not your intention, please change networks or disable the option.',
         {
           timeout: 0,
         },
