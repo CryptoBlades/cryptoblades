@@ -76,6 +76,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         stakeFromGameImpl = _stakeFromGame;
     }
 
+    function migrateTo_7dd2a56() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        // numbers given for the curves were $4.3-aligned so they need to be multiplied
+        // additional accuracy may be in order for the setter functions for these
+        fightRewardGasOffset = ABDKMath64x64.divu(23177, 100000); // 0.0539 x 4.3
+        fightRewardBaseline = ABDKMath64x64.divu(344, 1000); // 0.08 x 4.3
+    }
+
     // config vars
     uint characterLimit;
     uint8 staminaCostFight;
