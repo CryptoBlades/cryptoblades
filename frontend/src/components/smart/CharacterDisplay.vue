@@ -60,7 +60,7 @@
               :max="maxStamina"
             />
           <div class="small-stamina-char"
-          :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"></div>
+          :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`" v-tooltip="toolTipHtml"></div>
           </div>
         </li>
       </ul>
