@@ -494,8 +494,9 @@ export default {
 .name {
   position: absolute;
   bottom: 5px;
-  left: 0;
-  right: 0;
+  left: 12%;
+  right: 12%;
+  font-size: 0.9em;
   text-align: center;
 }
 
