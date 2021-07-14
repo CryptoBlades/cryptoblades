@@ -45,7 +45,7 @@ jobs:
         uses: netlify/actions/cli@master
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/production' }}
         with:
-          args: deploy --dir=frontend/dist
+          args: deploy --dir=frontend/dist --prod
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_MAINNET_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

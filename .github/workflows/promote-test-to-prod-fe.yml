@@ -7,12 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-        with:
-          ref: testnet
 
       - name: Merge test -> prod
-        uses: ad-m/github-push-action@master
+        uses: devmasx/merge-branch@v1.3.1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: production
-          force: true
+          type: now
+          from_branch: testnet
+          target_branch: production
+          github_token: ${{ secrets.MERGE_PERSONAL_ACCESS_TOKEN }}
