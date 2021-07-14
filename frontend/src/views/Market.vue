@@ -601,6 +601,7 @@ export default Vue.extend({
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
       this.searchResultsOwned = false; // temp
       this.allSearchResults = results;
+      this.allSearchResults = Array.from(this.allSearchResults).sort(function(a: any, b: any) {return a.price - b.price;});
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = null;
