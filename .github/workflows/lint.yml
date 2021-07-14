@@ -1,28 +1,51 @@
-name: Lint Code
+name: Build and Deploy
 
 on: [push, pull_request]
 
 jobs:
   build:
-    name: Lint Code
-
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node-version: [14.x]
+    name: Build
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js 14
+        uses: actions/setup-node@v1
+        with:
+          node-version: "14"
 
-    - run: npm install
+      - run: npm ci
 
-    - run: npm run lint
+      - run: npm run lint
 
-    - run: npm run build:frontend
+      - name: Setup frontend for testnet
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/testnet' }}
+        run: node scripts/ci-setup-frontend-for-testnet.js
+
+      - name: Setup frontend for mainnet
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/production' }}
+        run: node scripts/ci-setup-frontend-for-mainnet.js
+
+      - name: Build smart contracts
+        run: npm run build -- --all
+
+      - run: npm run build:frontend
+
+      - name: Deploy testnet frontend
+        uses: netlify/actions/cli@master
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/testnet' }}
+        with:
+          args: deploy --dir=frontend/dist --prod
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_TESTNET_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+
+      - name: Deploy mainnet frontend (must be published manually in Netlify UI)
+        uses: netlify/actions/cli@master
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/production' }}
+        with:
+          args: deploy --dir=frontend/dist
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_MAINNET_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

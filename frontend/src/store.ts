@@ -11,7 +11,7 @@ import {
   characterFromContract, targetFromContract, weaponFromContract
 } from './contract-models';
 import {
-  allStakeTypes, Contract, Contracts, IStakeOverviewState,
+  Contract, Contracts, isStakeType, IStakeOverviewState,
   IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
@@ -22,7 +22,8 @@ import {
   stakeOnly as featureFlagStakeOnly,
   reforging as featureFlagReforging
 } from './feature-flags';
-import { IERC721 } from '../../build/abi-interfaces';
+import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
+import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -30,32 +31,20 @@ interface SetEventSubscriptionsPayload {
   eventSubscriptions: () => IWeb3EventSubscription[];
 }
 
-type StakingRewardsAlias = Contracts['LPStakingRewards'] | Contracts['LP2StakingRewards'] | Contracts['SkillStakingRewards'];
+type StakingRewardsAlias = Contract<IStakingRewards> | null;
 
 interface StakingContracts {
   StakingRewards: StakingRewardsAlias,
-  StakingToken: Contracts['LPToken'] | Contracts['LP2Token'] | Contracts['SkillToken'],
+  StakingToken: Contract<IERC20> | null,
   RewardToken: Contracts['SkillToken'],
 }
 
 function getStakingContracts(contracts: Contracts, stakeType: StakeType): StakingContracts {
-  switch(stakeType) {
-  case 'skill': return {
-    StakingRewards: contracts.SkillStakingRewards,
-    StakingToken: contracts.SkillToken,
+  return {
+    StakingRewards: contracts.staking[stakeType]?.StakingRewards || null,
+    StakingToken: contracts.staking[stakeType]?.StakingToken || null,
     RewardToken: contracts.SkillToken
   };
-  case 'lp': return {
-    StakingRewards: contracts.LPStakingRewards,
-    StakingToken: contracts.LPToken,
-    RewardToken: contracts.SkillToken
-  };
-  case 'lp2': return {
-    StakingRewards: contracts.LP2StakingRewards,
-    StakingToken: contracts.LP2Token,
-    RewardToken: contracts.SkillToken
-  };
-  }
 }
 
 interface RaidData {
@@ -66,6 +55,10 @@ interface RaidData {
   weaponDrops: string[];
   staminaDrainSeconds: number;
 }
+
+type WaxBridgeDetailsPayload = Pick<
+IState, 'waxBridgeWithdrawableBnb' | 'waxBridgeRemainingWithdrawableBnbDuringPeriod' | 'waxBridgeTimeUntilLimitExpires'
+>;
 
 const defaultStakeState: IStakeState = {
   ownBalance: '0',
@@ -101,7 +94,11 @@ export function createStore(web3: Web3) {
 
       skillBalance: '0',
       skillRewards: '0',
+      maxRewardsClaimTax: '0',
+      rewardsClaimTax: '0',
       xpRewards: {},
+      inGameOnlyFunds: '0',
+      directStakeBonusPercent: 10,
       ownedCharacterIds: [],
       ownedWeaponIds: [],
       maxStamina: 0,
@@ -110,6 +107,7 @@ export function createStore(web3: Web3) {
       characters: {},
       characterStaminas: {},
       weapons: {},
+      isInCombat: false,
 
       targetsByCharacterIdAndWeaponId: {},
 
@@ -118,11 +116,13 @@ export function createStore(web3: Web3) {
 
       staking: {
         skill: { ...defaultStakeState },
+        skill2: { ...defaultStakeState },
         lp: { ...defaultStakeState },
         lp2: { ...defaultStakeState }
       },
       stakeOverviews: {
         skill: { ...defaultStakeOverviewState },
+        skill2: { ...defaultStakeOverviewState },
         lp: { ...defaultStakeOverviewState },
         lp2: { ...defaultStakeOverviewState }
       },
@@ -135,7 +135,11 @@ export function createStore(web3: Web3) {
         weaponDrops: [],
         staminaDrainSeconds: 0,
         isOwnedCharacterRaidingById: {}
-      }
+      },
+
+      waxBridgeWithdrawableBnb: '0',
+      waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
+      waxBridgeTimeUntilLimitExpires: 0,
     },
 
     getters: {
@@ -146,17 +150,19 @@ export function createStore(web3: Web3) {
       },
 
       availableStakeTypes(state: IState) {
-        const out: StakeType[] = ['skill'];
+        return Object.keys(state.contracts().staking).filter(isStakeType);
+      },
 
-        if(state.contracts().LPStakingRewards) {
-          out.push('lp');
+      hasStakedBalance(state) {
+        if(!state.contracts) return false;
+
+        const staking = state.contracts().staking;
+        for(const stakeType of Object.keys(staking).filter(isStakeType)) {
+          if(state.staking[stakeType].stakedBalance !== '0') {
+            return true;
+          }
         }
-
-        if(state.contracts().LP2StakingRewards) {
-          out.push('lp2');
-        }
-
-        return out;
+        return false;
       },
 
       getTargetsByCharacterIdAndWeaponId(state: IState) {
@@ -169,9 +175,20 @@ export function createStore(web3: Web3) {
       },
 
       getCharacterName() {
-
         return (characterId: number) => {
           return getCharacterNameFromSeed(characterId);
+        };
+      },
+
+      getCharacterStamina(state: IState) {
+        return (characterId: number) => {
+          return state.characterStaminas[characterId];
+        };
+      },
+
+      getCharacterUnclaimedXp(state: IState) {
+        return (characterId: number) => {
+          return state.xpRewards[characterId];
         };
       },
 
@@ -266,6 +283,14 @@ export function createStore(web3: Web3) {
         return state.characterStaminas;
       },
 
+      maxRewardsClaimTaxAsFactorBN(state) {
+        return new BN(state.maxRewardsClaimTax).dividedBy(new BN(2).exponentiatedBy(64));
+      },
+
+      rewardsClaimTaxAsFactorBN(state) {
+        return new BN(state.rewardsClaimTax).dividedBy(new BN(2).exponentiatedBy(64));
+      },
+
       stakeState(state) {
         return (stakeType: StakeType): IStakeState => state.staking[stakeType];
       },
@@ -283,6 +308,14 @@ export function createStore(web3: Web3) {
       fightBaseline(state) {
         return state.fightBaseline;
       },
+
+      getIsInCombat(state: IState): boolean {
+        return state.isInCombat;
+      },
+
+      waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod(state): string {
+        return BN.minimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
+      }
     },
 
     mutations: {
@@ -317,10 +350,22 @@ export function createStore(web3: Web3) {
         state.skillRewards = skillRewards;
       },
 
+      updateRewardsClaimTax(
+        state,
+        { maxRewardsClaimTax, rewardsClaimTax }: { maxRewardsClaimTax: string, rewardsClaimTax: string }
+      ) {
+        state.maxRewardsClaimTax = maxRewardsClaimTax;
+        state.rewardsClaimTax = rewardsClaimTax;
+      },
+
       updateXpRewards(state: IState, { xpRewards }: { xpRewards: { [characterId: string]: string } }) {
         for(const charaId in xpRewards) {
           Vue.set(state.xpRewards, charaId, xpRewards[charaId]);
         }
+      },
+
+      updateInGameOnlyFunds(state, { inGameOnlyFunds }: Pick<IState, 'inGameOnlyFunds'>) {
+        state.inGameOnlyFunds = inGameOnlyFunds;
       },
 
       updateFightGasOffset(state: IState, { fightGasOffset }: { fightGasOffset: string }) {
@@ -354,6 +399,10 @@ export function createStore(web3: Web3) {
 
       setCurrentCharacter(state: IState, characterId: number) {
         state.currentCharacterId = characterId;
+      },
+
+      setIsInCombat(state: IState, isInCombat: boolean) {
+        state.isInCombat = isInCombat;
       },
 
       addNewOwnedCharacterId(state: IState, characterId: number) {
@@ -422,6 +471,12 @@ export function createStore(web3: Web3) {
 
       updateAllIsOwnedCharacterRaidingById(state, payload: Record<number, boolean>) {
         state.raid.isOwnedCharacterRaidingById = payload;
+      },
+
+      updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
+        state.waxBridgeWithdrawableBnb = payload.waxBridgeWithdrawableBnb;
+        state.waxBridgeRemainingWithdrawableBnbDuringPeriod = payload.waxBridgeRemainingWithdrawableBnbDuringPeriod;
+        state.waxBridgeTimeUntilLimitExpires = payload.waxBridgeTimeUntilLimitExpires;
       }
     },
 
@@ -431,6 +486,8 @@ export function createStore(web3: Web3) {
         await dispatch('setUpContractEvents');
 
         await dispatch('pollAccountsAndNetwork');
+
+        await dispatch('setupCharacterStaminas');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -530,6 +587,21 @@ export function createStore(web3: Web3) {
             })
           );
 
+          subscriptions.push(
+            state.contracts().CryptoBlades!.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+
+              console.log('InGameOnlyFundsGiven', data);
+
+              await Promise.all([
+                dispatch('fetchInGameOnlyFunds')
+              ]);
+            })
+          );
+
           const { NFTMarket } = state.contracts();
 
           if(NFTMarket) {
@@ -592,9 +664,13 @@ export function createStore(web3: Web3) {
           );
         }
 
-        setupStakingEvents('skill', state.contracts().SkillStakingRewards);
-        setupStakingEvents('lp', state.contracts().LPStakingRewards);
-        setupStakingEvents('lp2', state.contracts().LP2StakingRewards);
+        const staking = state.contracts().staking;
+        for(const stakeType of Object.keys(staking).filter(isStakeType)) {
+          const stakingEntry = staking[stakeType]!;
+
+          console.log('setting up events for staking rewards type', stakeType);
+          setupStakingEvents(stakeType, stakingEntry.StakingRewards);
+        }
 
         const payload: SetEventSubscriptionsPayload = { eventSubscriptions: () => subscriptions };
         commit('setEventSubscriptions', payload);
@@ -606,7 +682,7 @@ export function createStore(web3: Web3) {
       },
 
       async fetchUserDetails({ dispatch }) {
-        const promises = [dispatch('fetchSkillBalance')];
+        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails')];
 
         if (!featureFlagStakeOnly) {
           promises.push(dispatch('fetchUserGameDetails'));
@@ -664,16 +740,34 @@ export function createStore(web3: Web3) {
         await dispatch('fetchCharacters', ownedCharacterIds);
       },
 
-      async fetchSkillBalance({ state, commit }) {
-        if(!state.defaultAccount) return;
+      async fetchSkillBalance({ state, commit, dispatch }) {
+        const { defaultAccount } = state;
+        if(!defaultAccount) return;
 
-        const skillBalance = await state.contracts().SkillToken.methods
-          .balanceOf(state.defaultAccount)
+        await Promise.all([
+          (async () => {
+            const skillBalance = await state.contracts().SkillToken.methods
+              .balanceOf(defaultAccount)
+              .call(defaultCallOptions(state));
+
+            if(state.skillBalance !== skillBalance) {
+              commit('updateSkillBalance', { skillBalance });
+            }
+          })(),
+          dispatch('fetchInGameOnlyFunds')
+        ]);
+      },
+
+      async fetchInGameOnlyFunds({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const inGameOnlyFunds = await CryptoBlades.methods
+          .inGameOnlyFunds(state.defaultAccount)
           .call(defaultCallOptions(state));
 
-        if(state.skillBalance !== skillBalance) {
-          commit('updateSkillBalance', { skillBalance });
-        }
+        const payload: Pick<IState, 'inGameOnlyFunds'> = { inGameOnlyFunds };
+        commit('updateInGameOnlyFunds', payload);
       },
 
       async addMoreSkill({ state, dispatch }, skillToAdd: string) {
@@ -798,6 +892,18 @@ export function createStore(web3: Web3) {
         }
       },
 
+      async setupCharacterStaminas({ state, dispatch }) {
+        const [
+          ownedCharacterIds
+        ] = await Promise.all([
+          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state))
+        ]);
+
+        for (const charId of ownedCharacterIds) {
+          dispatch('fetchCharacterStamina', charId);
+        }
+      },
+
       async fetchCharacterStamina({ state, commit }, characterId: number) {
         if(featureFlagStakeOnly) return;
 
@@ -812,11 +918,12 @@ export function createStore(web3: Web3) {
       },
 
       async mintCharacter({ state, dispatch }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         await approveFee(
           state.contracts().CryptoBlades!,
           state.contracts().SkillToken,
+          state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
@@ -827,16 +934,18 @@ export function createStore(web3: Web3) {
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp')
+          dispatch('fetchFightRewardXp'),
+          dispatch('setupCharacterStaminas')
         ]);
       },
 
       async mintWeapon({ state, dispatch }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         await approveFee(
           state.contracts().CryptoBlades!,
           state.contracts().SkillToken,
+          state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
@@ -854,11 +963,12 @@ export function createStore(web3: Web3) {
       },
 
       async reforgeWeapon({ state, dispatch }, { burnWeaponId, reforgeWeaponId }) {
-        if(featureFlagStakeOnly || !featureFlagReforging) return;
+        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
 
         await approveFee(
           state.contracts().CryptoBlades!,
           state.contracts().SkillToken,
+          state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
@@ -928,9 +1038,9 @@ export function createStore(web3: Web3) {
         ];
       },
 
-      async fetchStakeOverviewData({ dispatch }) {
+      async fetchStakeOverviewData({ getters, dispatch }) {
         await Promise.all(
-          allStakeTypes
+          (getters.availableStakeTypes as StakeType[])
             .map(stakeType =>
               dispatch('fetchStakeOverviewDataPartial', { stakeType })
             )
@@ -1031,6 +1141,23 @@ export function createStore(web3: Web3) {
         });
 
         await dispatch('fetchStakeDetails', { stakeType });
+      },
+
+      async stakeUnclaimedRewards({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
+        if(stakeType !== stakeTypeThatCanHaveUnclaimedRewardsStakedTo) return;
+
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        await CryptoBlades.methods
+          .stakeUnclaimedRewards()
+          .send(defaultCallOptions(state));
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchStakeDetails', { stakeType }),
+          dispatch('fetchFightRewardSkill'),
+        ]);
       },
 
       async claimReward({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
@@ -1359,13 +1486,40 @@ export function createStore(web3: Web3) {
         return fightBaseline;
       },
 
-      async fetchFightRewardSkill({ state, commit }) {
-        const skillRewards = await state.contracts().CryptoBlades!.methods
-          .getTokenRewards()
-          .call(defaultCallOptions(state));
+      async fetchFightRewardSkill({ state, commit, dispatch }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
 
-        commit('updateSkillRewards', { skillRewards });
+        const [skillRewards] = await Promise.all([
+          (async () => {
+            const skillRewards = await CryptoBlades.methods
+              .getTokenRewards()
+              .call(defaultCallOptions(state));
+
+            commit('updateSkillRewards', { skillRewards });
+
+            return skillRewards;
+          })(),
+          dispatch('fetchRewardsClaimTax')
+        ]);
+
         return skillRewards;
+      },
+
+      async fetchRewardsClaimTax({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        const [rewardsClaimTax, maxRewardsClaimTax] = await Promise.all([
+          CryptoBlades.methods
+            .getOwnRewardsClaimTax()
+            .call(defaultCallOptions(state)),
+          CryptoBlades.methods
+            .REWARDS_CLAIM_TAX_MAX()
+            .call(defaultCallOptions(state))
+        ]);
+
+        commit('updateRewardsClaimTax', { maxRewardsClaimTax, rewardsClaimTax });
       },
 
       async fetchFightRewardXp({ state, commit }) {
@@ -1413,6 +1567,37 @@ export function createStore(web3: Web3) {
           dispatch('fetchFightRewardXp')
         ]);
       },
+
+      async fetchWaxBridgeDetails({ state, commit }) {
+        const { WaxBridge } = state.contracts();
+        if(!WaxBridge || !state.defaultAccount) return;
+
+        const [
+          waxBridgeWithdrawableBnb,
+          waxBridgeRemainingWithdrawableBnbDuringPeriod,
+          waxBridgeTimeUntilLimitExpires
+        ] = await Promise.all([
+          WaxBridge.methods.withdrawableBnb(state.defaultAccount).call(defaultCallOptions(state)),
+          WaxBridge.methods.getRemainingWithdrawableBnbDuringPeriod().call(defaultCallOptions(state)),
+          WaxBridge.methods.getTimeUntilLimitExpires().call(defaultCallOptions(state)),
+        ]);
+
+        const payload: WaxBridgeDetailsPayload = {
+          waxBridgeWithdrawableBnb,
+          waxBridgeRemainingWithdrawableBnbDuringPeriod,
+          waxBridgeTimeUntilLimitExpires: +waxBridgeTimeUntilLimitExpires
+        };
+        commit('updateWaxBridgeDetails', payload);
+      },
+
+      async withdrawBnbFromWaxBridge({ state, dispatch }) {
+        const { WaxBridge } = state.contracts();
+        if(!WaxBridge || !state.defaultAccount) return;
+
+        await WaxBridge.methods.withdraw(state.waxBridgeWithdrawableBnb).send(defaultCallOptions(state));
+
+        await dispatch('fetchWaxBridgeDetails');
+      }
     }
   });
 }

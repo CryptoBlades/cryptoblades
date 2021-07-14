@@ -6,9 +6,11 @@
 </template>
 
 <script lang="ts">
+
 export default {
   props: ['mainText', 'subText', 'disabled'],
 };
+
 </script>
 
 <style>
@@ -17,7 +19,6 @@ export default {
   border-radius: 0.1em;
   background: rgb(31, 31, 34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
-
 }
 
 .button:hover:not(:disabled) {
@@ -27,7 +28,7 @@ export default {
 }
 
 .button:disabled {
-  opacity: 40%;
+  opacity: 40% !important;
 }
 
 h1 {
@@ -37,5 +38,23 @@ h1 {
 
 h2 {
   white-space: pre;
+}
+
+@media only screen and (min-width: 768px) {
+  div.encounter.text-center button h2{
+    font-size: x-large;
+  }
+}
+@media only screen and (min-width: 992px) {
+  div.encounter.text-center button h2{
+    font-size: xx-large;
+  }
+}
+
+/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
+@media all and (max-width:  767.98px) {
+  .dark-bg-text{
+    width: 75%;
+  }
 }
 </style>

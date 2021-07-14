@@ -8,14 +8,14 @@
 <script>
 import { mapGetters } from 'vuex';
 import Staking from '../components/smart/Staking.vue';
-import { allStakeTypes } from '../interfaces/State';
+import { isStakeType } from '../interfaces/State';
 
 export default {
   props: {
     stakeType: {
       type: String,
       validator(type) {
-        return allStakeTypes.includes(type);
+        return isStakeType(type);
       }
     }
   },

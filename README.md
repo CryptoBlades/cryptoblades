@@ -28,6 +28,10 @@ You will also need to create a `.env` file alongside `.env.mainnet` and `.env.te
 
 But if not specified, the deployed contracts will be pulled in automatically.
 
+### VSCode Setup
+
+If you're using VSCode, we recommend these extensions: Auto Rename Tag, EditorConfig for VSCode, Eslint, Github Pull Requests, Gitlens, Javascript and Typescript, Live Share, Solidity, Typescript Hero, Vetur
+
 ## Truffle Environment Variables
 
 Truffle also supports some environment variables, if you create a `.env` file in the root you can specify:

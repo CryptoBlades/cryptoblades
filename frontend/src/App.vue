@@ -1,22 +1,24 @@
 <template>
   <div class="app">
     <nav-bar />
-    <claim-rewards-bar v-if="canShowRewardsBar" />
     <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
-    {{ typeof skillBalance }}
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
-    <div class="fullscreen-warning" v-if="showMetamaskWarning || showNetworkError">
+    <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
         <span class="starter-panel-heading">Metamask Not Detected Or Incorrect Network</span>
         <div class="center">
-          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning"/>
-          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError"/>
+          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning" />
+          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError" />
+          <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
         </div>
       </div>
     </div>
-    <div class="fullscreen-warning" v-if="!showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0'))">
+    <div
+      class="fullscreen-warning"
+      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))"
+    >
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
@@ -32,23 +34,24 @@
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
             <li>
               2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br />
-              <a href="getExchangeUrl">Trade SKILL/BNB</a>
-            </li>
-            <li>3. Read the alert and select “I understand” and “Continue”</li>
-            <li>
-              4. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a>
+              <a v-bind:href="`${getExchangeUrl}`" target="_blank">Trade SKILL/BNB</a>
             </li>
             <li>
-              5. That's it! Now you can create your first character: (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer"
+              3. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a>
+            </li>
+            <li>
+              4. That's it! Now you can create your first character: (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer"
                 >Watch 'Getting Started' Video</a
               >)
             </li>
           </ul>
           <p>
             If you have any questions, please join our Discord:
-            <a href="https://discord.gg/c5afzyQ3Q9" target="_blank" rel="noopener noreferrer">https://discord.gg/c5afzyQ3Q9</a>
+            <a href="https://discord.gg/cryptoblades" target="_blank" rel="noopener noreferrer">https://discord.gg/cryptoblades</a>
           </p>
         </div>
+        <div class="seperator"></div>
+        <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
       </div>
     </div>
   </div>
@@ -61,9 +64,9 @@ import Vue from 'vue';
 import Events from './events';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import BigButton from './components/BigButton.vue';
+import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
-import ClaimRewardsBar from './components/smart/ClaimRewardsBar.vue';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
@@ -73,18 +76,18 @@ export default {
   components: {
     NavBar,
     CharacterBar,
-    ClaimRewardsBar,
     BigButton,
+    SmallButton,
   },
 
   data: () => ({
     errorMessage: '',
-    canShowRewardsBar: true,
+    hideWalletWarning: false,
   }),
 
   computed: {
-    ...mapState(['defaultAccount', 'currentNetworkId', 'currentCharacterId']),
-    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl']),
+    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
+    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
@@ -107,6 +110,15 @@ export default {
     async currentCharacterId() {
       await this.updateCurrentCharacterStamina();
     },
+    $route(to) {
+      // react to route changes
+      window.gtag('event', 'page_view', {
+        page_title: to.name,
+        page_location: to.fullPath,
+        page_path: to.path,
+        send_to: 'G-C5RLX74PEW',
+      });
+    },
   },
 
   methods: {
@@ -116,6 +128,9 @@ export default {
       'pollAccountsAndNetwork',
       'fetchWeaponTransferCooldownForOwnWeapons',
       'fetchCharacterTransferCooldownForOwnCharacters',
+      'fetchStakeDetails',
+      'fetchWaxBridgeDetails',
+      'fetchRewardsClaimTax',
     ]),
 
     async updateCurrentCharacterStamina() {
@@ -127,7 +142,7 @@ export default {
     },
 
     checkStorage() {
-      this.canShowRewardsBar = !localStorage.getItem('rewards');
+      this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     },
     async startOnboarding() {
       const onboarding = new MetaMaskOnboarding();
@@ -135,65 +150,152 @@ export default {
     },
     async configureMetaMask() {
       const web3 = this.web3.currentProvider;
-
-      try {
-        await web3.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x38' }],
-        });
-      } catch (switchError) {
+      if (this.currentNetworkId === 97) {
         try {
           await web3.request({
-            method: 'wallet_addEthereumChain',
-            params: [
-              {
-                chainId: '0x38',
-                chainName: 'Binance Smart Chain Mainnet',
-                nativeCurrency: {
-                  name: 'Binance Coin',
-                  symbol: 'BNB',
-                  decimals: 18,
-                },
-                rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                blockExplorerUrls: ['https://bscscan.com/'],
-              },
-            ],
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x61' }],
           });
-        } catch (addError) {
-          console.error(addError);
+        } catch (switchError) {
+          try {
+            await web3.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x61',
+                  chainName: 'Binance Smart Chain Testnet',
+                  nativeCurrency: {
+                    name: 'Binance Coin',
+                    symbol: 'BNB',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+                  blockExplorerUrls: ['https://testnet.bscscan.com'],
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error(addError);
+          }
+        }
+
+        try {
+          await web3.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: '0xcaf53066e36eef55ed0663419adff6e503bd134f',
+                symbol: 'SKILL',
+                decimals: 18,
+                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+              },
+            },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      } else {
+        {
+          try {
+            await web3.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x38' }],
+            });
+          } catch (switchError) {
+            try {
+              await web3.request({
+                method: 'wallet_addEthereumChain',
+                params: [
+                  {
+                    chainId: '0x38',
+                    chainName: 'Binance Smart Chain Mainnet',
+                    nativeCurrency: {
+                      name: 'Binance Coin',
+                      symbol: 'BNB',
+                      decimals: 18,
+                    },
+                    rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                    blockExplorerUrls: ['https://bscscan.com/'],
+                  },
+                ],
+              });
+            } catch (addError) {
+              console.error(addError);
+            }
+          }
+
+          try {
+            await web3.request({
+              method: 'wallet_watchAsset',
+              params: {
+                type: 'ERC20',
+                options: {
+                  address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
+                  symbol: 'SKILL',
+                  decimals: 18,
+                  image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+                },
+              },
+            });
+          } catch (error) {
+            console.error(error);
+          }
         }
       }
+    },
 
-      try {
-        await web3.request({
-          method: 'wallet_watchAsset',
-          params: {
-            type: 'ERC20',
-            options: {
-              address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
-              symbol: 'SKILL',
-              decimals: 18,
-              image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
-            },
-          },
-        });
-      } catch (error) {
-        console.error(error);
-      }
+    toggleHideWalletWarning() {
+      this.hideWalletWarning = !this.hideWalletWarning;
+      if (this.hideWalletWarning) localStorage.setItem('hideWalletWarning', 'true');
+      else localStorage.setItem('hideWalletWarning', 'false');
+
+      Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
     },
   },
 
   mounted() {
     this.checkStorage();
 
-    Events.$on('setting:rewards', () => this.checkStorage());
+    Events.$on('setting:hideRewards', () => this.checkStorage());
+    Events.$on('setting:hideAdvanced', () => this.checkStorage());
+    Events.$on('setting:useGraphics', () => this.checkStorage());
+    Events.$on('setting:hideWalletWarning', () => this.checkStorage());
+
+    document.body.addEventListener('click', (e) => {
+      const tagname = e.target.getAttribute('tagname');
+      if (!tagname) return;
+
+      if (e.target.nodeName === 'BUTTON') {
+        window.gtag('event', 'button_clicked', {
+          value: tagname,
+        });
+      }
+
+      if (e.target.className.includes('gtag-link-others')) {
+        window.gtag('event', 'nav', {
+          event_category: 'navigation',
+          event_label: 'navbar',
+          value: tagname,
+        });
+      }
+    });
+
+    if (this.hideWalletWarning) {
+      this.$dialog.notify.warning(
+        'You have hidden the wallet warning and are on the wrong network. If this was not your intention, please change networks or disable the option.',
+        {
+          timeout: 0,
+        },
+      );
+    }
   },
 
   async created() {
     try {
       await this.initializeStore();
     } catch (e) {
-      this.errorMessage = 'Welcome to CryptoBlades. Here\'s how you can get started.';
+      this.errorMessage = 'Welcome to CryptoBlades. Here is how you can get started.';
       if (e.code === 4001) {
         this.errorMessage = 'Error: MetaMask could not get permissions.';
       }
@@ -206,8 +308,17 @@ export default {
       await this.updateCurrentCharacterStamina();
     }, 3000);
 
-    this.weaponTransferCooldownPollIntervalId = setInterval(async () => {
-      await Promise.all([this.fetchCharacterTransferCooldownForOwnCharacters(), this.fetchWeaponTransferCooldownForOwnWeapons()]);
+    this.availableStakeTypes.forEach((item) => {
+      this.fetchStakeDetails({ stakeType: item });
+    });
+
+    this.slowPollIntervalId = setInterval(async () => {
+      await Promise.all([
+        this.fetchCharacterTransferCooldownForOwnCharacters(),
+        this.fetchWeaponTransferCooldownForOwnWeapons(),
+        this.fetchWaxBridgeDetails(),
+        this.fetchRewardsClaimTax(),
+      ]);
     }, 10 * 1000);
 
     this.doPollAccounts = true;
@@ -223,12 +334,17 @@ export default {
       setTimeout(pollAccounts, 200);
     };
     pollAccounts();
+
+    if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
+    if (!localStorage.getItem('hideAdvanced')) localStorage.setItem('hideAdvanced', 'false');
+    if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
+    if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
   },
 
   beforeDestroy() {
     this.doPollAccounts = false;
     clearInterval(this.pollCharacterStaminaIntervalId);
-    clearInterval(this.weaponTransferCooldownPollIntervalId);
+    clearInterval(this.slowPollIntervalId);
   },
 };
 </script>
@@ -263,7 +379,8 @@ body {
   max-height: calc(100vh - 56px - 160px);
 }
 
-button {
+button,
+.pointer {
   cursor: pointer;
 }
 
@@ -357,7 +474,12 @@ button.close {
   border-radius: 0.1em !important;
 }
 
-.btn:not(.disabled):hover {
+.btn.disabled,
+.btn:disabled {
+  cursor: auto;
+}
+
+.btn:not(.disabled):not(:disabled):hover {
   border: 2px solid #9e8a57 !important;
   background: rgb(61, 61, 64);
   background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
@@ -415,6 +537,7 @@ button.close {
 }
 
 .nav-tabs .nav-link.active {
+  color: #9e8a57 !important;
   border: 2px solid #9e8a57 !important;
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
@@ -429,8 +552,26 @@ button.close {
   text-shadow: -1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff;
 }
 
+.black-outline {
+  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+}
+
 div.bg-success {
   background-color: #19682b !important;
+}
+
+.nav.nav-pills .nav-link {
+  color: #9e8a57 !important;
+  border: 2px solid #6c5f38;
+  border-radius: 0.1em;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+}
+
+.nav.nav-pills .nav-link.active {
+  border: 2px solid #9e8a57 !important;
+  background: rgb(61, 61, 64);
+  background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
 }
 </style>
 <style scoped>
@@ -443,6 +584,7 @@ div.bg-success {
   height: calc(100vh - 56px);
   background: rgb(20, 20, 20);
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  margin: auto;
 }
 
 .fullscreen-warning {

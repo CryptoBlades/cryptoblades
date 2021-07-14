@@ -144,14 +144,8 @@ contract StakingRewardsUpgradeable is
         whenNotPaused
         updateReward(msg.sender)
     {
-        require(amount > 0, "Cannot stake 0");
-        _totalSupply = _totalSupply.add(amount);
-        _balances[msg.sender] = _balances[msg.sender].add(amount);
-        if (_stakeTimestamp[msg.sender] == 0) {
-            _stakeTimestamp[msg.sender] = block.timestamp;
-        }
+        _stake(msg.sender, amount);
         stakingToken.safeTransferFrom(msg.sender, address(this), amount);
-        emit Staked(msg.sender, amount);
     }
 
     function withdraw(uint256 amount)
@@ -172,6 +166,8 @@ contract StakingRewardsUpgradeable is
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
         if (_balances[msg.sender] == 0) {
             _stakeTimestamp[msg.sender] = 0;
+        } else {
+            _stakeTimestamp[msg.sender] = block.timestamp;
         }
         stakingToken.safeTransfer(msg.sender, amount);
         emit Withdrawn(msg.sender, amount);
@@ -322,6 +318,19 @@ contract StakingRewardsUpgradeable is
 
     function unpause() external onlyOwner whenPaused {
         _unpause();
+    }
+
+    /* ========== INTERNAL FUNCTIONS ========== */
+
+    function _stake(address staker, uint256 amount) internal
+    {
+        require(amount > 0, "Cannot stake 0");
+        _totalSupply = _totalSupply.add(amount);
+        _balances[staker] = _balances[staker].add(amount);
+        if (_stakeTimestamp[staker] == 0) {
+            _stakeTimestamp[staker] = block.timestamp;
+        }
+        emit Staked(staker, amount);
     }
 
     /* ========== MODIFIERS ========== */
