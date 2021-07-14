@@ -374,6 +374,12 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+.info-divider {
+  width: 100%;
+  position: relative;
+  top: -10px;
+}
+
 .title-bg-text {
   color: #9e8a57;
 }
