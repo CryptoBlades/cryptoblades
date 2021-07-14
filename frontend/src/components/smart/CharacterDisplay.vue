@@ -235,7 +235,7 @@ li.character{
 }
 
 li.character-highlight{
-  outline: solid #9e8a57 3px;
+  border: solid #9e8a57 3px;
   font-weight: 800;
   padding: 5px;
   border-radius: 5px;
