@@ -30,27 +30,28 @@ contract NFTMarket is
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    Weapons internal weapons;
-    Characters internal characters;
-
     // ############
     // Initializer
     // ############
-    function initialize(IERC20 _skillToken, address _taxRecipient, address _charactersContract, address _weaponsContract)
+    function initialize(IERC20 _skillToken, address _taxRecipient)
         public
         initializer
     {
         __AccessControl_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        // maybe just use extra params for NFT addresses?
-        characters = Characters(_charactersContract);
-        weapons = Weapons(_weaponsContract);
 
         skillToken = _skillToken;
 
         taxRecipient = _taxRecipient;
         defaultTax = ABDKMath64x64.divu(1, 10); // 10%
+    }
+
+    function migrateTo_a98a9ac(Characters _charactersContract, Weapons _weaponsContract) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        characters = _charactersContract;
+        weapons = _weaponsContract;
     }
 
     // basic listing; we can easily offer other types (auction / buy it now)
@@ -89,6 +90,9 @@ contract NFTMarket is
 
     // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
     EnumerableSet.AddressSet private allowedTokenTypes;
+
+    Weapons internal weapons;
+    Characters internal characters;
 
     // ############
     // Events
