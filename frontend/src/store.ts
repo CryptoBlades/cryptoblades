@@ -108,6 +108,7 @@ export function createStore(web3: Web3) {
       characterStaminas: {},
       weapons: {},
       isInCombat: false,
+      isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
 
@@ -313,6 +314,10 @@ export function createStore(web3: Web3) {
         return state.isInCombat;
       },
 
+      getIsCharacterViewExpanded(state: IState): boolean {
+        return state.isCharacterViewExpanded;
+      },
+
       waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod(state): string {
         return BN.minimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
       }
@@ -403,6 +408,11 @@ export function createStore(web3: Web3) {
 
       setIsInCombat(state: IState, isInCombat: boolean) {
         state.isInCombat = isInCombat;
+      },
+
+      setIsCharacterViewExpanded(state: IState, isExpanded: boolean) {
+        state.isCharacterViewExpanded = isExpanded;
+        localStorage.setItem('isCharacterViewExpanded', isExpanded ? 'true' : 'false');
       },
 
       addNewOwnedCharacterId(state: IState, characterId: number) {

@@ -52,12 +52,14 @@ export default {
     };
   },
   computed: {
-    ...mapState(['defaultAccount', 'skillBalance', 'inGameOnlyFunds']),
+    ...mapState(['defaultAccount', 'skillBalance', 'inGameOnlyFunds', 'skillRewards']),
     ...mapGetters(['getExchangeUrl', 'hasStakedBalance']),
-  },
 
-  has5SkillBalance() {
-    return Web3.utils.fromWei(this.skillBalance, 'ether') >= 5 || Web3.utils.fromWei(this.inGameOnlyFunds, 'ether') >= 5 || this.hasStakedBalance;
+    has5SkillBalance() {
+      // Has all 'pools' of SKILL to be used later.
+      // return Web3.utils.fromWei(this.skillBalance, 'ether') >= 5 || Web3.utils.fromWei(this.inGameOnlyFunds, 'ether') >= 5  || Web3.utils.fromWei(this.skillRewards, 'ether') >= 5 || this.hasStakedBalance;
+      return Web3.utils.fromWei(this.skillBalance, 'ether') + Web3.utils.fromWei(this.skillRewards, 'ether') >= 5;
+    },
   },
 
   methods: {

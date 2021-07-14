@@ -1,59 +1,49 @@
 <template>
-  <div class="character-display-container">
-    <div class="root main-font">
-      <div
-        class="character-portrait"
-      >
-        <!--img
-          v-if="!isLoadingCharacter"
-          :src="getCharacterArt(currentCharacter)"
-          alt="Placeholder character"
-        /-->
-        <CharacterArt
-          v-if="!isLoadingCharacter"
-          :character="currentCharacter"
-          :portrait="true" />
-        <span v-if="isLoadingCharacter" style="position: relative">
-          <div class="loading-container">
-            <i class="fas fa-spinner fa-spin"></i>
-          </div>
-        </span>
-      </div>
+  <div class="character-display-container" >
+    <transition name="slide-fade">
+      <div class="root main-font" v-if="getIsCharacterViewExpanded">
+        <div
+          class="character-portrait"
+        >
+          <!--img
+            v-if="!isLoadingCharacter"
+            :src="getCharacterArt(currentCharacter)"
+            alt="Placeholder character"
+          /-->
+          <CharacterArt
+            v-if="!isLoadingCharacter"
+            :character="currentCharacter"
+            :portrait="true" />
+          <span v-if="isLoadingCharacter" style="position: relative">
+            <div class="loading-container">
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+          </span>
+        </div>
 
-      <div class="character-data-column dark-bg-text">
-        <span v-if="!isLoadingCharacter" class="name bold"><span :class="traits[currentCharacter.trait].toLowerCase() + '-icon'"></span> {{
-          getCharacterName(currentCharacterId)
-        }}</span>
-        <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
-        <span v-if="!isLoadingCharacter" class="subtext">
-          Level {{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP)
-        </span>
-        <span v-if="!isLoadingCharacter" class="subtext">
-          Power: {{CharacterPower(currentCharacter.level).toLocaleString()}}
-          <Hint class="power-hint" text="Power increases by 10 every level up,
-            <br>and multiplied every 10 level ups
-            <br>Level 1: 1000
-            <br>Level 10: 1090
-            <br>Level 11: 2200
-            <br>Level 20: 2380
-            <br>Level 21: 3600" />
-        </span>
-        <small-bar
-          v-if="!isLoadingCharacter"
-          class="bar stamina"
-          :current="currentCharacterStamina"
-          :max="maxStamina"
-          v-tooltip="toolTipHtml"
-          faIcon="fa-bolt"
-          primaryColor="#ec4b4b"
-          altText="Stamina"
-        />
+        <div class="character-data-column dark-bg-text">
+          <span v-if="!isLoadingCharacter" class="name bold character-name">{{
+            getCharacterName(currentCharacterId)
+          }} <span :class="traits[currentCharacter.trait].toLowerCase() + '-icon trait-icon'"></span></span>
+          <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
+          <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
+            <b>Level</b> <span>{{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP) </span>
+            <b>Power:</b> <span>{{CharacterPower(currentCharacter.level).toLocaleString()}}</span>
+            <Hint class="power-hint" text="Power increases by 10 every level up,
+              <br>and multiplied every 10 level ups
+              <br>Level 1: 1000
+              <br>Level 10: 1090
+              <br>Level 11: 2200
+              <br>Level 20: 2380
+              <br>Level 21: 3600" />
+          </span>
+        </div>
       </div>
-    </div>
+    </transition>
 
     <div class="character-full-list" v-if="!isMobile()">
       <ul class="character-list"
-          v-bind:class="getIsInCombat ? 'disabled-li' : ''">
+          v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
         <li
           :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
           :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
@@ -69,6 +59,8 @@
               :current="getCharacterStamina(c.id)"
               :max="maxStamina"
             />
+          <div class="small-stamina-char"
+          :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"></div>
           </div>
         </li>
       </ul>
@@ -123,7 +115,8 @@ export default {
       'charactersWithIds',
       'ownCharacters',
       'timeUntilCurrentCharacterHasMaxStamina',
-      'getIsInCombat'
+      'getIsInCombat',
+      'getIsCharacterViewExpanded'
     ]),
 
     isLoadingCharacter(): boolean {
@@ -170,8 +163,8 @@ export default {
 }
 
 .character-portrait {
-  width: 7.5em;
-  height: 7.5em;
+  width: 6.5em;
+  height: 6.5em;
   background: gray;
   display: flex;
   justify-content: center;
@@ -198,7 +191,7 @@ export default {
 }
 
 .character-data-column .name {
-  font-size: 1.1rem;
+  font-size: 1.5rem;
 }
 
 .character-data-column .subtext {
@@ -214,6 +207,10 @@ export default {
   font-size: 1.3rem;
 }
 
+.character-display-container {
+  margin-top: -20px;
+}
+
 div.character-list{
   width: 70%;
 }
@@ -224,18 +221,19 @@ ul.character-list{
 }
 
 li.character{
-  background: linear-gradient(to right, rgb(236, 75, 75, 0.35) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
   padding: 7px 4px 2px;
   margin: 5px;
   vertical-align: middle;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 li.character-highlight{
-  outline: solid #9e8a57 3px;
+  border: solid #9e8a57 3px;
   font-weight: 800;
-  background: linear-gradient(to right, rgb(236, 75, 75, 0.35) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
   padding: 5px;
+  border-radius: 5px;
   margin: 5px;
   vertical-align: middle;
   cursor: pointer;
@@ -264,6 +262,11 @@ li.character-highlight{
   flex-direction: column;
   justify-content: space-around;
   align-items: stretch;
+  margin-bottom: 15px;
+}
+
+.centered-list {
+  justify-content: center;
 }
 
 .character-full-list > ul {
@@ -286,5 +289,56 @@ li.character-highlight{
 .disabled-li {
   pointer-events: none;
   opacity: 0.6;
+}
+
+.trait-icon {
+  position: relative;
+  border: 1px solid rgb(236, 236, 236);
+  border-radius: 15px;
+  top: 5px;
+  left: 5px;
+}
+
+.character-name {
+  color: #dabf75; /* little lighter to emboss */
+  font-family: serif;
+}
+
+.subtext-stats {
+  border: 1px solid;
+  border-radius: 5px;
+  width: 60%;
+  padding: 5px;
+  margin-bottom: 2px;
+}
+
+.subtext-stats > b {
+  font-size: 1.2em;
+}
+
+.subtext-stats > span {
+  color: rgb(230, 230, 230);
+  font-size: 1.1em;
+  margin-right: 2px;
+}
+
+.small-stamina-char {
+  height :10px;
+  margin: 10px 5px 0px 5px;
+  border-radius: 2px;
+  border: 0.5px solid rgb(216, 215, 215);
+  background : linear-gradient(to right, rgb(236, 75, 75) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+}
+
+.slide-fade-enter-active {
+  transition: all .3s ease;
+}
+.slide-fade-leave-active {
+  transition: all .3s ease;
+}
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateY(-30px);
+  overflow: hidden;
+  opacity: 0;
 }
 </style>

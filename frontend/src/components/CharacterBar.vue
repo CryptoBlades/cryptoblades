@@ -1,6 +1,7 @@
 <template>
   <div class="character-bar">
     <character-display />
+    <img src="../assets/infoDivider.png" class="info-divider">
   </div>
 </template>
 
@@ -16,7 +17,6 @@ export default {
 
 <style scoped>
 .character-bar {
-  background-image: url("../assets/title-bar-bg.png");
   padding: 0.5em 1.2em;
 }
 </style>
