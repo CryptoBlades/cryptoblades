@@ -248,24 +248,24 @@ contract NFTMarket is
     {
         EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
         uint256 matchingWeaponsAmount = getNumberOfWeaponListings(_tokenAddress, _trait, _stars);
-        uint256 limit = _limit * (_pageNumber + 1);
-        uint256 tokensSize = matchingWeaponsAmount >= limit ? _limit : matchingWeaponsAmount - (_limit * _pageNumber);
+        uint256 pageEnd = _limit * (_pageNumber + 1);
+        uint256 tokensSize = matchingWeaponsAmount >= pageEnd ? _limit : matchingWeaponsAmount - (_limit * _pageNumber);
         uint256[] memory tokens = new uint256[](tokensSize);
 
         uint256 counter = 0;
         uint8 tokenIterator = 0;
-        for (uint256 i = 0; i < set.length() && counter < limit; i++) {
+        for (uint256 i = 0; i < set.length() && counter < pageEnd; i++) {
             uint8 weaponTrait = weapons.getTrait(set.at(i));
             uint8 weaponStars = weapons.getStars(set.at(i));
             if((_trait == 255 || weaponTrait == _trait) && (_stars == 255 || weaponStars == _stars)) {
-                if(counter >= limit - _limit) {
+                if(counter >= pageEnd - _limit) {
                     tokens[tokenIterator] = set.at(i);
                     tokenIterator++;
                 }
                 counter++;
             }
         }
-        
+
         return tokens;
     }
 
@@ -276,24 +276,24 @@ contract NFTMarket is
     {
         EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
         uint256 matchingCharactersAmount = getNumberOfCharacterListings(_tokenAddress, _trait, _minLevel, _maxLevel);
-        uint256 limit = _limit * (_pageNumber + 1);
-        uint256 tokensSize = matchingCharactersAmount >= limit ? _limit : matchingCharactersAmount - (_limit * _pageNumber);
+        uint256 pageEnd = _limit * (_pageNumber + 1);
+        uint256 tokensSize = matchingCharactersAmount >= pageEnd ? _limit : matchingCharactersAmount - (_limit * _pageNumber);
         uint256[] memory tokens = new uint256[](tokensSize);
 
         uint256 counter = 0;
         uint8 tokenIterator = 0;
-        for (uint256 i = 0; i < set.length() && counter < limit; i++) {
+        for (uint256 i = 0; i < set.length() && counter < pageEnd; i++) {
             uint8 characterTrait = characters.getTrait(set.at(i));
             uint8 characterLevel = characters.getLevel(set.at(i));
              if((_trait == 255 || characterTrait == _trait) && (_minLevel == 255 || _maxLevel == 255 || (characterLevel >= _minLevel && characterLevel <= _maxLevel))) {
-                if(counter >= limit - _limit) {
+                if(counter >= pageEnd - _limit) {
                     tokens[tokenIterator] = set.at(i);
                     tokenIterator++;
                 }
                 counter++;
             }
         }
-        
+
         return tokens;
     }
 
