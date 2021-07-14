@@ -90,4 +90,5 @@ export interface IState {
   waxBridgeTimeUntilLimitExpires: number;
 
   isInCombat: boolean;
+  isCharacterViewExpanded: boolean;
 }
