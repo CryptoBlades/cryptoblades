@@ -69,6 +69,8 @@
               :current="getCharacterStamina(c.id)"
               :max="maxStamina"
             />
+          <div class="small-stamina-char"
+          :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"></div>
           </div>
         </li>
       </ul>
@@ -306,7 +308,7 @@ li.character-highlight{
 .subtext-stats {
   border: 1px solid;
   border-radius: 5px;
-  width: 50%;
+  width: 60%;
   padding: 5px;
   margin-bottom: 2px;
 }
@@ -319,5 +321,13 @@ li.character-highlight{
   color: rgb(230, 230, 230);
   font-size: 1.1em;
   margin-right: 2px;
+}
+
+.small-stamina-char {
+  height :10px;
+  margin: 10px 5px 0px 5px;
+  border-radius: 2px;
+  border: 0.5px solid rgb(216, 215, 215);
+  background : linear-gradient(to right, rgb(236, 75, 75) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
 }
 </style>
