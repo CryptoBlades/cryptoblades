@@ -23,8 +23,8 @@
     <div class="container_row">
       <img src="../assets/divider4.png" class="expander-divider">
       <b-button class="expander-button" @click="toggleCharacterView">
-        <b-icon-arrows-expand class="expand-collapse-icon" v-if="!isCharacterViewExpanded" />
-        <b-icon-arrows-collapse class="expand-collapse-icon" v-if="isCharacterViewExpanded" aria-hidden="true" />
+        <b-icon-arrows-expand class="expand-collapse-icon" v-if="!getIsCharacterViewExpanded" />
+        <b-icon-arrows-collapse class="expand-collapse-icon" v-if="getIsCharacterViewExpanded" aria-hidden="true" />
       </b-button>
     </div>
   </div>
@@ -40,7 +40,7 @@ import ClaimRewards from './smart/ClaimRewards.vue';
 import ClaimRewardsBar from './smart/ClaimRewardsBar.vue';
 
 import Events from '../events';
-import { mapMutations } from 'vuex';
+import { mapGetters, mapMutations } from 'vuex';
 
 export default Vue.extend({
   components: {
@@ -54,9 +54,12 @@ export default Vue.extend({
 
   data() {
     return {
-      canShowRewardsBar: true,
-      isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') === 'true'
+      canShowRewardsBar: true
     };
+  },
+
+  computed: {
+    ...mapGetters(['getIsCharacterViewExpanded'])
   },
 
   methods: {
@@ -65,9 +68,8 @@ export default Vue.extend({
       this.canShowRewardsBar = localStorage.getItem('hideRewards') === 'false';
     },
     toggleCharacterView(): void {
-      this.isCharacterViewExpanded = !this.isCharacterViewExpanded;
-      localStorage.setItem('isCharacterViewExpanded', this.isCharacterViewExpanded ? 'true' : 'false');
-      this.setIsCharacterViewExpanded(this.isCharacterViewExpanded);
+      this.setIsCharacterViewExpanded(!this.getIsCharacterViewExpanded);
+      localStorage.setItem('isCharacterViewExpanded', this.getIsCharacterViewExpanded ? 'true' : 'false');
     }
   },
 

@@ -108,7 +108,7 @@ export function createStore(web3: Web3) {
       characterStaminas: {},
       weapons: {},
       isInCombat: false,
-      isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') === 'true',
+      isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
 
@@ -412,6 +412,7 @@ export function createStore(web3: Web3) {
 
       setIsCharacterViewExpanded(state: IState, isExpanded: boolean) {
         state.isCharacterViewExpanded = isExpanded;
+        localStorage.setItem('isCharacterViewExpanded', isExpanded ? 'true' : 'false');
       },
 
       addNewOwnedCharacterId(state: IState, characterId: number) {
