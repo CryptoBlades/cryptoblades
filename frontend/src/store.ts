@@ -108,7 +108,7 @@ export function createStore(web3: Web3) {
       characterStaminas: {},
       weapons: {},
       isInCombat: false,
-      isCharacterViewExpanded: false,
+      isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') === 'true',
 
       targetsByCharacterIdAndWeaponId: {},
 

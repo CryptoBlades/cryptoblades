@@ -55,7 +55,7 @@ export default Vue.extend({
   data() {
     return {
       canShowRewardsBar: true,
-      isCharacterViewExpanded: true
+      isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') === 'true'
     };
   },
 
@@ -66,6 +66,7 @@ export default Vue.extend({
     },
     toggleCharacterView(): void {
       this.isCharacterViewExpanded = !this.isCharacterViewExpanded;
+      localStorage.setItem('isCharacterViewExpanded', this.isCharacterViewExpanded ? 'true' : 'false');
       this.setIsCharacterViewExpanded(this.isCharacterViewExpanded);
     }
   },
