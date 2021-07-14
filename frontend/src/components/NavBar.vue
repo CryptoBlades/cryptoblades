@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="main-nav-div">
     <b-navbar class="main-nav" toggleable="sm" type="dark" variant="dark">
       <b-navbar-brand href="#" class="nav-logo">
         <img src="../assets/logo_Text_Source.png" class="logo d-inline-block align-top" alt="Logo">
@@ -20,7 +20,13 @@
       </div>
     </b-navbar>
     <claim-rewards-bar v-if="canShowRewardsBar" />
-    <img src="../assets/infoDivider.png" class="info-divider">
+    <div class="container_row">
+      <img src="../assets/divider4.png" class="expander-divider">
+      <b-button class="expander-button" @click="toggleCharacterView" v-if="ownCharacters.length > 0">
+        <b-icon-arrows-expand class="expand-collapse-icon" v-if="!getIsCharacterViewExpanded" />
+        <b-icon-arrows-collapse class="expand-collapse-icon" v-if="getIsCharacterViewExpanded" aria-hidden="true" />
+      </b-button>
+    </div>
   </div>
 </template>
 
@@ -34,6 +40,7 @@ import ClaimRewards from './smart/ClaimRewards.vue';
 import ClaimRewardsBar from './smart/ClaimRewardsBar.vue';
 
 import Events from '../events';
+import { mapGetters, mapMutations } from 'vuex';
 
 export default Vue.extend({
   components: {
@@ -51,9 +58,18 @@ export default Vue.extend({
     };
   },
 
+  computed: {
+    ...mapGetters(['getIsCharacterViewExpanded','ownCharacters'])
+  },
+
   methods: {
+    ...mapMutations(['setIsCharacterViewExpanded']),
     checkStorage(): void {
       this.canShowRewardsBar = localStorage.getItem('hideRewards') === 'false';
+    },
+    toggleCharacterView(): void {
+      this.setIsCharacterViewExpanded(!this.getIsCharacterViewExpanded);
+      localStorage.setItem('isCharacterViewExpanded', this.getIsCharacterViewExpanded ? 'true' : 'false');
     }
   },
 
@@ -132,12 +148,38 @@ a.router-link-active {
   flex : 0.5;
 }
 
-.info-divider {
-  width: 100%;
+.expand-collapse-icon {
   position: relative;
-  top: -10px;
+  top: -4px;
+  left: -10px;
+  color: #9e8a57;
 }
 
+.expander-button{
+  position: relative;
+  height: 27px;
+  width: 27px;
+  top: -12px;
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  border: 2px solid #312E21 !important;
+  border-radius: 0.1em;
+  justify-items: center;
+}
+
+.container_row{
+  display: grid;
+  justify-items: center;
+}
+
+.expander-divider {
+  width: 100%;
+  position: relative;
+}
+
+.expander-divider, .expander-button{
+  grid-column: 1;
+  grid-row: 1;
+}
 </style>
 
 
