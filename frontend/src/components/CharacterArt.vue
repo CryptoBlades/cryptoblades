@@ -12,12 +12,17 @@
 
     <div class="id black-outline" v-if="advancedUI && !portrait">ID {{ character.id }}</div>
 
-    <div class="hero-score black-outline">Score {{ heroScore.toLocaleString() }}</div>
+    <div class="hero-score black-outline" v-if="!portrait">
+      Score {{ heroScore.toLocaleString() }}
+      <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Hero score is a measure of your hero's combat prowess so far.
+        It goes up when you win and down when you lose.`"/>
+    </div>
 
-    <div class="name black-outline">{{ getCharacterName(character.id) }} Lv.{{ character.level + 1 }}</div>
+    <div class="name black-outline" v-if="!portrait">{{ getCharacterName(character.id) }} Lv.{{ character.level + 1 }}</div>
 
     <div class="xp" v-if="advancedUI && !portrait">
-      <b-progress :max="RequiredXp(character.level)" variant="success">
+      <b-progress :max="RequiredXp(character.level)" variant="success"
+      v-tooltip.bottom="`Claimable XP ${this.getCharacterUnclaimedXp(character.id)}`">
         <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} XP</strong>
         <b-progress-bar :value="character.xp || 0"></b-progress-bar>
       </b-progress>
@@ -92,19 +97,15 @@ export default {
     tooltipHtml(character) {
       if (!character) return '';
 
-      let ttHtml = `
-        Claimable XP ${this.getCharacterUnclaimedXp(character.id)}
-      `;
-
       const cooldown = this.transferCooldownOfCharacterId(this.character.id);
       if (cooldown) {
         if (cooldown === 86400)
           // edge case for when it's exactly 1 day and the iso string cant display
-          ttHtml += '<br>May not be traded for: 1 day';
-        else ttHtml += `<br>May not be traded for: ${new Date(cooldown * 1000).toISOString().substr(11, 8)}`;
+          return 'May not be traded for: 1 day';
+        else return `May not be traded for: ${new Date(cooldown * 1000).toISOString().substr(11, 8)}`;
       }
 
-      return ttHtml;
+      return '';
     },
 
     getCharacterArt,
