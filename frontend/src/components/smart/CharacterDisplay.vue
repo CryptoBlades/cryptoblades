@@ -49,31 +49,48 @@
           altText="Stamina"
         />
       </div>
-      <div class="character-list d-none d-sm-block">
-      <ul class="character-list">
+    </div>
+
+    <div class="character-full-list" v-if="!isMobile()">
+      <ul class="character-list"
+          v-bind:class="getIsInCombat ? 'disabled-li' : ''">
         <li
-          class="character"
+          :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
+          :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
           v-for="c in filteredCharactersForList"
           :key="c.id"
-          @click="setCurrentCharacter(c.id)"
+          @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
         >
-        <div class="name-list"
-        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
+          <div class="name-list"
+          >{{ getCharacterName(c.id) }}<br>Lv.{{ c.level + 1}}
+            <small-bar
+              :showMinimalVersion="true"
+              v-if="!isLoadingCharacter"
+              :current="getCharacterStamina(c.id)"
+              :max="maxStamina"
+            />
+          </div>
         </li>
       </ul>
-      </div>
     </div>
 
     <div class="character-list-mobile" v-if="isMobile()">
       <ul>
         <li
-          class="character"
+          class="{selectedCharactersLiClass}"
           v-for="c in filteredCharactersForList"
           :key="c.id"
-          @click="setCurrentCharacter(c.id)"
+          @click="!getIsInCombat && setCurrentCharacter(c.id)"
         >
         <div class="name-list"
-        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}</div>
+        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+          <small-bar
+            :showMinimalVersion="true"
+            v-if="!isLoadingCharacter"
+            :current="getCharacterStamina(c.id)"
+            :max="maxStamina"
+          />
+        </div>
         </li>
       </ul>
       </div>
@@ -102,9 +119,11 @@ export default {
       'currentCharacter',
       'currentCharacterStamina',
       'getCharacterName',
+      'getCharacterStamina',
       'charactersWithIds',
       'ownCharacters',
-      'timeUntilCurrentCharacterHasMaxStamina'
+      'timeUntilCurrentCharacterHasMaxStamina',
+      'getIsInCombat'
     ]),
 
     isLoadingCharacter(): boolean {
@@ -116,19 +135,15 @@ export default {
     },
 
     filteredCharactersForList(): any {
-      let items: any  = this.ownCharacters;
-
-      items = items.filter((x: any) => x.id !== this.currentCharacterId);
-
-      if (items.length >= 4) items = items.filter((x: any) => x.id !== 0);
-
+      const items: any  = this.ownCharacters;
       return items;
     }
   },
 
   data() {
     return {
-      traits: CharacterTrait
+      traits: CharacterTrait,
+      isPlaza : false
     };
   },
   methods: {
@@ -136,6 +151,14 @@ export default {
     getCharacterArt,
     CharacterPower,
     RequiredXp,
+
+    setListClassForSelChar(id: string, currentCharId: string): any {
+      if (id === currentCharId){
+        return 'character-highlight';
+      }
+
+      else return 'character';
+    }
   },
 };
 </script>
@@ -201,17 +224,25 @@ ul.character-list{
 }
 
 li.character{
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(to right, rgb(236, 75, 75, 0.35) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
   padding: 7px 4px 2px;
   margin: 5px;
   vertical-align: middle;
   cursor: pointer;
 }
 
+li.character-highlight{
+  outline: solid #9e8a57 3px;
+  font-weight: 800;
+  background: linear-gradient(to right, rgb(236, 75, 75, 0.35) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+  padding: 5px;
+  margin: 5px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
 .name-list {
-  bottom: 20px;
   margin: auto;
-  float: left;
   font-size: 0.9em;
   text-align: center;
   color: #9e8a57;
@@ -227,11 +258,33 @@ li.character{
   align-items: stretch;
 }
 
+.character-full-list {
+  padding-top: 15px;
+  display :flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: stretch;
+}
+
+.character-full-list > ul {
+  display: flex;
+  padding-left: 0px;
+}
+
+.character-full-list .character, .character-full-list .character-highlight {
+  width: 220px;
+  margin: 0 20px 0 0;
+}
+
 .character-list-mobile > ul{
   padding :0px;
 }
 .character-list-mobile > ul > li{
   justify-content: center;
   display: flex;
+}
+.disabled-li {
+  pointer-events: none;
+  opacity: 0.6;
 }
 </style>

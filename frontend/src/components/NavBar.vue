@@ -1,23 +1,27 @@
 <template>
-  <b-navbar class="main-nav" toggleable="sm" type="dark" variant="dark">
-    <b-navbar-brand href="#">
-      <img src="../assets/logo.png" class="logo d-inline-block align-top" alt="Logo">
-    </b-navbar-brand>
+  <div>
+    <b-navbar class="main-nav" toggleable="sm" type="dark" variant="dark">
+      <b-navbar-brand href="#" class="nav-logo">
+        <img src="../assets/logo_Text_Source.png" class="logo d-inline-block align-top" alt="Logo">
+      </b-navbar-brand>
 
-    <view-links></view-links>
+      <view-links class="view-links"></view-links>
 
-    <skill-balance-display class="ml-auto d-none d-sm-flex" />
+      <skill-balance-display class="ml-auto d-none d-sm-flex" />
 
-    <claim-rewards  v-if="!canShowRewardsBar" />
+      <claim-rewards  v-if="!canShowRewardsBar" />
 
-    <options class="d-none d-sm-flex"/>
+      <options class="d-none d-sm-flex"/>
 
-    <!-- Render only on mobile view -->
-    <div class="d-flex d-sm-none">
-      <skill-balance-display class="skill-display-mobile" />
-      <options class="options-display-mobile"/>
-    </div>
-  </b-navbar>
+      <!-- Render only on mobile view -->
+      <div class="d-flex d-sm-none">
+        <skill-balance-display class="skill-display-mobile" />
+        <options class="options-display-mobile"/>
+      </div>
+    </b-navbar>
+    <claim-rewards-bar v-if="canShowRewardsBar" />
+    <img src="../assets/infoDivider.png" class="info-divider">
+  </div>
 </template>
 
 <script lang="ts">
@@ -27,6 +31,7 @@ import ViewLinks from './ViewLinks.vue';
 import Options from './Options.vue';
 import SkillBalanceDisplay from './smart/SkillBalanceDisplay.vue';
 import ClaimRewards from './smart/ClaimRewards.vue';
+import ClaimRewardsBar from './smart/ClaimRewardsBar.vue';
 
 import Events from '../events';
 
@@ -35,6 +40,7 @@ export default Vue.extend({
     ViewLinks,
     SkillBalanceDisplay,
     ClaimRewards,
+    ClaimRewardsBar,
     Options
   },
 
@@ -47,14 +53,13 @@ export default Vue.extend({
 
   methods: {
     checkStorage(): void {
-      this.canShowRewardsBar = !localStorage.getItem('rewards');
+      this.canShowRewardsBar = localStorage.getItem('hideRewards') === 'false';
     }
   },
 
   mounted() {
     this.checkStorage();
-
-    Events.$on('setting:rewards', () => this.checkStorage());
+    Events.$on('setting:hideRewards', () => this.checkStorage());
   },
 });
 </script>
@@ -100,6 +105,9 @@ a.router-link-active {
   .skill-display-mobile  {
     flex: 5;
   }
+  .skill-display-mobile > .balance-container {
+    font-size: 0.8em;
+  }
   .options-display-mobile {
     flex: 1;
     align-items: flex-end;
@@ -109,7 +117,7 @@ a.router-link-active {
 
 <style scoped>
 .logo {
-  max-width: 130px;
+  max-width: 230px;
   padding-top: 7px;
 }
 
@@ -117,6 +125,19 @@ a.router-link-active {
   background: rgb(20,20,20);
   background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
 }
+.main-nav > .view-links {
+  flex : 2.3;
+}
+.nav-logo {
+  flex : 0.5;
+}
+
+.info-divider {
+  width: 100%;
+  position: relative;
+  top: -10px;
+}
+
 </style>
 
 

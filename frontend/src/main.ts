@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 import VTooltip from 'v-tooltip';
 import BootstrapVue from 'bootstrap-vue';
+import { BootstrapVueIcons } from 'bootstrap-vue';
 import BootstrapVueDialog from 'bootstrap-vue-dialog';
 
 import Web3 from 'web3';
@@ -36,6 +37,8 @@ Vue.use(VueRouter);
 Vue.use(VTooltip);
 Vue.use(BootstrapVue);
 Vue.use(BootstrapVueDialog);
+
+Vue.use(BootstrapVueIcons);
 
 const store = createStore(web3);
 const router = createRouter();
