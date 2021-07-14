@@ -1,59 +1,49 @@
 <template>
-  <div class="character-display-container">
-    <div class="root main-font">
-      <div
-        class="character-portrait"
-      >
-        <!--img
-          v-if="!isLoadingCharacter"
-          :src="getCharacterArt(currentCharacter)"
-          alt="Placeholder character"
-        /-->
-        <CharacterArt
-          v-if="!isLoadingCharacter"
-          :character="currentCharacter"
-          :portrait="true" />
-        <span v-if="isLoadingCharacter" style="position: relative">
-          <div class="loading-container">
-            <i class="fas fa-spinner fa-spin"></i>
-          </div>
-        </span>
-      </div>
+  <div class="character-display-container" >
+    <transition name="slide-fade">
+      <div class="root main-font" v-if="getIsCharacterViewExpanded">
+        <div
+          class="character-portrait"
+        >
+          <!--img
+            v-if="!isLoadingCharacter"
+            :src="getCharacterArt(currentCharacter)"
+            alt="Placeholder character"
+          /-->
+          <CharacterArt
+            v-if="!isLoadingCharacter"
+            :character="currentCharacter"
+            :portrait="true" />
+          <span v-if="isLoadingCharacter" style="position: relative">
+            <div class="loading-container">
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+          </span>
+        </div>
 
-      <div class="character-data-column dark-bg-text">
-        <span v-if="!isLoadingCharacter" class="name bold character-name">{{
-          getCharacterName(currentCharacterId)
-        }} <span :class="traits[currentCharacter.trait].toLowerCase() + '-icon trait-icon'"></span></span>
-        <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
-        <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
-          <b>Level</b> <span>{{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP) </span>
-        </span>
-        <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
-          <b>Power:</b> <span>{{CharacterPower(currentCharacter.level).toLocaleString()}}</span>
-          <Hint class="power-hint" text="Power increases by 10 every level up,
-            <br>and multiplied every 10 level ups
-            <br>Level 1: 1000
-            <br>Level 10: 1090
-            <br>Level 11: 2200
-            <br>Level 20: 2380
-            <br>Level 21: 3600" />
-        </span>
-        <small-bar
-          v-if="!isLoadingCharacter"
-          class="bar stamina"
-          :current="currentCharacterStamina"
-          :max="maxStamina"
-          v-tooltip="toolTipHtml"
-          faIcon="fa-bolt"
-          primaryColor="#ec4b4b"
-          altText="Stamina"
-        />
+        <div class="character-data-column dark-bg-text">
+          <span v-if="!isLoadingCharacter" class="name bold character-name">{{
+            getCharacterName(currentCharacterId)
+          }} <span :class="traits[currentCharacter.trait].toLowerCase() + '-icon trait-icon'"></span></span>
+          <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
+          <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
+            <b>Level</b> <span>{{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP) </span>
+            <b>Power:</b> <span>{{CharacterPower(currentCharacter.level).toLocaleString()}}</span>
+            <Hint class="power-hint" text="Power increases by 10 every level up,
+              <br>and multiplied every 10 level ups
+              <br>Level 1: 1000
+              <br>Level 10: 1090
+              <br>Level 11: 2200
+              <br>Level 20: 2380
+              <br>Level 21: 3600" />
+          </span>
+        </div>
       </div>
-    </div>
+    </transition>
 
     <div class="character-full-list" v-if="!isMobile()">
       <ul class="character-list"
-          v-bind:class="getIsInCombat ? 'disabled-li' : ''">
+          v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
         <li
           :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
           :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
@@ -125,7 +115,8 @@ export default {
       'charactersWithIds',
       'ownCharacters',
       'timeUntilCurrentCharacterHasMaxStamina',
-      'getIsInCombat'
+      'getIsInCombat',
+      'getIsCharacterViewExpanded'
     ]),
 
     isLoadingCharacter(): boolean {
@@ -172,8 +163,8 @@ export default {
 }
 
 .character-portrait {
-  width: 8.5em;
-  height: 8.5em;
+  width: 6.5em;
+  height: 6.5em;
   background: gray;
   display: flex;
   justify-content: center;
@@ -214,6 +205,10 @@ export default {
 
 .power-hint {
   font-size: 1.3rem;
+}
+
+.character-display-container {
+  margin-top: -20px;
 }
 
 div.character-list{
@@ -270,6 +265,10 @@ li.character-highlight{
   margin-bottom: 15px;
 }
 
+.centered-list {
+  justify-content: center;
+}
+
 .character-full-list > ul {
   display: flex;
   padding-left: 0px;
@@ -297,7 +296,7 @@ li.character-highlight{
   border: 1px solid rgb(236, 236, 236);
   border-radius: 15px;
   top: 5px;
-  left: 10px;
+  left: 5px;
 }
 
 .character-name {
@@ -329,5 +328,17 @@ li.character-highlight{
   border-radius: 2px;
   border: 0.5px solid rgb(216, 215, 215);
   background : linear-gradient(to right, rgb(236, 75, 75) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+}
+
+.slide-fade-enter-active {
+  transition: all .3s ease;
+}
+.slide-fade-leave-active {
+  transition: all .3s ease;
+}
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateY(-30px);
+  overflow: hidden;
+  opacity: 0;
 }
 </style>
