@@ -260,24 +260,30 @@ export function createStore(web3: Web3) {
       },
 
       timeUntilCurrentCharacterHasMaxStamina(state, getters) {
-        const currentStamina = getters.currentCharacterStamina;
-        if (!currentStamina) {
-          return '';
-        }
-        const date = new Date();
+        return getters.timeUntilCharacterHasMaxStamina(state.currentCharacterId);
+      },
 
-        if (state.maxStamina !== currentStamina) {
-          date.setTime(date.getTime() + ((state.maxStamina - currentStamina) * (5 * 60000)));
-        }
+      timeUntilCharacterHasMaxStamina(state, getters) {
+        return (id: number) => {
+          const currentStamina = getters.getCharacterStamina(id);
+          if (!currentStamina) {
+            return '';
+          }
+          const date = new Date();
 
-        return(`${
-          (date.getMonth()+1).toString().padStart(2, '0')}/${
-          date.getDate().toString().padStart(2, '0')}/${
-          date.getFullYear().toString().padStart(4, '0')} ${
-          date.getHours().toString().padStart(2, '0')}:${
-          date.getMinutes().toString().padStart(2, '0')}:${
-          date.getSeconds().toString().padStart(2, '0')}`
-        );
+          if (state.maxStamina !== currentStamina) {
+            date.setTime(date.getTime() + ((state.maxStamina - currentStamina) * (5 * 60000)));
+          }
+
+          return(`${
+            (date.getMonth()+1).toString().padStart(2, '0')}/${
+            date.getDate().toString().padStart(2, '0')}/${
+            date.getFullYear().toString().padStart(4, '0')} ${
+            date.getHours().toString().padStart(2, '0')}:${
+            date.getMinutes().toString().padStart(2, '0')}:${
+            date.getSeconds().toString().padStart(2, '0')}`
+          );
+        };
       },
 
       allStaminas(state) {
