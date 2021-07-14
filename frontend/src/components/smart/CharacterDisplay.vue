@@ -60,7 +60,8 @@
               :max="maxStamina"
             />
           <div class="small-stamina-char"
-          :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"></div>
+          :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
+          v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))"></div>
           </div>
         </li>
       </ul>
@@ -114,17 +115,13 @@ export default {
       'getCharacterStamina',
       'charactersWithIds',
       'ownCharacters',
-      'timeUntilCurrentCharacterHasMaxStamina',
+      'timeUntilCharacterHasMaxStamina',
       'getIsInCombat',
       'getIsCharacterViewExpanded'
     ]),
 
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
-    },
-
-    toolTipHtml(): string {
-      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + this.timeUntilCurrentCharacterHasMaxStamina;
     },
 
     filteredCharactersForList(): any {
@@ -151,7 +148,11 @@ export default {
       }
 
       else return 'character';
-    }
+    },
+
+    toolTipHtml(time: string): string {
+      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
+    },
   },
 };
 </script>
