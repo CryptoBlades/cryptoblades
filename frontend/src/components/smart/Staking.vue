@@ -464,7 +464,6 @@ export default {
       if (this.loading || this.currentState !== 'ok') return;
 
       const amount = this.bigNumberAmount.toString();
-      console.log('It is showtime:', this.bigNumberAmount, amount);
 
       try {
         this.loading = true;
@@ -524,13 +523,11 @@ export default {
   },
   watch: {
     rewardDistributionTimeLeftInternal(newValue, oldValue) {
-      console.log('rewardDistributionTimeLeftInternal', newValue, oldValue);
       if (newValue !== oldValue) {
         this.stakeRewardDistributionTimeLeftCurrentEstimate = newValue;
       }
     },
     unlockTimeLeftInternal(newValue, oldValue) {
-      console.log('unlockTimeLeftInternal', newValue, oldValue);
       if (newValue !== oldValue) {
         this.stakeUnlockTimeLeftCurrentEstimate = newValue;
       }

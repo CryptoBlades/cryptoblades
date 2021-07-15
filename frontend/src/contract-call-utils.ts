@@ -38,18 +38,13 @@ export async function approveFee(
   let feeInSkill = new BigNumber(await getFeeInSkillFromUsd(cryptoBladesContract, callOptsWithFrom, fn));
 
   try {
-    console.log(`trying getSkillNeededFromUserWallet(${from}, ${feeInSkill.toString()})`);
-    const origFee = feeInSkill.toString();
-
     feeInSkill = await cryptoBladesContract.methods
       .getSkillNeededFromUserWallet(from, feeInSkill.toString())
       .call(callOptsWithFrom)
       .then(n => new BigNumber(n));
 
-    console.log(`success; getSkillNeededFromUserWallet(${from}, ${origFee}) = ${feeInSkill.toString()}`);
   }
   catch(err) {
-    console.log('failed to use getSkillNeededFromUserWallet; falling back to old behavior');
     const paidByRewardPool = feeInSkill.lte(skillRewardsAvailable);
 
     if(paidByRewardPool) {
