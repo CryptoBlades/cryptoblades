@@ -43,6 +43,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         characterLimit = 4;
         staminaCostFight = 40;
+        durabilityCostFight = 1;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
         fightRewardGasOffset = ABDKMath64x64.divu(8, 10);//0.8 usd;
@@ -120,6 +121,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     mapping(address => uint256) private _rewardsClaimTaxTimerStart;
 
+    uint8 durabilityCostFight;
+
     IStakeFromGame public stakeFromGameImpl;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
@@ -192,6 +195,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             oncePerBlock(msg.sender)
             isCharacterOwner(char)
             isWeaponOwner(wep) {
+        require(weapons.getDurabilityPoints(wep) >= durabilityCostFight, "Not enough durability!");
+
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
 
@@ -199,6 +204,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             uint8 weaponTrait) = weapons.getFightData(wep, charTrait);
+
+        weapons.drainDurability(wep, durabilityCostFight);
 
         _verifyFight(
             basePowerLevel,
@@ -566,6 +573,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function setStaminaCostFight(uint8 points) public restricted {
         staminaCostFight = points;
+    }
+
+    function setDurabilityCostFight(uint8 points) public restricted {
+        durabilityCostFight = points;
     }
 
     function setFightXpGain(uint256 average) public restricted {
