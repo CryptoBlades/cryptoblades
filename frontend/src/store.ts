@@ -546,7 +546,7 @@ export function createStore(web3: Web3) {
               { filter: { minter: state.defaultAccount } },
               async (err: Error, data: any) => {
                 if (err) {
-                  console.error(err);
+                  console.error(err, data);
                   return;
                 }
 
@@ -566,7 +566,7 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             state.contracts().Weapons!.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
 
@@ -584,7 +584,7 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             state.contracts().CryptoBlades!.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
 
@@ -598,7 +598,7 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             state.contracts().CryptoBlades!.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
 
@@ -614,7 +614,7 @@ export function createStore(web3: Web3) {
             subscriptions.push(
               NFTMarket.events.PurchasedListing({ filter: { seller: state.defaultAccount } }, async (err: Error, data: any) => {
                 if (err) {
-                  console.error(err);
+                  console.error(err, data);
                   return;
                 }
 
@@ -631,7 +631,7 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
 
@@ -642,7 +642,7 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             StakingRewards.events.RewardAdded(async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
 
@@ -653,7 +653,7 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             StakingRewards.events.RewardsDurationUpdated(async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
 
