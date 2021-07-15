@@ -46,9 +46,10 @@
             <img src="../../assets/earning-potential-sword.png" class="sword-right">
           </div>
           <div class="milestone-details">
-            Earn <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level)}}%</span> more per battle at<br>
+            Earn <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level, fightGasOffset, fightBaseline)}}%</span> more per battle at<br>
             <span class="milestone-lvl-text">LVL {{11}}</span>
-            <b-icon-question-circle class="milestone-hint" scale="0.95" v-tooltip.bottom="`${getMilestonesTooltip(currentCharacter.level)}`"/>
+            <b-icon-question-circle class="milestone-hint" scale="0.95"
+              v-tooltip.bottom="`${getMilestonesTooltip(currentCharacter.level,  fightGasOffset, fightBaseline)}`"/>
           </div>
         </div>
       </div>
@@ -111,6 +112,8 @@ import CharacterArt from '../CharacterArt.vue';
 import { CharacterPower, CharacterTrait } from '../../interfaces';
 import { RequiredXp } from '../../interfaces';
 import Hint from '../Hint.vue';
+import Web3 from 'web3';
+import BN from 'bignumber.js';
 
 export default {
   components: {
@@ -130,7 +133,9 @@ export default {
       'ownCharacters',
       'timeUntilCharacterHasMaxStamina',
       'getIsInCombat',
-      'getIsCharacterViewExpanded'
+      'getIsCharacterViewExpanded',
+      'fightGasOffset',
+      'fightBaseline'
     ]),
 
     isLoadingCharacter(): boolean {
@@ -167,30 +172,40 @@ export default {
       return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
     },
 
-    getNextMilestoneBonus(level: number): string {
+    getNextMilestoneBonus(level: number, fightGasOffset: number, fightRewardBaseling: number): string {
       const nextMilestoneLevel = this.getNextMilestoneLevel(level);
-      return (CharacterPower(nextMilestoneLevel) / CharacterPower(level)).toFixed(2);
-    },
-
-    getTargetMilestoneBonus(level: number, targetLevel: number): string {
-      return (CharacterPower(targetLevel) / CharacterPower(level)).toFixed(2);
+      return this.getRewardDiffBonus(level, nextMilestoneLevel, fightGasOffset, fightRewardBaseling);
     },
 
     getNextMilestoneLevel(level: number): number {
       return (Math.floor(level / 10) + 1) * 10 + 1;
     },
 
-    getMilestonesTooltip(level: number): string {
+    getMilestonesTooltip(level: number, fightGasOffset: number, fightRewardBaseling: number): string {
       const nextMilestoneLevel1 = this.getNextMilestoneLevel(level);
       const nextMilestoneLevel2 = this.getNextMilestoneLevel(nextMilestoneLevel1);
       const nextMilestoneLevel3 = this.getNextMilestoneLevel(nextMilestoneLevel2);
       const nextMilestoneLevel4 = this.getNextMilestoneLevel(nextMilestoneLevel3);
       const nextMilestoneLevel5 = this.getNextMilestoneLevel(nextMilestoneLevel4);
-      return `LVL ${nextMilestoneLevel1} = +${this.getTargetMilestoneBonus(level, nextMilestoneLevel1)}%<br/>
-      LVL ${nextMilestoneLevel2} = +${this.getTargetMilestoneBonus(level, nextMilestoneLevel2)}%<br/>
-      LVL ${nextMilestoneLevel3} = +${this.getTargetMilestoneBonus(level, nextMilestoneLevel3)}%<br/>
-      LVL ${nextMilestoneLevel4} = +${this.getTargetMilestoneBonus(level, nextMilestoneLevel4)}%<br/>
-      LVL ${nextMilestoneLevel5} = +${this.getTargetMilestoneBonus(level, nextMilestoneLevel5)}%`;
+      return `LVL ${nextMilestoneLevel1} = +${this.getRewardDiffBonus(level, nextMilestoneLevel1, fightGasOffset, fightRewardBaseling)}%<br/>
+      LVL ${nextMilestoneLevel2} = +${this.getRewardDiffBonus(level, nextMilestoneLevel2, fightGasOffset, fightRewardBaseling)}%<br/>
+      LVL ${nextMilestoneLevel3} = +${this.getRewardDiffBonus(level, nextMilestoneLevel3, fightGasOffset, fightRewardBaseling)}%<br/>
+      LVL ${nextMilestoneLevel4} = +${this.getRewardDiffBonus(level, nextMilestoneLevel4, fightGasOffset, fightRewardBaseling)}%<br/>
+      LVL ${nextMilestoneLevel5} = +${this.getRewardDiffBonus(level, nextMilestoneLevel5, fightGasOffset, fightRewardBaseling)}%`;
+    },
+
+    getAverageRewardAtLevel(level: number, fightGasOffset: number, fightRewardBaseling: number): number {
+      return this.formattedSkill(fightGasOffset) + (this.formattedSkill(fightRewardBaseling) * (CharacterPower(level)/1000));
+    },
+
+    getRewardDiffBonus(level: number, targetLevel: number, fightGasOffset: number, fightRewardBaseling: number): string {
+      return (this.getAverageRewardAtLevel(targetLevel, fightGasOffset, fightRewardBaseling) /
+        this.getAverageRewardAtLevel(level, fightGasOffset, fightRewardBaseling) * 100 - 100).toFixed(2);
+    },
+
+    formattedSkill(skill: number): number {
+      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
+      return new BN(skillBalance).toNumber();
     }
   },
 };
@@ -405,17 +420,12 @@ li.character-highlight{
 }
 
 .milestone-text {
-  white-space: nowrap;
   color: #dabf75; /* little lighter to emboss */
 }
 
 .milestone-details {
   text-align: center;
   line-height: 1;
-}
-
-.milestone-header {
-  white-space: nowrap;
 }
 
 .bonus-text {
