@@ -13,7 +13,9 @@
 
               <div class="row mt-2" v-for="(entry, pos) of leaderboard.leaderboard" :key="entry.name">
                 <div class="col-9">
-                  <strong class="mr-2 position-marker">#{{ pos + 1 }}</strong> {{ entry.name }}
+                  <strong class="mr-2 position-marker">#{{ pos + 1 }}</strong>
+                  {{ entry.name }}
+                  <b-icon v-if="matchesCharIdOrWallet(entry.name)" icon="star-fill" />
                 </div>
 
                 <div class="col-3 text-right">
@@ -29,6 +31,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 
 export default {
   data() {
@@ -45,9 +48,13 @@ export default {
   },
 
   methods: {
+    matchesCharIdOrWallet(str) {
+      return str.includes(this.defaultAcccount) || this.ownedCharacterIds.some(x => str.includes(`(ID ${x})`));
+    }
   },
 
-  components: {
+  computed: {
+    ...mapState(['defaultAccount', 'ownedCharacterIds']),
   },
 };
 </script>

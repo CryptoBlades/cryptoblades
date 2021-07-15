@@ -115,12 +115,6 @@ export default Vue.extend({
     }
   },
 
-  watch: {
-    skillBalance(balance: number, oldBalance: number) {
-      console.log('BALANCE CHANGE:', balance, oldBalance, balance - oldBalance);
-    }
-  },
-
   components: {
   }
 });

@@ -453,8 +453,6 @@ export default {
     loadingFinished() {
       this.renderer.render(this.scene, this.camera);
       this.allLoaded = true;
-
-      //console.log( this.character.id + ' >> Finished applying stuff');
     },
     animate() {
       requestAnimationFrame(this.animate);
@@ -465,7 +463,6 @@ export default {
     },
 
     async fetchScore() {
-      console.log('rpre');
       try {
         const scoreData = await fetch(`https://cryptoblades-api.herokuapp.com/static/character/score/${this.character.id}`);
         const { score } = await scoreData.json();
