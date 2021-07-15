@@ -175,12 +175,6 @@ export default Vue.extend({
         (this.$refs['claim-confirmation-modal'] as any).show();
       }
     }
-  },
-
-  watch: {
-    skillRewards(balance: number, oldBalance: number) {
-      console.log('REWARD SKILL CHANGE:', balance, oldBalance, balance - oldBalance);
-    }
   }
 });
 </script>

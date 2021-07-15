@@ -541,8 +541,6 @@ export function createStore(web3: Web3) {
         const subscriptions: IWeb3EventSubscription[] = [];
 
         if (!featureFlagStakeOnly) {
-          console.log('setting up events for:', state.defaultAccount);
-
           subscriptions.push(
             state.contracts().Characters!.events.NewCharacter(
               { filter: { minter: state.defaultAccount } },
@@ -551,8 +549,6 @@ export function createStore(web3: Web3) {
                   console.error(err);
                   return;
                 }
-
-                console.log('NewCharacter', data);
 
                 const characterId = data.returnValues.character;
 
@@ -574,8 +570,6 @@ export function createStore(web3: Web3) {
                 return;
               }
 
-              console.log('NewWeapon', data);
-
               const weaponId = data.returnValues.weapon;
 
               commit('addNewOwnedWeaponId', weaponId);
@@ -594,8 +588,6 @@ export function createStore(web3: Web3) {
                 return;
               }
 
-              console.log('FightOutcome', data);
-
               await Promise.all([
                 dispatch('fetchCharacter', data.returnValues.character),
                 dispatch('fetchSkillBalance')
@@ -609,8 +601,6 @@ export function createStore(web3: Web3) {
                 console.error(err);
                 return;
               }
-
-              console.log('InGameOnlyFundsGiven', data);
 
               await Promise.all([
                 dispatch('fetchInGameOnlyFunds')
@@ -627,8 +617,6 @@ export function createStore(web3: Web3) {
                   console.error(err);
                   return;
                 }
-
-                console.log('PurchasedListing', data);
 
                 await dispatch('fetchSkillBalance');
               })
@@ -647,8 +635,6 @@ export function createStore(web3: Web3) {
                 return;
               }
 
-              console.log('RewardPaid', data);
-
               await dispatch('fetchStakeDetails', { stakeType });
             })
           );
@@ -659,8 +645,6 @@ export function createStore(web3: Web3) {
                 console.error(err);
                 return;
               }
-
-              console.log('RewardAdded', data);
 
               await dispatch('fetchStakeDetails', { stakeType });
             })
@@ -673,8 +657,6 @@ export function createStore(web3: Web3) {
                 return;
               }
 
-              console.log('RewardsDurationUpdated', data);
-
               await dispatch('fetchStakeDetails', { stakeType });
             })
           );
@@ -684,7 +666,6 @@ export function createStore(web3: Web3) {
         for(const stakeType of Object.keys(staking).filter(isStakeType)) {
           const stakingEntry = staking[stakeType]!;
 
-          console.log('setting up events for staking rewards type', stakeType);
           setupStakingEvents(stakeType, stakingEntry.StakingRewards);
         }
 
@@ -1115,8 +1096,6 @@ export function createStore(web3: Web3) {
           StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
-
-        console.log('fetched data for', stakeType, StakingRewards.options.address, StakingToken.options.address);
 
         const stakeData: { stakeType: StakeType } & IStakeState = {
           stakeType,
