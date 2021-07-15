@@ -38,6 +38,19 @@
               <br>Level 21: 3600" />
           </span>
         </div>
+
+        <div class="character-earning-potential dark-bg-text" v-if="!isLoadingCharacter">
+          <div class="milestone-header">
+            <img src="../../assets/earning-potential-sword.png" class="sword-left">
+            <span class="milestone-text">Next Milestone</span>
+            <img src="../../assets/earning-potential-sword.png" class="sword-right">
+          </div>
+          <div class="milestone-details">
+            Earn <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level)}}%</span> more per battle at<br>
+            <span class="milestone-lvl-text">LVL {{11}}</span>
+            <b-icon-question-circle class="milestone-hint" scale="0.95" v-tooltip.bottom="`${getMilestonesTooltip(currentCharacter.level)}`"/>
+          </div>
+        </div>
       </div>
     </transition>
 
@@ -153,6 +166,32 @@ export default {
     toolTipHtml(time: string): string {
       return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
     },
+
+    getNextMilestoneBonus(level: number): string {
+      const nextMilestoneLevel = this.getNextMilestoneLevel(level);
+      return (CharacterPower(nextMilestoneLevel) / CharacterPower(level)).toFixed(2);
+    },
+
+    getTargetMilestoneBonus(level: number, targetLevel: number): string {
+      return (CharacterPower(targetLevel) / CharacterPower(level)).toFixed(2);
+    },
+
+    getNextMilestoneLevel(level: number): number {
+      return (Math.floor(level / 10) + 1) * 10 + 1;
+    },
+
+    getMilestonesTooltip(level: number): string {
+      const nextMilestoneLevel1 = this.getNextMilestoneLevel(level);
+      const nextMilestoneLevel2 = this.getNextMilestoneLevel(nextMilestoneLevel1);
+      const nextMilestoneLevel3 = this.getNextMilestoneLevel(nextMilestoneLevel2);
+      const nextMilestoneLevel4 = this.getNextMilestoneLevel(nextMilestoneLevel3);
+      const nextMilestoneLevel5 = this.getNextMilestoneLevel(nextMilestoneLevel4);
+      return `LVL ${nextMilestoneLevel1} = +${this.getTargetMilestoneBonus(level, nextMilestoneLevel1)}%<br/>
+      LVL ${nextMilestoneLevel2} = +${this.getTargetMilestoneBonus(level, nextMilestoneLevel2)}%<br/>
+      LVL ${nextMilestoneLevel3} = +${this.getTargetMilestoneBonus(level, nextMilestoneLevel3)}%<br/>
+      LVL ${nextMilestoneLevel4} = +${this.getTargetMilestoneBonus(level, nextMilestoneLevel4)}%<br/>
+      LVL ${nextMilestoneLevel5} = +${this.getTargetMilestoneBonus(level, nextMilestoneLevel5)}%`;
+    }
   },
 };
 </script>
@@ -342,4 +381,55 @@ li.character-highlight{
   overflow: hidden;
   opacity: 0;
 }
+
+.sword-left {
+  position: relative;
+  margin-right: 5px;
+  width: 5em;
+  pointer-events: none;
+}
+
+.sword-right {
+  transform: scaleX(-1);
+  margin-left: 5px;
+  position: relative;
+  width: 5em;
+  pointer-events: none;
+}
+
+.character-earning-potential {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.milestone-text {
+  white-space: nowrap;
+  color: #dabf75; /* little lighter to emboss */
+}
+
+.milestone-details {
+  text-align: center;
+  line-height: 1;
+}
+
+.milestone-header {
+  white-space: nowrap;
+}
+
+.bonus-text {
+  color: green;
+}
+
+.milestone-lvl-text {
+  color: rgb(236, 75, 75);
+}
+
+.milestone-hint {
+  margin-top: 5px;
+  margin-left: 5px;
+  align-self: center;
+}
+
 </style>
