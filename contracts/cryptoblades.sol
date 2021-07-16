@@ -76,6 +76,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         stakeFromGameImpl = _stakeFromGame;
     }
 
+    function migrateTo_7dd2a56() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        // numbers given for the curves were $4.3-aligned so they need to be multiplied
+        // additional accuracy may be in order for the setter functions for these
+        fightRewardGasOffset = ABDKMath64x64.divu(23177, 100000); // 0.0539 x 4.3
+        fightRewardBaseline = ABDKMath64x64.divu(344, 1000); // 0.08 x 4.3
+    }
+
     // config vars
     uint characterLimit;
     uint8 staminaCostFight;
@@ -284,13 +293,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getTokenGainForFight(uint24 monsterPower) internal view returns (int128) {
-        return ABDKMath64x64.add(
-            // Performance optimization: 1000 = getPowerAtLevel(0)
-            ABDKMath64x64.divu(monsterPower, 1000).mul(fightRewardBaseline),
-            fightRewardGasOffset
+        return fightRewardGasOffset.add(
+            fightRewardBaseline.mul(
+                ABDKMath64x64.sqrt(
+                    // Performance optimization: 1000 = getPowerAtLevel(0)
+                    ABDKMath64x64.divu(monsterPower, 1000)
+                )
+            )
         );
     }
-
+    
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
         return uint16(ABDKMath64x64.divu(monsterPower, playerPower).mulu(fightXpGain));
     }
