@@ -47,9 +47,10 @@
           </div>
           <div class="milestone-details">
             Earn <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level, fightGasOffset, fightBaseline)}}%</span> more per battle at<br>
-            <span class="milestone-lvl-text">LVL {{11}}</span>
-            <b-icon-question-circle class="milestone-hint" scale="0.95"
-              v-tooltip.bottom="`${getMilestonesTooltip(currentCharacter.level,  fightGasOffset, fightBaseline)}`"/>
+            <div class="calculator-icon-div">
+              <span class="milestone-lvl-text">LVL {{11}}</span>
+              <earnings-calculator/>
+            </div>
           </div>
         </div>
       </div>
@@ -110,16 +111,19 @@ import { getCharacterArt } from '../../character-arts-placeholder';
 import SmallBar from '../SmallBar.vue';
 import CharacterArt from '../CharacterArt.vue';
 import { CharacterPower, CharacterTrait } from '../../interfaces';
+import EarningsCalculator from './EarningsCalculator.vue';
 import { RequiredXp } from '../../interfaces';
 import Hint from '../Hint.vue';
 import Web3 from 'web3';
 import BN from 'bignumber.js';
+import Vue from 'vue';
 
-export default {
+export default Vue.extend({
   components: {
     CharacterArt,
     SmallBar,
     Hint,
+    EarningsCalculator,
   },
 
   computed: {
@@ -151,7 +155,7 @@ export default {
   data() {
     return {
       traits: CharacterTrait,
-      isPlaza : false
+      isPlaza : false,
     };
   },
   methods: {
@@ -206,9 +210,9 @@ export default {
     formattedSkill(skill: number): number {
       const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
       return new BN(skillBalance).toNumber();
-    }
+    },
   },
-};
+});
 </script>
 
 <style scoped>
@@ -436,10 +440,8 @@ li.character-highlight{
   color: rgb(236, 75, 75);
 }
 
-.milestone-hint {
-  margin-top: 5px;
-  margin-left: 5px;
-  align-self: center;
+.calculator-icon-div {
+  display: inline-flex;
+  margin-top: 6px;
 }
-
 </style>
