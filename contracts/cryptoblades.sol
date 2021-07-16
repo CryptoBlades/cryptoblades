@@ -663,7 +663,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getTotalSkillOwnedBy(address wallet) public view returns (uint256) {
-        return getTokenRewardsFor(wallet) + skillToken.balanceOf(wallet);
+        return inGameOnlyFunds[wallet] + getTokenRewardsFor(wallet) + skillToken.balanceOf(wallet);
     }
 
     function _getRewardsClaimTax(address playerAddress) internal view returns (int128) {
