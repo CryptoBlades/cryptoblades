@@ -383,14 +383,14 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         uint8 stars = getStarsFromProperties(burning.properties);
         if(stars == 0) { // 1 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 10) ? 2 : 1)
+            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 50) ? 2 : 1)
                 .add(wbp.lowStarBurnPoints));
             if(wbp.lowStarBurnPoints > 100)
                 wbp.lowStarBurnPoints = 100;
         }
         else if(stars == 1) { // 2 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 30) ? 4 : 2)
+            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 50) ? 4 : 2)
                 .add(wbp.lowStarBurnPoints));
             if(wbp.lowStarBurnPoints > 100)
                 wbp.lowStarBurnPoints = 100;
