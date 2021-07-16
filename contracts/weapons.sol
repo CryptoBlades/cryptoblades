@@ -6,17 +6,13 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./util.sol";
-import "./interfaces/ITransferCooldownable.sol";
 
-contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, ITransferCooldownable {
+contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint16;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
-    bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
-
-    uint256 public constant TRANSFER_COOLDOWN = 1 days;
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades weapon", "CBW");
@@ -45,8 +41,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
 
     function migrateTo_951a020() public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-
-        _registerInterface(TransferCooldownableInterfaceId.interfaceId());
     }
 
     /*
@@ -95,31 +89,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
     int128 public powerMultPerPointPWR; // 0.2575% (+3%)
     int128 public powerMultPerPointMatching; // 0.2675% (+7%)
 
-    mapping(uint256 => uint256) public override lastTransferTimestamp;
-
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
         _;
-    }
-
-    function __ITransferCooldownable_interfaceId() external pure returns (bytes4) {
-        return TransferCooldownableInterfaceId.interfaceId();
-    }
-
-    function transferCooldownEnd(uint256 tokenId) public override view returns (uint256) {
-        return lastTransferTimestamp[tokenId].add(TRANSFER_COOLDOWN);
-    }
-
-    function transferCooldownLeft(uint256 tokenId) public override view returns (uint256) {
-        (bool success, uint256 secondsLeft) =
-            lastTransferTimestamp[tokenId].trySub(
-                block.timestamp.sub(TRANSFER_COOLDOWN)
-            );
-
-        return success ? secondsLeft : 0;
     }
 
     function getStats(uint256 id) internal view
@@ -481,18 +456,4 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
     function setFiveStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
         fiveStarBurnPowerPerPoint = powerPerBurnPoint;
     }
-
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
-        // when not minting or burning...
-        if(from != address(0) && to != address(0)) {
-            // only allow transferring a particular token every TRANSFER_COOLDOWN seconds
-            require(lastTransferTimestamp[tokenId] < block.timestamp.sub(TRANSFER_COOLDOWN), "Transfer cooldown");
-
-            if(!hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to)) {
-                lastTransferTimestamp[tokenId] = block.timestamp;
-            }
-        }
-    }
-
 }
-
