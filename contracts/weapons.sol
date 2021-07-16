@@ -385,26 +385,19 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         uint carriedFourStarBurnPoints = (burningbp.fourStarBurnPoints + 1) / 2;
         uint carriedFiveStarBurnPoints = (burningbp.fiveStarBurnPoints + 1) / 2;
 
-        if(getStarsFromProperties(burning.properties) == 0) { // 1 star
+        uint8 stars = getStarsFromProperties(burning.properties);
+        if(stars < 3) { // 1-3 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 10) ? 2 : 1)
+            uint8 burnValue = stars + 1;
+            burnValue *= (wbp.lowStarBurnPoints < 50) ? 2 : 1;
+            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul(burnValue)
                 .add(wbp.lowStarBurnPoints));
         }
-        else if(getStarsFromProperties(burning.properties) == 1) { // 2 star
-            require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 30) ? 2 : 1)
-                .add(wbp.lowStarBurnPoints));
-        }
-        else if(getStarsFromProperties(burning.properties) == 2) { // 3 star
-            require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 50) ? 4 : 2)
-                .add(wbp.lowStarBurnPoints));
-        }
-        else if(getStarsFromProperties(burning.properties) == 3) { // 4 star
+        else if(stars == 3) { // 4 star
             require(wbp.fourStarBurnPoints < 25, "Four star burn points are capped");
             wbp.fourStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fourStarBurnPoints));
         }
-        else if(getStarsFromProperties(burning.properties) == 4) { // 5 star
+        else if(stars == 4) { // 5 star
             require(wbp.fiveStarBurnPoints < 10, "Five star burn points are capped");
             wbp.fiveStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fiveStarBurnPoints));
         }
