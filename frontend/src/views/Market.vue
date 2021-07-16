@@ -2,7 +2,7 @@
   <div class="body main-font">
 
     <b-tabs justified>
-      <b-tab @click="clearData()">
+      <b-tab @click="clearData();browseTabActive = true">
         <template #title>
           Browse NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -15,13 +15,13 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchAllListingsByType('character')"  class="gtag-link-others" tagname="browse_characters">Browse Characters</b-button>
+                  @click="searchAllCharacterListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_characters">Browse Characters</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchAllListingsByType('weapon')"  class="gtag-link-others" tagname="browse_weapons">Browse Weapons</b-button>
+                  @click="searchAllWeaponListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_weapons">Browse Weapons</b-button>
               </div>
 
               <div class="col">
@@ -35,11 +35,23 @@
             </div>
 
             <div class="search-results">
+              <b-pagination class="customPagination"
+                v-visible="allSearchResults && allSearchResults.length > 0"
+                align="center" v-model="currentPage"
+                :total-rows="allListingsAmount"
+                :per-page="activeType === 'weapon' ? weaponShowLimit : characterShowLimit"
+                first-number
+                last-number
+                v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
+                  searchAllCharacterListings(currentPage - 1)"
+              ></b-pagination>
+
               <weapon-grid
+                v-on:weapon-filters-changed="searchAllWeaponListings(0)"
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :weaponIds="allSearchResults"
-                :showLimit="60"
+                :showLimit="weaponShowLimit"
                 :showReforgedToggle="false"
                 :canFavorite="false"
                 v-model="selectedNftId">
@@ -54,11 +66,12 @@
               </weapon-grid>
 
               <character-list
+                v-on:character-filters-changed="searchAllCharacterListings(0)"
                 v-if="activeType === 'character'"
                 :showFilters="true"
                 :showGivenCharacterIds="true"
                 :characterIds="allSearchResults"
-                :showLimit="40"
+                :showLimit="characterShowLimit"
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
@@ -69,6 +82,17 @@
                 </template>
 
               </character-list>
+
+              <b-pagination class="customPagination"
+                v-if="allSearchResults && allSearchResults.length > 0"
+                align="center" v-model="currentPage"
+                :total-rows="allListingsAmount"
+                :per-page="activeType === 'weapon' ? weaponShowLimit : characterShowLimit"
+                first-number
+                last-number
+                v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
+                  searchAllCharacterListings(currentPage - 1)"
+              ></b-pagination>
             </div>
 
           </div>
@@ -86,7 +110,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData()">
+      <b-tab @click="clearData(),browseTabActive = false">
         <template #title>
           Search NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -215,7 +239,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData();loadMarketTaxes()">
+      <b-tab @click="clearData();loadMarketTaxes();browseTabActive = false">
         <template #title>
           List NFTs
           <hint class="hint" text="When you list an NFT for sale, it is transferred to the<br>market until someone buys it or you cancel the sale" />
@@ -307,6 +331,7 @@ import { Accessors } from 'vue/types/options';
 import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons } from '../../../build/abi-interfaces';
 import BigNumber from 'bignumber.js';
+import { traitNameToNumber } from '@/contract-models';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -324,10 +349,16 @@ interface Data {
   waitingMarketOutcome: boolean;
   nftPricesById: Record<string, string>;
   characterMarketTax: string;
-  weaponMarketTax: string ;
+  weaponMarketTax: string ;  characterShowLimit: number;
+  weaponShowLimit: number;
+  allListingsAmount: number;
+  currentPage: number;
+  browseTabActive: boolean;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
+
+const defaultLimit = 40;
 
 interface StoreMappedGetters {
   contracts: Contracts;
@@ -335,6 +366,12 @@ interface StoreMappedGetters {
 
 interface StoreMappedActions {
   fetchAllMarketNftIds(payload: { nftContractAddr: string }): Promise<string[]>;
+  fetchAllMarketCharacterNftIdsPage(payload: {
+    nftContractAddr: string, limit: number, pageNumber: number, trait: number, minLevel: number, maxLevel: number
+  }): Promise<string[]>;
+  fetchAllMarketWeaponNftIdsPage(payload: { nftContractAddr: string, limit: number, pageNumber: number, trait: number, stars: number }): Promise<string[]>;
+  fetchNumberOfWeaponListings(payload: { nftContractAddr: string, trait: number, stars: number }): Promise<number>;
+  fetchNumberOfCharacterListings(payload: { nftContractAddr: string, trait: number, minLevel: number, maxLevel: number}): Promise<number>;
   fetchMarketNftIdsBySeller(payload: { nftContractAddr: string, sellerAddr: string }): Promise<string[]>;
   fetchMarketNftPrice(payload: { nftContractAddr: string, tokenId: string | number }): Promise<string>;
   fetchMarketTax(payload: { nftContractAddr: string }): Promise<string>;
@@ -364,6 +401,11 @@ export default Vue.extend({
       nftPricesById: {},
       characterMarketTax: '',
       weaponMarketTax: '',
+      characterShowLimit: 40,
+      weaponShowLimit: 60,
+      allListingsAmount: 0,
+      currentPage: 1,
+      browseTabActive: true
     } as Data;
   },
 
@@ -409,12 +451,16 @@ export default Vue.extend({
       && (this.activeType === 'weapon'
         ? (this.transferCooldownOfWeaponId(+this.selectedNftId) > 0)
         : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
-    }
+    },
   },
 
   methods: {
     ...(mapActions([
       'fetchAllMarketNftIds',
+      'fetchAllMarketCharacterNftIdsPage',
+      'fetchAllMarketWeaponNftIdsPage',
+      'fetchNumberOfWeaponListings',
+      'fetchNumberOfCharacterListings',
       'fetchMarketNftIdsBySeller',
       'fetchMarketNftPrice',
       'fetchMarketTax',
@@ -436,6 +482,8 @@ export default Vue.extend({
       this.marketOutcome = null;
       this.waitingMarketOutcome = false;
       this.nftPricesById = {};
+      this.allListingsAmount = 0;
+      this.currentPage = 1;
     },
 
     async loadMarketTaxes() {
@@ -587,13 +635,53 @@ export default Vue.extend({
       await this.searchOwnListings(this.activeType);
     },
 
-    async searchAllListingsByType(type: SellType) {
-      this.activeType = type;
+    async searchAllCharacterListings(page: number) {
+      this.activeType = 'character';
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
+      this.allListingsAmount = await this.fetchNumberOfCharacterListings({
+        nftContractAddr: this.contractAddress,
+        trait: this.characterTraitFilter(),
+        minLevel: this.characterMinLevelFilter(),
+        maxLevel: this.characterMaxLevelFilter()
+      });
 
-      const results = await this.fetchAllMarketNftIds({
-        nftContractAddr: this.contractAddress
+      const results = await this.fetchAllMarketCharacterNftIdsPage({
+        nftContractAddr: this.contractAddress,
+        limit: this.characterShowLimit || defaultLimit,
+        pageNumber: page,
+        trait: this.characterTraitFilter(),
+        minLevel: this.characterMinLevelFilter(),
+        maxLevel: this.characterMaxLevelFilter()
+      });
+
+      // searchResultsOwned does not mesh with this function
+      // will need per-result checking of it, OR filtering out own NFTs
+      //this.searchResultsOwned = nftSeller === this.defaultAccount;
+      this.searchResultsOwned = false; // temp
+      this.allSearchResults = results;
+      console.log(this.allSearchResults.length);
+
+      this.waitingMarketOutcome = false;
+      this.marketOutcome = null;
+    },
+
+    async searchAllWeaponListings(page: number) {
+      this.activeType = 'weapon';
+      this.marketOutcome = null;
+      this.waitingMarketOutcome = true;
+      this.allListingsAmount = await this.fetchNumberOfWeaponListings({
+        nftContractAddr: this.contractAddress,
+        trait: this.weaponTratFilter(),
+        stars: this.weaponStarFilter()
+      });
+
+      const results = await this.fetchAllMarketWeaponNftIdsPage({
+        nftContractAddr: this.contractAddress,
+        limit: this.weaponShowLimit || defaultLimit,
+        pageNumber: page,
+        trait: this.weaponTratFilter(),
+        stars: this.weaponStarFilter()
       });
 
       // searchResultsOwned does not mesh with this function
@@ -682,6 +770,27 @@ export default Vue.extend({
         'ether'
       );
     },
+
+    characterMinLevelFilter(): number {
+      return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) - 1 : 255;
+    },
+
+    characterMaxLevelFilter(): number {
+      return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) + 8 : 255;
+    },
+
+    characterTraitFilter(): number {
+      return traitNameToNumber(localStorage.getItem('character-elementfilter') as string);
+    },
+
+    weaponTratFilter(): number {
+      return traitNameToNumber(localStorage.getItem('weapon-elementfilter') as string);
+    },
+
+    weaponStarFilter(): number {
+      return localStorage.getItem('weapon-starfilter') ? +(localStorage.getItem('weapon-starfilter') as string) - 1 : 255;
+    },
+
     convertStringToDecimal(val: string, maxDecimals: number) {
       return new BigNumber(val).toFixed(maxDecimals);
     }

@@ -1,9 +1,5 @@
 <template>
   <div>
-    <span v-if="showFilters && showLimit > 0 && filteredCharacters.length >= showLimit">
-      <h4>More than {{showLimit}} results, try adjusting the filters</h4>
-    </span>
-
     <div class="filters row mt-2 pl-2" v-if="showFilters">
       <div class="col-2">
         <strong>Level</strong>
@@ -139,6 +135,7 @@ export default {
     saveFilters() {
       localStorage.setItem('character-levelfilter', this.levelFilter);
       localStorage.setItem('character-elementfilter', this.elementFilter);
+      this.$emit('character-filters-changed');
     }
   },
 
