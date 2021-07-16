@@ -103,7 +103,7 @@
           </div>
           <div class="text-center" :hidden="burnWeaponId == null || !isWeaponReforged()">
             <b-icon icon="exclamation-circle" variant="danger" />
-            This item has been previously reforged and LBs will not carry over!
+            This item has been previously reforged and only half of each LBs will carry over!
           </div>
         </b-modal>
 

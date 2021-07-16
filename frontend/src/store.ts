@@ -1228,6 +1228,66 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async fetchNumberOfWeaponListings({ state }, { nftContractAddr, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns an array of bignumbers (these are nft IDs)
+        return await NFTMarket.methods
+          .getNumberOfWeaponListings(
+            nftContractAddr,
+            trait,
+            stars
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchNumberOfCharacterListings({ state }, { nftContractAddr, trait, minLevel, maxLevel }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns an array of bignumbers (these are nft IDs)
+        return await NFTMarket.methods
+          .getNumberOfCharacterListings(
+            nftContractAddr,
+            trait,
+            minLevel,
+            maxLevel
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchAllMarketCharacterNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, minLevel, maxLevel }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        return await NFTMarket.methods
+          .getCharacterListingIDsPage(
+            nftContractAddr,
+            limit,
+            pageNumber,
+            trait,
+            minLevel,
+            maxLevel
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchAllMarketWeaponNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        return await NFTMarket.methods
+          .getWeaponListingIDsPage(
+            nftContractAddr,
+            limit,
+            pageNumber,
+            trait,
+            stars
+          )
+          .call(defaultCallOptions(state));
+      },
+
       async fetchMarketNftIdsBySeller({ state }, { nftContractAddr, sellerAddr }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
