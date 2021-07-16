@@ -83,6 +83,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     int128 public mintCharacterFee;
     //int128 public rerollTraitFee;
     //int128 public rerollCosmeticsFee;
+    int128 public refillStaminaFee;
     // lvl 1 player power could be anywhere between ~909 to 1666
     // cents per fight multiplied by monster power divided by 1000 (lv1 power)
     int128 public fightRewardBaseline;
