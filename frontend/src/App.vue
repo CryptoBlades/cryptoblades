@@ -60,12 +60,16 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
 import _ from 'lodash';
+import Vue from 'vue';
 import Events from './events';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+
+Vue.directive('visible', (el, bind) => {
+  el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
 
 export default {
   inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
@@ -528,6 +532,23 @@ button.close {
   border-color: #9e8a57 !important;
 }
 
+.b-pagination > li > .page-link{
+  color:#9e8a57;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  border-color: #9e8a576e;
+}
+
+.b-pagination > .page-item.active > .page-link {
+  color: #9e8a57;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  border-color: #9e8a57;
+}
+
+.b-pagination > .page-item.disabled > .page-link {
+  color: #b3b0a72a;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  border-color: #9e8a576e;
+}
 .nav-tabs {
   border-bottom: 2px solid #9e8a57 !important;
 }
