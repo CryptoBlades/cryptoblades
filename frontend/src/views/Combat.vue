@@ -17,6 +17,8 @@
 
           <div class="message-box" v-if="currentCharacter && currentCharacterStamina < 40">You need 40 stamina to do battle.</div>
 
+          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurabilit(selectedWeaponId)">This weapon does not have enoguh durability.</div>
+
           <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">You cannot do battle during the last 30 seconds of the hour. Stand fast!</div>
         </div>
       </div>
@@ -61,7 +63,8 @@
                   <div class="combat-hints">
                     <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
                     <span class="fire-icon" />
-
+           <!-- && weaponHasDurabilit(selectedWeaponId) needs to be added below to block fights, but breaks the selected weapon icon if it returns false
+                meaning if weapon has no durability left -->
                     <Hint
                       text="The elements affect power:<br>
                       <br>Character vs Enemy: bonus or penalty as shown above
@@ -168,6 +171,7 @@ export default {
       'ownWeapons',
       'currentCharacter',
       'currentCharacterStamina',
+      'getWeaponDurability',
       'fightGasOffset',
       'fightBaseline'
     ]),
@@ -208,6 +212,9 @@ export default {
     ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
+    weaponHasDurabilit(id) {
+      return this.getWeaponDurability(id) > 0;
+    },
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
     },
