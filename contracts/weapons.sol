@@ -381,23 +381,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         Weapon storage burning = tokens[burnID];
 
         uint8 stars = getStarsFromProperties(burning.properties);
-        if(stars == 0) { // 1 star
+        if(stars < 3) { // 1-3 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 50) ? 2 : 1)
-                .add(wbp.lowStarBurnPoints));
-            if(wbp.lowStarBurnPoints > 100)
-                wbp.lowStarBurnPoints = 100;
-        }
-        else if(stars == 1) { // 2 star
-            require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 50) ? 4 : 2)
-                .add(wbp.lowStarBurnPoints));
-            if(wbp.lowStarBurnPoints > 100)
-                wbp.lowStarBurnPoints = 100;
-        }
-        else if(stars == 2) { // 3 star
-            require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 50) ? 6 : 3)
+            uint8 burnValue = stars + 1;
+            burnValue *= (wbp.lowStarBurnPoints < 50) ? 2 : 1;
+            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul(burnValue)
                 .add(wbp.lowStarBurnPoints));
             if(wbp.lowStarBurnPoints > 100)
                 wbp.lowStarBurnPoints = 100;
