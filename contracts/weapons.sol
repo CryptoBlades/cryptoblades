@@ -13,6 +13,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     using ABDKMath64x64 for uint16;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+    bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades weapon", "CBW");
@@ -88,6 +89,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     int128 public powerMultPerPointBasic; // 0.25%
     int128 public powerMultPerPointPWR; // 0.2575% (+3%)
     int128 public powerMultPerPointMatching; // 0.2675% (+7%)
+
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
+    mapping(uint256 => uint256) public lastTransferTimestamp;
 
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
