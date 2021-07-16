@@ -44,7 +44,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         characterLimit = 4;
         staminaCostFight = 40;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
-        refillStaminaFee = ABDKMath64x64.divu(5, 1);//5 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
         fightRewardGasOffset = ABDKMath64x64.divu(8, 10);//0.8 usd;
         mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
@@ -419,17 +418,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         weapons.mint(msg.sender, seed);
     }
 
-    function fillStamina(uint256 character) public doesNotHaveMoreThanMaxCharacters isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
-        require(characters.isStaminaFull(character) == false, "Your stamina is already full!");
-        _payContract(msg.sender, refillStaminaFee);
-        characters.setStaminaTimestamp(character,
-            uint64(
-                characters.getStaminaTimestamp(character)
-                    .sub(characters.getStaminaMaxWait())
-            )
-        );
-    }
-
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
             doesNotHaveMoreThanMaxCharacters
             isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
@@ -558,10 +546,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function setCharacterMintValue(uint256 cents) public restricted {
         mintCharacterFee = ABDKMath64x64.divu(cents, 100);
-    }
-
-    function setRefillStaminaValue(uint256 cents) public restricted {
-        refillStaminaFee = ABDKMath64x64.divu(cents, 100);
     }
 
     function setFightRewardBaselineValue(uint256 tenthcents) public restricted {
