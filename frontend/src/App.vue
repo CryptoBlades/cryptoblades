@@ -132,6 +132,7 @@ export default {
       'pollAccountsAndNetwork',
       'fetchWeaponTransferCooldownForOwnWeapons',
       'fetchCharacterTransferCooldownForOwnCharacters',
+      'setupWeaponDurabilities',
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
@@ -378,6 +379,7 @@ export default {
       await Promise.all([
         this.fetchCharacterTransferCooldownForOwnCharacters(),
         this.fetchWeaponTransferCooldownForOwnWeapons(),
+        this.setupWeaponDurabilities(),
         this.fetchWaxBridgeDetails(),
         this.fetchRewardsClaimTax(),
       ]);
