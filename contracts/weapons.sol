@@ -380,34 +380,35 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         WeaponBurnPoints storage wbp = burnPoints[reforgeID];
         Weapon storage burning = tokens[burnID];
 
-        if(getStarsFromProperties(burning.properties) == 0) { // 1 star
+        uint8 stars = getStarsFromProperties(burning.properties);
+        if(stars == 0) { // 1 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
             wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 10) ? 2 : 1)
                 .add(wbp.lowStarBurnPoints));
             if(wbp.lowStarBurnPoints > 100)
                 wbp.lowStarBurnPoints = 100;
         }
-        else if(getStarsFromProperties(burning.properties) == 1) { // 2 star
+        else if(stars == 1) { // 2 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
             wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 30) ? 2 : 1)
                 .add(wbp.lowStarBurnPoints));
             if(wbp.lowStarBurnPoints > 100)
                 wbp.lowStarBurnPoints = 100;
         }
-        else if(getStarsFromProperties(burning.properties) == 2) { // 3 star
+        else if(stars == 2) { // 3 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
             wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 50) ? 4 : 2)
                 .add(wbp.lowStarBurnPoints));
             if(wbp.lowStarBurnPoints > 100)
                 wbp.lowStarBurnPoints = 100;
         }
-        else if(getStarsFromProperties(burning.properties) == 3) { // 4 star
+        else if(stars == 3) { // 4 star
             require(wbp.fourStarBurnPoints < 25, "Four star burn points are capped");
             wbp.fourStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fourStarBurnPoints));
             if(wbp.fourStarBurnPoints > 25)
                 wbp.fourStarBurnPoints = 25;
         }
-        else if(getStarsFromProperties(burning.properties) == 4) { // 5 star
+        else if(stars == 4) { // 5 star
             require(wbp.fiveStarBurnPoints < 10, "Five star burn points are capped");
             wbp.fiveStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fiveStarBurnPoints));
             if(wbp.fiveStarBurnPoints > 10)
