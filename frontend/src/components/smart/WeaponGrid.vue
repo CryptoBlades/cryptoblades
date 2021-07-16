@@ -202,6 +202,7 @@ export default Vue.extend({
     saveFilters() {
       sessionStorage.setItem('weapon-starfilter', this.starFilter);
       sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
+      this.$emit('weapon-filters-changed');
     },
 
     toggleFavorite(e: Event, weaponId: number) {

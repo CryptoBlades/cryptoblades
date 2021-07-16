@@ -6,12 +6,12 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 abstract contract FailsafeUpgradeable is Initializable, OwnableUpgradeable {
     bool public failsafeModeActive;
 
-    function __Failsafe_init() public initializer {
+    function __Failsafe_init() internal initializer {
         __Ownable_init();
         __Failsafe_init_unchained();
     }
 
-    function __Failsafe_init_unchained() public initializer {
+    function __Failsafe_init_unchained() internal initializer {
         failsafeModeActive = false;
     }
 

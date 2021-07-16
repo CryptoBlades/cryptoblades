@@ -378,41 +378,48 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
 
     function reforge(uint256 reforgeID, uint256 burnID) public restricted {
         WeaponBurnPoints storage wbp = burnPoints[reforgeID];
+        WeaponBurnPoints storage burningbp = burnPoints[burnID];
         Weapon storage burning = tokens[burnID];
+
+        uint carriedLowStarBurnPoints = (burningbp.lowStarBurnPoints + 1) / 2;
+        uint carriedFourStarBurnPoints = (burningbp.fourStarBurnPoints + 1) / 2;
+        uint carriedFiveStarBurnPoints = (burningbp.fiveStarBurnPoints + 1) / 2;
 
         if(getStarsFromProperties(burning.properties) == 0) { // 1 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
             wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 10) ? 2 : 1)
                 .add(wbp.lowStarBurnPoints));
-            if(wbp.lowStarBurnPoints > 100)
-                wbp.lowStarBurnPoints = 100;
         }
         else if(getStarsFromProperties(burning.properties) == 1) { // 2 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
             wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 30) ? 2 : 1)
                 .add(wbp.lowStarBurnPoints));
-            if(wbp.lowStarBurnPoints > 100)
-                wbp.lowStarBurnPoints = 100;
         }
         else if(getStarsFromProperties(burning.properties) == 2) { // 3 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
             wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul((wbp.lowStarBurnPoints < 50) ? 4 : 2)
                 .add(wbp.lowStarBurnPoints));
-            if(wbp.lowStarBurnPoints > 100)
-                wbp.lowStarBurnPoints = 100;
         }
         else if(getStarsFromProperties(burning.properties) == 3) { // 4 star
             require(wbp.fourStarBurnPoints < 25, "Four star burn points are capped");
             wbp.fourStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fourStarBurnPoints));
-            if(wbp.fourStarBurnPoints > 25)
-                wbp.fourStarBurnPoints = 25;
         }
         else if(getStarsFromProperties(burning.properties) == 4) { // 5 star
             require(wbp.fiveStarBurnPoints < 10, "Five star burn points are capped");
             wbp.fiveStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fiveStarBurnPoints));
-            if(wbp.fiveStarBurnPoints > 10)
-                wbp.fiveStarBurnPoints = 10;
         }
+
+        wbp.lowStarBurnPoints = uint8(carriedLowStarBurnPoints.add(wbp.lowStarBurnPoints));
+        wbp.fourStarBurnPoints = uint8(carriedFourStarBurnPoints.add(wbp.fourStarBurnPoints));
+        wbp.fiveStarBurnPoints = uint8(carriedFiveStarBurnPoints.add(wbp.fiveStarBurnPoints));
+
+        if(wbp.lowStarBurnPoints > 100)
+            wbp.lowStarBurnPoints = 100;
+        if(wbp.fourStarBurnPoints > 25)
+            wbp.fourStarBurnPoints = 25;
+        if(wbp.fiveStarBurnPoints > 10)
+            wbp.fiveStarBurnPoints = 10;
+
         _burn(burnID);
         emit Reforged(
             ownerOf(reforgeID),
