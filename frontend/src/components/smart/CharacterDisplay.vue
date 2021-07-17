@@ -39,20 +39,7 @@
           </span>
         </div>
 
-        <div class="character-earning-potential dark-bg-text" v-if="!isLoadingCharacter">
-          <div class="milestone-header">
-            <img src="../../assets/earning-potential-sword.png" class="sword-left">
-            <span class="milestone-text">Next Milestone</span>
-            <img src="../../assets/earning-potential-sword.png" class="sword-right">
-          </div>
-          <div class="milestone-details">
-            Earn <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level, fightGasOffset, fightBaseline)}}%</span> more per battle at<br>
-            <div class="calculator-icon-div">
-              <span class="milestone-lvl-text">LVL {{11}}</span>
-              <earnings-calculator/>
-            </div>
-          </div>
-        </div>
+        <earnings-calculator/>
       </div>
     </transition>
 
@@ -399,49 +386,5 @@ li.character-highlight{
   transform: translateY(-30px);
   overflow: hidden;
   opacity: 0;
-}
-
-.sword-left {
-  position: relative;
-  margin-right: 5px;
-  width: 5em;
-  pointer-events: none;
-}
-
-.sword-right {
-  transform: scaleX(-1);
-  margin-left: 5px;
-  position: relative;
-  width: 5em;
-  pointer-events: none;
-}
-
-.character-earning-potential {
-  position: relative;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-}
-
-.milestone-text {
-  color: #dabf75; /* little lighter to emboss */
-}
-
-.milestone-details {
-  text-align: center;
-  line-height: 1;
-}
-
-.bonus-text {
-  color: green;
-}
-
-.milestone-lvl-text {
-  color: rgb(236, 75, 75);
-}
-
-.calculator-icon-div {
-  display: inline-flex;
-  margin-top: 6px;
 }
 </style>
