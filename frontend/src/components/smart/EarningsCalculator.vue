@@ -69,7 +69,12 @@
                 </div>
                 <div class="button-div">
                   <b-button class="btn btn-primary" @click="calculateEarnings"
-                    v-bind:class="[!canCalculate() ? 'disabled disabled-button' : '']">Calculate</b-button>
+                    v-bind:class="[!canCalculate() ? 'disabled disabled-button' : '']">
+                      Calculate
+                      <b-icon-question-circle class="centered-icon" scale="0.8"
+                      v-tooltip.bottom="`Earnings on victory: ${this.formattedSkill(this.fightGasOffset)} gas offset +
+                      ${this.stringFormattedSkill(this.fightBaseline)} per square root of power/1000`"/>
+                  </b-button>
                 </div>
               </div>
 
@@ -116,7 +121,7 @@
                 <span>Bonus power</span>
                 <div class="slider-input-div">
                   <input class="stat-slider" type="range" :min="0" :max="2500" v-model="wepBonusPowerSliderValue" />
-                  <b-form-input class="stat-input" type="number" v-model="wepBonusPowerSliderValue"
+                  <b-form-input class="power-input" type="number" v-model="wepBonusPowerSliderValue"
                     :min="getMinRoll(starsValue)" :max="getMaxRoll(starsValue)" />
                 </div>
               </div>
@@ -224,13 +229,11 @@ export default Vue.extend({
       const characterTrait = CharacterTrait[this.characterElementValue as keyof typeof CharacterTrait];
       const weaponMultiplier = GetTotalMultiplierForTrait(weapon, characterTrait);
 
-      const totalPower = this.getTotalPower(CharacterPower(this.levelSliderValue), weaponMultiplier, this.wepBonusPowerSliderValue);
-      console.log(totalPower);
+      const totalPower = this.getTotalPower(CharacterPower(this.levelSliderValue - 1), weaponMultiplier, this.wepBonusPowerSliderValue);
       const averageReward = this.getAverageRewardForPower(totalPower);
       const averageFightProfit = averageReward * this.skillPrice - fightBnbFee;
       for(let i = 1; i < 8; i++) {
         const averageDailyProfitForCharacter = averageFightProfit * i - (7 - i) * fightBnbFee;
-        console.log(`equation: ${averageFightProfit} * ${i} - ${7-i} * ${fightBnbFee} = ${averageDailyProfitForCharacter}`);
         const averageDailyProfitForAllCharacter = 4 * averageDailyProfitForCharacter;
         const averageMonthlyProfitForAllCharacter = 30 * averageDailyProfitForAllCharacter;
         this.calculationResults.push([averageDailyProfitForCharacter, averageDailyProfitForAllCharacter, averageMonthlyProfitForAllCharacter]);
@@ -254,7 +257,7 @@ export default Vue.extend({
     },
 
     getAverageRewardForPower(power: number): number {
-      return this.formattedSkill(this.fightGasOffset) + (this.formattedSkill(this.fightBaseline) * power / 1000);
+      return this.formattedSkill(this.fightGasOffset) + (this.formattedSkill(this.fightBaseline) * Math.sqrt(power / 1000));
     },
 
     getNextMilestoneBonus(level: number): string {
@@ -267,7 +270,7 @@ export default Vue.extend({
     },
 
     getAverageRewardAtLevel(level: number): number {
-      return this.formattedSkill(this.fightGasOffset) + (this.formattedSkill(this.fightBaseline) * (CharacterPower(level)/1000));
+      return this.formattedSkill(this.fightGasOffset) + (this.formattedSkill(this.fightBaseline) * (Math.sqrt(CharacterPower(level - 1)/1000)));
     },
 
     getRewardDiffBonus(level: number, targetLevel: number): string {
@@ -278,6 +281,11 @@ export default Vue.extend({
     formattedSkill(skill: number): number {
       const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
       return new BN(skillBalance).toNumber();
+    },
+
+    stringFormattedSkill(skill: number): string {
+      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
+      return new BN(skillBalance).toFixed(6);
     },
 
     getColoringClass(i: number): string {
@@ -382,6 +390,12 @@ export default Vue.extend({
 
 .form-control.stat-input {
   width: 45px;
+  height: 20px;
+  padding: 0;
+}
+
+.form-control.power-input {
+  width: 55px;
   height: 20px;
   padding: 0;
 }

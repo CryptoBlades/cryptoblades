@@ -6,12 +6,6 @@
       </div>
 
       <div class="row">
-        <div class="col">
-          <div class="payout-info">{{ getPayoutString() }}</div>
-        </div>
-      </div>
-
-      <div class="row">
         <div class="col text-center">
           <div class="combat-hints">
             <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
@@ -218,11 +212,6 @@ export default {
     getEnemyArt,
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
-    },
-    getPayoutString() {
-      return (
-        'Earnings on victory: ' + this.formattedSkill(this.fightGasOffset) + ' gas offset + ' + this.formattedSkill(this.fightBaseline) + ' per 1000 power'
-      );
     },
     getWinChance(enemyPower, enemyElement) {
       const characterPower = CharacterPower(this.currentCharacter.level);
