@@ -72,8 +72,6 @@ function getStakingContractsInfoWithDefaults(): Partial<Record<StakeType, Partia
     }
   }
 
-  console.log(out);
-
   return out;
 }
 

@@ -260,24 +260,30 @@ export function createStore(web3: Web3) {
       },
 
       timeUntilCurrentCharacterHasMaxStamina(state, getters) {
-        const currentStamina = getters.currentCharacterStamina;
-        if (!currentStamina) {
-          return '';
-        }
-        const date = new Date();
+        return getters.timeUntilCharacterHasMaxStamina(state.currentCharacterId);
+      },
 
-        if (state.maxStamina !== currentStamina) {
-          date.setTime(date.getTime() + ((state.maxStamina - currentStamina) * (5 * 60000)));
-        }
+      timeUntilCharacterHasMaxStamina(state, getters) {
+        return (id: number) => {
+          const currentStamina = getters.getCharacterStamina(id);
+          if (!currentStamina) {
+            return '';
+          }
+          const date = new Date();
 
-        return(`${
-          (date.getMonth()+1).toString().padStart(2, '0')}/${
-          date.getDate().toString().padStart(2, '0')}/${
-          date.getFullYear().toString().padStart(4, '0')} ${
-          date.getHours().toString().padStart(2, '0')}:${
-          date.getMinutes().toString().padStart(2, '0')}:${
-          date.getSeconds().toString().padStart(2, '0')}`
-        );
+          if (state.maxStamina !== currentStamina) {
+            date.setTime(date.getTime() + ((state.maxStamina - currentStamina) * (5 * 60000)));
+          }
+
+          return(`${
+            (date.getMonth()+1).toString().padStart(2, '0')}/${
+            date.getDate().toString().padStart(2, '0')}/${
+            date.getFullYear().toString().padStart(4, '0')} ${
+            date.getHours().toString().padStart(2, '0')}:${
+            date.getMinutes().toString().padStart(2, '0')}:${
+            date.getSeconds().toString().padStart(2, '0')}`
+          );
+        };
       },
 
       allStaminas(state) {
@@ -535,18 +541,14 @@ export function createStore(web3: Web3) {
         const subscriptions: IWeb3EventSubscription[] = [];
 
         if (!featureFlagStakeOnly) {
-          console.log('setting up events for:', state.defaultAccount);
-
           subscriptions.push(
             state.contracts().Characters!.events.NewCharacter(
               { filter: { minter: state.defaultAccount } },
               async (err: Error, data: any) => {
                 if (err) {
-                  console.error(err);
+                  console.error(err, data);
                   return;
                 }
-
-                console.log('NewCharacter', data);
 
                 const characterId = data.returnValues.character;
 
@@ -564,11 +566,9 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             state.contracts().Weapons!.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
-
-              console.log('NewWeapon', data);
 
               const weaponId = data.returnValues.weapon;
 
@@ -584,11 +584,9 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             state.contracts().CryptoBlades!.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
-
-              console.log('FightOutcome', data);
 
               await Promise.all([
                 dispatch('fetchCharacter', data.returnValues.character),
@@ -600,11 +598,9 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             state.contracts().CryptoBlades!.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
-
-              console.log('InGameOnlyFundsGiven', data);
 
               await Promise.all([
                 dispatch('fetchInGameOnlyFunds')
@@ -618,11 +614,9 @@ export function createStore(web3: Web3) {
             subscriptions.push(
               NFTMarket.events.PurchasedListing({ filter: { seller: state.defaultAccount } }, async (err: Error, data: any) => {
                 if (err) {
-                  console.error(err);
+                  console.error(err, data);
                   return;
                 }
-
-                console.log('PurchasedListing', data);
 
                 await dispatch('fetchSkillBalance');
               })
@@ -637,11 +631,9 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
-
-              console.log('RewardPaid', data);
 
               await dispatch('fetchStakeDetails', { stakeType });
             })
@@ -650,11 +642,9 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             StakingRewards.events.RewardAdded(async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
-
-              console.log('RewardAdded', data);
 
               await dispatch('fetchStakeDetails', { stakeType });
             })
@@ -663,11 +653,9 @@ export function createStore(web3: Web3) {
           subscriptions.push(
             StakingRewards.events.RewardsDurationUpdated(async (err: Error, data: any) => {
               if (err) {
-                console.error(err);
+                console.error(err, data);
                 return;
               }
-
-              console.log('RewardsDurationUpdated', data);
 
               await dispatch('fetchStakeDetails', { stakeType });
             })
@@ -678,7 +666,6 @@ export function createStore(web3: Web3) {
         for(const stakeType of Object.keys(staking).filter(isStakeType)) {
           const stakingEntry = staking[stakeType]!;
 
-          console.log('setting up events for staking rewards type', stakeType);
           setupStakingEvents(stakeType, stakingEntry.StakingRewards);
         }
 
@@ -1110,8 +1097,6 @@ export function createStore(web3: Web3) {
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
 
-        console.log('fetched data for', stakeType, StakingRewards.options.address, StakingToken.options.address);
-
         const stakeData: { stakeType: StakeType } & IStakeState = {
           stakeType,
           ownBalance,
@@ -1239,6 +1224,66 @@ export function createStore(web3: Web3) {
         return await NFTMarket.methods
           .getListingIDs(
             nftContractAddr
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchNumberOfWeaponListings({ state }, { nftContractAddr, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns an array of bignumbers (these are nft IDs)
+        return await NFTMarket.methods
+          .getNumberOfWeaponListings(
+            nftContractAddr,
+            trait,
+            stars
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchNumberOfCharacterListings({ state }, { nftContractAddr, trait, minLevel, maxLevel }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns an array of bignumbers (these are nft IDs)
+        return await NFTMarket.methods
+          .getNumberOfCharacterListings(
+            nftContractAddr,
+            trait,
+            minLevel,
+            maxLevel
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchAllMarketCharacterNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, minLevel, maxLevel }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        return await NFTMarket.methods
+          .getCharacterListingIDsPage(
+            nftContractAddr,
+            limit,
+            pageNumber,
+            trait,
+            minLevel,
+            maxLevel
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchAllMarketWeaponNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        return await NFTMarket.methods
+          .getWeaponListingIDsPage(
+            nftContractAddr,
+            limit,
+            pageNumber,
+            trait,
+            stars
           )
           .call(defaultCallOptions(state));
       },

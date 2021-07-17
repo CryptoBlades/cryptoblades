@@ -11,6 +11,16 @@ export function traitNumberToName(traitNum: number): string {
   }
 }
 
+export function traitNameToNumber(traitName: string): number {
+  switch(traitName) {
+  case 'Fire':        return WeaponElement.Fire;
+  case 'Earth':       return WeaponElement.Earth;
+  case 'Lightning':   return WeaponElement.Lightning;
+  case 'Water':       return WeaponElement.Water;
+  default:            return 255;
+  }
+}
+
 export function characterFromContract(id: string | number, data: string[]): ICharacter {
   const xp = data[0];
   const level = parseInt(data[1], 10);

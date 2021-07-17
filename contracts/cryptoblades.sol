@@ -44,7 +44,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         characterLimit = 4;
         staminaCostFight = 40;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
-        refillStaminaFee = ABDKMath64x64.divu(5, 1);//5 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
         fightRewardGasOffset = ABDKMath64x64.divu(8, 10);//0.8 usd;
         mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
@@ -74,6 +73,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         stakeFromGameImpl = _stakeFromGame;
+    }
+
+    function migrateTo_7dd2a56() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        // numbers given for the curves were $4.3-aligned so they need to be multiplied
+        // additional accuracy may be in order for the setter functions for these
+        fightRewardGasOffset = ABDKMath64x64.divu(23177, 100000); // 0.0539 x 4.3
+        fightRewardBaseline = ABDKMath64x64.divu(344, 1000); // 0.08 x 4.3
     }
 
     // config vars
@@ -284,13 +292,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getTokenGainForFight(uint24 monsterPower) internal view returns (int128) {
-        return ABDKMath64x64.add(
-            // Performance optimization: 1000 = getPowerAtLevel(0)
-            ABDKMath64x64.divu(monsterPower, 1000).mul(fightRewardBaseline),
-            fightRewardGasOffset
+        return fightRewardGasOffset.add(
+            fightRewardBaseline.mul(
+                ABDKMath64x64.sqrt(
+                    // Performance optimization: 1000 = getPowerAtLevel(0)
+                    ABDKMath64x64.divu(monsterPower, 1000)
+                )
+            )
         );
     }
-
+    
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
         return uint16(ABDKMath64x64.divu(monsterPower, playerPower).mulu(fightXpGain));
     }
@@ -405,17 +416,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         weapons.mint(msg.sender, seed);
-    }
-
-    function fillStamina(uint256 character) public doesNotHaveMoreThanMaxCharacters isCharacterOwner(character) requestPayFromPlayer(refillStaminaFee) {
-        require(characters.isStaminaFull(character) == false, "Your stamina is already full!");
-        _payContract(msg.sender, refillStaminaFee);
-        characters.setStaminaTimestamp(character,
-            uint64(
-                characters.getStaminaTimestamp(character)
-                    .sub(characters.getStaminaMaxWait())
-            )
-        );
     }
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
@@ -548,10 +548,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         mintCharacterFee = ABDKMath64x64.divu(cents, 100);
     }
 
-    function setRefillStaminaValue(uint256 cents) public restricted {
-        refillStaminaFee = ABDKMath64x64.divu(cents, 100);
-    }
-
     function setFightRewardBaselineValue(uint256 tenthcents) public restricted {
         fightRewardBaseline = ABDKMath64x64.divu(tenthcents, 1000); // !!! THIS TAKES TENTH OF CENTS !!!
     }
@@ -663,7 +659,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getTotalSkillOwnedBy(address wallet) public view returns (uint256) {
-        return getTokenRewardsFor(wallet) + skillToken.balanceOf(wallet);
+        return inGameOnlyFunds[wallet] + getTokenRewardsFor(wallet) + skillToken.balanceOf(wallet);
     }
 
     function _getRewardsClaimTax(address playerAddress) internal view returns (int128) {
