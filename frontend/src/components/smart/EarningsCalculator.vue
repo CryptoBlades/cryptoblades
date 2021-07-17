@@ -48,10 +48,10 @@
                   <strong>Earnings (USD)</strong>
                   <div class="earnings-grid">
                     <b-row>
-                      <b-col>Wins # per day</b-col>
-                      <b-col>Daily profit<br>(1 character)</b-col>
-                      <b-col>Daily profit<br>(4 characters)</b-col>
-                      <b-col>Monthly profit<br>(4 characters)</b-col>
+                      <b-col><strong>Wins # per day</strong></b-col>
+                      <b-col><strong>Daily profit</strong><br>(1 character)</b-col>
+                      <b-col><strong>Daily profit</strong><br>(4 characters)</b-col>
+                      <b-col><strong>Monthly profit</strong><br>(4 characters)</b-col>
                     </b-row>
                     <b-row class="earnings-row" v-for="i in 7" :key="i">
                       <b-col>{{8 - i}} ({{i - 1}} lost)</b-col>
@@ -461,7 +461,7 @@ export default Vue.extend({
 }
 
 .col {
-  border: 1px solid white;
+  border: 1px solid #9e8a57;
   text-align: center;
 }
 
