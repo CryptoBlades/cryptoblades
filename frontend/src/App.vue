@@ -300,6 +300,16 @@ export default {
     });
 
     this.showWarningDialog();
+    this.$dialog.confirm({
+      title: 'Market Notice',
+      text: `Hello, lovely player! We had an unexpected mixup with the market today (friday), 
+      and while it works on testnet, we realized later that it's due to the sheer quantity of market entries 
+      (which we hadn't expected to be a problem), that browsing the market is entirely broken right now.
+      We appreciate your patience, and hope to have a fix early next week (7/19/21-ish).
+      
+      This modal will show up every time you load the game, until we fix it. Sorry for being a pest! -Sei`
+    });
+
   },
 
   async created() {
