@@ -9,9 +9,12 @@
       <div class="milestone-details">
         Earn <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level)}}%</span> more per battle at<br>
         <div class="calculator-icon-div">
-          <span class="milestone-lvl-text">LVL {{11}}</span>
-          <b-icon-calculator-fill class="milestone-hint" scale="0.95"
-            v-tooltip.bottom="`Eranings Calculator`" v-on:click="onShowEarningsCalculator"/>
+          <span class="milestone-lvl-text">LVL {{11}}</span><br>
+          <b-button class="btn btn-primary btn-small" @click="onShowEarningsCalculator">
+            <b-icon-calculator-fill class="milestone-hint" scale="1"
+              v-tooltip.bottom="`Eranings Calculator`" v-on:click="onShowEarningsCalculator"/>
+              Earnings Calculator
+          </b-button>
 
           <b-modal hide-footer ref="earnings-calc-modal" size="xl" title="Earnings Calculator">
             <div class="calculator">
@@ -48,18 +51,18 @@
                       <b-col>Wins # per day</b-col>
                       <b-col>Daily profit<br>(1 character)</b-col>
                       <b-col>Daily profit<br>(4 characters)</b-col>
-                      <b-col>Monthly profit</b-col>
+                      <b-col>Monthly profit<br>(4 characters)</b-col>
                     </b-row>
                     <b-row class="earnings-row" v-for="i in 7" :key="i">
-                      <b-col>{{i}}</b-col>
-                      <b-col v-bind:class="[getColoringClass(i - 1)]">
-                        {{ calculationResults.length && calculationResults[i - 1][0].toFixed(2) || 0}}
+                      <b-col>{{8 - i}} ({{i - 1}} lost)</b-col>
+                      <b-col v-bind:class="[getColoringClass(8 - i - 1)]">
+                        ${{ calculationResults.length && calculationResults[8 - i - 1][0].toFixed(2) || 0}}
                       </b-col>
-                      <b-col v-bind:class="[getColoringClass(i - 1)]">
-                        {{ calculationResults.length && calculationResults[i - 1][1].toFixed(2) || 0}}
+                      <b-col v-bind:class="[getColoringClass(8 - i - 1)]">
+                        ${{ calculationResults.length && calculationResults[8 - i - 1][1].toFixed(2) || 0}}
                       </b-col>
-                      <b-col v-bind:class="[getColoringClass(i - 1)]">
-                        {{ calculationResults.length && calculationResults[i - 1][2].toFixed(2) || 0}}
+                      <b-col v-bind:class="[getColoringClass(8 - i - 1)]">
+                        ${{ calculationResults.length && calculationResults[8 - i - 1][2].toFixed(2) || 0}}
                       </b-col>
                     </b-row>
                   </div>
@@ -246,11 +249,11 @@ export default Vue.extend({
       return weapon;
     },
 
-    getTotalPower(characterPower: number, weaponMultiplier: number, bonusPower: number) {
-      return characterPower * weaponMultiplier + bonusPower;
+    getTotalPower(characterPower: number, weaponMultiplier: number, bonusPower: number): number {
+      return characterPower * weaponMultiplier + Number(bonusPower);
     },
 
-    getAverageRewardForPower(power: number) {
+    getAverageRewardForPower(power: number): number {
       return this.formattedSkill(this.fightGasOffset) + (this.formattedSkill(this.fightBaseline) * power / 1000);
     },
 
@@ -335,7 +338,6 @@ export default Vue.extend({
 }
 
 .calculator-icon-div {
-  display: inline-flex;
   margin-top: 6px;
 }
 .char-placeholder {
@@ -451,6 +453,7 @@ export default Vue.extend({
   flex-direction: column;
   width: 100%;
   height: 100%;
+  padding: 20px;
 }
 
 .row {
@@ -482,5 +485,10 @@ export default Vue.extend({
 
 .negative-value {
   color: red;
+}
+
+.btn-small {
+  font-size: small;
+  margin-top: 5px;
 }
 </style>
