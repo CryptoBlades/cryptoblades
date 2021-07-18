@@ -10,7 +10,7 @@
       <span class="balance"
         v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
         @mouseover="hover = !isMobile() || true"
-        @mouseleave="hover = !isMobile() || false"
+        @mouseleave="hover = !isMobile()"
       >{{ formattedTotalSkillBalance }}</span>
     </div>
 

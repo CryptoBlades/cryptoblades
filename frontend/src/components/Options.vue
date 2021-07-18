@@ -16,7 +16,7 @@
 
         <b-dropdown-item @click="claimSkill(ClaimStage.WaxBridge)">Claim Skill </b-dropdown-item>
 
-        <b-dropdown-item @click.native="$router.push('leaderboard')">Leaderboard </b-dropdown-item>
+        <b-dropdown-item @click.native="$router.push('leaderboard')" class="gtag-link-others" tagname="leaderboard_screen">Leaderboard </b-dropdown-item>
 
         <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank">Wiki <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
 

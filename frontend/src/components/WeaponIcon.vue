@@ -3,7 +3,7 @@
     class="weapon-icon"
     v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
     @mouseover="hover = !isMobile() || true"
-    @mouseleave="hover = !isMobile() || false"
+    @mouseleave="hover = !isMobile()"
   >
 
     <div class="loading-container" v-if="!allLoaded">
