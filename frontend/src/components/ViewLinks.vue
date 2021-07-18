@@ -32,21 +32,9 @@
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'leaderboard' }" exact class="nav-link" v-if="!featureFlagStakeOnly">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="leaderboard_screen">Leaderboard</span>
-      </li>
-    </router-link>
-
     <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
         <span class="gtag-link-others" tagname="stake_screen">Stake</span>
-      </li>
-    </router-link>
-
-    <router-link :to="{ name: 'portal' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagPortal">
-      <li class="nav-item nav-top-links">
-        <span>Portal</span>
       </li>
     </router-link>
 

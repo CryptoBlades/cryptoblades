@@ -3,8 +3,26 @@
     <b-navbar-nav>
       <b-nav-item-dropdown right>
         <template #button-content>
-          <i class="fa fa-cog"></i>
+          <i class="fa fa-bars"></i>
         </template>
+
+        <b-dropdown-group>
+
+        <b-dropdown-header>Links</b-dropdown-header>
+
+        <b-dropdown-item @click="claimSkill(ClaimStage.WaxBridge)">Claim Skill </b-dropdown-item>
+
+        <b-dropdown-item @click.native="$router.push('leaderboard')" class="gtag-link-others" tagname="leaderboard_screen">Leaderboard </b-dropdown-item>
+
+        <b-dropdown-item @click.native="$router.push('portal')">Portal </b-dropdown-item>
+
+        <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank">Wiki <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
+
+        </b-dropdown-group>
+
+        <b-dropdown-group>
+
+        <b-dropdown-header>Options</b-dropdown-header>
 
         <b-dropdown-item @click="toggleGraphics()">3D Graphics: {{ showGraphics ? 'On' : 'Off' }}</b-dropdown-item>
 
@@ -14,9 +32,7 @@
 
         <b-dropdown-item @click="toggleHideWalletWarning()">Hide Wallet Warning: {{ hideWalletWarning ? 'On' : 'Off' }}</b-dropdown-item>
 
-        <b-dropdown-item @click="claimSkill(ClaimStage.WaxBridge)">Claim Skill </b-dropdown-item>
-
-        <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank">Wiki <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
+        </b-dropdown-group>
 
       </b-nav-item-dropdown>
     </b-navbar-nav>
