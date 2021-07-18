@@ -38,12 +38,6 @@
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'portal' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagPortal">
-      <li class="nav-item nav-top-links">
-        <span>Portal</span>
-      </li>
-    </router-link>
-
   </b-navbar-nav>
 </template>
 
