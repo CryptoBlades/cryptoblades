@@ -94,6 +94,19 @@ contract NFTMarket is
     Weapons internal weapons;
     Characters internal characters;
 
+    // Support for 5 categories, each represented by a mapping.
+    // The more selective the filter, the fewer arrays to aggregate.
+    // For characters:
+    //      trait, level, 0, 0, 0
+    // For weapons:
+    //      trait, stars, stat1trait, stat2trait, stat3trait
+    mapping(address =>
+    mapping(uint8 =>
+    mapping(uint8 =>
+    mapping(uint8 =>
+    mapping(uint8 =>
+    mapping(uint8 => EnumerableSet.UintSet)))))) private listingsIndex;
+
     // ############
     // Events
     // ############
@@ -245,32 +258,58 @@ contract NFTMarket is
         return tokens;
     }
 
+    function getWeaponListingIDsHelper(IERC721 _tokenAddress, uint256 offset, uint256 pageCount, uint8 _trait, uint8 _stars)
+        private
+        view
+        returns (uint256[] memory)
+    {
+        uint256[] memory tokens = new uint256[](pageCount);
+        uint256 tokenIndex = 0;
+
+        for (uint8 a = 0; a < 5; a++) {
+            for (uint8 b = 0; b < 5; b++) {
+                for (uint8 c = 0; c < 5; c++) {
+                    EnumerableSet.UintSet storage set = listingsIndex[address(_tokenAddress)][_trait][_stars][a][b][c];
+                    if (offset >= set.length()) {
+                        offset -= set.length();
+                        continue;
+                    }
+
+                    uint256 i = offset;
+                    offset = 0;
+                    for ( ; ((i < set.length()) && (tokenIndex < pageCount)); i++) {
+                        tokens[tokenIndex++] = set.at(i);
+                    }
+
+                    if (tokenIndex == pageCount) {
+                        return tokens;
+                    }
+                }
+            }
+        }
+
+        // Something went wrong.
+        return new uint256[](0);
+    }
+
     function getWeaponListingIDsPage(IERC721 _tokenAddress, uint8 _limit, uint256 _pageNumber, uint8 _trait, uint8 _stars)
         public
         view
         returns (uint256[] memory)
     {
-        EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
-        uint256 matchingWeaponsAmount = getNumberOfWeaponListings(_tokenAddress, _trait, _stars);
-        uint256 pageEnd = _limit * (_pageNumber + 1);
-        uint256 tokensSize = matchingWeaponsAmount >= pageEnd ? _limit : matchingWeaponsAmount - (_limit * _pageNumber);
-        uint256[] memory tokens = new uint256[](tokensSize);
-
-        uint256 counter = 0;
-        uint8 tokenIterator = 0;
-        for (uint256 i = 0; i < set.length() && counter < pageEnd; i++) {
-            uint8 weaponTrait = weapons.getTrait(set.at(i));
-            uint8 weaponStars = weapons.getStars(set.at(i));
-            if((_trait == 255 || weaponTrait == _trait) && (_stars == 255 || weaponStars == _stars)) {
-                if(counter >= pageEnd - _limit) {
-                    tokens[tokenIterator] = set.at(i);
-                    tokenIterator++;
-                }
-                counter++;
-            }
+        uint256 matchingCount = getNumberOfWeaponListings(_tokenAddress, _trait, _stars);
+        uint256 offset = _limit * _pageNumber;
+        if (matchingCount <= offset) {
+            // No results.
+            return new uint256[](0);
         }
 
-        return tokens;
+        uint256 pageCount = matchingCount - offset;
+        if (pageCount > _limit) {
+            pageCount = _limit;
+        }
+
+        return getWeaponListingIDsHelper(_tokenAddress, offset, pageCount, _trait, _stars);
     }
 
     function getCharacterListingIDsPage(IERC721 _tokenAddress, uint8 _limit, uint256 _pageNumber, uint8 _trait, uint8 _minLevel, uint8 _maxLevel)
@@ -368,15 +407,13 @@ contract NFTMarket is
         view
         returns (uint256)
     {
-        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[address(_tokenAddress)];
         uint256 counter = 0;
-        uint8 weaponTrait;
-        uint8 weaponStars;
-        for(uint256 i = 0; i < listedTokens.length(); i++) {
-            weaponTrait = weapons.getTrait(listedTokens.at(i));
-            weaponStars = weapons.getStars(listedTokens.at(i));
-            if((_trait == 255 || weaponTrait == _trait) && (_stars == 255 || weaponStars == _stars)) {
-                counter++;
+        for (uint8 a = 0; a < 5; a++) {
+            for (uint8 b = 0; b < 5; b++) {
+                for (uint8 c = 0; c < 5; c++) {
+                    EnumerableSet.UintSet storage set = listingsIndex[address(_tokenAddress)][_trait][_stars][a][b][c];
+                    counter += set.length();
+                }
             }
         }
         return counter;
@@ -416,6 +453,25 @@ contract NFTMarket is
     // ############
     // Mutative
     // ############
+
+    function addListingToCharacterIndex(IERC721 _tokenAddress, uint256 _id) private
+    {
+        uint8 characterTrait = characters.getTrait(_id);
+        uint8 characterLevel = characters.getLevel(_id);
+        listingsIndex[address(_tokenAddress)][characterTrait][characterLevel][0][0][0].add(_id);
+    }
+
+    function addListingToWeaponIndex(IERC721 _tokenAddress, uint256 _id) private
+    {
+        uint8 weaponTrait = weapons.getTrait(_id);
+        uint8 weaponStars = weapons.getStars(_id);
+        uint8 statPattern = weapons.getStatPattern(_id);
+        uint8 stat1Trait = weapons.getStat1Trait(statPattern);
+        uint8 stat2Trait = weapons.getStat2Trait(statPattern);
+        uint8 stat3Trait = weapons.getStat3Trait(statPattern);
+        listingsIndex[address(_tokenAddress)][weaponTrait][weaponStars][stat1Trait][stat2Trait][stat3Trait].add(_id);
+    }
+
     function addListing(
         IERC721 _tokenAddress,
         uint256 _id,
@@ -431,6 +487,17 @@ contract NFTMarket is
         listedTokenIDs[address(_tokenAddress)].add(_id);
 
         _updateListedTokenTypes(_tokenAddress);
+
+        // _INTERFACE_ID_ERC721_METADATA
+        if (ERC165Checker.supportsInterface(address(_tokenAddress), 0x5b5e139f)) {
+            string memory symbol = IERC721MetadataUpgradeable(address(_tokenAddress)).symbol();
+            if (keccak256(abi.encodePacked(symbol)) == keccak256(abi.encodePacked("CBC"))) {
+                addListingToCharacterIndex(_tokenAddress, _id);
+            }
+            if (keccak256(abi.encodePacked(symbol)) == keccak256(abi.encodePacked("CBW"))) {
+                addListingToWeaponIndex(_tokenAddress, _id);
+            }
+        }
 
         // in theory the transfer and required approval already test non-owner operations
         _tokenAddress.safeTransferFrom(msg.sender, address(this), _id);
