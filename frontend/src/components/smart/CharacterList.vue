@@ -168,7 +168,7 @@ export default {
   background-repeat: no-repeat;
   background-size: 115%;
   background-color: #2e2e30cc;
-  background-image: url(/img/cardCharacterFrame.49ed9ade.png);
+  background-image: url('../../assets/cardCharacterFrame.png');
   border: 1px solid #a28d54;
   border-radius: 15px;
   padding: 0.5rem;
