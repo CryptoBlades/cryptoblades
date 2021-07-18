@@ -464,7 +464,7 @@ export default {
 
     async fetchScore() {
       try {
-        const scoreData = await fetch(`https://cryptoblades-api.herokuapp.com/static/character/score/${this.character.id}`);
+        const scoreData = await fetch(`https://api.cryptoblades.io/static/character/score/${this.character.id}`);
         const { score } = await scoreData.json();
         this.heroScore = score;
       } catch {
