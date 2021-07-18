@@ -162,6 +162,7 @@ export default {
 }
 
 .character {
+  position: relative;
   width: 14em;
   height: 25em;
   background-position: center;
@@ -201,7 +202,9 @@ export default {
 }
 
 .above-wrapper {
-  padding-bottom: 0.5rem;
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 
 @media (max-width: 576px) {

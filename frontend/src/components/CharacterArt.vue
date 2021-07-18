@@ -555,7 +555,6 @@ export default {
 .circle-element {
   width: 1.7em;
   height: 1.7em;
-  border: 2px solid rgb(211, 211, 211);
   border-radius: 50%;
 }
 

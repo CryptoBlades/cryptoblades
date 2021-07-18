@@ -75,10 +75,12 @@
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <span class="d-block text-center" v-if="nftPricesById[id]">
-                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                  </span>
-                  <span class="d-block text-center" v-else>Loading price...</span>
+                  <div class="token-price">
+                    <span class="d-block text-center" v-if="nftPricesById[id]">
+                      {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                  </div>
                 </template>
 
               </character-list>
@@ -216,10 +218,12 @@
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <span class="d-block text-center" v-if="nftPricesById[id]">
-                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                  </span>
-                  <span class="d-block text-center" v-else>Loading price...</span>
+                  <div class="token-price">
+                    <span class="d-block text-center" v-if="nftPricesById[id]">
+                      {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                  </div>
                 </template>
 
               </character-list>
