@@ -6,8 +6,13 @@
     </div>
 
     <div class="balance-container">
-      <strong class="mr-2 balance-text">Balance</strong>
-      <span class="balance">{{ formattedSkillBalance }}</span>
+      <strong class="mr-2 balance-text">Total Balance</strong>
+      <span class="balance"
+        v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
+        @mouseover="hover = !isMobile() || true"
+        @mouseleave="hover = !isMobile()"
+      >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/>
+      <b-icon-gift scale="1" v-if="!hasInGameSkill" /></span>
     </div>
 
     <div class="bnb-withdraw-container mx-3" v-if="hasBnbAvailableToWithdraw">
@@ -16,11 +21,6 @@
                            :variant="canWithdrawBnb ? 'success' : 'warning'"
                            @click="onWithdrawBNB"
                            v-tooltip.bottom="bnbClaimTooltip" />
-    </div>
-
-    <div class="balance-container">
-      <strong class="mr-2 balance-text">In-Game-Only Funds</strong>
-      <span class="balance">{{ formattedInGameOnlyFunds }}</span>
     </div>
   </div>
 </template>
@@ -53,6 +53,11 @@ export default Vue.extend({
       availableBNB: 'waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod',
       getExchangeUrl: 'getExchangeUrl'
     }) as Accessors<StoreMappedGetters>),
+
+    formattedTotalSkillBalance(): string {
+      const skillBalance = Web3.utils.fromWei(Web3.utils.toBN(this.skillBalance).add(Web3.utils.toBN(this.inGameOnlyFunds)), 'ether');
+      return `${new BN(skillBalance).toFixed(4)} SKILL`;
+    },
 
     formattedSkillBalance(): string {
       const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
@@ -93,7 +98,23 @@ export default Vue.extend({
     formattedInGameOnlyFunds(): string {
       const skillBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
       return `${new BN(skillBalance).toFixed(4)} SKILL`;
-    }
+    },
+    totalSkillTooltipHtml() {
+      const inGameOnlyFundsBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
+      const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
+
+      let html =  new BN(skillBalance).toFixed(4) + ' SKILL';
+
+      if(parseFloat(inGameOnlyFundsBalance) !== 0){
+        html += '<br>+ IN GAME ONLY ' + new BN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
+      }
+
+      return html;
+    },
+    hasInGameSkill(): boolean {
+      const inGameOnlyFundsBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
+      return parseFloat(inGameOnlyFundsBalance) !== 0;
+    },
   },
 
   methods: {
