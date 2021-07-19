@@ -203,8 +203,11 @@ export default {
 
 .above-wrapper {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 270px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
 }
 
 @media (max-width: 576px) {
