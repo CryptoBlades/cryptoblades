@@ -526,6 +526,8 @@ export default {
 
 .name {
   font-weight: 900;
+  overflow: hidden;
+  max-height: 24px;
 }
 
 .xp {
