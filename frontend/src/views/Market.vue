@@ -839,7 +839,7 @@ export default Vue.extend({
     },
 
     weaponStarFilter(): number {
-      return sessionStorage.getItem('weapon-starfilter') ? +(sessionStorage.getItem('weapon-starfilter') as string) - 1 : 0;
+      return sessionStorage.getItem('weapon-starfilter') ? +(sessionStorage.getItem('weapon-starfilter') as string) : 0;
     },
 
     weaponPriceOrder(): string {
