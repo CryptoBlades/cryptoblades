@@ -158,15 +158,20 @@ export default {
   display: grid;
   padding: 0.5em;
   grid-template-columns: repeat(auto-fit, 14em);
-  gap: 0.5em;
+  gap: 1.5em;
 }
 
 .character {
-  width: 12em;
-  /* height: 20em; */
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 4px #ffffff38;
-  border-radius: 5px;
+  position: relative;
+  width: 14em;
+  height: 25em;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 115%;
+  background-color: #2e2e30cc;
+  background-image: url('../../assets/cardCharacterFrame.png');
+  border: 1px solid #a28d54;
+  border-radius: 15px;
   padding: 0.5rem;
   cursor: pointer;
   display: flex;
@@ -193,11 +198,16 @@ export default {
 }
 
 .character.selected {
-  outline: solid currentcolor 2px;
+  box-shadow: 0 0 8px #ffd400;
 }
 
 .above-wrapper {
-  padding-bottom: 0.5rem;
+  position: absolute;
+  top: 270px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
 }
 
 @media (max-width: 576px) {

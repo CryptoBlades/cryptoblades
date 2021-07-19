@@ -41,7 +41,7 @@ export default {
   },
 
   async created() {
-    const leaderboardData = await fetch('https://cryptoblades-api.herokuapp.com/static/leaderboard');
+    const leaderboardData = await fetch('https://api.cryptoblades.io/static/leaderboard');
     const leaderboards = await leaderboardData.json();
 
     this.leaderboards = leaderboards.leaderboard;
