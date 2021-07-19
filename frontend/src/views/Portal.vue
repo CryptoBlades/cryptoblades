@@ -2,6 +2,9 @@
   <div class="body main-font">
     <div class="blank-slate">
       Portal
+      <div>
+        The portal allows you to convert your other currencies to BNB. Currently, the portal supports <a href="https://on.wax.io/wax-io/" target="_blank">WAX</a>.
+      </div>
       <br />
       <div class="sub-container" v-if="transactionResults != null && !waitingResults">
         We'll get your BNB to you ASAP!
