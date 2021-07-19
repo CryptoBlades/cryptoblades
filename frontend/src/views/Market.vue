@@ -335,7 +335,6 @@ import { Accessors } from 'vue/types/options';
 import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons } from '../../../build/abi-interfaces';
 import BigNumber from 'bignumber.js';
-import { traitNameToNumber } from '@/contract-models';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -643,6 +642,22 @@ export default Vue.extend({
       this.activeType = 'character';
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
+
+      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const params = {
+        element: '' + this.characterTraitFilter(),
+        minLevel: '' + this.characterMinLevelFilter(),
+        maxLevel: '' + this.characterMaxLevelFilter(),
+        pageSize: '' + (this.characterShowLimit || defaultLimit),
+        pageNum: '' + page,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const charactersData = await fetch(url.toString());
+      const characters = await charactersData.json();
+
+      /*
       this.allListingsAmount = await this.fetchNumberOfCharacterListings({
         nftContractAddr: this.contractAddress,
         trait: this.characterTraitFilter(),
@@ -658,13 +673,14 @@ export default Vue.extend({
         minLevel: this.characterMinLevelFilter(),
         maxLevel: this.characterMaxLevelFilter()
       });
+      */
 
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
       this.searchResultsOwned = false; // temp
-      this.allSearchResults = results;
-      console.log(this.allSearchResults.length);
+      this.allListingsAmount = characters.page.total;
+      this.allSearchResults = characters.idResults;
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = null;
@@ -674,25 +690,27 @@ export default Vue.extend({
       this.activeType = 'weapon';
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
-      this.allListingsAmount = await this.fetchNumberOfWeaponListings({
-        nftContractAddr: this.contractAddress,
-        trait: this.weaponTratFilter(),
-        stars: this.weaponStarFilter()
-      });
 
-      const results = await this.fetchAllMarketWeaponNftIdsPage({
-        nftContractAddr: this.contractAddress,
-        limit: this.weaponShowLimit || defaultLimit,
-        pageNumber: page,
-        trait: this.weaponTratFilter(),
-        stars: this.weaponStarFilter()
-      });
+      const url = new URL('https://api.cryptoblades.io/static/market/weapon');
+      const params = {
+        element: '' + this.weaponTraitFilter(),
+        minStars: '' + this.weaponStarFilter(),
+        maxStars: '' + this.weaponStarFilter(),
+        pageSize: '' + (this.weaponShowLimit || defaultLimit),
+        pageNum: '' + page,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const weaponsData = await fetch(url.toString());
+      const weapons = await weaponsData.json();
 
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
       this.searchResultsOwned = false; // temp
-      this.allSearchResults = results;
+      this.allListingsAmount = weapons.page.total;
+      this.allSearchResults = weapons.idResults;
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = null;
@@ -726,20 +744,18 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
 
       try {
-        const result = await this.fetchMarketNftIdsBySeller({
-          nftContractAddr: this.contractAddress,
-          sellerAddr: this.search,
-        });
-
-        this.searchResultsOwned = this.search === this.defaultAccount;
-        this.waitingMarketOutcome = false;
-        this.searchResults = result;
-
+        const results = this.activeType === 'weapon' ?
+          await this.searchWeaponListingsBySeller(this.search):
+          await this.searchCharacterListingsBySeller(this.search);
+        this.searchResults = results;
       } catch {
         this.searchResultsOwned = false;
         this.waitingMarketOutcome = false;
         this.searchResults = [];
       }
+
+      this.searchResultsOwned = false;
+      this.waitingMarketOutcome = false;
     },
 
     async searchOwnListings(type: SellType) {
@@ -753,13 +769,46 @@ export default Vue.extend({
 
       this.waitingMarketOutcome = true;
 
-      const result = await this.fetchMarketNftIdsBySeller({
-        nftContractAddr: this.contractAddress,
-        sellerAddr: this.defaultAccount,
-      });
+      const results = this.activeType === 'weapon' ?
+        await this.searchWeaponListingsBySeller(this.defaultAccount) :
+        await this.searchCharacterListingsBySeller(this.defaultAccount);
+
       this.searchResultsOwned = true;
       this.waitingMarketOutcome = false;
-      this.searchResults = result;
+      this.searchResults = results;
+    },
+
+    async searchCharacterListingsBySeller(sellerAddress: string): Promise<string[]>{
+      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const params = {
+        element: '' + this.characterTraitFilter(),
+        minLevel: '' + this.characterMinLevelFilter(),
+        maxLevel: '' + this.characterMaxLevelFilter(),
+        sellerAddress: '' + sellerAddress,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const charactersData = await fetch(url.toString());
+      const characters = await charactersData.json();
+      return characters.idResults;
+    },
+
+    async searchWeaponListingsBySeller(sellerAddress: string): Promise<string[]>{
+      const url = new URL('https://api.cryptoblades.io/static/market/weapon');
+      const params = {
+        element: '' + this.weaponTraitFilter(),
+        minStars: '' + this.weaponStarFilter(),
+        maxStars: '' + this.weaponStarFilter(),
+        pageSize: '' + (this.weaponShowLimit || defaultLimit),
+        sellerAddress: '' + sellerAddress,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const weaponsData = await fetch(url.toString());
+      const weapons = await weaponsData.json();
+      return weapons.idResults;
     },
 
     convertWeiToSkill(wei: string) {
@@ -776,23 +825,23 @@ export default Vue.extend({
     },
 
     characterMinLevelFilter(): number {
-      return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) - 1 : 255;
+      return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) - 1 : 0;
     },
 
     characterMaxLevelFilter(): number {
       return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) + 8 : 255;
     },
 
-    characterTraitFilter(): number {
-      return traitNameToNumber(localStorage.getItem('character-elementfilter') as string);
+    characterTraitFilter(): string {
+      return localStorage.getItem('character-elementfilter') as string;
     },
 
-    weaponTratFilter(): number {
-      return traitNameToNumber(localStorage.getItem('weapon-elementfilter') as string);
+    weaponTraitFilter(): string {
+      return (localStorage.getItem('weapon-elementfilter') as string).toLowerCase();
     },
 
     weaponStarFilter(): number {
-      return localStorage.getItem('weapon-starfilter') ? +(localStorage.getItem('weapon-starfilter') as string) - 1 : 255;
+      return localStorage.getItem('weapon-starfilter') ? +(localStorage.getItem('weapon-starfilter') as string) - 1 : 0;
     },
 
     convertStringToDecimal(val: string, maxDecimals: number) {
