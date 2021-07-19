@@ -652,6 +652,7 @@ export default Vue.extend({
         element: '' + this.characterTraitFilter(),
         minLevel: '' + this.characterMinLevelFilter(),
         maxLevel: '' + this.characterMaxLevelFilter(),
+        sortBy: '' + this.characterPriceOrder() ? 'price' : '',
         sortDir: '' + this.characterPriceOrder(),
         pageSize: '' + (this.characterShowLimit || defaultLimit),
         pageNum: '' + page,
@@ -683,6 +684,7 @@ export default Vue.extend({
         element: '' + this.weaponTraitFilter(),
         minStars: '' + this.weaponStarFilter(),
         maxStars: '' + this.weaponStarFilter(),
+        sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
         sortDir: '' + this.weaponPriceOrder(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         pageNum: '' + page,
@@ -772,6 +774,8 @@ export default Vue.extend({
         element: '' + this.characterTraitFilter(),
         minLevel: '' + this.characterMinLevelFilter(),
         maxLevel: '' + this.characterMaxLevelFilter(),
+        sortBy: '' + this.characterPriceOrder() ? 'price' : '',
+        sortDir: '' + this.characterPriceOrder(),
         sellerAddress: '' + sellerAddress,
       };
 
@@ -788,6 +792,8 @@ export default Vue.extend({
         element: '' + this.weaponTraitFilter(),
         minStars: '' + this.weaponStarFilter(),
         maxStars: '' + this.weaponStarFilter(),
+        sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
+        sortDir: '' + this.weaponPriceOrder(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         sellerAddress: '' + sellerAddress,
       };
