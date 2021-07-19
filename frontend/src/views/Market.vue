@@ -643,6 +643,22 @@ export default Vue.extend({
       this.activeType = 'character';
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
+
+      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const params = {
+        element: '' + this.characterTraitFilter(),
+        minLevel: '' + this.characterMinLevelFilter(),
+        maxLevel: '' + this.characterMaxLevelFilter(),
+        pageSize: '' + (this.characterShowLimit || defaultLimit),
+        pageNum: '' + page,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const charactersData = await fetch(url.toString());
+      const characters = await charactersData.json();
+
+      /*
       this.allListingsAmount = await this.fetchNumberOfCharacterListings({
         nftContractAddr: this.contractAddress,
         trait: this.characterTraitFilter(),
@@ -658,13 +674,14 @@ export default Vue.extend({
         minLevel: this.characterMinLevelFilter(),
         maxLevel: this.characterMaxLevelFilter()
       });
+      */
 
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
       this.searchResultsOwned = false; // temp
-      this.allSearchResults = results;
-      console.log(this.allSearchResults.length);
+      this.allListingsAmount = characters.page.total;
+      this.allSearchResults = characters.idResults;
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = null;
@@ -776,15 +793,15 @@ export default Vue.extend({
     },
 
     characterMinLevelFilter(): number {
-      return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) - 1 : 255;
+      return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) - 1 : 1;
     },
 
     characterMaxLevelFilter(): number {
       return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) + 8 : 255;
     },
 
-    characterTraitFilter(): number {
-      return traitNameToNumber(localStorage.getItem('character-elementfilter') as string);
+    characterTraitFilter(): string {
+      return localStorage.getItem('character-elementfilter') as string;
     },
 
     weaponTratFilter(): number {
