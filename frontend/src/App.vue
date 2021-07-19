@@ -108,7 +108,7 @@ export default {
     },
 
     async currentCharacterId() {
-      await this.updateCurrentCharacterStamina();
+      await this.updateCharacterStamina(this.currentCharacterId);
     },
     $route(to) {
       // react to route changes
@@ -133,11 +133,11 @@ export default {
       'fetchRewardsClaimTax',
     ]),
 
-    async updateCurrentCharacterStamina() {
+    async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;
 
-      if (this.currentCharacterId !== null) {
-        await this.fetchCharacterStamina(this.currentCharacterId);
+      if (id !== null) {
+        await this.fetchCharacterStamina(id);
       }
     },
 
@@ -325,8 +325,10 @@ export default {
       throw e;
     }
 
-    this.pollCharacterStaminaIntervalId = setInterval(async () => {
-      await this.updateCurrentCharacterStamina();
+    this.pollCharactersStaminaIntervalId = setInterval(async () => {
+      this.ownCharacters.forEach(async (c) => {
+        await this.updateCharacterStamina(c.id);
+      });
     }, 3000);
 
     this.availableStakeTypes.forEach((item) => {
