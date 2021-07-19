@@ -833,15 +833,15 @@ export default Vue.extend({
     },
 
     characterTraitFilter(): string {
-      return localStorage.getItem('character-elementfilter') as string;
+      return (localStorage.getItem('character-elementfilter') as string).toLowerCase();
     },
 
     weaponTraitFilter(): string {
-      return (localStorage.getItem('weapon-elementfilter') as string).toLowerCase();
+      return (sessionStorage.getItem('weapon-elementfilter') as string).toLowerCase();
     },
 
     weaponStarFilter(): number {
-      return localStorage.getItem('weapon-starfilter') ? +(localStorage.getItem('weapon-starfilter') as string) - 1 : 0;
+      return sessionStorage.getItem('weapon-starfilter') ? +(sessionStorage.getItem('weapon-starfilter') as string) - 1 : 0;
     },
 
     convertStringToDecimal(val: string, maxDecimals: number) {

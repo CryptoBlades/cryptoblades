@@ -3,7 +3,7 @@
     <span v-if="showLimit > 0 && nonIgnoredWeapons.length >= showLimit">
       <h4>More than {{ showLimit }} results, try adjusting the filters</h4>
     </span>
-    <div class="filters row mt-2 pl-2" v-if="displayWeapons.length > 0">
+    <div class="filters row mt-2 pl-2">
       <div class="col-sm-6 col-md-2">
         <strong>Stars</strong>
         <select class="form-control" v-model="starFilter" @change="saveFilters()">
