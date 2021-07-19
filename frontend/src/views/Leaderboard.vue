@@ -4,7 +4,7 @@
       <b-tabs pills card vertical>
         <b-tab v-for="leaderboard in leaderboards" :key="leaderboard.key" :title="leaderboard.key">
           <b-card-text>
-            <div class="offset-md-3 col-md-6 col-sm-12 col-xs-12">
+            <div class="offset-md-2 col-md-8 col-sm-12 col-xs-12">
               <div class="row">
                 <div class="col-12">
                   <h3 class="text-center">{{ leaderboard.key }}</h3>
