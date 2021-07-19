@@ -54,6 +54,7 @@
                 :showLimit="weaponShowLimit"
                 :showReforgedToggle="false"
                 :canFavorite="false"
+                :isMarket="true"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
@@ -72,6 +73,7 @@
                 :showGivenCharacterIds="true"
                 :characterIds="allSearchResults"
                 :showLimit="characterShowLimit"
+                :isMarket="true"
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
@@ -199,6 +201,7 @@
                 :showReforgedToggle="false"
                 :canFavorite="false"
                 :weaponIds="searchResults"
+                :isMarket="true"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
@@ -215,6 +218,7 @@
                 v-if="activeType === 'character'"
                 :showGivenCharacterIds="true"
                 :characterIds="searchResults"
+                :isMarket="true"
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
@@ -648,6 +652,7 @@ export default Vue.extend({
         element: '' + this.characterTraitFilter(),
         minLevel: '' + this.characterMinLevelFilter(),
         maxLevel: '' + this.characterMaxLevelFilter(),
+        sortDir: '' + this.characterPriceOrder(),
         pageSize: '' + (this.characterShowLimit || defaultLimit),
         pageNum: '' + page,
       };
@@ -656,24 +661,6 @@ export default Vue.extend({
 
       const charactersData = await fetch(url.toString());
       const characters = await charactersData.json();
-
-      /*
-      this.allListingsAmount = await this.fetchNumberOfCharacterListings({
-        nftContractAddr: this.contractAddress,
-        trait: this.characterTraitFilter(),
-        minLevel: this.characterMinLevelFilter(),
-        maxLevel: this.characterMaxLevelFilter()
-      });
-
-      const results = await this.fetchAllMarketCharacterNftIdsPage({
-        nftContractAddr: this.contractAddress,
-        limit: this.characterShowLimit || defaultLimit,
-        pageNumber: page,
-        trait: this.characterTraitFilter(),
-        minLevel: this.characterMinLevelFilter(),
-        maxLevel: this.characterMaxLevelFilter()
-      });
-      */
 
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs
@@ -696,6 +683,7 @@ export default Vue.extend({
         element: '' + this.weaponTraitFilter(),
         minStars: '' + this.weaponStarFilter(),
         maxStars: '' + this.weaponStarFilter(),
+        sortDir: '' + this.weaponPriceOrder(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         pageNum: '' + page,
       };
@@ -825,23 +813,31 @@ export default Vue.extend({
     },
 
     characterMinLevelFilter(): number {
-      return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) - 1 : 0;
+      return sessionStorage.getItem('character-levelfilter') ? +(sessionStorage.getItem('character-levelfilter') as string) - 1 : 0;
     },
 
     characterMaxLevelFilter(): number {
-      return localStorage.getItem('character-levelfilter') ? +(localStorage.getItem('character-levelfilter') as string) + 8 : 255;
+      return sessionStorage.getItem('character-levelfilter') ? +(sessionStorage.getItem('character-levelfilter') as string) + 8 : 255;
     },
 
     characterTraitFilter(): string {
-      return (localStorage.getItem('character-elementfilter') as string).toLowerCase();
+      return sessionStorage.getItem('character-elementfilter') ? (sessionStorage.getItem('character-elementfilter') as string).toLowerCase() : '';
+    },
+
+    characterPriceOrder(): string {
+      return sessionStorage.getItem('character-price-order') ? (sessionStorage.getItem('character-price-order') as string) : '';
     },
 
     weaponTraitFilter(): string {
-      return (sessionStorage.getItem('weapon-elementfilter') as string).toLowerCase();
+      return sessionStorage.getItem('weapon-elementfilter') ? (sessionStorage.getItem('weapon-elementfilter') as string).toLowerCase() : '';
     },
 
     weaponStarFilter(): number {
       return sessionStorage.getItem('weapon-starfilter') ? +(sessionStorage.getItem('weapon-starfilter') as string) - 1 : 0;
+    },
+
+    weaponPriceOrder(): string {
+      return sessionStorage.getItem('weapon-price-order') ? (sessionStorage.getItem('weapon-price-order') as string) : '';
     },
 
     convertStringToDecimal(val: string, maxDecimals: number) {
