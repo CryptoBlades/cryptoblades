@@ -12,13 +12,13 @@
               </div>
 
               <div class="row mt-2" v-for="(entry, pos) of leaderboard.leaderboard" :key="entry.name">
-                <div class="col-9">
+                <div class="col-7">
                   <strong class="mr-2 position-marker">#{{ pos + 1 }}</strong>
                   {{ entry.name }}
                   <b-icon v-if="matchesCharIdOrWallet(entry.name)" icon="star-fill" />
                 </div>
 
-                <div class="col-3 text-right">
+                <div class="col-5 text-right">
                   {{ entry.value }} {{ leaderboard.units }}
                 </div>
               </div>
