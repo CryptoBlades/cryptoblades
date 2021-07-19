@@ -42,8 +42,13 @@
     </div>
     <router-link
       class="stake-select-button button dark-bg-text"
+      :class="{ deprecated: deprecated }"
       :to="{ name: 'stake', params: { stakeType } }">
-      Select
+        <span v-if="deprecated">Warning</span>
+        <span v-if="!deprecated">Select</span>
+        <b-icon-question-circle-fill v-if="deprecated"
+          v-tooltip="`This stake pool has been deprecated, and should not be staked in anymore.
+          You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed.`" />
     </router-link>
   </div>
 </template>
@@ -52,7 +57,7 @@
 import { formatDurationFromSeconds } from '../utils/date-time';
 
 export default {
-  props: ['stakeTitle', 'stakeTokenName', 'rewardTokenName', 'stakeType', 'minimumStakeTime', 'estimatedYield'],
+  props: ['stakeTitle', 'stakeTokenName', 'rewardTokenName', 'stakeType', 'minimumStakeTime', 'estimatedYield', 'deprecated'],
 
   computed: {
     minimumStakeTimeFormatted() {
@@ -120,6 +125,10 @@ export default {
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
   text-transform: uppercase;
   color: #9e8a57 !important;
+}
+
+.stake-select-button.deprecated {
+  background: rgb(100, 50, 50);
 }
 
 .button:hover:not(:disabled) {

@@ -45,13 +45,15 @@ interface HumanReadableDetailsForStakeType {
   stakeTokenName: string;
   rewardTokenName: string;
   stakeTitle: string;
+  deprecated?: boolean;
 }
 
 const defaultHumanReadableDetailsForStakeTypes: Record<StakeType, HumanReadableDetailsForStakeType> = {
   skill: {
     stakeTokenName: 'SKILL',
     rewardTokenName: 'SKILL',
-    stakeTitle: 'SKILL for SKILL (Old)'
+    stakeTitle: 'SKILL for SKILL (Old)',
+    deprecated: true
   },
   skill2: {
     stakeTokenName: 'SKILL',
