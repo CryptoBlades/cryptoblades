@@ -46,7 +46,9 @@
       :to="{ name: 'stake', params: { stakeType } }">
         <span v-if="deprecated">Warning</span>
         <span v-if="!deprecated">Select</span>
-        <b-icon-question-circle-fill v-if="deprecated" v-tooltip="'This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed.'" />
+        <b-icon-question-circle-fill v-if="deprecated"
+          v-tooltip="`This stake pool has been deprecated, and should not be staked in anymore.
+          You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed.`" />
     </router-link>
   </div>
 </template>
