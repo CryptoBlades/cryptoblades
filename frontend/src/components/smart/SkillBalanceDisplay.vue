@@ -12,7 +12,7 @@
         @mouseover="hover = !isMobile() || true"
         @mouseleave="hover = !isMobile()"
       >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/>
-      <b-icon-gift scale="1" v-if="!hasInGameSkill" /></span>
+      </span>
     </div>
 
     <div class="bnb-withdraw-container mx-3" v-if="hasBnbAvailableToWithdraw">
