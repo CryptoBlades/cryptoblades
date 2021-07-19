@@ -71,10 +71,10 @@
                   <b-button class="btn btn-primary" @click="calculateEarnings"
                     v-bind:class="[!canCalculate() ? 'disabled disabled-button' : '']">
                       Calculate
-                      <b-icon-question-circle class="centered-icon" scale="0.8"
-                      v-tooltip.bottom="`Earnings on victory: ${this.formattedSkill(this.fightGasOffset)} gas offset +
-                      ${this.stringFormattedSkill(this.fightBaseline)} per square root of power/1000`"/>
                   </b-button>
+                  <b-icon-question-circle class="centered-icon" scale="1.5"
+                    v-tooltip.bottom="`Earnings on victory: ${this.stringFormattedSkill(this.fightGasOffset)} gas offset +
+                    ${this.stringFormattedSkill(this.fightBaseline)} per square root of power/1000`"/>
                 </div>
               </div>
 
@@ -504,5 +504,10 @@ export default Vue.extend({
 .btn-small {
   font-size: small;
   margin-top: 5px;
+}
+
+.centered-icon {
+  align-self: center;
+  margin-left: 5px;
 }
 </style>
