@@ -16,6 +16,19 @@
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
+
+      <div class="col-2" v-if="isMarket">
+        <strong>Sort</strong>
+        <select class="form-control" v-model="priceSort" @change="saveFilters()">
+          <option v-for="x in ['', 'Price: Low -> High', 'Price: High -> Low']" :value="x" :key="x">{{ x || 'Any' }}</option>
+        </select>
+      </div>
+
+      <b-button variant="primary" class="ml-3 clear-filters-button" @click="clearFilters" >
+          <span>
+            Clear Filters
+          </span>
+        </b-button>
     </div>
 
     <ul class="character-list">
@@ -60,13 +73,18 @@ export default {
     showLimit: {
       type: Number,
       default: 0
+    },
+    isMarket: {
+      type: Boolean,
+      default: false
     }
   },
 
   data() {
     return {
       levelFilter: '',
-      elementFilter: ''
+      elementFilter: '',
+      priceSort: '',
     };
   },
 
@@ -104,6 +122,14 @@ export default {
       }
 
       return items;
+    },
+
+    priceSortAscText() {
+      return 'Price: Low -> High';
+    },
+
+    priceSortDescText() {
+      return 'Price: High -> Low';
     }
   },
 
@@ -133,10 +159,26 @@ export default {
     },
 
     saveFilters() {
-      localStorage.setItem('character-levelfilter', this.levelFilter);
-      localStorage.setItem('character-elementfilter', this.elementFilter);
+      sessionStorage.setItem('character-levelfilter', this.levelFilter);
+      sessionStorage.setItem('character-elementfilter', this.elementFilter);
+
+      if(this.isMarket) {
+        const sortOrder = this.priceSort === this.priceSortAscText ? '1' :
+          this.priceSort === this.priceSortDescText ? '-1' : '';
+        sessionStorage.setItem('character-price-order', sortOrder);
+      }
       this.$emit('character-filters-changed');
-    }
+    },
+
+    clearFilters() {
+      sessionStorage.clear();
+
+      this.elementFilter = '';
+      this.levelFilter = '';
+      this.priceSort = '';
+
+      this.$emit('character-filters-changed');
+    },
   },
 
   components: {
@@ -146,6 +188,9 @@ export default {
   mounted() {
     this.levelFilter = localStorage.getItem('character-levelfilter') || '';
     this.elementFilter = localStorage.getItem('character-elementfilter') || '';
+    if(this.isMarket) {
+      this.priceSort = sessionStorage.getItem('character-price-order') || '';
+    }
   }
 };
 </script>
@@ -208,6 +253,11 @@ export default {
   right: 0;
   z-index: 100;
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+}
+
+.clear-filters-button {
+  align-self: flex-end;
+  height: fit-content;
 }
 
 @media (max-width: 576px) {
