@@ -3,7 +3,7 @@
     <span v-if="showLimit > 0 && nonIgnoredWeapons.length >= showLimit">
       <h4>More than {{ showLimit }} results, try adjusting the filters</h4>
     </span>
-    <div class="filters row mt-2 pl-2" v-if="displayWeapons.length > 0">
+    <div class="filters row mt-2 pl-2">
       <div class="col-sm-6 col-md-2">
         <strong>Stars</strong>
         <select class="form-control" v-model="starFilter" @change="saveFilters()">
@@ -15,6 +15,13 @@
         <strong>Element</strong>
         <select class="form-control" v-model="elementFilter" @change="saveFilters()">
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
+        </select>
+      </div>
+
+      <div class="col-2" v-if="isMarket">
+        <strong>Sort</strong>
+        <select class="form-control" v-model="priceSort" @change="saveFilters()">
+          <option v-for="x in ['', 'Price: Low -> High', 'Price: High -> Low']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
 
@@ -72,6 +79,7 @@ interface Data {
   elementFilter: string;
   showReforgedWeapons: boolean;
   favorites: Record<number, boolean>;
+  priceSort: string;
 }
 
 export default Vue.extend({
@@ -122,6 +130,10 @@ export default Vue.extend({
       type: Boolean,
       default: true,
     },
+    isMarket: {
+      type: Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -130,6 +142,7 @@ export default Vue.extend({
       elementFilter: '',
       showReforgedWeapons: true,
       favorites: {},
+      priceSort: '',
     } as Data;
   },
 
@@ -188,6 +201,14 @@ export default Vue.extend({
 
       return favoriteWeapons.concat(items);
     },
+
+    priceSortAscText() {
+      return 'Price: Low -> High';
+    },
+
+    priceSortDescText() {
+      return 'Price: High -> Low';
+    }
   },
 
   watch: {
@@ -202,6 +223,12 @@ export default Vue.extend({
     saveFilters() {
       sessionStorage.setItem('weapon-starfilter', this.starFilter);
       sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
+
+      if(this.isMarket) {
+        const sortOrder = this.priceSort === this.priceSortAscText ? '1' :
+          this.priceSort === this.priceSortDescText ? '-1' : '';
+        sessionStorage.setItem('weapon-price-order', sortOrder);
+      }
       this.$emit('weapon-filters-changed');
     },
 
@@ -239,12 +266,18 @@ export default Vue.extend({
 
       this.elementFilter = '';
       this.starFilter = '';
+      this.priceSort = '';
+
+      this.$emit('weapon-filters-changed');
     },
   },
 
   mounted() {
     this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
     this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
+    if(this.isMarket) {
+      this.priceSort = sessionStorage.getItem('weapon-price-order') || '';
+    }
 
     const favoritesFromStorage = localStorage.getItem('favorites');
     if (favoritesFromStorage) {
