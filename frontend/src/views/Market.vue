@@ -289,9 +289,10 @@
                   <template #modal-title>
                     Sell {{activeType}}
                   </template>
-                  <b-form-input type="number"
-                    oninput="javascript: if (this.value > 10000) this.value = 10000;"
+                  <b-form-input type="number" :max="10000"
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
+
+                  <span v-if="listingSellPrice">Do you want to sell your {{activeType}} for {{Math.min(+listingSellPrice, 10000)}} SKILL?</span>
                 </b-modal>
               </div>
 
@@ -555,7 +556,7 @@ export default Vue.extend({
       if(this.selectedNftId === null) return;
       if(!this.listingSellPrice) return;
 
-      const val = +this.listingSellPrice;
+      const val = Math.min(+this.listingSellPrice, 10000);
       if(val <= 0 || !val || isNaN(val)) return;
 
       this.waitingMarketOutcome = true;
