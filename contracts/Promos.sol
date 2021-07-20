@@ -15,7 +15,7 @@ contract Promos is Initializable, AccessControlUpgradeable {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function migrateTo_X() external {
+    function migrateTo_f73df27() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         firstCharacterPromoInGameOnlyFundsGivenInUsd = ABDKMath64x64.divu(
