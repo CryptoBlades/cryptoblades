@@ -274,15 +274,25 @@
                   v-if="activeType === 'weapon'"
                    class="gtag-link-others" tagname="add_listing_weapon"
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
-                  @click="addListingForNft()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
+                  @click="showListingSetupModal()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
                   v-tooltip.bottom="weaponMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
                    class="gtag-link-others" tagname="add_listing_character"
-                  @click="addListingForNft()">List Character <b-icon-question-circle :hidden=!characterMarketTax
+                  @click="showListingSetupModal()">List Character <b-icon-question-circle :hidden=!characterMarketTax
                   v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
+
+                <b-modal class="centered-modal" ref="listing-setup-modal"
+                  @ok="addListingForNft">
+                  <template #modal-title>
+                    Sell {{activeType}}
+                  </template>
+                  <b-form-input type="number"
+                    oninput="javascript: if (this.value > 10000) this.value = 10000;"
+                    class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
+                </b-modal>
               </div>
 
               <div class="col">
@@ -339,6 +349,7 @@ import { Accessors } from 'vue/types/options';
 import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons } from '../../../build/abi-interfaces';
 import BigNumber from 'bignumber.js';
+import { BModal } from 'bootstrap-vue';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -361,6 +372,7 @@ interface Data {
   allListingsAmount: number;
   currentPage: number;
   browseTabActive: boolean;
+  listingSellPrice: string;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -412,7 +424,8 @@ export default Vue.extend({
       weaponShowLimit: 60,
       allListingsAmount: 0,
       currentPage: 1,
-      browseTabActive: true
+      browseTabActive: true,
+      listingSellPrice: ''
     } as Data;
   },
 
@@ -458,7 +471,7 @@ export default Vue.extend({
       && (this.activeType === 'weapon'
         ? (this.transferCooldownOfWeaponId(+this.selectedNftId) > 0)
         : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
-    },
+    }
   },
 
   methods: {
@@ -491,6 +504,7 @@ export default Vue.extend({
       this.nftPricesById = {};
       this.allListingsAmount = 0;
       this.currentPage = 1;
+      this.listingSellPrice = '';
     },
 
     async loadMarketTaxes() {
@@ -539,11 +553,9 @@ export default Vue.extend({
     async addListingForNft() {
       this.marketOutcome = null;
       if(this.selectedNftId === null) return;
+      if(!this.listingSellPrice) return;
 
-      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeType}`, text: 'Sell Price (SKILL)' });
-      if(!sellFor) return;
-
-      const val = +sellFor;
+      const val = +this.listingSellPrice;
       if(val <= 0 || !val || isNaN(val)) return;
 
       this.waitingMarketOutcome = true;
@@ -551,7 +563,7 @@ export default Vue.extend({
       const results = await this.addMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
-        price: this.convertSkillToWei(sellFor)
+        price: this.convertSkillToWei(this.listingSellPrice),
       });
 
       this.selectedNftId = null;
@@ -805,6 +817,15 @@ export default Vue.extend({
       return weapons.idResults;
     },
 
+    showListingSetupModal() {
+      this.clearInputs();
+      (this.$refs['listing-setup-modal'] as BModal).show();
+    },
+
+    clearInputs() {
+      this.listingSellPrice = '';
+    },
+
     convertWeiToSkill(wei: string) {
       return Web3.utils.fromWei(
         wei,
@@ -915,6 +936,11 @@ export default Vue.extend({
   margin: auto;
   text-align: center;
   font-size: 1em;
+}
+
+.modal-input {
+  margin-bottom: 5px;
+  margin-top: 5px;
 }
 
 </style>
