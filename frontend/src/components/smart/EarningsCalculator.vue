@@ -154,6 +154,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters([
       'currentCharacter',
+      'currentWeapon',
       'fightGasOffset',
       'fightBaseline'
     ]),
@@ -184,6 +185,33 @@ export default Vue.extend({
 
   methods: {
     async onShowEarningsCalculator() {
+      if(this.currentCharacter !== null) {
+        this.characterElementValue = CharacterTrait[this.currentCharacter.trait];
+        this.levelSliderValue = this.currentCharacter.level + 1;
+      }
+
+      if(this.currentWeapon !== null) {
+        console.log(this.currentWeapon.stars);
+        console.log(this.currentWeapon.element);
+        console.log(this.currentWeapon.stat1);
+        console.log(this.currentWeapon.stat2);
+        console.log(this.currentWeapon.stat3);
+        console.log(this.currentWeapon.stat1Value);
+        console.log(this.currentWeapon.stat2Value);
+        console.log(this.currentWeapon.stat3Value);
+        console.log(this.currentWeapon.bonusPower);
+
+        this.starsValue = this.currentWeapon.stars + 1;
+        this.wepElementValue = this.currentWeapon.element;
+        this.wepFirstStatSliderValue = this.currentWeapon.stat1Value;
+        this.wepSecondStatSliderValue = this.starsValue > 3 && this.currentWeapon.stat2Value;
+        this.wepThirdStatSliderValue = this.starsValue > 4 && this.currentWeapon.stat3Value;
+        this.wepFirstStatElementValue = this.currentWeapon.stat1;
+        this.wepSecondStatElementValue = this.starsValue > 3 && this.currentWeapon.stat2;
+        this.wepThirdStatElementValue = this.starsValue > 4 && this.currentWeapon.stat3;
+        this.wepBonusPowerSliderValue = this.currentWeapon.bonusPower;
+      }
+
       await this.fetchPrices();
       (this.$refs['earnings-calc-modal'] as any).show();
     },
