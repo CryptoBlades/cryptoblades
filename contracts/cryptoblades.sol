@@ -301,7 +301,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             )
         );
     }
-    
+
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
         return uint16(ABDKMath64x64.divu(monsterPower, playerPower).mulu(fightXpGain));
     }
@@ -393,7 +393,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _payContract(msg.sender, mintCharacterFee);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
-            _giveInGameOnlyFundsFromContractBalance(msg.sender, 5 ether);
+            _giveInGameOnlyFundsFromContractBalance(msg.sender, usdToSkill(promos.firstCharacterPromoInGameOnlyFundsGivenInUsd()));
         }
 
         uint256 seed = randoms.getRandomSeed(msg.sender);

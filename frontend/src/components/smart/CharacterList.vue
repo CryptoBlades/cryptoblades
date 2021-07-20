@@ -4,7 +4,7 @@
       <div class="col-2">
         <strong>Level</strong>
         <select class="form-control" v-model="levelFilter" @change="saveFilters()">
-          <option v-for="x in ['', 1, 11, 21, 31, 41]" :value="x" :key="x">
+          <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
             {{ x ? `${x} - ${x + 9}` : 'Any' }}
           </option>
         </select>

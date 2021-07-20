@@ -300,14 +300,6 @@ export default {
     });
 
     this.showWarningDialog();
-    this.$dialog.confirm({
-      title: 'Market Notice',
-      text: `Hello, lovely player! We've been working through our market issues. 
-      We've got something semi-functional, and we're continuing to add new functionality as well as restore old functionality.
-      For now, it'll work alright, but there's more to come.
-      
-      This modal will show up every time you load the game, until we fix it. Sorry for being a pest! -Sei`
-    });
 
   },
 
