@@ -700,7 +700,7 @@ export default {
 }
 .balance {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 18px;
   line-height: 20px;
   text-align: center;
   letter-spacing: 0.3px;
