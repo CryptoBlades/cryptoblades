@@ -53,7 +53,7 @@ contract WaxBridge is Initializable, AccessControlUpgradeable {
         bnbLimitPerPeriod = _dailyBnbWeiLimit;
     }
 
-    receive() external payable restricted {
+    receive() external payable {
     }
 
     function processWaxConversions(uint256 _latestWaxChainBlockNumberProcessed, address[] calldata _to, uint256[] calldata _value) external payable {
