@@ -24,9 +24,9 @@
 
     </div>
 
-    <div class="id" v-if="advancedUI">ID {{ weapon.id }}</div>
+    <div class="id">ID {{ weapon.id }}</div>
 
-    <div class="stats" v-if="advancedUI">
+    <div class="stats">
       <div v-if="weapon.stat1Value">
         <span :class="weapon.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
         <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1 }} +{{ weapon.stat1Value }}</span>
@@ -196,7 +196,6 @@ export default {
       pommelNormalTexture: null,
       pommelAOTexture: null,
       showPlaceholder: false,
-      advancedUI: this.advancedUI
     };
   },
 
@@ -416,7 +415,6 @@ export default {
     }
   },
   mounted() {
-    this.advancedUI = localStorage.getItem('hideAdvanced') === 'false';
     if(localStorage.getItem('useGraphics') === 'false') {
       this.allLoaded = true;
       this.showPlaceholder = true;

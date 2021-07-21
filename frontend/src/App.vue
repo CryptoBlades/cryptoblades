@@ -276,7 +276,6 @@ export default {
     this.checkStorage();
 
     Events.$on('setting:hideRewards', () => this.checkStorage());
-    Events.$on('setting:hideAdvanced', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
     Events.$on('setting:hideWalletWarning', () => this.checkStorage());
 
@@ -350,7 +349,6 @@ export default {
     pollAccounts();
 
     if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
-    if (!localStorage.getItem('hideAdvanced')) localStorage.setItem('hideAdvanced', 'false');
     if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
     if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
   },
