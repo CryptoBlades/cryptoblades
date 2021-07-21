@@ -31,7 +31,7 @@
         </div>
 
         <div class="image">
-          image here
+          <img src="../assets/DragonFlyIdle_512.gif">
         </div>
 
         <div class="about-raid">
