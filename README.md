@@ -55,3 +55,7 @@ Truffle also supports some environment variables, if you create a `.env` file in
 - `npm run lint` - run lint checking for all modules
 - `npm run contract:prepare` - extract the ABI and re-compile Truffle contracts
 - `npm run contract:deploy` - deploy the Truffle contracts for testing
+
+## Errors
+
+- `Artifacts are from different compiler runs` - `rm -rf build/`
