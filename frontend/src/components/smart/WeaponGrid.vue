@@ -42,7 +42,7 @@
         :class="{ selected: highlight !== null && weapon.id === highlight }"
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
-        @click="onWeaponClick(weapon.id)"
+        @click="getWeaponDurability(weapon.id) > 0 && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
         <b-icon v-if="isFavorite(weapon.id) === true" class="favorite-star" icon="star-fill" variant="warning" />
@@ -159,7 +159,7 @@ export default Vue.extend({
 
   computed: {
     ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['weaponsWithIds','getWeaponDurability',]) as Accessors<StoreMappedGetters>),
 
     weaponIdsToDisplay(): string[] {
       if (this.showGivenWeaponIds) {

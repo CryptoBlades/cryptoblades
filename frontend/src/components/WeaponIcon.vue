@@ -1,6 +1,7 @@
 <template>
   <div
     class="weapon-icon"
+    v-bind:class="[getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '']"
     v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"
@@ -537,6 +538,10 @@ export default {
 
 .glow-4 {
   animation: glow-4 2000ms ease-out infinite alternate;
+}
+
+.no-durability {
+  opacity: 0.6;
 }
 
 @keyframes glow-1 {

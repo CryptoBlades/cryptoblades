@@ -303,7 +303,7 @@ export function createStore(web3: Web3) {
       timeUntilWeaponHasMaxDurability(state, getters) {
         return (id: number) => {
           const currentDurability = getters.getWeaponDurability(id);
-          if (!currentDurability) {
+          if (currentDurability === null || currentDurability === undefined) {
             return '';
           }
           const date = new Date();

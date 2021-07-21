@@ -17,7 +17,7 @@
 
           <div class="message-box" v-if="currentCharacter && currentCharacterStamina < 40">You need 40 stamina to do battle.</div>
 
-          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurabilit(selectedWeaponId)">This weapon does not have enoguh durability.</div>
+          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurabilit(selectedWeaponId)">This weapon does not have enough durability.</div>
 
           <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">You cannot do battle during the last 30 seconds of the hour. Stand fast!</div>
         </div>
