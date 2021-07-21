@@ -128,7 +128,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function recoverSkill(uint256 amount) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
-        skillToken.transfer(msg.sender, amount);
+        skillToken.safeTransferFrom(address(this), msg.sender, amount);
     }
 
     function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _skillNeeded)
@@ -525,7 +525,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
 
         tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
-        skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
+        skillToken.safeTransferFrom(playerAddress, address(this), fromUserWallet);
     }
 
     function _payPlayer(address playerAddress, int128 baseAmount) internal {
@@ -533,7 +533,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _payPlayerConverted(address playerAddress, uint256 convertedAmount) internal {
-        skillToken.transfer(playerAddress, convertedAmount);
+        skillToken.safeTransferFrom(address(this), playerAddress, convertedAmount);
     }
 
     function _approveContractCharacterFor(uint256 characterID, address playerAddress) internal {
@@ -580,7 +580,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
         inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
 
-        skillToken.transferFrom(msg.sender, address(this), skillAmount);
+        skillToken.safeTransferFrom(msg.sender, address(this), skillAmount);
 
         emit InGameOnlyFundsGiven(to, skillAmount);
     }

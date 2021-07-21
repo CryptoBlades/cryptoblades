@@ -488,8 +488,8 @@ contract NFTMarket is
         listedTokenIDs[address(_tokenAddress)].remove(_id);
         _updateListedTokenTypes(_tokenAddress);
 
-        skillToken.transferFrom(msg.sender, taxRecipient, taxAmount);
-        skillToken.transferFrom(
+        skillToken.safeTransferFrom(msg.sender, taxRecipient, taxAmount);
+        skillToken.safeTransferFrom(
             msg.sender,
             listing.seller,
             finalPrice.sub(taxAmount)
@@ -566,7 +566,7 @@ contract NFTMarket is
     }
 
     function recoverSkill(uint256 amount) public restricted {
-        skillToken.transfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
+        skillToken.safeTransferFrom(address(this), msg.sender, amount); // dont expect we'll hold tokens here but might as well
     }
 
     function onERC721Received(
