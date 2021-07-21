@@ -43,7 +43,7 @@
           <slot name="above" :character="c"></slot>
         </div>
         <div class="art">
-          <CharacterArt :character="c" />
+          <CharacterArt :character="c" :isMarket="isMarket"/>
         </div>
       </li>
     </ul>
@@ -135,20 +135,6 @@ export default {
     ...mapActions(['fetchCharacters']),
 
     getCharacterArt,
-
-    getStaminaPoints(timestamp_str) {
-      // super temporary function, just to make it work for now. sorry
-      const timestamp = parseInt(timestamp_str, 10);
-      const now = Date.now();
-      if(timestamp  > now)
-        return 0;
-
-      let points = (now - timestamp) / 300;
-      if(points > 200) {
-        points = 200;
-      }
-      return points;
-    },
 
     saveFilters() {
       sessionStorage.setItem('character-levelfilter', this.levelFilter);

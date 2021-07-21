@@ -42,7 +42,7 @@
         :class="{ selected: highlight !== null && weapon.id === highlight }"
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
-        @click="$emit('choose-weapon', weapon.id)"
+        @click="onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
         <b-icon v-if="isFavorite(weapon.id) === true" class="favorite-star" icon="star-fill" variant="warning" />
@@ -60,7 +60,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
 import WeaponIcon from '../WeaponIcon.vue';
 
@@ -212,6 +212,7 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['fetchWeapons']) as StoreMappedActions),
+    ...(mapMutations(['setCurrentWeapon'])),
 
     saveFilters() {
       sessionStorage.setItem('weapon-starfilter', this.starFilter);
@@ -271,6 +272,10 @@ export default Vue.extend({
       return 'Any';
     },
 
+    onWeaponClick(id: number) {
+      this.setCurrentWeapon(id);
+      this.$emit('choose-weapon', id);
+    }
   },
 
   mounted() {

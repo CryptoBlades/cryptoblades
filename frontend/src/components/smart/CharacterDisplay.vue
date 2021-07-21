@@ -159,37 +159,6 @@ export default Vue.extend({
       return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
     },
 
-    getNextMilestoneBonus(level: number, fightGasOffset: number, fightRewardBaseling: number): string {
-      const nextMilestoneLevel = this.getNextMilestoneLevel(level);
-      return this.getRewardDiffBonus(level, nextMilestoneLevel, fightGasOffset, fightRewardBaseling);
-    },
-
-    getNextMilestoneLevel(level: number): number {
-      return (Math.floor(level / 10) + 1) * 10 + 1;
-    },
-
-    getMilestonesTooltip(level: number, fightGasOffset: number, fightRewardBaseling: number): string {
-      const nextMilestoneLevel1 = this.getNextMilestoneLevel(level);
-      const nextMilestoneLevel2 = this.getNextMilestoneLevel(nextMilestoneLevel1);
-      const nextMilestoneLevel3 = this.getNextMilestoneLevel(nextMilestoneLevel2);
-      const nextMilestoneLevel4 = this.getNextMilestoneLevel(nextMilestoneLevel3);
-      const nextMilestoneLevel5 = this.getNextMilestoneLevel(nextMilestoneLevel4);
-      return `LVL ${nextMilestoneLevel1} = +${this.getRewardDiffBonus(level, nextMilestoneLevel1, fightGasOffset, fightRewardBaseling)}%<br/>
-      LVL ${nextMilestoneLevel2} = +${this.getRewardDiffBonus(level, nextMilestoneLevel2, fightGasOffset, fightRewardBaseling)}%<br/>
-      LVL ${nextMilestoneLevel3} = +${this.getRewardDiffBonus(level, nextMilestoneLevel3, fightGasOffset, fightRewardBaseling)}%<br/>
-      LVL ${nextMilestoneLevel4} = +${this.getRewardDiffBonus(level, nextMilestoneLevel4, fightGasOffset, fightRewardBaseling)}%<br/>
-      LVL ${nextMilestoneLevel5} = +${this.getRewardDiffBonus(level, nextMilestoneLevel5, fightGasOffset, fightRewardBaseling)}%`;
-    },
-
-    getAverageRewardAtLevel(level: number, fightGasOffset: number, fightRewardBaseling: number): number {
-      return this.formattedSkill(fightGasOffset) + (this.formattedSkill(fightRewardBaseling) * (CharacterPower(level)/1000));
-    },
-
-    getRewardDiffBonus(level: number, targetLevel: number, fightGasOffset: number, fightRewardBaseling: number): string {
-      return (this.getAverageRewardAtLevel(targetLevel, fightGasOffset, fightRewardBaseling) /
-        this.getAverageRewardAtLevel(level, fightGasOffset, fightRewardBaseling) * 100 - 100).toFixed(2);
-    },
-
     formattedSkill(skill: number): number {
       const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
       return new BN(skillBalance).toNumber();

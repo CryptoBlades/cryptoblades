@@ -1,6 +1,10 @@
 <template>
   <div class="body main-font">
     <b-card no-body>
+      <div class="outcome" v-if="waitingLeaderboardOutcome">
+        <i class="fas fa-spinner fa-spin"></i>
+        Loading...
+      </div>
       <b-tabs pills card vertical>
         <b-tab v-for="leaderboard in leaderboards" :key="leaderboard.key" :title="leaderboard.key">
           <b-card-text>
@@ -36,15 +40,18 @@ import { mapState } from 'vuex';
 export default {
   data() {
     return {
-      leaderboards: []
+      leaderboards: [],
+      waitingLeaderboardOutcome: false,
     };
   },
 
   async created() {
+    this.waitingLeaderboardOutcome = true;
     const leaderboardData = await fetch('https://api.cryptoblades.io/static/leaderboard');
     const leaderboards = await leaderboardData.json();
 
     this.leaderboards = leaderboards.leaderboard;
+    this.waitingLeaderboardOutcome = false;
   },
 
   methods: {
@@ -67,5 +74,11 @@ export default {
 .position-marker {
   display: inline-block;
   min-width: 30px;
+}
+
+.outcome {
+  margin: auto;
+  text-align: center;
+  font-size: 1em;
 }
 </style>
