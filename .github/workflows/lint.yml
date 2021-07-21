@@ -31,16 +31,6 @@ jobs:
         run: npm run build -- --all
 
       - run: npm run build:frontend
-      
-      - name: Netlify Preview URL
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: unsplash/comment-on-pr@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OUTPUT: "This pull request is being automatically deployed to Netlify.\n\n🔍 Inspect: ${{ steps.deploy-netlify.outputs.NETLIFY_LOGS_URL }}\n✅ Preview: ${{ steps.deploy-netlify.outputs.NETLIFY_URL }}"
-        with:
-          msg: ${{ env.OUTPUT }}
-          check_for_duplicate_msg: false
 
       - name: Deploy testnet frontend
         uses: netlify/actions/cli@master
