@@ -102,7 +102,8 @@ contract RaidBasic is Initializable, Raid {
     function removeRewardWeapon(uint256 index) public restricted {
         require(index < weaponDrops.length, "Index out of bounds");
 
-        delete weaponDrops[index];
+        weaponDrops[index] = weaponDrops[weaponDrops.length - 1];
+        delete weaponDrops[weaponDrops.length - 1];
     }
 
     function getWeaponDrops() public view returns(uint256[] memory) {
