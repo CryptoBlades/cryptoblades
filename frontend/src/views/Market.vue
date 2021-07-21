@@ -28,7 +28,11 @@
                 <b-button
                   variant="primary"
                   v-if="buyableNftSelected"
-                  @click="purchaseNft()"  class="gtag-link-others" tagname="confirm_purchase">Purchase</b-button>
+                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
+                  Purchase <b-icon-question-circle v-if="!canPurchase"
+                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                </b-button>
               </div>
 
               <div class="col"></div>
@@ -175,7 +179,11 @@
                 <b-button
                   variant="primary"
                   v-if="buyableNftSelected"
-                  @click="purchaseNft()"  class="gtag-link-others" tagname="confirm_purchase">Purchase</b-button>
+                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
+                  Purchase <b-icon-question-circle v-if="!canPurchase"
+                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                </b-button>
               </div>
 
               <div class="col">
@@ -292,7 +300,9 @@
                   <b-form-input type="number" :max="10000"
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
 
-                  <span v-if="listingSellPrice">Do you want to sell your {{activeType}} for {{Math.min(+listingSellPrice, 10000)}} SKILL?</span>
+                  <span v-if="listingSellPrice">Do you want to sell your {{activeType}} for {{Math.min(+listingSellPrice, 10000)}} SKILL?<br>
+                  <i>The buyer will pay an extra {{activeListingMarketTax()}}% market fee for a total of
+                  {{calculatedBuyerCost(Math.min(+listingSellPrice, 10000))}} SKILL</i></span>
                 </b-modal>
               </div>
 
@@ -382,6 +392,7 @@ const defaultLimit = 40;
 
 interface StoreMappedGetters {
   contracts: Contracts;
+  ownCharacters: any[];
 }
 
 interface StoreMappedActions {
@@ -435,7 +446,7 @@ export default Vue.extend({
       'defaultAccount', 'weapons', 'characters', 'ownedCharacterIds', 'ownedWeaponIds'
     ]) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'contracts'
+      'contracts', 'ownCharacters'
     ]) as Accessors<StoreMappedGetters>),
     ...mapGetters(['transferCooldownOfWeaponId', 'transferCooldownOfCharacterId']),
 
@@ -472,6 +483,10 @@ export default Vue.extend({
       && (this.activeType === 'weapon'
         ? (this.transferCooldownOfWeaponId(+this.selectedNftId) > 0)
         : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
+    },
+
+    canPurchase(): boolean {
+      return this.activeType === 'weapon' || this.ownCharacters.length < 4 ;
     }
   },
 
@@ -659,6 +674,7 @@ export default Vue.extend({
       this.activeType = 'character';
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
+      this.currentPage = page + 1;
 
       const url = new URL('https://api.cryptoblades.io/static/market/character');
       const params = {
@@ -691,6 +707,7 @@ export default Vue.extend({
       this.activeType = 'weapon';
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
+      this.currentPage = page + 1;
 
       const url = new URL('https://api.cryptoblades.io/static/market/weapon');
       const params = {
@@ -870,6 +887,21 @@ export default Vue.extend({
 
     convertStringToDecimal(val: string, maxDecimals: number) {
       return new BigNumber(val).toFixed(maxDecimals);
+    },
+    activeListingMarketTax(): string{
+      if(this.activeType === 'weapon'){
+        return this.weaponMarketTax;
+      }
+
+      if(this.activeType === 'character'){
+        return this.characterMarketTax;
+      }
+
+      return '0';
+    },
+
+    calculatedBuyerCost(listedPrice: number): string {
+      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(2);
     }
   },
 
@@ -942,6 +974,10 @@ export default Vue.extend({
 .modal-input {
   margin-bottom: 5px;
   margin-top: 5px;
+}
+
+.disabled-button {
+  opacity: 0.65;
 }
 
 </style>

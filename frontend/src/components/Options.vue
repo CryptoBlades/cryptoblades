@@ -28,8 +28,6 @@
 
         <b-dropdown-item @click="toggleRewards()">Reward Bar: {{ hideRewards ? 'Off' : 'On' }}</b-dropdown-item>
 
-        <b-dropdown-item @click="toggleAdvanced()">Advanced UI: {{ hideAdvanced ? 'Off' : 'On' }}</b-dropdown-item>
-
         <b-dropdown-item @click="toggleHideWalletWarning()">Hide Wallet Warning: {{ hideWalletWarning ? 'On' : 'Off' }}</b-dropdown-item>
 
         </b-dropdown-group>
@@ -37,9 +35,21 @@
       </b-nav-item-dropdown>
     </b-navbar-nav>
 
-    <b-modal class="centered-modal" ref="need-gas-modal" title="Need Gas?"
-      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Bridge" >
-        Need Gas? Try our WAX Bridge, which will pay you .5% under market rate to sell your WAX for BNB!
+    <b-modal class="centered-modal" ref="need-gas-modal" title="Need Withdraw?"
+      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Portal" >
+        Need Withdraw? Try our WAX Portal, which will pay you .5% under market rate to sell your WAX for BNB!
+        <div class="text-center">
+          <hr class="hr-divider">
+          Hold Reminder:<br>
+          A percentage of your earning goes back to the community,<br>
+          <u>if you withdraw early</u>
+          <div class="row">
+            <div class="col-5">Your early withdraw tax</div>
+            <div class="col-2"><span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></div>
+            <div class="col-5 text-left">Reduces 1% per day<br>
+              Reset to 15% after withdraw</div>
+          </div>
+        </div>
     </b-modal>
     <b-modal class="centered-modal" ref="stake-suggestion-modal" title="Stake Skill"
       @ok="$router.push({ name: 'select-stake-type' })" ok-only ok-title="Go to Stake" >
@@ -76,7 +86,6 @@ interface StoreMappedActions {
 interface Data {
   showGraphics: boolean;
   hideRewards: boolean;
-  hideAdvanced: boolean;
   hideWalletWarning: boolean;
 }
 
@@ -95,7 +104,6 @@ export default Vue.extend({
   created() {
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
-    this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
   },
 
@@ -103,7 +111,6 @@ export default Vue.extend({
     return {
       showGraphics: false,
       hideRewards: false,
-      hideAdvanced: false,
       hideWalletWarning: false,
       ClaimStage
     } as Data;
@@ -159,13 +166,6 @@ export default Vue.extend({
       Events.$emit('setting:hideRewards', { value: this.hideRewards });
     },
 
-    toggleAdvanced() {
-      this.hideAdvanced = !this.hideAdvanced;
-      if (this.hideAdvanced) localStorage.setItem('hideAdvanced', 'true');
-      else localStorage.setItem('hideAdvanced', 'false');
-
-      Events.$emit('setting:hideAdvanced', { value: this.hideAdvanced });
-    },
     async onClaimTokens() {
       if(this.canClaimTokens) {
         await this.claimTokenRewards();

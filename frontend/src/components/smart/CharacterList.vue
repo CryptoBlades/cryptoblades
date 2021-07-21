@@ -20,7 +20,7 @@
       <div class="col-2" v-if="isMarket">
         <strong>Sort</strong>
         <select class="form-control" v-model="priceSort" @change="saveFilters()">
-          <option v-for="x in ['', 'Price: Low -> High', 'Price: High -> Low']" :value="x" :key="x">{{ x || 'Any' }}</option>
+          <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
         </select>
       </div>
 
@@ -43,7 +43,7 @@
           <slot name="above" :character="c"></slot>
         </div>
         <div class="art">
-          <CharacterArt :character="c" />
+          <CharacterArt :character="c" :isMarket="isMarket"/>
         </div>
       </li>
     </ul>
@@ -54,6 +54,12 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
+
+const sorts = [
+  { name: 'Any', dir: '' },
+  { name: 'Price: Low -> High', dir: 1 },
+  { name: 'Price: High -> Low', dir: -1 },
+];
 
 export default {
   props: {
@@ -85,6 +91,7 @@ export default {
       levelFilter: '',
       elementFilter: '',
       priceSort: '',
+      sorts,
     };
   },
 
@@ -122,14 +129,6 @@ export default {
       }
 
       return items;
-    },
-
-    priceSortAscText() {
-      return 'Price: Low -> High';
-    },
-
-    priceSortDescText() {
-      return 'Price: High -> Low';
     }
   },
 
@@ -144,28 +143,12 @@ export default {
 
     getCharacterArt,
 
-    getStaminaPoints(timestamp_str) {
-      // super temporary function, just to make it work for now. sorry
-      const timestamp = parseInt(timestamp_str, 10);
-      const now = Date.now();
-      if(timestamp  > now)
-        return 0;
-
-      let points = (now - timestamp) / 300;
-      if(points > 200) {
-        points = 200;
-      }
-      return points;
-    },
-
     saveFilters() {
-      sessionStorage.setItem('character-levelfilter', this.levelFilter);
-      sessionStorage.setItem('character-elementfilter', this.elementFilter);
+      localStorage.setItem('character-levelfilter', this.levelFilter);
+      localStorage.setItem('character-elementfilter', this.elementFilter);
 
       if(this.isMarket) {
-        const sortOrder = this.priceSort === this.priceSortAscText ? '1' :
-          this.priceSort === this.priceSortDescText ? '-1' : '';
-        sessionStorage.setItem('character-price-order', sortOrder);
+        sessionStorage.setItem('character-price-order', this.priceSort);
       }
       this.$emit('character-filters-changed');
     },
@@ -186,8 +169,8 @@ export default {
   },
 
   mounted() {
-    this.levelFilter = localStorage.getItem('character-levelfilter') || '';
-    this.elementFilter = localStorage.getItem('character-elementfilter') || '';
+    this.levelFilter = sessionStorage.getItem('character-levelfilter') || '';
+    this.elementFilter = sessionStorage.getItem('character-elementfilter') || '';
     if(this.isMarket) {
       this.priceSort = sessionStorage.getItem('character-price-order') || '';
     }

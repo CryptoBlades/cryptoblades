@@ -107,6 +107,7 @@ export function createStore(web3: Web3) {
       characters: {},
       characterStaminas: {},
       weapons: {},
+      currentWeaponId: null,
       isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
@@ -219,6 +220,12 @@ export function createStore(web3: Web3) {
           if (weapons.some((w) => w === null)) return [];
           return weapons;
         };
+      },
+
+      currentWeapon(state) {
+        if (state.currentWeaponId === null) return null;
+
+        return state.weapons[state.currentWeaponId];
       },
 
       transferCooldownOfCharacterId(state) {
@@ -453,6 +460,10 @@ export function createStore(web3: Web3) {
         { weaponId, weaponTransferCooldown }: { weaponId: number, weaponTransferCooldown: ITransferCooldown }
       ) {
         Vue.set(state.weaponTransferCooldowns, weaponId, weaponTransferCooldown);
+      },
+
+      setCurrentWeapon(state: IState, weaponId: number) {
+        state.currentWeaponId = weaponId;
       },
 
       updateCharacterStamina(state: IState, { characterId, stamina }) {
