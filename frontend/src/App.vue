@@ -414,6 +414,26 @@ export default {
 </script>
 
 <style>
+button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
+  font-weight: 900;
+  text-align: center;
+  background: linear-gradient(to right, rgb(248, 218, 136) 20%, rgb(88, 82, 23) 40%, rgb(87, 87, 34) 60%, rgb(177, 150, 92) 80%);
+  background-size: 200% auto;
+  color: #000;
+  background-clip: text;
+  text-fill-color: transparent;
+  text-shadow: 0px 2px 3px rgba(0,0,0,0.4),
+               0px 4px 7px rgba(0,0,0,0.1),
+               0px 9px 12px rgba(0,0,0,0.1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 1s linear infinite;
+  @keyframes shine {
+    to {
+      background-position: 200% center;
+    }
+  }
+}
 hr.hr-divider{
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
