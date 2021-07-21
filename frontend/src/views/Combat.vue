@@ -73,60 +73,35 @@
               <div class="enemy-list">
                 <div class="col-md-3 col-sm-12 col-xs-12 encounter" v-for="(e, i) in targets" :key="i">
                   <div class="encounter-container">
-
-                  <!-- <div class="mobile-divider-wrapper">
-                    <div class="mobile-divider">
+                    <div class="enemy-character">
                       <div class="encounter-element">
-                        <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
-                        <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
-                      </div>
+                          <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
+                        </div>
 
-                      <div class="encounter-power">
-                        {{ e.power }} Power
-                      </div>
+                        <div class="mobile-divider mobile-img-adjustment">
+                          <img class="mr-auto ml-auto enemy-img" :src="getEnemyArt(e.power)" alt="Enemy" />
+                        </div>
 
-                      <div class="xp-gain">
-                        +{{getPotentialXp(e)}} XP
-                      </div>
+                        <div class="encounter-power">
+                          {{ e.power }} Power
+                        </div>
 
-                      <div class="victory-chance">
-                        {{ getWinChance(e.power, e.trait) }} Victory
-                      </div>
+                        <div class="xp-gain">
+                          +{{getPotentialXp(e)}} XP
+                        </div>
                     </div>
 
-                    <div class="mobile-divider mobile-img-adjustment">
-                    <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
+                    <div class="victory-chance">
+                      {{ getWinChance(e.power, e.trait) }} Victory
                     </div>
-                  </div> -->
-                  <div class="enemy-character">
-                    <div class="encounter-element">
-                        <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
-                      </div>
 
-                      <div class="mobile-divider mobile-img-adjustment">
-                        <img class="mr-auto ml-auto enemy-img" :src="getEnemyArt(e.power)" alt="Enemy" />
-                      </div>
-
-                      <div class="encounter-power">
-                        {{ e.power }} Power
-                      </div>
-
-                      <div class="xp-gain">
-                        +{{getPotentialXp(e)}} XP
-                      </div>
-                  </div>
-
-                  <div class="victory-chance">
-                    {{ getWinChance(e.power, e.trait) }} Victory
-                  </div>
-
-                  <big-button
-                    class="encounter-button"
-                    :mainText="`Fight!`"
-                    v-tooltip="'Cost 40 stamina'"
-                    :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-                    @click="onClickEncounter(e)"
-                  />
+                    <big-button
+                      class="encounter-button"
+                      :mainText="`Fight!`"
+                      v-tooltip="'Cost 40 stamina'"
+                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                      @click="onClickEncounter(e)"
+                    />
 
                   <p v-if="isLoadingTargets">Loading...</p>
                   </div>
