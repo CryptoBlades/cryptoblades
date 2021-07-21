@@ -20,7 +20,7 @@
       <div class="col-2" v-if="isMarket">
         <strong>Sort</strong>
         <select class="form-control" v-model="priceSort" @change="saveFilters()">
-          <option v-for="x in ['', '1', '-1']" :value="x" :key="x">{{ priceSortText(x) || 'Any' }}</option>
+          <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
         </select>
       </div>
 
@@ -55,6 +55,12 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
 
+const sorts = [
+  { name: 'Any', dir: '' },
+  { name: 'Price: Low -> High', dir: 1 },
+  { name: 'Price: High -> Low', dir: -1 },
+];
+
 export default {
   props: {
     value: {},
@@ -85,6 +91,7 @@ export default {
       levelFilter: '',
       elementFilter: '',
       priceSort: '',
+      sorts,
     };
   },
 
@@ -137,8 +144,8 @@ export default {
     getCharacterArt,
 
     saveFilters() {
-      sessionStorage.setItem('character-levelfilter', this.levelFilter);
-      sessionStorage.setItem('character-elementfilter', this.elementFilter);
+      localStorage.setItem('character-levelfilter', this.levelFilter);
+      localStorage.setItem('character-elementfilter', this.elementFilter);
 
       if(this.isMarket) {
         sessionStorage.setItem('character-price-order', this.priceSort);
@@ -154,15 +161,6 @@ export default {
       this.priceSort = '';
 
       this.$emit('character-filters-changed');
-    },
-
-    priceSortText(type) {
-      if (type === '1') {
-        return 'Price: Low -> High';
-      } else if (type === '-1') {
-        return 'Price: High -> Low';
-      }
-      return 'Any';
     },
   },
 

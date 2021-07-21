@@ -21,7 +21,7 @@
       <div class="col-2" v-if="isMarket">
         <strong>Sort</strong>
         <select class="form-control" v-model="priceSort" @change="saveFilters()">
-          <option v-for="x in ['', '1', '-1']" :value="x" :key="x">{{ priceSortText(x) || 'Any' }}</option>
+          <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
         </select>
       </div>
 
@@ -82,6 +82,11 @@ interface Data {
   priceSort: string;
 }
 
+const sorts = [
+  { name: 'Any', dir: '' },
+  { name: 'Price: Low -> High', dir: 1 },
+  { name: 'Price: High -> Low', dir: -1 },
+];
 
 export default Vue.extend({
   model: {
@@ -144,6 +149,7 @@ export default Vue.extend({
       showReforgedWeapons: true,
       favorites: {},
       priceSort: '',
+      sorts,
     } as Data;
   },
 
@@ -261,15 +267,6 @@ export default Vue.extend({
       this.priceSort = '';
 
       this.$emit('weapon-filters-changed');
-    },
-
-    priceSortText(type: string): string {
-      if (type === '1') {
-        return 'Price: Low -> High';
-      } else if (type === '-1') {
-        return 'Price: High -> Low';
-      }
-      return 'Any';
     },
 
     onWeaponClick(id: number) {
