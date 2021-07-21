@@ -270,6 +270,36 @@ export default {
         );
       }
     },
+
+    async checkNotifications() {
+      const response = await fetch('https://api.cryptoblades.io/static/notifications');
+      const notifications = await response.json();
+
+      const lastHash = localStorage.getItem('lastnotification');
+      let shouldContinue = true;
+
+      notifications.forEach(notif => {
+
+        if(!shouldContinue) return;
+
+        if(lastHash === notif.hash) {
+          shouldContinue = false;
+          return;
+        }
+
+        this.$dialog.notify.warning(
+          `${notif.title}
+          <br>
+          <a href="${notif.link}" target="_blank">Check it out!</a>
+          `,
+          {
+            timeout: 300000,
+          },
+        );
+      });
+
+      localStorage.setItem('lastnotification', notifications[0].hash);
+    }
   },
 
   mounted() {
@@ -346,11 +376,14 @@ export default {
 
       setTimeout(pollAccounts, 200);
     };
+
     pollAccounts();
 
     if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
     if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
     if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
+
+    this.checkNotifications();
   },
 
   beforeDestroy() {
