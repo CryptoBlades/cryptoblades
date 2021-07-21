@@ -46,8 +46,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
         fightRewardGasOffset = ABDKMath64x64.divu(8, 10);//0.8 usd;
+
+        burnWeaponFee = ABDKMath64x64.divu(2, 10);//0.2 usd;
+        reforgeWeaponWithDustFee = ABDKMath64x64.divu(3, 10);//0.3 usd;
+
         mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
-        reforgeWeaponFee = ABDKMath64x64.divu(5, 10);//0.5 usd;
+        reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;//0.5 usd;
     }
 
     function migrateTo_1ee400a() public {
@@ -121,6 +125,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     mapping(address => uint256) private _rewardsClaimTaxTimerStart;
 
     IStakeFromGame public stakeFromGameImpl;
+
+    int128 public burnWeaponFee;
+    int128 public reforgeWeaponWithDustFee;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -418,11 +425,25 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         weapons.mint(msg.sender, seed);
     }
 
+    function burnWeapon(uint256 burnID) public
+            doesNotHaveMoreThanMaxCharacters
+            isWeaponOwner(burnID) requestPayFromPlayer(burnWeaponFee) {
+        _payContract(msg.sender, burnWeaponFee);
+        weapons.burn(burnID);
+    }
+
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
             doesNotHaveMoreThanMaxCharacters
             isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
         _payContract(msg.sender, reforgeWeaponFee);
         weapons.reforge(reforgeID, burnID);
+    }
+
+    function reforgeWeaponWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) public
+            doesNotHaveMoreThanMaxCharacters
+            isWeaponOwner(reforgeID) requestPayFromPlayer(reforgeWeaponWithDustFee) {
+        _payContract(msg.sender, reforgeWeaponWithDustFee);
+        weapons.reforgeWithDust(reforgeID, amountLB, amount4B, amount5B);
     }
 
     function migrateRandoms(IRandoms _newRandoms) external {
@@ -560,8 +581,20 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         mintWeaponFee = ABDKMath64x64.divu(cents, 100);
     }
 
+    function setBurnWeaponValue(uint256 cents) public restricted {
+        burnWeaponFee = ABDKMath64x64.divu(cents, 100);
+    }
+
     function setReforgeWeaponValue(uint256 cents) public restricted {
-        reforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
+        int128 newReforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
+        require(newReforgeWeaponFee > burnWeaponFee, "Reforge fee must include burn fee");
+        reforgeWeaponWithDustFee = newReforgeWeaponFee - burnWeaponFee;
+        reforgeWeaponFee = newReforgeWeaponFee;
+    }
+
+    function setReforgeWeaponWithDustValue(uint256 cents) public restricted {
+        reforgeWeaponWithDustFee = ABDKMath64x64.divu(cents, 100);
+        reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;
     }
 
     function setStaminaCostFight(uint8 points) public restricted {
