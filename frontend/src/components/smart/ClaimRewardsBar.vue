@@ -53,14 +53,18 @@
       " tax for early withdrawal, costing you " + this.formattedTaxAmount + " SKILL. You will also " : "" }}
       miss out on {{formattedBonusLost}} bonus SKILL. Are you sure
       you wish to continue? <b>This action cannot be undone.</b>
-      <hr class="hr-divider">
-      Hold Reminder:<br>
-      <ul>
-        <li>A percentage of your earning goes back to the community, <u class="font-weight-bold">if you withdraw early</u></li>
-        <li>Your early withdraw tax: <span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></li>
-        <li>Reduces 1% per day</li>
-        <li>Reset to 15% after withdraw</li>
-      </ul>
+      <div class="text-center">
+        <hr class="hr-divider">
+        Hold Reminder:<br>
+        A percentage of your earning goes back to the community,<br>
+        <u>if you withdraw early</u>
+        <div class="row">
+          <div class="col-5">Your early withdraw tax</div>
+          <div class="col-2"><span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></div>
+          <div class="col-5 text-left">Reduces 1% per day<br>
+            Reset to 15% after withdraw</div>
+        </div>
+      </div>
     </b-modal>
   </div>
 </template>
