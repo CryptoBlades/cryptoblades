@@ -676,10 +676,12 @@ export default Vue.extend({
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
 
-      if(useBlockchain === true)
+      if(useBlockchain){
         await this.searchAllCharacterListingsThroughChain(page);
-      else
+      }
+      else{
         await this.searchAllCharacterListingsThroughAPI(page);
+      }
 
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs
@@ -813,19 +815,11 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
 
       try {
-        if(useBlockchain === true){
-          this.searchResults = await this.fetchMarketNftIdsBySeller({
-            nftContractAddr: this.contractAddress,
-            sellerAddr: this.search,
-          });
-
-          this.searchResultsOwned = this.search === this.defaultAccount;
+        if(useBlockchain){
+          await this.searchListingsBySellerThroughChain();
         }
         else {
-          this.searchResults = this.activeType === 'weapon' ?
-            await this.searchWeaponListingsBySeller(this.search):
-            await this.searchCharacterListingsBySeller(this.search);
-          this.searchResultsOwned = false;
+          await this.searchListingsBySellerThroughAPI();
         }
       } catch {
         this.searchResultsOwned = false;
@@ -836,6 +830,22 @@ export default Vue.extend({
       this.waitingMarketOutcome = false;
     },
 
+    async searchListingsBySellerThroughChain(){
+      this.searchResults = await this.fetchMarketNftIdsBySeller({
+        nftContractAddr: this.contractAddress,
+        sellerAddr: this.search
+      });
+
+      this.searchResultsOwned = this.search === this.defaultAccount;
+    },
+
+    async searchListingsBySellerThroughAPI(){
+      this.searchResults = this.activeType === 'weapon' ?
+        await this.searchWeaponListingsBySeller(this.search):
+        await this.searchCharacterListingsBySeller(this.search);
+
+      this.searchResultsOwned = false;
+    },
     async searchOwnListings(type: SellType) {
       this.marketOutcome = null;
       this.activeType = type;
@@ -847,20 +857,28 @@ export default Vue.extend({
 
       this.waitingMarketOutcome = true;
 
-      if(useBlockchain === true){
-        this.searchResults = await this.fetchMarketNftIdsBySeller({
-          nftContractAddr: this.contractAddress,
-          sellerAddr: this.defaultAccount,
-        });
+      if(useBlockchain){
+        await this.searchOwnListingsThroughChain();
       }
       else {
-        this.searchResults = this.activeType === 'weapon' ?
-          await this.searchWeaponListingsBySeller(this.defaultAccount) :
-          await this.searchCharacterListingsBySeller(this.defaultAccount);
+        await this.searchOwnListingsThroughAPI();
       }
 
       this.searchResultsOwned = true;
       this.waitingMarketOutcome = false;
+    },
+
+    async searchOwnListingsThroughChain() {
+      this.searchResults = await this.fetchMarketNftIdsBySeller({
+        nftContractAddr: this.contractAddress,
+        sellerAddr: this.defaultAccount as string
+      });
+    },
+
+    async searchOwnListingsThroughAPI(){
+      this.searchResults = this.activeType === 'weapon' ?
+        await this.searchWeaponListingsBySeller(this.defaultAccount as string):
+        await this.searchCharacterListingsBySeller(this.defaultAccount as string);
     },
 
     async searchCharacterListingsBySeller(sellerAddress: string): Promise<string[]>{
