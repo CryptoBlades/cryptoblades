@@ -204,10 +204,6 @@ export default {
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
     },
-
-    selectedWeaponId() {
-      localStorage.setItem('selected-weapon-id', this.selectedWeaponId);
-    },
   },
 
   methods: {

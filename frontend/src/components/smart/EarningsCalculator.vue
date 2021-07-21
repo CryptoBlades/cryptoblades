@@ -12,7 +12,7 @@
           <span class="milestone-lvl-text">LVL {{getNextMilestoneLevel(currentCharacter.level)}}</span><br>
           <b-button class="btn btn-primary btn-small" @click="onShowEarningsCalculator">
             <b-icon-calculator-fill class="milestone-hint" scale="1"
-              v-tooltip.bottom="`Eranings Calculator`" v-on:click="onShowEarningsCalculator"/>
+              v-tooltip.bottom="`Eranings Calculator`"/>
               Earnings Calculator
           </b-button>
 
@@ -68,6 +68,9 @@
                   </div>
                 </div>
                 <div class="button-div">
+                  <b-button class="btn btn-primary" @click="onReset">
+                      Reset
+                  </b-button>
                   <b-button class="btn btn-primary" @click="calculateEarnings"
                     v-bind:class="[!canCalculate() ? 'disabled disabled-button' : '']">
                       Calculate
@@ -82,7 +85,7 @@
                 <span class="calculator-subheader">Weapon</span>
                 <img src="../../assets/placeholder/sword-placeholder-0.png" class="wep-placeholder">
                 <span>Stars</span>
-                <b-form-rating class="stars-picker" variant="warning" v-model="starsValue" size="sm"></b-form-rating>
+                <b-form-rating @change="refreshWeaponStats" class="stars-picker" variant="warning" v-model="starsValue" size="sm"></b-form-rating>
                 <span>Element</span>
                 <select class="form-control wep-trait-form" v-model="wepElementValue">
                   <option v-for="x in ['Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x }}</option>
@@ -191,16 +194,6 @@ export default Vue.extend({
       }
 
       if(this.currentWeapon !== null) {
-        console.log(this.currentWeapon.stars);
-        console.log(this.currentWeapon.element);
-        console.log(this.currentWeapon.stat1);
-        console.log(this.currentWeapon.stat2);
-        console.log(this.currentWeapon.stat3);
-        console.log(this.currentWeapon.stat1Value);
-        console.log(this.currentWeapon.stat2Value);
-        console.log(this.currentWeapon.stat3Value);
-        console.log(this.currentWeapon.bonusPower);
-
         this.starsValue = this.currentWeapon.stars + 1;
         this.wepElementValue = this.currentWeapon.element;
         this.wepFirstStatSliderValue = this.currentWeapon.stat1Value;
@@ -214,6 +207,21 @@ export default Vue.extend({
 
       await this.fetchPrices();
       (this.$refs['earnings-calc-modal'] as any).show();
+    },
+
+    onReset() {
+      this.characterElementValue = '';
+      this.levelSliderValue =  1;
+      this.starsValue =  1;
+      this.wepElementValue =  '';
+      this.wepFirstStatElementValue =  '';
+      this.wepSecondStatElementValue =  '';
+      this.wepThirdStatElementValue =  '';
+      this.wepFirstStatSliderValue =  4;
+      this.wepSecondStatSliderValue =  4;
+      this.wepThirdStatSliderValue =  4;
+      this.wepBonusPowerSliderValue =  0;
+      this.calculationResults = [] as number[][];
     },
 
     getMinRoll(stars: number): number {
@@ -321,15 +329,13 @@ export default Vue.extend({
       if(this.calculationResults[i][0] < 0) return 'negative-value';
       return 'positive-value';
     },
-  },
 
-  watch: {
-    starsValue(value: number) {
+    refreshWeaponStats(value: number) {
       this.wepFirstStatSliderValue = this.getMinRoll(value);
       this.wepSecondStatSliderValue = this.getMinRoll(value);
       this.wepThirdStatSliderValue = this.getMinRoll(value);
-    },
-  }
+    }
+  },
 });
 </script>
 <style scoped>
@@ -515,6 +521,10 @@ export default Vue.extend({
   margin-top: 5px;
   display: flex;
   justify-content: center;
+}
+
+.button-div > * {
+  margin: 5px;
 }
 
 .disabled-button {
