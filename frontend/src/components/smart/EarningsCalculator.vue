@@ -12,7 +12,7 @@
           <span class="milestone-lvl-text">LVL {{getNextMilestoneLevel(currentCharacter.level)}}</span><br>
           <b-button class="btn btn-primary btn-small" @click="onShowEarningsCalculator">
             <b-icon-calculator-fill class="milestone-hint" scale="1"
-              v-tooltip.bottom="`Eranings Calculator`"/>
+              v-tooltip.bottom="`Earnings Calculator`"/>
               Earnings Calculator
           </b-button>
 
