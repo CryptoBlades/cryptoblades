@@ -20,7 +20,7 @@
       <div class="col-2" v-if="isMarket">
         <strong>Sort</strong>
         <select class="form-control" v-model="priceSort" @change="saveFilters()">
-          <option v-for="x in priceSortList" :value="x.val" :key="x.val">{{ x.text || 'Any' }}</option>
+          <option v-for="x in ['', '1', '-1']" :value="x" :key="x">{{ priceSortText(x) || 'Any' }}</option>
         </select>
       </div>
 
@@ -54,9 +54,6 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
-import {EnumPriceSort} from '../../utils/enum';
-
-const priceSortList = [EnumPriceSort.None, EnumPriceSort.PriceLowToHigh, EnumPriceSort.PriceHighToLow];
 
 export default {
   props: {
@@ -87,8 +84,7 @@ export default {
     return {
       levelFilter: '',
       elementFilter: '',
-      priceSort: EnumPriceSort.None.val,
-      priceSortList,
+      priceSort: '',
     };
   },
 
@@ -169,9 +165,18 @@ export default {
 
       this.elementFilter = '';
       this.levelFilter = '';
-      this.priceSort = EnumPriceSort.None.text;
+      this.priceSort = '';
 
       this.$emit('character-filters-changed');
+    },
+
+    priceSortText(type) {
+      if (type === '1') {
+        return 'Price: Low -> High';
+      } else if (type === '-1') {
+        return 'Price: High -> Low';
+      }
+      return 'Any';
     },
   },
 
@@ -183,7 +188,7 @@ export default {
     this.levelFilter = sessionStorage.getItem('character-levelfilter') || '';
     this.elementFilter = sessionStorage.getItem('character-elementfilter') || '';
     if(this.isMarket) {
-      this.priceSort = sessionStorage.getItem('character-price-order') || EnumPriceSort.None.val;
+      this.priceSort = sessionStorage.getItem('character-price-order') || '';
     }
   }
 };
