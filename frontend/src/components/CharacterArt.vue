@@ -526,6 +526,8 @@ export default {
   font-weight: 900;
   overflow: hidden;
   max-height: 24px;
+  max-width: 170px;
+  white-space: nowrap;
 }
 
 .xp {
