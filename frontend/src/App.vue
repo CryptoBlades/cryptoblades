@@ -362,6 +362,10 @@ export default {
 </script>
 
 <style>
+hr.hr-divider{
+  border-top: 1px solid #9e8a57;
+  margin-bottom: 0.5rem !important;
+}
 body {
   margin: 0;
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
