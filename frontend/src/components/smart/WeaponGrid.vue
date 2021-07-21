@@ -21,7 +21,7 @@
       <div class="col-2" v-if="isMarket">
         <strong>Sort</strong>
         <select class="form-control" v-model="priceSort" @change="saveFilters()">
-          <option v-for="x in ['', 'Price: Low -> High', 'Price: High -> Low']" :value="x" :key="x">{{ x || 'Any' }}</option>
+          <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
         </select>
       </div>
 
@@ -42,7 +42,7 @@
         :class="{ selected: highlight !== null && weapon.id === highlight }"
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
-        @click="$emit('choose-weapon', weapon.id)"
+        @click="onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
         <b-icon v-if="isFavorite(weapon.id) === true" class="favorite-star" icon="star-fill" variant="warning" />
@@ -60,7 +60,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
 import WeaponIcon from '../WeaponIcon.vue';
 
@@ -81,6 +81,12 @@ interface Data {
   favorites: Record<number, boolean>;
   priceSort: string;
 }
+
+const sorts = [
+  { name: 'Any', dir: '' },
+  { name: 'Price: Low -> High', dir: 1 },
+  { name: 'Price: High -> Low', dir: -1 },
+];
 
 export default Vue.extend({
   model: {
@@ -143,6 +149,7 @@ export default Vue.extend({
       showReforgedWeapons: true,
       favorites: {},
       priceSort: '',
+      sorts,
     } as Data;
   },
 
@@ -201,14 +208,6 @@ export default Vue.extend({
 
       return favoriteWeapons.concat(items);
     },
-
-    priceSortAscText() {
-      return 'Price: Low -> High';
-    },
-
-    priceSortDescText() {
-      return 'Price: High -> Low';
-    }
   },
 
   watch: {
@@ -219,15 +218,14 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['fetchWeapons']) as StoreMappedActions),
+    ...(mapMutations(['setCurrentWeapon'])),
 
     saveFilters() {
       sessionStorage.setItem('weapon-starfilter', this.starFilter);
       sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
 
       if(this.isMarket) {
-        const sortOrder = this.priceSort === this.priceSortAscText ? '1' :
-          this.priceSort === this.priceSortDescText ? '-1' : '';
-        sessionStorage.setItem('weapon-price-order', sortOrder);
+        sessionStorage.setItem('weapon-price-order', this.priceSort);
       }
       this.$emit('weapon-filters-changed');
     },
@@ -270,6 +268,11 @@ export default Vue.extend({
 
       this.$emit('weapon-filters-changed');
     },
+
+    onWeaponClick(id: number) {
+      this.setCurrentWeapon(id);
+      this.$emit('choose-weapon', id);
+    }
   },
 
   mounted() {

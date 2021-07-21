@@ -59,9 +59,7 @@ export default {
     ...mapGetters(['getExchangeUrl', 'hasStakedBalance']),
 
     has5SkillBalance() {
-      // Has all 'pools' of SKILL to be used later.
-      // return Web3.utils.fromWei(this.skillBalance, 'ether') >= 5 || Web3.utils.fromWei(this.inGameOnlyFunds, 'ether') >= 5  || Web3.utils.fromWei(this.skillRewards, 'ether') >= 5 || this.hasStakedBalance;
-      return Web3.utils.fromWei(this.skillBalance, 'ether') + Web3.utils.fromWei(this.skillRewards, 'ether') >= 5;
+      return new BN(Web3.utils.fromWei(this.skillBalance, 'ether')).plus(new BN(Web3.utils.fromWei(this.skillRewards, 'ether'))).gte(5);
     },
   },
 

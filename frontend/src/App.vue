@@ -23,12 +23,15 @@
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
-        <big-button class="button" :mainText="`Configure MetaMask`" @click="configureMetaMask" />
+        <div>
+          <big-button class="button mm-button" :mainText="`Configure MetaMask`" @click="configureMetaMask" />
+          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button" :mainText="`Connect to MetaMask`" @click="connectMetamask" />
+        </div>
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>
-            Get started in less than 10 minutes! To recruit your first character you need 5 Skill and .001 BNB for gas. You will also need .0015 BNB to do your
-            first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
+            Get started in less than 10 minutes! To recruit your first character you need {{recruitCost}} SKILL and .001 BNB for gas.
+            You will also need .0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
           </p>
           <ul class="unstyled-list">
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
@@ -58,6 +61,8 @@
 </template>
 
 <script>
+import BN from 'bignumber.js';
+
 import { mapState, mapActions, mapGetters } from 'vuex';
 import _ from 'lodash';
 import Vue from 'vue';
@@ -83,6 +88,8 @@ export default {
   data: () => ({
     errorMessage: '',
     hideWalletWarning: false,
+    isConnecting: false,
+    recruitCost: ''
   }),
 
   computed: {
@@ -144,6 +151,18 @@ export default {
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     },
+
+    async initializeRecruitCost() {
+      const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
+      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+      this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
+    },
+    data() {
+      return {
+        recruitCost: this.recruitCost
+      };
+    },
+
     async startOnboarding() {
       const onboarding = new MetaMaskOnboarding();
       onboarding.startOnboarding();
@@ -245,6 +264,21 @@ export default {
       }
     },
 
+    async connectMetamask() {
+      const web3 = this.web3.currentProvider;
+      this.isConnecting = true;
+      this.errorMessage = 'Connecting to MetaMask...';
+      web3.request({method: 'eth_requestAccounts'})
+        .then(() => {
+          this.errorMessage = 'Success: MetaMask connected.';
+          this.isConnecting = false;
+        })
+        .catch(() => {
+          this.errorMessage = 'Error: MetaMask could not get permissions.';
+          this.isConnecting = false;
+        });
+    },
+
     toggleHideWalletWarning() {
       this.hideWalletWarning = !this.hideWalletWarning;
       if (this.hideWalletWarning) localStorage.setItem('hideWalletWarning', 'true');
@@ -270,13 +304,42 @@ export default {
         );
       }
     },
+
+    async checkNotifications() {
+      const response = await fetch('https://api.cryptoblades.io/static/notifications');
+      const notifications = await response.json();
+
+      const lastHash = localStorage.getItem('lastnotification');
+      let shouldContinue = true;
+
+      notifications.forEach(notif => {
+
+        if(!shouldContinue) return;
+
+        if(lastHash === notif.hash) {
+          shouldContinue = false;
+          return;
+        }
+
+        this.$dialog.notify.warning(
+          `${notif.title}
+          <br>
+          <a href="${notif.link}" target="_blank">Check it out!</a>
+          `,
+          {
+            timeout: 300000,
+          },
+        );
+      });
+
+      localStorage.setItem('lastnotification', notifications[0].hash);
+    }
   },
 
   mounted() {
     this.checkStorage();
 
     Events.$on('setting:hideRewards', () => this.checkStorage());
-    Events.$on('setting:hideAdvanced', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
     Events.$on('setting:hideWalletWarning', () => this.checkStorage());
 
@@ -347,12 +410,15 @@ export default {
 
       setTimeout(pollAccounts, 200);
     };
+
     pollAccounts();
 
     if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
-    if (!localStorage.getItem('hideAdvanced')) localStorage.setItem('hideAdvanced', 'false');
     if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
     if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
+
+    this.checkNotifications();
+    this.initializeRecruitCost();
   },
 
   beforeDestroy() {
@@ -364,6 +430,10 @@ export default {
 </script>
 
 <style>
+hr.hr-divider{
+  border-top: 1px solid #9e8a57;
+  margin-bottom: 0.5rem !important;
+}
 body {
   margin: 0;
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
@@ -487,6 +557,12 @@ button,
 
 button.close {
   color: #9e8a57 !important;
+}
+
+.mm-button {
+  margin: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 .btn {
@@ -666,5 +742,10 @@ div.bg-success {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+
+.border-main {
+  border: 1px solid #9e8a57;
 }
 </style>
