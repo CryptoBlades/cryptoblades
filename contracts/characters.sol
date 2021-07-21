@@ -24,6 +24,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        characterLimit = 4;
     }
 
     function migrateTo_1ee400a() public {
@@ -94,6 +96,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     mapping(uint256 => uint256) public override lastTransferTimestamp;
 
     Promos public promos;
+
+    uint characterLimit;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -250,7 +254,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to)) {
-            require(balanceOf(to) < 4, "Recv has too many characters");
+            require(balanceOf(to) < characterLimit, "Recv has too many characters");
         }
 
         // when not minting or burning...
@@ -265,5 +269,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
         promos.setBit(from, promos.BIT_FIRST_CHARACTER());
         promos.setBit(to, promos.BIT_FIRST_CHARACTER());
+    }
+
+    function setCharacterLimit(uint256 max) public restricted {
+        characterLimit = max;
     }
 }

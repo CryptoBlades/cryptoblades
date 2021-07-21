@@ -41,7 +41,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
         randoms = _randoms;
 
-        characterLimit = 4;
         staminaCostFight = 40;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
@@ -85,7 +84,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     // config vars
-    uint characterLimit;
     uint8 staminaCostFight;
 
     // prices & payouts are in USD, with 4 decimals of accuracy in 64.64 fixed point format
@@ -388,8 +386,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function mintCharacter() public doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
-        require(characters.balanceOf(msg.sender) < characterLimit,
-            string(abi.encodePacked("You can only have ",characterLimit," characters!")));
+        require(characters.balanceOf(msg.sender) < characters.characterLimit,
+            string(abi.encodePacked("You can only have ",characters.characterLimit," characters!")));
         _payContract(msg.sender, mintCharacterFee);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
@@ -452,7 +450,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     modifier doesNotHaveMoreThanMaxCharacters() {
-        require(characters.balanceOf(msg.sender) <= characterLimit, "Too many characters owned");
+        require(characters.balanceOf(msg.sender) <= characters.characterLimit, "Too many characters owned");
         _;
     }
 
@@ -573,7 +571,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setCharacterLimit(uint256 max) public restricted {
-        characterLimit = max;
+        characters.setCharacterLimit(max);
     }
 
     function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {
