@@ -743,4 +743,9 @@ div.bg-success {
   justify-content: center;
   align-items: center;
 }
+
+
+.border-main {
+  border: 1px solid #9e8a57;
+}
 </style>
