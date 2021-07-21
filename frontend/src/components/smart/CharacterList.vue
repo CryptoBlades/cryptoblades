@@ -20,7 +20,7 @@
       <div class="col-2" v-if="isMarket">
         <strong>Sort</strong>
         <select class="form-control" v-model="priceSort" @change="saveFilters()">
-          <option v-for="x in ['', 'Price: Low -> High', 'Price: High -> Low']" :value="x" :key="x">{{ x || 'Any' }}</option>
+          <option v-for="x in priceSortList" :value="x.val" :key="x.val">{{ x.text || 'Any' }}</option>
         </select>
       </div>
 
@@ -54,6 +54,9 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
+import {EnumPriceSort} from '../../utils/enum';
+
+const priceSortList = [EnumPriceSort.None, EnumPriceSort.PriceLowToHigh, EnumPriceSort.PriceHighToLow];
 
 export default {
   props: {
@@ -84,7 +87,8 @@ export default {
     return {
       levelFilter: '',
       elementFilter: '',
-      priceSort: '',
+      priceSort: EnumPriceSort.None.val,
+      priceSortList,
     };
   },
 
@@ -122,14 +126,6 @@ export default {
       }
 
       return items;
-    },
-
-    priceSortAscText() {
-      return 'Price: Low -> High';
-    },
-
-    priceSortDescText() {
-      return 'Price: High -> Low';
     }
   },
 
@@ -163,9 +159,7 @@ export default {
       sessionStorage.setItem('character-elementfilter', this.elementFilter);
 
       if(this.isMarket) {
-        const sortOrder = this.priceSort === this.priceSortAscText ? '1' :
-          this.priceSort === this.priceSortDescText ? '-1' : '';
-        sessionStorage.setItem('character-price-order', sortOrder);
+        sessionStorage.setItem('character-price-order', this.priceSort);
       }
       this.$emit('character-filters-changed');
     },
@@ -175,7 +169,7 @@ export default {
 
       this.elementFilter = '';
       this.levelFilter = '';
-      this.priceSort = '';
+      this.priceSort = EnumPriceSort.None.text;
 
       this.$emit('character-filters-changed');
     },
@@ -186,10 +180,10 @@ export default {
   },
 
   mounted() {
-    this.levelFilter = localStorage.getItem('character-levelfilter') || '';
-    this.elementFilter = localStorage.getItem('character-elementfilter') || '';
+    this.levelFilter = sessionStorage.getItem('character-levelfilter') || '';
+    this.elementFilter = sessionStorage.getItem('character-elementfilter') || '';
     if(this.isMarket) {
-      this.priceSort = sessionStorage.getItem('character-price-order') || '';
+      this.priceSort = sessionStorage.getItem('character-price-order') || EnumPriceSort.None.val;
     }
   }
 };

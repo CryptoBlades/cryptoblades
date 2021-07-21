@@ -21,7 +21,7 @@
       <div class="col-2" v-if="isMarket">
         <strong>Sort</strong>
         <select class="form-control" v-model="priceSort" @change="saveFilters()">
-          <option v-for="x in ['', 'Price: Low -> High', 'Price: High -> Low']" :value="x" :key="x">{{ x || 'Any' }}</option>
+          <option v-for="x in priceSortList" :value="x.val" :key="x.val">{{ x.text || 'Any' }}</option>
         </select>
       </div>
 
@@ -63,6 +63,7 @@ import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
 import WeaponIcon from '../WeaponIcon.vue';
+import {EnumPriceSort} from '../../utils/enum';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 
@@ -81,6 +82,8 @@ interface Data {
   favorites: Record<number, boolean>;
   priceSort: string;
 }
+
+const priceSortList = [EnumPriceSort.None, EnumPriceSort.PriceLowToHigh, EnumPriceSort.PriceHighToLow];
 
 export default Vue.extend({
   model: {
@@ -142,7 +145,8 @@ export default Vue.extend({
       elementFilter: '',
       showReforgedWeapons: true,
       favorites: {},
-      priceSort: '',
+      priceSort: EnumPriceSort.None.val,
+      priceSortList,
     } as Data;
   },
 
@@ -201,14 +205,6 @@ export default Vue.extend({
 
       return favoriteWeapons.concat(items);
     },
-
-    priceSortAscText() {
-      return 'Price: Low -> High';
-    },
-
-    priceSortDescText() {
-      return 'Price: High -> Low';
-    }
   },
 
   watch: {
@@ -225,9 +221,7 @@ export default Vue.extend({
       sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
 
       if(this.isMarket) {
-        const sortOrder = this.priceSort === this.priceSortAscText ? '1' :
-          this.priceSort === this.priceSortDescText ? '-1' : '';
-        sessionStorage.setItem('weapon-price-order', sortOrder);
+        sessionStorage.setItem('weapon-price-order', this.priceSort);
       }
       this.$emit('weapon-filters-changed');
     },
@@ -266,7 +260,7 @@ export default Vue.extend({
 
       this.elementFilter = '';
       this.starFilter = '';
-      this.priceSort = '';
+      this.priceSort = EnumPriceSort.None.val;
 
       this.$emit('weapon-filters-changed');
     },
@@ -276,7 +270,7 @@ export default Vue.extend({
     this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
     this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
     if(this.isMarket) {
-      this.priceSort = sessionStorage.getItem('weapon-price-order') || '';
+      this.priceSort = sessionStorage.getItem('weapon-price-order') || EnumPriceSort.None.val;
     }
 
     const favoritesFromStorage = localStorage.getItem('favorites');

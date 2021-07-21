@@ -659,6 +659,7 @@ export default Vue.extend({
       this.activeType = 'character';
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
+      this.currentPage = page + 1;
 
       const url = new URL('https://api.cryptoblades.io/static/market/character');
       const params = {
@@ -691,6 +692,7 @@ export default Vue.extend({
       this.activeType = 'weapon';
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
+      this.currentPage = page + 1;
 
       const url = new URL('https://api.cryptoblades.io/static/market/weapon');
       const params = {
