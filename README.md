@@ -15,16 +15,17 @@ You should now have 100 fake eth! You're now fake rich.
 ## Frontend Setup
 
 1. `npm install`
-2. Create a new file named `.env` in the 'frontend' directory alongside `.env.mainnet` and `.env.testnet` [**Edit this file to include the following lines of code**](https://github.com/CryptoBlades/cryptoblades/blob/main/frontend/.env.testnet#L1-L5)
-3. `npm run contract:deploy` (this deploys your contracts to your local blockchain)
-4. `npm run start:frontend`
+1. Create a new file named `.env` in the 'frontend' directory alongside `.env.mainnet` and `.env.testnet` [**Edit this file to include the following lines of code**](https://github.com/CryptoBlades/cryptoblades/blob/main/frontend/.env.testnet#L1-L5)
+1. `npm run contract:prepare` (this builds your contracts)
+1. `npm run contract:deploy` (this deploys your contracts to your local blockchain)
+1. `npm run start:frontend`
 
 For Windows developers experiencing errors follow these steps:
-1. `Remove-item build`
-3. `npm run contract:prepare` (this builds your contracts)
-4. `Remove-item build/contracts`
-5. `npm run contract:deploy`
-6. `npm run start:frontend`
+1. `rm -r build`
+1. `npm run contract:prepare` (this builds your contracts)
+1. `rm -r build/contracts`
+1. `npm run contract:deploy`
+1. `npm run start:frontend`
 
 ### VSCode Setup
 
@@ -56,5 +57,5 @@ Truffle also supports some environment variables, if you create a `.env` file in
 
 ## Errors
 - If you run into any error at all during the build process you may need to reset [Ganache](https://www.trufflesuite.com/ganache) by deleting previous workspaces and going through the Ganache setup process again including importing a new account for Metamask.
-- Artifacts are from different compiler runs - rm -rf build/
+- Artifacts are from different compiler runs `- rm -rf build/`
 
