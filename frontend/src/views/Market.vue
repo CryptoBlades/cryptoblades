@@ -28,7 +28,11 @@
                 <b-button
                   variant="primary"
                   v-if="buyableNftSelected"
-                  @click="purchaseNft()"  class="gtag-link-others" tagname="confirm_purchase">Purchase</b-button>
+                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
+                  Purchase <b-icon-question-circle v-if="!canPurchase"
+                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                </b-button>
               </div>
 
               <div class="col"></div>
@@ -175,7 +179,11 @@
                 <b-button
                   variant="primary"
                   v-if="buyableNftSelected"
-                  @click="purchaseNft()"  class="gtag-link-others" tagname="confirm_purchase">Purchase</b-button>
+                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
+                  Purchase <b-icon-question-circle v-if="!canPurchase"
+                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                </b-button>
               </div>
 
               <div class="col">
@@ -384,6 +392,7 @@ const defaultLimit = 40;
 
 interface StoreMappedGetters {
   contracts: Contracts;
+  ownCharacters: any[];
 }
 
 interface StoreMappedActions {
@@ -437,7 +446,7 @@ export default Vue.extend({
       'defaultAccount', 'weapons', 'characters', 'ownedCharacterIds', 'ownedWeaponIds'
     ]) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'contracts'
+      'contracts', 'ownCharacters'
     ]) as Accessors<StoreMappedGetters>),
     ...mapGetters(['transferCooldownOfWeaponId', 'transferCooldownOfCharacterId']),
 
@@ -474,6 +483,10 @@ export default Vue.extend({
       && (this.activeType === 'weapon'
         ? (this.transferCooldownOfWeaponId(+this.selectedNftId) > 0)
         : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
+    },
+
+    canPurchase(): boolean {
+      return this.activeType === 'weapon' || this.ownCharacters.length < 4 ;
     }
   },
 
@@ -959,6 +972,10 @@ export default Vue.extend({
 .modal-input {
   margin-bottom: 5px;
   margin-top: 5px;
+}
+
+.disabled-button {
+  opacity: 0.65;
 }
 
 </style>
