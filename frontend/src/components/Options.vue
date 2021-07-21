@@ -37,7 +37,7 @@
 
     <b-modal class="centered-modal" ref="need-gas-modal" title="Need Withdraw?"
       @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Portal" >
-        Need Withdraw? Try our WAX Bridge, which will pay you .5% under market rate to sell your WAX for BNB!
+        Need Withdraw? Try our WAX Portal, which will pay you .5% under market rate to sell your WAX for BNB!
         <div class="text-center">
           <hr class="hr-divider">
           Hold Reminder:<br>
