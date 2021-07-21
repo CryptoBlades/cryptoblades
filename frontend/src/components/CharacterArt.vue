@@ -15,7 +15,7 @@
       <div>Lv.<span class="white">{{ character.level + 1 }}</span></div>
     </div>
     <div class="score-id-container">
-    <div class="black-outline" v-if="advancedUI && !portrait">ID <span class="white">{{ character.id }}</span></div>
+    <div class="black-outline" v-if="!portrait">ID <span class="white">{{ character.id }}</span></div>
     <div class="black-outline" v-if="!portrait">
       Score <span class="white">{{ heroScore.toLocaleString() }}</span>
       <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Hero score is a measure of your hero's combat prowess so far.
@@ -23,7 +23,7 @@
     </div>
     </div>
 
-    <div class="xp" v-if="advancedUI && !portrait">
+    <div class="xp" v-if="!portrait">
       <b-progress :max="RequiredXp(character.level)" variant="success"
       v-tooltip.bottom="`Claimable XP ${this.getCharacterUnclaimedXp(character.id)}`">
         <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} XP</strong>
@@ -85,7 +85,6 @@ export default {
       body: null,
       trait: CharacterTrait[this.character.trait],
       showPlaceholder: false,
-      advancedUI: this.advancedUI,
       heroScore: 0
     };
   },
@@ -478,7 +477,6 @@ export default {
   mounted() {
     this.fetchScore();
 
-    this.advancedUI = localStorage.getItem('hideAdvanced') === 'false';
     if(localStorage.getItem('useGraphics') === 'false') {
       this.allLoaded = true;
       this.showPlaceholder = true;

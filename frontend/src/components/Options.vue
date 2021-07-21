@@ -28,8 +28,6 @@
 
         <b-dropdown-item @click="toggleRewards()">Reward Bar: {{ hideRewards ? 'Off' : 'On' }}</b-dropdown-item>
 
-        <b-dropdown-item @click="toggleAdvanced()">Advanced UI: {{ hideAdvanced ? 'Off' : 'On' }}</b-dropdown-item>
-
         <b-dropdown-item @click="toggleHideWalletWarning()">Hide Wallet Warning: {{ hideWalletWarning ? 'On' : 'Off' }}</b-dropdown-item>
 
         </b-dropdown-group>
@@ -76,7 +74,6 @@ interface StoreMappedActions {
 interface Data {
   showGraphics: boolean;
   hideRewards: boolean;
-  hideAdvanced: boolean;
   hideWalletWarning: boolean;
 }
 
@@ -95,7 +92,6 @@ export default Vue.extend({
   created() {
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
-    this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
   },
 
@@ -103,7 +99,6 @@ export default Vue.extend({
     return {
       showGraphics: false,
       hideRewards: false,
-      hideAdvanced: false,
       hideWalletWarning: false,
       ClaimStage
     } as Data;
@@ -159,13 +154,6 @@ export default Vue.extend({
       Events.$emit('setting:hideRewards', { value: this.hideRewards });
     },
 
-    toggleAdvanced() {
-      this.hideAdvanced = !this.hideAdvanced;
-      if (this.hideAdvanced) localStorage.setItem('hideAdvanced', 'true');
-      else localStorage.setItem('hideAdvanced', 'false');
-
-      Events.$emit('setting:hideAdvanced', { value: this.hideAdvanced });
-    },
     async onClaimTokens() {
       if(this.canClaimTokens) {
         await this.claimTokenRewards();
