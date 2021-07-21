@@ -18,7 +18,7 @@ You should now have 100 fake eth! You're now fake rich.
 1. `npm run contract:prepare` (this builds your contracts)
 1. `npm run contract:deploy` (this deploys your contracts to your local blockchain)
 
-You will also need to create a `.env` file alongside `.env.mainnet` and `.env.testnet`. Inside this file you should only copy the feature flags from either other file. All addresses and other variables are set correctly for local development. **If you don't create a `.env` file, you're going to be missing a lot of the UI.**
+You will also need to create a `.env` file alongside `.env.mainnet` and `.env.testnet`. Inside this file you [**should only copy the feature flags from either other file**](https://github.com/CryptoBlades/cryptoblades/blob/main/frontend/.env.testnet#L1-L5), and the **file must be called `.env`**. All addresses and other variables are set correctly for local development. **If you don't create a `.env` file, you're going to be missing a lot of the UI.**
 
 But if not specified, the deployed contracts will be pulled in automatically.
 
