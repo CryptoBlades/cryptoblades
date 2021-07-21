@@ -8,7 +8,8 @@
           :rewardTokenName="e.rewardTokenName"
           :stakeType="e.stakeType"
           :minimumStakeTime="stakeOverviews[e.stakeType].minimumStakeTime"
-          :estimatedYield="estimatedYields[e.stakeType]" />
+          :estimatedYield="estimatedYields[e.stakeType]"
+          :deprecated="e.deprecated" />
       </li>
     </ul>
     <div class="loading-indicator" v-else>

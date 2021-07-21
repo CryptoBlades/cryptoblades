@@ -1,7 +1,7 @@
 <template>
   <div class="character-art" v-tooltip="tooltipHtml(character)" ref="el">
     <div class="trait" v-if="!portrait">
-      <span :class="trait.toLowerCase() + '-icon'"></span>
+      <span :class="trait.toLowerCase() + '-icon circle-element'"></span>
     </div>
 
     <img v-if="showPlaceholder && !portrait" class="placeholder" :src="getCharacterArt(character)" />
@@ -10,15 +10,18 @@
       <i class="fas fa-spinner fa-spin"></i>
     </div>
 
-    <div class="id black-outline" v-if="advancedUI && !portrait">ID {{ character.id }}</div>
-
-    <div class="hero-score black-outline" v-if="!portrait">
-      Score {{ heroScore.toLocaleString() }}
+    <div class="name-lvl-container">
+      <div class="name black-outline" v-if="!portrait">{{ getCharacterName(character.id) }} </div>
+      <div>Lv.<span class="white">{{ character.level + 1 }}</span></div>
+    </div>
+    <div class="score-id-container">
+    <div class="black-outline" v-if="advancedUI && !portrait">ID <span class="white">{{ character.id }}</span></div>
+    <div class="black-outline" v-if="!portrait">
+      Score <span class="white">{{ heroScore.toLocaleString() }}</span>
       <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Hero score is a measure of your hero's combat prowess so far.
         It goes up when you win and down when you lose.`"/>
     </div>
-
-    <div class="name black-outline" v-if="!portrait">{{ getCharacterName(character.id) }} Lv.{{ character.level + 1 }}</div>
+    </div>
 
     <div class="xp" v-if="advancedUI && !portrait">
       <b-progress :max="RequiredXp(character.level)" variant="success"
@@ -495,19 +498,18 @@ export default {
   position: relative;
   display: flex;
   justify-content: center;
+  flex-direction: column;
 }
 
-.trait,
-.id,
-.name,
-.hero-score,
 .xp {
   position: absolute;
 }
 
 .trait {
-  top: 5px;
-  left: 5px;
+  top: -27px;
+  justify-self: center;
+  margin: 0 auto;
+  position: relative;
 }
 
 .id {
@@ -523,16 +525,15 @@ export default {
 }
 
 .name {
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  font-size: 0.9em;
-  text-align: center;
+  font-weight: 900;
+  overflow: hidden;
+  max-height: 24px;
 }
 
 .xp {
-  bottom: 0;
-  left: 0;
+  bottom: -30px;
+  left: 30px;
+  width: 150px;
   right: 0;
 }
 
@@ -544,10 +545,28 @@ export default {
 }
 
 .placeholder {
-  padding: 10px;
   max-width: 100%;
-  height: 90%;
-  padding-top: 10%;
+  top: -15px;
+  position: relative;
+  height: 75%;
+  padding-top: 0;
+  -o-object-fit: contain;
   object-fit: contain;
 }
+
+.circle-element {
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 50%;
+}
+
+.name-lvl-container, .score-id-container {
+  display :flex;
+  justify-content: space-around;
+}
+
+.white {
+  color : rgb(204, 204, 204)
+}
+
 </style>

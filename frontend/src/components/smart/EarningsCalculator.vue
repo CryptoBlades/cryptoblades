@@ -9,7 +9,7 @@
       <div class="milestone-details">
         Earn <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level)}}%</span> more per battle at<br>
         <div class="calculator-icon-div">
-          <span class="milestone-lvl-text">LVL {{11}}</span><br>
+          <span class="milestone-lvl-text">LVL {{getNextMilestoneLevel(currentCharacter.level)}}</span><br>
           <b-button class="btn btn-primary btn-small" @click="onShowEarningsCalculator">
             <b-icon-calculator-fill class="milestone-hint" scale="1"
               v-tooltip.bottom="`Eranings Calculator`" v-on:click="onShowEarningsCalculator"/>
@@ -71,10 +71,10 @@
                   <b-button class="btn btn-primary" @click="calculateEarnings"
                     v-bind:class="[!canCalculate() ? 'disabled disabled-button' : '']">
                       Calculate
-                      <b-icon-question-circle class="centered-icon" scale="0.8"
-                      v-tooltip.bottom="`Earnings on victory: ${this.formattedSkill(this.fightGasOffset)} gas offset +
-                      ${this.stringFormattedSkill(this.fightBaseline)} per square root of power/1000`"/>
                   </b-button>
+                  <b-icon-question-circle class="centered-icon" scale="1.5"
+                    v-tooltip.bottom="`Earnings on victory: ${this.stringFormattedSkill(this.fightGasOffset)} gas offset +
+                    ${this.stringFormattedSkill(this.fightBaseline)} per square root of power/1000`"/>
                 </div>
               </div>
 
@@ -275,7 +275,7 @@ export default Vue.extend({
 
     getRewardDiffBonus(level: number, targetLevel: number): string {
       return (this.getAverageRewardAtLevel(targetLevel) /
-        this.getAverageRewardAtLevel(level) * 100 - 100).toFixed(2);
+        this.getAverageRewardAtLevel(level + 1) * 100 - 100).toFixed(2);
     },
 
     formattedSkill(skill: number): number {
@@ -504,5 +504,10 @@ export default Vue.extend({
 .btn-small {
   font-size: small;
   margin-top: 5px;
+}
+
+.centered-icon {
+  align-self: center;
+  margin-left: 5px;
 }
 </style>

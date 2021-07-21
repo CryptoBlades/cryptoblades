@@ -108,7 +108,7 @@ export default {
     },
 
     async currentCharacterId() {
-      await this.updateCurrentCharacterStamina();
+      await this.updateCharacterStamina(this.currentCharacterId);
     },
     $route(to) {
       // react to route changes
@@ -133,11 +133,11 @@ export default {
       'fetchRewardsClaimTax',
     ]),
 
-    async updateCurrentCharacterStamina() {
+    async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;
 
-      if (this.currentCharacterId !== null) {
-        await this.fetchCharacterStamina(this.currentCharacterId);
+      if (id !== null) {
+        await this.fetchCharacterStamina(id);
       }
     },
 
@@ -300,15 +300,6 @@ export default {
     });
 
     this.showWarningDialog();
-    this.$dialog.confirm({
-      title: 'Market Notice',
-      text: `Hello, lovely player! We had an unexpected mixup with the market today (friday), 
-      and while it works on testnet, we realized later that it's due to the sheer quantity of market entries 
-      (which we hadn't expected to be a problem), that browsing the market is entirely broken right now.
-      We appreciate your patience, and hope to have a fix early next week (7/19/21-ish).
-      
-      This modal will show up every time you load the game, until we fix it. Sorry for being a pest! -Sei`
-    });
 
   },
 
@@ -325,8 +316,10 @@ export default {
       throw e;
     }
 
-    this.pollCharacterStaminaIntervalId = setInterval(async () => {
-      await this.updateCurrentCharacterStamina();
+    this.pollCharactersStaminaIntervalId = setInterval(async () => {
+      this.ownCharacters.forEach(async (c) => {
+        await this.updateCharacterStamina(c.id);
+      });
     }, 3000);
 
     this.availableStakeTypes.forEach((item) => {

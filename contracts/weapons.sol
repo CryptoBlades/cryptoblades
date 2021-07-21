@@ -389,7 +389,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         if(stars < 3) { // 1-3 star
             require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
             uint8 burnValue = stars + 1;
-            burnValue *= (wbp.lowStarBurnPoints < 50) ? 2 : 1;
             wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul(burnValue)
                 .add(wbp.lowStarBurnPoints));
         }

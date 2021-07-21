@@ -53,17 +53,13 @@
           :key="c.id"
           @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
         >
-          <div class="name-list"
-          >{{ getCharacterName(c.id) }}<br>Lv.{{ c.level + 1}}
-            <small-bar
-              :showMinimalVersion="true"
-              v-if="!isLoadingCharacter"
-              :current="getCharacterStamina(c.id)"
-              :max="maxStamina"
-            />
+          <div class="name-list">
+            {{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+          </div>
           <div class="small-stamina-char"
-          :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-          v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))"></div>
+            :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
+            v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
+            <div class="stamina-text black-outline">STA {{ getCharacterStamina(c.id) }} / 200</div>
           </div>
         </li>
       </ul>
@@ -369,11 +365,22 @@ li.character-highlight{
 }
 
 .small-stamina-char {
-  height :10px;
+  position: relative;
+  height :14px;
   margin: 10px 5px 0px 5px;
   border-radius: 2px;
   border: 0.5px solid rgb(216, 215, 215);
   background : linear-gradient(to right, rgb(236, 75, 75) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+}
+
+.stamina-text {
+  position: absolute;
+  top: -3px;
+  font-size: 75%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #fff;
 }
 
 .slide-fade-enter-active {
