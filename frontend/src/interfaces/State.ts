@@ -78,7 +78,6 @@ export interface IState {
   targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
 
   characterTransferCooldowns: Record<number, ITransferCooldown | undefined>;
-  weaponTransferCooldowns: Record<number, ITransferCooldown | undefined>;
 
   staking: Record<StakeType, IStakeState>;
   stakeOverviews: Record<StakeType, IStakeOverviewState>;

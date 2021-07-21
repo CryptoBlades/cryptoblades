@@ -122,7 +122,6 @@ export default {
     ...mapActions([
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
-      'fetchWeaponTransferCooldownForOwnWeapons',
       'fetchCharacterTransferCooldownForOwnCharacters',
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
@@ -322,7 +321,6 @@ export default {
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
         this.fetchCharacterTransferCooldownForOwnCharacters(),
-        this.fetchWeaponTransferCooldownForOwnWeapons(),
         this.fetchWaxBridgeDetails(),
         this.fetchRewardsClaimTax(),
       ]);

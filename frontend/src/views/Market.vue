@@ -374,7 +374,7 @@ export default Vue.extend({
     ...(mapGetters([
       'contracts'
     ]) as Accessors<StoreMappedGetters>),
-    ...mapGetters(['transferCooldownOfWeaponId', 'transferCooldownOfCharacterId']),
+    ...mapGetters(['transferCooldownOfCharacterId']),
 
     Weapons(): Contract<Weapons> {
       // we use x! here because we assert that they're set already in created()
@@ -407,7 +407,7 @@ export default Vue.extend({
     selectedNftOnCooldown(): boolean {
       return this.selectedNftId !== null
       && (this.activeType === 'weapon'
-        ? (this.transferCooldownOfWeaponId(+this.selectedNftId) > 0)
+        ? false
         : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
     }
   },
