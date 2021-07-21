@@ -4,7 +4,7 @@
 
 1. Install [Ganache](https://www.trufflesuite.com/ganache).
 1. For Ganache, choose Quickstart Ethereum.
-1. Increase the gas limit in the workspace to `67219751` (or some other high number so you can deploy).
+1. Increase the gas limit in the workspace to `99999999` (or some other high number so you can deploy).
 1. Install [MetaMask](https://metamask.io/).
 1. Create a new connection to connect to Ganache with these settings: http://localhost:7545, any name, any chain id
 1. In Ganache, click the key icon on the right side of any address and grab the private key.
