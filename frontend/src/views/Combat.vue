@@ -5,27 +5,6 @@
         <div class="col error">Error: {{ error }}</div>
       </div>
 
-      <div class="row">
-        <div class="col">
-          <div class="payout-info">{{ getPayoutString() }}</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col text-center">
-          <div class="combat-hints">
-            <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
-            <span class="fire-icon" />
-
-            <Hint
-              text="The elements affect power:<br>
-              <br>Character vs Enemy: bonus or penalty as shown above
-              <br>Character and Weapon match gives bonus"
-            />
-          </div>
-        </div>
-      </div>
-
       <div class="row" v-if="resultsAvailable">
         <div class="col">
           <CombatResults v-if="resultsAvailable" :results="fightResults" />
@@ -42,6 +21,8 @@
         </div>
       </div>
 
+      <img src="../assets/divider7.png" class="info-divider enemy-divider" />
+
       <div class="row" v-if="currentCharacterStamina >= 40">
         <div class="col">
           <div class="row">
@@ -52,10 +33,9 @@
               </div>
             </div>
           </div>
-
-          <div class="row">
-            <div class="col">
-              <div class="header-row">
+          <div class="combat-enemy-container">
+            <div class="col weapon-selection">
+              <div class="header-row weapon-header">
                 <h1>Choose a weapon</h1>
                 <Hint
                   text="Your weapon multiplies your power<br>
@@ -75,50 +55,62 @@
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" />
 
             </div>
-          </div>
+            <div class="row mb-3 flex-column enemy-container" v-if="targets.length > 0">
+              <div class="row">
+                <div class="col text-center">
+                  <div class="combat-hints">
+                    <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
+                    <span class="fire-icon" />
 
-          <div class="row mb-3" v-if="targets.length > 0">
-            <div class="col-md-3 col-sm-12 col-xs-12 encounter text-center d-flex flex-column justify-content-center" v-for="(e, i) in targets" :key="i">
-
-              <div class="encounter-container">
-
-                <div class="mobile-divider-wrapper">
-                  <div class="mobile-divider">
-                    <div class="encounter-element">
-                      <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
-                      <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
-                    </div>
-
-                    <div class="encounter-power">
-                      {{ e.power }} Power
-                    </div>
-
-                    <div class="xp-gain">
-                      +{{getPotentialXp(e)}} XP
-                    </div>
-
-                    <div class="victory-chance">
-                      {{ getWinChance(e.power, e.trait) }} Victory
-                    </div>
-                  </div>
-
-                  <div class="mobile-divider mobile-img-adjustment">
-                  <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
+                    <Hint
+                      text="The elements affect power:<br>
+                      <br>Character vs Enemy: bonus or penalty as shown above
+                      <br>Character and Weapon match gives bonus"
+                    />
                   </div>
                 </div>
-
-                <big-button
-                  class="encounter-button"
-                  :mainText="`Fight!`"
-                  v-tooltip="'Cost 40 stamina'"
-                  :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-                  @click="onClickEncounter(e)"
-                />
-
-                <p v-if="isLoadingTargets">Loading...</p>
               </div>
-            </div>
+              <div class="enemy-list">
+                <div class="col-md-3 col-sm-12 col-xs-12 encounter" v-for="(e, i) in targets" :key="i">
+                  <div class="encounter-container">
+
+                  <div class="enemy-character">
+                    <div class="encounter-element">
+                        <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
+                      </div>
+
+                      <div class="mobile-divider mobile-img-adjustment">
+                        <img class="mr-auto ml-auto enemy-img" :src="getEnemyArt(e.power)" alt="Enemy" />
+                      </div>
+
+                      <div class="encounter-power">
+                        {{ e.power }} Power
+                      </div>
+
+                      <div class="xp-gain">
+                        +{{getPotentialXp(e)}} XP
+                      </div>
+                  </div>
+
+                  <div class="victory-chance">
+                    {{ getWinChance(e.power, e.trait) }} Victory
+                  </div>
+
+                  <big-button
+                    class="encounter-button"
+                    :mainText="`Fight!`"
+                    v-tooltip="'Cost 40 stamina'"
+                    :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                    @click="onClickEncounter(e)"
+                  />
+
+                  <p v-if="isLoadingTargets">Loading...</p>
+                  </div>
+                </div>
+              </div>
           </div>
+          </div>
+
         </div>
       </div>
 
@@ -218,11 +210,6 @@ export default {
     getEnemyArt,
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
-    },
-    getPayoutString() {
-      return (
-        'Earnings on victory: ' + this.formattedSkill(this.fightGasOffset) + ' gas offset + ' + this.formattedSkill(this.fightBaseline) + ' per 1000 power'
-      );
     },
     getWinChance(enemyPower, enemyElement) {
       const characterPower = CharacterPower(this.currentCharacter.level);
@@ -339,8 +326,27 @@ export default {
 </script>
 
 <style scoped>
+
+.enemy-character {
+  position: relative;
+  width: 14em;
+  height: 25em;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 115%;
+  background-color: #2e2e30cc;
+  background-image: url('../assets/cardCharacterFrame.png');
+  border: 1px solid #a28d54;
+  border-radius: 15px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
 .encounter img {
-  max-width: 15vw;
+  max-width: 10vw;
 }
 
 .payout-info {
@@ -412,6 +418,11 @@ div.encounter.text-center {
   position: relative;
 }
 
+.encounter {
+  display : flex;
+  justify-content: center;
+}
+
 .xp-gain, .encounter-power{
   color: #9e8a57 !important;
 }
@@ -422,15 +433,14 @@ div.encounter.text-center {
 }
 
 .encounter-element {
-  top: 40px;
+  top: 25px;
 }
 
 .encounter-power {
-  top: 70px;
+  bottom: 55px;
 }
 
 .victory-chance {
-  bottom: 80px;
   left: 0;
   right: 0;
   text-align: center;
@@ -438,7 +448,7 @@ div.encounter.text-center {
 }
 
 .xp-gain {
-  top: 100px;
+  bottom: 20px;
 }
 
 /* Mobile Support Classes*/
@@ -448,12 +458,42 @@ div.encounter.text-center {
 }
 
 .mobile-divider{
-  max-width: 50%;
   margin: auto;
 }
 
-.mobile-img-adjustment{
-  padding-bottom: 25px;
+.combat-enemy-container {
+  display : flex;
+  margin-bottom: 50px;
+}
+
+.enemy-container {
+  flex : 3;
+}
+
+.enemy-divider {
+  margin-top : 30px;
+}
+
+.enemy-list {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.weapon-selection {
+  border-right : 1px solid #9e8a57;
+}
+
+.weapon-header {
+    justify-content: center;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.enemy-energy {
+  top: -30px;
+  position: relative;
 }
 
 /* Needed to asjust image size, not just image column-size and other classes to accommodate that */
@@ -466,6 +506,18 @@ div.encounter.text-center {
     position: inherit;
     font-size: x-large;
   }
+  .combat-enemy-container {
+    flex-direction: column;
+  }
+  .encounter {
+    margin-top: 50px;
+  }
+  .weapon-selection {
+    border-right: none;
+  }
+  .results-panel {
+    width : 100%;
+  }
 }
 
 .encounter-button {
@@ -473,5 +525,12 @@ div.encounter.text-center {
   margin: 0 auto;
   height: 5em;
   width: 13em;
+  position: relative;
+  top: 35px;
+}
+
+.enemy-img {
+  position: relative;
+  top: -40px;
 }
 </style>

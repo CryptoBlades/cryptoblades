@@ -38,6 +38,8 @@
               <br>Level 21: 3600" />
           </span>
         </div>
+
+        <earnings-calculator/>
       </div>
     </transition>
 
@@ -51,17 +53,13 @@
           :key="c.id"
           @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
         >
-          <div class="name-list"
-          >{{ getCharacterName(c.id) }}<br>Lv.{{ c.level + 1}}
-            <small-bar
-              :showMinimalVersion="true"
-              v-if="!isLoadingCharacter"
-              :current="getCharacterStamina(c.id)"
-              :max="maxStamina"
-            />
+          <div class="name-list">
+            {{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+          </div>
           <div class="small-stamina-char"
-          :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-          v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))"></div>
+            :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
+            v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
+            <div class="stamina-text black-outline">STA {{ getCharacterStamina(c.id) }} / 200</div>
           </div>
         </li>
       </ul>
@@ -96,14 +94,19 @@ import { getCharacterArt } from '../../character-arts-placeholder';
 import SmallBar from '../SmallBar.vue';
 import CharacterArt from '../CharacterArt.vue';
 import { CharacterPower, CharacterTrait } from '../../interfaces';
+import EarningsCalculator from './EarningsCalculator.vue';
 import { RequiredXp } from '../../interfaces';
 import Hint from '../Hint.vue';
+import Web3 from 'web3';
+import BN from 'bignumber.js';
+import Vue from 'vue';
 
-export default {
+export default Vue.extend({
   components: {
     CharacterArt,
     SmallBar,
     Hint,
+    EarningsCalculator,
   },
 
   computed: {
@@ -117,7 +120,9 @@ export default {
       'ownCharacters',
       'timeUntilCharacterHasMaxStamina',
       'getIsInCombat',
-      'getIsCharacterViewExpanded'
+      'getIsCharacterViewExpanded',
+      'fightGasOffset',
+      'fightBaseline'
     ]),
 
     isLoadingCharacter(): boolean {
@@ -133,7 +138,7 @@ export default {
   data() {
     return {
       traits: CharacterTrait,
-      isPlaza : false
+      isPlaza : false,
     };
   },
   methods: {
@@ -153,8 +158,13 @@ export default {
     toolTipHtml(time: string): string {
       return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
     },
+
+    formattedSkill(skill: number): number {
+      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
+      return new BN(skillBalance).toNumber();
+    },
   },
-};
+});
 </script>
 
 <style scoped>
@@ -324,11 +334,22 @@ li.character-highlight{
 }
 
 .small-stamina-char {
-  height :10px;
+  position: relative;
+  height :14px;
   margin: 10px 5px 0px 5px;
   border-radius: 2px;
   border: 0.5px solid rgb(216, 215, 215);
   background : linear-gradient(to right, rgb(236, 75, 75) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+}
+
+.stamina-text {
+  position: absolute;
+  top: -3px;
+  font-size: 75%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #fff;
 }
 
 .slide-fade-enter-active {

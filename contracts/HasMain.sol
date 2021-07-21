@@ -6,12 +6,12 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 contract HasMain is Initializable, OwnableUpgradeable {
     address public main;
 
-    function __HasMain_init() public initializer {
+    function __HasMain_init() internal initializer {
         __Ownable_init();
         __HasMain_init_unchained();
     }
 
-    function __HasMain_init_unchained() public initializer {
+    function __HasMain_init_unchained() internal initializer {
         main = address(0);
     }
 

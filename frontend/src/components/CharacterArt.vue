@@ -1,7 +1,7 @@
 <template>
   <div class="character-art" v-tooltip="tooltipHtml(character)" ref="el">
     <div class="trait" v-if="!portrait">
-      <span :class="trait.toLowerCase() + '-icon'"></span>
+      <span :class="trait.toLowerCase() + '-icon circle-element'"></span>
     </div>
 
     <img v-if="showPlaceholder && !portrait" class="placeholder" :src="getCharacterArt(character)" />
@@ -10,17 +10,26 @@
       <i class="fas fa-spinner fa-spin"></i>
     </div>
 
-    <div class="id black-outline" v-if="advancedUI && !portrait">ID {{ character.id }}</div>
-
-    <div class="hero-score black-outline" v-if="!portrait">
-      Score {{ heroScore.toLocaleString() }}
+    <div class="name-lvl-container">
+      <div class="name black-outline" v-if="!portrait">{{ getCharacterName(character.id) }} </div>
+      <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
+    </div>
+    <div class="score-id-container">
+    <div class="black-outline" v-if="!portrait">ID <span class="white">{{ character.id }}</span></div>
+    <div class="black-outline" v-if="!portrait">
+      Score <span class="white">{{ heroScore.toLocaleString() }}</span>
       <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Hero score is a measure of your hero's combat prowess so far.
         It goes up when you win and down when you lose.`"/>
     </div>
+    </div>
 
-    <div class="name black-outline" v-if="!portrait">{{ getCharacterName(character.id) }} Lv.{{ character.level + 1 }}</div>
+    <div v-if="!portrait && isMarket" class="small-stamina-char"
+      :style="`--staminaReady: ${(timestampToStamina(character.staminaTimestamp)/maxStamina)*100}%;`"
+      v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
+      <div class="stamina-text black-outline">STA {{ timestampToStamina(character.staminaTimestamp) }} / 200</div>
+    </div>
 
-    <div class="xp" v-if="advancedUI && !portrait">
+    <div class="xp" v-if="!portrait">
       <b-progress :max="RequiredXp(character.level)" variant="success"
       v-tooltip.bottom="`Claimable XP ${this.getCharacterUnclaimedXp(character.id)}`">
         <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} XP</strong>
@@ -41,7 +50,7 @@ import torsos from '../assets/characterWardrobe_torso.json';
 import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
-import { mapGetters} from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 const headCount = 13;
 const armsCount = 45;
@@ -59,7 +68,7 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character', 'portrait'],
+  props: ['character', 'portrait', 'isMarket'],
   watch: {
     character() {
       this.clearScene();
@@ -82,13 +91,18 @@ export default {
       body: null,
       trait: CharacterTrait[this.character.trait],
       showPlaceholder: false,
-      advancedUI: this.advancedUI,
       heroScore: 0
     };
   },
 
   computed: {
-    ...mapGetters(['getCharacterName', 'transferCooldownOfCharacterId', 'getCharacterUnclaimedXp']),
+    ...mapState(['maxStamina']),
+    ...mapGetters([
+      'getCharacterName',
+      'transferCooldownOfCharacterId',
+      'getCharacterUnclaimedXp',
+      'timeUntilCharacterHasMaxStamina'
+    ]),
   },
 
   methods: {
@@ -106,6 +120,15 @@ export default {
       }
 
       return '';
+    },
+
+    staminaToolTipHtml(time) {
+      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
+    },
+
+    timestampToStamina(timestamp) {
+      if(timestamp > Math.floor(Date.now()/1000)) return 0;
+      return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
     },
 
     getCharacterArt,
@@ -464,7 +487,7 @@ export default {
 
     async fetchScore() {
       try {
-        const scoreData = await fetch(`https://cryptoblades-api.herokuapp.com/static/character/score/${this.character.id}`);
+        const scoreData = await fetch(`https://api.cryptoblades.io/static/character/score/${this.character.id}`);
         const { score } = await scoreData.json();
         this.heroScore = score;
       } catch {
@@ -475,7 +498,6 @@ export default {
   mounted() {
     this.fetchScore();
 
-    this.advancedUI = localStorage.getItem('hideAdvanced') === 'false';
     if(localStorage.getItem('useGraphics') === 'false') {
       this.allLoaded = true;
       this.showPlaceholder = true;
@@ -495,19 +517,19 @@ export default {
   position: relative;
   display: flex;
   justify-content: center;
+  flex-direction: column;
 }
 
-.trait,
-.id,
-.name,
-.hero-score,
 .xp {
   position: absolute;
 }
 
 .trait {
-  top: 5px;
-  left: 5px;
+  top: -30px;
+  justify-self: center;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
 }
 
 .id {
@@ -523,16 +545,17 @@ export default {
 }
 
 .name {
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  font-size: 0.9em;
-  text-align: center;
+  font-weight: 900;
+  overflow: hidden;
+  max-height: 24px;
+  max-width: 170px;
+  white-space: nowrap;
 }
 
 .xp {
-  bottom: 0;
-  left: 0;
+  bottom: -30px;
+  left: 30px;
+  width: 150px;
   right: 0;
 }
 
@@ -544,10 +567,50 @@ export default {
 }
 
 .placeholder {
-  padding: 10px;
   max-width: 100%;
-  height: 90%;
-  padding-top: 10%;
+  top: -15px;
+  position: relative;
+  height: 75%;
+  padding-top: 0;
+  -o-object-fit: contain;
   object-fit: contain;
+}
+
+.circle-element {
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 50%;
+}
+
+.name-lvl-container, .score-id-container {
+  display :flex;
+  justify-content: space-around;
+  position: relative;
+}
+
+.white {
+  color : rgb(204, 204, 204)
+}
+
+.small-stamina-char {
+  position: relative;
+  margin-top: -10px;
+  top: 7px;
+  align-self: center;
+  height :14px;
+  width: 180px;
+  border-radius: 2px;
+  border: 0.5px solid rgb(216, 215, 215);
+  background : linear-gradient(to right, rgb(236, 75, 75) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+}
+
+.stamina-text {
+  position: relative;
+  top: -3px;
+  font-size: 75%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #fff;
 }
 </style>

@@ -107,6 +107,7 @@ export function createStore(web3: Web3) {
       characters: {},
       characterStaminas: {},
       weapons: {},
+      currentWeaponId: null,
       isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
@@ -218,6 +219,12 @@ export function createStore(web3: Web3) {
           if (weapons.some((w) => w === null)) return [];
           return weapons;
         };
+      },
+
+      currentWeapon(state) {
+        if (state.currentWeaponId === null) return null;
+
+        return state.weapons[state.currentWeaponId];
       },
 
       transferCooldownOfCharacterId(state) {
@@ -431,6 +438,10 @@ export function createStore(web3: Web3) {
 
       updateWeapon(state: IState, { weaponId, weapon }) {
         Vue.set(state.weapons, weaponId, weapon);
+      },
+
+      setCurrentWeapon(state: IState, weaponId: number) {
+        state.currentWeaponId = weaponId;
       },
 
       updateCharacterStamina(state: IState, { characterId, stamina }) {
@@ -1167,6 +1178,66 @@ export function createStore(web3: Web3) {
         return await NFTMarket.methods
           .getListingIDs(
             nftContractAddr
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchNumberOfWeaponListings({ state }, { nftContractAddr, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns an array of bignumbers (these are nft IDs)
+        return await NFTMarket.methods
+          .getNumberOfWeaponListings(
+            nftContractAddr,
+            trait,
+            stars
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchNumberOfCharacterListings({ state }, { nftContractAddr, trait, minLevel, maxLevel }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns an array of bignumbers (these are nft IDs)
+        return await NFTMarket.methods
+          .getNumberOfCharacterListings(
+            nftContractAddr,
+            trait,
+            minLevel,
+            maxLevel
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchAllMarketCharacterNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, minLevel, maxLevel }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        return await NFTMarket.methods
+          .getCharacterListingIDsPage(
+            nftContractAddr,
+            limit,
+            pageNumber,
+            trait,
+            minLevel,
+            maxLevel
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchAllMarketWeaponNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        return await NFTMarket.methods
+          .getWeaponListingIDsPage(
+            nftContractAddr,
+            limit,
+            pageNumber,
+            trait,
+            stars
           )
           .call(defaultCallOptions(state));
       },

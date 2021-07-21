@@ -60,12 +60,16 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
 import _ from 'lodash';
+import Vue from 'vue';
 import Events from './events';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+
+Vue.directive('visible', (el, bind) => {
+  el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
 
 export default {
   inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
@@ -104,7 +108,7 @@ export default {
     },
 
     async currentCharacterId() {
-      await this.updateCurrentCharacterStamina();
+      await this.updateCharacterStamina(this.currentCharacterId);
     },
     $route(to) {
       // react to route changes
@@ -128,11 +132,11 @@ export default {
       'fetchRewardsClaimTax',
     ]),
 
-    async updateCurrentCharacterStamina() {
+    async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;
 
-      if (this.currentCharacterId !== null) {
-        await this.fetchCharacterStamina(this.currentCharacterId);
+      if (id !== null) {
+        await this.fetchCharacterStamina(id);
       }
     },
 
@@ -265,13 +269,42 @@ export default {
         );
       }
     },
+
+    async checkNotifications() {
+      const response = await fetch('https://api.cryptoblades.io/static/notifications');
+      const notifications = await response.json();
+
+      const lastHash = localStorage.getItem('lastnotification');
+      let shouldContinue = true;
+
+      notifications.forEach(notif => {
+
+        if(!shouldContinue) return;
+
+        if(lastHash === notif.hash) {
+          shouldContinue = false;
+          return;
+        }
+
+        this.$dialog.notify.warning(
+          `${notif.title}
+          <br>
+          <a href="${notif.link}" target="_blank">Check it out!</a>
+          `,
+          {
+            timeout: 300000,
+          },
+        );
+      });
+
+      localStorage.setItem('lastnotification', notifications[0].hash);
+    }
   },
 
   mounted() {
     this.checkStorage();
 
     Events.$on('setting:hideRewards', () => this.checkStorage());
-    Events.$on('setting:hideAdvanced', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
     Events.$on('setting:hideWalletWarning', () => this.checkStorage());
 
@@ -295,6 +328,7 @@ export default {
     });
 
     this.showWarningDialog();
+
   },
 
   async created() {
@@ -310,8 +344,10 @@ export default {
       throw e;
     }
 
-    this.pollCharacterStaminaIntervalId = setInterval(async () => {
-      await this.updateCurrentCharacterStamina();
+    this.pollCharactersStaminaIntervalId = setInterval(async () => {
+      this.ownCharacters.forEach(async (c) => {
+        await this.updateCharacterStamina(c.id);
+      });
     }, 3000);
 
     this.availableStakeTypes.forEach((item) => {
@@ -338,12 +374,14 @@ export default {
 
       setTimeout(pollAccounts, 200);
     };
+
     pollAccounts();
 
     if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
-    if (!localStorage.getItem('hideAdvanced')) localStorage.setItem('hideAdvanced', 'false');
     if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
     if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
+
+    this.checkNotifications();
   },
 
   beforeDestroy() {
@@ -355,6 +393,10 @@ export default {
 </script>
 
 <style>
+hr.hr-divider{
+  border-top: 1px solid #9e8a57;
+  margin-bottom: 0.5rem !important;
+}
 body {
   margin: 0;
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
@@ -515,17 +557,32 @@ button.close {
 
 .modal-body {
   color: #9e8a57 !important;
-  background: rgb(31, 31, 34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
 
 .modal-footer {
   color: #9e8a57 !important;
-  background: rgb(31, 31, 34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
   border-color: #9e8a57 !important;
 }
 
+.b-pagination > li > .page-link{
+  color:#9e8a57;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  border-color: #9e8a576e;
+}
+
+.b-pagination > .page-item.active > .page-link {
+  color: #9e8a57;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  border-color: #9e8a57;
+}
+
+.b-pagination > .page-item.disabled > .page-link {
+  color: #b3b0a72a;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  border-color: #9e8a576e;
+}
 .nav-tabs {
   border-bottom: 2px solid #9e8a57 !important;
 }

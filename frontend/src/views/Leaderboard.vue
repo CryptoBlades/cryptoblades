@@ -1,10 +1,14 @@
 <template>
   <div class="body main-font">
     <b-card no-body>
+      <div class="outcome" v-if="waitingLeaderboardOutcome">
+        <i class="fas fa-spinner fa-spin"></i>
+        Loading...
+      </div>
       <b-tabs pills card vertical>
         <b-tab v-for="leaderboard in leaderboards" :key="leaderboard.key" :title="leaderboard.key">
           <b-card-text>
-            <div class="offset-md-3 col-md-6 col-sm-12 col-xs-12">
+            <div class="offset-md-2 col-md-8 col-sm-12 col-xs-12">
               <div class="row">
                 <div class="col-12">
                   <h3 class="text-center">{{ leaderboard.key }}</h3>
@@ -12,13 +16,13 @@
               </div>
 
               <div class="row mt-2" v-for="(entry, pos) of leaderboard.leaderboard" :key="entry.name">
-                <div class="col-9">
+                <div class="col-7">
                   <strong class="mr-2 position-marker">#{{ pos + 1 }}</strong>
                   {{ entry.name }}
                   <b-icon v-if="matchesCharIdOrWallet(entry.name)" icon="star-fill" />
                 </div>
 
-                <div class="col-3 text-right">
+                <div class="col-5 text-right">
                   {{ entry.value }} {{ leaderboard.units }}
                 </div>
               </div>
@@ -36,15 +40,18 @@ import { mapState } from 'vuex';
 export default {
   data() {
     return {
-      leaderboards: []
+      leaderboards: [],
+      waitingLeaderboardOutcome: false,
     };
   },
 
   async created() {
-    const leaderboardData = await fetch('https://cryptoblades-api.herokuapp.com/static/leaderboard');
+    this.waitingLeaderboardOutcome = true;
+    const leaderboardData = await fetch('https://api.cryptoblades.io/static/leaderboard');
     const leaderboards = await leaderboardData.json();
 
     this.leaderboards = leaderboards.leaderboard;
+    this.waitingLeaderboardOutcome = false;
   },
 
   methods: {
@@ -67,5 +74,11 @@ export default {
 .position-marker {
   display: inline-block;
   min-width: 30px;
+}
+
+.outcome {
+  margin: auto;
+  text-align: center;
+  font-size: 1em;
 }
 </style>

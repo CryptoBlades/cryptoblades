@@ -2,7 +2,7 @@
   <div class="body main-font">
 
     <b-tabs justified>
-      <b-tab @click="clearData()">
+      <b-tab @click="clearData();browseTabActive = true">
         <template #title>
           Browse NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -15,33 +15,50 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchAllListingsByType('character')"  class="gtag-link-others" tagname="browse_characters">Browse Characters</b-button>
+                  @click="searchAllCharacterListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_characters">Browse Characters</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchAllListingsByType('weapon')"  class="gtag-link-others" tagname="browse_weapons">Browse Weapons</b-button>
+                  @click="searchAllWeaponListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_weapons">Browse Weapons</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   v-if="buyableNftSelected"
-                  @click="purchaseNft()"  class="gtag-link-others" tagname="confirm_purchase">Purchase</b-button>
+                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
+                  Purchase <b-icon-question-circle v-if="!canPurchase"
+                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                </b-button>
               </div>
 
               <div class="col"></div>
             </div>
 
             <div class="search-results">
+              <b-pagination class="customPagination"
+                v-visible="allSearchResults && allSearchResults.length > 0"
+                align="center" v-model="currentPage"
+                :total-rows="allListingsAmount"
+                :per-page="activeType === 'weapon' ? weaponShowLimit : characterShowLimit"
+                first-number
+                last-number
+                v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
+                  searchAllCharacterListings(currentPage - 1)"
+              ></b-pagination>
+
               <weapon-grid
+                v-on:weapon-filters-changed="searchAllWeaponListings(0)"
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :weaponIds="allSearchResults"
-                :showLimit="60"
+                :showLimit="weaponShowLimit"
                 :showReforgedToggle="false"
                 :canFavorite="false"
+                :isMarket="true"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
@@ -54,21 +71,36 @@
               </weapon-grid>
 
               <character-list
+                v-on:character-filters-changed="searchAllCharacterListings(0)"
                 v-if="activeType === 'character'"
                 :showFilters="true"
                 :showGivenCharacterIds="true"
                 :characterIds="allSearchResults"
-                :showLimit="40"
+                :showLimit="characterShowLimit"
+                :isMarket="true"
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <span class="d-block text-center" v-if="nftPricesById[id]">
-                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                  </span>
-                  <span class="d-block text-center" v-else>Loading price...</span>
+                  <div class="token-price">
+                    <span class="d-block text-center" v-if="nftPricesById[id]">
+                      {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                  </div>
                 </template>
 
               </character-list>
+
+              <b-pagination class="customPagination"
+                v-if="allSearchResults && allSearchResults.length > 0"
+                align="center" v-model="currentPage"
+                :total-rows="allListingsAmount"
+                :per-page="activeType === 'weapon' ? weaponShowLimit : characterShowLimit"
+                first-number
+                last-number
+                v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
+                  searchAllCharacterListings(currentPage - 1)"
+              ></b-pagination>
             </div>
 
           </div>
@@ -86,7 +118,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData()">
+      <b-tab @click="clearData(),browseTabActive = false">
         <template #title>
           Search NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -147,7 +179,11 @@
                 <b-button
                   variant="primary"
                   v-if="buyableNftSelected"
-                  @click="purchaseNft()"  class="gtag-link-others" tagname="confirm_purchase">Purchase</b-button>
+                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
+                  Purchase <b-icon-question-circle v-if="!canPurchase"
+                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                </b-button>
               </div>
 
               <div class="col">
@@ -173,6 +209,7 @@
                 :showReforgedToggle="false"
                 :canFavorite="false"
                 :weaponIds="searchResults"
+                :isMarket="true"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
@@ -189,13 +226,16 @@
                 v-if="activeType === 'character'"
                 :showGivenCharacterIds="true"
                 :characterIds="searchResults"
+                :isMarket="true"
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <span class="d-block text-center" v-if="nftPricesById[id]">
-                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                  </span>
-                  <span class="d-block text-center" v-else>Loading price...</span>
+                  <div class="token-price">
+                    <span class="d-block text-center" v-if="nftPricesById[id]">
+                      {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                  </div>
                 </template>
 
               </character-list>
@@ -215,7 +255,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData();loadMarketTaxes()">
+      <b-tab @click="clearData();loadMarketTaxes();browseTabActive = false">
         <template #title>
           List NFTs
           <hint class="hint" text="When you list an NFT for sale, it is transferred to the<br>market until someone buys it or you cancel the sale" />
@@ -242,15 +282,28 @@
                   v-if="activeType === 'weapon'"
                    class="gtag-link-others" tagname="add_listing_weapon"
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
-                  @click="addListingForNft()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
+                  @click="showListingSetupModal()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
                   v-tooltip.bottom="weaponMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
                    class="gtag-link-others" tagname="add_listing_character"
-                  @click="addListingForNft()">List Character <b-icon-question-circle :hidden=!characterMarketTax
+                  @click="showListingSetupModal()">List Character <b-icon-question-circle :hidden=!characterMarketTax
                   v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
+
+                <b-modal class="centered-modal" ref="listing-setup-modal"
+                  @ok="addListingForNft">
+                  <template #modal-title>
+                    Sell {{activeType}}
+                  </template>
+                  <b-form-input type="number" :max="10000"
+                    class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
+
+                  <span v-if="listingSellPrice">Do you want to sell your {{activeType}} for {{Math.min(+listingSellPrice, 10000)}} SKILL?<br>
+                  <i>The buyer will pay an extra {{activeListingMarketTax()}}% market fee for a total of
+                  {{calculatedBuyerCost(Math.min(+listingSellPrice, 10000))}} SKILL</i></span>
+                </b-modal>
               </div>
 
               <div class="col">
@@ -307,6 +360,7 @@ import { Accessors } from 'vue/types/options';
 import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons } from '../../../build/abi-interfaces';
 import BigNumber from 'bignumber.js';
+import { BModal } from 'bootstrap-vue';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -324,17 +378,31 @@ interface Data {
   waitingMarketOutcome: boolean;
   nftPricesById: Record<string, string>;
   characterMarketTax: string;
-  weaponMarketTax: string ;
+  weaponMarketTax: string ;  characterShowLimit: number;
+  weaponShowLimit: number;
+  allListingsAmount: number;
+  currentPage: number;
+  browseTabActive: boolean;
+  listingSellPrice: string;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
 
+const defaultLimit = 40;
+
 interface StoreMappedGetters {
   contracts: Contracts;
+  ownCharacters: any[];
 }
 
 interface StoreMappedActions {
   fetchAllMarketNftIds(payload: { nftContractAddr: string }): Promise<string[]>;
+  fetchAllMarketCharacterNftIdsPage(payload: {
+    nftContractAddr: string, limit: number, pageNumber: number, trait: number, minLevel: number, maxLevel: number
+  }): Promise<string[]>;
+  fetchAllMarketWeaponNftIdsPage(payload: { nftContractAddr: string, limit: number, pageNumber: number, trait: number, stars: number }): Promise<string[]>;
+  fetchNumberOfWeaponListings(payload: { nftContractAddr: string, trait: number, stars: number }): Promise<number>;
+  fetchNumberOfCharacterListings(payload: { nftContractAddr: string, trait: number, minLevel: number, maxLevel: number}): Promise<number>;
   fetchMarketNftIdsBySeller(payload: { nftContractAddr: string, sellerAddr: string }): Promise<string[]>;
   fetchMarketNftPrice(payload: { nftContractAddr: string, tokenId: string | number }): Promise<string>;
   fetchMarketTax(payload: { nftContractAddr: string }): Promise<string>;
@@ -364,6 +432,12 @@ export default Vue.extend({
       nftPricesById: {},
       characterMarketTax: '',
       weaponMarketTax: '',
+      characterShowLimit: 40,
+      weaponShowLimit: 60,
+      allListingsAmount: 0,
+      currentPage: 1,
+      browseTabActive: true,
+      listingSellPrice: ''
     } as Data;
   },
 
@@ -372,7 +446,7 @@ export default Vue.extend({
       'defaultAccount', 'weapons', 'characters', 'ownedCharacterIds', 'ownedWeaponIds'
     ]) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'contracts'
+      'contracts', 'ownCharacters'
     ]) as Accessors<StoreMappedGetters>),
     ...mapGetters(['transferCooldownOfCharacterId']),
 
@@ -409,12 +483,20 @@ export default Vue.extend({
       && (this.activeType === 'weapon'
         ? false
         : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
+    },
+
+    canPurchase(): boolean {
+      return this.activeType === 'weapon' || this.ownCharacters.length < 4 ;
     }
   },
 
   methods: {
     ...(mapActions([
       'fetchAllMarketNftIds',
+      'fetchAllMarketCharacterNftIdsPage',
+      'fetchAllMarketWeaponNftIdsPage',
+      'fetchNumberOfWeaponListings',
+      'fetchNumberOfCharacterListings',
       'fetchMarketNftIdsBySeller',
       'fetchMarketNftPrice',
       'fetchMarketTax',
@@ -436,6 +518,9 @@ export default Vue.extend({
       this.marketOutcome = null;
       this.waitingMarketOutcome = false;
       this.nftPricesById = {};
+      this.allListingsAmount = 0;
+      this.currentPage = 1;
+      this.listingSellPrice = '';
     },
 
     async loadMarketTaxes() {
@@ -484,11 +569,9 @@ export default Vue.extend({
     async addListingForNft() {
       this.marketOutcome = null;
       if(this.selectedNftId === null) return;
+      if(!this.listingSellPrice) return;
 
-      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeType}`, text: 'Sell Price (SKILL)' });
-      if(!sellFor) return;
-
-      const val = +sellFor;
+      const val = Math.min(+this.listingSellPrice, 10000);
       if(val <= 0 || !val || isNaN(val)) return;
 
       this.waitingMarketOutcome = true;
@@ -496,7 +579,7 @@ export default Vue.extend({
       const results = await this.addMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
-        price: this.convertSkillToWei(sellFor)
+        price: this.convertSkillToWei(this.listingSellPrice),
       });
 
       this.selectedNftId = null;
@@ -587,20 +670,65 @@ export default Vue.extend({
       await this.searchOwnListings(this.activeType);
     },
 
-    async searchAllListingsByType(type: SellType) {
-      this.activeType = type;
+    async searchAllCharacterListings(page: number) {
+      this.activeType = 'character';
       this.marketOutcome = null;
       this.waitingMarketOutcome = true;
 
-      const results = await this.fetchAllMarketNftIds({
-        nftContractAddr: this.contractAddress
-      });
+      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const params = {
+        element: '' + this.characterTraitFilter(),
+        minLevel: '' + this.characterMinLevelFilter(),
+        maxLevel: '' + this.characterMaxLevelFilter(),
+        sortBy: '' + this.characterPriceOrder() ? 'price' : '',
+        sortDir: '' + this.characterPriceOrder(),
+        pageSize: '' + (this.characterShowLimit || defaultLimit),
+        pageNum: '' + page,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const charactersData = await fetch(url.toString());
+      const characters = await charactersData.json();
 
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
       this.searchResultsOwned = false; // temp
-      this.allSearchResults = results;
+      this.allListingsAmount = characters.page.total;
+      this.allSearchResults = characters.idResults;
+
+      this.waitingMarketOutcome = false;
+      this.marketOutcome = null;
+    },
+
+    async searchAllWeaponListings(page: number) {
+      this.activeType = 'weapon';
+      this.marketOutcome = null;
+      this.waitingMarketOutcome = true;
+
+      const url = new URL('https://api.cryptoblades.io/static/market/weapon');
+      const params = {
+        element: '' + this.weaponTraitFilter(),
+        minStars: '' + this.weaponStarFilter(),
+        maxStars: '' + this.weaponStarFilter(),
+        sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
+        sortDir: '' + this.weaponPriceOrder(),
+        pageSize: '' + (this.weaponShowLimit || defaultLimit),
+        pageNum: '' + page,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const weaponsData = await fetch(url.toString());
+      const weapons = await weaponsData.json();
+
+      // searchResultsOwned does not mesh with this function
+      // will need per-result checking of it, OR filtering out own NFTs
+      //this.searchResultsOwned = nftSeller === this.defaultAccount;
+      this.searchResultsOwned = false; // temp
+      this.allListingsAmount = weapons.page.total;
+      this.allSearchResults = weapons.idResults;
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = null;
@@ -634,20 +762,18 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
 
       try {
-        const result = await this.fetchMarketNftIdsBySeller({
-          nftContractAddr: this.contractAddress,
-          sellerAddr: this.search,
-        });
-
-        this.searchResultsOwned = this.search === this.defaultAccount;
-        this.waitingMarketOutcome = false;
-        this.searchResults = result;
-
+        const results = this.activeType === 'weapon' ?
+          await this.searchWeaponListingsBySeller(this.search):
+          await this.searchCharacterListingsBySeller(this.search);
+        this.searchResults = results;
       } catch {
         this.searchResultsOwned = false;
         this.waitingMarketOutcome = false;
         this.searchResults = [];
       }
+
+      this.searchResultsOwned = false;
+      this.waitingMarketOutcome = false;
     },
 
     async searchOwnListings(type: SellType) {
@@ -661,13 +787,59 @@ export default Vue.extend({
 
       this.waitingMarketOutcome = true;
 
-      const result = await this.fetchMarketNftIdsBySeller({
-        nftContractAddr: this.contractAddress,
-        sellerAddr: this.defaultAccount,
-      });
+      const results = this.activeType === 'weapon' ?
+        await this.searchWeaponListingsBySeller(this.defaultAccount) :
+        await this.searchCharacterListingsBySeller(this.defaultAccount);
+
       this.searchResultsOwned = true;
       this.waitingMarketOutcome = false;
-      this.searchResults = result;
+      this.searchResults = results;
+    },
+
+    async searchCharacterListingsBySeller(sellerAddress: string): Promise<string[]>{
+      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const params = {
+        element: '' + this.characterTraitFilter(),
+        minLevel: '' + this.characterMinLevelFilter(),
+        maxLevel: '' + this.characterMaxLevelFilter(),
+        sortBy: '' + this.characterPriceOrder() ? 'price' : '',
+        sortDir: '' + this.characterPriceOrder(),
+        sellerAddress: '' + sellerAddress,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const charactersData = await fetch(url.toString());
+      const characters = await charactersData.json();
+      return characters.idResults;
+    },
+
+    async searchWeaponListingsBySeller(sellerAddress: string): Promise<string[]>{
+      const url = new URL('https://api.cryptoblades.io/static/market/weapon');
+      const params = {
+        element: '' + this.weaponTraitFilter(),
+        minStars: '' + this.weaponStarFilter(),
+        maxStars: '' + this.weaponStarFilter(),
+        sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
+        sortDir: '' + this.weaponPriceOrder(),
+        pageSize: '' + (this.weaponShowLimit || defaultLimit),
+        sellerAddress: '' + sellerAddress,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const weaponsData = await fetch(url.toString());
+      const weapons = await weaponsData.json();
+      return weapons.idResults;
+    },
+
+    showListingSetupModal() {
+      this.clearInputs();
+      (this.$refs['listing-setup-modal'] as BModal).show();
+    },
+
+    clearInputs() {
+      this.listingSellPrice = '';
     },
 
     convertWeiToSkill(wei: string) {
@@ -682,8 +854,52 @@ export default Vue.extend({
         'ether'
       );
     },
+
+    characterMinLevelFilter(): number {
+      return sessionStorage.getItem('character-levelfilter') ? +(sessionStorage.getItem('character-levelfilter') as string) - 1 : 0;
+    },
+
+    characterMaxLevelFilter(): number {
+      return sessionStorage.getItem('character-levelfilter') ? +(sessionStorage.getItem('character-levelfilter') as string) + 8 : 255;
+    },
+
+    characterTraitFilter(): string {
+      return sessionStorage.getItem('character-elementfilter') ? (sessionStorage.getItem('character-elementfilter') as string).toLowerCase() : '';
+    },
+
+    characterPriceOrder(): string {
+      return sessionStorage.getItem('character-price-order') ? (sessionStorage.getItem('character-price-order') as string) : '';
+    },
+
+    weaponTraitFilter(): string {
+      return sessionStorage.getItem('weapon-elementfilter') ? (sessionStorage.getItem('weapon-elementfilter') as string).toLowerCase() : '';
+    },
+
+    weaponStarFilter(): number {
+      return sessionStorage.getItem('weapon-starfilter') ? +(sessionStorage.getItem('weapon-starfilter') as string) : 0;
+    },
+
+    weaponPriceOrder(): string {
+      return sessionStorage.getItem('weapon-price-order') ? (sessionStorage.getItem('weapon-price-order') as string) : '';
+    },
+
     convertStringToDecimal(val: string, maxDecimals: number) {
       return new BigNumber(val).toFixed(maxDecimals);
+    },
+    activeListingMarketTax(): string{
+      if(this.activeType === 'weapon'){
+        return this.weaponMarketTax;
+      }
+
+      if(this.activeType === 'character'){
+        return this.characterMarketTax;
+      }
+
+      return '0';
+    },
+
+    calculatedBuyerCost(listedPrice: number): string {
+      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(2);
     }
   },
 
@@ -751,6 +967,15 @@ export default Vue.extend({
   margin: auto;
   text-align: center;
   font-size: 1em;
+}
+
+.modal-input {
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+.disabled-button {
+  opacity: 0.65;
 }
 
 </style>

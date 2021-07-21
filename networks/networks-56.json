@@ -448,7 +448,7 @@
     },
     "links": {},
     "address": "0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
-    "transactionHash": "0xa948968589cca78c2464adb706f8c9751a755403d8ed02e6d3de476ed51b424a"
+    "transactionHash": "0x5f5e858d4908031ead13bfbf30493e4e27985d12195caba9d886ebc17c1bb805"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -465,7 +465,7 @@
     "events": {},
     "links": {},
     "address": "0x39e0D6D95E035e2F8a2392788e0c53b7BA7d9B83",
-    "transactionHash": "0xc548c8e4bac778048665399a6565fb8ad59ed14a6ab5fce80edde017b9a32788"
+    "transactionHash": "0x3deb5a23b3b2b6b9b2ed7e5d0269e511a2c48772b765e1c76020dbb103c36631"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -677,7 +677,7 @@
     },
     "links": {},
     "address": "0x90099dA42806b21128A094C713347C7885aF79e2",
-    "transactionHash": "0xce47454f1fc5d7860814b49009fbb6694943908304d8b7228a91179906f5fdd3"
+    "transactionHash": "0x978d1e09af4c19de707095f767abb5224e1e26c2e780ae0531c9d0709e9a820a"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -759,7 +759,7 @@
     },
     "links": {},
     "address": "0xE6259bd51bd2cCa4078C4b188B8E966E995822b9",
-    "transactionHash": "0xc6d854eb4a2a0ceabe70b12eaa1fbce39fc9a7b4d13dbe084ed32c6a7689f9b8"
+    "transactionHash": "0xc826e3a84723213f41f7e8998c3c023e9e8689d28fe32fbdb8719faf080703df"
   },
   "build/contracts/RaidBasic.json": {
     "events": {},
@@ -777,7 +777,7 @@
     "events": {},
     "links": {},
     "address": "0xd6b2D8f59Bf30cfE7009fB4fC00a7b13Ca836A2c",
-    "transactionHash": "0x7b6da81530a5c6c52b7d3bd69b00a78dafaa0e1797d7f6971fb7a521119cc69f"
+    "transactionHash": "0xfdc792b988a38bd4cf73e13091a28872a9042d5c64905d53b2a68e4d6480c301"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
@@ -1127,6 +1127,6 @@
     },
     "links": {},
     "address": "0x7E091b0a220356B157131c831258A9C98aC8031A",
-    "transactionHash": "0xc6721ff2756798d8bb0f917daff92a690f8d5d5145b582c9796feaa2bec92f50"
+    "transactionHash": "0x1fac855baa1981e1d3bdb4043f72a8f7180ed2ccce3eb1ce772c380b0c11e7a5"
   }
 }

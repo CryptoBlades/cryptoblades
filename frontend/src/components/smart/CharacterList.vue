@@ -1,14 +1,10 @@
 <template>
   <div>
-    <span v-if="showFilters && showLimit > 0 && filteredCharacters.length >= showLimit">
-      <h4>More than {{showLimit}} results, try adjusting the filters</h4>
-    </span>
-
     <div class="filters row mt-2 pl-2" v-if="showFilters">
       <div class="col-2">
         <strong>Level</strong>
         <select class="form-control" v-model="levelFilter" @change="saveFilters()">
-          <option v-for="x in ['', 1, 11, 21, 31, 41]" :value="x" :key="x">
+          <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
             {{ x ? `${x} - ${x + 9}` : 'Any' }}
           </option>
         </select>
@@ -20,6 +16,19 @@
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
+
+      <div class="col-2" v-if="isMarket">
+        <strong>Sort</strong>
+        <select class="form-control" v-model="priceSort" @change="saveFilters()">
+          <option v-for="x in ['', 'Price: Low -> High', 'Price: High -> Low']" :value="x" :key="x">{{ x || 'Any' }}</option>
+        </select>
+      </div>
+
+      <b-button variant="primary" class="ml-3 clear-filters-button" @click="clearFilters" >
+          <span>
+            Clear Filters
+          </span>
+        </b-button>
     </div>
 
     <ul class="character-list">
@@ -34,7 +43,7 @@
           <slot name="above" :character="c"></slot>
         </div>
         <div class="art">
-          <CharacterArt :character="c" />
+          <CharacterArt :character="c" :isMarket="isMarket"/>
         </div>
       </li>
     </ul>
@@ -64,13 +73,18 @@ export default {
     showLimit: {
       type: Number,
       default: 0
+    },
+    isMarket: {
+      type: Boolean,
+      default: false
     }
   },
 
   data() {
     return {
       levelFilter: '',
-      elementFilter: ''
+      elementFilter: '',
+      priceSort: '',
     };
   },
 
@@ -108,6 +122,14 @@ export default {
       }
 
       return items;
+    },
+
+    priceSortAscText() {
+      return 'Price: Low -> High';
+    },
+
+    priceSortDescText() {
+      return 'Price: High -> Low';
     }
   },
 
@@ -122,24 +144,27 @@ export default {
 
     getCharacterArt,
 
-    getStaminaPoints(timestamp_str) {
-      // super temporary function, just to make it work for now. sorry
-      const timestamp = parseInt(timestamp_str, 10);
-      const now = Date.now();
-      if(timestamp  > now)
-        return 0;
+    saveFilters() {
+      sessionStorage.setItem('character-levelfilter', this.levelFilter);
+      sessionStorage.setItem('character-elementfilter', this.elementFilter);
 
-      let points = (now - timestamp) / 300;
-      if(points > 200) {
-        points = 200;
+      if(this.isMarket) {
+        const sortOrder = this.priceSort === this.priceSortAscText ? '1' :
+          this.priceSort === this.priceSortDescText ? '-1' : '';
+        sessionStorage.setItem('character-price-order', sortOrder);
       }
-      return points;
+      this.$emit('character-filters-changed');
     },
 
-    saveFilters() {
-      localStorage.setItem('character-levelfilter', this.levelFilter);
-      localStorage.setItem('character-elementfilter', this.elementFilter);
-    }
+    clearFilters() {
+      sessionStorage.clear();
+
+      this.elementFilter = '';
+      this.levelFilter = '';
+      this.priceSort = '';
+
+      this.$emit('character-filters-changed');
+    },
   },
 
   components: {
@@ -149,6 +174,9 @@ export default {
   mounted() {
     this.levelFilter = localStorage.getItem('character-levelfilter') || '';
     this.elementFilter = localStorage.getItem('character-elementfilter') || '';
+    if(this.isMarket) {
+      this.priceSort = sessionStorage.getItem('character-price-order') || '';
+    }
   }
 };
 </script>
@@ -161,15 +189,20 @@ export default {
   display: grid;
   padding: 0.5em;
   grid-template-columns: repeat(auto-fit, 14em);
-  gap: 0.5em;
+  gap: 1.5em;
 }
 
 .character {
-  width: 12em;
-  /* height: 20em; */
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 4px #ffffff38;
-  border-radius: 5px;
+  position: relative;
+  width: 14em;
+  height: 25em;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 115%;
+  background-color: #2e2e30cc;
+  background-image: url('../../assets/cardCharacterFrame.png');
+  border: 1px solid #a28d54;
+  border-radius: 15px;
   padding: 0.5rem;
   cursor: pointer;
   display: flex;
@@ -196,11 +229,21 @@ export default {
 }
 
 .character.selected {
-  outline: solid currentcolor 2px;
+  box-shadow: 0 0 8px #ffd400;
 }
 
 .above-wrapper {
-  padding-bottom: 0.5rem;
+  position: absolute;
+  top: 270px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+}
+
+.clear-filters-button {
+  align-self: flex-end;
+  height: fit-content;
 }
 
 @media (max-width: 576px) {

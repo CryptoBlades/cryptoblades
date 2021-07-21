@@ -2,6 +2,9 @@
   <div class="body main-font">
     <div class="blank-slate">
       Portal
+      <div>
+        The portal allows you to convert your other currencies to BNB. Currently, the portal supports <a href="https://on.wax.io/wax-io/" target="_blank">WAX</a>.
+      </div>
       <br />
       <div class="sub-container" v-if="transactionResults != null && !waitingResults">
         We'll get your BNB to you ASAP!
@@ -56,9 +59,7 @@ export default {
     ...mapGetters(['getExchangeUrl', 'hasStakedBalance']),
 
     has5SkillBalance() {
-      // Has all 'pools' of SKILL to be used later.
-      // return Web3.utils.fromWei(this.skillBalance, 'ether') >= 5 || Web3.utils.fromWei(this.inGameOnlyFunds, 'ether') >= 5  || Web3.utils.fromWei(this.skillRewards, 'ether') >= 5 || this.hasStakedBalance;
-      return Web3.utils.fromWei(this.skillBalance, 'ether') + Web3.utils.fromWei(this.skillRewards, 'ether') >= 5;
+      return new BN(Web3.utils.fromWei(this.skillBalance, 'ether')).plus(new BN(Web3.utils.fromWei(this.skillRewards, 'ether'))).gte(5);
     },
   },
 

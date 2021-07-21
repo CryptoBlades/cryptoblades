@@ -8,12 +8,12 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 abstract contract RewardsDistributionRecipientUpgradeable is Initializable, OwnableUpgradeable {
     address public rewardsDistribution;
 
-    function __RewardsDistributionRecipient_init() public initializer {
+    function __RewardsDistributionRecipient_init() internal initializer {
         __Ownable_init();
         __RewardsDistributionRecipient_init_unchained();
     }
 
-    function __RewardsDistributionRecipient_init_unchained() public initializer {
+    function __RewardsDistributionRecipient_init_unchained() internal initializer {
     }
 
     function notifyRewardAmount(uint256 reward) external virtual;
