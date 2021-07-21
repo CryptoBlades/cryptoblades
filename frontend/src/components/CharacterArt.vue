@@ -569,4 +569,24 @@ export default {
   color : rgb(204, 204, 204)
 }
 
+.sold {
+  height: 40px;
+  width: 300px;
+  background-color: rgb(187, 33, 0);
+  transform: rotate(30deg);
+  left: -40px;
+  position: absolute;
+  top: 150px;
+}
+
+.sold span {
+    text-align: center;
+    width: auto;
+    color: white;
+    display: block;
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 40px;
+}
+
 </style>

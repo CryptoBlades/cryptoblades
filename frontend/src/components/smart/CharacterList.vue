@@ -42,6 +42,7 @@
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :character="c"></slot>
         </div>
+        <slot name="sold" :character="c"></slot>
         <div class="art">
           <CharacterArt :character="c" />
         </div>
@@ -223,6 +224,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .character .art {

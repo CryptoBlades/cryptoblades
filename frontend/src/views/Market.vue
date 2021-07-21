@@ -85,6 +85,9 @@
                   </div>
                 </template>
 
+                <template #sold="{ character: { id } }">
+                  <div class="sold" v-if="nftPricesById[id] && !convertWeiToSkill(nftPricesById[id])"><span>SOLD</span></div>
+                </template>
               </character-list>
 
               <b-pagination class="customPagination"
@@ -228,6 +231,10 @@
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
                   </div>
+                </template>
+
+                <template #sold="{ character: { id } }">
+                  <div class="sold" v-if="nftPricesById[id] && !convertWeiToSkill(nftPricesById[id])"><span>SOLD</span></div>
                 </template>
 
               </character-list>
