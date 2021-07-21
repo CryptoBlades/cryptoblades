@@ -1,6 +1,6 @@
 # CryptoBlades
 
-## Getting Started (Crypto)
+## Currency Setup
 
 1. Install [Ganache](https://www.trufflesuite.com/ganache).
 1. For Ganache, choose Quickstart Ethereum.
@@ -12,15 +12,20 @@
 
 You should now have 100 fake eth! You're now fake rich.
 
-## Getting Started (Frontend)
+## Frontend Setup
 
 1. `npm install`
+1. Create a new file named `.env` in the 'frontend' directory alongside `.env.mainnet` and `.env.testnet` [**Edit this file to include the following lines of code**](https://github.com/CryptoBlades/cryptoblades/blob/main/frontend/.env.testnet#L1-L5)
 1. `npm run contract:prepare` (this builds your contracts)
 1. `npm run contract:deploy` (this deploys your contracts to your local blockchain)
+1. `npm run start:frontend`
 
-You will also need to create a `.env` file alongside `.env.mainnet` and `.env.testnet`. Inside this file you [**should only copy the feature flags from either other file**](https://github.com/CryptoBlades/cryptoblades/blob/main/frontend/.env.testnet#L1-L5), and the **file must be called `.env`**. All addresses and other variables are set correctly for local development. **If you don't create a `.env` file, you're going to be missing a lot of the UI.**
-
-But if not specified, the deployed contracts will be pulled in automatically.
+For Windows developers experiencing errors follow these steps:
+1. `rm -r build`
+1. `npm run contract:prepare` (this builds your contracts)
+1. `rm -r build/contracts`
+1. `npm run contract:deploy`
+1. `npm run start:frontend`
 
 ### VSCode Setup
 
@@ -51,5 +56,6 @@ Truffle also supports some environment variables, if you create a `.env` file in
 - `npm run contract:deploy` - deploy the Truffle contracts for testing
 
 ## Errors
+- If you run into any error at all during the build process you may need to reset [Ganache](https://www.trufflesuite.com/ganache) by deleting previous workspaces and going through the Ganache setup process again including importing a new account for Metamask.
+- Artifacts are from different compiler runs `- rm -rf build/`
 
-- `Artifacts are from different compiler runs` - `rm -rf build/`
