@@ -23,7 +23,10 @@
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
-        <big-button class="button" :mainText="`Configure MetaMask`" @click="configureMetaMask" />
+        <div>
+          <big-button class="button mm-button" :mainText="`Configure MetaMask`" @click="configureMetaMask" />
+          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button" :mainText="`Connect to MetaMask`" @click="connectMetamask" />
+        </div>
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>
@@ -83,6 +86,7 @@ export default {
   data: () => ({
     errorMessage: '',
     hideWalletWarning: false,
+    isConnecting: false
   }),
 
   computed: {
@@ -243,6 +247,21 @@ export default {
           }
         }
       }
+    },
+
+    async connectMetamask() {
+      const web3 = this.web3.currentProvider;
+      this.isConnecting = true;
+      this.errorMessage = 'Connecting to MetaMask...';
+      web3.request({method: 'eth_requestAccounts'})
+        .then(() => {
+          this.errorMessage = 'Success: MetaMask connected.';
+          this.isConnecting = false;
+        })
+        .catch(() => {
+          this.errorMessage = 'Error: MetaMask could not get permissions.';
+          this.isConnecting = false;
+        });
     },
 
     toggleHideWalletWarning() {
@@ -522,6 +541,12 @@ button,
 
 button.close {
   color: #9e8a57 !important;
+}
+
+.mm-button {
+  margin: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 .btn {
