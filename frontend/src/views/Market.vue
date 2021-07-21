@@ -292,7 +292,9 @@
                   <b-form-input type="number" :max="10000"
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
 
-                  <span v-if="listingSellPrice">Do you want to sell your {{activeType}} for {{Math.min(+listingSellPrice, 10000)}} SKILL?</span>
+                  <span v-if="listingSellPrice">Do you want to sell your {{activeType}} for {{Math.min(+listingSellPrice, 10000)}} SKILL?<br>
+                  <i>The buyer will pay an extra {{activeListingMarketTax()}}% market fee for a total of
+                  {{calculatedBuyerCost(Math.min(+listingSellPrice, 10000))}} SKILL</i></span>
                 </b-modal>
               </div>
 
@@ -870,6 +872,21 @@ export default Vue.extend({
 
     convertStringToDecimal(val: string, maxDecimals: number) {
       return new BigNumber(val).toFixed(maxDecimals);
+    },
+    activeListingMarketTax(): string{
+      if(this.activeType === 'weapon'){
+        return this.weaponMarketTax;
+      }
+
+      if(this.activeType === 'character'){
+        return this.characterMarketTax;
+      }
+
+      return '0';
+    },
+
+    calculatedBuyerCost(listedPrice: number): string {
+      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(2);
     }
   },
 
