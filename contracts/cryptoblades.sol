@@ -561,14 +561,20 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setReforgeWeaponValue(uint256 cents) public restricted {
+        require(cents >= 25, "ReforgeWeaponValue too low");
+        require(cents <= 100, "ReforgeWeaponValue too high");
         reforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
     }
 
     function setStaminaCostFight(uint8 points) public restricted {
+        require(points >= 20, "StaminaCostFight too low");
+        require(points <= 50, "StaminaCostFight too high");
         staminaCostFight = points;
     }
 
     function setFightXpGain(uint256 average) public restricted {
+        require(average >= 16, "FightXpGain too low");
+        require(average <= 64, "FightXpGain too high");
         fightXpGain = average;
     }
 
