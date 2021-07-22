@@ -433,8 +433,6 @@ export default {
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
   font-weight: 600;
   text-align: center;
-  font-weight: 900;
-  text-align: center;
   background: linear-gradient(to right, rgb(248, 218, 136) 20%, rgb(88, 82, 23) 40%, rgb(87, 87, 34) 60%, rgb(177, 150, 92) 80%);
   background-size: 200% auto;
   color: #000;
@@ -771,6 +769,7 @@ div.bg-success {
 .border-main {
   border: 1px solid #9e8a57;
 }
+
 @media all and (max-width:  767.98px) {
   .content {
     padding: 10px;

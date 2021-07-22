@@ -525,6 +525,7 @@ h1  {
     to {
       background-position: 200% center;
     }
+
   }
 }
 
@@ -610,6 +611,10 @@ h1 {
   top: -40px;
 }
 @media (max-width: 575.98px) {
-
+  .show-reforged {
+    width: 100%;
+    justify-content: center;
+    display: block;
+  }
 }
 </style>

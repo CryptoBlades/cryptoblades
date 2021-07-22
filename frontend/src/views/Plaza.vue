@@ -10,16 +10,11 @@
         <b-icon-question-circle class="centered-icon" scale="0.75"
           v-tooltip.bottom="`Only available for wallets than have not recruited any characters before.`"/>
         <br>
-        <span>You will get <strong>$30</strong> worth of <strong>SKILL</strong> upon recruiting your first character!</span>
+        <span>You will get <strong>1 SKILL</strong> upon recruiting your first character!</span>
         <div class="bot-bg-img promotion-decoration">
             <img src="../assets/border-element.png">
         </div>
       </div>
-      You do not have any characters.
-      <br>
-      You can recruit one by clicking the button below.
-      <br>
-      <br>
       <big-button
         class="button"
         :mainText="`Recruit character for ${recruitCost} SKILL`"
@@ -135,8 +130,18 @@ export default {
 </script>
 
 <style scoped>
+
 .current-promotion {
   width: 40%;
+  text-align: center;
+}
+
+@media all and (max-width:  767.98px) {
+  .current-promotion {
+    width: 100vw;
+    margin-top: 90px;
+    padding-left: 15px;
+  }
 }
 
 .promotion-decoration {
