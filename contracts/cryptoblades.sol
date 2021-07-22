@@ -84,7 +84,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         fightRewardBaseline = ABDKMath64x64.divu(344, 1000); // 0.08 x 4.3
     }
 
-    function migrateTo_X() external {
+    function migrateTo_5e833b0() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         durabilityCostFight = 1;
