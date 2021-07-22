@@ -83,14 +83,16 @@
                 <template #above="{ character: { id } }">
                   <div class="token-price">
                     <span class="d-block text-center" v-if="nftPricesById[id]">
-                      {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'">
+                        {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                      </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
                   </div>
                 </template>
 
                 <template #sold="{ character: { id } }">
-                  <div class="sold" v-if="nftPricesById[id] && !convertWeiToSkill(nftPricesById[id])"><span>SOLD</span></div>
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>SOLD</span></div>
                 </template>
               </character-list>
 
@@ -235,14 +237,16 @@
                 <template #above="{ character: { id } }">
                   <div class="token-price">
                     <span class="d-block text-center" v-if="nftPricesById[id]">
-                      {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'">
+                        {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                      </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
                   </div>
                 </template>
 
                 <template #sold="{ character: { id } }">
-                  <div class="sold" v-if="nftPricesById[id] && !convertWeiToSkill(nftPricesById[id])"><span>SOLD</span></div>
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>SOLD</span></div>
                 </template>
 
               </character-list>
