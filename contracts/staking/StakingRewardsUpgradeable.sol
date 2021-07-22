@@ -31,6 +31,7 @@ contract StakingRewardsUpgradeable is
     uint256 public periodFinish;
     uint256 public override rewardRate;
     uint256 public override rewardsDuration;
+    uint256 public override minimumStakeAmount;
     uint256 public override minimumStakeTime;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
@@ -49,6 +50,7 @@ contract StakingRewardsUpgradeable is
         address _rewardsDistribution,
         address _rewardsToken,
         address _stakingToken,
+        uint256 _minimumStakeAmount,
         uint256 _minimumStakeTime
     ) public virtual initializer {
         __Context_init();
@@ -64,6 +66,7 @@ contract StakingRewardsUpgradeable is
         rewardsToken = IERC20(_rewardsToken);
         stakingToken = IERC20(_stakingToken);
         rewardsDistribution = _rewardsDistribution;
+        minimumStakeAmount = _minimumStakeAmount;
         minimumStakeTime = _minimumStakeTime;
 
         periodFinish = 0;
@@ -289,7 +292,17 @@ contract StakingRewardsUpgradeable is
         emit MinimumStakeTimeUpdated(_minimumStakeTime);
     }
 
+    function setMinimumStakeAmount(uint256 _minimumStakeAmount)
+        external
+        normalMode
+        onlyOwner
+    {
+        minimumStakeAmount = _minimumStakeAmount;
+        emit MinimumStakeAmountUpdated(_minimumStakeAmount);
+    }
+
     function enableFailsafeMode() public override normalMode onlyOwner {
+        minimumStakeAmount = 0;
         minimumStakeTime = 0;
         periodFinish = 0;
         rewardRate = 0;
@@ -324,7 +337,7 @@ contract StakingRewardsUpgradeable is
 
     function _stake(address staker, uint256 amount) internal
     {
-        require(amount > 0, "Cannot stake 0");
+        require(amount >= minimumStakeAmount, "Minimum stake amount required");
         _totalSupply = _totalSupply.add(amount);
         _balances[staker] = _balances[staker].add(amount);
         if (_stakeTimestamp[staker] == 0) {
