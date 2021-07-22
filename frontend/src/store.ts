@@ -108,7 +108,8 @@ export function createStore(web3: Web3) {
       characterStaminas: {},
       weapons: {},
       currentWeaponId: null,
-      isInCombat: false,
+      weaponDurabilities: {},
+      maxDurability: 0,      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
@@ -191,6 +192,12 @@ export function createStore(web3: Web3) {
       getCharacterUnclaimedXp(state: IState) {
         return (characterId: number) => {
           return state.xpRewards[characterId];
+        };
+      },
+
+      getWeaponDurability(state: IState) {
+        return (weaponId: number) => {
+          return state.weaponDurabilities[weaponId];
         };
       },
 
@@ -280,6 +287,29 @@ export function createStore(web3: Web3) {
 
           if (state.maxStamina !== currentStamina) {
             date.setTime(date.getTime() + ((state.maxStamina - currentStamina) * (5 * 60000)));
+          }
+
+          return(`${
+            (date.getMonth()+1).toString().padStart(2, '0')}/${
+            date.getDate().toString().padStart(2, '0')}/${
+            date.getFullYear().toString().padStart(4, '0')} ${
+            date.getHours().toString().padStart(2, '0')}:${
+            date.getMinutes().toString().padStart(2, '0')}:${
+            date.getSeconds().toString().padStart(2, '0')}`
+          );
+        };
+      },
+
+      timeUntilWeaponHasMaxDurability(state, getters) {
+        return (id: number) => {
+          const currentDurability = getters.getWeaponDurability(id);
+          if (currentDurability === null || currentDurability === undefined) {
+            return '';
+          }
+          const date = new Date();
+
+          if (state.maxDurability !== currentDurability) {
+            date.setTime(date.getTime() + ((state.maxDurability - currentDurability) * (48 * 60000)));
           }
 
           return(`${
@@ -395,7 +425,7 @@ export function createStore(web3: Web3) {
       },
 
       updateUserDetails(state: IState, payload) {
-        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina'];
+        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability'];
         for (const key of keysToAllow) {
           if (Object.hasOwnProperty.call(payload, key)) {
             Vue.set(state, key, payload[key]);
@@ -466,6 +496,9 @@ export function createStore(web3: Web3) {
         state.currentWeaponId = weaponId;
       },
 
+      updateWeaponDurability(state: IState, { weaponId, durability }) {
+        Vue.set(state.weaponDurabilities, weaponId, durability);
+      },
       updateCharacterStamina(state: IState, { characterId, stamina }) {
         Vue.set(state.characterStaminas, characterId, stamina);
       },
@@ -515,6 +548,7 @@ export function createStore(web3: Web3) {
         await dispatch('pollAccountsAndNetwork');
 
         await dispatch('setupCharacterStaminas');
+        await dispatch('setupWeaponDurabilities');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -706,16 +740,19 @@ export function createStore(web3: Web3) {
           ownedCharacterIds,
           ownedWeaponIds,
           maxStamina,
+          maxDurability,
         ] = await Promise.all([
           state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
           state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
           state.contracts().Characters!.methods.maxStamina().call(defaultCallOptions(state)),
+          state.contracts().Weapons!.methods.maxDurability().call(defaultCallOptions(state)),
         ]);
 
         commit('updateUserDetails', {
           ownedCharacterIds: Array.from(ownedCharacterIds),
           ownedWeaponIds: Array.from(ownedWeaponIds),
-          maxStamina: parseInt(maxStamina, 10)
+          maxStamina: parseInt(maxStamina, 10),
+          maxDurability: parseInt(maxDurability, 10),
         });
 
         await Promise.all([
@@ -900,6 +937,31 @@ export function createStore(web3: Web3) {
         }
       },
 
+      async setupWeaponDurabilities({ state, dispatch }) {
+        const [
+          ownedWeaponIds
+        ] = await Promise.all([
+          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
+        ]);
+
+        for (const weapId of ownedWeaponIds) {
+          dispatch('fetchWeaponDurability', weapId);
+        }
+      },
+
+      async fetchWeaponDurability({ state, commit }, weaponId: number) {
+        if(featureFlagStakeOnly) return;
+
+        const durabilityString = await state.contracts().Weapons!.methods
+          .getDurabilityPoints('' + weaponId)
+          .call(defaultCallOptions(state));
+
+        const durability = parseInt(durabilityString, 10);
+        if (state.weaponDurabilities[weaponId] !== durability) {
+          commit('updateWeaponDurability', { weaponId, durability });
+        }
+      },
+
       async setupCharacterStaminas({ state, dispatch }) {
         const [
           ownedCharacterIds
@@ -966,7 +1028,8 @@ export function createStore(web3: Web3) {
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp')
+          dispatch('fetchFightRewardXp'),
+          dispatch('setupWeaponDurabilities')
         ]);
       },
 
@@ -1037,6 +1100,8 @@ export function createStore(web3: Web3) {
           xpGain,
           skillGain
         } = res.events.FightOutcome.returnValues;
+
+        await dispatch('fetchWeaponDurability', weaponId);
 
         return [parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
           playerRoll,
