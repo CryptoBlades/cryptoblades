@@ -525,6 +525,14 @@ h1  {
     to {
       background-position: 200% center;
     }
+
+  }
+}
+
+/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
+@media all and (max-width:  767.98px) {
+  .encounter img {
+    max-width: 30vw;
   }
 }
 

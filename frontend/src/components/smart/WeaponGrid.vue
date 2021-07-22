@@ -46,12 +46,13 @@
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
         <b-icon v-if="isFavorite(weapon.id) === true" class="favorite-star" icon="star-fill" variant="warning" />
-        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
-          <slot name="above" :weapon="weapon"></slot>
-        </div>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" />
         </div>
+        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+          <slot name="above" :weapon="weapon"></slot>
+        </div>
+        <slot name="sold" :weapon="weapon"></slot>
       </li>
     </ul>
   </div>
@@ -221,11 +222,13 @@ export default Vue.extend({
     ...(mapMutations(['setCurrentWeapon'])),
 
     saveFilters() {
-      sessionStorage.setItem('weapon-starfilter', this.starFilter);
-      sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
-
       if(this.isMarket) {
-        sessionStorage.setItem('weapon-price-order', this.priceSort);
+        sessionStorage.setItem('market-weapon-starfilter', this.starFilter);
+        sessionStorage.setItem('market-weapon-elementfilter', this.elementFilter);
+        sessionStorage.setItem('market-weapon-price-order', this.priceSort);
+      } else {
+        sessionStorage.setItem('weapon-starfilter', this.starFilter);
+        sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
       }
       this.$emit('weapon-filters-changed');
     },
@@ -260,8 +263,14 @@ export default Vue.extend({
     },
 
     clearFilters() {
-      sessionStorage.clear();
-
+      if(this.isMarket) {
+        sessionStorage.removeItem('market-weapon-starfilter');
+        sessionStorage.removeItem('market-weapon-elementfilter');
+        sessionStorage.removeItem('market-weapon-price-order');
+      } else {
+        sessionStorage.removeItem('weapon-starfilter');
+        sessionStorage.removeItem('weapon-elementfilter');
+      }
       this.elementFilter = '';
       this.starFilter = '';
       this.priceSort = '';
@@ -276,10 +285,13 @@ export default Vue.extend({
   },
 
   mounted() {
-    this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
-    this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
     if(this.isMarket) {
-      this.priceSort = sessionStorage.getItem('weapon-price-order') || '';
+      this.starFilter = sessionStorage.getItem('market-weapon-starfilter') || '';
+      this.elementFilter = sessionStorage.getItem('market-weapon-elementfilter') || '';
+      this.priceSort = sessionStorage.getItem('market-weapon-price-order') || '';
+    } else {
+      this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
+      this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
     }
 
     const favoritesFromStorage = localStorage.getItem('favorites');
@@ -322,6 +334,7 @@ export default Vue.extend({
   border-radius: 5px;
   cursor: pointer;
   position: relative;
+  overflow: hidden;
 }
 
 .weapon.selected {
@@ -334,7 +347,7 @@ export default Vue.extend({
 }
 
 .above-wrapper {
-  padding: 0.5rem;
+  padding: 0.1rem;
 }
 
 .toggle-button {
@@ -409,5 +422,32 @@ export default Vue.extend({
     display: inline-block;
     margin: auto;
   }
+}
+
+.sold {
+    height: 40px;
+    width: 230px;
+    background-color: rgb(187, 33, 0);
+    transform: rotate(15deg);
+    left: -20px;
+    position: absolute;
+    top: 110px;
+    z-index: 100;
+}
+
+.sold span {
+    text-align: center;
+    width: auto;
+    color: white;
+    display: block;
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 40px;
+    text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+    text-transform: uppercase;
+}
+
+.fix-h24 {
+  height: 24px;
 }
 </style>
