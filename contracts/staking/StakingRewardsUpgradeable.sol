@@ -3,9 +3,9 @@ pragma solidity ^0.6.2;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "../../node_modules/@openzeppelin/contracts/math/Math.sol";
-import "../../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../../node_modules/@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "../@openzeppelin/contracts/math/Math.sol";
+import "../@openzeppelin/contracts/math/SafeMath.sol";
+import "../@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 // Inheritance
 import "./interfaces/IStakingRewards.sol";
