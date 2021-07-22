@@ -15,11 +15,6 @@
             <img src="../assets/border-element.png">
         </div>
       </div>
-      You do not have any characters.
-      <br>
-      You can recruit one by clicking the button below.
-      <br>
-      <br>
       <big-button
         class="button"
         :mainText="`Recruit character for ${recruitCost} SKILL`"
@@ -135,8 +130,18 @@ export default {
 </script>
 
 <style scoped>
+
 .current-promotion {
   width: 40%;
+  text-align: center;
+}
+
+@media all and (max-width:  767.98px) {
+  .current-promotion {
+    width: 100vw;
+    margin-top: 90px;
+    padding-left: 15px;
+  }
 }
 
 .promotion-decoration {
