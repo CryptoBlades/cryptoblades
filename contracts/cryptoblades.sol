@@ -43,7 +43,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         characterLimit = 4;
         staminaCostFight = 40;
-        durabilityCostFight = 1;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
         fightRewardGasOffset = ABDKMath64x64.divu(8, 10);//0.8 usd;
@@ -85,6 +84,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         fightRewardBaseline = ABDKMath64x64.divu(344, 1000); // 0.08 x 4.3
     }
 
+    function migrateTo_X() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        durabilityCostFight = 1;
+    }
+
     // config vars
     uint characterLimit;
     uint8 staminaCostFight;
@@ -121,9 +126,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     mapping(address => uint256) private _rewardsClaimTaxTimerStart;
 
-    uint8 durabilityCostFight;
-
     IStakeFromGame public stakeFromGameImpl;
+
+    uint8 durabilityCostFight;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
