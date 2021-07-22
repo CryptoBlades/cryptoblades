@@ -253,7 +253,7 @@ contract NFTMarket is
         EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
         uint256 matchingWeaponsAmount = getNumberOfWeaponListings(_tokenAddress, _trait, _stars);
         uint256 pageEnd = _limit * (_pageNumber + 1);
-        uint256 tokensSize = matchingWeaponsAmount >= pageEnd ? _limit : uint256(SafeMath.sub(matchingWeaponsAmount, _limit * _pageNumber));
+        uint256 tokensSize = matchingWeaponsAmount >= pageEnd ? _limit : matchingWeaponsAmount.sub(_limit * _pageNumber);
         uint256[] memory tokens = new uint256[](tokensSize);
 
         uint256 counter = 0;
@@ -281,7 +281,7 @@ contract NFTMarket is
         EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
         uint256 matchingCharactersAmount = getNumberOfCharacterListings(_tokenAddress, _trait, _minLevel, _maxLevel);
         uint256 pageEnd = _limit * (_pageNumber + 1);
-        uint256 tokensSize = matchingCharactersAmount >= pageEnd ? _limit : uint256(SafeMath.sub(matchingCharactersAmount, _limit * _pageNumber));
+        uint256 tokensSize = matchingCharactersAmount >= pageEnd ? _limit : matchingCharactersAmount.sub(_limit * _pageNumber);
         uint256[] memory tokens = new uint256[](tokensSize);
 
         uint256 counter = 0;
