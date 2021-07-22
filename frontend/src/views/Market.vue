@@ -51,8 +51,7 @@
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
-                  <div class="d-flex flex-column align-items-center justify-content-center"
-                  style="margin-top: -10px;">
+                  <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
                     <span class="d-block text-center" v-if="nftPricesById[id]">
                       <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
                     </span>
@@ -79,8 +78,7 @@
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <div class="token-price d-flex flex-column align-items-center justify-content-center"
-                    style="margin-top: -50px;">
+                  <div class="token-price d-flex flex-column align-items-center justify-content-center m-top-negative-50">
                     <span class="d-block text-center" v-if="nftPricesById[id]">
                        {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
                      </span>
@@ -209,8 +207,7 @@
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
-                  <div class="d-flex flex-column align-items-center justify-content-center"
-                  style="margin-top: -10px;">
+                  <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
                     <span class="d-block text-center" v-if="nftPricesById[id]">
                       <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
                     </span>
@@ -236,11 +233,20 @@
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <div class="token-price">
+                  <div class="token-price d-flex flex-column align-items-center justify-content-center m-top-negative-50">
                     <span class="d-block text-center" v-if="nftPricesById[id]">
                       {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      v-if="id !== null && !searchResultsOwned"
+                      @click="selectedNftId = id; canPurchase && purchaseNft();"
+                      variant="primary"
+                      v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                      class="gtag-link-others" tagname="confirm_purchase">
+                      Purchase <b-icon-question-circle v-if="!canPurchase"
+                      v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                    </b-button>
                   </div>
                 </template>
 
@@ -1070,6 +1076,14 @@ export default Vue.extend({
 
 .disabled-button {
   opacity: 0.65;
+}
+
+.m-top-negative-5{
+  margin-top: -5px;
+}
+
+.m-top-negative-50{
+  margin-top: -50px;
 }
 
 </style>
