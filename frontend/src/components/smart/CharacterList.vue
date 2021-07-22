@@ -42,6 +42,7 @@
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :character="c"></slot>
         </div>
+        <slot name="sold" :character="c"></slot>
         <div class="art">
           <CharacterArt :character="c" :isMarket="isMarket"/>
         </div>
@@ -210,6 +211,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .character .art {
@@ -254,5 +256,32 @@ export default {
     align-items: center;
     justify-content: center;
   }
+}
+
+.sold {
+  height: 40px;
+  width: 300px;
+  background-color: rgb(187, 33, 0);
+  transform: rotate(30deg);
+  left: -40px;
+  position: absolute;
+  top: 150px;
+  z-index: 100;
+}
+
+.sold span {
+    text-align: center;
+    width: auto;
+    color: white;
+    display: block;
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 40px;
+    text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+    text-transform: uppercase;
+}
+
+.fix-h24 {
+  height: 24px;
 }
 </style>

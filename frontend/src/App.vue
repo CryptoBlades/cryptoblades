@@ -431,6 +431,8 @@ export default {
 
 <style>
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
+  font-weight: 600;
+  text-align: center;
   font-weight: 900;
   text-align: center;
   background: linear-gradient(to right, rgb(248, 218, 136) 20%, rgb(88, 82, 23) 40%, rgb(87, 87, 34) 60%, rgb(177, 150, 92) 80%);
@@ -456,7 +458,7 @@ hr.hr-divider{
 }
 body {
   margin: 0;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
 }
 
 .no-margin {
@@ -689,6 +691,8 @@ div.bg-success {
 }
 </style>
 <style scoped>
+
+
 .app {
   margin: 0;
 }
@@ -696,8 +700,7 @@ div.bg-success {
 .content {
   padding: 0 1em;
   height: calc(100vh - 56px);
-  background: rgb(20, 20, 20);
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }
 
@@ -767,5 +770,13 @@ div.bg-success {
 
 .border-main {
   border: 1px solid #9e8a57;
+}
+@media all and (max-width:  767.98px) {
+  .content {
+    padding: 10px;
+  }
+  .dark-bg-text {
+    width: 100%;
+  }
 }
 </style>
