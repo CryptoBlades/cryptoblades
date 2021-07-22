@@ -53,8 +53,12 @@
                 <template #above="{ weapon: { id } }">
                   <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
                     <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
-                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'">
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'"
+                      v-tooltip.top="{ content: maxPrecisionSkill(nftPricesById[id]) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
+                      >
+                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -87,8 +91,12 @@
                 <template #above="{ character: { id } }">
                   <div class="token-price d-flex flex-column align-items-center justify-content-center m-top-negative-50">
                     <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
-                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'">
-                        {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'"
+                      v-tooltip.top="{ content: maxPrecisionSkill(nftPricesById[id]) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
+                      >
+                      {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
                       </span>
                     </span>
 
@@ -223,8 +231,12 @@
                 <template #above="{ weapon: { id } }">
                   <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
                     <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
-                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'">
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'"
+                      v-tooltip.top="{ content: maxPrecisionSkill(nftPricesById[id]) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
+                      >
+                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -256,8 +268,12 @@
                 <template #above="{ character: { id } }">
                   <div class="token-price d-flex flex-column align-items-center justify-content-center m-top-negative-50">
                     <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
-                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'">
-                        {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'"
+                      v-tooltip.top="{ content: maxPrecisionSkill(nftPricesById[id]) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
+                      >
+                        {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -1028,6 +1044,10 @@ export default Vue.extend({
 
     calculatedBuyerCost(listedPrice: number): string {
       return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(2);
+    },
+
+    maxPrecisionSkill(listedPrice: string): string {
+      return this.convertStringToDecimal(this.convertWeiToSkill(listedPrice), 8);
     }
   },
 
@@ -1049,6 +1069,21 @@ export default Vue.extend({
   filters: {
     maxDecimals(val: string, maxDecimals: number) {
       return new BigNumber(val).toFixed(maxDecimals);
+    },
+    dynamicDecimals(val: string, minDecimals: number, maxDecimals: number) {
+      const parsedVal = new BigNumber(val);
+
+      if(parsedVal < new BigNumber(Math.pow(10, -maxDecimals))){
+        return '< ' + Math.pow(10, -maxDecimals).toFixed(maxDecimals);
+      }
+
+      for(let i = maxDecimals - 1; i >= minDecimals; i--){
+        if(parsedVal < new BigNumber(Math.pow(10, -i))){
+          return new BigNumber(val).toFixed(i + 1);
+        }
+      }
+
+      return new BigNumber(val).toFixed(minDecimals);
     }
   },
 
