@@ -6,7 +6,7 @@
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="../assets/border-element.png">
         </div>
-        <strong>SIGN UP BONUS</strong>
+        <strong class="upper-text">Sign up bonus</strong>
         <b-icon-question-circle class="centered-icon" scale="0.75"
           v-tooltip.bottom="`Only available for wallets than have not recruited any characters before.`"/>
         <br>
@@ -143,7 +143,11 @@ export default {
   width: 100%;
   margin-left: auto;
   margin-right: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
-
+.upper-text {
+  text-transform: uppercase;
+}
 </style>
