@@ -280,4 +280,8 @@ export default {
     text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
     text-transform: uppercase;
 }
+
+.fix-h24 {
+  height: 24px;
+}
 </style>

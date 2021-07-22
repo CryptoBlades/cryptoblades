@@ -52,17 +52,24 @@
 
                 <template #above="{ weapon: { id } }">
                   <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
-                    <span class="d-block text-center" v-if="nftPricesById[id]">
-                      <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                    <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'">
+                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                      </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
+                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; purchaseNft();"
                       variant="primary"
                       class="gtag-link-others">
-                      Purchase
+                      {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
                     </b-button>
                   </div>
+                </template>
+
+                <template #sold="{ weapon: { id } }">
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
                 </template>
 
               </weapon-grid>
@@ -79,7 +86,7 @@
 
                 <template #above="{ character: { id } }">
                   <div class="token-price d-flex flex-column align-items-center justify-content-center m-top-negative-50">
-                    <span class="d-block text-center" v-if="nftPricesById[id]">
+                    <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
                       <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'">
                         {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
                       </span>
@@ -87,11 +94,12 @@
 
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
+                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; canPurchase && purchaseNft();"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
                       class="gtag-link-others" tagname="confirm_purchase">
-                      Purchase <b-icon-question-circle v-if="!canPurchase"
+                      {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }} <b-icon-question-circle v-if="!canPurchase"
                       v-tooltip.bottom="'You already have max amount of characters (4).'"/>
                     </b-button>
                   </div>
@@ -214,18 +222,25 @@
 
                 <template #above="{ weapon: { id } }">
                   <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
-                    <span class="d-block text-center" v-if="nftPricesById[id]">
-                      <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                    <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'">
+                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                      </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
                         v-if="id !== null && !searchResultsOwned"
+                        :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
                         @click="selectedNftId = id; purchaseNft();"
                         variant="primary"
                         class="gtag-link-others">
-                        Purchase
+                        {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
                     </b-button>
                   </div>
+                </template>
+
+                <template #sold="{ weapon: { id } }">
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
                 </template>
 
               </weapon-grid>
@@ -240,7 +255,7 @@
 
                 <template #above="{ character: { id } }">
                   <div class="token-price d-flex flex-column align-items-center justify-content-center m-top-negative-50">
-                    <span class="d-block text-center" v-if="nftPricesById[id]">
+                    <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
                       <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'">
                         {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
                       </span>
@@ -248,11 +263,12 @@
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
+                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; canPurchase && purchaseNft();"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
                       class="gtag-link-others" tagname="confirm_purchase">
-                      Purchase <b-icon-question-circle v-if="!canPurchase"
+                      {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }} <b-icon-question-circle v-if="!canPurchase"
                       v-tooltip.bottom="'You already have max amount of characters (4).'"/>
                     </b-button>
                   </div>
