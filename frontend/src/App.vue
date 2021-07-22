@@ -30,8 +30,8 @@
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>
-            Get started in less than 10 minutes! To recruit your first character you need 5 Skill and .001 BNB for gas. You will also need .0015 BNB to do your
-            first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
+            Get started in less than 10 minutes! To recruit your first character you need {{recruitCost}} SKILL and .001 BNB for gas.
+            You will also need .0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
           </p>
           <ul class="unstyled-list">
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
@@ -61,6 +61,8 @@
 </template>
 
 <script>
+import BN from 'bignumber.js';
+
 import { mapState, mapActions, mapGetters } from 'vuex';
 import _ from 'lodash';
 import Vue from 'vue';
@@ -86,7 +88,8 @@ export default {
   data: () => ({
     errorMessage: '',
     hideWalletWarning: false,
-    isConnecting: false
+    isConnecting: false,
+    recruitCost: ''
   }),
 
   computed: {
@@ -148,6 +151,18 @@ export default {
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     },
+
+    async initializeRecruitCost() {
+      const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
+      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+      this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
+    },
+    data() {
+      return {
+        recruitCost: this.recruitCost
+      };
+    },
+
     async startOnboarding() {
       const onboarding = new MetaMaskOnboarding();
       onboarding.startOnboarding();
@@ -403,6 +418,7 @@ export default {
     if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
 
     this.checkNotifications();
+    this.initializeRecruitCost();
   },
 
   beforeDestroy() {
@@ -417,6 +433,24 @@ export default {
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
   font-weight: 600;
   text-align: center;
+  font-weight: 900;
+  text-align: center;
+  background: linear-gradient(to right, rgb(248, 218, 136) 20%, rgb(88, 82, 23) 40%, rgb(87, 87, 34) 60%, rgb(177, 150, 92) 80%);
+  background-size: 200% auto;
+  color: #000;
+  background-clip: text;
+  text-fill-color: transparent;
+  text-shadow: 0px 2px 3px rgba(0,0,0,0.4),
+               0px 4px 7px rgba(0,0,0,0.1),
+               0px 9px 12px rgba(0,0,0,0.1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 1s linear infinite;
+  @keyframes shine {
+    to {
+      background-position: 200% center;
+    }
+  }
 }
 hr.hr-divider{
   border-top: 1px solid #9e8a57;
@@ -737,7 +771,6 @@ div.bg-success {
 .border-main {
   border: 1px solid #9e8a57;
 }
-
 @media all and (max-width:  767.98px) {
   .content {
     padding: 10px;

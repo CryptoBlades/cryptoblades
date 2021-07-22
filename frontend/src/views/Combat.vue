@@ -530,6 +530,13 @@ h1  {
 
 /* Needed to asjust image size, not just image column-size and other classes to accommodate that */
 @media all and (max-width:  767.98px) {
+  .encounter img {
+    max-width: 30vw;
+  }
+}
+
+/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
+@media all and (max-width:  767.98px) {
   .combat-enemy-container {
     flex-direction: column;
   }
