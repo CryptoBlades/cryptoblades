@@ -97,7 +97,7 @@
                   </div>
 
                   <big-button
-                    class="encounter-button"
+                    class="encounter-button btn-styled"
                     :mainText="`Fight!`"
                     v-tooltip="'Cost 40 stamina'"
                     :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
@@ -344,9 +344,16 @@ export default {
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
+  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.705),
+               0px 12px 7px rgba(0,0,0,0.5),
+               0px 9px 12px rgba(0,0,0,0.1);
+
 }
 .encounter img {
-  max-width: 10vw;
+    width: calc(100% - 60px);
+    height: auto;
+    margin: 0 auto;
+    display: block;
 }
 
 .payout-info {
@@ -496,6 +503,27 @@ div.encounter.text-center {
   position: relative;
 }
 
+h1  {
+  font-weight: 900 !important;
+  text-align: center;
+  background: linear-gradient(to right, rgb(248, 218, 136) 20%, rgb(233, 226, 167) 40%, rgb(112, 112, 51) 60%, rgb(177, 150, 92) 80%);
+  background-size: 200% auto;
+  color: #000;
+  background-clip: text;
+  text-fill-color: transparent;
+  text-shadow: 0px 2px 3px rgba(0,0,0,0.4),
+               0px 4px 7px rgba(0,0,0,0.1),
+               0px 9px 12px rgba(0,0,0,0.1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 1s linear infinite;
+  @keyframes shine {
+    to {
+      background-position: 200% center;
+    }
+  }
+}
+
 /* Needed to asjust image size, not just image column-size and other classes to accommodate that */
 @media all and (max-width:  767.98px) {
   .encounter img {
@@ -528,6 +556,7 @@ div.encounter.text-center {
   position: relative;
   top: 35px;
 }
+
 
 .enemy-img {
   position: relative;
