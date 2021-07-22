@@ -386,7 +386,6 @@ interface Data {
   marketOutcome: string | null;
   waitingMarketOutcome: boolean;
   nftPricesById: Record<string, string>;
-  nftTargetBuyersById: Record<string, string>;
   characterMarketTax: string;
   weaponMarketTax: string;
   characterShowLimit: number;
@@ -448,7 +447,6 @@ export default Vue.extend({
       marketOutcome: null,
       waitingMarketOutcome: false,
       nftPricesById: {},
-      nftTargetBuyersById: {},
       characterMarketTax: '',
       weaponMarketTax: '',
       characterShowLimit: 40,
@@ -544,7 +542,6 @@ export default Vue.extend({
       this.currentPage = 1;
       this.listingSellPrice = '';
       this.listingTargetBuyer = '';
-      this.nftTargetBuyersById = {};
     },
 
     showListingSetupModal() {
@@ -601,17 +598,6 @@ export default Vue.extend({
 
         void price;
         this.nftPricesById[nftId] = price;
-      }));
-    },
-
-    async fetchNftTargetBuyers(nftIds: NftId[]) {
-      if(!this.contractAddress) return;
-
-      await Promise.all(nftIds.map(async nftId => {
-        const targetBuyer = (await this.lookupNftTargetBuyer(nftId))!;
-
-        void targetBuyer;
-        this.nftTargetBuyersById[nftId] = targetBuyer;
       }));
     },
 
@@ -747,9 +733,11 @@ export default Vue.extend({
       this.currentPage = page + 1;
 
       if(useBlockchain){
+        console.log('chain');
         await this.searchAllCharacterListingsThroughChain(page);
       }
       else{
+        console.log('api');
         await this.searchAllCharacterListingsThroughAPI(page);
       }
 
@@ -772,6 +760,7 @@ export default Vue.extend({
         sortDir: '' + this.characterPriceOrder(),
         pageSize: '' + (this.characterShowLimit || defaultLimit),
         pageNum: '' + page,
+        buyerAddress: '' + this.defaultAccount
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -791,7 +780,7 @@ export default Vue.extend({
         maxLevel: this.characterMaxLevelFilter()
       });
 
-      this.allSearchResults = await this.fetchAllMarketCharacterNftIdsPage({
+      const results = await this.fetchAllMarketCharacterNftIdsPage({
         nftContractAddr: this.contractAddress,
         limit: this.characterShowLimit || defaultLimit,
         pageNumber: page,
@@ -800,7 +789,7 @@ export default Vue.extend({
         maxLevel: this.characterMaxLevelFilter()
       });
 
-      await this.fetchNftTargetBuyers(this.allSearchResults);
+      this.allSearchResults = await this.filterOutTargetBuyers(results);
     },
 
     async searchAllWeaponListings(page: number) {
@@ -832,13 +821,15 @@ export default Vue.extend({
         stars: filterStar
       });
 
-      this.allSearchResults = await this.fetchAllMarketWeaponNftIdsPage({
+      const results = await this.fetchAllMarketWeaponNftIdsPage({
         nftContractAddr: this.contractAddress,
         limit: this.weaponShowLimit || defaultLimit,
         pageNumber: page,
         trait: traitNameToNumber(this.weaponTraitFilter()),
         stars: filterStar
       });
+
+      this.allSearchResults = await this.filterOutTargetBuyers(results);
     },
     async searchAllWeaponListingsThroughAPI(page: number) {
       const url = new URL('https://api.cryptoblades.io/static/market/weapon');
@@ -850,6 +841,7 @@ export default Vue.extend({
         sortDir: '' + this.weaponPriceOrder(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         pageNum: '' + page,
+        buyerAddress: '' + this.defaultAccount
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -965,6 +957,7 @@ export default Vue.extend({
         sortBy: '' + this.characterPriceOrder() ? 'price' : '',
         sortDir: '' + this.characterPriceOrder(),
         sellerAddress: '' + sellerAddress,
+        buyerAddress: '' + this.defaultAccount
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -984,6 +977,7 @@ export default Vue.extend({
         sortDir: '' + this.weaponPriceOrder(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         sellerAddress: '' + sellerAddress,
+        buyerAddress: '' + this.defaultAccount
       };
 
       url.search = new URLSearchParams(params).toString();
