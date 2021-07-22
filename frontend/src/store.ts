@@ -115,7 +115,6 @@ export function createStore(web3: Web3) {
       targetsByCharacterIdAndWeaponId: {},
 
       characterTransferCooldowns: {},
-      weaponTransferCooldowns: {},
 
       staking: {
         skill: { ...defaultStakeState },
@@ -238,20 +237,6 @@ export function createStore(web3: Web3) {
       transferCooldownOfCharacterId(state) {
         return (characterId: string | number, now: number | null = null) => {
           const transferCooldown = state.characterTransferCooldowns[+characterId];
-          if(!transferCooldown) return 0;
-
-          const deltaFromLastUpdated =
-            now === null
-              ? 0
-              : (now - transferCooldown.lastUpdatedTimestamp);
-
-          return Math.max(Math.floor(transferCooldown.secondsLeft - deltaFromLastUpdated), 0);
-        };
-      },
-
-      transferCooldownOfWeaponId(state) {
-        return (weaponId: string | number, now: number | null = null) => {
-          const transferCooldown = state.weaponTransferCooldowns[+weaponId];
           if(!transferCooldown) return 0;
 
           const deltaFromLastUpdated =
@@ -483,13 +468,6 @@ export function createStore(web3: Web3) {
 
       updateWeapon(state: IState, { weaponId, weapon }) {
         Vue.set(state.weapons, weaponId, weapon);
-      },
-
-      updateWeaponTransferCooldown(
-        state: IState,
-        { weaponId, weaponTransferCooldown }: { weaponId: number, weaponTransferCooldown: ITransferCooldown }
-      ) {
-        Vue.set(state.weaponTransferCooldowns, weaponId, weaponTransferCooldown);
       },
 
       setCurrentWeapon(state: IState, weaponId: number) {
@@ -886,7 +864,7 @@ export function createStore(web3: Web3) {
         await Promise.all(weaponIds.map(id => dispatch('fetchWeapon', id)));
       },
 
-      async fetchWeapon({ state, commit, dispatch }, weaponId: string | number) {
+      async fetchWeapon({ state, commit }, weaponId: string | number) {
         const { Weapons } = state.contracts();
         if(!Weapons) return;
 
@@ -899,42 +877,7 @@ export function createStore(web3: Web3) {
 
             commit('updateWeapon', { weaponId, weapon });
           })(),
-          dispatch('fetchWeaponTransferCooldown', weaponId)
         ]);
-      },
-
-      async fetchWeaponTransferCooldownForOwnWeapons({ state, dispatch }) {
-        await Promise.all(
-          state.ownedWeaponIds.map(weaponId =>
-            dispatch('fetchWeaponTransferCooldown', weaponId)
-          )
-        );
-      },
-
-      async fetchWeaponTransferCooldown({ state, commit }, weaponId: string | number) {
-        const { Weapons } = state.contracts();
-        if(!Weapons) return;
-
-        const supportsTransferCooldownable = await Weapons.methods
-          .supportsInterface(INTERFACE_ID_TRANSFER_COOLDOWNABLE)
-          .call(defaultCallOptions(state));
-        if(!supportsTransferCooldownable) return;
-
-        const lastUpdatedTimestamp = Date.now();
-        const secondsLeft = await Weapons.methods
-          .transferCooldownLeft(weaponId)
-          .call(defaultCallOptions(state));
-
-        const payload: {
-          weaponId: number,
-          weaponTransferCooldown: ITransferCooldown
-        } = {
-          weaponId: +weaponId,
-          weaponTransferCooldown: { lastUpdatedTimestamp, secondsLeft: +secondsLeft }
-        };
-        if(!_.isEqual(state.weaponTransferCooldowns[+weaponId], payload)) {
-          commit('updateWeaponTransferCooldown', payload);
-        }
       },
 
       async setupWeaponDurabilities({ state, dispatch }) {

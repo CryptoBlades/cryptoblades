@@ -94,7 +94,6 @@ export default {
     ...mapState(['maxDurability']),
     ...mapGetters([
       'currentCharacter',
-      'transferCooldownOfWeaponId',
       'getWeaponDurability',
       'timeUntilWeaponHasMaxDurability'
     ]),
@@ -166,14 +165,6 @@ export default {
 
       if(this.weapon.bonusPower > 0) {
         ttHtml += `<br>Bonus power: ${this.weapon.bonusPower}`;
-      }
-
-      const cooldown = this.transferCooldownOfWeaponId(this.weapon.id);
-      if(cooldown) {
-        if(cooldown === 86400) // edge case for when it's exactly 1 day and the iso string cant display
-          ttHtml += '<br>May not be traded for: 1 day';
-        else
-          ttHtml += `<br>May not be traded for: ${new Date(cooldown * 1000).toISOString().substr(11, 8)}`;
       }
 
       return ttHtml;
