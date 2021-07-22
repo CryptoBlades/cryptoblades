@@ -4,7 +4,19 @@
       <span :class="trait.toLowerCase() + '-icon circle-element'"></span>
     </div>
 
-    <img v-if="showPlaceholder && !portrait" class="placeholder" :src="getCharacterArt(character)" />
+    <div class="placeholder d-flex align-items-start justify-content-center p-1"
+      >
+      <div class="w-100" :style="{
+        'background-image': 'url(' + getCharacterArt(character) + ')',
+      }"
+      :class="{
+        'h-100': !isMarket,
+        'h-75': isMarket
+      }">
+
+      </div>
+      <!--<small-button class="button" :text="`Purchase`" v-if="isMarket"/>-->
+    </div>
 
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
@@ -51,6 +63,7 @@ import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
 import { mapGetters, mapState } from 'vuex';
+//import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
 const armsCount = 45;
@@ -69,6 +82,9 @@ function transformModel(model) {
 
 export default {
   props: ['character', 'portrait', 'isMarket'],
+  components: {
+    //SmallButton,
+  },
   watch: {
     character() {
       this.clearScene();
@@ -574,6 +590,12 @@ export default {
   padding-top: 0;
   -o-object-fit: contain;
   object-fit: contain;
+}
+
+.placeholder div{
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .circle-element {
