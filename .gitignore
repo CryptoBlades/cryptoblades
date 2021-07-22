@@ -10,3 +10,4 @@ report*.json
 .vscode/launch.json
 package-lock.json
 frontend/package-lock.json
+.vs

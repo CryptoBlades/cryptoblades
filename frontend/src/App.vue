@@ -23,12 +23,15 @@
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
-        <big-button class="button" :mainText="`Configure MetaMask`" @click="configureMetaMask" />
+        <div>
+          <big-button class="button mm-button" :mainText="`Configure MetaMask`" @click="configureMetaMask" />
+          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button" :mainText="`Connect to MetaMask`" @click="connectMetamask" />
+        </div>
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>
-            Get started in less than 10 minutes! To recruit your first character you need 5 Skill and .001 BNB for gas. You will also need .0015 BNB to do your
-            first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
+            Get started in less than 10 minutes! To recruit your first character you need {{recruitCost}} SKILL and .001 BNB for gas.
+            You will also need .0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
           </p>
           <ul class="unstyled-list">
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
@@ -58,6 +61,8 @@
 </template>
 
 <script>
+import BN from 'bignumber.js';
+
 import { mapState, mapActions, mapGetters } from 'vuex';
 import _ from 'lodash';
 import Vue from 'vue';
@@ -83,6 +88,8 @@ export default {
   data: () => ({
     errorMessage: '',
     hideWalletWarning: false,
+    isConnecting: false,
+    recruitCost: ''
   }),
 
   computed: {
@@ -143,6 +150,18 @@ export default {
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     },
+
+    async initializeRecruitCost() {
+      const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
+      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+      this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
+    },
+    data() {
+      return {
+        recruitCost: this.recruitCost
+      };
+    },
+
     async startOnboarding() {
       const onboarding = new MetaMaskOnboarding();
       onboarding.startOnboarding();
@@ -242,6 +261,21 @@ export default {
           }
         }
       }
+    },
+
+    async connectMetamask() {
+      const web3 = this.web3.currentProvider;
+      this.isConnecting = true;
+      this.errorMessage = 'Connecting to MetaMask...';
+      web3.request({method: 'eth_requestAccounts'})
+        .then(() => {
+          this.errorMessage = 'Success: MetaMask connected.';
+          this.isConnecting = false;
+        })
+        .catch(() => {
+          this.errorMessage = 'Error: MetaMask could not get permissions.';
+          this.isConnecting = false;
+        });
     },
 
     toggleHideWalletWarning() {
@@ -382,6 +416,7 @@ export default {
     if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
 
     this.checkNotifications();
+    this.initializeRecruitCost();
   },
 
   beforeDestroy() {
@@ -393,13 +428,33 @@ export default {
 </script>
 
 <style>
+button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
+  font-weight: 600;
+  text-align: center;
+  background: linear-gradient(to right, rgb(248, 218, 136) 20%, rgb(88, 82, 23) 40%, rgb(87, 87, 34) 60%, rgb(177, 150, 92) 80%);
+  background-size: 200% auto;
+  color: #000;
+  background-clip: text;
+  text-fill-color: transparent;
+  text-shadow: 0px 2px 3px rgba(0,0,0,0.4),
+               0px 4px 7px rgba(0,0,0,0.1),
+               0px 9px 12px rgba(0,0,0,0.1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 1s linear infinite;
+  @keyframes shine {
+    to {
+      background-position: 200% center;
+    }
+  }
+}
 hr.hr-divider{
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
 }
 body {
   margin: 0;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
 }
 
 .no-margin {
@@ -522,6 +577,12 @@ button.close {
   color: #9e8a57 !important;
 }
 
+.mm-button {
+  margin: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
 .btn {
   border: 2px solid #6c5f38 !important;
   border-radius: 0.1em !important;
@@ -626,6 +687,8 @@ div.bg-success {
 }
 </style>
 <style scoped>
+
+
 .app {
   margin: 0;
 }
@@ -633,8 +696,7 @@ div.bg-success {
 .content {
   padding: 0 1em;
   height: calc(100vh - 56px);
-  background: rgb(20, 20, 20);
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }
 
@@ -699,5 +761,19 @@ div.bg-success {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+
+.border-main {
+  border: 1px solid #9e8a57;
+}
+
+@media all and (max-width:  767.98px) {
+  .content {
+    padding: 10px;
+  }
+  .dark-bg-text {
+    width: 100%;
+  }
 }
 </style>
