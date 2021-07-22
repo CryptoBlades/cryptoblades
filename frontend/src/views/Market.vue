@@ -24,17 +24,6 @@
                   @click="searchAllWeaponListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_weapons">Browse Weapons</b-button>
               </div>
 
-              <div class="col">
-                <b-button
-                  variant="primary"
-                  v-if="buyableNftSelected"
-                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
-                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
-                  Purchase <b-icon-question-circle v-if="!canPurchase"
-                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
-                </b-button>
-              </div>
-
               <div class="col"></div>
             </div>
 
@@ -62,10 +51,18 @@
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
-                  <span class="d-block text-center" v-if="nftPricesById[id]">
-                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                  </span>
-                  <span class="d-block text-center" v-else>Loading price...</span>
+                  <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
+                    <span class="d-block text-center" v-if="nftPricesById[id]">
+                      <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      @click="selectedNftId = id; purchaseNft();"
+                      variant="primary"
+                      class="gtag-link-others">
+                      Purchase
+                    </b-button>
+                  </div>
                 </template>
 
               </weapon-grid>
@@ -81,11 +78,19 @@
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <div class="token-price">
+                  <div class="token-price d-flex flex-column align-items-center justify-content-center m-top-negative-50">
                     <span class="d-block text-center" v-if="nftPricesById[id]">
-                      {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                    </span>
+                       {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      @click="selectedNftId = id; canPurchase && purchaseNft();"
+                      variant="primary"
+                      v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                      class="gtag-link-others" tagname="confirm_purchase">
+                      Purchase <b-icon-question-circle v-if="!canPurchase"
+                      v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                    </b-button>
                   </div>
                 </template>
 
@@ -178,17 +183,6 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  v-if="buyableNftSelected"
-                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
-                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
-                  Purchase <b-icon-question-circle v-if="!canPurchase"
-                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
-                </b-button>
-              </div>
-
-              <div class="col">
-                <b-button
-                  variant="primary"
                   v-if="ownListedNftSelected"
                   @click="updateNftListingPrice()"  class="gtag-link-others" tagname="change_price">Change Price</b-button>
               </div>
@@ -213,10 +207,19 @@
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
-                  <span class="d-block text-center" v-if="nftPricesById[id]">
-                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                  </span>
-                  <span class="d-block text-center" v-else>Loading price...</span>
+                  <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
+                    <span class="d-block text-center" v-if="nftPricesById[id]">
+                      <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                        v-if="id !== null && !searchResultsOwned"
+                        @click="selectedNftId = id; purchaseNft();"
+                        variant="primary"
+                        class="gtag-link-others">
+                        Purchase
+                    </b-button>
+                  </div>
                 </template>
 
               </weapon-grid>
@@ -230,11 +233,20 @@
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <div class="token-price">
+                  <div class="token-price d-flex flex-column align-items-center justify-content-center m-top-negative-50">
                     <span class="d-block text-center" v-if="nftPricesById[id]">
                       {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      v-if="id !== null && !searchResultsOwned"
+                      @click="selectedNftId = id; canPurchase && purchaseNft();"
+                      variant="primary"
+                      v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                      class="gtag-link-others" tagname="confirm_purchase">
+                      Purchase <b-icon-question-circle v-if="!canPurchase"
+                      v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                    </b-button>
                   </div>
                 </template>
 
@@ -363,6 +375,7 @@ import BigNumber from 'bignumber.js';
 import { BModal } from 'bootstrap-vue';
 import { traitNameToNumber } from '@/contract-models';
 import { market_blockchain as useBlockchain } from './../feature-flags';
+
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
 type CharacterId = string;
@@ -1063,6 +1076,14 @@ export default Vue.extend({
 
 .disabled-button {
   opacity: 0.65;
+}
+
+.m-top-negative-5{
+  margin-top: -5px;
+}
+
+.m-top-negative-50{
+  margin-top: -50px;
 }
 
 </style>

@@ -46,11 +46,11 @@
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
         <b-icon v-if="isFavorite(weapon.id) === true" class="favorite-star" icon="star-fill" variant="warning" />
-        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
-          <slot name="above" :weapon="weapon"></slot>
-        </div>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" />
+        </div>
+        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+          <slot name="above" :weapon="weapon"></slot>
         </div>
       </li>
     </ul>
@@ -319,7 +319,7 @@ export default Vue.extend({
 }
 
 .above-wrapper {
-  padding: 0.5rem;
+  padding: 0.1rem;
 }
 
 .toggle-button {
