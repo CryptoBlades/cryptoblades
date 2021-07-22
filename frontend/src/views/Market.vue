@@ -24,17 +24,6 @@
                   @click="searchAllWeaponListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_weapons">Browse Weapons</b-button>
               </div>
 
-              <div class="col">
-                <b-button
-                  variant="primary"
-                  v-if="buyableNftSelected"
-                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
-                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
-                  Purchase <b-icon-question-circle v-if="!canPurchase"
-                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
-                </b-button>
-              </div>
-
               <div class="col"></div>
             </div>
 
@@ -62,10 +51,19 @@
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
-                  <span class="d-block text-center" v-if="nftPricesById[id]">
-                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                  </span>
-                  <span class="d-block text-center" v-else>Loading price...</span>
+                  <div class="d-flex flex-column align-items-center justify-content-center"
+                  style="margin-top: -10px;">
+                    <span class="d-block text-center" v-if="nftPricesById[id]">
+                      <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      @click="selectedNftId = id; purchaseNft();"
+                      variant="primary"
+                      class="gtag-link-others">
+                      Purchase
+                    </b-button>
+                  </div>
                 </template>
 
               </weapon-grid>
@@ -187,17 +185,6 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  v-if="buyableNftSelected"
-                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
-                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
-                  Purchase <b-icon-question-circle v-if="!canPurchase"
-                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
-                </b-button>
-              </div>
-
-              <div class="col">
-                <b-button
-                  variant="primary"
                   v-if="ownListedNftSelected"
                   @click="updateNftListingPrice()"  class="gtag-link-others" tagname="change_price">Change Price</b-button>
               </div>
@@ -222,10 +209,20 @@
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
-                  <span class="d-block text-center" v-if="nftPricesById[id]">
-                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                  </span>
-                  <span class="d-block text-center" v-else>Loading price...</span>
+                  <div class="d-flex flex-column align-items-center justify-content-center"
+                  style="margin-top: -10px;">
+                    <span class="d-block text-center" v-if="nftPricesById[id]">
+                      <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                        v-if="id !== null && !searchResultsOwned"
+                        @click="selectedNftId = id; purchaseNft();"
+                        variant="primary"
+                        class="gtag-link-others">
+                        Purchase
+                    </b-button>
+                  </div>
                 </template>
 
               </weapon-grid>
