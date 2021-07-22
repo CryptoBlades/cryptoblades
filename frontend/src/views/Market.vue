@@ -368,7 +368,6 @@ import { Accessors } from 'vue/types/options';
 import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons } from '../../../build/abi-interfaces';
 import BigNumber from 'bignumber.js';
-import { BModal } from 'bootstrap-vue';
 import { traitNameToNumber } from '@/contract-models';
 import { market_blockchain as useBlockchain } from './../feature-flags';
 type SellType = 'weapon' | 'character';
@@ -457,7 +456,7 @@ export default Vue.extend({
       allListingsAmount: 0,
       currentPage: 1,
       browseTabActive: true,
-      listingSellPrice: ''
+      listingSellPrice: '',
       listingTargetBuyer: '',
     } as Data;
   },
@@ -791,7 +790,6 @@ export default Vue.extend({
         minLevel: this.characterMinLevelFilter(),
         maxLevel: this.characterMaxLevelFilter()
       });
-      await this.fetchNftTargetBuyers(results);
 
       this.allSearchResults = await this.fetchAllMarketCharacterNftIdsPage({
         nftContractAddr: this.contractAddress,
@@ -801,6 +799,8 @@ export default Vue.extend({
         minLevel: this.characterMinLevelFilter(),
         maxLevel: this.characterMaxLevelFilter()
       });
+
+      await this.fetchNftTargetBuyers(this.allSearchResults);
     },
 
     async searchAllWeaponListings(page: number) {
@@ -818,7 +818,7 @@ export default Vue.extend({
       // will need per-result checking of it, OR filtering out own NFTs
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
       this.searchResultsOwned = false; // temp
-      this.allSearchResults = await this.filterOutTargetBuyers(results) as string[];
+      // this.allSearchResults = await this.filterOutTargetBuyers(results) as string[];
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = null;
@@ -911,7 +911,7 @@ export default Vue.extend({
       });
 
       this.searchResultsOwned = this.search === this.defaultAccount;
-      this.searchResults = await this.filterOutTargetBuyers(searchResults) as string[];
+      this.searchResults = await this.filterOutTargetBuyers(this.searchResults) as string[];
     },
 
     async searchListingsBySellerThroughAPI(){
@@ -1010,15 +1010,6 @@ export default Vue.extend({
     clearInputs() {
       this.listingSellPrice = '';
       this.listingTargetBuyer = '';
-    },
-
-    showListingSetupModal() {
-      this.clearInputs();
-      (this.$refs['listing-setup-modal'] as BModal).show();
-    },
-
-    clearInputs() {
-      this.listingSellPrice = '';
     },
 
     convertWeiToSkill(wei: string) {
