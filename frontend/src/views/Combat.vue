@@ -71,7 +71,7 @@
                 </div>
               </div>
               <div class="enemy-list">
-                <div class="col-md-3 col-sm-12 col-xs-12 encounter" v-for="(e, i) in targets" :key="i">
+                <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 encounter" v-for="(e, i) in targets" :key="i">
                   <div class="encounter-container">
 
                   <div class="enemy-character">
@@ -428,6 +428,10 @@ div.encounter.text-center {
 .encounter {
   display : flex;
   justify-content: center;
+    padding-top: 20px;
+    border-radius: 15px;
+    max-width: 100%;
+    margin: 0 auto;
 }
 
 .xp-gain, .encounter-power{
@@ -474,7 +478,7 @@ div.encounter.text-center {
 }
 
 .enemy-container {
-  flex : 3;
+  flex : 4;
 }
 
 .enemy-divider {
@@ -526,14 +530,6 @@ h1  {
 
 /* Needed to asjust image size, not just image column-size and other classes to accommodate that */
 @media all and (max-width:  767.98px) {
-  .encounter img {
-    max-width: 30vw;
-  }
-
-  .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
-    position: inherit;
-    font-size: x-large;
-  }
   .combat-enemy-container {
     flex-direction: column;
   }
@@ -547,7 +543,25 @@ h1  {
     width : 100%;
   }
 }
-
+h1 {
+  font-size: 1.8rem;
+  display: inline-block;
+}
+.hint.has-tooltip {
+  font-size: 1.8rem;
+  display: inline-block;
+  margin-left: 10px;
+}
+.enemy-character {
+    width: 16em;
+    height: 28em;
+  }
+.dark-bg-text {
+  width: 100% !important;
+}
+.content {
+  padding: 0 !important;
+}
 .encounter-button {
   display: block;
   margin: 0 auto;
@@ -556,10 +570,39 @@ h1  {
   position: relative;
   top: 35px;
 }
+.encounter {
+    padding-top: 20px;
+    border-radius: 15px;
+}
 
-
+.encounter-container {
+  margin-bottom: 50px;
+}
+.combat-hints {
+  margin-top: 30px;
+}
+#gtag-link-others {
+    margin: 0 auto;
+    display: block;
+    position: relative;
+    margin-top: 20px;
+    width: 100%;
+}
+.ml-3 {
+    margin-left: 0px !important;
+}
+.header-row {
+  display: block;
+  text-align: center;
+}
+.weapon-icon-wrapper {
+  margin: 0 auto;
+}
 .enemy-img {
   position: relative;
   top: -40px;
+}
+@media (max-width: 575.98px) {
+
 }
 </style>
