@@ -4,14 +4,14 @@
       <h4>More than {{ showLimit }} results, try adjusting the filters</h4>
     </span>
     <div class="filters row mt-2 pl-2">
-      <div class="col-sm-6 col-md-2">
+      <div class="col-sm-6 col-md-4 stars-elem">
         <strong>Stars</strong>
         <select class="form-control" v-model="starFilter" @change="saveFilters()">
           <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
 
-      <div class="col-sm-6 col-md-2">
+      <div class="col-sm-6 col-md-4 stars-elem">
         <strong>Element</strong>
         <select class="form-control" v-model="elementFilter" @change="saveFilters()">
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
@@ -291,8 +291,23 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.stars-elem {
+  margin-bottom: 20px;
+  max-width: 300px;
+  width: 100%;
+}
+.filters {
+   justify-content: center;
+   width: 100%;
+   max-width: 900px;
+   margin: 0 auto;
+   align-content: center;
+   border-bottom: 0.2px solid rgba(102, 80, 80, 0.1);
+   margin-bottom: 20px;
+}
 .weapon-grid {
   list-style-type: none;
+  justify-content: center;
   margin: 0;
   padding: 0;
   display: grid;
@@ -347,10 +362,35 @@ export default Vue.extend({
   right: 5px;
 }
 
+ .clear-filters-button {
+    display: flex;
+    flex-direction: row;
+    align-self: center;
+  }
+
 @media (max-width: 576px) {
   .weapon-grid {
     justify-content: center;
     margin-top: 10px;
+  }
+  .show-reforged {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+
+  .clear-filters-button {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-self: center;
+    text-align: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .ml-3 {
+    margin-left: 0 !important;
   }
 }
 
@@ -358,8 +398,13 @@ export default Vue.extend({
 @media all and (max-width: 767.98px) {
   .weapon-grid {
     padding-left: 2em;
+    justify-content: center;
   }
-
+  .stars-elem {
+  margin-bottom: 20px;
+  max-width: 500px;
+  width: 100%;
+}
   li.weapon {
     display: inline-block;
     margin: auto;
