@@ -154,7 +154,11 @@ export default {
     },
 
     clearFilters() {
-      sessionStorage.clear();
+      sessionStorage.removeItem('character-levelfilter');
+      sessionStorage.removeItem('character-elementfilter');
+      if(this.isMarket) {
+        sessionStorage.removeItem('character-price-order');
+      }
 
       this.elementFilter = '';
       this.levelFilter = '';

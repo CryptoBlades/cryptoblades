@@ -221,11 +221,13 @@ export default Vue.extend({
     ...(mapMutations(['setCurrentWeapon'])),
 
     saveFilters() {
-      sessionStorage.setItem('weapon-starfilter', this.starFilter);
-      sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
-
       if(this.isMarket) {
-        sessionStorage.setItem('weapon-price-order', this.priceSort);
+        sessionStorage.setItem('market-weapon-starfilter', this.starFilter);
+        sessionStorage.setItem('market-weapon-elementfilter', this.elementFilter);
+        sessionStorage.setItem('market-weapon-price-order', this.priceSort);
+      } else {
+        sessionStorage.setItem('weapon-starfilter', this.starFilter);
+        sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
       }
       this.$emit('weapon-filters-changed');
     },
@@ -260,8 +262,14 @@ export default Vue.extend({
     },
 
     clearFilters() {
-      sessionStorage.clear();
-
+      if(this.isMarket) {
+        sessionStorage.removeItem('market-weapon-starfilter');
+        sessionStorage.removeItem('market-weapon-elementfilter');
+        sessionStorage.removeItem('market-weapon-price-order');
+      } else {
+        sessionStorage.removeItem('weapon-starfilter');
+        sessionStorage.removeItem('weapon-elementfilter');
+      }
       this.elementFilter = '';
       this.starFilter = '';
       this.priceSort = '';
@@ -276,10 +284,13 @@ export default Vue.extend({
   },
 
   mounted() {
-    this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
-    this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
     if(this.isMarket) {
-      this.priceSort = sessionStorage.getItem('weapon-price-order') || '';
+      this.starFilter = sessionStorage.getItem('market-weapon-starfilter') || '';
+      this.elementFilter = sessionStorage.getItem('market-weapon-elementfilter') || '';
+      this.priceSort = sessionStorage.getItem('market-weapon-price-order') || '';
+    } else {
+      this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
+      this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
     }
 
     const favoritesFromStorage = localStorage.getItem('favorites');
