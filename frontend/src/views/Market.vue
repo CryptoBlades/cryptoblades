@@ -81,11 +81,20 @@
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <div class="token-price">
+                  <div class="token-price d-flex flex-column align-items-center justify-content-center"
+                    style="margin-top: -50px;">
                     <span class="d-block text-center" v-if="nftPricesById[id]">
-                      {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                    </span>
+                       {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      @click="selectedNftId = id; canPurchase && purchaseNft();"
+                      variant="primary"
+                      v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                      class="gtag-link-others" tagname="confirm_purchase">
+                      Purchase <b-icon-question-circle v-if="!canPurchase"
+                      v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                    </b-button>
                   </div>
                 </template>
 
@@ -363,6 +372,7 @@ import BigNumber from 'bignumber.js';
 import { BModal } from 'bootstrap-vue';
 import { traitNameToNumber } from '@/contract-models';
 import { market_blockchain as useBlockchain } from './../feature-flags';
+
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
 type CharacterId = string;
