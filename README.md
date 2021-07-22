@@ -3,12 +3,45 @@
 ## Currency Setup
 
 1. Install [Ganache](https://www.trufflesuite.com/ganache).
-1. For Ganache, choose Quickstart Ethereum.
-1. Increase the gas limit in the workspace to `99999999` (or some other high number so you can deploy).
+IF YOU ENCOUNTER PERMISSION ERROR:
+Disable running anti virus. 
+Then reinstall and restart device
+Check the anti virus if still enable if yes disable
+and run Ganache
+
+1. For Ganache, choose New Workspace.
+Fill up the following on each tab:
+
+WORKSPACE 
+workspace name  : any
+
+SERVER  
+Hostname : any
+Port number : default
+Network ID : default
+
+ACCOUNTS & KEY 
+default all
+
+CHAIN 
+Gas Limit : 99999999
+Gas Price : default
+Hardfork : default
+
+
 1. Install [MetaMask](https://metamask.io/).
-1. Create a new connection to connect to Ganache with these settings: http://localhost:7545, any name, any chain id
+1. In Metamask Add a New Network 
+Fill up the following
+Network Name : any
+New RPC URL : http://localhost:7545
+Chain ID : any
+Currency Symbol: (optional)
+Block Explorer URL: (optional)
+
 1. In Ganache, click the key icon on the right side of any address and grab the private key.
-1. In MetaMask, create a new account, import from private key, and paste the key in there. 
+1. In MetaMask, create a new account, import from private key, and paste the key in there.
+
+Then select the New Network you added.
 
 You should now have 100 fake eth! You're now fake rich.
 
@@ -58,4 +91,3 @@ Truffle also supports some environment variables, if you create a `.env` file in
 ## Errors
 - If you run into any error at all during the build process you may need to reset [Ganache](https://www.trufflesuite.com/ganache) by deleting previous workspaces and going through the Ganache setup process again including importing a new account for Metamask.
 - Artifacts are from different compiler runs `- rm -rf build/`
-
