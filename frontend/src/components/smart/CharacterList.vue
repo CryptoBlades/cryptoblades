@@ -144,8 +144,8 @@ export default {
     getCharacterArt,
 
     saveFilters() {
-      localStorage.setItem('character-levelfilter', this.levelFilter);
-      localStorage.setItem('character-elementfilter', this.elementFilter);
+      sessionStorage.setItem('character-levelfilter', this.levelFilter);
+      sessionStorage.setItem('character-elementfilter', this.elementFilter);
 
       if(this.isMarket) {
         sessionStorage.setItem('character-price-order', this.priceSort);
@@ -169,8 +169,8 @@ export default {
   },
 
   mounted() {
-    this.levelFilter = sessionStorage.getItem('character-levelfilter') || '';
-    this.elementFilter = sessionStorage.getItem('character-elementfilter') || '';
+    this.levelFilter = localStorage.getItem('character-levelfilter') || '';
+    this.elementFilter = localStorage.getItem('character-elementfilter') || '';
     if(this.isMarket) {
       this.priceSort = sessionStorage.getItem('character-price-order') || '';
     }
