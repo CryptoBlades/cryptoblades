@@ -93,6 +93,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(uint256 => uint256) public lastTransferTimestamp;
 
+    mapping(uint256 => uint64) durabilityTimestamp;
+
+    uint256 public constant maxDurability = 20;
+    uint256 public constant secondsPerDurability = 2880; //48 * 60
+
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
 
@@ -183,6 +188,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         tokens.push(Weapon(properties, stat1, stat2, stat3, 0));
         cosmetics.push(WeaponCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);
+        durabilityTimestamp[tokenID] = uint64(now.sub(getDurabilityMaxWait()));
+
         emit NewWeapon(tokenID, minter);
         return tokenID;
     }
@@ -447,6 +454,19 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
+    function drainDurability(uint256 id, uint8 amount) public restricted {
+        uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
+        require(durabilityPoints >= amount, "Not enough durability!");
+
+        uint64 drainTime = uint64(amount * secondsPerDurability);
+        if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
+            durabilityTimestamp[id] = uint64(now - getDurabilityMaxWait() + drainTime);
+        }
+        else {
+            durabilityTimestamp[id] = uint64(durabilityTimestamp[id] + drainTime);
+        }
+    }
+
     function setBurnPointMultiplier(uint256 multiplier) public restricted {
         burnPointMultiplier = multiplier;
     }
@@ -458,5 +478,36 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
     function setFiveStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
         fiveStarBurnPowerPerPoint = powerPerBurnPoint;
+    }
+
+    function getDurabilityTimestamp(uint256 id) public view returns (uint64) {
+        return durabilityTimestamp[id];
+    }
+
+    function setDurabilityTimestamp(uint256 id, uint64 timestamp) public restricted {
+        durabilityTimestamp[id] = timestamp;
+    }
+
+    function getDurabilityPoints(uint256 id) public view returns (uint8) {
+        return getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
+    }
+
+    function getDurabilityPointsFromTimestamp(uint64 timestamp) public view returns (uint8) {
+        if(timestamp  > now)
+            return 0;
+
+        uint256 points = (now - timestamp) / secondsPerDurability;
+        if(points > maxDurability) {
+            points = maxDurability;
+        }
+        return uint8(points);
+    }
+
+    function isDurabilityFull(uint256 id) public view returns (bool) {
+        return getDurabilityPoints(id) >= maxDurability;
+    }
+
+    function getDurabilityMaxWait() public pure returns (uint64) {
+        return uint64(maxDurability * secondsPerDurability);
     }
 }

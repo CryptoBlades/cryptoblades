@@ -134,6 +134,7 @@ export default {
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
       'fetchCharacterTransferCooldownForOwnCharacters',
+      'setupWeaponDurabilities',
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
@@ -295,7 +296,7 @@ export default {
         (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
       ) {
         this.$dialog.notify.warning(
-          `You have hidden the wallet warning and it would now be displayed. If you are trying to play, 
+          `You have hidden the wallet warning and it would now be displayed. If you are trying to play,
         please disable the option and follow the instructions, otherwise close and ignore.`,
           {
             timeout: 0,
@@ -391,6 +392,7 @@ export default {
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
         this.fetchCharacterTransferCooldownForOwnCharacters(),
+        this.setupWeaponDurabilities(),
         this.fetchWaxBridgeDetails(),
         this.fetchRewardsClaimTax(),
       ]);

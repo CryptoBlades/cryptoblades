@@ -1,6 +1,7 @@
 <template>
   <div
     class="weapon-icon"
+    v-bind:class="[getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '']"
     v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"
@@ -20,6 +21,13 @@
 
       <div class="name">
         {{ getWeaponNameFromSeed(weapon.id, weapon.stars) }}
+      </div>
+
+      <div>
+        <div class="small-durability-bar"
+        :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
+        v-tooltip.bottom="`Durability: ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
+          Repairs 1 point every 48 minutes, durability will be full at: ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
       </div>
 
     </div>
@@ -57,7 +65,7 @@ import { Stat1PercentForChar,
   Stat3PercentForChar
 } from '../interfaces';
 
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 const bladeCount = 24;
 const crossGuardCount = 24;
@@ -83,8 +91,11 @@ export default {
   props: ['weapon'],
 
   computed: {
+    ...mapState(['maxDurability']),
     ...mapGetters([
       'currentCharacter',
+      'getWeaponDurability',
+      'timeUntilWeaponHasMaxDurability'
     ]),
     tooltipHtml() {
       if(!this.weapon) return '';
@@ -420,6 +431,17 @@ export default {
 </script>
 
 <style scoped>
+.small-durability-bar {
+  position: relative;
+  top: -5px;
+  height: 10px;
+  width: 80%;
+  margin: 0 auto;
+  border-radius: 2px;
+  border: 0.5px solid rgb(216, 215, 215);
+  background : linear-gradient(to right, rgb(236, 75, 75) var(--durabilityReady), rgba(255, 255, 255, 0.1) 0);
+}
+
 .weapon-icon {
   height: 100%;
   width: 100%;
@@ -482,7 +504,7 @@ export default {
 
 .name {
   position: absolute;
-  bottom: 5px;
+  bottom: 15px;
   left: 12%;
   right: 12%;
   font-size: 0.9em;
@@ -507,6 +529,10 @@ export default {
 
 .glow-4 {
   animation: glow-4 2000ms ease-out infinite alternate;
+}
+
+.no-durability {
+  opacity: 0.6;
 }
 
 @keyframes glow-1 {
