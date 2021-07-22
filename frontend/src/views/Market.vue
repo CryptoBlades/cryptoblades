@@ -92,7 +92,7 @@
                 </template>
 
                 <template #sold="{ character: { id } }">
-                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>SOLD</span></div>
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
                 </template>
               </character-list>
 
@@ -246,7 +246,7 @@
                 </template>
 
                 <template #sold="{ character: { id } }">
-                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>SOLD</span></div>
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
                 </template>
 
               </character-list>

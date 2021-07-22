@@ -274,5 +274,6 @@ export default {
     font-weight: bold;
     line-height: 40px;
     text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+    text-transform: uppercase;
 }
 </style>
