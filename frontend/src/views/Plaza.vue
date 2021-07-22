@@ -2,6 +2,19 @@
   <div class="body main-font">
 
     <div v-if="ownCharacters.length === 0" class="blank-slate">
+      <div class="current-promotion">
+        <div class="tob-bg-img promotion-decoration">
+          <img class="vertical-decoration bottom" src="../assets/border-element.png">
+        </div>
+        <strong>SIGN UP BONUS</strong>
+        <b-icon-question-circle class="centered-icon" scale="0.75"
+          v-tooltip.bottom="`Only available for wallets than have not recruited any characters before.`"/>
+        <br>
+        <span>You will get <strong>$30</strong> worth of <strong>SKILL</strong> upon recruiting your first character!</span>
+        <div class="bot-bg-img promotion-decoration">
+            <img src="../assets/border-element.png">
+        </div>
+      </div>
       You do not have any characters.
       <br>
       You can recruit one by clicking the button below.
@@ -122,4 +135,15 @@ export default {
 </script>
 
 <style scoped>
+.current-promotion {
+  width: 40%;
+}
+
+.promotion-decoration {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
 </style>
