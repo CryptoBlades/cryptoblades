@@ -469,15 +469,23 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
     }
 
     function setBurnPointMultiplier(uint256 multiplier) public restricted {
+        require(multiplier >= 1, "BurnPointMultiplier too low");
+        require(multiplier <= 5, "BurnPointMultiplier too high");
         burnPointMultiplier = multiplier;
     }
     function setLowStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
+        require(powerPerBurnPoint >= 10, "LowStarBurnPowerPerPoint too low");
+        require(powerPerBurnPoint <= 20, "LowStarBurnPowerPerPoint too high");
         lowStarBurnPowerPerPoint = powerPerBurnPoint;
     }
     function setFourStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
+        require(powerPerBurnPoint >= 25, "FourStarBurnPowerPerPoint too low");
+        require(powerPerBurnPoint <= 35, "FourStarBurnPowerPerPoint too high");
         fourStarBurnPowerPerPoint = powerPerBurnPoint;
     }
     function setFiveStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
+        require(powerPerBurnPoint >= 40, "FiveStarBurnPowerPerPoint too low");
+        require(powerPerBurnPoint <= 80, "FiveStarBurnPowerPerPoint too high");
         fiveStarBurnPowerPerPoint = powerPerBurnPoint;
     }
 
