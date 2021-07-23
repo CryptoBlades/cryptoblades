@@ -6,17 +6,14 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./util.sol";
-import "./interfaces/ITransferCooldownable.sol";
 
-contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, ITransferCooldownable {
+contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint16;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
-
-    uint256 public constant TRANSFER_COOLDOWN = 1 days;
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades weapon", "CBW");
@@ -46,7 +43,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
     function migrateTo_951a020() public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
-        _registerInterface(TransferCooldownableInterfaceId.interfaceId());
+        // Apparently ERC165 interfaces cannot be removed in this version of the OpenZeppelin library.
+        // But if we remove the registration, then while local deployments would not register the interface ID,
+        // existing deployments on both testnet and mainnet would still be registered to handle it.
+        // That sort of inconsistency is a good way to attract bugs that only happens on some environments.
+        // Hence, we keep registering the interface despite not actually implementing the interface.
+        _registerInterface(0xe62e6974); // TransferCooldownableInterfaceId.interfaceId()
     }
 
     /*
@@ -95,7 +97,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
     int128 public powerMultPerPointPWR; // 0.2575% (+3%)
     int128 public powerMultPerPointMatching; // 0.2675% (+7%)
 
-    mapping(uint256 => uint256) public override lastTransferTimestamp;
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
+    mapping(uint256 => uint256) public lastTransferTimestamp;
+
+    mapping(uint256 => uint64) durabilityTimestamp;
+
+    uint256 public constant maxDurability = 20;
+    uint256 public constant secondsPerDurability = 2880; //48 * 60
 
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
@@ -103,23 +111,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
         _;
-    }
-
-    function __ITransferCooldownable_interfaceId() external pure returns (bytes4) {
-        return TransferCooldownableInterfaceId.interfaceId();
-    }
-
-    function transferCooldownEnd(uint256 tokenId) public override view returns (uint256) {
-        return lastTransferTimestamp[tokenId].add(TRANSFER_COOLDOWN);
-    }
-
-    function transferCooldownLeft(uint256 tokenId) public override view returns (uint256) {
-        (bool success, uint256 secondsLeft) =
-            lastTransferTimestamp[tokenId].trySub(
-                block.timestamp.sub(TRANSFER_COOLDOWN)
-            );
-
-        return success ? secondsLeft : 0;
     }
 
     function getStats(uint256 id) internal view
@@ -204,6 +195,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         tokens.push(Weapon(properties, stat1, stat2, stat3, 0));
         cosmetics.push(WeaponCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);
+        durabilityTimestamp[tokenID] = uint64(now.sub(getDurabilityMaxWait()));
+
         emit NewWeapon(tokenID, minter);
         return tokenID;
     }
@@ -468,30 +461,68 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         );
     }
 
-    function setBurnPointMultiplier(uint256 multiplier) public restricted {
-        burnPointMultiplier = multiplier;
-    }
-    function setLowStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
-        lowStarBurnPowerPerPoint = powerPerBurnPoint;
-    }
-    function setFourStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
-        fourStarBurnPowerPerPoint = powerPerBurnPoint;
-    }
-    function setFiveStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
-        fiveStarBurnPowerPerPoint = powerPerBurnPoint;
-    }
+    function drainDurability(uint256 id, uint8 amount) public restricted {
+        uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
+        require(durabilityPoints >= amount, "Not enough durability!");
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
-        // when not minting or burning...
-        if(from != address(0) && to != address(0)) {
-            // only allow transferring a particular token every TRANSFER_COOLDOWN seconds
-            require(lastTransferTimestamp[tokenId] < block.timestamp.sub(TRANSFER_COOLDOWN), "Transfer cooldown");
-
-            if(!hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to)) {
-                lastTransferTimestamp[tokenId] = block.timestamp;
-            }
+        uint64 drainTime = uint64(amount * secondsPerDurability);
+        if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
+            durabilityTimestamp[id] = uint64(now - getDurabilityMaxWait() + drainTime);
+        }
+        else {
+            durabilityTimestamp[id] = uint64(durabilityTimestamp[id] + drainTime);
         }
     }
 
-}
+    function setBurnPointMultiplier(uint256 multiplier) public restricted {
+        require(multiplier >= 1, "BurnPointMultiplier too low");
+        require(multiplier <= 5, "BurnPointMultiplier too high");
+        burnPointMultiplier = multiplier;
+    }
+    function setLowStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
+        require(powerPerBurnPoint >= 10, "LowStarBurnPowerPerPoint too low");
+        require(powerPerBurnPoint <= 20, "LowStarBurnPowerPerPoint too high");
+        lowStarBurnPowerPerPoint = powerPerBurnPoint;
+    }
+    function setFourStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
+        require(powerPerBurnPoint >= 25, "FourStarBurnPowerPerPoint too low");
+        require(powerPerBurnPoint <= 35, "FourStarBurnPowerPerPoint too high");
+        fourStarBurnPowerPerPoint = powerPerBurnPoint;
+    }
+    function setFiveStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
+        require(powerPerBurnPoint >= 40, "FiveStarBurnPowerPerPoint too low");
+        require(powerPerBurnPoint <= 80, "FiveStarBurnPowerPerPoint too high");
+        fiveStarBurnPowerPerPoint = powerPerBurnPoint;
+    }
 
+    function getDurabilityTimestamp(uint256 id) public view returns (uint64) {
+        return durabilityTimestamp[id];
+    }
+
+    function setDurabilityTimestamp(uint256 id, uint64 timestamp) public restricted {
+        durabilityTimestamp[id] = timestamp;
+    }
+
+    function getDurabilityPoints(uint256 id) public view returns (uint8) {
+        return getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
+    }
+
+    function getDurabilityPointsFromTimestamp(uint64 timestamp) public view returns (uint8) {
+        if(timestamp  > now)
+            return 0;
+
+        uint256 points = (now - timestamp) / secondsPerDurability;
+        if(points > maxDurability) {
+            points = maxDurability;
+        }
+        return uint8(points);
+    }
+
+    function isDurabilityFull(uint256 id) public view returns (bool) {
+        return getDurabilityPoints(id) >= maxDurability;
+    }
+
+    function getDurabilityMaxWait() public pure returns (uint64) {
+        return uint64(maxDurability * secondsPerDurability);
+    }
+}

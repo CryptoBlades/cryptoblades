@@ -4,7 +4,19 @@
       <span :class="trait.toLowerCase() + '-icon circle-element'"></span>
     </div>
 
-    <img v-if="showPlaceholder && !portrait" class="placeholder" :src="getCharacterArt(character)" />
+    <div class="placeholder d-flex align-items-start justify-content-center p-1"
+      >
+      <div class="w-100" :style="{
+        'background-image': 'url(' + getCharacterArt(character) + ')',
+      }"
+      :class="{
+        'h-100': !isMarket,
+        'h-75': isMarket
+      }">
+
+      </div>
+      <!--<small-button class="button" :text="`Purchase`" v-if="isMarket"/>-->
+    </div>
 
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
@@ -12,15 +24,21 @@
 
     <div class="name-lvl-container">
       <div class="name black-outline" v-if="!portrait">{{ getCharacterName(character.id) }} </div>
-      <div>Lv.<span class="white">{{ character.level + 1 }}</span></div>
+      <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
     </div>
     <div class="score-id-container">
     <div class="black-outline" v-if="!portrait">ID <span class="white">{{ character.id }}</span></div>
     <div class="black-outline" v-if="!portrait">
       Score <span class="white">{{ heroScore.toLocaleString() }}</span>
       <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Hero score is a measure of your hero's combat prowess so far.
-        It goes up when you win and down when you lose.`"/>
+        It goes up when you win and down when you lose. It is also temporarily disabled!`"/>
     </div>
+    </div>
+
+    <div v-if="!portrait && isMarket" class="small-stamina-char"
+      :style="`--staminaReady: ${(timestampToStamina(character.staminaTimestamp)/maxStamina)*100}%;`"
+      v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
+      <div class="stamina-text black-outline">STA {{ timestampToStamina(character.staminaTimestamp) }} / 200</div>
     </div>
 
     <div class="xp" v-if="!portrait">
@@ -44,7 +62,8 @@ import torsos from '../assets/characterWardrobe_torso.json';
 import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
-import { mapGetters} from 'vuex';
+import { mapGetters, mapState } from 'vuex';
+//import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
 const armsCount = 45;
@@ -62,7 +81,10 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character', 'portrait'],
+  props: ['character', 'portrait', 'isMarket'],
+  components: {
+    //SmallButton,
+  },
   watch: {
     character() {
       this.clearScene();
@@ -90,7 +112,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['getCharacterName', 'transferCooldownOfCharacterId', 'getCharacterUnclaimedXp']),
+    ...mapState(['maxStamina']),
+    ...mapGetters([
+      'getCharacterName',
+      'transferCooldownOfCharacterId',
+      'getCharacterUnclaimedXp',
+      'timeUntilCharacterHasMaxStamina'
+    ]),
   },
 
   methods: {
@@ -108,6 +136,15 @@ export default {
       }
 
       return '';
+    },
+
+    staminaToolTipHtml(time) {
+      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
+    },
+
+    timestampToStamina(timestamp) {
+      if(timestamp > Math.floor(Date.now()/1000)) return 0;
+      return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
     },
 
     getCharacterArt,
@@ -465,6 +502,7 @@ export default {
     },
 
     async fetchScore() {
+      /*
       try {
         const scoreData = await fetch(`https://api.cryptoblades.io/static/character/score/${this.character.id}`);
         const { score } = await scoreData.json();
@@ -472,6 +510,7 @@ export default {
       } catch {
         console.error(`Could not fetch score for ID ${this.character.id}`);
       }
+      */
     }
   },
   mounted() {
@@ -504,10 +543,11 @@ export default {
 }
 
 .trait {
-  top: -27px;
+  top: -30px;
   justify-self: center;
   margin: 0 auto;
   position: relative;
+  display: flex;
 }
 
 .id {
@@ -526,6 +566,8 @@ export default {
   font-weight: 900;
   overflow: hidden;
   max-height: 24px;
+  max-width: 170px;
+  white-space: nowrap;
 }
 
 .xp {
@@ -552,6 +594,12 @@ export default {
   object-fit: contain;
 }
 
+.placeholder div{
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 .circle-element {
   width: 1.7em;
   height: 1.7em;
@@ -561,10 +609,32 @@ export default {
 .name-lvl-container, .score-id-container {
   display :flex;
   justify-content: space-around;
+  position: relative;
 }
 
 .white {
   color : rgb(204, 204, 204)
 }
 
+.small-stamina-char {
+  position: relative;
+  margin-top: -10px;
+  top: 7px;
+  align-self: center;
+  height :14px;
+  width: 180px;
+  border-radius: 2px;
+  border: 0.5px solid rgb(216, 215, 215);
+  background : linear-gradient(to right, rgb(236, 75, 75) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+}
+
+.stamina-text {
+  position: relative;
+  top: -3px;
+  font-size: 75%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #fff;
+}
 </style>

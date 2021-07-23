@@ -20,7 +20,7 @@
       <div class="col-2" v-if="isMarket">
         <strong>Sort</strong>
         <select class="form-control" v-model="priceSort" @change="saveFilters()">
-          <option v-for="x in ['', 'Price: Low -> High', 'Price: High -> Low']" :value="x" :key="x">{{ x || 'Any' }}</option>
+          <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
         </select>
       </div>
 
@@ -42,8 +42,9 @@
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :character="c"></slot>
         </div>
+        <slot name="sold" :character="c"></slot>
         <div class="art">
-          <CharacterArt :character="c" />
+          <CharacterArt :character="c" :isMarket="isMarket"/>
         </div>
       </li>
     </ul>
@@ -54,6 +55,12 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
+
+const sorts = [
+  { name: 'Any', dir: '' },
+  { name: 'Price: Low -> High', dir: 1 },
+  { name: 'Price: High -> Low', dir: -1 },
+];
 
 export default {
   props: {
@@ -85,6 +92,7 @@ export default {
       levelFilter: '',
       elementFilter: '',
       priceSort: '',
+      sorts,
     };
   },
 
@@ -122,14 +130,6 @@ export default {
       }
 
       return items;
-    },
-
-    priceSortAscText() {
-      return 'Price: Low -> High';
-    },
-
-    priceSortDescText() {
-      return 'Price: High -> Low';
     }
   },
 
@@ -144,34 +144,22 @@ export default {
 
     getCharacterArt,
 
-    getStaminaPoints(timestamp_str) {
-      // super temporary function, just to make it work for now. sorry
-      const timestamp = parseInt(timestamp_str, 10);
-      const now = Date.now();
-      if(timestamp  > now)
-        return 0;
-
-      let points = (now - timestamp) / 300;
-      if(points > 200) {
-        points = 200;
-      }
-      return points;
-    },
-
     saveFilters() {
       sessionStorage.setItem('character-levelfilter', this.levelFilter);
       sessionStorage.setItem('character-elementfilter', this.elementFilter);
 
       if(this.isMarket) {
-        const sortOrder = this.priceSort === this.priceSortAscText ? '1' :
-          this.priceSort === this.priceSortDescText ? '-1' : '';
-        sessionStorage.setItem('character-price-order', sortOrder);
+        sessionStorage.setItem('character-price-order', this.priceSort);
       }
       this.$emit('character-filters-changed');
     },
 
     clearFilters() {
-      sessionStorage.clear();
+      sessionStorage.removeItem('character-levelfilter');
+      sessionStorage.removeItem('character-elementfilter');
+      if(this.isMarket) {
+        sessionStorage.removeItem('character-price-order');
+      }
 
       this.elementFilter = '';
       this.levelFilter = '';
@@ -223,6 +211,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .character .art {
@@ -267,5 +256,32 @@ export default {
     align-items: center;
     justify-content: center;
   }
+}
+
+.sold {
+  height: 40px;
+  width: 300px;
+  background-color: rgb(187, 33, 0);
+  transform: rotate(30deg);
+  left: -40px;
+  position: absolute;
+  top: 150px;
+  z-index: 100;
+}
+
+.sold span {
+    text-align: center;
+    width: auto;
+    color: white;
+    display: block;
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 40px;
+    text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+    text-transform: uppercase;
+}
+
+.fix-h24 {
+  height: 24px;
 }
 </style>

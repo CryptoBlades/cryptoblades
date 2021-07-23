@@ -25,9 +25,21 @@
       </b-nav-item>
     </b-navbar>
 
-    <b-modal class="centered-modal" ref="need-gas-modal" title="Need Gas?"
-      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Bridge" >
-        Need Gas? Try our WAX Bridge, which will pay you .5% under market rate to sell your WAX for BNB!
+    <b-modal class="centered-modal" ref="need-gas-modal" title="Need Withdraw?"
+      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Portal" >
+        Need Withdraw? Try our WAX Portal, which will pay you .5% under market rate to sell your WAX for BNB!
+        <div class="text-center">
+          <hr class="hr-divider">
+          Hold Reminder:<br>
+          A percentage of your earning goes back to the community,<br>
+          <u>if you withdraw early</u>
+          <div class="row">
+            <div class="col-5">Your early withdraw tax</div>
+            <div class="col-2"><span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></div>
+            <div class="col-5 text-left">Reduces 1% per day<br>
+              Reset to 15% after withdraw</div>
+          </div>
+        </div>
     </b-modal>
     <b-modal class="centered-modal" ref="stake-suggestion-modal" title="Stake Skill"
       @ok="$router.push({ name: 'select-stake-type' })" ok-only ok-title="Go to Stake" >
@@ -41,6 +53,18 @@
       " tax for early withdrawal, costing you " + this.formattedTaxAmount + " SKILL. You will also " : "" }}
       miss out on {{formattedBonusLost}} bonus SKILL. Are you sure
       you wish to continue? <b>This action cannot be undone.</b>
+      <div class="text-center">
+        <hr class="hr-divider">
+        Hold Reminder:<br>
+        A percentage of your earning goes back to the community,<br>
+        <u>if you withdraw early</u>
+        <div class="row">
+          <div class="col-5">Your early withdraw tax</div>
+          <div class="col-2"><span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></div>
+          <div class="col-5 text-left">Reduces 1% per day<br>
+            Reset to 15% after withdraw</div>
+        </div>
+      </div>
     </b-modal>
   </div>
 </template>

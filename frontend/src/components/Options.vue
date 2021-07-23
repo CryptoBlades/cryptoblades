@@ -10,34 +10,43 @@
 
         <b-dropdown-header>Links</b-dropdown-header>
 
-        <b-dropdown-item @click="claimSkill(ClaimStage.WaxBridge)">Claim Skill </b-dropdown-item>
+        <b-dropdown-item @click="claimSkill(ClaimStage.WaxBridge)"><i class="fa fa-coins mr-2"></i>Claim Skill </b-dropdown-item>
 
-        <b-dropdown-item @click.native="$router.push('leaderboard')" class="gtag-link-others" tagname="leaderboard_screen">Leaderboard </b-dropdown-item>
+        <b-dropdown-item @click.native="$router.push('leaderboard')" class="gtag-link-others" tagname="leaderboard_screen">
+        <i class="fa fa-trophy mr-2"></i>Leaderboard
+        </b-dropdown-item>
 
-        <b-dropdown-item @click.native="$router.push('portal')">Portal </b-dropdown-item>
+        <b-dropdown-item @click.native="$router.push('portal')"><i class="fa fa-dungeon mr-2"></i>Portal</b-dropdown-item>
 
-        <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank">Wiki <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
-
-        </b-dropdown-group>
-
-        <b-dropdown-group>
-
-        <b-dropdown-header>Options</b-dropdown-header>
-
-        <b-dropdown-item @click="toggleGraphics()">3D Graphics: {{ showGraphics ? 'On' : 'Off' }}</b-dropdown-item>
-
-        <b-dropdown-item @click="toggleRewards()">Reward Bar: {{ hideRewards ? 'Off' : 'On' }}</b-dropdown-item>
-
-        <b-dropdown-item @click="toggleHideWalletWarning()">Hide Wallet Warning: {{ hideWalletWarning ? 'On' : 'Off' }}</b-dropdown-item>
+        <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank"><i class="fa fa-book mr-2"></i>Wiki <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
 
         </b-dropdown-group>
+        <hr class="border-light">
 
+        <b-dropdown-group class="mb-2">
+
+       <b-dropdown-item  @click.native="$router.push('options')">
+        <i class="fa fa-cog mr-2"></i>Options
+        </b-dropdown-item>
+        </b-dropdown-group>
       </b-nav-item-dropdown>
     </b-navbar-nav>
 
-    <b-modal class="centered-modal" ref="need-gas-modal" title="Need Gas?"
-      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Bridge" >
-        Need Gas? Try our WAX Bridge, which will pay you .5% under market rate to sell your WAX for BNB!
+    <b-modal class="centered-modal" ref="need-gas-modal" title="Need Withdraw?"
+      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Portal" >
+        Need Withdraw? Try our WAX Portal, which will pay you .5% under market rate to sell your WAX for BNB!
+        <div class="text-center">
+          <hr class="hr-divider">
+          Hold Reminder:<br>
+          A percentage of your earning goes back to the community,<br>
+          <u>if you withdraw early</u>
+          <div class="row">
+            <div class="col-5">Your early withdraw tax</div>
+            <div class="col-2"><span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></div>
+            <div class="col-5 text-left">Reduces 1% per day<br>
+              Reset to 15% after withdraw</div>
+          </div>
+        </div>
     </b-modal>
     <b-modal class="centered-modal" ref="stake-suggestion-modal" title="Stake Skill"
       @ok="$router.push({ name: 'select-stake-type' })" ok-only ok-title="Go to Stake" >
