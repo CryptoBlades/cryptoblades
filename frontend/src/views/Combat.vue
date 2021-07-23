@@ -517,29 +517,11 @@ div.encounter.text-center {
 h1  {
   font-weight: 900 !important;
   text-align: center;
-  background: linear-gradient(to right, rgb(248, 218, 136) 20%, rgb(233, 226, 167) 40%, rgb(112, 112, 51) 60%, rgb(177, 150, 92) 80%);
-  background-size: 200% auto;
-  color: #000;
-  background-clip: text;
-  text-fill-color: transparent;
-  text-shadow: 0px 2px 3px rgba(0,0,0,0.4),
-               0px 4px 7px rgba(0,0,0,0.1),
-               0px 9px 12px rgba(0,0,0,0.1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shine 1s linear infinite;
-  @keyframes shine {
-    to {
-      background-position: 200% center;
-    }
-
-  }
 }
 
 /* Needed to asjust image size, not just image column-size and other classes to accommodate that */
 @media all and (max-width:  767.98px) {
   .encounter img {
-    max-width: 30vw;
   }
 }
 
