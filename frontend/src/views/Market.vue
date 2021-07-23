@@ -63,7 +63,7 @@
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; purchaseNft();"
                       variant="primary"
                       class="gtag-link-others">
@@ -102,7 +102,7 @@
 
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; canPurchase && purchaseNft();"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
@@ -206,7 +206,7 @@
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
-                  @click="updateNftListingPrice()"  class="gtag-link-others" tagname="change_price">Change Price</b-button>
+                  @click="showListingSetupModal(true)" class="gtag-link-others" tagname="change_price">Change Price</b-button>
               </div>
 
               <div class="col">
@@ -242,7 +242,7 @@
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
                         v-if="id !== null && !searchResultsOwned"
-                        :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                        :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                         @click="selectedNftId = id; purchaseNft();"
                         variant="primary"
                         class="gtag-link-others">
@@ -279,7 +279,7 @@
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; canPurchase && purchaseNft();"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
@@ -350,9 +350,9 @@
                   v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
 
                 <b-modal class="centered-modal" ref="listing-setup-modal"
-                  @ok="addListingForNft">
+                  @ok="!priceChangeModal ? addListingForNft() : updateNftListingPrice()">
                   <template #modal-title>
-                    Sell {{activeType}}
+                    {{!priceChangeModal ? `Sell ${activeType}` : `Change ${activeType} price`}}
                   </template>
                   <b-form-input type="number" :max="10000"
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
@@ -461,7 +461,7 @@ interface Data {
   currentPage: number;
   browseTabActive: boolean;
   listingSellPrice: string;
-  items: any;
+  priceChangeModal: boolean;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -516,7 +516,7 @@ export default Vue.extend({
       currentPage: 1,
       browseTabActive: true,
       listingSellPrice: '',
-      items: [{}]
+      priceChangeModal: false
     } as Data;
   },
 
@@ -659,7 +659,7 @@ export default Vue.extend({
       const results = await this.addMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
-        price: this.convertSkillToWei(this.listingSellPrice),
+        price: this.convertSkillToWei(val.toString()),
       });
 
       this.selectedNftId = null;
@@ -673,11 +673,7 @@ export default Vue.extend({
       this.marketOutcome = null;
       if(this.selectedNftId === null) return;
 
-
-      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeType}`, text: 'Sell Price (SKILL)' });
-      if(!sellFor) return;
-
-      const val = +sellFor;
+      const val = Math.min(+this.listingSellPrice, 10000);
       if(val <= 0 || !val || isNaN(val)) return;
 
       this.waitingMarketOutcome = true;
@@ -685,7 +681,7 @@ export default Vue.extend({
       const results = await this.changeMarketListingPrice({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
-        newPrice: this.convertSkillToWei(sellFor)
+        newPrice: this.convertSkillToWei(val.toString())
       });
 
       this.selectedNftId = null;
@@ -999,8 +995,9 @@ export default Vue.extend({
       return weapons.idResults;
     },
 
-    showListingSetupModal() {
+    showListingSetupModal(changingPrice: boolean = false) {
       this.clearInputs();
+      this.priceChangeModal = changingPrice;
       (this.$refs['listing-setup-modal'] as BModal).show();
     },
 
