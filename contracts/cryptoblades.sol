@@ -617,6 +617,22 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _giveInGameOnlyFundsFromContractBalance(to, skillAmount);
     }
 
+    function transferInGameOnlyFunds(address from, address to, uint256 skillAmount) external restricted {
+        require(from != address(0), "From address can't be zero");
+        require(to != address(0), "To address can't be zero");
+        require(inGameOnlyFunds[from] >= skillAmount, "Not enough SKILL");
+        inGameOnlyFunds[from] = inGameOnlyFunds[from].sub(skillAmount);
+        inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
+    }
+
+    function transferTokenRewards(address from, address to, uint256 skillAmount) external restricted {
+        require(from != address(0), "From address can't be zero");
+        require(to != address(0), "To address can't be zero");
+        require(tokenRewards[from] >= skillAmount, "Not enough SKILL");
+        tokenRewards[from] = tokenRewards[from].sub(skillAmount);
+        tokenRewards[to] = tokenRewards[to].add(skillAmount);
+    }
+
     function usdToSkill(int128 usdAmount) public view returns (uint256) {
         return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
     }

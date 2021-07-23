@@ -10,6 +10,7 @@ import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
+import "./interfaces/ICryptoBlades.sol";
 import "./characters.sol";
 import "./weapons.sol";
 
@@ -488,12 +489,46 @@ contract NFTMarket is
         listedTokenIDs[address(_tokenAddress)].remove(_id);
         _updateListedTokenTypes(_tokenAddress);
 
-        skillToken.transferFrom(msg.sender, taxRecipient, taxAmount);
-        skillToken.transferFrom(
-            msg.sender,
-            listing.seller,
-            finalPrice.sub(taxAmount)
-        );
+
+        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromUserWallet) =
+            ICryptoBlades(taxRecipient).getSkillToSubtract(
+                ICryptoBlades(taxRecipient).inGameOnlyFunds(msg.sender),
+                ICryptoBlades(taxRecipient).getTokenRewardsFor(msg.sender),
+                finalPrice
+            );
+
+        if (fromInGameOnlyFunds >= finalPrice) {
+            // If Buyer has enough inGameOnlyFunds
+            ICryptoBlades(taxRecipient).transferInGameOnlyFunds(msg.sender, taxRecipient, taxAmount);
+            ICryptoBlades(taxRecipient).transferInGameOnlyFunds(msg.sender, listing.seller, finalPrice.sub(taxAmount));
+
+        } else if (fromInGameOnlyFunds.add(fromTokenRewards) >= finalPrice) {
+            // If Buyer has funds in both inGameOnlyFunds and tokenRewards
+            uint256 taxAmountInGameOnlyFunds = fromInGameOnlyFunds.mul(taxAmount).div(finalPrice);
+            ICryptoBlades(taxRecipient).transferInGameOnlyFunds(msg.sender, taxRecipient, taxAmountInGameOnlyFunds);
+            ICryptoBlades(taxRecipient).transferInGameOnlyFunds(msg.sender, listing.seller, fromInGameOnlyFunds.sub(taxAmountInGameOnlyFunds));
+
+            uint256 taxAmountTokenRewards = taxAmount.sub(taxAmountInGameOnlyFunds);
+            ICryptoBlades(taxRecipient).transferTokenRewards(msg.sender, taxRecipient, taxAmountTokenRewards);
+            ICryptoBlades(taxRecipient).transferTokenRewards(msg.sender, listing.seller, fromTokenRewards.sub(taxAmountTokenRewards));
+        } else {
+            uint256 taxAmountInGameOnlyFunds = fromInGameOnlyFunds.mul(taxAmount).div(finalPrice);
+            ICryptoBlades(taxRecipient).transferInGameOnlyFunds(msg.sender, taxRecipient, taxAmountInGameOnlyFunds);
+            ICryptoBlades(taxRecipient).transferInGameOnlyFunds(msg.sender, listing.seller, fromInGameOnlyFunds.sub(taxAmountInGameOnlyFunds));
+
+            uint256 taxAmountTokenRewards = fromTokenRewards.mul(taxAmount).div(finalPrice);
+            ICryptoBlades(taxRecipient).transferTokenRewards(msg.sender, taxRecipient, taxAmountTokenRewards);
+            ICryptoBlades(taxRecipient).transferTokenRewards(msg.sender, listing.seller, fromTokenRewards.sub(taxAmountTokenRewards));
+
+            uint256 taxAmountUserWallet = taxAmount.sub(taxAmountInGameOnlyFunds).sub(taxAmountTokenRewards);
+
+            skillToken.transferFrom(msg.sender, taxRecipient, taxAmountUserWallet);
+            skillToken.transferFrom(
+                msg.sender,
+                listing.seller,
+                fromUserWallet.sub(taxAmountUserWallet)
+            );
+        }
         _tokenAddress.safeTransferFrom(address(this), msg.sender, _id);
 
         emit PurchasedListing(
