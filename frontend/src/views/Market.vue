@@ -63,7 +63,7 @@
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; purchaseNft();"
                       variant="primary"
                       class="gtag-link-others">
@@ -102,7 +102,7 @@
 
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; canPurchase && purchaseNft();"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
@@ -242,7 +242,7 @@
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
                         v-if="id !== null && !searchResultsOwned"
-                        :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                        :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                         @click="selectedNftId = id; purchaseNft();"
                         variant="primary"
                         class="gtag-link-others">
@@ -279,7 +279,7 @@
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; canPurchase && purchaseNft();"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
