@@ -284,6 +284,7 @@
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
                   @click="showListingSetupModal()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
                   v-tooltip.bottom="weaponMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
+
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
@@ -307,6 +308,24 @@
               </div>
 
               <div class="col">
+                <b-button
+                  variant="primary"
+                   class="gtag-link-others" tagname="show_weapons_sold"
+                  @click="showWeaponsSoldModal()"> Weapons Sold
+                  <b-icon-question-circle v-tooltip.bottom="'View weapons you have sold.'"/>
+                </b-button>
+
+                <b-modal ok-only class="centered-modal " ref="weapons-sold-modal">
+                    <template #modal-header>
+                         <div class="transaction-history-header-text">
+                           Transaction History
+                         </div>
+                    </template>
+                    <div>
+                      <b-table class="transaction-history-text" :items="items"></b-table>
+                    </div>
+                </b-modal>
+
               </div>
 
               <div class="col">
@@ -385,6 +404,7 @@ interface Data {
   currentPage: number;
   browseTabActive: boolean;
   listingSellPrice: string;
+  items: any;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -438,7 +458,8 @@ export default Vue.extend({
       allListingsAmount: 0,
       currentPage: 1,
       browseTabActive: true,
-      listingSellPrice: ''
+      listingSellPrice: '',
+      items: [{}]
     } as Data;
   },
 
@@ -523,6 +544,7 @@ export default Vue.extend({
       this.currentPage = 1;
       this.listingSellPrice = '';
     },
+
 
     async loadMarketTaxes() {
       if(!this.characterMarketTax) {
@@ -925,6 +947,19 @@ export default Vue.extend({
       (this.$refs['listing-setup-modal'] as BModal).show();
     },
 
+    showWeaponsSoldModal() {
+      this.items = [
+        { ID: '222212', Name:'Blazing Sunderer', Price:'6.5' },
+        { ID: '222213', Name:'Freezing Blob', Price:'10.49' },
+        { ID: '222214', Name:'Yeeting Monli', Price:'5.59' },
+        { ID: '222215', Name:'Ayt Gaw', Price:'2.19' }];
+      (this.$refs['weapons-sold-modal'] as BModal).show();
+    },
+
+    hideWeaponsSoldModal(){
+      (this.$refs['weapons-sold-modal'] as BModal).hide();
+    },
+
     clearInputs() {
       this.listingSellPrice = '';
     },
@@ -1063,6 +1098,15 @@ export default Vue.extend({
 
 .disabled-button {
   opacity: 0.65;
+}
+
+.transaction-history-text{
+  color: #9e8a57 !important;
+}
+
+.transaction-history-header-text{
+   color: #9e8a57;
+  font-size: 34px;
 }
 
 </style>
