@@ -66,8 +66,17 @@
                       :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; purchaseNft();"
                       variant="primary"
-                      class="gtag-link-others">
+                      class="w-100 gtag-link-others mt-3">
                       {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
+                    </b-button>
+                    <b-button
+                      variant="link"
+                      class="w-100"
+                      v-clipboard="getShareLink($router, id)"
+                      v-clipboard:success="shareHandler"
+                      v-clipboard:error="shareErrorHandler"
+                    >
+                      Share
                     </b-button>
                   </div>
                 </template>
@@ -545,6 +554,11 @@ export default Vue.extend({
 
     canPurchase(): boolean {
       return this.activeType === 'weapon' || this.ownCharacters.length < 4 ;
+    },
+
+    shareUrl(): string {
+      console.warn(`${window.location.origin}/#/market/we`);
+      return 'ok';
     }
   },
 
@@ -565,6 +579,23 @@ export default Vue.extend({
       'purchaseMarketListing',
       'fetchSellerOfNft',
     ]) as StoreMappedActions),
+
+
+    getShareLink (router: any, id: number) {
+      const url = router.resolve({
+        name: 'weapon',
+        params: { id }
+      });
+      return `${window.location.origin}/${url.href}`;
+    },
+
+    shareHandler () {
+      (this as any).$dialog.notify.success('Link was succesfully copied to clipbard');
+    },
+
+    shareErrorHandler () {
+      (this as any).$dialog.notify.error('Error: The link could not be copied to the clipboard.');
+    },
 
     clearData() {
       this.activeType = 'weapon';

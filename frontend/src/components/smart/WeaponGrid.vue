@@ -337,6 +337,20 @@ export default Vue.extend({
   overflow: hidden;
 }
 
+.weapon-share {
+  color: #9e8a57;
+  background: transparent;
+  border-color: transparent !important;
+}
+
+.weapon-share:hover,
+.weapon-share:focus,
+.weapon-share:active {
+  color: #9e8a57;
+  background: transparent;
+  border-color: transparent !important;
+}
+
 .weapon.selected {
   outline: solid currentcolor 2px;
 }

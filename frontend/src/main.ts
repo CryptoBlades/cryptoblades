@@ -5,6 +5,7 @@ import VTooltip from 'v-tooltip';
 import BootstrapVue from 'bootstrap-vue';
 import { BootstrapVueIcons } from 'bootstrap-vue';
 import BootstrapVueDialog from 'bootstrap-vue-dialog';
+import Clipboard from 'v-clipboard';
 
 import Web3 from 'web3';
 
@@ -39,6 +40,8 @@ Vue.use(BootstrapVue);
 Vue.use(BootstrapVueDialog);
 
 Vue.use(BootstrapVueIcons);
+Vue.use(Clipboard);
+
 
 const store = createStore(web3);
 const router = createRouter();

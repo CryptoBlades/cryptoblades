@@ -32,7 +32,8 @@ function createRouter() {
   let marketRoutes: RouteConfig[] = [];
   if(featureFlagMarket) {
     marketRoutes = [
-      { path: '/market', name: 'market', component: Market }
+      { path: '/market', name: 'market', component: Market },
+      { path: '/market/weapon/:id', name: 'weapon', component: Market }
     ];
   }
 
