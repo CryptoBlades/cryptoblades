@@ -108,13 +108,13 @@ export function createStore(web3: Web3) {
       characterStaminas: {},
       weapons: {},
       currentWeaponId: null,
-      isInCombat: false,
+      weaponDurabilities: {},
+      maxDurability: 0,      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
 
       characterTransferCooldowns: {},
-      weaponTransferCooldowns: {},
 
       staking: {
         skill: { ...defaultStakeState },
@@ -194,6 +194,12 @@ export function createStore(web3: Web3) {
         };
       },
 
+      getWeaponDurability(state: IState) {
+        return (weaponId: number) => {
+          return state.weaponDurabilities[weaponId];
+        };
+      },
+
       getExchangeUrl() {
         return 'https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
       },
@@ -242,20 +248,6 @@ export function createStore(web3: Web3) {
         };
       },
 
-      transferCooldownOfWeaponId(state) {
-        return (weaponId: string | number, now: number | null = null) => {
-          const transferCooldown = state.weaponTransferCooldowns[+weaponId];
-          if(!transferCooldown) return 0;
-
-          const deltaFromLastUpdated =
-            now === null
-              ? 0
-              : (now - transferCooldown.lastUpdatedTimestamp);
-
-          return Math.max(Math.floor(transferCooldown.secondsLeft - deltaFromLastUpdated), 0);
-        };
-      },
-
       currentCharacter(state) {
         if (state.currentCharacterId === null) return null;
 
@@ -280,6 +272,29 @@ export function createStore(web3: Web3) {
 
           if (state.maxStamina !== currentStamina) {
             date.setTime(date.getTime() + ((state.maxStamina - currentStamina) * (5 * 60000)));
+          }
+
+          return(`${
+            (date.getMonth()+1).toString().padStart(2, '0')}/${
+            date.getDate().toString().padStart(2, '0')}/${
+            date.getFullYear().toString().padStart(4, '0')} ${
+            date.getHours().toString().padStart(2, '0')}:${
+            date.getMinutes().toString().padStart(2, '0')}:${
+            date.getSeconds().toString().padStart(2, '0')}`
+          );
+        };
+      },
+
+      timeUntilWeaponHasMaxDurability(state, getters) {
+        return (id: number) => {
+          const currentDurability = getters.getWeaponDurability(id);
+          if (currentDurability === null || currentDurability === undefined) {
+            return '';
+          }
+          const date = new Date();
+
+          if (state.maxDurability !== currentDurability) {
+            date.setTime(date.getTime() + ((state.maxDurability - currentDurability) * (48 * 60000)));
           }
 
           return(`${
@@ -395,7 +410,7 @@ export function createStore(web3: Web3) {
       },
 
       updateUserDetails(state: IState, payload) {
-        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina'];
+        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability'];
         for (const key of keysToAllow) {
           if (Object.hasOwnProperty.call(payload, key)) {
             Vue.set(state, key, payload[key]);
@@ -455,17 +470,13 @@ export function createStore(web3: Web3) {
         Vue.set(state.weapons, weaponId, weapon);
       },
 
-      updateWeaponTransferCooldown(
-        state: IState,
-        { weaponId, weaponTransferCooldown }: { weaponId: number, weaponTransferCooldown: ITransferCooldown }
-      ) {
-        Vue.set(state.weaponTransferCooldowns, weaponId, weaponTransferCooldown);
-      },
-
       setCurrentWeapon(state: IState, weaponId: number) {
         state.currentWeaponId = weaponId;
       },
 
+      updateWeaponDurability(state: IState, { weaponId, durability }) {
+        Vue.set(state.weaponDurabilities, weaponId, durability);
+      },
       updateCharacterStamina(state: IState, { characterId, stamina }) {
         Vue.set(state.characterStaminas, characterId, stamina);
       },
@@ -515,6 +526,7 @@ export function createStore(web3: Web3) {
         await dispatch('pollAccountsAndNetwork');
 
         await dispatch('setupCharacterStaminas');
+        await dispatch('setupWeaponDurabilities');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -706,16 +718,19 @@ export function createStore(web3: Web3) {
           ownedCharacterIds,
           ownedWeaponIds,
           maxStamina,
+          maxDurability,
         ] = await Promise.all([
           state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
           state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
           state.contracts().Characters!.methods.maxStamina().call(defaultCallOptions(state)),
+          state.contracts().Weapons!.methods.maxDurability().call(defaultCallOptions(state)),
         ]);
 
         commit('updateUserDetails', {
           ownedCharacterIds: Array.from(ownedCharacterIds),
           ownedWeaponIds: Array.from(ownedWeaponIds),
-          maxStamina: parseInt(maxStamina, 10)
+          maxStamina: parseInt(maxStamina, 10),
+          maxDurability: parseInt(maxDurability, 10),
         });
 
         await Promise.all([
@@ -849,7 +864,7 @@ export function createStore(web3: Web3) {
         await Promise.all(weaponIds.map(id => dispatch('fetchWeapon', id)));
       },
 
-      async fetchWeapon({ state, commit, dispatch }, weaponId: string | number) {
+      async fetchWeapon({ state, commit }, weaponId: string | number) {
         const { Weapons } = state.contracts();
         if(!Weapons) return;
 
@@ -862,41 +877,31 @@ export function createStore(web3: Web3) {
 
             commit('updateWeapon', { weaponId, weapon });
           })(),
-          dispatch('fetchWeaponTransferCooldown', weaponId)
         ]);
       },
 
-      async fetchWeaponTransferCooldownForOwnWeapons({ state, dispatch }) {
-        await Promise.all(
-          state.ownedWeaponIds.map(weaponId =>
-            dispatch('fetchWeaponTransferCooldown', weaponId)
-          )
-        );
+      async setupWeaponDurabilities({ state, dispatch }) {
+        const [
+          ownedWeaponIds
+        ] = await Promise.all([
+          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
+        ]);
+
+        for (const weapId of ownedWeaponIds) {
+          dispatch('fetchWeaponDurability', weapId);
+        }
       },
 
-      async fetchWeaponTransferCooldown({ state, commit }, weaponId: string | number) {
-        const { Weapons } = state.contracts();
-        if(!Weapons) return;
+      async fetchWeaponDurability({ state, commit }, weaponId: number) {
+        if(featureFlagStakeOnly) return;
 
-        const supportsTransferCooldownable = await Weapons.methods
-          .supportsInterface(INTERFACE_ID_TRANSFER_COOLDOWNABLE)
-          .call(defaultCallOptions(state));
-        if(!supportsTransferCooldownable) return;
-
-        const lastUpdatedTimestamp = Date.now();
-        const secondsLeft = await Weapons.methods
-          .transferCooldownLeft(weaponId)
+        const durabilityString = await state.contracts().Weapons!.methods
+          .getDurabilityPoints('' + weaponId)
           .call(defaultCallOptions(state));
 
-        const payload: {
-          weaponId: number,
-          weaponTransferCooldown: ITransferCooldown
-        } = {
-          weaponId: +weaponId,
-          weaponTransferCooldown: { lastUpdatedTimestamp, secondsLeft: +secondsLeft }
-        };
-        if(!_.isEqual(state.weaponTransferCooldowns[+weaponId], payload)) {
-          commit('updateWeaponTransferCooldown', payload);
+        const durability = parseInt(durabilityString, 10);
+        if (state.weaponDurabilities[weaponId] !== durability) {
+          commit('updateWeaponDurability', { weaponId, durability });
         }
       },
 
@@ -966,7 +971,8 @@ export function createStore(web3: Web3) {
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp')
+          dispatch('fetchFightRewardXp'),
+          dispatch('setupWeaponDurabilities')
         ]);
       },
 
@@ -1037,6 +1043,8 @@ export function createStore(web3: Web3) {
           xpGain,
           skillGain
         } = res.events.FightOutcome.returnValues;
+
+        await dispatch('fetchWeaponDurability', weaponId);
 
         return [parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
           playerRoll,
