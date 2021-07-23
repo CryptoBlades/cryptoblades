@@ -200,7 +200,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             oncePerBlock(msg.sender)
             isCharacterOwner(char)
             isWeaponOwner(wep) {
-        require(weapons.getDurabilityPoints(wep) >= durabilityCostFight, "Not enough durability!");
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
