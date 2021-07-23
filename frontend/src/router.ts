@@ -33,7 +33,8 @@ function createRouter() {
   if(featureFlagMarket) {
     marketRoutes = [
       { path: '/market', name: 'market', component: Market },
-      { path: '/market/weapon/:id', name: 'weapon', component: Market }
+      { path: '/market/weapon/:id', name: 'weapon', component: Market },
+      { path: '/market/character/:id', name: 'character', component: Market }
     ];
   }
 
