@@ -461,9 +461,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function drainDurability(uint256 id, uint8 amount) public restricted {
+    function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) public restricted {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
-        require(durabilityPoints >= amount, "Not enough durability!");
+        require(allowNegativeDurability || durabilityPoints >= amount, "Not enough durability!");
 
         uint64 drainTime = uint64(amount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that

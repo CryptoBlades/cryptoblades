@@ -202,14 +202,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             isWeaponOwner(wep) {
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
+            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight, false));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             uint8 weaponTrait) = weapons.getFightData(wep, charTrait);
 
-        weapons.drainDurability(wep, durabilityCostFight);
+        weapons.drainDurability(wep, durabilityCostFight, false);
 
         _verifyFight(
             basePowerLevel,
