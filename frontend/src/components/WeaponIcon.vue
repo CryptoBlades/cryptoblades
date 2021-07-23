@@ -11,7 +11,7 @@
       <i class="fas fa-spinner fa-spin"></i>
     </div>
 
-    <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
+    <div ref="el">
 
       <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)" />
 
@@ -448,16 +448,6 @@ export default {
   position: relative;
 }
 
-.glow-container {
-  height: 100%;
-  width: 100%;
-}
-
-.glow-container {
-  border-radius: 5px;
-  z-index: 540;
-}
-
 .loading-container {
   height: 100%;
   display: flex;
@@ -511,63 +501,7 @@ export default {
   text-align: center;
 }
 
-.glow-0 {
-  animation: none;
-}
-
-.glow-1 {
-  animation: glow-1 2000ms ease-out infinite alternate;
-}
-
-.glow-2 {
-  animation: glow-2 2000ms ease-out infinite alternate;
-}
-
-.glow-3 {
-  animation: glow-3 2000ms ease-out infinite alternate;
-}
-
-.glow-4 {
-  animation: glow-4 2000ms ease-out infinite alternate;
-}
-
 .no-durability {
   opacity: 0.6;
-}
-
-@keyframes glow-1 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(0, 162, 255, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
-  }
-}
-
-@keyframes glow-2 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(125, 0, 125, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
-  }
-}
-
-@keyframes glow-3 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(255, 102, 0, 0.3);
-  }
-  100% {
-    box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
-  }
-}
-
-@keyframes glow-4 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(125, 0, 0, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
-  }
 }
 </style>
