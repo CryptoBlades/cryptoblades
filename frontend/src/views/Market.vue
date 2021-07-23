@@ -66,13 +66,13 @@
                       :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; purchaseNft();"
                       variant="primary"
-                      class="w-100 gtag-link-others mt-3">
+                      class="w-75 gtag-link-others mt-3">
                       {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
                     </b-button>
                     <b-button
                       variant="link"
-                      class="w-100"
-                      v-clipboard="getShareLink($router, id)"
+                      class="w-75"
+                      v-clipboard="getShareLink('weapon', $router, id)"
                       v-clipboard:success="shareHandler"
                       v-clipboard:error="shareErrorHandler"
                     >
@@ -115,9 +115,18 @@
                       @click="selectedNftId = id; canPurchase && purchaseNft();"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
-                      class="gtag-link-others" tagname="confirm_purchase">
+                      class="gtag-link-others w-75" tagname="confirm_purchase">
                       {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }} <b-icon-question-circle v-if="!canPurchase"
                       v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                    </b-button>
+                    <b-button
+                      variant="link"
+                      class="w-75"
+                      v-clipboard="getShareLink('character', $router, id)"
+                      v-clipboard:success="shareHandler"
+                      v-clipboard:error="shareErrorHandler"
+                    >
+                      Share
                     </b-button>
                   </div>
                 </template>
@@ -581,9 +590,9 @@ export default Vue.extend({
     ]) as StoreMappedActions),
 
 
-    getShareLink (router: any, id: number) {
+    getShareLink (name: string, router: any, id: number) {
       const url = router.resolve({
-        name: 'weapon',
+        name,
         params: { id }
       });
       return `${window.location.origin}/${url.href}`;
