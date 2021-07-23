@@ -7,7 +7,7 @@
     "build": "vue-cli-service build && npm run crush-images",
     "lint": "vue-cli-service lint",
     "start": "npm run serve",
-    "crush-images": "node crush-images"
+    "crush-images": "node scripts/crush-images"
   },
   "dependencies": {
     "@metamask/onboarding": "^1.0.1",
