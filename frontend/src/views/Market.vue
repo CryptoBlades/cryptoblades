@@ -1,8 +1,8 @@
 <template>
   <div class="body main-font">
 
-    <b-tabs justified v-model="browseTabActive">
-      <b-tab @click="clearData();changeTab($router, 'browse');browseTabActive = 0;">
+    <b-tabs justified>
+      <b-tab @click="clearData();changeTab($router, 'browse');" :active="$route.params.category === 'browse'">
         <template #title>
           Browse NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -163,7 +163,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData();changeTab($router, 'search');browseTabActive = 1">
+      <b-tab @click="clearData();changeTab($router, 'search')" :active="$route.params.category === 'search'">
         <template #title>
           Search NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -329,7 +329,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData();changeTab($router, 'list');loadMarketTaxes();browseTabActive = 2">
+      <b-tab @click="clearData();changeTab($router, 'list');loadMarketTaxes();" :active="$route.params.category === 'list'">
         <template #title>
           List NFTs
           <hint class="hint" text="When you list an NFT for sale, it is transferred to the<br>market until someone buys it or you cancel the sale" />
@@ -458,7 +458,7 @@ interface Data {
   weaponShowLimit: number;
   allListingsAmount: number;
   currentPage: number;
-  browseTabActive: string;
+  browseTabActive: number;
   listingSellPrice: string;
 }
 
@@ -512,7 +512,7 @@ export default Vue.extend({
       weaponShowLimit: 60,
       allListingsAmount: 0,
       currentPage: 1,
-      browseTabActive: 'search',
+      browseTabActive: 0,
       listingSellPrice: ''
     } as Data;
   },
@@ -600,12 +600,6 @@ export default Vue.extend({
 
     changeTab (router: any, category: string): void {
       router.push({ name: 'market', params: { category } });
-    },
-
-    getTabIndex(tab: any): number {
-      const tabs = ['browse', 'search', 'list'];
-      const index = tabs.indexOf(tab);
-      return Math.max(index, 0);
     },
 
     shareHandler () {

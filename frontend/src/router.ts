@@ -32,8 +32,7 @@ function createRouter() {
   let marketRoutes: RouteConfig[] = [];
   if(featureFlagMarket) {
     marketRoutes = [
-      { path: '/market', name: 'market', component: Market, props: () => ({ category: 'browse' }) },
-      { path: '/market/:category', name: 'market', component: Market/*, props: (route) => ({ category: route.params.category || 'browse' })*/ },
+      { path: '/market/:category', name: 'market', component: Market, props: (route) => ({ category: route.params.category || 'browse' })},
       { path: '/market/search/weapon/:id', name: 'weapon', component: Market },
       { path: '/market/search/character/:id', name: 'character', component: Market }
     ];
