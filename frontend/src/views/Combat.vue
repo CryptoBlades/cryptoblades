@@ -5,21 +5,6 @@
         <div class="col error">Error: {{ error }}</div>
       </div>
 
-      <div class="row">
-        <div class="col text-center">
-          <div class="combat-hints">
-            <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
-            <span class="fire-icon" />
-
-            <Hint
-              text="The elements affect power:<br>
-              <br>Character vs Enemy: bonus or penalty as shown above
-              <br>Character and Weapon match gives bonus"
-            />
-          </div>
-        </div>
-      </div>
-
       <div class="row" v-if="resultsAvailable">
         <div class="col">
           <CombatResults v-if="resultsAvailable" :results="fightResults" />
@@ -32,9 +17,13 @@
 
           <div class="message-box" v-if="currentCharacter && currentCharacterStamina < 40">You need 40 stamina to do battle.</div>
 
+          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurabilit(selectedWeaponId)">This weapon does not have enough durability.</div>
+
           <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">You cannot do battle during the last 30 seconds of the hour. Stand fast!</div>
         </div>
       </div>
+
+      <img src="../assets/divider7.png" class="info-divider enemy-divider" />
 
       <div class="row" v-if="currentCharacterStamina >= 40">
         <div class="col">
@@ -46,10 +35,9 @@
               </div>
             </div>
           </div>
-
-          <div class="row">
-            <div class="col">
-              <div class="header-row">
+          <div class="combat-enemy-container">
+            <div class="col weapon-selection">
+              <div class="header-row weapon-header">
                 <h1>Choose a weapon</h1>
                 <Hint
                   text="Your weapon multiplies your power<br>
@@ -69,50 +57,63 @@
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" />
 
             </div>
-          </div>
-
-          <div class="row mb-3" v-if="targets.length > 0">
-            <div class="col-md-3 col-sm-12 col-xs-12 encounter text-center d-flex flex-column justify-content-center" v-for="(e, i) in targets" :key="i">
-
-              <div class="encounter-container">
-
-                <div class="mobile-divider-wrapper">
-                  <div class="mobile-divider">
-                    <div class="encounter-element">
-                      <span :class="getCharacterTrait(e.trait).toLowerCase()">{{ getCharacterTrait(e.trait) }}</span>
-                      <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
-                    </div>
-
-                    <div class="encounter-power">
-                      {{ e.power }} Power
-                    </div>
-
-                    <div class="xp-gain">
-                      +{{getPotentialXp(e)}} XP
-                    </div>
-
-                    <div class="victory-chance">
-                      {{ getWinChance(e.power, e.trait) }} Victory
-                    </div>
-                  </div>
-
-                  <div class="mobile-divider mobile-img-adjustment">
-                  <img class="mr-auto ml-auto" :src="getEnemyArt(e.power)" alt="Enemy" />
+            <div class="row mb-3 flex-column enemy-container" v-if="targets.length > 0">
+              <div class="row">
+                <div class="col text-center">
+                  <div class="combat-hints">
+                    <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
+                    <span class="fire-icon" />
+           <!-- && weaponHasDurabilit(selectedWeaponId) needs to be added below to block fights, but breaks the selected weapon icon if it returns false
+                meaning if weapon has no durability left -->
+                    <Hint
+                      text="The elements affect power:<br>
+                      <br>Character vs Enemy: bonus or penalty as shown above
+                      <br>Character and Weapon match gives bonus"
+                    />
                   </div>
                 </div>
-
-                <big-button
-                  class="encounter-button"
-                  :mainText="`Fight!`"
-                  v-tooltip="'Cost 40 stamina'"
-                  :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-                  @click="onClickEncounter(e)"
-                />
-
-                <p v-if="isLoadingTargets">Loading...</p>
               </div>
-            </div>
+              <div class="enemy-list">
+                <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 encounter" v-for="(e, i) in targets" :key="i">
+                  <div class="encounter-container">
+
+                  <div class="enemy-character">
+                    <div class="encounter-element">
+                        <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
+                      </div>
+
+                      <div class="mobile-divider mobile-img-adjustment">
+                        <img class="mr-auto ml-auto enemy-img" :src="getEnemyArt(e.power)" alt="Enemy" />
+                      </div>
+
+                      <div class="encounter-power">
+                        {{ e.power }} Power
+                      </div>
+
+                      <div class="xp-gain">
+                        +{{getPotentialXp(e)}} XP
+                      </div>
+                  </div>
+
+                  <div class="victory-chance">
+                    {{ getWinChance(e.power, e.trait) }} Victory
+                  </div>
+
+                  <big-button
+                    class="encounter-button btn-styled"
+                    :mainText="`Fight!`"
+                    v-tooltip="'Cost 40 stamina'"
+                    :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                    @click="onClickEncounter(e)"
+                  />
+
+                  <p v-if="isLoadingTargets">Loading...</p>
+                  </div>
+                </div>
+              </div>
           </div>
+          </div>
+
         </div>
       </div>
 
@@ -170,6 +171,7 @@ export default {
       'ownWeapons',
       'currentCharacter',
       'currentCharacterStamina',
+      'getWeaponDurability',
       'fightGasOffset',
       'fightBaseline'
     ]),
@@ -210,6 +212,9 @@ export default {
     ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
+    weaponHasDurabilit(id) {
+      return this.getWeaponDurability(id) > 0;
+    },
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
     },
@@ -328,8 +333,35 @@ export default {
 </script>
 
 <style scoped>
+
+.enemy-character {
+  position: relative;
+  width: 16vw;
+  height: 28vw;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 115%;
+  background-color: #2e2e30cc;
+  background-image: url('../assets/cardCharacterFrame.png');
+  border: 1px solid #a28d54;
+  border-radius: 15px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.705),
+               0px 12px 7px rgba(0,0,0,0.5),
+               0px 9px 12px rgba(0,0,0,0.1);
+
+}
+
 .encounter img {
-  max-width: 15vw;
+    width: 10vw;
+    height: auto;
+    margin: 0 auto;
+    display: block;
 }
 
 .payout-info {
@@ -401,33 +433,40 @@ div.encounter.text-center {
   position: relative;
 }
 
+.encounter {
+  display : flex;
+  justify-content: center;
+  padding-top: 20px;
+  border-radius: 15px;
+  max-width: 25%;
+}
+
 .xp-gain, .encounter-power{
   color: #9e8a57 !important;
 }
 
 .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
   position: absolute;
-  font-size: x-large;
+  font-size: 2vw;
 }
 
 .encounter-element {
-  top: 40px;
+  top: 1.3vw;
 }
 
 .encounter-power {
-  top: 70px;
+  bottom: 3.5vw;
+}
+
+.xp-gain {
+  bottom: 1.25vw;
 }
 
 .victory-chance {
-  bottom: 80px;
   left: 0;
   right: 0;
   text-align: center;
   text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
-}
-
-.xp-gain {
-  top: 100px;
 }
 
 /* Mobile Support Classes*/
@@ -437,24 +476,51 @@ div.encounter.text-center {
 }
 
 .mobile-divider{
-  max-width: 50%;
   margin: auto;
 }
 
-.mobile-img-adjustment{
-  padding-bottom: 25px;
+.combat-enemy-container {
+  display : flex;
+  margin-bottom: 50px;
 }
 
-/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
-@media all and (max-width:  767.98px) {
-  .encounter img {
-    max-width: 30vw;
-  }
+.enemy-container {
+  flex : 4;
+}
 
-  .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
-    position: inherit;
-    font-size: x-large;
-  }
+.enemy-divider {
+  margin-top : 30px;
+}
+
+.enemy-list {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 1vw;
+  padding-right: 1vw;
+}
+
+.weapon-selection {
+  border-right : 1px solid #9e8a57;
+  padding-left: 1vw;
+  padding-right: 1vw;
+}
+
+.weapon-header {
+    justify-content: center;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.enemy-energy {
+  top: -30px;
+  position: relative;
+}
+
+h1  {
+  font-weight: 900 !important;
+  text-align: center;
+  font-size: 3vw;
+  padding-top: 0px;
 }
 
 .encounter-button {
@@ -462,5 +528,124 @@ div.encounter.text-center {
   margin: 0 auto;
   height: 5em;
   width: 13em;
+  position: relative;
+  top: 3vw;
+}
+
+.enemy-img {
+  position: relative;
+  top: -3vw;
+}
+
+@media (max-width: 1025px){
+  .enemy-img {
+    top: -40px;
+  }
+
+  .enemy-list {
+    flex-direction: column;
+  }
+
+  .enemy-character {
+      width: 16em;
+      height: 28em;
+  }
+
+  .encounter img {
+    width: 10em;
+  }
+
+  .encounter {
+    padding-top: 20px;
+    border-radius: 15px;
+    margin-top: 50px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .encounter-element {
+    top: 25px;
+  }
+
+  .encounter-power {
+    bottom: 55px;
+  }
+
+  .xp-gain {
+    bottom: 20px;
+  }
+
+  .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
+    position: absolute;
+    font-size: x-large;
+  }
+
+  .encounter-button {
+    top: 35px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    display: inline-block;
+  }
+}
+
+/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
+@media all and (max-width:  767.98px) {
+  .encounter img {
+    width: calc(100% - 60px);
+  }
+  .combat-enemy-container {
+    flex-direction: column;
+  }
+  .weapon-selection {
+    border-right: none;
+  }
+  .results-panel {
+    width : 100%;
+  }
+}
+.hint.has-tooltip {
+  font-size: 1.8rem;
+  display: inline-block;
+  margin-left: 10px;
+}
+.dark-bg-text {
+  width: 100% !important;
+}
+.content {
+  padding: 0 !important;
+}
+
+.encounter-container {
+  margin-bottom: 50px;
+}
+.combat-hints {
+  margin-top: 30px;
+}
+#gtag-link-others {
+    margin: 0 auto;
+    display: block;
+    position: relative;
+    margin-top: 20px;
+    width: 100%;
+}
+.ml-3 {
+    margin-left: 0px !important;
+}
+.header-row {
+  display: block;
+  text-align: center;
+}
+.weapon-icon-wrapper {
+  margin: 0 auto;
+}
+
+@media (max-width: 575.98px) {
+  .show-reforged {
+    width: 100%;
+    justify-content: center;
+    display: block;
+  }
 }
 </style>

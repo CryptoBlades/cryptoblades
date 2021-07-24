@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build && npm run crush-images",
     "lint": "vue-cli-service lint",
-    "start": "npm run serve"
+    "start": "npm run serve",
+    "crush-images": "node scripts/crush-images"
   },
   "dependencies": {
     "@metamask/onboarding": "^1.0.1",
@@ -19,6 +20,7 @@
     "bootstrap-vue-dialog": "^0.1.0",
     "core-js": "^3.6.5",
     "fantastical": "^2.0.1",
+    "imagemin": "^7.0.1",
     "seedrandom": "^3.0.5",
     "three": "^0.127.0",
     "three-fbx-loader": "^1.0.3",

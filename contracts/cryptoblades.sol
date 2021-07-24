@@ -84,6 +84,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         fightRewardBaseline = ABDKMath64x64.divu(344, 1000); // 0.08 x 4.3
     }
 
+    function migrateTo_5e833b0() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        durabilityCostFight = 1;
+    }
+
     // config vars
     uint characterLimit;
     uint8 staminaCostFight;
@@ -121,6 +127,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     mapping(address => uint256) private _rewardsClaimTaxTimerStart;
 
     IStakeFromGame public stakeFromGameImpl;
+
+    uint8 durabilityCostFight;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -192,6 +200,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             oncePerBlock(msg.sender)
             isCharacterOwner(char)
             isWeaponOwner(wep) {
+
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
 
@@ -199,6 +208,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             uint8 weaponTrait) = weapons.getFightData(wep, charTrait);
+
+        weapons.drainDurability(wep, durabilityCostFight);
 
         _verifyFight(
             basePowerLevel,
@@ -561,14 +572,24 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setReforgeWeaponValue(uint256 cents) public restricted {
+        require(cents >= 25, "ReforgeWeaponValue too low");
+        require(cents <= 100, "ReforgeWeaponValue too high");
         reforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
     }
 
     function setStaminaCostFight(uint8 points) public restricted {
+        require(points >= 20, "StaminaCostFight too low");
+        require(points <= 50, "StaminaCostFight too high");
         staminaCostFight = points;
     }
 
+    function setDurabilityCostFight(uint8 points) public restricted {
+        durabilityCostFight = points;
+    }
+
     function setFightXpGain(uint256 average) public restricted {
+        require(average >= 16, "FightXpGain too low");
+        require(average <= 64, "FightXpGain too high");
         fightXpGain = average;
     }
 
