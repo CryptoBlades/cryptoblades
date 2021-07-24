@@ -502,9 +502,9 @@ interface Data {
   browseTabActive: boolean;
   listingSellPrice: string;
   priceChangeModal: boolean;
-  weaponTransactionHistoryData: any;
+  weaponTransactionHistoryData: WeaponTransactionHistoryData[];
   weaponTransactionHistoryHeader: any;
-  characterTransactionHistoryData: any;
+  characterTransactionHistoryData: CharacterTransactionHistoryData[];
   characterTransactionHistoryHeader: any;
   historyCounter: number;
 }
@@ -1341,15 +1341,3 @@ export default Vue.extend({
 }
 
 </style>
-
-function getCharacterName(charId: string): String {
-  throw new Error('Function not implemented.');
-}
-
-function getCharacterName(charId: string): String {
-  throw new Error('Function not implemented.');
-}
-
-function getCharacterName(charId: string): String {
-  throw new Error('Function not implemented.');
-}
