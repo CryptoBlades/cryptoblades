@@ -1042,7 +1042,7 @@ export default Vue.extend({
     },
 
     calculatedBuyerCost(listedPrice: number): string {
-      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(2);
+      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(8).replace(/(\.0+|0+)$/, '');
     },
 
     maxPrecisionSkill(listedPrice: string): string {
