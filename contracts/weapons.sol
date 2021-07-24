@@ -42,6 +42,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function migrateTo_951a020() public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        // Apparently ERC165 interfaces cannot be removed in this version of the OpenZeppelin library.
+        // But if we remove the registration, then while local deployments would not register the interface ID,
+        // existing deployments on both testnet and mainnet would still be registered to handle it.
+        // That sort of inconsistency is a good way to attract bugs that only happens on some environments.
+        // Hence, we keep registering the interface despite not actually implementing the interface.
+        _registerInterface(0xe62e6974); // TransferCooldownableInterfaceId.interfaceId()
     }
 
     /*

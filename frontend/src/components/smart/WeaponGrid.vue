@@ -1,8 +1,5 @@
 <template>
   <div>
-    <span v-if="showLimit > 0 && nonIgnoredWeapons.length >= showLimit">
-      <h4>More than {{ showLimit }} results, try adjusting the filters</h4>
-    </span>
     <div class="filters row mt-2 pl-2">
       <div class="col-sm-6 col-md-4 stars-elem">
         <strong>Stars</strong>
