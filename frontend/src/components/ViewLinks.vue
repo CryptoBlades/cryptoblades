@@ -26,7 +26,7 @@
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'market' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagMarket">
+    <router-link :to="{ name: 'market', params: { category: 'browse' } }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagMarket">
       <li class="nav-item nav-top-links">
         <span class="gtag-link-others" tagname="market_screen">Market</span>
       </li>
