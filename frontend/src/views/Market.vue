@@ -378,12 +378,17 @@
                            Weapon Transaction History
                          </div>
                     </template>
-                    <div>
+                    <div v-if="historyCounter > 0">
                       <b-table class="transaction-history-text" :items="weaponTransactionHistoryData" :fields="weaponTransactionHistoryHeader"></b-table>
+                    </div>
+                    <div v-if="historyCounter === 0">
+                      <p>It's seems like there's nothing here.</p>
+                      <p>For tips on how to list NFTs, you may click this <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">link</a></strong></p>
                     </div>
                     <template #modal-footer>
                     <b-button class="mt-3" block @click="resetTransactionHistoryValues('weapons-sold-modal')">Ok</b-button>
                     </template>
+
 
                 </b-modal>
 
@@ -404,8 +409,12 @@
                            Character Transaction History
                          </div>
                     </template>
-                    <div>
+                    <div v-if="historyCounter > 0">
                       <b-table class="transaction-history-text" :items="characterTransactionHistoryData" :fields="characterTransactionHistoryHeader"></b-table>
+                    </div>
+                    <div v-if="historyCounter === 0">
+                      <p>It's seems like there's nothing here.</p>
+                      <p>For tips on how to list NFTs, you may click this <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">link</a></strong></p>
                     </div>
                     <template #modal-footer>
                     <b-button class="mt-3" block @click="resetTransactionHistoryValues('characters-sold-modal')">Ok</b-button>
@@ -497,6 +506,7 @@ interface Data {
   weaponTransactionHistoryHeader: any;
   characterTransactionHistoryData: any;
   characterTransactionHistoryHeader: any;
+  historyCounter: number;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -555,7 +565,8 @@ export default Vue.extend({
       weaponTransactionHistoryData: [],
       weaponTransactionHistoryHeader: [],
       characterTransactionHistoryData: [],
-      characterTransactionHistoryHeader: []
+      characterTransactionHistoryHeader: [],
+      historyCounter: 0
     } as Data;
   },
 
@@ -1035,18 +1046,15 @@ export default Vue.extend({
     },
 
     async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
-      sellerAddress = '0x34f5E70Fcb4923093487ac27556e6a1413d9D36D';
-
       const url = new URL('https://api.cryptoblades.io/static/market/transactions/' + sellerAddress);
 
       const weaponsData = await fetch(url.toString());
       const weapons = await weaponsData.json();
-      console.log(weapons.results);
       return weapons.results;
     },
 
     async showWeaponsSoldModal() {
-      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller('');
+      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
       this.weaponTransactionHistoryHeader = [
         {
           key: 'weaponId',
@@ -1083,9 +1091,10 @@ export default Vue.extend({
         }
       ];
       if(weaponHistory.length === 0){
-        alert('Nothing here');
+        this.historyCounter = 0;
       }
       else{
+        this.historyCounter = weaponHistory.length;
         for (let i = 0; i<weaponHistory.length; ++i){
           if(weaponHistory[i].type === 'weapon' && weaponHistory !== undefined){
             // eslint-disable-next-line prefer-const
@@ -1103,7 +1112,7 @@ export default Vue.extend({
       (this.$refs['weapons-sold-modal'] as BModal).show();
     },
     async showCharactersSoldModal() {
-      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller('');
+      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
       this.characterTransactionHistoryHeader = [
         {
           key: 'charId',
@@ -1122,9 +1131,10 @@ export default Vue.extend({
         }
       ];
       if(characterHistory.length === 0){
-        alert('Nothing here');
+        this.historyCounter = 0;
       }
       else{
+        this.historyCounter = characterHistory.length;
         for (let i = 0; i<characterHistory.length; ++i){
 
           if(characterHistory[i].type === 'character' && characterHistory !== undefined){
