@@ -72,7 +72,7 @@
                     <b-button
                       variant="link"
                       class="w-75"
-                      v-clipboard="getShareLink('weapon', $router, id)"
+                      v-clipboard="getShareLink('marketSearch', $router, id, 'weapon')"
                       v-clipboard:success="shareHandler"
                       v-clipboard:error="shareErrorHandler"
                     >
@@ -122,7 +122,7 @@
                     <b-button
                       variant="link"
                       class="w-75"
-                      v-clipboard="getShareLink('character', $router, id)"
+                      v-clipboard="getShareLink('marketSearch', $router, id, 'character')"
                       v-clipboard:success="shareHandler"
                       v-clipboard:error="shareErrorHandler"
                     >
@@ -498,7 +498,7 @@ export default Vue.extend({
   data() {
     return {
       activeType: 'weapon',
-      search: '',
+      search: 'asdsasd',
       searchResults: [],
       allSearchResults: [],
       searchResultsOwned: false,
@@ -516,6 +516,15 @@ export default Vue.extend({
       listingSellPrice: ''
     } as Data;
   },
+
+  mounted() {
+    this.handleRouteParams();
+    (this as any).$router.afterEach(() => {
+      this.handleRouteParams();
+    });
+    assert.ok(this.contracts.Weapons && this.contracts.Characters, 'Expected required contracts to be available');
+  },
+
 
   computed: {
     ...(mapState([
@@ -566,7 +575,6 @@ export default Vue.extend({
     },
 
     shareUrl(): string {
-      console.warn(`${window.location.origin}/#/market/we`);
       return 'ok';
     }
   },
@@ -590,16 +598,28 @@ export default Vue.extend({
     ]) as StoreMappedActions),
 
 
-    getShareLink (name: string, router: any, id: number) {
+    getShareLink (name: string, router: any, id: number, type: string) {
       const url = router.resolve({
         name,
-        params: { id }
+        params: { id, type, category: 'search' }
       });
       return `${window.location.origin}/${url.href}`;
     },
 
     changeTab (router: any, category: string): void {
       router.push({ name: 'market', params: { category } });
+    },
+
+    handleRouteParams () {
+      const route = (this as any).$route;
+      if (route.name === 'marketSearch' && route.params.type && route.params.id) {
+        this.search = route.params.id;
+        if (route.params.type === 'character') {
+          this.searchListingsByNftId('character');
+        } else if (route.params.type === 'weapon') {
+          this.searchListingsByNftId('weapon');
+        }
+      }
     },
 
     shareHandler () {
@@ -1129,11 +1149,7 @@ export default Vue.extend({
 
       return new BigNumber(val).toFixed(minDecimals);
     }
-  },
-
-  mounted() {
-    assert.ok(this.contracts.Weapons && this.contracts.Characters, 'Expected required contracts to be available');
-  },
+  }
 });
 </script>
 
