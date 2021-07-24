@@ -62,22 +62,23 @@
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
-                    <b-button
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
-                      @click="selectedNftId = id; purchaseNft();"
-                      variant="primary"
-                      class="w-75 gtag-link-others mt-3">
-                      {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
-                    </b-button>
-                    <b-button
-                      variant="link"
-                      class="w-75"
-                      v-clipboard="getShareLink('marketSearch', $router, id, 'weapon')"
-                      v-clipboard:success="shareHandler"
-                      v-clipboard:error="shareErrorHandler"
-                    >
-                      Share
-                    </b-button>
+                    <b-button-group class="w-75">
+                      <b-button
+                        :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                        @click="selectedNftId = id; purchaseNft();"
+                        variant="primary"
+                        class="tag-link-others">
+                        {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
+                      </b-button>
+                      <b-button
+                        variant="primary"
+                        v-clipboard="getShareLink('marketSearch', $router, id, 'weapon')"
+                        v-clipboard:success="shareHandler"
+                        v-clipboard:error="shareErrorHandler"
+                      >
+                        <b-icon-share class="share-icon" scale="0.75"/>
+                      </b-button>
+                    </b-button-group>
                   </div>
                 </template>
 
@@ -110,24 +111,25 @@
                     </span>
 
                     <span class="d-block text-center" v-else>Loading price...</span>
-                    <b-button
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
-                      @click="selectedNftId = id; canPurchase && purchaseNft();"
-                      variant="primary"
-                      v-bind:class="[!canPurchase ? 'disabled-button' : '']"
-                      class="gtag-link-others w-75" tagname="confirm_purchase">
-                      {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }} <b-icon-question-circle v-if="!canPurchase"
-                      v-tooltip.bottom="'You already have max amount of characters (4).'"/>
-                    </b-button>
-                    <b-button
-                      variant="link"
-                      class="w-75"
-                      v-clipboard="getShareLink('marketSearch', $router, id, 'character')"
-                      v-clipboard:success="shareHandler"
-                      v-clipboard:error="shareErrorHandler"
-                    >
-                      Share
-                    </b-button>
+                    <b-button-group class="w-75">
+                      <b-button
+                        :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                        @click="selectedNftId = id; canPurchase && purchaseNft();"
+                        variant="primary"
+                        v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                        class="gtag-link-others" tagname="confirm_purchase">
+                        {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }} <b-icon-question-circle v-if="!canPurchase"
+                        v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                      </b-button>
+                      <b-button
+                        variant="primary"
+                        v-clipboard="getShareLink('marketSearch', $router, id, 'character')"
+                        v-clipboard:success="shareHandler"
+                        v-clipboard:error="shareErrorHandler"
+                      >
+                        <b-icon-share class="share-icon" scale="0.75"/>
+                      </b-button>
+                    </b-button-group>
                   </div>
                 </template>
 
