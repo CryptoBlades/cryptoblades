@@ -500,7 +500,7 @@ export default Vue.extend({
   data() {
     return {
       activeType: 'weapon',
-      search: 'asdsasd',
+      search: '',
       searchResults: [],
       allSearchResults: [],
       searchResultsOwned: false,
