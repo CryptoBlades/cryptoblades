@@ -17,6 +17,7 @@
 
       <div class="trait">
         <span :class="weapon.element.toLowerCase() + '-icon'"></span>
+        <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
       </div>
 
       <div class="name">
@@ -88,7 +89,7 @@ function transformModel(model, y) {
 }
 
 export default {
-  props: ['weapon'],
+  props: ['weapon', 'favorite'],
 
   computed: {
     ...mapState(['maxDurability']),
@@ -477,8 +478,13 @@ export default {
   left: 10px;
 }
 
+.favorite-star {
+  position: absolute;
+  margin-left: 5px;
+}
+
 .id {
-  top: 10px;
+  top: 8px;
   right: 10px;
   font-style: italic;
 }

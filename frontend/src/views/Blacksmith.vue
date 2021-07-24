@@ -107,7 +107,7 @@
           </div>
         </b-modal>
 
-        <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" />
+        <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" :showReforgedWeapons="false" :showFavoriteWeapons="false" />
       </div>
     </div>
   </div>
