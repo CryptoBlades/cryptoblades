@@ -97,6 +97,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
 
     mapping(uint256 => uint256) public override lastTransferTimestamp;
 
+    uint256 private lastMintedBlock;
+    uint256 private firstMintedOfLastBlock;
+
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
 
@@ -122,6 +125,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         return success ? secondsLeft : 0;
     }
 
+    modifier noFreshLookup(uint256 id) {
+        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
+        _;
+    }
+
     function getStats(uint256 id) internal view
         returns (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level) {
 
@@ -139,7 +147,17 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         _pommel = getRandomCosmetic(wc.seed, 4, 24);
     }
 
-    function get(uint256 id) public view
+    function get(uint256 id) public view noFreshLookup(id)
+        returns (
+            uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,
+            uint8 _blade, uint8 _crossguard, uint8 _grip, uint8 _pommel,
+            uint24 _burnPoints, // burn points.. got stack limits so i put them together
+            uint24 _bonusPower // bonus power
+    ) {
+        return _get(id);
+    }
+
+    function _get(uint256 id) internal view
         returns (
             uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,
             uint8 _blade, uint8 _crossguard, uint8 _grip, uint8 _pommel,
@@ -201,6 +219,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
     ) public restricted returns(uint256) {
 
         uint256 tokenID = tokens.length;
+
+        if(block.number != lastMintedBlock)
+            firstMintedOfLastBlock = tokenID;
+        lastMintedBlock = block.number;
+
         tokens.push(Weapon(properties, stat1, stat2, stat3, 0));
         cosmetics.push(WeaponCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);
@@ -270,11 +293,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         return uint8(stars)-1;
     }
 
-    function getProperties(uint256 id) public view returns (uint16) {
+    function getProperties(uint256 id) public view noFreshLookup(id) returns (uint16) {
         return tokens[id].properties;
     }
 
-    function getStars(uint256 id) public view returns (uint8) {
+    function getStars(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return getStarsFromProperties(getProperties(id));
     }
 
@@ -282,7 +305,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         return uint8(properties & 0x7); // first two bits for stars
     }
 
-    function getTrait(uint256 id) public view returns (uint8) {
+    function getTrait(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return getTraitFromProperties(getProperties(id));
     }
 
@@ -290,7 +313,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         return uint8((properties >> 3) & 0x3); // two bits after star bits (3)
     }
 
-    function getStatPattern(uint256 id) public view returns (uint8) {
+    function getStatPattern(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return getStatPatternFromProperties(getProperties(id));
     }
 
@@ -310,23 +333,23 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         return uint8(SafeMath.div(statPattern, 25) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
-    function getLevel(uint256 id) public view returns (uint8) {
+    function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return tokens[id].level;
     }
 
-    function getStat1(uint256 id) public view returns (uint16) {
+    function getStat1(uint256 id) public view noFreshLookup(id) returns (uint16) {
         return tokens[id].stat1;
     }
 
-    function getStat2(uint256 id) public view returns (uint16) {
+    function getStat2(uint256 id) public view noFreshLookup(id) returns (uint16) {
         return tokens[id].stat2;
     }
 
-    function getStat3(uint256 id) public view returns (uint16) {
+    function getStat3(uint256 id) public view noFreshLookup(id) returns (uint16) {
         return tokens[id].stat3;
     }
 
-    function getPowerMultiplier(uint256 id) public view returns (int128) {
+    function getPowerMultiplier(uint256 id) public view noFreshLookup(id) returns (int128) {
         // returns a 64.64 fixed point number for power multiplier
         // this function does not account for traits
         // it is used to calculate base enemy powers for targeting
@@ -440,12 +463,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         }
     }
 
-    function getBonusPower(uint256 id) public view returns (uint24) {
+    function getBonusPower(uint256 id) public view noFreshLookup(id) returns (uint24) {
         Weapon storage wep = tokens[id];
         return getBonusPowerForFight(id, wep.level);
     }
 
-    function getBonusPowerForFight(uint256 id, uint8 level) public view returns (uint24) {
+    function getBonusPowerForFight(uint256 id, uint8 level) public view noFreshLookup(id) returns (uint24) {
         WeaponBurnPoints storage wbp = burnPoints[id];
         return uint24(lowStarBurnPowerPerPoint.mul(wbp.lowStarBurnPoints)
             .add(fourStarBurnPowerPerPoint.mul(wbp.fourStarBurnPoints))
@@ -454,7 +477,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         );
     }
 
-    function getFightData(uint256 id, uint8 charTrait) public view returns (int128, int128, uint24, uint8) {
+    function getFightData(uint256 id, uint8 charTrait) public view noFreshLookup(id) returns (int128, int128, uint24, uint8) {
         Weapon storage wep = tokens[id];
         return (
             oneFrac.add(powerMultPerPointBasic.mul(
