@@ -625,7 +625,7 @@ export default Vue.extend({
     },
 
     shareHandler () {
-      (this as any).$dialog.notify.success('Link was succesfully copied to clipbard');
+      (this as any).$dialog.notify.success('Link was succesfully copied to clipboard');
     },
 
     shareErrorHandler () {
