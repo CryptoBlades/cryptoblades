@@ -371,20 +371,47 @@
                   <b-icon-question-circle v-tooltip.bottom="'View weapons you have sold.'"/>
                 </b-button>
 
-                <b-modal ok-only class="centered-modal " ref="weapons-sold-modal">
+                <b-modal class="centered-modal " ref="weapons-sold-modal">
+
                     <template #modal-header>
                          <div class="transaction-history-header-text">
-                           Transaction History
+                           Weapon Transaction History
                          </div>
                     </template>
                     <div>
-                      <b-table class="transaction-history-text" :items="items"></b-table>
+                      <b-table class="transaction-history-text" :items="weaponTransactionHistoryData" :fields="weaponTransactionHistoryHeader"></b-table>
                     </div>
+                    <template #modal-footer>
+                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('weapons-sold-modal')">Ok</b-button>
+                    </template>
+
                 </b-modal>
 
               </div>
 
               <div class="col">
+                <b-button
+                  variant="primary"
+                   class="gtag-link-others" tagname="show_characters_sold"
+                  @click="showCharactersSoldModal()"> Characters Sold
+                  <b-icon-question-circle v-tooltip.bottom="'View characters you have sold.'"/>
+                </b-button>
+
+                <b-modal class="centered-modal " ref="characters-sold-modal">
+
+                    <template #modal-header>
+                         <div class="transaction-history-header-text">
+                           Character Transaction History
+                         </div>
+                    </template>
+                    <div>
+                      <b-table class="transaction-history-text" :items="characterTransactionHistoryData" :fields="characterTransactionHistoryHeader"></b-table>
+                    </div>
+                    <template #modal-footer>
+                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('characters-sold-modal')">Ok</b-button>
+                    </template>
+
+                </b-modal>
               </div>
 
               <div class="col">
@@ -438,6 +465,9 @@ import BigNumber from 'bignumber.js';
 import { BModal } from 'bootstrap-vue';
 import { traitNameToNumber } from '@/contract-models';
 import { market_blockchain as useBlockchain } from './../feature-flags';
+import { CharacterTransactionHistoryData, ICharacterHistory, IWeaponHistory, WeaponTransactionHistoryData } from '@/interfaces/History';
+import { getWeaponNameFromSeed } from '@/weapon-name';
+import { getCharacterNameFromSeed } from '@/character-name';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -455,13 +485,18 @@ interface Data {
   waitingMarketOutcome: boolean;
   nftPricesById: Record<string, string>;
   characterMarketTax: string;
-  weaponMarketTax: string ;  characterShowLimit: number;
+  weaponMarketTax: string ;
+  characterShowLimit: number;
   weaponShowLimit: number;
   allListingsAmount: number;
   currentPage: number;
   browseTabActive: boolean;
   listingSellPrice: string;
   priceChangeModal: boolean;
+  weaponTransactionHistoryData: any;
+  weaponTransactionHistoryHeader: any;
+  characterTransactionHistoryData: any;
+  characterTransactionHistoryHeader: any;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -516,7 +551,11 @@ export default Vue.extend({
       currentPage: 1,
       browseTabActive: true,
       listingSellPrice: '',
-      priceChangeModal: false
+      priceChangeModal: false,
+      weaponTransactionHistoryData: [],
+      weaponTransactionHistoryHeader: [],
+      characterTransactionHistoryData: [],
+      characterTransactionHistoryHeader: []
     } as Data;
   },
 
@@ -995,23 +1034,125 @@ export default Vue.extend({
       return weapons.idResults;
     },
 
+    async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
+      sellerAddress = '0x34f5E70Fcb4923093487ac27556e6a1413d9D36D';
+
+      const url = new URL('https://api.cryptoblades.io/static/market/transactions/' + sellerAddress);
+
+      const weaponsData = await fetch(url.toString());
+      const weapons = await weaponsData.json();
+      console.log(weapons.results);
+      return weapons.results;
+    },
+
+    async showWeaponsSoldModal() {
+      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller('');
+      this.weaponTransactionHistoryHeader = [
+        {
+          key: 'weaponId',
+          sortable: true,
+          label: 'Weapon ID'
+        },
+        {
+          key: 'weaponName',
+          sortable: true,
+          label: 'Name'
+        },
+        {
+          key: 'weaponPrice',
+          label: 'Price',
+          sortable: true,
+        }
+      ];
+
+      this.characterTransactionHistoryHeader = [
+        {
+          key: 'charId',
+          sortable: true,
+          label: 'Character ID'
+        },
+        {
+          key: 'charName',
+          sortable: true,
+          label: 'Name'
+        },
+        {
+          key: 'charPrice',
+          label: 'Price',
+          sortable: true,
+        }
+      ];
+      if(weaponHistory.length === 0){
+        alert('Nothing here');
+      }
+      else{
+        for (let i = 0; i<weaponHistory.length; ++i){
+          if(weaponHistory[i].type === 'weapon' && weaponHistory !== undefined){
+            // eslint-disable-next-line prefer-const
+            let items: WeaponTransactionHistoryData = {
+              weaponId: weaponHistory[i].weaponId,
+              weaponName: getWeaponNameFromSeed(parseInt(weaponHistory[i].weaponId,10),weaponHistory[i].weaponStars),
+              weaponPrice: weaponHistory[i].price
+            };
+
+            this.weaponTransactionHistoryData.push(items);
+          }
+        }
+      }
+
+      (this.$refs['weapons-sold-modal'] as BModal).show();
+    },
+    async showCharactersSoldModal() {
+      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller('');
+      this.characterTransactionHistoryHeader = [
+        {
+          key: 'charId',
+          sortable: true,
+          label: 'Character ID'
+        },
+        {
+          key: 'charName',
+          sortable: true,
+          label: 'Name'
+        },
+        {
+          key: 'charPrice',
+          label: 'Price',
+          sortable: true,
+        }
+      ];
+      if(characterHistory.length === 0){
+        alert('Nothing here');
+      }
+      else{
+        for (let i = 0; i<characterHistory.length; ++i){
+
+          if(characterHistory[i].type === 'character' && characterHistory !== undefined){
+            // eslint-disable-next-line prefer-const
+            let items: CharacterTransactionHistoryData = {
+              charId: characterHistory[i].charId,
+              charName: getCharacterNameFromSeed(parseInt(characterHistory[i].charId,10)),
+              charPrice: characterHistory[i].price
+            };
+
+            this.characterTransactionHistoryData.push(items);
+          }
+        }
+      }
+
+      (this.$refs['characters-sold-modal'] as BModal).show();
+    },
+
+    resetTransactionHistoryValues(modalName: string){
+      this.characterTransactionHistoryData = [];
+      this.weaponTransactionHistoryData = [];
+      (this.$refs[modalName] as BModal).hide();
+    },
+
     showListingSetupModal(changingPrice: boolean = false) {
       this.clearInputs();
       this.priceChangeModal = changingPrice;
       (this.$refs['listing-setup-modal'] as BModal).show();
-    },
-
-    showWeaponsSoldModal() {
-      this.items = [
-        { ID: '222212', Name:'Blazing Sunderer', Price:'6.5' },
-        { ID: '222213', Name:'Freezing Blob', Price:'10.49' },
-        { ID: '222214', Name:'Yeeting Monli', Price:'5.59' },
-        { ID: '222215', Name:'Ayt Gaw', Price:'2.19' }];
-      (this.$refs['weapons-sold-modal'] as BModal).show();
-    },
-
-    hideWeaponsSoldModal(){
-      (this.$refs['weapons-sold-modal'] as BModal).hide();
     },
 
     clearInputs() {
@@ -1144,7 +1285,7 @@ export default Vue.extend({
   justify-content: space-around;
 }
 
-.result-item {
+.result-weaponHistory {
   max-width: 12em;
 }
 
@@ -1190,3 +1331,15 @@ export default Vue.extend({
 }
 
 </style>
+
+function getCharacterName(charId: string): String {
+  throw new Error('Function not implemented.');
+}
+
+function getCharacterName(charId: string): String {
+  throw new Error('Function not implemented.');
+}
+
+function getCharacterName(charId: string): String {
+  throw new Error('Function not implemented.');
+}
