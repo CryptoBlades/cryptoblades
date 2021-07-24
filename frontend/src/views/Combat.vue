@@ -336,8 +336,8 @@ export default {
 
 .enemy-character {
   position: relative;
-  width: 14em;
-  height: 25em;
+  width: 16vw;
+  height: 28vw;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 115%;
@@ -356,8 +356,9 @@ export default {
                0px 9px 12px rgba(0,0,0,0.1);
 
 }
+
 .encounter img {
-    width: calc(100% - 60px);
+    width: 10vw;
     height: auto;
     margin: 0 auto;
     display: block;
@@ -435,10 +436,9 @@ div.encounter.text-center {
 .encounter {
   display : flex;
   justify-content: center;
-    padding-top: 20px;
-    border-radius: 15px;
-    max-width: 100%;
-    margin: 0 auto;
+  padding-top: 20px;
+  border-radius: 15px;
+  max-width: 25%;
 }
 
 .xp-gain, .encounter-power{
@@ -447,15 +447,19 @@ div.encounter.text-center {
 
 .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
   position: absolute;
-  font-size: x-large;
+  font-size: 2vw;
 }
 
 .encounter-element {
-  top: 25px;
+  top: 1.3vw;
 }
 
 .encounter-power {
-  bottom: 55px;
+  bottom: 3.5vw;
+}
+
+.xp-gain {
+  bottom: 1.25vw;
 }
 
 .victory-chance {
@@ -463,10 +467,6 @@ div.encounter.text-center {
   right: 0;
   text-align: center;
   text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
-}
-
-.xp-gain {
-  bottom: 20px;
 }
 
 /* Mobile Support Classes*/
@@ -495,12 +495,14 @@ div.encounter.text-center {
 .enemy-list {
   display: flex;
   flex-wrap: wrap;
-  padding-left: 30px;
-  padding-right: 30px;
+  padding-left: 1vw;
+  padding-right: 1vw;
 }
 
 .weapon-selection {
   border-right : 1px solid #9e8a57;
+  padding-left: 1vw;
+  padding-right: 1vw;
 }
 
 .weapon-header {
@@ -517,21 +519,84 @@ div.encounter.text-center {
 h1  {
   font-weight: 900 !important;
   text-align: center;
+  font-size: 3vw;
+  padding-top: 0px;
+}
+
+.encounter-button {
+  display: block;
+  margin: 0 auto;
+  height: 5em;
+  width: 13em;
+  position: relative;
+  top: 3vw;
+}
+
+.enemy-img {
+  position: relative;
+  top: -3vw;
+}
+
+@media (max-width: 1025px){
+  .enemy-img {
+    top: -40px;
+  }
+
+  .enemy-list {
+    flex-direction: column;
+  }
+
+  .enemy-character {
+      width: 16em;
+      height: 28em;
+  }
+
+  .encounter img {
+    width: 10em;
+  }
+
+  .encounter {
+    padding-top: 20px;
+    border-radius: 15px;
+    margin-top: 50px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .encounter-element {
+    top: 25px;
+  }
+
+  .encounter-power {
+    bottom: 55px;
+  }
+
+  .xp-gain {
+    bottom: 20px;
+  }
+
+  .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
+    position: absolute;
+    font-size: x-large;
+  }
+
+  .encounter-button {
+    top: 35px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    display: inline-block;
+  }
 }
 
 /* Needed to asjust image size, not just image column-size and other classes to accommodate that */
 @media all and (max-width:  767.98px) {
   .encounter img {
+    width: calc(100% - 60px);
   }
-}
-
-/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
-@media all and (max-width:  767.98px) {
   .combat-enemy-container {
     flex-direction: column;
-  }
-  .encounter {
-    margin-top: 50px;
   }
   .weapon-selection {
     border-right: none;
@@ -540,36 +605,16 @@ h1  {
     width : 100%;
   }
 }
-h1 {
-  font-size: 1.8rem;
-  display: inline-block;
-}
 .hint.has-tooltip {
   font-size: 1.8rem;
   display: inline-block;
   margin-left: 10px;
 }
-.enemy-character {
-    width: 16em;
-    height: 28em;
-  }
 .dark-bg-text {
   width: 100% !important;
 }
 .content {
   padding: 0 !important;
-}
-.encounter-button {
-  display: block;
-  margin: 0 auto;
-  height: 5em;
-  width: 13em;
-  position: relative;
-  top: 35px;
-}
-.encounter {
-    padding-top: 20px;
-    border-radius: 15px;
 }
 
 .encounter-container {
@@ -595,10 +640,7 @@ h1 {
 .weapon-icon-wrapper {
   margin: 0 auto;
 }
-.enemy-img {
-  position: relative;
-  top: -40px;
-}
+
 @media (max-width: 575.98px) {
   .show-reforged {
     width: 100%;
