@@ -46,6 +46,7 @@
                 :weaponIds="allSearchResults"
                 :showLimit="weaponShowLimit"
                 :showReforgedToggle="false"
+                :showFavoriteToggle="false"
                 :canFavorite="false"
                 :isMarket="true"
                 v-model="selectedNftId">
@@ -223,6 +224,7 @@
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :showReforgedToggle="false"
+                :showFavoriteToggle="false"
                 :canFavorite="false"
                 :weaponIds="searchResults"
                 :isMarket="true"
@@ -430,7 +432,8 @@
             <div class="sell-grid" v-if="activeType === 'weapon'">
               <weapon-grid
                 v-model="selectedNftId"
-                :showReforgedToggle="false"
+                :showReforgedWeaponsDefVal="false"
+                :showFavoriteWeaponsDefVal="false"
                 :canFavorite="false"
               />
             </div>
