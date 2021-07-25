@@ -73,6 +73,9 @@
               <div class="enemy-list">
                 <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 encounter" v-for="(e, i) in targets" :key="i">
                   <div class="encounter-container">
+                    <div style="text-align: center">
+                      {{ (getWinChanceNumber(e.power, e.trait) * 100).toFixed(2) }} %
+                    </div>
 
                   <div class="enemy-character">
                     <div class="encounter-element">
@@ -254,6 +257,50 @@ export default {
       if (rollingTotal <= 0.5) return 'Possible';
       if (rollingTotal <= 0.7) return 'Likely';
       return 'Very Likely';
+    },
+    getWinChanceNumber(enemyPower, enemyElement) {
+      const characterPower = CharacterPower(this.currentCharacter.level);
+      const playerElement = parseInt(this.currentCharacter.trait, 10);
+      const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id === this.selectedWeaponId);
+      this.selectedWeapon = selectedWeapon;
+      const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
+      const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
+      const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
+      const totalMultiplier = 1 + (0.075 * (weaponElement === playerElement ? 1 : 0)) + (0.075*this.getElementAdvantage(playerElement, enemyElement));
+      const playerMin = totalPower * totalMultiplier * 0.9;
+      const playerMax = totalPower * totalMultiplier * 1.1;
+      const playerRange = playerMax - playerMin;
+      const enemyMin = enemyPower * 0.9;
+      const enemyMax = enemyPower * 1.1;
+      const enemyRange = enemyMax - enemyMin;
+      let rollingTotal = 0;
+      // shortcut: if it is impossible for one side to win, just say so
+      if (playerMin > enemyMax) return 1;
+      if (playerMax < enemyMin) return 0;
+
+      // case 1: player power is higher than enemy power
+      if (playerMin >= enemyMin) {
+        // case 1: enemy roll is lower than player's minimum
+        rollingTotal = (playerMin - enemyMin) / enemyRange;
+        // case 2: 1 is not true, and player roll is higher than enemy maximum
+        rollingTotal += (1 - rollingTotal) * ((playerMax - enemyMax) / playerRange);
+        // case 3: 1 and 2 are not true, both values are in the overlap range. Since values are basically continuous, we assume 50%
+        rollingTotal += (1 - rollingTotal) * 0.5;
+      } // otherwise, enemy power is higher
+      else {
+        // case 1: player rolls below enemy minimum
+        rollingTotal = (enemyMin - playerMin) / playerRange;
+        // case 2: enemy rolls above player maximum
+        rollingTotal += (1 - rollingTotal) * ((enemyMax - playerMax) / enemyRange);
+        // case 3: 1 and 2 are not true, both values are in the overlap range
+        rollingTotal += (1 - rollingTotal) * 0.5;
+        //since this is chance the enemy wins, we negate it
+        rollingTotal = 1 - rollingTotal;
+      }
+      // if (rollingTotal <= 0.3) return 'Unlikely';
+      // if (rollingTotal <= 0.5) return 'Possible';
+      // if (rollingTotal <= 0.7) return 'Likely';
+      return rollingTotal;
     },
     getElementAdvantage(playerElement, enemyElement) {
       if ((playerElement + 1) % 4 === enemyElement) return 1;
