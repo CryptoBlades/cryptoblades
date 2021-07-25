@@ -7,6 +7,7 @@ import Stake from './views/Stake.vue';
 import SelectStakeType from './views/SelectStakeType.vue';
 import Raid from './views/Raid.vue';
 import Market from './views/Market.vue';
+import Seller from './views/Seller.vue';
 import Leaderboard from './views/Leaderboard.vue';
 import Portal from './views/Portal.vue';
 import Options from './views/Options.vue';
@@ -33,6 +34,7 @@ function createRouter() {
   if(featureFlagMarket) {
     marketRoutes = [
       { path: '/market/:category/:type/:id', name: 'marketSearch', component: Market },
+      { path: '/market/seller/:walletId', name: 'seller', component: Seller },
       { path: '/market/:category', name: 'market', component: Market, props: (route) => ({ category: route.params.category || '' })}
     ];
   }

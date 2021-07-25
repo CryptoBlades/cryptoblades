@@ -38,7 +38,7 @@
                 v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
                   searchAllCharacterListings(currentPage - 1)"
               ></b-pagination>
-              
+
               <weapon-grid
                 v-on:weapon-filters-changed="searchAllWeaponListings(0)"
                 v-if="activeType === 'weapon'"
