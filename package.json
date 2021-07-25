@@ -30,6 +30,7 @@
     "yargs": "^17.0.1"
   },
   "scripts": {
+    "build:cloudflare": "npm install && npm run build && cd frontend && cp .env.mainnet .env && npm install && npm run build",
     "postinstall": "npm run contract:prepare && lerna exec -- npm install",
     "lint": "lerna exec -- npm run lint",
     "build:frontend": "cd frontend && npm run build",
