@@ -1,77 +1,85 @@
 <template>
   <div class="body main-font">
-    Seller's page
-    Seller's NFTs:
-    <ul>
-      <li v-for="(item, index) in items" :key="index">{{ item}}</li>
-    </ul>
+    <div v-if="loading">
+      Loading data...
+    </div>
+    <div v-else>
+      Seller's page
+      Seller's NFTs:
+      <!-- <ul>
+        <li v-for="(item, index) in items" :key="index">{{ item}}</li>
+      </ul> -->
+      <weapon-grid
+        :weaponIds="items"
+        :showGivenWeaponIds="true">
+      </weapon-grid>
+    </div>
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import Vue from 'vue';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { Accessors } from 'vue/types/options';
-import { Weapons, Characters } from '../../../build/abi-interfaces';
-import { Contract, Contracts, IState } from '../interfaces';
-
-interface StoreMappedGetters {
-  contracts: Contracts;
-}
-
-interface StoreMappedActions {
-  fetchMarketNftIdsBySeller(payload: { nftContractAddr: string, sellerAddr: string }): Promise<string[]>;
-}
-
-interface Data {
-  seller: string,
-  items: string[]
-}
-
-type StoreMappedState = Pick<IState, 'weapons' | 'characters'>;
+import WeaponGrid from '../components/smart/WeaponGrid.vue';
+// import { market_blockchain as useBlockchain } from './../feature-flags'; TODO
 
 export default Vue.extend({
-  components: {},
-  async mounted () {
-    const route = (this as any).$route;
-    this.seller = route.params.walletId;
-    await this.searchListingsBySellerThroughChain();
-  },
+  components: { WeaponGrid },
   data() {
     return {
       seller: '',
-      items: []
-    } as Data;
+      type: 'weapons',
+      items: [],
+      loading: true
+    };
+  },
+
+  mounted () {
+    this.fetchData();
   },
 
   computed: {
-    Weapons(): Contract<Weapons> {
-      return this.contracts.Weapons!;
+    Weapons() {
+      return this.contracts.Weapons;
     },
-    Characters(): Contract<Characters> {
-      return this.contracts.Characters!;
+    Characters() {
+      return this.contracts.Characters;
     },
     ...(mapState([
       'defaultAccount', 'weapons', 'characters', 'ownedCharacterIds', 'ownedWeaponIds'
-    ]) as Accessors<StoreMappedState>),
+    ])),
 
     ...(mapGetters([
       'contracts', 'ownCharacters'
-    ]) as Accessors<StoreMappedGetters>),
+    ])),
+  },
+
+  watch:{
+    $route: {
+      async handler () {
+        this.fetchData();
+      }
+    }
   },
 
   methods: {
-    ...(mapActions([
-      'fetchMarketNftIdsBySeller'
-    ]) as StoreMappedActions),
+    ...(mapActions(['fetchMarketNftIdsBySeller' ])),
 
-    async searchListingsBySellerThroughChain(){
-      this.items = await this.fetchMarketNftIdsBySeller({
-        nftContractAddr: this.Weapons.options.address, // || this.Characters.options.address
-        sellerAddr: this.seller
-      });
+    async fetchData () {
+      const route = this.$route;
+      const sellerAddress = route.params.sellerAddress;
+      this.items = await this.searchListingsBySellerThroughChain(sellerAddress);
+      console.warn(this.items);
+      this.loading = false;
     },
 
+    async searchListingsBySellerThroughChain(sellerAddr){
+      const nftContractAddr = this.type === 'weapons' ? this.Weapons.options.address : this.Characters.options.address;
+      return await this.fetchMarketNftIdsBySeller({
+        nftContractAddr,
+        sellerAddr
+      });
+    }
   }
 });
 </script>

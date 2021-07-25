@@ -34,7 +34,7 @@ function createRouter() {
   if(featureFlagMarket) {
     marketRoutes = [
       { path: '/market/:category/:type/:id', name: 'marketSearch', component: Market },
-      { path: '/market/seller/:walletId', name: 'seller', component: Seller },
+      { path: '/market/seller/:sellerAddress', name: 'seller', component: Seller },
       { path: '/market/:category', name: 'market', component: Market, props: (route) => ({ category: route.params.category || '' })}
     ];
   }
