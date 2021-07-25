@@ -50,7 +50,8 @@
         :class="{ selected: highlight !== null && weapon.id === highlight }"
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
-        @click="getWeaponDurability(weapon.id) > 0 && onWeaponClick(weapon.id)"
+        @click=
+        "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
         <div class="weapon-icon-wrapper">
@@ -161,7 +162,11 @@ export default Vue.extend({
     isMarket: {
       type: Boolean,
       default: false
-    }
+    },
+    checkForDurability: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data() {
