@@ -265,9 +265,11 @@ export function createStore(web3: Web3) {
       timeUntilCharacterHasMaxStamina(state, getters) {
         return (id: number) => {
           const currentStamina = getters.getCharacterStamina(id);
-          if (!currentStamina) {
+
+          if (!currentStamina && currentStamina !== 0) {
             return '';
           }
+
           const date = new Date();
 
           if (state.maxStamina !== currentStamina) {
