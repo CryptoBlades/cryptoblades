@@ -45,7 +45,7 @@ contract StakingRewardsUpgradeable is
     mapping(address => uint256) private _stakeTimestamp;
 
     // used only by the SKILL-for-SKILL staking contract
-    CryptoBlades public __game;
+    CryptoBlades internal __game;
 
     uint256 public override minimumStakeAmount;
 
