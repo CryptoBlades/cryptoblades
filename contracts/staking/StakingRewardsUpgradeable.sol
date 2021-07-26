@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
+import "../cryptoblades.sol";
+
 // Inheritance
 import "./interfaces/IStakingRewards.sol";
 import "./RewardsDistributionRecipientUpgradeable.sol";
@@ -31,7 +33,6 @@ contract StakingRewardsUpgradeable is
     uint256 public periodFinish;
     uint256 public override rewardRate;
     uint256 public override rewardsDuration;
-    uint256 public override minimumStakeAmount;
     uint256 public override minimumStakeTime;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
@@ -43,6 +44,11 @@ contract StakingRewardsUpgradeable is
     mapping(address => uint256) private _balances;
     mapping(address => uint256) private _stakeTimestamp;
 
+    // used only by the SKILL-for-SKILL staking contract
+    CryptoBlades public __game;
+
+    uint256 public override minimumStakeAmount;
+
     /* ========== CONSTRUCTOR ========== */
 
     function initialize(
@@ -50,7 +56,6 @@ contract StakingRewardsUpgradeable is
         address _rewardsDistribution,
         address _rewardsToken,
         address _stakingToken,
-        uint256 _minimumStakeAmount,
         uint256 _minimumStakeTime
     ) public virtual initializer {
         __Context_init();
@@ -66,12 +71,15 @@ contract StakingRewardsUpgradeable is
         rewardsToken = IERC20(_rewardsToken);
         stakingToken = IERC20(_stakingToken);
         rewardsDistribution = _rewardsDistribution;
-        minimumStakeAmount = _minimumStakeAmount;
         minimumStakeTime = _minimumStakeTime;
 
         periodFinish = 0;
         rewardRate = 0;
         rewardsDuration = 180 days;
+    }
+
+    function migrateTo_X(uint256 _minimumStakeAmount) external onlyOwner {
+        minimumStakeAmount = _minimumStakeAmount;
     }
 
     /* ========== VIEWS ========== */
@@ -368,5 +376,6 @@ contract StakingRewardsUpgradeable is
     event RewardPaid(address indexed user, uint256 reward);
     event RewardsDurationUpdated(uint256 newDuration);
     event MinimumStakeTimeUpdated(uint256 newMinimumStakeTime);
+    event MinimumStakeAmountUpdated(uint256 newMinimumStakeAmount);
     event Recovered(address token, uint256 amount);
 }

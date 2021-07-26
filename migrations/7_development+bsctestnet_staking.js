@@ -13,13 +13,8 @@ module.exports = async function (deployer, network, accounts) {
     const expToken = await ExperimentToken.deployed();
     const expToken2 = await ExperimentToken2.deployed();
 
-    // 0.001 minimumStakeAmount
-    await deployProxy(SkillStakingRewardsUpgradeable, [accounts[0], accounts[0], token.address, token.address, 1000000000000000, 60], { deployer });
-
-    // 0.001 minimumStakeAmount
-    await deployProxy(LPStakingRewardsUpgradeable, [accounts[0], accounts[0], token.address, expToken.address, 1000000000000000, 0], { deployer });
-
-    // 0.001 minimumStakeAmount
-    await deployProxy(LP2StakingRewardsUpgradeable, [accounts[0], accounts[0], token.address, expToken2.address, 1000000000000000, 0], { deployer });
+    await deployProxy(SkillStakingRewardsUpgradeable, [accounts[0], accounts[0], token.address, token.address, 60], { deployer });
+    await deployProxy(LPStakingRewardsUpgradeable, [accounts[0], accounts[0], token.address, expToken.address, 0], { deployer });
+    await deployProxy(LP2StakingRewardsUpgradeable, [accounts[0], accounts[0], token.address, expToken2.address, 0], { deployer });
   }
 };

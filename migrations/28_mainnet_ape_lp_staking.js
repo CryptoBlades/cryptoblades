@@ -9,8 +9,7 @@ module.exports = async function (deployer, network, accounts) {
     const skillTokenAddress = '0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab';
     const lpTokenAddress = '0x0dEB588c1EC6f1D9f348126D401f05c4c7B7a80c';
 
-    // 0.001 minimumStakeAmount
-    await deployProxy(LPStakingRewardsUpgradeable, [accounts[0], rewardDistributorAddress, skillTokenAddress, lpTokenAddress, 1000000000000000, 0], { deployer });
+    await deployProxy(LPStakingRewardsUpgradeable, [accounts[0], rewardDistributorAddress, skillTokenAddress, lpTokenAddress, 0], { deployer });
   }
 };
 
