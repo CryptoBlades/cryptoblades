@@ -247,8 +247,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         // That being said these rates stink if the oracle is 3x lower than real value.
         uint256 seed = RandomUtil.combineSeeds(raidSeed[claimRaidIndex], uint256(msg.sender));
 
-        uint256 commonRoll = RandomUtil.randomSeededMinMax(0, comparedToAverage.mulu(100), seed);
-        if(commonRoll > 90) { // 90% base chance
+        uint256 commonRoll = RandomUtil.randomSeededMinMax(1, comparedToAverage.mulu(100), seed);
+        if(commonRoll > 10) { // 90% base chance
             uint mod = seed % 6;
             if(mod == 0) { // 1 star junk, 1 out of 5 (20%)
                 uint tokenID = 0;
@@ -268,7 +268,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             }
         }
 
-        uint256 rareRoll = RandomUtil.randomSeededMinMax(0, comparedToAverage.mulu(1000), seed + 1);
+        uint256 rareRoll = RandomUtil.randomSeededMinMax(1, 950 + comparedToAverage.mulu(50), seed + 1);
         if(rareRoll > 950) { // 5% base chance
             uint mod = (seed / 10) % 14;
             if(mod == 0) { // key box, 1 out of 13 (7.69%)
