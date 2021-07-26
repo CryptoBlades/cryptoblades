@@ -653,7 +653,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 _tokenRewards = tokenRewards[msg.sender];
         tokenRewards[msg.sender] = 0;
 
-        _giveInGameOnlyFundsFromContractBalance(msg.sender, _tokenRewards / 10);
+        _giveInGameOnlyFundsFromContractBalance(msg.sender, _tokenRewards / 2);
 
         skillToken.approve(address(stakeFromGameImpl), _tokenRewards);
         stakeFromGameImpl.stakeFromGame(msg.sender, _tokenRewards);
