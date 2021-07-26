@@ -78,7 +78,7 @@ contract StakingRewardsUpgradeable is
         rewardsDuration = 180 days;
     }
 
-    function migrateTo_X(uint256 _minimumStakeAmount) external onlyOwner {
+    function migrateTo_8cb6e70(uint256 _minimumStakeAmount) external onlyOwner {
         minimumStakeAmount = _minimumStakeAmount;
     }
 
