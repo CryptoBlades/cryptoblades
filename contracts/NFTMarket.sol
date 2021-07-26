@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
@@ -25,6 +26,7 @@ contract NFTMarket is
     using ABDKMath64x64 for int128; // kroge beware
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.AddressSet;
+    using SafeERC20 for IERC20;
 
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
 
@@ -488,8 +490,8 @@ contract NFTMarket is
         listedTokenIDs[address(_tokenAddress)].remove(_id);
         _updateListedTokenTypes(_tokenAddress);
 
-        skillToken.transferFrom(msg.sender, taxRecipient, taxAmount);
-        skillToken.transferFrom(
+        skillToken.safeTransferFrom(msg.sender, taxRecipient, taxAmount);
+        skillToken.safeTransferFrom(
             msg.sender,
             listing.seller,
             finalPrice.sub(taxAmount)
@@ -566,7 +568,7 @@ contract NFTMarket is
     }
 
     function recoverSkill(uint256 amount) public restricted {
-        skillToken.transfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
+        skillToken.safeTransfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
     }
 
     function onERC721Received(
