@@ -66,7 +66,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         promos = _promos;
     }
 
-    function migrateTo_X() external {
+    function migrateTo_b627f23() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         characterLimit = 4;
