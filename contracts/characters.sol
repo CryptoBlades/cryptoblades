@@ -95,6 +95,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     Promos public promos;
 
+    uint256 private lastMintedBlock;
+    uint256 private firstMintedOfLastBlock;
+    
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
 
@@ -103,6 +106,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        _;
+    }
+
+    modifier noFreshLookup(uint256 id) {
+        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
         _;
     }
 
@@ -119,7 +127,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return success ? secondsLeft : 0;
     }
 
-    function get(uint256 id) public view returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
+    function get(uint256 id) public view noFreshLookup(id) returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
         Character memory c = tokens[id];
         CharacterCosmetics memory cc = cosmetics[id];
         return (c.xp, c.level, c.trait, c.staminaTimestamp,
@@ -139,6 +147,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function mint(address minter, uint256 seed) public restricted {
         uint256 tokenID = tokens.length;
 
+        if(block.number != lastMintedBlock)
+            firstMintedOfLastBlock = tokenID;
+        lastMintedBlock = block.number;
+
         uint16 xp = 0;
         uint8 level = 0; // 1
         uint8 trait = uint8(RandomUtil.randomSeededMinMax(0,3,seed));
@@ -150,7 +162,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         emit NewCharacter(tokenID, minter);
     }
 
-    function getLevel(uint256 id) public view returns (uint8) {
+    function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return tokens[id].level; // this is used by dataminers and it benefits us
     }
 
@@ -158,7 +170,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint16(experienceTable[currentLevel]); // this is helpful to users as the array is private
     }
 
-    function getPower(uint256 id) public view returns (uint24) {
+    function getPower(uint256 id) public view noFreshLookup(id) returns (uint24) {
         return getPowerAtLevel(tokens[id].level);
     }
 
@@ -177,11 +189,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         );
     }
 
-    function getTrait(uint256 id) public view returns (uint8) {
+    function getTrait(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return tokens[id].trait;
     }
 
-    function getXp(uint256 id) public view returns (uint32) {
+    function getXp(uint256 id) public view noFreshLookup(id) returns (uint32) {
         return tokens[id].xp;
     }
 
@@ -203,7 +215,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
     }
 
-    function getStaminaTimestamp(uint256 id) public view returns (uint64) {
+    function getStaminaTimestamp(uint256 id) public view noFreshLookup(id) returns (uint64) {
         return tokens[id].staminaTimestamp;
     }
 
@@ -211,7 +223,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         tokens[id].staminaTimestamp = timestamp;
     }
 
-    function getStaminaPoints(uint256 id) public view returns (uint8) {
+    function getStaminaPoints(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return getStaminaPointsFromTimestamp(tokens[id].staminaTimestamp);
     }
 
@@ -226,7 +238,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint8(points);
     }
 
-    function isStaminaFull(uint256 id) public view returns (bool) {
+    function isStaminaFull(uint256 id) public view noFreshLookup(id) returns (bool) {
         return getStaminaPoints(id) >= maxStamina;
     }
 

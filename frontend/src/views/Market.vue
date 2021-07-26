@@ -46,6 +46,7 @@
                 :weaponIds="allSearchResults"
                 :showLimit="weaponShowLimit"
                 :showReforgedToggle="false"
+                :showFavoriteToggle="false"
                 :canFavorite="false"
                 :isMarket="true"
                 v-model="selectedNftId">
@@ -63,7 +64,7 @@
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; purchaseNft();"
                       variant="primary"
                       class="gtag-link-others">
@@ -102,7 +103,7 @@
 
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; canPurchase && purchaseNft();"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
@@ -206,7 +207,7 @@
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
-                  @click="updateNftListingPrice()"  class="gtag-link-others" tagname="change_price">Change Price</b-button>
+                  @click="showListingSetupModal(true)" class="gtag-link-others" tagname="change_price">Change Price</b-button>
               </div>
 
               <div class="col">
@@ -223,6 +224,7 @@
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :showReforgedToggle="false"
+                :showFavoriteToggle="false"
                 :canFavorite="false"
                 :weaponIds="searchResults"
                 :isMarket="true"
@@ -242,7 +244,7 @@
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
                         v-if="id !== null && !searchResultsOwned"
-                        :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                        :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                         @click="selectedNftId = id; purchaseNft();"
                         variant="primary"
                         class="gtag-link-others">
@@ -279,7 +281,7 @@
                     <span class="d-block text-center" v-else>Loading price...</span>
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
-                      :disabled="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; canPurchase && purchaseNft();"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
@@ -340,6 +342,7 @@
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
                   @click="showListingSetupModal()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
                   v-tooltip.bottom="weaponMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
+
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
@@ -349,9 +352,9 @@
                   v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
 
                 <b-modal class="centered-modal" ref="listing-setup-modal"
-                  @ok="addListingForNft">
+                  @ok="!priceChangeModal ? addListingForNft() : updateNftListingPrice()">
                   <template #modal-title>
-                    Sell {{activeType}}
+                    {{!priceChangeModal ? `Sell ${activeType}` : `Change ${activeType} price`}}
                   </template>
                   <b-form-input type="number" :max="10000"
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
@@ -363,9 +366,63 @@
               </div>
 
               <div class="col">
+                <b-button
+                  variant="primary"
+                   class="gtag-link-others" tagname="show_weapons_sold"
+                  @click="showWeaponsSoldModal()"> Weapons Sold
+                  <b-icon-question-circle v-tooltip.bottom="'View weapons you have sold.'"/>
+                </b-button>
+
+                <b-modal class="centered-modal " ref="weapons-sold-modal">
+
+                    <template #modal-header>
+                         <div class="transaction-history-header-text">
+                           Weapon Transaction History
+                         </div>
+                    </template>
+                    <div v-if="historyCounter > 0">
+                      <b-table class="transaction-history-text" :items="weaponTransactionHistoryData" :fields="weaponTransactionHistoryHeader"></b-table>
+                    </div>
+                    <div v-if="historyCounter === 0">
+                      <p>It's seems like there's nothing here.</p>
+                      <p>For tips on how to list NFTs, you may click this <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">link</a></strong></p>
+                    </div>
+                    <template #modal-footer>
+                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('weapons-sold-modal')">Ok</b-button>
+                    </template>
+
+
+                </b-modal>
+
               </div>
 
               <div class="col">
+                <b-button
+                  variant="primary"
+                   class="gtag-link-others" tagname="show_characters_sold"
+                  @click="showCharactersSoldModal()"> Characters Sold
+                  <b-icon-question-circle v-tooltip.bottom="'View characters you have sold.'"/>
+                </b-button>
+
+                <b-modal class="centered-modal " ref="characters-sold-modal">
+
+                    <template #modal-header>
+                         <div class="transaction-history-header-text">
+                           Character Transaction History
+                         </div>
+                    </template>
+                    <div v-if="historyCounter > 0">
+                      <b-table class="transaction-history-text" :items="characterTransactionHistoryData" :fields="characterTransactionHistoryHeader"></b-table>
+                    </div>
+                    <div v-if="historyCounter === 0">
+                      <p>It's seems like there's nothing here.</p>
+                      <p>For tips on how to list NFTs, you may click this <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">link</a></strong></p>
+                    </div>
+                    <template #modal-footer>
+                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('characters-sold-modal')">Ok</b-button>
+                    </template>
+
+                </b-modal>
               </div>
 
               <div class="col">
@@ -375,7 +432,8 @@
             <div class="sell-grid" v-if="activeType === 'weapon'">
               <weapon-grid
                 v-model="selectedNftId"
-                :showReforgedToggle="false"
+                :showReforgedWeaponsDefVal="false"
+                :showFavoriteWeaponsDefVal="false"
                 :canFavorite="false"
               />
             </div>
@@ -419,6 +477,9 @@ import BigNumber from 'bignumber.js';
 import { BModal } from 'bootstrap-vue';
 import { traitNameToNumber } from '@/contract-models';
 import { market_blockchain as useBlockchain } from './../feature-flags';
+import { CharacterTransactionHistoryData, ICharacterHistory, IWeaponHistory, WeaponTransactionHistoryData } from '@/interfaces/History';
+import { getWeaponNameFromSeed } from '@/weapon-name';
+import { getCharacterNameFromSeed } from '@/character-name';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -436,12 +497,19 @@ interface Data {
   waitingMarketOutcome: boolean;
   nftPricesById: Record<string, string>;
   characterMarketTax: string;
-  weaponMarketTax: string ;  characterShowLimit: number;
+  weaponMarketTax: string ;
+  characterShowLimit: number;
   weaponShowLimit: number;
   allListingsAmount: number;
   currentPage: number;
   browseTabActive: boolean;
   listingSellPrice: string;
+  priceChangeModal: boolean;
+  weaponTransactionHistoryData: WeaponTransactionHistoryData[];
+  weaponTransactionHistoryHeader: any;
+  characterTransactionHistoryData: CharacterTransactionHistoryData[];
+  characterTransactionHistoryHeader: any;
+  historyCounter: number;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -495,7 +563,13 @@ export default Vue.extend({
       allListingsAmount: 0,
       currentPage: 1,
       browseTabActive: true,
-      listingSellPrice: ''
+      listingSellPrice: '',
+      priceChangeModal: false,
+      weaponTransactionHistoryData: [],
+      weaponTransactionHistoryHeader: [],
+      characterTransactionHistoryData: [],
+      characterTransactionHistoryHeader: [],
+      historyCounter: 0
     } as Data;
   },
 
@@ -581,6 +655,7 @@ export default Vue.extend({
       this.listingSellPrice = '';
     },
 
+
     async loadMarketTaxes() {
       if(!this.characterMarketTax) {
         const tax = await this.getMarketTax(this.Characters.options.address) as string;
@@ -637,7 +712,7 @@ export default Vue.extend({
       const results = await this.addMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
-        price: this.convertSkillToWei(this.listingSellPrice),
+        price: this.convertSkillToWei(val.toString()),
       });
 
       this.selectedNftId = null;
@@ -651,11 +726,7 @@ export default Vue.extend({
       this.marketOutcome = null;
       if(this.selectedNftId === null) return;
 
-
-      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeType}`, text: 'Sell Price (SKILL)' });
-      if(!sellFor) return;
-
-      const val = +sellFor;
+      const val = Math.min(+this.listingSellPrice, 10000);
       if(val <= 0 || !val || isNaN(val)) return;
 
       this.waitingMarketOutcome = true;
@@ -663,7 +734,7 @@ export default Vue.extend({
       const results = await this.changeMarketListingPrice({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
-        newPrice: this.convertSkillToWei(sellFor)
+        newPrice: this.convertSkillToWei(val.toString())
       });
 
       this.selectedNftId = null;
@@ -977,8 +1048,123 @@ export default Vue.extend({
       return weapons.idResults;
     },
 
-    showListingSetupModal() {
+    async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
+      const url = new URL('https://api.cryptoblades.io/static/market/transactions/' + sellerAddress);
+
+      const weaponsData = await fetch(url.toString());
+      const weapons = await weaponsData.json();
+      return weapons.results;
+    },
+
+    async showWeaponsSoldModal() {
+      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      this.weaponTransactionHistoryHeader = [
+        {
+          key: 'weaponId',
+          sortable: true,
+          label: 'Weapon ID'
+        },
+        {
+          key: 'weaponName',
+          sortable: true,
+          label: 'Name'
+        },
+        {
+          key: 'weaponPrice',
+          label: 'Price',
+          sortable: true,
+        }
+      ];
+
+      this.characterTransactionHistoryHeader = [
+        {
+          key: 'charId',
+          sortable: true,
+          label: 'Character ID'
+        },
+        {
+          key: 'charName',
+          sortable: true,
+          label: 'Name'
+        },
+        {
+          key: 'charPrice',
+          label: 'Price',
+          sortable: true,
+        }
+      ];
+      if(weaponHistory.length === 0){
+        this.historyCounter = 0;
+      }
+      else{
+        this.historyCounter = weaponHistory.length;
+        for (let i = 0; i<weaponHistory.length; ++i){
+          if(weaponHistory[i].type === 'weapon' && weaponHistory !== undefined){
+            // eslint-disable-next-line prefer-const
+            let items: WeaponTransactionHistoryData = {
+              weaponId: weaponHistory[i].weaponId,
+              weaponName: getWeaponNameFromSeed(parseInt(weaponHistory[i].weaponId,10),weaponHistory[i].weaponStars),
+              weaponPrice: weaponHistory[i].price
+            };
+
+            this.weaponTransactionHistoryData.push(items);
+          }
+        }
+      }
+
+      (this.$refs['weapons-sold-modal'] as BModal).show();
+    },
+    async showCharactersSoldModal() {
+      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      this.characterTransactionHistoryHeader = [
+        {
+          key: 'charId',
+          sortable: true,
+          label: 'Character ID'
+        },
+        {
+          key: 'charName',
+          sortable: true,
+          label: 'Name'
+        },
+        {
+          key: 'charPrice',
+          label: 'Price',
+          sortable: true,
+        }
+      ];
+      if(characterHistory.length === 0){
+        this.historyCounter = 0;
+      }
+      else{
+        this.historyCounter = characterHistory.length;
+        for (let i = 0; i<characterHistory.length; ++i){
+
+          if(characterHistory[i].type === 'character' && characterHistory !== undefined){
+            // eslint-disable-next-line prefer-const
+            let items: CharacterTransactionHistoryData = {
+              charId: characterHistory[i].charId,
+              charName: getCharacterNameFromSeed(parseInt(characterHistory[i].charId,10)),
+              charPrice: characterHistory[i].price
+            };
+
+            this.characterTransactionHistoryData.push(items);
+          }
+        }
+      }
+
+      (this.$refs['characters-sold-modal'] as BModal).show();
+    },
+
+    resetTransactionHistoryValues(modalName: string){
+      this.characterTransactionHistoryData = [];
+      this.weaponTransactionHistoryData = [];
+      (this.$refs[modalName] as BModal).hide();
+    },
+
+    showListingSetupModal(changingPrice: boolean = false) {
       this.clearInputs();
+      this.priceChangeModal = changingPrice;
       (this.$refs['listing-setup-modal'] as BModal).show();
     },
 
@@ -1043,7 +1229,7 @@ export default Vue.extend({
     },
 
     calculatedBuyerCost(listedPrice: number): string {
-      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(2);
+      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(8).replace(/(\.0+|0+)$/, '');
     },
 
     maxPrecisionSkill(listedPrice: string): string {
@@ -1112,7 +1298,7 @@ export default Vue.extend({
   justify-content: space-around;
 }
 
-.result-item {
+.result-weaponHistory {
   max-width: 12em;
 }
 
@@ -1141,6 +1327,14 @@ export default Vue.extend({
   opacity: 0.65;
 }
 
+.transaction-history-text{
+  color: #9e8a57 !important;
+}
+
+.transaction-history-header-text{
+   color: #9e8a57;
+  font-size: 34px;
+}
 .m-top-negative-5{
   margin-top: -5px;
 }
