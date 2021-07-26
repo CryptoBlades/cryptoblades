@@ -401,7 +401,7 @@
     },
     "links": {},
     "address": "0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
-    "transactionHash": "0x8234786bc10ad43eeb2200f5c8a368e05c748d4bb8dc206f6d77250728788ab4"
+    "transactionHash": "0x91e104afca37eb49304b4c7e30bf47c03fb1a7f948e5515eb4766757cc95f1ad"
   },
   "build/contracts/CryptoBlades.json": {
     "events": {
@@ -587,7 +587,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0x8dff2ca463b5f57dc78841c97fa7050a30686e88937c0456a0380ea26008eaea"
+    "transactionHash": "0x88a1115379d6217641225e99bd8e04a063d4aba33cf8bf171cb368b5ecc77acb"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -712,7 +712,7 @@
     "events": {},
     "links": {},
     "address": "0x4168062aB151Da9fDF2c5ae0Bc503BCA7Abd8952",
-    "transactionHash": "0x5fc85ba486d46e3dd76bc340f63af584824657d69a807827b9a372ffee916c5a"
+    "transactionHash": "0xee8721745eac72893a84dff8ce17ddf0a53a17e70cdb352ba734d39e5def73e6"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -924,7 +924,7 @@
     },
     "links": {},
     "address": "0x9E47585eC2f55E2e48D3645090136426BF67745B",
-    "transactionHash": "0xf3d7ac48c20989b1e35a168db98e4b74dd5ad0e7017f82bc88e4580a2d7d37bf"
+    "transactionHash": "0x4cbc464684f316f145f956b9499840dad0b4a25f907b9808a5ced3380aa319b7"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -1012,13 +1012,13 @@
     "events": {},
     "links": {},
     "address": "0x874607dd1D157b60E60A56cBE96b112e24a9Ca7b",
-    "transactionHash": "0x3601cb2e35cc35206ab1e08a7e461422d5cb316383e3425b0cb398933b0fe561"
+    "transactionHash": "0xb8e0591723ef10d269d378afddef96747b928118d35041b511af9af2a6a436b2"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
     "links": {},
     "address": "0x9ad206A5E72D05CA9F3951155FfB74c4dD22eB7b",
-    "transactionHash": "0x0983da473b7f02866c4fdfc65d7da29a9405287164823d5740b67d4f0c264126"
+    "transactionHash": "0x4cb732f476c190f440f77539acbebbcd94bf3b09084166382af0f3513a483474"
   },
   "build/contracts/SkillToken.json": {
     "events": {
