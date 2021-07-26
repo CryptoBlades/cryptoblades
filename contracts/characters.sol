@@ -24,8 +24,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-
-        characterLimit = 4;
     }
 
     function migrateTo_1ee400a() public {
@@ -68,6 +66,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         promos = _promos;
     }
 
+    function migrateTo_X() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        characterLimit = 4;
+    }
+
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-256
@@ -100,7 +104,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     uint256 private lastMintedBlock;
     uint256 private firstMintedOfLastBlock;
 
-    uint characterLimit;
+    uint256 public characterLimit;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);

@@ -89,6 +89,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         durabilityCostFight = 1;
     }
 
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
+    uint characterLimit;
     // config vars
     uint8 staminaCostFight;
 
@@ -398,8 +400,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function mintCharacter() public onlyNonContract doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
-        require(characters.balanceOf(msg.sender) < characters.characterLimit,
-            string(abi.encodePacked("You can only have ",characters.characterLimit," characters!")));
+        require(characters.balanceOf(msg.sender) < characters.characterLimit(),
+            string(abi.encodePacked("You can only have ",characters.characterLimit()," characters!")));
         _payContract(msg.sender, mintCharacterFee);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
@@ -467,7 +469,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     modifier doesNotHaveMoreThanMaxCharacters() {
-        require(characters.balanceOf(msg.sender) <= characters.characterLimit, "Too many characters owned");
+        require(characters.balanceOf(msg.sender) <= characters.characterLimit(), "Too many characters owned");
         _;
     }
 
