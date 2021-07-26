@@ -42,6 +42,7 @@
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :character="c"></slot>
         </div>
+        <slot name="sold" :character="c"></slot>
         <div class="art">
           <CharacterArt :character="c" :isMarket="isMarket"/>
         </div>
@@ -144,8 +145,8 @@ export default {
     getCharacterArt,
 
     saveFilters() {
-      localStorage.setItem('character-levelfilter', this.levelFilter);
-      localStorage.setItem('character-elementfilter', this.elementFilter);
+      sessionStorage.setItem('character-levelfilter', this.levelFilter);
+      sessionStorage.setItem('character-elementfilter', this.elementFilter);
 
       if(this.isMarket) {
         sessionStorage.setItem('character-price-order', this.priceSort);
@@ -154,7 +155,11 @@ export default {
     },
 
     clearFilters() {
-      sessionStorage.clear();
+      sessionStorage.removeItem('character-levelfilter');
+      sessionStorage.removeItem('character-elementfilter');
+      if(this.isMarket) {
+        sessionStorage.removeItem('character-price-order');
+      }
 
       this.elementFilter = '';
       this.levelFilter = '';
@@ -169,8 +174,8 @@ export default {
   },
 
   mounted() {
-    this.levelFilter = sessionStorage.getItem('character-levelfilter') || '';
-    this.elementFilter = sessionStorage.getItem('character-elementfilter') || '';
+    this.levelFilter = localStorage.getItem('character-levelfilter') || '';
+    this.elementFilter = localStorage.getItem('character-elementfilter') || '';
     if(this.isMarket) {
       this.priceSort = sessionStorage.getItem('character-price-order') || '';
     }
@@ -206,6 +211,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .character .art {
@@ -250,5 +256,32 @@ export default {
     align-items: center;
     justify-content: center;
   }
+}
+
+.sold {
+  height: 40px;
+  width: 300px;
+  background-color: rgb(187, 33, 0);
+  transform: rotate(30deg);
+  left: -40px;
+  position: absolute;
+  top: 150px;
+  z-index: 100;
+}
+
+.sold span {
+    text-align: center;
+    width: auto;
+    color: white;
+    display: block;
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 40px;
+    text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+    text-transform: uppercase;
+}
+
+.fix-h24 {
+  height: 24px;
 }
 </style>

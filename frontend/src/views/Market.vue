@@ -24,17 +24,6 @@
                   @click="searchAllWeaponListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_weapons">Browse Weapons</b-button>
               </div>
 
-              <div class="col">
-                <b-button
-                  variant="primary"
-                  v-if="buyableNftSelected"
-                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
-                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
-                  Purchase <b-icon-question-circle v-if="!canPurchase"
-                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
-                </b-button>
-              </div>
-
               <div class="col"></div>
             </div>
 
@@ -57,15 +46,35 @@
                 :weaponIds="allSearchResults"
                 :showLimit="weaponShowLimit"
                 :showReforgedToggle="false"
+                :showFavoriteToggle="false"
                 :canFavorite="false"
                 :isMarket="true"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
-                  <span class="d-block text-center" v-if="nftPricesById[id]">
-                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                  </span>
-                  <span class="d-block text-center" v-else>Loading price...</span>
+                  <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
+                    <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'"
+                      v-tooltip.top="{ content: maxPrecisionSkill(nftPricesById[id]) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
+                      >
+                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                      </span>
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      @click="selectedNftId = id; purchaseNft();"
+                      variant="primary"
+                      class="gtag-link-others">
+                      {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
+                    </b-button>
+                  </div>
+                </template>
+
+                <template #sold="{ weapon: { id } }">
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
                 </template>
 
               </weapon-grid>
@@ -81,14 +90,33 @@
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <div class="token-price">
-                    <span class="d-block text-center" v-if="nftPricesById[id]">
-                      {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                  <div class="token-price d-flex flex-column align-items-center justify-content-center m-top-negative-50">
+                    <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'"
+                      v-tooltip.top="{ content: maxPrecisionSkill(nftPricesById[id]) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
+                      >
+                      {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                      </span>
                     </span>
+
                     <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      @click="selectedNftId = id; canPurchase && purchaseNft();"
+                      variant="primary"
+                      v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                      class="gtag-link-others" tagname="confirm_purchase">
+                      {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }} <b-icon-question-circle v-if="!canPurchase"
+                      v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                    </b-button>
                   </div>
                 </template>
 
+                <template #sold="{ character: { id } }">
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
+                </template>
               </character-list>
 
               <b-pagination class="customPagination"
@@ -178,19 +206,8 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  v-if="buyableNftSelected"
-                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
-                  @click="canPurchase && purchaseNft()" class="gtag-link-others" tagname="confirm_purchase">
-                  Purchase <b-icon-question-circle v-if="!canPurchase"
-                  v-tooltip.bottom="'You already have max amount of characters (4).'"/>
-                </b-button>
-              </div>
-
-              <div class="col">
-                <b-button
-                  variant="primary"
                   v-if="ownListedNftSelected"
-                  @click="updateNftListingPrice()"  class="gtag-link-others" tagname="change_price">Change Price</b-button>
+                  @click="showListingSetupModal(true)" class="gtag-link-others" tagname="change_price">Change Price</b-button>
               </div>
 
               <div class="col">
@@ -207,16 +224,37 @@
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :showReforgedToggle="false"
+                :showFavoriteToggle="false"
                 :canFavorite="false"
                 :weaponIds="searchResults"
                 :isMarket="true"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
-                  <span class="d-block text-center" v-if="nftPricesById[id]">
-                    <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
-                  </span>
-                  <span class="d-block text-center" v-else>Loading price...</span>
+                  <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
+                    <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'"
+                      v-tooltip.top="{ content: maxPrecisionSkill(nftPricesById[id]) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
+                      >
+                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                      </span>
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                        v-if="id !== null && !searchResultsOwned"
+                        :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
+                        @click="selectedNftId = id; purchaseNft();"
+                        variant="primary"
+                        class="gtag-link-others">
+                        {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
+                    </b-button>
+                  </div>
+                </template>
+
+                <template #sold="{ weapon: { id } }">
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
                 </template>
 
               </weapon-grid>
@@ -230,12 +268,32 @@
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
-                  <div class="token-price">
-                    <span class="d-block text-center" v-if="nftPricesById[id]">
-                      {{ convertWeiToSkill(nftPricesById[id]) | maxDecimals(2) }} SKILL
+                  <div class="token-price d-flex flex-column align-items-center justify-content-center m-top-negative-50">
+                    <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'"
+                      v-tooltip.top="{ content: maxPrecisionSkill(nftPricesById[id]) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
+                      >
+                        {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                      </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      v-if="id !== null && !searchResultsOwned"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      @click="selectedNftId = id; canPurchase && purchaseNft();"
+                      variant="primary"
+                      v-bind:class="[!canPurchase ? 'disabled-button' : '']"
+                      class="gtag-link-others" tagname="confirm_purchase">
+                      {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }} <b-icon-question-circle v-if="!canPurchase"
+                      v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                    </b-button>
                   </div>
+                </template>
+
+                <template #sold="{ character: { id } }">
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
                 </template>
 
               </character-list>
@@ -284,6 +342,7 @@
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
                   @click="showListingSetupModal()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
                   v-tooltip.bottom="weaponMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
+
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
@@ -293,9 +352,9 @@
                   v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
 
                 <b-modal class="centered-modal" ref="listing-setup-modal"
-                  @ok="addListingForNft">
+                  @ok="!priceChangeModal ? addListingForNft() : updateNftListingPrice()">
                   <template #modal-title>
-                    Sell {{activeType}}
+                    {{!priceChangeModal ? `Sell ${activeType}` : `Change ${activeType} price`}}
                   </template>
                   <b-form-input type="number" :max="10000"
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
@@ -307,9 +366,63 @@
               </div>
 
               <div class="col">
+                <b-button
+                  variant="primary"
+                   class="gtag-link-others" tagname="show_weapons_sold"
+                  @click="showWeaponsSoldModal()"> Weapons Sold
+                  <b-icon-question-circle v-tooltip.bottom="'View weapons you have sold.'"/>
+                </b-button>
+
+                <b-modal class="centered-modal " ref="weapons-sold-modal">
+
+                    <template #modal-header>
+                         <div class="transaction-history-header-text">
+                           Weapon Transaction History
+                         </div>
+                    </template>
+                    <div v-if="historyCounter > 0">
+                      <b-table class="transaction-history-text" :items="weaponTransactionHistoryData" :fields="weaponTransactionHistoryHeader"></b-table>
+                    </div>
+                    <div v-if="historyCounter === 0">
+                      <p>It's seems like there's nothing here.</p>
+                      <p>For tips on how to list NFTs, you may click this <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">link</a></strong></p>
+                    </div>
+                    <template #modal-footer>
+                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('weapons-sold-modal')">Ok</b-button>
+                    </template>
+
+
+                </b-modal>
+
               </div>
 
               <div class="col">
+                <b-button
+                  variant="primary"
+                   class="gtag-link-others" tagname="show_characters_sold"
+                  @click="showCharactersSoldModal()"> Characters Sold
+                  <b-icon-question-circle v-tooltip.bottom="'View characters you have sold.'"/>
+                </b-button>
+
+                <b-modal class="centered-modal " ref="characters-sold-modal">
+
+                    <template #modal-header>
+                         <div class="transaction-history-header-text">
+                           Character Transaction History
+                         </div>
+                    </template>
+                    <div v-if="historyCounter > 0">
+                      <b-table class="transaction-history-text" :items="characterTransactionHistoryData" :fields="characterTransactionHistoryHeader"></b-table>
+                    </div>
+                    <div v-if="historyCounter === 0">
+                      <p>It's seems like there's nothing here.</p>
+                      <p>For tips on how to list NFTs, you may click this <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">link</a></strong></p>
+                    </div>
+                    <template #modal-footer>
+                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('characters-sold-modal')">Ok</b-button>
+                    </template>
+
+                </b-modal>
               </div>
 
               <div class="col">
@@ -319,7 +432,8 @@
             <div class="sell-grid" v-if="activeType === 'weapon'">
               <weapon-grid
                 v-model="selectedNftId"
-                :showReforgedToggle="false"
+                :showReforgedWeaponsDefVal="false"
+                :showFavoriteWeaponsDefVal="false"
                 :canFavorite="false"
               />
             </div>
@@ -363,6 +477,10 @@ import BigNumber from 'bignumber.js';
 import { BModal } from 'bootstrap-vue';
 import { traitNameToNumber } from '@/contract-models';
 import { market_blockchain as useBlockchain } from './../feature-flags';
+import { CharacterTransactionHistoryData, ICharacterHistory, IWeaponHistory, WeaponTransactionHistoryData } from '@/interfaces/History';
+import { getWeaponNameFromSeed } from '@/weapon-name';
+import { getCharacterNameFromSeed } from '@/character-name';
+
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
 type CharacterId = string;
@@ -379,12 +497,19 @@ interface Data {
   waitingMarketOutcome: boolean;
   nftPricesById: Record<string, string>;
   characterMarketTax: string;
-  weaponMarketTax: string ;  characterShowLimit: number;
+  weaponMarketTax: string ;
+  characterShowLimit: number;
   weaponShowLimit: number;
   allListingsAmount: number;
   currentPage: number;
   browseTabActive: boolean;
   listingSellPrice: string;
+  priceChangeModal: boolean;
+  weaponTransactionHistoryData: WeaponTransactionHistoryData[];
+  weaponTransactionHistoryHeader: any;
+  characterTransactionHistoryData: CharacterTransactionHistoryData[];
+  characterTransactionHistoryHeader: any;
+  historyCounter: number;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
@@ -438,7 +563,13 @@ export default Vue.extend({
       allListingsAmount: 0,
       currentPage: 1,
       browseTabActive: true,
-      listingSellPrice: ''
+      listingSellPrice: '',
+      priceChangeModal: false,
+      weaponTransactionHistoryData: [],
+      weaponTransactionHistoryHeader: [],
+      characterTransactionHistoryData: [],
+      characterTransactionHistoryHeader: [],
+      historyCounter: 0
     } as Data;
   },
 
@@ -449,7 +580,7 @@ export default Vue.extend({
     ...(mapGetters([
       'contracts', 'ownCharacters'
     ]) as Accessors<StoreMappedGetters>),
-    ...mapGetters(['transferCooldownOfWeaponId', 'transferCooldownOfCharacterId']),
+    ...mapGetters(['transferCooldownOfCharacterId']),
 
     Weapons(): Contract<Weapons> {
       // we use x! here because we assert that they're set already in created()
@@ -482,7 +613,7 @@ export default Vue.extend({
     selectedNftOnCooldown(): boolean {
       return this.selectedNftId !== null
       && (this.activeType === 'weapon'
-        ? (this.transferCooldownOfWeaponId(+this.selectedNftId) > 0)
+        ? false
         : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
     },
 
@@ -523,6 +654,7 @@ export default Vue.extend({
       this.currentPage = 1;
       this.listingSellPrice = '';
     },
+
 
     async loadMarketTaxes() {
       if(!this.characterMarketTax) {
@@ -580,7 +712,7 @@ export default Vue.extend({
       const results = await this.addMarketListing({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
-        price: this.convertSkillToWei(this.listingSellPrice),
+        price: this.convertSkillToWei(val.toString()),
       });
 
       this.selectedNftId = null;
@@ -594,11 +726,7 @@ export default Vue.extend({
       this.marketOutcome = null;
       if(this.selectedNftId === null) return;
 
-
-      const sellFor = await (this as any).$dialog.prompt({ title: `Sell ${this.activeType}`, text: 'Sell Price (SKILL)' });
-      if(!sellFor) return;
-
-      const val = +sellFor;
+      const val = Math.min(+this.listingSellPrice, 10000);
       if(val <= 0 || !val || isNaN(val)) return;
 
       this.waitingMarketOutcome = true;
@@ -606,7 +734,7 @@ export default Vue.extend({
       const results = await this.changeMarketListingPrice({
         nftContractAddr: this.contractAddress,
         tokenId: this.selectedNftId,
-        newPrice: this.convertSkillToWei(sellFor)
+        newPrice: this.convertSkillToWei(val.toString())
       });
 
       this.selectedNftId = null;
@@ -920,8 +1048,123 @@ export default Vue.extend({
       return weapons.idResults;
     },
 
-    showListingSetupModal() {
+    async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
+      const url = new URL('https://api.cryptoblades.io/static/market/transactions/' + sellerAddress);
+
+      const weaponsData = await fetch(url.toString());
+      const weapons = await weaponsData.json();
+      return weapons.results;
+    },
+
+    async showWeaponsSoldModal() {
+      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      this.weaponTransactionHistoryHeader = [
+        {
+          key: 'weaponId',
+          sortable: true,
+          label: 'Weapon ID'
+        },
+        {
+          key: 'weaponName',
+          sortable: true,
+          label: 'Name'
+        },
+        {
+          key: 'weaponPrice',
+          label: 'Price',
+          sortable: true,
+        }
+      ];
+
+      this.characterTransactionHistoryHeader = [
+        {
+          key: 'charId',
+          sortable: true,
+          label: 'Character ID'
+        },
+        {
+          key: 'charName',
+          sortable: true,
+          label: 'Name'
+        },
+        {
+          key: 'charPrice',
+          label: 'Price',
+          sortable: true,
+        }
+      ];
+      if(weaponHistory.length === 0){
+        this.historyCounter = 0;
+      }
+      else{
+        this.historyCounter = weaponHistory.length;
+        for (let i = 0; i<weaponHistory.length; ++i){
+          if(weaponHistory[i].type === 'weapon' && weaponHistory !== undefined){
+            // eslint-disable-next-line prefer-const
+            let items: WeaponTransactionHistoryData = {
+              weaponId: weaponHistory[i].weaponId,
+              weaponName: getWeaponNameFromSeed(parseInt(weaponHistory[i].weaponId,10),weaponHistory[i].weaponStars),
+              weaponPrice: weaponHistory[i].price
+            };
+
+            this.weaponTransactionHistoryData.push(items);
+          }
+        }
+      }
+
+      (this.$refs['weapons-sold-modal'] as BModal).show();
+    },
+    async showCharactersSoldModal() {
+      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      this.characterTransactionHistoryHeader = [
+        {
+          key: 'charId',
+          sortable: true,
+          label: 'Character ID'
+        },
+        {
+          key: 'charName',
+          sortable: true,
+          label: 'Name'
+        },
+        {
+          key: 'charPrice',
+          label: 'Price',
+          sortable: true,
+        }
+      ];
+      if(characterHistory.length === 0){
+        this.historyCounter = 0;
+      }
+      else{
+        this.historyCounter = characterHistory.length;
+        for (let i = 0; i<characterHistory.length; ++i){
+
+          if(characterHistory[i].type === 'character' && characterHistory !== undefined){
+            // eslint-disable-next-line prefer-const
+            let items: CharacterTransactionHistoryData = {
+              charId: characterHistory[i].charId,
+              charName: getCharacterNameFromSeed(parseInt(characterHistory[i].charId,10)),
+              charPrice: characterHistory[i].price
+            };
+
+            this.characterTransactionHistoryData.push(items);
+          }
+        }
+      }
+
+      (this.$refs['characters-sold-modal'] as BModal).show();
+    },
+
+    resetTransactionHistoryValues(modalName: string){
+      this.characterTransactionHistoryData = [];
+      this.weaponTransactionHistoryData = [];
+      (this.$refs[modalName] as BModal).hide();
+    },
+
+    showListingSetupModal(changingPrice: boolean = false) {
       this.clearInputs();
+      this.priceChangeModal = changingPrice;
       (this.$refs['listing-setup-modal'] as BModal).show();
     },
 
@@ -959,15 +1202,15 @@ export default Vue.extend({
     },
 
     weaponTraitFilter(): string {
-      return sessionStorage.getItem('weapon-elementfilter') ? (sessionStorage.getItem('weapon-elementfilter') as string).toLowerCase() : '';
+      return sessionStorage.getItem('market-weapon-elementfilter') ? (sessionStorage.getItem('market-weapon-elementfilter') as string).toLowerCase() : '';
     },
 
     weaponStarFilter(): number {
-      return sessionStorage.getItem('weapon-starfilter') ? +(sessionStorage.getItem('weapon-starfilter') as string) : 0;
+      return sessionStorage.getItem('market-weapon-starfilter') ? +(sessionStorage.getItem('market-weapon-starfilter') as string) : 0;
     },
 
     weaponPriceOrder(): string {
-      return sessionStorage.getItem('weapon-price-order') ? (sessionStorage.getItem('weapon-price-order') as string) : '';
+      return sessionStorage.getItem('market-weapon-price-order') ? (sessionStorage.getItem('market-weapon-price-order') as string) : '';
     },
 
     convertStringToDecimal(val: string, maxDecimals: number) {
@@ -986,7 +1229,11 @@ export default Vue.extend({
     },
 
     calculatedBuyerCost(listedPrice: number): string {
-      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(2);
+      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(8).replace(/(\.0+|0+)$/, '');
+    },
+
+    maxPrecisionSkill(listedPrice: string): string {
+      return this.convertStringToDecimal(this.convertWeiToSkill(listedPrice), 8);
     }
   },
 
@@ -1008,6 +1255,21 @@ export default Vue.extend({
   filters: {
     maxDecimals(val: string, maxDecimals: number) {
       return new BigNumber(val).toFixed(maxDecimals);
+    },
+    dynamicDecimals(val: string, minDecimals: number, maxDecimals: number) {
+      const parsedVal = new BigNumber(val);
+
+      if(parsedVal < new BigNumber(Math.pow(10, -maxDecimals))){
+        return '< ' + Math.pow(10, -maxDecimals).toFixed(maxDecimals);
+      }
+
+      for(let i = maxDecimals - 1; i >= minDecimals; i--){
+        if(parsedVal < new BigNumber(Math.pow(10, -i))){
+          return new BigNumber(val).toFixed(i + 1);
+        }
+      }
+
+      return new BigNumber(val).toFixed(minDecimals);
     }
   },
 
@@ -1036,7 +1298,7 @@ export default Vue.extend({
   justify-content: space-around;
 }
 
-.result-item {
+.result-weaponHistory {
   max-width: 12em;
 }
 
@@ -1063,6 +1325,22 @@ export default Vue.extend({
 
 .disabled-button {
   opacity: 0.65;
+}
+
+.transaction-history-text{
+  color: #9e8a57 !important;
+}
+
+.transaction-history-header-text{
+   color: #9e8a57;
+  font-size: 34px;
+}
+.m-top-negative-5{
+  margin-top: -5px;
+}
+
+.m-top-negative-50{
+  margin-top: -50px;
 }
 
 </style>

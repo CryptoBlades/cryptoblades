@@ -5,17 +5,18 @@
         <div class="col error">Error: {{ error }}</div>
       </div>
 
-      <div class="row" v-if="resultsAvailable">
-        <div class="col">
-          <CombatResults v-if="resultsAvailable" :results="fightResults" />
-        </div>
-      </div>
+      <b-modal id="fightResultsModal" hide-footer title="Fight Results">
+        <CombatResults v-if="resultsAvailable" :results="fightResults" />
+        <b-button class="mt-3" variant="primary" block @click="$bvModal.hide('fightResultsModal')">Close</b-button>
+      </b-modal>
 
       <div class="row">
         <div class="col">
           <div class="message-box" v-if="!currentCharacter">You need to select a character to do battle.</div>
 
           <div class="message-box" v-if="currentCharacter && currentCharacterStamina < 40">You need 40 stamina to do battle.</div>
+
+          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurabilit(selectedWeaponId)">This weapon does not have enough durability.</div>
 
           <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">You cannot do battle during the last 30 seconds of the hour. Stand fast!</div>
         </div>
@@ -52,7 +53,7 @@
                 </b-button>
               </div>
 
-              <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" />
+              <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" checkForDurability="true" />
 
             </div>
             <div class="row mb-3 flex-column enemy-container" v-if="targets.length > 0">
@@ -61,7 +62,8 @@
                   <div class="combat-hints">
                     <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
                     <span class="fire-icon" />
-
+           <!-- && weaponHasDurabilit(selectedWeaponId) needs to be added below to block fights, but breaks the selected weapon icon if it returns false
+                meaning if weapon has no durability left -->
                     <Hint
                       text="The elements affect power:<br>
                       <br>Character vs Enemy: bonus or penalty as shown above
@@ -71,7 +73,7 @@
                 </div>
               </div>
               <div class="enemy-list">
-                <div class="col-md-3 col-sm-12 col-xs-12 encounter" v-for="(e, i) in targets" :key="i">
+                <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 encounter" v-for="(e, i) in targets" :key="i">
                   <div class="encounter-container">
 
                   <div class="enemy-character">
@@ -168,6 +170,7 @@ export default {
       'ownWeapons',
       'currentCharacter',
       'currentCharacterStamina',
+      'getWeaponDurability',
       'fightGasOffset',
       'fightBaseline'
     ]),
@@ -201,6 +204,7 @@ export default {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
+      if(this.resultsAvailable) this.$bvModal.show('fightResultsModal');
     },
   },
 
@@ -208,6 +212,9 @@ export default {
     ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
+    weaponHasDurabilit(id) {
+      return this.getWeaponDurability(id) > 0;
+    },
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
     },
@@ -329,8 +336,8 @@ export default {
 
 .enemy-character {
   position: relative;
-  width: 14em;
-  height: 25em;
+  width: 16vw;
+  height: 28vw;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 115%;
@@ -349,8 +356,9 @@ export default {
                0px 9px 12px rgba(0,0,0,0.1);
 
 }
+
 .encounter img {
-    width: calc(100% - 60px);
+    width: 10vw;
     height: auto;
     margin: 0 auto;
     display: block;
@@ -428,6 +436,9 @@ div.encounter.text-center {
 .encounter {
   display : flex;
   justify-content: center;
+  padding-top: 20px;
+  border-radius: 15px;
+  max-width: 25%;
 }
 
 .xp-gain, .encounter-power{
@@ -436,15 +447,19 @@ div.encounter.text-center {
 
 .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
   position: absolute;
-  font-size: x-large;
+  font-size: 2vw;
 }
 
 .encounter-element {
-  top: 25px;
+  top: 1.3vw;
 }
 
 .encounter-power {
-  bottom: 55px;
+  bottom: 3.5vw;
+}
+
+.xp-gain {
+  bottom: 1.25vw;
 }
 
 .victory-chance {
@@ -452,10 +467,6 @@ div.encounter.text-center {
   right: 0;
   text-align: center;
   text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
-}
-
-.xp-gain {
-  bottom: 20px;
 }
 
 /* Mobile Support Classes*/
@@ -474,7 +485,7 @@ div.encounter.text-center {
 }
 
 .enemy-container {
-  flex : 3;
+  flex : 4;
 }
 
 .enemy-divider {
@@ -484,12 +495,14 @@ div.encounter.text-center {
 .enemy-list {
   display: flex;
   flex-wrap: wrap;
-  padding-left: 30px;
-  padding-right: 30px;
+  padding-left: 1vw;
+  padding-right: 1vw;
 }
 
 .weapon-selection {
   border-right : 1px solid #9e8a57;
+  padding-left: 1vw;
+  padding-right: 1vw;
 }
 
 .weapon-header {
@@ -506,46 +519,8 @@ div.encounter.text-center {
 h1  {
   font-weight: 900 !important;
   text-align: center;
-  background: linear-gradient(to right, rgb(248, 218, 136) 20%, rgb(233, 226, 167) 40%, rgb(112, 112, 51) 60%, rgb(177, 150, 92) 80%);
-  background-size: 200% auto;
-  color: #000;
-  background-clip: text;
-  text-fill-color: transparent;
-  text-shadow: 0px 2px 3px rgba(0,0,0,0.4),
-               0px 4px 7px rgba(0,0,0,0.1),
-               0px 9px 12px rgba(0,0,0,0.1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shine 1s linear infinite;
-  @keyframes shine {
-    to {
-      background-position: 200% center;
-    }
-  }
-}
-
-/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
-@media all and (max-width:  767.98px) {
-  .encounter img {
-    max-width: 30vw;
-  }
-
-  .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
-    position: inherit;
-    font-size: x-large;
-  }
-  .combat-enemy-container {
-    flex-direction: column;
-  }
-  .encounter {
-    margin-top: 50px;
-  }
-  .weapon-selection {
-    border-right: none;
-  }
-  .results-panel {
-    width : 100%;
-  }
+  font-size: 3vw;
+  padding-top: 0px;
 }
 
 .encounter-button {
@@ -554,12 +529,123 @@ h1  {
   height: 5em;
   width: 13em;
   position: relative;
-  top: 35px;
+  top: 3vw;
 }
-
 
 .enemy-img {
   position: relative;
-  top: -40px;
+  top: -3vw;
+}
+
+@media (max-width: 1025px){
+  .enemy-img {
+    top: -40px;
+  }
+
+  .enemy-list {
+    flex-direction: column;
+  }
+
+  .enemy-character {
+      width: 16em;
+      height: 28em;
+  }
+
+  .encounter img {
+    width: 10em;
+  }
+
+  .encounter {
+    padding-top: 20px;
+    border-radius: 15px;
+    margin-top: 50px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .encounter-element {
+    top: 25px;
+  }
+
+  .encounter-power {
+    bottom: 55px;
+  }
+
+  .xp-gain {
+    bottom: 20px;
+  }
+
+  .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
+    position: absolute;
+    font-size: x-large;
+  }
+
+  .encounter-button {
+    top: 35px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    display: inline-block;
+  }
+}
+
+/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
+@media all and (max-width:  767.98px) {
+  .encounter img {
+    width: calc(100% - 60px);
+  }
+  .combat-enemy-container {
+    flex-direction: column;
+  }
+  .weapon-selection {
+    border-right: none;
+  }
+  .results-panel {
+    width : 100%;
+  }
+}
+.hint.has-tooltip {
+  font-size: 1.8rem;
+  display: inline-block;
+  margin-left: 10px;
+}
+.dark-bg-text {
+  width: 100% !important;
+}
+.content {
+  padding: 0 !important;
+}
+
+.encounter-container {
+  margin-bottom: 50px;
+}
+.combat-hints {
+  margin-top: 30px;
+}
+#gtag-link-others {
+    margin: 0 auto;
+    display: block;
+    position: relative;
+    margin-top: 20px;
+    width: 100%;
+}
+.ml-3 {
+    margin-left: 0px !important;
+}
+.header-row {
+  display: block;
+  text-align: center;
+}
+.weapon-icon-wrapper {
+  margin: 0 auto;
+}
+
+@media (max-width: 575.98px) {
+  .show-reforged {
+    width: 100%;
+    justify-content: center;
+    display: block;
+  }
 }
 </style>
