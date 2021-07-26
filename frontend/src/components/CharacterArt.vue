@@ -4,7 +4,19 @@
       <span :class="trait.toLowerCase() + '-icon circle-element'"></span>
     </div>
 
-    <img v-if="showPlaceholder && !portrait" class="placeholder" :src="getCharacterArt(character)" />
+    <div class="placeholder d-flex align-items-start justify-content-center p-1"
+      >
+      <div class="w-100" :style="{
+        'background-image': 'url(' + getCharacterArt(character) + ')',
+      }"
+      :class="{
+        'h-100': !isMarket,
+        'h-75': isMarket
+      }">
+
+      </div>
+      <!--<small-button class="button" :text="`Purchase`" v-if="isMarket"/>-->
+    </div>
 
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
@@ -19,7 +31,7 @@
     <div class="black-outline" v-if="!portrait">
       Score <span class="white">{{ heroScore.toLocaleString() }}</span>
       <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Hero score is a measure of your hero's combat prowess so far.
-        It goes up when you win and down when you lose.`"/>
+        It goes up when you win and down when you lose. It is also temporarily disabled!`"/>
     </div>
     </div>
 
@@ -51,6 +63,7 @@ import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
 import { mapGetters, mapState } from 'vuex';
+//import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
 const armsCount = 45;
@@ -69,6 +82,9 @@ function transformModel(model) {
 
 export default {
   props: ['character', 'portrait', 'isMarket'],
+  components: {
+    //SmallButton,
+  },
   watch: {
     character() {
       this.clearScene();
@@ -486,6 +502,7 @@ export default {
     },
 
     async fetchScore() {
+      /*
       try {
         const scoreData = await fetch(`https://api.cryptoblades.io/static/character/score/${this.character.id}`);
         const { score } = await scoreData.json();
@@ -493,6 +510,7 @@ export default {
       } catch {
         console.error(`Could not fetch score for ID ${this.character.id}`);
       }
+      */
     }
   },
   mounted() {
@@ -574,6 +592,12 @@ export default {
   padding-top: 0;
   -o-object-fit: contain;
   object-fit: contain;
+}
+
+.placeholder div{
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .circle-element {
