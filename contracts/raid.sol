@@ -5,7 +5,7 @@ import "./multiAccessUpgradeable.sol";
 import "./cryptoblades.sol";
 import "./characters.sol";
 import "./weapons.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 abstract contract Raid is Initializable, MultiAccessUpgradeable {
 

@@ -1,6 +1,6 @@
 <template>
   <button :disabled="disabled" class="button main-font dark-bg-text" @click="$emit('click')">
-    <h3>{{ text }}</h3>
+    {{ text }}
   </button>
 </template>
 
@@ -29,7 +29,4 @@ export default {
   opacity: 0.4;
 }
 
-h3 {
-  margin: auto;
-}
 </style>

@@ -30,8 +30,8 @@
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>
-            Get started in less than 10 minutes! To recruit your first character you need 5 Skill and .001 BNB for gas. You will also need .0015 BNB to do your
-            first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
+            Get started in less than 10 minutes! To recruit your first character you need {{recruitCost}} SKILL and .001 BNB for gas.
+            You will also need .0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
           </p>
           <ul class="unstyled-list">
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
@@ -61,6 +61,8 @@
 </template>
 
 <script>
+import BN from 'bignumber.js';
+
 import { mapState, mapActions, mapGetters } from 'vuex';
 import _ from 'lodash';
 import Vue from 'vue';
@@ -86,7 +88,8 @@ export default {
   data: () => ({
     errorMessage: '',
     hideWalletWarning: false,
-    isConnecting: false
+    isConnecting: false,
+    recruitCost: ''
   }),
 
   computed: {
@@ -130,8 +133,8 @@ export default {
     ...mapActions([
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
-      'fetchWeaponTransferCooldownForOwnWeapons',
       'fetchCharacterTransferCooldownForOwnCharacters',
+      'setupWeaponDurabilities',
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
@@ -148,6 +151,18 @@ export default {
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     },
+
+    async initializeRecruitCost() {
+      const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
+      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+      this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
+    },
+    data() {
+      return {
+        recruitCost: this.recruitCost
+      };
+    },
+
     async startOnboarding() {
       const onboarding = new MetaMaskOnboarding();
       onboarding.startOnboarding();
@@ -281,7 +296,7 @@ export default {
         (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
       ) {
         this.$dialog.notify.warning(
-          `You have hidden the wallet warning and it would now be displayed. If you are trying to play, 
+          `You have hidden the wallet warning and it would now be displayed. If you are trying to play,
         please disable the option and follow the instructions, otherwise close and ignore.`,
           {
             timeout: 0,
@@ -377,7 +392,7 @@ export default {
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
         this.fetchCharacterTransferCooldownForOwnCharacters(),
-        this.fetchWeaponTransferCooldownForOwnWeapons(),
+        this.setupWeaponDurabilities(),
         this.fetchWaxBridgeDetails(),
         this.fetchRewardsClaimTax(),
       ]);
@@ -403,6 +418,7 @@ export default {
     if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
 
     this.checkNotifications();
+    this.initializeRecruitCost();
   },
 
   beforeDestroy() {
@@ -414,13 +430,17 @@ export default {
 </script>
 
 <style>
+button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
+  font-weight: 600;
+  text-align: center;
+}
 hr.hr-divider{
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
 }
 body {
   margin: 0;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
 }
 
 .no-margin {
@@ -653,6 +673,8 @@ div.bg-success {
 }
 </style>
 <style scoped>
+
+
 .app {
   margin: 0;
 }
@@ -660,8 +682,7 @@ div.bg-success {
 .content {
   padding: 0 1em;
   height: calc(100vh - 56px);
-  background: rgb(20, 20, 20);
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }
 
@@ -726,5 +747,19 @@ div.bg-success {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+
+.border-main {
+  border: 1px solid #9e8a57;
+}
+
+@media all and (max-width:  767.98px) {
+  .content {
+    padding: 10px;
+  }
+  .dark-bg-text {
+    width: 100%;
+  }
 }
 </style>

@@ -1,17 +1,14 @@
 <template>
   <div>
-    <span v-if="showLimit > 0 && nonIgnoredWeapons.length >= showLimit">
-      <h4>More than {{ showLimit }} results, try adjusting the filters</h4>
-    </span>
     <div class="filters row mt-2 pl-2">
-      <div class="col-sm-6 col-md-2">
+      <div class="col-sm-6 col-md-4 stars-elem">
         <strong>Stars</strong>
         <select class="form-control" v-model="starFilter" @change="saveFilters()">
           <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
 
-      <div class="col-sm-6 col-md-2">
+      <div class="col-sm-6 col-md-4 stars-elem">
         <strong>Element</strong>
         <select class="form-control" v-model="elementFilter" @change="saveFilters()">
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
@@ -29,11 +26,22 @@
         <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
         <strong>Show reforged</strong>
       </div>
-       <b-button variant="primary" class="ml-3 clear-filters-button" @click="clearFilters" >
-          <span>
-            Clear Filters
-          </span>
-        </b-button>
+
+      <div v-if="showFavoriteToggle" class="show-reforged show-favorite">
+        <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
+        <strong>Show Favorite</strong>
+      </div>
+
+      <b-button
+        variant="primary"
+        class="ml-3 clear-filters-button"
+        :class="{ 'mb-4': showReforgedToggle && showFavoriteToggle }"
+        @click="clearFilters"
+      >
+        <span>
+          Clear Filters
+        </span>
+      </b-button>
     </div>
 
     <ul class="weapon-grid">
@@ -42,16 +50,17 @@
         :class="{ selected: highlight !== null && weapon.id === highlight }"
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
-        @click="onWeaponClick(weapon.id)"
+        @click=
+        "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
-        <b-icon v-if="isFavorite(weapon.id) === true" class="favorite-star" icon="star-fill" variant="warning" />
+        <div class="weapon-icon-wrapper">
+          <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
+        </div>
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :weapon="weapon"></slot>
         </div>
-        <div class="weapon-icon-wrapper">
-          <weapon-icon class="weapon-icon" :weapon="weapon" />
-        </div>
+        <slot name="sold" :weapon="weapon"></slot>
       </li>
     </ul>
   </div>
@@ -59,6 +68,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import Events from '../../events';
 import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
@@ -77,9 +87,10 @@ interface StoreMappedActions {
 interface Data {
   starFilter: string;
   elementFilter: string;
-  showReforgedWeapons: boolean;
   favorites: Record<number, boolean>;
   priceSort: string;
+  showReforgedWeapons: boolean;
+  showFavoriteWeapons: boolean;
 }
 
 const sorts = [
@@ -132,6 +143,18 @@ export default Vue.extend({
       type: Boolean,
       default: true,
     },
+    showReforgedWeaponsDefVal: {
+      type: Boolean,
+      default: true,
+    },
+    showFavoriteToggle: {
+      type: Boolean,
+      default: true,
+    },
+    showFavoriteWeaponsDefVal: {
+      type: Boolean,
+      default: true,
+    },
     canFavorite: {
       type: Boolean,
       default: true,
@@ -139,17 +162,22 @@ export default Vue.extend({
     isMarket: {
       type: Boolean,
       default: false
-    }
+    },
+    checkForDurability: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data() {
     return {
       starFilter: '',
       elementFilter: '',
-      showReforgedWeapons: true,
       favorites: {},
       priceSort: '',
       sorts,
+      showReforgedWeapons: this.showReforgedWeaponsDefVal,
+      showFavoriteWeapons: this.showFavoriteWeaponsDefVal,
     } as Data;
   },
 
@@ -159,7 +187,7 @@ export default Vue.extend({
 
   computed: {
     ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['weaponsWithIds','getWeaponDurability',]) as Accessors<StoreMappedGetters>),
 
     weaponIdsToDisplay(): string[] {
       if (this.showGivenWeaponIds) {
@@ -177,9 +205,17 @@ export default Vue.extend({
       let items: IWeapon[] = [];
       this.displayWeapons.forEach((x) => items.push(x));
 
+      const allIgnore: string[] = [];
       if (this.ignore) {
-        items = items.filter((x) => x.id.toString() !== (this.ignore || '').toString());
+        allIgnore.push((this.ignore || '').toString());
       }
+      if (!this.showFavoriteWeapons) {
+        for (const key in this.favorites) {
+          allIgnore.push(key);
+        }
+      }
+      items = items.filter((x) => allIgnore.findIndex((y) => y === x.id.toString()) < 0);
+
 
       if (this.starFilter) {
         items = items.filter((x) => x.stars === +this.starFilter - 1);
@@ -221,11 +257,13 @@ export default Vue.extend({
     ...(mapMutations(['setCurrentWeapon'])),
 
     saveFilters() {
-      sessionStorage.setItem('weapon-starfilter', this.starFilter);
-      sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
-
       if(this.isMarket) {
-        sessionStorage.setItem('weapon-price-order', this.priceSort);
+        sessionStorage.setItem('market-weapon-starfilter', this.starFilter);
+        sessionStorage.setItem('market-weapon-elementfilter', this.elementFilter);
+        sessionStorage.setItem('market-weapon-price-order', this.priceSort);
+      } else {
+        sessionStorage.setItem('weapon-starfilter', this.starFilter);
+        sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
       }
       this.$emit('weapon-filters-changed');
     },
@@ -239,6 +277,8 @@ export default Vue.extend({
       }
 
       localStorage.setItem('favorites', this.getFavoritesString(this.favorites));
+
+      Events.$emit('weapon:newFavorite', { value: weaponId });
     },
 
     getFavoritesString(favorites: Record<number, boolean>): string {
@@ -260,8 +300,14 @@ export default Vue.extend({
     },
 
     clearFilters() {
-      sessionStorage.clear();
-
+      if(this.isMarket) {
+        sessionStorage.removeItem('market-weapon-starfilter');
+        sessionStorage.removeItem('market-weapon-elementfilter');
+        sessionStorage.removeItem('market-weapon-price-order');
+      } else {
+        sessionStorage.removeItem('weapon-starfilter');
+        sessionStorage.removeItem('weapon-elementfilter');
+      }
       this.elementFilter = '';
       this.starFilter = '';
       this.priceSort = '';
@@ -272,27 +318,52 @@ export default Vue.extend({
     onWeaponClick(id: number) {
       this.setCurrentWeapon(id);
       this.$emit('choose-weapon', id);
+    },
+
+    checkStorageFavorite() {
+      const favoritesFromStorage = localStorage.getItem('favorites');
+      if (favoritesFromStorage) {
+        this.favorites = JSON.parse(favoritesFromStorage);
+      }
     }
   },
 
   mounted() {
-    this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
-    this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
-    if(this.isMarket) {
-      this.priceSort = sessionStorage.getItem('weapon-price-order') || '';
-    }
 
-    const favoritesFromStorage = localStorage.getItem('favorites');
-    if (favoritesFromStorage) {
-      this.favorites = JSON.parse(favoritesFromStorage);
+    this.checkStorageFavorite();
+
+    Events.$on('weapon:newFavorite', () => this.checkStorageFavorite());
+
+    if(this.isMarket) {
+      this.starFilter = sessionStorage.getItem('market-weapon-starfilter') || '';
+      this.elementFilter = sessionStorage.getItem('market-weapon-elementfilter') || '';
+      this.priceSort = sessionStorage.getItem('market-weapon-price-order') || '';
+    } else {
+      this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
+      this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
     }
   },
 });
 </script>
 
 <style scoped>
+.stars-elem {
+  margin-bottom: 20px;
+  max-width: 300px;
+  width: 100%;
+}
+.filters {
+   justify-content: center;
+   width: 100%;
+   max-width: 900px;
+   margin: 0 auto;
+   align-content: center;
+   border-bottom: 0.2px solid rgba(102, 80, 80, 0.1);
+   margin-bottom: 20px;
+}
 .weapon-grid {
   list-style-type: none;
+  justify-content: center;
   margin: 0;
   padding: 0;
   display: grid;
@@ -307,6 +378,7 @@ export default Vue.extend({
   border-radius: 5px;
   cursor: pointer;
   position: relative;
+  overflow: hidden;
 }
 
 .weapon.selected {
@@ -319,7 +391,7 @@ export default Vue.extend({
 }
 
 .above-wrapper {
-  padding: 0.5rem;
+  padding: 0.1rem;
 }
 
 .toggle-button {
@@ -332,6 +404,10 @@ export default Vue.extend({
   align-self: center;
 }
 
+.show-favorite {
+    margin-left: 15px;
+  }
+
 .show-reforged-checkbox {
   margin-left: 5px;
 }
@@ -341,10 +417,10 @@ export default Vue.extend({
   height: fit-content;
 }
 
-.favorite-star {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
+.clear-filters-button {
+  display: flex;
+  flex-direction: row;
+  align-self: center;
 }
 
 @media (max-width: 576px) {
@@ -352,17 +428,69 @@ export default Vue.extend({
     justify-content: center;
     margin-top: 10px;
   }
+
+  .show-reforged {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+
+  .clear-filters-button {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-self: center;
+    text-align: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .ml-3 {
+    margin-left: 0 !important;
+  }
 }
 
 /* Needed to adjust weapon list */
 @media all and (max-width: 767.98px) {
   .weapon-grid {
     padding-left: 2em;
+    justify-content: center;
   }
-
+  .stars-elem {
+  margin-bottom: 20px;
+  max-width: 500px;
+  width: 100%;
+}
   li.weapon {
     display: inline-block;
     margin: auto;
   }
+}
+
+.sold {
+    height: 40px;
+    width: 230px;
+    background-color: rgb(187, 33, 0);
+    transform: rotate(15deg);
+    left: -20px;
+    position: absolute;
+    top: 110px;
+    z-index: 100;
+}
+
+.sold span {
+    text-align: center;
+    width: auto;
+    color: white;
+    display: block;
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 40px;
+    text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+    text-transform: uppercase;
+}
+
+.fix-h24 {
+  height: 24px;
 }
 </style>

@@ -2,9 +2,9 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IStakeFromGame.sol";
 import "./interfaces/IRandoms.sol";
 import "./interfaces/IPriceOracle.sol";
@@ -83,6 +83,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         fightRewardBaseline = ABDKMath64x64.divu(344, 1000); // 0.08 x 4.3
     }
 
+    function migrateTo_5e833b0() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        durabilityCostFight = 1;
+    }
+
     // config vars
     uint8 staminaCostFight;
 
@@ -119,6 +125,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     mapping(address => uint256) private _rewardsClaimTaxTimerStart;
 
     IStakeFromGame public stakeFromGameImpl;
+
+    uint8 durabilityCostFight;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -186,10 +194,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target) external
+            onlyNonContract
             doesNotHaveMoreThanMaxCharacters
             oncePerBlock(msg.sender)
             isCharacterOwner(char)
             isWeaponOwner(wep) {
+
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
 
@@ -197,6 +207,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             uint8 weaponTrait) = weapons.getFightData(wep, charTrait);
+
+        weapons.drainDurability(wep, durabilityCostFight);
 
         _verifyFight(
             basePowerLevel,
@@ -385,7 +397,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
-    function mintCharacter() public doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
+    function mintCharacter() public onlyNonContract doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
         require(characters.balanceOf(msg.sender) < characters.characterLimit,
             string(abi.encodePacked("You can only have ",characters.characterLimit," characters!")));
         _payContract(msg.sender, mintCharacterFee);
@@ -409,7 +421,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeapon() public doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
+    function mintWeapon() public onlyNonContract doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
         _payContract(msg.sender, mintWeaponFee);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
@@ -426,6 +438,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function migrateRandoms(IRandoms _newRandoms) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
         randoms = _newRandoms;
+    }
+
+    modifier onlyNonContract() {
+        require(tx.origin == msg.sender, "Only EOA allowed (temporary)");
+        _;
     }
 
     modifier restricted() {
@@ -559,14 +576,24 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setReforgeWeaponValue(uint256 cents) public restricted {
+        require(cents >= 25, "ReforgeWeaponValue too low");
+        require(cents <= 100, "ReforgeWeaponValue too high");
         reforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
     }
 
     function setStaminaCostFight(uint8 points) public restricted {
+        require(points >= 20, "StaminaCostFight too low");
+        require(points <= 50, "StaminaCostFight too high");
         staminaCostFight = points;
     }
 
+    function setDurabilityCostFight(uint8 points) public restricted {
+        durabilityCostFight = points;
+    }
+
     function setFightXpGain(uint256 average) public restricted {
+        require(average >= 16, "FightXpGain too low");
+        require(average <= 64, "FightXpGain too high");
         fightXpGain = average;
     }
 
