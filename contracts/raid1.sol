@@ -1,26 +1,39 @@
 pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./raid.sol";
+import "./util.sol";
+import "./interfaces/IRandoms.sol";
 
-contract Raid1 is Initializable, MultiAccessUpgradeable {
+contract Raid1 is Initializable, AccessControlUpgradeable {
 
     /*
-        WIP raids reimplementation
+        Actual raids reimplementation
         Figured the old contract may have a lot of redundant variables and it's already deployed
         Maybe the raid interface isn't the way to go
         Either way it's probably fine to lay out the new one in a single file and compare
         The idea is to store all participants and raid details using an indexed mapping system
         And players get to claim their rewards as a derivative of a raid completion seed that
             a safe verifiable random source will provide (ideally)
-        
+        It may be better to convert the mappings using raidIndex into a struct
+        Need to test gas impact or if stack limits are any different
+
+        TODO: mint rewards (and link the relevant contracts somehow)
+            perhaps create and use interfaces for the rewards
     */
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
     
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+
+    uint8 public constant STATUS_UNSTARTED = 0;
+    uint8 public constant STATUS_STARTED = 1;
+    uint8 public constant STATUS_WON = 2;
+    uint8 public constant STATUS_LOST = 3;
+    uint8 public constant STATUS_PAUSED = 4; // in case of emergency
 
     CryptoBlades public game;
     Characters public characters;
@@ -34,14 +47,16 @@ contract Raid1 is Initializable, MultiAccessUpgradeable {
         uint24 traitsCWS;//char trait, wep trait, wep statpattern
     }
 
-    uint64 public staminaDrain;
+    uint64 public staminaCost;
+    uint64 public durabilityCost;
     int128 public joinCost;
+    uint16 public xpReward;
 
     uint256 public raidIndex;
-    // all keys are raidIndex
-    mapping(uint256 => bool) public raidCompleted; // may be unnecessary if you do completionseed != 0
-    mapping(uint256 => uint256) public raidEndTime; // check == 0 to see if it started yet
-    mapping(uint256 => uint256) public raidCompletionSeeds;
+    // all (first) keys are raidIndex
+    mapping(uint256 => uint8) public raidStatus;
+    mapping(uint256 => uint256) public raidEndTime;
+    mapping(uint256 => uint256) public raidSeed;
     mapping(uint256 => uint8) public raidBossTrait;
     mapping(uint256 => uint256) public raidBossPower;
     mapping(uint256 => uint256) public raidPlayerPower;
@@ -50,18 +65,18 @@ contract Raid1 is Initializable, MultiAccessUpgradeable {
     mapping(uint256 => mapping(uint256 => bool)) public raidRewardClaimed;
 
     event RaidStarted(uint256 indexed raidIndex, uint8 bossTrait, uint256 bossPower, uint256 endTime);
-    event RaidJoined(uint256 indexed raidIndex,
+    event RaidJoined(uint256 raidIndex,
         address indexed user,
         uint256 indexed character,
         uint256 indexed weapon,
         uint256 skillPaid);
-    event RaidCompleted(uint256 indexed raidIndex, bool victory, uint256 bossPower, uint256 playerPower);
+    event RaidCompleted(uint256 indexed raidIndex, uint8 outcome, uint256 bossRoll, uint256 playerRoll);
     
     // reward specific events for analytics
-    event RewardClaimed(uint256 indexed raidIndex, address indexed user);
-    event RewardedDustLB(uint256 indexed raidIndex, address indexed user, uint256 amount);
+    event RewardClaimed(uint256 indexed raidIndex, address indexed user, uint256 characterCount);
+    /*event RewardedDustLB(uint256 indexed raidIndex, address indexed user, uint256 amount);
     event RewardedDust4B(uint256 indexed raidIndex, address indexed user, uint256 amount);
-    event RewardedDust5B(uint256 indexed raidIndex, address indexed user, uint256 amount);
+    event RewardedDust5B(uint256 indexed raidIndex, address indexed user, uint256 amount);*/
     event RewardedWeapon(uint256 indexed raidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
     event RewardedJunk(uint256 indexed raidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
     event RewardedTrinket(uint256 indexed raidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
@@ -69,14 +84,17 @@ contract Raid1 is Initializable, MultiAccessUpgradeable {
 
     function initialize(address gameContract) public initializer {
         
-        MultiAccessUpgradeable.initialize();
+        __AccessControl_init_unchained();
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         game = CryptoBlades(gameContract);
         characters = Characters(game.characters());
         weapons = Weapons(game.weapons());
 
-        staminaDrain = 57600; // 16 hours
+        staminaCost = 192; // 5 mins each, or 16 hours
+        durabilityCost = 20; // 48 mins each, or 16 hours
         joinCost = ABDKMath64x64.fromUInt(10);// 10 usd
+        xpReward = 128; // 13 hour 20 min worth of fight xp
     }
 
     modifier restricted() {
@@ -84,31 +102,54 @@ contract Raid1 is Initializable, MultiAccessUpgradeable {
         _;
     }
 
+    function startRaid(uint256 bossPower, uint8 bossTrait, uint256 durationHours) public restricted {
+        raidStatus[raidIndex] = STATUS_STARTED;
+        raidBossPower[raidIndex] = bossPower;
+        raidBossTrait[raidIndex] = bossTrait;
+
+        uint256 endTime = now + (durationHours * 1 hours);
+        raidEndTime[raidIndex] = endTime;
+
+        emit RaidStarted(raidIndex, bossTrait, bossPower, endTime);
+    }
+
     function joinRaid(uint256 characterID, uint256 weaponID) public {
         require(characters.ownerOf(characterID) == msg.sender);
         require(weapons.ownerOf(weaponID) == msg.sender);
         require(characters.getStaminaPoints(characterID) > 0, "You cannot join with 0 character stamina");
         require(weapons.getDurabilityPoints(weaponID) > 0, "You cannot join with 0 weapon durability");
+        require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
+        require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            game.unpackFightData(characters.getFightDataAndDrainStamina(characterID, staminaDrain, true));
+            game.unpackFightData(characters.getFightDataAndDrainStamina(
+                                    characterID,
+                                    uint8(staminaCost),
+                                    true)
+                                );
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightData(wep, charTrait);
+            uint8 weaponTrait) = weapons.getFightData(weaponID, charTrait);
+        weapons.drainDurability(weaponID, uint8(durabilityCost), true);
         
-        weapons.drainDurability(weaponID, staminaDrain, true);
-
         uint24 power = getPlayerFinalPower(
             game.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             charTrait,
             raidBossTrait[raidIndex]
         );
-        totalPower += power;
-        uint8 wepStatPattern = weapons.getStatPattern(weaponID);
+        raidPlayerPower[raidIndex] += power;
 
-        raidParticipants[raidIndex].push(Raider(uint256(msg.sender), characterID, weaponID, power, traitCWS));
+        uint8 wepStatPattern = weapons.getStatPattern(weaponID);
+        raidParticipantIndices[raidIndex][uint256(msg.sender)].push(raidParticipants[raidIndex].length);
+        raidParticipants[raidIndex].push(Raider(
+            uint256(msg.sender),
+            characterID,
+            weaponID,
+            power,
+            uint24(charTrait) | (uint24(weaponTrait) << 8) | ((uint24(wepStatPattern)) << 16)//traitCWS
+        ));
 
         emit RaidJoined(raidIndex,
             msg.sender,
@@ -123,34 +164,153 @@ contract Raid1 is Initializable, MultiAccessUpgradeable {
         game.payContract(msg.sender, joinCost);
     }
 
-    function getPlayerFinalPower(uint24 playerPower, uint8 charTrait, uint8 bossTrait) returns(uint24) {
+    function setRaidStatus(uint256 index, uint8 status) public restricted {
+        // only use if absolutely necessary
+        raidStatus[index] = status;
+    }
+
+    function completeRaid() public restricted {
+        completeRaidWithSeed(game.randoms().getRandomSeed(msg.sender));
+    }
+
+    function completeRaidWithSeed(uint256 seed) internal {
+
+        raidSeed[raidIndex] = seed;
+        raidEndTime[raidIndex] = now;
+
+        uint256 bossPower = raidBossPower[raidIndex];
+        // we could also not include bossPower in the roll to have slightly higher chances of failure
+        // with bosspower added to roll ceiling the likelyhood of a win is: playerPower / bossPower
+        uint256 roll = RandomUtil.randomSeededMinMax(0,raidPlayerPower[raidIndex]+bossPower, seed);
+        uint8 outcome = roll > bossPower ? STATUS_WON : STATUS_LOST;
+        raidStatus[raidIndex] = outcome;
+
+        // since we pay out exactly one trinket per raid, we might as well do it here
+        Raider memory trinketWinner = raidParticipants[raidIndex][seed % raidParticipants[raidIndex].length];
+        // TODO mint trinket and send it to address
+        //emit RewardedTrinket(raidIndex, trinketWinner.owner, trinketStars, trinketID);
+
+        emit RaidCompleted(raidIndex, outcome, bossPower, roll);
+        raidIndex++;
+    }
+
+    function getPlayerFinalPower(uint24 playerPower, uint8 charTrait, uint8 bossTrait) public view returns(uint24) {
         if(game.isTraitEffectiveAgainst(charTrait, bossTrait))
             return uint24(ABDKMath64x64.divu(1075,1000).mulu(uint256(playerPower)));
         return playerPower;
     }
 
-    function completeRaid(uint256 seed) public restricted {
-        
-        emit RaidCompleted();
+    function claimReward(uint256 claimRaidIndex) public {
+        // NOTE: this function is stack limited
+        //claimRaidIndex can act as a version integer if future rewards change
+        bool victory = raidStatus[claimRaidIndex] == STATUS_WON;
+        require(victory || raidStatus[claimRaidIndex] == STATUS_LOST, "Raid not over");
+        require(raidRewardClaimed[claimRaidIndex][uint256(msg.sender)] == false, "Already claimed");
+
+        uint256[] memory raiderIndices = raidParticipantIndices[claimRaidIndex][uint256(msg.sender)];
+        require(raiderIndices.length > 0, "None of your characters participated");
+
+        int128 earlyBonus = ABDKMath64x64.divu(1,10); // up to 10%
+        uint256 earlyBonusCutoff = raidParticipants[claimRaidIndex].length/2; // first half of players
+        // we grab raider info (power) and give out xp and raid stats
+        for(uint i = 0; i < raiderIndices.length; i++) {
+            uint256 raiderIndex = raiderIndices[i];
+            Raider memory raider = raidParticipants[claimRaidIndex][raiderIndex];
+            int128 earlyMultiplier = ABDKMath64x64.fromUInt(1).add(
+                earlyBonus.mul(
+                    (earlyBonusCutoff-raiderIndex).divu(earlyBonusCutoff)
+                )
+            );
+            if(victory) {
+                distributeRewards(
+                    claimRaidIndex,
+                    ABDKMath64x64.divu(earlyMultiplier.mulu(raider.power),
+                        raidPlayerPower[claimRaidIndex]/raidParticipants[claimRaidIndex].length)
+                );
+            }
+            characters.processRaidParticipation(raider.charID, victory, uint16(earlyMultiplier.mulu(xpReward)));
+        }
+
+        raidRewardClaimed[claimRaidIndex][uint256(msg.sender)] = true;
+        emit RewardClaimed(claimRaidIndex, msg.sender, raiderIndices.length);
     }
 
-    function claimReward(uint256 raidIndex) public {
-        //characters.processRaidParticipation(charID, victory, xp)
+    function distributeRewards(
+        uint256 claimRaidIndex,
+        int128 comparedToAverage
+    ) private {
+        // at most 2 types of rewards
+        // dust is not implemented yet so we can expand with that later
+        // common: Lb dust, 1-3 star junk, 3 star wep
+        // rare: 4-5b dust, 4-5 star wep, 4-5 star junk, keybox
+        // chances are a bit generous compared to weapon mints because stamina cost equals lost skill
+        // That being said these rates stink if the oracle is 3x lower than real value.
+        uint256 seed = RandomUtil.combineSeeds(raidSeed[claimRaidIndex], uint256(msg.sender));
+
+        uint256 commonRoll = RandomUtil.randomSeededMinMax(0, comparedToAverage.mulu(100), seed);
+        if(commonRoll > 90) { // 90% base chance
+            uint mod = seed % 6;
+            if(mod == 0) { // 1 star junk, 1 out of 5 (20%)
+                uint tokenID = 0;
+                emit RewardedJunk(claimRaidIndex, msg.sender, 0, tokenID);
+            }
+            else if(mod == 1) { // 2 star junk, 1 out of 5 (20%)
+                uint tokenID = 0;
+                emit RewardedJunk(claimRaidIndex, msg.sender, 1, tokenID);
+            }
+            else if(mod < 4) { // 3 star junk, 2 out of 4 (40%)
+                uint tokenID = 0;
+                emit RewardedJunk(claimRaidIndex, msg.sender, 2, tokenID);
+            }
+            else { // 3 star weapon, 2 out of 4 (40%)
+                uint tokenID = 0;
+                emit RewardedWeapon(claimRaidIndex, msg.sender, 2, tokenID);
+            }
+        }
+
+        uint256 rareRoll = RandomUtil.randomSeededMinMax(0, comparedToAverage.mulu(1000), seed + 1);
+        if(rareRoll > 950) { // 5% base chance
+            uint mod = (seed / 10) % 14;
+            if(mod == 0) { // key box, 1 out of 13 (7.69%)
+                uint tokenID = 0;
+                emit RewardedKeyBox(claimRaidIndex, msg.sender, tokenID);
+            }
+            else if(mod == 1) { // 5 star sword, 1 out of 13 (7.69%)
+                uint tokenID = 0;
+                emit RewardedWeapon(claimRaidIndex, msg.sender, 4, tokenID);
+            }
+            else if(mod == 2) { // 5 star junk, 1 out of 13 (7.69%)
+                uint tokenID = 0;
+                emit RewardedJunk(claimRaidIndex, msg.sender, 4, tokenID);
+            }
+            else if(mod < 8) { // 4 star sword, 5 out of 13 (38.4%)
+                uint tokenID = 0;
+                emit RewardedWeapon(claimRaidIndex, msg.sender, 3, tokenID);
+            }
+            else { // 4 star junk, 5 out of 13 (38.4%)
+                uint tokenID = 0;
+                emit RewardedJunk(claimRaidIndex, msg.sender, 3, tokenID);
+            }
+        }
     }
 
-    function getTotalPower() public view returns(uint256) {
-        return totalPower;
+    function setStaminaPointCost(uint8 points) public restricted {
+        staminaCost = points;
     }
 
-    function setStaminaDrainSeconds(uint64 secs) public restricted {
-        staminaDrain = secs;
-    }
-
-    function getStaminaDrainSeconds() public view returns(uint64) {
-        return staminaDrain;
+    function setDurabilityPointCost(uint8 points) public restricted {
+        durabilityCost = points;
     }
 
     function setJoinCostInCents(uint256 cents) public restricted {
         joinCost = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function getJoinCostInSkill() public view returns(uint256) {
+        return game.usdToSkill(joinCost);
+    }
+
+    function setXpReward(uint16 xp) public restricted {
+        xpReward = xp;
     }
 }
