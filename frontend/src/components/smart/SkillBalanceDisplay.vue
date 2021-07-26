@@ -34,7 +34,7 @@ import Web3 from 'web3';
 import { IState } from '@/interfaces';
 import { formatDurationFromSeconds } from '@/utils/date-time';
 
-type StoreMappedState = Pick<IState, 'skillBalance' | 'inGameOnlyFunds' | 'waxBridgeWithdrawableBnb' | 'waxBridgeTimeUntilLimitExpires'>;
+type StoreMappedState = Pick<IState, 'skillRewards' | 'skillBalance' | 'inGameOnlyFunds' | 'waxBridgeWithdrawableBnb' | 'waxBridgeTimeUntilLimitExpires'>;
 
 interface StoreMappedGetters {
   getExchangeUrl: string;
@@ -48,14 +48,18 @@ interface StoreMappedActions {
 
 export default Vue.extend({
   computed: {
-    ...(mapState(['skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb', 'waxBridgeTimeUntilLimitExpires']) as Accessors<StoreMappedState>),
+    ...(mapState(['skillRewards', 'skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb',
+      'waxBridgeTimeUntilLimitExpires']) as Accessors<StoreMappedState>),
     ...(mapGetters({
       availableBNB: 'waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod',
       getExchangeUrl: 'getExchangeUrl'
     }) as Accessors<StoreMappedGetters>),
 
     formattedTotalSkillBalance(): string {
-      const skillBalance = Web3.utils.fromWei(Web3.utils.toBN(this.skillBalance).add(Web3.utils.toBN(this.inGameOnlyFunds)), 'ether');
+      const skillBalance = Web3.utils.fromWei(Web3.utils.toBN(this.skillBalance)
+        .add(Web3.utils.toBN(this.inGameOnlyFunds))
+        .add(Web3.utils.toBN(this.skillRewards)), 'ether');
+
       return `${new BN(skillBalance).toFixed(4)} SKILL`;
     },
 
@@ -101,9 +105,14 @@ export default Vue.extend({
     },
     totalSkillTooltipHtml() {
       const inGameOnlyFundsBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
+      const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
       const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
 
       let html =  new BN(skillBalance).toFixed(4) + ' SKILL';
+
+      if(parseFloat(skillRewards) !== 0){
+        html += '<br>+ WITHDRAWABLE ' + new BN(skillRewards).toFixed(4) + ' SKILL';
+      }
 
       if(parseFloat(inGameOnlyFundsBalance) !== 0){
         html += '<br>+ IN GAME ONLY ' + new BN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';

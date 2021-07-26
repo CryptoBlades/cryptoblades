@@ -2,7 +2,7 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
 
 contract Promos is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;

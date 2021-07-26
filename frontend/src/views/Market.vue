@@ -46,6 +46,7 @@
                 :weaponIds="allSearchResults"
                 :showLimit="weaponShowLimit"
                 :showReforgedToggle="false"
+                :showFavoriteToggle="false"
                 :canFavorite="false"
                 :isMarket="true"
                 v-model="selectedNftId">
@@ -223,6 +224,7 @@
                 v-if="activeType === 'weapon'"
                 :showGivenWeaponIds="true"
                 :showReforgedToggle="false"
+                :showFavoriteToggle="false"
                 :canFavorite="false"
                 :weaponIds="searchResults"
                 :isMarket="true"
@@ -430,7 +432,8 @@
             <div class="sell-grid" v-if="activeType === 'weapon'">
               <weapon-grid
                 v-model="selectedNftId"
-                :showReforgedToggle="false"
+                :showReforgedWeaponsDefVal="false"
+                :showFavoriteWeaponsDefVal="false"
                 :canFavorite="false"
               />
             </div>
@@ -502,9 +505,9 @@ interface Data {
   browseTabActive: boolean;
   listingSellPrice: string;
   priceChangeModal: boolean;
-  weaponTransactionHistoryData: any;
+  weaponTransactionHistoryData: WeaponTransactionHistoryData[];
   weaponTransactionHistoryHeader: any;
-  characterTransactionHistoryData: any;
+  characterTransactionHistoryData: CharacterTransactionHistoryData[];
   characterTransactionHistoryHeader: any;
   historyCounter: number;
 }
@@ -1226,7 +1229,7 @@ export default Vue.extend({
     },
 
     calculatedBuyerCost(listedPrice: number): string {
-      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(2);
+      return (0.01 * listedPrice * (100 + parseFloat(this.activeListingMarketTax()))).toFixed(8).replace(/(\.0+|0+)$/, '');
     },
 
     maxPrecisionSkill(listedPrice: string): string {

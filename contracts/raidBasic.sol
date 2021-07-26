@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./raid.sol";
 
 contract RaidBasic is Initializable, Raid {
