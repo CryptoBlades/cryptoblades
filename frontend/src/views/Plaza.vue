@@ -6,11 +6,7 @@
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="../assets/border-element.png">
         </div>
-        <strong class="upper-text">Sign up bonus</strong>
-        <b-icon-question-circle class="centered-icon" scale="0.75"
-          v-tooltip.bottom="`Only available for wallets than have not recruited any characters before.`"/>
-        <br>
-        <span>You will get <strong>1 SKILL</strong> upon recruiting your first character!</span>
+        <strong class="upper-text">Start earning today!</strong>
         <div class="bot-bg-img promotion-decoration">
             <img src="../assets/border-element.png">
         </div>
