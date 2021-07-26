@@ -568,7 +568,7 @@ contract NFTMarket is
     }
 
     function recoverSkill(uint256 amount) public restricted {
-        skillToken.safeTransferFrom(address(this), msg.sender, amount); // dont expect we'll hold tokens here but might as well
+        skillToken.safeTransfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
     }
 
     function onERC721Received(

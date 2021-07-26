@@ -138,7 +138,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function recoverSkill(uint256 amount) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
-        skillToken.safeTransferFrom(address(this), msg.sender, amount);
+        skillToken.safeTransfer(msg.sender, amount);
     }
 
     function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _skillNeeded)
@@ -552,7 +552,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _payPlayerConverted(address playerAddress, uint256 convertedAmount) internal {
-        skillToken.safeTransferFrom(address(this), playerAddress, convertedAmount);
+        skillToken.safeTransfer(playerAddress, convertedAmount);
     }
 
     function _approveContractCharacterFor(uint256 characterID, address playerAddress) internal {
