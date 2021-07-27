@@ -45,23 +45,24 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         staminaCostFight = 40;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
-        fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
-        fightRewardGasOffset = ABDKMath64x64.divu(8, 10);//0.8 usd;
         mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
         reforgeWeaponFee = ABDKMath64x64.divu(5, 10);//0.5 usd;
-    }
 
-    function migrateTo_1ee400a() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-
+        // migrateTo_1ee400a
         fightXpGain = 32;
-    }
 
-    function migrateTo_aa9da90() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-
+        // migrateTo_aa9da90
         oneFrac = ABDKMath64x64.fromUInt(1);
         fightTraitBonus = ABDKMath64x64.divu(75, 1000);
+
+        // migrateTo_7dd2a56
+        // numbers given for the curves were $4.3-aligned so they need to be multiplied
+        // additional accuracy may be in order for the setter functions for these
+        fightRewardGasOffset = ABDKMath64x64.divu(23177, 100000); // 0.0539 x 4.3
+        fightRewardBaseline = ABDKMath64x64.divu(344, 1000); // 0.08 x 4.3
+
+        // migrateTo_5e833b0
+        durabilityCostFight = 1;
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
@@ -74,21 +75,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         stakeFromGameImpl = _stakeFromGame;
-    }
-
-    function migrateTo_7dd2a56() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-
-        // numbers given for the curves were $4.3-aligned so they need to be multiplied
-        // additional accuracy may be in order for the setter functions for these
-        fightRewardGasOffset = ABDKMath64x64.divu(23177, 100000); // 0.0539 x 4.3
-        fightRewardBaseline = ABDKMath64x64.divu(344, 1000); // 0.08 x 4.3
-    }
-
-    function migrateTo_5e833b0() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-
-        durabilityCostFight = 1;
     }
 
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
