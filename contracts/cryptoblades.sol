@@ -13,6 +13,8 @@ import "./characters.sol";
 import "./Promos.sol";
 import "./weapons.sol";
 import "./util.sol";
+import "./WeaponRewardPool.sol";
+import "./FightUtil.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -30,8 +32,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
     IPriceOracle public priceOracleSkillPerUsd;
     IRandoms public randoms;
+    WeaponRewardPool weaponRewardPool;
+    FightUtil fightUtil;
 
-    function initialize(IERC20 _skillToken, Characters _characters, Weapons _weapons, IPriceOracle _priceOracleSkillPerUsd, IRandoms _randoms) public initializer {
+    function initialize(IERC20 _skillToken,
+    Characters _characters,
+    Weapons _weapons,
+    IPriceOracle _priceOracleSkillPerUsd,
+    IRandoms _randoms,
+    WeaponRewardPool _weaponRewardPool,
+    FightUtil _fightUtil) public initializer {
         __AccessControl_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -42,8 +52,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         weapons = _weapons;
         priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
         randoms = _randoms;
+        weaponRewardPool = _weaponRewardPool;
+        fightUtil = _fightUtil;
 
-        staminaCostFight = 40;
+        staminaCostFight = 1;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
         reforgeWeaponFee = ABDKMath64x64.divu(5, 10);//0.5 usd;
@@ -118,8 +130,21 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     uint8 durabilityCostFight;
 
+    address weaponPoolAddress;
+
+    struct VerifyFightData {
+        uint24 basePowerLevel;
+        int128 weaponMultTarget;
+        int128 weaponMultFight;
+        uint24 weaponBonusPower;
+        uint8 weaponTrait;
+        uint64 timestamp;
+        uint32 target;
+    }
+
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
+    event UnlikelyWeaponMint(address indexed owner, uint256 indexed unlikelyWeapon, bool won);
 
     function recoverSkill(uint256 amount) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
@@ -190,66 +215,66 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             isCharacterOwner(char)
             isWeaponOwner(wep) {
 
+        uint24 traitCWE;
+        uint24 targetPower;
+        VerifyFightData memory data;
+
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
 
-        (int128 weaponMultTarget,
-            int128 weaponMultFight,
-            uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightData(wep, charTrait);
+        data = _getFightData(wep, charTrait);
+
+        data.basePowerLevel = basePowerLevel;
+        data.timestamp = timestamp;
+        data.target = target;
+
+        traitCWE = uint24(charTrait | (uint24(data.weaponTrait) << 8) | (target & 0xFF000000) >> 8);
+        targetPower = uint24(target & 0xFFFFFF);
 
         weapons.drainDurability(wep, durabilityCostFight);
 
-        _verifyFight(
-            basePowerLevel,
-            weaponMultTarget,
-            weaponBonusPower,
-            timestamp,
-            target
+        _verifyFight(data);
+
+        uint256 unlikelyFightWeaponId = _checkForUnlikelyFight(
+            fightUtil.getPlayerPower(basePowerLevel, data.weaponMultFight, data.weaponBonusPower),
+            traitCWE,
+            targetPower
         );
+
         performFight(
             char,
             wep,
-            getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
-            uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
-            uint24(target & 0xFFFFFF)
+            fightUtil.getPlayerPower(basePowerLevel, data.weaponMultFight, data.weaponBonusPower),
+            traitCWE,
+            targetPower,
+            unlikelyFightWeaponId
         );
     }
 
-    function _verifyFight(
-        uint24 basePowerLevel,
-        int128 weaponMultTarget,
-        uint24 weaponBonusPower,
-        uint64 timestamp,
-        uint32 target
-    ) internal view {
-        verifyFight(
-            basePowerLevel,
-            weaponMultTarget,
-            weaponBonusPower,
-            timestamp,
-            getCurrentHour(),
-            target
-        );
+    function _getFightData(uint256 wep, uint8 charTrait) private view returns(VerifyFightData memory) {
+        VerifyFightData memory fightData;
+        (fightData.weaponMultTarget,
+            fightData.weaponMultFight,
+            fightData.weaponBonusPower,
+            fightData.weaponTrait) = weapons.getFightData(wep, charTrait);
+
+        return fightData;
     }
 
-    function verifyFight(
-        uint24 playerBasePower,
-        int128 wepMultiplier,
-        uint24 wepBonusPower,
-        uint64 staminaTimestamp,
-        uint256 hour,
-        uint32 target
-    ) public pure {
+    function _verifyFight(VerifyFightData memory data) internal view {
+        verifyFight(data, getCurrentHour());
+    }
+
+    function verifyFight(VerifyFightData memory data, uint256 hour) internal view {
 
         uint32[4] memory targets = getTargetsInternal(
-            getPlayerPower(playerBasePower, wepMultiplier, wepBonusPower),
-            staminaTimestamp,
+            fightUtil.getPlayerPower(data.basePowerLevel, data.weaponMultTarget, data.weaponBonusPower),
+            data.timestamp,
             hour
         );
         bool foundMatch = false;
         for(uint i = 0; i < targets.length; i++) {
-            if(targets[i] == target) {
+            if(targets[i] == data.target) {
                 foundMatch = true;
                 i = targets.length;
             }
@@ -257,16 +282,29 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(foundMatch, "Target invalid");
     }
 
+    function _checkForUnlikelyFight(
+        uint24 playerFightPower,
+        uint24 traitsCWE,
+        uint24 targetPower
+    ) private returns(uint256 unlikelyWeaponId) {
+        if (weaponRewardPool.isUnlikelyFight(playerFightPower, traitsCWE, targetPower, oneFrac, fightTraitBonus)) {
+            return weaponRewardPool.mintUnlikelyWeapon();
+        }
+
+        return 0;
+    }
+
     function performFight(
         uint256 char,
         uint256 wep,
         uint24 playerFightPower,
         uint24 traitsCWE, // could fit into uint8 since each trait is only stored on 2 bits (TODO)
-        uint24 targetPower
+        uint24 targetPower,
+        uint256 unlikelyFightWeaponId
     ) private {
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
-        uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
+        uint24 playerRoll = fightUtil.getPlayerPowerRoll(playerFightPower, traitsCWE, seed, traitsCWE, fightTraitBonus);
+        uint24 monsterRoll = fightUtil.getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
         uint16 xp = getXpGainForFight(playerFightPower, targetPower);
         uint256 tokens = usdToSkill(getTokenGainForFight(targetPower));
@@ -274,6 +312,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if(playerRoll < monsterRoll) {
             tokens = 0;
             xp = 0;
+            if (unlikelyFightWeaponId > 0) {
+                weaponRewardPool.poolUnlikelyFightWeapon(unlikelyFightWeaponId);
+            }
         }
 
         if(tokenRewards[msg.sender] == 0 && tokens > 0) {
@@ -285,10 +326,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         xpRewards[char] += xp;
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
-    }
 
-    function getMonsterPower(uint32 target) public pure returns (uint24) {
-        return uint24(target & 0xFFFFFF);
+        if (unlikelyFightWeaponId > 0) {
+            emit UnlikelyWeaponMint(msg.sender, unlikelyFightWeaponId, playerRoll > monsterRoll);
+        }
     }
 
     function getTokenGainForFight(uint24 monsterPower) internal view returns (int128) {
@@ -306,51 +347,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint16(ABDKMath64x64.divu(monsterPower, playerPower).mulu(fightXpGain));
     }
 
-    function getPlayerPowerRoll(
-        uint24 playerFightPower,
-        uint24 traitsCWE,
-        uint256 seed
-    ) internal view returns(uint24) {
-
-        uint256 playerPower = RandomUtil.plusMinus10PercentSeeded(playerFightPower,seed);
-        return uint24(getPlayerTraitBonusAgainst(traitsCWE).mulu(playerPower));
-    }
-
-    function getMonsterPowerRoll(uint24 monsterPower, uint256 seed) internal pure returns(uint24) {
-        // roll for fights
-        return uint24(RandomUtil.plusMinus10PercentSeeded(monsterPower, seed));
-    }
-
-    function getPlayerPower(
-        uint24 basePower,
-        int128 weaponMultiplier,
-        uint24 bonusPower
-    ) public pure returns(uint24) {
-        return uint24(weaponMultiplier.mulu(basePower).add(bonusPower));
-    }
-
-    function getPlayerTraitBonusAgainst(uint24 traitsCWE) public view returns (int128) {
-        int128 traitBonus = oneFrac;
-        uint8 characterTrait = uint8(traitsCWE & 0xFF);
-        if(characterTrait == (traitsCWE >> 8) & 0xFF/*wepTrait*/) {
-            traitBonus = traitBonus.add(fightTraitBonus);
-        }
-        if(isTraitEffectiveAgainst(characterTrait, uint8(traitsCWE >> 16)/*enemy*/)) {
-            traitBonus = traitBonus.add(fightTraitBonus);
-        }
-        else if(isTraitEffectiveAgainst(uint8(traitsCWE >> 16)/*enemy*/, characterTrait)) {
-            traitBonus = traitBonus.sub(fightTraitBonus);
-        }
-        return traitBonus;
-    }
-
     function getTargets(uint256 char, uint256 wep) public view returns (uint32[4] memory) {
         (int128 weaponMultTarget,,
             uint24 weaponBonusPower,
             ) = weapons.getFightData(wep, characters.getTrait(char));
 
         return getTargetsInternal(
-            getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
+            fightUtil.getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
             characters.getStaminaTimestamp(char),
             getCurrentHour()
         );
@@ -589,6 +592,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function setCharacterLimit(uint256 max) public restricted {
         characters.setCharacterLimit(max);
+    }
+
+    function setWeaponPoolAddress(address pool) public restricted {
+        weaponPoolAddress = pool;
     }
 
     function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {
