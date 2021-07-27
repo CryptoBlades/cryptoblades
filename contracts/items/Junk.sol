@@ -5,8 +5,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "../interfaces/IERC721MintAccessSeededStars.sol";
 
-contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
+contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IERC721MintAccessSeededStars {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
@@ -18,6 +19,8 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     mapping(uint256 => uint8) public stars;
+    
+    event MintAccessSeededStars(address indexed minter, address indexed receiver, uint256 ref, uint256 indexed id, uint8 stars);
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
@@ -30,6 +33,11 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         stars[tokenID] = mintStars;
         _mint(minter, tokenID);
         return tokenID;
+    }
+
+    function mintAccessSeededStars(address receiver, uint256 ref, uint256 seed, uint8 mintStars) external override restricted {
+        uint tokenID = mint(receiver, mintStars);
+        emit MintAccessSeededStars(msg.sender, receiver, ref, tokenID, mintStars);
     }
 
 }

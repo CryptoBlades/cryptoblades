@@ -7,6 +7,9 @@ import "./characters.sol";
 import "./weapons.sol";
 import "./util.sol";
 import "./interfaces/IRandoms.sol";
+import "./interfaces/IERC20MintAccess.sol";
+import "./interfaces/IERC721MintAccessSeeded.sol";
+import "./interfaces/IERC721MintAccessSeededStars.sol";
 
 contract Raid1 is Initializable, AccessControlUpgradeable {
 
@@ -64,6 +67,11 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Raider[]) public raidParticipants;
     mapping(uint256 => mapping(uint256/*address*/ => uint256[])) public raidParticipantIndices;
     mapping(uint256 => mapping(uint256 => bool)) public raidRewardClaimed;
+
+    // reward interface, keys are reward indices that are unique per-type
+    mapping(uint256 => uint256) public rewardsERC20;
+    mapping(uint256 => uint256) public rewardsERC721Seeded;
+    mapping(uint256 => uint256) public rewardsERC721SeededStars;
 
     event RaidStarted(uint256 indexed raidIndex, uint8 bossTrait, uint256 bossPower, uint256 endTime);
     event RaidJoined(uint256 raidIndex,
@@ -295,7 +303,15 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function registerNFTRewardStarsAddress(address addr, uint256 index) public restricted {
+    function registerERC20RewardAddress(address addr, uint256 index) public restricted {
+
+    }
+
+    function registerERC721RewardSeededAddress(address addr, uint256 index) public restricted {
+
+    }
+
+    function registerERC721RewardSeededStarsAddress(address addr, uint256 index) public restricted {
 
     }
 

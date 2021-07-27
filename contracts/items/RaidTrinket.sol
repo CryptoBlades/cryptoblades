@@ -6,8 +6,9 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../interfaces/ITransferCooldownable.sol";
+import "../interfaces/IERC721MintAccessSeededStars.sol";
 
-contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable, ITransferCooldownable {
+contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeable, ITransferCooldownable, IERC721MintAccessSeededStars {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
@@ -25,6 +26,8 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable, ITr
 
     mapping(uint256 => uint8) public stars;
     mapping(uint256 => uint256) public effect;
+
+    event MintAccessSeededStars(address indexed minter, address indexed receiver, uint256 ref, uint256 indexed id, uint8 stars);
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
@@ -55,6 +58,11 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable, ITr
         effect[tokenID] = mintEffect;
         _mint(minter, tokenID);
         return tokenID;
+    }
+    
+    function mintAccessSeededStars(address receiver, uint256 ref, uint256 seed, uint8 mintStars) external override restricted {
+        uint tokenID = mint(receiver, mintStars, ref);
+        emit MintAccessSeededStars(msg.sender, receiver, ref, tokenID, mintStars);
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
