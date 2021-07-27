@@ -3,9 +3,11 @@ pragma solidity ^0.6.2;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "../../node_modules/@openzeppelin/contracts/math/Math.sol";
-import "../../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../../node_modules/@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/math/Math.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+
+import "../cryptoblades.sol";
 
 // Inheritance
 import "./interfaces/IStakingRewards.sol";
@@ -42,6 +44,11 @@ contract StakingRewardsUpgradeable is
     mapping(address => uint256) private _balances;
     mapping(address => uint256) private _stakeTimestamp;
 
+    // used only by the SKILL-for-SKILL staking contract
+    CryptoBlades internal __game;
+
+    uint256 public override minimumStakeAmount;
+
     /* ========== CONSTRUCTOR ========== */
 
     function initialize(
@@ -69,6 +76,10 @@ contract StakingRewardsUpgradeable is
         periodFinish = 0;
         rewardRate = 0;
         rewardsDuration = 180 days;
+    }
+
+    function migrateTo_8cb6e70(uint256 _minimumStakeAmount) external onlyOwner {
+        minimumStakeAmount = _minimumStakeAmount;
     }
 
     /* ========== VIEWS ========== */
@@ -289,7 +300,17 @@ contract StakingRewardsUpgradeable is
         emit MinimumStakeTimeUpdated(_minimumStakeTime);
     }
 
+    function setMinimumStakeAmount(uint256 _minimumStakeAmount)
+        external
+        normalMode
+        onlyOwner
+    {
+        minimumStakeAmount = _minimumStakeAmount;
+        emit MinimumStakeAmountUpdated(_minimumStakeAmount);
+    }
+
     function enableFailsafeMode() public override normalMode onlyOwner {
+        minimumStakeAmount = 0;
         minimumStakeTime = 0;
         periodFinish = 0;
         rewardRate = 0;
@@ -324,7 +345,7 @@ contract StakingRewardsUpgradeable is
 
     function _stake(address staker, uint256 amount) internal
     {
-        require(amount > 0, "Cannot stake 0");
+        require(amount >= minimumStakeAmount, "Minimum stake amount required");
         _totalSupply = _totalSupply.add(amount);
         _balances[staker] = _balances[staker].add(amount);
         if (_stakeTimestamp[staker] == 0) {
@@ -355,5 +376,6 @@ contract StakingRewardsUpgradeable is
     event RewardPaid(address indexed user, uint256 reward);
     event RewardsDurationUpdated(uint256 newDuration);
     event MinimumStakeTimeUpdated(uint256 newMinimumStakeTime);
+    event MinimumStakeAmountUpdated(uint256 newMinimumStakeAmount);
     event Recovered(address token, uint256 amount);
 }

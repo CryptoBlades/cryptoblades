@@ -2,11 +2,15 @@
   <div class="body main-font">
 
     <div v-if="ownCharacters.length === 0" class="blank-slate">
-      You do not have any characters.
-      <br>
-      You can recruit one by clicking the button below.
-      <br>
-      <br>
+      <div class="current-promotion">
+        <div class="tob-bg-img promotion-decoration">
+          <img class="vertical-decoration bottom" src="../assets/border-element.png">
+        </div>
+        <strong class="upper-text">Start earning today!</strong>
+        <div class="bot-bg-img promotion-decoration">
+            <img src="../assets/border-element.png">
+        </div>
+      </div>
       <big-button
         class="button"
         :mainText="`Recruit character for ${recruitCost} SKILL`"
@@ -122,4 +126,29 @@ export default {
 </script>
 
 <style scoped>
+
+.current-promotion {
+  width: 40%;
+  text-align: center;
+}
+
+@media all and (max-width:  767.98px) {
+  .current-promotion {
+    width: 100vw;
+    margin-top: 90px;
+    padding-left: 15px;
+  }
+}
+
+.promotion-decoration {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.upper-text {
+  text-transform: uppercase;
+}
 </style>
