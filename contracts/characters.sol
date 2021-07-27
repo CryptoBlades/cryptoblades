@@ -3,7 +3,7 @@ pragma solidity ^0.6.0;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
 import "./interfaces/ITransferCooldownable.sol";
@@ -66,6 +66,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         promos = _promos;
     }
 
+    function migrateTo_b627f23() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        characterLimit = 4;
+    }
+
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-256
@@ -100,6 +106,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
+
+    uint256 public characterLimit;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -271,7 +279,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to)) {
-            require(balanceOf(to) < 4, "Recv has too many characters");
+            require(balanceOf(to) < characterLimit, "Recv has too many characters");
         }
 
         // when not minting or burning...
@@ -286,5 +294,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
         promos.setBit(from, promos.BIT_FIRST_CHARACTER());
         promos.setBit(to, promos.BIT_FIRST_CHARACTER());
+    }
+
+    function setCharacterLimit(uint256 max) public restricted {
+        characterLimit = max;
     }
 }
