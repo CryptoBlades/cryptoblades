@@ -137,14 +137,14 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
-        (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
+        (uint8 charTrait, uint24 basePowerLevel, /*uint64 timestamp*/) =
             game.unpackFightData(characters.getFightDataAndDrainStamina(
                                     characterID,
                                     uint8(staminaCost),
                                     true)
                                 );
 
-        (int128 weaponMultTarget,
+        (/*int128 weaponMultTarget*/,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             uint8 weaponTrait) = weapons.getFightData(weaponID, charTrait);
@@ -398,8 +398,26 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function isEligibleForReward(uint256 index) public view returns(uint256[] memory) {
-        return raidParticipantIndices[i][uint256(msg.sender)].length > 0
-            && raidRewardClaimed[i][uint256(msg.sender)] == false;
+    function isEligibleForReward(uint256 index) public view returns(bool) {
+        return raidParticipantIndices[index][uint256(msg.sender)].length > 0
+            && raidRewardClaimed[index][uint256(msg.sender)] == false;
+    }
+
+    function getParticipatingCharacters() public view returns(uint256[] memory) {
+        uint256[] memory indices = raidParticipantIndices[raidIndex][uint256(msg.sender)];
+        uint256[] memory chars = new uint256[](indices.length);
+        for(uint i = 0; i < indices.length; i++) {
+            chars[i] = raidParticipants[raidIndex][i].charID;
+        }
+        return chars;
+    }
+    
+    function getParticipatingWeapons() public view returns(uint256[] memory) {
+        uint256[] memory indices = raidParticipantIndices[raidIndex][uint256(msg.sender)];
+        uint256[] memory weps = new uint256[](indices.length);
+        for(uint i = 0; i < indices.length; i++) {
+            weps[i] = raidParticipants[raidIndex][i].wepID;
+        }
+        return weps;
     }
 }
