@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./interfaces/IStakeFromGame.sol";
 import "./interfaces/IRandoms.sol";
 import "./interfaces/IPriceOracle.sol";
@@ -17,6 +18,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
     using SafeMath for uint256;
     using SafeMath for uint64;
+    using SafeERC20 for IERC20;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
@@ -41,7 +43,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
         randoms = _randoms;
 
-        characterLimit = 4;
         staminaCostFight = 40;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         fightRewardBaseline = ABDKMath64x64.divu(1, 100);//0.01 usd;
@@ -90,8 +91,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         durabilityCostFight = 1;
     }
 
-    // config vars
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint characterLimit;
+    // config vars
     uint8 staminaCostFight;
 
     // prices & payouts are in USD, with 4 decimals of accuracy in 64.64 fixed point format
@@ -136,7 +138,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function recoverSkill(uint256 amount) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
-        skillToken.transfer(msg.sender, amount);
+        skillToken.safeTransfer(msg.sender, amount);
     }
 
     function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _skillNeeded)
@@ -400,8 +402,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function mintCharacter() public onlyNonContract doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
-        require(characters.balanceOf(msg.sender) < characterLimit,
-            string(abi.encodePacked("You can only have ",characterLimit," characters!")));
+        require(characters.balanceOf(msg.sender) < characters.characterLimit(),
+            string(abi.encodePacked("You can only have ",characters.characterLimit()," characters!")));
         _payContract(msg.sender, mintCharacterFee);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
@@ -469,7 +471,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     modifier doesNotHaveMoreThanMaxCharacters() {
-        require(characters.balanceOf(msg.sender) <= characterLimit, "Too many characters owned");
+        require(characters.balanceOf(msg.sender) <= characters.characterLimit(), "Too many characters owned");
         _;
     }
 
@@ -542,7 +544,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
 
         tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
-        skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
+        skillToken.safeTransferFrom(playerAddress, address(this), fromUserWallet);
     }
 
     function _payPlayer(address playerAddress, int128 baseAmount) internal {
@@ -550,7 +552,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _payPlayerConverted(address playerAddress, uint256 convertedAmount) internal {
-        skillToken.transfer(playerAddress, convertedAmount);
+        skillToken.safeTransfer(playerAddress, convertedAmount);
     }
 
     function _approveContractCharacterFor(uint256 characterID, address playerAddress) internal {
@@ -600,14 +602,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setCharacterLimit(uint256 max) public restricted {
-        characterLimit = max;
+        characters.setCharacterLimit(max);
     }
 
     function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {
         totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
         inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
 
-        skillToken.transferFrom(msg.sender, address(this), skillAmount);
+        skillToken.safeTransferFrom(msg.sender, address(this), skillAmount);
 
         emit InGameOnlyFundsGiven(to, skillAmount);
     }
@@ -653,7 +655,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 _tokenRewards = tokenRewards[msg.sender];
         tokenRewards[msg.sender] = 0;
 
-        _giveInGameOnlyFundsFromContractBalance(msg.sender, _tokenRewards / 10);
+        _giveInGameOnlyFundsFromContractBalance(msg.sender, _tokenRewards / 2);
 
         skillToken.approve(address(stakeFromGameImpl), _tokenRewards);
         stakeFromGameImpl.stakeFromGame(msg.sender, _tokenRewards);

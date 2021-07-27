@@ -100,13 +100,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(uint256 => uint256) public lastTransferTimestamp;
 
+    uint256 private lastMintedBlock;
+    uint256 private firstMintedOfLastBlock;
+
     mapping(uint256 => uint64) durabilityTimestamp;
 
     uint256 public constant maxDurability = 20;
     uint256 public constant secondsPerDurability = 2880; //48 * 60
-
-    uint256 private lastMintedBlock;
-    uint256 private firstMintedOfLastBlock;
 
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);

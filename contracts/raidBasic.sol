@@ -68,7 +68,7 @@ contract RaidBasic is Initializable, Raid {
         for(uint i = 0; i < weaponDrops.length; i++) {
             Raider memory r = raiders[RandomUtil.randomSeededMinMax(0, raiders.length-1, RandomUtil.combineSeeds(seed,i))];
             game.approveContractWeaponFor(weaponDrops[i], address(this));
-            weapons.transferFrom(address(game), address(r.owner), weaponDrops[i]);
+            weapons.safeTransferFrom(address(game), address(r.owner), weaponDrops[i]);
             emit WeaponWinner(address(r.owner), weaponDrops[i]);
         }
 
@@ -102,7 +102,8 @@ contract RaidBasic is Initializable, Raid {
     function removeRewardWeapon(uint256 index) public restricted {
         require(index < weaponDrops.length, "Index out of bounds");
 
-        delete weaponDrops[index];
+        weaponDrops[index] = weaponDrops[weaponDrops.length - 1];
+        weaponDrops.pop();
     }
 
     function getWeaponDrops() public view returns(uint256[] memory) {
