@@ -5,10 +5,11 @@
         <div class="col error">Error: {{ error }}</div>
       </div>
 
-      <b-modal id="fightResultsModal" hide-footer title="Fight Results">
-        <CombatResults v-if="resultsAvailable" :results="fightResults" />
-        <b-button class="mt-3" variant="primary" block @click="$bvModal.hide('fightResultsModal')">Close</b-button>
+
+      <b-modal id="fightResultsModal" hide-footer hide-header>
+          <CombatResults v-if="resultsAvailable" :results="fightResults" />
       </b-modal>
+
 
       <div class="row">
         <div class="col">
@@ -204,7 +205,10 @@ export default {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
-      if(this.resultsAvailable) this.$bvModal.show('fightResultsModal');
+      if(this.resultsAvailable){
+        this.$bvModal.show('fightResultsModal');
+        setTimeout(() => this.$bvModal.hide('fightResultsModal'), 2000);
+      }
     },
   },
 
@@ -333,6 +337,9 @@ export default {
 </script>
 
 <style scoped>
+.modal-backdrop{
+  opacity: 0;
+}
 
 .enemy-character {
   position: relative;
