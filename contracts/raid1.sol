@@ -2,8 +2,9 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
-import "./raid.sol";
+import "./cryptoblades.sol";
+import "./characters.sol";
+import "./weapons.sol";
 import "./util.sol";
 import "./interfaces/IRandoms.sol";
 
@@ -292,6 +293,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
                 emit RewardedJunk(claimRaidIndex, msg.sender, 3, tokenID);
             }
         }
+    }
+
+    function registerNFTRewardStarsAddress(address addr, uint256 index) public restricted {
+
     }
 
     function setStaminaPointCost(uint8 points) public restricted {
