@@ -288,7 +288,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 targetPower
     ) private returns(uint256 unlikelyWeaponId) {
         if (weaponRewardPool.isUnlikelyFight(playerFightPower, traitsCWE, targetPower, oneFrac, fightTraitBonus)) {
-            return weaponRewardPool.mintUnlikelyWeapon();
+            return weaponRewardPool.mintUnlikelyFightWeapon();
         }
 
         return 0;
