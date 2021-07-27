@@ -78,7 +78,7 @@ import { mapActions, mapGetters,mapState } from 'vuex';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
-import WeaponIcon from '../components/WeaponIcon.vue';
+//import WeaponIcon from '../components/WeaponIcon.vue';
 
 export default {
   computed: {
@@ -117,6 +117,7 @@ export default {
 
   watch: {
     async selections([characterId, weaponId]) {
+      console.log(characterId);
       if (!this.ownWeapons.find((weapon) => weapon.id === weaponId)) {
         this.selectedWeaponId = null;
       }
@@ -131,7 +132,7 @@ export default {
     BigButton,
     CharacterList,
     WeaponGrid,
-    WeaponIcon,
+    //WeaponIcon,
   },
 };
 </script>
