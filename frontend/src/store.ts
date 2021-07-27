@@ -1185,6 +1185,18 @@ export function createStore(web3: Web3) {
         await dispatch('fetchStakeDetails', { stakeType });
       },
 
+      async joinRaid({ state }, { characterId, weaponId }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        console.log('Within the join raid method...');
+
+        await Raid1!.methods
+          .joinRaid(characterId, weaponId)
+          .send(defaultCallOptions(state));
+
+        console.log('past the join raid await');
+      },
+
       async fetchRaidData({ state, commit }) {
         if(featureFlagStakeOnly || !featureFlagRaid) return;
 

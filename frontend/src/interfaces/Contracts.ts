@@ -1,5 +1,6 @@
 import { Contract as Web3EthContract } from 'web3-eth-contract';
-import type { IERC20, IStakingRewards, CryptoBlades, Characters, Weapons, RaidBasic, IRandoms, NFTMarket, WaxBridge } from '../../../build/abi-interfaces';
+import type { IERC20, IStakingRewards, CryptoBlades, Characters, Weapons,
+  RaidBasic, IRandoms, NFTMarket, WaxBridge, Raid1 } from '../../../build/abi-interfaces';
 import { StakeType } from './State';
 
 interface TypeSafeContract<Abi> {
@@ -24,4 +25,5 @@ export interface Contracts {
   RaidBasic?: Contract<RaidBasic>;
   NFTMarket?: Contract<NFTMarket>;
   WaxBridge?: Contract<WaxBridge>;
+  Raid1?: Contract<Raid1>;
 }
