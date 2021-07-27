@@ -11,7 +11,7 @@ import {
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
-  IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState
+  IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
@@ -117,8 +117,6 @@ export function createStore(web3: Web3) {
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
-
-      characterTransferCooldowns: {},
 
       shields: {},
       trinkets: {},
@@ -354,20 +352,6 @@ export function createStore(web3: Web3) {
         return state.weapons[state.currentWeaponId];
       },
 
-      transferCooldownOfCharacterId(state) {
-        return (characterId: string | number, now: number | null = null) => {
-          const transferCooldown = state.characterTransferCooldowns[+characterId];
-          if(!transferCooldown) return 0;
-
-          const deltaFromLastUpdated =
-            now === null
-              ? 0
-              : (now - transferCooldown.lastUpdatedTimestamp);
-
-          return Math.max(Math.floor(transferCooldown.secondsLeft - deltaFromLastUpdated), 0);
-        };
-      },
-
       currentCharacter(state) {
         if (state.currentCharacterId === null) return null;
 
@@ -592,13 +576,6 @@ export function createStore(web3: Web3) {
 
       updateCharacter(state: IState, { characterId, character }) {
         Vue.set(state.characters, characterId, character);
-      },
-
-      updateCharacterTransferCooldown(
-        state: IState,
-        { characterId, characterTransferCooldown }: { characterId: number, characterTransferCooldown: ITransferCooldown }
-      ) {
-        Vue.set(state.characterTransferCooldowns, characterId, characterTransferCooldown);
       },
 
       updateShield(state: IState, { shieldId, shield }) {
@@ -1122,42 +1099,7 @@ export function createStore(web3: Web3) {
 
             commit('updateCharacter', { characterId, character });
           })(),
-          dispatch('fetchCharacterTransferCooldown', characterId)
         ]);
-      },
-
-      async fetchCharacterTransferCooldownForOwnCharacters({ state, dispatch }) {
-        await Promise.all(
-          state.ownedCharacterIds.map(weaponId =>
-            dispatch('fetchCharacterTransferCooldown', weaponId)
-          )
-        );
-      },
-
-      async fetchCharacterTransferCooldown({ state, commit }, characterId: string | number) {
-        const { Characters } = state.contracts();
-        if(!Characters) return;
-
-        const supportsTransferCooldownable = await Characters.methods
-          .supportsInterface(INTERFACE_ID_TRANSFER_COOLDOWNABLE)
-          .call(defaultCallOptions(state));
-        if(!supportsTransferCooldownable) return;
-
-        const lastUpdatedTimestamp = Date.now();
-        const secondsLeft = await Characters.methods
-          .transferCooldownLeft(characterId)
-          .call(defaultCallOptions(state));
-
-        const payload: {
-          characterId: number,
-          characterTransferCooldown: ITransferCooldown
-        } = {
-          characterId: +characterId,
-          characterTransferCooldown: { lastUpdatedTimestamp, secondsLeft: +secondsLeft }
-        };
-        if(!_.isEqual(state.characterTransferCooldowns[+characterId], payload)) {
-          commit('updateCharacterTransferCooldown', payload);
-        }
       },
 
       async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {
