@@ -41,6 +41,7 @@
     "build": "truffle compile",
     "postbuild": "node scripts/generate-ts-from-abis.js",
     "test": "truffle test",
+    "console": "truffle console",
     "deploy": "truffle migrate --reset",
     "deploy-testnet": "truffle migrate --network bsctestnet",
     "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet",
