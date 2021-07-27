@@ -3,12 +3,13 @@ pragma solidity ^0.6.0;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/utils/EnumerableSet.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../node_modules/@openzeppelin/contracts/introspection/ERC165Checker.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
+import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/introspection/ERC165Checker.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
 import "./weapons.sol";
@@ -25,6 +26,7 @@ contract NFTMarket is
     using ABDKMath64x64 for int128; // kroge beware
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.AddressSet;
+    using SafeERC20 for IERC20;
 
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
 
@@ -253,7 +255,7 @@ contract NFTMarket is
         EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
         uint256 matchingWeaponsAmount = getNumberOfWeaponListings(_tokenAddress, _trait, _stars);
         uint256 pageEnd = _limit * (_pageNumber + 1);
-        uint256 tokensSize = matchingWeaponsAmount >= pageEnd ? _limit : matchingWeaponsAmount - (_limit * _pageNumber);
+        uint256 tokensSize = matchingWeaponsAmount >= pageEnd ? _limit : matchingWeaponsAmount.sub(_limit * _pageNumber);
         uint256[] memory tokens = new uint256[](tokensSize);
 
         uint256 counter = 0;
@@ -281,7 +283,7 @@ contract NFTMarket is
         EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
         uint256 matchingCharactersAmount = getNumberOfCharacterListings(_tokenAddress, _trait, _minLevel, _maxLevel);
         uint256 pageEnd = _limit * (_pageNumber + 1);
-        uint256 tokensSize = matchingCharactersAmount >= pageEnd ? _limit : matchingCharactersAmount - (_limit * _pageNumber);
+        uint256 tokensSize = matchingCharactersAmount >= pageEnd ? _limit : matchingCharactersAmount.sub(_limit * _pageNumber);
         uint256[] memory tokens = new uint256[](tokensSize);
 
         uint256 counter = 0;
@@ -488,8 +490,8 @@ contract NFTMarket is
         listedTokenIDs[address(_tokenAddress)].remove(_id);
         _updateListedTokenTypes(_tokenAddress);
 
-        skillToken.transferFrom(msg.sender, taxRecipient, taxAmount);
-        skillToken.transferFrom(
+        skillToken.safeTransferFrom(msg.sender, taxRecipient, taxAmount);
+        skillToken.safeTransferFrom(
             msg.sender,
             listing.seller,
             finalPrice.sub(taxAmount)
@@ -566,7 +568,7 @@ contract NFTMarket is
     }
 
     function recoverSkill(uint256 amount) public restricted {
-        skillToken.transfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
+        skillToken.safeTransfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
     }
 
     function onERC721Received(

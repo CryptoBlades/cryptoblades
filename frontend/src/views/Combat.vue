@@ -5,11 +5,10 @@
         <div class="col error">Error: {{ error }}</div>
       </div>
 
-      <div class="row" v-if="resultsAvailable">
-        <div class="col">
-          <CombatResults v-if="resultsAvailable" :results="fightResults" />
-        </div>
-      </div>
+      <b-modal id="fightResultsModal" hide-footer title="Fight Results">
+        <CombatResults v-if="resultsAvailable" :results="fightResults" />
+        <b-button class="mt-3" variant="primary" block @click="$bvModal.hide('fightResultsModal')">Close</b-button>
+      </b-modal>
 
       <div class="row">
         <div class="col">
@@ -54,7 +53,7 @@
                 </b-button>
               </div>
 
-              <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" />
+              <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" checkForDurability="true" />
 
             </div>
             <div class="row mb-3 flex-column enemy-container" v-if="targets.length > 0">
@@ -205,6 +204,7 @@ export default {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
+      if(this.resultsAvailable) this.$bvModal.show('fightResultsModal');
     },
   },
 

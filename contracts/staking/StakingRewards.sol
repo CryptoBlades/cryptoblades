@@ -1,9 +1,9 @@
 pragma solidity ^0.6.2;
 
-import "../../node_modules/@openzeppelin/contracts/math/Math.sol";
-import "../../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../../node_modules/@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "../../node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/math/Math.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 // Inheritance
 import "./interfaces/IStakingRewards.sol";
@@ -29,6 +29,7 @@ contract StakingRewards is
     uint256 public periodFinish = 0;
     uint256 public override rewardRate = 0;
     uint256 public override rewardsDuration = 180 days;
+    uint256 public override minimumStakeAmount;
     uint256 public override minimumStakeTime;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
@@ -47,11 +48,13 @@ contract StakingRewards is
         address _rewardsDistribution,
         address _rewardsToken,
         address _stakingToken,
+        uint256 _minimumStakeAmount,
         uint256 _minimumStakeTime
     ) public Owned(_owner) {
         rewardsToken = IERC20(_rewardsToken);
         stakingToken = IERC20(_stakingToken);
         rewardsDistribution = _rewardsDistribution;
+        minimumStakeAmount = _minimumStakeAmount;
         minimumStakeTime = _minimumStakeTime;
     }
 
@@ -128,7 +131,7 @@ contract StakingRewards is
         notPaused
         updateReward(msg.sender)
     {
-        require(amount > 0, "Cannot stake 0");
+        require(amount >= minimumStakeAmount, "Minimum stake amount required");
         _totalSupply = _totalSupply.add(amount);
         _balances[msg.sender] = _balances[msg.sender].add(amount);
         if (_stakeTimestamp[msg.sender] == 0) {
@@ -268,6 +271,15 @@ contract StakingRewards is
         emit RewardsDurationUpdated(rewardsDuration);
     }
 
+    function setMinimumStakeAmount(uint256 _minimumStakeAmount)
+        external
+        normalMode
+        onlyOwner
+    {
+        minimumStakeAmount = _minimumStakeAmount;
+        emit MinimumStakeAmountUpdated(_minimumStakeAmount);
+    }
+
     function setMinimumStakeTime(uint256 _minimumStakeTime)
         external
         normalMode
@@ -278,6 +290,7 @@ contract StakingRewards is
     }
 
     function enableFailsafeMode() public override normalMode onlyOwner {
+        minimumStakeAmount = 0;
         minimumStakeTime = 0;
         periodFinish = 0;
         rewardRate = 0;
@@ -321,6 +334,7 @@ contract StakingRewards is
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
     event RewardsDurationUpdated(uint256 newDuration);
+    event MinimumStakeAmountUpdated(uint256 newMinimumStakeAmount);
     event MinimumStakeTimeUpdated(uint256 newMinimumStakeTime);
     event Recovered(address token, uint256 amount);
 }

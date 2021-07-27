@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
-import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 library RandomUtil {
 

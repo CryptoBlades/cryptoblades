@@ -3,8 +3,8 @@ pragma solidity ^0.6.0;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./util.sol";
 
 contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
@@ -100,13 +100,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(uint256 => uint256) public lastTransferTimestamp;
 
+    uint256 private lastMintedBlock;
+    uint256 private firstMintedOfLastBlock;
+
     mapping(uint256 => uint64) durabilityTimestamp;
 
     uint256 public constant maxDurability = 20;
     uint256 public constant secondsPerDurability = 2880; //48 * 60
-
-    uint256 private lastMintedBlock;
-    uint256 private firstMintedOfLastBlock;
 
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
