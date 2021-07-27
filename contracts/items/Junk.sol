@@ -20,7 +20,7 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IER
 
     mapping(uint256 => uint8) public stars;
     
-    event MintAccessSeededStars(address indexed minter, address indexed receiver, uint256 ref, uint256 indexed id, uint8 stars);
+    event Minted(uint256 indexed id, address indexed minter);
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
@@ -32,12 +32,17 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IER
         uint256 tokenID = totalSupply();
         stars[tokenID] = mintStars;
         _mint(minter, tokenID);
+        emit Minted(tokenID, minter);
         return tokenID;
     }
 
-    function mintAccessSeededStars(address receiver, uint256 ref, uint256 seed, uint8 mintStars) external override restricted {
-        uint tokenID = mint(receiver, mintStars);
-        emit MintAccessSeededStars(msg.sender, receiver, ref, tokenID, mintStars);
+    function mintAccessSeededStars(
+        address receiver,
+        uint256 ref,
+        uint256 seed,
+        uint8 mintStars
+    ) external override restricted returns(uint256) {
+        return mint(receiver, mintStars);
     }
 
 }

@@ -27,7 +27,7 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
     mapping(uint256 => uint8) public stars;
     mapping(uint256 => uint256) public effect;
 
-    event MintAccessSeededStars(address indexed minter, address indexed receiver, uint256 ref, uint256 indexed id, uint8 stars);
+    event Minted(uint256 indexed id, address indexed minter);
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
@@ -57,12 +57,17 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         stars[tokenID] = mintStars;
         effect[tokenID] = mintEffect;
         _mint(minter, tokenID);
+        emit Minted(tokenID, minter);
         return tokenID;
     }
     
-    function mintAccessSeededStars(address receiver, uint256 ref, uint256 seed, uint8 mintStars) external override restricted {
-        uint tokenID = mint(receiver, mintStars, ref);
-        emit MintAccessSeededStars(msg.sender, receiver, ref, tokenID, mintStars);
+    function mintAccessSeededStars(
+        address receiver,
+        uint256 ref,
+        uint256 seed,
+        uint8 mintStars
+    ) external override restricted returns(uint256) {
+        return mint(receiver, mintStars, ref);
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {

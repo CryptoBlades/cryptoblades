@@ -39,6 +39,14 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     uint8 public constant STATUS_LOST = 3;
     uint8 public constant STATUS_PAUSED = 4; // in case of emergency
 
+    /*uint256 public constant REWARD_ERC20_DUST_LB = 0;
+    uint256 public constant REWARD_ERC20_DUST_4B = 1;
+    uint256 public constant REWARD_ERC20_DUST_5B = 2;*/
+    uint256 public constant REWARD_ERC721SEEDED_KEYBOX = 0;
+    uint256 public constant REWARD_ERC721SEEDEDSTARS_TRINKET = 0;
+    uint256 public constant REWARD_ERC721SEEDEDSTARS_WEAPON = 1;
+    uint256 public constant REWARD_ERC721SEEDEDSTARS_JUNK = 2;
+
     CryptoBlades public game;
     Characters public characters;
     Weapons public weapons;
@@ -69,9 +77,9 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     mapping(uint256 => mapping(uint256 => bool)) public raidRewardClaimed;
 
     // reward interface, keys are reward indices that are unique per-type
-    mapping(uint256 => uint256) public rewardsERC20;
-    mapping(uint256 => uint256) public rewardsERC721Seeded;
-    mapping(uint256 => uint256) public rewardsERC721SeededStars;
+    mapping(uint256 => IERC20MintAccess) public rewardsERC20;
+    mapping(uint256 => IERC721MintAccessSeeded) public rewardsERC721Seeded;
+    mapping(uint256 => IERC721MintAccessSeededStars) public rewardsERC721SeededStars;
 
     event RaidStarted(uint256 indexed raidIndex, uint8 bossTrait, uint256 bossPower, uint256 endTime);
     event RaidJoined(uint256 raidIndex,
@@ -95,6 +103,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(GAME_ADMIN, msg.sender);
 
         game = CryptoBlades(gameContract);
         characters = Characters(game.characters());
@@ -196,8 +205,12 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
         // since we pay out exactly one trinket per raid, we might as well do it here
         Raider memory trinketWinner = raidParticipants[raidIndex][seed % raidParticipants[raidIndex].length];
-        // TODO mint trinket and send it to address
-        //emit RewardedTrinket(raidIndex, trinketWinner.owner, trinketStars, trinketID);
+        uint8 trinketStars = uint8(seed % 5);
+        uint tokenID =
+            rewardsERC721SeededStars[REWARD_ERC721SEEDEDSTARS_TRINKET].mintAccessSeededStars(
+                address(trinketWinner.owner), raidIndex, seed, trinketStars
+            );
+        emit RewardedTrinket(raidIndex, address(trinketWinner.owner), trinketStars, tokenID);
 
         emit RaidCompleted(raidIndex, outcome, bossPower, roll);
         raidIndex++;
@@ -260,20 +273,16 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         if(commonRoll > 10) { // 90% base chance
             uint mod = seed % 6;
             if(mod == 0) { // 1 star junk, 1 out of 5 (20%)
-                uint tokenID = 0;
-                emit RewardedJunk(claimRaidIndex, msg.sender, 0, tokenID);
+                distributeJunk(msg.sender, claimRaidIndex, seed, 0);
             }
             else if(mod == 1) { // 2 star junk, 1 out of 5 (20%)
-                uint tokenID = 0;
-                emit RewardedJunk(claimRaidIndex, msg.sender, 1, tokenID);
+                distributeJunk(msg.sender, claimRaidIndex, seed, 1);
             }
             else if(mod < 4) { // 3 star junk, 2 out of 4 (40%)
-                uint tokenID = 0;
-                emit RewardedJunk(claimRaidIndex, msg.sender, 2, tokenID);
+                distributeJunk(msg.sender, claimRaidIndex, seed, 2);
             }
             else { // 3 star weapon, 2 out of 4 (40%)
-                uint tokenID = 0;
-                emit RewardedWeapon(claimRaidIndex, msg.sender, 2, tokenID);
+                distributeWeapon(msg.sender, claimRaidIndex, seed, 2);
             }
         }
 
@@ -281,38 +290,54 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         if(rareRoll > 950) { // 5% base chance
             uint mod = (seed / 10) % 14;
             if(mod == 0) { // key box, 1 out of 13 (7.69%)
-                uint tokenID = 0;
-                emit RewardedKeyBox(claimRaidIndex, msg.sender, tokenID);
+                distributeKeyBox(msg.sender, claimRaidIndex, seed);
             }
             else if(mod == 1) { // 5 star sword, 1 out of 13 (7.69%)
-                uint tokenID = 0;
-                emit RewardedWeapon(claimRaidIndex, msg.sender, 4, tokenID);
+                distributeWeapon(msg.sender, claimRaidIndex, seed, 4);
             }
             else if(mod == 2) { // 5 star junk, 1 out of 13 (7.69%)
-                uint tokenID = 0;
-                emit RewardedJunk(claimRaidIndex, msg.sender, 4, tokenID);
+                distributeJunk(msg.sender, claimRaidIndex, seed, 4);
             }
             else if(mod < 8) { // 4 star sword, 5 out of 13 (38.4%)
-                uint tokenID = 0;
-                emit RewardedWeapon(claimRaidIndex, msg.sender, 3, tokenID);
+                distributeWeapon(msg.sender, claimRaidIndex, seed, 3);
             }
             else { // 4 star junk, 5 out of 13 (38.4%)
-                uint tokenID = 0;
-                emit RewardedJunk(claimRaidIndex, msg.sender, 3, tokenID);
+                distributeJunk(msg.sender, claimRaidIndex, seed, 3);
             }
         }
     }
 
-    function registerERC20RewardAddress(address addr, uint256 index) public restricted {
+    function distributeKeyBox(address claimant, uint256 claimRaidIndex, uint256 seed) public restricted {
+        uint tokenID = rewardsERC721Seeded[REWARD_ERC721SEEDEDSTARS_WEAPON].mintAccessSeeded(
+                claimant, claimRaidIndex, seed
+            );
+        emit RewardedKeyBox(claimRaidIndex, claimant, tokenID);
+    }
 
+    function distributeJunk(address claimant, uint256 claimRaidIndex, uint256 seed, uint8 stars) public restricted {
+        uint tokenID = rewardsERC721SeededStars[REWARD_ERC721SEEDEDSTARS_JUNK].mintAccessSeededStars(
+                claimant, claimRaidIndex, seed, stars
+            );
+        emit RewardedJunk(claimRaidIndex, claimant, stars, tokenID);
+    }
+
+    function distributeWeapon(address claimant, uint256 claimRaidIndex, uint256 seed, uint8 stars) public restricted {
+        uint tokenID = rewardsERC721SeededStars[REWARD_ERC721SEEDEDSTARS_WEAPON].mintAccessSeededStars(
+                claimant, claimRaidIndex, seed, stars
+            );
+        emit RewardedWeapon(claimRaidIndex, claimant, stars, tokenID);
+    }
+
+    function registerERC20RewardAddress(address addr, uint256 index) public restricted {
+        rewardsERC20[index] = IERC20MintAccess(addr);
     }
 
     function registerERC721RewardSeededAddress(address addr, uint256 index) public restricted {
-
+        rewardsERC721Seeded[index] = IERC721MintAccessSeeded(addr);
     }
 
     function registerERC721RewardSeededStarsAddress(address addr, uint256 index) public restricted {
-
+        rewardsERC721SeededStars[index] = IERC721MintAccessSeededStars(addr);
     }
 
     function setStaminaPointCost(uint8 points) public restricted {

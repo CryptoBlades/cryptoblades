@@ -11,7 +11,7 @@ contract KeyLootbox is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    event MintAccessSeeded(address indexed minter, address indexed receiver, uint256 ref, uint256 indexed id);
+    event Minted(uint256 indexed id, address indexed minter);
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades Key Lootbox", "CBKBX");
@@ -29,12 +29,16 @@ contract KeyLootbox is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
         uint256 tokenID = totalSupply();
         _mint(minter, tokenID);
+        emit Minted(tokenID, minter);
         return tokenID;
     }
 
-    function mintAccessSeeded(address receiver, uint256 ref, uint256 seed) external override restricted {
-        uint tokenID = mint(receiver);
-        emit MintAccessSeeded(msg.sender, receiver, ref, tokenID);
+    function mintAccessSeeded(
+        address receiver,
+        uint256 ref,
+        uint256 seed
+    ) external override restricted returns(uint256) {
+        return mint(receiver);
     }
 
 }
