@@ -51,42 +51,42 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         reforgeWeaponFee = ABDKMath64x64.divu(5, 10);//0.5 usd;
     }
 
-    function migrateTo_1ee400a() public {
+    /*function migrateTo_1ee400a() public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         fightXpGain = 32;
-    }
+    }*/
 
     function migrateTo_aa9da90() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         oneFrac = ABDKMath64x64.fromUInt(1);
         fightTraitBonus = ABDKMath64x64.divu(75, 1000);
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         promos = _promos;
     }
 
     function migrateTo_23b3a8b(IStakeFromGame _stakeFromGame) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         stakeFromGameImpl = _stakeFromGame;
     }
 
-    function migrateTo_7dd2a56() external {
+    /*function migrateTo_7dd2a56() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         // numbers given for the curves were $4.3-aligned so they need to be multiplied
         // additional accuracy may be in order for the setter functions for these
         fightRewardGasOffset = ABDKMath64x64.divu(23177, 100000); // 0.0539 x 4.3
         fightRewardBaseline = ABDKMath64x64.divu(344, 1000); // 0.08 x 4.3
-    }
+    }*/
 
     function migrateTo_5e833b0() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         durabilityCostFight = 1;
     }

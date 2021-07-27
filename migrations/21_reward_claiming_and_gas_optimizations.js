@@ -10,5 +10,5 @@ module.exports = async function (deployer) {
 
   const game = await CryptoBlades.deployed();
   const newGame = await upgradeProxy(game.address, CryptoBlades, { deployer });
-  await newGame.migrateTo_1ee400a();
+  //await newGame.migrateTo_1ee400a(); TEMP REMOVED
 };
