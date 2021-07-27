@@ -45,7 +45,7 @@ contract WeaponRewardPool is AccessControlUpgradeable {
         int128 rollingTotal;
     }
 
-    function mintUnlikelyWeapon() public restricted returns (uint256) {
+    function mintUnlikelyFightWeapon() public restricted returns (uint256) {
         // uint256 seed = randoms.getRandomSeed(msg.sender);
         // return weapons.mint(msg.sender, seed);
     }
