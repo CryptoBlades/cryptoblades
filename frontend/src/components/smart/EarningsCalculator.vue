@@ -7,7 +7,8 @@
         <img src="../../assets/earning-potential-sword.png" class="sword-right">
       </div>
       <div class="milestone-details">
-        Earn <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level)}}%</span> more per battle at<br>
+        You need to claim <span class="remaining-xp-text">{{getXpForNextMilestone(currentCharacter.level)}}</span> XP<br>
+        to earn <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level)}}%</span> more per battle at<br>
         <div class="calculator-icon-div">
           <span class="milestone-lvl-text">LVL {{getNextMilestoneLevel(currentCharacter.level)}}</span><br>
           <b-button class="btn btn-primary btn-small" @click="onShowEarningsCalculator">
@@ -137,7 +138,7 @@
 </template>
 
 <script lang="ts">
-import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, WeaponTrait } from '@/interfaces';
+import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, WeaponTrait, ExperienceTable } from '@/interfaces';
 import axios from 'axios';
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
@@ -301,6 +302,16 @@ export default Vue.extend({
       return this.getRewardDiffBonus(level, nextMilestoneLevel);
     },
 
+    getXpForNextMilestone(level: number): number {
+      const xpTable = ExperienceTable();
+      const nextMilestoneLevel = this.getNextMilestoneLevel(level);
+      let totalXpNeeded = 0;
+      for (let i = nextMilestoneLevel - 2; i > level - 1; i--) {
+        totalXpNeeded += xpTable[i];
+      }
+      return totalXpNeeded - this.currentCharacter.xp;
+    },
+
     getNextMilestoneLevel(level: number): number {
       return (Math.floor(level / 10) + 1) * 10 + 1;
     },
@@ -369,6 +380,10 @@ export default Vue.extend({
 .milestone-details {
   text-align: center;
   line-height: 1;
+}
+
+.remaining-xp-text {
+  color: rgb(230, 230, 230);
 }
 
 .bonus-text {
