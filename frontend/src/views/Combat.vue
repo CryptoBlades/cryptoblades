@@ -136,7 +136,7 @@ import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, WeaponEleme
 import Hint from '../components/Hint.vue';
 import CombatResults from '../components/CombatResults.vue';
 import Web3 from 'web3';
-import BN from 'bignumber.js';
+import { toBN } from '../utils/common';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 
@@ -305,7 +305,7 @@ export default {
 
     formattedSkill(skill) {
       const skillBalance = Web3.utils.fromWei(skill, 'ether');
-      return `${new BN(skillBalance).toFixed(6)} SKILL`;
+      return `${toBN(skillBalance).toFixed(6)} SKILL`;
     },
 
     getPotentialXp(targetToFight) {

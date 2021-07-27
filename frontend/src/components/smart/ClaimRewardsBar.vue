@@ -73,11 +73,12 @@
 import Vue from 'vue';
 import { Accessors } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import BN from 'bignumber.js';
+import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { getCharacterNameFromSeed } from '../../character-name';
 import { RequiredXp } from '../../interfaces';
 import { ICharacter } from '@/interfaces';
+import { toBN } from '../../utils/common';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -89,8 +90,8 @@ interface StoreMappedState {
 interface StoreMappedGetters {
   ownCharacters: ICharacter[];
   currentCharacter: ICharacter | null;
-  maxRewardsClaimTaxAsFactorBN: BN;
-  rewardsClaimTaxAsFactorBN: BN;
+  maxRewardsClaimTaxAsFactorBN: BigNumber;
+  rewardsClaimTaxAsFactorBN: BigNumber;
 }
 
 enum ClaimStage {
@@ -119,17 +120,17 @@ export default Vue.extend({
 
     formattedSkillReward(): string {
       const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
-      return `${new BN(skillRewards).toFixed(4)}`;
+      return `${toBN(skillRewards).toFixed(4)}`;
     },
 
     formattedTaxAmount(): string {
       const skillRewards = Web3.utils.fromWei((parseFloat(this.skillRewards)* parseFloat(String(this.rewardsClaimTaxAsFactorBN))).toString(), 'ether');
-      return `${new BN(skillRewards).toFixed(4)}`;
+      return `${toBN(skillRewards).toFixed(4)}`;
     },
 
     formattedBonusLost(): string {
       const skillLost = Web3.utils.fromWei((parseFloat(this.skillRewards)*this.directStakeBonusPercent/100).toString(), 'ether');
-      return `${new BN(skillLost).toFixed(4)}`;
+      return `${toBN(skillLost).toFixed(4)}`;
     },
 
     formattedRewardsClaimTax(): string {
@@ -138,7 +139,7 @@ export default Vue.extend({
           ? this.maxRewardsClaimTaxAsFactorBN
           : this.rewardsClaimTaxAsFactorBN;
 
-      return `${frac.multipliedBy(100).decimalPlaces(0, BN.ROUND_HALF_UP)}%`;
+      return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
     },
 
     xpRewardsForOwnedCharacters(): string[] {
@@ -158,7 +159,7 @@ export default Vue.extend({
     },
 
     canClaimTokens(): boolean {
-      if(new BN(this.skillRewards).lte(0)) {
+      if(toBN(this.skillRewards).lte(0)) {
         return false;
       }
 
@@ -166,7 +167,7 @@ export default Vue.extend({
     },
 
     canClaimXp(): boolean {
-      const allXpsAreZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => new BN(xp).lte(0));
+      const allXpsAreZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => toBN(xp).lte(0));
       if(allXpsAreZeroOrLess) {
         return false;
       }
