@@ -150,9 +150,7 @@
 </template>
 
 <script>
-import BN from 'bignumber.js';
-BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
-BN.config({ EXPONENTIAL_AT: 100 });
+import { toBN } from '../../utils/common';
 import { mapActions, mapState } from 'vuex';
 
 import { formatDurationFromSeconds, secondsToDDHHMMSS } from '../../utils/date-time';
@@ -240,15 +238,15 @@ export default {
     },
 
     walletBalance() {
-      return BN(this.stakeData.ownBalance);
+      return toBN(this.stakeData.ownBalance);
     },
 
     stakedBalance() {
-      return BN(this.stakeData.stakedBalance);
+      return toBN(this.stakeData.stakedBalance);
     },
 
     currentRewardEarned() {
-      return BN(this.stakeData.currentRewardEarned).dividedBy(1e18);
+      return toBN(this.stakeData.currentRewardEarned).dividedBy(1e18);
     },
 
     remainingCapacityForDeposit() {
@@ -256,15 +254,15 @@ export default {
         return null;
       }
 
-      return BN(this.stakeData.remainingCapacityForDeposit);
+      return toBN(this.stakeData.remainingCapacityForDeposit);
     },
 
     remainingCapacityForWithdraw() {
-      return BN(this.stakeData.remainingCapacityForWithdraw);
+      return toBN(this.stakeData.remainingCapacityForWithdraw);
     },
 
     contractBalance() {
-      return BN(this.stakeData.contractBalance);
+      return toBN(this.stakeData.contractBalance);
     },
 
     validator() {
@@ -388,9 +386,9 @@ export default {
 
     bigNumberAmount: {
       get() {
-        if (!this.textAmount) return BN(0);
+        if (!this.textAmount) return toBN(0);
 
-        return BN(this.textAmount).multipliedBy(1e18);
+        return toBN(this.textAmount).multipliedBy(1e18);
       },
       set(newBnAmount) {
         this.textAmount = newBnAmount.dividedBy(1e18);
@@ -403,12 +401,12 @@ export default {
     },
 
     canStakeUnclaimedRewards() {
-      return !this.loading && new BN(this.skillRewards).gt(0);
+      return !this.loading && toBN(this.skillRewards).gt(0);
       // return true;
     },
 
     formattedSkillRewards() {
-      const b = new BN(this.skillRewards);
+      const b = toBN(this.skillRewards);
       return b.dividedBy(1e18).toFixed(4);
     },
   },
@@ -446,7 +444,7 @@ export default {
           this.remainingCapacityForDeposit &&
           this.bigNumberAmount.gt(this.remainingCapacityForDeposit)
         ) {
-          this.bigNumberAmount = BN(this.remainingCapacityForDeposit);
+          this.bigNumberAmount = toBN(this.remainingCapacityForDeposit);
         }
       } else {
         this.bigNumberAmount = this.stakedBalance;

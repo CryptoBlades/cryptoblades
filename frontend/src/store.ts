@@ -2,9 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, { isUndefined } from 'lodash';
-import BN from 'bignumber.js';
-BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
-BN.config({ EXPONENTIAL_AT: 100 });
+import { toBN, bnMinimum } from './utils/common';
 
 import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
 import {
@@ -315,11 +313,11 @@ export function createStore(web3: Web3) {
       },
 
       maxRewardsClaimTaxAsFactorBN(state) {
-        return new BN(state.maxRewardsClaimTax).dividedBy(new BN(2).exponentiatedBy(64));
+        return toBN(state.maxRewardsClaimTax).dividedBy(toBN(2).exponentiatedBy(64));
       },
 
       rewardsClaimTaxAsFactorBN(state) {
-        return new BN(state.rewardsClaimTax).dividedBy(new BN(2).exponentiatedBy(64));
+        return toBN(state.rewardsClaimTax).dividedBy(toBN(2).exponentiatedBy(64));
       },
 
       stakeState(state) {
@@ -349,7 +347,7 @@ export function createStore(web3: Web3) {
       },
 
       waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod(state): string {
-        return BN.minimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
+        return bnMinimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
       }
     },
 
