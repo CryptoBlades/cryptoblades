@@ -37,7 +37,7 @@
           <div class="combat-enemy-container">
             <div class="col weapon-selection">
               <div class="header-row weapon-header">
-                <h1>Choose a weapon</h1>
+                <b>Choose a weapon</b>
                 <Hint
                   text="Your weapon multiplies your power<br>
                   <br>+Stats determine the multiplier
@@ -136,7 +136,7 @@ import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, WeaponEleme
 import Hint from '../components/Hint.vue';
 import CombatResults from '../components/CombatResults.vue';
 import Web3 from 'web3';
-import BN from 'bignumber.js';
+import { toBN } from '../utils/common';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 
@@ -305,7 +305,7 @@ export default {
 
     formattedSkill(skill) {
       const skillBalance = Web3.utils.fromWei(skill, 'ether');
-      return `${new BN(skillBalance).toFixed(6)} SKILL`;
+      return `${toBN(skillBalance).toFixed(6)} SKILL`;
     },
 
     getPotentialXp(targetToFight) {
@@ -336,8 +336,8 @@ export default {
 
 .enemy-character {
   position: relative;
-  width: 16vw;
-  height: 28vw;
+  width: 14em;
+  height: 25em;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 115%;
@@ -358,10 +358,11 @@ export default {
 }
 
 .encounter img {
-    width: 10vw;
-    height: auto;
-    margin: 0 auto;
-    display: block;
+  width: 170px;
+}
+
+.weapon-header > b {
+  font-size: 1.8em;
 }
 
 .payout-info {
@@ -436,9 +437,6 @@ div.encounter.text-center {
 .encounter {
   display : flex;
   justify-content: center;
-  padding-top: 20px;
-  border-radius: 15px;
-  max-width: 25%;
 }
 
 .xp-gain, .encounter-power{
@@ -447,25 +445,28 @@ div.encounter.text-center {
 
 .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
   position: absolute;
-  font-size: 2vw;
 }
 
 .encounter-element {
-  top: 1.3vw;
+  top: 25px;
+  font-size : 20px;
 }
 
 .encounter-power {
-  bottom: 3.5vw;
+  bottom: 50px;
+  font-size: 1.5em;
 }
 
 .xp-gain {
-  bottom: 1.25vw;
+  bottom: 25px;
+  font-size: 1em;
 }
 
 .victory-chance {
   left: 0;
   right: 0;
   text-align: center;
+  font-size: 1.5em;
   text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
 }
 
@@ -485,7 +486,7 @@ div.encounter.text-center {
 }
 
 .enemy-container {
-  flex : 4;
+  flex : 3;
 }
 
 .enemy-divider {
@@ -495,14 +496,12 @@ div.encounter.text-center {
 .enemy-list {
   display: flex;
   flex-wrap: wrap;
-  padding-left: 1vw;
-  padding-right: 1vw;
+  padding-left: 30px;
+  padding-right: 30px;
 }
 
 .weapon-selection {
   border-right : 1px solid #9e8a57;
-  padding-left: 1vw;
-  padding-right: 1vw;
 }
 
 .weapon-header {
@@ -534,59 +533,13 @@ h1  {
 
 .enemy-img {
   position: relative;
-  top: -3vw;
+  top: -50px;
 }
 
 @media (max-width: 1025px){
-  .enemy-img {
-    top: -40px;
-  }
-
   .enemy-list {
     flex-direction: column;
-  }
-
-  .enemy-character {
-      width: 16em;
-      height: 28em;
-  }
-
-  .encounter img {
-    width: 10em;
-  }
-
-  .encounter {
-    padding-top: 20px;
-    border-radius: 15px;
-    margin-top: 50px;
-    max-width: 100%;
-    margin: 0 auto;
-  }
-
-  .encounter-element {
-    top: 25px;
-  }
-
-  .encounter-power {
-    bottom: 55px;
-  }
-
-  .xp-gain {
-    bottom: 20px;
-  }
-
-  .xp-gain, .encounter-power, .encounter-element, .victory-chance  {
-    position: absolute;
-    font-size: x-large;
-  }
-
-  .encounter-button {
-    top: 35px;
-  }
-
-  h1 {
-    font-size: 1.8rem;
-    display: inline-block;
+    align-items: center;
   }
 }
 
@@ -646,6 +599,10 @@ h1  {
     width: 100%;
     justify-content: center;
     display: block;
+  }
+
+  .encounter-button {
+    top: 10vw;
   }
 }
 </style>

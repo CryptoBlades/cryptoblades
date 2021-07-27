@@ -98,8 +98,8 @@ import EarningsCalculator from './EarningsCalculator.vue';
 import { RequiredXp } from '../../interfaces';
 import Hint from '../Hint.vue';
 import Web3 from 'web3';
-import BN from 'bignumber.js';
 import Vue from 'vue';
+import { toBN } from '../../utils/common';
 
 export default Vue.extend({
   components: {
@@ -161,7 +161,7 @@ export default Vue.extend({
 
     formattedSkill(skill: number): number {
       const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
-      return new BN(skillBalance).toNumber();
+      return toBN(skillBalance).toNumber();
     },
   },
 });

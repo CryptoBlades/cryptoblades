@@ -29,7 +29,7 @@
 import Vue from 'vue';
 import { Accessors } from 'vue/types/options';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import BN from 'bignumber.js';
+import { toBN } from '../../utils/common';
 import Web3 from 'web3';
 import { IState } from '@/interfaces';
 import { formatDurationFromSeconds } from '@/utils/date-time';
@@ -60,20 +60,20 @@ export default Vue.extend({
         .add(Web3.utils.toBN(this.inGameOnlyFunds))
         .add(Web3.utils.toBN(this.skillRewards)), 'ether');
 
-      return `${new BN(skillBalance).toFixed(4)} SKILL`;
+      return `${toBN(skillBalance).toFixed(4)} SKILL`;
     },
 
     formattedSkillBalance(): string {
       const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
-      return `${new BN(skillBalance).toFixed(4)} SKILL`;
+      return `${toBN(skillBalance).toFixed(4)} SKILL`;
     },
 
     hasBnbAvailableToWithdraw(): boolean {
-      return new BN(this.waxBridgeWithdrawableBnb).gt(0);
+      return toBN(this.waxBridgeWithdrawableBnb).gt(0);
     },
 
     canWithdrawBnb(): boolean {
-      return new BN(this.availableBNB).gt(0);
+      return toBN(this.availableBNB).gt(0);
     },
 
     formattedBnbThatCanBeWithdrawn(): string {
@@ -101,21 +101,21 @@ export default Vue.extend({
     },
     formattedInGameOnlyFunds(): string {
       const skillBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
-      return `${new BN(skillBalance).toFixed(4)} SKILL`;
+      return `${toBN(skillBalance).toFixed(4)} SKILL`;
     },
     totalSkillTooltipHtml() {
       const inGameOnlyFundsBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
       const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
       const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
 
-      let html =  new BN(skillBalance).toFixed(4) + ' SKILL';
+      let html =  toBN(skillBalance).toFixed(4) + ' SKILL';
 
       if(parseFloat(skillRewards) !== 0){
-        html += '<br>+ WITHDRAWABLE ' + new BN(skillRewards).toFixed(4) + ' SKILL';
+        html += '<br>+ WITHDRAWABLE ' + toBN(skillRewards).toFixed(4) + ' SKILL';
       }
 
       if(parseFloat(inGameOnlyFundsBalance) !== 0){
-        html += '<br>+ IN GAME ONLY ' + new BN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
+        html += '<br>+ IN GAME ONLY ' + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
       }
 
       return html;
@@ -131,7 +131,7 @@ export default Vue.extend({
 
     formatBnb(bnb: string): string {
       const amount = Web3.utils.fromWei(bnb, 'ether');
-      return `${new BN(amount).toFixed(4)} BNB`;
+      return `${toBN(amount).toFixed(4)} BNB`;
     },
 
     onBuySkill() {
