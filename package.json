@@ -16,10 +16,12 @@
   },
   "devDependencies": {
     "@openzeppelin/test-helpers": "^0.5.11",
-    "@openzeppelin/truffle-upgrades": "^1.5.2",
+    "@openzeppelin/truffle-upgrades": "^1.8.0",
     "@truffle/config": "^1.2.41",
     "@truffle/provider": "^0.2.32",
     "bignumber.js": "^9.0.1",
+    "imagemin": "^8.0.0",
+    "imagemin-pngquant": "^9.0.2",
     "lerna": "^4.0.0",
     "ohm-js": "^15.5.0",
     "shelljs": "^0.8.4",

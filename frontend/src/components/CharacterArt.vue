@@ -31,7 +31,7 @@
     <div class="black-outline" v-if="!portrait">
       Score <span class="white">{{ heroScore.toLocaleString() }}</span>
       <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Hero score is a measure of your hero's combat prowess so far.
-        It goes up when you win and down when you lose. It's also temporarily disabled!`"/>
+        It goes up when you win and down when you lose. It is also temporarily disabled!`"/>
     </div>
     </div>
 
@@ -502,7 +502,7 @@ export default {
     },
 
     async fetchScore() {
-    /*
+      /*
       try {
         const scoreData = await fetch(`https://api.cryptoblades.io/static/character/score/${this.character.id}`);
         const { score } = await scoreData.json();

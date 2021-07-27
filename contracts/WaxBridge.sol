@@ -2,8 +2,8 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
 
 contract WaxBridge is Initializable, AccessControlUpgradeable {
 

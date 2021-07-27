@@ -8,6 +8,7 @@ contract SkillStakingRewards is StakingRewards {
         address _rewardsDistribution,
         address _rewardsToken,
         address _stakingToken,
+        uint256 _minimumStakeAmount,
         uint256 _minimumStakeTime
     )
         public
@@ -16,6 +17,7 @@ contract SkillStakingRewards is StakingRewards {
             _rewardsDistribution,
             _rewardsToken,
             _stakingToken,
+            _minimumStakeAmount,
             _minimumStakeTime
         )
     {}
