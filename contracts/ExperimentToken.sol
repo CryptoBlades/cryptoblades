@@ -1,6 +1,6 @@
 pragma solidity ^0.6.2;
 
-import "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract ExperimentToken is ERC20 {
     /**
