@@ -23,9 +23,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             a safe verifiable random source will provide (ideally)
         It may be better to convert the mappings using raidIndex into a struct
         Need to test gas impact or if stack limits are any different
-
-        TODO: mint rewards (and link the relevant contracts somehow)
-            perhaps create and use interfaces for the rewards
     */
 
     using ABDKMath64x64 for int128;
@@ -77,6 +74,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     mapping(uint256 => mapping(uint256 => bool)) public raidRewardClaimed;
 
     // reward interface, keys are reward indices that are unique per-type
+    // the idea is to avoid littering the contract with variables for each type of reward
     mapping(uint256 => IERC20MintAccess) public rewardsERC20;
     mapping(uint256 => IERC721MintAccessSeeded) public rewardsERC721Seeded;
     mapping(uint256 => IERC721MintAccessSeededStars) public rewardsERC721SeededStars;
@@ -358,5 +356,50 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     function setXpReward(uint16 xp) public restricted {
         xpReward = xp;
+    }
+
+    function getRaidStatus(uint256 index) public view returns(uint8) {
+        return raidStatus[index];
+    }
+
+    function getRaidEndTime(uint256 index) public view returns(uint256) {
+        return raidEndTime[index];
+    }
+
+    function getRaidBossTrait(uint256 index) public view returns(uint8) {
+        return raidBossTrait[index];
+    }
+
+    function getRaidBossPower(uint256 index) public view returns(uint256) {
+        return raidBossPower[index];
+    }
+
+    function getRaidPlayerPower(uint256 index) public view returns(uint256) {
+        return raidPlayerPower[index];
+    }
+
+    function getRaidParticipantCount(uint256 index) public view returns(uint256) {
+        return raidParticipants[index].length;
+    }
+
+    function getEligibleRewardIndexes(uint256 startIndex, uint256 endIndex) public view returns(uint256[] memory) {
+        uint indexCount = 0;
+        for(uint i = startIndex; i <= endIndex; i++) {
+            if(isEligibleForReward(i)) {
+                indexCount++;
+            }
+        }
+        uint256[] memory result = new uint256[](indexCount);
+        uint currentIndex = 0;
+        for(uint i = startIndex; i <= endIndex; i++) {
+            if(isEligibleForReward(i)) {
+                result[currentIndex] = i;
+            }
+        }
+    }
+
+    function isEligibleForReward(uint256 index) public view returns(uint256[] memory) {
+        return raidParticipantIndices[i][uint256(msg.sender)].length > 0
+            && raidRewardClaimed[i][uint256(msg.sender)] == false;
     }
 }
