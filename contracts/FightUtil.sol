@@ -4,7 +4,7 @@ import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./util.sol";
 
-contract FightUtil {
+library FightUtil {
     using ABDKMath64x64 for int128;
     using SafeMath for uint256;
 

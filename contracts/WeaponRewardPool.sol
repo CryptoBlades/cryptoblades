@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./weapons.sol";
+import "./FightUtil.sol";
 
 // contract WeaponRewardPool is
 //     IERC721ReceiverUpgradeable,
@@ -62,7 +63,7 @@ contract WeaponRewardPool is AccessControlUpgradeable {
         int128 fightTraitBonus
     ) public pure returns(bool) {
         UnlikelyFightMath memory math;
-        math.totalPlayerFightPower =  _getPlayerTraitBonusAgainst(traitsCWE, oneFrac, fightTraitBonus) * playerFightPower;
+        math.totalPlayerFightPower = FightUtil.getPlayerTraitBonusAgainst(traitsCWE, oneFrac, fightTraitBonus) * playerFightPower;
         math.playerMin = ABDKMath64x64.divu(uint256(math.totalPlayerFightPower * 9), 10);
         math.playerMax = ABDKMath64x64.divu(uint256(math.totalPlayerFightPower * 11), 10);
         math.playerRange = math.playerMax - math.playerMin;
@@ -85,24 +86,24 @@ contract WeaponRewardPool is AccessControlUpgradeable {
         return math.rollingTotal <= ABDKMath64x64.divu(3, 10);
     }
 
-    function _getPlayerTraitBonusAgainst(uint24 traitsCWE, int128 oneFrac, int128 fightTraitBonus) private pure returns (int128) {
-        int128 traitBonus = oneFrac;
-        uint8 characterTrait = uint8(traitsCWE & 0xFF);
-        if(characterTrait == (traitsCWE >> 8) & 0xFF/*wepTrait*/) {
-            traitBonus = traitBonus.add(fightTraitBonus);
-        }
-        if(isTraitEffectiveAgainst(characterTrait, uint8(traitsCWE >> 16)/*enemy*/)) {
-            traitBonus = traitBonus.add(fightTraitBonus);
-        }
-        else if(isTraitEffectiveAgainst(uint8(traitsCWE >> 16)/*enemy*/, characterTrait)) {
-            traitBonus = traitBonus.sub(fightTraitBonus);
-        }
-        return traitBonus;
-    }
+    // function _getPlayerTraitBonusAgainst(uint24 traitsCWE, int128 oneFrac, int128 fightTraitBonus) private pure returns (int128) {
+    //     int128 traitBonus = oneFrac;
+    //     uint8 characterTrait = uint8(traitsCWE & 0xFF);
+    //     if(characterTrait == (traitsCWE >> 8) & 0xFF/*wepTrait*/) {
+    //         traitBonus = traitBonus.add(fightTraitBonus);
+    //     }
+    //     if(isTraitEffectiveAgainst(characterTrait, uint8(traitsCWE >> 16)/*enemy*/)) {
+    //         traitBonus = traitBonus.add(fightTraitBonus);
+    //     }
+    //     else if(isTraitEffectiveAgainst(uint8(traitsCWE >> 16)/*enemy*/, characterTrait)) {
+    //         traitBonus = traitBonus.sub(fightTraitBonus);
+    //     }
+    //     return traitBonus;
+    // }
 
-    function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
-        return (((attacker + 1) % 4) == defender); // Thanks to Tourist
-    }
+    // function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
+    //     return (((attacker + 1) % 4) == defender); // Thanks to Tourist
+    // }
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");

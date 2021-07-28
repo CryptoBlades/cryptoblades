@@ -33,15 +33,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     IPriceOracle public priceOracleSkillPerUsd;
     IRandoms public randoms;
     WeaponRewardPool weaponRewardPool;
-    FightUtil fightUtil;
 
     function initialize(IERC20 _skillToken,
     Characters _characters,
     Weapons _weapons,
     IPriceOracle _priceOracleSkillPerUsd,
     IRandoms _randoms,
-    WeaponRewardPool _weaponRewardPool,
-    FightUtil _fightUtil) public initializer {
+    WeaponRewardPool _weaponRewardPool) public initializer {
         __AccessControl_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -53,7 +51,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
         randoms = _randoms;
         weaponRewardPool = _weaponRewardPool;
-        fightUtil = _fightUtil;
 
         staminaCostFight = 40;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
@@ -236,7 +233,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _verifyFight(data);
 
         uint256 unlikelyFightWeaponId = _checkForUnlikelyFight(
-            fightUtil.getPlayerPower(basePowerLevel, data.weaponMultFight, data.weaponBonusPower),
+            FightUtil.getPlayerPower(basePowerLevel, data.weaponMultFight, data.weaponBonusPower),
             traitCWE,
             targetPower
         );
@@ -244,7 +241,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         performFight(
             char,
             wep,
-            fightUtil.getPlayerPower(basePowerLevel, data.weaponMultFight, data.weaponBonusPower),
+            FightUtil.getPlayerPower(basePowerLevel, data.weaponMultFight, data.weaponBonusPower),
             traitCWE,
             targetPower,
             unlikelyFightWeaponId
@@ -265,10 +262,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         verifyFight(data, getCurrentHour());
     }
 
-    function verifyFight(VerifyFightData memory data, uint256 hour) internal view {
+    function verifyFight(VerifyFightData memory data, uint256 hour) internal pure {
 
         uint32[4] memory targets = getTargetsInternal(
-            fightUtil.getPlayerPower(data.basePowerLevel, data.weaponMultTarget, data.weaponBonusPower),
+            FightUtil.getPlayerPower(data.basePowerLevel, data.weaponMultTarget, data.weaponBonusPower),
             data.timestamp,
             hour
         );
@@ -303,8 +300,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 unlikelyFightWeaponId
     ) private {
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        uint24 playerRoll = fightUtil.getPlayerPowerRoll(playerFightPower, traitsCWE, seed, traitsCWE, fightTraitBonus);
-        uint24 monsterRoll = fightUtil.getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
+        uint24 playerRoll = FightUtil.getPlayerPowerRoll(playerFightPower, traitsCWE, seed, traitsCWE, fightTraitBonus);
+        uint24 monsterRoll = FightUtil.getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
         uint16 xp = getXpGainForFight(playerFightPower, targetPower);
         uint256 tokens = usdToSkill(getTokenGainForFight(targetPower));
@@ -353,7 +350,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             ) = weapons.getFightData(wep, characters.getTrait(char));
 
         return getTargetsInternal(
-            fightUtil.getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
+            FightUtil.getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
             characters.getStaminaTimestamp(char),
             getCurrentHour()
         );
