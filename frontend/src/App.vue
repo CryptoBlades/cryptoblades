@@ -416,6 +416,7 @@ export default {
     if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
     if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
     if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
+    if (!localStorage.getItem('fightMultiplier')) localStorage.setItem('fightMultiplier', '1');
 
     this.checkNotifications();
     this.initializeRecruitCost();
