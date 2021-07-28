@@ -438,8 +438,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function burnWeapons(uint256[] memory burnIDs) public
             doesNotHaveMoreThanMaxCharacters
-            isWeaponsOwner(burnIDs) requestPayFromPlayer(ABDKMath64x64.fromUInt(burnWeaponFee.mulu(burnIDs.length))) {
-        _payContract(msg.sender, ABDKMath64x64.fromUInt(burnWeaponFee.mulu(burnIDs.length)));
+            isWeaponsOwner(burnIDs) requestPayFromPlayer(burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length))) {
+        _payContract(msg.sender, burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length)));
         for(uint i = 0; i < burnIDs.length; i++) {
             weapons.burn(burnIDs[i]);
         }
