@@ -248,9 +248,11 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             uint256 raiderIndex = raiderIndices[i];
             Raider memory raider = raidParticipants[claimRaidIndex][raiderIndex];
             int128 earlyMultiplier = ABDKMath64x64.fromUInt(1).add(
-                earlyBonus.mul(
-                    (earlyBonusCutoff-raiderIndex).divu(earlyBonusCutoff)
-                )
+                raiderIndex < earlyBonusCutoff ?
+                    earlyBonus.mul(
+                        (earlyBonusCutoff-raiderIndex).divu(earlyBonusCutoff)
+                    )
+                    : ABDKMath64x64.fromUInt(0)
             );
             if(victory) {
                 distributeRewards(
