@@ -76,7 +76,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         stakeFromGameImpl = _stakeFromGame;
     }
 
-    function migrateTo_X() external {
+    function migrateTo_801f279() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         burnWeaponFee = ABDKMath64x64.divu(2, 10);//0.2 usd;
