@@ -55,7 +55,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         weaponRewardPool = _weaponRewardPool;
         fightUtil = _fightUtil;
 
-        staminaCostFight = 1;
+        staminaCostFight = 40;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
         mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
         reforgeWeaponFee = ABDKMath64x64.divu(5, 10);//0.5 usd;
