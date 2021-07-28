@@ -103,6 +103,7 @@
                     :mainText="`Fight!`"
                     v-tooltip="'Cost 40 stamina'"
                     :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                    v-show="getWeaponDurability(selectedWeaponId) > 0"
                     @click="onClickEncounter(e)"
                   />
 
