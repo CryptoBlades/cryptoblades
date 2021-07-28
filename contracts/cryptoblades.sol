@@ -456,34 +456,58 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     modifier onlyNonContract() {
-        require(tx.origin == msg.sender, "Only EOA allowed (temporary)");
+        _onlyNonContract();
         _;
+    }
+
+    function _onlyNonContract() internal view {
+        require(tx.origin == msg.sender, "Only EOA allowed (temporary)");
     }
 
     modifier restricted() {
-        require(hasRole(GAME_ADMIN, msg.sender), "Missing GAME_ADMIN role");
+        _restricted();
         _;
+    }
+
+    function _restricted() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender), "Missing GAME_ADMIN role");
     }
 
     modifier oncePerBlock(address user) {
+        _oncePerBlock(user);
+        _;
+    }
+
+    function _oncePerBlock(address user) internal {
         require(lastBlockNumberCalled[user] < block.number, "Only callable once per block");
         lastBlockNumberCalled[user] = block.number;
-        _;
     }
 
     modifier isWeaponOwner(uint256 weapon) {
-        require(weapons.ownerOf(weapon) == msg.sender, "Not the weapon owner");
+        _isWeaponOwner(weapon);
         _;
+    }
+
+    function _isWeaponOwner(uint256 weapon) internal view {
+        require(weapons.ownerOf(weapon) == msg.sender, "Not the weapon owner");
     }
 
     modifier isCharacterOwner(uint256 character) {
-        require(characters.ownerOf(character) == msg.sender, "Not the character owner");
+        _isCharacterOwner(character);
         _;
     }
 
+    function _isCharacterOwner(uint256 character) internal view {
+        require(characters.ownerOf(character) == msg.sender, "Not the character owner");
+    }
+
     modifier doesNotHaveMoreThanMaxCharacters() {
-        require(characters.balanceOf(msg.sender) <= characters.characterLimit(), "Too many characters owned");
+        _doesNotHaveMoreThanMaxCharacters();
         _;
+    }
+
+    function _doesNotHaveMoreThanMaxCharacters() internal view {
+        require(characters.balanceOf(msg.sender) <= characters.characterLimit(), "Too many characters owned");
     }
 
     modifier isTargetValid(uint256 character, uint256 weapon, uint32 target) {
@@ -499,6 +523,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     modifier requestPayFromPlayer(int128 usdAmount) {
+        _requestPayFromPlayer(usdAmount);
+        _;
+    }
+
+    function _requestPayFromPlayer(int128 usdAmount) internal view {
         uint256 skillAmount = usdToSkill(usdAmount);
 
         (,, uint256 fromUserWallet) =
@@ -510,7 +539,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         require(skillToken.balanceOf(msg.sender) >= fromUserWallet,
             string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(skillAmount))));
-        _;
     }
 
     function payContract(address playerAddress, int128 usdAmount) public restricted {

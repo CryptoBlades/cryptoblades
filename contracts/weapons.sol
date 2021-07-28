@@ -116,13 +116,21 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
 
     modifier restricted() {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        _restricted();
         _;
     }
 
+    function _restricted() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+    }
+
     modifier noFreshLookup(uint256 id) {
-        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
+        _noFreshLookup(id);
         _;
+    }
+
+    function _noFreshLookup(uint256 id) internal view {
+        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
     }
 
     function getStats(uint256 id) internal view
