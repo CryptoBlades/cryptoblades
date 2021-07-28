@@ -436,6 +436,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         weapons.burn(burnID);
     }
 
+    function burnWeapons(uint256[] memory burnIDs) public
+            doesNotHaveMoreThanMaxCharacters
+            isWeaponsOwner(burnIDs) requestPayFromPlayer(ABDKMath64x64.fromUInt(burnWeaponFee.mulu(burnIDs.length))) {
+        _payContract(msg.sender, ABDKMath64x64.fromUInt(burnWeaponFee.mulu(burnIDs.length)));
+        for(uint i = 0; i < burnIDs.length; i++) {
+            weapons.burn(burnIDs[i]);
+        }
+    }
+
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
             doesNotHaveMoreThanMaxCharacters
             isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
@@ -490,6 +499,17 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _isWeaponOwner(uint256 weapon) internal view {
         require(weapons.ownerOf(weapon) == msg.sender, "Not the weapon owner");
+    }
+
+    modifier isWeaponsOwner(uint256[] memory weaponArray) {
+        _isWeaponsOwner(weaponArray);
+        _;
+    }
+
+    function _isWeaponsOwner(uint256[] memory weaponArray) internal view {
+        for(uint i = 0; i < weaponArray.length; i++) {
+            require(weapons.ownerOf(weaponArray[i]) == msg.sender, "Not the weapon owner");
+        }
     }
 
     modifier isCharacterOwner(uint256 character) {
