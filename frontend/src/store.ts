@@ -4,7 +4,8 @@ import Web3 from 'web3';
 import _, { isUndefined } from 'lodash';
 import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
-import { getConfigValue, INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
+import { getConfigValue, setUpContracts } from './contracts';
+
 import {
   characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract,
   trinketFromContract, junkFromContract
@@ -1086,7 +1087,7 @@ export function createStore(web3: Web3) {
         await Promise.all(characterIds.map(id => dispatch('fetchCharacter', id)));
       },
 
-      async fetchCharacter({ state, commit, dispatch }, characterId: string | number) {
+      async fetchCharacter({ state, commit }, characterId: string | number) {
         const { Characters } = state.contracts();
         if(!Characters) return;
 

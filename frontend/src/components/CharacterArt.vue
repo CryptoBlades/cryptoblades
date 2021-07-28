@@ -1,5 +1,5 @@
 <template>
-  <div class="character-art" v-tooltip="tooltipHtml(character)" ref="el">
+  <div class="character-art" ref="el">
     <div class="trait" v-if="!portrait">
       <span :class="characterTrait.toLowerCase() + '-icon circle-element'"></span>
     </div>
