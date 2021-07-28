@@ -194,22 +194,24 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
     }
 
-    function fight(uint256 char, uint256 wep, uint32 target) external
-            onlyNonContract
-            doesNotHaveMoreThanMaxCharacters
-            oncePerBlock(msg.sender)
-            isCharacterOwner(char)
-            isWeaponOwner(wep) {
+    function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
+            // These have been combined due to error: CompilerError: Stack too deep, try removing local variables. TODO
+            // onlyNonContract
+            // doesNotHaveMoreThanMaxCharacters
+            // oncePerBlock(msg.sender)
+            // isCharacterOwner(char)
+            // isWeaponOwner(wep) {
+        fightModifierChecks(char, wep) {
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
+            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight * fightMultiplier));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             uint8 weaponTrait) = weapons.getFightData(wep, charTrait);
 
-        weapons.drainDurability(wep, durabilityCostFight);
+        weapons.drainDurability(wep, durabilityCostFight * fightMultiplier);
 
         _verifyFight(
             basePowerLevel,
@@ -223,7 +225,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             wep,
             getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
-            uint24(target & 0xFFFFFF)
+            uint24(target & 0xFFFFFF),
+            fightMultiplier
         );
     }
 
@@ -273,14 +276,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 wep,
         uint24 playerFightPower,
         uint24 traitsCWE, // could fit into uint8 since each trait is only stored on 2 bits (TODO)
-        uint24 targetPower
+        uint24 targetPower,
+        uint8 fightMultiplier
     ) private {
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
-        uint16 xp = getXpGainForFight(playerFightPower, targetPower);
-        uint256 tokens = usdToSkill(getTokenGainForFight(targetPower));
+        uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
+        uint256 tokens = usdToSkill(getTokenGainForFight(targetPower) * fightMultiplier);
 
         if(playerRoll < monsterRoll) {
             tokens = 0;
@@ -453,6 +457,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function migrateRandoms(IRandoms _newRandoms) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
         randoms = _newRandoms;
+    }
+
+    modifier fightModifierChecks(uint256 char, uint256 wep) {
+        require(tx.origin == msg.sender, "Only EOA allowed (temporary)");
+        require(characters.balanceOf(msg.sender) <= characters.characterLimit(), "Too many characters owned");
+        require(lastBlockNumberCalled[msg.sender] < block.number, "Only callable once per block");
+        lastBlockNumberCalled[msg.sender] = block.number;
+        require(characters.ownerOf(char) == msg.sender, "Not the character owner");
+        require(weapons.ownerOf(wep) == msg.sender, "Not the weapon owner");
+        _;
     }
 
     modifier onlyNonContract() {
