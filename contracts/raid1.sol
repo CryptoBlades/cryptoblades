@@ -118,6 +118,13 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         _;
     }
 
+    function doRaid(uint256 bossPower, uint8 bossTrait, uint256 durationHours) public restricted {
+        if(raidIndex > 0) {
+            completeRaid();
+        }
+        startRaid(bossPower, bossTrait, durationHours);
+    }
+
     function startRaid(uint256 bossPower, uint8 bossTrait, uint256 durationHours) public restricted {
         raidStatus[raidIndex] = STATUS_STARTED;
         raidBossPower[raidIndex] = bossPower;
@@ -136,6 +143,14 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         require(weapons.getDurabilityPoints(weaponID) > 0, "You cannot join with 0 weapon durability");
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
+
+        uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][uint256(msg.sender)];
+        for(uint i = 0; i < raiderIndices.length; i++) {
+            require(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID,
+                "This weapon is already used in the raid");
+            require(raidParticipants[raidIndex][raiderIndices[i]].charID != characterID,
+                "This character is already participating");
+        }
 
         (uint8 charTrait, uint24 basePowerLevel, /*uint64 timestamp*/) =
             game.unpackFightData(characters.getFightDataAndDrainStamina(
@@ -173,10 +188,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             weaponID,
             game.usdToSkill(joinCost));
         
-        // maybe "restrict" this pay method and do the join from game?
-        // it woul help simplify gas usage analytics and skill approvals
-        // we may need the "requestPayFromPlayer" modifier
-        // game contract would need a raid contract link
         game.payContract(msg.sender, joinCost);
     }
 
@@ -231,7 +242,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         require(raiderIndices.length > 0, "None of your characters participated");
 
         int128 earlyBonus = ABDKMath64x64.divu(1,10); // up to 10%
-        uint256 earlyBonusCutoff = raidParticipants[claimRaidIndex].length/2; // first half of players
+        uint256 earlyBonusCutoff = raidParticipants[claimRaidIndex].length/2+1; // first half of players
         // we grab raider info (power) and give out xp and raid stats
         for(uint i = 0; i < raiderIndices.length; i++) {
             uint256 raiderIndex = raiderIndices[i];
@@ -420,4 +431,24 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
         return weps;
     }
+    
+    function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
+
+        if(characters.getStaminaPoints(characterID) == 0
+        || weapons.getDurabilityPoints(weaponID) == 0
+        || raidStatus[raidIndex] != STATUS_STARTED
+        || raidEndTime[raidIndex] <= now)
+            return false;
+        
+        uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][uint256(msg.sender)];
+        for(uint i = 0; i < raiderIndices.length; i++) {
+            if(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID
+            || raidParticipants[raidIndex][raiderIndices[i]].charID != characterID) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }
