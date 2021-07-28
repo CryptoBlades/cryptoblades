@@ -45,12 +45,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         staminaCostFight = 40;
         mintCharacterFee = ABDKMath64x64.divu(10, 1);//10 usd;
-
-        burnWeaponFee = ABDKMath64x64.divu(2, 10);//0.2 usd;
-        reforgeWeaponWithDustFee = ABDKMath64x64.divu(3, 10);//0.3 usd;
-
         mintWeaponFee = ABDKMath64x64.divu(3, 1);//3 usd;
-        reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;//0.5 usd;
 
         // migrateTo_1ee400a
         fightXpGain = 32;
@@ -79,6 +74,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         stakeFromGameImpl = _stakeFromGame;
+    }
+
+    function migrateTo_X() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        burnWeaponFee = ABDKMath64x64.divu(2, 10);//0.2 usd;
+        reforgeWeaponWithDustFee = ABDKMath64x64.divu(3, 10);//0.3 usd;
+
+        reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;//0.5 usd;
     }
 
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
