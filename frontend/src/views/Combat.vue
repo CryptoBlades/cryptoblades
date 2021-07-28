@@ -308,7 +308,7 @@ export default {
       const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
 
       //Formula taken from getXpGainForFight funtion of cryptoblades.sol
-      return Math.floor((targetToFight.power / totalPower) * this.fightXpGain);
+      return Math.floor((targetToFight.power / totalPower) * this.fightXpGain) * this.fightMultiplier;
     },
   },
 
