@@ -53,7 +53,7 @@
                 </b-button>
               </div>
 
-              <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" checkForDurability="true" />
+              <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" :checkForDurability="true" />
 
             </div>
             <div class="row mb-3 flex-column enemy-container" v-if="targets.length > 0">
