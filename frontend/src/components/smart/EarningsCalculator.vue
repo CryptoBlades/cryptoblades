@@ -539,13 +539,23 @@ export default Vue.extend({
   color: red;
 }
 
+.centered-icon {
+  align-self: center;
+  margin-left: 5px;
+}
+
 .btn-small {
   font-size: small;
   margin-top: 5px;
 }
 
-.centered-icon {
-  align-self: center;
-  margin-left: 5px;
+@media (max-width: 576px) {
+  .calculator {
+    flex-direction: column;
+  }
+  .calculator-character, .calculator-weapon {
+    justify-self: center;
+    width: 100%;
+  }
 }
 </style>
