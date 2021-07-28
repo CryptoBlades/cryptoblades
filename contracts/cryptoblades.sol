@@ -183,36 +183,43 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
     }
 
-    function fight(uint256 char, uint256 wep, uint32 target) external
+    struct FightData {
+        uint8 charTrait;
+        uint24 basePowerLevel;
+        uint64 timestamp;
+    }
+
+    function fight(uint256 char, uint256 wep, uint32 target, bool claimInGame) external
             onlyNonContract
             doesNotHaveMoreThanMaxCharacters
             oncePerBlock(msg.sender)
             isCharacterOwner(char)
             isWeaponOwner(wep) {
 
-        (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
+        FightData memory fightData;
+        (fightData.charTrait, fightData.basePowerLevel, fightData.timestamp) = unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightData(wep, charTrait);
+            uint8 weaponTrait) = weapons.getFightData(wep, fightData.charTrait);
 
         weapons.drainDurability(wep, durabilityCostFight);
 
         _verifyFight(
-            basePowerLevel,
+            fightData.basePowerLevel,
             weaponMultTarget,
             weaponBonusPower,
-            timestamp,
+            fightData.timestamp,
             target
         );
         performFight(
             char,
             wep,
-            getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
-            uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
-            uint24(target & 0xFFFFFF)
+            getPlayerPower(fightData.basePowerLevel, weaponMultFight, weaponBonusPower),
+            uint24(fightData.charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
+            uint24(target & 0xFFFFFF),
+            claimInGame
         );
     }
 
@@ -262,7 +269,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 wep,
         uint24 playerFightPower,
         uint24 traitsCWE, // could fit into uint8 since each trait is only stored on 2 bits (TODO)
-        uint24 targetPower
+        uint24 targetPower,
+        bool claimInGame
     ) private {
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
@@ -281,7 +289,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
 
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
-        tokenRewards[msg.sender] += tokens;
+        if(claimInGame){
+            _giveInGameOnlyFundsFromContractBalance(msg.sender, tokens);
+        } else {
+            tokenRewards[msg.sender] += tokens;
+        }
         xpRewards[char] += xp;
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);

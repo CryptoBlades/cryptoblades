@@ -1027,7 +1027,8 @@ export function createStore(web3: Web3) {
           .fight(
             characterId,
             weaponId,
-            targetString
+            targetString,
+            true
           )
           .send({ from: state.defaultAccount, gas: '500000' });
 
