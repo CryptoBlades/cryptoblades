@@ -17,9 +17,7 @@ export const toBN = (value: string|number): BigNumber => {
   const valueString = typeof value === 'string' ? value : String(value);
   if(!valueString.includes('.')) return new BigNumber(valueString);
 
-  // return new BigNumber(valueString.substring(0, valueString.indexOf('.')));
-
-  return new BigNumber(valueString.substring(valueString.indexOf('.'), valueString.length));
+  return new BigNumber(valueString.substring(0, valueString.indexOf('.')));
 };
 
 export const bnMinimum = (...values: string[]): BigNumber => {
