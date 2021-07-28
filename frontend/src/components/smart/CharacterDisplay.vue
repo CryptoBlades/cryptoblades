@@ -304,7 +304,6 @@ li.character-highlight{
 
 .trait-icon {
   position: relative;
-  border: 1px solid rgb(236, 236, 236);
   border-radius: 15px;
   top: 5px;
   left: 5px;
