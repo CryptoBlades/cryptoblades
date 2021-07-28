@@ -136,8 +136,7 @@ import { getEnemyArt } from '../enemy-art';
 import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, WeaponElement } from '../interfaces';
 import Hint from '../components/Hint.vue';
 import CombatResults from '../components/CombatResults.vue';
-import Web3 from 'web3';
-import { toBN } from '../utils/common';
+import { toBN, fromWeiEther } from '../utils/common';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 
@@ -305,7 +304,7 @@ export default {
     },
 
     formattedSkill(skill) {
-      const skillBalance = Web3.utils.fromWei(skill, 'ether');
+      const skillBalance = fromWeiEther(skill, 'ether');
       return `${toBN(skillBalance).toFixed(6)} SKILL`;
     },
 

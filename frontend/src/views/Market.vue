@@ -480,6 +480,7 @@ import { market_blockchain as useBlockchain } from './../feature-flags';
 import { CharacterTransactionHistoryData, ICharacterHistory, IWeaponHistory, WeaponTransactionHistoryData } from '@/interfaces/History';
 import { getWeaponNameFromSeed } from '@/weapon-name';
 import { getCharacterNameFromSeed } from '@/character-name';
+import { fromWeiEther } from '../utils/common';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -1173,16 +1174,10 @@ export default Vue.extend({
     },
 
     convertWeiToSkill(wei: string) {
-      return Web3.utils.fromWei(
-        wei,
-        'ether'
-      );
+      return fromWeiEther(wei);
     },
     convertSkillToWei(skill: string) {
-      return Web3.utils.toWei(
-        skill,
-        'ether'
-      );
+      return Web3.utils.toWei(skill);
     },
 
     characterMinLevelFilter(): number {
