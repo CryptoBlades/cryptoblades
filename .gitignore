@@ -11,3 +11,5 @@ report*.json
 package-lock.json
 frontend/package-lock.json
 .vs
+frontend/package-lock.json
+package-lock.json

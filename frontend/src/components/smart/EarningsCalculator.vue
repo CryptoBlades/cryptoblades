@@ -548,4 +548,15 @@ export default Vue.extend({
   align-self: center;
   margin-left: 5px;
 }
+
+@media (max-width: 576px) {
+  .calculator-character, .calculator-weapon {
+    justify-self: center;
+    width: 100%;
+  }
+  .calculator {
+    flex-direction: column;
+  }
+}
+
 </style>
