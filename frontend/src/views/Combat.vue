@@ -55,7 +55,8 @@
                 </b-button>
               </div>
 
-              <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" checkForDurability="true" />
+              <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" :checkForDurability="true" />
+
             </div>
             <div class="row mb-3 flex-column enemy-container" v-if="targets.length > 0">
               <div class="row">
@@ -185,7 +186,7 @@ export default {
 
   watch: {
     async selections([characterId, weaponId]) {
-      if (!this.ownWeapons.find((weapon) => weapon.id === weaponId)) {
+      if (!this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === weaponId)) {
         this.selectedWeaponId = null;
       }
       await this.fetchTargets({ characterId, weaponId });
@@ -212,7 +213,7 @@ export default {
     getWinChance(enemyPower, enemyElement) {
       const characterPower = CharacterPower(this.currentCharacter.level);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id === this.selectedWeaponId);
+      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === this.selectedWeaponId);
       this.selectedWeapon = selectedWeapon;
       const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
@@ -303,7 +304,7 @@ export default {
     getPotentialXp(targetToFight) {
       const characterPower = CharacterPower(this.currentCharacter.level);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id === this.selectedWeaponId);
+      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === this.selectedWeaponId);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
       const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
 

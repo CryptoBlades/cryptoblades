@@ -294,7 +294,7 @@ export function createStore(web3: Web3) {
           const date = new Date();
 
           if (state.maxDurability !== currentDurability) {
-            date.setTime(date.getTime() + ((state.maxDurability - currentDurability) * (48 * 60000)));
+            date.setTime(date.getTime() + ((state.maxDurability - currentDurability) * (50 * 60000)));
           }
 
           return(`${
