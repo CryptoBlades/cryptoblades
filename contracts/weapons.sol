@@ -106,7 +106,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     mapping(uint256 => uint64) durabilityTimestamp;
 
     uint256 public constant maxDurability = 20;
-    uint256 public constant secondsPerDurability = 2880; //48 * 60
+    uint256 public constant secondsPerDurability = 3000; //50 * 60
 
     mapping(address => uint256) burnDust; // user address : burned item dust counts
 
