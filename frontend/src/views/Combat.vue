@@ -195,7 +195,7 @@ export default {
 
   watch: {
     async selections([characterId, weaponId]) {
-      if (!this.ownWeapons.find((weapon) => weapon.id === weaponId)) {
+      if (!this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === weaponId)) {
         this.selectedWeaponId = null;
       }
       await this.fetchTargets({ characterId, weaponId });
@@ -222,7 +222,7 @@ export default {
     getWinChance(enemyPower, enemyElement) {
       const characterPower = CharacterPower(this.currentCharacter.level);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id === this.selectedWeaponId);
+      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === this.selectedWeaponId);
       this.selectedWeapon = selectedWeapon;
       const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
@@ -313,7 +313,7 @@ export default {
 
       const characterPower = CharacterPower(this.currentCharacter.level);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id ===this.selectedWeaponId);
+      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id ===this.selectedWeaponId);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
       const totalPower = ((characterPower * weaponMultiplier) + selectedWeapon.bonusPower);
 
