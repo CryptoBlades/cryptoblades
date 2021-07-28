@@ -1,29 +1,25 @@
 <template>
   <div class = "body main-font">
-    <div class = "pvp-container">
-        <big-button
-            v-if="!battleFlag"
-            class="encounter-button btn-styled"
-            :mainText="`ATTACK`"
-            v-tooltip="'Cost x-amount of skill'"
-            :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-            @click="showAttackView()"
-        />
-        <big-button
-            v-if="!battleFlag"
-            class="encounter-button btn-styled"
-            :mainText="`DEFEND`"
-            v-tooltip="'Cost x-amount of skill'"
-            :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-            @click="showDefendView()"
-        />
 
+    <div class = "pvp-container">
+      <!-- here goes the stepper -->
     </div>
-    <div class ="combat-container" v-if="characterFlag">
-        <div class="weapon-container weapon-selection" v-if="weaponFlag">
-          <div class="col">
+
+    <div class ="combat-container">
+      <b-tabs justified content-class="mt-3" align="center">
+        <b-tab
+              :active="pvpArsenalFlag"
+              :disabled="!pvpArsenalFlag">
+        <template #title>
+          Arsenal Preparation
+          <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
+        </template>
+          <b-container fluid>
+            <b-row>
+              <b-col cols="5" class="weapon-selection">
+          <div>
                 <div class="header-row weapon-header">
-                <h1>Choose a weapon</h1>
+                <h1>Choose your weapon</h1>
                 <Hint
                 text="Your weapon multiplies your power<br>
                 <br>+Stats determine the multiplier
@@ -43,41 +39,86 @@
               <weapon-grid
                   v-if="!selectedWeaponId"
                   v-model="selectedWeaponId"
-                  checkForDurability="true" />
-
-        </div>
-
-        <div class= "fight-button" v-if="battleFlag">
-            <div class="enter-pvp">
-              <big-button
-                  v-if="battleFlag"
-                  class="encounter-button btn-styled"
-                  :mainText="`ENTER`"
-                  v-tooltip="'Cost x-amount of skill'"
-                  :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-                  @click="showAttackView()"
+                  checkForDurability="true"
               />
-            </div>
-            <div class="leave-pvp">
-              <big-button
-                  v-if="battleFlag"
-                  class="encounter-button btn-styled back-button"
-                  :mainText="`LEAVE`"
-                  v-tooltip="'Go back to choose battle mode'"
-                  :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-                  @click="showChooseBattleMode()"
-               />
-            </div>
-        </div>
 
-        <div class = "character-container">
+              </b-col>
+              <b-col cols="1">
+              </b-col>
+              <b-col cols="5" class = "character-container">
+                <div>
+                <div class="header-row weapon-header">
+                <h1>Choose your character</h1>
+                <Hint
+                text="Your weapon multiplies your power<br>
+                <br>+Stats determine the multiplier
+                <br>Stat element match with character gives greater bonus"
+                />
+                </div>
+          </div>
           <character-list
             :value="currentCharacterId"
             @input="setCurrentCharacter"
           />
+              </b-col>
+              <b-col cols="1">
+                <big-button
+                    class="encounter-button btn-styled"
+                    :mainText="`X`"
+                    v-tooltip=""
+                    :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                    @click="findEnemies()"
+                  />
+              </b-col>
+            </b-row>
+          </b-container>
+        </b-tab>
+
+        <b-tab
+            :active="pvpQueueFlag"
+            :disabled="!pvpQueueFlag">
+          <template #title>
+          Find 'em
+          <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
+        </template>
+
+        <div
+            class="text-center header-row weapon-header"
+            v-if="!enemiesFound">
+          <h1> FINDING ENEMIES...</h1>
+          <b-spinner type="grow" label="Spinning"></b-spinner>
+          <b-spinner type="grow" label="Spinning"></b-spinner>
+          <b-spinner type="grow" label="Spinning"></b-spinner>
         </div>
 
+        <div
+            class="text-center"
+            v-if="enemiesFound">
+                <div>
+                <div class="header-row weapon-header">
+                <h1>DISPLAY ENEMIES HERE</h1>
+                <!-- <Hint
+                text="Your weapon multiplies your power<br>
+                <br>+Stats determine the multiplier
+                <br>Stat element match with character gives greater bonus"
+                /> -->
+                </div>
+          </div>
+        </div>
+        </b-tab>
+
+        <b-tab
+            :active="pvpArenaFlag"
+            :disabled="!pvpArenaFlag">
+          <template #title>
+          Arena
+          <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
+        </template>
+        </b-tab>
+
+      </b-tabs>
     </div>
+
   </div>
 </template>
 
@@ -103,9 +144,10 @@ export default {
       timeMinutes: null,
       fightXpGain: 32,
       selectedWeapon: null,
-      weaponFlag: false,
-      characterFlag: false,
-      battleFlag: false,
+      pvpArsenalFlag: true,
+      pvpQueueFlag: false,
+      pvpArenaFlag: false,
+      enemiesFound: false,
     };
   },
 
@@ -159,25 +201,22 @@ export default {
       const selectedWeapon = this.ownWeapons.find((weapon) => weapon.id === this.selectedWeaponId);
       this.selectedWeapon = selectedWeapon;
     },
-    showAttackView(){
-      this.characterFlag = true;
-      this.weaponFlag = true;
+    findEnemies(){
+      this.pvpArsenalFlag = false;
+      this.pvpQueueFlag = true;
+      this.pvpArenaFlag = false;
 
-      this.battleFlag = true;
+      setTimeout(() => this.enemiesFound = true, 2000);
     },
-
-    showDefendView(){
-      this.characterFlag = true;
-      this.weaponFlag = true;
-
-      this.battleFlag = true;
+    enterArena(){
+      this.pvpArsenalFlag = false;
+      this.pvpQueueFlag = false;
+      this.pvpArenaFlag = true;
     },
-
-    showChooseBattleMode(){
-      this.characterFlag = false;
-      this.weaponFlag = false;
-
-      this.battleFlag = false;
+    initiateCombat(){
+      this.pvpArsenalFlag = false;
+      this.pvpQueueFlag = false;
+      this.pvpArenaFlag = false;
     },
   },
 
@@ -203,18 +242,13 @@ export default {
   top: 3vw;
 }
 
-.back-button {
-  justify-content: right;
-}
-
 .pvp-container {
   display : flex;
   margin-bottom: 50px;
 }
 
 .combat-container {
-  display:flex;
-  margin-top: 50px;
+  margin: 50px;
 }
 
 .header-row {
@@ -251,16 +285,15 @@ export default {
 }
 
 .character-container {
-  flex:30%
+
 }
 
 .weapon-container {
-  flex:30%
+
 }
 
 .fight-button {
   padding-left: 50px;
-  flex:20%
 }
 
 .enter-pvp {
