@@ -462,7 +462,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         Weapon storage burning = tokens[burnID];
         uint8 stars = getStarsFromProperties(burning.properties);
         if(stars < 3) { // 1-3 star
-            values[0] += stars;
+            values[0] += stars + 1;
         }
         else if(stars == 3) { // 4 star
             values[1] += 1;
