@@ -290,6 +290,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
         if(claimInGame){
+            tokens = (tokens * 3 / 2);
             _giveInGameOnlyFundsFromContractBalance(msg.sender, tokens);
         } else {
             tokenRewards[msg.sender] += tokens;
