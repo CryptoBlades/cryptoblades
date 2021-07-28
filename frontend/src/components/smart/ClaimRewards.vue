@@ -134,12 +134,12 @@ export default Vue.extend({
     },
 
     formattedTaxAmount(): string {
-      const skillRewards = Web3.utils.fromWei((parseFloat(this.skillRewards)* parseFloat(String(this.rewardsClaimTaxAsFactorBN))).toString(), 'ether');
+      const skillRewards = Web3.utils.fromWei(toBN(parseFloat(this.skillRewards)* parseFloat(String(this.rewardsClaimTaxAsFactorBN))).toString(), 'ether');
       return `${toBN(skillRewards).toFixed(4)}`;
     },
 
     formattedBonusLost(): string {
-      const skillLost = Web3.utils.fromWei((parseFloat(this.skillRewards)*this.directStakeBonusPercent/100).toString(), 'ether');
+      const skillLost = Web3.utils.fromWei(toBN(parseFloat(this.skillRewards)*this.directStakeBonusPercent/100).toString(), 'ether');
       return `${toBN(skillLost).toFixed(4)}`;
     },
 

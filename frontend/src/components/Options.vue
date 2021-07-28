@@ -123,7 +123,7 @@ export default Vue.extend({
       return `${toBN(skillRewards).toFixed(4)}`;
     },
     formattedTaxAmount(): string {
-      const skillRewards = Web3.utils.fromWei((parseFloat(this.skillRewards)* parseFloat(String(this.rewardsClaimTaxAsFactorBN))).toString(), 'ether');
+      const skillRewards = Web3.utils.fromWei(parseFloat(String(parseFloat(this.skillRewards)*parseFloat(String(this.rewardsClaimTaxAsFactorBN)))) + '');
       return `${toBN(skillRewards).toFixed(4)}`;
     },
     formattedRewardsClaimTax(): string {
@@ -135,7 +135,7 @@ export default Vue.extend({
       return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
     },
     formattedBonusLost(): string {
-      const skillLost = Web3.utils.fromWei((parseFloat(this.skillRewards)*this.directStakeBonusPercent/100).toString(), 'ether');
+      const skillLost = Web3.utils.fromWei(parseFloat(String(parseFloat(this.skillRewards)*this.directStakeBonusPercent/100)).toString(), 'ether');
       return `${toBN(skillLost).toFixed(4)}`;
     },
     canClaimTokens(): boolean {
