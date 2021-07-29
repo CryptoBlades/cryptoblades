@@ -1,6 +1,6 @@
 {
-  "language": "Francais",
-  "view-link": {
+  "name": "Francais",
+  "viewLink": {
       "plaza": "Caserne",
       "blacksmith": "Forge",
       "combat": "Combat",
@@ -11,5 +11,15 @@
   },
   "plaza": {
     "welcome": "Commence a gagner dès aujourd'hui !"
-  }
+  },
+  "options": {
+    "title": "Options",
+    "graphic": "Paramètre graphique 3D",
+    "rewardBar": "Masquer la barre de récompense",
+    "walletWarning": "Masquer l'alerte de connexion au wallet",
+    "staminaFight": "Coût en endurance par combat",
+    "language": "Langue"
+  },
+  "on": "Oui",
+  "off": "Non"
 }
