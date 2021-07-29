@@ -278,8 +278,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     {
         require (tickets[msg.sender] >= num, "You don't have enough tickets");
 
-        for (int i = 0; i < num; i++) {
-            weapons.mint(msg.sender, randoms.getRandomSeed(msg.sender));
+        for (uint i = 0; i < num; i++) {
+            weapons.mint(msg.sender, uint256(keccak256(abi.encode(randoms.getRandomSeed(msg.sender) ^ (block.number + i)))));
         }
 
         tickets[msg.sender] -= num;
