@@ -4,37 +4,37 @@
     <router-link :to="{ name: 'plaza' }" exact class="nav-link"
     v-if="!featureFlagStakeOnly">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="plaza_screen">{{ $t("view-link.plaza") }}</span>
+        <span class="gtag-link-others" tagname="plaza_screen">{{ $t("viewLink.plaza") }}</span>
       </li>
     </router-link>
 
     <router-link :to="{ name: 'blacksmith' }" exact class="nav-link"   v-if="!featureFlagStakeOnly">
       <li class="nav-item nav-top-links" >
-        <span class="gtag-link-others" tagname="blacksmith_screen">{{ $t("view-link.blacksmith") }}</span>
+        <span class="gtag-link-others" tagname="blacksmith_screen">{{ $t("viewLink.blacksmith") }}</span>
       </li>
     </router-link>
 
     <router-link :to="{ name: 'combat' }" exact class="nav-link"  v-if="!featureFlagStakeOnly">
       <li class="nav-item nav-top-links" >
-        <span class="gtag-link-others" tagname="combat_screen">{{ $t("view-link.combat") }}</span>
+        <span class="gtag-link-others" tagname="combat_screen">{{ $t("viewLink.combat") }}</span>
       </li>
     </router-link>
 
     <router-link :to="{ name: 'raid' }" exact class="nav-link"  v-if="!featureFlagStakeOnly && featureFlagRaid">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="raid_screen">{{ $t("view-link.raid") }}</span>
+        <span class="gtag-link-others" tagname="raid_screen">{{ $t("viewLink.raid") }}</span>
       </li>
     </router-link>
 
     <router-link :to="{ name: 'market' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagMarket">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="market_screen">{{ $t("view-link.market") }}</span>
+        <span class="gtag-link-others" tagname="market_screen">{{ $t("viewLink.market") }}</span>
       </li>
     </router-link>
 
     <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="stake_screen">{{ $t("view-link.stake") }}</span>
+        <span class="gtag-link-others" tagname="stake_screen">{{ $t("viewLink.stake") }}</span>
       </li>
     </router-link>
 
