@@ -313,7 +313,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                     // Performance optimization: 1000 = getPowerAtLevel(0)
                     ABDKMath64x64.divu(monsterPower, 1000)
                 )
-            ) * fightMultiplier
+            ).mul(ABDKMath64x64.fromUInt(fightMultiplier))
         );
     }
 
