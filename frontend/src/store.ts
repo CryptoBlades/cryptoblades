@@ -294,7 +294,7 @@ export function createStore(web3: Web3) {
           const date = new Date();
 
           if (state.maxDurability !== currentDurability) {
-            date.setTime(date.getTime() + ((state.maxDurability - currentDurability) * (48 * 60000)));
+            date.setTime(date.getTime() + ((state.maxDurability - currentDurability) * (50 * 60000)));
           }
 
           return(`${
@@ -1020,14 +1020,15 @@ export function createStore(web3: Web3) {
         commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
       },
 
-      async doEncounter({ state, dispatch }, { characterId, weaponId, targetString }) {
+      async doEncounter({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier }) {
         if(featureFlagStakeOnly) return;
 
         const res = await state.contracts().CryptoBlades!.methods
           .fight(
             characterId,
             weaponId,
-            targetString
+            targetString,
+            fightMultiplier
           )
           .send({ from: state.defaultAccount, gas: '500000' });
 
