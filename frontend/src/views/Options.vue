@@ -43,6 +43,14 @@
                 <b-form-select-option value="5">200</b-form-select-option>
               </b-form-select>
             </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
+              <h4>Language</h4>
+              <b-form-select class="combobox-languages" size="md" v-model="$i18n.locale">
+                <b-form-select-option v-for="(value, key) in languages" :key="key" :value="key">
+                  {{ value }}
+                </b-form-select-option>
+              </b-form-select>
+            </b-list-group-item>
           </b-list-group>
         </div>
         <div class="bot-bg-img">
@@ -60,6 +68,7 @@ import BigNumber from 'bignumber.js';
 import { Accessors } from 'vue/types/options';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../utils/common';
+import i18n from '../i18n';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -75,6 +84,7 @@ interface Data {
   hideAdvanced: boolean;
   hideWalletWarning: boolean;
   fightMultiplier: number;
+  //languages: any;
 }
 
 interface StoreMappedGetters {
@@ -95,7 +105,9 @@ export default Vue.extend({
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
+    console.log(i18n.messages);
   },
+
   data() {
     return {
       showGraphics: false,
@@ -105,6 +117,7 @@ export default Vue.extend({
       fightMultiplier: 1,
       checked: false,
       ClaimStage,
+      //languages: {en: 'English', fr: 'Francais'},
     } as Data;
   },
 
@@ -135,6 +148,13 @@ export default Vue.extend({
       }
       return true;
     },
+    languages(): { [key: string]: string } {
+      const rObj: { [key: string]: string } = {};
+      for (const [key, value] of Object.entries(i18n.messages)) {
+        rObj[key] = value.language.toString();
+      }
+      return rObj;
+    }
   },
 
   methods: {
@@ -192,8 +212,15 @@ export default Vue.extend({
       localStorage.setItem('fightMultiplier', this.fightMultiplier.toString());
 
       Events.$emit('setting:fightMultiplier', { value: this.fightMultiplier });
-    },
+    }
   },
+
+  watch: {
+    '$i18n.locale'(newVal, ) {
+      localStorage.setItem('language', newVal);
+    }
+  },
+
 });
 </script>
 
@@ -307,6 +334,10 @@ export default Vue.extend({
       background-position: 200% center;
     }
   }
+}
+
+.combobox-languages {
+  width: 150px !important;
 }
 
 .fullscreen-warning {

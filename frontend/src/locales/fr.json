@@ -1,0 +1,15 @@
+{
+  "language": "Francais",
+  "view-link": {
+      "plaza": "Caserne",
+      "blacksmith": "Forge",
+      "combat": "Combat",
+      "raid": "Raid",
+      "pvp": "PvP",
+      "market": "Marché",
+      "stake": "Stake"
+  },
+  "plaza": {
+    "welcome": "Commence a gagner dès aujourd'hui !"
+  }
+}

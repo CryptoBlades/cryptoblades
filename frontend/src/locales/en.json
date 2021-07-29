@@ -1,0 +1,15 @@
+{
+  "language": "English",
+  "view-link": {
+      "plaza": "Plaza",
+      "blacksmith": "Blacksmith",
+      "combat": "Combat",
+      "raid": "Raid",
+      "pvp": "PvP",
+      "market": "Market",
+      "stake": "Stake"
+  },
+  "plaza": {
+    "welcome": "Start earning today!"
+  }
+}
