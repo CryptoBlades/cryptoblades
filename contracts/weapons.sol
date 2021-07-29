@@ -487,7 +487,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _incrementDustSupplies(burnOwner, values[0], values[1], values[2]);
 
         emit Burned(
-            ownerOf(burnID),
+            burnOwner,
             burnID
         );
     }
