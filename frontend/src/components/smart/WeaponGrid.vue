@@ -250,8 +250,11 @@ export default Vue.extend({
   },
 
   watch: {
-    async weaponIdsToDisplay(newWeaponIds: string[]) {
-      await this.fetchWeapons(newWeaponIds);
+    weaponIdsToDisplay: {
+      async handler (newWeaponIds: string[]) {
+        await this.fetchWeapons(newWeaponIds);
+      },
+      immediate: true
     },
   },
 

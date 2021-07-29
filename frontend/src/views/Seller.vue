@@ -33,11 +33,6 @@ export default Vue.extend({
       loading: true
     };
   },
-
-  mounted () {
-    this.fetchData();
-  },
-
   computed: {
     Weapons() {
       return this.contracts.Weapons;
@@ -58,7 +53,8 @@ export default Vue.extend({
     $route: {
       async handler () {
         this.fetchData();
-      }
+      },
+      immediate: true
     }
   },
 
