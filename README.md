@@ -15,7 +15,7 @@ You should now have 100 fake eth! You're now fake rich.
 ## Frontend Setup
 
 1. `npm install`
-1. Create a new file named `.env` in the 'frontend' directory alongside `.env.mainnet` and `.env.testnet` [**Edit this file to include the following lines of code**](https://github.com/CryptoBlades/cryptoblades/blob/main/frontend/.env.testnet#L1-L5)
+1. `mv .env.local .env` (copy the example env to your local so it can be used)
 1. `npm run contract:prepare` (this builds your contracts)
 1. `npm run contract:deploy` (this deploys your contracts to your local blockchain)
 1. `npm run start:frontend`

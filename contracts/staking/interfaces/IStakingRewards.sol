@@ -15,6 +15,8 @@ interface IStakingRewards {
 
     function balanceOf(address account) external view returns (uint256);
 
+    function minimumStakeAmount() external view returns (uint256);
+
     function minimumStakeTime() external view returns (uint256);
 
     function getStakeRewardDistributionTimeLeft() external view returns (uint256);

@@ -141,8 +141,7 @@ import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, We
 import axios from 'axios';
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import Web3 from 'web3';
-import BN from 'bignumber.js';
+import { toBN, fromWeiEther } from '../../utils/common';
 
 interface PriceJson {
   binancecoin: CoinPrice;
@@ -315,13 +314,13 @@ export default Vue.extend({
     },
 
     formattedSkill(skill: number): number {
-      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
-      return new BN(skillBalance).toNumber();
+      const skillBalance = fromWeiEther(skill.toString());
+      return toBN(skillBalance).toNumber();
     },
 
     stringFormattedSkill(skill: number): string {
-      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
-      return new BN(skillBalance).toFixed(6);
+      const skillBalance = fromWeiEther(skill.toString());
+      return toBN(skillBalance).toFixed(6);
     },
 
     getColoringClass(i: number): string {
@@ -539,13 +538,23 @@ export default Vue.extend({
   color: red;
 }
 
+.centered-icon {
+  align-self: center;
+  margin-left: 5px;
+}
+
 .btn-small {
   font-size: small;
   margin-top: 5px;
 }
 
-.centered-icon {
-  align-self: center;
-  margin-left: 5px;
+@media (max-width: 576px) {
+  .calculator {
+    flex-direction: column;
+  }
+  .calculator-character, .calculator-weapon {
+    justify-self: center;
+    width: 100%;
+  }
 }
 </style>

@@ -17,6 +17,7 @@
 
       <div class="trait">
         <span :class="weapon.element.toLowerCase() + '-icon'"></span>
+        <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
       </div>
 
       <div class="name">
@@ -27,7 +28,7 @@
         <div class="small-durability-bar"
         :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
         v-tooltip.bottom="`Durability: ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
-          Repairs 1 point every 48 minutes, durability will be full at: ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
+          Repairs 1 point every 50 minutes, durability will be full at: ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
       </div>
 
     </div>
@@ -88,7 +89,7 @@ function transformModel(model, y) {
 }
 
 export default {
-  props: ['weapon'],
+  props: ['weapon', 'favorite'],
 
   computed: {
     ...mapState(['maxDurability']),
@@ -467,8 +468,13 @@ export default {
   left: 10px;
 }
 
+.favorite-star {
+  position: absolute;
+  margin-left: 5px;
+}
+
 .id {
-  top: 10px;
+  top: 8px;
   right: 10px;
   font-style: italic;
 }
