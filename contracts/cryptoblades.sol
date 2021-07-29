@@ -284,7 +284,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
-        uint256 tokens = usdToSkill(getTokenGainForFight(targetPower) * fightMultiplier);
+        uint256 tokens = usdToSkill(getTokenGainForFight(targetPower, fightMultiplier));
 
         if(playerRoll < monsterRoll) {
             tokens = 0;
@@ -306,14 +306,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint24(target & 0xFFFFFF);
     }
 
-    function getTokenGainForFight(uint24 monsterPower) internal view returns (int128) {
+    function getTokenGainForFight(uint24 monsterPower, uint8 fightMultiplier) internal view returns (int128) {
         return fightRewardGasOffset.add(
             fightRewardBaseline.mul(
                 ABDKMath64x64.sqrt(
                     // Performance optimization: 1000 = getPowerAtLevel(0)
                     ABDKMath64x64.divu(monsterPower, 1000)
                 )
-            )
+            ) * fightMultiplier
         );
     }
 
