@@ -390,7 +390,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function mintCharacter() public onlyNonContract doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
         require(characters.balanceOf(msg.sender) < characters.characterLimit(),
             string(abi.encodePacked("You can only have ",characters.characterLimit()," characters!")));
-        _payContract(msg.sender, mintCharacterFee);
+        _payContractTokenOnly(msg.sender, mintCharacterFee);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
             _giveInGameOnlyFundsFromContractBalance(msg.sender, usdToSkill(promos.firstCharacterPromoInGameOnlyFundsGivenInUsd()));
@@ -510,6 +510,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function approveContractWeaponFor(uint256 weaponID, address playerAddress) public restricted {
         _approveContractWeaponFor(weaponID, playerAddress);
+    }
+
+    function _payContractTokenOnly(address playerAddress, int128 usdAmount) internal {
+        uint256 convertedAmount = usdToSkill(usdAmount);
+        skillToken.safeTransferFrom(playerAddress, address(this), convertedAmount);
     }
 
     function _payContract(address playerAddress, int128 usdAmount) internal {
