@@ -68,10 +68,9 @@
 import Events from '../events';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import Web3 from 'web3';
 import { Accessors } from 'vue/types/options';
 import Vue from 'vue';
-import { toBN } from '../utils/common';
+import { toBN, fromWeiEther } from '../utils/common';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -119,11 +118,11 @@ export default Vue.extend({
     ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN']) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
-      const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
+      const skillRewards = fromWeiEther(this.skillRewards);
       return `${toBN(skillRewards).toFixed(4)}`;
     },
     formattedTaxAmount(): string {
-      const skillRewards = Web3.utils.fromWei(parseFloat(String(parseFloat(this.skillRewards)*parseFloat(String(this.rewardsClaimTaxAsFactorBN)))) + '');
+      const skillRewards = fromWeiEther(parseFloat(String(parseFloat(this.skillRewards)*parseFloat(String(this.rewardsClaimTaxAsFactorBN)))) + '');
       return `${toBN(skillRewards).toFixed(4)}`;
     },
     formattedRewardsClaimTax(): string {
@@ -135,7 +134,7 @@ export default Vue.extend({
       return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
     },
     formattedBonusLost(): string {
-      const skillLost = Web3.utils.fromWei(parseFloat(String(parseFloat(this.skillRewards)*this.directStakeBonusPercent/100)).toString(), 'ether');
+      const skillLost = fromWeiEther(parseFloat(String(parseFloat(this.skillRewards)*this.directStakeBonusPercent/100)).toString());
       return `${toBN(skillLost).toFixed(4)}`;
     },
     canClaimTokens(): boolean {
