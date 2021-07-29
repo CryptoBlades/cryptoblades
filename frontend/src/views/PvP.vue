@@ -1,6 +1,5 @@
 <template>
   <div class = "body main-font">
-
     <div class = "pvp-container">
       <!-- here goes the stepper -->
     </div>
@@ -8,117 +7,124 @@
     <div class ="combat-container">
       <b-tabs justified content-class="mt-3" align="center">
         <b-tab
-              :active="pvpArsenalFlag"
-              :disabled="!pvpArsenalFlag">
-        <template #title>
-          Arsenal Preparation
-          <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
-        </template>
+          :active="pvpArsenalFlag"
+          :disabled="!pvpArsenalFlag"
+        >
+          <template #title>
+            Arsenal Preparation
+            <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
+          </template>
           <b-container fluid>
             <b-row>
               <b-col cols="5" class="weapon-selection">
-          <div>
-                <div class="header-row weapon-header">
-                <h1>Choose your weapon</h1>
-                <Hint
-                text="Your weapon multiplies your power<br>
-                <br>+Stats determine the multiplier
-                <br>Stat element match with character gives greater bonus"
-                />
+                <div>
+                  <div class="header-row weapon-header">
+                    <h1>Choose your weapon</h1>
+                    <Hint
+                      text="Your weapon multiplies your power<br>
+                      <br>+Stats determine the multiplier
+                      <br>Stat element match with character gives greater bonus"
+                    />
+                  </div>
                 </div>
-          </div>
-          <div v-if="selectedWeaponId" class="weapon-icon-wrapper">
-              <weapon-icon
-                  class = "select-char-weap"
-                  :weapon="selectedWeapon"
-           />
-        <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-link-others" tagname="choose_weapon">
-                  Choose New Weapon
-        </b-button>
-              </div>
-              <weapon-grid
+                <div v-if="selectedWeaponId" class="weapon-icon-wrapper">
+                  <weapon-icon
+                    class = "select-char-weap"
+                    :weapon="selectedWeapon"
+                  />
+                  <b-button
+                    v-if="selectedWeaponId"
+                    variant="primary"
+                    class="ml-3"
+                    @click="selectedWeaponId = null"
+                    id="gtag-link-others"
+                    tagname="choose_weapon"
+                  >
+                      Choose New Weapon
+                  </b-button>
+                </div>
+                <weapon-grid
                   v-if="!selectedWeaponId"
                   v-model="selectedWeaponId"
                   checkForDurability="true"
-              />
-
+                />
               </b-col>
               <b-col cols="1">
               </b-col>
               <b-col cols="5" class = "character-container">
                 <div>
-                <div class="header-row weapon-header">
-                <h1>Choose your character</h1>
-                <Hint
-                text="Your weapon multiplies your power<br>
-                <br>+Stats determine the multiplier
-                <br>Stat element match with character gives greater bonus"
-                />
+                  <div class="header-row weapon-header">
+                    <h1>Choose your character</h1>
+                    <Hint
+                      text="Your weapon multiplies your power<br>
+                      <br>+Stats determine the multiplier
+                      <br>Stat element match with character gives greater bonus"
+                    />
+                  </div>
                 </div>
-          </div>
-          <character-list
-            :value="currentCharacterId"
-            @input="setCurrentCharacter"
-          />
+                <character-list
+                  :value="currentCharacterId"
+                  @input="setCurrentCharacter"
+                />
               </b-col>
               <b-col cols="1">
                 <big-button
-                    class="encounter-button btn-styled"
-                    :mainText="`X`"
-                    v-tooltip=""
-                    :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-                    @click="findEnemies()"
-                  />
+                  class="encounter-button btn-styled"
+                  :mainText="`X`"
+                  v-tooltip=""
+                  :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                  @click="findEnemies()"
+                />
               </b-col>
             </b-row>
           </b-container>
         </b-tab>
-
         <b-tab
-            :active="pvpQueueFlag"
-            :disabled="!pvpQueueFlag">
+          :active="pvpQueueFlag"
+          :disabled="!pvpQueueFlag"
+        >
           <template #title>
-          Find 'em
-          <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
-        </template>
+            Find 'em
+            <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
+          </template>
 
-        <div
+          <div
             class="text-center header-row weapon-header"
-            v-if="!enemiesFound">
-          <h1> FINDING ENEMIES...</h1>
-          <b-spinner type="grow" label="Spinning"></b-spinner>
-          <b-spinner type="grow" label="Spinning"></b-spinner>
-          <b-spinner type="grow" label="Spinning"></b-spinner>
-        </div>
+            v-if="!enemiesFound"
+          >
+            <h1> FINDING ENEMIES...</h1>
+            <b-spinner type="grow" label="Spinning"></b-spinner>
+            <b-spinner type="grow" label="Spinning"></b-spinner>
+            <b-spinner type="grow" label="Spinning"></b-spinner>
+          </div>
 
-        <div
+          <div
             class="text-center"
-            v-if="enemiesFound">
-                <div>
-                <div class="header-row weapon-header">
+            v-if="enemiesFound"
+          >
+            <div>
+              <div class="header-row weapon-header">
                 <h1>DISPLAY ENEMIES HERE</h1>
                 <!-- <Hint
-                text="Your weapon multiplies your power<br>
-                <br>+Stats determine the multiplier
-                <br>Stat element match with character gives greater bonus"
+                  text="Your weapon multiplies your power<br>
+                  <br>+Stats determine the multiplier
+                  <br>Stat element match with character gives greater bonus"
                 /> -->
-                </div>
+              </div>
+            </div>
           </div>
-        </div>
         </b-tab>
-
         <b-tab
-            :active="pvpArenaFlag"
-            :disabled="!pvpArenaFlag">
+          :active="pvpArenaFlag"
+          :disabled="!pvpArenaFlag"
+        >
           <template #title>
-          Arena
-          <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
-        </template>
+            Arena
+            <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
+          </template>
         </b-tab>
-
       </b-tabs>
     </div>
-
   </div>
 </template>
 
