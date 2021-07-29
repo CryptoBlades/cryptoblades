@@ -106,19 +106,31 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     mapping(uint256 => uint64) durabilityTimestamp;
 
     uint256 public constant maxDurability = 20;
-    uint256 public constant secondsPerDurability = 2880; //48 * 60
+    uint256 public constant secondsPerDurability = 3000; //50 * 60
 
+    mapping(address => uint256) burnDust; // user address : burned item dust counts
+
+    event Burned(address indexed owner, uint256 indexed burned);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
+    event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
 
     modifier restricted() {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        _restricted();
         _;
     }
 
+    function _restricted() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+    }
+
     modifier noFreshLookup(uint256 id) {
-        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
+        _noFreshLookup(id);
         _;
+    }
+
+    function _noFreshLookup(uint256 id) internal view {
+        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
     }
 
     function getStats(uint256 id) internal view
@@ -392,43 +404,102 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return result;
     }
 
-    function reforge(uint256 reforgeID, uint256 burnID) public restricted {
-        WeaponBurnPoints storage wbp = burnPoints[reforgeID];
+    function getDustSupplies(address playerAddress) public view returns (uint32[] memory) {
+        uint256 burnDustValue = burnDust[playerAddress];
+        uint32[] memory supplies = new uint32[](3);
+        supplies[0] = uint32(burnDustValue);
+        supplies[1] = uint32(burnDustValue >> 32);
+        supplies[2] = uint32(burnDustValue >> 64);
+        return supplies;
+    }
+
+    function _setDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
+        uint256 burnDustValue = (amount5B << 64) + (amount4B << 32) + amountLB;
+        burnDust[playerAddress] = burnDustValue;
+    }
+
+    function _decrementDustSuppliesCheck(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
+        uint32[] memory supplies = getDustSupplies(playerAddress);
+        require(supplies[0] >= amountLB, "Dust LB supply needed");
+        require(supplies[1] >= amount4B, "Dust 4B supply needed");
+        require(supplies[2] >= amount5B, "Dust 5B supply needed");
+    }
+
+    function _decrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
+        uint32[] memory supplies = getDustSupplies(playerAddress);
+        supplies[0] -= amountLB;
+        supplies[1] -= amount4B;
+        supplies[2] -= amount5B;
+        _setDustSupplies(playerAddress, supplies[0], supplies[1], supplies[2]);
+    }
+
+    function _incrementDustSuppliesCheck(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
+        uint32[] memory supplies = getDustSupplies(playerAddress);
+        require(uint256(supplies[0]) + amountLB <= 0xFFFFFFFF, "Dust LB supply capped");
+        require(uint256(supplies[1]) + amount4B <= 0xFFFFFFFF, "Dust 4B supply capped");
+        require(uint256(supplies[2]) + amount5B <= 0xFFFFFFFF, "Dust 5B supply capped");
+    }
+
+    function _incrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
+        _incrementDustSuppliesCheck(playerAddress, amountLB, amount4B, amount5B);
+        uint32[] memory supplies = getDustSupplies(playerAddress);
+        supplies[0] += amountLB;
+        supplies[1] += amount4B;
+        supplies[2] += amount5B;
+        _setDustSupplies(playerAddress, supplies[0], supplies[1], supplies[2]);
+    }
+
+    function _calculateBurnValues(uint256 burnID) public view returns(uint8[] memory) {
+        uint8[] memory values = new uint8[](3);
+
+        // Carried burn points.
         WeaponBurnPoints storage burningbp = burnPoints[burnID];
+        values[0] = (burningbp.lowStarBurnPoints + 1) / 2;
+        values[1] = (burningbp.fourStarBurnPoints + 1) / 2;
+        values[2] = (burningbp.fiveStarBurnPoints + 1) / 2;
+
+        // Stars-based burn points.
         Weapon storage burning = tokens[burnID];
-
-        uint carriedLowStarBurnPoints = (burningbp.lowStarBurnPoints + 1) / 2;
-        uint carriedFourStarBurnPoints = (burningbp.fourStarBurnPoints + 1) / 2;
-        uint carriedFiveStarBurnPoints = (burningbp.fiveStarBurnPoints + 1) / 2;
-
         uint8 stars = getStarsFromProperties(burning.properties);
         if(stars < 3) { // 1-3 star
-            require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
-            uint8 burnValue = stars + 1;
-            wbp.lowStarBurnPoints = uint8(burnPointMultiplier.mul(burnValue)
-                .add(wbp.lowStarBurnPoints));
+            values[0] += uint8(burnPointMultiplier * (stars + 1));
         }
         else if(stars == 3) { // 4 star
-            require(wbp.fourStarBurnPoints < 25, "Four star burn points are capped");
-            wbp.fourStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fourStarBurnPoints));
+            values[1] += uint8(burnPointMultiplier);
         }
         else if(stars == 4) { // 5 star
-            require(wbp.fiveStarBurnPoints < 10, "Five star burn points are capped");
-            wbp.fiveStarBurnPoints = uint8(burnPointMultiplier.add(wbp.fiveStarBurnPoints));
+            values[2] += uint8(burnPointMultiplier);
         }
 
-        wbp.lowStarBurnPoints = uint8(carriedLowStarBurnPoints.add(wbp.lowStarBurnPoints));
-        wbp.fourStarBurnPoints = uint8(carriedFourStarBurnPoints.add(wbp.fourStarBurnPoints));
-        wbp.fiveStarBurnPoints = uint8(carriedFiveStarBurnPoints.add(wbp.fiveStarBurnPoints));
+        return values;
+    }
 
-        if(wbp.lowStarBurnPoints > 100)
-            wbp.lowStarBurnPoints = 100;
-        if(wbp.fourStarBurnPoints > 25)
-            wbp.fourStarBurnPoints = 25;
-        if(wbp.fiveStarBurnPoints > 10)
-            wbp.fiveStarBurnPoints = 10;
+    function burn(uint256 burnID) public restricted {
+        uint8[] memory values = _calculateBurnValues(burnID);
+
+        address burnOwner = ownerOf(burnID);
+
+        // While this may seem redundant, _burn could fail so
+        // dust cannot be pre-incremented.
+        _incrementDustSuppliesCheck(burnOwner, values[0], values[1], values[2]);
 
         _burn(burnID);
+        _incrementDustSupplies(burnOwner, values[0], values[1], values[2]);
+
+        emit Burned(
+            burnOwner,
+            burnID
+        );
+    }
+
+    function reforge(uint256 reforgeID, uint256 burnID) public restricted {
+        uint8[] memory values = _calculateBurnValues(burnID);
+
+        // Note: preexisting issue of applying burn points even if _burn fails.
+        _applyBurnPoints(reforgeID, values[0], values[1], values[2]);
+        _burn(burnID);
+
+        WeaponBurnPoints storage wbp = burnPoints[reforgeID];
         emit Reforged(
             ownerOf(reforgeID),
             reforgeID,
@@ -437,6 +508,52 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             wbp.fourStarBurnPoints,
             wbp.fiveStarBurnPoints
         );
+    }
+
+    function reforgeWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) public restricted {
+        // While this may seem redundant, _applyBurnPoints could fail so
+        // dust cannot be pre-decremented.
+        _decrementDustSuppliesCheck(ownerOf(reforgeID), amountLB, amount4B, amount5B);
+
+        _applyBurnPoints(reforgeID, amountLB, amount4B, amount5B);
+        _decrementDustSupplies(ownerOf(reforgeID), amountLB, amount4B, amount5B);
+
+        WeaponBurnPoints storage wbp = burnPoints[reforgeID];
+        emit ReforgedWithDust(
+            ownerOf(reforgeID),
+            reforgeID,
+            amountLB,
+            amount4B,
+            amount5B,
+            wbp.lowStarBurnPoints,
+            wbp.fourStarBurnPoints,
+            wbp.fiveStarBurnPoints
+        );
+    }
+
+    function _applyBurnPoints(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) private {
+        WeaponBurnPoints storage wbp = burnPoints[reforgeID];
+
+        if(amountLB > 0) {
+            require(wbp.lowStarBurnPoints < 100, "Low star burn points are capped");
+        }
+        if(amount4B > 0) {
+            require(wbp.fourStarBurnPoints < 25, "Four star burn points are capped");
+        }
+        if(amount5B > 0) {
+            require(wbp.fiveStarBurnPoints < 10, "Five star burn points are capped");
+        }
+
+        wbp.lowStarBurnPoints += amountLB;
+        wbp.fourStarBurnPoints += amount4B;
+        wbp.fiveStarBurnPoints += amount5B;
+
+        if(wbp.lowStarBurnPoints > 100)
+            wbp.lowStarBurnPoints = 100;
+        if(wbp.fourStarBurnPoints > 25)
+            wbp.fourStarBurnPoints = 25;
+        if(wbp.fiveStarBurnPoints > 10)
+            wbp.fiveStarBurnPoints = 10;
     }
 
     // UNUSED FOR NOW!
