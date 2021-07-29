@@ -13,7 +13,7 @@
 
 <script>
 import Web3 from 'web3';
-import BN from 'bignumber.js';
+import { toBN } from '../utils/common';
 import Hint from '../components/Hint.vue';
 
 export default {
@@ -22,7 +22,7 @@ export default {
   computed: {
     formattedSkill() {
       const skillBalance = Web3.utils.fromWei(this.results[4], 'ether');
-      return `${new BN(skillBalance).toFixed(6)} SKILL`;
+      return `${toBN(skillBalance).toFixed(6)} SKILL`;
     }
   },
 
