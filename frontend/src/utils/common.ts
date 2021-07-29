@@ -22,3 +22,7 @@ export const toBN = (value: string|number): BigNumber => {
 export const bnMinimum = (...values: string[]): BigNumber => {
   return BigNumber.minimum(...values);
 };
+
+export const fromWeiEther = (value: string|BigNumber): string => {
+  return new BigNumber(value).div('1000000000000000000').toFixed();
+};
