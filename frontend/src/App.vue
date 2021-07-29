@@ -98,6 +98,7 @@ export default {
     ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
+      console.log(process.env.VUE_APP_NETWORK_ID);
       return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
     },
 

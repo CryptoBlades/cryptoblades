@@ -38,7 +38,7 @@
     "start:frontend": "cd frontend && npm start",
     "contract:prepare": "npm run build",
     "contract:deploy": "npm run deploy",
-    "build": "truffle compile",
+    "build": "truffle compile --all",
     "postbuild": "node scripts/generate-ts-from-abis.js",
     "test": "truffle test",
     "deploy": "truffle migrate --reset",

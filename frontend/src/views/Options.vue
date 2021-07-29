@@ -125,7 +125,7 @@ export default Vue.extend({
 
       return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
     },
-    formattedBonusLost(): string 
+    formattedBonusLost(): string {
       const skillLost = fromWeiEther((parseFloat(this.skillRewards)*this.directStakeBonusPercent/100).toString());
       return `${toBN(skillLost).toFixed(4)}`;
     },
