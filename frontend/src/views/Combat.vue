@@ -14,17 +14,21 @@
         <div class="col">
           <div class="message-box" v-if="!currentCharacter">You need to select a character to do battle.</div>
 
-          <div class="message-box" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
-            You need {{ staminaPerFight }} stamina to do battle.
-            <h4>Stamina Cost per Fight</h4>
-            <b-form-select v-model="fightMultiplier" @change="setFightMultiplier()" class="ml-3">
-              <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
-              <b-form-select-option value="1">40</b-form-select-option>
-              <b-form-select-option value="2">80</b-form-select-option>
-              <b-form-select-option value="3">120</b-form-select-option>
-              <b-form-select-option value="4">160</b-form-select-option>
-              <b-form-select-option value="5">200</b-form-select-option>
-            </b-form-select>
+          <div class="row">
+            <div class="col-12 col-md-2 offset-md-5">
+              <div class="message-box" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
+                You need {{ staminaPerFight }} stamina to do battle.
+                <h4>Stamina Cost Per Fight</h4>
+                <b-form-select v-model="fightMultiplier" @change="setFightMultiplier()" class="ml-3">
+                  <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
+                  <b-form-select-option value="1">40</b-form-select-option>
+                  <b-form-select-option value="2">80</b-form-select-option>
+                  <b-form-select-option value="3">120</b-form-select-option>
+                  <b-form-select-option value="4">160</b-form-select-option>
+                  <b-form-select-option value="5">200</b-form-select-option>
+                </b-form-select>
+              </div>
+            </div>
           </div>
 
           <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">This weapon does not have enough durability.</div>
@@ -47,30 +51,38 @@
           </div>
           <div class="combat-enemy-container">
             <div class="col weapon-selection">
-              <div class="header-row weapon-header">
-                <b>Choose a weapon</b>
-                <Hint
-                  text="Your weapon multiplies your power<br>
-                  <br>+Stats determine the multiplier
-                  <br>Stat element match with character gives greater bonus"
-                />
-              </div>
               <div class="header-row">
+
+                <div class="row mb-3 mt-3">
+                  <div class="col-12 col-md-2 offset-md-5">
+                    <h4>Stamina Cost per Fight</h4>
+                    <b-form-select v-model="fightMultiplier" @change="setFightMultiplier()">
+                      <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
+                      <b-form-select-option value="1">40</b-form-select-option>
+                      <b-form-select-option value="2">80</b-form-select-option>
+                      <b-form-select-option value="3">120</b-form-select-option>
+                      <b-form-select-option value="4">160</b-form-select-option>
+                      <b-form-select-option value="5">200</b-form-select-option>
+                    </b-form-select>
+                  </div>
+                </div>
+
+                <div class="header-row weapon-header">
+                  <b>Choose a weapon</b>
+                  <Hint
+                    text="Your weapon multiplies your power<br>
+                    <br>+Stats determine the multiplier
+                    <br>Stat element match with character gives greater bonus"
+                  />
+                </div>
+
                 <div v-if="selectedWeaponId" class="weapon-icon-wrapper">
                   <weapon-icon class="weapon-icon" :weapon="selectedWeapon" />
                 </div>
+
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-link-others" tagname="choose_weapon">
                   Choose New Weapon
                 </b-button>
-                <h4>Stamina Cost per Fight</h4>
-                <b-form-select v-model="fightMultiplier" @change="setFightMultiplier()" class="ml-3">
-                  <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
-                  <b-form-select-option value="1">40</b-form-select-option>
-                  <b-form-select-option value="2">80</b-form-select-option>
-                  <b-form-select-option value="3">120</b-form-select-option>
-                  <b-form-select-option value="4">160</b-form-select-option>
-                  <b-form-select-option value="5">200</b-form-select-option>
-                </b-form-select>
               </div>
 
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" :checkForDurability="true" />
