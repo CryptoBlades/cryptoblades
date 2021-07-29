@@ -271,6 +271,49 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(foundMatch, "Target invalid");
     }
 
+    mapping (address => uint32) tickets;
+
+    function spendTicket(uint32 num)
+        public
+    {
+        require (tickets[msg.sender] >= num, "You don't have enough tickets");
+
+        for (int i = 0; i < num; i++) {
+            weapons.mint(msg.sender, randoms.getRandomSeed(msg.sender));
+        }
+
+        tickets[msg.sender] -= num;
+    }
+    
+    function isUnlikely(uint24 pp, uint24 ep)
+        private
+        pure
+        returns(bool)
+    {
+        int128 playerMin = ABDKMath64x64.fromUInt(pp).mul(ABDKMath64x64.fromUInt(90)).div(ABDKMath64x64.fromUInt(100));
+        int128 playerMax = ABDKMath64x64.fromUInt(pp).mul(ABDKMath64x64.fromUInt(110)).div(ABDKMath64x64.fromUInt(100));
+        int128 playerRange = playerMax.sub(playerMin);
+        int128 enemyMin = ABDKMath64x64.fromUInt(ep).mul(ABDKMath64x64.fromUInt(90)).div(ABDKMath64x64.fromUInt(100));
+        int128 enemyMax = ABDKMath64x64.fromUInt(ep).mul(ABDKMath64x64.fromUInt(110)).div(ABDKMath64x64.fromUInt(100));
+        int128 enemyRange = enemyMax.sub(enemyMin);
+        int256 rollingTotal = 0;
+        
+        if (playerMin >= enemyMin) {
+            int128 temp = playerMin.sub(enemyMin).div(enemyRange);
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(playerMax.sub(enemyMax).div(playerRange)));
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(ABDKMath64x64.fromUInt(50).div(ABDKMath64x64.fromUInt(100))));
+            rollingTotal = ABDKMath64x64.toInt(temp.mul(ABDKMath64x64.fromUInt(1000)));
+        } else {
+            int128 temp = enemyMin.sub(playerMin).div(playerRange);
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(enemyMax.sub(playerMax).div(enemyRange)));
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(ABDKMath64x64.fromUInt(50).div(ABDKMath64x64.fromUInt(100))));
+            temp = ABDKMath64x64.fromUInt(1).sub(temp);
+            rollingTotal = ABDKMath64x64.toInt(temp.mul(ABDKMath64x64.fromUInt(1000)));
+        }
+
+        return rollingTotal <= 300 ? true : false;
+    }
+
     function performFight(
         uint256 char,
         uint256 wep,
@@ -298,6 +341,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
         tokenRewards[msg.sender] += tokens;
         xpRewards[char] += xp;
+
+        if (playerRoll > monsterRoll && isUnlikely(uint24(getPlayerTraitBonusAgainst(traitsCWE).mulu(playerFightPower)), targetPower)) {
+            tickets[msg.sender] += 1;
+        }
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
