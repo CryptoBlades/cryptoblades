@@ -6,7 +6,7 @@
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="../assets/border-element.png">
         </div>
-        <strong class="upper-text">Start earning today!</strong>
+        <strong class="upper-text">{{ $t("plaza.welcome") }}</strong>
         <div class="bot-bg-img promotion-decoration">
             <img src="../assets/border-element.png">
         </div>

@@ -22,6 +22,8 @@ import {
   reforging as featureFlagReforging
 } from './feature-flags';
 
+import i18n from './i18n';
+
 let expectedNetworkId: number | null = null;
 if(process.env.VUE_APP_EXPECTED_NETWORK_ID) {
   expectedNetworkId = parseInt(process.env.VUE_APP_EXPECTED_NETWORK_ID, 10);
@@ -45,7 +47,7 @@ const router = createRouter();
 
 new Vue({
   render: h => h(App),
-  router, store,
+  router, store, i18n,
   provide: {
     web3,
     // maybe feature flags should just reference the feature-flags.ts module directly?
