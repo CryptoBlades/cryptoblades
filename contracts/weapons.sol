@@ -477,12 +477,14 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function burn(uint256 burnID) public restricted {
         uint8[] memory values = _calculateBurnValues(burnID);
 
+        address burnOwner = ownerOf(burnID);
+
         // While this may seem redundant, _burn could fail so
         // dust cannot be pre-incremented.
-        _incrementDustSuppliesCheck(ownerOf(burnID), values[0], values[1], values[2]);
+        _incrementDustSuppliesCheck(burnOwner, values[0], values[1], values[2]);
 
         _burn(burnID);
-        _incrementDustSupplies(ownerOf(burnID), values[0], values[1], values[2]);
+        _incrementDustSupplies(burnOwner, values[0], values[1], values[2]);
 
         emit Burned(
             ownerOf(burnID),
