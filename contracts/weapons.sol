@@ -414,7 +414,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _setDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
-        uint256 burnDustValue = (amount5B << 64) + (amount4B << 32) + amountLB;
+        uint256 burnDustValue = (uint256(amount5B) << 64) + (uint256(amount4B) << 32) + amountLB;
         burnDust[playerAddress] = burnDustValue;
     }
 
@@ -435,9 +435,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function _incrementDustSuppliesCheck(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
         uint32[] memory supplies = getDustSupplies(playerAddress);
-        require(uint256(supplies[0]) + amountLB >= 0xFFFFFFFF, "Dust LB supply capped");
-        require(uint256(supplies[1]) + amount4B >= 0xFFFFFFFF, "Dust 4B supply capped");
-        require(uint256(supplies[2]) + amount5B >= 0xFFFFFFFF, "Dust 5B supply capped");
+        require(uint256(supplies[0]) + amountLB <= 0xFFFFFFFF, "Dust LB supply capped");
+        require(uint256(supplies[1]) + amount4B <= 0xFFFFFFFF, "Dust 4B supply capped");
+        require(uint256(supplies[2]) + amount5B <= 0xFFFFFFFF, "Dust 5B supply capped");
     }
 
     function _incrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
@@ -477,15 +477,17 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function burn(uint256 burnID) public restricted {
         uint8[] memory values = _calculateBurnValues(burnID);
 
+        address burnOwner = ownerOf(burnID);
+
         // While this may seem redundant, _burn could fail so
         // dust cannot be pre-incremented.
-        _incrementDustSuppliesCheck(ownerOf(burnID), values[0], values[1], values[2]);
+        _incrementDustSuppliesCheck(burnOwner, values[0], values[1], values[2]);
 
         _burn(burnID);
-        _incrementDustSupplies(ownerOf(burnID), values[0], values[1], values[2]);
+        _incrementDustSupplies(burnOwner, values[0], values[1], values[2]);
 
         emit Burned(
-            ownerOf(burnID),
+            burnOwner,
             burnID
         );
     }

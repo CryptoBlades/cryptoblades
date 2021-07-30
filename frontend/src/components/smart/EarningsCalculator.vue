@@ -141,8 +141,7 @@ import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, We
 import axios from 'axios';
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import Web3 from 'web3';
-import { toBN } from '../../utils/common';
+import { toBN, fromWeiEther } from '../../utils/common';
 
 interface PriceJson {
   binancecoin: CoinPrice;
@@ -315,12 +314,12 @@ export default Vue.extend({
     },
 
     formattedSkill(skill: number): number {
-      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
+      const skillBalance = fromWeiEther(skill.toString());
       return toBN(skillBalance).toNumber();
     },
 
     stringFormattedSkill(skill: number): string {
-      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
+      const skillBalance = fromWeiEther(skill.toString());
       return toBN(skillBalance).toFixed(6);
     },
 

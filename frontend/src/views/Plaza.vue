@@ -54,7 +54,7 @@ import BN from 'bignumber.js';
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
-import Web3 from 'web3';
+import { fromWeiEther } from '../utils/common';
 
 export default {
   computed: {
@@ -114,7 +114,7 @@ export default {
       }
     },
     formatSkill() {
-      return Web3.utils.fromWei(this.skillBalance, 'ether');
+      return fromWeiEther(this.skillBalance);
     },
   },
 
