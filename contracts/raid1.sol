@@ -281,38 +281,41 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         uint256 seed = RandomUtil.combineSeeds(raidSeed[claimRaidIndex], uint256(msg.sender));
 
         uint256 commonRoll = RandomUtil.randomSeededMinMax(1, comparedToAverage.mulu(100), seed);
-        if(commonRoll > 10) { // 90% base chance
-            uint mod = seed % 6;
-            if(mod == 0) { // 1 star junk, 1 out of 5 (20%)
+        if(commonRoll > 20) { // Expected: ~72.4%
+            uint mod = seed % 8;
+            if(mod < 2) { // 1 star junk, 2 out of 8 (25%)
                 distributeJunk(msg.sender, claimRaidIndex, seed, 0);
             }
-            else if(mod == 1) { // 2 star junk, 1 out of 5 (20%)
+            else if(mod < 4) { // 2 star junk, 2 out of 8 (25%)
                 distributeJunk(msg.sender, claimRaidIndex, seed, 1);
             }
-            else if(mod < 4) { // 3 star junk, 2 out of 4 (40%)
+            else if(mod < 6) { // 2 star weapon, 2 out of 8 (25%)
+                distributeWeapon(msg.sender, claimRaidIndex, seed, 1);
+            }
+            else if(mod == 6) { // 3 star junk, 1 out of 8 (12.5%)
                 distributeJunk(msg.sender, claimRaidIndex, seed, 2);
             }
-            else { // 3 star weapon, 2 out of 4 (40%)
+            else { // 3 star weapon, 1 out of 8 (12.5%)
                 distributeWeapon(msg.sender, claimRaidIndex, seed, 2);
             }
         }
 
         uint256 rareRoll = RandomUtil.randomSeededMinMax(1, 950 + comparedToAverage.mulu(50), seed + 1);
-        if(rareRoll > 950) { // 5% base chance
-            uint mod = (seed / 10) % 14;
-            if(mod == 0) { // key box, 1 out of 13 (7.69%)
+        if(rareRoll > 950) { // Expected: ~5%
+            uint mod = (seed / 10) % 18;
+            if(mod < 8) { // key box, 8 out of 18 (44.444%)
                 distributeKeyBox(msg.sender, claimRaidIndex, seed);
             }
-            else if(mod == 1) { // 5 star sword, 1 out of 13 (7.69%)
+            else if(mod == 8) { // 5 star sword, 1 out of 18 (5.555%)
                 distributeWeapon(msg.sender, claimRaidIndex, seed, 4);
             }
-            else if(mod == 2) { // 5 star junk, 1 out of 13 (7.69%)
+            else if(mod == 9) { // 5 star junk, 1 out of 18 (5.555%)
                 distributeJunk(msg.sender, claimRaidIndex, seed, 4);
             }
-            else if(mod < 8) { // 4 star sword, 5 out of 13 (38.4%)
+            else if(mod < 14) { // 4 star sword, 4 out of 18 (22.222%)
                 distributeWeapon(msg.sender, claimRaidIndex, seed, 3);
             }
-            else { // 4 star junk, 5 out of 13 (38.4%)
+            else { // 4 star junk, 4 out of 18 (22.222%)
                 distributeJunk(msg.sender, claimRaidIndex, seed, 3);
             }
         }
