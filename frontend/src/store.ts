@@ -1023,7 +1023,7 @@ export function createStore(web3: Web3) {
 
       async doEncounter({ state, dispatch }, { characterId, weaponId, targetString }) {
         if(featureFlagStakeOnly) return;
-        const claimInGame = localStorage.getItem('claimInGame') === 'null' ? null : localStorage.getItem('claimInGame') === 'true';
+        const claimInGame = localStorage.getItem('claimInGame') === 'true';
         const res = await state.contracts().CryptoBlades!.methods
           .fight(
             characterId,
