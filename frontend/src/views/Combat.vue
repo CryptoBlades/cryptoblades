@@ -19,14 +19,7 @@
               <div class="message-box" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
                 You need {{ staminaPerFight }} stamina to do battle.
                 <h4>Stamina Cost Per Fight</h4>
-                <b-form-select v-model="fightMultiplier" @change="setFightMultiplier()" class="ml-3">
-                  <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
-                  <b-form-select-option value="1">40</b-form-select-option>
-                  <b-form-select-option value="2">80</b-form-select-option>
-                  <b-form-select-option value="3">120</b-form-select-option>
-                  <b-form-select-option value="4">160</b-form-select-option>
-                  <b-form-select-option value="5">200</b-form-select-option>
-                </b-form-select>
+                <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()" class="ml-3"></b-form-select>
               </div>
             </div>
           </div>
@@ -54,16 +47,9 @@
               <div class="header-row">
 
                 <div class="row mb-3 mt-3">
-                  <div class="col-12">
+                  <div class="col-12 col-md-2 offset-md-5">
                     <h4>Stamina Cost per Fight</h4>
-                    <b-form-select v-model="fightMultiplier" @change="setFightMultiplier()" class="col-md-2 col-4">
-                      <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
-                      <b-form-select-option value="1">40</b-form-select-option>
-                      <b-form-select-option value="2">80</b-form-select-option>
-                      <b-form-select-option value="3">120</b-form-select-option>
-                      <b-form-select-option value="4">160</b-form-select-option>
-                      <b-form-select-option value="5">200</b-form-select-option>
-                    </b-form-select>
+                    <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
                   </div>
                 </div>
 
@@ -343,6 +329,54 @@ export default {
     setFightMultiplier() {
       localStorage.setItem('fightMultiplier', this.fightMultiplier.toString());
     },
+
+    setStaminaSelectorValues(){
+      if (this.currentCharacterStamina === 200) {
+        return [
+          {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
+          {value: 1, text: 40},
+          {value: 2, text: 80},
+          {value: 3, text: 120},
+          {value: 4, text: 160},
+          {value: 5, text: 200}
+        ];
+      }
+      else if (this.currentCharacterStamina >= 160) {
+        return [
+          {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
+          {value: 1, text: 40},
+          {value: 2, text: 80},
+          {value: 3, text: 120},
+          {value: 4, text: 160}
+        ];
+      }
+      else if (this.currentCharacterStamina >= 120) {
+        return [
+          {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
+          {value: 1, text: 40},
+          {value: 2, text: 80},
+          {value: 3, text: 120}
+        ];
+      }
+      else if (this.currentCharacterStamina >= 80) {
+        return [
+          {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
+          {value: 1, text: 40},
+          {value: 2, text: 80}
+        ];
+      }
+      else if (this.currentCharacterStamina >= 40) {
+        return [
+          {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
+          {value: 1, text: 40}
+        ];
+      }
+      else if (this.currentCharacterStamina < 40) {
+        return [
+          {value: null, text: 'No Stamina to fight left!', disabled: true},
+        ];
+      }
+    },
   },
 
   components: {
@@ -434,16 +468,9 @@ export default {
 
 .message-box {
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  align-items: center;
-  text-align: center;
   width: 100%;
   font-size: 2em;
-}
-
-.message-box > h4 {
-  padding-top : 2rem;
 }
 
 div.encounter.text-center {
