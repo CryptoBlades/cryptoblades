@@ -330,52 +330,40 @@ export default {
       localStorage.setItem('fightMultiplier', this.fightMultiplier.toString());
     },
 
-    setStaminaSelectorValues(){
-      if (this.currentCharacterStamina === 200) {
-        return [
-          {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
-          {value: 1, text: 40},
-          {value: 2, text: 80},
-          {value: 3, text: 120},
-          {value: 4, text: 160},
-          {value: 5, text: 200}
-        ];
+    setStaminaSelectorValues() {
+      if(this.currentCharacterStamina < 40) {
+        return [{ value: null, text: 'You need more stamina to fight!', disabled: true }];
       }
-      else if (this.currentCharacterStamina >= 160) {
-        return [
-          {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
-          {value: 1, text: 40},
-          {value: 2, text: 80},
-          {value: 3, text: 120},
-          {value: 4, text: 160}
-        ];
+
+      const choices = [
+        {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
+      ];
+
+      const addChoices = [];
+
+      if(this.currentCharacterStamina >= 200) {
+        addChoices.push({ value: 5, text: 200 });
       }
-      else if (this.currentCharacterStamina >= 120) {
-        return [
-          {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
-          {value: 1, text: 40},
-          {value: 2, text: 80},
-          {value: 3, text: 120}
-        ];
+
+      if(this.currentCharacterStamina >= 160) {
+        addChoices.push({ value: 4, text: 160 });
       }
-      else if (this.currentCharacterStamina >= 80) {
-        return [
-          {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
-          {value: 1, text: 40},
-          {value: 2, text: 80}
-        ];
+
+      if(this.currentCharacterStamina >= 120) {
+        addChoices.push({ value: 3, text: 120 });
       }
-      else if (this.currentCharacterStamina >= 40) {
-        return [
-          {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
-          {value: 1, text: 40}
-        ];
+
+      if(this.currentCharacterStamina >= 80) {
+        addChoices.push({ value: 2, text: 80 });
       }
-      else if (this.currentCharacterStamina < 40) {
-        return [
-          {value: null, text: 'No Stamina to fight left!', disabled: true},
-        ];
+
+      if(this.currentCharacterStamina >= 40) {
+        addChoices.push({ value: 1, text: 40 });
       }
+
+      choices.push(...addChoices.reverse());
+
+      return choices;
     },
   },
 
