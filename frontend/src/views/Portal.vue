@@ -38,8 +38,7 @@ import BigButton from '../components/BigButton.vue';
 import * as waxjs from '@waxio/waxjs/dist';
 import { mapGetters, mapState } from 'vuex';
 const wax = new waxjs.WaxJS('https://wax.greymass.com', null, null, false);
-import BN from 'bignumber.js';
-import Web3 from 'web3';
+import { toBN, fromWeiEther } from '../utils/common';
 
 export default {
   data() {
@@ -59,7 +58,7 @@ export default {
     ...mapGetters(['getExchangeUrl', 'hasStakedBalance']),
 
     has5SkillBalance() {
-      return new BN(Web3.utils.fromWei(this.skillBalance, 'ether')).plus(new BN(Web3.utils.fromWei(this.skillRewards, 'ether'))).gte(5);
+      return toBN(fromWeiEther(this.skillBalance)).plus(toBN(fromWeiEther(this.skillRewards))).gte(5);
     },
   },
 
@@ -93,7 +92,7 @@ export default {
                 data: {
                   from: wax.userAccount, //user's BSC Address
                   to: process.env.VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS, //CB Wallet Address
-                  quantity: new BN(this.WAXAmount).toFixed(8) + ' WAX', //WAX *needs* to be here.
+                  quantity: toBN(this.WAXAmount).toFixed(8) + ' WAX', //WAX *needs* to be here.
                   memo: this.defaultAccount,
                 },
               },
