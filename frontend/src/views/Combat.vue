@@ -14,11 +14,24 @@
         <div class="col">
           <div class="message-box" v-if="!currentCharacter">You need to select a character to do battle.</div>
 
-          <div class="message-box" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
-            You need {{ staminaPerFight }} stamina to do battle.
+          <div class="row">
+            <div class="col-12 col-md-2 offset-md-5">
+              <div class="message-box" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
+                You need {{ staminaPerFight }} stamina to do battle.
+                <h4>Stamina Cost Per Fight</h4>
+                <b-form-select v-model="fightMultiplier" @change="setFightMultiplier()" class="ml-3">
+                  <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
+                  <b-form-select-option value="1">40</b-form-select-option>
+                  <b-form-select-option value="2">80</b-form-select-option>
+                  <b-form-select-option value="3">120</b-form-select-option>
+                  <b-form-select-option value="4">160</b-form-select-option>
+                  <b-form-select-option value="5">200</b-form-select-option>
+                </b-form-select>
+              </div>
+            </div>
           </div>
 
-          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurabilit(selectedWeaponId)">This weapon does not have enough durability.</div>
+          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">This weapon does not have enough durability.</div>
 
           <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">You cannot do battle during the last 30 seconds of the hour. Stand fast!</div>
         </div>
@@ -38,25 +51,41 @@
           </div>
           <div class="combat-enemy-container">
             <div class="col weapon-selection">
-              <div class="header-row weapon-header">
-                <b>Choose a weapon</b>
-                <Hint
-                  text="Your weapon multiplies your power<br>
-                  <br>+Stats determine the multiplier
-                  <br>Stat element match with character gives greater bonus"
-                />
-              </div>
               <div class="header-row">
+
+                <div class="row mb-3 mt-3">
+                  <div class="col-12">
+                    <h4>Stamina Cost per Fight</h4>
+                    <b-form-select v-model="fightMultiplier" @change="setFightMultiplier()" class="col-md-2 col-4">
+                      <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
+                      <b-form-select-option value="1">40</b-form-select-option>
+                      <b-form-select-option value="2">80</b-form-select-option>
+                      <b-form-select-option value="3">120</b-form-select-option>
+                      <b-form-select-option value="4">160</b-form-select-option>
+                      <b-form-select-option value="5">200</b-form-select-option>
+                    </b-form-select>
+                  </div>
+                </div>
+
+                <div class="header-row weapon-header">
+                  <b>Choose a weapon</b>
+                  <Hint
+                    text="Your weapon multiplies your power<br>
+                    <br>+Stats determine the multiplier
+                    <br>Stat element match with character gives greater bonus"
+                  />
+                </div>
+
                 <div v-if="selectedWeaponId" class="weapon-icon-wrapper">
                   <weapon-icon class="weapon-icon" :weapon="selectedWeapon" />
                 </div>
+
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-link-others" tagname="choose_weapon">
                   Choose New Weapon
                 </b-button>
               </div>
 
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" :checkForDurability="true" />
-
             </div>
             <div class="row mb-3 flex-column enemy-container" v-if="targets.length > 0">
               <div class="row">
@@ -203,8 +232,8 @@ export default {
     ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
-    weaponHasDurabilit(id) {
-      return this.getWeaponDurability(id) > 0;
+    weaponHasDurability(id) {
+      return this.getWeaponDurability(id) >= this.fightMultiplier;
     },
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
@@ -310,6 +339,10 @@ export default {
       //Formula taken from getXpGainForFight funtion of cryptoblades.sol
       return Math.floor((targetToFight.power / totalPower) * this.fightXpGain) * this.fightMultiplier;
     },
+
+    setFightMultiplier() {
+      localStorage.setItem('fightMultiplier', this.fightMultiplier.toString());
+    },
   },
 
   components: {
@@ -401,9 +434,16 @@ export default {
 
 .message-box {
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  text-align: center;
   width: 100%;
   font-size: 2em;
+}
+
+.message-box > h4 {
+  padding-top : 2rem;
 }
 
 div.encounter.text-center {
