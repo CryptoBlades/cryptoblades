@@ -428,7 +428,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
             weapons.performMintWeapon(msg.sender,
-                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100)),
+                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100), 0),
                 weapons.getRandomStat(4, 200, seed, 101),
                 0, // stat2
                 0, // stat3
@@ -442,6 +442,20 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         weapons.mint(msg.sender, seed);
+    }
+
+    function mintLootWeapon() public restricted doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) {
+        _payContract(msg.sender, mintWeaponFee);
+
+        uint256 seed = randoms.getRandomSeed(msg.sender);
+        weapons.mintRareWithAlignment(msg.sender, seed, 1);
+    }
+
+    function mintPremiumWeapon() public onlyNonContract doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee * 5) {
+        _payContract(msg.sender, mintWeaponFee);
+
+        uint256 seed = randoms.getRandomSeed(msg.sender);
+        weapons.mintRareWithAlignment(msg.sender, seed, 0);
     }
 
     function burnWeapon(uint256 burnID) public

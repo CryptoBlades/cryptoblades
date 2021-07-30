@@ -199,15 +199,32 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             stars = 0; // 1* at 44%
         }
 
-        return mintWeaponWithStars(minter, stars, seed);
+        return mintWeaponWithStars(minter, stars, seed, 0);
     }
 
-    function mintWeaponWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
+    function mintRareWithAlignment(address minter, uint256 seed, uint8 minimumAlignedStats) public restricted returns(uint256) {
+        uint256 stars;
+        uint256 roll = seed % 100;
+        // will need revision, possibly manual configuration if we support more than 5 stars
+        if(roll < 5) {
+            stars = 4; // 5* at 5%
+        }
+        else if(roll < 25) { // 4* at 20%
+            stars = 3;
+        }
+        else { // 3* at 75%
+            stars = 2;
+        }
+
+        return mintWeaponWithStars(minter, stars, seed, minimumAlignedStats);
+    }
+
+    function mintWeaponWithStars(address minter, uint256 stars, uint256 seed, uint8 minimumAlignedStats) public restricted returns(uint256) {
         require(stars < 8, "Stars parameter too high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
         return performMintWeapon(minter,
-            getRandomProperties(stars, seed),
+            getRandomProperties(stars, seed, minimumAlignedStats),
             stat1,
             stat2,
             stat3,
@@ -236,10 +253,31 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokenID;
     }
 
-    function getRandomProperties(uint256 stars, uint256 seed) public pure returns (uint16) {
+    function getRandomProperties(uint256 stars, uint256 seed, uint8 minimumAlignedStats) public pure returns (uint16) {
+        require(minimumAlignedStats <= 3, "minimumAlignedStats too high");
+
+        uint256 trait = (RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3);
+        uint256 statPattern = (RandomUtil.randomSeededMinMax(0,124,RandomUtil.combineSeeds(seed,2)) & 0x7F);
+
+        if (minimumAlignedStats >= 1) {
+            statPattern /= 5;
+            if (minimumAlignedStats >= 2) {
+                statPattern /= 5;
+                if (minimumAlignedStats >= 3) {
+                    statPattern /= 5;
+                    statPattern *= 5;
+                    statPattern += trait;
+                }
+                statPattern *= 5;
+                statPattern += trait;
+            }
+            statPattern *= 5;
+            statPattern += trait;
+        }
+
         return uint16((stars & 0x7) // stars aren't randomized here!
-            | ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3) // trait
-            | ((RandomUtil.randomSeededMinMax(0,124,RandomUtil.combineSeeds(seed,2)) & 0x7F) << 5)); // statPattern
+            | (trait << 3) // trait
+            | (statPattern << 5));
     }
 
     function getStatRolls(uint256 stars, uint256 seed) private pure returns (uint16, uint16, uint16) {
