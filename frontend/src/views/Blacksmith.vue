@@ -40,7 +40,22 @@
               </span>
 
               <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+                Forge x1 ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+              </span>
+            </b-button>
+
+              <b-button
+              variant="primary"
+              class="ml-3"
+              @click="onForgeWeaponx10"
+              :disabled="disableForge"
+              v-tooltip="'Forge new weapon'">
+              <span v-if="disableForge">
+                Cooling forge...
+              </span>
+
+              <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i>
               </span>
             </b-button>
 
@@ -129,6 +144,7 @@ export default {
       forgeCost: 0,
       reforgeCost: 0,
       disableForge: false,
+      forgeMultiplier: 10,
     };
   },
 
@@ -163,7 +179,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['mintWeapon', 'reforgeWeapon']),
+    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN']),
 
     async onForgeWeapon() {
       if(this.disableForge) return;
@@ -176,6 +192,23 @@ export default {
 
       try {
         await this.mintWeapon();
+      } catch (e) {
+        console.error(e);
+        this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+      }
+    },
+
+    async onForgeWeaponx10(){
+      if(this.disableForge) return;
+
+      this.disableForge = true;
+
+      setTimeout(() => {
+        this.disableForge = false;
+      }, 10000);
+
+      try {
+        await this.mintWeaponN({num: this.forgeMultiplier});
       } catch (e) {
         console.error(e);
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
