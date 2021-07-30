@@ -9,7 +9,7 @@
       <b-nav-item
         class="ml-3"
         :disabled="!canClaimTokens"
-        @click="claimSkill(ClaimStage.WaxBridge)"><!-- moved gtag-link below b-nav-item -->
+        @click="onClaimTokens()"><!-- moved gtag-link below b-nav-item -->
         <span class="gtag-link-others" tagname="claim_skill">
           <strong>SKILL</strong> {{ formattedSkillReward }}
           <strong>Early Withdraw Tax</strong> {{ formattedRewardsClaimTax }}
