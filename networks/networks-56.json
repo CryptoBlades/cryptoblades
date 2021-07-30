@@ -311,7 +311,7 @@
     },
     "links": {},
     "address": "0xc6f252c2CdD4087e30608A35c022ce490B58179b",
-    "transactionHash": "0x958101e298c59124ad6b5cbfc0387c884447344850116a4efd3f3a6725039ac6"
+    "transactionHash": "0x6483825086f534b3b6ace595b388d8f2007fb8a5a7663c90871c59feb46b229f"
   },
   "build/contracts/CryptoBlades.json": {
     "events": {
@@ -448,7 +448,7 @@
     },
     "links": {},
     "address": "0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
-    "transactionHash": "0x0b4ccea6e02c7cfaaf536f5276134fa9908560e724b00a9d5880e09600a84fc1"
+    "transactionHash": "0x12a5e0cb45eb85065ed9d62c20e000654df3a230be1a85a850ca4baf71c1eb66"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -465,7 +465,7 @@
     "events": {},
     "links": {},
     "address": "0x39e0D6D95E035e2F8a2392788e0c53b7BA7d9B83",
-    "transactionHash": "0x3deb5a23b3b2b6b9b2ed7e5d0269e511a2c48772b765e1c76020dbb103c36631"
+    "transactionHash": "0x38fb46fea8c629f8c6d39e5240a4fe30454a4e0d5a16b5395254aa742e0068a3"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -677,7 +677,7 @@
     },
     "links": {},
     "address": "0x90099dA42806b21128A094C713347C7885aF79e2",
-    "transactionHash": "0x978d1e09af4c19de707095f767abb5224e1e26c2e780ae0531c9d0709e9a820a"
+    "transactionHash": "0x26e17db7eaee4259bfd47c1f27cfbfa3417d2cd7647532de83cd97e5f467bbe7"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -765,7 +765,7 @@
     "events": {},
     "links": {},
     "address": "0x33d449d9b0086fB0Bc75cD804CB79c01db69aD5E",
-    "transactionHash": "0x80523b404fc5da72a9e8d34640b7275e035f1738649453667c93728401f89961"
+    "transactionHash": "0x22b89efd300d2b083fa4f79bd988bf0b9bd561d2e4af436400a07340f6ce72ca"
   },
   "build/contracts/SkillStakingRewards.json": {
     "events": {},
@@ -777,7 +777,7 @@
     "events": {},
     "links": {},
     "address": "0xd6b2D8f59Bf30cfE7009fB4fC00a7b13Ca836A2c",
-    "transactionHash": "0xfdc792b988a38bd4cf73e13091a28872a9042d5c64905d53b2a68e4d6480c301"
+    "transactionHash": "0x639343da44f13f2e44175cab99dbffd7642cb26257ffc031b62aa89b0b2bb62b"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
@@ -1127,6 +1127,6 @@
     },
     "links": {},
     "address": "0x7E091b0a220356B157131c831258A9C98aC8031A",
-    "transactionHash": "0x25dba477d595a78359e0ca6a69bb2408b449351ab414b489013c8df455850761"
+    "transactionHash": "0xd4ddb5aa365d537cc56820961d79009b549ceb1d68b67f6985ae862c63f23e8f"
   }
 }

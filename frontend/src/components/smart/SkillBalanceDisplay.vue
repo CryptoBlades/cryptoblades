@@ -27,10 +27,10 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import Bignumber from 'bignumber.js';
 import { Accessors } from 'vue/types/options';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import BN from 'bignumber.js';
-import Web3 from 'web3';
+import { toBN, fromWeiEther } from '../../utils/common';
 import { IState } from '@/interfaces';
 import { formatDurationFromSeconds } from '@/utils/date-time';
 
@@ -56,24 +56,22 @@ export default Vue.extend({
     }) as Accessors<StoreMappedGetters>),
 
     formattedTotalSkillBalance(): string {
-      const skillBalance = Web3.utils.fromWei(Web3.utils.toBN(this.skillBalance)
-        .add(Web3.utils.toBN(this.inGameOnlyFunds))
-        .add(Web3.utils.toBN(this.skillRewards)), 'ether');
+      const skillBalance = fromWeiEther(Bignumber.sum(toBN(this.skillBalance), toBN(this.inGameOnlyFunds), toBN(this.skillRewards)));
 
-      return `${new BN(skillBalance).toFixed(4)} SKILL`;
+      return `${toBN(skillBalance).toFixed(4)} SKILL`;
     },
 
     formattedSkillBalance(): string {
-      const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
-      return `${new BN(skillBalance).toFixed(4)} SKILL`;
+      const skillBalance = fromWeiEther(this.skillBalance);
+      return `${toBN(skillBalance).toFixed(4)} SKILL`;
     },
 
     hasBnbAvailableToWithdraw(): boolean {
-      return new BN(this.waxBridgeWithdrawableBnb).gt(0);
+      return toBN(this.waxBridgeWithdrawableBnb).gt(0);
     },
 
     canWithdrawBnb(): boolean {
-      return new BN(this.availableBNB).gt(0);
+      return toBN(this.availableBNB).gt(0);
     },
 
     formattedBnbThatCanBeWithdrawn(): string {
@@ -100,28 +98,28 @@ export default Vue.extend({
       return `${this.formattedBnbThatCanBeWithdrawn} of ${this.formattedTotalAvailableBnb} withdrawable from the portal`;
     },
     formattedInGameOnlyFunds(): string {
-      const skillBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
-      return `${new BN(skillBalance).toFixed(4)} SKILL`;
+      const skillBalance = fromWeiEther(this.inGameOnlyFunds);
+      return `${toBN(skillBalance).toFixed(4)} SKILL`;
     },
     totalSkillTooltipHtml() {
-      const inGameOnlyFundsBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
-      const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
-      const skillBalance = Web3.utils.fromWei(this.skillBalance, 'ether');
+      const inGameOnlyFundsBalance = fromWeiEther(this.inGameOnlyFunds);
+      const skillRewards = fromWeiEther(this.skillRewards);
+      const skillBalance = fromWeiEther(this.skillBalance);
 
-      let html =  new BN(skillBalance).toFixed(4) + ' SKILL';
+      let html =  toBN(skillBalance).toFixed(4) + ' SKILL';
 
       if(parseFloat(skillRewards) !== 0){
-        html += '<br>+ WITHDRAWABLE ' + new BN(skillRewards).toFixed(4) + ' SKILL';
+        html += '<br>+ WITHDRAWABLE ' + toBN(skillRewards).toFixed(4) + ' SKILL';
       }
 
       if(parseFloat(inGameOnlyFundsBalance) !== 0){
-        html += '<br>+ IN GAME ONLY ' + new BN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
+        html += '<br>+ IN GAME ONLY ' + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
       }
 
       return html;
     },
     hasInGameSkill(): boolean {
-      const inGameOnlyFundsBalance = Web3.utils.fromWei(this.inGameOnlyFunds, 'ether');
+      const inGameOnlyFundsBalance = fromWeiEther(this.inGameOnlyFunds);
       return parseFloat(inGameOnlyFundsBalance) !== 0;
     },
   },
@@ -130,8 +128,8 @@ export default Vue.extend({
     ...(mapActions(['addMoreSkill', 'withdrawBnbFromWaxBridge']) as StoreMappedActions),
 
     formatBnb(bnb: string): string {
-      const amount = Web3.utils.fromWei(bnb, 'ether');
-      return `${new BN(amount).toFixed(4)} BNB`;
+      const amount = fromWeiEther(bnb);
+      return `${toBN(amount).toFixed(4)} BNB`;
     },
 
     onBuySkill() {
