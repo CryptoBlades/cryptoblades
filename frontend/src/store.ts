@@ -107,7 +107,8 @@ export function createStore(web3: Web3) {
       weapons: {},
       currentWeaponId: null,
       weaponDurabilities: {},
-      maxDurability: 0,      isInCombat: false,
+      maxDurability: 0,
+      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
@@ -1022,13 +1023,14 @@ export function createStore(web3: Web3) {
 
       async doEncounter({ state, dispatch }, { characterId, weaponId, targetString }) {
         if(featureFlagStakeOnly) return;
-
+        const claimInGame = localStorage.getItem('claimInGame') === 'null' ? null : localStorage.getItem('claimInGame') === 'true';
+        console.log(`claimInGame = ${claimInGame}`);
         const res = await state.contracts().CryptoBlades!.methods
           .fight(
             characterId,
             weaponId,
             targetString,
-            true
+            claimInGame
           )
           .send({ from: state.defaultAccount, gas: '500000' });
 
@@ -1510,7 +1512,6 @@ export function createStore(web3: Web3) {
             const skillRewards = await CryptoBlades.methods
               .getTokenRewards()
               .call(defaultCallOptions(state));
-
             commit('updateSkillRewards', { skillRewards });
 
             return skillRewards;

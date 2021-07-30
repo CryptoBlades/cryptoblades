@@ -32,6 +32,12 @@
                 <b class="float-left">{{ hideWalletWarning  ? 'On' : 'Off' }}</b>
               </b-form-checkbox>
             </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
+              <h4>Claim as In-Game Skill</h4>
+              <b-form-checkbox size="lg" :checked="claimInGame" @change="toggleClaimInGame()" switch>
+                <b class="float-left">{{ claimInGame ? 'On' : 'Off' }}</b>
+              </b-form-checkbox>
+            </b-list-group-item>
           </b-list-group>
         </div>
         <div class="bot-bg-img">
@@ -66,6 +72,7 @@ interface Data {
   hideRewards: boolean;
   hideAdvanced: boolean;
   hideWalletWarning: boolean;
+  claimInGame: boolean | null;
 }
 
 interface StoreMappedGetters {
@@ -84,7 +91,7 @@ export default Vue.extend({
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
-    this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+    this.claimInGame = localStorage.getItem('claimInGame') === 'null' ? null : localStorage.getItem('claimInGame') === 'true';
   },
   data() {
     return {
@@ -93,6 +100,7 @@ export default Vue.extend({
       hideAdvanced: false,
       hideWalletWarning: false,
       checked: false,
+      claimInGame: null,
       ClaimStage
     } as Data;
   },
@@ -145,6 +153,11 @@ export default Vue.extend({
       else localStorage.setItem('hideRewards', 'false');
 
       Events.$emit('setting:hideRewards', { value: this.hideRewards });
+    },
+
+    toggleClaimInGame() {
+      this.claimInGame = !this.claimInGame;
+      localStorage.setItem('claimInGame', this.claimInGame.toString());
     },
 
     toggleAdvanced() {
