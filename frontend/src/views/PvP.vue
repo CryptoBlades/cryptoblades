@@ -136,52 +136,52 @@
             </b-row>
           </b-container>
         </b-tab>
-
         <b-tab
-            :active="pvpQueueFlag"
-            :disabled="!pvpQueueFlag">
+          :active="pvpQueueFlag"
+          :disabled="!pvpQueueFlag"
+        >
           <template #title>
-          Find 'em
-          <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
-        </template>
+            Find 'em
+            <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
+          </template>
 
-        <div
+          <div
             class="text-center header-row weapon-header"
-            v-if="!enemiesFound">
-          <h1> FINDING ENEMIES...</h1>
-          <b-spinner type="grow" label="Spinning"></b-spinner>
-          <b-spinner type="grow" label="Spinning"></b-spinner>
-          <b-spinner type="grow" label="Spinning"></b-spinner>
-        </div>
+            v-if="!enemiesFound"
+          >
+            <h1> FINDING ENEMIES...</h1>
+            <b-spinner type="grow" label="Spinning"></b-spinner>
+            <b-spinner type="grow" label="Spinning"></b-spinner>
+            <b-spinner type="grow" label="Spinning"></b-spinner>
+          </div>
 
-        <div
+          <div
             class="text-center"
-            v-if="enemiesFound">
-                <div>
-                <div class="header-row weapon-header">
+            v-if="enemiesFound"
+          >
+            <div>
+              <div class="header-row weapon-header">
                 <h1>DISPLAY ENEMIES HERE</h1>
                 <!-- <Hint
-                text="Your weapon multiplies your power<br>
-                <br>+Stats determine the multiplier
-                <br>Stat element match with character gives greater bonus"
+                  text="Your weapon multiplies your power<br>
+                  <br>+Stats determine the multiplier
+                  <br>Stat element match with character gives greater bonus"
                 /> -->
-                </div>
+              </div>
+            </div>
           </div>
-        </div>
         </b-tab>
-
         <b-tab
-            :active="pvpArenaFlag"
-            :disabled="!pvpArenaFlag">
+          :active="pvpArenaFlag"
+          :disabled="!pvpArenaFlag"
+        >
           <template #title>
-          Arena
-          <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
-        </template>
+            Arena
+            <!-- <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" /> -->
+          </template>
         </b-tab>
-
       </b-tabs>
     </div>
-
   </div>
 </template>
 
