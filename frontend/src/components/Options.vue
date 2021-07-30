@@ -10,7 +10,7 @@
 
         <b-dropdown-header>Links</b-dropdown-header>
 
-        <b-dropdown-item @click="claimSkill(ClaimStage.WaxBridge)"><i class="fa fa-coins mr-2"></i>Claim Skill </b-dropdown-item>
+        <b-dropdown-item @click="onClaimTokens()"><i class="fa fa-coins mr-2"></i>Claim Skill </b-dropdown-item>
 
         <b-dropdown-item @click.native="$router.push('leaderboard')" class="gtag-link-others" tagname="leaderboard_screen">
         <i class="fa fa-trophy mr-2"></i>Leaderboard
