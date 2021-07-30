@@ -35,7 +35,7 @@
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Stamina Cost per Fight</h4>
               <b-form-select size="lg" v-model="fightMultiplier" @change="setFightMultiplier()">
-                <b-form-select-option :value="null">Please select Stamina Cost per Fight</b-form-select-option>
+                <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
                 <b-form-select-option value="1">40</b-form-select-option>
                 <b-form-select-option value="2">80</b-form-select-option>
                 <b-form-select-option value="3">120</b-form-select-option>

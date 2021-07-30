@@ -414,7 +414,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _setDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
-        uint256 burnDustValue = (amount5B << 64) + (amount4B << 32) + amountLB;
+        uint256 burnDustValue = (uint256(amount5B) << 64) + (uint256(amount4B) << 32) + amountLB;
         burnDust[playerAddress] = burnDustValue;
     }
 
