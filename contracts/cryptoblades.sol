@@ -534,7 +534,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             );
 
         tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
-        skillToken.safeTransferFrom(playerAddress, address(this), convertedAmount);
+        skillToken.safeTransferFrom(playerAddress, address(this), fromUserWallet);
     }
 
     function _payContract(address playerAddress, int128 usdAmount) internal {
