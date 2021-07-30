@@ -6,26 +6,45 @@
           <span class="title">Finishes on</span>
           <br />
           {{ expectedFinishTime }}
+          <br />
+          <br />
+          <span class="title">Raid status</span>
+          <br />
+          {{ raidStatus }}
         </div>
 
         <div class="raiders">
           <span class="title">Raiders</span> {{ raiderCount }}
           <br />
-          <span class="title">Total Power</span> {{ totalPower }}
+          <span class="title">Total Player Power</span> {{ totalPower }}
           <br />
-          <span class="title">Bounty</span> {{ bounty }}
+          <span class="title">Boss Power</span> {{ bossPower }}
+          <br />
+          <span class="title">Join Cost</span>
+          <br />
+          {{ 'Stamina: '+staminaCost }}
+          <br />
+          {{ 'Durability: '+durabilityCost }}
+          <br />
+          {{ 'SKILL: '+joinCost }}
         </div>
 
         <div class="drops">
           <span class="title">Drops</span>
           <br />
-          {{ weaponDrops }}
+          {{ '(Rewards are based on your contributed power relative to others)' }}
+          <br />
+          {{ '(Joining early gives up to 10% bonus)' }}
+          <br />
+          {{ 'Weapons (2-5*), Junk (1-5*), SECRET (??) - INSERT IMAGES HERE' }}
+          <br />
+          <span class="title">XP reward</span> {{ xpReward }}
         </div>
       </div>
 
       <div class="right-side raid-boss">
         <div class="raid-title">
-          <span class="title">Raid title</span>
+          <span class="title">Dragon's lair</span>
         </div>
 
         <div class="image">
@@ -33,9 +52,9 @@
         </div>
 
         <div class="about-raid">
-          <span class="title">Raid Name</span>
+          <span class="title"> {{ bossName }} </span>
           <br />
-          <span class="lightning">Lightning</span>
+          <span class="lightning"> {{ bossTrait }} </span>
         </div>
       </div>
     </div>
@@ -70,7 +89,7 @@
 
       <div class="signup">
         <div class="warning">
-          Joining will cost 12h of stamina
+          Joining will cost {{ staminaCost }} stamina, {{ durabilityCost }} durability and {{ joinCost }} SKILL
         </div>
 
         <div class="power">
@@ -98,23 +117,43 @@ import BigButton from '../components/BigButton.vue';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import Hint from '../components/Hint.vue';
 
+const dragonNames = [
+  'Fudbringer',
+  'HODL Lord',
+  'Skill Eater',
+  'Chain Congester',
+  'Swap Guardian',
+  'Blade Hoarder',
+  'Centralizer',
+  'Exchange Tormentor',
+  'Eater of Stakes'
+];
+
 export default {
   data() {
     return {
       selectedWeaponId: null,
       selectedWeapon: null,
       error: null,
+      raidIndex: null,
+      bossName: null,
       raiderCount: null,
       totalPower: null,
-      bounty: null,
-      weaponDrops: null,
       expectedFinishTime: null,
+      xpReward: null,
+      staminaCost: null,
+      durabilityCost: null,
+      joinCost: null,
+      raidStatus: null,
+      bossPower: null,
+      bossTrait: null,
     };
   },
 
   computed: {
     ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount']),
-    ...mapGetters(['ownCharacters', 'ownWeapons', 'ownCharacters', 'currentCharacter', 'currentCharacterStamina', 'getWeaponDurability', 'contracts']),
+    ...mapGetters(['ownCharacters', 'ownWeapons', 'ownCharacters', 'currentCharacter',
+      'currentCharacterStamina', 'getWeaponDurability', 'contracts']),
 
     selections() {
       return [this.currentCharacterId, this.selectedWeaponId];
@@ -122,8 +161,9 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchRaidData', 'fetchOwnedCharacterRaidStatus', 'joinRaid']),
+    ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid']),
     ...mapMutations(['setCurrentCharacter']),
+    ...mapGetters(['getRaidState']),
 
     weaponHasDurabilit(id) {
       return this.getWeaponDurability(id) > 0;
@@ -144,6 +184,40 @@ export default {
         this.$dialog.notify.error('Whoops...');
       }
     },
+
+    async getRewardEligibility(lowIndex, highIndex) {
+      console.log(lowIndex+' / '+highIndex);
+    },
+
+    async getParticipatingCharacters() {
+    },
+
+    async getParticipatingWeapons() {
+    },
+
+    async canJoinRaid(characterID, weaponID) {
+      console.log(characterID+' / '+weaponID);
+    },
+
+    getBossName() {
+      return dragonNames[this.raidIndex % dragonNames.length];
+    },
+
+    processRaidData() {
+      const raidData = this.getRaidState();
+      this.raidIndex = raidData.index;
+      this.bossName = this.getBossName();
+      this.raiderCount = raidData.raiderCount;
+      this.totalPower = raidData.playerPower;
+      this.expectedFinishTime = raidData.expectedFinishTime;
+      this.xpReward = raidData.xpReward;
+      this.staminaCost = raidData.staminaCost;
+      this.durabilityCost = raidData.durabilityCost;
+      this.joinCost = raidData.joinSkill;
+      this.raidStatus = raidData.status;
+      this.bossPower = raidData.bossPower;
+      this.bossTrait = raidData.bossTrait;
+    }
   },
 
   watch: {
@@ -157,7 +231,10 @@ export default {
   },
 
   async mounted() {
-    await Promise.all([this.fetchRaidData(), this.fetchOwnedCharacterRaidStatus()]);
+    await Promise.all([
+      this.fetchRaidState(),
+    ]);
+    this.processRaidData();
   },
 
   components: {

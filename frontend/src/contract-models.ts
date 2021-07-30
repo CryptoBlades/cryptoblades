@@ -1,5 +1,5 @@
 
-import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement } from './interfaces';
+import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState } from './interfaces';
 
 export function traitNumberToName(traitNum: number): string {
   switch(traitNum) {
@@ -118,5 +118,23 @@ export function targetFromContract(data: string): ITarget {
     original: data,
     power: n & 0b11111111_11111111_11111111,
     trait: n >> 24
+  };
+}
+
+export function raidFromContract(data: string[]): IRaidState {
+  const index = data[0];
+  const expectedFinishTime = data[1];
+  const raiderCount = data[2];
+  const playerPower = data[3];
+  const bossPower = data[4];
+  const bossTrait = data[5];
+  const status = data[6];
+  const joinSkill = data[7];
+  const staminaCost = data[8];
+  const durabilityCost = data[9];
+  const xpReward = data[10];
+  return {
+    index, expectedFinishTime, raiderCount, playerPower, bossPower, bossTrait, status,
+    joinSkill, staminaCost, durabilityCost, xpReward
   };
 }

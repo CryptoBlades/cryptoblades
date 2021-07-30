@@ -9,7 +9,7 @@ import { networks as lp2TokenNetworks } from '../../build/contracts/ExperimentTo
 import { abi as stakingRewardsAbi } from '../../build/contracts/IStakingRewards.json';
 
 import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../build/contracts/CryptoBlades.json';
-import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/RaidBasic.json';
+import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/Raid1.json';
 import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
@@ -28,7 +28,7 @@ import {
 } from './feature-flags';
 
 interface RaidContracts {
-  RaidBasic?: Contracts['RaidBasic'];
+  Raid1?: Contracts['Raid1'];
 }
 
 interface MarketContracts {
@@ -124,7 +124,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   if(featureFlagRaid) {
     const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as Networks)[networkId]!.address;
 
-    raidContracts.RaidBasic = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
+    raidContracts.Raid1 = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
   }
 
   const marketContracts: MarketContracts = {};

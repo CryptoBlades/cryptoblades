@@ -453,4 +453,20 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         return true;
     }
 
+    function getRaidData() public view returns(
+        uint256 index, uint256 endTime, uint256 raiderCount, uint256 playerPower, uint256 bossPower,
+        uint8 trait, uint8 status, uint256 joinSkill, uint64 stamina, uint64 durability, uint64 xp
+    ) {
+        index = raidIndex;
+        endTime = raidEndTime[raidIndex];
+        raiderCount = getRaidParticipantCount(raidIndex);
+        playerPower = getRaidPlayerPower(raidIndex);
+        bossPower = getRaidBossPower(raidIndex);
+        trait = getRaidBossTrait(raidIndex);
+        status = getRaidStatus(raidIndex);
+        joinSkill = getJoinCostInSkill();
+        stamina = staminaCost;
+        durability = durabilityCost;
+        xp = xpReward;
+    }
 }
