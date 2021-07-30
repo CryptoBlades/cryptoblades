@@ -434,9 +434,16 @@ export default {
 
 .message-box {
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  text-align: center;
   width: 100%;
   font-size: 2em;
+}
+
+.message-box > h4 {
+  padding-top : 2rem;
 }
 
 div.encounter.text-center {
