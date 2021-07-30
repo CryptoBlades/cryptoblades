@@ -20,6 +20,40 @@
     "staminaFight": "Coût en endurance par combat",
     "language": "Langue"
   },
+  "app": {
+    "warning": {
+      "title": "Metamask Non Détecté OU Réseau Incorect",
+      "start": "Commencer CryptoBlades",
+      "buttons": {
+        "addMetamask": "Ajouter MetaMask",
+        "confMetamask": "Configurer MetaMask",
+        "startMetamask": "Se Connecter à MetaMask",
+        "network": "Changer de réseau: BSC",
+        "hide": "Masquer l'alerte"
+      },
+      "errorMessage": {
+        "connecting": "Connection à MetaMask en cours...",
+        "success": "MetaMask connecté avec succès.",
+        "error": "Erreur: MetaMask n'a pas pu obtenir les autorisations.",
+        "welcome": "Bienvenue sur CryptoBlades. Voici comment commencer."
+      },
+      "message": {
+        "hideWalletWarning": "Vous avez masqué l'avertissement du  Wallet mais il s'affiche quand même. Si vous essayez de jouer, veuillez désactiver l'option et suivre les instructions, sinon fermez et ignorez.",
+        "instructions": "Commencez en moins de 10 minutes ! Pour recruter votre premier personnage, vous avez besoin de {recruitCost} SKILL et de 0,001 BNB pour les frais. Vous aurez également besoin de 0,0015 BNB pour effectuer vos premiers combats, mais ne vous inquiétez pas, vous récupérez immédiatement les frais de combat en SKILL !",
+        "inst1": "Acheter du BNB:",
+        "inst2": "Maintenant que tu as du BNB, vas sur ApeSwap pour acheter du SKILL:",
+        "inst3": "Suis le tutoriel pour échanger du BNB contre du SKILL:",
+        "inst4": "Et voilà ! Maintenant tu peux créer ton premier personnage:",
+        "watchVideo": "Regarder la vidéo {name}",
+        "questionDiscord": "Si vous avez des questions n'hesitez pas à nous rejoindre sur Discord:"
+        
+      }
+    },
+    "notification": {
+      "link": "Aller voir !"
+    }
+  },
   "on": "Oui",
-  "off": "Non"
+  "off": "Non",
+  "trade": "Echanger"
 }
