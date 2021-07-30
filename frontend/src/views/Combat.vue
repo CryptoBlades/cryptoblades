@@ -54,9 +54,9 @@
               <div class="header-row">
 
                 <div class="row mb-3 mt-3">
-                  <div class="col-12 col-md-2 offset-md-5">
+                  <div class="col-12">
                     <h4>Stamina Cost per Fight</h4>
-                    <b-form-select v-model="fightMultiplier" @change="setFightMultiplier()">
+                    <b-form-select v-model="fightMultiplier" @change="setFightMultiplier()" class="col-md-2 col-4">
                       <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
                       <b-form-select-option value="1">40</b-form-select-option>
                       <b-form-select-option value="2">80</b-form-select-option>
