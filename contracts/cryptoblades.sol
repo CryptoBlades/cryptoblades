@@ -387,9 +387,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
-    function mintCharacter() public onlyNonContract doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintCharacterFee) {
+    function mintCharacter() public onlyNonContract doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) {
         require(characters.balanceOf(msg.sender) < characters.characterLimit(),
             string(abi.encodePacked("You can only have ",characters.characterLimit()," characters!")));
+
+        uint256 skillAmount = usdToSkill(mintCharacterFee);
+        require(skillToken.balanceOf(msg.sender) >= skillAmount,
+            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(skillAmount))));
+
         _payContractTokenOnly(msg.sender, mintCharacterFee);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
