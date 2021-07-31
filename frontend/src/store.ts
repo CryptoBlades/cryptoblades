@@ -864,7 +864,7 @@ export function createStore(web3: Web3) {
         await Promise.all(weaponIds.map(id => dispatch('fetchWeapon', id)));
       },
 
-      async fetchWeapon({ state, commit }, weaponId: string | number) {
+      async fetchWeapon({ state, commit, dispatch }, weaponId: string | number) {
         const { Weapons } = state.contracts();
         if(!Weapons) return;
 
@@ -878,6 +878,7 @@ export function createStore(web3: Web3) {
             commit('updateWeapon', { weaponId, weapon });
           })(),
         ]);
+        dispatch('fetchWeaponDurability', weaponId);
       },
 
       async setupWeaponDurabilities({ state, dispatch }) {
