@@ -10,7 +10,7 @@
 
         <b-dropdown-header>Links</b-dropdown-header>
 
-        <b-dropdown-item @click="claimSkill(ClaimStage.WaxBridge)"><i class="fa fa-coins mr-2"></i>Claim Skill </b-dropdown-item>
+        <b-dropdown-item @click="onClaimTokens()"><i class="fa fa-coins mr-2"></i>Claim Skill </b-dropdown-item>
 
         <b-dropdown-item @click.native="$router.push('leaderboard')" class="gtag-link-others" tagname="leaderboard_screen">
         <i class="fa fa-trophy mr-2"></i>Leaderboard
@@ -50,8 +50,8 @@
     </b-modal>
     <b-modal class="centered-modal" ref="stake-suggestion-modal" title="Stake Skill"
       @ok="$router.push({ name: 'select-stake-type' })" ok-only ok-title="Go to Stake" >
-        You can avoid paying the 15% tax by staking for 7 days. And if you stake your SKILL now, we will give you a 10% bonus in SKILL
-        that you can use in-game right away!
+        You can avoid paying the 15% tax by staking unclaimed skill rewards for 7 days. If you stake your SKILL now, we'll give you a
+        50% bonus in-game only SKILL that you can use right away!
       <a href="#" @click="claimSkill(ClaimStage.Claim)"> <br>No thanks, I'd rather {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " +
         this.formattedTaxAmount + " in taxes and " : ""  }}forfeit my bonus </a>
     </b-modal>
@@ -67,10 +67,10 @@
 <script lang="ts">
 import Events from '../events';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import BN from 'bignumber.js';
-import Web3 from 'web3';
+import BigNumber from 'bignumber.js';
 import { Accessors } from 'vue/types/options';
 import Vue from 'vue';
+import { toBN, fromWeiEther } from '../utils/common';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -87,8 +87,8 @@ interface Data {
 }
 
 interface StoreMappedGetters {
-  rewardsClaimTaxAsFactorBN: BN;
-  maxRewardsClaimTaxAsFactorBN: BN;
+  rewardsClaimTaxAsFactorBN: BigNumber;
+  maxRewardsClaimTaxAsFactorBN: BigNumber;
 }
 
 enum ClaimStage {
@@ -118,12 +118,12 @@ export default Vue.extend({
     ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN']) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
-      const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
-      return `${new BN(skillRewards).toFixed(4)}`;
+      const skillRewards = fromWeiEther(this.skillRewards);
+      return `${toBN(skillRewards).toFixed(4)}`;
     },
     formattedTaxAmount(): string {
-      const skillRewards = Web3.utils.fromWei((parseFloat(this.skillRewards)* parseFloat(String(this.rewardsClaimTaxAsFactorBN))).toString(), 'ether');
-      return `${new BN(skillRewards).toFixed(4)}`;
+      const skillRewards = fromWeiEther(parseFloat(String(parseFloat(this.skillRewards)*parseFloat(String(this.rewardsClaimTaxAsFactorBN)))) + '');
+      return `${toBN(skillRewards).toFixed(4)}`;
     },
     formattedRewardsClaimTax(): string {
       const frac =
@@ -131,14 +131,14 @@ export default Vue.extend({
           ? this.maxRewardsClaimTaxAsFactorBN
           : this.rewardsClaimTaxAsFactorBN;
 
-      return `${frac.multipliedBy(100).decimalPlaces(0, BN.ROUND_HALF_UP)}%`;
+      return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
     },
     formattedBonusLost(): string {
-      const skillLost = Web3.utils.fromWei((parseFloat(this.skillRewards)*this.directStakeBonusPercent/100).toString(), 'ether');
-      return `${new BN(skillLost).toFixed(4)}`;
+      const skillLost = fromWeiEther(parseFloat(String(parseFloat(this.skillRewards)*this.directStakeBonusPercent/100)).toString());
+      return `${toBN(skillLost).toFixed(4)}`;
     },
     canClaimTokens(): boolean {
-      if(new BN(this.skillRewards).lte(0)) {
+      if(toBN(this.skillRewards).lte(0)) {
         return false;
       }
       return true;

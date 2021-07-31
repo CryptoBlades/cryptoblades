@@ -12,8 +12,7 @@
 </template>
 
 <script>
-import Web3 from 'web3';
-import BN from 'bignumber.js';
+import { toBN, fromWeiEther } from '../utils/common';
 import Hint from '../components/Hint.vue';
 
 export default {
@@ -21,8 +20,8 @@ export default {
 
   computed: {
     formattedSkill() {
-      const skillBalance = Web3.utils.fromWei(this.results[4], 'ether');
-      return `${new BN(skillBalance).toFixed(6)} SKILL`;
+      const skillBalance = fromWeiEther(this.results[4]);
+      return `${toBN(skillBalance).toFixed(6)} SKILL`;
     }
   },
 
@@ -31,10 +30,7 @@ export default {
       return this.results[0] ? 'You won the fight!' : 'You lost the fight!';
     },
     convertWei(wei) {
-      return Web3.utils.fromWei(
-        wei,
-        'ether'
-      );
+      return fromWeiEther(wei);
     }
   },
 

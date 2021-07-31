@@ -4,10 +4,7 @@ node_modules/
 .openzeppelin/unknown-1337.json
 .netlify
 .env
-package-lock.json
 *.log
 report*.json
 .vscode/launch.json
-package-lock.json
-frontend/package-lock.json
 .vs
