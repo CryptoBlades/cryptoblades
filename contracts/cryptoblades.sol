@@ -483,8 +483,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     modifier fightModifierChecks(uint256 char, uint256 wep) {
         require(tx.origin == msg.sender, "Only EOA allowed (temporary)");
         require(characters.balanceOf(msg.sender) <= characters.characterLimit(), "Too many characters owned");
-        require(lastBlockNumberCalled[msg.sender] < block.number, "Only callable once per block");
-        lastBlockNumberCalled[msg.sender] = block.number;
         require(characters.ownerOf(char) == msg.sender, "Not the character owner");
         require(weapons.ownerOf(wep) == msg.sender, "Not the weapon owner");
         _;
