@@ -197,8 +197,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
             // These have been combined due to error: CompilerError: Stack too deep, try removing local variables. TODO
             // onlyNonContract
-            // doesNotHaveMoreThanMaxCharacters
-            // oncePerBlock(msg.sender)
             // isCharacterOwner(char)
             // isWeaponOwner(wep) {
         fightModifierChecks(char, wep) {
@@ -403,9 +401,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
-    function mintCharacter() public onlyNonContract doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) {
-        require(characters.balanceOf(msg.sender) < characters.characterLimit(),
-            string(abi.encodePacked("You can only have ",characters.characterLimit()," characters!")));
+    function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
 
         uint256 skillAmount = usdToSkill(mintCharacterFee);
         (,, uint256 fromUserWallet) =
@@ -437,7 +433,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             );
         }
     }
-
     function mintWeaponN(uint32 num)
         public
         onlyNonContract
@@ -452,7 +447,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeapon() public onlyNonContract doesNotHaveMoreThanMaxCharacters oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
+    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
         _payContract(msg.sender, mintWeaponFee);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
@@ -460,14 +455,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function burnWeapon(uint256 burnID) public
-            doesNotHaveMoreThanMaxCharacters
             isWeaponOwner(burnID) requestPayFromPlayer(burnWeaponFee) {
         _payContract(msg.sender, burnWeaponFee);
         weapons.burn(burnID);
     }
 
     function burnWeapons(uint256[] memory burnIDs) public
-            doesNotHaveMoreThanMaxCharacters
             isWeaponsOwner(burnIDs) requestPayFromPlayer(burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length))) {
         _payContract(msg.sender, burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length)));
         for(uint i = 0; i < burnIDs.length; i++) {
@@ -476,14 +469,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
-            doesNotHaveMoreThanMaxCharacters
             isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
         _payContract(msg.sender, reforgeWeaponFee);
         weapons.reforge(reforgeID, burnID);
     }
 
     function reforgeWeaponWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) public
-            doesNotHaveMoreThanMaxCharacters
             isWeaponOwner(reforgeID) requestPayFromPlayer(reforgeWeaponWithDustFee) {
         _payContract(msg.sender, reforgeWeaponWithDustFee);
         weapons.reforgeWithDust(reforgeID, amountLB, amount4B, amount5B);
@@ -496,9 +487,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     modifier fightModifierChecks(uint256 char, uint256 wep) {
         require(tx.origin == msg.sender, "Only EOA allowed (temporary)");
-        require(characters.balanceOf(msg.sender) <= characters.characterLimit(), "Too many characters owned");
-        require(lastBlockNumberCalled[msg.sender] < block.number, "Only callable once per block");
-        lastBlockNumberCalled[msg.sender] = block.number;
         require(characters.ownerOf(char) == msg.sender, "Not the character owner");
         require(weapons.ownerOf(wep) == msg.sender, "Not the weapon owner");
         _;
@@ -559,15 +547,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _isCharacterOwner(uint256 character) internal view {
         require(characters.ownerOf(character) == msg.sender, "Not the character owner");
-    }
-
-    modifier doesNotHaveMoreThanMaxCharacters() {
-        _doesNotHaveMoreThanMaxCharacters();
-        _;
-    }
-
-    function _doesNotHaveMoreThanMaxCharacters() internal view {
-        require(characters.balanceOf(msg.sender) <= characters.characterLimit(), "Too many characters owned");
     }
 
     modifier isTargetValid(uint256 character, uint256 weapon, uint32 target) {
