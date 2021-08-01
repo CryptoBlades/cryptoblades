@@ -109,7 +109,7 @@
                       class="encounter-button btn-styled"
                       :mainText="`Fight!`"
                       :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
-                      @click="onClickEncounter(e)"
+                      @click="onClickEncounter(e,i)"
                     />
                     <p v-if="isLoadingTargets">Loading...</p>
                   </div>
@@ -273,7 +273,7 @@ export default {
       if ((enemyElement + 1) % 4 === playerElement) return -1;
       return 0;
     },
-    async onClickEncounter(targetToFight) {
+    async onClickEncounter(targetToFight, targetIndex) {
       if (this.selectedWeaponId === null || this.currentCharacterId === null) {
         return;
       }
@@ -281,7 +281,7 @@ export default {
       // Force a quick refresh of targets
       await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
-      if (!this.targets.find((target) => target.original === targetToFight.original)) {
+      if (this.targets[targetIndex].original !== targetToFight.original) {
         return;
       }
 
@@ -294,7 +294,7 @@ export default {
         const results = await this.doEncounter({
           characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
-          targetString: targetToFight.original,
+          targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
         });
 

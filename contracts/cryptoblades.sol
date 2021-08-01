@@ -212,12 +212,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         weapons.drainDurability(wep, durabilityCostFight * fightMultiplier);
 
-        _verifyFight(
-            basePowerLevel,
-            weaponMultTarget,
-            weaponBonusPower,
+        // dirty variable reuse to avoid stack limits
+        target = grabTarget(
+            getPlayerPower(basePowerLevel, weaponMultTarget, weaponBonusPower),
             timestamp,
-            target
+            target,
+            getCurrentHour()
         );
         performFight(
             char,
@@ -227,47 +227,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             uint24(target & 0xFFFFFF),
             fightMultiplier
         );
-    }
-
-    function _verifyFight(
-        uint24 basePowerLevel,
-        int128 weaponMultTarget,
-        uint24 weaponBonusPower,
-        uint64 timestamp,
-        uint32 target
-    ) internal view {
-        verifyFight(
-            basePowerLevel,
-            weaponMultTarget,
-            weaponBonusPower,
-            timestamp,
-            getCurrentHour(),
-            target
-        );
-    }
-
-    function verifyFight(
-        uint24 playerBasePower,
-        int128 wepMultiplier,
-        uint24 wepBonusPower,
-        uint64 staminaTimestamp,
-        uint256 hour,
-        uint32 target
-    ) public pure {
-
-        uint32[4] memory targets = getTargetsInternal(
-            getPlayerPower(playerBasePower, wepMultiplier, wepBonusPower),
-            staminaTimestamp,
-            hour
-        );
-        bool foundMatch = false;
-        for(uint i = 0; i < targets.length; i++) {
-            if(targets[i] == target) {
-                foundMatch = true;
-                i = targets.length;
-            }
-        }
-        require(foundMatch, "Target invalid");
     }
 
     function performFight(
@@ -378,16 +337,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // trait bonuses not accounted for
         // targets expire on the hour
 
-        uint256 baseSeed = RandomUtil.combineSeeds(
-            RandomUtil.combineSeeds(staminaTimestamp,
-            currentHour),
-            playerPower
-        );
-
         uint32[4] memory targets;
-        for(uint i = 0; i < targets.length; i++) {
+        for(uint32 i = 0; i < targets.length; i++) {
             // we alter seed per-index or they would be all the same
-            uint256 indexSeed = RandomUtil.combineSeeds(baseSeed, i);
+            // this is a read only function so it's fine to pack all 4 params each iteration
+            // for the sake of target picking it needs to be the same as in grabTarget(i)
+            // even the exact type of "i" is important here
+            uint256 indexSeed = uint256(keccak256(abi.encodePacked(
+                staminaTimestamp, currentHour, playerPower, i
+            )));
             targets[i] = uint32(
                 RandomUtil.plusMinus10PercentSeeded(playerPower, indexSeed) // power
                 | (uint32(indexSeed % 4) << 24) // trait
@@ -395,6 +353,23 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
 
         return targets;
+    }
+
+    function grabTarget(
+        uint24 playerPower,
+        uint64 staminaTimestamp,
+        uint32 enemyIndex,
+        uint256 currentHour
+    ) private pure returns (uint32) {
+        require(enemyIndex < 4, "High target index");
+
+        uint256 enemySeed = uint256(keccak256(abi.encodePacked(
+            staminaTimestamp, currentHour, playerPower, enemyIndex
+        )));
+        return uint32(
+            RandomUtil.plusMinus10PercentSeeded(playerPower, enemySeed) // power
+            | (uint32(enemySeed % 4) << 24) // trait
+        );
     }
 
     function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
