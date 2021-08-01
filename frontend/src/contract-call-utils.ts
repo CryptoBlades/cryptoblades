@@ -30,7 +30,8 @@ export async function approveFee(
   skillRewardsAvailable: string,
   callOpts: WithOptionalFrom<Web3JsCallOptions>,
   approveOpts: WithOptionalFrom<Web3JsSendOptions>,
-  fn: CryptoBladesMethodsFunction
+  fn: CryptoBladesMethodsFunction,
+  allowInGameOnlyFunds: boolean
 ) {
   const callOptsWithFrom: Web3JsCallOptions = { from, ...callOpts };
   const approveOptsWithFrom: Web3JsSendOptions = { from, ...approveOpts };
@@ -39,7 +40,7 @@ export async function approveFee(
 
   try {
     feeInSkill = await cryptoBladesContract.methods
-      .getSkillNeededFromUserWallet(from, feeInSkill.toString())
+      .getSkillNeededFromUserWallet(from, feeInSkill.toString(), allowInGameOnlyFunds)
       .call(callOptsWithFrom)
       .then(n => new BigNumber(n));
 

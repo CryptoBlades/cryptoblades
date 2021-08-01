@@ -941,7 +941,8 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee()
+          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee(),
+          true
         );
 
         await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
@@ -963,7 +964,8 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
+          cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+          true
         );
 
         await state.contracts().CryptoBlades!.methods.mintWeapon().send({
@@ -987,7 +989,8 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee()
+          cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee(),
+          true
         );
 
         await state.contracts().CryptoBlades!.methods
