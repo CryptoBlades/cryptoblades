@@ -440,7 +440,7 @@ contract NFTMarket is
         isValidERC721(_tokenAddress)
         isNotListed(_tokenAddress, _id)
     {
-        _tokenAddress.safeTransferFrom(msg.sender, address(this), usdToSkill(addFee));
+        skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(addFee));
 
         listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price);
         listedTokenIDs[address(_tokenAddress)].add(_id);
@@ -463,7 +463,7 @@ contract NFTMarket is
         isListed(_tokenAddress, _id)
         isSeller(_tokenAddress, _id)
     {
-        _tokenAddress.safeTransferFrom(msg.sender, address(this), usdToSkill(changeFee));
+        skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(changeFee));
 
         listings[address(_tokenAddress)][_id].price = _newPrice;
         emit ListingPriceChange(
