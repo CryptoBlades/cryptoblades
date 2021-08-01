@@ -88,6 +88,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         uint8 version;
         uint256 seed;
     }
+    struct CharacterPVEStats {
+        uint32 wins;
+        uint32 losses;
+    }
 
     Character[] private tokens;
     CharacterCosmetics[] private cosmetics;
@@ -105,6 +109,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     uint256 private firstMintedOfLastBlock;
 
     uint256 public characterLimit;
+
+    CharacterPVEStats[] private pveStats;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -151,6 +157,18 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             getRandomCosmetic(cc.seed, 5, 22), // boots
             getRandomCosmetic(cc.seed, 6, 2) // race
         );
+    }
+
+    function getPVEStats(uint256 id) public view noFreshLookup(id) returns (uint32 wins, uint32 losses) {
+        return (pveStats[id].wins, pveStats[id].losses);
+    }
+
+    function incrementPVEWins(uint256 id) external restricted() {
+        pveStats[id].wins++;
+    }
+
+    function incrementPVELosses(uint256 id) external restricted() {
+        pveStats[id].losses++;
     }
 
     function getRandomCosmetic(uint256 seed, uint256 seed2, uint16 limit) private pure returns (uint16) {
