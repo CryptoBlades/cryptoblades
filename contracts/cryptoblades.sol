@@ -286,8 +286,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 tokens = usdToSkill(getTokenGainForFight(targetPower, fightMultiplier));
 
         if(playerRoll < monsterRoll) {
+            characters.incrementPVELosses(char);
             tokens = 0;
             xp = 0;
+        } else {
+            characters.incrementPVEWins(char);
         }
 
         if(tokenRewards[msg.sender] == 0 && tokens > 0) {
