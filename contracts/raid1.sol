@@ -121,7 +121,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     function doRaid(uint256 bossPower, uint8 bossTrait, uint256 durationHours) public restricted {
         require(raidStatus[raidIndex] != STATUS_PAUSED, "Raid paused");
 
-        if(raidStatus[raidIndex] == STATUS_STARTED) {
+        if(raidStatus[raidIndex] == STATUS_STARTED
+        && raidParticipants[raidIndex].length > 0) {
             completeRaid();
         }
         startRaid(bossPower, bossTrait, durationHours);
