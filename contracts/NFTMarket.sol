@@ -12,6 +12,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
+import "./cryptoblades.sol";
 import "./weapons.sol";
 
 // *****************************************************************************
@@ -56,6 +57,16 @@ contract NFTMarket is
         weapons = _weaponsContract;
     }
 
+    function migrateTo_PLACEHOLDER(IPriceOracle _priceOracleSkillPerUsd, CryptoBlades _cryptoBladesContract) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
+        cryptoBlades = _cryptoBladesContract;
+
+        characterBuyBackNew = cryptoBlades.mintCharacterFee().div(ABDKMath64x64.fromUInt(4));
+        characterBuyBackPerLevel = cryptoBlades.mintCharacterFee().div(ABDKMath64x64.fromUInt(8));
+    }
+
     // basic listing; we can easily offer other types (auction / buy it now)
     // if the struct can be extended, that's one way, otherwise different mapping per type.
     struct Listing {
@@ -69,7 +80,6 @@ contract NFTMarket is
     // ############
     IERC20 public skillToken; //0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
     address public taxRecipient; //game contract
-    //IPriceOracle public priceOracleSkillPerUsd; // we may want this for dynamic pricing
 
     // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
     mapping(address => mapping(uint256 => Listing)) private listings;
@@ -95,6 +105,11 @@ contract NFTMarket is
 
     Weapons internal weapons;
     Characters internal characters;
+
+    IPriceOracle public priceOracleSkillPerUsd;
+    CryptoBlades public cryptoBlades;
+    int128 public characterBuyBackNew;
+    int128 public characterBuyBackPerLevel;
 
     // ############
     // Events
@@ -429,6 +444,10 @@ contract NFTMarket is
         isValidERC721(_tokenAddress)
         isNotListed(_tokenAddress, _id)
     {
+        if(buyBackIfPriceIsLow(_tokenAddress, _id, _price)) {
+            return;
+        }
+
         listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price);
         listedTokenIDs[address(_tokenAddress)].add(_id);
 
@@ -450,6 +469,11 @@ contract NFTMarket is
         isListed(_tokenAddress, _id)
         isSeller(_tokenAddress, _id)
     {
+        if(buyBackIfPriceIsLow(_tokenAddress, _id, _newPrice)) {
+            cancelListing(_tokenAddress, _id);
+            return;
+        }
+
         listings[address(_tokenAddress)][_id].price = _newPrice;
         emit ListingPriceChange(
             msg.sender,
@@ -505,6 +529,28 @@ contract NFTMarket is
             _id,
             finalPrice
         );
+    }
+
+    function buyBackIfPriceIsLow(IERC721 _tokenAddress, uint256 _id, uint256 _price) private returns (bool) {
+        if(address(_tokenAddress) == address(characters)) {
+            uint8 characterLevel = characters.getLevel(_id);
+            int128 buyBackUSDValue = characterBuyBackNew + characterBuyBackPerLevel.mul(ABDKMath64x64.fromUInt(characterLevel));
+            uint256 buyBackTokenValue = usdToSkill(buyBackUSDValue);
+            if(buyBackTokenValue >= _price) {
+                _tokenAddress.safeTransferFrom(msg.sender, address(0), _id);
+                skillToken.safeTransferFrom(address(this), msg.sender, _price);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function setCharacterBuyBackNewValue(uint256 cents) public restricted {
+        characterBuyBackNew = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setCharacterBuyBackPerLevelValue(uint256 cents) public restricted {
+        characterBuyBackPerLevel = ABDKMath64x64.divu(cents, 100);
     }
 
     function setTaxRecipient(address _taxRecipient) public restricted {
@@ -569,6 +615,10 @@ contract NFTMarket is
 
     function recoverSkill(uint256 amount) public restricted {
         skillToken.safeTransfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
+    }
+
+    function usdToSkill(int128 usdAmount) public view returns (uint256) {
+        return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
     }
 
     function onERC721Received(
