@@ -47,7 +47,7 @@
               <div class="header-row">
 
                 <div class="row mb-3 mt-3">
-                  <div class="col-12 col-md-2 offset-md-5">
+                  <div :class="['col-12', selectedWeaponId ? 'col-md-6 offset-md-3' : 'col-md-2 offset-md-5']">
                     <h4>Stamina Cost per Fight</h4>
                     <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
                   </div>
