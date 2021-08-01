@@ -119,7 +119,9 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function doRaid(uint256 bossPower, uint8 bossTrait, uint256 durationHours) public restricted {
-        if(raidIndex > 0) {
+        require(raidStatus[raidIndex] != STATUS_PAUSED, "Raid paused");
+
+        if(raidStatus[raidIndex] == STATUS_STARTED) {
             completeRaid();
         }
         startRaid(bossPower, bossTrait, durationHours);
@@ -412,11 +414,13 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
                 result[currentIndex] = i;
             }
         }
+        return result;
     }
 
     function isEligibleForReward(uint256 index) public view returns(bool) {
         return raidParticipantIndices[index][uint256(msg.sender)].length > 0
-            && raidRewardClaimed[index][uint256(msg.sender)] == false;
+            && raidRewardClaimed[index][uint256(msg.sender)] == false
+            && (raidStatus[index] == STATUS_WON || raidStatus[index] == STATUS_LOST);
     }
 
     function getParticipatingCharacters() public view returns(uint256[] memory) {

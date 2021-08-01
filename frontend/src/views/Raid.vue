@@ -19,10 +19,6 @@
                  Boss Power
                 <span class="badge badge-primary badge-pill">{{ bossPower }}</span>
               </li>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                Bounty
-                <span class="badge badge-primary badge-pill">1232</span>
-              </li>
             </ul>
             <h5 class="mt-3">Drops</h5>
             <hr class="devider">
@@ -105,6 +101,9 @@
                   </div>
               </div>
             </div>
+            <div class="col-sm-4" v-if="rewardIndexes !== null && rewardIndexes.length > 0">
+              <big-button class="encounter-button btn-styled" :mainText="`Claim rewards`" @click="promptRewardClaim()" />
+            </div>
             <div class="col-sm-4">
               <big-button class="encounter-button btn-styled" :mainText="`Sign up!`" v-tooltip="'Joining will cost 12h of stamina'" @click="joinRaidMethod()" />
             </div>
@@ -159,6 +158,7 @@ export default {
       raidStatus: null,
       bossPower: null,
       bossTrait: null,
+      rewardIndexes: null,
     };
   },
 
@@ -173,7 +173,9 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid']),
+    ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid',
+      'fetchRaidRewards', 'claimRaidRewards', 'fetchRaidingCharacters', 'fetchRaidingWeapons',
+      'fetchRaidJoinEligibility']),
     ...mapMutations(['setCurrentCharacter']),
     ...mapGetters(['getRaidState']),
 
@@ -197,18 +199,61 @@ export default {
       }
     },
 
-    async getRewardEligibility(lowIndex, highIndex) {
-      console.log(lowIndex+' / '+highIndex);
-    },
-
     async getParticipatingCharacters() {
+      // gets the list of this player's raid locked characters
+      // TODO store these?
+      await this.fetchRaidingCharacters();
     },
 
     async getParticipatingWeapons() {
+      // gets the list of this player's raid locked weapons
+      // TODO store these?
+      await this.fetchRaidingWeapons();
     },
 
     async canJoinRaid(characterID, weaponID) {
-      console.log(characterID+' / '+weaponID);
+      return await this.fetchRaidJoinEligibility({
+        characterID,
+        weaponID
+      });
+    },
+
+    async getRewardIndexes() {
+      if(this.raidIndex === null || this.raidIndex === undefined)
+        return;
+      let startIndex = this.raidIndex-21; // one week worth
+      if(startIndex < 0)
+        startIndex = 0;
+      const endIndex = this.raidIndex;
+
+      this.rewardIndexes = await this.fetchRaidRewards({
+        startIndex,
+        endIndex
+      });
+      console.log('SI '+startIndex+' / EI '+endIndex);
+      console.log('RI '+this.rewardIndexes.length);
+    },
+
+    promptRewardClaim() {
+      // should offer a popup here to pick which index to claim
+      // if only one index, then claim instantly
+      if(this.rewardIndexes !== null && this.rewardIndexes.length > 0) {
+        if(this.rewardIndexes.length === 1) {
+          this.claimRewardIndex(this.rewardIndexes[0]);
+        }
+        else {
+          console.log('TODO choose claim index via popup');
+        }
+      }
+    },
+
+    async claimRewardIndex(rewardIndex) {
+      console.log('Attempting to claim reward index '+rewardIndex);
+      const result = await this.claimRaidRewards({
+        rewardIndex
+      });
+      console.log('Reward claimed for '+rewardIndex);
+      console.log('Result: '+result);
     },
 
     getBossName() {
@@ -247,6 +292,7 @@ export default {
       this.fetchRaidState(),
     ]);
     this.processRaidData();
+    await this.getRewardIndexes();
   },
 
   components: {

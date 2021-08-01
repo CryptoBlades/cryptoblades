@@ -1205,6 +1205,53 @@ export function createStore(web3: Web3) {
         ]);
       },
 
+      async fetchRaidRewards({ state }, { startIndex, endIndex }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .getEligibleRewardIndexes(
+            startIndex,
+            endIndex
+          )
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchRaidingCharacters({ state }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .getParticipatingCharacters()
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchRaidingWeapons({ state }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .getParticipatingWeapons()
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchRaidJoinEligibility({ state }, { characterID, weaponID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .canJoinRaid(characterID, weaponID)
+          .call(defaultCallOptions(state));
+      },
+
+      async claimRaidRewards({ state }, { rewardIndex }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        const res = await Raid1!.methods
+          .claimReward(rewardIndex)
+          .send(defaultCallOptions(state));
+
+        // there may be other events fired that can be used to obtain the exact loot
+        // RewardedWeapon, RewardedJunk, RewardedTrinket, RewardedKeyBox etc
+        return res.events.RewardClaimed.returnValues;
+      },
+
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;

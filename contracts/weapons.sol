@@ -5,9 +5,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "./interfaces/IERC721MintAccessSeededStars.sol";
 import "./util.sol";
 
-contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
+contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IERC721MintAccessSeededStars {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint16;
@@ -188,6 +189,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         }
 
         return mintWeaponWithStars(minter, stars, seed);
+    }
+
+    function mintAccessSeededStars(address receiver, uint256 ref, uint256 seed, uint8 stars) external override
+        restricted returns(uint256) {
+        // for raids reward interface compatibility
+        return mintWeaponWithStars(receiver, stars, seed);
     }
 
     function mintWeaponWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
