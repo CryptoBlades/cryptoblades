@@ -276,15 +276,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function spendTicket(uint32 num)
         public
     {
+        require(num > 0);
         require (tickets[msg.sender] >= num, "You don't have enough tickets");
+        tickets[msg.sender] -= num;
 
         for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encode(randoms.getRandomSeed(msg.sender) ^ (block.number + i)))));
+            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i))));
         }
-
-        tickets[msg.sender] -= num;
     }
-    
+
     function isUnlikely(uint24 pp, uint24 ep)
         private
         pure
@@ -297,7 +297,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         int128 enemyMax = ABDKMath64x64.fromUInt(ep).mul(ABDKMath64x64.fromUInt(110)).div(ABDKMath64x64.fromUInt(100));
         int128 enemyRange = enemyMax.sub(enemyMin);
         int256 rollingTotal = 0;
-        
+
         if (playerMin >= enemyMin) {
             int128 temp = playerMin.sub(enemyMin).div(enemyRange);
             temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(playerMax.sub(enemyMax).div(playerRange)));
