@@ -51,6 +51,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _registerInterface(0xe62e6974); // TransferCooldownableInterfaceId.interfaceId()
     }
 
+    function migrateTo_PLACEHOLDER() public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        baseWeaponMultiplier = ABDKMath64x64.fromUInt(1);
+    }
+
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-128
@@ -109,6 +115,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint256 public constant secondsPerDurability = 3000; //50 * 60
 
     mapping(address => uint256) burnDust; // user address : burned item dust counts
+
+    int128 public baseWeaponMultiplier; // 1.0
 
     event Burned(address indexed owner, uint256 indexed burned);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
@@ -378,7 +386,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         // This function can be used by frontend to get expected % bonus for each type
         // Making it easy to see on the market how useful it will be to you
         uint8 statPattern = getStatPatternFromProperties(properties);
-        int128 result = oneFrac;
+        int128 result = baseWeaponMultiplier;
 
         if(getStat1Trait(statPattern) == trait)
             result = result.add(stat1.fromUInt().mul(powerMultPerPointMatching));
@@ -590,7 +598,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function getFightData(uint256 id, uint8 charTrait) public view noFreshLookup(id) returns (int128, int128, uint24, uint8) {
         Weapon storage wep = tokens[id];
         return (
-            oneFrac.add(powerMultPerPointBasic.mul(
+            baseWeaponMultiplier.add(powerMultPerPointBasic.mul(
                     ABDKMath64x64.fromUInt(
                         wep.stat1 + wep.stat2 + wep.stat3
                     )
@@ -618,7 +626,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         
         Weapon storage wep = tokens[id];
         return (
-            oneFrac.add(powerMultPerPointBasic.mul(
+            baseWeaponMultiplier.add(powerMultPerPointBasic.mul(
                     ABDKMath64x64.fromUInt(
                         wep.stat1 + wep.stat2 + wep.stat3
                     )
@@ -640,6 +648,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         else {
             durabilityTimestamp[id] = uint64(durabilityTimestamp[id] + drainTime);
         }
+    }
+
+    function setBaseWeaponMultiplier(int128 multiplier) public restricted {
+        require(multiplier >= 0, "BaseWeaponMultiplier too low");
+        require(multiplier <= 1, "BaseWeaponMultiplier too high");
+        baseWeaponMultiplier = multiplier;
     }
 
     function setBurnPointMultiplier(uint256 multiplier) public restricted {
