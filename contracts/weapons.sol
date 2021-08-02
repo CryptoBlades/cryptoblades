@@ -56,8 +56,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
         baseWeaponMultiplier = ABDKMath64x64.fromUInt(0);
         powerMultPerPointBasic =  ABDKMath64x64.divu(300, 10000); // 0.300%
-        powerMultPerPointPWR = powerMultPerPointBasic.mul(ABDKMath64x64.divu(309, 10000)); // 0.309% (+3%)
-        powerMultPerPointMatching = powerMultPerPointBasic.mul(ABDKMath64x64.divu(321, 10000)); // 0.321% (+7%)
+        powerMultPerPointPWR = ABDKMath64x64.divu(309, 10000); // 0.309% (+3%)
+        powerMultPerPointMatching = ABDKMath64x64.divu(321, 10000); // 0.321% (+7%)
     }
 
     /*
