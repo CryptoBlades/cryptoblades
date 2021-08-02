@@ -1339,15 +1339,3 @@ export default Vue.extend({
 }
 
 </style>
-
-function getCharacterName(charId: string): String {
-  throw new Error('Function not implemented.');
-}
-
-function getCharacterName(charId: string): String {
-  throw new Error('Function not implemented.');
-}
-
-function getCharacterName(charId: string): String {
-  throw new Error('Function not implemented.');
-}
