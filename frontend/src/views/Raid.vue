@@ -1,11 +1,11 @@
 <template>
   <div class="main-font">
     <div class="row">
-      <div class="col-6">
+      <div class="col-md-12 col-lg-6">
         <h2>Dragon's Lair</h2>
         <hr class="devider">
         <div class="row">
-          <div class="col-6">
+          <div class="col-md-12 col-lg-6 order-xs-last order-sm-last order-lg-first">
             <ul class="list-group">
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 Number of Raiders
@@ -35,7 +35,7 @@
               <span class="title">XP reward</span> {{ xpReward }}
             </div>
           </div>
-          <div class="col-6">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 order-xs-first order-sm-first boss-col">
             <div class="boss-box">
               <div class="raid-title">
                 <span class="title mr-3"> {{ bossName }} </span>
@@ -48,9 +48,9 @@
           </div>
         </div>
       </div>
-      <div class="col-6">
+      <div class="col-md-12 col-lg-6 weap-char">
         <div class="row">
-          <div class="col-6">
+          <div class="col-xs-12 col-sm-12 col-lg-6 weap-box">
             <h2>Weapon
                 <Hint
                 text="Your weapon multiplies your power<br>
@@ -67,12 +67,12 @@
                 Choose New Weapon
               </b-button>
             </div>
-            <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" />
+            <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" class="raid-weapon-grid" />
           </div>
-          <div class="col-6">
-            <h3>Choose a Character <span class="float-right sub-text">Power {{ 10000 }}</span></h3>
+          <div class="col-xs-12 col-sm-12 col-lg-6 char-box">
+            <h2>Choose a Character <span class="float-right sub-text">Power {{ 10000 }}</span></h2>
             <hr class="devider">
-            <character-list :value="currentCharacterId" @input="setCurrentCharacter" />
+            <character-list :value="currentCharacterId" @input="setCurrentCharacter" class="raid-style" />
           </div>
         </div>
       </div>
@@ -95,7 +95,7 @@
         <div class="raid-info-box mt-3">
           <div class="row">
             <div class="col-sm-4">
-              <div class="float-left">
+              <div class="float-lg-left text-sm-center mb-sm-2">
                 <div class="finish">
                     <span class="title">Finishes on</span>
                     {{ expectedFinishTime }}
@@ -119,7 +119,7 @@
               <big-button class="encounter-button btn-styled" :mainText="`Sign up!`" v-tooltip="'Joining will cost 12h of stamina'" @click="joinRaidMethod()" />
             </div>
             <div class="col-sm-4">
-             <div class="float-right">
+             <div class="float-lg-right text-sm-center mt-sm-2 text-center">
                 <div class="finish">
                     <span class="title">Total Power:  10000</span>
                   </div>
@@ -320,6 +320,122 @@ export default {
 </script>
 
 <style scoped>
+.raid-height {
+  height: 500px !important;
+}
+
+.raid-style {
+  display: block;
+  width: 100%;
+  padding: 0;
+ height: 650px;
+ overflow-y: auto;
+ overflow-x: hidden;
+ border: 0.5px solid #1f1f1f;
+}
+
+
+.raid-style::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(156, 109, 46, 0.3);
+	background-color: #F5F5F5;
+}
+
+.raid-style::-webkit-scrollbar
+{
+	width: 10px;
+	background-color: #F5F5F5;
+}
+.raid-style::-webkit-scrollbar-thumb
+{
+	background-color: #a3773e;
+	border: 2px solid #555555;
+}
+
+
+.raid-style >>> ul.character-list {
+    width: 100% !important;
+    margin: 0 auto;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    position: relative;
+  }
+.raid-style >>> ul.character-list > li.character {
+  margin: 0 auto;
+}
+
+.raid-style >>> ul.character-list > li.character.selected {
+    box-shadow: 0 3px 15px #ffd400;
+    border: 0.5px solid #fff;
+}
+
+.raid-weapon-grid >>> .stars-elem  {
+  width: 50% !important;
+  max-width: 100% !important;
+  flex: 0 0 50% !important;
+}
+
+.raid-weapon-grid >>> .clear-filters-button {
+  max-width: 300px;
+  width: 100%;
+  margin-top: 10px;
+  margin-left: 0px;
+}
+
+.raid-weapon-grid >>> .clear-filters-button > span {
+  margin: 0 auto;
+}
+
+.raid-weapon-grid {
+  height: 650px;
+  overflow-y: auto;
+  border: 0.5px solid #1f1f1f;
+}
+
+.raid-weapon-grid::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(156, 109, 46, 0.3);
+	background-color: #F5F5F5;
+}
+
+.raid-weapon-grid::-webkit-scrollbar
+{
+	width: 10px;
+	background-color: #F5F5F5;
+}
+.raid-weapon-grid::-webkit-scrollbar-thumb
+{
+	background-color: #a3773e;
+	border: 2px solid #555555;
+}
+
+
+.raid-weapon-grid >>> .weapon-grid {
+  width: 100% !important;
+  margin: 0 auto;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  position: relative;
+}
+
+.raid-weapon-grid >>> ul.weapon-grid > li.weapon {
+  margin: 0 auto;
+  height: 100%;
+  border-radius: 0;
+  background-image: none;
+  height: auto;
+}
+h2 {
+  font-size: 20px;
+}
+h2 > span.sub-text {
+  font-size: 16px;
+  color: #fff;
+  vertical-align: middle;
+  line-height: 2;
+}
 hr.devider {
    border: 0.5px solid #242423;
 }
@@ -349,10 +465,11 @@ hr.devider {
   height: calc(100vh - 56px - 160px - 32px);
 }
 .raid-info-box {
-  background: rgb(49, 44, 44);
+  background: #2e2e30cc;
   padding: 20px;
   margin-bottom: 20px;
-  border-radius: 5px;
+  border-radius: 0px;
+  border: 1px solid #515152cc;
 }
 .border-box {
   border: 0.5px solid #242423;
@@ -471,5 +588,39 @@ hr.devider {
   height: fit-content;
   margin: 5px;
   padding: 0;
+}
+
+@media (max-width: 1024px) {
+  .weap-char {
+    margin-top: 50px;
+    border-top: dashed 1px #ccc;
+    padding-top : 20px;
+  }
+}
+
+@media (max-width: 994px) {
+
+  img.img-responsive {
+    height: 350px;
+  }
+}
+@media (max-width: 726px) {
+  .weap-box, .char-box {
+    margin-top: 30px;
+  }
+  .img-responsive .boss-img {
+    height: 300px;
+  }
+  .finish {
+    text-align: center;
+    margin: 10px;
+  }
+}
+
+
+@media (max-width: 1251px) {
+  .boss-col {
+    display: block;
+  }
 }
 </style>
