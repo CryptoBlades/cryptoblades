@@ -55,6 +55,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         baseWeaponMultiplier = ABDKMath64x64.fromUInt(0);
+        powerMultPerPointBasic =  ABDKMath64x64.divu(300, 10000); // 0.300%
+        powerMultPerPointPWR = powerMultPerPointBasic.mul(ABDKMath64x64.divu(309, 10000)); // 0.309% (+3%)
+        powerMultPerPointMatching = powerMultPerPointBasic.mul(ABDKMath64x64.divu(321, 10000)); // 0.321% (+7%)
     }
 
     /*
@@ -99,9 +102,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint public fiveStarBurnPowerPerPoint; // 60
 
     int128 public oneFrac; // 1.0
-    int128 public powerMultPerPointBasic; // 0.25%
-    int128 public powerMultPerPointPWR; // 0.2575% (+3%)
-    int128 public powerMultPerPointMatching; // 0.2675% (+7%)
+    int128 public powerMultPerPointBasic; // 0.300%
+    int128 public powerMultPerPointPWR; // 0.309% (+3%)
+    int128 public powerMultPerPointMatching; // 0.321% (+7%)
 
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(uint256 => uint256) public lastTransferTimestamp;
