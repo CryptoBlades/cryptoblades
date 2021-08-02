@@ -108,7 +108,7 @@
                     <big-button
                       class="encounter-button btn-styled"
                       :mainText="`Fight!`"
-                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId)"
                       @click="onClickEncounter(e)"
                     />
                     <p v-if="isLoadingTargets">Loading...</p>

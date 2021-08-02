@@ -601,6 +601,34 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
+    function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount) public
+        restricted noFreshLookup(id)
+    returns (int128, int128, uint24, uint8) {
+
+        uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
+        require(durabilityPoints >= drainAmount, "Not enough durability!");
+
+        uint64 drainTime = uint64(drainAmount * secondsPerDurability);
+        if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
+            durabilityTimestamp[id] = uint64(now - getDurabilityMaxWait() + drainTime);
+        }
+        else {
+            durabilityTimestamp[id] = uint64(durabilityTimestamp[id] + drainTime);
+        }
+        
+        Weapon storage wep = tokens[id];
+        return (
+            oneFrac.add(powerMultPerPointBasic.mul(
+                    ABDKMath64x64.fromUInt(
+                        wep.stat1 + wep.stat2 + wep.stat3
+                    )
+            )),//targetMult
+            getPowerMultiplierForTrait(wep.properties, wep.stat1, wep.stat2, wep.stat3, charTrait),
+            getBonusPowerForFight(id, wep.level),
+            getTraitFromProperties(wep.properties)
+        );
+    }
+
     function drainDurability(uint256 id, uint8 amount) public restricted {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require(durabilityPoints >= amount, "Not enough durability!");
