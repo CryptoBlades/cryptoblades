@@ -20,14 +20,17 @@
                 <span class="badge badge-primary badge-pill">{{ bossPower }}</span>
               </li>
             </ul>
-            <h5 class="mt-3">Drops</h5>
+            <h5 class="mt-3">
+              Drops
+              <b-icon-question-circle v-tooltip="'Rewards are based on your contributed power relative to others.<br>Joining early gives up to 10% bonus.'"/>
+            </h5>
             <hr class="devider">
             <div class="drops">
-              {{ '(Rewards are based on your contributed power relative to others)' }}
-              <br />
-              {{ '(Joining early gives up to 10% bonus)' }}
-              <br />
-              {{ 'Weapons (2-5*), Junk (1-5*), SECRET (??) - INSERT IMAGES HERE' }}
+              <div class="drops-icons">
+                <nft-icon :isDefault="true" :nftType="'weapon'" />
+                <nft-icon :isDefault="true" :nftType="'junk'"/>
+                <nft-icon :isDefault="true" :nftType="'secret'"/>
+              </div>
               <br />
               <span class="title">XP reward</span> {{ xpReward }}
             </div>
@@ -103,6 +106,14 @@
             </div>
             <div class="col-sm-4" v-if="rewardIndexes !== null && rewardIndexes.length > 0">
               <big-button class="encounter-button btn-styled" :mainText="`Claim rewards`" @click="promptRewardClaim()" />
+              <b-modal id="rewardsRaidPicker" title="Raid rewards selector" @ok="claimRewardIndex(rewardsRaidId)">
+                <div class="raid-picker">
+                  Select a raid to claim rewards from:
+                  <select class="form-control raid-id-selector" v-model="rewardsRaidId">
+                    <option v-for="id in rewardIndexes" :value="id" :key="id">{{ id }}</option>
+                  </select>
+                </div>
+              </b-modal>
             </div>
             <div class="col-sm-4">
               <big-button class="encounter-button btn-styled" :mainText="`Sign up!`" v-tooltip="'Joining will cost 12h of stamina'" @click="joinRaidMethod()" />
@@ -127,6 +138,7 @@ import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import Hint from '../components/Hint.vue';
+import NftIcon from '@/components/NftIcon.vue';
 
 const dragonNames = [
   'Fudbringer',
@@ -159,6 +171,7 @@ export default {
       bossPower: null,
       bossTrait: null,
       rewardIndexes: null,
+      rewardsRaidId: null
     };
   },
 
@@ -242,7 +255,7 @@ export default {
           this.claimRewardIndex(this.rewardIndexes[0]);
         }
         else {
-          console.log('TODO choose claim index via popup');
+          this.$bvModal.show('rewardsRaidPicker');
         }
       }
     },
@@ -279,10 +292,10 @@ export default {
 
   watch: {
     async selections([weaponId]) {
-      if (!this.ownWeapons.find((weapon) => weapon.id === weaponId)) {
+      if (!this.ownWeapons.find((weapon) => weapon && weapon.id === weaponId)) {
         this.selectedWeaponId = null;
       } else {
-        this.selectedWeapon = this.ownWeapons.find((weapon) => weapon.id === this.selectedWeaponId);
+        this.selectedWeapon = this.ownWeapons.find((weapon) => weapon && weapon.id === this.selectedWeaponId);
       }
     },
   },
@@ -301,6 +314,7 @@ export default {
     WeaponGrid,
     WeaponIcon,
     Hint,
+    NftIcon
   },
 };
 </script>
@@ -403,6 +417,11 @@ hr.devider {
 .drops {
   margin-top: 1em;
 }
+.drops-icons {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
 .encounter-button {
   display: block;
   top:0 !important;
@@ -440,5 +459,17 @@ hr.devider {
     flex-wrap: wrap;
     padding-left: 30px;
     padding-right: 30px;
+}
+
+.raid-picker {
+  display: flex;
+  align-items: center;
+}
+
+.form-control.raid-id-selector {
+  width: fit-content;
+  height: fit-content;
+  margin: 5px;
+  padding: 0;
 }
 </style>
