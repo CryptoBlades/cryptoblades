@@ -210,7 +210,7 @@ export default {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
-      if (this.resultsAvailable) this.$bvModal.show('fightResultsModal');
+      if (this.resultsAvailable && error === null) this.$bvModal.show('fightResultsModal');
     },
   },
 
