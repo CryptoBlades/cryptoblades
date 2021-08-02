@@ -54,7 +54,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function migrateTo_PLACEHOLDER() public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
-        baseWeaponMultiplier = ABDKMath64x64.fromUInt(1);
+        baseWeaponMultiplier = ABDKMath64x64.fromUInt(0);
     }
 
     /*
@@ -116,7 +116,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     mapping(address => uint256) burnDust; // user address : burned item dust counts
 
-    int128 public baseWeaponMultiplier; // 1.0
+    int128 public baseWeaponMultiplier; // 0.0 - 1.0
 
     event Burned(address indexed owner, uint256 indexed burned);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
