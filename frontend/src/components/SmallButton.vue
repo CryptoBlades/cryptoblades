@@ -26,7 +26,7 @@ export default {
 }
 
 .button:disabled {
-  opacity: 0.4 !important;
+  opacity: 40% !important;
 }
 
 </style>
