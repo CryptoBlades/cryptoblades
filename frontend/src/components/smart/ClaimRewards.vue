@@ -11,7 +11,7 @@
 
         <b-dropdown-item
           :disabled="!canClaimTokens"
-          @click="claimSkill(ClaimStage.WaxBridge)" class="gtag-link-others" tagname="claim_skill">
+          @click="onClaimTokens()" class="gtag-link-others" tagname="claim_skill">
             SKILL
             <div class="pl-3">{{ formattedSkillReward }}</div>
             <div class="pl-3">
