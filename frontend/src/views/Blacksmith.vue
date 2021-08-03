@@ -23,7 +23,7 @@
             <b-button
               variant="primary"
               v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
-              @click="showReforge = true"
+              @click="showReforge = true, showBlacksmith = false"
               tagname="reforge_weapon"
               v-tooltip="'Burn weapons to buff selected weapon'">
               Reforge
@@ -58,9 +58,7 @@
                 x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i>
               </span>
             </b-button>
-
-            <b-icon-question-circle class="centered-icon" scale="1.5"
-              v-on:click="onShowForgeDetails" v-tooltip.bottom="'Click for forge percentages'"/>
+            <b-icon-question-circle class="centered-icon" scale="1.5" v-on:click="onShowForgeDetails" v-tooltip.bottom="'Click for forge percentages'"/>
 
             <b-modal hide-footer ref="forge-details-modal" title="Forge Percentages">
               <div>
@@ -79,70 +77,160 @@
                 1+ star @ 100% chance.
               </div>
             </b-modal>
+
           </div>
         </div>
 
-        <weapon-grid v-model="reforgeWeaponId" />
-        <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
-                    <template #modal-header>
-                         <div v-if="!spin" class="new-weapon-header-text text-center">
-                              <strong>A-hooooy! These things look shurpppp!</strong>
-                         </div>
-                         <div v-if="spin" class="new-weapon-header-text text-center">
-                              <strong>Be patient, the elves are minting ....</strong>
-                         </div>
-                    </template>
-                    <div class="text-center">
-                      <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                      <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                      <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                    </div>
-                    <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
+        <div class="" v-if="showBlacksmith">
+          <weapon-grid v-model="reforgeWeaponId" />
+        </div>
 
-                    <template #modal-footer>
-                    </template>
-                </b-modal>
+        <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
+          <template #modal-header>
+            <div v-if="!spin" class="new-weapon-header-text text-center">
+              <strong>A-hooooy! These things look shurpppp!</strong>
+            </div>
+            <div v-if="spin" class="new-weapon-header-text text-center">
+              <strong>Be patient, the elves are minting ....</strong>
+            </div>
+          </template>
+          <div class="text-center">
+            <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+            <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+            <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+          </div>
+          <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
+          <template #modal-footer></template>
+        </b-modal>
       </div>
 
-      <div class="col-6" v-if="showReforge">
-        <div class="d-flex justify-content-space-between">
-          <h1>Choose Burn Weapon</h1>
-
-          <div class="d-flex justify-content-flex-end ml-auto">
-            <b-button
-              variant="primary"
-              class="ml-3"
-              tagname="confirm_forge_weapon"
-              @click="showReforgeConfirmation"
-              :disabled="canReforge"
-              v-tooltip="'Forge new weapon'">
-              Confirm Reforge ({{ reforgeCost }} SKILL)
-            </b-button>
-          </div>
-        </div>
-
-        <b-modal class="centered-modal" ref="reforge-confirmation-modal" title="Reforge Confirmation"
-          @ok="onReforgeWeapon">
-          <div class="text-center" v-text="'Are you sure you want to reforge with this weapon?'" />
-          <div class="weapon" :hidden="burnWeaponId == null">
-            <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
-              <slot name="above" :weapon="getWeaponToBurn()"></slot>
-            </div>
-            <div class="weapon-icon-wrapper">
-              <weapon-icon class="weapon-icon" :weapon="getWeaponToBurn()" />
-            </div>
-          </div>
+      <div class="col-md-12" v-if="showReforge">
+        <b-modal class="centered-modal text-center" ref="reforge-confirmation-modal" title="Reforge Confirmation" @ok="onReforgeWeapon">
           <div class="text-center" :hidden="burnWeaponId == null || !isWeaponRare()">
-            <b-icon icon="exclamation-circle" variant="danger" /> This is a rare weapon!
+            <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This is a rare weapon!
           </div>
           <div class="text-center" :hidden="burnWeaponId == null || !isWeaponReforged()">
-            <b-icon icon="exclamation-circle" variant="danger" />
-            This item has been previously reforged and only half of each LBs will carry over!
+            <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This item has been previously reforged and only half of each bonus will carry over!
+          </div>
+          <div class="row">
+            <div class="headings">
+              <h2 class="text-center">Upgrade</h2>
+              <div class="weapon" :hidden="reforgeWeaponId == null">
+                <div v-if="$slots.above || $scopedSlots.above">
+                  <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
+                </div>
+                <div class="weapon-icon-wrapper">
+                  <weapon-icon class="weapon-icon" :weapon="getWeaponToUpgrade()" />
+                </div>
+                <div class="text-center" :hidden="burnWeaponId == null">
+                </div>
+              </div>
+            </div>
+            <div class="headings">
+              <h2 class="text-center">Burn</h2>
+              <div class="weapon" :hidden="burnWeaponId == null">
+                <div v-if="$slots.above || $scopedSlots.above">
+                  <slot name="above" :weapon="getWeaponToBurn()"></slot>
+                </div>
+                <div class="weapon-icon-wrapper">
+                  <weapon-icon class="weapon-icon" :weapon="getWeaponToBurn()" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-center" v-text="'Are you sure you want to reforge with this weapon?'" />
+          <div class="text-center">
+            <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
           </div>
         </b-modal>
 
-        <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" :showReforgedWeaponsDefVal="false" :showFavoriteWeaponsDefVal="false" />
+        <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" title="Reforge Bonuses">
+          <div>
+            5* Burn: 1 5B (75 Bonus Power / 600 Max).
+          </div>
+          <div>
+            4* Burn: 1 4B (30 Bonus Power/ 750 Max).
+          </div>
+          <div>
+            3* Burn: 3 LB (45 Bonus Power/ 1500 Max).
+          </div>
+          <div>
+            2* Burn: 2 LB (30 Bonus Power/ 1500 Max).
+          </div>
+          <div>
+            1* Burn: 1 LB (15 Bonus Power/ 1500 Max).
+          </div>
+        </b-modal>
+
+        <row>
+          <div class="col-md-12">
+            <div class="row">
+              <div class="col-md-2">
+              </div>
+              <div class="col-md-3">
+                <div class="headings">
+                  <h2 class="text-center">Upgrade</h2>
+                  <div class="weapon" :hidden="reforgeWeaponId == null">
+                    <div v-if="$slots.above || $scopedSlots.above">
+                      <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
+                    </div>
+                    <div class="weapon-icon-wrapper">
+                      <weapon-icon class="weapon-icon" :weapon="getWeaponToUpgrade()" />
+                    </div>
+                    <div class="text-center" :hidden="burnWeaponId == null">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-1">
+                <div class="confirmReforge">
+                  <b-button
+                          variant="primary"
+                          tagname="confirm_forge_weapon"
+                          class="confirmReforge"
+                          @click="showReforgeConfirmation"
+                          :disabled="canReforge"
+                          v-tooltip="'Forge new weapon'">
+                          Confirm Reforge ({{ reforgeCost }} SKILL)
+                  </b-button>
+                  <b-button
+                          variant="primary"
+                          tagname="confirm_forge_weapon"
+                          class="confirmReforge"
+                          @click="showReforgeBonuses"
+                          v-tooltip="'Show reforge bonuses'">
+                          Show Bonuses
+                  </b-button>
+                  <b-button
+                          variant="primary"
+                          tagname="confirm_forge_weapon"
+                          class="confirmReforge"
+                          @click="showReforge = false, showBlacksmith = true"
+                          v-tooltip="'Cancel Reforge'">
+                          Cancel Reforge
+                  </b-button>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="headings">
+                  <h2 class="text-center">Burn</h2>
+                  <div class="weapon" :hidden="burnWeaponId == null">
+                    <div v-if="$slots.above || $scopedSlots.above">
+                      <slot name="above" :weapon="getWeaponToBurn()"></slot>
+                    </div>
+                    <div class="weapon-icon-wrapper">
+                      <weapon-icon class="weapon-icon" :weapon="getWeaponToBurn()" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <h1 class="text-center">Select the weapon you wish to burn</h1>
+            <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" :showReforgedWeaponsDefVal="false" :showFavoriteWeaponsDefVal="false" />
+          </div>
+        </row>
       </div>
+      <div/>
     </div>
   </div>
 </template>
@@ -162,6 +250,7 @@ export default {
   data() {
     return {
       showReforge: false,
+      showBlacksmith: true,
       reforgeWeaponId: null,
       burnWeaponId: null,
       forgeCost: 0,
@@ -265,6 +354,10 @@ export default {
       this.$refs['reforge-confirmation-modal'].show();
     },
 
+    showReforgeBonuses() {
+      this.$refs['reforge-bonuses-modal'].show();
+    },
+
     isWeaponRare() {
       return this.getWeaponToBurn().stars >= 3;
     },
@@ -277,6 +370,9 @@ export default {
       return this.ownWeapons.find(x => x.id === this.burnWeaponId);
     },
 
+    getWeaponToUpgrade() {
+      return this.ownWeapons.find(x => x.id === this.reforgeWeaponId);
+    },
     getCurrentListofWeapons(){
       this.ownedWeaponIds.forEach(x => {
         this.currentListofWeapons.push(x);
@@ -357,6 +453,22 @@ export default {
   flex: 1;
 }
 
+.confirmReforge{
+  margin: 1em auto 2em;
+  border-radius:0.15em;
+  box-sizing: border-box;
+  text-decoration:none;
+  font-family:'Roboto',sans-serif;
+  text-transform:uppercase;
+  font-weight:400;
+  box-shadow:inset 0 -0.6em 0 -0.35em rgba(0,0,0,0.17);
+  text-align:center;
+  width: 14em;
+}
+.confirmReforge:active{
+  top:0.1em;
+}
+
 .weapon {
   width: 12em;
   background: rgba(255, 255, 255, 0.1);
@@ -366,8 +478,27 @@ export default {
   margin-right: auto;
 }
 
+.headings {
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
+  rgba(0, 0, 0, 0.12) 0px -12px 30px,
+  rgba(0, 0, 0, 0.12) 0px 4px 6px,
+  rgba(0, 0, 0, 0.17) 0px 12px 13px,
+  rgba(0, 0, 0, 0.09) 0px -3px 5px;
+  width: 13em;
+  border: 15px white;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: auto;
+  padding-bottom: 10px;
+}
+
 .centered-modal {
   justify-content: center;
+}
+
+.centered-text-modal {
+  justify-content: center;
+  text-align: center;
 }
 
 .centered-icon {
