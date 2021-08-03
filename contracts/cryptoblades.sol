@@ -439,7 +439,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         oncePerBlock(msg.sender)
         requestPayFromPlayer(mintWeaponFee * num)
     {
-        require(num > 0);
+        require(num > 0 && num <= 1000);
         _payContract(msg.sender, mintWeaponFee * num);
 
         for (uint i = 0; i < num; i++) {
