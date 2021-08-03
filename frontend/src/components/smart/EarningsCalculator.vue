@@ -37,10 +37,10 @@
                   <span class="calculator-subheader">Current prices (USD)</span>
                   <div class="prices-div">
                     <div class="token-price-div">
-                      BNB: <b-form-input class="price-input" type="number" v-model="bnbPrice" />
+                       BNB: <b-form-label class="price-input" type="number" v-model="bnbPrice" /> <span class="text-white"> ${{bnbPrice }}</span>
                     </div>
                     <div class="token-price-div">
-                      SKILL: <b-form-input class="price-input" type="number" v-model="skillPrice" />
+                     SKILL:  <b-form-label class="price-input" type="number" v-model="skillPrice" /> <span class="text-white"> ${{skillPrice }}</span>
                     </div>
                   </div>
                 </div>
