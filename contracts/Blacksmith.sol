@@ -16,6 +16,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     IRandoms public randoms;
 
     mapping(address => uint32) public tickets;
+    uint256 public givenTickets; // includes spent
+    uint256 public spentTickets;
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -39,6 +41,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         require(_num > 0);
         require(tickets[msg.sender] >= _num, "Not enough tickets");
         tickets[msg.sender] -= _num;
+        spentTickets += _num;
 
         for (uint256 i = 0; i < _num; i++) {
             weapons.mint(
@@ -54,6 +57,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function giveTicket(address _player, uint32 _num) external onlyGame {
         tickets[_player] += _num;
+        givenTickets += _num;
     }
 
     /* ========== MODIFIERS ========== */
