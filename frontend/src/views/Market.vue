@@ -166,6 +166,18 @@
               <div class="col">
                 <b-button
                   variant="primary"
+                  @click="searchPrivateWeaponListings()" class="gtag-link-others" tagname="weapons_private">Weapons Private Trades</b-button>
+              </div>
+
+              <div class="col">
+                <b-button
+                  variant="primary"
+                  @click="searchPrivateCharacterListings()" class="gtag-link-others" tagname="characters_private">Characters Private Trades</b-button>
+              </div>
+
+              <div class="col">
+                <b-button
+                  variant="primary"
                   @click="searchOwnListings('weapon')"  class="gtag-link-others" tagname="search_own_weapons">Search My Weapons</b-button>
               </div>
 
@@ -759,8 +771,7 @@ export default Vue.extend({
         sortBy: '' + this.characterPriceOrder() ? 'price' : '',
         sortDir: '' + this.characterPriceOrder(),
         pageSize: '' + (this.characterShowLimit || defaultLimit),
-        pageNum: '' + page,
-        buyerAddress: '' + this.defaultAccount
+        pageNum: '' + page
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -840,8 +851,7 @@ export default Vue.extend({
         sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
         sortDir: '' + this.weaponPriceOrder(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
-        pageNum: '' + page,
-        buyerAddress: '' + this.defaultAccount
+        pageNum: '' + page
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -957,7 +967,6 @@ export default Vue.extend({
         sortBy: '' + this.characterPriceOrder() ? 'price' : '',
         sortDir: '' + this.characterPriceOrder(),
         sellerAddress: '' + sellerAddress,
-        buyerAddress: '' + this.defaultAccount
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -977,6 +986,25 @@ export default Vue.extend({
         sortDir: '' + this.weaponPriceOrder(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         sellerAddress: '' + sellerAddress,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const weaponsData = await fetch(url.toString());
+      const weapons = await weaponsData.json();
+      return weapons.idResults;
+    },
+
+    async searchPrivateWeaponListings(): Promise<string[]>{
+      this.activeType = 'weapon';
+      const url = new URL('https://api.cryptoblades.io/static/market/weapon');
+      const params = {
+        element: '' + this.weaponTraitFilter(),
+        minStars: '' + this.weaponStarFilter(),
+        maxStars: '' + this.weaponStarFilter(),
+        sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
+        sortDir: '' + this.weaponPriceOrder(),
+        pageSize: '' + (this.weaponShowLimit || defaultLimit),
         buyerAddress: '' + this.defaultAccount
       };
 
@@ -985,6 +1013,25 @@ export default Vue.extend({
       const weaponsData = await fetch(url.toString());
       const weapons = await weaponsData.json();
       return weapons.idResults;
+    },
+
+    async searchPrivateCharacterListings(): Promise<string[]> {
+      this.activeType = 'character';
+      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const params = {
+        element: '' + this.characterTraitFilter(),
+        minLevel: '' + this.characterMinLevelFilter(),
+        maxLevel: '' + this.characterMaxLevelFilter(),
+        sortBy: '' + this.characterPriceOrder() ? 'price' : '',
+        sortDir: '' + this.characterPriceOrder(),
+        buyerAddress: '' + this.defaultAccount,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const charactersData = await fetch(url.toString());
+      const characters = await charactersData.json();
+      return characters.idResults;
     },
 
     async filterOutTargetBuyers(nftIds: NftId[]) {
