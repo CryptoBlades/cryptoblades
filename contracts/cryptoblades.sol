@@ -475,7 +475,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
             weapons.performMintWeapon(msg.sender,
-                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100)),
+                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100), 4),
                 weapons.getRandomStat(4, 200, seed, 101),
                 0, // stat2
                 0, // stat3
@@ -484,7 +484,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeaponN(uint32 num)
+    function mintWeaponN(uint32 num, uint256 choosenElement)
         public
         onlyNonContract
         oncePerBlock(msg.sender)
@@ -494,15 +494,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _payContract(msg.sender, mintWeaponFee * num);
 
         for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i))));
+            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i))), choosenElement);
         }
     }
 
-    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
+    function mintWeapon(uint256 choosenElement) public onlyNonContract oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
         _payContract(msg.sender, mintWeaponFee);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.mint(msg.sender, seed);
+        weapons.mint(msg.sender, seed, choosenElement);
     }
 
     function burnWeapon(uint256 burnID) public
