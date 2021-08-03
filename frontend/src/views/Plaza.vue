@@ -14,6 +14,7 @@
       <big-button
         class="button"
         :mainText="`Recruit character for ${recruitCost} SKILL`"
+        :disabled="!canRecruit()"
         @click="onMintCharacter"
         tagname="recruit_character"
       />
@@ -30,11 +31,12 @@
 
             <b-button
               v-if="ownCharacters.length < 4"
+              :disabled="!canRecruit()"
               variant="primary"
               class="ml-auto gtag-link-others"
               @click="onMintCharacter"
               v-tooltip="'Recruit new character'" tagname="recruit_character">
-              Recruit ({{ recruitCost }} SKILL) <i class="fas fa-plus"></i>
+              Recruit ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
             </b-button>
           </div>
 
@@ -54,7 +56,7 @@ import BN from 'bignumber.js';
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
-import Web3 from 'web3';
+import { fromWeiEther, toBN } from '../utils/common';
 
 export default {
   computed: {
@@ -89,7 +91,6 @@ export default {
     },
   },
 
-
   async created() {
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
@@ -114,8 +115,13 @@ export default {
       }
     },
     formatSkill() {
-      return Web3.utils.fromWei(this.skillBalance, 'ether');
+      return fromWeiEther(this.skillBalance);
     },
+    canRecruit() {
+      const cost = toBN(this.recruitCost);
+      const balance = toBN(this.skillBalance);
+      return balance.isGreaterThanOrEqualTo(cost);
+    }
   },
 
   components: {

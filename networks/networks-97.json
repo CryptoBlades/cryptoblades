@@ -587,7 +587,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0xbef1813c93e7f83130a599285b3a78bea78351e2f72350da2bfaadff292cc5f8"
+    "transactionHash": "0x3937f170d25ba99ac00e720470a4e1944b8908bd774190ef487fd71901d4dc3b"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -1425,6 +1425,6 @@
     },
     "links": {},
     "address": "0x672E4CddA311b3BfAd1e09313241C62B4eFF5782",
-    "transactionHash": "0x0b0956f5c47319de4d757e9535d42c4faa54fa083424a4a53a5b371117a65b03"
+    "transactionHash": "0x516a35def74701b73ccde1cec982aa3af8df459e6b5ed1767df3f1a4d4444c36"
   }
 }
