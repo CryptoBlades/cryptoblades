@@ -40,7 +40,22 @@
               </span>
 
               <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                Forge ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+                Forge x1 ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+              </span>
+            </b-button>
+
+              <b-button
+              variant="primary"
+              class="ml-3"
+              @click="onForgeWeaponx10()"
+              :disabled="disableForge"
+              v-tooltip="'Forge new weapon'">
+              <span v-if="disableForge">
+                Cooling forge...
+              </span>
+
+              <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i>
               </span>
             </b-button>
 
@@ -68,6 +83,25 @@
         </div>
 
         <weapon-grid v-model="reforgeWeaponId" />
+        <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
+                    <template #modal-header>
+                         <div v-if="!spin" class="new-weapon-header-text text-center">
+                              <strong>A-hooooy! These things look shurpppp!</strong>
+                         </div>
+                         <div v-if="spin" class="new-weapon-header-text text-center">
+                              <strong>Be patient, the elves are minting ....</strong>
+                         </div>
+                    </template>
+                    <div class="text-center">
+                      <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                      <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                      <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                    </div>
+                    <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
+
+                    <template #modal-footer>
+                    </template>
+                </b-modal>
       </div>
 
       <div class="col-6" v-if="showReforge">
@@ -119,8 +153,12 @@ import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import WeaponIcon from '../components/WeaponIcon.vue';
+import { BModal } from 'bootstrap-vue';
+
 
 export default {
+
+
   data() {
     return {
       showReforge: false,
@@ -129,11 +167,18 @@ export default {
       forgeCost: 0,
       reforgeCost: 0,
       disableForge: false,
+      forgeMultiplier: 10,
+      newForged: [],
+      currentListofWeapons: [],
+      x10Forge: false,
+      x1Forge: false,
+      onError: false,
+      spin: false,
     };
   },
 
   computed: {
-    ...mapState(['defaultAccount']),
+    ...mapState(['defaultAccount','ownedWeaponIds']),
     ...mapGetters(['contracts', 'ownWeapons']),
 
     canReforge() {
@@ -163,11 +208,14 @@ export default {
   },
 
   methods: {
-    ...mapActions(['mintWeapon', 'reforgeWeapon']),
+    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN']),
 
     async onForgeWeapon() {
       if(this.disableForge) return;
 
+      this.getCurrentListofWeapons();
+      this.onError = false;
+      this.x1Forge = true;
       this.disableForge = true;
 
       setTimeout(() => {
@@ -176,12 +224,39 @@ export default {
 
       try {
         await this.mintWeapon();
+
+        this.viewNewWeapons(1);
+
       } catch (e) {
         console.error(e);
+        this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       }
     },
 
+    async onForgeWeaponx10(){
+      if(this.disableForge) return;
+      this.disableForge = true;
+
+      this.getCurrentListofWeapons();
+      this.onError = false;
+      this.x10Forge = true;
+
+      setTimeout(() => {
+        this.disableForge = false;
+      }, 10000);
+
+      try {
+        await this.mintWeaponN({num: this.forgeMultiplier});
+
+        this.viewNewWeapons(this.forgeMultiplier);
+
+      } catch (e) {
+        console.error(e);
+        this.onError = true;
+        this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+      }
+    },
     onShowForgeDetails() {
       this.$refs['forge-details-modal'].show();
     },
@@ -200,6 +275,28 @@ export default {
 
     getWeaponToBurn() {
       return this.ownWeapons.find(x => x.id === this.burnWeaponId);
+    },
+
+    getCurrentListofWeapons(){
+      this.ownedWeaponIds.forEach(x => {
+        this.currentListofWeapons.push(x);
+      });
+    },
+
+    viewNewWeapons(newWeaponCount = 1){
+      this.newForged = this.ownedWeaponIds.slice(-newWeaponCount);
+
+      // eslint-disable-next-line no-constant-condition
+      if (this.newForged.length > 0 && !this.onError){
+        this.spin = true;
+        this.$refs['new-weapons'].show();
+
+        setTimeout(() => {
+          this.spin = false;
+        }, 10000);
+      }
+
+
     },
 
     async onReforgeWeapon() {
@@ -221,11 +318,18 @@ export default {
     WeaponGrid,
     BigButton,
     WeaponIcon,
+    BModal,
   },
 };
 </script>
 
 <style scoped>
+
+.new-weapon-header-text{
+   color: #9e8a57;
+  font-size: 34px;
+}
+
 .button-row {
   margin-top: 1em;
   display: flex;
