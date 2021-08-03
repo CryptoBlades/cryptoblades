@@ -108,7 +108,7 @@
                     <big-button
                       class="encounter-button btn-styled"
                       :mainText="`Fight!`"
-                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId)"
                       @click="onClickEncounter(e)"
                     />
                     <p v-if="isLoadingTargets">Loading...</p>
@@ -210,7 +210,7 @@ export default {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
-      if (this.resultsAvailable) this.$bvModal.show('fightResultsModal');
+      if (this.resultsAvailable && error === null) this.$bvModal.show('fightResultsModal');
     },
   },
 

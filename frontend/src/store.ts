@@ -864,7 +864,7 @@ export function createStore(web3: Web3) {
         await Promise.all(weaponIds.map(id => dispatch('fetchWeapon', id)));
       },
 
-      async fetchWeapon({ state, commit }, weaponId: string | number) {
+      async fetchWeapon({ state, commit, dispatch }, weaponId: string | number) {
         const { Weapons } = state.contracts();
         if(!Weapons) return;
 
@@ -878,6 +878,7 @@ export function createStore(web3: Web3) {
             commit('updateWeapon', { weaponId, weapon });
           })(),
         ]);
+        dispatch('fetchWeaponDurability', weaponId);
       },
 
       async setupWeaponDurabilities({ state, dispatch }) {
@@ -949,6 +950,35 @@ export function createStore(web3: Web3) {
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
           dispatch('setupCharacterStaminas')
+        ]);
+      },
+
+      async mintWeaponN({ state, dispatch }, {num}) {
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
+
+        await approveFee(
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+          { feeMultiplier: num }
+        );
+
+        await state.contracts().CryptoBlades!.methods
+          .mintWeaponN(
+            num
+          )
+          .send({
+            from: state.defaultAccount,
+          });
+
+        await Promise.all([
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('setupWeaponDurabilities')
         ]);
       },
 

@@ -12,6 +12,7 @@ import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../
 import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/RaidBasic.json';
 import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
+import { abi as blacksmithAbi } from '../../build/contracts/Blacksmith.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
@@ -111,14 +112,16 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as Networks)[networkId]!.address;
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as Abi, cryptoBladesContractAddr);
-  const [charactersAddr, weaponsAddr, randomsAddr] = await Promise.all([
+  const [charactersAddr, weaponsAddr, randomsAddr, blacksmithAddr] = await Promise.all([
     CryptoBlades.methods.characters().call(),
     CryptoBlades.methods.weapons().call(),
     CryptoBlades.methods.randoms().call(),
+    CryptoBlades.methods.blacksmith().call(),
   ]);
   const Randoms = new web3.eth.Contract(randomsAbi as Abi, randomsAddr);
   const Characters = new web3.eth.Contract(charactersAbi as Abi, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
+  const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
   const raidContracts: RaidContracts = {};
   if(featureFlagRaid) {
@@ -139,7 +142,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   return {
     ...stakingContracts,
-    CryptoBlades, Randoms, Characters, Weapons,
+    CryptoBlades, Randoms, Characters, Weapons, Blacksmith,
     ...raidContracts,
     ...marketContracts,
     WaxBridge,
