@@ -953,6 +953,35 @@ export function createStore(web3: Web3) {
         ]);
       },
 
+      async mintWeaponN({ state, dispatch }, {num}) {
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
+
+        await approveFee(
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+          { feeMultiplier: num }
+        );
+
+        await state.contracts().CryptoBlades!.methods
+          .mintWeaponN(
+            num
+          )
+          .send({
+            from: state.defaultAccount,
+          });
+
+        await Promise.all([
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('setupWeaponDurabilities')
+        ]);
+      },
+
       async mintWeapon({ state, dispatch }) {
         if(featureFlagStakeOnly || !state.defaultAccount) return;
 
