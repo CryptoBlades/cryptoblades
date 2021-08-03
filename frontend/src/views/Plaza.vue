@@ -95,6 +95,8 @@ export default {
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
+
+    console.log(this.recruitCost, this.formatSkill());
   },
 
   data() {
