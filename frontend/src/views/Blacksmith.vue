@@ -225,12 +225,13 @@ export default {
       try {
         await this.mintWeapon();
 
+        this.viewNewWeapons(1);
+
       } catch (e) {
         console.error(e);
         this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       }
-      this.viewNewWeapons();
     },
 
     async onForgeWeaponx10(){
@@ -248,12 +249,13 @@ export default {
       try {
         await this.mintWeaponN({num: this.forgeMultiplier});
 
+        this.viewNewWeapons(this.forgeMultiplier);
+
       } catch (e) {
         console.error(e);
         this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       }
-      this.viewNewWeapons();
     },
     onShowForgeDetails() {
       this.$refs['forge-details-modal'].show();
@@ -281,20 +283,11 @@ export default {
       });
     },
 
-    viewNewWeapons(){
-      this.newForged = [];
-      this.ownedWeaponIds.forEach(x => {
-        this.newForged.push(x);
-      });
-      if(this.x1Forge === true){
-        this.newForged.splice(0,this.ownedWeaponIds.length-2);
-      }
-      else if(this.x10Forge === true){
-        this.newForged.splice(0,this.ownedWeaponIds.length-11);
-      }
+    viewNewWeapons(newWeaponCount = 1){
+      this.newForged = this.ownedWeaponIds.slice(-newWeaponCount);
 
       // eslint-disable-next-line no-constant-condition
-      if (this.newForged.length !== 0 && !this.onError){
+      if (this.newForged.length > 0 && !this.onError){
         this.spin = true;
         this.$refs['new-weapons'].show();
 

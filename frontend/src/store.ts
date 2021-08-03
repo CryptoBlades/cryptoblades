@@ -954,11 +954,12 @@ export function createStore(web3: Web3) {
       },
 
       async mintWeaponN({ state, dispatch }, {num}) {
-        if(featureFlagStakeOnly || !state.defaultAccount) return;
+        const { CryptoBlades, SkillToken, Weapons } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
 
         await approveFee(
-          state.contracts().CryptoBlades!,
-          state.contracts().SkillToken,
+          CryptoBlades,
+          SkillToken,
           state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
@@ -967,10 +968,8 @@ export function createStore(web3: Web3) {
           { feeMultiplier: num }
         );
 
-        await state.contracts().CryptoBlades!.methods
-          .mintWeaponN(
-            num
-          )
+        await CryptoBlades.methods
+          .mintWeaponN(num)
           .send({
             from: state.defaultAccount,
           });
@@ -978,16 +977,18 @@ export function createStore(web3: Web3) {
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
+          dispatch('updateWeaponIds'),
           dispatch('setupWeaponDurabilities')
         ]);
       },
 
       async mintWeapon({ state, dispatch }) {
-        if(featureFlagStakeOnly || !state.defaultAccount) return;
+        const { CryptoBlades, SkillToken, Weapons } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
 
         await approveFee(
-          state.contracts().CryptoBlades!,
-          state.contracts().SkillToken,
+          CryptoBlades,
+          SkillToken,
           state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
@@ -995,13 +996,14 @@ export function createStore(web3: Web3) {
           cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
         );
 
-        await state.contracts().CryptoBlades!.methods.mintWeapon().send({
+        await CryptoBlades.methods.mintWeapon().send({
           from: state.defaultAccount,
         });
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
+          dispatch('updateWeaponIds'),
           dispatch('setupWeaponDurabilities')
         ]);
       },
