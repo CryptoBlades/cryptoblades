@@ -33,6 +33,10 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     /* ========== VIEWS ========== */
 
+    function getTicketCount() external view returns(uint32){
+        return tickets[msg.sender];
+    }
+
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     function spendTicket(uint32 _num) external {

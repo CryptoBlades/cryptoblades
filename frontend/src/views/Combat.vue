@@ -92,7 +92,7 @@
                   <div class="encounter-container">
 
                     <div v-bind:class="getWinChance(e.power, e.trait) === 'Unlikely' ? 'bounty-fight' : ''" class="enemy-character">
-                      <div v-tooltip="'Winning this fight will also forge a sword!'"
+                      <div v-tooltip="'Winning this fight grants a free forge ticket!'"
                       v-if="getWinChance(e.power, e.trait) === 'Unlikely'" class="bounty-icon-div">
                         <img class="bounty-icon" src="../assets/bounty.png" />
                       </div>

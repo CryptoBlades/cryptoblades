@@ -32,6 +32,22 @@
             <b-button
               variant="primary"
               class="ml-3"
+              @click="onTicketForge()"
+              :disabled="disableForge || +forgeTicketCount === 0"
+              v-tooltip="'Forge new weapon'">
+              <span v-if="disableForge">
+                Cooling forge...
+              </span>
+
+              <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                Ticket Forge <b-icon-question-circle v-tooltip.bottom="'Collect tickets by winning Unlikely fights'"/>
+              </span>
+
+            </b-button>
+
+            <b-button
+              variant="primary"
+              class="ml-3"
               @click="onForgeWeapon"
               :disabled="disableForge"
               v-tooltip="'Forge new weapon'">
@@ -77,6 +93,15 @@
               </div>
               <div>
                 1+ star @ 100% chance.
+              </div>
+            </b-modal>
+
+            <b-modal ref="ticket-amount-modal" title="Ticket Amount" @ok="forgeWithTickets(ticketsToSpendAmount)">
+              <div class="ticket-amount-picker">
+                Pick amount of tickets to spend:
+                <select class="form-control ticket-amount-selector" v-model="ticketsToSpendAmount">
+                  <option v-for="i in +forgeTicketCount" :value="i" :key="i">{{ i }}</option>
+                </select>
               </div>
             </b-modal>
           </div>
@@ -174,12 +199,13 @@ export default {
       x1Forge: false,
       onError: false,
       spin: false,
+      ticketsToSpendAmount: 1,
     };
   },
 
   computed: {
     ...mapState(['defaultAccount','ownedWeaponIds']),
-    ...mapGetters(['contracts', 'ownWeapons']),
+    ...mapGetters(['contracts', 'ownWeapons', 'forgeTicketCount']),
 
     canReforge() {
       return (
@@ -208,7 +234,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN']),
+    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN', 'spendTicketN', 'fetchForgeTicketCount']),
 
     async onForgeWeapon() {
       if(this.disableForge) return;
@@ -257,6 +283,27 @@ export default {
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       }
     },
+
+    async onTicketForge() {
+      console.log(this.forgeTicketCount);
+      if(+this.forgeTicketCount === 0) return;
+      if(+this.forgeTicketCount === 1) {
+        await this.forgeWithTickets();
+      } else {
+        this.$refs['ticket-amount-modal'].show();
+      }
+    },
+
+    async forgeWithTickets() {
+      try {
+        await this.spendTicketN({num: this.ticketsToSpendAmount});
+      } catch {
+        this.$dialog.notify.error('Could not forge sword: insuffucient tickets or transaction denied.');
+      }
+      await this.fetchForgeTicketCount();
+      this.ticketsToSpendAmount = 1;
+    },
+
     onShowForgeDetails() {
       this.$refs['forge-details-modal'].show();
     },
@@ -312,6 +359,10 @@ export default {
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       }
     }
+  },
+
+  async mounted() {
+    await this.fetchForgeTicketCount();
   },
 
   components: {
@@ -373,6 +424,18 @@ export default {
 .centered-icon {
   align-self: center;
   margin-left: 5px;
+}
+
+.ticket-amount-picker {
+  display: flex;
+  align-items: center;
+}
+
+.form-control.ticket-amount-selector {
+  width: fit-content;
+  height: fit-content;
+  margin: 5px;
+  padding: 0;
 }
 
 </style>

@@ -93,4 +93,6 @@ export interface IState {
 
   isInCombat: boolean;
   isCharacterViewExpanded: boolean;
+
+  forgeTicketCount: number;
 }

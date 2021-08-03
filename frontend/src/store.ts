@@ -140,6 +140,8 @@ export function createStore(web3: Web3) {
       waxBridgeWithdrawableBnb: '0',
       waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
       waxBridgeTimeUntilLimitExpires: 0,
+
+      forgeTicketCount: 0,
     },
 
     getters: {
@@ -348,6 +350,10 @@ export function createStore(web3: Web3) {
 
       waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod(state): string {
         return bnMinimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
+      },
+
+      forgeTicketCount(state) {
+        return state.forgeTicketCount;
       }
     },
 
@@ -515,6 +521,10 @@ export function createStore(web3: Web3) {
         state.waxBridgeWithdrawableBnb = payload.waxBridgeWithdrawableBnb;
         state.waxBridgeRemainingWithdrawableBnbDuringPeriod = payload.waxBridgeRemainingWithdrawableBnbDuringPeriod;
         state.waxBridgeTimeUntilLimitExpires = payload.waxBridgeTimeUntilLimitExpires;
+      },
+
+      updateForgeTicketCount(state, { ticketCount }: { ticketCount: number }) {
+        state.forgeTicketCount = ticketCount;
       }
     },
 
@@ -950,6 +960,25 @@ export function createStore(web3: Web3) {
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
           dispatch('setupCharacterStaminas')
+        ]);
+      },
+
+      async spendTicketN({ state, dispatch }, {num}) {
+        console.log(num);
+        const { Blacksmith, SkillToken, Weapons } = state.contracts();
+        if(!Blacksmith || !SkillToken || !Weapons || !state.defaultAccount) return;
+        console.log(num);
+        await Blacksmith.methods
+          .spendTicket(num)
+          .send({
+            from: state.defaultAccount,
+          });
+
+        await Promise.all([
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('updateWeaponIds'),
+          dispatch('setupWeaponDurabilities')
         ]);
       },
 
@@ -1613,6 +1642,17 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacters', state.ownedCharacterIds),
           dispatch('fetchFightRewardXp')
         ]);
+      },
+
+      async fetchForgeTicketCount({ state, commit }) {
+        const { Blacksmith } = state.contracts();
+        if(!Blacksmith) return;
+
+        const ticketCount = await Blacksmith.methods.getTicketCount().call(
+          defaultCallOptions(state)
+        );
+
+        commit('updateForgeTicketCount', { ticketCount });
       },
 
       async fetchWaxBridgeDetails({ state, commit }) {
