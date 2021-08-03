@@ -1,23 +1,26 @@
 <template>
   <div v-bind:class="isDefault ? 'default-icon-wrapper' : 'nft-icon-wrapper'">
     <div v-if="isDefault" class="nft-icon">
-      <img class="default-placeholder" v-if="nftType === 'weapon'" src="../assets/placeholder/sword-placeholder-1.png"
+      <img class="default-placeholder" v-if="nft.nftType === 'weapon'" src="../assets/placeholder/sword-placeholder-1.png"
         v-tooltip="'Weapons (2-5*)'"/>
-      <img class="default-placeholder" v-if="nftType === 'junk'" src="../assets/bounty.png"
+      <img class="default-placeholder" v-if="nft.nftType === 'junk'" src="../assets/bounty.png"
         v-tooltip="'Junk (1-5*)'" />
-      <img class="default-placeholder" v-if="nftType === 'secret'" src="../assets/secret.png"
+      <img class="default-placeholder" v-if="nft.nftType === 'secret'" src="../assets/secret.png"
         v-tooltip="'Secret (??)'" />
     </div>
 
     <div v-if="!isDefault" class="nft-icon">
       <!-- TODO: show nft with id: nftId of type: ndfType (contract address?)-->
+      Type: {{nft.nftType}}<br>
+      ID: {{nft.nftId}}<br>
+      Stars: {{nft.stars}}
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['nftType', 'nftId', 'isDefault']
+  props: ['nft', 'isDefault']
 };
 </script>
 

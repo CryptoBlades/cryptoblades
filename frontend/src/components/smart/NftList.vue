@@ -2,7 +2,7 @@
   <div>
     <ul class="nft-grid">
       <li class="nft" v-for="nft in nfts" :key="nft.nftType + nft.nftId">
-        <nft-icon :nftId="nft.nftId" :nftType="nft.nftType"/>
+        <nft-icon :nft="nft"/>
       </li>
     </ul>
   </div>
@@ -26,12 +26,12 @@ export default {
   margin: 0;
   display: grid;
   padding: 0.5em;
-  grid-template-columns: repeat(auto-fit, 5em);
+  grid-template-columns: repeat(auto-fit, 12em);
   gap: 0.5em;
 }
 
 .nft {
-  width: 5em;
+  width: 12em;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
   cursor: pointer;

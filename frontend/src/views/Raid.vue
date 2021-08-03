@@ -27,9 +27,9 @@
             <hr class="devider">
             <div class="drops">
               <div class="drops-icons">
-                <nft-icon :isDefault="true" :nftType="'weapon'" />
-                <nft-icon :isDefault="true" :nftType="'junk'"/>
-                <nft-icon :isDefault="true" :nftType="'secret'"/>
+                <nft-icon :isDefault="true" :nft="{nftType: 'weapon'}" />
+                <nft-icon :isDefault="true" :nft="{nftType: 'junk'}"/>
+                <nft-icon :isDefault="true" :nft="{nftType: 'secret'}"/>
               </div>
               <br />
               <span class="title">XP reward</span> {{ xpReward }}
@@ -94,7 +94,7 @@
       <div class="col-sm-12">
         <div class="raid-info-box mt-3">
           <div class="row">
-            <div class="col-sm-4">
+            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
               <div class="float-lg-left text-sm-center mb-sm-2">
                 <div class="finish">
                     <span class="title">Finishes on</span>
@@ -104,7 +104,7 @@
                   </div>
               </div>
             </div>
-            <div class="col-sm-4" v-if="rewardIndexes !== null && rewardIndexes.length > 0">
+            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'" v-if="claimButtonActive">
               <big-button class="encounter-button btn-styled" :mainText="`Claim rewards`" @click="promptRewardClaim()" />
               <b-modal id="rewardsRaidPicker" title="Raid rewards selector" @ok="claimRewardIndex(rewardsRaidId)">
                 <div class="raid-picker">
@@ -114,11 +114,14 @@
                   </select>
                 </div>
               </b-modal>
+              <b-modal id="rewardsModal" title="Raid rewards" size="lg">
+                <nft-list :nfts="rewards"/>
+              </b-modal>
             </div>
-            <div class="col-sm-4">
+            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
               <big-button class="encounter-button btn-styled" :mainText="`Sign up!`" v-tooltip="'Joining will cost 12h of stamina'" @click="joinRaidMethod()" />
             </div>
-            <div class="col-sm-4">
+            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
              <div class="float-lg-right text-sm-center mt-sm-2 text-center">
                 <div class="finish">
                     <span class="title">Total Power:  10000</span>
@@ -139,6 +142,7 @@ import BigButton from '../components/BigButton.vue';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import Hint from '../components/Hint.vue';
 import NftIcon from '@/components/NftIcon.vue';
+import NftList from '@/components/smart/NftList.vue';
 
 const dragonNames = [
   'Fudbringer',
@@ -171,7 +175,8 @@ export default {
       bossPower: null,
       bossTrait: null,
       rewardIndexes: null,
-      rewardsRaidId: null
+      rewardsRaidId: null,
+      rewards: null
     };
   },
 
@@ -183,6 +188,11 @@ export default {
     selections() {
       return [this.currentCharacterId, this.selectedWeaponId];
     },
+
+    claimButtonActive() {
+      return true;
+      //return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
+    }
   },
 
   methods: {
@@ -250,6 +260,7 @@ export default {
     promptRewardClaim() {
       // should offer a popup here to pick which index to claim
       // if only one index, then claim instantly
+      this.rewardIndexes = [1, 2, 3, 4];
       if(this.rewardIndexes !== null && this.rewardIndexes.length > 0) {
         if(this.rewardIndexes.length === 1) {
           this.claimRewardIndex(this.rewardIndexes[0]);
@@ -262,11 +273,22 @@ export default {
 
     async claimRewardIndex(rewardIndex) {
       console.log('Attempting to claim reward index '+rewardIndex);
-      const result = await this.claimRaidRewards({
-        rewardIndex
-      });
+      // const result = await this.claimRaidRewards({
+      //   rewardIndex
+      // });
+      // const nfts = [];
+      // nfts.push(result.weapons.map(x => { return { nftType: 'weapon', nftId: x.tokenId, stars: x.stars}; }));
+      // nfts.push(result.junk.map(x => { return { nftType: 'junk', nftId: x.tokenId, stars: x.stars}; }));
+      // nfts.push(result.keybox.map(x => { return { nftType: 'keybox', nftId: x.tokenId }; }));
+      // this.rewards = nfts;
+      this.rewards = [
+        {nftType:'weapon', nftId:1, stars:2},
+        {nftType:'junk', nftId:1, stars:3},
+        {nftType:'keybox', nftId:1}
+      ];
+      this.$bvModal.show('rewardsModal');
       console.log('Reward claimed for '+rewardIndex);
-      console.log('Result: '+result);
+      //console.log('Result: '+result);
     },
 
     getBossName() {
@@ -314,7 +336,8 @@ export default {
     WeaponGrid,
     WeaponIcon,
     Hint,
-    NftIcon
+    NftIcon,
+    NftList
   },
 };
 </script>
@@ -558,9 +581,9 @@ hr.devider {
 
 .encounter-button {
   display: block;
-  margin: 0 auto;
+  margin: 2px auto;
   height: 5em;
-  width: 13em;
+  width: 20em;
   position: relative;
   top: 3vw;
 }

@@ -1249,7 +1249,13 @@ export function createStore(web3: Web3) {
 
         // there may be other events fired that can be used to obtain the exact loot
         // RewardedWeapon, RewardedJunk, RewardedTrinket, RewardedKeyBox etc
-        return res.events.RewardClaimed.returnValues;
+        const rewards = {
+          rewardsClaimed: res.events.RewardClaimed.returnValues,
+          weapons: res.events.RewardedWeapon.returnValues,
+          junk: res.events.RewardedJunk.returnValues,
+          keybox: res.events.RewardedKeyBox.returnValues
+        };
+        return rewards;
       },
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
