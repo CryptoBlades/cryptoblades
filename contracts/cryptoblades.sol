@@ -87,7 +87,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;//0.5 usd;
     }
 
-    function migrateTo_X(Blacksmith _blacksmith) external {
+    function migrateTo_60872c8(Blacksmith _blacksmith) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         blacksmith = _blacksmith;
