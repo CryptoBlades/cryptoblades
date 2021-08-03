@@ -13,6 +13,7 @@ import "./characters.sol";
 import "./Promos.sol";
 import "./weapons.sol";
 import "./util.sol";
+import "./Blacksmith.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -85,6 +86,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;//0.5 usd;
     }
 
+    function migrateTo_60872c8(Blacksmith _blacksmith) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        blacksmith = _blacksmith;
+    }
+
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint characterLimit;
     // config vars
@@ -128,6 +135,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     int128 public burnWeaponFee;
     int128 public reforgeWeaponWithDustFee;
+
+    Blacksmith public blacksmith;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -269,6 +278,44 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(foundMatch, "Target invalid");
     }
 
+    function spendTicket(uint32 num)
+        public
+    {
+        blacksmith.spendTicket(num);
+    }
+
+    function isUnlikely(uint24 pp, uint24 ep)
+        private
+        pure
+        returns(bool)
+    {
+        int128 playerMin = ABDKMath64x64.fromUInt(pp).mul(ABDKMath64x64.fromUInt(90)).div(ABDKMath64x64.fromUInt(100));
+        int128 playerMax = ABDKMath64x64.fromUInt(pp).mul(ABDKMath64x64.fromUInt(110)).div(ABDKMath64x64.fromUInt(100));
+        int128 playerRange = playerMax.sub(playerMin);
+        int128 enemyMin = ABDKMath64x64.fromUInt(ep).mul(ABDKMath64x64.fromUInt(90)).div(ABDKMath64x64.fromUInt(100));
+        int128 enemyMax = ABDKMath64x64.fromUInt(ep).mul(ABDKMath64x64.fromUInt(110)).div(ABDKMath64x64.fromUInt(100));
+        int128 enemyRange = enemyMax.sub(enemyMin);
+        int256 rollingTotal = 0;
+
+        if (playerMin > enemyMax) return false;
+        if (playerMax < enemyMin) return true;
+
+        if (playerMin >= enemyMin) {
+            int128 temp = playerMin.sub(enemyMin).div(enemyRange);
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(playerMax.sub(enemyMax).div(playerRange)));
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(ABDKMath64x64.fromUInt(50).div(ABDKMath64x64.fromUInt(100))));
+            rollingTotal = ABDKMath64x64.toInt(temp.mul(ABDKMath64x64.fromUInt(1000)));
+        } else {
+            int128 temp = enemyMin.sub(playerMin).div(playerRange);
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(enemyMax.sub(playerMax).div(enemyRange)));
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(ABDKMath64x64.fromUInt(50).div(ABDKMath64x64.fromUInt(100))));
+            temp = ABDKMath64x64.fromUInt(1).sub(temp);
+            rollingTotal = ABDKMath64x64.toInt(temp.mul(ABDKMath64x64.fromUInt(1000)));
+        }
+
+        return rollingTotal <= 300 ? true : false;
+    }
+
     function performFight(
         uint256 char,
         uint256 wep,
@@ -296,6 +343,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
         tokenRewards[msg.sender] += tokens;
         xpRewards[char] += xp;
+
+        // if (playerRoll > monsterRoll && isUnlikely(uint24(getPlayerTraitBonusAgainst(traitsCWE).mulu(playerFightPower)), targetPower)) {
+        //     blacksmith.giveTicket(msg.sender, 1);
+        // }
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
@@ -430,6 +481,20 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 0, // stat3
                 RandomUtil.combineSeeds(seed,102)
             );
+        }
+    }
+
+    function mintWeaponN(uint32 num)
+        public
+        onlyNonContract
+        oncePerBlock(msg.sender)
+        requestPayFromPlayer(mintWeaponFee * num)
+    {
+        require(num > 0 && num <= 1000);
+        _payContract(msg.sender, mintWeaponFee * num);
+
+        for (uint i = 0; i < num; i++) {
+            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i))));
         }
     }
 
