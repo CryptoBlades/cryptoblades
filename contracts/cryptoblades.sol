@@ -13,6 +13,7 @@ import "./characters.sol";
 import "./Promos.sol";
 import "./weapons.sol";
 import "./util.sol";
+import "./Blacksmith.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -30,6 +31,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
     IPriceOracle public priceOracleSkillPerUsd;
     IRandoms public randoms;
+    Blacksmith public blacksmith;
 
     function initialize(IERC20 _skillToken, Characters _characters, Weapons _weapons, IPriceOracle _priceOracleSkillPerUsd, IRandoms _randoms) public initializer {
         __AccessControl_init();
@@ -83,6 +85,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         reforgeWeaponWithDustFee = ABDKMath64x64.divu(3, 10);//0.3 usd;
 
         reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;//0.5 usd;
+    }
+
+    function migrateTo_60872c8(Blacksmith _blacksmith) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        blacksmith = _blacksmith;
     }
 
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
@@ -269,6 +277,44 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(foundMatch, "Target invalid");
     }
 
+    function spendTicket(uint32 num)
+        public
+    {
+        blacksmith.spendTicket(num);
+    }
+
+    function isUnlikely(uint24 pp, uint24 ep)
+        private
+        pure
+        returns(bool)
+    {
+        int128 playerMin = ABDKMath64x64.fromUInt(pp).mul(ABDKMath64x64.fromUInt(90)).div(ABDKMath64x64.fromUInt(100));
+        int128 playerMax = ABDKMath64x64.fromUInt(pp).mul(ABDKMath64x64.fromUInt(110)).div(ABDKMath64x64.fromUInt(100));
+        int128 playerRange = playerMax.sub(playerMin);
+        int128 enemyMin = ABDKMath64x64.fromUInt(ep).mul(ABDKMath64x64.fromUInt(90)).div(ABDKMath64x64.fromUInt(100));
+        int128 enemyMax = ABDKMath64x64.fromUInt(ep).mul(ABDKMath64x64.fromUInt(110)).div(ABDKMath64x64.fromUInt(100));
+        int128 enemyRange = enemyMax.sub(enemyMin);
+        int256 rollingTotal = 0;
+
+        if (playerMin > enemyMax) return false;
+        if (playerMax < enemyMin) return true;
+
+        if (playerMin >= enemyMin) {
+            int128 temp = playerMin.sub(enemyMin).div(enemyRange);
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(playerMax.sub(enemyMax).div(playerRange)));
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(ABDKMath64x64.fromUInt(50).div(ABDKMath64x64.fromUInt(100))));
+            rollingTotal = ABDKMath64x64.toInt(temp.mul(ABDKMath64x64.fromUInt(1000)));
+        } else {
+            int128 temp = enemyMin.sub(playerMin).div(playerRange);
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(enemyMax.sub(playerMax).div(enemyRange)));
+            temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(ABDKMath64x64.fromUInt(50).div(ABDKMath64x64.fromUInt(100))));
+            temp = ABDKMath64x64.fromUInt(1).sub(temp);
+            rollingTotal = ABDKMath64x64.toInt(temp.mul(ABDKMath64x64.fromUInt(1000)));
+        }
+
+        return rollingTotal <= 300 ? true : false;
+    }
+
     function performFight(
         uint256 char,
         uint256 wep,
@@ -296,6 +342,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
         tokenRewards[msg.sender] += tokens;
         xpRewards[char] += xp;
+
+        if (playerRoll > monsterRoll && isUnlikely(uint24(getPlayerTraitBonusAgainst(traitsCWE).mulu(playerFightPower)), targetPower)) {
+            blacksmith.giveTicket(msg.sender, 1);
+        }
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
