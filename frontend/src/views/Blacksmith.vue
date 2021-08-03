@@ -106,34 +106,32 @@
 
       <div class="col-md-12" v-if="showReforge">
         <b-modal class="centered-modal text-center" ref="reforge-confirmation-modal" title="Reforge Confirmation" @ok="onReforgeWeapon">
-          <div class="text-center" :hidden="burnWeaponId == null || !isWeaponRare()">
+          <div class="text-center" :hidden="burnWeaponId === null || !isWeaponRare()">
             <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This is a rare weapon!
           </div>
-          <div class="text-center" :hidden="burnWeaponId == null || !isWeaponReforged()">
+          <div class="text-center" :hidden="burnWeaponId === null || !isWeaponReforged()">
             <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This item has been previously reforged and only half of each bonus will carry over!
           </div>
           <div class="row">
             <div class="headings">
               <h2 class="text-center">Upgrade</h2>
-              <div class="weapon" :hidden="reforgeWeaponId == null">
+              <div class="weapon" v-if="reforgeWeaponId">
                 <div v-if="$slots.above || $scopedSlots.above">
                   <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
                 </div>
                 <div class="weapon-icon-wrapper">
-                  <weapon-icon class="weapon-icon" :weapon="getWeaponToUpgrade()" />
-                </div>
-                <div class="text-center" :hidden="burnWeaponId == null">
+                  <weapon-icon v-if="getWeaponToUpgrade()" class="weapon-icon" :weapon="getWeaponToUpgrade()" />
                 </div>
               </div>
             </div>
             <div class="headings">
               <h2 class="text-center">Burn</h2>
-              <div class="weapon" :hidden="burnWeaponId == null">
+              <div class="weapon" v-if="burnWeaponId">
                 <div v-if="$slots.above || $scopedSlots.above">
                   <slot name="above" :weapon="getWeaponToBurn()"></slot>
                 </div>
                 <div class="weapon-icon-wrapper">
-                  <weapon-icon class="weapon-icon" :weapon="getWeaponToBurn()" />
+                  <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
                 </div>
               </div>
             </div>
@@ -162,7 +160,7 @@
           </div>
         </b-modal>
 
-        <row>
+        <div>
           <div class="col-md-12">
             <div class="row">
               <div class="col-md-2">
@@ -170,14 +168,14 @@
               <div class="col-md-3">
                 <div class="headings">
                   <h2 class="text-center">Upgrade</h2>
-                  <div class="weapon" :hidden="reforgeWeaponId == null">
+                  <div class="weapon" :hidden="reforgeWeaponId === null">
                     <div v-if="$slots.above || $scopedSlots.above">
                       <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
                     </div>
                     <div class="weapon-icon-wrapper">
-                      <weapon-icon class="weapon-icon" :weapon="getWeaponToUpgrade()" />
+                      <weapon-icon v-if="getWeaponToUpgrade()" class="weapon-icon" :weapon="getWeaponToUpgrade()" />
                     </div>
-                    <div class="text-center" :hidden="burnWeaponId == null">
+                    <div class="text-center" :hidden="burnWeaponId === 0">
                     </div>
                   </div>
                 </div>
@@ -214,12 +212,12 @@
               <div class="col-md-4">
                 <div class="headings">
                   <h2 class="text-center">Burn</h2>
-                  <div class="weapon" :hidden="burnWeaponId == null">
+                  <div class="weapon" :hidden="burnWeaponId === null">
                     <div v-if="$slots.above || $scopedSlots.above">
                       <slot name="above" :weapon="getWeaponToBurn()"></slot>
                     </div>
                     <div class="weapon-icon-wrapper">
-                      <weapon-icon class="weapon-icon" :weapon="getWeaponToBurn()" />
+                      <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
                     </div>
                   </div>
                 </div>
@@ -228,9 +226,8 @@
             <h1 class="text-center">Select the weapon you wish to burn</h1>
             <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" :showReforgedWeaponsDefVal="false" :showFavoriteWeaponsDefVal="false" />
           </div>
-        </row>
+        </div>
       </div>
-      <div/>
     </div>
   </div>
 </template>
@@ -359,18 +356,24 @@ export default {
     },
 
     isWeaponRare() {
-      return this.getWeaponToBurn().stars >= 3;
+      const weapon = this.getWeaponToBurn();
+      if(!weapon) return false;
+      return weapon.stars >= 3;
     },
 
     isWeaponReforged() {
-      return this.getWeaponToBurn().bonusPower > 0;
+      const weapon = this.getWeaponToBurn();
+      if(!weapon) return false;
+      return weapon.bonusPower > 0;
     },
 
     getWeaponToBurn() {
+      if(!this.burnWeaponId) return null;
       return this.ownWeapons.find(x => x.id === this.burnWeaponId);
     },
 
     getWeaponToUpgrade() {
+      if(!this.burnWeaponId) return null;
       return this.ownWeapons.find(x => x.id === this.reforgeWeaponId);
     },
     getCurrentListofWeapons(){
