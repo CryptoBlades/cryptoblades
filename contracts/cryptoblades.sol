@@ -13,6 +13,7 @@ import "./characters.sol";
 import "./Promos.sol";
 import "./weapons.sol";
 import "./util.sol";
+import "./Blacksmith.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -30,6 +31,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
     IPriceOracle public priceOracleSkillPerUsd;
     IRandoms public randoms;
+    Blacksmith public blacksmith;
 
     function initialize(IERC20 _skillToken, Characters _characters, Weapons _weapons, IPriceOracle _priceOracleSkillPerUsd, IRandoms _randoms) public initializer {
         __AccessControl_init();
@@ -83,6 +85,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         reforgeWeaponWithDustFee = ABDKMath64x64.divu(3, 10);//0.3 usd;
 
         reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;//0.5 usd;
+    }
+
+    function migrateTo_X(Blacksmith _blacksmith) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        blacksmith = _blacksmith;
     }
 
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
@@ -271,18 +279,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(foundMatch, "Target invalid");
     }
 
-    mapping (address => uint32) tickets;
-
     function spendTicket(uint32 num)
         public
     {
-        require(num > 0);
-        require (tickets[msg.sender] >= num, "You don't have enough tickets");
-        tickets[msg.sender] -= num;
-
-        for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i))));
-        }
+        blacksmith.spendTicket(num);
     }
 
     function isUnlikely(uint24 pp, uint24 ep)
@@ -346,7 +346,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         xpRewards[char] += xp;
 
         if (playerRoll > monsterRoll && isUnlikely(uint24(getPlayerTraitBonusAgainst(traitsCWE).mulu(playerFightPower)), targetPower)) {
-            tickets[msg.sender] += 1;
+            blacksmith.giveTicket(msg.sender, 1);
         }
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
