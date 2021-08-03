@@ -46,8 +46,8 @@
             <div class="col weapon-selection">
               <div class="header-row">
 
-                <div class="row mb-3 mt-3">
-                  <div class="col-12 col-md-2 offset-md-5">
+                <div class="staminaCost row mb-3 mt-3 justify-content-center">
+                  <div class="col-12 col-md-12">
                     <h4>Stamina Cost per Fight</h4>
                     <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
                   </div>
@@ -513,6 +513,16 @@ div.encounter.text-center {
   text-align: center;
   font-size: 1.5em;
   text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+}
+
+.staminaCost {
+  width: 100%;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.staminaCost .custom-select {
+  width: 5rem;
 }
 
 /* Mobile Support Classes*/
