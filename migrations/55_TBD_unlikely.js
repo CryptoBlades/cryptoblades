@@ -12,4 +12,8 @@ module.exports = async function (deployer, network, accounts) {
   const blacksmith = await deployProxy(Blacksmith, [weaponsAddr, randomsAddr], { deployer });
 
   await game.migrateTo_60872c8(blacksmith.address);
+
+  const GAME = await blacksmith.GAME();
+
+  await blacksmith.grantRole(GAME, game.address);
 };
