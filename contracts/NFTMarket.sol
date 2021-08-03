@@ -61,7 +61,7 @@ contract NFTMarket is
 
         priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
         addFee = ABDKMath64x64.divu(2, 100);    // 0.02 usd;
-        changeFee = ABDKMath64x64.divu(1, 100); // 0.01 usd;
+        changeFee = ABDKMath64x64.divu(0, 100); // 0.00 usd;
     }
 
     // basic listing; we can easily offer other types (auction / buy it now)
