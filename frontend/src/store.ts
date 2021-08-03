@@ -953,7 +953,7 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeaponN({ state, dispatch }, {num, choosenElement}) {
+      async mintWeaponN({ state, dispatch }, {num}) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
 
@@ -969,7 +969,7 @@ export function createStore(web3: Web3) {
         );
 
         await CryptoBlades.methods
-          .mintWeaponN(num, choosenElement)
+          .mintWeaponN(num)
           .send({
             from: state.defaultAccount,
           });
@@ -982,7 +982,7 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeapon({ state, dispatch }, {choosenElement}) {
+      async mintWeapon({ state, dispatch }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
 
@@ -996,7 +996,7 @@ export function createStore(web3: Web3) {
           cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
         );
 
-        await CryptoBlades.methods.mintWeapon(choosenElement).send({
+        await CryptoBlades.methods.mintWeapon().send({
           from: state.defaultAccount,
         });
 
