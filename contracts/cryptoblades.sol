@@ -31,7 +31,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
     IPriceOracle public priceOracleSkillPerUsd;
     IRandoms public randoms;
-    Blacksmith public blacksmith;
 
     function initialize(IERC20 _skillToken, Characters _characters, Weapons _weapons, IPriceOracle _priceOracleSkillPerUsd, IRandoms _randoms) public initializer {
         __AccessControl_init();
@@ -136,6 +135,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     int128 public burnWeaponFee;
     int128 public reforgeWeaponWithDustFee;
+
+    Blacksmith public blacksmith;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
