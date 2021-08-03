@@ -315,6 +315,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         return rollingTotal <= 300 ? true : false;
     }
+
     uint256 seed2;
 
     function performFight(
@@ -349,7 +350,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         //     blacksmith.giveTicket(msg.sender, 1);
         // }
 
-        seed2 = uint256(msg.sender) ^ priceOracleSkillPerUsd.currentPrice() ^ block.timestamp;
+        seed2 = uint256(msg.sender) ^ seed2 ^ priceOracleSkillPerUsd.currentPrice() ^ block.timestamp;
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
 
