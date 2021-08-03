@@ -298,6 +298,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         int128 enemyRange = enemyMax.sub(enemyMin);
         int256 rollingTotal = 0;
 
+        if (playerMin > enemyMax) return false;
+        if (playerMax < enemyMin) return true;
+
         if (playerMin >= enemyMin) {
             int128 temp = playerMin.sub(enemyMin).div(enemyRange);
             temp = temp.add(ABDKMath64x64.fromUInt(1).sub(temp).mul(playerMax.sub(enemyMax).div(playerRange)));
