@@ -30,12 +30,17 @@ export async function approveFee(
   skillRewardsAvailable: string,
   callOpts: WithOptionalFrom<Web3JsCallOptions>,
   approveOpts: WithOptionalFrom<Web3JsSendOptions>,
-  fn: CryptoBladesMethodsFunction
+  fn: CryptoBladesMethodsFunction,
+  { feeMultiplier }: { feeMultiplier?: string | number } = {}
 ) {
   const callOptsWithFrom: Web3JsCallOptions = { from, ...callOpts };
   const approveOptsWithFrom: Web3JsSendOptions = { from, ...approveOpts };
 
   let feeInSkill = new BigNumber(await getFeeInSkillFromUsd(cryptoBladesContract, callOptsWithFrom, fn));
+
+  if(feeMultiplier !== undefined) {
+    feeInSkill = feeInSkill.times(feeMultiplier);
+  }
 
   try {
     feeInSkill = await cryptoBladesContract.methods
