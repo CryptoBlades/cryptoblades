@@ -225,13 +225,13 @@ export default {
       try {
         await this.mintWeapon();
 
-        this.viewNewWeapons(1);
-
       } catch (e) {
         console.error(e);
         this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       }
+
+      this.viewNewWeapons(1);
     },
 
     async onForgeWeaponx10(){
@@ -249,13 +249,13 @@ export default {
       try {
         await this.mintWeaponN({num: this.forgeMultiplier});
 
-        this.viewNewWeapons(this.forgeMultiplier);
-
       } catch (e) {
         console.error(e);
         this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       }
+
+      this.viewNewWeapons(this.forgeMultiplier);
     },
     onShowForgeDetails() {
       this.$refs['forge-details-modal'].show();
