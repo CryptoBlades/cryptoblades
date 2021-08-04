@@ -8,6 +8,12 @@
       <span v-tooltip="convertWei(results[4])+' SKILL'">{{"and "+formattedSkill}}</span>
         <Hint text="SKILL earned is based on gas costs of the network plus a factor of your power" />
     </span>
+    <span v-if="results[0] && wasUnlikely" class="outcome">
+      {{ "You also won a forge ticket!"}}
+    </span>
+    <span v-if="results[0] && wasUnlikely" class="reward">
+      {{ "Take it to the blacksmith to forge a weapon."}}
+    </span>
   </div>
 </template>
 
@@ -16,7 +22,7 @@ import { toBN, fromWeiEther } from '../utils/common';
 import Hint from '../components/Hint.vue';
 
 export default {
-  props: ['results'],
+  props: ['results', 'wasUnlikely'],
 
   computed: {
     formattedSkill() {

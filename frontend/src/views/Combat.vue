@@ -6,8 +6,8 @@
       </div>
 
       <b-modal id="fightResultsModal" hide-footer title="Fight Results">
-        <CombatResults v-if="resultsAvailable" :results="fightResults" />
-        <b-button class="mt-3" variant="primary" block @click="$bvModal.hide('fightResultsModal')">Close</b-button>
+        <CombatResults v-if="resultsAvailable" :results="fightResults" :wasUnlikely="isUnlikelyFight" />
+        <b-button class="mt-3" variant="primary" block @click="$bvModal.hide('fightResultsModal');isUnlikelyFight = false;">Close</b-button>
       </b-modal>
 
       <div class="row">
@@ -166,6 +166,7 @@ export default {
       selectedWeapon: null,
       fightMultiplier: Number(localStorage.getItem('fightMultiplier')),
       staminaPerFight: 40,
+      isUnlikelyFight: false,
     };
   },
 
@@ -281,6 +282,11 @@ export default {
       return 0;
     },
     async onClickEncounter(targetToFight) {
+      if(this.getWinChance(targetToFight.power, targetToFight.trait) === 'Unlikely') {
+        this.isUnlikelyFight = true;
+      } else {
+        this.isUnlikelyFight = false;
+      }
       if (this.selectedWeaponId === null || this.currentCharacterId === null) {
         return;
       }
