@@ -1587,6 +1587,15 @@ export function createStore(web3: Web3) {
         return xpCharaIdPairs;
       },
 
+      async purchaseShield({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        await CryptoBlades.methods.purchaseShield().send({
+          from: state.defaultAccount,
+        });
+      },
+
       async claimTokenRewards({ state, dispatch }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
