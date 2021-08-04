@@ -57,7 +57,7 @@
                 x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i>
               </span>
             </b-button>
-            <b-icon-question-circle class="centered-icon" scale="1.5" v-on:click="onShowForgeDetails" v-tooltip.bottom="'Click for forge percentages'"/>
+             <b-icon-question-circle class="centered-icon ml-3" scale="1.5" v-on:click="onShowForgeDetails" v-tooltip.bottom="'Click for forge percentages'"/>
 
             <b-modal hide-footer ref="forge-details-modal" title="Forge Percentages">
               <div>
