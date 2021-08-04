@@ -3,6 +3,7 @@ pragma solidity ^0.6.5;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./interfaces/IRandoms.sol";
+import "./shields.sol";
 import "./weapons.sol";
 
 contract Blacksmith is Initializable, AccessControlUpgradeable {
@@ -17,6 +18,10 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     mapping(address => uint32) public tickets;
 
+    Shields public shields;
+    // we could use string constant keyed entries to save on state vars (would require interfaces)
+    //mapping(bytes32 => address) public nfts;
+
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
     function initialize(Weapons _weapons, IRandoms _randoms)
@@ -29,6 +34,12 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
         weapons = _weapons;
         randoms = _randoms;
+    }
+
+    function migrateTo_TBD(Shields _shields) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        shields = _shields;
     }
 
     /* ========== VIEWS ========== */
@@ -54,6 +65,11 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function giveTicket(address _player, uint32 _num) external onlyGame {
         tickets[_player] += _num;
+    }
+    
+    function createShield(address _player) public onlyGame {
+        // pass through blacksmith so we dont litter the main contract
+        shields.mintForPurchase(_player);
     }
 
     /* ========== MODIFIERS ========== */

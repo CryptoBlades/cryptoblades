@@ -26,6 +26,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     int128 public constant REWARDS_CLAIM_TAX_MAX = 2767011611056432742; // = ~0.15 = ~15%
     uint256 public constant REWARDS_CLAIM_TAX_DURATION = 15 days;
 
+    uint256 public constant SHIELD_SKILL_FEE = 5 ether;
+
     Characters public characters;
     Weapons public weapons;
     IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
@@ -529,6 +531,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             isWeaponOwner(reforgeID) requestPayFromPlayer(reforgeWeaponWithDustFee) {
         _payContract(msg.sender, reforgeWeaponWithDustFee);
         weapons.reforgeWithDust(reforgeID, amountLB, amount4B, amount5B);
+    }
+
+    function purchaseShield() public {
+        _payContractConverted(msg.sender, SHIELD_SKILL_FEE);
+        blacksmith.createShield(msg.sender);
     }
 
     function migrateRandoms(IRandoms _newRandoms) external {
