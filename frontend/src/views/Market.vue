@@ -318,19 +318,19 @@
         <div class="row mt-3">
           <div class="col">
             <div class="row button-row">
-              <div class="col-4 col-md-3 col-lg-2">
+              <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   @click="activeType = 'weapon'"  class="gtag-link-others" tagname="show_weapons_market">Show Weapons</b-button>
               </div>
 
-              <div class="col-4 col-md-3 col-lg-2">
+              <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   @click="activeType = 'character'"  class="gtag-link-others" tagname="show_characters_market">Show Characters</b-button>
               </div>
 
-              <div class="col-4 col-md-3 col-lg-2">
+              <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   v-if="activeType === 'weapon'"
