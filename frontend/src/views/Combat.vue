@@ -278,16 +278,18 @@ export default {
         return;
       }
 
+      this.waitingResults = true;
+
       // Force a quick refresh of targets
       await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
       if (!this.targets.find((target) => target.original === targetToFight.original)) {
+        this.waitingResults = false;
         return;
       }
 
       this.fightResults = null;
       this.error = null;
-      this.waitingResults = true;
       this.setIsInCombat(this.waitingResults);
 
       try {
