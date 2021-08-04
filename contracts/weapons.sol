@@ -374,7 +374,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         int128 stat1 = wep.stat1.fromUInt().mul(powerPerPoint);
         int128 stat2 = wep.stat2.fromUInt().mul(powerPerPoint);
         int128 stat3 = wep.stat3.fromUInt().mul(powerPerPoint);
-        return ABDKMath64x64.fromUInt(1).add(stat1).add(stat2).add(stat3);
+        return baseWeaponMultiplier.add(stat1).add(stat2).add(stat3);
     }
 
     function getPowerMultiplierForTrait(
