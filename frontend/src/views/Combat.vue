@@ -46,10 +46,11 @@
             <div class="col weapon-selection">
               <div class="header-row">
 
-                <div class="row mb-3 mt-3">
-                  <div class="col-12 col-md-2 offset-md-5">
+                <div class="row mb-3 mt-3 fight-stamina-container">
+                  <div class="col-12 fight-stamina-selector">
                     <h4>Stamina Cost per Fight</h4>
-                    <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
+                    <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()'
+                    @change="setFightMultiplier()"></b-form-select>
                   </div>
                 </div>
 
@@ -378,6 +379,14 @@ export default {
 </script>
 
 <style scoped>
+.fight-stamina-container{
+  justify-content: center;
+}
+
+.fight-stamina-selector{
+  max-width: 90%;
+}
+
 .enemy-character {
   position: relative;
   width: 14em;
