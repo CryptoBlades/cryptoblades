@@ -454,6 +454,37 @@
           </div>
         </div>
       </b-tab>
+
+      <b-tab @click="clearData();loadMarketTaxes();browseTabActive = false">
+        <template #title>
+          Skill Shop
+          <hint class="hint" text="You can buy various goods in here" />
+        </template>
+
+        <div>
+          <div class="row">
+            <div class="col-sm-4 centered-text">
+              <h3>Specials</h3>
+            </div>
+            <div class="col-sm-8 centered-text">
+              <h3>Shop</h3>
+            </div>
+            <img class="shop-horizontal-divider" src="../assets/divider4.png" />
+          </div>
+           <div class="row">
+            <div class="col-sm-4 special-offer-items">
+              <div class="special-offer-items">
+                 <nft-list/>
+              </div>
+            </div>
+            <div class="col-sm-8 shop-items">
+              <div class="shop-items">
+                <nft-list/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </b-tab>
     </b-tabs>
   </div>
 </template>
@@ -477,6 +508,7 @@ import { CharacterTransactionHistoryData, ICharacterHistory, IWeaponHistory, Wea
 import { getWeaponNameFromSeed } from '@/weapon-name';
 import { getCharacterNameFromSeed } from '@/character-name';
 import { fromWeiEther, apiUrl } from '../utils/common';
+import NftList from '@/components/smart/NftList.vue';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -540,7 +572,7 @@ interface StoreMappedActions {
 }
 
 export default Vue.extend({
-  components: { CharacterList, WeaponGrid, Hint },
+  components: { CharacterList, WeaponGrid, Hint, NftList },
 
   data() {
     return {
@@ -1332,6 +1364,32 @@ export default Vue.extend({
 
 .m-top-negative-50{
   margin-top: -50px;
+}
+
+.centered-text {
+  text-align: center;
+  padding: 10px;
+}
+
+.shop-horizontal-divider {
+  margin-top: -10px;
+  width: 100%;
+}
+
+.special-offer-items {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.shop-items {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 </style>
