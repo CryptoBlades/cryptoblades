@@ -159,7 +159,7 @@
         </b-modal>
 
         <div>
-          <div class="col-lg-12">
+          <div class="col-lg-12 mt-4">
             <div class="row mobile-flip">
               <div class="col-lg-6 col-sm-12 weapon-container" align="center">
                 <h1 class="text-center">Select the weapon you wish to burn</h1>
