@@ -294,7 +294,7 @@ export function createStore(web3: Web3) {
           const date = new Date();
 
           if (state.maxDurability !== currentDurability) {
-            date.setTime(date.getTime() + ((state.maxDurability - currentDurability) * (48 * 60000)));
+            date.setTime(date.getTime() + ((state.maxDurability - currentDurability) * (50 * 60000)));
           }
 
           return(`${
@@ -864,7 +864,7 @@ export function createStore(web3: Web3) {
         await Promise.all(weaponIds.map(id => dispatch('fetchWeapon', id)));
       },
 
-      async fetchWeapon({ state, commit }, weaponId: string | number) {
+      async fetchWeapon({ state, commit, dispatch }, weaponId: string | number) {
         const { Weapons } = state.contracts();
         if(!Weapons) return;
 
@@ -878,6 +878,7 @@ export function createStore(web3: Web3) {
             commit('updateWeapon', { weaponId, weapon });
           })(),
         ]);
+        dispatch('fetchWeaponDurability', weaponId);
       },
 
       async setupWeaponDurabilities({ state, dispatch }) {
@@ -952,12 +953,42 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeapon({ state, dispatch }) {
-        if(featureFlagStakeOnly || !state.defaultAccount) return;
+      async mintWeaponN({ state, dispatch }, {num}) {
+        const { CryptoBlades, SkillToken, Weapons } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
 
         await approveFee(
-          state.contracts().CryptoBlades!,
-          state.contracts().SkillToken,
+          CryptoBlades,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+          { feeMultiplier: num }
+        );
+
+        await CryptoBlades.methods
+          .mintWeaponN(num)
+          .send({
+            from: state.defaultAccount,
+          });
+
+        await Promise.all([
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('updateWeaponIds'),
+          dispatch('setupWeaponDurabilities')
+        ]);
+      },
+
+      async mintWeapon({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, Weapons } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+
+        await approveFee(
+          CryptoBlades,
+          SkillToken,
           state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
@@ -965,13 +996,14 @@ export function createStore(web3: Web3) {
           cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
         );
 
-        await state.contracts().CryptoBlades!.methods.mintWeapon().send({
+        await CryptoBlades.methods.mintWeapon().send({
           from: state.defaultAccount,
         });
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
+          dispatch('updateWeaponIds'),
           dispatch('setupWeaponDurabilities')
         ]);
       },
@@ -1020,14 +1052,15 @@ export function createStore(web3: Web3) {
         commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
       },
 
-      async doEncounter({ state, dispatch }, { characterId, weaponId, targetString }) {
+      async doEncounter({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier }) {
         if(featureFlagStakeOnly) return;
 
         const res = await state.contracts().CryptoBlades!.methods
           .fight(
             characterId,
             weaponId,
-            targetString
+            targetString,
+            fightMultiplier
           )
           .send({ from: state.defaultAccount, gas: '500000' });
 

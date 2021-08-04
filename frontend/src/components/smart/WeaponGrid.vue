@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="filters row mt-2">
+    <div class="filters row mt-2" v-if="!newWeapon">
       <div class="col-sm-6 col-md-4 stars-elem">
         <strong>Stars</strong>
         <select class="form-control" v-model="starFilter" @change="saveFilters()">
@@ -33,6 +33,7 @@
       </div>
 
       <b-button
+        v-if="!newWeapon"
         variant="primary"
         class="ml-3 clear-filters-button"
         :class="{ 'mb-4': showReforgedToggle && showFavoriteToggle }"
@@ -164,6 +165,10 @@ export default Vue.extend({
       default: false
     },
     checkForDurability: {
+      type: Boolean,
+      default: false,
+    },
+    newWeapon: {
       type: Boolean,
       default: false,
     },

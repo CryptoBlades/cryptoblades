@@ -476,6 +476,7 @@ import { market_blockchain as useBlockchain } from './../feature-flags';
 import { CharacterTransactionHistoryData, ICharacterHistory, IWeaponHistory, WeaponTransactionHistoryData } from '@/interfaces/History';
 import { getWeaponNameFromSeed } from '@/weapon-name';
 import { getCharacterNameFromSeed } from '@/character-name';
+import { fromWeiEther, apiUrl } from '../utils/common';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -818,7 +819,7 @@ export default Vue.extend({
     },
 
     async searchAllCharacterListingsThroughAPI(page: number) {
-      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const url = new URL(apiUrl('static/market/character'));
       const params = {
         element: '' + this.characterTraitFilter(),
         minLevel: '' + this.characterMinLevelFilter(),
@@ -893,7 +894,7 @@ export default Vue.extend({
       });
     },
     async searchAllWeaponListingsThroughAPI(page: number) {
-      const url = new URL('https://api.cryptoblades.io/static/market/weapon');
+      const url = new URL(apiUrl('static/market/weapon'));
       const params = {
         element: '' + this.weaponTraitFilter(),
         minStars: '' + this.weaponStarFilter(),
@@ -1008,7 +1009,7 @@ export default Vue.extend({
     },
 
     async searchCharacterListingsBySeller(sellerAddress: string): Promise<string[]>{
-      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const url = new URL(apiUrl('static/market/character'));
       const params = {
         element: '' + this.characterTraitFilter(),
         minLevel: '' + this.characterMinLevelFilter(),
@@ -1026,7 +1027,7 @@ export default Vue.extend({
     },
 
     async searchWeaponListingsBySeller(sellerAddress: string): Promise<string[]>{
-      const url = new URL('https://api.cryptoblades.io/static/market/weapon');
+      const url = new URL(apiUrl('static/market/weapon'));
       const params = {
         element: '' + this.weaponTraitFilter(),
         minStars: '' + this.weaponStarFilter(),
@@ -1045,7 +1046,7 @@ export default Vue.extend({
     },
 
     async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
-      const url = new URL('https://api.cryptoblades.io/static/market/transactions/' + sellerAddress);
+      const url = new URL(apiUrl(`static/market/transactions/${sellerAddress}`));
 
       const weaponsData = await fetch(url.toString());
       const weapons = await weaponsData.json();
@@ -1169,16 +1170,10 @@ export default Vue.extend({
     },
 
     convertWeiToSkill(wei: string) {
-      return Web3.utils.fromWei(
-        wei,
-        'ether'
-      );
+      return fromWeiEther(wei);
     },
     convertSkillToWei(skill: string) {
-      return Web3.utils.toWei(
-        skill,
-        'ether'
-      );
+      return Web3.utils.toWei(skill);
     },
 
     characterMinLevelFilter(): number {

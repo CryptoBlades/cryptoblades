@@ -37,10 +37,10 @@
                   <span class="calculator-subheader">Current prices (USD)</span>
                   <div class="prices-div">
                     <div class="token-price-div">
-                      BNB: <b-form-input class="price-input" type="number" v-model="bnbPrice" />
+                       BNB: <b-form-label class="price-input" type="number" v-model="bnbPrice" /> <span class="text-white"> ${{bnbPrice }}</span>
                     </div>
                     <div class="token-price-div">
-                      SKILL: <b-form-input class="price-input" type="number" v-model="skillPrice" />
+                     SKILL:  <b-form-label class="price-input" type="number" v-model="skillPrice" /> <span class="text-white"> ${{skillPrice }}</span>
                     </div>
                   </div>
                 </div>
@@ -141,8 +141,7 @@ import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, We
 import axios from 'axios';
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import Web3 from 'web3';
-import { toBN } from '../../utils/common';
+import { toBN, fromWeiEther } from '../../utils/common';
 
 interface PriceJson {
   binancecoin: CoinPrice;
@@ -315,12 +314,12 @@ export default Vue.extend({
     },
 
     formattedSkill(skill: number): number {
-      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
+      const skillBalance = fromWeiEther(skill.toString());
       return toBN(skillBalance).toNumber();
     },
 
     stringFormattedSkill(skill: number): string {
-      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
+      const skillBalance = fromWeiEther(skill.toString());
       return toBN(skillBalance).toFixed(6);
     },
 
@@ -539,13 +538,23 @@ export default Vue.extend({
   color: red;
 }
 
+.centered-icon {
+  align-self: center;
+  margin-left: 5px;
+}
+
 .btn-small {
   font-size: small;
   margin-top: 5px;
 }
 
-.centered-icon {
-  align-self: center;
-  margin-left: 5px;
+@media (max-width: 576px) {
+  .calculator {
+    flex-direction: column;
+  }
+  .calculator-character, .calculator-weapon {
+    justify-self: center;
+    width: 100%;
+  }
 }
 </style>

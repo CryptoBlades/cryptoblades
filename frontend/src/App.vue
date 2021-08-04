@@ -30,8 +30,8 @@
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>
-            Get started in less than 10 minutes! To recruit your first character you need {{recruitCost}} SKILL and .001 BNB for gas.
-            You will also need .0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
+            Get started in less than 10 minutes! To recruit your first character you need {{ recruitCost }} SKILL and .001 BNB for gas. You will also need .0015
+            BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
           </p>
           <ul class="unstyled-list">
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
@@ -72,9 +72,11 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+import { apiUrl } from './utils/common';
 
 Vue.directive('visible', (el, bind) => {
-  el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
+  el.style.visibility = bind.value ? 'visible' : 'hidden';
+});
 
 export default {
   inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
@@ -89,7 +91,7 @@ export default {
     errorMessage: '',
     hideWalletWarning: false,
     isConnecting: false,
-    recruitCost: ''
+    recruitCost: '',
   }),
 
   computed: {
@@ -155,11 +157,13 @@ export default {
     async initializeRecruitCost() {
       const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
-      this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
+      this.recruitCost = BN(skillRecruitCost)
+        .div(BN(10).pow(18))
+        .toFixed(4);
     },
     data() {
       return {
-        recruitCost: this.recruitCost
+        recruitCost: this.recruitCost,
       };
     },
 
@@ -268,7 +272,8 @@ export default {
       const web3 = this.web3.currentProvider;
       this.isConnecting = true;
       this.errorMessage = 'Connecting to MetaMask...';
-      web3.request({method: 'eth_requestAccounts'})
+      web3
+        .request({ method: 'eth_requestAccounts' })
         .then(() => {
           this.errorMessage = 'Success: MetaMask connected.';
           this.isConnecting = false;
@@ -306,17 +311,16 @@ export default {
     },
 
     async checkNotifications() {
-      const response = await fetch('https://api.cryptoblades.io/static/notifications');
+      const response = await fetch(apiUrl('static/notifications'));
       const notifications = await response.json();
 
       const lastHash = localStorage.getItem('lastnotification');
       let shouldContinue = true;
 
-      notifications.forEach(notif => {
+      notifications.forEach((notif) => {
+        if (!shouldContinue) return;
 
-        if(!shouldContinue) return;
-
-        if(lastHash === notif.hash) {
+        if (lastHash === notif.hash) {
           shouldContinue = false;
           return;
         }
@@ -333,7 +337,7 @@ export default {
       });
 
       localStorage.setItem('lastnotification', notifications[0].hash);
-    }
+    },
   },
 
   mounted() {
@@ -363,7 +367,6 @@ export default {
     });
 
     this.showWarningDialog();
-
   },
 
   async created() {
@@ -416,6 +419,7 @@ export default {
     if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
     if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
     if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
+    if (!localStorage.getItem('fightMultiplier')) localStorage.setItem('fightMultiplier', '1');
 
     this.checkNotifications();
     this.initializeRecruitCost();
@@ -434,7 +438,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   font-weight: 600;
   text-align: center;
 }
-hr.hr-divider{
+hr.hr-divider {
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
 }
@@ -613,8 +617,8 @@ button.close {
   border-color: #9e8a57 !important;
 }
 
-.b-pagination > li > .page-link{
-  color:#9e8a57;
+.b-pagination > li > .page-link {
+  color: #9e8a57;
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
   border-color: #9e8a576e;
 }
@@ -673,8 +677,6 @@ div.bg-success {
 }
 </style>
 <style scoped>
-
-
 .app {
   margin: 0;
 }
@@ -749,12 +751,11 @@ div.bg-success {
   align-items: center;
 }
 
-
 .border-main {
   border: 1px solid #9e8a57;
 }
 
-@media all and (max-width:  767.98px) {
+@media all and (max-width: 767.98px) {
   .content {
     padding: 10px;
   }
