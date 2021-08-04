@@ -28,3 +28,11 @@ export const bnMinimum = (...values: string[]): BigNumber => {
 export const fromWeiEther = (value: string|BigNumber): string => {
   return new BigNumber(value).div('1000000000000000000').toFixed();
 };
+
+export const gasUsedToBnb = (gasUsed: number): string =>{
+  const gweiPrice = 5;
+
+  const gweiToBnbFactor = 1000000000;
+
+  return ((gasUsed * gweiPrice) / gweiToBnbFactor).toFixed(6);
+};

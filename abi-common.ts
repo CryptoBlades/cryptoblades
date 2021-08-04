@@ -11,6 +11,7 @@ export interface Web3JsSendOptions extends Web3JsCallOptions {
 export interface Web3JsTransactionResult {
   events: any;
   blockNumber: number;
+  gasUsed: number;
 }
 
 type BlockNumber = number | string | 'latest' | 'earliest' | 'pending';
