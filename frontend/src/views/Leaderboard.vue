@@ -49,6 +49,11 @@ export default {
   async created() {
     this.waitingLeaderboardOutcome = true;
     const leaderboardData = await fetch(apiUrl('static/leaderboard'));
+
+    if(leaderboardData.status === 429){
+      this.$dialog.notify.error('You are making too many requests. Please try again in 1 minute.');
+    }
+
     const leaderboards = await leaderboardData.json();
 
     this.leaderboards = leaderboards.leaderboard;

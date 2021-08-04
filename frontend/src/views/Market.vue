@@ -836,7 +836,7 @@ export default Vue.extend({
 
       url.search = new URLSearchParams(params).toString();
 
-      const charactersData = await fetch(url.toString());
+      const charactersData = await this.fetchEnhanced(url.toString());
       const characters = await charactersData.json();
 
       this.allListingsAmount = characters.page.total;
@@ -911,7 +911,7 @@ export default Vue.extend({
 
       url.search = new URLSearchParams(params).toString();
 
-      const weaponsData = await fetch(url.toString());
+      const weaponsData = await this.fetchEnhanced(url.toString());
       const weapons = await weaponsData.json();
 
       this.allListingsAmount = weapons.page.total;
@@ -1025,7 +1025,7 @@ export default Vue.extend({
 
       url.search = new URLSearchParams(params).toString();
 
-      const charactersData = await fetch(url.toString());
+      const charactersData = await this.fetchEnhanced(url.toString());
       const characters = await charactersData.json();
       return characters.idResults;
     },
@@ -1044,7 +1044,7 @@ export default Vue.extend({
 
       url.search = new URLSearchParams(params).toString();
 
-      const weaponsData = await fetch(url.toString());
+      const weaponsData = await this.fetchEnhanced(url.toString());
       const weapons = await weaponsData.json();
       return weapons.idResults;
     },
@@ -1052,7 +1052,7 @@ export default Vue.extend({
     async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
       const url = new URL(apiUrl(`static/market/transactions/${sellerAddress}`));
 
-      const weaponsData = await fetch(url.toString());
+      const weaponsData = await this.fetchEnhanced(url.toString());
       const weapons = await weaponsData.json();
       return weapons.results;
     },
@@ -1229,6 +1229,18 @@ export default Vue.extend({
 
     maxPrecisionSkill(listedPrice: string): string {
       return this.convertStringToDecimal(this.convertWeiToSkill(listedPrice), 8);
+    },
+
+    async fetchEnhanced(url: string): Promise<any>{
+      const result = await fetch(url);
+      this.checkResponse(result);
+      return result;
+    },
+
+    checkResponse(response: any) {
+      if(response.status === 429){
+        (this as any).$dialog.notify.error('You are making too many requests. Please try again in 1 minute.');
+      }
     }
   },
 
