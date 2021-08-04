@@ -2,7 +2,7 @@
   <div class="body main-font">
 
     <b-tabs justified>
-      <b-tab @click="clearData();browseTabActive = true">
+      <b-tab @click="clearData();browseTabActive = true;skillShopTabActive = false">
         <template #title>
           Browse NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -146,7 +146,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData(),browseTabActive = false">
+      <b-tab @click="clearData(),browseTabActive = false;skillShopTabActive = false">
         <template #title>
           Search NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -309,7 +309,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData();loadMarketTaxes();browseTabActive = false">
+      <b-tab @click="clearData();loadMarketTaxes();browseTabActive = false;skillShopTabActive = false">
         <template #title>
           List NFTs
           <hint class="hint" text="When you list an NFT for sale, it is transferred to the<br>market until someone buys it or you cancel the sale" />
@@ -455,7 +455,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData();loadMarketTaxes();browseTabActive = false">
+      <b-tab @click="clearData();browseTabActive = false;skillShopTabActive = true">
         <template #title>
           Skill Shop
           <hint class="hint" text="You can buy various goods in here" />
@@ -469,19 +469,20 @@
             <div class="col-sm-8 centered-text">
               <h3>Shop</h3>
             </div>
-            <img class="shop-horizontal-divider" src="../assets/divider4.png" />
+            <img class="shop-horizontal-divider-top" src="../assets/divider4.png" />
           </div>
            <div class="row">
             <div class="col-sm-4 special-offer-items">
-              <div class="special-offer-items">
-                 <nft-list/>
+              <div class="special-offer-bg">
+                 <nft-list :isShop="true" :nfts="specialOffersNftList"/>
               </div>
             </div>
             <div class="col-sm-8 shop-items">
               <div class="shop-items">
-                <nft-list/>
+                <nft-list :isShop="true" :nfts="shopOffersNftList"/>
               </div>
             </div>
+            <img class="shop-horizontal-divider" src="../assets/divider4.png" />
           </div>
         </div>
       </b-tab>
@@ -532,6 +533,7 @@ interface Data {
   allListingsAmount: number;
   currentPage: number;
   browseTabActive: boolean;
+  skillShopTabActive: boolean;
   listingSellPrice: string;
   priceChangeModal: boolean;
   weaponTransactionHistoryData: WeaponTransactionHistoryData[];
@@ -548,6 +550,13 @@ const defaultLimit = 40;
 interface StoreMappedGetters {
   contracts: Contracts;
   ownCharacters: any[];
+  totalShieldSupply: 0;
+}
+
+interface Nft {
+  nftId: string;
+  nftType: string;
+  nftPrice: number;
 }
 
 interface StoreMappedActions {
@@ -569,6 +578,7 @@ interface StoreMappedActions {
   cancelMarketListing(payload: { nftContractAddr: string, tokenId: string }): Promise<{ seller: string, nftID: string }>;
   purchaseMarketListing(payload: { nftContractAddr: string, tokenId: string, maxPrice: string }): Promise<{ seller: string, nftID: string, price: string }>;
   fetchSellerOfNft(payload: { nftContractAddr: string, tokenId: string }): Promise<string>;
+  fetchTotalShieldSupply(): Promise<number>;
 }
 
 export default Vue.extend({
@@ -592,6 +602,7 @@ export default Vue.extend({
       allListingsAmount: 0,
       currentPage: 1,
       browseTabActive: true,
+      skillShopTabActive: false,
       listingSellPrice: '',
       priceChangeModal: false,
       weaponTransactionHistoryData: [],
@@ -607,7 +618,7 @@ export default Vue.extend({
       'defaultAccount', 'weapons', 'characters', 'ownedCharacterIds', 'ownedWeaponIds'
     ]) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'contracts', 'ownCharacters'
+      'contracts', 'ownCharacters', 'totalShieldSupply'
     ]) as Accessors<StoreMappedGetters>),
     ...mapGetters(['transferCooldownOfCharacterId']),
 
@@ -648,6 +659,24 @@ export default Vue.extend({
 
     canPurchase(): boolean {
       return this.activeType === 'weapon' || this.ownCharacters.length < 4 ;
+    },
+
+    specialOffersNftList(): Nft[] {
+      const nftList = [
+        {
+          nftId: 'placeholder',
+          nftType: 'shield',
+          nftPrice: 5
+        },
+      ];
+
+      return nftList;
+    },
+
+    shopOffersNftList(): Nft[] {
+      const nftList = [] as Nft[];
+
+      return nftList;
     }
   },
 
@@ -667,6 +696,7 @@ export default Vue.extend({
       'cancelMarketListing',
       'purchaseMarketListing',
       'fetchSellerOfNft',
+      'fetchTotalShieldSupply',
     ]) as StoreMappedActions),
 
     clearData() {
@@ -1371,8 +1401,13 @@ export default Vue.extend({
   padding: 10px;
 }
 
-.shop-horizontal-divider {
+.shop-horizontal-divider-top {
   margin-top: -10px;
+  height: fit-content;
+  width: 100%;
+}
+
+.shop-horizontal-divider {
   width: 100%;
 }
 
@@ -1390,6 +1425,10 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+}
+
+.special-offer-bg {
+  margin-top: -5px;
 }
 
 </style>

@@ -348,7 +348,7 @@ export function createStore(web3: Web3) {
 
       waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod(state): string {
         return bnMinimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
-      }
+      },
     },
 
     mutations: {
@@ -515,7 +515,7 @@ export function createStore(web3: Web3) {
         state.waxBridgeWithdrawableBnb = payload.waxBridgeWithdrawableBnb;
         state.waxBridgeRemainingWithdrawableBnbDuringPeriod = payload.waxBridgeRemainingWithdrawableBnbDuringPeriod;
         state.waxBridgeTimeUntilLimitExpires = payload.waxBridgeTimeUntilLimitExpires;
-      }
+      },
     },
 
     actions: {
@@ -1587,7 +1587,7 @@ export function createStore(web3: Web3) {
         return xpCharaIdPairs;
       },
 
-      async purchaseShield({ state }) {
+      async purchaseShield({ state, dispatch }) {
         const { CryptoBlades, SkillToken, Blacksmith } = state.contracts();
         if(!CryptoBlades || !Blacksmith || !state.defaultAccount) return;
 
@@ -1605,6 +1605,8 @@ export function createStore(web3: Web3) {
         await Blacksmith.methods.purchaseShield().send({
           from: state.defaultAccount,
         });
+
+        await dispatch('fetchTotalShieldSupply');
       },
 
       async claimTokenRewards({ state, dispatch }) {
@@ -1664,6 +1666,13 @@ export function createStore(web3: Web3) {
         await WaxBridge.methods.withdraw(state.waxBridgeWithdrawableBnb).send(defaultCallOptions(state));
 
         await dispatch('fetchWaxBridgeDetails');
+      },
+
+      async fetchTotalShieldSupply({ state }) {
+        const { Shields } = state.contracts();
+        if(!Shields || !state.defaultAccount) return;
+
+        return await Shields.methods.totalSupply().call(defaultCallOptions(state));
       }
     }
   });
