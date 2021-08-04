@@ -334,7 +334,7 @@ export default {
 
     setStaminaSelectorValues() {
       if(this.currentCharacterStamina < 40) {
-        return [{ value: null, text: 'You need more stamina to fight!', disabled: true }];
+        return [{ value: this.fightMultiplier, text: 'You need more stamina to fight!', disabled: true}];
       }
 
       const choices = [
