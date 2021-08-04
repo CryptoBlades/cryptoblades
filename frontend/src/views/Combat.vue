@@ -88,14 +88,14 @@
                 </div>
               </div>
               <div class="enemy-list">
-                <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 encounter" v-for="(e, i) in targets" :key="i">
+                <div class="enemy-list-child mx-auto encounter" v-for="(e, i) in targets" :key="i">
                   <div class="encounter-container">
                     <div class="enemy-character">
                       <div class="encounter-element">
                         <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
                       </div>
 
-                      <div class="mobile-divider mobile-img-adjustment">
+                      <div class="">
                         <img class="mr-auto ml-auto enemy-img" :src="getEnemyArt(e.power)" alt="Enemy" />
                       </div>
 
@@ -576,6 +576,7 @@ h1 {
   width: 13em;
   position: relative;
   top: 3vw;
+  margin-top: 2em;
 }
 
 .enemy-img {
@@ -583,10 +584,16 @@ h1 {
   top: -50px;
 }
 
-@media (max-width: 1025px) {
+@media (max-width: 1334px) {
   .enemy-list {
-    flex-direction: column;
+    flex-flow: row wrap;
     align-items: center;
+  }
+  .enemy-list > .enemy-list-child{
+     flex-basis: 50%;
+  }
+  .encounter-button {
+    margin-top: 1.35em;
   }
 }
 
@@ -595,8 +602,13 @@ h1 {
   .encounter img {
     width: calc(100% - 60px);
   }
+  .enemy-list{
+    flex-direction:column;
+    align-items:center;
+  }
   .combat-enemy-container {
     flex-direction: column;
+    align-items: center;
   }
   .weapon-selection {
     border-right: none;
@@ -646,10 +658,6 @@ h1 {
     width: 100%;
     justify-content: center;
     display: block;
-  }
-
-  .encounter-button {
-    top: 10vw;
   }
 }
 </style>
