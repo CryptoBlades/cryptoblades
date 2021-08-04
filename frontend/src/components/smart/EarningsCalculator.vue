@@ -31,14 +31,9 @@
                   <b-form-input class="stat-input" type="number" v-model="levelSliderValue" :min="1" :max="255" />
                 </div>
                 <span>Stamina</span>
-                <div class="d-flex">
-                <select class="form-control wep-trait-form" v-model="staminaSelectValue">
+                <select class="form-control" v-model="staminaSelectValue">
                   <option v-for="x in [40,80,120,160,200]" :value="x" :key="x">{{ x }}</option>
                 </select>
-                <b-icon-question-circle class="centered-icon mt-1 ml-2 " scale="1.2"
-                  v-tooltip.right="`LowStamina: + SKILL - USD HighStamina: - SKILL + USD
-                                  Increasing stamina spent reduces Gas Offset rewards, however: BnbFees>GasOffset`"/>
-                  </div>
               </div>
 
               <div class="calculator-earnings">
@@ -321,7 +316,8 @@ export default Vue.extend({
     },
 
     getAverageRewardAtLevel(level: number): number {
-      return this.formattedSkill(this.fightGasOffset) + (this.formattedSkill(this.fightBaseline) * (Math.sqrt(CharacterPower(level - 1)/1000)));
+      return this.formattedSkill(this.fight
+      ) + (this.formattedSkill(this.fightBaseline) * (Math.sqrt(CharacterPower(level - 1)/1000)));
     },
 
     getRewardDiffBonus(level: number, targetLevel: number): string {
