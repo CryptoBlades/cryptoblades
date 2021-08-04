@@ -3,9 +3,9 @@
     <span class="outcome">{{ getSuccessText() }}</span>
     <span class="roll">{{ "You rolled "+results[1]+", Enemy rolled "+results[2] }}</span>
     <span v-if="results[0]" class="reward">
-      {{ "You earned "+results[3]+" xp "}}
+      {{ "You earned "+results[3]+" xp"}}
       <br>
-      <span v-tooltip="convertWei(results[4])+' SKILL'">{{" and " +formattedSkill}}</span>
+      <span v-tooltip="convertWei(results[4])+' SKILL'">{{"and "+formattedSkill}}</span>
         <Hint text="SKILL earned is based on gas costs of the network plus a factor of your power" />
     </span>
     <span>
