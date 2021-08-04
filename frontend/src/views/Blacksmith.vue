@@ -297,6 +297,7 @@ export default {
     async forgeWithTickets() {
       try {
         await this.spendTicketN({num: this.ticketsToSpendAmount});
+        this.viewNewWeapons(this.ticketsToSpendAmount);
       } catch {
         this.$dialog.notify.error('Could not forge sword: insuffucient tickets or transaction denied.');
       }
