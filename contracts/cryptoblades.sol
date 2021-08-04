@@ -209,7 +209,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             // isCharacterOwner(char)
             // isWeaponOwner(wep) {
         fightModifierChecks(char, wep) {
-        require(fightMultiplier > 0);
+        require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight * fightMultiplier));
@@ -475,7 +475,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
             weapons.performMintWeapon(msg.sender,
-                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100), 4),
+                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100), 100),
                 weapons.getRandomStat(4, 200, seed, 101),
                 0, // stat2
                 0, // stat3
@@ -484,25 +484,25 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeaponN(uint32 num, uint256 choosenElement)
+    function mintWeaponN(uint32 num, uint256 chosenElement, uint16 chosenElementFee)
         public
         onlyNonContract
         oncePerBlock(msg.sender)
-        requestPayFromPlayer(mintWeaponFee * num)
+        requestPayFromPlayer(mintWeaponFee * num * chosenElementFee)
     {
         require(num > 0 && num <= 1000);
-        _payContract(msg.sender, mintWeaponFee * num);
+        _payContract(msg.sender, mintWeaponFee * num * chosenElementFee);
 
         for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i))), choosenElement);
+            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i))), chosenElement);
         }
     }
 
-    function mintWeapon(uint256 choosenElement) public onlyNonContract oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
-        _payContract(msg.sender, mintWeaponFee);
+    function mintWeapon(uint256 chosenElement, uint16 chosenElementFee) public onlyNonContract oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee * chosenElementFee) {
+        _payContract(msg.sender, mintWeaponFee * chosenElementFee);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.mint(msg.sender, seed, choosenElement);
+        weapons.mint(msg.sender, seed, chosenElement);
     }
 
     function burnWeapon(uint256 burnID) public

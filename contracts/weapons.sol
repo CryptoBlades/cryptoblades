@@ -179,7 +179,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _bonusPower = getBonusPower(id);
     }
 
-    function mint(address minter, uint256 seed, uint256 choosenElement) public restricted returns(uint256) {
+    function mint(address minter, uint256 seed, uint256 chosenElement) public restricted returns(uint256) {
         uint256 stars;
         uint256 roll = seed % 100;
         // will need revision, possibly manual configuration if we support more than 5 stars
@@ -199,15 +199,15 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             stars = 0; // 1* at 44%
         }
 
-        return mintWeaponWithStars(minter, stars, seed, choosenElement);
+        return mintWeaponWithStars(minter, stars, seed, chosenElement);
     }
 
-    function mintWeaponWithStars(address minter, uint256 stars, uint256 seed, uint256 choosenElement) public restricted returns(uint256) {
+    function mintWeaponWithStars(address minter, uint256 stars, uint256 seed, uint256 chosenElement) public restricted returns(uint256) {
         require(stars < 8, "Stars parameter too high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
         return performMintWeapon(minter,
-            getRandomProperties(stars, seed, choosenElement),
+            getRandomProperties(stars, seed, chosenElement),
             stat1,
             stat2,
             stat3,
@@ -236,12 +236,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokenID;
     }
 
-    function getRandomProperties(uint256 stars, uint256 seed, uint256 choosenElement) public pure returns (uint16) {
+    function getRandomProperties(uint256 stars, uint256 seed, uint256 chosenElement) public pure returns (uint16) {
         uint256 trait;
-        if (choosenElement == 4) {
+        if (chosenElement == 100) {
             trait = ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3);
         } else {
-            trait = ((choosenElement & 0x3) << 3);
+            trait = ((chosenElement & 0x3) << 3);
         }
         return uint16((stars & 0x7) // stars aren't randomized here!
             | trait // trait

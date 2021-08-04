@@ -95,7 +95,7 @@ contract RaidBasic is Initializable, Raid {
     }
 
     function mintRewardWeapon(uint256 stars, uint256 seed) public restricted {
-        uint256 tokenId = weapons.mintWeaponWithStars(address(game), stars, seed, 4);
+        uint256 tokenId = weapons.mintWeaponWithStars(address(game), stars, seed, 100);
         addRewardWeapon(tokenId);
     }
 

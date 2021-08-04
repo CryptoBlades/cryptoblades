@@ -80,35 +80,35 @@
               </div>
             </b-modal>
 
-            <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element" @hide="disableConfirmButton = true, forgeCostMultiplier = null">
+            <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element" @hide="onHideModal">
               <div class="row justify-content-md-center">
-                <img v-on:click="setChoosenElement($event, 4)" class="elements-modal" src="../assets/Question_mark_white_icon.png"/>
+                <img v-on:click="setChoosenElement($event, 100)" class="elements-modal" src="../assets/Question_mark_white_icon.png"/>
                 <img v-on:click="setChoosenElement($event, 0)" class="elements-modal" src="../assets/elements/fire.png"/>
                 <img v-on:click="setChoosenElement($event, 1)" class="elements-modal" src="../assets/elements/earth.png"/>
                 <img v-on:click="setChoosenElement($event, 2)" class="elements-modal" src="../assets/elements/lightning.png"/>
                 <img v-on:click="setChoosenElement($event, 3)" class="elements-modal" src="../assets/elements/water.png"/>
               </div>
-              <div class="row justify-content-md-center" style="margin-top: 2%;">
+              <div class="row justify-content-md-center margin-top">
                 <b-button
-                v-if="chlickedForgeButton === 0"
+                v-if="clickedForgeButton === 0"
                 variant="primary"
                 class="row justify-content-md-center"
                 @click="onForgeWeapon"
                 :disabled="disableConfirmButton"
                 v-tooltip="'Forge new weapon'">
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                    Forge ({{Number.parseFloat(forgeCost * this.forgeCostMultiplier).toFixed(2)}} SKILL)
+                    Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee).toFixed(2)}} SKILL)
                   </span>
                 </b-button>
                 <b-button
-                v-if="chlickedForgeButton === 1"
+                v-if="clickedForgeButton === 1"
                 variant="primary"
                 class="row justify-content-md-center"
                 @click="onForgeWeaponx10"
                 :disabled="disableConfirmButton"
                 v-tooltip="'Forge new weapon'">
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                    Forge ({{Number.parseFloat(forgeCost * this.forgeCostMultiplier * 10).toFixed(2)}} SKILL)
+                    Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee * 10).toFixed(2)}} SKILL)
                   </span>
                 </b-button>
               </div>
@@ -120,10 +120,10 @@
         <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
                     <template #modal-header>
                          <div v-if="!spin" class="new-weapon-header-text text-center">
-                              <strong>A-hooooy! These things look shurpppp!</strong>
+                              <strong>Forging Results</strong>
                          </div>
                          <div v-if="spin" class="new-weapon-header-text text-center">
-                              <strong>Be patient, the elves are minting ....</strong>
+                              <strong>Be patient, the irons are hot...</strong>
                          </div>
                     </template>
                     <div class="text-center">
@@ -209,9 +209,9 @@ export default {
       onError: false,
       spin: false,
       selectedElement: null,
-      forgeCostMultiplier: null,
+      chosenElementFee: null,
       disableConfirmButton: true,
-      chlickedForgeButton: null,
+      clickedForgeButton: null,
     };
   },
 
@@ -263,7 +263,7 @@ export default {
       }, 10000);
 
       try {
-        await this.mintWeapon({choosenElement: this.selectedElement});
+        await this.mintWeapon({chosenElement: this.selectedElement, chosenElementFee: this.chosenElementFee});
 
         this.viewNewWeapons(1);
 
@@ -289,7 +289,7 @@ export default {
       }, 10000);
 
       try {
-        await this.mintWeaponN({num: this.forgeMultiplier, choosenElement: this.selectedElement});
+        await this.mintWeaponN({num: this.forgeMultiplier, chosenElement: this.selectedElement, chosenElementFee: this.chosenElementFee});
 
         this.viewNewWeapons(this.forgeMultiplier);
 
@@ -304,18 +304,18 @@ export default {
     },
 
     onClickForge(i) {
-      this.chlickedForgeButton = i;
+      this.clickedForgeButton = i;
       this.$refs['forge-element-selector-modal'].show();
     },
 
     setChoosenElement(ele, i) {
       this.selectedElement = i;
-      if (i === 4) {
-        this.forgeCostMultiplier = 1;
+      if (i === 100) {
+        this.chosenElementFee = 1;
       } else{
-        this.forgeCostMultiplier = 2;
+        this.chosenElementFee = 2;
       }
-      [].forEach.call(ele.srcElement.parentNode.childNodes, function(child) {
+      Array.from(ele.srcElement.parentNode.childNodes).forEach((child) => {
         child.style.transform = 'scale(1)';
       });
       ele.srcElement.style.transform = 'scale(1.4)';
@@ -372,6 +372,10 @@ export default {
         console.error(e);
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       }
+    },
+
+    onHideModal(){
+      this.disableConfirmButton = true;
     }
   },
 
@@ -445,5 +449,9 @@ export default {
 
 img.elements-modal:hover {
   transform:scale(1.4)
+}
+
+.margin-top {
+  margin-top: 2%;
 }
 </style>

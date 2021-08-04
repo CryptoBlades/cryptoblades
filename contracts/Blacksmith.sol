@@ -48,7 +48,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
                         abi.encodePacked(randoms.getRandomSeed(msg.sender), i)
                     )
                 ),
-                4
+                100
             );
         }
     }
