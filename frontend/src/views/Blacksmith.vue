@@ -18,7 +18,6 @@
       <div class="col">
         <div class="d-flex justify-content-space-between">
           <h1>Weapons ({{ ownWeapons.length }})</h1>
-
           <div class="d-flex justify-content-flex-end ml-auto">
             <b-button
               variant="primary"
@@ -44,7 +43,7 @@
               </span>
             </b-button>
 
-              <b-button
+            <b-button
               variant="primary"
               class="ml-3"
               @click="onForgeWeaponx10()"
@@ -77,7 +76,6 @@
                 1+ star @ 100% chance.
               </div>
             </b-modal>
-
           </div>
         </div>
 
@@ -161,12 +159,34 @@
         </b-modal>
 
         <div>
-          <div class="col-md-12">
-            <div class="row">
-              <div class="col-md-2">
+          <div class="col-lg-12">
+            <div class="row mobile-flip">
+              <div class="col-lg-6 col-sm-12 weapon-container" align="center">
+                <h1 class="text-center">Select the weapon you wish to burn</h1>
+                <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId"
+                             :showReforgedWeaponsDefVal="false" :showFavoriteWeaponsDefVal="false" :showFilters="false" />
               </div>
-              <div class="col-md-3">
+              <div class="col-lg-3 col-sm-12 weapon-container">
                 <div class="headings">
+                  <h2 class="text-center">Burn</h2>
+                  <div class="weapon" :hidden="burnWeaponId === null">
+                    <div v-if="$slots.above || $scopedSlots.above">
+                      <slot name="above" :weapon="getWeaponToBurn()"></slot>
+                    </div>
+                    <div class="weapon-icon-wrapper">
+                      <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
+                    </div>
+                    <div class="text-center" :hidden="burnWeaponId === 0">
+                    </div>
+                  </div>
+                </div>
+                <span class="arrow arrow-right"></span>
+                <span class="arrow arrow-right"></span>
+                <span class="arrow2 arrow-right"></span>
+                <span class="arrow2 arrow-right"></span>
+              </div>
+              <div class="col-lg-3 col-sm-12 upgrade-container">
+                <div class="confirmReforge">
                   <h2 class="text-center">Upgrade</h2>
                   <div class="weapon" :hidden="reforgeWeaponId === null">
                     <div v-if="$slots.above || $scopedSlots.above">
@@ -178,18 +198,16 @@
                     <div class="text-center" :hidden="burnWeaponId === 0">
                     </div>
                   </div>
-                </div>
-              </div>
-              <div class="col-md-1">
-                <div class="confirmReforge">
                   <b-button
                           variant="primary"
                           tagname="confirm_forge_weapon"
                           class="confirmReforge"
                           @click="showReforgeConfirmation"
                           :disabled="canReforge"
-                          v-tooltip="'Forge new weapon'">
-                          Confirm Reforge ({{ reforgeCost }} SKILL)
+                          v-tooltip="'Reforge selected weapon'">
+                    Confirm Reforge
+                    <br>
+                    ({{ reforgeCost }} SKILL)
                   </b-button>
                   <b-button
                           variant="primary"
@@ -197,7 +215,7 @@
                           class="confirmReforge"
                           @click="showReforgeBonuses"
                           v-tooltip="'Show reforge bonuses'">
-                          Show Bonuses
+                    Show Bonuses
                   </b-button>
                   <b-button
                           variant="primary"
@@ -205,26 +223,11 @@
                           class="confirmReforge"
                           @click="showReforge = false, showBlacksmith = true"
                           v-tooltip="'Cancel Reforge'">
-                          Cancel Reforge
+                    Cancel Reforge
                   </b-button>
                 </div>
               </div>
-              <div class="col-md-4">
-                <div class="headings">
-                  <h2 class="text-center">Burn</h2>
-                  <div class="weapon" :hidden="burnWeaponId === null">
-                    <div v-if="$slots.above || $scopedSlots.above">
-                      <slot name="above" :weapon="getWeaponToBurn()"></slot>
-                    </div>
-                    <div class="weapon-icon-wrapper">
-                      <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
-            <h1 class="text-center">Select the weapon you wish to burn</h1>
-            <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" :showReforgedWeaponsDefVal="false" :showFavoriteWeaponsDefVal="false" />
           </div>
         </div>
       </div>
@@ -394,8 +397,6 @@ export default {
           this.spin = false;
         }, 10000);
       }
-
-
     },
 
     async onReforgeWeapon() {
@@ -447,52 +448,49 @@ export default {
 }
 
 .weapon-container {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-}
-
-.sub-container {
-  flex: 1;
+  border-right: 1px solid #9e8a57;
+  border-top: 1px solid #9e8a57;
 }
 
 .confirmReforge{
   margin: 1em auto 2em;
   border-radius:0.15em;
-  box-sizing: border-box;
   text-decoration:none;
-  font-family:'Roboto',sans-serif;
-  text-transform:uppercase;
   font-weight:400;
-  box-shadow:inset 0 -0.6em 0 -0.35em rgba(0,0,0,0.17);
   text-align:center;
-  width: 14em;
+  width: 12em;
 }
 .confirmReforge:active{
   top:0.1em;
 }
 
 .weapon {
+  min-height: 12em;
+  max-height: 13em;
+  border-style: dashed;
+  border-color: #9e8a57;
   width: 12em;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
   cursor: pointer;
-  margin-left: auto;
-  margin-right: auto;
+  align-items :center;
 }
 
 .headings {
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
-  rgba(0, 0, 0, 0.12) 0px -12px 30px,
-  rgba(0, 0, 0, 0.12) 0px 4px 6px,
-  rgba(0, 0, 0, 0.17) 0px 12px 13px,
-  rgba(0, 0, 0, 0.09) 0px -3px 5px;
+  min-height: 13em;
+  min-width: 13em;
+  max-height: 13em;
+  max-width: 13em;
+  border-radius:0.15em;
+  box-sizing: border-box;
+  font-weight:400;
+  box-shadow:inset 0 -0.6em 0 -0.35em rgba(0,0,0,0.17);
   width: 13em;
-  border: 15px white;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: auto;
-  padding-bottom: 10px;
+  margin: 1em auto 2em;
+}
+
+.upgrade-container {
+  border-top: 1px solid #9e8a57;
 }
 
 .centered-modal {
@@ -508,5 +506,49 @@ export default {
   align-self: center;
   margin-left: 5px;
 }
+
+.arrow {
+  top: 18em;
+  width: 25px;
+  height: 25px;
+  border-top: 6px solid #9e8a57;
+  border-right: 6px solid #9e8a57;
+  float: right;
+}
+
+.arrow2 {
+  top: 18em;
+  width: 25px;
+  height: 25px;
+  border-top: 6px solid #9e8a57;
+  border-right: 6px solid #9e8a57;
+  float: left;
+}
+
+@media (max-width: 1000px) {
+  .mobile-flip{
+    display: flex;
+    flex-flow: column-reverse;
+  }
+}
+
+.arrow-right {
+  transform: rotate(45deg);
+}
+@media (max-width: 1000px) {
+  .arrow{
+    height: 0;
+    width: 0;
+    border-top: 0 solid #9e8a57;
+    border-right: 0 solid #9e8a57;
+  }
+  .arrow2{
+    height: 0;
+    width: 0;
+    border-top: 0 solid #9e8a57;
+    border-right: 0 solid #9e8a57;
+  }
+}
+
 
 </style>
