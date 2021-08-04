@@ -285,7 +285,6 @@ export default {
     },
 
     async onTicketForge() {
-      console.log(this.forgeTicketCount);
       if(+this.forgeTicketCount === 0) return;
       if(+this.forgeTicketCount === 1) {
         await this.forgeWithTickets();

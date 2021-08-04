@@ -964,10 +964,8 @@ export function createStore(web3: Web3) {
       },
 
       async spendTicketN({ state, dispatch }, {num}) {
-        console.log(num);
         const { Blacksmith, SkillToken, Weapons } = state.contracts();
         if(!Blacksmith || !SkillToken || !Weapons || !state.defaultAccount) return;
-        console.log(num);
         await Blacksmith.methods
           .spendTicket(num)
           .send({
