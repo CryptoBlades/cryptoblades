@@ -106,6 +106,18 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getStats(id);
     }
 
+    function getOwned() public view returns(uint256[] memory) {
+        return getOwnedBy(msg.sender);
+    }
+
+    function getOwnedBy(address owner) public view returns(uint256[] memory) {
+        uint256[] memory tokens = new uint256[](balanceOf(owner));
+        for(uint256 i = 0; i < tokens.length; i++) {
+            tokens[i] = tokenOfOwnerByIndex(owner, i);
+        }
+        return tokens;
+    }
+
     function mintForPurchase(address buyer) external restricted {
         require(totalSupply() < 10000, "Out of stock"); // temporary restriction
         mint(buyer, uint256(keccak256(abi.encodePacked(buyer, block.timestamp, blockhash(block.number - 1)))));
