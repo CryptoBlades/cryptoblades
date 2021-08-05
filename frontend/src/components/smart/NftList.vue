@@ -5,7 +5,22 @@ import { Nft } from '@/views/Market.vue';
     <div class="centered-text-div" v-if="isShop && (!nfts || nfts.length === 0)">
       <span>Nothing to buy at this time</span>
     </div>
-    <ul class="nft-grid">
+    <ul v-if="isShop" class="nft-grid">
+      <li class="nft" v-for="nft in nfts" :key="nft.nftType + nft.nftId">
+        <nft-icon :nft="nft" :isShop="isShop"/>
+        <b-button
+          variant="primary"
+          class="shop-button"
+          @click="onShieldBuy()"
+          v-if="isShop">
+          <span class="gtag-link-others" tagname="forge_weapon">
+            Buy ({{ nft.nftPrice }} SKILL)
+          </span>
+        </b-button>
+      </li>
+    </ul>
+
+    <ul v-if="!isShop" class="nft-grid">
       <li class="nft" v-for="nft in nonIgnoredNfts" :key="nft.nftType + nft.nftId">
         <nft-icon :nft="nft" :isShop="isShop"/>
         <b-button
@@ -101,7 +116,7 @@ export default {
     ...mapGetters(['nftsWithIdType']),
 
     nftsToDisplay(): NftToDisplay[] {
-      return this.nfts.map(nft => { return { type: nft.nftType, id: nft.nftId }; });
+      return this.nfts.map(nft => { console.log(nft.nftId + ' ' + nft.nftType); return { type: nft.nftType, id: nft.nftId }; });
     },
 
     displayNfts(): Nft[] {

@@ -738,11 +738,13 @@ export function createStore(web3: Web3) {
         const [
           ownedCharacterIds,
           ownedWeaponIds,
+          ownedShieldIds,
           maxStamina,
           maxDurability,
         ] = await Promise.all([
           state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
           state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
+          state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)),
           state.contracts().Characters!.methods.maxStamina().call(defaultCallOptions(state)),
           state.contracts().Weapons!.methods.maxDurability().call(defaultCallOptions(state)),
         ]);
@@ -757,11 +759,12 @@ export function createStore(web3: Web3) {
         await Promise.all([
           dispatch('fetchCharacters', ownedCharacterIds),
           dispatch('fetchWeapons', ownedWeaponIds),
+          dispatch('fetchShields', ownedShieldIds),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
           dispatch('fetchFightGasOffset'),
           dispatch('fetchFightBaseline'),
-          dispatch('updateNftIdTypes'),
+          //dispatch('updateNftIdTypes'),
         ]);
       },
 
@@ -795,21 +798,21 @@ export function createStore(web3: Web3) {
         await dispatch('fetchShields', ownedShieldIds);
       },
 
-      async updateNftIdTypes({ state, dispatch, commit }) {
-        console.log('udpating nft id types');
-        if(featureFlagStakeOnly) return;
+      // async updateNftIdTypes({ state, dispatch, commit }) {
+      //   console.log('udpating nft id types');
+      //   if(featureFlagStakeOnly) return;
 
-        // get owned ids of certain nft type
-        const ownedShieldIds = await state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)) as string[];
-        console.log('ownedShieldIds ' + ownedShieldIds);
-        // commit owned ids of certain nft type to update
-        commit('updateUserDetails', {
-          ownedShieldIds: Array.from(ownedShieldIds)
-        });
+      //   // get owned ids of certain nft type
+      //   const ownedShieldIds = await state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)) as string[];
+      //   console.log('ownedShieldIds ' + ownedShieldIds);
+      //   // commit owned ids of certain nft type to update
+      //   commit('updateUserDetails', {
+      //     ownedShieldIds: Array.from(ownedShieldIds)
+      //   });
 
-        // fetch nfts - make sure the fetch method updates generic nfts collection
-        await dispatch('fetchShields', ownedShieldIds);
-      },
+      //   // fetch nfts - make sure the fetch method updates generic nfts collection
+      //   await dispatch('fetchShields', ownedShieldIds);
+      // },
 
       async fetchSkillBalance({ state, commit, dispatch }) {
         const { defaultAccount } = state;
