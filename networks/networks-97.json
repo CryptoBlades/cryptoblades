@@ -281,8 +281,8 @@
       }
     },
     "links": {},
-    "address": "0xf5F5f1f7E633156cb75A6d9235c3e6247E29e013",
-    "transactionHash": "0xdde9d45dee3f5ebdeefae92bd76ae8ef0c0e73f8c4080e7046e8d13499169671"
+    "address": "0xE9BCfe0D3d9eFCBE3F4F44078EcB831e37317678",
+    "transactionHash": "0x924393584a651aed1fa629c6b521335d6f4892067e52a702eb77b211ae26bbf2"
   },
   "build/contracts/Characters.json": {
     "events": {
