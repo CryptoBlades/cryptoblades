@@ -21,6 +21,9 @@ module.exports = async function (deployer, network, accounts) {
   const game_GAME_ADMIN = await game.GAME_ADMIN();
   await game.grantRole(game_GAME_ADMIN, blacksmith.address);
 
+  const promos_GAME_ADMIN = await promos.GAME_ADMIN();
+  await promos.grantRole(promos_GAME_ADMIN, blacksmith.address);
+
   const market = await NFTMarket.deployed();
   await market.allowToken(shields.address);
 };
