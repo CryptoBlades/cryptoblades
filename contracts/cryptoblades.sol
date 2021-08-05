@@ -534,6 +534,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function purchaseShield() public {
+        require(!promos.getBit(msg.sender, promos.BIT_FOUNDER_SHIELD()), "Limit 1");
+        promos.setBit(msg.sender, promos.BIT_FOUNDER_SHIELD());
         _payContractConverted(msg.sender, SHIELD_SKILL_FEE);
         blacksmith.createShield(msg.sender);
     }
