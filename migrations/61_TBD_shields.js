@@ -13,7 +13,7 @@ module.exports = async function (deployer, network, accounts) {
   const shields = await deployProxy(Shields, [], { deployer });
 
   const blacksmith = await upgradeProxy(Blacksmith.address, Blacksmith, { deployer });
-  await blacksmith.migrateTo_TBD(shields.address, game.address);
+  await blacksmith.migrateTo_61c10da(shields.address, game.address);
 
   const shields_GAME_ADMIN = await shields.GAME_ADMIN();
   await shields.grantRole(shields_GAME_ADMIN, blacksmith.address);
