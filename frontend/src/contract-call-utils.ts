@@ -42,6 +42,8 @@ export async function approveFee(
     feeInSkill = feeInSkill.times(feeMultiplier);
   }
 
+  console.log(feeInSkill);
+
   try {
     feeInSkill = await cryptoBladesContract.methods
       .getSkillNeededFromUserWallet(from, feeInSkill.toString())

@@ -52,6 +52,8 @@ export default {
 
     if(leaderboardData.status === 429){
       this.$dialog.notify.error('You are making too many requests. Please try again in 1 minute.');
+      this.waitingLeaderboardOutcome = false;
+      return;
     }
 
     const leaderboards = await leaderboardData.json();

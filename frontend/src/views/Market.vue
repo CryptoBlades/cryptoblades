@@ -867,10 +867,10 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
       this.currentPage = page + 1;
 
-      if(useBlockchain === true)
-        await this.searchAllWeaponListingsThroughChain(page);
-      else
-        await this.searchAllWeaponListingsThroughAPI(page);
+      //if(useBlockchain === true)
+      //  await this.searchAllWeaponListingsThroughChain(page);
+      //else
+      await this.searchAllWeaponListingsThroughAPI(page);
 
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs
@@ -898,7 +898,7 @@ export default Vue.extend({
       });
     },
     async searchAllWeaponListingsThroughAPI(page: number) {
-      const url = new URL(apiUrl('static/market/weapon'));
+      const url = apiUrl('static/market/weapon');
       const params = {
         element: '' + this.weaponTraitFilter(),
         minStars: '' + this.weaponStarFilter(),
@@ -909,6 +909,7 @@ export default Vue.extend({
         pageNum: '' + page,
       };
 
+      console.log(url);
       url.search = new URLSearchParams(params).toString();
 
       const weaponsData = await this.fetchEnhanced(url.toString());
@@ -1233,13 +1234,19 @@ export default Vue.extend({
 
     async fetchEnhanced(url: string): Promise<any>{
       const result = await fetch(url);
-      this.checkResponse(result);
+      await this.checkResponse(result);
       return result;
     },
 
-    checkResponse(response: any) {
+    async checkResponse(response: any) {
       if(response.status === 429){
         (this as any).$dialog.notify.error('You are making too many requests. Please try again in 1 minute.');
+      }
+
+      if(response.status !== 200){
+        this.waitingMarketOutcome = false;
+        const errorBody = await response.json();
+        throw new Error(errorBody || 'error');
       }
     }
   },
