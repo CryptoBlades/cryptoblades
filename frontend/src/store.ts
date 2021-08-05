@@ -22,7 +22,6 @@ import {
 } from './feature-flags';
 import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
-import BigNumber from 'bignumber.js';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -1688,23 +1687,11 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, Blacksmith } = state.contracts();
         if(!CryptoBlades || !Blacksmith || !state.defaultAccount) return;
 
-        const callOptsWithFrom = defaultCallOptions(state);
-
-        const [skillRewards, shieldSkillFee, allowance] = await Promise.all([
-          CryptoBlades.methods.getTokenRewards().call(callOptsWithFrom),
-          Blacksmith.methods.SHIELD_SKILL_FEE().call(callOptsWithFrom),
-          SkillToken.methods.allowance(state.defaultAccount, CryptoBlades.options.address).call(callOptsWithFrom)
-        ]);
-
-        const feeInSkill = new BigNumber(shieldSkillFee).minus(skillRewards);
-
-        if(feeInSkill.gt(allowance)) {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, feeInSkill.toString())
-            .send({
-              from: state.defaultAccount
-            });
-        }
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
+          .send({
+            from: state.defaultAccount
+          });
 
         await Blacksmith.methods.purchaseShield().send({
           from: state.defaultAccount,
