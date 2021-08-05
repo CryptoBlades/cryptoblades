@@ -415,6 +415,30 @@ contract NFTMarket is
             );
     }
 
+    function getListingSlice(IERC721 _tokenAddress, uint256 start, uint256 length)
+        public
+        view
+        returns (uint256 returnedCount, uint256[] memory ids, address[] memory sellers, uint256[] memory prices)
+    {
+        returnedCount = length;
+        ids = new uint256[](length);
+        sellers = new address[](length);
+        prices = new uint256[](length);
+
+        uint index = 0;
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[address(_tokenAddress)];
+        for(uint i = start; i < start+length; i++) {
+            if(i >= listedTokens.length())
+                return(index, ids, sellers, prices);
+
+            uint256 id = listedTokens.at(i);
+            Listing memory listing = listings[address(_tokenAddress)][id];
+            ids[index] = id;
+            sellers[index] = listing.seller;
+            prices[index++] = listing.price;
+        }
+    }
+
     // ############
     // Mutative
     // ############

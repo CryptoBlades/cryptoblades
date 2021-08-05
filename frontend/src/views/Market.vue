@@ -2,7 +2,7 @@
   <div class="body main-font">
 
     <b-tabs justified>
-      <b-tab @click="clearData();browseTabActive = true">
+      <b-tab @click="clearData();browseTabActive = true;skillShopTabActive = false">
         <template #title>
           Browse NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -146,7 +146,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData(),browseTabActive = false">
+      <b-tab @click="clearData(),browseTabActive = false;skillShopTabActive = false">
         <template #title>
           Search NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
@@ -154,63 +154,59 @@
 
         <div class="row mt-3">
           <div class="col">
-            <div class="row">
-              <div class="col"></div>
-              <div class="col">
-                <input class="form-control search" type="text" v-model.trim="search" placeholder="Seller Address, NFT ID" />
-              </div>
-              <div class="col"></div>
+            <div class="d-flex justify-content-center">
+               <input class="form-control search w-50" type="text" v-model.trim="search" placeholder="Seller Address, NFT ID" />
             </div>
 
             <div class="row buttons-row mt-3">
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   :disabled="!search"
                   @click="searchListingsByNftId('character')"  class="gtag-link-others" tagname="search_character_id">Search Character ID</b-button>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   :disabled="!search"
                   @click="searchListingsByNftId('weapon')"  class="gtag-link-others" tagname="search_weapon_id">Search Weapon ID</b-button>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   :disabled="!search"
                   @click="searchListingsBySeller('weapon')"  class="gtag-link-others" tagname="weapons_seller">Weapons by Seller</b-button>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
                   :disabled="!search"
                   @click="searchListingsBySeller('character')"  class="gtag-link-others" tagname="characters_seller">Characters by Seller</b-button>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
                   @click="searchOwnListings('weapon')"  class="gtag-link-others" tagname="search_own_weapons">Search My Weapons</b-button>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
                   @click="searchOwnListings('character')"  class="gtag-link-others" tagname="search_own_characters">Search My Characters</b-button>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
                   @click="showListingSetupModal(true)" class="gtag-link-others" tagname="change_price">Change Price</b-button>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3">
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
@@ -313,7 +309,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData();loadMarketTaxes();browseTabActive = false">
+      <b-tab @click="clearData();loadMarketTaxes();browseTabActive = false;skillShopTabActive = false">
         <template #title>
           List NFTs
           <hint class="hint" text="When you list an NFT for sale, it is transferred to the<br>market until someone buys it or you cancel the sale" />
@@ -322,19 +318,19 @@
         <div class="row mt-3">
           <div class="col">
             <div class="row button-row">
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   @click="activeType = 'weapon'"  class="gtag-link-others" tagname="show_weapons_market">Show Weapons</b-button>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   @click="activeType = 'character'"  class="gtag-link-others" tagname="show_characters_market">Show Characters</b-button>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   v-if="activeType === 'weapon'"
@@ -365,7 +361,7 @@
                 </b-modal>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
                    class="gtag-link-others" tagname="show_weapons_sold"
@@ -396,7 +392,7 @@
 
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
                    class="gtag-link-others" tagname="show_characters_sold"
@@ -425,7 +421,7 @@
                 </b-modal>
               </div>
 
-              <div class="col">
+              <div class="col-4 col-md-3 col-lg-2">
               </div>
             </div>
 
@@ -458,6 +454,38 @@
           </div>
         </div>
       </b-tab>
+
+      <b-tab @click="clearData();browseTabActive = false;skillShopTabActive = true">
+        <template #title>
+          Skill Shop
+          <hint class="hint" text="You can buy various goods in here" />
+        </template>
+
+        <div>
+          <div class="row">
+            <div class="col-sm-4 centered-text">
+              <h3>Specials</h3>
+            </div>
+            <div class="col-sm-8 centered-text">
+              <h3>Shop</h3>
+            </div>
+            <img class="shop-horizontal-divider-top" src="../assets/divider4.png" />
+          </div>
+           <div class="row">
+            <div class="col-sm-4 special-offer-items">
+              <div class="special-offer-bg">
+                 <nft-list :isShop="true" :nfts="specialOffersNftList"/>
+              </div>
+            </div>
+            <div class="col-sm-8 shop-items">
+              <div class="shop-items">
+                <nft-list :isShop="true" :nfts="shopOffersNftList"/>
+              </div>
+            </div>
+            <img class="shop-horizontal-divider" src="../assets/divider4.png" />
+          </div>
+        </div>
+      </b-tab>
     </b-tabs>
   </div>
 </template>
@@ -480,7 +508,8 @@ import { market_blockchain as useBlockchain } from './../feature-flags';
 import { CharacterTransactionHistoryData, ICharacterHistory, IWeaponHistory, WeaponTransactionHistoryData } from '@/interfaces/History';
 import { getWeaponNameFromSeed } from '@/weapon-name';
 import { getCharacterNameFromSeed } from '@/character-name';
-import { fromWeiEther } from '../utils/common';
+import { fromWeiEther, apiUrl } from '../utils/common';
+import NftList from '@/components/smart/NftList.vue';
 
 type SellType = 'weapon' | 'character';
 type WeaponId = string;
@@ -504,6 +533,7 @@ interface Data {
   allListingsAmount: number;
   currentPage: number;
   browseTabActive: boolean;
+  skillShopTabActive: boolean;
   listingSellPrice: string;
   priceChangeModal: boolean;
   weaponTransactionHistoryData: WeaponTransactionHistoryData[];
@@ -520,6 +550,21 @@ const defaultLimit = 40;
 interface StoreMappedGetters {
   contracts: Contracts;
   ownCharacters: any[];
+  totalShieldSupply: 0;
+}
+
+export interface Nft {
+  nftId: string;
+  nftType: string;
+  stars?: number;
+  element?: string;
+  stat1?: string;
+  stat2?: string;
+  stat3?: string;
+  stat1Value?: number;
+  stat2Value?: number;
+  stat3Value?: number;
+  nftPrice?: number;
 }
 
 interface StoreMappedActions {
@@ -544,7 +589,7 @@ interface StoreMappedActions {
 }
 
 export default Vue.extend({
-  components: { CharacterList, WeaponGrid, Hint },
+  components: { CharacterList, WeaponGrid, Hint, NftList },
 
   data() {
     return {
@@ -564,6 +609,7 @@ export default Vue.extend({
       allListingsAmount: 0,
       currentPage: 1,
       browseTabActive: true,
+      skillShopTabActive: false,
       listingSellPrice: '',
       priceChangeModal: false,
       weaponTransactionHistoryData: [],
@@ -579,7 +625,7 @@ export default Vue.extend({
       'defaultAccount', 'weapons', 'characters', 'ownedCharacterIds', 'ownedWeaponIds'
     ]) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'contracts', 'ownCharacters'
+      'contracts', 'ownCharacters', 'totalShieldSupply'
     ]) as Accessors<StoreMappedGetters>),
     ...mapGetters(['transferCooldownOfCharacterId']),
 
@@ -620,6 +666,24 @@ export default Vue.extend({
 
     canPurchase(): boolean {
       return this.activeType === 'weapon' || this.ownCharacters.length < 4 ;
+    },
+
+    specialOffersNftList(): Nft[] {
+      const nftList = [
+        {
+          nftId: 'placeholder',
+          nftType: 'shield',
+          nftPrice: 5
+        },
+      ];
+
+      return nftList;
+    },
+
+    shopOffersNftList(): Nft[] {
+      const nftList = [] as Nft[];
+
+      return nftList;
     }
   },
 
@@ -823,7 +887,7 @@ export default Vue.extend({
     },
 
     async searchAllCharacterListingsThroughAPI(page: number) {
-      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const url = new URL(apiUrl('static/market/character'));
       const params = {
         element: '' + this.characterTraitFilter(),
         minLevel: '' + this.characterMinLevelFilter(),
@@ -898,7 +962,7 @@ export default Vue.extend({
       });
     },
     async searchAllWeaponListingsThroughAPI(page: number) {
-      const url = new URL('https://api.cryptoblades.io/static/market/weapon');
+      const url = new URL(apiUrl('static/market/weapon'));
       const params = {
         element: '' + this.weaponTraitFilter(),
         minStars: '' + this.weaponStarFilter(),
@@ -1013,7 +1077,7 @@ export default Vue.extend({
     },
 
     async searchCharacterListingsBySeller(sellerAddress: string): Promise<string[]>{
-      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const url = new URL(apiUrl('static/market/character'));
       const params = {
         element: '' + this.characterTraitFilter(),
         minLevel: '' + this.characterMinLevelFilter(),
@@ -1031,7 +1095,7 @@ export default Vue.extend({
     },
 
     async searchWeaponListingsBySeller(sellerAddress: string): Promise<string[]>{
-      const url = new URL('https://api.cryptoblades.io/static/market/weapon');
+      const url = new URL(apiUrl('static/market/weapon'));
       const params = {
         element: '' + this.weaponTraitFilter(),
         minStars: '' + this.weaponStarFilter(),
@@ -1050,7 +1114,7 @@ export default Vue.extend({
     },
 
     async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
-      const url = new URL('https://api.cryptoblades.io/static/market/transactions/' + sellerAddress);
+      const url = new URL(apiUrl(`static/market/transactions/${sellerAddress}`));
 
       const weaponsData = await fetch(url.toString());
       const weapons = await weaponsData.json();
@@ -1336,6 +1400,41 @@ export default Vue.extend({
 
 .m-top-negative-50{
   margin-top: -50px;
+}
+
+.centered-text {
+  text-align: center;
+  padding: 10px;
+}
+
+.shop-horizontal-divider-top {
+  margin-top: -10px;
+  height: fit-content;
+  width: 100%;
+}
+
+.shop-horizontal-divider {
+  width: 100%;
+}
+
+.special-offer-items {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.shop-items {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.special-offer-bg {
+  margin-top: -5px;
 }
 
 </style>
