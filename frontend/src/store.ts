@@ -1708,6 +1708,7 @@ export function createStore(web3: Web3) {
 
         await Blacksmith.methods.purchaseShield().send({
           from: state.defaultAccount,
+          gas: '500000'
         });
 
         await Promise.all([
