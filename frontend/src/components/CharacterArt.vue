@@ -1,6 +1,6 @@
 <template>
   <div class="character-art" v-tooltip="tooltipHtml(character)" ref="el">
-    <div class="trait" v-if="!portrait">
+    <div class="char-trait" v-if="!portrait">
       <span :class="trait.toLowerCase() + '-icon circle-element'"></span>
     </div>
 
@@ -636,5 +636,13 @@ export default {
   right: 0;
   text-align: center;
   color: #fff;
+}
+
+.char-trait {
+  top: -30px;
+  justify-self: center;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
 }
 </style>
