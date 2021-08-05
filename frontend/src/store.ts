@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, { isUndefined } from 'lodash';
-import { toBN, bnMinimum } from './utils/common';
+import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
 import {
@@ -1066,6 +1066,7 @@ export function createStore(web3: Web3) {
 
         await dispatch('fetchTargets', { characterId, weaponId });
 
+
         const {
           /*owner,
           character,
@@ -1077,13 +1078,18 @@ export function createStore(web3: Web3) {
           skillGain
         } = res.events.FightOutcome.returnValues;
 
+        const {gasPrice} = await web3.eth.getTransaction(res.transactionHash);
+
+        const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
+
         await dispatch('fetchWeaponDurability', weaponId);
 
         return [parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
           playerRoll,
           enemyRoll,
           xpGain,
-          skillGain
+          skillGain,
+          bnbGasUsed
         ];
       },
 
