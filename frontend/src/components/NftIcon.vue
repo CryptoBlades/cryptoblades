@@ -2,10 +2,12 @@
   <div v-bind:class="isDefault ? 'default-icon-wrapper' : 'nft-icon-wrapper'">
 
     <div v-if="!isDefault" class="nft-icon">
-      <!-- TODO: show nft with id: nftId of type: ndfType (contract address?)-->
+      <!-- show nft with id: nftId of type: nftfType (contract address?)
+        either load properties here or wherever the list of nfts is created and pass in nft object-->
       <div v-if="nft.nftType === 'shield'" class="nft-details">
         <img class="placeholder-shield" src="../assets/shield1.png"/>
-        <span class="nft-supply">Supply left: {{totalShieldSupply}}</span>
+        <span v-if="isShop" class="nft-supply">Supply left: {{totalShieldSupply}}</span>
+        <div v-if="!isShop" class="id">ID {{ nft.nftId }}</div>
       </div>
     </div>
   </div>
@@ -14,7 +16,7 @@
 <script>
 import { mapActions } from 'vuex';
 export default {
-  props: ['nft', 'isDefault'],
+  props: ['nft', 'isDefault', 'isShop'],
 
   data() {
     return {
@@ -88,5 +90,20 @@ export default {
 
 .nft-details {
   text-align: center;
+}
+
+.trait, .id {
+  position: absolute;
+}
+
+.id {
+  top: 8px;
+  right: 10px;
+  font-style: italic;
+}
+
+.trait {
+  top: 10px;
+  left: 10px;
 }
 </style>

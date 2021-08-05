@@ -5,7 +5,7 @@
     </div>
     <ul class="nft-grid">
       <li class="nft" v-for="nft in nfts" :key="nft.nftType + nft.nftId">
-        <nft-icon :nft="nft"/>
+        <nft-icon :nft="nft" :isShop="isShop"/>
         <b-button
           variant="primary"
           class="shop-button"
