@@ -463,7 +463,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(skillToken.balanceOf(msg.sender) >= fromUserWallet,
             string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(fromUserWallet))));
 
-        _payContractTokenOnly(msg.sender, mintCharacterFee);
+        uint256 convertedAmount = usdToSkill(mintCharacterFee);
+        payContractTokenOnly(msg.sender, convertedAmount);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
             _giveInGameOnlyFundsFromContractBalance(msg.sender, usdToSkill(promos.firstCharacterPromoInGameOnlyFundsGivenInUsd()));
@@ -655,9 +656,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _approveContractWeaponFor(weaponID, playerAddress);
     }
 
-    function _payContractTokenOnly(address playerAddress, int128 usdAmount) internal {
-        uint256 convertedAmount = usdToSkill(usdAmount);
-
+    function payContractTokenOnly(address playerAddress, uint256 convertedAmount) public restricted {
         (, uint256 fromTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
@@ -666,7 +665,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             );
 
         tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
-        skillToken.safeTransferFrom(playerAddress, address(this), fromUserWallet);
+        skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
     }
 
     function _payContract(address playerAddress, int128 usdAmount) internal {
@@ -687,7 +686,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
 
         tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
-        skillToken.safeTransferFrom(playerAddress, address(this), fromUserWallet);
+        skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
     }
 
     function _payPlayer(address playerAddress, int128 baseAmount) internal {
