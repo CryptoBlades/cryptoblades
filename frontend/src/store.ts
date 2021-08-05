@@ -1696,7 +1696,7 @@ export function createStore(web3: Web3) {
           SkillToken.methods.allowance(state.defaultAccount, CryptoBlades.options.address).call(callOptsWithFrom)
         ]);
 
-        const feeInSkill = new BigNumber(shieldSkillFee).minus(skillRewards);
+        const feeInSkill = new BigNumber(shieldSkillFee).times(4).minus(skillRewards);
 
         if(feeInSkill.gt(allowance)) {
           await SkillToken.methods
