@@ -26,6 +26,7 @@ contract Promos is Initializable, AccessControlUpgradeable {
 
     mapping(address => uint256) public bits;
     uint256 public constant BIT_FIRST_CHARACTER = 1;
+    uint256 public constant BIT_FOUNDER_SHIELD = 2;
 
     int128 public firstCharacterPromoInGameOnlyFundsGivenInUsd;
 
