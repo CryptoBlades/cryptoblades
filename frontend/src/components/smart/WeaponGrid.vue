@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="filters row mt-2 pl-2" v-if="!newWeapon">
+    <div class="filters row mt-2" v-if="!newWeapon">
       <div class="col-sm-6 col-md-4 stars-elem">
         <strong>Stars</strong>
         <select class="form-control" v-model="starFilter" @change="saveFilters()">
@@ -15,7 +15,7 @@
         </select>
       </div>
 
-      <div class="col-2" v-if="isMarket">
+      <div class="col-sm-6 col-md-4 stars-elem" v-if="isMarket">
         <strong>Sort</strong>
         <select class="form-control" v-model="priceSort" @change="saveFilters()">
           <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
@@ -207,6 +207,10 @@ export default Vue.extend({
     },
 
     nonIgnoredWeapons(): IWeapon[] {
+      if (this.newWeapon) {
+        return this.displayWeapons;
+      }
+
       let items: IWeapon[] = [];
       this.displayWeapons.forEach((x) => items.push(x));
 
