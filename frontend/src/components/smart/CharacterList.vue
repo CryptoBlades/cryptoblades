@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="filters row mt-2 pl-2" v-if="showFilters">
-      <div class="col-2">
+    <div class="filters row mt-2" v-if="showFilters">
+      <div class="col-sm-6 col-md-4 col-lg-3 mb-3">
         <strong>Level</strong>
         <select class="form-control" v-model="levelFilter" @change="saveFilters()">
           <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
@@ -10,21 +10,21 @@
         </select>
       </div>
 
-      <div class="col-2">
+      <div class="col-sm-6 col-md-4 col-lg-3 mb-3">
         <strong>Element</strong>
         <select class="form-control" v-model="elementFilter" @change="saveFilters()">
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
 
-      <div class="col-2" v-if="isMarket">
+      <div class="col-sm-6 col-md-4 col-lg-3 mb-3" v-if="isMarket">
         <strong>Sort</strong>
         <select class="form-control" v-model="priceSort" @change="saveFilters()">
           <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
         </select>
       </div>
 
-      <b-button variant="primary" class="ml-3 clear-filters-button" @click="clearFilters" >
+      <b-button variant="primary" class="ml-3 clear-filters-button mt-2" @click="clearFilters" >
           <span>
             Clear Filters
           </span>
@@ -184,6 +184,17 @@ export default {
 </script>
 
 <style scoped>
+
+.filters {
+   justify-content: center;
+   width: 100%;
+   max-width: 900px;
+   margin: 0 auto;
+   align-content: center;
+   border-bottom: 0.2px solid rgba(102, 80, 80, 0.1);
+   margin-bottom: 20px;
+}
+
 .character-list {
   list-style-type: none;
   margin: 0;

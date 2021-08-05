@@ -209,7 +209,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             // isCharacterOwner(char)
             // isWeaponOwner(wep) {
         fightModifierChecks(char, wep) {
-        require(fightMultiplier > 0);
+        require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight * fightMultiplier));
@@ -463,7 +463,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(skillToken.balanceOf(msg.sender) >= fromUserWallet,
             string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(fromUserWallet))));
 
-        _payContractTokenOnly(msg.sender, mintCharacterFee);
+        uint256 convertedAmount = usdToSkill(mintCharacterFee);
+        payContractTokenOnly(msg.sender, convertedAmount);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
             _giveInGameOnlyFundsFromContractBalance(msg.sender, usdToSkill(promos.firstCharacterPromoInGameOnlyFundsGivenInUsd()));
@@ -655,9 +656,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _approveContractWeaponFor(weaponID, playerAddress);
     }
 
-    function _payContractTokenOnly(address playerAddress, int128 usdAmount) internal {
-        uint256 convertedAmount = usdToSkill(usdAmount);
-
+    function payContractTokenOnly(address playerAddress, uint256 convertedAmount) public restricted {
         (, uint256 fromTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
