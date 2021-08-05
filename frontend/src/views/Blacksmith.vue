@@ -307,9 +307,10 @@ export default {
       this.x1Forge = true;
       this.disableForge = true;
 
-      setTimeout(() => {
+      // Incase the network or mm are having issues, after 1 min we reshow
+      const failbackTimeout = setTimeout(() => {
         this.disableForge = false;
-      }, 10000);
+      }, 60000);
 
       try {
         await this.mintWeapon();
@@ -318,6 +319,9 @@ export default {
         console.error(e);
         this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+      } finally {
+        clearTimeout(failbackTimeout);
+        this.disableForge = false;
       }
 
       this.viewNewWeapons(1);
@@ -331,9 +335,10 @@ export default {
       this.onError = false;
       this.x10Forge = true;
 
-      setTimeout(() => {
+      // Incase the network or mm are having issues, after 1 min we reshow
+      const failbackTimeout = setTimeout(() => {
         this.disableForge = false;
-      }, 10000);
+      }, 60000);
 
       try {
         await this.mintWeaponN({num: this.forgeMultiplier});
@@ -342,6 +347,9 @@ export default {
         console.error(e);
         this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+      } finally {
+        clearTimeout(failbackTimeout);
+        this.disableForge = false;
       }
 
       this.viewNewWeapons(this.forgeMultiplier);
