@@ -22,7 +22,6 @@ import {
 } from './feature-flags';
 import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
-import BigNumber from 'bignumber.js';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
