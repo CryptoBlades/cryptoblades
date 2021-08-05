@@ -1,5 +1,5 @@
 export interface Nft {
-  nftId: string;
+  nftId: number | string;
   nftType: string;
   stars?: number;
   element?: string;

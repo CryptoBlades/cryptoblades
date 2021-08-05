@@ -98,5 +98,5 @@ export interface IState {
   isCharacterViewExpanded: boolean;
 
   shields: Record<number, IShield>;
-  nfts: Record<string, Record<string, Nft>>;
+  nfts: Record<string, Record<number | string, Nft>>;
 }

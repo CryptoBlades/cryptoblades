@@ -147,7 +147,7 @@
         </div>
       </b-tab>
       <b-tab title="Shields">
-        <nft-list :nfts="ownShields"/>
+        <nft-list :nfts="ownNfts"/>
       </b-tab>
     </b-tabs>
   </div>
@@ -185,8 +185,8 @@ export default {
   },
 
   computed: {
-    ...mapState(['defaultAccount','ownedWeaponIds','ownShieldIds']),
-    ...mapGetters(['contracts', 'ownWeapons']),
+    ...mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds']),
+    ...mapGetters(['contracts', 'ownWeapons', 'ownShields']),
 
     canReforge() {
       return (
@@ -196,8 +196,14 @@ export default {
       );
     },
 
-    ownShields() {
-      return this.ownedWeaponIds.map(id => { return { nftId: id, nftType: 'shield'}; });
+    ownNfts() {
+      const ownNfts = [];
+
+      // get various types of nfts and push to ownNfts list
+      const shieldsIdTypes = this.ownedShieldIds.map(id => { return { nftId: id, nftType: 'shield'}; });
+
+      ownNfts.push(shieldsIdTypes);
+      return shieldsIdTypes;
     }
   },
 

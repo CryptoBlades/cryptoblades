@@ -11,8 +11,7 @@ import { Nft } from '@/views/Market.vue';
         <b-button
           variant="primary"
           class="shop-button"
-          @click="onShieldBuy()"
-          v-if="isShop">
+          @click="onShieldBuy()">
           <span class="gtag-link-others" tagname="forge_weapon">
             Buy ({{ nft.nftPrice }} SKILL)
           </span>
@@ -23,29 +22,20 @@ import { Nft } from '@/views/Market.vue';
     <ul v-if="!isShop" class="nft-grid">
       <li class="nft" v-for="nft in nonIgnoredNfts" :key="nft.nftType + nft.nftId">
         <nft-icon :nft="nft" :isShop="isShop"/>
-        <b-button
-          variant="primary"
-          class="shop-button"
-          @click="onShieldBuy()"
-          v-if="isShop">
-          <span class="gtag-link-others" tagname="forge_weapon">
-            Buy ({{ nft.nftPrice }} SKILL)
-          </span>
-        </b-button>
       </li>
     </ul>
   </div>
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import NftIcon from '../NftIcon.vue';
 import { Nft } from '../../views/Market.vue';
 import { PropType } from 'vue';
 
 interface NftToDisplay {
-  type: string;
-  id: string;
+  nftType: string;
+  nftId: string;
 }
 
 interface Data {
@@ -112,59 +102,18 @@ export default {
   },
 
   computed: {
-    ...mapState(['ownedShieldIds']),
     ...mapGetters(['nftsWithIdType']),
 
     nftsToDisplay(): NftToDisplay[] {
-      return this.nfts.map(nft => { console.log(nft.nftId + ' ' + nft.nftType); return { type: nft.nftType, id: nft.nftId }; });
+      return this.nfts;
     },
 
     displayNfts(): Nft[] {
-      return this.nftsWithIdType(this.nftsToDisplay).filter(Boolean);
+      return this.nftsWithIdType(this.nftsToDisplay);
     },
 
     nonIgnoredNfts(): Nft[] {
-      let items: Nft[] = [];
-      this.displayNfts.forEach((x) => items.push(x));
-
-      const allIgnore: string[] = [];
-      if (this.ignore) {
-        allIgnore.push((this.ignore || '').toString());
-      }
-      // if (!this.showFavoriteNfts) {
-      //   for (const key in this.favorites) {
-      //     allIgnore.push(key);
-      //   }
-      // }
-      items = items.filter((x) => allIgnore.findIndex((y) => y === x.nftId.toString()) < 0);
-
-
-      if (this.starFilter) {
-        items = items.filter((x) => x.stars === +this.starFilter - 1);
-      }
-
-      if (this.elementFilter) {
-        items = items.filter((x) => x.element?.includes(this.elementFilter));
-      }
-
-      // if (!this.showReforgedWeapons) {
-      //   items = items.filter((x) => x.bonusPower === 0);
-      // }
-
-      if (this.showLimit > 0 && items.length > this.showLimit) {
-        items = items.slice(0, this.showLimit);
-      }
-
-      const favoriteNfts: Nft[] = [];
-      // for (const key in this.favorites) {
-      //   const i = items.findIndex((y) => y.id === +key);
-      //   if (i !== -1) {
-      //     favoriteWeapons.push(items[i]);
-      //     items.splice(i, 1);
-      //   }
-      // }
-
-      return favoriteNfts.concat(items);
+      return this.displayNfts;
     },
   },
 

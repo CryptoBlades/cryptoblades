@@ -558,12 +558,12 @@ export interface Nft {
   nftType: string;
   stars?: number;
   element?: string;
-  stat1Trait?: string;
-  stat2Trait?: string;
-  stat3Trait?: string;
-  stat1?: number;
-  stat2?: number;
-  stat3?: number;
+  stat1?: string;
+  stat2?: string;
+  stat3?: string;
+  stat1Value?: number;
+  stat2Value?: number;
+  stat3Value?: number;
   nftPrice?: number;
 }
 
@@ -586,7 +586,6 @@ interface StoreMappedActions {
   cancelMarketListing(payload: { nftContractAddr: string, tokenId: string }): Promise<{ seller: string, nftID: string }>;
   purchaseMarketListing(payload: { nftContractAddr: string, tokenId: string, maxPrice: string }): Promise<{ seller: string, nftID: string, price: string }>;
   fetchSellerOfNft(payload: { nftContractAddr: string, tokenId: string }): Promise<string>;
-  fetchTotalShieldSupply(): Promise<number>;
 }
 
 export default Vue.extend({
@@ -704,7 +703,6 @@ export default Vue.extend({
       'cancelMarketListing',
       'purchaseMarketListing',
       'fetchSellerOfNft',
-      'fetchTotalShieldSupply',
     ]) as StoreMappedActions),
 
     clearData() {

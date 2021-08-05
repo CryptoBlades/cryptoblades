@@ -11,7 +11,7 @@ export enum ShieldTrait {
   DEX = 1,
   CHA = 2,
   INT = 3,
-  PWR = 4
+  DEF = 4
 }
 export interface IShield {
   id: number;
