@@ -1,5 +1,6 @@
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
+import Web3 from 'web3';
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
 BigNumber.config({ EXPONENTIAL_AT: 100 });
@@ -29,10 +30,10 @@ export const fromWeiEther = (value: string|BigNumber): string => {
   return new BigNumber(value).div('1000000000000000000').toFixed();
 };
 
-export const gasUsedToBnb = (gasUsed: number): string =>{
-  const gweiPrice = 5;
+export const gasUsedToBnb = (gasUsed: number, gasPrice: string): string => {
+  const gasCost = gasUsed * Number(gasPrice);
 
-  const gweiToBnbFactor = 1000000000;
+  const bnbGasCost =  Web3.utils.fromWei(gasCost.toString()).toString();
 
-  return ((gasUsed * gweiPrice) / gweiToBnbFactor).toFixed(6);
+  return  bnbGasCost;
 };

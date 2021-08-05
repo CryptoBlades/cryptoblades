@@ -1078,7 +1078,9 @@ export function createStore(web3: Web3) {
           skillGain
         } = res.events.FightOutcome.returnValues;
 
-        const bnbGasUsed = gasUsedToBnb(res.gasUsed);
+        const {gasPrice} = await web3.eth.getTransaction(res.transactionHash);
+
+        const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
 
         await dispatch('fetchWeaponDurability', weaponId);
 
