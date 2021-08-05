@@ -656,7 +656,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _approveContractWeaponFor(weaponID, playerAddress);
     }
 
-    function payContractTokenOnly(address playerAddress, uint256 convertedAmount) internal {
+    function payContractTokenOnly(address playerAddress, uint256 convertedAmount) public restricted {
         (, uint256 fromTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
