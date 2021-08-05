@@ -146,7 +146,10 @@
           </div>
         </div>
       </b-tab>
-      <b-tab title="Shields">
+      <b-tab>
+        <template #title>
+          Shields <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`You can buy shield in Skill shop tab in the market!`"/>
+        </template>
         <nft-list :nfts="ownNfts"/>
       </b-tab>
     </b-tabs>

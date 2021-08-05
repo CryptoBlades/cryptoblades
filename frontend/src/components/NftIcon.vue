@@ -2,13 +2,13 @@
   <div v-bind:class="isDefault ? 'default-icon-wrapper' : 'nft-icon-wrapper'">
 
     <div v-if="!isDefault" class="nft-icon"
-      v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
+      v-tooltip="!isShop && { content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
       @mouseover="hover = !isMobile() || true"
       @mouseleave="hover = !isMobile()"
     >
       <!-- show nft with id: nftId of type: nftfType (contract address?)
         either load properties here or wherever the list of nfts is created and pass in nft object-->
-      <div v-if="nft.nftType === 'shield'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
+      <div v-if="nft.nftType === 'shield'" class="nft-details">
         <img class="placeholder-shield" src="../assets/shield1.png"/>
 
         <div v-if="!isShop" class="trait">
@@ -19,7 +19,7 @@
         <span v-if="isShop" class="nft-supply">Supply left: {{totalShieldSupply}}</span>
         <div v-if="!isShop" class="id">ID {{ nft.nftId }}</div>
 
-        <div class="stats">
+        <div v-if="!isShop" class="stats">
           <div v-if="nft.stat1Value">
             <span :class="nft.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
             <span :class="nft.stat1.toLowerCase()">{{ nft.stat1 }} +{{ nft.stat1Value }}</span>
@@ -159,35 +159,5 @@ export default {
 .stats {
   top: 35px;
   left: 10px;
-}
-
-.glow-container {
-  height: 100%;
-  width: 100%;
-}
-
-.glow-container {
-  border-radius: 5px;
-  z-index: 540;
-}
-
-.glow-0 {
-  animation: glow-4 2000ms ease-out infinite alternate;
-}
-
-.glow-1 {
-  animation: glow-1 2000ms ease-out infinite alternate;
-}
-
-.glow-2 {
-  animation: glow-2 2000ms ease-out infinite alternate;
-}
-
-.glow-3 {
-  animation: glow-3 2000ms ease-out infinite alternate;
-}
-
-.glow-4 {
-  animation: glow-4 2000ms ease-out infinite alternate;
 }
 </style>
