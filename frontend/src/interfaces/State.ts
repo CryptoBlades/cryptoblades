@@ -2,6 +2,8 @@ import { ICharacter } from './Character';
 import { IWeapon } from './Weapon';
 import { ITarget } from './Target';
 import { Contracts } from './Contracts';
+import { Nft } from './Nft';
+import { IShield } from './Shield';
 
 export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2';
 export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2'];
@@ -68,6 +70,7 @@ export interface IState {
   directStakeBonusPercent: number;
   ownedCharacterIds: number[];
   ownedWeaponIds: number[];
+  ownedShieldIds: number[];
   maxStamina: number;
 
   currentCharacterId: number | null;
@@ -93,4 +96,7 @@ export interface IState {
 
   isInCombat: boolean;
   isCharacterViewExpanded: boolean;
+
+  shields: Record<number, IShield>;
+  nfts: Record<string, Record<string, Nft>>;
 }

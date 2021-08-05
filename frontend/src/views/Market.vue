@@ -553,10 +553,18 @@ interface StoreMappedGetters {
   totalShieldSupply: 0;
 }
 
-interface Nft {
+export interface Nft {
   nftId: string;
   nftType: string;
-  nftPrice: number;
+  stars?: number;
+  element?: string;
+  stat1Trait?: string;
+  stat2Trait?: string;
+  stat3Trait?: string;
+  stat1?: number;
+  stat2?: number;
+  stat3?: number;
+  nftPrice?: number;
 }
 
 interface StoreMappedActions {
