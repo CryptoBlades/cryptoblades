@@ -25,114 +25,104 @@
                     PAY UP CRYPTOKNIGHT!
                   </template>
                   <b-form-input type="number" :max="10000"
-                    class="modal-input" v-model="listingSellPrice" placeholder="Skill to stake for PvP" />
+                    class="modal-input" placeholder="Skill to stake for PvP" />
                 </b-modal>
 
             </div>
           <b-container fluid>
             <b-row>
-              <b-col cols="6" class="weapon-selection">
+              <b-col cols="6" class = "character-selection">
                   <div>
-                    <div class="header-row weapon-header">
-                    <h1>WEAPONS</h1>
-                    </div>
-                    <b-carousel
-                    id="carousel"
-                    controls
-                    :interval="interval">
-                    <b-carousel-slide>
-                        <template #img>
-                            <img class="character-card"
-                              :src="weap1"
-                              alt="image slot"
-                            >
-                        </template>
-                    </b-carousel-slide>
-
-                    <b-carousel-slide>
-                        <template #img>
-                            <img
-                              class="character-card"
-                              :src="weap2"
-                              alt="image slot"
-                            >
-                        </template>
-                    </b-carousel-slide>
-
-                    <b-carousel-slide>
-                        <template #img>
-                            <img
-                              class="character-card"
-                              :src="weap3"
-                              alt="image slot"
-                            >
-                        </template>
-                    </b-carousel-slide>
-
-                    <b-carousel-slide>
-                        <template #img>
-                              <img
-                                class="character-card"
-                                :src="weap4"
-                                alt="image slot"
-                                    >
-                        </template>
-                    </b-carousel-slide>
-                  </b-carousel>
-                  </div>
-              </b-col>
-
-              <b-col cols="6" class = "character-container">
-                  <div>
-                      <div class="header-row weapon-header">
+                      <div class="header-row character-header">
                       <h1>CHARACTER</h1>
                       </div>
-                  <b-carousel
-                    id="carousel"
-                    controls
-                    :interval="interval">
-                    <b-carousel-slide>
-                        <template #img>
-                            <img class="character-card"
-                              :src="img1"
-                              alt="image slot"
-                            >
-                        </template>
-                    </b-carousel-slide>
-
-                    <b-carousel-slide>
-                        <template #img>
-                            <img
-                              class="character-card"
-                              :src="img2"
-                              alt="image slot"
-                            >
-                        </template>
-                    </b-carousel-slide>
-
-                    <b-carousel-slide>
-                        <template #img>
-                            <img
-                              class="character-card"
-                              :src="img3"
-                              alt="image slot"
-                            >
-                        </template>
-                    </b-carousel-slide>
-
-                    <b-carousel-slide>
-                        <template #img>
-                              <img
-                                class="character-card"
-                                :src="img4"
-                                alt="image slot"
-                                    >
-                        </template>
-                    </b-carousel-slide>
-                  </b-carousel>
+                          <b-tabs justified content-class="mt-3" align="center">
+                            <b-tab v-for="character in getCharacterList(1)" :key="character.id" class="drag-el">
+                              <template #title>
+                                  {{character.name}}
+                              </template>
+                              <b-row>
+                              <b-col cols="4">
+                                <img
+                                  class="inventory-slot"
+                                  alt="Helmet">
+                                <img
+                                  class="inventory-slot"
+                                  alt="Armor">
+                                <img
+                                  class="inventory-slot"
+                                  alt="Boots">
+                              </b-col>
+                              <b-col cols="4">
+                                <img
+                                  class="character-card"
+                                  :src="character.img">
+                              </b-col>
+                              <b-col cols="4">
+                                <img
+                                  class="inventory-slot"
+                                  alt="?">
+                                <img
+                                  class="inventory-slot"
+                                  alt="Sword">
+                                <img
+                                  class="inventory-slot"
+                                  alt="Shield">
+                              </b-col>
+                              </b-row>
+                            </b-tab>
+                          </b-tabs>
                   </div>
               </b-col>
-
+              <b-col cols="6" class="weapon-selection">
+                  <div>
+                      <div class="header-row inventory-header">
+                      <h1>INVENTORY</h1>
+                      </div>
+                          <b-tabs justified content-class="mt-3" align="center">
+                            <b-tab v-for="inventory in getInventoryList(1)" :key="inventory.id" class="drag-el">
+                              <template #title>
+                                  {{inventory.name}}
+                              </template>
+                              <b-row>
+                              <b-col cols="3">
+                              </b-col>
+                              <b-col cols="6">
+                                <img
+                                  class="inventory-box"
+                                  :alt="inventory.name">
+                                <img
+                                  class="inventory-box"
+                                  :alt="inventory.name">
+                                <img
+                                  class="inventory-box"
+                                  :alt="inventory.name">
+                                  <img
+                                  class="inventory-box"
+                                  :alt="inventory.name">
+                                <img
+                                  class="inventory-box"
+                                  :alt="inventory.name">
+                                <img
+                                  class="inventory-box"
+                                  :alt="inventory.name">
+                                  <img
+                                  class="inventory-box"
+                                  :alt="inventory.name">
+                                <img
+                                  class="inventory-box"
+                                  :alt="inventory.name">
+                                <img
+                                  class="inventory-box"
+                                  :alt="inventory.name">
+                              </b-col>
+                              <b-col cols="3">
+                              </b-col>
+                              </b-row>
+                            </b-tab>
+                          </b-tabs>
+                  </div>
+              </b-col>
             </b-row>
           </b-container>
         </b-tab>
@@ -196,7 +186,8 @@ import weap1 from '../assets/placeholder/sword-placeholder-0.png';
 import weap2 from '../assets/placeholder/sword-placeholder-1.png';
 import weap3 from '../assets/placeholder/sword-placeholder-2.png';
 import weap4 from '../assets/placeholder/sword-placeholder-3.png';
-import {BCarousel, BCarouselSlide, BModal} from 'bootstrap-vue';
+import {BModal} from 'bootstrap-vue';
+
 export default {
 
   data() {
@@ -216,10 +207,6 @@ export default {
       pvpQueueFlag: false,
       pvpArenaFlag: false,
       enemiesFound: false,
-      img1,
-      img2,
-      img3,
-      img4,
       weap1,
       weap2,
       weap3,
@@ -298,12 +285,33 @@ export default {
       this.pvpQueueFlag = false;
       this.pvpArenaFlag = false;
     },
+    getCharacterList(){
+      const characters = [
+        {id: '0', name: 'Tirasthu Lithuir', img: img1},
+        {id: '1', name: 'Voir Ghuru', img: img2},
+        {id: '2', name: 'Tutu Whykie', img: img3},
+        {id: '3', name: 'Poli Truiy', img: img4},
+      ];
+
+      return characters;
+    },
+    getInventoryList(){
+      const characters = [
+        {id: '0', name: 'Sword', img: img1},
+        {id: '1', name: 'Shield', img: img2},
+        {id: '2', name: 'Helmet', img: img3},
+        {id: '3', name: 'Boot', img: img4},
+        {id: '4', name: 'Armor', img: img1},
+        {id: '5', name: 'Others', img: img2},
+        {id: '6', name: '?', img: img3},
+      ];
+
+      return characters;
+    }
   },
 
   components: {
     BigButton,
-    BCarousel,
-    BCarouselSlide,
     BModal,
   },
 };
@@ -312,12 +320,35 @@ export default {
 <style>
 
 .character-card{
-  display: block;
+  min-width: 200px;
+  min-height: 300px;
+  max-height: 300px;
+  max-width: 200px;
+  border : 1px solid #9e8a57;
+}
+
+.inventory-slot{
+  min-width: 60px;
+  min-height: 60px;
+  max-height: 60px;
+  max-width: 60px;
+  border : 1px solid #9e8a57;
+  display:block;
   margin-left: auto;
   margin-right: auto;
-  width: 50%;
-  height: 100% + 100px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
+
+.inventory-box{
+  min-width: 60px;
+  min-height: 60px;
+  max-height: 60px;
+  max-width: 60px;
+  border : 1px solid #9e8a57;
+  margin: 10px;
+}
+
 .find-button {
   display: block;
   margin: 0 auto;
@@ -351,12 +382,27 @@ export default {
 }
 
 .weapon-selection {
-  border-right : 1px solid #9e8a57;
   padding-left: 1vw;
   padding-right: 1vw;
 }
 
+.character-selection {
+  border-right : 1px solid #9e8a57;
+}
+
 .weapon-header {
+    justify-content: center;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.inventory-header{
+    justify-content: center;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.character-header {
     justify-content: center;
     margin-bottom: 20px;
     margin-top: 20px;
