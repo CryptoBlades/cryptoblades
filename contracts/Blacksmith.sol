@@ -31,6 +31,11 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         randoms = _randoms;
     }
 
+    function migrateRandoms(IRandoms _newRandoms) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        randoms = _newRandoms;
+    }
+
     /* ========== VIEWS ========== */
 
     /* ========== MUTATIVE FUNCTIONS ========== */
