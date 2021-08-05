@@ -81,7 +81,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
         require(!promos.getBit(msg.sender, BIT_FOUNDER_SHIELD), "Limit 1");
         promos.setBit(msg.sender, BIT_FOUNDER_SHIELD);
-        game.payContractConverted(msg.sender, SHIELD_SKILL_FEE);
+        game.payContractTokenOnly(msg.sender, SHIELD_SKILL_FEE);
         shields.mintForPurchase(msg.sender);
     }
 
