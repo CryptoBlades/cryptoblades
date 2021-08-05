@@ -207,6 +207,10 @@ export default Vue.extend({
     },
 
     nonIgnoredWeapons(): IWeapon[] {
+      if (this.newWeapon) {
+        return this.displayWeapons;
+      }
+
       let items: IWeapon[] = [];
       this.displayWeapons.forEach((x) => items.push(x));
 
