@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, { isUndefined } from 'lodash';
-import { toBN, bnMinimum } from './utils/common';
+import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
 import {
@@ -13,7 +13,7 @@ import {
   IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
+import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
@@ -1066,6 +1066,7 @@ export function createStore(web3: Web3) {
 
         await dispatch('fetchTargets', { characterId, weaponId });
 
+
         const {
           /*owner,
           character,
@@ -1077,13 +1078,18 @@ export function createStore(web3: Web3) {
           skillGain
         } = res.events.FightOutcome.returnValues;
 
+        const {gasPrice} = await web3.eth.getTransaction(res.transactionHash);
+
+        const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
+
         await dispatch('fetchWeaponDurability', weaponId);
 
         return [parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
           playerRoll,
           enemyRoll,
           xpGain,
-          skillGain
+          skillGain,
+          bnbGasUsed
         ];
       },
 
@@ -1585,6 +1591,26 @@ export function createStore(web3: Web3) {
 
         commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
         return xpCharaIdPairs;
+      },
+
+      async purchaseShield({ state }) {
+        const { CryptoBlades, SkillToken, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !state.defaultAccount) return;
+
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          Blacksmith,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          methods => methods.SHIELD_SKILL_FEE()
+        );
+
+        await Blacksmith.methods.purchaseShield().send({
+          from: state.defaultAccount,
+        });
       },
 
       async claimTokenRewards({ state, dispatch }) {
