@@ -27,19 +27,9 @@ import { Nft } from '@/views/Market.vue';
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { mapActions, mapGetters } from 'vuex';
 import NftIcon from '../NftIcon.vue';
-import { Nft } from '../../views/Market.vue';
-import { PropType } from 'vue';
-
-interface Data {
-  starFilter: string;
-  elementFilter: string;
-  favorites: Record<number, boolean>;
-  priceSort: string;
-  showFavoriteNfts: boolean;
-}
 
 const sorts = [
   { name: 'Any', dir: '' },
@@ -48,38 +38,7 @@ const sorts = [
 ];
 
 export default {
-  props: {
-    nfts: {
-      type: Array as PropType<Nft[]>,
-      default: [] as Nft[]
-    },
-    showGivenNfts: {
-      type: Boolean,
-      default: false,
-    },
-    isShop: {
-      type: Boolean,
-      default: false,
-    },
-    ignore: {
-      // this forces Typescript to consider a prop a certain type
-      // without us specifying a "type" property;
-      // Vue's "type" property is not as flexible as we need it here
-      validator(x: string | number | null) {
-        void x;
-        return true;
-      },
-      default: null,
-    },
-    showFavoriteNftsDefVal: {
-      type: Boolean,
-      default: true,
-    },
-    showLimit: {
-      type: Number,
-      default: 0,
-    },
-  },
+  props: ['nfts','showGivenNfts','isShop'],
 
   data() {
     return {
@@ -88,8 +47,8 @@ export default {
       favorites: {},
       priceSort: '',
       sorts,
-      showFavoriteNfts: true,
-    } as Data;
+      showFavoriteNfts: true
+    };
   },
 
   components: {
@@ -99,12 +58,16 @@ export default {
   computed: {
     ...mapGetters(['nftsWithIdType']),
 
-    displayNfts(): Nft[] {
-      return this.nftsWithIdType();
+    nftsToDisplay() {
+      return this.nfts;
     },
 
-    nonIgnoredNfts(): Nft[] {
-      return this.displayNfts as unknown as Nft[];
+    displayNfts() {
+      return this.nftsWithIdType(this.nftsToDisplay);
+    },
+
+    nonIgnoredNfts() {
+      return this.displayNfts;
     },
   },
 
