@@ -15,8 +15,8 @@
           <div class="message-box" v-if="!currentCharacter">You need to select a character to do battle.</div>
 
           <div class="row">
-            <div class="col-12 col-md-2 offset-md-5">
-              <div class="message-box" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
+            <div class="col-12 col-md-2 offset-md-5 text-center">
+              <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
                 You need {{ staminaPerFight }} stamina to do battle.
                 <h4>Stamina Cost Per Fight</h4>
                 <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()" class="ml-3"></b-form-select>
@@ -337,7 +337,7 @@ export default {
 
     setStaminaSelectorValues() {
       if(this.currentCharacterStamina < 40) {
-        return [{ value: null, text: 'You need more stamina to fight!', disabled: true }];
+        return [{ value: this.fightMultiplier, text: 'You need more stamina to fight!', disabled: true}];
       }
 
       const choices = [
