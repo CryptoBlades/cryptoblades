@@ -8,7 +8,7 @@
     "lint": "vue-cli-service lint",
     "start": "npm run serve",
     "crush-images": "node scripts/crush-images",
-    "copy:abi": "copyfiles -f \"../build/contracts/*.json\" ./public/abi"
+    "copy:abi": "copyfiles -f \"../build/contracts/*.json\" ./dist/abi"
   },
   "dependencies": {
     "@metamask/onboarding": "^1.0.1",
