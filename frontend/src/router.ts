@@ -37,6 +37,7 @@ function createRouter() {
   }
 
   const router = new VueRouter({
+    mode: 'history',
     routes: [
       { path: '/', name: 'plaza', component: Plaza },
       { path: '/blacksmith', name: 'blacksmith', component: Blacksmith },

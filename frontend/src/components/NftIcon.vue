@@ -92,7 +92,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .nft-icon {
   height: 100%;
   width: 100%;
