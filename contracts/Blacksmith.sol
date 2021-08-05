@@ -38,10 +38,11 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         randoms = _randoms;
     }
 
-    function migrateTo_TBD(Shields _shields) external {
+    function migrateTo_TBD(Shields _shields, CryptoBlades _game) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         shields = _shields;
+        game = _game;
     }
 
     /* ========== VIEWS ========== */
