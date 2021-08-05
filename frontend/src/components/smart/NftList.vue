@@ -33,11 +33,6 @@ import NftIcon from '../NftIcon.vue';
 import { Nft } from '../../views/Market.vue';
 import { PropType } from 'vue';
 
-interface NftToDisplay {
-  nftType: string;
-  nftId: string;
-}
-
 interface Data {
   starFilter: string;
   elementFilter: string;
@@ -93,7 +88,7 @@ export default {
       favorites: {},
       priceSort: '',
       sorts,
-      showFavoriteNfts: this.showFavoriteNftsDefVal,
+      showFavoriteNfts: true,
     } as Data;
   },
 
@@ -104,16 +99,12 @@ export default {
   computed: {
     ...mapGetters(['nftsWithIdType']),
 
-    nftsToDisplay(): NftToDisplay[] {
-      return this.nfts;
-    },
-
     displayNfts(): Nft[] {
-      return this.nftsWithIdType(this.nftsToDisplay);
+      return this.nftsWithIdType();
     },
 
     nonIgnoredNfts(): Nft[] {
-      return this.displayNfts;
+      return this.displayNfts as unknown as Nft[];
     },
   },
 
