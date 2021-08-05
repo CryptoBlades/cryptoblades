@@ -8,7 +8,7 @@ const Promos = artifacts.require("Promos");
 
 module.exports = async function (deployer, network, accounts) {
   const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
-  await upgradeProxy(Promos.address, Promos, { deployer });
+  const promos = await upgradeProxy(Promos.address, Promos, { deployer });
 
   const shields = await deployProxy(Shields, [], { deployer });
 
