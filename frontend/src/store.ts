@@ -13,7 +13,7 @@ import {
   IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
+import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
@@ -1588,10 +1588,21 @@ export function createStore(web3: Web3) {
       },
 
       async purchaseShield({ state }) {
-        const { CryptoBlades } = state.contracts();
-        if(!CryptoBlades) return;
+        const { CryptoBlades, SkillToken, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !state.defaultAccount) return;
 
-        await CryptoBlades.methods.purchaseShield().send({
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          Blacksmith,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          methods => methods.SHIELD_SKILL_FEE()
+        );
+
+        await Blacksmith.methods.purchaseShield().send({
           from: state.defaultAccount,
         });
       },
