@@ -515,14 +515,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(num > 0 && num <= 1000);
         _payContract(msg.sender, mintWeaponFee * num);
         for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(_getMintSeed()))));
+            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(_getMintSeed(), msg.sender))));
             _updateMintSeed();
         }
     }
 
     function mintWeapon() public onlyNonContract oncePerBlock(msg.sender)  {
         _payContract(msg.sender, mintWeaponFee);
-        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(_getMintSeed()))));
+        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(_getMintSeed(), msg.sender))));
         _updateMintSeed();
     }
 
