@@ -489,7 +489,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         public
         onlyNonContract
         oncePerBlock(msg.sender)
-        requestPayFromPlayer(mintWeaponFee * num)
     {
         require(num > 0 && num <= 1000);
         _payContract(msg.sender, mintWeaponFee * num);
@@ -499,7 +498,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
+    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender) {
         _payContract(msg.sender, mintWeaponFee);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
@@ -507,13 +506,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function burnWeapon(uint256 burnID) public
-            isWeaponOwner(burnID) requestPayFromPlayer(burnWeaponFee) {
+            isWeaponOwner(burnID) {
         _payContract(msg.sender, burnWeaponFee);
         weapons.burn(burnID);
     }
 
     function burnWeapons(uint256[] memory burnIDs) public
-            isWeaponsOwner(burnIDs) requestPayFromPlayer(burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length))) {
+            isWeaponsOwner(burnIDs) {
         _payContract(msg.sender, burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length)));
         for(uint i = 0; i < burnIDs.length; i++) {
             weapons.burn(burnIDs[i]);
@@ -521,13 +520,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
-            isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
+            isWeaponOwner(reforgeID) isWeaponOwner(burnID) {
         _payContract(msg.sender, reforgeWeaponFee);
         weapons.reforge(reforgeID, burnID);
     }
 
     function reforgeWeaponWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) public
-            isWeaponOwner(reforgeID) requestPayFromPlayer(reforgeWeaponWithDustFee) {
+            isWeaponOwner(reforgeID) {
         _payContract(msg.sender, reforgeWeaponWithDustFee);
         weapons.reforgeWithDust(reforgeID, amountLB, amount4B, amount5B);
     }
@@ -613,25 +612,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _;
     }
 
-    modifier requestPayFromPlayer(int128 usdAmount) {
-        _requestPayFromPlayer(usdAmount);
-        _;
-    }
-
-    function _requestPayFromPlayer(int128 usdAmount) internal view {
-        uint256 skillAmount = usdToSkill(usdAmount);
-
-        (,, uint256 fromUserWallet) =
-            getSkillToSubtract(
-                inGameOnlyFunds[msg.sender],
-                tokenRewards[msg.sender],
-                skillAmount
-            );
-
-        require(skillToken.balanceOf(msg.sender) >= fromUserWallet,
-            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(skillAmount))));
-    }
-
     function payContract(address playerAddress, int128 usdAmount) public restricted {
         _payContract(playerAddress, usdAmount);
     }
@@ -685,7 +665,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 convertedAmount
             );
 
-        // must use requestPayFromPlayer modifier to approve on the initial function!
+        require(skillToken.balanceOf(playerAddress) >= fromUserWallet,
+            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(convertedAmount))));
+
         totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
         inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
 
