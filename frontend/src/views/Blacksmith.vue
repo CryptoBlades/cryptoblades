@@ -246,13 +246,20 @@ export default {
       try {
         await this.mintWeapon();
 
-        this.viewNewWeapons(1);
+      } catch (e) {
+        console.error(e);
+        this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+      } finally {
+        this.disableForge = false;
+      }
 
+      try{
+        this.viewNewWeapons(1);
       } catch (e) {
         console.error(e);
         this.onError = true;
-        this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
-      } finally {
+        this.$dialog.notify.error('This one belongs to viewNewWeapons x1');
+      }finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
       }
@@ -274,13 +281,20 @@ export default {
       try {
         await this.mintWeaponN({num: this.forgeMultiplier});
 
-        this.viewNewWeapons(this.forgeMultiplier);
+      } catch (e) {
+        console.error(e);
+        this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+      } finally {
+        this.disableForge = false;
+      }
 
+      try{
+        this.viewNewWeapons(this.forgeMultiplier);
       } catch (e) {
         console.error(e);
         this.onError = true;
-        this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
-      } finally {
+        this.$dialog.notify.error('This one belongs to viewNewWeapons x10');
+      }finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
       }
@@ -311,8 +325,17 @@ export default {
       });
     },
 
-    viewNewWeapons(newWeaponCount = 1){
-      this.newForged = this.ownedWeaponIds.slice(-newWeaponCount);
+    viewNewWeapons(){
+      this.newForged = [];
+      this.ownedWeaponIds.forEach(x => {
+        this.newForged.push(x);
+      });
+      if(this.x1Forge === true){
+        this.newForged.splice(0,this.ownedWeaponIds.length-2);
+      }
+      else if(this.x10Forge === true){
+        this.newForged.splice(0,this.ownedWeaponIds.length-11);
+      }
 
       // eslint-disable-next-line no-constant-condition
       if (this.newForged.length > 0 && !this.onError){
