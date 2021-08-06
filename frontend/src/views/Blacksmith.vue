@@ -180,8 +180,6 @@ export default {
       forgeMultiplier: 10,
       newForged: [],
       currentListofWeapons: [],
-      x10Forge: false,
-      x1Forge: false,
       onError: false,
       spin: false,
     };
@@ -235,7 +233,7 @@ export default {
 
       this.getCurrentListofWeapons();
       this.onError = false;
-      this.x1Forge = true;
+      this.forgeMultiplier = 1;
       this.disableForge = true;
 
       // Incase the network or mm are having issues, after 1 min we reshow
@@ -258,7 +256,6 @@ export default {
       } catch (e) {
         console.error(e);
         this.onError = true;
-        this.$dialog.notify.error('This one belongs to viewNewWeapons x1');
       }finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
@@ -271,7 +268,7 @@ export default {
 
       this.getCurrentListofWeapons();
       this.onError = false;
-      this.x10Forge = true;
+      this.forgeMultiplier = 10;
 
       // Incase the network or mm are having issues, after 1 min we reshow
       const failbackTimeout = setTimeout(() => {
@@ -293,7 +290,6 @@ export default {
       } catch (e) {
         console.error(e);
         this.onError = true;
-        this.$dialog.notify.error('This one belongs to viewNewWeapons x10');
       }finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
@@ -330,10 +326,10 @@ export default {
       this.ownedWeaponIds.forEach(x => {
         this.newForged.push(x);
       });
-      if(this.x1Forge === true){
+      if(this.forgeMultiplier === 1){
         this.newForged.splice(0,this.ownedWeaponIds.length-2);
       }
-      else if(this.x10Forge === true){
+      else if(this.forgeMultiplier === 10){
         this.newForged.splice(0,this.ownedWeaponIds.length-11);
       }
 
