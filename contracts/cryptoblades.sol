@@ -482,6 +482,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
+    function hasPaidForMint() public view returns(bool){
+        return (mintPayments[msg.sender].count > 0);
+    }
+
     function payForMint(address nftAddress, uint count) public {
         _discardPaymentIfExpired();
 
