@@ -716,6 +716,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
-        require(_isFeatureEnabled(BIT_FEATURE_TRANSFER));
+        // Always allow minting and burning.
+        if(from != address(0) && to != address(0)) {
+            // But other transfers require the feature to be enabled.
+            require(_isFeatureEnabled(BIT_FEATURE_TRANSFER));
+        }
     }
 }
