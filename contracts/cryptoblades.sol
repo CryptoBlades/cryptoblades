@@ -466,6 +466,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             if (mintPayments[msg.sender].blockNumber + 200 >= block.number) {
                 delete mintPayments[msg.sender];
             }
+        }
     }
 
     function payForMint(address nftAddress, uint count) public {
@@ -535,14 +536,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         oncePerBlock(msg.sender)
     {
         require(num > 0 && num <= 1000);
-        usePayment(address(weapons), num);
+        _usePayment(address(weapons), num);
         for (uint i = 0; i < num; i++) {
             weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i))));
         }
     }
 
     function mintWeapon() public onlyNonContract oncePerBlock(msg.sender)  {
-        usePayment(address(weapons), 1);
+        _usePayment(address(weapons), 1);
         weapons.mint(msg.sender, randoms.getRandomSeed(msg.sender));
     }
 
