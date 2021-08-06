@@ -177,10 +177,8 @@ export default {
       forgeCost: 0,
       reforgeCost: 0,
       disableForge: false,
-      forgeMultiplier: 10,
       newForged: [],
       currentListofWeapons: [],
-      onError: false,
       spin: false,
     };
   },
@@ -231,15 +229,13 @@ export default {
     async onForgeWeapon() {
       if(this.disableForge) return;
 
-      this.getCurrentListofWeapons();
-      this.onError = false;
-      this.forgeMultiplier = 1;
-      this.disableForge = true;
+      const forgeMultiplier = 1;
 
+      this.disableForge = true;
       // Incase the network or mm are having issues, after 1 min we reshow
       const failbackTimeout = setTimeout(() => {
         this.disableForge = false;
-      }, 60000);
+      }, 30000);
 
       try {
         await this.mintWeapon();
@@ -248,53 +244,46 @@ export default {
         console.error(e);
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       } finally {
-        this.disableForge = false;
-      }
-
-      try{
-        this.viewNewWeapons(1);
-      } catch (e) {
-        console.error(e);
-        this.onError = true;
-      }finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
       }
+      this.relayFunction(forgeMultiplier);
     },
 
     async onForgeWeaponx10(){
       if(this.disableForge) return;
-      this.disableForge = true;
 
-      this.getCurrentListofWeapons();
-      this.onError = false;
-      this.forgeMultiplier = 10;
+      this.disableForge = true;
+      const forgeMultiplier = 10;
 
       // Incase the network or mm are having issues, after 1 min we reshow
       const failbackTimeout = setTimeout(() => {
         this.disableForge = false;
-      }, 60000);
+      }, 30000);
 
       try {
-        await this.mintWeaponN({num: this.forgeMultiplier});
+        await this.mintWeaponN({num: forgeMultiplier});
 
       } catch (e) {
         console.error(e);
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       } finally {
-        this.disableForge = false;
-      }
-
-      try{
-        this.viewNewWeapons(this.forgeMultiplier);
-      } catch (e) {
-        console.error(e);
-        this.onError = true;
-      }finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
       }
+      this.relayFunction(forgeMultiplier);
+
     },
+
+    relayFunction(offset){
+      try{
+        this.viewNewWeapons(offset);
+      } catch (e) {
+        console.error(e);
+        this.onError = true;
+      }
+    },
+
     onShowForgeDetails() {
       this.$refs['forge-details-modal'].show();
     },
@@ -315,23 +304,16 @@ export default {
       return this.ownWeapons.find(x => x.id === this.burnWeaponId);
     },
 
-    getCurrentListofWeapons(){
-      this.ownedWeaponIds.forEach(x => {
-        this.currentListofWeapons.push(x);
-      });
-    },
-
-    viewNewWeapons(){
+    viewNewWeapons(offset){
       this.newForged = [];
       this.ownedWeaponIds.forEach(x => {
         this.newForged.push(x);
       });
-      if(this.forgeMultiplier === 1){
-        this.newForged.splice(0,this.ownedWeaponIds.length-2);
-      }
-      else if(this.forgeMultiplier === 10){
-        this.newForged.splice(0,this.ownedWeaponIds.length-11);
-      }
+
+      ++offset;
+
+      this.newForged.splice(0,this.ownedWeaponIds.length-offset);
+
 
       // eslint-disable-next-line no-constant-condition
       if (this.newForged.length > 0 && !this.onError){
