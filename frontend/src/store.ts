@@ -116,6 +116,7 @@ export function createStore(web3: Web3) {
       characterTransferCooldowns: {},
 
       shields: {},
+      currentShieldId: null,
       nfts: {shield:{}},
 
       staking: {
@@ -1446,6 +1447,20 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async fetchNumberOfShieldListings({ state }, { nftContractAddr, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns an array of bignumbers (these are nft IDs)
+        console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
+        return await NFTMarket.methods
+          .getNumberOfListingsForToken(
+            nftContractAddr
+            // TODO add contract function and filtering params
+          )
+          .call(defaultCallOptions(state));
+      },
+
       async fetchAllMarketCharacterNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, minLevel, maxLevel }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
@@ -1475,6 +1490,30 @@ export function createStore(web3: Web3) {
             stars
           )
           .call(defaultCallOptions(state));
+      },
+
+      async fetchAllMarketShieldNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
+        const res = await NFTMarket.methods
+          .getListingSlice(
+            nftContractAddr,
+            pageNumber*limit, // startIndex
+            limit // length
+          )
+          .call(defaultCallOptions(state));
+        // returned values are: uint256 returnedCount, uint256[] ids, address[] sellers, uint256[] prices
+        // res[1][] refers to ids, which is what we're looking for
+        // this slice function returns the full length even if there are no items on that index
+        // we must cull the nonexistant items
+        const ids = [];
+        for(let i = 0; i < res[1].length; i++) {
+          if(res[1][i] !== '0' || res[3][i] !== '0') // id and price both 0, it's invalid
+            ids.push(res[1][i]);
+        }
+        return ids;
       },
 
       async fetchMarketNftIdsBySeller({ state }, { nftContractAddr, sellerAddr }) {
