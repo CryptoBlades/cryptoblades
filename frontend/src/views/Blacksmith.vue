@@ -1,271 +1,192 @@
 <template>
   <div class="body main-font">
-
-    <div class="blank-slate" v-if="ownWeapons.length === 0">
-      You do not currently have any weapons.
-      <br>
-      You can forge one by clicking the button below.
-      <br>
-      <br>
-      <big-button
-        class="button"
-        :mainText="`Forge sword for ${forgeCost} SKILL`"
-        @click="onForgeWeapon"
-      />
-    </div>
-
-    <div class="row mt-3" v-if="ownWeapons.length > 0">
-      <div class="col">
-        <div class="d-flex justify-content-space-between">
-          <h1>Weapons ({{ ownWeapons.length }})</h1>
-          <div class="d-flex justify-content-flex-end ml-auto">
-            <b-button
-              variant="primary"
-              v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
-              @click="showReforge = true, showBlacksmith = false"
-              tagname="reforge_weapon"
-              v-tooltip="'Burn weapons to buff selected weapon'">
-              Reforge
-            </b-button>
-
-            <b-button
-              variant="primary"
-              class="ml-3"
-              @click="onClickForge(0)"
-              :disabled="disableForge"
-              v-tooltip="'Forge new weapon'">
-              <span v-if="disableForge">
-                Cooling forge...
-              </span>
-
-              <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                Forge x1 ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
-              </span>
-            </b-button>
-
-            <b-button
-              variant="primary"
-              class="ml-3"
-              @click="onClickForge(1)"
-              :disabled="disableForge"
-              v-tooltip="'Forge new weapon'">
-              <span v-if="disableForge">
-                Cooling forge...
-              </span>
-
-              <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i>
-              </span>
-            </b-button>
-             <b-icon-question-circle class="centered-icon ml-3" scale="1.5" v-on:click="onShowForgeDetails" v-tooltip.bottom="'Click for forge percentages'"/>
-
-            <b-modal hide-footer ref="forge-details-modal" title="Forge Percentages">
-              <div>
-                5+ star @ 1% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
-              </div>
-              <div>
-                4+ star @ 6% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
-              </div>
-              <div>
-                3+ star @ 21% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
-              </div>
-              <div>
-                2+ star @ 56% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
-              </div>
-              <div>
-                1+ star @ 100% chance.
-              </div>
-            </b-modal>
-
-            <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element" @hide="onHideModal">
-              <div class="row justify-content-md-center">
-                <img v-on:click="setChoosenElement($event, 100)" class="elements-modal" src="../assets/Question_mark_white_icon.png"/>
-                <img v-on:click="setChoosenElement($event, 0)" class="elements-modal" src="../assets/elements/fire.png"/>
-                <img v-on:click="setChoosenElement($event, 1)" class="elements-modal" src="../assets/elements/earth.png"/>
-                <img v-on:click="setChoosenElement($event, 2)" class="elements-modal" src="../assets/elements/lightning.png"/>
-                <img v-on:click="setChoosenElement($event, 3)" class="elements-modal" src="../assets/elements/water.png"/>
-              </div>
-              <div class="row justify-content-md-center margin-top">
-                <b-button
-                v-if="clickedForgeButton === 0"
-                variant="primary"
-                class="row justify-content-md-center"
-                @click="onForgeWeapon"
-                :disabled="disableConfirmButton"
-                v-tooltip="'Forge new weapon'">
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                    Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee).toFixed(2)}} SKILL)
-                  </span>
-                </b-button>
-                <b-button
-                v-if="clickedForgeButton === 1"
-                variant="primary"
-                class="row justify-content-md-center"
-                @click="onForgeWeaponx10"
-                :disabled="disableConfirmButton"
-                v-tooltip="'Forge new weapon'">
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                    Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee * 10).toFixed(2)}} SKILL)
-                  </span>
-                </b-button>
-              </div>
-            </b-modal>
-          </div>
+    <b-tabs justified>
+      <b-tab title="Weapons">
+        <div class="blank-slate" v-if="ownWeapons.length === 0">
+          You do not currently have any weapons.
+          <br>
+          You can forge one by clicking the button below.
+          <br>
+          <br>
+          <big-button
+            class="button"
+            :mainText="`Forge sword for ${forgeCost} SKILL`"
+            @click="onForgeWeapon"
+          />
         </div>
 
-        <div class="" v-if="showBlacksmith">
-          <weapon-grid v-model="reforgeWeaponId" />
-        </div>
+        <div class="row mt-3" v-if="ownWeapons.length > 0">
+          <div class="col">
+            <div class="d-flex justify-content-space-between">
+              <h1>Weapons ({{ ownWeapons.length }})</h1>
 
-        <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
-          <template #modal-header>
-            <div v-if="!spin" class="new-weapon-header-text text-center">
-              <strong>A-hooooy! These things look shurpppp!</strong>
-            </div>
-            <div v-if="spin" class="new-weapon-header-text text-center">
-              <strong>Be patient, the elves are minting ....</strong>
-            </div>
-          </template>
-          <div class="text-center">
-            <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-            <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-            <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-          </div>
-          <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
-          <template #modal-footer></template>
-        </b-modal>
-      </div>
+              <div class="d-flex justify-content-flex-end ml-auto">
+                <b-button
+                  variant="primary"
+                  v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
+                  @click="showReforge = true"
+                  tagname="reforge_weapon"
+                  v-tooltip="'Burn weapons to buff selected weapon'">
+                  Reforge
+                </b-button>
 
-      <div class="col-md-12" v-if="showReforge">
-        <b-modal class="centered-modal text-center" ref="reforge-confirmation-modal" title="Reforge Confirmation" @ok="onReforgeWeapon">
-          <div class="text-center" :hidden="burnWeaponId === null || !isWeaponRare()">
-            <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This is a rare weapon!
-          </div>
-          <div class="text-center" :hidden="burnWeaponId === null || !isWeaponReforged()">
-            <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This item has been previously reforged and only half of each bonus will carry over!
-          </div>
-          <div class="row">
-            <div class="headings">
-              <h2 class="text-center">Upgrade</h2>
-              <div class="weapon" v-if="reforgeWeaponId">
-                <div v-if="$slots.above || $scopedSlots.above">
-                  <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
-                </div>
-                <div class="weapon-icon-wrapper">
-                  <weapon-icon v-if="getWeaponToUpgrade()" class="weapon-icon" :weapon="getWeaponToUpgrade()" />
-                </div>
+                <b-button
+                  variant="primary"
+                  class="ml-3"
+                  @click="onClickForge(0)"
+                  :disabled="disableForge"
+                  v-tooltip="'Forge new weapon'">
+                  <span v-if="disableForge">
+                    Cooling forge...
+                  </span>
+
+                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                    Forge x1 ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+                  </span>
+                </b-button>
+
+                <b-button
+                  variant="primary"
+                  class="ml-3"
+                  @click="onClickForge(1)"
+                  :disabled="disableForge"
+                  v-tooltip="'Forge new weapon'">
+                  <span v-if="disableForge">
+                    Cooling forge...
+                  </span>
+
+                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                    x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i>
+                  </span>
+                </b-button>
+
+                <b-icon-question-circle class="centered-icon" scale="1.5"
+                  v-on:click="onShowForgeDetails" v-tooltip.bottom="'Click for forge percentages'"/>
+
+                <b-modal hide-footer ref="forge-details-modal" title="Forge Percentages">
+                  <div>
+                    5+ star @ 1% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
+                  </div>
+                  <div>
+                    4+ star @ 6% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
+                  </div>
+                  <div>
+                    3+ star @ 21% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
+                  </div>
+                  <div>
+                    2+ star @ 56% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
+                  </div>
+                  <div>
+                    1+ star @ 100% chance.
+                  </div>
+                </b-modal>
+
+                <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element" @hide="onHideModal">
+                  <div class="row justify-content-md-center">
+                    <img v-on:click="setChosenElement($event, 100)" class="elements-modal" src="../assets/Question_mark_white_icon.png"/>
+                    <img v-on:click="setChosenElement($event, 0)" class="elements-modal" src="../assets/elements/fire.png"/>
+                    <img v-on:click="setChosenElement($event, 1)" class="elements-modal" src="../assets/elements/earth.png"/>
+                    <img v-on:click="setChosenElement($event, 2)" class="elements-modal" src="../assets/elements/lightning.png"/>
+                    <img v-on:click="setChosenElement($event, 3)" class="elements-modal" src="../assets/elements/water.png"/>
+                  </div>
+                  <div class="row justify-content-md-center margin-top">
+                    <b-button
+                      v-if="clickedForgeButton === 0"
+                      variant="primary"
+                      class="row justify-content-md-center"
+                      @click="onForgeWeapon"
+                      :disabled="disableConfirmButton"
+                      v-tooltip="'Forge new weapon'">
+                        <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                          Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee).toFixed(2)}} SKILL)
+                        </span>
+                    </b-button>
+                    <b-button
+                      v-if="clickedForgeButton === 1"
+                      variant="primary"
+                      class="row justify-content-md-center"
+                      @click="onForgeWeaponx10"
+                      :disabled="disableConfirmButton"
+                      v-tooltip="'Forge new weapon'">
+                        <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                          Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee * 10).toFixed(2)}} SKILL)
+                        </span>
+                    </b-button>
+                  </div>
+                </b-modal>
               </div>
             </div>
-            <div class="headings">
-              <h2 class="text-center">Burn</h2>
-              <div class="weapon" v-if="burnWeaponId">
-                <div v-if="$slots.above || $scopedSlots.above">
+
+            <weapon-grid v-model="reforgeWeaponId" />
+            <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
+                        <template #modal-header>
+                            <div v-if="!spin" class="new-weapon-header-text text-center">
+                                  <strong>Forging Results</strong>
+                            </div>
+                            <div v-if="spin" class="new-weapon-header-text text-center">
+                                  <strong>Be patient, the irons are hot...</strong>
+                            </div>
+                        </template>
+                        <div class="text-center">
+                          <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                          <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                          <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                        </div>
+                        <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
+
+                        <template #modal-footer>
+                        </template>
+                    </b-modal>
+          </div>
+
+          <div class="col-6" v-if="showReforge">
+            <div class="d-flex justify-content-space-between">
+              <h1>Choose Burn Weapon</h1>
+
+              <div class="d-flex justify-content-flex-end ml-auto">
+                <b-button
+                  variant="primary"
+                  class="ml-3"
+                  tagname="confirm_forge_weapon"
+                  @click="showReforgeConfirmation"
+                  :disabled="canReforge"
+                  v-tooltip="'Forge new weapon'">
+                  Confirm Reforge ({{ reforgeCost }} SKILL)
+                </b-button>
+              </div>
+            </div>
+
+            <b-modal class="centered-modal" ref="reforge-confirmation-modal" title="Reforge Confirmation"
+              @ok="onReforgeWeapon">
+              <div class="text-center" v-text="'Are you sure you want to reforge with this weapon?'" />
+              <div class="weapon" :hidden="burnWeaponId == null">
+                <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
                   <slot name="above" :weapon="getWeaponToBurn()"></slot>
                 </div>
                 <div class="weapon-icon-wrapper">
-                  <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
+                  <weapon-icon class="weapon-icon" :weapon="getWeaponToBurn()" />
                 </div>
               </div>
-            </div>
-          </div>
-          <div class="text-center" v-text="'Are you sure you want to reforge with this weapon?'" />
-          <div class="text-center">
-            <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
-          </div>
-        </b-modal>
+              <div class="text-center" :hidden="burnWeaponId == null || !isWeaponRare()">
+                <b-icon icon="exclamation-circle" variant="danger" /> This is a rare weapon!
+              </div>
+              <div class="text-center" :hidden="burnWeaponId == null || !isWeaponReforged()">
+                <b-icon icon="exclamation-circle" variant="danger" />
+                This item has been previously reforged and only half of each LBs will carry over!
+              </div>
+            </b-modal>
 
-        <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" title="Reforge Bonuses">
-          <div>
-            5* Burn: 1 5B (75 Bonus Power / 600 Max).
-          </div>
-          <div>
-            4* Burn: 1 4B (30 Bonus Power/ 750 Max).
-          </div>
-          <div>
-            3* Burn: 3 LB (45 Bonus Power/ 1500 Max).
-          </div>
-          <div>
-            2* Burn: 2 LB (30 Bonus Power/ 1500 Max).
-          </div>
-          <div>
-            1* Burn: 1 LB (15 Bonus Power/ 1500 Max).
-          </div>
-        </b-modal>
-
-        <div>
-          <div class="col-lg-12 mt-4">
-            <div class="row mobile-flip">
-              <div class="col-lg-6 col-sm-12 weapon-container" align="center">
-                <h1 class="text-center">Select the weapon you wish to burn</h1>
-                <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId"
-                             :showReforgedWeaponsDefVal="false" :showFavoriteWeaponsDefVal="false" :showFilters="false" />
-              </div>
-              <div class="col-lg-3 col-sm-12 weapon-container">
-                <div class="headings">
-                  <h2 class="text-center">Burn</h2>
-                  <div class="weapon" :hidden="burnWeaponId === null">
-                    <div v-if="$slots.above || $scopedSlots.above">
-                      <slot name="above" :weapon="getWeaponToBurn()"></slot>
-                    </div>
-                    <div class="weapon-icon-wrapper">
-                      <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
-                    </div>
-                    <div class="text-center" :hidden="burnWeaponId === 0">
-                    </div>
-                  </div>
-                </div>
-                <span class="arrow arrow-right"></span>
-                <span class="arrow arrow-right"></span>
-                <span class="arrow2 arrow-right"></span>
-                <span class="arrow2 arrow-right"></span>
-              </div>
-              <div class="col-lg-3 col-sm-12 upgrade-container">
-                <div class="confirmReforge">
-                  <h2 class="text-center">Upgrade</h2>
-                  <div class="weapon" :hidden="reforgeWeaponId === null">
-                    <div v-if="$slots.above || $scopedSlots.above">
-                      <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
-                    </div>
-                    <div class="weapon-icon-wrapper">
-                      <weapon-icon v-if="getWeaponToUpgrade()" class="weapon-icon" :weapon="getWeaponToUpgrade()" />
-                    </div>
-                    <div class="text-center" :hidden="burnWeaponId === 0">
-                    </div>
-                  </div>
-                  <b-button
-                          variant="primary"
-                          tagname="confirm_forge_weapon"
-                          class="confirmReforge"
-                          @click="showReforgeConfirmation"
-                          :disabled="canReforge"
-                          v-tooltip="'Reforge selected weapon'">
-                    Confirm Reforge
-                    <br>
-                    ({{ reforgeCost }} SKILL)
-                  </b-button>
-                  <b-button
-                          variant="primary"
-                          tagname="confirm_forge_weapon"
-                          class="confirmReforge"
-                          @click="showReforgeBonuses"
-                          v-tooltip="'Show reforge bonuses'">
-                    Show Bonuses
-                  </b-button>
-                  <b-button
-                          variant="primary"
-                          tagname="confirm_forge_weapon"
-                          class="confirmReforge"
-                          @click="showReforge = false, showBlacksmith = true"
-                          v-tooltip="'Cancel Reforge'">
-                    Cancel Reforge
-                  </b-button>
-                </div>
-              </div>
-            </div>
+            <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId" :showReforgedWeaponsDefVal="false" :showFavoriteWeaponsDefVal="false" />
           </div>
         </div>
-      </div>
-    </div>
+      </b-tab>
+      <b-tab>
+        <template #title>
+          Shields <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`You can buy shield in Skill shop tab in the market!`"/>
+        </template>
+        <nft-list :nfts="ownNfts"/>
+      </b-tab>
+    </b-tabs>
   </div>
 </template>
 
@@ -276,6 +197,7 @@ import BigButton from '../components/BigButton.vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import { BModal } from 'bootstrap-vue';
+import NftList from '@/components/smart/NftList.vue';
 
 
 export default {
@@ -284,7 +206,6 @@ export default {
   data() {
     return {
       showReforge: false,
-      showBlacksmith: true,
       reforgeWeaponId: null,
       burnWeaponId: null,
       forgeCost: 0,
@@ -305,8 +226,8 @@ export default {
   },
 
   computed: {
-    ...mapState(['defaultAccount','ownedWeaponIds']),
-    ...mapGetters(['contracts', 'ownWeapons']),
+    ...mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds']),
+    ...mapGetters(['contracts', 'ownWeapons', 'ownShields']),
 
     canReforge() {
       return (
@@ -315,6 +236,16 @@ export default {
         this.reforgeWeaponId === this.burnWeaponId
       );
     },
+
+    ownNfts() {
+      const ownNfts = [];
+
+      // get various types of nfts and push to ownNfts list
+      const shieldsIdTypes = this.ownedShieldIds.map(id => { return { nftId: id, nftType: 'shield'}; });
+
+      ownNfts.push(shieldsIdTypes);
+      return shieldsIdTypes;
+    }
   },
 
   watch: {
@@ -347,20 +278,24 @@ export default {
       this.x1Forge = true;
       this.disableForge = true;
 
-      setTimeout(() => {
+      // Incase the network or mm are having issues, after 1 min we reshow
+      const failbackTimeout = setTimeout(() => {
         this.disableForge = false;
-      }, 10000);
+      }, 60000);
 
       try {
         await this.mintWeapon({chosenElement: this.selectedElement, chosenElementFee: this.chosenElementFee});
+
+        this.viewNewWeapons(1);
 
       } catch (e) {
         console.error(e);
         this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+      } finally {
+        clearTimeout(failbackTimeout);
+        this.disableForge = false;
       }
-
-      this.viewNewWeapons(1);
     },
 
     async onForgeWeaponx10(){
@@ -373,20 +308,24 @@ export default {
       this.onError = false;
       this.x10Forge = true;
 
-      setTimeout(() => {
+      // Incase the network or mm are having issues, after 1 min we reshow
+      const failbackTimeout = setTimeout(() => {
         this.disableForge = false;
-      }, 10000);
+      }, 60000);
 
       try {
         await this.mintWeaponN({num: this.forgeMultiplier, chosenElement: this.selectedElement, chosenElementFee: this.chosenElementFee});
+
+        this.viewNewWeapons(this.forgeMultiplier);
 
       } catch (e) {
         console.error(e);
         this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+      } finally {
+        clearTimeout(failbackTimeout);
+        this.disableForge = false;
       }
-
-      this.viewNewWeapons(this.forgeMultiplier);
     },
     onShowForgeDetails() {
       this.$refs['forge-details-modal'].show();
@@ -398,7 +337,7 @@ export default {
       this.$refs['forge-element-selector-modal'].show();
     },
 
-    setChoosenElement(ele, i) {
+    setChosenElement(ele, i) {
       this.selectedElement = i;
       if (i === 100) {
         this.chosenElementFee = 1;
@@ -416,31 +355,18 @@ export default {
       this.$refs['reforge-confirmation-modal'].show();
     },
 
-    showReforgeBonuses() {
-      this.$refs['reforge-bonuses-modal'].show();
-    },
-
     isWeaponRare() {
-      const weapon = this.getWeaponToBurn();
-      if(!weapon) return false;
-      return weapon.stars >= 3;
+      return this.getWeaponToBurn().stars >= 3;
     },
 
     isWeaponReforged() {
-      const weapon = this.getWeaponToBurn();
-      if(!weapon) return false;
-      return weapon.bonusPower > 0;
+      return this.getWeaponToBurn().bonusPower > 0;
     },
 
     getWeaponToBurn() {
-      if(!this.burnWeaponId) return null;
       return this.ownWeapons.find(x => x.id === this.burnWeaponId);
     },
 
-    getWeaponToUpgrade() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id === this.reforgeWeaponId);
-    },
     getCurrentListofWeapons(){
       this.ownedWeaponIds.forEach(x => {
         this.currentListofWeapons.push(x);
@@ -459,6 +385,8 @@ export default {
           this.spin = false;
         }, 10000);
       }
+
+
     },
 
     async onReforgeWeapon() {
@@ -485,6 +413,7 @@ export default {
     BigButton,
     WeaponIcon,
     BModal,
+    NftList,
   },
 };
 </script>
@@ -514,58 +443,26 @@ export default {
 }
 
 .weapon-container {
-  border-right: 1px solid #9e8a57;
-  border-top: 1px solid #9e8a57;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
 }
 
-.confirmReforge{
-  margin: 1em auto 2em;
-  border-radius:0.15em;
-  text-decoration:none;
-  font-weight:400;
-  text-align:center;
-  width: 12em;
-}
-.confirmReforge:active{
-  top:0.1em;
+.sub-container {
+  flex: 1;
 }
 
 .weapon {
-  min-height: 12em;
-  max-height: 13em;
-  border-style: dashed;
-  border-color: #9e8a57;
   width: 12em;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
   cursor: pointer;
-  align-items :center;
-}
-
-.headings {
-  min-height: 13em;
-  min-width: 13em;
-  max-height: 13em;
-  max-width: 13em;
-  border-radius:0.15em;
-  box-sizing: border-box;
-  font-weight:400;
-  box-shadow:inset 0 -0.6em 0 -0.35em rgba(0,0,0,0.17);
-  width: 13em;
-  margin: 1em auto 2em;
-}
-
-.upgrade-container {
-  border-top: 1px solid #9e8a57;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .centered-modal {
   justify-content: center;
-}
-
-.centered-text-modal {
-  justify-content: center;
-  text-align: center;
 }
 
 .centered-icon {
