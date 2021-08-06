@@ -464,7 +464,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(fromUserWallet))));
 
         uint256 convertedAmount = usdToSkill(mintCharacterFee);
-        payContractTokenOnly(msg.sender, convertedAmount);
+        _payContractTokenOnly(msg.sender, convertedAmount);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
             _giveInGameOnlyFundsFromContractBalance(msg.sender, usdToSkill(promos.firstCharacterPromoInGameOnlyFundsGivenInUsd()));
@@ -657,6 +657,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function payContractTokenOnly(address playerAddress, uint256 convertedAmount) public restricted {
+        _payContractTokenOnly(playerAddress, convertedAmount);
+    }
+
+    function _payContractTokenOnly(address playerAddress, uint256 convertedAmount) internal {
         (, uint256 fromTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
