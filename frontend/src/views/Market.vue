@@ -894,6 +894,8 @@ export default Vue.extend({
         maxLevel: '' + this.characterMaxLevelFilter(),
         sortBy: '' + this.characterPriceOrder() ? 'price' : '',
         sortDir: '' + this.characterPriceOrder(),
+        minPrice: '' + this.characterMinPriceFilter(),
+        maxPrice: '' + this.characterMaxPriceFilter(),
         pageSize: '' + (this.characterShowLimit || defaultLimit),
         pageNum: '' + page,
       };
@@ -969,6 +971,8 @@ export default Vue.extend({
         maxStars: '' + this.weaponStarFilter(),
         sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
         sortDir: '' + this.weaponPriceOrder(),
+        minPrice: '' + this.weaponMinPriceFilter(),
+        maxPrice: '' + this.weaponMaxPriceFilter(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         pageNum: '' + page,
       };
@@ -1083,6 +1087,8 @@ export default Vue.extend({
         minLevel: '' + this.characterMinLevelFilter(),
         maxLevel: '' + this.characterMaxLevelFilter(),
         sortBy: '' + this.characterPriceOrder() ? 'price' : '',
+        minPrice: '' + this.characterMinPriceFilter(),
+        maxPrice: '' + this.characterMaxPriceFilter(),
         sortDir: '' + this.characterPriceOrder(),
         sellerAddress: '' + sellerAddress,
       };
@@ -1102,6 +1108,8 @@ export default Vue.extend({
         maxStars: '' + this.weaponStarFilter(),
         sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
         sortDir: '' + this.weaponPriceOrder(),
+        minPrice: '' + this.weaponMinPriceFilter(),
+        maxPrice: '' + this.weaponMaxPriceFilter(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         sellerAddress: '' + sellerAddress,
       };
@@ -1260,6 +1268,13 @@ export default Vue.extend({
       return sessionStorage.getItem('character-price-order') ? (sessionStorage.getItem('character-price-order') as string) : '';
     },
 
+    characterMinPriceFilter(): string {
+      return sessionStorage.getItem('character-price-minfilter') ? (sessionStorage.getItem('character-price-minfilter') as string) : '';
+    },
+    characterMaxPriceFilter(): string {
+      return sessionStorage.getItem('character-price-maxfilter') ? (sessionStorage.getItem('character-price-maxfilter') as string) : '';
+    },
+
     weaponTraitFilter(): string {
       return sessionStorage.getItem('market-weapon-elementfilter') ? (sessionStorage.getItem('market-weapon-elementfilter') as string).toLowerCase() : '';
     },
@@ -1270,6 +1285,13 @@ export default Vue.extend({
 
     weaponPriceOrder(): string {
       return sessionStorage.getItem('market-weapon-price-order') ? (sessionStorage.getItem('market-weapon-price-order') as string) : '';
+    },
+
+    weaponMinPriceFilter(): string {
+      return sessionStorage.getItem('market-weapon-price-minfilter') ? (sessionStorage.getItem('market-weapon-price-minfilter') as string) : '';
+    },
+    weaponMaxPriceFilter(): string {
+      return sessionStorage.getItem('market-weapon-price-maxfilter') ? (sessionStorage.getItem('market-weapon-price-maxfilter') as string) : '';
     },
 
     convertStringToDecimal(val: string, maxDecimals: number) {

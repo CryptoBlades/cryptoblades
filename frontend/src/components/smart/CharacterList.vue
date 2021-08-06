@@ -1,30 +1,40 @@
 <template>
   <div>
-    <div class="filters row mt-2" v-if="showFilters">
-      <div class="col-sm-6 col-md-4 col-lg-3 mb-3">
+    <div class="filters row mt-2 pl-2" v-if="showFilters" @change="saveFilters()">
+      <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
         <strong>Level</strong>
-        <select class="form-control" v-model="levelFilter" @change="saveFilters()">
+        <select class="form-control" v-model="levelFilter">
           <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
             {{ x ? `${x} - ${x + 9}` : 'Any' }}
           </option>
         </select>
       </div>
 
-      <div class="col-sm-6 col-md-4 col-lg-3 mb-3">
+      <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
         <strong>Element</strong>
-        <select class="form-control" v-model="elementFilter" @change="saveFilters()">
+        <select class="form-control" v-model="elementFilter">
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
 
-      <div class="col-sm-6 col-md-4 col-lg-3 mb-3" v-if="isMarket">
-        <strong>Sort</strong>
-        <select class="form-control" v-model="priceSort" @change="saveFilters()">
-          <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
-        </select>
-      </div>
+      <template v-if="isMarket">
+        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
+          <strong>Min Price</strong>
+          <input class="form-control" type="number" v-model.trim="minPriceFilter" :min="0" placeholder="Min" />
+        </div>
+        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
+          <strong>Max Price</strong>
+          <input class="form-control" type="number" v-model.trim="maxPriceFilter" :min="0" placeholder="Max" />
+        </div>
+        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
+          <strong>Sort</strong>
+          <select class="form-control" v-model="priceSort">
+            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
+          </select>
+        </div>
+      </template>
 
-      <b-button variant="primary" class="ml-3 clear-filters-button mt-2" @click="clearFilters" >
+      <b-button variant="primary" class="clear-filters-button mb-3" @click="clearFilters" >
           <span>
             Clear Filters
           </span>
@@ -91,6 +101,8 @@ export default {
     return {
       levelFilter: '',
       elementFilter: '',
+      minPriceFilter:'',
+      maxPriceFilter:'',
       priceSort: '',
       sorts,
     };
@@ -150,6 +162,8 @@ export default {
 
       if(this.isMarket) {
         sessionStorage.setItem('character-price-order', this.priceSort);
+        sessionStorage.setItem('character-price-minfilter', this.minPriceFilter);
+        sessionStorage.setItem('character-price-maxfilter', this.maxPriceFilter);
       }
       this.$emit('character-filters-changed');
     },
@@ -159,11 +173,15 @@ export default {
       sessionStorage.removeItem('character-elementfilter');
       if(this.isMarket) {
         sessionStorage.removeItem('character-price-order');
+        sessionStorage.removeItem('character-price-minfilter');
+        sessionStorage.removeItem('character-price-maxfilter');
       }
 
       this.elementFilter = '';
       this.levelFilter = '';
       this.priceSort = '';
+      this.minPriceFilter = '';
+      this.maxPriceFilter = '';
 
       this.$emit('character-filters-changed');
     },
@@ -178,6 +196,8 @@ export default {
     this.elementFilter = localStorage.getItem('character-elementfilter') || '';
     if(this.isMarket) {
       this.priceSort = sessionStorage.getItem('character-price-order') || '';
+      this.minPriceFilter = sessionStorage.getItem('character-price-minfilter') || '';
+      this.maxPriceFilter = sessionStorage.getItem('character-price-maxfilter') || '';
     }
   }
 };
@@ -256,8 +276,11 @@ export default {
 }
 
 .clear-filters-button {
-  align-self: flex-end;
   height: fit-content;
+  display: flex;
+  flex-direction: row;
+  align-self: flex-end;
+  margin:0 15px;
 }
 
 @media (max-width: 576px) {
@@ -265,6 +288,11 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+  }
+  .clear-filters-button {
+    width: 100%;
+    text-align: center;
     justify-content: center;
   }
 }
