@@ -51,6 +51,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _registerInterface(0xe62e6974); // TransferCooldownableInterfaceId.interfaceId()
     }
 
+    function migrateFeaturesEnabled() public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        featuresEnabled = BIT_FEATURE_TRANSFER;
+    }
+
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-128
@@ -109,6 +115,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint256 public constant secondsPerDurability = 3000; //50 * 60
 
     mapping(address => uint256) burnDust; // user address : burned item dust counts
+
+    uint256 public constant BIT_FEATURE_TRANSFER = 1;
+    uint256 featuresEnabled;
 
     event Burned(address indexed owner, uint256 indexed burned);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
@@ -692,5 +701,21 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function getDurabilityMaxWait() public pure returns (uint64) {
         return uint64(maxDurability * secondsPerDurability);
+    }
+
+    function setFeatureEnabled(uint256 bit, bool enabled) public restricted {
+        if (enabled) {
+            featuresEnabled |= bit;
+        } else {
+            featuresEnabled &= ~bit;
+        }
+    }
+
+    function _isFeatureEnabled(uint256 bit) private view returns (bool) {
+        return (featuresEnabled & bit) == bit;
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        require(_isFeatureEnabled(BIT_FEATURE_TRANSFER));
     }
 }
