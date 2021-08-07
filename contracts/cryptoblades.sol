@@ -92,12 +92,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         blacksmith = _blacksmith;
     }
 
-    function migrateSeeds() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-
-        lastSeed = blockhash(block.number - 1);
-    }
-
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint characterLimit;
     // config vars
@@ -144,8 +138,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     Blacksmith public blacksmith;
 
-    bytes32 private lastSeed;
-    mapping(address => bytes32) private mintSeeds;
+    struct MintPayment {
+        bytes32 blockHash;
+        uint256 blockNumber;
+        address nftAddress;
+        uint count;
+    }
+
+    mapping(address => MintPayment) mintPayments;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -460,16 +460,58 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
-    function _getMintSeed() internal returns(bytes32) {
-        bytes32 seed = mintSeeds[msg.sender];
-        if (seed == 0) {
-            seed = lastSeed;
+    function _updatePaymentBlockHash() internal {
+        if ((mintPayments[msg.sender].count > 0) &&
+            (mintPayments[msg.sender].blockHash == 0) &&
+            (mintPayments[msg.sender].blockNumber < block.number)) {
+
+            // Payment must be recent enough that the hash is available for the payment block.
+            // Use 200 as a 'friendly' window of "You have 10 minutes."
+            if (mintPayments[msg.sender].blockNumber + 200 >= block.number) {
+                mintPayments[msg.sender].blockHash = blockhash(mintPayments[msg.sender].blockNumber);
+            }
         }
-        return seed;
     }
 
-    function _updateMintSeed() internal {
-        mintSeeds[msg.sender] = blockhash(block.number - 1);
+    function _discardPaymentIfExpired() internal {
+        _updatePaymentBlockHash();
+        if (mintPayments[msg.sender].count > 0) {
+            if (mintPayments[msg.sender].blockHash == 0) {
+                delete mintPayments[msg.sender];
+            }
+        }
+    }
+
+    function hasPaidForMint() public view returns(bool){
+        return (mintPayments[msg.sender].count > 0);
+    }
+
+    function payForMint(address nftAddress, uint count) public {
+        _discardPaymentIfExpired();
+
+        require(mintPayments[msg.sender].count == 0);
+
+        require(nftAddress == address(weapons));
+        _payContract(msg.sender, mintWeaponFee);
+
+        mintPayments[msg.sender].count = count;
+        mintPayments[msg.sender].nftAddress = nftAddress;
+        mintPayments[msg.sender].blockNumber = block.number;
+        mintPayments[msg.sender].blockHash = 0;
+    }
+
+    function _usePayment(address nftAddress, uint count) internal {
+        _discardPaymentIfExpired();
+
+        require(mintPayments[msg.sender].count >= count);
+        require(mintPayments[msg.sender].nftAddress == nftAddress);
+        // Payment must commit in a block before being used.
+        require(mintPayments[msg.sender].blockNumber < block.number);
+
+        mintPayments[msg.sender].count -= count;
+        if (mintPayments[msg.sender].count == 0) {
+            delete mintPayments[msg.sender];
+        }
     }
 
     function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
@@ -512,17 +554,28 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         oncePerBlock(msg.sender)
     {
         require(num > 0 && num <= 1000);
-        _payContract(msg.sender, mintWeaponFee * num);
+        _discardPaymentIfExpired();
         for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(_getMintSeed()))));
-            _updateMintSeed();
+            // TODO: Need getRandomSeed version that accepts
+            // both msg.sender and mintPayments[msg.sender].blockHash
+            try weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i)))) {
+                _usePayment(address(weapons), num);
+            }
+            catch {
+                return;
+            }
         }
     }
 
     function mintWeapon() public onlyNonContract oncePerBlock(msg.sender)  {
-        _payContract(msg.sender, mintWeaponFee);
-        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(_getMintSeed()))));
-        _updateMintSeed();
+        _discardPaymentIfExpired();
+        // TODO: Need getRandomSeed version that accepts
+        // both msg.sender and mintPayments[msg.sender].blockHash
+        try weapons.mint(msg.sender, randoms.getRandomSeed(msg.sender)) {
+            _usePayment(address(weapons), 1);
+        }
+        catch {
+        }
     }
 
     function burnWeapon(uint256 burnID) public
