@@ -287,12 +287,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(foundMatch, "Target invalid");
     }
 
-    function spendTicket(uint32 num)
-        public
-    {
-        blacksmith.spendTicket(num);
-    }
-
     function isUnlikely(uint24 pp, uint24 ep)
         private
         pure
@@ -468,7 +462,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             // Use 200 as a 'friendly' window of "You have 10 minutes."
             (mintPayments[msg.sender].blockNumber + 200 >= block.number)) {
 
-                mintPayments[msg.sender].blockHash = blockhash(mintPayments[msg.sender].blockNumber);
+            mintPayments[msg.sender].blockHash = blockhash(mintPayments[msg.sender].blockNumber);
         }
     }
 
