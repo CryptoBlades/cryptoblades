@@ -469,8 +469,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _updateMintSeed() internal {
-        lastSeed = blockhash(block.number - 1);
-        mintSeeds[msg.sender] = lastSeed;
+        mintSeeds[msg.sender] = blockhash(block.number - 1);
     }
 
     function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
