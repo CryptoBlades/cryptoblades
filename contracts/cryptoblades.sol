@@ -558,7 +558,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         for (uint i = 0; i < num; i++) {
             bytes32 hash = mintPayments[msg.sender].blockHash;
             try weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeedUsingHash(msg.sender, hash), i)))) {
-                _usePayment(address(weapons), num);
+                _usePayment(address(weapons), 1);
             }
             catch {
                 return;
