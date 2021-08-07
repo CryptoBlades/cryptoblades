@@ -556,9 +556,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(num > 0 && num <= 1000);
         _discardPaymentIfExpired();
         for (uint i = 0; i < num; i++) {
-            // TODO: Need getRandomSeed version that accepts
-            // both msg.sender and mintPayments[msg.sender].blockHash
-            try weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i)))) {
+            bytes32 hash = mintPayments[msg.sender].blockHash;
+            try weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeedUsingHash(msg.sender, hash), i)))) {
                 _usePayment(address(weapons), num);
             }
             catch {
@@ -569,9 +568,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function mintWeapon() public onlyNonContract oncePerBlock(msg.sender)  {
         _discardPaymentIfExpired();
-        // TODO: Need getRandomSeed version that accepts
-        // both msg.sender and mintPayments[msg.sender].blockHash
-        try weapons.mint(msg.sender, randoms.getRandomSeed(msg.sender)) {
+        bytes32 hash = mintPayments[msg.sender].blockHash;
+        try weapons.mint(msg.sender, randoms.getRandomSeedUsingHash(msg.sender, hash)) {
             _usePayment(address(weapons), 1);
         }
         catch {
