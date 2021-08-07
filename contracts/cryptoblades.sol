@@ -463,13 +463,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function _updatePaymentBlockHash() internal {
         if ((mintPayments[msg.sender].count > 0) &&
             (mintPayments[msg.sender].blockHash == 0) &&
-            (mintPayments[msg.sender].blockNumber < block.number)) {
-
+            (mintPayments[msg.sender].blockNumber < block.number) &&
             // Payment must be recent enough that the hash is available for the payment block.
             // Use 200 as a 'friendly' window of "You have 10 minutes."
-            if (mintPayments[msg.sender].blockNumber + 200 >= block.number) {
+            (mintPayments[msg.sender].blockNumber + 200 >= block.number)) {
+
                 mintPayments[msg.sender].blockHash = blockhash(mintPayments[msg.sender].blockNumber);
-            }
         }
     }
 
