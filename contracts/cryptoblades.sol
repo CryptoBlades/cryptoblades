@@ -500,6 +500,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
+    function checkIfMintPaymentExpiredAndRefunded() external {
+        _discardPaymentIfExpired(msg.sender);
+    }
+
     function mintPaymentClaimRefund() external {
         _discardPaymentIfExpired(msg.sender);
 
