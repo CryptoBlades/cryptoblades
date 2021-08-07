@@ -82,12 +82,17 @@
                 </b-modal>
 
                 <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element" @hide="onHideModal">
-                  <div class="row justify-content-md-center">
-                    <img v-on:click="setChosenElement($event, 100)" class="elements-modal" src="../assets/Question_mark_white_icon.png"/>
+                  <div class="row justify-content-md-center select-elements-container">
+                    <div id="random-border"  v-on:click="setChosenElement($event, 100)"> </div>
+                    <div id="fire-border"  v-on:click="setChosenElement($event, 0)"> </div>
+                    <div id="earth-border"  v-on:click="setChosenElement($event, 1)"> </div>
+                    <div id="lightning-border"  v-on:click="setChosenElement($event, 2)"> </div>
+                    <div id="water-border"  v-on:click="setChosenElement($event, 3)"> </div>
+                    <!--<img v-on:click="setChosenElement($event, 100)" class="elements-modal" src="../assets/Question_mark_white_icon.png"/>
                     <img v-on:click="setChosenElement($event, 0)" class="elements-modal" src="../assets/elements/fire.png"/>
                     <img v-on:click="setChosenElement($event, 1)" class="elements-modal" src="../assets/elements/earth.png"/>
                     <img v-on:click="setChosenElement($event, 2)" class="elements-modal" src="../assets/elements/lightning.png"/>
-                    <img v-on:click="setChosenElement($event, 3)" class="elements-modal" src="../assets/elements/water.png"/>
+                    <img v-on:click="setChosenElement($event, 3)" class="elements-modal" src="../assets/elements/water.png"/>-->
                   </div>
                   <div class="row justify-content-md-center margin-top">
                     <b-button
@@ -339,15 +344,13 @@ export default {
 
     setChosenElement(ele, i) {
       this.selectedElement = i;
-      if (i === 100) {
-        this.chosenElementFee = 1;
-      } else{
-        this.chosenElementFee = 2;
-      }
+      this.chosenElementFee = i === 100 ? 1 : 2;
+      ele.srcElement.classList.toggle('done');
       Array.from(ele.srcElement.parentNode.childNodes).forEach((child) => {
-        child.style.transform = 'scale(1)';
+        if (child !== ele.srcElement && child.classList.contains('done') === true){
+          child.classList.toggle('done');
+        }
       });
-      ele.srcElement.style.transform = 'scale(1.4)';
       this.disableConfirmButton = false;
     },
 
@@ -420,6 +423,127 @@ export default {
 
 <style scoped>
 
+
+#random-border{
+  background-image: url('../assets/questionmark-icon.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#random-border:hover{
+  background-image: url('../assets/questionmark-icon-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#random-border.done {
+  background-image: url('../assets/questionmark-icon-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#fire-border{
+  background-image: url('../assets/elements/fire.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#fire-border:hover{
+  background-image: url('../assets/elements/fire-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#fire-border.done {
+  background-image: url('../assets/elements/fire-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#earth-border{
+  background-image: url('../assets/elements/earth.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#earth-border:hover{
+  background-image: url('../assets/elements/earth-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#earth-border.done {
+  background-image: url('../assets/elements/earth-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#lightning-border{
+  background-image: url('../assets/elements/lightning.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#lightning-border:hover{
+  background-image: url('../assets/elements/lightning-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#lightning-border.done {
+  background-image: url('../assets/elements/lightning-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#water-border{
+  background-image: url('../assets/elements/water.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#water-border:hover{
+  background-image: url('../assets/elements/water-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#water-border.done {
+  background-image: url('../assets/elements/water-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
 .new-weapon-header-text{
    color: #9e8a57;
   font-size: 34px;
@@ -481,9 +605,13 @@ img.elements-modal:hover {
   transform:scale(1.4)
 }
 
-.margin-top {
-  margin-top: 2%;
+.margin-top{
+  margin-top: 1.7em;
 }
+.select-elements-container {
+  margin-top: 0.7em;
+}
+
 .arrow {
   top: 18em;
   width: 25px;
