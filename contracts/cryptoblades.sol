@@ -508,6 +508,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(mintPayments[msg.sender].blockNumber < block.number);
 
         mintPayments[msg.sender].count = mintPayments[msg.sender].count.sub(count);
+        mintPayments[msg.sender].blockHash = bytes32(uint256(mintPayments[msg.sender].blockHash) + 1);
         if (mintPayments[msg.sender].count == 0) {
             delete mintPayments[msg.sender];
         }
