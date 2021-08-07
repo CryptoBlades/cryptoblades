@@ -112,7 +112,7 @@
                 <big-button
                       class="encounter-button btn-styled"
                       :mainText="`Fight!`"
-                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId)"
+                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId) || !charHasStamina()"
                       @click="onClickEncounter(e)"
                     />
                 <p v-if="isLoadingTargets">Loading...</p>
@@ -223,6 +223,9 @@ export default {
     getEnemyArt,
     weaponHasDurability(id) {
       return this.getWeaponDurability(id) >= this.fightMultiplier;
+    },
+    charHasStamina(){
+      return this.currentCharacterStamina >= this.staminaPerFight;
     },
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
