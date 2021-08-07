@@ -151,6 +151,21 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     mapping(address => MintPayment) mintPayments;
 
+    struct MintPaymentSkillDeposited {
+        uint256 skillDepositedFromWallet;
+        uint256 skillDepositedFromRewards;
+        uint256 skillDepositedFromIgo;
+
+        uint256 skillRefundableFromWallet;
+        uint256 skillRefundableFromRewards;
+        uint256 skillRefundableFromIgo;
+
+        uint256 refundClaimableTimestamp;
+    }
+
+    uint256 public totalMintPaymentSkillRefundable;
+    mapping(address => MintPaymentSkillDeposited) mintPaymentSkillDepositeds;
+
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
     event MintWeaponsSuccess(address indexed minter, uint32 count);
@@ -264,7 +279,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             weaponMultTarget,
             weaponBonusPower,
             timestamp,
-            getCurrentHour(),
+            now.div(1 hours),
             target
         );
     }
@@ -346,7 +361,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
 
         if(tokenRewards[msg.sender] == 0 && tokens > 0) {
-            _startRewardsClaimTaxTimer(msg.sender);
+            _rewardsClaimTaxTimerStart[msg.sender] = block.timestamp;
         }
 
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
@@ -425,7 +440,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return getTargetsInternal(
             getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
             characters.getStaminaTimestamp(char),
-            getCurrentHour()
+            now.div(1 hours)
         );
     }
 
@@ -460,6 +475,30 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
+    function mintPaymentSkillRefundable(address _minter) external view
+        returns (uint256 _refundInGameOnlyFunds, uint256 _refundTokenRewards, uint256 _refundUserWallet) {
+
+        return (
+            mintPaymentSkillDepositeds[_minter].skillRefundableFromIgo,
+            mintPaymentSkillDepositeds[_minter].skillRefundableFromRewards,
+            mintPaymentSkillDepositeds[_minter].skillRefundableFromWallet
+        );
+    }
+
+    function mintPaymentSecondsUntilSkillRefundClaimable(address _minter) external view
+        returns (uint256) {
+
+        (bool success, uint256 result) =
+            mintPaymentSkillDepositeds[_minter].refundClaimableTimestamp.trySub(block.timestamp);
+
+        if(success) {
+            return result;
+        }
+        else {
+            return 0;
+        }
+    }
+
     function _updatePaymentBlockHash(address _minter) internal {
         if ((mintPayments[_minter].count > 0) &&
             (mintPayments[_minter].blockHash == 0) &&
@@ -474,6 +513,27 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _updatePaymentBlockHash(_minter);
         if ((mintPayments[_minter].count > 0) &&
             (mintPayments[_minter].blockHash == 0)) {
+
+            uint256 depositedSkillFromWallet = mintPaymentSkillDepositeds[_minter].skillDepositedFromWallet;
+            uint256 depositedSkillFromRewards = mintPaymentSkillDepositeds[_minter].skillDepositedFromRewards;
+            uint256 depositedSkillFromIgo = mintPaymentSkillDepositeds[_minter].skillDepositedFromIgo;
+            mintPaymentSkillDepositeds[_minter].skillDepositedFromWallet = 0;
+            mintPaymentSkillDepositeds[_minter].skillDepositedFromRewards = 0;
+            mintPaymentSkillDepositeds[_minter].skillDepositedFromIgo = 0;
+
+            mintPaymentSkillDepositeds[_minter].skillRefundableFromWallet =
+                mintPaymentSkillDepositeds[_minter].skillRefundableFromWallet.add(depositedSkillFromWallet);
+            mintPaymentSkillDepositeds[_minter].skillRefundableFromRewards =
+                mintPaymentSkillDepositeds[_minter].skillRefundableFromRewards.add(depositedSkillFromRewards);
+            mintPaymentSkillDepositeds[_minter].skillRefundableFromIgo =
+                mintPaymentSkillDepositeds[_minter].skillRefundableFromIgo.add(depositedSkillFromIgo);
+
+            totalMintPaymentSkillRefundable = totalMintPaymentSkillRefundable
+                .add(depositedSkillFromWallet)
+                .add(depositedSkillFromRewards)
+                .add(depositedSkillFromIgo);
+            mintPaymentSkillDepositeds[_minter].refundClaimableTimestamp = block.timestamp + 3 hours;
+
             delete mintPayments[_minter];
         }
     }
@@ -494,7 +554,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(mintPayments[msg.sender].count == 0);
 
         require(nftAddress == address(weapons));
-        _payContract(msg.sender, mintWeaponFee * int128(count));
+        (uint256 _paidFeeFromInGameOnlyFunds, uint256 _paidFeeFromTokenRewards, uint256 _paidFeeFromUserWallet) =
+            _payContract(msg.sender, mintWeaponFee * int128(count));
 
         require(count == 1 || count == 10);
 
@@ -502,6 +563,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         mintPayments[msg.sender].nftAddress = nftAddress;
         mintPayments[msg.sender].blockNumber = block.number;
         mintPayments[msg.sender].blockHash = 0;
+        mintPaymentSkillDepositeds[msg.sender].skillDepositedFromWallet =
+            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromWallet.add(_paidFeeFromUserWallet);
+        mintPaymentSkillDepositeds[msg.sender].skillDepositedFromRewards =
+            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromRewards.add(_paidFeeFromTokenRewards);
+        mintPaymentSkillDepositeds[msg.sender].skillDepositedFromIgo =
+            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromIgo.add(_paidFeeFromInGameOnlyFunds);
     }
 
     function _usePayment(address _minter, address nftAddress, uint count) internal {
@@ -581,6 +648,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             weapons.mint(_minter, randoms.getRandomSeedUsingHash(_minter, hash));
             _usePayment(_minter, address(weapons), 1);
         }
+
+        mintPaymentSkillDepositeds[_minter].skillDepositedFromWallet = 0;
+        mintPaymentSkillDepositeds[_minter].skillDepositedFromRewards = 0;
+        mintPaymentSkillDepositeds[_minter].skillDepositedFromIgo = 0;
     }
 
     function mintWeapon() public onlyNonContract oncePerBlock(msg.sender)  {
@@ -591,6 +662,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         bytes32 hash = mintPayments[msg.sender].blockHash;
         try weapons.mint(msg.sender, randoms.getRandomSeedUsingHash(msg.sender, hash)) {
             _usePayment(msg.sender, address(weapons), 1);
+
+            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromWallet = 0;
+            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromRewards = 0;
+            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromIgo = 0;
+
             emit MintWeaponsSuccess(msg.sender, 1);
         }
         catch {
@@ -629,10 +705,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         randoms = _newRandoms;
     }
 
-    modifier fightModifierChecks(uint256 char, uint256 wep) {
-        require(tx.origin == msg.sender, "Only EOA allowed (temporary)");
-        require(characters.ownerOf(char) == msg.sender, "Not the character owner");
-        require(weapons.ownerOf(wep) == msg.sender, "Not the weapon owner");
+    modifier fightModifierChecks(uint256 character, uint256 weapon) {
+        _onlyNonContract();
+        _isCharacterOwner(character);
+        _isWeaponOwner(weapon);
         _;
     }
 
@@ -724,24 +800,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(skillAmount))));
     }
 
-    function payContract(address playerAddress, int128 usdAmount) public restricted {
-        _payContract(playerAddress, usdAmount);
-    }
-
-    function payContractConverted(address playerAddress, uint256 convertedAmount) public restricted {
-        _payContractConverted(playerAddress, convertedAmount);
-    }
-
-    function payPlayer(address playerAddress, int128 baseAmount) public restricted {
-        _payPlayer(playerAddress, baseAmount);
-    }
-
     function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
         _payPlayerConverted(playerAddress, convertedAmount);
-    }
-
-    function approveContractCharacterFor(uint256 characterID, address playerAddress) public restricted {
-        _approveContractCharacterFor(characterID, playerAddress);
     }
 
     function approveContractWeaponFor(uint256 weaponID, address playerAddress) public restricted {
@@ -764,11 +824,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
     }
 
-    function _payContract(address playerAddress, int128 usdAmount) internal {
-        _payContractConverted(playerAddress, usdToSkill(usdAmount));
+    function _payContract(address playerAddress, int128 usdAmount) internal
+        returns (uint256 _fromInGameOnlyFunds, uint256 _fromTokenRewards, uint256 _fromUserWallet) {
+
+        return _payContractConverted(playerAddress, usdToSkill(usdAmount));
     }
 
-    function _payContractConverted(address playerAddress, uint256 convertedAmount) internal {
+    function _payContractConverted(address playerAddress, uint256 convertedAmount) internal
+        returns (uint256 _fromInGameOnlyFunds, uint256 _fromTokenRewards, uint256 _fromUserWallet) {
 
         (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
@@ -783,6 +846,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
         skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
+
+        return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
 
     function _payPlayer(address playerAddress, int128 baseAmount) internal {
@@ -879,11 +944,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
     }
 
-    function getCurrentHour() public view returns (uint256) {
-        // "now" returns unix time since 1970 Jan 1, in seconds
-        return now.div(1 hours);
-    }
-
     function claimTokenRewards() public {
         // our characters go to the tavern
         // and the barkeep pays them for the bounties
@@ -955,10 +1015,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getOwnRewardsClaimTax() public view returns (int128) {
         return _getRewardsClaimTax(msg.sender);
-    }
-
-    function _startRewardsClaimTaxTimer(address playerAddress) internal {
-        _rewardsClaimTaxTimerStart[playerAddress] = block.timestamp;
     }
 
 }
