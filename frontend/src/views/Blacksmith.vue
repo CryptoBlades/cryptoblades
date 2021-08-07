@@ -310,9 +310,7 @@ export default {
         this.newForged.push(x);
       });
 
-      ++offset;
-
-      this.newForged.splice(0,this.ownedWeaponIds.length-offset);
+      this.newForged.splice(0, this.ownedWeaponIds.length - offset + 1);
 
 
       // eslint-disable-next-line no-constant-condition
