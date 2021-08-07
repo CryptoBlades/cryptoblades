@@ -26,6 +26,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     // Payment must be recent enough that the hash is available for the payment block.
     // Use 200 as a 'friendly' window of "You have 10 minutes."
     uint256 public constant MINT_PAYMENT_TIMEOUT = 200;
+    uint256 public constant MINT_PAYMENT_RECLAIM_MINIMUM_WAIT_TIME = 3 hours;
 
     int128 public constant REWARDS_CLAIM_TAX_MAX = 2767011611056432742; // = ~0.15 = ~15%
     uint256 public constant REWARDS_CLAIM_TAX_DURATION = 15 days;
@@ -499,6 +500,33 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
+    function mintPaymentClaimRefund() external {
+        _discardPaymentIfExpired(msg.sender);
+
+        require(mintPaymentSkillDepositeds[msg.sender].refundClaimableTimestamp <= block.timestamp);
+
+        uint256 skillRefundableFromIgo = mintPaymentSkillDepositeds[msg.sender].skillRefundableFromIgo;
+        uint256 skillRefundableFromRewards = mintPaymentSkillDepositeds[msg.sender].skillRefundableFromRewards;
+        uint256 skillRefundableFromWallet = mintPaymentSkillDepositeds[msg.sender].skillRefundableFromWallet;
+
+        require(skillRefundableFromWallet > 0 || skillRefundableFromRewards > 0 || skillRefundableFromIgo > 0);
+
+        mintPaymentSkillDepositeds[msg.sender].skillRefundableFromIgo = 0;
+        mintPaymentSkillDepositeds[msg.sender].skillRefundableFromRewards = 0;
+        mintPaymentSkillDepositeds[msg.sender].skillRefundableFromWallet = 0;
+
+        totalMintPaymentSkillRefundable = totalMintPaymentSkillRefundable
+                .sub(skillRefundableFromWallet)
+                .sub(skillRefundableFromRewards)
+                .sub(skillRefundableFromIgo);
+
+        totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillRefundableFromIgo);
+        inGameOnlyFunds[msg.sender] = inGameOnlyFunds[msg.sender].add(skillRefundableFromIgo);
+
+        tokenRewards[msg.sender] = tokenRewards[msg.sender].add(skillRefundableFromRewards);
+        skillToken.transfer(msg.sender, skillRefundableFromWallet);
+    }
+
     function _updatePaymentBlockHash(address _minter) internal {
         if ((mintPayments[_minter].count > 0) &&
             (mintPayments[_minter].blockHash == 0) &&
@@ -551,6 +579,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function payForMint(address nftAddress, uint count) public {
         _discardPaymentIfExpired(msg.sender);
 
+        require(
+            mintPaymentSkillDepositeds[msg.sender].skillRefundableFromWallet == 0 &&
+            mintPaymentSkillDepositeds[msg.sender].skillRefundableFromRewards == 0 &&
+            mintPaymentSkillDepositeds[msg.sender].skillRefundableFromIgo == 0
+        );
+
         require(mintPayments[msg.sender].count == 0);
 
         require(nftAddress == address(weapons));
@@ -594,8 +628,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 tokenRewards[msg.sender],
                 skillAmount
             );
-        require(skillToken.balanceOf(msg.sender) >= fromUserWallet,
-            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(fromUserWallet))));
+        require(skillToken.balanceOf(msg.sender) >= fromUserWallet);
 
         uint256 convertedAmount = usdToSkill(mintCharacterFee);
         _payContractTokenOnly(msg.sender, convertedAmount);
@@ -718,7 +751,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _onlyNonContract() internal view {
-        require(tx.origin == msg.sender, "Only EOA allowed (temporary)");
+        require(tx.origin == msg.sender);
     }
 
     modifier restricted() {
@@ -727,7 +760,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Missing GAME_ADMIN role");
+        require(hasRole(GAME_ADMIN, msg.sender), "NGA");
     }
 
     modifier oncePerBlock(address user) {
@@ -736,7 +769,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _oncePerBlock(address user) internal {
-        require(lastBlockNumberCalled[user] < block.number, "Only callable once per block");
+        require(lastBlockNumberCalled[user] < block.number, "OCB");
         lastBlockNumberCalled[user] = block.number;
     }
 
@@ -796,8 +829,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 skillAmount
             );
 
-        require(skillToken.balanceOf(msg.sender) >= fromUserWallet,
-            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(skillAmount))));
+        require(skillToken.balanceOf(msg.sender) >= fromUserWallet);
     }
 
     function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
