@@ -474,8 +474,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function hasPaidForMint() public view returns(bool){
-        return (mintPayments[msg.sender].count > 0);
+    function hasPaidForMint(uint32 _num) public view returns(bool){
+        return (
+            mintPayments[msg.sender].count == _num && (
+                mintPayments[msg.sender].blockHash != 0 ||
+                mintPayments[msg.sender].blockNumber + 200 >= block.number
+            )
+        );
     }
 
     function payForMint(address nftAddress, uint count) public {
@@ -547,19 +552,33 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     {
         require(num > 0 && num <= 1000);
         _discardPaymentIfExpired();
+        require(mintPayments[msg.sender].count == num, "count mismatch");
+
+        // the function below is external so we can try-catch on it
+        try this._mintWeaponNUsableByThisOnlyButExternalForReasons(msg.sender, num) {
+        }
+        catch {
+        }
+    }
+
+    function _mintWeaponNUsableByThisOnlyButExternalForReasons(address minter, uint32 num) external {
+        // the reason referred to in the function name is that we want to
+        // try-catch on this from within the same contract
+
+        require(msg.sender == address(this), "Not self");
+
         for (uint i = 0; i < num; i++) {
-            bytes32 hash = mintPayments[msg.sender].blockHash;
-            try weapons.mint(msg.sender, randoms.getRandomSeedUsingHash(msg.sender, hash)) {
-                _usePayment(address(weapons), 1);
-            }
-            catch {
-                return;
-            }
+            bytes32 hash = mintPayments[minter].blockHash;
+            weapons.mint(minter, randoms.getRandomSeedUsingHash(minter, hash));
+            _usePayment(address(weapons), 1);
         }
     }
 
     function mintWeapon() public onlyNonContract oncePerBlock(msg.sender)  {
         _discardPaymentIfExpired();
+
+        require(mintPayments[msg.sender].count == 1, "count mismatch");
+
         bytes32 hash = mintPayments[msg.sender].blockHash;
         try weapons.mint(msg.sender, randoms.getRandomSeedUsingHash(msg.sender, hash)) {
             _usePayment(address(weapons), 1);
