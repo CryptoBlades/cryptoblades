@@ -1065,6 +1065,7 @@ export function createStore(web3: Web3) {
           .mintWeaponN(num)
           .send({
             from: state.defaultAccount,
+            gas: '5000000'
           });
 
         const hasPaidForMintAfter = await CryptoBlades.methods
@@ -1116,6 +1117,7 @@ export function createStore(web3: Web3) {
           .mintWeapon()
           .send({
             from: state.defaultAccount,
+            gas: '500000'
           });
 
         const hasPaidForMintAfter = await CryptoBlades.methods
