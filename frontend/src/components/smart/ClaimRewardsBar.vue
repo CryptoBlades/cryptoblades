@@ -10,10 +10,10 @@
         class="ml-3"
         :disabled="!canClaimTokens"
         @click="onClaimTokens()"><!-- moved gtag-link below b-nav-item -->
-        <span class="gtag-link-others" tagname="claim_skill">
+        <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="'Tax is being reduced by 1% per day.' + getTaxTimerNextTick">
           <strong>SKILL</strong> {{ formattedSkillReward }}
           <strong>Early Withdraw Tax</strong> {{ formattedRewardsClaimTax }}
-          <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="'Tax is being reduced by 1% per day'"/>
+          <b-icon-question-circle class="centered-icon" scale="0.8"/>
         </span>
       </b-nav-item>
 
@@ -78,6 +78,7 @@ import { getCharacterNameFromSeed } from '../../character-name';
 import { RequiredXp } from '../../interfaces';
 import { ICharacter } from '@/interfaces';
 import { toBN, fromWeiEther } from '../../utils/common';
+import { secondsToDDHHMMSS } from '../../utils/date-time';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -139,6 +140,24 @@ export default Vue.extend({
           : this.rewardsClaimTaxAsFactorBN;
 
       return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
+    },
+
+    getTaxTimerNextTick(): string {
+      let frac: BigNumber;
+
+      // if has no skill rewards do not display timer next tick.
+      if (this.skillRewards === '0') {
+        return '';
+      } else {
+        frac = this.rewardsClaimTaxAsFactorBN;
+      }
+
+      // get 2 decimal values
+      const decVal = toBN(frac.multipliedBy(100).decimalPlaces(2).toString().split('.')[1]);
+      // convert to seconds
+      const toSec = decVal.dividedBy(100).multipliedBy(24).multipliedBy(60).multipliedBy(60);
+      // return message
+      return ` Next tick in ${secondsToDDHHMMSS(toSec.toNumber())}.`;
     },
 
     xpRewardsForOwnedCharacters(): string[] {
