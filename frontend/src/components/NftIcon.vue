@@ -8,12 +8,12 @@
     >
       <!-- show nft with id: nftId of type: nftfType (contract address?)
         either load properties here or wherever the list of nfts is created and pass in nft object-->
-      <div v-if="nft.nftType === 'shield'" class="nft-details">
+      <div v-if="nft.nftType === 'shield'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
         <img class="placeholder-shield" src="../assets/shield1.png"/>
 
         <div v-if="!isShop" class="trait">
           <span :class="nft.element.toLowerCase() + '-icon'"></span>
-          <!-- <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" /> -->
+          <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
         </div>
 
         <span v-if="isShop" class="nft-supply">Supply left: {{totalShieldSupply}}</span>
@@ -41,7 +41,7 @@
 <script>
 import { mapActions } from 'vuex';
 export default {
-  props: ['nft', 'isDefault', 'isShop'],
+  props: ['nft', 'isDefault', 'isShop', 'favorite'],
 
   computed: {
     tooltipHtml() {
@@ -98,7 +98,6 @@ export default {
   width: 100%;
   position: relative;
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid #9e8a57;
 }
 .nft-icon-wrapper {
   width: 12em;
@@ -159,5 +158,76 @@ export default {
 .stats {
   top: 35px;
   left: 10px;
+}
+
+.favorite-star {
+  position: absolute;
+  margin-left: 5px;
+}
+
+.glow-container {
+  height: 100%;
+  width: 100%;
+}
+
+.glow-container {
+  border-radius: 5px;
+  z-index: 540;
+}
+
+.glow-0 {
+  animation: none;
+}
+
+.glow-1 {
+  animation: glow-1 2000ms ease-out infinite alternate;
+}
+
+.glow-2 {
+  animation: glow-2 2000ms ease-out infinite alternate;
+}
+
+.glow-3 {
+  animation: glow-3 2000ms ease-out infinite alternate;
+}
+
+.glow-4 {
+  animation: glow-4 2000ms ease-out infinite alternate;
+}
+
+@keyframes glow-1 {
+  0% {
+    box-shadow: inset 0 0 10px rgba(0, 162, 255, 0.5);
+  }
+  100% {
+    box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
+  }
+}
+
+@keyframes glow-2 {
+  0% {
+    box-shadow: inset 0 0 10px rgba(125, 0, 125, 0.5);
+  }
+  100% {
+    box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
+  }
+}
+
+@keyframes glow-3 {
+  0% {
+    box-shadow: inset 0 0 10px rgba(255, 102, 0, 0.3);
+  }
+  100% {
+    box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
+  }
+}
+
+@keyframes glow-4 {
+  0% {
+    box-shadow: inset 0 0 10px rgba(125, 0, 0, 0.5);
+  }
+  100% {
+    box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
+  }
 }
 </style>

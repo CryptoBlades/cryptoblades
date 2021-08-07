@@ -83,6 +83,9 @@ export interface IState {
   maxDurability: number;
   targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
 
+  currentNftType: string | null;
+  currentNftId: number | null;
+
   characterTransferCooldowns: Record<number, ITransferCooldown | undefined>;
 
   staking: Record<StakeType, IStakeState>;

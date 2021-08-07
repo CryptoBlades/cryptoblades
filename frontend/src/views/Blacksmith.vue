@@ -148,9 +148,16 @@
       </b-tab>
       <b-tab>
         <template #title>
-          Shields <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`You can buy shield in Skill shop tab in the market!`"/>
+          Equipment <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`You can buy shield in Skill shop tab in the market!`"/>
         </template>
-        <nft-list :nfts="ownNfts"/>
+        <div class="row mt-3" v-if="ownWeapons.length > 0">
+          <div class="col">
+            <div class="d-flex justify-content-space-between">
+              <h1>Equipment ({{ nftsCount }})</h1>
+            </div>
+            <nft-list v-if="nftsCount > 0" v-model="selectedNft"/>
+          </div>
+        </div>
       </b-tab>
     </b-tabs>
   </div>
@@ -174,6 +181,7 @@ export default {
       showReforge: false,
       reforgeWeaponId: null,
       burnWeaponId: null,
+      selectedNft: null,
       forgeCost: 0,
       reforgeCost: 0,
       disableForge: false,
@@ -185,7 +193,7 @@ export default {
 
   computed: {
     ...mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds']),
-    ...mapGetters(['contracts', 'ownWeapons', 'ownShields']),
+    ...mapGetters(['contracts', 'ownWeapons', 'nftsCount']),
 
     canReforge() {
       return (

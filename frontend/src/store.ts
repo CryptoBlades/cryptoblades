@@ -22,6 +22,7 @@ import {
 } from './feature-flags';
 import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
+import { Nft } from './interfaces/Nft';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -107,6 +108,8 @@ export function createStore(web3: Web3) {
       characterStaminas: {},
       weapons: {},
       currentWeaponId: null,
+      currentNftType: null,
+      currentNftId: null,
       weaponDurabilities: {},
       maxDurability: 0,      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
@@ -117,7 +120,7 @@ export function createStore(web3: Web3) {
 
       shields: {},
       currentShieldId: null,
-      nfts: {shield:{}},
+      nfts: {},
 
       staking: {
         skill: { ...defaultStakeState },
@@ -229,6 +232,28 @@ export function createStore(web3: Web3) {
           if (weapons.some((w) => w === null)) return [];
           return weapons;
         };
+      },
+
+      shieldsWithIds(state) {
+        return (shieldIds: (string | number)[]) => {
+          const shields = shieldIds.map(id => {
+            //console.log('shield: ' + JSON.stringify(state.shields[+id]));
+            const shieldNft = state.shields[+id] as unknown as Nft;
+            shieldNft.nftId = id;
+            shieldNft.nftType = 'shield';
+            //console.log('shield: ' + JSON.stringify(shieldNft));
+            return shieldNft;
+          });
+          if (shields.some((s) => s === null)) return [];
+          console.log('final shields: ' + JSON.stringify(shields));
+          return shields;
+        };
+      },
+
+      nftsCount(state) {
+        let count = 0;
+        Object.keys(state.nfts)?.forEach(type => Object.keys(state.nfts[type])?.forEach(() => count++));
+        return count;
       },
 
       nftsWithIdType(state) {
@@ -493,6 +518,9 @@ export function createStore(web3: Web3) {
 
       updateShield(state: IState, { shieldId, shield }) {
         Vue.set(state.shields, shieldId, shield);
+        if(!state.nfts.shield) {
+          Vue.set(state.nfts, 'shield', {});
+        }
         Vue.set(state.nfts.shield, shieldId, shield);
       },
 
@@ -545,6 +573,11 @@ export function createStore(web3: Web3) {
         state.waxBridgeWithdrawableBnb = payload.waxBridgeWithdrawableBnb;
         state.waxBridgeRemainingWithdrawableBnbDuringPeriod = payload.waxBridgeRemainingWithdrawableBnbDuringPeriod;
         state.waxBridgeTimeUntilLimitExpires = payload.waxBridgeTimeUntilLimitExpires;
+      },
+
+      setCurrentNft(state: IState, payload: {nftType: string, nftId: number} ) {
+        state.currentNftType = payload.nftType;
+        state.currentNftId = payload.nftId;
       },
     },
 
