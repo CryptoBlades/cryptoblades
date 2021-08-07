@@ -494,7 +494,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(mintPayments[msg.sender].count == 0);
 
         require(nftAddress == address(weapons));
-        _payContract(msg.sender, mintWeaponFee);
+        _payContract(msg.sender, mintWeaponFee * int128(count));
 
         require(count == 1 || count == 10);
 
