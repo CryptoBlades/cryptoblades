@@ -35,6 +35,7 @@
                   class="ml-3"
                   @click="onForgeWeapon"
                   :disabled="disableForge"
+                  v-if="false"
                   v-tooltip="'Forge new weapon'">
                   <span v-if="disableForge">
                     Cooling forge...
@@ -50,6 +51,7 @@
                   class="ml-3"
                   @click="onForgeWeaponx10()"
                   :disabled="disableForge"
+                  v-if="false"
                   v-tooltip="'Forge new weapon'">
                   <span v-if="disableForge">
                     Cooling forge...
