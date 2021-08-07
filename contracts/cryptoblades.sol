@@ -23,6 +23,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
+    // Payment must be recent enough that the hash is available for the payment block.
+    // Use 200 as a 'friendly' window of "You have 10 minutes."
+    uint256 public constant MINT_PAYMENT_TIMEOUT = 200;
+
     int128 public constant REWARDS_CLAIM_TAX_MAX = 2767011611056432742; // = ~0.15 = ~15%
     uint256 public constant REWARDS_CLAIM_TAX_DURATION = 15 days;
 
@@ -138,8 +142,19 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     Blacksmith public blacksmith;
 
+    struct MintPayment {
+        bytes32 blockHash;
+        uint256 blockNumber;
+        address nftAddress;
+        uint count;
+    }
+
+    mapping(address => MintPayment) mintPayments;
+
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
+    event MintWeaponsSuccess(address indexed minter, uint32 count);
+    event MintWeaponsFailure(address indexed minter, uint32 count);
 
     function recoverSkill(uint256 amount) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
@@ -276,12 +291,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             }
         }
         require(foundMatch, "Target invalid");
-    }
-
-    function spendTicket(uint32 num)
-        public
-    {
-        blacksmith.spendTicket(num);
     }
 
     function isUnlikely(uint24 pp, uint24 ep)
@@ -451,6 +460,64 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
+    function _updatePaymentBlockHash(address _minter) internal {
+        if ((mintPayments[_minter].count > 0) &&
+            (mintPayments[_minter].blockHash == 0) &&
+            (mintPayments[_minter].blockNumber < block.number) &&
+            (mintPayments[_minter].blockNumber + MINT_PAYMENT_TIMEOUT >= block.number)) {
+
+            mintPayments[_minter].blockHash = blockhash(mintPayments[_minter].blockNumber);
+        }
+    }
+
+    function _discardPaymentIfExpired(address _minter) internal {
+        _updatePaymentBlockHash(_minter);
+        if ((mintPayments[_minter].count > 0) &&
+            (mintPayments[_minter].blockHash == 0)) {
+            delete mintPayments[_minter];
+        }
+    }
+
+    function hasPaidForMint(uint32 _num) public view returns(bool){
+        require(_num > 0);
+        return (
+            mintPayments[msg.sender].count == _num && (
+                mintPayments[msg.sender].blockHash != 0 ||
+                mintPayments[msg.sender].blockNumber + MINT_PAYMENT_TIMEOUT >= block.number
+            )
+        );
+    }
+
+    function payForMint(address nftAddress, uint count) public {
+        _discardPaymentIfExpired(msg.sender);
+
+        require(mintPayments[msg.sender].count == 0);
+
+        require(nftAddress == address(weapons));
+        _payContract(msg.sender, mintWeaponFee * int128(count));
+
+        require(count == 1 || count == 10);
+
+        mintPayments[msg.sender].count = count;
+        mintPayments[msg.sender].nftAddress = nftAddress;
+        mintPayments[msg.sender].blockNumber = block.number;
+        mintPayments[msg.sender].blockHash = 0;
+    }
+
+    function _usePayment(address _minter, address nftAddress, uint count) internal {
+        _discardPaymentIfExpired(_minter);
+
+        require(mintPayments[_minter].nftAddress == nftAddress);
+        // Payment must commit in a block before being used.
+        require(mintPayments[_minter].blockNumber < block.number);
+
+        mintPayments[_minter].count = mintPayments[_minter].count.sub(count);
+        mintPayments[_minter].blockHash = bytes32(uint256(mintPayments[_minter].blockHash) + 1);
+        if (mintPayments[_minter].count == 0) {
+            delete mintPayments[_minter];
+        }
+    }
+
     function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
 
         uint256 skillAmount = usdToSkill(mintCharacterFee);
@@ -464,7 +531,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(fromUserWallet))));
 
         uint256 convertedAmount = usdToSkill(mintCharacterFee);
-        payContractTokenOnly(msg.sender, convertedAmount);
+        _payContractTokenOnly(msg.sender, convertedAmount);
 
         if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
             _giveInGameOnlyFundsFromContractBalance(msg.sender, usdToSkill(promos.firstCharacterPromoInGameOnlyFundsGivenInUsd()));
@@ -489,21 +556,46 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         public
         onlyNonContract
         oncePerBlock(msg.sender)
-        requestPayFromPlayer(mintWeaponFee * num)
     {
         require(num > 0 && num <= 1000);
-        _payContract(msg.sender, mintWeaponFee * num);
+        _discardPaymentIfExpired(msg.sender);
+        require(mintPayments[msg.sender].count == num, "count mismatch");
 
-        for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(randoms.getRandomSeed(msg.sender), i))));
+        // the function below is external so we can try-catch on it
+        try this._mintWeaponNUsableByThisOnlyButExternalForReasons(msg.sender, num) {
+            emit MintWeaponsSuccess(msg.sender, num);
+        }
+        catch {
+            emit MintWeaponsFailure(msg.sender, num);
         }
     }
 
-    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
-        _payContract(msg.sender, mintWeaponFee);
+    function _mintWeaponNUsableByThisOnlyButExternalForReasons(address _minter, uint32 num) external {
+        // the reason referred to in the function name is that we want to
+        // try-catch on this from within the same contract
 
-        uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.mint(msg.sender, seed);
+        require(msg.sender == address(this));
+
+        for (uint i = 0; i < num; i++) {
+            bytes32 hash = mintPayments[_minter].blockHash;
+            weapons.mint(_minter, randoms.getRandomSeedUsingHash(_minter, hash));
+            _usePayment(_minter, address(weapons), 1);
+        }
+    }
+
+    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender)  {
+        _discardPaymentIfExpired(msg.sender);
+
+        require(mintPayments[msg.sender].count == 1, "count mismatch");
+
+        bytes32 hash = mintPayments[msg.sender].blockHash;
+        try weapons.mint(msg.sender, randoms.getRandomSeedUsingHash(msg.sender, hash)) {
+            _usePayment(msg.sender, address(weapons), 1);
+            emit MintWeaponsSuccess(msg.sender, 1);
+        }
+        catch {
+            emit MintWeaponsFailure(msg.sender, 1);
+        }
     }
 
     function burnWeapon(uint256 burnID) public
@@ -657,6 +749,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function payContractTokenOnly(address playerAddress, uint256 convertedAmount) public restricted {
+        _payContractTokenOnly(playerAddress, convertedAmount);
+    }
+
+    function _payContractTokenOnly(address playerAddress, uint256 convertedAmount) internal {
         (, uint256 fromTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
