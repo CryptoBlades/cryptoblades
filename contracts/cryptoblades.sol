@@ -503,12 +503,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function _usePayment(address nftAddress, uint count) internal {
         _discardPaymentIfExpired();
 
-        require(mintPayments[msg.sender].count >= count);
         require(mintPayments[msg.sender].nftAddress == nftAddress);
         // Payment must commit in a block before being used.
         require(mintPayments[msg.sender].blockNumber < block.number);
 
-        mintPayments[msg.sender].count -= count;
+        mintPayments[msg.sender].count = mintPayments[msg.sender].count.sub(count);
         if (mintPayments[msg.sender].count == 0) {
             delete mintPayments[msg.sender];
         }
