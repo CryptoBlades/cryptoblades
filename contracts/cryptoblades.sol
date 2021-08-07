@@ -475,10 +475,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _discardPaymentIfExpired() internal {
         _updatePaymentBlockHash();
-        if (mintPayments[msg.sender].count > 0) {
-            if (mintPayments[msg.sender].blockHash == 0) {
-                delete mintPayments[msg.sender];
-            }
+        if ((mintPayments[msg.sender].count > 0) &&
+            (mintPayments[msg.sender].blockHash == 0)) {
+            delete mintPayments[msg.sender];
         }
     }
 
