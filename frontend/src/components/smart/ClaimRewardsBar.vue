@@ -157,7 +157,7 @@ export default Vue.extend({
       // convert to seconds
       const toSec = decVal.dividedBy(100).multipliedBy(24).multipliedBy(60).multipliedBy(60);
       // return message
-      return ` Next tick in ${secondsToDDHHMMSS(toSec.toNumber())}.`;
+      return ` Next -1% reduction happens in ${secondsToDDHHMMSS(toSec.toNumber())}.`;
     },
 
     xpRewardsForOwnedCharacters(): string[] {
