@@ -28,7 +28,14 @@
         <div v-if="ownCharacters.length > 0">
           <div class="d-flex justify-content-space-between">
             <h1>Characters ({{ ownCharacters.length }} / 4)</h1>
-
+            <b-button
+              v-if="canRename()"
+              variant="primary"
+              class="ml-auto gtag-link-others"
+              @click="openRenameCharacter"
+              v-tooltip="'Rename character'" tagname="rename_character">
+              Rename Character
+            </b-button>
             <b-button
               v-if="ownCharacters.length < 4"
               :disabled="!canRecruit()"
@@ -45,18 +52,27 @@
             @input="setCurrentCharacter"
           />
         </div>
+        <b-modal class="centered-modal" ref="character-rename-modal"
+                  @ok="renameCharacterCall()">
+                  <template #modal-title>
+                    Rename Character
+                  </template>
+                  <b-form-input type="string"
+                    class="modal-input" v-model="characterRename" placeholder="New Name" />
+                </b-modal>
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script lang='ts'>
 import BN from 'bignumber.js';
 
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
+import { BModal } from 'bootstrap-vue';
 
 export default {
   computed: {
@@ -95,19 +111,20 @@ export default {
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
-
-    console.log(this.recruitCost, this.formatSkill());
+    this.haveRename = await this.contracts.CharacterRenameTagConsumables?.methods.getItemCount().call();
   },
 
   data() {
     return {
-      recruitCost: this.recruitCost
+      recruitCost: this.recruitCost,
+      haveRename: 0,
+      characterRename: ''
     };
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
-    ...mapActions(['mintCharacter']),
+    ...mapActions(['mintCharacter', 'renameCharacter']),
 
     async onMintCharacter() {
       try {
@@ -123,6 +140,20 @@ export default {
       const cost = toBN(this.recruitCost);
       const balance = toBN(this.skillBalance);
       return balance.isGreaterThanOrEqualTo(cost);
+    },
+    canRename() {
+      return this.haveRename > 0 && this.currentCharacter !== undefined && this.currentCharacter.id > 0;
+    },
+    openRenameCharacter() {
+      (this.$refs['character-rename-modal'] as BModal).show();
+    },
+    async renameCharacterCall() {
+      if(this.characterRename === ''){
+        return;
+      }
+
+      await this.renameCharacter({id: this.currentCharacter.id, name: this.characterRename});
+      this.haveRename = await this.contracts.CharacterRenameTagConsumables?.methods.getItemCount().call();
     }
   },
 

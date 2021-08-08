@@ -4,6 +4,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./interfaces/IRandoms.sol";
 import "./shields.sol";
+import "./WeaponRenameTagConsumables.sol";
+import "./CharacterRenameTagConsumables.sol";
 import "./weapons.sol";
 import "./cryptoblades.sol";
 
@@ -13,6 +15,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     bytes32 public constant GAME = keccak256("GAME");
 
     uint256 public constant SHIELD_SKILL_FEE = 5 ether;
+    uint256 public constant ONE_SKILL_FEE = 1 ether;
 
     /* ========== STATE VARIABLES ========== */
 
@@ -23,6 +26,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     Shields public shields;
     CryptoBlades public game;
+    CharacterRenameTagConsumables public characterRename;
+    WeaponRenameTagConsumables public weaponRename;
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -49,6 +54,13 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         shields = _shields;
         game = _game;
     }
+
+     function migrateTo_Something(CharacterRenameTagConsumables _characterRename,
+     WeaponRenameTagConsumables _weaponRename) external {
+         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+         characterRename = _characterRename;
+         weaponRename = _weaponRename;
+     }
 
     /* ========== VIEWS ========== */
 
@@ -86,5 +98,15 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     modifier onlyGame() {
         require(hasRole(GAME, msg.sender), "Only game");
         _;
+    }
+
+    function purchaseCharacterRenameTag() public {
+        game.payContractTokenOnly(msg.sender, ONE_SKILL_FEE);
+        characterRename.giveItem(msg.sender);
+    }
+
+    function purchaseWeaponRenameTag() public {
+        game.payContractTokenOnly(msg.sender, ONE_SKILL_FEE);
+        weaponRename.giveItem(msg.sender);
     }
 }

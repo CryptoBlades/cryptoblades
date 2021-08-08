@@ -8,6 +8,9 @@
         <li class="nft"
         v-for="nft in nftIdTypes" :key="`${nft.type}.${nft.id}`">
           <nft-icon :nft="nft" :isShop="isShop" :favorite="isFavorite(nft.typeId, nft.id)"/>
+            v-tooltip.top="{ content: itemDescriptionHtml(nft) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
           <b-button
             variant="primary"
             class="shop-button"
@@ -85,6 +88,8 @@
 <script lang="ts">
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import Events from '../../events';
+import {Nft as nftItem} from '../../interfaces/Nft';
+import { SkillShopListing } from '../../interfaces/SkillShopListing';
 import NftIcon from '../NftIcon.vue';
 import { Nft } from '@/interfaces/Nft';
 import Vue from 'vue';
@@ -271,7 +276,7 @@ export default Vue.extend({
       }
 
       return favoriteNfts.concat(items);
-    },
+    }
   },
 
   watch: {
@@ -291,7 +296,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['purchaseShield', 'fetchShields']) as StoreMappedActions),
+    ...(mapActions(['purchaseShield', 'fetchShields', 'purchaseRenameTag', 'purchaseWeaponRenameTag']) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
     async onShieldBuy() {
@@ -375,6 +380,25 @@ export default Vue.extend({
     if(!this.showGivenNftIdTypes) {
       this.fetchShields(this.ownedShieldIds);
     }
+  }
+  async buyItem(item: nftItem) {
+      if(item.nftType === 'shield'){
+        await this.purchaseShield();
+      }
+
+      if(item.nftType === 'CharacterRenameTag'){
+        await this.purchaseRenameTag();
+      }
+
+      if(item.nftType === 'WeaponRenameTag'){
+        await this.purchaseWeaponRenameTag();
+      }
+    },
+    itemDescriptionHtml(item: SkillShopListing): string {
+      return item.name + '<br>' + item.description;
+    }
+  }
+};
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());
 

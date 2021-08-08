@@ -663,6 +663,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { Accessors } from 'vue/types/options';
 import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons, Shields } from '../../../build/abi-interfaces';
+import { SkillShopListing } from '../interfaces/SkillShopListing';
 import BigNumber from 'bignumber.js';
 import { BModal } from 'bootstrap-vue';
 import { traitNameToNumber } from '@/contract-models';
@@ -735,6 +736,10 @@ export interface Nft {
   stat2Value?: number;
   stat3Value?: number;
   nftPrice?: number;
+  isConsumable: boolean;
+  name: string;
+  description: string;
+  image: string;
 }
 
 interface StoreMappedActions {
@@ -852,20 +857,39 @@ export default Vue.extend({
       return this.activeType === 'weapon' || this.activeType === 'shield' || this.ownCharacters.length < 4 ;
     },
 
-    specialOffersNftList(): Nft[] {
+    specialOffersNftList(): SkillShopListing[] {
       const nftList = [
         {
           id: 'placeholder',
           type: 'shield',
-          nftPrice: 5
+          nftPrice: 5,
+          name: 'Shield',
+          description: 'A shield'
         },
       ];
 
       return nftList;
     },
 
-    shopOffersNftList(): Nft[] {
-      const nftList = [] as Nft[];
+    shopOffersNftList(): SkillShopListing[] {
+      const nftList = [
+        {
+          nftId: 0,
+          nftType: 'CharacterRenameTag',
+          nftPrice: 1,
+          name: 'Rename Tag',
+          description: 'Renames one character.',
+          image: 'https://seiyria.com/gameicons-font/svg/id-card.svg'
+        },
+        {
+          nftId: 1,
+          nftType: 'WeaponRenameTag',
+          nftPrice: 1,
+          name: 'Weapon Tag',
+          description: 'Renames a weapon.',
+          image: 'https://seiyria.com/gameicons-font/svg/price-tag.svg'
+        },
+      ] as SkillShopListing[];
 
       return nftList;
     }

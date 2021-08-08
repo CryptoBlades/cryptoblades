@@ -14,6 +14,8 @@ import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
 import { abi as blacksmithAbi } from '../../build/contracts/Blacksmith.json';
 import { abi as shieldsAbi } from '../../build/contracts/Shields.json';
+import { abi as weaponRenameTagConsumablesAbi } from '../../build/contracts/WeaponRenameTagConsumables.json';
+import { abi as characterRenameTagConsumablesAbi } from '../../build/contracts/CharacterRenameTagConsumables.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
@@ -127,6 +129,14 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const shieldsAddr = await Blacksmith.methods.shields().call();
   const Shields = new web3.eth.Contract(shieldsAbi as Abi, shieldsAddr);
 
+  const weaponRenameTagConsumablesAddr = await Blacksmith.methods.weaponRename().call();
+  const WeaponRenameTagConsumables = new web3.eth.Contract(weaponRenameTagConsumablesAbi as Abi, weaponRenameTagConsumablesAddr);
+
+  const characterRenameTagConsumablesAddr = await Blacksmith.methods.characterRename().call();
+  const CharacterRenameTagConsumables = new web3.eth.Contract(characterRenameTagConsumablesAbi as Abi, characterRenameTagConsumablesAddr);
+
+
+
   const raidContracts: RaidContracts = {};
   if(featureFlagRaid) {
     const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as Networks)[networkId]!.address;
@@ -146,7 +156,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   return {
     ...stakingContracts,
-    CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields,
+    CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
     ...raidContracts,
     ...marketContracts,
     WaxBridge,

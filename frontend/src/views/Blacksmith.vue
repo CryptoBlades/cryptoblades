@@ -21,8 +21,18 @@
               <h1>Weapons ({{ ownWeapons.length }})</h1>
 
               <div class="d-flex justify-content-flex-end ml-auto">
+              <b-button
+                  variant="primary"
+                  v-if="canRename()"
+                  @click="openRenameWeapon"
+                  tagname="rename_weapon"
+                  v-tooltip="'Rename Weapon'">
+                  Rename Weapon
+                </b-button>
+
                 <b-button
                   variant="primary"
+                  class="ml-3"
                   v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
                   @click="showReforge = true"
                   tagname="reforge_weapon"
@@ -160,10 +170,18 @@
         </div>
       </b-tab>
     </b-tabs>
+    <b-modal class="centered-modal" ref="weapon-rename-modal"
+                  @ok="renameWeaponCall()">
+                  <template #modal-title>
+                    Rename Weapon
+                  </template>
+                  <b-form-input type="string"
+                    class="modal-input" v-model="weaponRename" placeholder="New Name" />
+      </b-modal>
   </div>
 </template>
 
-<script>
+<script lang='ts'>
 import BN from 'bignumber.js';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
@@ -188,6 +206,7 @@ export default {
       newForged: [],
       currentListofWeapons: [],
       spin: false,
+      weaponRename: ''
     };
   },
 
@@ -219,10 +238,12 @@ export default {
     const reforgeCost = await this.contracts.CryptoBlades.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
     const skillReforgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(reforgeCost).call();
     this.reforgeCost = BN(skillReforgeCost).div(BN(10).pow(18)).toFixed(4);
+
+    this.haveRename = await this.contracts.WeaponRenameTagConsumables?.methods.getItemCount().call();
   },
 
   methods: {
-    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN']),
+    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN', 'renameWeapon']),
 
     async onForgeWeapon() {
       if(this.disableForge) return;
@@ -336,6 +357,20 @@ export default {
         console.error(e);
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       }
+    },
+    canRename() {
+      return this.reforgeWeaponId !== null && this.haveRename > 0;
+    },
+    openRenameWeapon() {
+      (this.$refs['weapon-rename-modal'] as BModal).show();
+    },
+    async renameWeaponCall() {
+      if(this.weaponRename === '' || this.reforgeWeaponId === null){
+        return;
+      }
+
+      await this.renameWeapon({id: this.reforgeWeaponId, name: this.weaponRename});
+      this.haveRename = await this.contracts.WeaponRenameTagConsumables?.methods.getItemCount().call();
     }
   },
 
