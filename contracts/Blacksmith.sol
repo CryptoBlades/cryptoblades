@@ -54,23 +54,18 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    function spendTicket(uint32 _num) external {
-        require(_num > 0);
-        require(tickets[msg.sender] >= _num, "Not enough tickets");
-        tickets[msg.sender] -= _num;
+    // function spendTicket(uint32 _num) external {
+    //     require(_num > 0);
+    //     require(tickets[msg.sender] >= _num, "Not enough tickets");
+    //     tickets[msg.sender] -= _num;
 
-        for (uint256 i = 0; i < _num; i++) {
-            weapons.mint(
-                msg.sender,
-                uint256(
-                    keccak256(
-                        abi.encodePacked(randoms.getRandomSeed(msg.sender), i)
-                    )
-                ),
-                100
-            );
-        }
-    }
+    //     for (uint256 i = 0; i < _num; i++) {
+    //         weapons.mint(
+    //             msg.sender,
+    //             // TODO: Do the thing we do in cryptoblades.sol to "lock in" the user into a given blockhash
+    //         );
+    //     }
+    // }
 
     function giveTicket(address _player, uint32 _num) external onlyGame {
         tickets[_player] += _num;
