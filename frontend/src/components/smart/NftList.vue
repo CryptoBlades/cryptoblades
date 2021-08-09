@@ -6,8 +6,8 @@
       </div>
       <ul class="nft-grid">
         <li class="nft"
-        v-for="nft in nftIdTypes" :key="nft.nftType + nft.nftId">
-          <nft-icon :nft="nft" :isShop="isShop" :favorite="isFavorite(nft.typeId, nft.nftId)"/>
+        v-for="nft in nftIdTypes" :key="`${nft.type}.${nft.id}`">
+          <nft-icon :nft="nft" :isShop="isShop" :favorite="isFavorite(nft.typeId, nft.id)"/>
           <b-button
             variant="primary"
             class="shop-button"
@@ -66,12 +66,12 @@
         </b-button>
       </div>
       <ul class="nft-grid">
-        <li class="nft" v-for="nft in nonIgnoredNfts" :key="nft.nftType + nft.nftId"
-          :class="{ selected: highlight !== null && nft.nftType + nft.nftId === highlight }"
-          @click="onNftClick(nft.nftType, nft.nftId)"
-          @contextmenu="canFavorite && toggleFavorite($event, nft.nftType, nft.nftId)"
+        <li class="nft" v-for="nft in nonIgnoredNfts" :key="`${nft.type}.${nft.id}`"
+          :class="{ selected: highlight !== null && `${nft.type}.${nft.id}` === highlight }"
+          @click="onNftClick(nft.type, nft.id)"
+          @contextmenu="canFavorite && toggleFavorite($event, nft.type, nft.id)"
         >
-          <nft-icon :favorite="isFavorite(nft.nftType, nft.nftId)" :nft="nft" :isShop="isShop"/>
+          <nft-icon :favorite="isFavorite(nft.type, nft.id)" :nft="nft" :isShop="isShop"/>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :nft="nft"></slot>
           </div>
@@ -107,8 +107,8 @@ interface Data {
 }
 
 export interface NftIdType {
-  nftId: number | string;
-  nftType: string;
+  id: number | string;
+  type: string;
 }
 
 type StoreMappedState = Pick<IState, 'ownedShieldIds'>;
@@ -120,6 +120,7 @@ interface StoreMappedGetters {
 
 interface StoreMappedActions {
   purchaseShield(): Promise<void>;
+  fetchShields(shieldIds: (string | number)[]): Promise<void>;
 }
 
 export default Vue.extend({
@@ -210,19 +211,18 @@ export default Vue.extend({
       }
 
       const nfts: NftIdType[] = [];
-
       // push different kinds of nfts to nfts array here
-      this.ownedShieldIds?.forEach(id => { nfts.push({ nftId: id, nftType: 'shield' }); });
+      this.ownedShieldIds?.forEach(id => { nfts.push({ id, type: 'shield' }); });
 
       return nfts;
     },
 
     displayNfts(): Nft[] {
       if(this.isMarket && this.showGivenNftIdTypes) {
-        const nftType = this.nftIdTypes && this.nftIdTypes[0]?.nftType;
-        switch(nftType) {
+        const type = this.nftIdTypes && this.nftIdTypes[0]?.type;
+        switch(type) {
         case('shield'):
-          return this.shieldsWithIds(this.nftsToDisplay.map(x => x.nftId.toString())).filter(Boolean);
+          return this.shieldsWithIds(this.nftsToDisplay.map(x => x.id.toString())).filter(Boolean);
         default:
           return [];
         }
@@ -239,14 +239,14 @@ export default Vue.extend({
       if (!this.showFavoriteNfts) {
         for (const type in Object.keys(this.favorites)) {
           for(const id in Object.keys(this.favorites[type])) {
-            allIgnore.push({ nftType: type, nftId: id });
+            allIgnore.push({ type, id });
           }
         }
       }
-      items = items.filter((x) => allIgnore.findIndex((y) => y.nftId === x.nftId && y.nftType === x.nftType) < 0);
+      items = items.filter((x) => allIgnore.findIndex((y) => y.id === x.id && y.type === x.type) < 0);
 
       if(this.typeFilter) {
-        items = items.filter((x) => x.nftType.localeCompare(this.typeFilter, undefined, { sensitivity: 'base' } ) === 0);
+        items = items.filter((x) => x.type?.localeCompare(this.typeFilter, undefined, { sensitivity: 'base' } ) === 0);
       }
 
       if (this.starFilter) {
@@ -263,7 +263,7 @@ export default Vue.extend({
 
       const favoriteNfts: Nft[] = [];
       for (const key in this.favorites) {
-        const i = items.findIndex((y) => y?.nftId === +key);
+        const i = items.findIndex((y) => y?.id === +key);
         if (i !== -1) {
           favoriteNfts.push(items[i]);
           items.splice(i, 1);
@@ -277,10 +277,10 @@ export default Vue.extend({
   watch: {
     async nftsToDisplay(newNftsToDisplay: NftIdType[]) {
       const shieldIds: string[] = [];
-      newNftsToDisplay.forEach(x => {
-        switch(x.nftType) {
+      newNftsToDisplay.forEach(nft => {
+        switch(nft.type) {
         case('shield'):
-          shieldIds.push(x.nftId.toString());
+          shieldIds.push(nft.id.toString());
         }
       });
 
@@ -291,12 +291,11 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['purchaseShield']) as Accessors<StoreMappedActions>),
-    ...mapActions(['fetchShields']),
+    ...(mapActions(['purchaseShield', 'fetchShields']) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
     async onShieldBuy() {
-      await this.purchaseShield;
+      await this.purchaseShield();
     },
 
     saveFilters() {
@@ -333,25 +332,25 @@ export default Vue.extend({
       this.$emit('nft-filters-changed');
     },
 
-    toggleFavorite(e: Event, nftType: string, nftId: number) {
+    toggleFavorite(e: Event, type: string, id: number) {
       e.preventDefault();
-      if (this.favorites[nftType] && this.favorites[nftType][nftId]) {
-        this.$delete(this.favorites[nftType], nftId);
+      if (this.favorites[type] && this.favorites[type][id]) {
+        this.$delete(this.favorites[type], id);
       } else {
-        if(!this.favorites[nftType]) {
-          this.$set(this.favorites, nftType, {});
+        if(!this.favorites[type]) {
+          this.$set(this.favorites, type, {});
         }
-        this.$set(this.favorites[nftType], nftId, true);
+        this.$set(this.favorites[type], id, true);
       }
 
       localStorage.setItem('favorite-nfts', this.getFavoritesString(this.favorites));
 
-      Events.$emit('nft:newFavorite', { nftType, nftId });
+      Events.$emit('nft:newFavorite', { type, id });
     },
 
     onNftClick(type: string, id: number) {
-      this.setCurrentNft({ nftType: type, nftId: id });
-      this.$emit('choose-nft', type+id);
+      this.setCurrentNft({ type, id });
+      this.$emit('choose-nft', `${type}.${id}`);
     },
 
     getFavoritesString(favorites: Record<string, Record<number, boolean>>): string {
@@ -365,13 +364,17 @@ export default Vue.extend({
       }
     },
 
-    isFavorite(nftType: string, nftId: number): boolean {
-      return this.favorites && this.favorites[nftType] && this.favorites[nftType][nftId];
+    isFavorite(type: string, id: number): boolean {
+      return this.favorites && this.favorites[type] && this.favorites[type][id];
     },
   },
 
   mounted() {
     this.checkStorageFavorite();
+
+    if(!this.showGivenNftIdTypes) {
+      this.fetchShields(this.ownedShieldIds);
+    }
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());
 

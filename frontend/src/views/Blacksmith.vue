@@ -150,7 +150,7 @@
         <template #title>
           Equipment <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`You can buy shield in Skill shop tab in the market!`"/>
         </template>
-        <div class="row mt-3" v-if="ownWeapons.length > 0">
+        <div class="row mt-3">
           <div class="col">
             <div class="d-flex justify-content-space-between">
               <h1>Equipment ({{ nftsCount }})</h1>
@@ -192,7 +192,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds']),
+    ...mapState(['defaultAccount','ownedWeaponIds']),
     ...mapGetters(['contracts', 'ownWeapons', 'nftsCount']),
 
     canReforge() {
@@ -202,16 +202,6 @@ export default {
         this.reforgeWeaponId === this.burnWeaponId
       );
     },
-
-    ownNfts() {
-      const ownNfts = [];
-
-      // get various types of nfts and push to ownNfts list
-      const shieldsIdTypes = this.ownedShieldIds.map(id => { return { nftId: id, nftType: 'shield'}; });
-
-      ownNfts.push(shieldsIdTypes);
-      return shieldsIdTypes;
-    }
   },
 
   watch: {

@@ -237,31 +237,34 @@ export function createStore(web3: Web3) {
       shieldsWithIds(state) {
         return (shieldIds: (string | number)[]) => {
           const shields = shieldIds.map(id => {
-            //console.log('shield: ' + JSON.stringify(state.shields[+id]));
-            const shieldNft = state.shields[+id] as unknown as Nft;
-            shieldNft.nftId = id;
-            shieldNft.nftType = 'shield';
-            //console.log('shield: ' + JSON.stringify(shieldNft));
+            const shieldNft = state.shields[+id] as Nft;
+            if(!shieldNft) {
+              return;
+            }
+            shieldNft.type = 'shield';
             return shieldNft;
           });
           if (shields.some((s) => s === null)) return [];
-          console.log('final shields: ' + JSON.stringify(shields));
           return shields;
         };
       },
 
       nftsCount(state) {
         let count = 0;
-        Object.keys(state.nfts)?.forEach(type => Object.keys(state.nfts[type])?.forEach(() => count++));
+        // add count of various nft types here
+        count += state.ownedShieldIds.length;
         return count;
       },
 
       nftsWithIdType(state) {
-        return (nftIdTypes: { nftType: string, nftId: string | number }[]) => {
+        return (nftIdTypes: { type: string, id: string | number }[]) => {
           const nfts = nftIdTypes.map((idType) => {
-            const nft = state.nfts[idType.nftType][+(idType.nftId)];
-            nft.nftType = idType.nftType;
-            nft.nftId = idType.nftId;
+            const nft = state.nfts[idType.type] && state.nfts[idType.type][+(idType.id)];
+            if(!nft) {
+              return;
+            }
+            nft.type = idType.type;
+            nft.id = idType.id;
             return nft;
           });
 
@@ -575,9 +578,9 @@ export function createStore(web3: Web3) {
         state.waxBridgeTimeUntilLimitExpires = payload.waxBridgeTimeUntilLimitExpires;
       },
 
-      setCurrentNft(state: IState, payload: {nftType: string, nftId: number} ) {
-        state.currentNftType = payload.nftType;
-        state.currentNftId = payload.nftId;
+      setCurrentNft(state: IState, payload: {type: string, id: number} ) {
+        state.currentNftType = payload.type;
+        state.currentNftId = payload.id;
       },
     },
 

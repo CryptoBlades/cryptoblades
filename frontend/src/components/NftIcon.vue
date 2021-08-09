@@ -8,7 +8,7 @@
     >
       <!-- show nft with id: nftId of type: nftfType (contract address?)
         either load properties here or wherever the list of nfts is created and pass in nft object-->
-      <div v-if="nft.nftType === 'shield'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
+      <div v-if="nft.type === 'shield'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
         <img class="placeholder-shield" src="../assets/shield1.png"/>
 
         <div v-if="!isShop" class="trait">
@@ -17,7 +17,7 @@
         </div>
 
         <span v-if="isShop" class="nft-supply">Supply left: {{totalShieldSupply}}</span>
-        <div v-if="!isShop" class="id">ID {{ nft.nftId }}</div>
+        <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
 
         <div v-if="!isShop" class="stats">
           <div v-if="nft.stat1Value">
@@ -79,7 +79,7 @@ export default {
   },
 
   mounted() {
-    if(this.nft.nftType === 'shield') {
+    if(this.nft.type === 'shield') {
       this.fetchSupplyInterval = setInterval(async () => {
         this.totalShieldSupply = 10000 - (await this.fetchTotalShieldSupply());
       }, 3000);
