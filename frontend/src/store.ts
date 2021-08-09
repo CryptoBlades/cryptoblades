@@ -22,7 +22,7 @@ import {
 } from './feature-flags';
 import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
-import BigNumber from 'bignumber.js';
+import { Nft } from './interfaces/Nft';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -108,6 +108,8 @@ export function createStore(web3: Web3) {
       characterStaminas: {},
       weapons: {},
       currentWeaponId: null,
+      currentNftType: null,
+      currentNftId: null,
       weaponDurabilities: {},
       maxDurability: 0,      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
@@ -117,7 +119,8 @@ export function createStore(web3: Web3) {
       characterTransferCooldowns: {},
 
       shields: {},
-      nfts: {shield:{}},
+      currentShieldId: null,
+      nfts: {},
 
       staking: {
         skill: { ...defaultStakeState },
@@ -231,12 +234,37 @@ export function createStore(web3: Web3) {
         };
       },
 
+      shieldsWithIds(state) {
+        return (shieldIds: (string | number)[]) => {
+          const shields = shieldIds.map(id => {
+            const shieldNft = state.shields[+id] as Nft;
+            if(!shieldNft) {
+              return;
+            }
+            shieldNft.type = 'shield';
+            return shieldNft;
+          });
+          if (shields.some((s) => s === null)) return [];
+          return shields;
+        };
+      },
+
+      nftsCount(state) {
+        let count = 0;
+        // add count of various nft types here
+        count += state.ownedShieldIds.length;
+        return count;
+      },
+
       nftsWithIdType(state) {
-        return (nftIdTypes: { nftType: string, nftId: string | number }[]) => {
+        return (nftIdTypes: { type: string, id: string | number }[]) => {
           const nfts = nftIdTypes.map((idType) => {
-            const nft = state.nfts[idType.nftType][+(idType.nftId)];
-            nft.nftType = idType.nftType;
-            nft.nftId = idType.nftId;
+            const nft = state.nfts[idType.type] && state.nfts[idType.type][+(idType.id)];
+            if(!nft) {
+              return;
+            }
+            nft.type = idType.type;
+            nft.id = idType.id;
             return nft;
           });
 
@@ -493,6 +521,9 @@ export function createStore(web3: Web3) {
 
       updateShield(state: IState, { shieldId, shield }) {
         Vue.set(state.shields, shieldId, shield);
+        if(!state.nfts.shield) {
+          Vue.set(state.nfts, 'shield', {});
+        }
         Vue.set(state.nfts.shield, shieldId, shield);
       },
 
@@ -545,6 +576,11 @@ export function createStore(web3: Web3) {
         state.waxBridgeWithdrawableBnb = payload.waxBridgeWithdrawableBnb;
         state.waxBridgeRemainingWithdrawableBnbDuringPeriod = payload.waxBridgeRemainingWithdrawableBnbDuringPeriod;
         state.waxBridgeTimeUntilLimitExpires = payload.waxBridgeTimeUntilLimitExpires;
+      },
+
+      setCurrentNft(state: IState, payload: {type: string, id: number} ) {
+        state.currentNftType = payload.type;
+        state.currentNftId = payload.id;
       },
     },
 
@@ -1050,11 +1086,35 @@ export function createStore(web3: Web3) {
           { feeMultiplier: num }
         );
 
-        await CryptoBlades.methods
+        const hasPaidForMintBefore = await CryptoBlades.methods
+          .hasPaidForMint(num)
+          .call(defaultCallOptions(state));
+
+        if(!hasPaidForMintBefore) {
+          await CryptoBlades.methods
+            .payForMint(Weapons.options.address, num)
+            .send({
+              from: state.defaultAccount,
+            });
+        }
+
+        const { blockNumber: mintBlockNum } = await CryptoBlades.methods
           .mintWeaponN(num)
           .send({
             from: state.defaultAccount,
+            gas: '5000000'
           });
+
+        const hasPaidForMintAfter = await CryptoBlades.methods
+          .hasPaidForMint(num)
+          .call(defaultCallOptions(state), mintBlockNum);
+
+        // if it was a success, then we should no longer be marked as having paid for the mint
+        const isSuccess = !hasPaidForMintAfter;
+
+        if(!isSuccess) {
+          throw new Error('Failed to mint, try again');
+        }
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
@@ -1078,9 +1138,35 @@ export function createStore(web3: Web3) {
           cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
         );
 
-        await CryptoBlades.methods.mintWeapon().send({
-          from: state.defaultAccount,
-        });
+        const hasPaidForMintBefore = await CryptoBlades.methods
+          .hasPaidForMint(1)
+          .call(defaultCallOptions(state));
+
+        if(!hasPaidForMintBefore) {
+          await CryptoBlades.methods
+            .payForMint(Weapons.options.address, 1)
+            .send({
+              from: state.defaultAccount,
+            });
+        }
+
+        const { blockNumber: mintBlockNum } = await CryptoBlades.methods
+          .mintWeapon()
+          .send({
+            from: state.defaultAccount,
+            gas: '500000'
+          });
+
+        const hasPaidForMintAfter = await CryptoBlades.methods
+          .hasPaidForMint(1)
+          .call(defaultCallOptions(state), mintBlockNum);
+
+        // if it was a success, then we should no longer be marked as having paid for the mint
+        const isSuccess = !hasPaidForMintAfter;
+
+        if(!isSuccess) {
+          throw new Error('Failed to mint, try again');
+        }
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
@@ -1397,6 +1483,22 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async fetchNumberOfShieldListings({ state }, { nftContractAddr, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns an array of bignumbers (these are nft IDs)
+        //console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
+        void trait;
+        void stars;
+        return await NFTMarket.methods
+          .getNumberOfListingsForToken(
+            nftContractAddr
+            // TODO add contract function and filtering params
+          )
+          .call(defaultCallOptions(state));
+      },
+
       async fetchAllMarketCharacterNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, minLevel, maxLevel }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
@@ -1426,6 +1528,32 @@ export function createStore(web3: Web3) {
             stars
           )
           .call(defaultCallOptions(state));
+      },
+
+      async fetchAllMarketShieldNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        //console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
+        void trait;
+        void stars;
+        const res = await NFTMarket.methods
+          .getListingSlice(
+            nftContractAddr,
+            pageNumber*limit, // startIndex
+            limit // length
+          )
+          .call(defaultCallOptions(state));
+        // returned values are: uint256 returnedCount, uint256[] ids, address[] sellers, uint256[] prices
+        // res[1][] refers to ids, which is what we're looking for
+        // this slice function returns the full length even if there are no items on that index
+        // we must cull the nonexistant items
+        const ids = [];
+        for(let i = 0; i < res[1].length; i++) {
+          if(res[1][i] !== '0' || res[3][i] !== '0') // id and price both 0, it's invalid
+            ids.push(res[1][i]);
+        }
+        return ids;
       },
 
       async fetchMarketNftIdsBySeller({ state }, { nftContractAddr, sellerAddr }) {
@@ -1688,26 +1816,15 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, Blacksmith } = state.contracts();
         if(!CryptoBlades || !Blacksmith || !state.defaultAccount) return;
 
-        const callOptsWithFrom = defaultCallOptions(state);
-
-        const [skillRewards, shieldSkillFee, allowance] = await Promise.all([
-          CryptoBlades.methods.getTokenRewards().call(callOptsWithFrom),
-          Blacksmith.methods.SHIELD_SKILL_FEE().call(callOptsWithFrom),
-          SkillToken.methods.allowance(state.defaultAccount, CryptoBlades.options.address).call(callOptsWithFrom)
-        ]);
-
-        const feeInSkill = new BigNumber(shieldSkillFee).minus(skillRewards);
-
-        if(feeInSkill.gt(allowance)) {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, feeInSkill.toString())
-            .send({
-              from: state.defaultAccount
-            });
-        }
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
+          .send({
+            from: state.defaultAccount
+          });
 
         await Blacksmith.methods.purchaseShield().send({
           from: state.defaultAccount,
+          gas: '500000'
         });
 
         await Promise.all([

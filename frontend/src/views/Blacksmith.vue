@@ -148,9 +148,16 @@
       </b-tab>
       <b-tab>
         <template #title>
-          Shields <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`You can buy shield in Skill shop tab in the market!`"/>
+          Equipment <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`You can buy shield in Skill shop tab in the market!`"/>
         </template>
-        <nft-list :nfts="ownNfts"/>
+        <div class="row mt-3">
+          <div class="col">
+            <div class="d-flex justify-content-space-between">
+              <h1>Equipment ({{ nftsCount }})</h1>
+            </div>
+            <nft-list v-if="nftsCount > 0" v-model="selectedNft"/>
+          </div>
+        </div>
       </b-tab>
     </b-tabs>
   </div>
@@ -174,22 +181,19 @@ export default {
       showReforge: false,
       reforgeWeaponId: null,
       burnWeaponId: null,
+      selectedNft: null,
       forgeCost: 0,
       reforgeCost: 0,
       disableForge: false,
-      forgeMultiplier: 10,
       newForged: [],
       currentListofWeapons: [],
-      x10Forge: false,
-      x1Forge: false,
-      onError: false,
       spin: false,
     };
   },
 
   computed: {
-    ...mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds']),
-    ...mapGetters(['contracts', 'ownWeapons', 'ownShields']),
+    ...mapState(['defaultAccount','ownedWeaponIds']),
+    ...mapGetters(['contracts', 'ownWeapons', 'nftsCount']),
 
     canReforge() {
       return (
@@ -198,16 +202,6 @@ export default {
         this.reforgeWeaponId === this.burnWeaponId
       );
     },
-
-    ownNfts() {
-      const ownNfts = [];
-
-      // get various types of nfts and push to ownNfts list
-      const shieldsIdTypes = this.ownedShieldIds.map(id => { return { nftId: id, nftType: 'shield'}; });
-
-      ownNfts.push(shieldsIdTypes);
-      return shieldsIdTypes;
-    }
   },
 
   watch: {
@@ -233,58 +227,61 @@ export default {
     async onForgeWeapon() {
       if(this.disableForge) return;
 
-      this.getCurrentListofWeapons();
-      this.onError = false;
-      this.x1Forge = true;
-      this.disableForge = true;
+      const forgeMultiplier = 1;
 
+      this.disableForge = true;
       // Incase the network or mm are having issues, after 1 min we reshow
       const failbackTimeout = setTimeout(() => {
         this.disableForge = false;
-      }, 60000);
+      }, 30000);
 
       try {
         await this.mintWeapon();
 
-        this.viewNewWeapons(1);
-
       } catch (e) {
         console.error(e);
-        this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
       }
+      this.relayFunction(forgeMultiplier);
     },
 
     async onForgeWeaponx10(){
       if(this.disableForge) return;
-      this.disableForge = true;
 
-      this.getCurrentListofWeapons();
-      this.onError = false;
-      this.x10Forge = true;
+      this.disableForge = true;
+      const forgeMultiplier = 10;
 
       // Incase the network or mm are having issues, after 1 min we reshow
       const failbackTimeout = setTimeout(() => {
         this.disableForge = false;
-      }, 60000);
+      }, 30000);
 
       try {
-        await this.mintWeaponN({num: this.forgeMultiplier});
-
-        this.viewNewWeapons(this.forgeMultiplier);
+        await this.mintWeaponN({num: forgeMultiplier});
 
       } catch (e) {
         console.error(e);
-        this.onError = true;
         this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
       }
+      this.relayFunction(forgeMultiplier);
+
     },
+
+    relayFunction(offset){
+      try{
+        this.viewNewWeapons(offset);
+      } catch (e) {
+        console.error(e);
+        this.onError = true;
+      }
+    },
+
     onShowForgeDetails() {
       this.$refs['forge-details-modal'].show();
     },
@@ -305,14 +302,14 @@ export default {
       return this.ownWeapons.find(x => x.id === this.burnWeaponId);
     },
 
-    getCurrentListofWeapons(){
+    viewNewWeapons(offset){
+      this.newForged = [];
       this.ownedWeaponIds.forEach(x => {
-        this.currentListofWeapons.push(x);
+        this.newForged.push(x);
       });
-    },
 
-    viewNewWeapons(newWeaponCount = 1){
-      this.newForged = this.ownedWeaponIds.slice(-newWeaponCount);
+      this.newForged.splice(0, this.ownedWeaponIds.length - offset + 1);
+
 
       // eslint-disable-next-line no-constant-condition
       if (this.newForged.length > 0 && !this.onError){
