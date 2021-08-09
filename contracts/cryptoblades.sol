@@ -71,19 +71,19 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         promos = _promos;
     }
 
     function migrateTo_23b3a8b(IStakeFromGame _stakeFromGame) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         stakeFromGameImpl = _stakeFromGame;
     }
 
     function migrateTo_801f279() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         burnWeaponFee = ABDKMath64x64.divu(2, 10);//0.2 usd;
         reforgeWeaponWithDustFee = ABDKMath64x64.divu(3, 10);//0.3 usd;
@@ -92,7 +92,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function migrateTo_60872c8(Blacksmith _blacksmith) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         blacksmith = _blacksmith;
     }
@@ -628,7 +628,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 tokenRewards[msg.sender],
                 skillAmount
             );
-        require(skillToken.balanceOf(msg.sender) >= fromUserWallet);
+        require(skillToken.balanceOf(msg.sender) >= fromUserWallet && promos.getBit(msg.sender, 4) == false);
 
         uint256 convertedAmount = usdToSkill(mintCharacterFee);
         _payContractTokenOnly(msg.sender, convertedAmount);
@@ -919,8 +919,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setReforgeWeaponValue(uint256 cents) public restricted {
-        require(cents >= 25, "ReforgeWeaponValue too low");
-        require(cents <= 100, "ReforgeWeaponValue too high");
         int128 newReforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
         require(newReforgeWeaponFee > burnWeaponFee, "Reforge fee must include burn fee");
         reforgeWeaponWithDustFee = newReforgeWeaponFee - burnWeaponFee;
@@ -933,8 +931,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setStaminaCostFight(uint8 points) public restricted {
-        require(points >= 20, "StaminaCostFight too low");
-        require(points <= 50, "StaminaCostFight too high");
         staminaCostFight = points;
     }
 
@@ -943,8 +939,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setFightXpGain(uint256 average) public restricted {
-        require(average >= 16, "FightXpGain too low");
-        require(average <= 64, "FightXpGain too high");
         fightXpGain = average;
     }
 
@@ -989,16 +983,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // Tax goes to game contract itself, which would mean
         // transferring from the game contract to ...itself.
         // So we don't need to do anything with the tax part of the rewards.
-
-        _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
+        if(promos.getBit(msg.sender, 4) == false)
+            _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
     }
 
     function stakeUnclaimedRewards() external {
         uint256 _tokenRewards = tokenRewards[msg.sender];
         tokenRewards[msg.sender] = 0;
 
-        skillToken.approve(address(stakeFromGameImpl), _tokenRewards);
-        stakeFromGameImpl.stakeFromGame(msg.sender, _tokenRewards);
+        if(promos.getBit(msg.sender, 4) == false) {
+            skillToken.approve(address(stakeFromGameImpl), _tokenRewards);
+            stakeFromGameImpl.stakeFromGame(msg.sender, _tokenRewards);
+        }
     }
 
     function claimXpRewards() public {
