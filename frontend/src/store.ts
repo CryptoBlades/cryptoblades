@@ -1488,7 +1488,9 @@ export function createStore(web3: Web3) {
         if(!NFTMarket) return;
 
         // returns an array of bignumbers (these are nft IDs)
-        console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
+        //console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
+        void trait;
+        void stars;
         return await NFTMarket.methods
           .getNumberOfListingsForToken(
             nftContractAddr
@@ -1532,7 +1534,9 @@ export function createStore(web3: Web3) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
 
-        console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
+        //console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
+        void trait;
+        void stars;
         const res = await NFTMarket.methods
           .getListingSlice(
             nftContractAddr,
