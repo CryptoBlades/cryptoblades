@@ -14,6 +14,6 @@ module.exports = async function (deployer, network, accounts) {
   await promos.grantRole(GAME_ADMIN, accounts[0]);
   const weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
   const shields = await upgradeProxy(Shields.address, Shields, { deployer });
-  weapons.migrateTo_surprise(promos.address);
-  shields.migrateTo_surprise(promos.address);
+  await weapons.migrateTo_surprise(promos.address);
+  await shields.migrateTo_surprise(promos.address);
 };
