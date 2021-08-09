@@ -2,14 +2,16 @@ const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
 const CryptoBlades = artifacts.require("CryptoBlades");
 const Blacksmith = artifacts.require("Blacksmith");
+const Characters = artifacts.require("Characters");
+const Weapons = artifacts.require("Weapons");
 const CharacterRenameTagConsumables = artifacts.require("CharacterRenameTagConsumables");
 const WeaponRenameTagConsumables = artifacts.require("WeaponRenameTagConsumables");
 
 module.exports = async function (deployer, network, accounts) {
   const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
 
-  const characterRenameTagConsumables = await deployProxy(CharacterRenameTagConsumables, [], { deployer });
-  const weaponRenameTagConsumables = await deployProxy(WeaponRenameTagConsumables, [], { deployer });
+  const characterRenameTagConsumables = await deployProxy(CharacterRenameTagConsumables, [Characters.address], { deployer });
+  const weaponRenameTagConsumables = await deployProxy(WeaponRenameTagConsumables, [Weapons.address], { deployer });
 
   const blacksmith = await upgradeProxy(Blacksmith.address, Blacksmith, { deployer });
   await blacksmith.migrateTo_Something(characterRenameTagConsumables.address, weaponRenameTagConsumables.address);
