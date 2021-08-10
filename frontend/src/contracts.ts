@@ -142,13 +142,13 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const characterFireTraitChangeConsumablesAddr = await Blacksmith.methods.characterFireTraitChange().call();
   const CharacterFireTraitChangeConsumables = new web3.eth.Contract(characterFireTraitChangeConsumablesAbi as Abi, characterFireTraitChangeConsumablesAddr);
 
-  const characterEarthTraitChangeConsumablesAddr = await Blacksmith.methods.characterFireTraitChange().call();
+  const characterEarthTraitChangeConsumablesAddr = await Blacksmith.methods.characterEarthTraitChange().call();
   const CharacterEarthTraitChangeConsumables = new web3.eth.Contract(characterEarthTraitChangeConsumablesAbi as Abi, characterEarthTraitChangeConsumablesAddr);
 
-  const characterWaterTraitChangeConsumablesAddr = await Blacksmith.methods.characterFireTraitChange().call();
+  const characterWaterTraitChangeConsumablesAddr = await Blacksmith.methods.characterWaterTraitChange().call();
   const CharacterWaterTraitChangeConsumables = new web3.eth.Contract(characterWaterTraitChangeConsumablesAbi as Abi, characterWaterTraitChangeConsumablesAddr);
 
-  const characterLightningTraitChangeConsumablesAddr = await Blacksmith.methods.characterFireTraitChange().call();
+  const characterLightningTraitChangeConsumablesAddr = await Blacksmith.methods.characterLightningTraitChange().call();
   const CharacterLightningTraitChangeConsumables = new web3.eth.Contract(characterLightningTraitChangeConsumablesAbi as Abi,
     characterLightningTraitChangeConsumablesAddr);
 
