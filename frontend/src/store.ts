@@ -1999,6 +1999,8 @@ export function createStore(web3: Web3) {
         });
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
           dispatch('fetchTotalRenameTags')
         ]);
       },
@@ -2022,6 +2024,8 @@ export function createStore(web3: Web3) {
         });
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
           dispatch('fetchTotalRenameTags')
         ]);
       },
@@ -2065,6 +2069,8 @@ export function createStore(web3: Web3) {
         });
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
           dispatch('fetchTotalRenameTags')
         ]);
       },
@@ -2088,6 +2094,8 @@ export function createStore(web3: Web3) {
         });
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
           dispatch('fetchTotalRenameTags')
         ]);
       },
@@ -2132,6 +2140,8 @@ export function createStore(web3: Web3) {
         });
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
           dispatch('fetchTotalCharacterFireTraitChanges')
         ]);
       },
@@ -2176,6 +2186,8 @@ export function createStore(web3: Web3) {
         });
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
           dispatch('fetchTotalCharacterEarthTraitChanges')
         ]);
       },
@@ -2220,6 +2232,8 @@ export function createStore(web3: Web3) {
         });
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
           dispatch('fetchTotalCharacterWaterTraitChanges')
         ]);
       },
@@ -2264,6 +2278,8 @@ export function createStore(web3: Web3) {
         });
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
           dispatch('fetchTotalCharacterLightningTraitChanges')
         ]);
       },
