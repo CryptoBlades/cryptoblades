@@ -4,6 +4,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./interfaces/IRandoms.sol";
 import "./shields.sol";
+import "./WeaponRenameTagConsumables.sol";
+import "./CharacterRenameTagConsumables.sol";
 import "./weapons.sol";
 import "./cryptoblades.sol";
 
@@ -13,6 +15,10 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     bytes32 public constant GAME = keccak256("GAME");
 
     uint256 public constant SHIELD_SKILL_FEE = 5 ether;
+    uint256 public constant ONE_SKILL_FEE = 1 ether;
+
+    uint256 private _characterRenamePrice;
+    uint256 private _weaponRenamePrice;
 
     /* ========== STATE VARIABLES ========== */
 
@@ -23,6 +29,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     Shields public shields;
     CryptoBlades public game;
+    CharacterRenameTagConsumables public characterRename;
+    WeaponRenameTagConsumables public weaponRename;
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -49,6 +57,15 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         shields = _shields;
         game = _game;
     }
+
+     function migrateTo_16884dd(CharacterRenameTagConsumables _characterRename,
+     WeaponRenameTagConsumables _weaponRename) external {
+         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+         characterRename = _characterRename;
+         weaponRename = _weaponRename;
+         _characterRenamePrice = 1 ether;
+         _weaponRenamePrice = 1 ether;
+     }
 
     /* ========== VIEWS ========== */
 
@@ -86,5 +103,44 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     modifier onlyGame() {
         require(hasRole(GAME, msg.sender), "Only game");
         _;
+    }
+
+     modifier isAdmin() {
+         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        _;
+    }
+
+    /* ========== Character Rename ========== */
+    
+    function setCharacterRenamePrice(uint256 newPrice) external isAdmin {
+        require(newPrice > 0, 'invalid price');
+        _characterRenamePrice = newPrice;
+    }
+
+    function characterRenamePrice() public view returns (uint256){
+        return _characterRenamePrice;
+    }
+
+    function purchaseCharacterRenameTag(uint256 paying) public {
+        require(paying == _characterRenamePrice, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, _characterRenamePrice);
+        characterRename.giveItem(msg.sender);
+    }
+    
+    /* ========== Weapon Rename ========== */
+
+    function setWeaponRenamePrice(uint256 newPrice) external isAdmin {
+        require(newPrice > 0, 'invalid price');
+        _weaponRenamePrice = newPrice;
+    }
+
+    function weaponRenamePrice() public view returns (uint256){
+        return _weaponRenamePrice;
+    }
+
+    function purchaseWeaponRenameTag(uint256 paying) public {
+        require(paying == _weaponRenamePrice, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, _weaponRenamePrice);
+        weaponRename.giveItem(msg.sender);
     }
 }

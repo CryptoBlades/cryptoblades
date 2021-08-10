@@ -34,6 +34,10 @@
           </div>
         </div>
       </div>
+      <div v-if="nft.type !== 'shield'" class="nft-details">
+        <img class="placeholder-shield" :src="nft.image"/>
+        <span v-if="isShop" class="nft-supply">Owned: {{this.quantityOwned}}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -42,7 +46,9 @@
 import { mapActions } from 'vuex';
 export default {
   props: ['nft', 'isDefault', 'isShop', 'favorite'],
+  async created() {
 
+  },
   computed: {
     tooltipHtml() {
       if(!this.nft) return '';
@@ -71,18 +77,27 @@ export default {
     return {
       totalShieldSupply: 0,
       fetchSupplyInterval: 0,
+      quantityOwned: 0
     };
   },
 
   methods: {
-    ...mapActions(['fetchTotalShieldSupply']),
+    ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags'])
   },
 
-  mounted() {
+  async mounted() {
     if(this.nft.type === 'shield') {
       this.fetchSupplyInterval = setInterval(async () => {
         this.totalShieldSupply = 10000 - (await this.fetchTotalShieldSupply());
       }, 3000);
+    } else if(this.nft.type === 'CharacterRenameTag') {
+      this.fetchSupplyInterval = setInterval(async () => {
+        this.quantityOwned = await this.fetchTotalRenameTags();
+      }, 10000);
+    } else if(this.nft.type === 'WeaponRenameTag') {
+      this.fetchSupplyInterval = setInterval(async () => {
+        this.quantityOwned = await this.fetchTotalWeaponRenameTags();
+      }, 10000);
     }
   },
 

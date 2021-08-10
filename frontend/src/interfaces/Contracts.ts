@@ -2,7 +2,7 @@ import { Contract as Web3EthContract } from 'web3-eth-contract';
 import type {
   IERC20, IStakingRewards,
   CryptoBlades, Characters, Weapons, RaidBasic, IRandoms,
-  NFTMarket, WaxBridge, Blacksmith, Shields
+  NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables, WeaponRenameTagConsumables
 } from '../../../build/abi-interfaces';
 import { StakeType } from './State';
 
@@ -30,4 +30,6 @@ export interface Contracts {
   NFTMarket?: Contract<NFTMarket>;
   WaxBridge?: Contract<WaxBridge>;
   Shields?: Contract<Shields>;
+  CharacterRenameTagConsumables?: Contract<CharacterRenameTagConsumables>;
+  WeaponRenameTagConsumables?: Contract<WeaponRenameTagConsumables>;
 }
