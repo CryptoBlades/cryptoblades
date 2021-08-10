@@ -44,13 +44,9 @@ contract Consumables is Initializable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
     }
 
-    modifier haveItem(address consumer) {
-        _haveItem(consumer);
+    modifier haveItem() {
+        require(owned[msg.sender] > 0, "No item");
         _;
-    }
-
-    function _haveItem(address consumer) internal view {
-        require(owned[consumer] > 0, "No item");
     }
 
     function giveItem(address buyer) public restricted {
@@ -58,7 +54,7 @@ contract Consumables is Initializable, AccessControlUpgradeable {
         emit ConsumableGiven(buyer);
     }
 
-    function consumeItem() internal haveItem(msg.sender) itemNotDisabled {
+    function consumeItem() internal haveItem() itemNotDisabled {
         owned[msg.sender]--;
     }
 
@@ -66,16 +62,16 @@ contract Consumables is Initializable, AccessControlUpgradeable {
         return owned[msg.sender];
     }
 
-    function toggleItemCanUse(bool canUse) public isAdmin {
+    function toggleItemCanUse(bool canUse) external isAdmin {
         _enabled = canUse;
     }
 
-    function giveItem(address receiver, uint32 amount) public isAdmin {
+    function giveItem(address receiver, uint32 amount) external isAdmin {
         require(amount > 0, 'Amount negative');
         owned[receiver] += amount;
     }
 
-    function takeItem(address target, uint32 amount) public isAdmin {
+    function takeItem(address target, uint32 amount) external isAdmin {
         require(amount > 0, 'Amount negative');
         require(owned[target] >= amount, 'Not enough item');
         owned[target] -= amount;
