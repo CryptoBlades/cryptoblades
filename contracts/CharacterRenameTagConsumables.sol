@@ -7,6 +7,9 @@ contract CharacterRenameTagConsumables is Consumables {
 
     Characters characters;
 
+    uint8 private _minSize;
+    uint8 private _maxSize;
+
     mapping(uint256 => string) public renames;
 
     event CharacterRenamed(address indexed owner, uint256 indexed character);
@@ -22,10 +25,12 @@ contract CharacterRenameTagConsumables is Consumables {
         _enabled = true;
 
         characters = _characters;
+        _minSize = 1;
+        _maxSize = 16;
     }
 
     function renameCharacter(uint256 characterId, string memory newName) public {
-        require(bytes(newName).length < 16, 'too long');
+        require(bytes(newName).length >= _minSize && bytes(newName).length <= _maxSize, 'size not valid');
         require(characters.ownerOf(characterId) == msg.sender, "Not the character owner");
         consumeItem();
         renames[characterId] = newName;
@@ -34,5 +39,23 @@ contract CharacterRenameTagConsumables is Consumables {
 
     function getCharacterRename(uint256 characterId) public view returns (string memory) {
         return renames[characterId];
+    }
+
+    function setMinSize(uint8 newMinSize) external isAdmin {
+        require(newMinSize > 0, 'invalid size');
+        _minSize = newMinSize;
+    }
+
+    function setMaxSize(uint8 newMaxSize) external isAdmin {
+        require(newMaxSize > 0, 'invalid size');
+        _maxSize = newMaxSize;
+    }
+
+    function getMinSize() public view returns (uint8){
+        return _minSize;
+    }
+
+    function getMaxSize() public view returns (uint8){
+        return _maxSize;
     }
 }
