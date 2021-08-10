@@ -17,6 +17,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant SHIELD_SKILL_FEE = 5 ether;
     uint256 public constant ONE_SKILL_FEE = 1 ether;
 
+    uint256 private _characterRenamePrice;
+    uint256 private _weaponRenamePrice;
+
     /* ========== STATE VARIABLES ========== */
 
     Weapons public weapons;
@@ -55,11 +58,13 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         game = _game;
     }
 
-     function migrateTo_Something(CharacterRenameTagConsumables _characterRename,
+     function migrateTo_16884dd(CharacterRenameTagConsumables _characterRename,
      WeaponRenameTagConsumables _weaponRename) external {
          require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
          characterRename = _characterRename;
          weaponRename = _weaponRename;
+         _characterRenamePrice = 1 ether;
+         _weaponRenamePrice = 1 ether;
      }
 
     /* ========== VIEWS ========== */
@@ -100,13 +105,42 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         _;
     }
 
-    function purchaseCharacterRenameTag() public {
-        game.payContractTokenOnly(msg.sender, ONE_SKILL_FEE);
-        characterRename.giveItem(msg.sender);
+     modifier isAdmin() {
+         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        _;
     }
 
-    function purchaseWeaponRenameTag() public {
-        game.payContractTokenOnly(msg.sender, ONE_SKILL_FEE);
+    /* ========== Character Rename ========== */
+    
+    function setCharacterRenamePrice(uint256 newPrice) external isAdmin {
+        require(newPrice > 0, 'invalid price');
+        _characterRenamePrice = newPrice;
+    }
+
+    function characterRenamePrice() public view returns (uint256){
+        return _characterRenamePrice;
+    }
+
+    function purchaseCharacterRenameTag(uint256 paying) public {
+        require(paying == _characterRenamePrice, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, _characterRenamePrice);
+        characterRename.giveItem(msg.sender);
+    }
+    
+    /* ========== Weapon Rename ========== */
+
+    function setWeaponRenamePrice(uint256 newPrice) external isAdmin {
+        require(newPrice > 0, 'invalid price');
+        _weaponRenamePrice = newPrice;
+    }
+
+    function weaponRenamePrice() public view returns (uint256){
+        return _weaponRenamePrice;
+    }
+
+    function purchaseWeaponRenameTag(uint256 paying) public {
+        require(paying == _weaponRenamePrice, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, _weaponRenamePrice);
         weaponRename.giveItem(msg.sender);
     }
 }
