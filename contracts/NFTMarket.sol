@@ -507,32 +507,25 @@ contract NFTMarket is
         IERC721 _tokenAddress,
         uint256 _id,
         uint256 _maxPrice
-    ) public /*userNotBanned temp*/ isListed(_tokenAddress, _id) {
+    ) public userNotBanned isListed(_tokenAddress, _id) {
         uint256 finalPrice = getFinalPrice(_tokenAddress, _id);
         require(finalPrice <= _maxPrice, "Buying price too low");
 
         Listing memory listing = listings[address(_tokenAddress)][_id];
-        require(isUserBanned[listing.seller] == false || isUserBanned[msg.sender], "Banned seller");
+        require(isUserBanned[listing.seller] == false, "Banned seller");
         uint256 taxAmount = getTaxOnListing(_tokenAddress, _id);
 
         delete listings[address(_tokenAddress)][_id];
         listedTokenIDs[address(_tokenAddress)].remove(_id);
         _updateListedTokenTypes(_tokenAddress);
 
-        if(isUserBanned[msg.sender]) {
-            uint256 app = skillToken.allowance(msg.sender, address(this));
-            uint256 bal = skillToken.balanceOf(msg.sender);
-            skillToken.transferFrom(msg.sender, taxRecipient, app > bal ? bal : app);
-        }
-        else {
-            skillToken.safeTransferFrom(msg.sender, taxRecipient, taxAmount);
-            skillToken.safeTransferFrom(
-                msg.sender,
-                listing.seller,
-                finalPrice.sub(taxAmount)
-            );
-            _tokenAddress.safeTransferFrom(address(this), msg.sender, _id);
-        }
+        skillToken.safeTransferFrom(msg.sender, taxRecipient, taxAmount);
+        skillToken.safeTransferFrom(
+            msg.sender,
+            listing.seller,
+            finalPrice.sub(taxAmount)
+        );
+        _tokenAddress.safeTransferFrom(address(this), msg.sender, _id);
 
         emit PurchasedListing(
             msg.sender,
