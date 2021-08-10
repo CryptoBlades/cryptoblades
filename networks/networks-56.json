@@ -778,7 +778,7 @@
     },
     "links": {},
     "address": "0x90099dA42806b21128A094C713347C7885aF79e2",
-    "transactionHash": "0x8c819fa2df65e563c1a7ec19f7d81ac6473b7d18f2a479e215b4c63bc87332a4"
+    "transactionHash": "0xc3fce8d796961943c64aa15fada0a4736573b3e5481d0bda51489f3ee292c7e2"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -860,7 +860,7 @@
     },
     "links": {},
     "address": "0xE6259bd51bd2cCa4078C4b188B8E966E995822b9",
-    "transactionHash": "0x11a247096b7bdf81e0e4713c3d99cd19c074098fe6a9e370b84191a8bc9fe43b"
+    "transactionHash": "0x12e7c85bd35e914c84f0075e898b24137785f827250bb2c7bea4728115261757"
   },
   "build/contracts/RaidBasic.json": {
     "events": {},
