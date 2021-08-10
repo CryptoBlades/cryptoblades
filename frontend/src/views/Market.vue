@@ -877,23 +877,39 @@ export default Vue.extend({
         {
           id: 0,
           type: 'CharacterRenameTag',
-          nftPrice: 1,
+          nftPrice: 0.1,
           name: 'Rename Tag',
           description: 'Renames one character.',
           image: 'https://seiyria.com/gameicons-font/svg/id-card.svg'
         },
         {
+          id: 0,
+          type: 'CharacterRenameTagDeal',
+          nftPrice: 0.3,
+          name: 'Rename Tag Deal',
+          description: 'Renames 4 characters for the price of 3.',
+          image: 'https://seiyria.com/gameicons-font/svg/id-card.svg'
+        },
+        {
           id: 1,
           type: 'WeaponRenameTag',
-          nftPrice: 1,
+          nftPrice: 0.1,
           name: 'Weapon Tag',
           description: 'Renames a weapon.',
           image: 'https://seiyria.com/gameicons-font/svg/price-tag.svg'
         },
         {
           id: 1,
+          type: 'WeaponRenameTagDeal',
+          nftPrice: 0.3,
+          name: 'Weapon Tag Deal',
+          description: 'Renames 4 weapons for the price of 3.',
+          image: 'https://seiyria.com/gameicons-font/svg/price-tag.svg'
+        },
+        {
+          id: 1,
           type: 'CharacterEarthTraitChange',
-          nftPrice: 1,
+          nftPrice: 0.2,
           name: 'Earth Character Trait',
           description: 'Changes character\'s trait to Earth.',
           image: 'earth.png'
@@ -901,7 +917,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'CharacterFireTraitChange',
-          nftPrice: 1,
+          nftPrice: 0.2,
           name: 'Fire Character Trait',
           description: 'Changes character\'s trait to Fire.',
           image: 'fire.png'
@@ -909,7 +925,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'CharacterWaterTraitChange',
-          nftPrice: 1,
+          nftPrice: 0.2,
           name: 'Water Character Trait',
           description: 'Changes character\'s trait to Water.',
           image: 'water.png'
@@ -917,7 +933,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'CharacterLightningTraitChange',
-          nftPrice: 1,
+          nftPrice: 0.2,
           name: 'Lightning Character Trait',
           description: 'Changes character\'s trait to Lightning.',
           image: 'lightning.png'

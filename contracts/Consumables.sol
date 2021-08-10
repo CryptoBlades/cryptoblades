@@ -8,7 +8,7 @@ contract Consumables is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    event ConsumableGiven(address indexed owner);
+    event ConsumableGiven(address indexed owner, uint32 amount);
 
     mapping(address => uint32) public owned;
     
@@ -44,18 +44,18 @@ contract Consumables is Initializable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
     }
 
-    modifier haveItem() {
-        require(owned[msg.sender] > 0, "No item");
+    modifier haveItem(uint32 amount) {
+        require(owned[msg.sender] >= amount, "No item");
         _;
     }
 
-    function giveItem(address buyer) public restricted {
-        owned[buyer]++;
-        emit ConsumableGiven(buyer);
+    function giveItem(address buyer, uint32 amount) public restricted {
+        owned[buyer] += amount;
+        emit ConsumableGiven(buyer, amount);
     }
 
-    function consumeItem() internal haveItem() itemNotDisabled {
-        owned[msg.sender]--;
+    function consumeItem(uint32 amount) internal haveItem(amount) itemNotDisabled {
+        owned[msg.sender] -= amount;
     }
 
     function getItemCount() public view returns (uint32) {
@@ -66,13 +66,11 @@ contract Consumables is Initializable, AccessControlUpgradeable {
         _enabled = canUse;
     }
 
-    function giveItem(address receiver, uint32 amount) external isAdmin {
-        require(amount > 0, 'Amount negative');
+    function giveItemByAdmin(address receiver, uint32 amount) external isAdmin {
         owned[receiver] += amount;
     }
 
-    function takeItem(address target, uint32 amount) external isAdmin {
-        require(amount > 0, 'Amount negative');
+    function takeItemByAdmin(address target, uint32 amount) external isAdmin {
         require(owned[target] >= amount, 'Not enough item');
         owned[target] -= amount;
     }

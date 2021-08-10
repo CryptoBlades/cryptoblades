@@ -85,7 +85,9 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags']),
+    ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags',
+      'fetchTotalCharacterFireTraitChanges', 'fetchTotalCharacterEarthTraitChanges',
+      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
 
     imgPath(img) {
       console.log(this.images);

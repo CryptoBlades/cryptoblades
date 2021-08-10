@@ -1983,13 +1983,40 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
-          .send({
-            from: state.defaultAccount
-          });
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
 
-        await Blacksmith.methods.purchaseCharacterRenameTag(Web3.utils.toWei('1')).send({
+        await Blacksmith.methods.purchaseCharacterRenameTag(Web3.utils.toWei('0.1')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchTotalRenameTags')
+        ]);
+      },
+      async purchaseRenameTagDeal({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.3', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseCharacterRenameTagDeal(Web3.utils.toWei('0.3')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2022,13 +2049,40 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
-          .send({
-            from: state.defaultAccount
-          });
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
 
-        await Blacksmith.methods.purchaseWeaponRenameTag(Web3.utils.toWei('1')).send({
+        await Blacksmith.methods.purchaseWeaponRenameTag(Web3.utils.toWei('0.1')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchTotalRenameTags')
+        ]);
+      },
+      async purchaseWeaponRenameTagDeal({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.3', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseWeaponRenameTagDeal(Web3.utils.toWei('0.3')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2062,13 +2116,17 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterFireTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
-          .send({
-            from: state.defaultAccount
-          });
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
 
-        await Blacksmith.methods.purchaseCharacterFireTraitChange(Web3.utils.toWei('1')).send({
+        await Blacksmith.methods.purchaseCharacterFireTraitChange(Web3.utils.toWei('0.2')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2081,12 +2139,16 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables } = state.contracts();
         if(!CryptoBlades || !SkillToken || !CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
 
-        await CharacterFireTraitChangeConsumables.methods
-          .changeCharacterTrait(id)
-          .send({
-            from: state.defaultAccount,
-            gas: '5000000'
-          });
+        try {
+          await CharacterFireTraitChangeConsumables.methods
+            .changeCharacterTrait(id)
+            .send({
+              from: state.defaultAccount,
+              gas: '5000000'
+            });
+        } catch(err) {
+          console.error(err);
+        }
 
         await Promise.all([
           dispatch('fetchCharacter', id),
@@ -2102,13 +2164,17 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterEarthTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
-          .send({
-            from: state.defaultAccount
-          });
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
 
-        await Blacksmith.methods.purchaseCharacterEarthTraitChange(Web3.utils.toWei('1')).send({
+        await Blacksmith.methods.purchaseCharacterEarthTraitChange(Web3.utils.toWei('0.2')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2118,10 +2184,10 @@ export function createStore(web3: Web3) {
         ]);
       },
       async changeCharacterTraitEarth({ state, dispatch}, { id }) {
-        const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
+        const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterEarthTraitChangeConsumables || !state.defaultAccount) return;
 
-        await CharacterFireTraitChangeConsumables.methods
+        await CharacterEarthTraitChangeConsumables.methods
           .changeCharacterTrait(id)
           .send({
             from: state.defaultAccount,
@@ -2142,13 +2208,17 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterWaterTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
-          .send({
-            from: state.defaultAccount
-          });
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
 
-        await Blacksmith.methods.purchaseCharacterWaterTraitChange(Web3.utils.toWei('1')).send({
+        await Blacksmith.methods.purchaseCharacterWaterTraitChange(Web3.utils.toWei('0.2')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2182,13 +2252,17 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterLightningTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
-          .send({
-            from: state.defaultAccount
-          });
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
 
-        await Blacksmith.methods.purchaseCharacterLightningTraitChange(Web3.utils.toWei('1')).send({
+        await Blacksmith.methods.purchaseCharacterLightningTraitChange(Web3.utils.toWei('0.2')).send({
           from: state.defaultAccount,
           gas: '500000'
         });

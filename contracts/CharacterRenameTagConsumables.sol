@@ -26,13 +26,13 @@ contract CharacterRenameTagConsumables is Consumables {
 
         characters = _characters;
         _minSize = 1;
-        _maxSize = 16;
+        _maxSize = 24;
     }
 
     function renameCharacter(uint256 characterId, string memory newName) public {
         require(bytes(newName).length >= _minSize && bytes(newName).length <= _maxSize, 'size not valid');
         require(characters.ownerOf(characterId) == msg.sender, "Not the character owner");
-        consumeItem();
+        consumeItem(1);
         renames[characterId] = newName;
         emit CharacterRenamed(msg.sender, characterId);
     }

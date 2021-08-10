@@ -26,13 +26,13 @@ contract WeaponRenameTagConsumables is Consumables {
 
         weapons = _weapons;
         _minSize = 1;
-        _maxSize = 16;
+        _maxSize = 24;
     }
 
     function renameWeapon(uint256 weaponId, string memory newName) public {
         require(bytes(newName).length >= _minSize && bytes(newName).length <= _maxSize, 'size not valid');
         require(weapons.ownerOf(weaponId) == msg.sender, "Not the weapon owner");
-        consumeItem();
+        consumeItem(1);
         renames[weaponId] = newName;
         emit WeaponRenamed(msg.sender, weaponId);
     }

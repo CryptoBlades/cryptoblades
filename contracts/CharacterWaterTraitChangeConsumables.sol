@@ -7,7 +7,7 @@ contract CharacterWaterTraitChangeConsumables is Consumables {
 
     Characters characters;
 
-    event CharacterTraitChanged(address indexed owner, uint256 indexed character);
+    event CharacterTraitChangedToWater(address indexed owner, uint256 indexed character, uint8 from);
 
     function initialize(Characters _characters)
         public
@@ -24,8 +24,8 @@ contract CharacterWaterTraitChangeConsumables is Consumables {
 
     function changeCharacterTrait(uint256 characterId) public {
         require(characters.ownerOf(characterId) == msg.sender, "Not the character owner");
-        consumeItem();
+        consumeItem(1);
         characters.setTrait(characterId, 3);
-        emit CharacterTraitChanged(msg.sender, characterId);
+        emit CharacterTraitChangedToWater(msg.sender, characterId, characters.getTrait(characterId));
     }
 }

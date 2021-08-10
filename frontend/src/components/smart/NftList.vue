@@ -127,7 +127,13 @@ interface StoreMappedActions {
   purchaseShield(): Promise<void>;
   fetchShields(shieldIds: (string | number)[]): Promise<void>;
   purchaseRenameTag(): Promise<void>;
+  purchaseRenameTagDeal(): Promise<void>;
   purchaseWeaponRenameTag(): Promise<void>;
+  purchaseWeaponRenameTagDeal(): Promise<void>;
+  purchaseCharacterFireTraitChange(): Promise<void>;
+  purchaseCharacterEarthTraitChange(): Promise<void>;
+  purchaseCharacterWaterTraitChange(): Promise<void>;
+  purchaseCharacterLightningTraitChange(): Promise<void>;
 }
 
 export default Vue.extend({
@@ -298,7 +304,11 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['purchaseShield', 'fetchShields', 'purchaseRenameTag', 'purchaseWeaponRenameTag']) as StoreMappedActions),
+    ...(mapActions(['purchaseShield', 'fetchShields', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
+      'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
+      'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
+      'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange'
+    ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
     async onShieldBuy() {
@@ -385,10 +395,35 @@ export default Vue.extend({
         console.log('buying CharacterRenameTag');
         await this.purchaseRenameTag();
       }
+      if(item.type === 'CharacterRenameTagDeal'){
+        console.log('buying CharacterRenameTagDeal');
+        await this.purchaseRenameTagDeal();
+      }
 
       if(item.type === 'WeaponRenameTag'){
         console.log('buying WeaponRenameTag');
         await this.purchaseWeaponRenameTag();
+      }
+      if(item.type === 'WeaponRenameTagDeal'){
+        console.log('buying WeaponRenameTagDeal');
+        await this.purchaseWeaponRenameTagDeal();
+      }
+
+      if(item.type === 'CharacterFireTraitChange'){
+        console.log('buying CharacterFireTraitChange');
+        await this.purchaseCharacterFireTraitChange();
+      }
+      if(item.type === 'CharacterEarthTraitChange'){
+        console.log('buying CharacterEarthTraitChange');
+        await this.purchaseCharacterEarthTraitChange();
+      }
+      if(item.type === 'CharacterWaterTraitChange'){
+        console.log('buying CharacterWaterTraitChange');
+        await this.purchaseCharacterWaterTraitChange();
+      }
+      if(item.type === 'CharacterLightningTraitChange'){
+        console.log('buying CharacterLightningTraitChange');
+        await this.purchaseCharacterLightningTraitChange();
       }
     },
     itemDescriptionHtml(item: SkillShopListing): string {
