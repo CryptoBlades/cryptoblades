@@ -7,6 +7,9 @@ contract WeaponRenameTagConsumables is Consumables {
 
     Weapons public weapons;
 
+    uint8 private _minSize;
+    uint8 private _maxSize;
+
     mapping(uint256 => string) public renames;
 
     event WeaponRenamed(address indexed owner, uint256 indexed weapon);
@@ -22,10 +25,12 @@ contract WeaponRenameTagConsumables is Consumables {
         _enabled = true;
 
         weapons = _weapons;
+        _minSize = 1;
+        _maxSize = 16;
     }
 
     function renameWeapon(uint256 weaponId, string memory newName) public {
-        require(bytes(newName).length < 16, 'too long');
+        require(bytes(newName).length >= _minSize && bytes(newName).length <= _maxSize, 'size not valid');
         require(weapons.ownerOf(weaponId) == msg.sender, "Not the weapon owner");
         consumeItem();
         renames[weaponId] = newName;
@@ -34,5 +39,23 @@ contract WeaponRenameTagConsumables is Consumables {
 
     function getWeaponRename(uint256 weaponId) public view returns (string memory) {
         return renames[weaponId];
+    }
+
+    function setMinSize(uint8 newMinSize) external isAdmin {
+        require(newMinSize > 0, 'invalid size');
+        _minSize = newMinSize;
+    }
+
+    function setMaxSize(uint8 newMaxSize) external isAdmin {
+        require(newMaxSize > 0, 'invalid size');
+        _maxSize = newMaxSize;
+    }
+
+    function getMinSize() public view returns (uint8){
+        return _minSize;
+    }
+
+    function getMaxSize() public view returns (uint8){
+        return _maxSize;
     }
 }
