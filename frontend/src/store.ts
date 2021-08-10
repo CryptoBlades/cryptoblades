@@ -2052,6 +2052,166 @@ export function createStore(web3: Web3) {
           dispatch('fetchWeaponRename', id)
         ]);
       },
+
+      async fetchTotalCharacterFireTraitChanges({ state }) {
+        const { CharacterFireTraitChangeConsumables } = state.contracts();
+        if(!CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
+        return await CharacterFireTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseCharacterFireTraitChange({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterFireTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
+          .send({
+            from: state.defaultAccount
+          });
+
+        await Blacksmith.methods.purchaseCharacterFireTraitChange(Web3.utils.toWei('1')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchTotalCharacterFireTraitChanges')
+        ]);
+      },
+      async changeCharacterTraitFire({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
+
+        await CharacterFireTraitChangeConsumables.methods
+          .changeCharacterTrait(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacter', id),
+        ]);
+      },
+
+      async fetchTotalCharacterEarthTraitChanges({ state }) {
+        const { CharacterEarthTraitChangeConsumables } = state.contracts();
+        if(!CharacterEarthTraitChangeConsumables || !state.defaultAccount) return;
+        return await CharacterEarthTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseCharacterEarthTraitChange({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterEarthTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
+          .send({
+            from: state.defaultAccount
+          });
+
+        await Blacksmith.methods.purchaseCharacterEarthTraitChange(Web3.utils.toWei('1')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchTotalCharacterEarthTraitChanges')
+        ]);
+      },
+      async changeCharacterTraitEarth({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
+
+        await CharacterFireTraitChangeConsumables.methods
+          .changeCharacterTrait(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacter', id),
+        ]);
+      },
+
+      async fetchTotalCharacterWaterTraitChanges({ state }) {
+        const { CharacterWaterTraitChangeConsumables } = state.contracts();
+        if(!CharacterWaterTraitChangeConsumables || !state.defaultAccount) return;
+        return await CharacterWaterTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseCharacterWaterTraitChange({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterWaterTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
+          .send({
+            from: state.defaultAccount
+          });
+
+        await Blacksmith.methods.purchaseCharacterWaterTraitChange(Web3.utils.toWei('1')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchTotalCharacterWaterTraitChanges')
+        ]);
+      },
+      async changeCharacterTraitWater({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterWaterTraitChangeConsumables || !state.defaultAccount) return;
+
+        await CharacterWaterTraitChangeConsumables.methods
+          .changeCharacterTrait(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacter', id),
+        ]);
+      },
+
+      async fetchTotalCharacterLightningTraitChanges({ state }) {
+        const { CharacterLightningTraitChangeConsumables } = state.contracts();
+        if(!CharacterLightningTraitChangeConsumables || !state.defaultAccount) return;
+        return await CharacterLightningTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseCharacterLightningTraitChange({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterLightningTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
+          .send({
+            from: state.defaultAccount
+          });
+
+        await Blacksmith.methods.purchaseCharacterLightningTraitChange(Web3.utils.toWei('1')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchTotalCharacterLightningTraitChanges')
+        ]);
+      },
+      async changeCharacterTraitLightning({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterLightningTraitChangeConsumables || !state.defaultAccount) return;
+
+        await CharacterLightningTraitChangeConsumables.methods
+          .changeCharacterTrait(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacter', id),
+        ]);
+      },
     }
   });
 }

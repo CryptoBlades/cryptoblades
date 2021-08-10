@@ -6,6 +6,10 @@ import "./interfaces/IRandoms.sol";
 import "./shields.sol";
 import "./WeaponRenameTagConsumables.sol";
 import "./CharacterRenameTagConsumables.sol";
+import "./CharacterFireTraitChangeConsumables.sol";
+import "./CharacterEarthTraitChangeConsumables.sol";
+import "./CharacterWaterTraitChangeConsumables.sol";
+import "./CharacterLightningTraitChangeConsumables.sol";
 import "./weapons.sol";
 import "./cryptoblades.sol";
 
@@ -19,6 +23,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     uint256 private _characterRenamePrice;
     uint256 private _weaponRenamePrice;
+    uint256 private _characterTraitChangePrice;
 
     /* ========== STATE VARIABLES ========== */
 
@@ -31,6 +36,10 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     CryptoBlades public game;
     CharacterRenameTagConsumables public characterRename;
     WeaponRenameTagConsumables public weaponRename;
+    CharacterFireTraitChangeConsumables public characterFireTraitChangeConsumables;
+    CharacterEarthTraitChangeConsumables public characterEarthTraitChangeConsumables;
+    CharacterWaterTraitChangeConsumables public characterWaterTraitChangeConsumables;
+    CharacterLightningTraitChangeConsumables public characterLightningTraitChangeConsumables;
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -59,12 +68,23 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     }
 
      function migrateTo_16884dd(CharacterRenameTagConsumables _characterRename,
-     WeaponRenameTagConsumables _weaponRename) external {
+     WeaponRenameTagConsumables _weaponRename,
+     CharacterFireTraitChangeConsumables _charFireTraitChange,
+     CharacterEarthTraitChangeConsumables _charEarthTraitChange,
+     CharacterWaterTraitChangeConsumables _charWaterTraitChange,
+     CharacterLightningTraitChangeConsumables _charLightningTraitChange
+     ) external {
          require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
          characterRename = _characterRename;
          weaponRename = _weaponRename;
+         characterFireTraitChangeConsumables = _charFireTraitChange;
+         characterEarthTraitChangeConsumables = _charEarthTraitChange;
+         characterWaterTraitChangeConsumables = _charWaterTraitChange;
+         characterLightningTraitChangeConsumables = _charLightningTraitChange;
+
          _characterRenamePrice = 1 ether;
          _weaponRenamePrice = 1 ether;
+         _characterTraitChangePrice = 1 ether;
      }
 
     /* ========== VIEWS ========== */
@@ -142,5 +162,40 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         require(paying == _weaponRenamePrice, 'Invalid price');
         game.payContractTokenOnly(msg.sender, _weaponRenamePrice);
         weaponRename.giveItem(msg.sender);
+    }
+
+     /* ========== Character Trait Change ========== */
+
+     function setCharacterTraitChangePrice(uint256 newPrice) external isAdmin {
+        require(newPrice > 0, 'invalid price');
+        _characterTraitChangePrice = newPrice;
+    }
+
+     function characterTraitChangePrice() public view returns (uint256){
+        return _characterTraitChangePrice;
+    }
+
+    function purchaseCharacterFireTraitChange(uint256 paying) public {
+        require(paying == _characterTraitChangePrice, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, _characterTraitChangePrice);
+        characterFireTraitChangeConsumables.giveItem(msg.sender);
+    }
+
+    function purchaseCharacterEarthTraitChange(uint256 paying) public {
+        require(paying == _characterTraitChangePrice, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, _characterTraitChangePrice);
+        characterEarthTraitChangeConsumables.giveItem(msg.sender);
+    }
+
+    function purchaseCharacterWaterTraitChange(uint256 paying) public {
+        require(paying == _characterTraitChangePrice, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, _characterTraitChangePrice);
+        characterWaterTraitChangeConsumables.giveItem(msg.sender);
+    }
+
+    function purchaseCharacterLightningTraitChange(uint256 paying) public {
+        require(paying == _characterTraitChangePrice, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, _characterTraitChangePrice);
+        characterLightningTraitChangeConsumables.giveItem(msg.sender);
     }
 }

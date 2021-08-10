@@ -29,6 +29,14 @@
           <div class="d-flex justify-content-space-between">
             <h1>Characters ({{ ownCharacters.length }} / 4)</h1>
             <b-button
+              v-if="canChangeTrait()"
+              variant="primary"
+              class="ml-auto gtag-link-others"
+              @click="openRenameCharacter"
+              v-tooltip="'Change character\'s trait'" tagname="change_trait_character">
+              Change Trait
+            </b-button>
+            <b-button
               v-if="canRename()"
               variant="primary"
               class="ml-auto gtag-link-others"
@@ -63,6 +71,18 @@
                     Name can not be shorter than 2 characters.
                   </span>
                 </b-modal>
+        <b-modal class="centered-modal" ref="character-change-trait-modal"
+                  @ok="changeCharacterTraitCall">
+                  <template #modal-title>
+                    Change Character's Trait
+                  </template>
+                  <span >
+                    Pick a trait to switch to.
+                  </span>
+                  <select class="form-control" v-model="targetTrait">
+                    <option v-for="x in availableTraits" :value="x" :key="x">{{ x || 'Any' }}</option>
+                  </select>
+                </b-modal>
       </div>
     </div>
   </div>
@@ -81,6 +101,11 @@ interface Data {
   recruitCost: string;
   haveRename: number;
   characterRename: string;
+  haveChangeTraitFire: number;
+  haveChangeTraitEarth: number;
+  haveChangeTraitWater: number;
+  haveChangeTraitLightning: number;
+  targetTrait: string;
 }
 
 export default Vue.extend({
@@ -114,6 +139,24 @@ export default Vue.extend({
         experience: c.xp,
       };
     },
+
+    availableTraits(): string[] {
+      const availableTraits = [''];
+      if(this.haveChangeTraitFire) {
+        availableTraits.push('Fire');
+      }
+      if(this.haveChangeTraitEarth) {
+        availableTraits.push('Earth');
+      }
+      if(this.haveChangeTraitWater) {
+        availableTraits.push('Water');
+      }
+      if(this.haveChangeTraitLightning) {
+        availableTraits.push('Lightning');
+      }
+
+      return availableTraits;
+    }
   },
 
   async created() {
@@ -121,19 +164,29 @@ export default Vue.extend({
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     this.haveRename = await this.contracts.CharacterRenameTagConsumables?.methods.getItemCount().call();
+    this.haveChangeTraitFire = await this.contracts.CharacterFireTraitChangeConsumables?.methods.getItemCount().call();
+    this.haveChangeTraitEarth = await this.contracts.CharacterEarthTraitChangeConsumables?.methods.getItemCount().call();
+    this.haveChangeTraitWater = await this.contracts.CharacterWaterTraitChangeConsumables?.methods.getItemCount().call();
+    this.haveChangeTraitLightning = await this.contracts.CharacterLightningTraitChangeConsumables?.methods.getItemCount().call();
   },
 
   data() {
     return {
       recruitCost: '0',
       haveRename: 0,
-      characterRename: ''
+      characterRename: '',
+      haveChangeTraitFire: 0,
+      haveChangeTraitEarth: 0,
+      haveChangeTraitWater: 0,
+      haveChangeTraitLightning: 0,
+      targetTrait: '',
     } as Data;
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
-    ...mapActions(['mintCharacter', 'renameCharacter']),
+    ...mapActions(['mintCharacter', 'renameCharacter','changeCharacterTraitLightning',
+      'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater']),
 
     async onMintCharacter() {
       try {
@@ -164,7 +217,38 @@ export default Vue.extend({
 
       await this.renameCharacter({id: this.currentCharacter.id, name: this.characterRename.trim()});
       this.haveRename = await this.contracts.CharacterRenameTagConsumables?.methods.getItemCount().call();
-    }
+    },
+
+    canChangeTrait() {
+      return (this.haveChangeTraitFire || this.haveChangeTraitEarth || this.haveChangeTraitWater || this.haveChangeTraitLightning)
+        && this.currentCharacter !== undefined && this.currentCharacter.id > 0;
+    },
+    openChangeTrait() {
+      (this.$refs['character-change-trait-modal'] as BModal).show();
+    },
+    async changeCharacterTraitCall(bvModalEvt: BvModalEvent) {
+      if(!this.targetTrait) {
+        bvModalEvt.preventDefault();
+      }
+      switch(this.targetTrait) {
+      case 'Fire':
+        await this.changeCharacterTraitFire({ id: this.currentCharacter.id });
+        this.haveChangeTraitFire = await this.contracts.CharacterFireTraitChangeConsumables?.methods.getItemCount().call();
+        break;
+      case 'Earth' :
+        await this.changeCharacterTraitEarth({ id: this.currentCharacter.id });
+        this.haveChangeTraitEarth = await this.contracts.CharacterEarthTraitChangeConsumables?.methods.getItemCount().call();
+        break;
+      case 'Water':
+        await this.changeCharacterTraitWater({ id: this.currentCharacter.id });
+        this.haveChangeTraitWater = await this.contracts.CharacterWaterTraitChangeConsumables?.methods.getItemCount().call();
+        break;
+      case 'Lightning':
+        await this.changeCharacterTraitLightning({ id: this.currentCharacter.id });
+        this.haveChangeTraitLightning = await this.contracts.CharacterLightningTraitChangeConsumables?.methods.getItemCount().call();
+        break;
+      }
+    },
   },
 
   components: {

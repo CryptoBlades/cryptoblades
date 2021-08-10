@@ -892,31 +892,31 @@ export default Vue.extend({
         },
         {
           id: 1,
-          type: 'CharacterTraitChange',
+          type: 'CharacterEarthTraitChange',
           nftPrice: 1,
           name: 'Earth Character Trait',
           description: 'Changes character\'s trait to Earth.',
           image: 'earth.png'
         },
         {
-          id: 2,
-          type: 'CharacterTraitChange',
+          id: 1,
+          type: 'CharacterFireTraitChange',
           nftPrice: 1,
           name: 'Fire Character Trait',
           description: 'Changes character\'s trait to Fire.',
           image: 'fire.png'
         },
         {
-          id: 3,
-          type: 'CharacterTraitChange',
+          id: 1,
+          type: 'CharacterWaterTraitChange',
           nftPrice: 1,
           name: 'Water Character Trait',
           description: 'Changes character\'s trait to Water.',
           image: 'water.png'
         },
         {
-          id: 4,
-          type: 'CharacterTraitChange',
+          id: 1,
+          type: 'CharacterLightningTraitChange',
           nftPrice: 1,
           name: 'Lightning Character Trait',
           description: 'Changes character\'s trait to Lightning.',

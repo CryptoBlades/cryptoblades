@@ -24,7 +24,9 @@ module.exports = async function (deployer, network, accounts) {
   const characterLightningTraitChangeConsumables = await deployProxy(CharacterLightningTraitChangeConsumables, [Characters.address], { deployer });
 
   const blacksmith = await upgradeProxy(Blacksmith.address, Blacksmith, { deployer });
-  await blacksmith.migrateTo_16884dd(characterRenameTagConsumables.address, weaponRenameTagConsumables.address);
+  await blacksmith.migrateTo_16884dd(characterRenameTagConsumables.address, weaponRenameTagConsumables.address,
+    characterFireTraitChangeConsumables.address, characterEarthTraitChangeConsumables.address,
+    characterWaterTraitChangeConsumables.address, characterLightningTraitChangeConsumables.address);
 
   const characterRenameTagConsumables_GAME_ADMIN = await characterRenameTagConsumables.GAME_ADMIN();
   await characterRenameTagConsumables.grantRole(characterRenameTagConsumables_GAME_ADMIN, blacksmith.address);

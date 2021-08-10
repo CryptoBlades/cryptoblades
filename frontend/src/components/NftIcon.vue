@@ -109,6 +109,26 @@ export default {
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalWeaponRenameTags();
       }, 3000);
+    } else if(this.nft.type === 'CharacterFireTraitChange') {
+      this.quantityOwned = await this.fetchTotalCharacterFireTraitChanges();
+      this.fetchSupplyInterval = setInterval(async () => {
+        this.quantityOwned = await this.fetchTotalCharacterFireTraitChanges();
+      }, 3000);
+    } else if(this.nft.type === 'CharacterEarthTraitChange') {
+      this.quantityOwned = await this.fetchTotalCharacterEarthTraitChanges();
+      this.fetchSupplyInterval = setInterval(async () => {
+        this.quantityOwned = await this.fetchTotalCharacterEarthTraitChanges();
+      }, 3000);
+    } else if(this.nft.type === 'CharacterWaterTraitChange') {
+      this.quantityOwned = await this.fetchTotalCharacterWaterTraitChanges();
+      this.fetchSupplyInterval = setInterval(async () => {
+        this.quantityOwned = await this.fetchTotalCharacterWaterTraitChanges();
+      }, 3000);
+    } else if(this.nft.type === 'CharacterLightningTraitChange') {
+      this.quantityOwned = await this.fetchTotalCharacterLightningTraitChanges();
+      this.fetchSupplyInterval = setInterval(async () => {
+        this.quantityOwned = await this.fetchTotalCharacterLightningTraitChanges();
+      }, 3000);
     }
   },
 

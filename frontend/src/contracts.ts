@@ -16,6 +16,10 @@ import { abi as blacksmithAbi } from '../../build/contracts/Blacksmith.json';
 import { abi as shieldsAbi } from '../../build/contracts/Shields.json';
 import { abi as weaponRenameTagConsumablesAbi } from '../../build/contracts/WeaponRenameTagConsumables.json';
 import { abi as characterRenameTagConsumablesAbi } from '../../build/contracts/CharacterRenameTagConsumables.json';
+import { abi as characterFireTraitChangeConsumablesAbi } from '../../build/contracts/CharacterFireTraitChangeConsumables.json';
+import { abi as characterEarthTraitChangeConsumablesAbi } from '../../build/contracts/CharacterEarthTraitChangeConsumables.json';
+import { abi as characterWaterTraitChangeConsumablesAbi } from '../../build/contracts/CharacterWaterTraitChangeConsumables.json';
+import { abi as characterLightningTraitChangeConsumablesAbi } from '../../build/contracts/CharacterLightningTraitChangeConsumables.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
@@ -135,6 +139,19 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const characterRenameTagConsumablesAddr = await Blacksmith.methods.characterRename().call();
   const CharacterRenameTagConsumables = new web3.eth.Contract(characterRenameTagConsumablesAbi as Abi, characterRenameTagConsumablesAddr);
 
+  const characterFireTraitChangeConsumablesAddr = await Blacksmith.methods.characterFireTraitChange().call();
+  const CharacterFireTraitChangeConsumables = new web3.eth.Contract(characterFireTraitChangeConsumablesAbi as Abi, characterFireTraitChangeConsumablesAddr);
+
+  const characterEarthTraitChangeConsumablesAddr = await Blacksmith.methods.characterFireTraitChange().call();
+  const CharacterEarthTraitChangeConsumables = new web3.eth.Contract(characterEarthTraitChangeConsumablesAbi as Abi, characterEarthTraitChangeConsumablesAddr);
+
+  const characterWaterTraitChangeConsumablesAddr = await Blacksmith.methods.characterFireTraitChange().call();
+  const CharacterWaterTraitChangeConsumables = new web3.eth.Contract(characterWaterTraitChangeConsumablesAbi as Abi, characterWaterTraitChangeConsumablesAddr);
+
+  const characterLightningTraitChangeConsumablesAddr = await Blacksmith.methods.characterFireTraitChange().call();
+  const CharacterLightningTraitChangeConsumables = new web3.eth.Contract(characterLightningTraitChangeConsumablesAbi as Abi,
+    characterLightningTraitChangeConsumablesAddr);
+
 
 
   const raidContracts: RaidContracts = {};
@@ -157,6 +174,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   return {
     ...stakingContracts,
     CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
+    CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     ...raidContracts,
     ...marketContracts,
     WaxBridge,
