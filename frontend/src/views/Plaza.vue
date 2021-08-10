@@ -67,14 +67,20 @@
 
 <script lang='ts'>
 import BN from 'bignumber.js';
-
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import { BModal } from 'bootstrap-vue';
+import Vue from 'vue';
 
-export default {
+interface Data {
+  recruitCost: string;
+  haveRename: number;
+  characterRename: string;
+}
+
+export default Vue.extend({
   computed: {
     ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
     ...mapGetters([
@@ -87,7 +93,7 @@ export default {
       'getExchangeUrl',
     ]),
 
-    character() {
+    character(): any {
       if (!this.currentCharacter) {
         return {
           id: null,
@@ -110,16 +116,16 @@ export default {
   async created() {
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
-    this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
+    this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     this.haveRename = await this.contracts.CharacterRenameTagConsumables?.methods.getItemCount().call();
   },
 
   data() {
     return {
-      recruitCost: this.recruitCost,
+      recruitCost: '0',
       haveRename: 0,
       characterRename: ''
-    };
+    } as Data;
   },
 
   methods: {
@@ -130,7 +136,7 @@ export default {
       try {
         await this.mintCharacter();
       } catch (e) {
-        this.$dialog.notify.error('Could not mint character: insufficient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not mint character: insufficient funds or transaction denied.');
       }
     },
     formatSkill() {
@@ -161,7 +167,7 @@ export default {
     BigButton,
     CharacterList,
   },
-};
+});
 </script>
 
 <style scoped>

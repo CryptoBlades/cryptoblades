@@ -59,7 +59,7 @@
   </div>
 </template>
 
-<script lang='ts'>
+<script>
 import { getWeaponArt } from '../weapon-arts-placeholder';
 import { getWeaponNameFromSeed } from '../weapon-name';
 import * as Three from 'three';

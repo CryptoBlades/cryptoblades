@@ -864,9 +864,10 @@ export default Vue.extend({
           type: 'shield',
           nftPrice: 5,
           name: 'Shield',
-          description: 'A shield'
+          description: 'A shield',
+          image: '',
         },
-      ];
+      ] as SkillShopListing[];
 
       return nftList;
     },
@@ -874,16 +875,16 @@ export default Vue.extend({
     shopOffersNftList(): SkillShopListing[] {
       const nftList = [
         {
-          nftId: 0,
-          nftType: 'CharacterRenameTag',
+          id: 0,
+          type: 'CharacterRenameTag',
           nftPrice: 1,
           name: 'Rename Tag',
           description: 'Renames one character.',
           image: 'https://seiyria.com/gameicons-font/svg/id-card.svg'
         },
         {
-          nftId: 1,
-          nftType: 'WeaponRenameTag',
+          id: 1,
+          type: 'WeaponRenameTag',
           nftPrice: 1,
           name: 'Weapon Tag',
           description: 'Renames a weapon.',

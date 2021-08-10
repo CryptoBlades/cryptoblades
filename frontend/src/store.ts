@@ -1981,7 +1981,7 @@ export function createStore(web3: Web3) {
       },
       async purchaseRenameTag({ state, dispatch }) {
         const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
-        if(!CryptoBlades || !CharacterRenameTagConsumables || !state.defaultAccount) return;
+        if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         await SkillToken.methods
           .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
@@ -2020,7 +2020,7 @@ export function createStore(web3: Web3) {
       },
       async purchaseWeaponRenameTag({ state, dispatch }) {
         const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
-        if(!CryptoBlades || !WeaponRenameTagConsumables || !state.defaultAccount) return;
+        if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         await SkillToken.methods
           .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))

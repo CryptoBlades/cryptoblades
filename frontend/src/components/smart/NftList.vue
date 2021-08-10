@@ -7,10 +7,10 @@
       <ul class="nft-grid">
         <li class="nft"
         v-for="nft in nftIdTypes" :key="`${nft.type}.${nft.id}`">
-          <nft-icon :nft="nft" :isShop="isShop" :favorite="isFavorite(nft.typeId, nft.id)"/>
+          <nft-icon :nft="nft" :isShop="isShop" :favorite="isFavorite(nft.typeId, nft.id)"
             v-tooltip.top="{ content: itemDescriptionHtml(nft) , trigger: (isMobile() ? 'click' : 'hover') }"
                       @mouseover="hover = !isMobile() || true"
-                      @mouseleave="hover = !isMobile()"
+                      @mouseleave="hover = !isMobile()" />
           <b-button
             variant="primary"
             class="shop-button"
@@ -126,6 +126,8 @@ interface StoreMappedGetters {
 interface StoreMappedActions {
   purchaseShield(): Promise<void>;
   fetchShields(shieldIds: (string | number)[]): Promise<void>;
+  purchaseRenameTag(): Promise<void>;
+  purchaseWeaponRenameTag(): Promise<void>;
 }
 
 export default Vue.extend({
@@ -372,6 +374,23 @@ export default Vue.extend({
     isFavorite(type: string, id: number): boolean {
       return this.favorites && this.favorites[type] && this.favorites[type][id];
     },
+
+    async buyItem(item: nftItem) {
+      if(item.type === 'shield'){
+        await this.purchaseShield();
+      }
+
+      if(item.type === 'CharacterRenameTag'){
+        await this.purchaseRenameTag();
+      }
+
+      if(item.type === 'WeaponRenameTag'){
+        await this.purchaseWeaponRenameTag();
+      }
+    },
+    itemDescriptionHtml(item: SkillShopListing): string {
+      return item.name + '<br>' + item.description;
+    }
   },
 
   mounted() {
@@ -380,25 +399,6 @@ export default Vue.extend({
     if(!this.showGivenNftIdTypes) {
       this.fetchShields(this.ownedShieldIds);
     }
-  }
-  async buyItem(item: nftItem) {
-      if(item.nftType === 'shield'){
-        await this.purchaseShield();
-      }
-
-      if(item.nftType === 'CharacterRenameTag'){
-        await this.purchaseRenameTag();
-      }
-
-      if(item.nftType === 'WeaponRenameTag'){
-        await this.purchaseWeaponRenameTag();
-      }
-    },
-    itemDescriptionHtml(item: SkillShopListing): string {
-      return item.name + '<br>' + item.description;
-    }
-  }
-};
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());
 
@@ -412,7 +412,7 @@ export default Vue.extend({
       this.starFilter = sessionStorage.getItem('nft-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('nft-elementfilter') || '';
     }
-  },
+  }
 });
 </script>
 

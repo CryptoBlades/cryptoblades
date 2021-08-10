@@ -34,7 +34,7 @@
           </div>
         </div>
       </div>
-      <div v-if="nft.nftType !== 'shield'" class="nft-details">
+      <div v-if="nft.type !== 'shield'" class="nft-details">
         <img class="placeholder-shield" :src="nft.image"/>
         <span v-if="isShop" class="nft-supply">Owned: {{this.quantityOwned}}</span>
       </div>
@@ -90,11 +90,11 @@ export default {
       this.fetchSupplyInterval = setInterval(async () => {
         this.totalShieldSupply = 10000 - (await this.fetchTotalShieldSupply());
       }, 3000);
-    } else if(this.nft.nftType === 'CharacterRenameTag') {
+    } else if(this.nft.type === 'CharacterRenameTag') {
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalRenameTags();
       }, 10000);
-    } else if(this.nft.nftType === 'WeaponRenameTag') {
+    } else if(this.nft.type === 'WeaponRenameTag') {
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalWeaponRenameTags();
       }, 10000);

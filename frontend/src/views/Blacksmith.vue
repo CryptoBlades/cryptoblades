@@ -185,36 +185,62 @@
 import BN from 'bignumber.js';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
+import Vue from 'vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import { BModal } from 'bootstrap-vue';
 import NftList from '@/components/smart/NftList.vue';
+import { Contracts, IState } from '@/interfaces';
+import { Accessors } from 'vue/types/options';
 
+type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds'>;
 
-export default {
+interface StoreMappedGetters {
+  contracts: Contracts;
+  ownWeapons: any[];
+  nftsCount: number;
+}
 
+interface Data {
+  showReforge: boolean;
+  reforgeWeaponId: string | null;
+  burnWeaponId: string | null;
+  selectedNft: string | null;
+  forgeCost: string;
+  reforgeCost: string;
+  disableForge: boolean;
+  newForged: number[];
+  currentListofWeapons: string[];
+  spin: boolean;
+  weaponRename: string;
+  haveRename: string;
+  onError: boolean;
+}
 
+export default Vue.extend({
   data() {
     return {
       showReforge: false,
       reforgeWeaponId: null,
       burnWeaponId: null,
       selectedNft: null,
-      forgeCost: 0,
-      reforgeCost: 0,
+      forgeCost: '0',
+      reforgeCost: '0',
       disableForge: false,
       newForged: [],
       currentListofWeapons: [],
       spin: false,
-      weaponRename: ''
-    };
+      weaponRename: '',
+      haveRename: '0',
+      onError: false,
+    } as Data;
   },
 
   computed: {
-    ...mapState(['defaultAccount','ownedWeaponIds']),
-    ...mapGetters(['contracts', 'ownWeapons', 'nftsCount']),
+    ...(mapState(['defaultAccount','ownedWeaponIds']) as Accessors<StoreMappedState>),
+    ...(mapGetters(['contracts', 'ownWeapons', 'nftsCount']) as Accessors<StoreMappedGetters>),
 
-    canReforge() {
+    canReforge(): boolean {
       return (
         this.reforgeWeaponId === null ||
         this.burnWeaponId === null ||
@@ -231,15 +257,17 @@ export default {
   },
 
   async created() {
+    if(!this.contracts.CryptoBlades) return;
     const forgeCost = await this.contracts.CryptoBlades.methods.mintWeaponFee().call({ from: this.defaultAccount });
-    const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call();
-    this.forgeCost = BN(skillForgeCost).div(BN(10).pow(18)).toFixed(4);
+    const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
+    this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
 
     const reforgeCost = await this.contracts.CryptoBlades.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
-    const skillReforgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(reforgeCost).call();
-    this.reforgeCost = BN(skillReforgeCost).div(BN(10).pow(18)).toFixed(4);
+    const skillReforgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(reforgeCost).call({ from: this.defaultAccount });
+    this.reforgeCost = new BN(skillReforgeCost).div(new BN(10).pow(18)).toFixed(4);
 
-    this.haveRename = await this.contracts.WeaponRenameTagConsumables?.methods.getItemCount().call();
+    if(!this.contracts.WeaponRenameTagConsumables) return;
+    this.haveRename = await this.contracts.WeaponRenameTagConsumables.methods.getItemCount().call({ from: this.defaultAccount });
   },
 
   methods: {
@@ -261,7 +289,7 @@ export default {
 
       } catch (e) {
         console.error(e);
-        this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
@@ -285,7 +313,7 @@ export default {
 
       } catch (e) {
         console.error(e);
-        this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
@@ -294,7 +322,7 @@ export default {
 
     },
 
-    relayFunction(offset){
+    relayFunction(offset: number){
       try{
         this.viewNewWeapons(offset);
       } catch (e) {
@@ -304,11 +332,11 @@ export default {
     },
 
     onShowForgeDetails() {
-      this.$refs['forge-details-modal'].show();
+      (this.$refs['forge-details-modal'] as BModal).show();
     },
 
     showReforgeConfirmation() {
-      this.$refs['reforge-confirmation-modal'].show();
+      (this.$refs['reforge-confirmation-modal'] as BModal).show();
     },
 
     isWeaponRare() {
@@ -323,7 +351,7 @@ export default {
       return this.ownWeapons.find(x => x.id === this.burnWeaponId);
     },
 
-    viewNewWeapons(offset){
+    viewNewWeapons(offset: number){
       this.newForged = [];
       this.ownedWeaponIds.forEach(x => {
         this.newForged.push(x);
@@ -335,7 +363,7 @@ export default {
       // eslint-disable-next-line no-constant-condition
       if (this.newForged.length > 0 && !this.onError){
         this.spin = true;
-        this.$refs['new-weapons'].show();
+        (this.$refs['new-weapons'] as BModal).show();
 
         setTimeout(() => {
           this.spin = false;
@@ -355,11 +383,11 @@ export default {
         this.burnWeaponId = null;
       } catch (e) {
         console.error(e);
-        this.$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
       }
     },
     canRename() {
-      return this.reforgeWeaponId !== null && this.haveRename > 0;
+      return this.reforgeWeaponId !== null && +this.haveRename > 0;
     },
     openRenameWeapon() {
       (this.$refs['weapon-rename-modal'] as BModal).show();
@@ -370,7 +398,9 @@ export default {
       }
 
       await this.renameWeapon({id: this.reforgeWeaponId, name: this.weaponRename});
-      this.haveRename = await this.contracts.WeaponRenameTagConsumables?.methods.getItemCount().call();
+      if(this.contracts.WeaponRenameTagConsumables) {
+        this.haveRename = await this.contracts.WeaponRenameTagConsumables.methods.getItemCount().call({ from: this.defaultAccount });
+      }
     }
   },
 
@@ -381,7 +411,7 @@ export default {
     BModal,
     NftList,
   },
-};
+});
 </script>
 
 <style scoped>
