@@ -1989,7 +1989,7 @@ export function createStore(web3: Web3) {
             from: state.defaultAccount
           });
 
-        await Blacksmith.methods.purchaseCharacterRenameTag().send({
+        await Blacksmith.methods.purchaseCharacterRenameTag(Web3.utils.toWei('1')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2028,7 +2028,7 @@ export function createStore(web3: Web3) {
             from: state.defaultAccount
           });
 
-        await Blacksmith.methods.purchaseWeaponRenameTag().send({
+        await Blacksmith.methods.purchaseWeaponRenameTag(Web3.utils.toWei('1')).send({
           from: state.defaultAccount,
           gas: '500000'
         });

@@ -14,7 +14,7 @@
           <b-button
             variant="primary"
             class="shop-button"
-            @click="onShieldBuy()">
+            @click="buyItem(nft)">
             <span class="gtag-link-others">
               Buy ({{ nft.nftPrice }} SKILL)
             </span>
@@ -377,14 +377,17 @@ export default Vue.extend({
 
     async buyItem(item: nftItem) {
       if(item.type === 'shield'){
+        console.log('buying shield');
         await this.purchaseShield();
       }
 
       if(item.type === 'CharacterRenameTag'){
+        console.log('buying CharacterRenameTag');
         await this.purchaseRenameTag();
       }
 
       if(item.type === 'WeaponRenameTag'){
+        console.log('buying WeaponRenameTag');
         await this.purchaseWeaponRenameTag();
       }
     },

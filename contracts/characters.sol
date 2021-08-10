@@ -206,6 +206,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokens[id].trait;
     }
 
+    function setTrait(uint256 id, uint8 trait) public restricted {
+        tokens[id].trait = trait;
+    }
+
     function getXp(uint256 id) public view noFreshLookup(id) returns (uint32) {
         return tokens[id].xp;
     }

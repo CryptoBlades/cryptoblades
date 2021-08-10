@@ -271,7 +271,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN', 'renameWeapon']),
+    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN', 'renameWeapon', 'fetchTotalWeaponRenameTags']),
 
     async onForgeWeapon() {
       if(this.disableForge) return;

@@ -864,7 +864,7 @@ export default Vue.extend({
           type: 'shield',
           nftPrice: 5,
           name: 'Shield',
-          description: 'A shield',
+          description: 'A Templars Will Shield',
           image: '',
         },
       ] as SkillShopListing[];
@@ -889,6 +889,38 @@ export default Vue.extend({
           name: 'Weapon Tag',
           description: 'Renames a weapon.',
           image: 'https://seiyria.com/gameicons-font/svg/price-tag.svg'
+        },
+        {
+          id: 1,
+          type: 'CharacterTraitChange',
+          nftPrice: 1,
+          name: 'Earth Character Trait',
+          description: 'Changes character\'s trait to Earth.',
+          image: 'earth.png'
+        },
+        {
+          id: 2,
+          type: 'CharacterTraitChange',
+          nftPrice: 1,
+          name: 'Fire Character Trait',
+          description: 'Changes character\'s trait to Fire.',
+          image: 'fire.png'
+        },
+        {
+          id: 3,
+          type: 'CharacterTraitChange',
+          nftPrice: 1,
+          name: 'Water Character Trait',
+          description: 'Changes character\'s trait to Water.',
+          image: 'water.png'
+        },
+        {
+          id: 4,
+          type: 'CharacterTraitChange',
+          nftPrice: 1,
+          name: 'Lightning Character Trait',
+          description: 'Changes character\'s trait to Lightning.',
+          image: 'lightning.png'
         },
       ] as SkillShopListing[];
 

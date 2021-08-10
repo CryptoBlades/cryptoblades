@@ -34,8 +34,9 @@
           </div>
         </div>
       </div>
+
       <div v-if="nft.type !== 'shield'" class="nft-details">
-        <img class="placeholder-shield" :src="nft.image"/>
+        <img class="placeholder-consumable" :src="nft.image.startsWith('http') ? nft.image : imgPath(nft.image)"/>
         <span v-if="isShop" class="nft-supply">Owned: {{this.quantityOwned}}</span>
       </div>
     </div>
@@ -44,6 +45,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+
 export default {
   props: ['nft', 'isDefault', 'isShop', 'favorite'],
   async created() {
@@ -77,27 +79,36 @@ export default {
     return {
       totalShieldSupply: 0,
       fetchSupplyInterval: 0,
-      quantityOwned: 0
+      quantityOwned: 0,
+      images: require.context('../assets/elements/', false, /\.png$/)
     };
   },
 
   methods: {
-    ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags'])
+    ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags']),
+
+    imgPath(img) {
+      console.log(this.images);
+      return this.images('./' + img);
+    }
   },
 
   async mounted() {
     if(this.nft.type === 'shield') {
+      this.totalShieldSupply = 10000 - (await this.fetchTotalShieldSupply());
       this.fetchSupplyInterval = setInterval(async () => {
         this.totalShieldSupply = 10000 - (await this.fetchTotalShieldSupply());
       }, 3000);
     } else if(this.nft.type === 'CharacterRenameTag') {
+      this.quantityOwned = await this.fetchTotalRenameTags();
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalRenameTags();
-      }, 10000);
+      }, 3000);
     } else if(this.nft.type === 'WeaponRenameTag') {
+      this.quantityOwned = await this.fetchTotalWeaponRenameTags();
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalWeaponRenameTags();
-      }, 10000);
+      }, 3000);
     }
   },
 
@@ -144,6 +155,11 @@ export default {
   margin-top: -10px;
 }
 
+.placeholder-consumable {
+  height: 100%;
+  transform: scale(0.7);
+}
+
 .nft-supply {
   position: absolute;
   bottom: 0;
@@ -153,6 +169,7 @@ export default {
 
 .nft-details {
   text-align: center;
+  height: 100%;
 }
 
 .trait, .id, .stats {

@@ -53,12 +53,15 @@
           />
         </div>
         <b-modal class="centered-modal" ref="character-rename-modal"
-                  @ok="renameCharacterCall()">
+                  @ok="renameCharacterCall">
                   <template #modal-title>
                     Rename Character
                   </template>
                   <b-form-input type="string"
                     class="modal-input" v-model="characterRename" placeholder="New Name" />
+                  <span v-if="characterRename !== '' && characterRename.length < 2">
+                    Name can not be shorter than 2 characters.
+                  </span>
                 </b-modal>
       </div>
     </div>
@@ -71,7 +74,7 @@ import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
-import { BModal } from 'bootstrap-vue';
+import { BModal, BvModalEvent } from 'bootstrap-vue';
 import Vue from 'vue';
 
 interface Data {
@@ -153,12 +156,13 @@ export default Vue.extend({
     openRenameCharacter() {
       (this.$refs['character-rename-modal'] as BModal).show();
     },
-    async renameCharacterCall() {
-      if(this.characterRename === ''){
+    async renameCharacterCall(bvModalEvt: BvModalEvent) {
+      if(this.characterRename.length < 2){
+        bvModalEvt.preventDefault();
         return;
       }
 
-      await this.renameCharacter({id: this.currentCharacter.id, name: this.characterRename});
+      await this.renameCharacter({id: this.currentCharacter.id, name: this.characterRename.trim()});
       this.haveRename = await this.contracts.CharacterRenameTagConsumables?.methods.getItemCount().call();
     }
   },
