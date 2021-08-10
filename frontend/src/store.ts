@@ -2139,16 +2139,12 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables } = state.contracts();
         if(!CryptoBlades || !SkillToken || !CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
 
-        try {
-          await CharacterFireTraitChangeConsumables.methods
-            .changeCharacterTrait(id)
-            .send({
-              from: state.defaultAccount,
-              gas: '5000000'
-            });
-        } catch(err) {
-          console.error(err);
-        }
+        await CharacterFireTraitChangeConsumables.methods
+          .changeCharacterTrait(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
 
         await Promise.all([
           dispatch('fetchCharacter', id),
