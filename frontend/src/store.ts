@@ -1161,7 +1161,7 @@ export function createStore(web3: Web3) {
           { feeMultiplier: num }
         );
 
-        await CryptoBlades.methods.mintWeaponN(num).send({ from: state.defaultAccount });
+        await CryptoBlades.methods.mintWeaponN(num).send({ from: state.defaultAccount, gas: '5000000' });
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
