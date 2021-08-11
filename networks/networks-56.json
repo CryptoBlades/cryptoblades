@@ -194,6 +194,26 @@
     "address": "0x9de48972261924Cd0652D357a9700D615Dd6c05B",
     "transactionHash": "0x376fe85f89e76d1899ab28c500b70bb873da7aa881b855327e152fba90e79c71"
   },
+  "build/contracts/CharacterEarthTraitChangeConsumables.json": {
+    "events": {},
+    "links": {},
+    "address": "0x5A76Ba4f13eA0D1F0dB22CdfE2420Df25D46a3dC"
+  },
+  "build/contracts/CharacterFireTraitChangeConsumables.json": {
+    "events": {},
+    "links": {},
+    "address": "0xA1fa3E149c3e7d5af8Cd1EFED039FC64ff8260a3"
+  },
+  "build/contracts/CharacterLightningTraitChangeConsumables.json": {
+    "events": {},
+    "links": {},
+    "address": "0x118de12Cc76615d6E0e8F883ca9DAE5F6F503940"
+  },
+  "build/contracts/CharacterRenameTagConsumables.json": {
+    "events": {},
+    "links": {},
+    "address": "0x06c1c043434AC4B68b2f8A5e4d9fD92238eCC0e3"
+  },
   "build/contracts/Characters.json": {
     "events": {
       "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
@@ -394,6 +414,11 @@
     "links": {},
     "address": "0xc6f252c2CdD4087e30608A35c022ce490B58179b",
     "transactionHash": "0xacf29d91e9286d27c086eb8f7220d4dd8a28c98783572f876f09685f23c8a618"
+  },
+  "build/contracts/CharacterWaterTraitChangeConsumables.json": {
+    "events": {},
+    "links": {},
+    "address": "0x9e6b9853cF82f169D6D64d0272E0c6407275Eb93"
   },
   "build/contracts/CryptoBlades.json": {
     "events": {
@@ -1138,6 +1163,11 @@
     "address": "0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
     "transactionHash": "0x3dac1bb6496f4f719d37f9297243a4c8e60da16c9a97db3e7cf57f068437afa5"
   },
+  "build/contracts/WeaponRenameTagConsumables.json": {
+    "events": {},
+    "links": {},
+    "address": "0xEcDC66Ca26e2B90d1e10AFAA162164f685f51c81"
+  },
   "build/contracts/Weapons.json": {
     "events": {
       "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
@@ -1405,35 +1435,5 @@
     "links": {},
     "address": "0x7E091b0a220356B157131c831258A9C98aC8031A",
     "transactionHash": "0x4a016963bc66fff74ae8263aae2cc8d6a9650b65f516bde4fff06ba8fc522bd3"
-  },
-  "build/contracts/CharacterRenameTagConsumables.json": {
-    "events": {},
-    "links": {},
-    "address": "0x06c1c043434AC4B68b2f8A5e4d9fD92238eCC0e3"
-  },
-  "build/contracts/WeaponRenameTagConsumables.json": {
-    "events": {},
-    "links": {},
-    "address": "0xEcDC66Ca26e2B90d1e10AFAA162164f685f51c81"
-  },
-  "build/contracts/CharacterFireTraitChangeConsumables.json": {
-    "events": {},
-    "links": {},
-    "address": "0xA1fa3E149c3e7d5af8Cd1EFED039FC64ff8260a3"
-  },
-  "build/contracts/CharacterEarthTraitChangeConsumables.json": {
-    "events": {},
-    "links": {},
-    "address": "0x5A76Ba4f13eA0D1F0dB22CdfE2420Df25D46a3dC"
-  },
-  "build/contracts/CharacterWaterTraitChangeConsumables.json": {
-    "events": {},
-    "links": {},
-    "address": "0x9e6b9853cF82f169D6D64d0272E0c6407275Eb93"
-  },
-  "build/contracts/CharacterLightningTraitChangeConsumables.json": {
-    "events": {},
-    "links": {},
-    "address": "0x118de12Cc76615d6E0e8F883ca9DAE5F6F503940"
   }
 }
