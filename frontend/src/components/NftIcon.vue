@@ -98,9 +98,9 @@ export default {
 
   async mounted() {
     if(this.nft.type === 'shield') {
-      this.totalShieldSupply = 10000 - (await this.fetchTotalShieldSupply());
+      this.totalShieldSupply = 25000 - (await this.fetchTotalShieldSupply());
       this.fetchSupplyInterval = setInterval(async () => {
-        this.totalShieldSupply = 10000 - (await this.fetchTotalShieldSupply());
+        this.totalShieldSupply = 25000 - (await this.fetchTotalShieldSupply());
       }, 3000);
     } else if(this.nft.type === 'CharacterRenameTag' || this.nft.type === 'CharacterRenameTagDeal') {
       this.quantityOwned = await this.fetchTotalRenameTags();
