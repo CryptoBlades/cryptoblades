@@ -71,19 +71,19 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         promos = _promos;
     }
 
     function migrateTo_23b3a8b(IStakeFromGame _stakeFromGame) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         stakeFromGameImpl = _stakeFromGame;
     }
 
     function migrateTo_801f279() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         burnWeaponFee = ABDKMath64x64.divu(2, 10);//0.2 usd;
         reforgeWeaponWithDustFee = ABDKMath64x64.divu(3, 10);//0.3 usd;
@@ -92,7 +92,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function migrateTo_60872c8(Blacksmith _blacksmith) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         blacksmith = _blacksmith;
     }
@@ -476,7 +476,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
-    function mintPaymentSkillRefundable(address _minter) external view
+    /*function mintPaymentSkillRefundable(address _minter) external view
         returns (uint256 _refundInGameOnlyFunds, uint256 _refundTokenRewards, uint256 _refundUserWallet) {
 
         return (
@@ -498,6 +498,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         else {
             return 0;
         }
+    }
+
+    function checkIfMintPaymentExpiredAndRefunded() external {
+        _discardPaymentIfExpired(msg.sender);
     }
 
     function mintPaymentClaimRefund() external {
@@ -617,7 +621,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if (mintPayments[_minter].count == 0) {
             delete mintPayments[_minter];
         }
-    }
+    }*/
 
     function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
 
@@ -628,7 +632,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 tokenRewards[msg.sender],
                 skillAmount
             );
-        require(skillToken.balanceOf(msg.sender) >= fromUserWallet);
+        require(skillToken.balanceOf(msg.sender) >= fromUserWallet && promos.getBit(msg.sender, 4) == false);
 
         uint256 convertedAmount = usdToSkill(mintCharacterFee);
         _payContractTokenOnly(msg.sender, convertedAmount);
@@ -652,7 +656,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeaponN(uint32 num, uint256 chosenElement)
+    /*function mintWeaponN(uint32 num)
         public
         onlyNonContract
         oncePerBlock(msg.sender)
@@ -705,6 +709,26 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         catch {
             emit MintWeaponsFailure(msg.sender, 1);
         }
+    }*/
+
+    function mintWeaponN(uint32 num, uint16 chosenElement, uint16 chosenElementFee)
+        public
+        onlyNonContract
+        oncePerBlock(msg.sender)
+    {
+        require(num > 0 && num <= 10);
+        _payContract(msg.sender, mintWeaponFee * num * chosenElementFee);
+
+        for (uint i = 0; i < num; i++) {
+            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))), chosenElement);
+        }
+    }
+
+    function mintWeapon(uint16 chosenElement, uint16 chosenElementFee) public onlyNonContract oncePerBlock(msg.sender) {
+        _payContract(msg.sender, mintWeaponFee * chosenElementFee);
+
+        //uint256 seed = randoms.getRandomSeed(msg.sender);
+        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
     function burnWeapon(uint256 burnID) public
@@ -919,8 +943,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setReforgeWeaponValue(uint256 cents) public restricted {
-        require(cents >= 25, "ReforgeWeaponValue too low");
-        require(cents <= 100, "ReforgeWeaponValue too high");
         int128 newReforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
         require(newReforgeWeaponFee > burnWeaponFee, "Reforge fee must include burn fee");
         reforgeWeaponWithDustFee = newReforgeWeaponFee - burnWeaponFee;
@@ -933,8 +955,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setStaminaCostFight(uint8 points) public restricted {
-        require(points >= 20, "StaminaCostFight too low");
-        require(points <= 50, "StaminaCostFight too high");
         staminaCostFight = points;
     }
 
@@ -943,8 +963,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setFightXpGain(uint256 average) public restricted {
-        require(average >= 16, "FightXpGain too low");
-        require(average <= 64, "FightXpGain too high");
         fightXpGain = average;
     }
 
@@ -989,16 +1007,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // Tax goes to game contract itself, which would mean
         // transferring from the game contract to ...itself.
         // So we don't need to do anything with the tax part of the rewards.
-
-        _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
+        if(promos.getBit(msg.sender, 4) == false)
+            _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
     }
 
     function stakeUnclaimedRewards() external {
         uint256 _tokenRewards = tokenRewards[msg.sender];
         tokenRewards[msg.sender] = 0;
 
-        skillToken.approve(address(stakeFromGameImpl), _tokenRewards);
-        stakeFromGameImpl.stakeFromGame(msg.sender, _tokenRewards);
+        if(promos.getBit(msg.sender, 4) == false) {
+            skillToken.approve(address(stakeFromGameImpl), _tokenRewards);
+            stakeFromGameImpl.stakeFromGame(msg.sender, _tokenRewards);
+        }
     }
 
     function claimXpRewards() public {

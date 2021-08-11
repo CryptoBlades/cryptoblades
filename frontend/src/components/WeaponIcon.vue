@@ -21,7 +21,7 @@
       </div>
 
       <div class="name">
-        {{ getWeaponNameFromSeed(weapon.id, weapon.stars) }}
+        {{ getWeaponName(weapon.id, weapon.stars) }}
       </div>
 
       <div class="bonus-power">
@@ -102,7 +102,8 @@ export default {
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',
-      'timeUntilWeaponHasMaxDurability'
+      'timeUntilWeaponHasMaxDurability',
+      'getWeaponName'
     ]),
     tooltipHtml() {
       if(!this.weapon) return '';
@@ -211,7 +212,6 @@ export default {
   methods: {
     getWeaponNameFromSeed,
     getWeaponArt,
-
     init() {
       const container = this.$refs.el;
 

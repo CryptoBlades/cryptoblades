@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "./Promos.sol";
 import "./util.sol";
 
 contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
@@ -49,6 +50,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         // That sort of inconsistency is a good way to attract bugs that only happens on some environments.
         // Hence, we keep registering the interface despite not actually implementing the interface.
         _registerInterface(0xe62e6974); // TransferCooldownableInterfaceId.interfaceId()
+    }
+    
+    function migrateTo_surprise(Promos _promos) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        promos = _promos;
     }
 
     /*
@@ -109,6 +116,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint256 public constant secondsPerDurability = 3000; //50 * 60
 
     mapping(address => uint256) burnDust; // user address : burned item dust counts
+
+    Promos public promos;
 
     event Burned(address indexed owner, uint256 indexed burned);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
@@ -490,7 +499,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _incrementDustSuppliesCheck(burnOwner, values[0], values[1], values[2]);
 
         _burn(burnID);
-        _incrementDustSupplies(burnOwner, values[0], values[1], values[2]);
+        if(promos.getBit(burnOwner, 4) == false)
+            _incrementDustSupplies(burnOwner, values[0], values[1], values[2]);
 
         emit Burned(
             burnOwner,
@@ -502,7 +512,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint8[] memory values = _calculateBurnValues(burnID);
 
         // Note: preexisting issue of applying burn points even if _burn fails.
-        _applyBurnPoints(reforgeID, values[0], values[1], values[2]);
+        if(promos.getBit(ownerOf(reforgeID), 4) == false)
+            _applyBurnPoints(reforgeID, values[0], values[1], values[2]);
         _burn(burnID);
 
         WeaponBurnPoints storage wbp = burnPoints[reforgeID];
@@ -521,7 +532,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         // dust cannot be pre-decremented.
         _decrementDustSuppliesCheck(ownerOf(reforgeID), amountLB, amount4B, amount5B);
 
-        _applyBurnPoints(reforgeID, amountLB, amount4B, amount5B);
+        if(promos.getBit(ownerOf(reforgeID), 4) == false)
+            _applyBurnPoints(reforgeID, amountLB, amount4B, amount5B);
         _decrementDustSupplies(ownerOf(reforgeID), amountLB, amount4B, amount5B);
 
         WeaponBurnPoints storage wbp = burnPoints[reforgeID];
@@ -612,7 +624,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     returns (int128, int128, uint24, uint8) {
 
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
-        require(durabilityPoints >= drainAmount, "Not enough durability!");
+        require(durabilityPoints >= drainAmount && promos.getBit(ownerOf(id), 4) == false, "Not enough durability!");
 
         uint64 drainTime = uint64(drainAmount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
@@ -649,23 +661,15 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function setBurnPointMultiplier(uint256 multiplier) public restricted {
-        require(multiplier >= 1, "BurnPointMultiplier too low");
-        require(multiplier <= 5, "BurnPointMultiplier too high");
         burnPointMultiplier = multiplier;
     }
     function setLowStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
-        require(powerPerBurnPoint >= 10, "LowStarBurnPowerPerPoint too low");
-        require(powerPerBurnPoint <= 20, "LowStarBurnPowerPerPoint too high");
         lowStarBurnPowerPerPoint = powerPerBurnPoint;
     }
     function setFourStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
-        require(powerPerBurnPoint >= 25, "FourStarBurnPowerPerPoint too low");
-        require(powerPerBurnPoint <= 35, "FourStarBurnPowerPerPoint too high");
         fourStarBurnPowerPerPoint = powerPerBurnPoint;
     }
     function setFiveStarBurnPowerPerPoint(uint256 powerPerBurnPoint) public restricted {
-        require(powerPerBurnPoint >= 40, "FiveStarBurnPowerPerPoint too low");
-        require(powerPerBurnPoint <= 80, "FiveStarBurnPowerPerPoint too high");
         fiveStarBurnPowerPerPoint = powerPerBurnPoint;
     }
 
@@ -698,5 +702,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function getDurabilityMaxWait() public pure returns (uint64) {
         return uint64(maxDurability * secondsPerDurability);
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        if(promos.getBit(from, 4) && from != address(0) && to != address(0)) {
+            require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to), "Transfer cooldown");
+        }
     }
 }
