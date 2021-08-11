@@ -10,6 +10,7 @@
         either load properties here or wherever the list of nfts is created and pass in nft object-->
       <div v-if="nft.type === 'shield'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
         <img class="placeholder-shield" src="../assets/shield1.png" v-if="!isShop && nft.id < 10000" />
+        <img class="placeholder-shield" src="../assets/shield2.png" v-if="!isShop && nft.id >= 10000 && nft.id < 25000" />
         <img class="placeholder-shield" src="../assets/shield2.png" v-if="isShop" />
 
         <div v-if="!isShop" class="trait">
