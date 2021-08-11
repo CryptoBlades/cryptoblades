@@ -67,8 +67,8 @@
                   </template>
                   <b-form-input type="string"
                     class="modal-input" v-model="characterRename" placeholder="New Name" />
-                  <span v-if="characterRename !== '' && characterRename.length < 2">
-                    Name can not be shorter than 2 characters.
+                  <span v-if="characterRename !== '' && characterRename.length < 2 || characterRename.length <= 24">
+                    Name must be 2 - 24 characters long.
                   </span>
                 </b-modal>
         <b-modal class="centered-modal" ref="character-change-trait-modal"
@@ -80,7 +80,7 @@
                     Pick a trait to switch to.
                   </span>
                   <select class="form-control" v-model="targetTrait">
-                    <option v-for="x in availableTraits" :value="x" :key="x">{{ x || 'Any' }}</option>
+                    <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
                   </select>
                 </b-modal>
       </div>
@@ -141,17 +141,17 @@ export default Vue.extend({
     },
 
     availableTraits(): string[] {
-      const availableTraits = [''];
-      if(this.haveChangeTraitFire) {
+      const availableTraits = [];
+      if(this.haveChangeTraitFire > 0) {
         availableTraits.push('Fire');
       }
-      if(this.haveChangeTraitEarth) {
+      if(this.haveChangeTraitEarth > 0) {
         availableTraits.push('Earth');
       }
-      if(this.haveChangeTraitWater) {
+      if(this.haveChangeTraitWater > 0) {
         availableTraits.push('Water');
       }
-      if(this.haveChangeTraitLightning) {
+      if(this.haveChangeTraitLightning > 0) {
         availableTraits.push('Lightning');
       }
 
@@ -211,7 +211,7 @@ export default Vue.extend({
       (this.$refs['character-rename-modal'] as BModal).show();
     },
     async renameCharacterCall(bvModalEvt: BvModalEvent) {
-      if(this.characterRename.length < 2){
+      if(this.characterRename.length < 2 || this.characterRename.length > 24){
         bvModalEvt.preventDefault();
         return;
       }
@@ -221,7 +221,7 @@ export default Vue.extend({
     },
 
     canChangeTrait() {
-      return (this.haveChangeTraitFire || this.haveChangeTraitEarth || this.haveChangeTraitWater || this.haveChangeTraitLightning)
+      return (this.haveChangeTraitFire > 0 || this.haveChangeTraitEarth > 0 || this.haveChangeTraitWater > 0 || this.haveChangeTraitLightning > 0)
         && this.currentCharacter !== undefined && this.currentCharacter.id > 0;
     },
     openChangeTrait() {
