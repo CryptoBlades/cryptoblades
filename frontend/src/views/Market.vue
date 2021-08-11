@@ -663,6 +663,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { Accessors } from 'vue/types/options';
 import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons, Shields } from '../../../build/abi-interfaces';
+import { SkillShopListing } from '../interfaces/SkillShopListing';
 import BigNumber from 'bignumber.js';
 import { BModal } from 'bootstrap-vue';
 import { traitNameToNumber } from '@/contract-models';
@@ -735,6 +736,10 @@ export interface Nft {
   stat2Value?: number;
   stat3Value?: number;
   nftPrice?: number;
+  isConsumable: boolean;
+  name: string;
+  description: string;
+  image: string;
 }
 
 interface StoreMappedActions {
@@ -852,20 +857,88 @@ export default Vue.extend({
       return this.activeType === 'weapon' || this.activeType === 'shield' || this.ownCharacters.length < 4 ;
     },
 
-    specialOffersNftList(): Nft[] {
+    specialOffersNftList(): SkillShopListing[] {
       const nftList = [
         {
           id: 'placeholder',
           type: 'shield',
-          nftPrice: 5
+          nftPrice: 5,
+          name: 'Shield',
+          description: 'A Templars Will Shield',
+          image: '',
         },
-      ];
+      ] as SkillShopListing[];
 
       return nftList;
     },
 
-    shopOffersNftList(): Nft[] {
-      const nftList = [] as Nft[];
+    shopOffersNftList(): SkillShopListing[] {
+      const nftList = [
+        {
+          id: 0,
+          type: 'CharacterRenameTag',
+          nftPrice: 0.1,
+          name: 'Rename Tag',
+          description: 'Renames one character.',
+          image: 'scroll_06_te.png'
+        },
+        {
+          id: 0,
+          type: 'CharacterRenameTagDeal',
+          nftPrice: 0.3,
+          name: 'Rename Tag Deal',
+          description: 'Renames 4 characters for the price of 3.',
+          image: 'scroll_06_te4.png'
+        },
+        {
+          id: 1,
+          type: 'WeaponRenameTag',
+          nftPrice: 0.1,
+          name: 'Weapon Tag',
+          description: 'Renames a weapon.',
+          image: 'rune_05_te.png'
+        },
+        {
+          id: 1,
+          type: 'WeaponRenameTagDeal',
+          nftPrice: 0.3,
+          name: 'Weapon Tag Deal',
+          description: 'Renames 4 weapons for the price of 3.',
+          image: 'rune_05_te4.png'
+        },
+        {
+          id: 1,
+          type: 'CharacterEarthTraitChange',
+          nftPrice: 0.2,
+          name: 'Earth Character Trait',
+          description: 'Changes character\'s trait to Earth.',
+          image: 'potion_06_te.png'
+        },
+        {
+          id: 1,
+          type: 'CharacterFireTraitChange',
+          nftPrice: 0.2,
+          name: 'Fire Character Trait',
+          description: 'Changes character\'s trait to Fire.',
+          image: 'potion_09_te.png'
+        },
+        {
+          id: 1,
+          type: 'CharacterWaterTraitChange',
+          nftPrice: 0.2,
+          name: 'Water Character Trait',
+          description: 'Changes character\'s trait to Water.',
+          image: 'potion_07_te.png'
+        },
+        {
+          id: 1,
+          type: 'CharacterLightningTraitChange',
+          nftPrice: 0.2,
+          name: 'Lightning Character Trait',
+          description: 'Changes character\'s trait to Lightning.',
+          image: 'potion_05_te.png'
+        },
+      ] as SkillShopListing[];
 
       return nftList;
     }
