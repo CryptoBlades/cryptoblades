@@ -35,15 +35,25 @@ contract Promos is Initializable, AccessControlUpgradeable {
         _;
     }
 
-    function setBit(address user, uint256 bit) public restricted {
+    function setBit(address user, uint256 bit) external restricted {
         bits[user] |= bit;
+    }
+
+    function setBits(address[] memory user, uint256 bit) public restricted {
+        for(uint i = 0; i < user.length; i++)
+            bits[user[i]] |= bit;
     }
 
     function unsetBit(address user, uint256 bit) public restricted {
         bits[user] &= ~bit;
     }
 
-    function getBit(address user, uint256 bit) public view returns (bool) {
+    function unsetBits(address[] memory user, uint256 bit) public restricted {
+        for(uint i = 0; i < user.length; i++)
+            bits[user[i]] &= ~bit;
+    }
+
+    function getBit(address user, uint256 bit) external view returns (bool) {
         return (bits[user] & bit) == bit;
     }
 
