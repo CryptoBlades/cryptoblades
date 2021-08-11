@@ -1,4 +1,4 @@
-const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
+const { upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
 const Blacksmith = artifacts.require("Blacksmith");
 const Shields = artifacts.require("Shields");
