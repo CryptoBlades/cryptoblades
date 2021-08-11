@@ -163,7 +163,7 @@ export default Vue.extend({
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
-    this.haveRename = await this.fetchTotalRenameTags();
+    this.haveRename = await this.fetchTotalRenameTags(); // the other type of call returned 0 on testnet but not on local
     this.haveChangeTraitFire = await this.contracts.CharacterFireTraitChangeConsumables?.methods.getItemCount().call();
     this.haveChangeTraitEarth = await this.contracts.CharacterEarthTraitChangeConsumables?.methods.getItemCount().call();
     this.haveChangeTraitWater = await this.contracts.CharacterWaterTraitChangeConsumables?.methods.getItemCount().call();
@@ -204,7 +204,7 @@ export default Vue.extend({
       return balance.isGreaterThanOrEqualTo(cost);
     },
     canRename() {
-      console.log('CR '+this.haveRename+' / '+this.currentCharacter+' / '+this.currentCharacter.id);
+      //console.log('CR '+this.haveRename+' / '+this.currentCharacter+' / '+this.currentCharacter.id);
       return this.haveRename > 0 && this.currentCharacter !== undefined && this.currentCharacter.id > 0;
     },
     openRenameCharacter() {
