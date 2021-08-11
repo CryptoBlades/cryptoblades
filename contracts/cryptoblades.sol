@@ -476,7 +476,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
-    function mintPaymentSkillRefundable(address _minter) external view
+    /*function mintPaymentSkillRefundable(address _minter) external view
         returns (uint256 _refundInGameOnlyFunds, uint256 _refundTokenRewards, uint256 _refundUserWallet) {
 
         return (
@@ -621,7 +621,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if (mintPayments[_minter].count == 0) {
             delete mintPayments[_minter];
         }
-    }
+    }*/
 
     function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
 
@@ -656,7 +656,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeaponN(uint32 num)
+    /*function mintWeaponN(uint32 num)
         public
         onlyNonContract
         oncePerBlock(msg.sender)
@@ -709,6 +709,26 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         catch {
             emit MintWeaponsFailure(msg.sender, 1);
         }
+    }*/
+
+    function mintWeaponN(uint32 num)
+        public
+        onlyNonContract
+        oncePerBlock(msg.sender)
+    {
+        require(num > 0 && num <= 10);
+        _payContract(msg.sender, mintWeaponFee * num);
+
+        for (uint i = 0; i < num; i++) {
+            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))));
+        }
+    }
+
+    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender) {
+        _payContract(msg.sender, mintWeaponFee);
+
+        //uint256 seed = randoms.getRandomSeed(msg.sender);
+        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))));
     }
 
     function burnWeapon(uint256 burnID) public

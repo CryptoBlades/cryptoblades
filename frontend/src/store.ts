@@ -1161,35 +1161,7 @@ export function createStore(web3: Web3) {
           { feeMultiplier: num }
         );
 
-        const hasPaidForMintBefore = await CryptoBlades.methods
-          .hasPaidForMint(num)
-          .call(defaultCallOptions(state));
-
-        if(!hasPaidForMintBefore) {
-          await CryptoBlades.methods
-            .payForMint(Weapons.options.address, num)
-            .send({
-              from: state.defaultAccount,
-            });
-        }
-
-        const { blockNumber: mintBlockNum } = await CryptoBlades.methods
-          .mintWeaponN(num)
-          .send({
-            from: state.defaultAccount,
-            gas: '5000000'
-          });
-
-        const hasPaidForMintAfter = await CryptoBlades.methods
-          .hasPaidForMint(num)
-          .call(defaultCallOptions(state), mintBlockNum);
-
-        // if it was a success, then we should no longer be marked as having paid for the mint
-        const isSuccess = !hasPaidForMintAfter;
-
-        if(!isSuccess) {
-          throw new Error('Failed to mint, try again');
-        }
+        await CryptoBlades.methods.mintWeaponN(num).send({ from: state.defaultAccount });
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
@@ -1213,35 +1185,7 @@ export function createStore(web3: Web3) {
           cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
         );
 
-        const hasPaidForMintBefore = await CryptoBlades.methods
-          .hasPaidForMint(1)
-          .call(defaultCallOptions(state));
-
-        if(!hasPaidForMintBefore) {
-          await CryptoBlades.methods
-            .payForMint(Weapons.options.address, 1)
-            .send({
-              from: state.defaultAccount,
-            });
-        }
-
-        const { blockNumber: mintBlockNum } = await CryptoBlades.methods
-          .mintWeapon()
-          .send({
-            from: state.defaultAccount,
-            gas: '500000'
-          });
-
-        const hasPaidForMintAfter = await CryptoBlades.methods
-          .hasPaidForMint(1)
-          .call(defaultCallOptions(state), mintBlockNum);
-
-        // if it was a success, then we should no longer be marked as having paid for the mint
-        const isSuccess = !hasPaidForMintAfter;
-
-        if(!isSuccess) {
-          throw new Error('Failed to mint, try again');
-        }
+        await CryptoBlades.methods.mintWeapon().send({ from: state.defaultAccount });
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
