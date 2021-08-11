@@ -163,7 +163,7 @@ export default Vue.extend({
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
-    this.haveRename = await this.contracts.CharacterRenameTagConsumables?.methods.getItemCount().call();
+    this.haveRename = await this.fetchTotalRenameTags();
     this.haveChangeTraitFire = await this.contracts.CharacterFireTraitChangeConsumables?.methods.getItemCount().call();
     this.haveChangeTraitEarth = await this.contracts.CharacterEarthTraitChangeConsumables?.methods.getItemCount().call();
     this.haveChangeTraitWater = await this.contracts.CharacterWaterTraitChangeConsumables?.methods.getItemCount().call();
@@ -186,7 +186,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'renameCharacter','changeCharacterTraitLightning',
-      'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater']),
+      'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater', 'fetchTotalRenameTags']),
 
     async onMintCharacter() {
       try {

@@ -1976,6 +1976,7 @@ export function createStore(web3: Web3) {
 
       async fetchTotalRenameTags({ state }) {
         const { CharacterRenameTagConsumables } = state.contracts();
+        console.log(CharacterRenameTagConsumables+' / '+!state.defaultAccount);
         if(!CharacterRenameTagConsumables || !state.defaultAccount) return;
         return await CharacterRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
