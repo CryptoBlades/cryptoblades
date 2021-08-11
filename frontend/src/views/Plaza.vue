@@ -67,8 +67,8 @@
                   </template>
                   <b-form-input type="string"
                     class="modal-input" v-model="characterRename" placeholder="New Name" />
-                  <span v-if="characterRename !== '' && characterRename.length < 2">
-                    Name can not be shorter than 2 characters.
+                  <span v-if="characterRename !== '' && characterRename.length < 2 && characterRename.length <= 24">
+                    Name must be 2 - 24 characters long.
                   </span>
                 </b-modal>
         <b-modal class="centered-modal" ref="character-change-trait-modal"
@@ -210,7 +210,7 @@ export default Vue.extend({
       (this.$refs['character-rename-modal'] as BModal).show();
     },
     async renameCharacterCall(bvModalEvt: BvModalEvent) {
-      if(this.characterRename.length < 2){
+      if(this.characterRename.length < 2 || this.characterRename.length > 24){
         bvModalEvt.preventDefault();
         return;
       }
