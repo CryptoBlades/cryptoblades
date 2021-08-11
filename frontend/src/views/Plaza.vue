@@ -32,7 +32,7 @@
               v-if="canChangeTrait()"
               variant="primary"
               class="ml-auto gtag-link-others"
-              @click="openRenameCharacter"
+              @click="openChangeTrait"
               v-tooltip="'Change character\'s trait'" tagname="change_trait_character">
               Change Trait
             </b-button>

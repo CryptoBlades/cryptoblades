@@ -101,12 +101,12 @@ export default {
       this.fetchSupplyInterval = setInterval(async () => {
         this.totalShieldSupply = 10000 - (await this.fetchTotalShieldSupply());
       }, 3000);
-    } else if(this.nft.type === 'CharacterRenameTag') {
+    } else if(this.nft.type === 'CharacterRenameTag' || this.nft.type === 'CharacterRenameTagDeal') {
       this.quantityOwned = await this.fetchTotalRenameTags();
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalRenameTags();
       }, 3000);
-    } else if(this.nft.type === 'WeaponRenameTag') {
+    } else if(this.nft.type === 'WeaponRenameTag' || this.nft.type === 'WeaponRenameTagDeal') {
       this.quantityOwned = await this.fetchTotalWeaponRenameTags();
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalWeaponRenameTags();

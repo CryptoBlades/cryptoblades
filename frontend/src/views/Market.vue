@@ -880,7 +880,7 @@ export default Vue.extend({
           nftPrice: 0.1,
           name: 'Rename Tag',
           description: 'Renames one character.',
-          image: 'https://seiyria.com/gameicons-font/svg/id-card.svg'
+          image: 'scroll_06_te.png'
         },
         {
           id: 0,
@@ -888,7 +888,7 @@ export default Vue.extend({
           nftPrice: 0.3,
           name: 'Rename Tag Deal',
           description: 'Renames 4 characters for the price of 3.',
-          image: 'https://seiyria.com/gameicons-font/svg/id-card.svg'
+          image: 'scroll_06_te4.png'
         },
         {
           id: 1,
@@ -896,7 +896,7 @@ export default Vue.extend({
           nftPrice: 0.1,
           name: 'Weapon Tag',
           description: 'Renames a weapon.',
-          image: 'https://seiyria.com/gameicons-font/svg/price-tag.svg'
+          image: 'rune_05_te.png'
         },
         {
           id: 1,
@@ -904,7 +904,7 @@ export default Vue.extend({
           nftPrice: 0.3,
           name: 'Weapon Tag Deal',
           description: 'Renames 4 weapons for the price of 3.',
-          image: 'https://seiyria.com/gameicons-font/svg/price-tag.svg'
+          image: 'rune_05_te4.png'
         },
         {
           id: 1,
@@ -912,7 +912,7 @@ export default Vue.extend({
           nftPrice: 0.2,
           name: 'Earth Character Trait',
           description: 'Changes character\'s trait to Earth.',
-          image: 'earth.png'
+          image: 'potion_06_te.png'
         },
         {
           id: 1,
@@ -920,7 +920,7 @@ export default Vue.extend({
           nftPrice: 0.2,
           name: 'Fire Character Trait',
           description: 'Changes character\'s trait to Fire.',
-          image: 'fire.png'
+          image: 'potion_09_te.png'
         },
         {
           id: 1,
@@ -928,7 +928,7 @@ export default Vue.extend({
           nftPrice: 0.2,
           name: 'Water Character Trait',
           description: 'Changes character\'s trait to Water.',
-          image: 'water.png'
+          image: 'potion_07_te.png'
         },
         {
           id: 1,
@@ -936,7 +936,7 @@ export default Vue.extend({
           nftPrice: 0.2,
           name: 'Lightning Character Trait',
           description: 'Changes character\'s trait to Lightning.',
-          image: 'lightning.png'
+          image: 'potion_05_te.png'
         },
       ] as SkillShopListing[];
 
