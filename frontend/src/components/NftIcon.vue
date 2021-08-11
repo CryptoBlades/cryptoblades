@@ -90,7 +90,6 @@ export default {
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
 
     imgPath(img) {
-      console.log(this.images);
       return this.images('./' + img);
     }
   },
