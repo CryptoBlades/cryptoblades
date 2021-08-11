@@ -1,6 +1,5 @@
 const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
-const CryptoBlades = artifacts.require("CryptoBlades");
 const Blacksmith = artifacts.require("Blacksmith");
 const Characters = artifacts.require("Characters");
 const Weapons = artifacts.require("Weapons");
@@ -12,7 +11,6 @@ const CharacterWaterTraitChangeConsumables = artifacts.require("CharacterWaterTr
 const CharacterLightningTraitChangeConsumables = artifacts.require("CharacterLightningTraitChangeConsumables");
 
 module.exports = async function (deployer, network, accounts) {
-  const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
   const characters = await upgradeProxy(Characters.address, Characters, { deployer });
   const characters_GAME_ADMIN = await characters.GAME_ADMIN();
 
@@ -50,8 +48,4 @@ module.exports = async function (deployer, network, accounts) {
   await characters.grantRole(characters_GAME_ADMIN, characterEarthTraitChangeConsumables.address);
   await characters.grantRole(characters_GAME_ADMIN, characterWaterTraitChangeConsumables.address);
   await characters.grantRole(characters_GAME_ADMIN, characterLightningTraitChangeConsumables.address);
-
-  const game_GAME_ADMIN = await game.GAME_ADMIN();
-  await game.grantRole(game_GAME_ADMIN, blacksmith.address);
-
 };

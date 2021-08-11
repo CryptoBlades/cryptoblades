@@ -14,7 +14,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     bytes32 public constant GAME = keccak256("GAME");
 
     uint256 public constant SHIELD_SKILL_FEE = 5 ether;
-    uint256 public constant ONE_SKILL_FEE = 1 ether;
 
     uint256 public constant ITEM_WEAPON_RENAME = 1;
     uint256 public constant ITEM_CHARACTER_RENAME = 2;
