@@ -74,7 +74,6 @@ import Vue from 'vue';
 import { Accessors } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { getCharacterNameFromSeed } from '../../character-name';
 import { RequiredXp } from '../../interfaces';
 import { ICharacter } from '@/interfaces';
 import { toBN, fromWeiEther } from '../../utils/common';
@@ -92,6 +91,7 @@ interface StoreMappedGetters {
   currentCharacter: ICharacter | null;
   maxRewardsClaimTaxAsFactorBN: BigNumber;
   rewardsClaimTaxAsFactorBN: BigNumber;
+  getCharacterName(id: number): string;
 }
 
 enum ClaimStage {
@@ -115,7 +115,7 @@ export default Vue.extend({
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN'
+      'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName'
     ]) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
@@ -170,7 +170,7 @@ export default Vue.extend({
         if(!this.ownCharacters[i]) return `${xp}`;
         return  `${this.ownCharacters[i].id === currentCharacter.id ? '<b>' : ''}` +
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '<u>' : ''}` +
-                `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}` +
+                `${this.getCharacterName(this.ownCharacters[i].id)} ${xp}` +
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '</u>' : ''}` +
                 `${this.ownCharacters[i].id === currentCharacter.id ? '</b>' : ''}`;
       }).join(', ');

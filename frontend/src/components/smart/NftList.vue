@@ -7,11 +7,14 @@
       <ul class="nft-grid">
         <li class="nft"
         v-for="nft in nftIdTypes" :key="`${nft.type}.${nft.id}`">
-          <nft-icon :nft="nft" :isShop="isShop" :favorite="isFavorite(nft.typeId, nft.id)"/>
+          <nft-icon :nft="nft" :isShop="isShop" :favorite="isFavorite(nft.typeId, nft.id)"
+            v-tooltip.top="{ content: itemDescriptionHtml(nft) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()" />
           <b-button
             variant="primary"
             class="shop-button"
-            @click="onShieldBuy()">
+            @click="buyItem(nft)">
             <span class="gtag-link-others">
               Buy ({{ nft.nftPrice }} SKILL)
             </span>
@@ -85,6 +88,8 @@
 <script lang="ts">
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import Events from '../../events';
+import {Nft as nftItem} from '../../interfaces/Nft';
+import { SkillShopListing } from '../../interfaces/SkillShopListing';
 import NftIcon from '../NftIcon.vue';
 import { Nft } from '@/interfaces/Nft';
 import Vue from 'vue';
@@ -121,6 +126,14 @@ interface StoreMappedGetters {
 interface StoreMappedActions {
   purchaseShield(): Promise<void>;
   fetchShields(shieldIds: (string | number)[]): Promise<void>;
+  purchaseRenameTag(): Promise<void>;
+  purchaseRenameTagDeal(): Promise<void>;
+  purchaseWeaponRenameTag(): Promise<void>;
+  purchaseWeaponRenameTagDeal(): Promise<void>;
+  purchaseCharacterFireTraitChange(): Promise<void>;
+  purchaseCharacterEarthTraitChange(): Promise<void>;
+  purchaseCharacterWaterTraitChange(): Promise<void>;
+  purchaseCharacterLightningTraitChange(): Promise<void>;
 }
 
 export default Vue.extend({
@@ -271,7 +284,7 @@ export default Vue.extend({
       }
 
       return favoriteNfts.concat(items);
-    },
+    }
   },
 
   watch: {
@@ -291,7 +304,11 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['purchaseShield', 'fetchShields']) as StoreMappedActions),
+    ...(mapActions(['purchaseShield', 'fetchShields', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
+      'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
+      'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
+      'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange'
+    ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
     async onShieldBuy() {
@@ -367,6 +384,51 @@ export default Vue.extend({
     isFavorite(type: string, id: number): boolean {
       return this.favorites && this.favorites[type] && this.favorites[type][id];
     },
+
+    async buyItem(item: nftItem) {
+      if(item.type === 'shield'){
+        console.log('buying shield');
+        await this.purchaseShield();
+      }
+
+      if(item.type === 'CharacterRenameTag'){
+        console.log('buying CharacterRenameTag');
+        await this.purchaseRenameTag();
+      }
+      if(item.type === 'CharacterRenameTagDeal'){
+        console.log('buying CharacterRenameTagDeal');
+        await this.purchaseRenameTagDeal();
+      }
+
+      if(item.type === 'WeaponRenameTag'){
+        console.log('buying WeaponRenameTag');
+        await this.purchaseWeaponRenameTag();
+      }
+      if(item.type === 'WeaponRenameTagDeal'){
+        console.log('buying WeaponRenameTagDeal');
+        await this.purchaseWeaponRenameTagDeal();
+      }
+
+      if(item.type === 'CharacterFireTraitChange'){
+        console.log('buying CharacterFireTraitChange');
+        await this.purchaseCharacterFireTraitChange();
+      }
+      if(item.type === 'CharacterEarthTraitChange'){
+        console.log('buying CharacterEarthTraitChange');
+        await this.purchaseCharacterEarthTraitChange();
+      }
+      if(item.type === 'CharacterWaterTraitChange'){
+        console.log('buying CharacterWaterTraitChange');
+        await this.purchaseCharacterWaterTraitChange();
+      }
+      if(item.type === 'CharacterLightningTraitChange'){
+        console.log('buying CharacterLightningTraitChange');
+        await this.purchaseCharacterLightningTraitChange();
+      }
+    },
+    itemDescriptionHtml(item: SkillShopListing): string {
+      return item.name + '<br>' + item.description;
+    }
   },
 
   mounted() {
@@ -388,7 +450,7 @@ export default Vue.extend({
       this.starFilter = sessionStorage.getItem('nft-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('nft-elementfilter') || '';
     }
-  },
+  }
 });
 </script>
 
