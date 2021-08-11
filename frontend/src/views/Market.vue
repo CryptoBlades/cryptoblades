@@ -864,7 +864,7 @@ export default Vue.extend({
           type: 'shield',
           nftPrice: 5,
           name: 'Shield',
-          description: 'A Templars Will Shield',
+          description: 'A Legendary Defender Shield',
           image: '',
         },
       ] as SkillShopListing[];
