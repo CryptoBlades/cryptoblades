@@ -1158,7 +1158,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-          { feeMultiplier: num }
+          { feeMultiplier: num * 4 }
         );
 
         await CryptoBlades.methods.mintWeaponN(num).send({ from: state.defaultAccount, gas: '5000000' });
