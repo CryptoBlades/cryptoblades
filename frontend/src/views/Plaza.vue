@@ -97,6 +97,8 @@ import { fromWeiEther, toBN } from '../utils/common';
 import { BModal, BvModalEvent } from 'bootstrap-vue';
 import Vue from 'vue';
 
+let getConsumablesCountInterval: any = null;
+
 interface Data {
   recruitCost: string;
   haveRename: number;
@@ -163,11 +165,14 @@ export default Vue.extend({
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
-    this.haveRename = await this.fetchTotalRenameTags(); // the other type of call returned 0 on testnet but not on local
-    this.haveChangeTraitFire = await this.fetchTotalCharacterFireTraitChanges();
-    this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
-    this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
-    this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
+    this.loadConsumablesCount();
+    getConsumablesCountInterval = setInterval(async () => {
+      this.loadConsumablesCount();
+    }, 3000);
+  },
+
+  destroyed() {
+    clearInterval(getConsumablesCountInterval);
   },
 
   data() {
@@ -252,6 +257,14 @@ export default Vue.extend({
         break;
       }
     },
+
+    async loadConsumablesCount() {
+      this.haveRename = await this.fetchTotalRenameTags(); // the other type of call returned 0 on testnet but not on local
+      this.haveChangeTraitFire = await this.fetchTotalCharacterFireTraitChanges();
+      this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
+      this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
+      this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
+    }
   },
 
   components: {

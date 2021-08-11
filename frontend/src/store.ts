@@ -2072,7 +2072,7 @@ export function createStore(web3: Web3) {
         await Promise.all([
           dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchTotalRenameTags')
+          dispatch('fetchTotalWeaponRenameTags')
         ]);
       },
       async purchaseWeaponRenameTagDeal({ state, dispatch }) {
