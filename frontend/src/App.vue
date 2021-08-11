@@ -277,6 +277,9 @@ export default {
         .then(() => {
           this.errorMessage = 'Success: MetaMask connected.';
           this.isConnecting = false;
+
+          this.initializeStore();
+          this.toggleHideWalletWarning();
         })
         .catch(() => {
           this.errorMessage = 'Error: MetaMask could not get permissions.';

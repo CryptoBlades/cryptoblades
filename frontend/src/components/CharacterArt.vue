@@ -1,7 +1,7 @@
 <template>
   <div class="character-art" v-tooltip="tooltipHtml(character)" ref="el">
     <div class="trait" v-if="!portrait">
-      <span :class="trait.toLowerCase() + '-icon circle-element'"></span>
+      <span :class="characterTrait.toLowerCase() + '-icon circle-element'"></span>
     </div>
 
     <div class="placeholder d-flex align-items-start justify-content-center p-1"
@@ -105,7 +105,7 @@ export default {
       modelLoader: null,
       textureLoader: null,
       body: null,
-      trait: CharacterTrait[this.character.trait],
+      trait: this.characterTrait,
       showPlaceholder: false,
       heroScore: 0
     };
@@ -117,8 +117,14 @@ export default {
       'getCharacterName',
       'transferCooldownOfCharacterId',
       'getCharacterUnclaimedXp',
-      'timeUntilCharacterHasMaxStamina'
+      'timeUntilCharacterHasMaxStamina',
+      'charactersWithIds',
     ]),
+
+    characterTrait() {
+      const characterWithId = this.charactersWithIds && this.charactersWithIds([this.character.id]);
+      return characterWithId && CharacterTrait[characterWithId[0].trait] || CharacterTrait[this.character.trait];
+    }
   },
 
   methods: {
