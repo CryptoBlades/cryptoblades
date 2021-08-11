@@ -67,7 +67,7 @@
                   </template>
                   <b-form-input type="string"
                     class="modal-input" v-model="characterRename" placeholder="New Name" />
-                  <span v-if="characterRename !== '' && characterRename.length < 2 || characterRename.length <= 24">
+                  <span v-if="characterRename !== '' && (characterRename.length < 2 || characterRename.length > 24)">
                     Name must be 2 - 24 characters long.
                   </span>
                 </b-modal>
@@ -164,10 +164,10 @@ export default Vue.extend({
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     this.haveRename = await this.fetchTotalRenameTags(); // the other type of call returned 0 on testnet but not on local
-    this.haveChangeTraitFire = await this.contracts.CharacterFireTraitChangeConsumables?.methods.getItemCount().call();
-    this.haveChangeTraitEarth = await this.contracts.CharacterEarthTraitChangeConsumables?.methods.getItemCount().call();
-    this.haveChangeTraitWater = await this.contracts.CharacterWaterTraitChangeConsumables?.methods.getItemCount().call();
-    this.haveChangeTraitLightning = await this.contracts.CharacterLightningTraitChangeConsumables?.methods.getItemCount().call();
+    this.haveChangeTraitFire = await this.fetchTotalCharacterFireTraitChanges();
+    this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
+    this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
+    this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
   },
 
   data() {
@@ -186,7 +186,9 @@ export default Vue.extend({
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'renameCharacter','changeCharacterTraitLightning',
-      'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater', 'fetchTotalRenameTags']),
+      'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater', 'fetchTotalRenameTags',
+      'fetchTotalCharacterFireTraitChanges','fetchTotalCharacterEarthTraitChanges',
+      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
 
     async onMintCharacter() {
       try {
@@ -217,7 +219,7 @@ export default Vue.extend({
       }
 
       await this.renameCharacter({id: this.currentCharacter.id, name: this.characterRename.trim()});
-      this.haveRename = await this.contracts.CharacterRenameTagConsumables?.methods.getItemCount().call();
+      this.haveRename = await this.fetchTotalRenameTags();
     },
 
     canChangeTrait() {
@@ -234,19 +236,19 @@ export default Vue.extend({
       switch(this.targetTrait) {
       case 'Fire':
         await this.changeCharacterTraitFire({ id: this.currentCharacter.id });
-        this.haveChangeTraitFire = await this.contracts.CharacterFireTraitChangeConsumables?.methods.getItemCount().call();
+        this.haveChangeTraitFire = await this.fetchTotalCharacterFireTraitChanges();
         break;
       case 'Earth' :
         await this.changeCharacterTraitEarth({ id: this.currentCharacter.id });
-        this.haveChangeTraitEarth = await this.contracts.CharacterEarthTraitChangeConsumables?.methods.getItemCount().call();
+        this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
         break;
       case 'Water':
         await this.changeCharacterTraitWater({ id: this.currentCharacter.id });
-        this.haveChangeTraitWater = await this.contracts.CharacterWaterTraitChangeConsumables?.methods.getItemCount().call();
+        this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
         break;
       case 'Lightning':
         await this.changeCharacterTraitLightning({ id: this.currentCharacter.id });
-        this.haveChangeTraitLightning = await this.contracts.CharacterLightningTraitChangeConsumables?.methods.getItemCount().call();
+        this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
         break;
       }
     },

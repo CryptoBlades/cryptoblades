@@ -392,37 +392,29 @@ export default Vue.extend({
       }
 
       if(item.type === 'CharacterRenameTag'){
-        console.log('buying CharacterRenameTag');
         await this.purchaseRenameTag();
       }
       if(item.type === 'CharacterRenameTagDeal'){
-        console.log('buying CharacterRenameTagDeal');
         await this.purchaseRenameTagDeal();
       }
 
       if(item.type === 'WeaponRenameTag'){
-        console.log('buying WeaponRenameTag');
         await this.purchaseWeaponRenameTag();
       }
       if(item.type === 'WeaponRenameTagDeal'){
-        console.log('buying WeaponRenameTagDeal');
         await this.purchaseWeaponRenameTagDeal();
       }
 
       if(item.type === 'CharacterFireTraitChange'){
-        console.log('buying CharacterFireTraitChange');
         await this.purchaseCharacterFireTraitChange();
       }
       if(item.type === 'CharacterEarthTraitChange'){
-        console.log('buying CharacterEarthTraitChange');
         await this.purchaseCharacterEarthTraitChange();
       }
       if(item.type === 'CharacterWaterTraitChange'){
-        console.log('buying CharacterWaterTraitChange');
         await this.purchaseCharacterWaterTraitChange();
       }
       if(item.type === 'CharacterLightningTraitChange'){
-        console.log('buying CharacterLightningTraitChange');
         await this.purchaseCharacterLightningTraitChange();
       }
     },
