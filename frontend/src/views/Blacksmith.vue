@@ -96,10 +96,10 @@
                 <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
                   <template #modal-header>
                     <div v-if="!spin" class="new-weapon-header-text text-center">
-                      <strong>A-hooooy! These things look shurpppp!</strong>
+                      <strong>Forge results</strong>
                     </div>
                     <div v-if="spin" class="new-weapon-header-text text-center">
-                      <strong>Be patient, the elves are minting ....</strong>
+                      <strong>Forging swords...</strong>
                     </div>
                   </template>
                   <div class="text-center">
