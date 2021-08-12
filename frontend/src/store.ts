@@ -104,6 +104,7 @@ export function createStore(web3: Web3) {
       ownedShieldIds: [],
       maxStamina: 0,
       currentCharacterId: null,
+      ownedDust: [],
 
       characters: {},
       characterStaminas: {},
@@ -244,6 +245,27 @@ export function createStore(web3: Web3) {
           const characters = characterIds.map((id) => state.characters[+id]);
           if (characters.some((w) => w === null)) return [];
           return characters.filter(Boolean);
+        };
+      },
+
+      getPowerfulDust(state) {
+        return () => {
+          const dust = state.ownedDust[2];
+          return dust;
+        };
+      },
+
+      getLesserDust(state) {
+        return () => {
+          const dust = state.ownedDust[0];
+          return dust;
+        };
+      },
+
+      getGreaterDust(state) {
+        return () => {
+          const dust = state.ownedDust[1];
+          return dust;
         };
       },
 
@@ -449,6 +471,10 @@ export function createStore(web3: Web3) {
 
       updateSkillBalance(state: IState, { skillBalance }) {
         state.skillBalance = skillBalance;
+      },
+
+      updateDustBalance(state: IState, { dustBalance }) {
+        state.ownedDust = dustBalance;
       },
 
       updateSkillRewards(state: IState, { skillRewards }: { skillRewards: string }) {
@@ -684,7 +710,8 @@ export function createStore(web3: Web3) {
                   dispatch('fetchCharacter', characterId),
                   dispatch('fetchSkillBalance'),
                   dispatch('fetchFightRewardSkill'),
-                  dispatch('fetchFightRewardXp')
+                  dispatch('fetchFightRewardXp'),
+                  dispatch('fetchDustBalance')
                 ]);
               })
           );
@@ -720,7 +747,8 @@ export function createStore(web3: Web3) {
 
               await Promise.all([
                 dispatch('fetchShield', shieldId),
-                dispatch('fetchSkillBalance')
+                dispatch('fetchSkillBalance'),
+                dispatch('fetchDustBalance')
               ]);
             })
           );
@@ -823,7 +851,7 @@ export function createStore(web3: Web3) {
       },
 
       async fetchUserDetails({ dispatch }) {
-        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails')];
+        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails'), dispatch('fetchDustBalance')];
 
         if (!featureFlagStakeOnly) {
           promises.push(dispatch('fetchUserGameDetails'));
@@ -913,6 +941,20 @@ export function createStore(web3: Web3) {
             }
           })(),
           dispatch('fetchInGameOnlyFunds')
+        ]);
+      },
+
+      async fetchDustBalance({ state, commit }) {
+        const { defaultAccount } = state;
+        if(!defaultAccount) return;
+
+        await Promise.all([
+          (async () => {
+            const dustBalance = await state.contracts().Weapons!.methods
+              .getDustSupplies(defaultAccount)
+              .call(defaultCallOptions(state));
+            commit('updateDustBalance', { dustBalance });
+          })(),
         ]);
       },
 
@@ -1073,6 +1115,12 @@ export function createStore(web3: Web3) {
         }
       },
 
+      async setupWeaponsWithIdsRenames({ dispatch }, weaponIds: string[]) {
+        for (const weapId of weaponIds) {
+          dispatch('fetchWeaponRename', weapId);
+        }
+      },
+
       async fetchWeaponRename({ state, commit }, weaponId: number) {
         const renameString = await state.contracts().WeaponRenameTagConsumables!.methods
           .getWeaponRename(weaponId)
@@ -1093,6 +1141,7 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacterStamina', charId);
         }
       },
+
       async fetchCharacterStamina({ state, commit }, characterId: number) {
         if(featureFlagStakeOnly) return;
 
@@ -1113,6 +1162,11 @@ export function createStore(web3: Web3) {
         ]);
 
         for (const charId of ownedCharacterIds) {
+          dispatch('fetchCharacterRename', charId);
+        }
+      },
+      async setupCharactersWithIdsRenames({ dispatch }, characterIds: string[]) {
+        for (const charId of characterIds) {
           dispatch('fetchCharacterRename', charId);
         }
       },
@@ -1221,6 +1275,96 @@ export function createStore(web3: Web3) {
           dispatch('updateWeaponIds'),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp')
+        ]);
+      },
+
+      async reforgeWeaponWithDust({ state, dispatch }, { reforgeWeaponId, lesserDust, greaterDust, powerfulDust}) {
+        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
+
+        await approveFee(
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponWithDustFee()
+        );
+
+        await state.contracts().CryptoBlades!.methods
+          .reforgeWeaponWithDust(
+            reforgeWeaponId,
+            lesserDust,
+            greaterDust,
+            powerfulDust
+          )
+          .send({
+            from: state.defaultAccount,
+          });
+
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('fetchDustBalance')
+        ]);
+      },
+
+      async burnWeapon({ state, dispatch }, { burnWeaponId}) {
+        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
+
+        await approveFee(
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee()
+        );
+
+        await state.contracts().CryptoBlades!.methods
+          .burnWeapon(
+            burnWeaponId
+          )
+          .send({
+            from: state.defaultAccount,
+          });
+
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('fetchDustBalance')
+        ]);
+      },
+
+      async massBurnWeapons({ state, dispatch }, { burnWeaponIds}) {
+        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
+
+        await approveFee(
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee()
+        );
+
+        await state.contracts().CryptoBlades!.methods
+          .burnWeapons(
+            burnWeaponIds
+          )
+          .send({
+            from: state.defaultAccount,
+          });
+
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('fetchDustBalance')
         ]);
       },
 
