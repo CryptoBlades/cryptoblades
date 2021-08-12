@@ -167,7 +167,7 @@
                   <div class="col-lg-2"></div>
                   <div class="col-lg-2 dust-container" align="center">
                     <div class="dust">
-                      LB: <span class="text-warning">15</span>
+                      LB: <span class="text-warning">15 power per level</span>
                       <div class="dust-image1"></div>
                     </div>
                     <h2 class="text-center">Lesser</h2>
@@ -187,7 +187,7 @@
                   </div>
                   <div class="col-lg-2 dust-container" align="center">
                     <div class="dust">
-                      4B: <span class="text-warning">30</span>
+                      4B: <span class="text-warning">30 power per level</span>
                       <div class="dust-image2"></div>
                     </div>
                     <h2 class="text-center">Greater</h2>
@@ -215,7 +215,7 @@
                   </div>
                   <div class="col-lg-2 weapon-container dust-container" align="center">
                     <div class="dust">
-                      5B: <span class="text-warning">75</span>
+                      5B: <span class="text-warning">75 power per level</span>
                       <div class="dust-image3"></div>
                     </div>
                     <h2 class="text-center">Powerful</h2>
