@@ -1330,9 +1330,15 @@ export default Vue.extend({
         tokenId: this.search
       });
       this.searchResultsOwned = nftSeller === this.defaultAccount;
+      const url = new URL('https://api.cryptoblades.io/static/wallet/banned/' + nftSeller);
+      const data = await fetch(url.toString());
+      const banned = await data.json();
+      if(banned.banned) {
+        (this as any).$dialog.notify.error('Item not available!');
+      }
 
       const price = await this.lookupNftPrice(this.search);
-      if(price !== '0') {
+      if(price !== '0' && !banned.banned) {
         this.searchResults = [this.search];
       } else {
         this.searchResults = [];
