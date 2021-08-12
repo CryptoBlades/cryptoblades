@@ -31,7 +31,7 @@
                         variant="primary"
                         class="ml-3"
                         v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
-                        @click="showReforge = true, showBlacksmith = false, showReforgeDust = false, showDustForge = false"
+                        @click="displayWeaponReforge()"
                         tagname="reforge_weapon"
                         v-tooltip="'Burn weapons to buff selected weapon'">
                   Reforge
@@ -40,7 +40,7 @@
                         variant="primary"
                         class="ml-3"
                         v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
-                        @click="showReforge = true, showBlacksmith = false, showReforgeDust = true, showDustForge = false"
+                        @click="displayDustReforge()"
                         tagname="reforge_weapon"
                         v-tooltip="'Burn weapons to buff selected weapon'">
                   Reforge with Dust
@@ -48,7 +48,7 @@
                 <b-button
                         variant="primary"
                         class="ml-3"
-                        @click="showReforge = true, showBlacksmith = false, showDustForge = true, showReforgeDust = false"
+                        @click="displayDustCreation()"
                         tagname="reforge_weapon"
                         v-tooltip="'Burn weapons to buff selected weapon'">
                   Create Dust
@@ -352,7 +352,7 @@
                                 variant="primary"
                                 tagname="confirm_forge_weapon"
                                 class="confirmReforge"
-                                @click="showReforge = false, showBlacksmith = true"
+                                @click="displayBlacksmith()"
                                 v-tooltip="'Cancel Reforge'">
                           Cancel Reforge
                         </b-button>
@@ -547,6 +547,7 @@ interface Data {
   showReforge: boolean;
   showBlacksmith: boolean,
   showDustForge: boolean,
+  showReforgeDust: boolean,
   reforgeWeaponId: string | null;
   burnWeaponId: string | null;
   selectedNft: string | null;
@@ -575,6 +576,7 @@ export default Vue.extend({
       showReforge: false,
       showBlacksmith: true,
       showDustForge: false,
+      showReforgeDust: false,
       reforgeWeaponId: null,
       burnWeaponId: null,
       selectedNft: null,
@@ -729,6 +731,19 @@ export default Vue.extend({
       (this.$refs['reforge-bonuses-modal']as BModal).show();
     },
 
+    displayWeaponReforge(){
+      return this.showReforge = true, this.showBlacksmith = false, this.showReforgeDust = false, this.showDustForge = false;
+    },
+    displayDustReforge() {
+      return this.showReforge = true, this.showBlacksmith = false, this.showReforgeDust = true, this.showDustForge = false;
+    },
+    displayDustCreation(){
+      return this.showReforge = true, this.showBlacksmith = false, this.showDustForge = true, this.showReforgeDust = false;
+    },
+    displayBlacksmith(){
+      return this.showReforge = false, this.showBlacksmith = true, this.showDustForge = false, this.showReforgeDust = false;
+    },
+
     isWeaponRare() {
       const weapon = this.getWeaponToBurn();
       if(!weapon) return false;
@@ -756,11 +771,11 @@ export default Vue.extend({
     },
 
     getCurrentBurntWeapons(){
-      let test = false;
-      if (test === false) {
+      let addBurnWeapon = false;
+      if (addBurnWeapon === false) {
         this.burnWeaponIds.push(this.burnWeaponId);
         this.burnWeaponId = null;
-        test = true;
+        addBurnWeapon = true;
       }
     },
 
