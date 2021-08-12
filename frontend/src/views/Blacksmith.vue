@@ -372,6 +372,7 @@
                     <weapon-grid v-model="burnWeaponId" :showFilters="true" />
                   </div>
                   <div class="col-lg-4 col-sm-12 weapon-container">
+                    <div v-if="showReforge && showDustForge === true">
                     <h1 class="text-center">
                       <b-button
                               variant="primary"
@@ -382,7 +383,22 @@
                               :disabled="burnWeaponId === null">
                         Add Weapon for multi-forging
                       </b-button></h1>
-                    <weapon-grid :showGivenWeaponIds="true" :weaponIds="burnWeaponIds" />
+                      <weapon-grid :showGivenWeaponIds="true" :weaponIds="burnWeaponIds" />
+                    </div>
+                    <div v-if="showReforge && showDustForge === false">
+                      <div class="headings">
+                        <h2 class="text-center">Burn</h2>
+                        <div class="weapon" v-if="burnWeaponId">
+                          <div v-if="$slots.above || $scopedSlots.above">
+                            <slot name="above" :weapon="getWeaponToBurn()"></slot>
+                            <slot name="above"></slot>
+                          </div>
+                          <div class="weapon-icon-wrapper">
+                            <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div class="col-lg-3 col-sm-12 upgrade-container">
                     <div v-if="showReforge && showDustForge === false">
@@ -888,17 +904,6 @@ export default Vue.extend({
   border-radius: 5px;
   cursor: pointer;
   margin-bottom: 2em;
-}
-
-.createDust {
-  min-height: 12em;
-  max-height: 13em;
-  border-style: dashed;
-  border-color: #9e8a57;
-  width: 12em;
-  border-radius: 5px;
-  cursor: pointer;
-  align-items :center;
 }
 
 .multiForging {
