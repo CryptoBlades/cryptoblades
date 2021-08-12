@@ -346,7 +346,7 @@ export default Vue.extend({
 
     onWeaponClick(id: number) {
       this.setCurrentWeapon(id);
-      this.$emit('choose-weapon', id);
+      this.$emit('chooseweapon', id);
     },
 
     checkStorageFavorite() {

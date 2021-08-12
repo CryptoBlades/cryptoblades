@@ -285,32 +285,24 @@
                 <div class="row mobile-flip">
                   <div class="col-md-5 weapon-container" align="center">
                     <h1 class="text-center">Select the weapon you wish to burn</h1>
-                    <weapon-grid v-model="burnWeaponId" :showGivenWeaponIds="true" :weaponIds="hideWeapons" />
+                    <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds"
+                      :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon" />
                   </div>
                   <div class="col-md-4 weapon-container">
                     <div v-if="showReforge && showDustForge === true">
-                    <h1 class="text-center">
-                      <b-button
-                              variant="primary"
-                              tagname="confirm_forge_weapon"
-                              class="multiForging"
-                              @click="getCurrentBurntWeapons()"
-                              v-tooltip="'Add Weapons to Burn'"
-                              :disabled="burnWeaponId === null">
-                        Add Weapon for multi-forging
-                      </b-button>
-                      <b-button
-                              variant="primary"
-                              tagname="confirm_forge_weapon"
-                              class="multiForging"
-                              @click="clearAllMassBurn()"
-                              v-tooltip="'Clear all'"
-                              :disabled="burnWeaponIds === []">
-                        Clear all
-                      </b-button>
-                    </h1>
+                      <h1 class="text-center">
+                        <b-button
+                                variant="primary"
+                                tagname="confirm_forge_weapon"
+                                class="multiForging"
+                                @click="clearAllMassBurn()"
+                                v-tooltip="'Clear all'"
+                                :disabled="burnWeaponIds === []">
+                          Clear all
+                        </b-button>
+                      </h1>
                       <div class="weapon-grid-container">
-                      <weapon-grid :showGivenWeaponIds="true" :weaponIds="burnWeaponIds" />
+                        <weapon-grid :showGivenWeaponIds="true" :weaponIds="burnWeaponIds" @chooseweapon="removeBurnWeapon" />
                       </div>
                     </div>
                     <div v-if="showReforge && showDustForge === false">
@@ -835,14 +827,14 @@ export default Vue.extend({
       this.powerfulDust = (document.getElementById('myRange3')! as HTMLInputElement).value;
     },
 
-    getCurrentBurntWeapons(){
-      let addBurnWeapon = false;
-      if (addBurnWeapon === false) {
-        this.burnWeaponIds.push(this.burnWeaponId!.toString());
-        this.hideWeapons = this.hideWeapons.filter(val => !this.burnWeaponIds.includes(val));
-        this.burnWeaponId = null;
-        addBurnWeapon = true;
-      }
+    addBurnWeapon(id: number){
+      this.burnWeaponIds.push(id.toString());
+    },
+
+    removeBurnWeapon(id: number){
+      console.log('remove', id);
+      this.burnWeaponIds = this.burnWeaponIds.filter(x => x !== id.toString());
+
     },
 
     viewNewWeapons(offset: number){
