@@ -1146,9 +1146,10 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeaponN({ state, dispatch }, {num, chosenElement, chosenElementFee}) {
+      async mintWeaponN({ state, dispatch }, {num, chosenElement}) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+        const chosenElementFee = chosenElement === 100 ? 1 : 2;
 
         await approveFee(
           CryptoBlades,
@@ -1161,7 +1162,7 @@ export function createStore(web3: Web3) {
           { feeMultiplier: num * 4 * chosenElementFee}
         );
 
-        await CryptoBlades.methods.mintWeaponN(num, chosenElement, chosenElementFee).send({ from: state.defaultAccount, gas: '5000000' });
+        await CryptoBlades.methods.mintWeaponN(num, chosenElement).send({ from: state.defaultAccount, gas: '5000000' });
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
@@ -1171,9 +1172,10 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeapon({ state, dispatch }, {chosenElement, chosenElementFee}) {
+      async mintWeapon({ state, dispatch }, {chosenElement}) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+        const chosenElementFee = chosenElement === 100 ? 1 : 2;
 
         await approveFee(
           CryptoBlades,
@@ -1186,7 +1188,7 @@ export function createStore(web3: Web3) {
           { feeMultiplier: chosenElementFee }
         );
 
-        await CryptoBlades.methods.mintWeapon(chosenElement, chosenElementFee).send({ from: state.defaultAccount });
+        await CryptoBlades.methods.mintWeapon(chosenElement).send({ from: state.defaultAccount });
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),

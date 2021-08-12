@@ -329,7 +329,7 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await this.mintWeapon({chosenElement: this.selectedElement, chosenElementFee: this.chosenElementFee});
+        await this.mintWeapon({chosenElement: this.selectedElement});
 
       } catch (e) {
         console.error(e);
@@ -355,7 +355,7 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await this.mintWeaponN({num: forgeMultiplier, chosenElement: this.selectedElement, chosenElementFee: this.chosenElementFee});
+        await this.mintWeaponN({num: forgeMultiplier, chosenElement: this.selectedElement});
 
       } catch (e) {
         console.error(e);

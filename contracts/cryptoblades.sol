@@ -711,12 +711,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }*/
 
-    function mintWeaponN(uint32 num, uint16 chosenElement, uint16 chosenElementFee)
+    function mintWeaponN(uint32 num, uint8 chosenElement)
         public
         onlyNonContract
         oncePerBlock(msg.sender)
     {
         require(num > 0 && num <= 10);
+
+        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
+
         _payContract(msg.sender, mintWeaponFee * num * chosenElementFee);
 
         for (uint i = 0; i < num; i++) {
@@ -724,7 +727,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeapon(uint16 chosenElement, uint16 chosenElementFee) public onlyNonContract oncePerBlock(msg.sender) {
+    function mintWeapon(uint8 chosenElement) public onlyNonContract oncePerBlock(msg.sender) {
+        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
+
         _payContract(msg.sender, mintWeaponFee * chosenElementFee);
 
         //uint256 seed = randoms.getRandomSeed(msg.sender);
