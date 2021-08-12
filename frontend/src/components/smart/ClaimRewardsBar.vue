@@ -78,6 +78,7 @@ import { RequiredXp } from '../../interfaces';
 import { ICharacter } from '@/interfaces';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { secondsToDDHHMMSS } from '../../utils/date-time';
+import { getCleanName } from '../../rename-censor';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -170,7 +171,7 @@ export default Vue.extend({
         if(!this.ownCharacters[i]) return `${xp}`;
         return  `${this.ownCharacters[i].id === currentCharacter.id ? '<b>' : ''}` +
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '<u>' : ''}` +
-                `${this.getCharacterName(this.ownCharacters[i].id)} ${xp}` +
+                `${(this.getCleanCharacterName(this.ownCharacters[i].id))} ${xp}` +
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '</u>' : ''}` +
                 `${this.ownCharacters[i].id === currentCharacter.id ? '</b>' : ''}`;
       }).join(', ');
@@ -220,6 +221,10 @@ export default Vue.extend({
         (this.$refs['stake-suggestion-modal'] as any).hide();
         (this.$refs['claim-confirmation-modal'] as any).show();
       }
+    },
+
+    getCleanCharacterName(id: number): string {
+      return getCleanName(this.getCharacterName(id));
     }
   }
 });
