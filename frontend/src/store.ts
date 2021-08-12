@@ -248,9 +248,23 @@ export function createStore(web3: Web3) {
         };
       },
 
-      getOwnedDust(state) {
+      getPowerfulDust(state) {
         return () => {
-          const dust = state.ownedDust;
+          const dust = state.ownedDust.slice(2, 3).shift();
+          return dust;
+        };
+      },
+
+      getLesserDust(state) {
+        return () => {
+          const dust = state.ownedDust.slice(0, 1).shift();
+          return dust;
+        };
+      },
+
+      getGreaterDust(state) {
+        return () => {
+          const dust = state.ownedDust.slice(1, 2).shift();
           return dust;
         };
       },

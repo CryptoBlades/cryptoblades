@@ -259,7 +259,7 @@
                     </div>
                     <h2 class="text-center">Lesser</h2>
                     <div class="boxed">
-                      <h2>{{this.getOwnedDust().slice(0, 1).shift()}}</h2>
+                      <h2>{{this.getLesserDust()}}</h2>
                     </div>
                     <div class="range">
                       <div class="sliderValue">
@@ -279,7 +279,7 @@
                     </div>
                     <h2 class="text-center">Greater</h2>
                     <div class="boxed">
-                      <h2>{{this.getOwnedDust().slice(1, 2).shift()}}</h2>
+                      <h2>{{this.getGreaterDust()}}</h2>
                     </div>
                     <div class="range">
                       <div class="sliderValue">
@@ -307,7 +307,7 @@
                     </div>
                     <h2 class="text-center">Powerful</h2>
                     <div class="boxed">
-                      <h2>{{this.getOwnedDust().slice(2, 3).shift()}}</h2>
+                      <h2>{{this.getPowerfulDust()}}</h2>
                     </div>
                     <div class="range">
                       <div class="sliderValue">
@@ -369,46 +369,20 @@
                 <div class="row mobile-flip">
                   <div class="col-lg-5 col-sm-12 weapon-container" align="center">
                     <h1 class="text-center">Select the weapon you wish to burn</h1>
-                    <weapon-grid v-model="burnWeaponId" :ignore="reforgeWeaponId"
-                             :showReforgedWeaponsDefVal="false" :showFavoriteWeaponsDefVal="false" :showFilters="false" />
+                    <weapon-grid v-model="burnWeaponId" :showFilters="true" />
                   </div>
-                  <div class="col-lg-2 col-sm-12 weapon-container">
-                    <div class="headings">
-                        <div class="weapon-icon-wrapper weapon">
-                          <weapon-icon v-if="getWeaponsToBurn()" class="weapon-icon" :weapon="getWeaponsToBurn()" />
-                        </div>
-                        <div class="weapon-icon-wrapper weapon">
-                          <weapon-icon v-if="getWeaponsToBurn2()" class="weapon-icon" :weapon="getWeaponsToBurn2()" />
-                        </div>
-                          <div class="weapon-icon-wrapper weapon">
-                          <weapon-icon v-if="getWeaponsToBurn3()" class="weapon-icon" :weapon="getWeaponsToBurn3()" />
-                          </div>
-                        <div class="weapon-icon-wrapper weapon">
-                          <weapon-icon v-if="getWeaponsToBurn4()" class="weapon-icon" :weapon="getWeaponsToBurn4()" />
-                        </div>
-                        <div class="weapon-icon-wrapper weapon">
-                          <weapon-icon v-if="getWeaponsToBurn5()" class="weapon-icon" :weapon="getWeaponsToBurn5()" />
-                        </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-2 col-sm-12">
-                    <div class="headings">
-                        <div class="weapon-icon-wrapper weapon">
-                          <weapon-icon v-if="getWeaponsToBurn6()" class="weapon-icon" :weapon="getWeaponsToBurn6()" />
-                        </div>
-                        <div class="weapon-icon-wrapper weapon">
-                          <weapon-icon v-if="getWeaponsToBurn7()" class="weapon-icon" :weapon="getWeaponsToBurn7()" />
-                        </div>
-                        <div class="weapon-icon-wrapper weapon">
-                          <weapon-icon v-if="getWeaponsToBurn8()" class="weapon-icon" :weapon="getWeaponsToBurn8()" />
-                        </div>
-                        <div class="weapon-icon-wrapper weapon">
-                          <weapon-icon v-if="getWeaponsToBurn9()" class="weapon-icon" :weapon="getWeaponsToBurn9()" />
-                        </div>
-                        <div class="weapon-icon-wrapper weapon">
-                          <weapon-icon v-if="getWeaponsToBurn10()" class="weapon-icon" :weapon="getWeaponsToBurn10()" />
-                        </div>
-                    </div>
+                  <div class="col-lg-4 col-sm-12 weapon-container">
+                    <h1 class="text-center">
+                      <b-button
+                              variant="primary"
+                              tagname="confirm_forge_weapon"
+                              class="multiForging"
+                              @click="getCurrentBurntWeapons()"
+                              v-tooltip="'Add Weapons to Burn'"
+                              :disabled="burnWeaponId === null">
+                        Add Weapon for multi-forging
+                      </b-button></h1>
+                    <weapon-grid :showGivenWeaponIds="true" :weaponIds="burnWeaponIds" />
                   </div>
                   <div class="col-lg-3 col-sm-12 upgrade-container">
                     <div v-if="showReforge && showDustForge === false">
@@ -491,15 +465,6 @@
                             @click="showReforge = false, showBlacksmith = true, showDustForge = false, showReforgeDust,false"
                             v-tooltip="'Cancel Reforge'">
                             Cancel
-                    </b-button>
-                    <b-button
-                            variant="primary"
-                            tagname="confirm_forge_weapon"
-                            class="confirmReforge"
-                            @click="getCurrentBurntWeapons()"
-                            v-tooltip="'Update dust used'"
-                            :disabled="burnWeaponId === null">
-                            Add Weapon for multi-forging
                     </b-button>
                   </div>
                 </div>
@@ -619,7 +584,10 @@ export default Vue.extend({
 
   computed: {
     ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['contracts', 'ownWeapons', 'nftsCount',  'ownShields', 'getOwnedDust']) as Accessors<StoreMappedGetters>),
+    ...(mapGetters([
+      'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
+      'getPowerfulDust', 'getGreaterDust', 'getLesserDust'
+    ]) as Accessors<StoreMappedGetters>),
 
     canReforge(): boolean {
       return (
@@ -761,47 +729,6 @@ export default Vue.extend({
       if(!this.burnWeaponId) return null;
       return this.ownWeapons.find(x => x.id === this.burnWeaponId);
     },
-
-    getWeaponsToBurn() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id ===  this.burnWeaponIds.slice(0, 1).shift());
-    },
-    getWeaponsToBurn2() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id ===  this.burnWeaponIds.slice(1, 2).shift());
-    },
-    getWeaponsToBurn3() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id ===  this.burnWeaponIds.slice(2, 3).shift());
-    },
-    getWeaponsToBurn4() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id ===  this.burnWeaponIds.slice(3, 4).shift());
-    },
-    getWeaponsToBurn5() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id ===  this.burnWeaponIds.slice(4, 5).shift());
-    },
-    getWeaponsToBurn6() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id ===  this.burnWeaponIds.slice(5, 6).shift());
-    },
-    getWeaponsToBurn7() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id ===  this.burnWeaponIds.slice(6, 7).shift());
-    },
-    getWeaponsToBurn8() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id ===  this.burnWeaponIds.slice(7, 8).shift());
-    },
-    getWeaponsToBurn9() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id ===  this.burnWeaponIds.slice(8, 9).shift());
-    },
-    getWeaponsToBurn10() {
-      if(!this.burnWeaponId) return null;
-      return this.ownWeapons.find(x => x.id ===  this.burnWeaponIds.slice(9, 10).shift());
-    },
     getWeaponToUpgrade() {
       return this.ownWeapons.find(x => x.id === this.reforgeWeaponId);
     },
@@ -839,7 +766,6 @@ export default Vue.extend({
           this.spin = false;
         }, 10000);
       }
-
 
     },
 
@@ -973,6 +899,10 @@ export default Vue.extend({
   border-radius: 5px;
   cursor: pointer;
   align-items :center;
+}
+
+.multiForging {
+  align-items: center;
 }
 
 .headings {

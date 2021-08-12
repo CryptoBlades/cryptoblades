@@ -13,7 +13,7 @@
           <h1 class="text-center">Lesser</h1>
           <div class="boxed">
             <h2>
-              <h2>{{this.getOwnedDust().slice(0, 1).shift()}}</h2>
+              <h2>{{this.getLesserDust()}}</h2>
             </h2>
           </div>
         </div>
@@ -26,7 +26,7 @@
           <h1 class="text-center">Greater</h1>
           <div class="boxed">
             <h2>
-              <h2>{{this.getOwnedDust().slice(1, 2).shift()}}</h2>
+              <h2>{{this.getGreaterDust()}}</h2>
             </h2>
           </div>
         </div>
@@ -39,7 +39,7 @@
           <h1 class="text-center">Powerful</h1>
           <div class="boxed">
             <h2>
-              <h2>{{this.getOwnedDust().slice(2, 3).shift()}}</h2>
+              <h2>{{this.getPowerfulDust()}}</h2>
             </h2>
           </div>
         </div>
@@ -64,7 +64,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['getOwnedDust']),
+    ...mapGetters(['getPowerfulDust', 'getGreaterDust', 'getLesserDust']),
 
   },
 
