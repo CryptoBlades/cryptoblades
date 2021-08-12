@@ -393,6 +393,10 @@
         1* Burn: 1 LB (15 Bonus Power/ 1500 Max).
       </div>
     </b-modal>
+              <span v-if="isRenameProfanish">
+                This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+               </span>
+      </b-modal>
   </div>
 </template>
 
@@ -408,6 +412,7 @@ import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
+import { getCleanName, isProfaneIsh } from '../rename-censor';
 
 type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds'>;
 
@@ -482,6 +487,14 @@ export default Vue.extend({
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust'
     ]) as Accessors<StoreMappedGetters>),
+
+    isRenameProfanish(): boolean {
+      return isProfaneIsh(this.weaponRename);
+    },
+
+    cleanRename(): string {
+      return getCleanName(this.weaponRename);
+    }
   },
 
   watch: {
