@@ -1,14 +1,14 @@
 <template>
   <div>
     <div class="filters row mt-2 pl-2" v-if="!newWeapon" @change="saveFilters()">
-      <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
+      <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
         <strong>Stars</strong>
         <select class="form-control" v-model="starFilter" >
           <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
 
-      <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
+      <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
         <strong>Element</strong>
         <select class="form-control" v-model="elementFilter" >
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
