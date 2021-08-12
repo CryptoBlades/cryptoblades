@@ -267,8 +267,8 @@
                       </div>
                       <div class="field">
                         <div class="value left">0</div>
-                        <input id="myRange" type="range" min="0" max="100" value="0" steps="1">
-                        <div class="value right">100</div>
+                        <input id="myRange" type="range" min="0" :max="this.getLesserDust()" value="0" steps="1">
+                        <div class="value right">{{this.getLesserDust()}}</div>
                       </div>
                     </div>
                   </div>
@@ -287,8 +287,8 @@
                       </div>
                       <div class="field">
                         <div class="value left">0</div>
-                        <input id="myRange2" type="range" min="0" max="25" value="0" steps="1">
-                        <div class="value right">25</div>
+                        <input id="myRange2" type="range" min="0" :max="this.getGreaterDust()" value="0" steps="1">
+                        <div class="value right">{{this.getGreaterDust()}}</div>
                       </div>
                       <b-button
                               variant="primary"
@@ -315,8 +315,8 @@
                       </div>
                       <div class="field">
                         <div class="value left">0</div>
-                        <input id="myRange3" type="range" min="0" max="15" value="0" steps="1">
-                        <div class="value right">15</div>
+                        <input id="myRange3" type="range" min="0" :max="this.getPowerfulDust()" value="0" steps="1">
+                        <div class="value right">{{this.getPowerfulDust()}}</div>
                       </div>
                     </div>
                   </div>
