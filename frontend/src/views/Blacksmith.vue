@@ -109,7 +109,7 @@
           </div>
         </div>
 
-        <div class="row mt-3" v-if="showReforge">
+        <div class="row mt-3" v-if="showReforge && !showReforgeDust">
           <div class="col">
             <div class="d-flex justify-content-space-between">
               <h1>Create Dust</h1>
@@ -153,7 +153,7 @@
                     </div>
                     <h2 class="text-center">Lesser</h2>
                     <div class="boxed">
-                      <h2>{{getLesserDust()}}</h2>
+                      <h2>{{lesserDust}}/{{getLesserDust()}}</h2>
                     </div>
                     <div class="range">
                       <div class="sliderValue">
@@ -161,7 +161,7 @@
                       </div>
                       <div class="field">
                         <div class="value left">0</div>
-                        <input id="myRange" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
+                        <input v-model="lesserDust" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
                         <div class="value right">{{getLesserDust()}}</div>
                       </div>
                     </div>
@@ -173,7 +173,7 @@
                     </div>
                     <h2 class="text-center">Greater</h2>
                     <div class="boxed">
-                      <h2>{{getGreaterDust()}}</h2>
+                      <h2>{{greaterDust}}/{{getGreaterDust()}}</h2>
                     </div>
                     <div class="range">
                       <div class="sliderValue">
@@ -181,17 +181,9 @@
                       </div>
                       <div class="field">
                         <div class="value left">0</div>
-                        <input id="myRange2" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
+                        <input v-model="greaterDust" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
                         <div class="value right">{{getGreaterDust()}}</div>
                       </div>
-                      <b-button
-                              variant="primary"
-                              tagname="confirm_forge_weapon"
-                              class="confirmReforge"
-                              @click="useDust()"
-                              v-tooltip="'Update dust used'">
-                        Press to update the amount of dust used.
-                      </b-button>
                     </div>
                   </div>
                   <div class="col-lg-2 weapon-container dust-container" align="center">
@@ -201,7 +193,7 @@
                     </div>
                     <h2 class="text-center">Powerful</h2>
                     <div class="boxed">
-                      <h2>{{getPowerfulDust()}}</h2>
+                      <h2>{{powerfulDust}}/{{getPowerfulDust()}}</h2>
                     </div>
                     <div class="range">
                       <div class="sliderValue">
@@ -209,7 +201,7 @@
                       </div>
                       <div class="field">
                         <div class="value left">0</div>
-                        <input id="myRange3" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
+                        <input v-model="powerfulDust" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
                         <div class="value right">{{getPowerfulDust()}}</div>
                       </div>
                     </div>
@@ -238,7 +230,7 @@
                           <br>
                           Use: {{greaterDust}} Greater
                           <br>
-                          Use:{{powerfulDust}} Powerful
+                          Use: {{powerfulDust}} Powerful
                           <br>
                           ({{ dustReforgeCost }} SKILL)
                         </b-button>
@@ -359,11 +351,11 @@
       <br/>
       <div class="text-center" v-text="'Are you sure you want to reforge this weapon using:'" />
       <p class="text-center">
-        {{lesserDust}}: Lesser Dust
+        {{lesserDust}} Lesser Dust
         <br>
-        {{greaterDust}}: Greater Dust
+        {{greaterDust}} Greater Dust
         <br>
-        {{powerfulDust}}: Powerful Dust
+        {{powerfulDust}} Powerful Dust
       </p>
       <div class="text-center">
         <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
