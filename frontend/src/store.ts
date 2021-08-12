@@ -250,21 +250,21 @@ export function createStore(web3: Web3) {
 
       getPowerfulDust(state) {
         return () => {
-          const dust = state.ownedDust.slice(2, 3).shift();
+          const dust = state.ownedDust[2];
           return dust;
         };
       },
 
       getLesserDust(state) {
         return () => {
-          const dust = state.ownedDust.slice(0, 1).shift();
+          const dust = state.ownedDust[0];
           return dust;
         };
       },
 
       getGreaterDust(state) {
         return () => {
-          const dust = state.ownedDust.slice(1, 2).shift();
+          const dust = state.ownedDust[1];
           return dust;
         };
       },
