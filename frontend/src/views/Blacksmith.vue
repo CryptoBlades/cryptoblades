@@ -122,7 +122,7 @@
                         v-tooltip="'Reforge selected weapon with dust'">
                   Mass Burn
                   <br>
-                  ({{ this.burnCost * this.burnWeaponIds.length }} SKILL)
+                  ({{this.burnCost * this.burnWeaponIds.length}} SKILL)
                 </b-button>
                 <b-button
                         variant="primary"
