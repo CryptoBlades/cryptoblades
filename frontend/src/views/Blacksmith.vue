@@ -110,133 +110,6 @@
                   <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
                   <template #modal-footer></template>
                 </b-modal>
-
-                <b-modal class="centered-modal text-center" ref="reforge-confirmation-modal" title="Reforge Confirmation" @ok="onReforgeWeapon">
-                  <div class="text-center" :hidden="burnWeaponId === null || !isWeaponRare()">
-                    <b-icon icon="exclamation-circle" variant="danger" />
-                    [WARNING] This is a rare weapon!
-                  </div>
-                  <div class="text-center" :hidden="burnWeaponId === null || !isWeaponReforged()">
-                    <b-icon icon="exclamation-circle" variant="danger" />
-                    [WARNING] This item has been previously reforged and only half of each bonus will carry over!
-                  </div>
-                  <div class="row">
-                    <div class="headings">
-                      <h2 class="text-center">Upgrade</h2>
-                      <div class="weapon" v-if="reforgeWeaponId">
-                        <div v-if="$slots.above || $scopedSlots.above">
-                          <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
-                        </div>
-                        <div class="weapon-icon-wrapper">
-                          <weapon-icon v-if="getWeaponToUpgrade()" class="weapon-icon" :weapon="getWeaponToUpgrade()" />
-                        </div>
-                      </div>
-                    </div>
-                    <div class="headings">
-                      <h2 class="text-center">Burn</h2>
-                      <div class="weapon" v-if="burnWeaponId">
-                        <div v-if="$slots.above || $scopedSlots.above">
-                          <slot name="above" :weapon="getWeaponToBurn()"></slot>
-                          <slot name="above"></slot>
-                        </div>
-                        <div class="weapon-icon-wrapper">
-                          <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="text-center" v-text="'Are you sure you want to reforge with this weapon?'" />
-                  <div class="text-center">
-                    <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
-                  </div>
-                </b-modal>
-
-                <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
-                         title="Dust Reforge Confirmation" @ok="onReforgeWeaponWithDust">
-                  <div class="row">
-                    <div class="headings">
-                      <h2 class="text-center">Upgrade</h2>
-                      <div class="weapon" v-if="reforgeWeaponId">
-                        <div v-if="$slots.above || $scopedSlots.above">
-                          <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
-                        </div>
-                        <div class="weapon-icon-wrapper">
-                          <weapon-icon v-if="getWeaponToUpgrade()" class="weapon-icon" :weapon="getWeaponToUpgrade()" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <br/>
-                  <div class="text-center" v-text="'Are you sure you want to reforge this weapon using:'" />
-                  <p class="text-center">
-                    {{this.lesserDust}}: Lesser Dust
-                    <br>
-                    {{this.greaterDust}}: Greater Dust
-                    <br>
-                    {{this.powerfulDust}}: Powerful Dust
-                  </p>
-                  <div class="text-center">
-                    <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
-                  </div>
-                </b-modal>
-
-                <b-modal class="centered-modal text-center" ref="dust-confirmation-modal" title="Reforge Confirmation" @ok="onBurnWeapon">
-                  <div class="text-center" :hidden="burnWeaponId === null || !isWeaponRare()">
-                    <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This is a rare weapon!
-                  </div>
-                  <div class="text-center" :hidden="burnWeaponId === null || !isWeaponReforged()">
-                    <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This item has been previously reforged are you sure you want to destroy?
-                  </div>
-                  <div class="row">
-                    <div class="headings">
-                      <h2 class="text-center">Burn to Dust</h2>
-                      <div class="weapon" v-if="burnWeaponId">
-                        <div v-if="$slots.above || $scopedSlots.above">
-                          <slot name="above" :weapon="getWeaponToBurn()"></slot>
-                          <slot name="above"></slot>
-                        </div>
-                        <div class="weapon-icon-wrapper">
-                          <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="text-center" v-text="'Are you sure you want to turn this weapon to dust?'" />
-                  <div class="text-center">
-                    <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
-                  </div>
-                </b-modal>
-
-                <b-modal class="centered-modal text-center" ref="mass-dust-confirmation-modal" title="Reforge Confirmation" @ok="onMassBurnWeapons">
-                  <div class="text-center" :hidden="burnWeaponId === null || !isWeaponRare()">
-                    <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This is a rare weapon!
-                  </div>
-                  <div class="text-center" :hidden="burnWeaponId === null || !isWeaponReforged()">
-                    <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This item has been previously reforged are you sure you want to destroy?
-                  </div>
-                  <div class="text-center" v-text="'Are you sure you want to turn all these weapons into dust?'" />
-                  <div class="text-center">
-                    <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone! No Refunds!
-                  </div>
-                </b-modal>
-
-                <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" title="Reforge Bonuses">
-                  <div>
-                    5* Burn: 1 5B (75 Bonus Power / 600 Max).
-                  </div>
-                  <div>
-                    4* Burn: 1 4B (30 Bonus Power/ 750 Max).
-                  </div>
-                  <div>
-                    3* Burn: 3 LB (45 Bonus Power/ 1500 Max).
-                  </div>
-                  <div>
-                    2* Burn: 2 LB (30 Bonus Power/ 1500 Max).
-                  </div>
-                  <div>
-                    1* Burn: 1 LB (15 Bonus Power/ 1500 Max).
-                  </div>
-                </b-modal>
               </div>
             </div>
             <div class="" v-if="showBlacksmith">
@@ -549,6 +422,133 @@
                   <b-form-input type="string"
                     class="modal-input" v-model="weaponRename" placeholder="New Name" />
       </b-modal>
+
+    <b-modal class="centered-modal text-center" ref="reforge-confirmation-modal" title="Reforge Confirmation" @ok="onReforgeWeapon">
+      <div class="text-center" :hidden="burnWeaponId === null || !isWeaponRare()">
+        <b-icon icon="exclamation-circle" variant="danger" />
+        [WARNING] This is a rare weapon!
+      </div>
+      <div class="text-center" :hidden="burnWeaponId === null || !isWeaponReforged()">
+        <b-icon icon="exclamation-circle" variant="danger" />
+        [WARNING] This item has been previously reforged and only half of each bonus will carry over!
+      </div>
+      <div class="row">
+        <div class="headings">
+          <h2 class="text-center">Upgrade</h2>
+          <div class="weapon" v-if="reforgeWeaponId">
+            <div v-if="$slots.above || $scopedSlots.above">
+              <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
+            </div>
+            <div class="weapon-icon-wrapper">
+              <weapon-icon v-if="getWeaponToUpgrade()" class="weapon-icon" :weapon="getWeaponToUpgrade()" />
+            </div>
+          </div>
+        </div>
+        <div class="headings">
+          <h2 class="text-center">Burn</h2>
+          <div class="weapon" v-if="burnWeaponId">
+            <div v-if="$slots.above || $scopedSlots.above">
+              <slot name="above" :weapon="getWeaponToBurn()"></slot>
+              <slot name="above"></slot>
+            </div>
+            <div class="weapon-icon-wrapper">
+              <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center" v-text="'Are you sure you want to reforge with this weapon?'" />
+      <div class="text-center">
+        <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
+      </div>
+    </b-modal>
+
+    <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
+             title="Dust Reforge Confirmation" @ok="onReforgeWeaponWithDust">
+      <div class="row">
+        <div class="headings">
+          <h2 class="text-center">Upgrade</h2>
+          <div class="weapon" v-if="reforgeWeaponId">
+            <div v-if="$slots.above || $scopedSlots.above">
+              <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
+            </div>
+            <div class="weapon-icon-wrapper">
+              <weapon-icon v-if="getWeaponToUpgrade()" class="weapon-icon" :weapon="getWeaponToUpgrade()" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <br/>
+      <div class="text-center" v-text="'Are you sure you want to reforge this weapon using:'" />
+      <p class="text-center">
+        {{this.lesserDust}}: Lesser Dust
+        <br>
+        {{this.greaterDust}}: Greater Dust
+        <br>
+        {{this.powerfulDust}}: Powerful Dust
+      </p>
+      <div class="text-center">
+        <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
+      </div>
+    </b-modal>
+
+    <b-modal class="centered-modal text-center" ref="dust-confirmation-modal" title="Reforge Confirmation" @ok="onBurnWeapon">
+      <div class="text-center" :hidden="burnWeaponId === null || !isWeaponRare()">
+        <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This is a rare weapon!
+      </div>
+      <div class="text-center" :hidden="burnWeaponId === null || !isWeaponReforged()">
+        <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This item has been previously reforged are you sure you want to destroy?
+      </div>
+      <div class="row">
+        <div class="headings">
+          <h2 class="text-center">Burn to Dust</h2>
+          <div class="weapon" v-if="burnWeaponId">
+            <div v-if="$slots.above || $scopedSlots.above">
+              <slot name="above" :weapon="getWeaponToBurn()"></slot>
+              <slot name="above"></slot>
+            </div>
+            <div class="weapon-icon-wrapper">
+              <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center" v-text="'Are you sure you want to turn this weapon to dust?'" />
+      <div class="text-center">
+        <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
+      </div>
+    </b-modal>
+
+    <b-modal class="centered-modal text-center" ref="mass-dust-confirmation-modal" title="Reforge Confirmation" @ok="onMassBurnWeapons">
+      <div class="text-center" :hidden="burnWeaponId === null || !isWeaponRare()">
+        <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This is a rare weapon!
+      </div>
+      <div class="text-center" :hidden="burnWeaponId === null || !isWeaponReforged()">
+        <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] This item has been previously reforged are you sure you want to destroy?
+      </div>
+      <div class="text-center" v-text="'Are you sure you want to turn all these weapons into dust?'" />
+      <div class="text-center">
+        <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone! No Refunds!
+      </div>
+    </b-modal>
+
+    <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" title="Reforge Bonuses">
+      <div>
+        5* Burn: 1 5B (75 Bonus Power / 600 Max).
+      </div>
+      <div>
+        4* Burn: 1 4B (30 Bonus Power/ 750 Max).
+      </div>
+      <div>
+        3* Burn: 3 LB (45 Bonus Power/ 1500 Max).
+      </div>
+      <div>
+        2* Burn: 2 LB (30 Bonus Power/ 1500 Max).
+      </div>
+      <div>
+        1* Burn: 1 LB (15 Bonus Power/ 1500 Max).
+      </div>
+    </b-modal>
   </div>
 </template>
 
