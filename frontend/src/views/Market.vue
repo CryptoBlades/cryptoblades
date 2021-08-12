@@ -671,17 +671,18 @@ import { market_blockchain as useBlockchain } from './../feature-flags';
 import { CharacterTransactionHistoryData, ICharacterHistory,
   IWeaponHistory, WeaponTransactionHistoryData,
   IShieldHistory, ShieldTransactionHistoryData } from '@/interfaces/History';
-import { getWeaponNameFromSeed } from '@/weapon-name';
-import { getCharacterNameFromSeed } from '@/character-name';
 import { getShieldNameFromSeed } from '@/shield-name';
 import { fromWeiEther, apiUrl } from '../utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
+import { CensorSensor } from 'censor-sensor';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
 type CharacterId = string;
 type ShieldId = string;
 type NftId = WeaponId | CharacterId | ShieldId;
+
+const censor = new CensorSensor();
 
 interface Data {
   activeType: SellType;
@@ -722,6 +723,8 @@ interface StoreMappedGetters {
   contracts: Contracts;
   ownCharacters: any[];
   totalShieldSupply: 0;
+  getCharacterName(id: string): string;
+  getWeaponName(id: string, stars: number): string;
 }
 
 export interface Nft {
@@ -807,7 +810,7 @@ export default Vue.extend({
       'defaultAccount', 'weapons', 'characters', 'shields', 'ownedCharacterIds', 'ownedWeaponIds', 'ownedShieldIds',
     ]) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'contracts', 'ownCharacters', 'totalShieldSupply'
+      'contracts', 'ownCharacters', 'totalShieldSupply','getCharacterName','getWeaponName'
     ]) as Accessors<StoreMappedGetters>),
     ...mapGetters(['transferCooldownOfCharacterId']),
 
@@ -980,6 +983,9 @@ export default Vue.extend({
       this.listingSellPrice = '';
     },
 
+    getCleanName(name: string): string {
+      return censor.cleanProfanityIsh(name);
+    },
 
     async loadMarketTaxes() {
       if(!this.characterMarketTax) {
@@ -1533,7 +1539,7 @@ export default Vue.extend({
             // eslint-disable-next-line prefer-const
             let items: WeaponTransactionHistoryData = {
               weaponId: weaponHistory[i].weaponId,
-              weaponName: getWeaponNameFromSeed(parseInt(weaponHistory[i].weaponId,10),weaponHistory[i].weaponStars),
+              weaponName: this.getCleanName(this.getWeaponName(weaponHistory[i].weaponId, weaponHistory[i].weaponStars)),
               weaponPrice: weaponHistory[i].price
             };
 
@@ -1574,7 +1580,7 @@ export default Vue.extend({
             // eslint-disable-next-line prefer-const
             let items: CharacterTransactionHistoryData = {
               charId: characterHistory[i].charId,
-              charName: getCharacterNameFromSeed(parseInt(characterHistory[i].charId,10)),
+              charName: this.getCleanName(this.getCharacterName(characterHistory[i].charId)),
               charPrice: characterHistory[i].price
             };
 

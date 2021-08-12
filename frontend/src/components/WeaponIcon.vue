@@ -21,7 +21,7 @@
       </div>
 
       <div class="name">
-        {{ getWeaponName(weapon.id, weapon.stars) }}
+        {{ getCleanWeaponName(weapon.id, weapon.stars) }}
       </div>
 
       <div class="bonus-power">
@@ -61,7 +61,6 @@
 
 <script>
 import { getWeaponArt } from '../weapon-arts-placeholder';
-import { getWeaponNameFromSeed } from '../weapon-name';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import swordspecs from '../assets/swordspecs.json';
@@ -73,6 +72,7 @@ import { Stat1PercentForChar,
 } from '../interfaces';
 
 import { mapGetters, mapState } from 'vuex';
+import { CensorSensor } from 'censor-sensor';
 
 const bladeCount = 24;
 const crossGuardCount = 24;
@@ -87,6 +87,8 @@ const rColor = new Three.Color(0x7A7A7A);
 const gColor = new Three.Color(0x413F41);
 const bColor = new Three.Color(0xAF5822);
 const white = new Three.Color(0xFFFFFF);
+
+const censor = new CensorSensor();
 
 function transformModel(model, y) {
   model.scale.set( modelScale,modelScale,modelScale );
@@ -210,7 +212,6 @@ export default {
   },
 
   methods: {
-    getWeaponNameFromSeed,
     getWeaponArt,
     init() {
       const container = this.$refs.el;
@@ -421,6 +422,10 @@ export default {
           this.renderer.render(this.scene, this.camera);
         }
       }
+    },
+
+    getCleanWeaponName(id, stars) {
+      return censor.cleanProfanityIsh(this.getWeaponName(id, stars));
     }
   },
   mounted() {

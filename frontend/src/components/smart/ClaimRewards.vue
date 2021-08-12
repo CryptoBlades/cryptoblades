@@ -66,9 +66,11 @@ import Vue from 'vue';
 import { Accessors } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { getCharacterNameFromSeed } from '../../character-name';
 import { ICharacter } from '@/interfaces';
 import { toBN, fromWeiEther } from '../../utils/common';
+import { CensorSensor } from 'censor-sensor';
+
+const censor = new CensorSensor();
 
 interface StoreMappedState {
   skillRewards: string;
@@ -81,6 +83,7 @@ interface StoreMappedGetters {
   ownCharacters: ICharacter[];
   maxRewardsClaimTaxAsFactorBN: BigNumber;
   rewardsClaimTaxAsFactorBN: BigNumber;
+  getCharacterName(id: number): string;
 }
 
 interface StoreMappedActions {
@@ -104,7 +107,7 @@ export default Vue.extend({
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'ownCharacters', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN'
+      'ownCharacters', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName'
     ]) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
@@ -120,7 +123,7 @@ export default Vue.extend({
       return this.xpRewardsForOwnedCharacters.map((xp, i) => {
         if(!this.ownCharacters[i]) return xp;
 
-        return `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}`;
+        return `${this.getCleanCharacterName(this.ownCharacters[i].id)} ${xp}`;
       });
     },
 
@@ -187,6 +190,10 @@ export default Vue.extend({
         (this.$refs['stake-suggestion-modal'] as any).hide();
         (this.$refs['claim-confirmation-modal'] as any).show();
       }
+    },
+
+    getCleanCharacterName(id: number): string {
+      return censor.cleanProfanityIsh(this.getCharacterName(id));
     }
   }
 });
