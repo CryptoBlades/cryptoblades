@@ -408,13 +408,13 @@
         <div class="row mt-3">
           <div class="col-md-12" v-if="showReforge && showReforgeDust === false">
             <div>
-              <div class="col-lg-12">
+              <div class="col-md-12">
                 <div class="row mobile-flip">
-                  <div class="col-lg-5 col-sm-12 weapon-container" align="center">
+                  <div class="col-md-5 weapon-container" align="center">
                     <h1 class="text-center">Select the weapon you wish to burn</h1>
-                    <weapon-grid v-model="burnWeaponId" :showFilters="true" />
+                    <weapon-grid v-model="burnWeaponId" :showGivenWeaponIds="true" :weaponIds="hideWeapons" />
                   </div>
-                  <div class="col-lg-4 col-sm-12 weapon-container">
+                  <div class="col-md-4 weapon-container">
                     <div v-if="showReforge && showDustForge === true">
                     <h1 class="text-center">
                       <b-button
@@ -425,8 +425,20 @@
                               v-tooltip="'Add Weapons to Burn'"
                               :disabled="burnWeaponId === null">
                         Add Weapon for multi-forging
-                      </b-button></h1>
+                      </b-button>
+                      <b-button
+                              variant="primary"
+                              tagname="confirm_forge_weapon"
+                              class="multiForging"
+                              @click="clearAllMassBurn()"
+                              v-tooltip="'Clear all'"
+                              :disabled="burnWeaponIds === []">
+                        Clear all
+                      </b-button>
+                    </h1>
+                      <div class="weapon-grid-container">
                       <weapon-grid :showGivenWeaponIds="true" :weaponIds="burnWeaponIds" />
+                      </div>
                     </div>
                     <div v-if="showReforge && showDustForge === false">
                       <div class="headings">
@@ -443,7 +455,7 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-lg-3 col-sm-12 upgrade-container">
+                  <div class="col-md-3 upgrade-container">
                     <div v-if="showReforge && showDustForge === false">
                       <div class="confirmReforge">
                         <h2 class="text-center">Upgrade</h2>
@@ -586,6 +598,7 @@ interface Data {
   weaponRename: string;
   haveRename: string;
   onError: boolean;
+  hideWeapons: any[];
 }
 
 export default Vue.extend({
@@ -615,6 +628,7 @@ export default Vue.extend({
       weaponRename: '',
       haveRename: '0',
       onError: false,
+      hideWeapons: [],
     } as Data;
   },
 
@@ -762,10 +776,11 @@ export default Vue.extend({
       this.showDustForge = false;
     },
     displayDustCreation(){
-      this.showReforge = true;
-      this.showBlacksmith = false;
-      this.showDustForge = true;
-      this.showReforgeDust = false;
+      return this.showReforge = true,
+      this.showBlacksmith = false,
+      this.showDustForge = true,
+      this.showReforgeDust = false,
+      this.hideWeapons = this.ownedWeaponIds;
     },
     displayBlacksmith(){
       this.showReforge = false;
@@ -773,12 +788,17 @@ export default Vue.extend({
       this.showDustForge = false;
       this.showReforgeDust = false;
     },
-
     cancelReforge() {
       this.showReforge = false;
       this.showBlacksmith = true;
       this.showDustForge = false;
       this.showReforgeDust = false;
+    },
+    cancelMassBurnToDust(){
+      return this.showReforge = false, this.showBlacksmith = true, this.showDustForge = false, this.showReforgeDust = false, this.burnWeaponIds = [];
+    },
+    clearAllMassBurn(){
+      return this.burnWeaponIds = [],  this.hideWeapons = [];
     },
 
     isWeaponRare() {
@@ -810,7 +830,8 @@ export default Vue.extend({
     getCurrentBurntWeapons(){
       let addBurnWeapon = false;
       if (addBurnWeapon === false) {
-        this.burnWeaponIds.push(this.burnWeaponId);
+        this.burnWeaponIds.push(this.burnWeaponId!.toString());
+        this.hideWeapons = this.hideWeapons.filter(val => !this.burnWeaponIds.includes(val));
         this.burnWeaponId = null;
         addBurnWeapon = true;
       }
