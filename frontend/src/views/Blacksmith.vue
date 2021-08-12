@@ -177,6 +177,9 @@
                   </template>
                   <b-form-input type="string"
                     class="modal-input" v-model="weaponRename" placeholder="New Name" />
+                  <span v-if="isRenameProfanish">
+                    This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+                  </span>
       </b-modal>
   </div>
 </template>
@@ -192,6 +195,9 @@ import { BModal } from 'bootstrap-vue';
 import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
+import { CensorSensor } from 'censor-sensor';
+
+const censor = new CensorSensor();
 
 type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds'>;
 
@@ -247,6 +253,14 @@ export default Vue.extend({
         this.reforgeWeaponId === this.burnWeaponId
       );
     },
+
+    isRenameProfanish(): boolean {
+      return censor.isProfaneIsh(this.weaponRename);
+    },
+
+    cleanRename(): string {
+      return censor.cleanProfanityIsh(this.weaponRename);
+    }
   },
 
   watch: {

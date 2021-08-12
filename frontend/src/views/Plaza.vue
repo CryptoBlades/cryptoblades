@@ -70,6 +70,9 @@
                   <span v-if="characterRename !== '' && (characterRename.length < 2 || characterRename.length > 24)">
                     Name must be 2 - 24 characters long.
                   </span>
+                  <span v-if="isRenameProfanish">
+                    This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+                  </span>
                 </b-modal>
         <b-modal class="centered-modal" ref="character-change-trait-modal"
                   @ok="changeCharacterTraitCall">
@@ -96,8 +99,11 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import { BModal, BvModalEvent } from 'bootstrap-vue';
 import Vue from 'vue';
+import { CensorSensor } from 'censor-sensor';
 
 let getConsumablesCountInterval: any = null;
+
+const censor = new CensorSensor();
 
 interface Data {
   recruitCost: string;
@@ -158,6 +164,14 @@ export default Vue.extend({
       }
 
       return availableTraits;
+    },
+
+    isRenameProfanish(): boolean {
+      return censor.isProfaneIsh(this.characterRename);
+    },
+
+    cleanRename(): string {
+      return censor.cleanProfanityIsh(this.characterRename);
     }
   },
 
@@ -264,7 +278,7 @@ export default Vue.extend({
       this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
       this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
       this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
-    }
+    },
   },
 
   components: {
