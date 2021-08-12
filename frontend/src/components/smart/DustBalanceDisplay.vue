@@ -6,40 +6,40 @@
         <div class="col-lg-3"></div>
         <div class="col-lg-2 dust-container" align="center">
           <div class="dust">
-            LB: <span class="text-warning">15</span>
+            LB: <span class="text-warning">15 power per point</span>
             <div class="dust-image1">
             </div>
           </div>
           <h1 class="text-center">Lesser</h1>
           <div class="boxed">
             <h2>
-              <h2>{{this.getLesserDust()}}</h2>
+              <h2>{{getLesserDust()}}</h2>
             </h2>
           </div>
         </div>
         <div class="col-lg-2 dust-container" align="center">
           <div class="dust">
-            4B: <span class="text-warning">30</span>
+            4B: <span class="text-warning">30 power per point</span>
             <div class="dust-image2">
             </div>
           </div>
           <h1 class="text-center">Greater</h1>
           <div class="boxed">
             <h2>
-              <h2>{{this.getGreaterDust()}}</h2>
+              <h2>{{getGreaterDust()}}</h2>
             </h2>
           </div>
         </div>
         <div class="col-lg-2 dust-container" align="center">
           <div class="dust">
-            5B: <span class="text-warning">75</span>
+            5B: <span class="text-warning">75 power per point</span>
             <div class="dust-image3">
             </div>
           </div>
           <h1 class="text-center">Powerful</h1>
           <div class="boxed">
             <h2>
-              <h2>{{this.getPowerfulDust()}}</h2>
+              <h2>{{getPowerfulDust()}}</h2>
             </h2>
           </div>
         </div>
