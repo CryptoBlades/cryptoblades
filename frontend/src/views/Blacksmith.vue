@@ -768,12 +768,17 @@ export default Vue.extend({
       this.showBlacksmith = false;
       this.showReforgeDust = false;
       this.showDustForge = false;
+      this.burnWeaponIds = [];
+      this.hideWeapons = this.ownedWeaponIds;
     },
     displayDustReforge() {
       this.showReforge = true;
       this.showBlacksmith = false;
       this.showReforgeDust = true;
       this.showDustForge = false;
+      this.lesserDust = '0';
+      this.greaterDust = '0';
+      this.powerfulDust = '0';
     },
     displayDustCreation(){
       return this.showReforge = true,
@@ -795,9 +800,13 @@ export default Vue.extend({
       this.showReforgeDust = false;
       this.burnWeaponIds = [];
       this.hideWeapons = this.ownedWeaponIds;
+      this.lesserDust = '0';
+      this.greaterDust = '0';
+      this.powerfulDust = '0';
     },
     clearAllMassBurn(){
-      return this.burnWeaponIds = [],  this.hideWeapons = this.ownedWeaponIds;
+      return this.burnWeaponIds = [],
+      this.hideWeapons = this.ownedWeaponIds;
     },
 
     isWeaponRare() {
