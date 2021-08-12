@@ -1115,6 +1115,12 @@ export function createStore(web3: Web3) {
         }
       },
 
+      async setupWeaponsWithIdsRenames({ dispatch }, weaponIds: string[]) {
+        for (const weapId of weaponIds) {
+          dispatch('fetchWeaponRename', weapId);
+        }
+      },
+
       async fetchWeaponRename({ state, commit }, weaponId: number) {
         const renameString = await state.contracts().WeaponRenameTagConsumables!.methods
           .getWeaponRename(weaponId)
@@ -1156,6 +1162,11 @@ export function createStore(web3: Web3) {
         ]);
 
         for (const charId of ownedCharacterIds) {
+          dispatch('fetchCharacterRename', charId);
+        }
+      },
+      async setupCharactersWithIdsRenames({ dispatch }, characterIds: string[]) {
+        for (const charId of characterIds) {
           dispatch('fetchCharacterRename', charId);
         }
       },
