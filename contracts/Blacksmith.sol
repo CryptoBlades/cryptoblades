@@ -13,7 +13,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME = keccak256("GAME");
 
-    uint256 public constant SHIELD_SKILL_FEE = 5 ether;
+    uint256 public constant SHIELD_SKILL_FEE = 3 ether;
 
     uint256 public constant ITEM_WEAPON_RENAME = 1;
     uint256 public constant ITEM_CHARACTER_RENAME = 2;
@@ -109,10 +109,10 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function purchaseShield() public {
         Promos promos = game.promos();
-        uint256 BIT_FOUNDER_SHIELD = promos.BIT_FOUNDER_SHIELD();
+        uint256 BIT_LEGENDARY_DEFENDER = promos.BIT_LEGENDARY_DEFENDER();
 
-        require(!promos.getBit(msg.sender, BIT_FOUNDER_SHIELD), "Limit 1");
-        promos.setBit(msg.sender, BIT_FOUNDER_SHIELD);
+        require(!promos.getBit(msg.sender, BIT_LEGENDARY_DEFENDER), "Limit 1");
+        promos.setBit(msg.sender, BIT_LEGENDARY_DEFENDER);
         game.payContractTokenOnly(msg.sender, SHIELD_SKILL_FEE);
         shields.mintForPurchase(msg.sender);
     }

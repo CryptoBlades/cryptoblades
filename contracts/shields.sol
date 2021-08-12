@@ -128,8 +128,8 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function mintForPurchase(address buyer) external restricted {
-        require(totalSupply() < 10000, "Out of stock"); // temporary restriction
-        mint(buyer, uint256(keccak256(abi.encodePacked(buyer, block.timestamp, blockhash(block.number - 1), gasleft()))));
+        require(totalSupply() < 25000, "Out of stock"); // temporary restriction
+        mint(buyer, uint256(keccak256(abi.encodePacked(buyer, blockhash(block.number - 1)))));
     }
 
     function mint(address minter, uint256 seed) public restricted returns(uint256) {
