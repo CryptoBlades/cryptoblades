@@ -78,9 +78,7 @@ import { RequiredXp } from '../../interfaces';
 import { ICharacter } from '@/interfaces';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { secondsToDDHHMMSS } from '../../utils/date-time';
-import { CensorSensor } from 'censor-sensor';
-
-const censor = new CensorSensor();
+import { getCleanName } from '../../rename-censor';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -226,7 +224,7 @@ export default Vue.extend({
     },
 
     getCleanCharacterName(id: number): string {
-      return censor.cleanProfanityIsh(this.getCharacterName(id));
+      return getCleanName(this.getCharacterName(id));
     }
   }
 });

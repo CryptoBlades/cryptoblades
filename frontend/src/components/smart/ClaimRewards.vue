@@ -68,9 +68,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { ICharacter } from '@/interfaces';
 import { toBN, fromWeiEther } from '../../utils/common';
-import { CensorSensor } from 'censor-sensor';
-
-const censor = new CensorSensor();
+import { getCleanName } from '../../rename-censor';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -193,7 +191,7 @@ export default Vue.extend({
     },
 
     getCleanCharacterName(id: number): string {
-      return censor.cleanProfanityIsh(this.getCharacterName(id));
+      return getCleanName(this.getCharacterName(id));
     }
   }
 });

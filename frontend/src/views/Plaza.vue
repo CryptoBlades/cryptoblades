@@ -99,11 +99,9 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import { BModal, BvModalEvent } from 'bootstrap-vue';
 import Vue from 'vue';
-import { CensorSensor } from 'censor-sensor';
+import { getCleanName, isProfaneIsh } from '../rename-censor';
 
 let getConsumablesCountInterval: any = null;
-
-const censor = new CensorSensor();
 
 interface Data {
   recruitCost: string;
@@ -167,11 +165,11 @@ export default Vue.extend({
     },
 
     isRenameProfanish(): boolean {
-      return censor.isProfaneIsh(this.characterRename);
+      return isProfaneIsh(this.characterRename);
     },
 
     cleanRename(): string {
-      return censor.cleanProfanityIsh(this.characterRename);
+      return getCleanName(this.characterRename);
     }
   },
 

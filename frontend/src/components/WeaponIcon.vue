@@ -72,7 +72,7 @@ import { Stat1PercentForChar,
 } from '../interfaces';
 
 import { mapGetters, mapState } from 'vuex';
-import { CensorSensor } from 'censor-sensor';
+import { getCleanName } from '../rename-censor';
 
 const bladeCount = 24;
 const crossGuardCount = 24;
@@ -87,8 +87,6 @@ const rColor = new Three.Color(0x7A7A7A);
 const gColor = new Three.Color(0x413F41);
 const bColor = new Three.Color(0xAF5822);
 const white = new Three.Color(0xFFFFFF);
-
-const censor = new CensorSensor();
 
 function transformModel(model, y) {
   model.scale.set( modelScale,modelScale,modelScale );
@@ -425,7 +423,7 @@ export default {
     },
 
     getCleanWeaponName(id, stars) {
-      return censor.cleanProfanityIsh(this.getWeaponName(id, stars));
+      return getCleanName(this.getWeaponName(id, stars));
     }
   },
   mounted() {

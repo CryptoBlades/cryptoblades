@@ -99,9 +99,7 @@ import { RequiredXp } from '../../interfaces';
 import Hint from '../Hint.vue';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../../utils/common';
-import { CensorSensor } from 'censor-sensor';
-
-const censor = new CensorSensor();
+import { getCleanName } from '../../rename-censor';
 
 export default Vue.extend({
   components: {
@@ -167,7 +165,7 @@ export default Vue.extend({
     },
 
     getCleanCharacterName(id: string): string {
-      return censor.cleanProfanityIsh(this.getCharacterName(id));
+      return getCleanName(this.getCharacterName(id));
     }
   },
 });

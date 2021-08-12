@@ -63,7 +63,7 @@ import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
 import { mapGetters, mapState } from 'vuex';
-import { CensorSensor } from 'censor-sensor';
+import { getCleanName } from '../rename-censor.ts';
 //import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
@@ -74,8 +74,6 @@ const bootsCount = 22;
 //const raceCount = 2; // separate genders of each race!
 
 const modelScale = 1 / 100;
-
-const censor = new CensorSensor();
 
 function transformModel(model) {
   model.getObjectByName('Base_HumanRUpperarm1').rotation.y += (75.0 / 180.0) * Math.PI; // flipped only in threejs..
@@ -148,7 +146,7 @@ export default {
     },
 
     getCleanCharacterName(id) {
-      return censor.cleanProfanityIsh(this.getCharacterName(id));
+      return getCleanName(this.getCharacterName(id));
     },
 
     staminaToolTipHtml(time) {

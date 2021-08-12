@@ -195,9 +195,7 @@ import { BModal } from 'bootstrap-vue';
 import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
-import { CensorSensor } from 'censor-sensor';
-
-const censor = new CensorSensor();
+import { getCleanName, isProfaneIsh } from '../rename-censor';
 
 type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds'>;
 
@@ -255,11 +253,11 @@ export default Vue.extend({
     },
 
     isRenameProfanish(): boolean {
-      return censor.isProfaneIsh(this.weaponRename);
+      return isProfaneIsh(this.weaponRename);
     },
 
     cleanRename(): string {
-      return censor.cleanProfanityIsh(this.weaponRename);
+      return getCleanName(this.weaponRename);
     }
   },
 

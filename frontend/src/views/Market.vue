@@ -674,15 +674,13 @@ import { CharacterTransactionHistoryData, ICharacterHistory,
 import { getShieldNameFromSeed } from '@/shield-name';
 import { fromWeiEther, apiUrl } from '../utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
-import { CensorSensor } from 'censor-sensor';
+import { getCleanName } from '../rename-censor';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
 type CharacterId = string;
 type ShieldId = string;
 type NftId = WeaponId | CharacterId | ShieldId;
-
-const censor = new CensorSensor();
 
 interface Data {
   activeType: SellType;
@@ -767,6 +765,8 @@ interface StoreMappedActions {
   purchaseMarketListing(payload: { nftContractAddr: string, tokenId: string, maxPrice: string }): Promise<{ seller: string, nftID: string, price: string }>;
   fetchSellerOfNft(payload: { nftContractAddr: string, tokenId: string }): Promise<string>;
   fetchTotalShieldSupply(): Promise<number>;
+  setupWeaponsWithIdsRenames(weaponIds: string[]): Promise<void>;
+  setupCharactersWithIdsRenames(weaponIds: string[]): Promise<void>;
 }
 
 export default Vue.extend({
@@ -966,6 +966,8 @@ export default Vue.extend({
       'purchaseMarketListing',
       'fetchSellerOfNft',
       'fetchTotalShieldSupply',
+      'setupWeaponsWithIdsRenames',
+      'setupCharactersWithIdsRenames',
     ]) as StoreMappedActions),
 
     clearData() {
@@ -981,10 +983,6 @@ export default Vue.extend({
       this.allListingsAmount = 0;
       this.currentPage = 1;
       this.listingSellPrice = '';
-    },
-
-    getCleanName(name: string): string {
-      return censor.cleanProfanityIsh(name);
     },
 
     async loadMarketTaxes() {
@@ -1539,7 +1537,7 @@ export default Vue.extend({
             // eslint-disable-next-line prefer-const
             let items: WeaponTransactionHistoryData = {
               weaponId: weaponHistory[i].weaponId,
-              weaponName: this.getCleanName(this.getWeaponName(weaponHistory[i].weaponId, weaponHistory[i].weaponStars)),
+              weaponName: getCleanName(this.getWeaponName(weaponHistory[i].weaponId, weaponHistory[i].weaponStars)),
               weaponPrice: weaponHistory[i].price
             };
 
@@ -1580,7 +1578,7 @@ export default Vue.extend({
             // eslint-disable-next-line prefer-const
             let items: CharacterTransactionHistoryData = {
               charId: characterHistory[i].charId,
-              charName: this.getCleanName(this.getCharacterName(characterHistory[i].charId)),
+              charName: getCleanName(this.getCharacterName(characterHistory[i].charId)),
               charPrice: characterHistory[i].price
             };
 
@@ -1749,12 +1747,22 @@ export default Vue.extend({
       this.selectedNftId = null;
 
       await this.fetchNftPrices(nftIds);
+      if(this.activeType === 'weapon') {
+        await this.setupWeaponsWithIdsRenames(nftIds);
+      } else if(this.activeType === 'character') {
+        await this.setupCharactersWithIdsRenames(nftIds);
+      }
     },
 
     async allSearchResults(nftIds: CharacterId[] | WeaponId[] | ShieldId[]) {
       this.selectedNftId = null;
 
       await this.fetchNftPrices(nftIds);
+      if(this.activeType === 'weapon') {
+        await this.setupWeaponsWithIdsRenames(nftIds);
+      } else if(this.activeType === 'character') {
+        await this.setupCharactersWithIdsRenames(nftIds);
+      }
     }
   },
 
