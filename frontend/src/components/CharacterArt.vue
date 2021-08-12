@@ -63,7 +63,7 @@ import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
 import { mapGetters, mapState } from 'vuex';
-import { getCleanName } from '../rename-censor.ts';
+import { getCleanName } from '../rename-censor';
 //import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
