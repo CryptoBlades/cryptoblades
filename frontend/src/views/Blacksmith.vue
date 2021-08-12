@@ -245,6 +245,44 @@
           </div>
         </div>
 
+        <div class="row mt-3" v-if="showReforge">
+          <div class="col">
+            <div class="d-flex justify-content-space-between">
+              <h1>Create Dust</h1>
+              <div class="d-flex justify-content-flex-end ml-auto">
+                <b-button
+                        variant="primary"
+                        tagname="confirm_forge_weapon"
+                        class="confirmReforge ml-3"
+                        @click="showDustConfirmation"
+                        v-tooltip="'Reforge selected weapon with dust'">
+                        Create Dust
+                        <br>
+                        ({{ burnCost }} SKILL)
+                </b-button>
+                <b-button
+                        variant="primary"
+                        tagname="confirm_forge_weapon"
+                        class="confirmReforge ml-3"
+                        @click="showMassDustConfirmation"
+                        v-tooltip="'Reforge selected weapon with dust'">
+                  Mass Burn
+                  <br>
+                  ({{ burnCost }} SKILL per weapon)
+                </b-button>
+                <b-button
+                        variant="primary"
+                        tagname="confirm_forge_weapon"
+                        class="confirmReforge ml-3"
+                        @click="cancelReforge()"
+                        v-tooltip="'Cancel Reforge'">
+                        Cancel
+                </b-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="row mt-3">
           <div class="col-md-12" v-if="showReforge && showReforgeDust === true">
             <div>
@@ -459,34 +497,6 @@
                         <weapon-icon v-if="getWeaponToBurn()" class="weapon-icon" :weapon="getWeaponToBurn()" />
                       </div>
                     </div>
-                    <b-button
-                            variant="primary"
-                            tagname="confirm_forge_weapon"
-                            class="confirmReforge"
-                            @click="showDustConfirmation"
-                            v-tooltip="'Reforge selected weapon with dust'">
-                            Create Dust
-                            <br>
-                            ({{ burnCost }} SKILL)
-                    </b-button>
-                    <b-button
-                            variant="primary"
-                            tagname="confirm_forge_weapon"
-                            class="confirmReforge"
-                            @click="showMassDustConfirmation"
-                            v-tooltip="'Reforge selected weapon with dust'">
-                      Mass Burn
-                      <br>
-                      ({{ burnCost }} SKILL per weapon)
-                    </b-button>
-                    <b-button
-                            variant="primary"
-                            tagname="confirm_forge_weapon"
-                            class="confirmReforge"
-                            @click="cancelReforge()"
-                            v-tooltip="'Cancel Reforge'">
-                            Cancel
-                    </b-button>
                   </div>
                 </div>
               </div>
