@@ -640,12 +640,13 @@ export default Vue.extend({
 
     addBurnWeapon(id: number){
       this.burnWeaponIds.push(id.toString());
+      this.hideWeapons = this.hideWeapons.filter(val => !this.burnWeaponIds.includes(val));
+      this.burnWeaponId = null;
     },
 
     removeBurnWeapon(id: number){
-      console.log('remove', id);
+      this.hideWeapons.push(id.toString());
       this.burnWeaponIds = this.burnWeaponIds.filter(x => x !== id.toString());
-
     },
 
     viewNewWeapons(offset: number){
@@ -667,20 +668,6 @@ export default Vue.extend({
         }, 10000);
       }
 
-    },
-
-    async onReforgeWeapon() {
-      try {
-        await this.reforgeWeapon({
-          burnWeaponId: this.burnWeaponId,
-          reforgeWeaponId: this.reforgeWeaponId,
-        });
-
-        this.burnWeaponId = null;
-      } catch (e) {
-        console.error(e);
-        (this as any).$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
-      }
     },
 
     async onReforgeWeaponWithDust() {
