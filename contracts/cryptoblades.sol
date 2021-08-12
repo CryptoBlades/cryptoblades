@@ -715,6 +715,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         public
         onlyNonContract
         oncePerBlock(msg.sender)
+        isSupportedElement(chosenElement)
     {
         require(num > 0 && num <= 10);
 
@@ -727,7 +728,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeapon(uint8 chosenElement) public onlyNonContract oncePerBlock(msg.sender) {
+    function mintWeapon(uint8 chosenElement) public onlyNonContract oncePerBlock(msg.sender) isSupportedElement(chosenElement) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
 
         _payContract(msg.sender, mintWeaponFee * chosenElementFee);
@@ -800,6 +801,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function _oncePerBlock(address user) internal {
         require(lastBlockNumberCalled[user] < block.number, "OCB");
         lastBlockNumberCalled[user] = block.number;
+    }
+
+    modifier isSupportedElement(uint8 element) {
+    _isSupportedElement(element);
+    _;
+    }
+
+    function _isSupportedElement(uint8 element) internal pure {
+        require(element == 100 || (element>= 0 && element<= 3), "Not supported element");
     }
 
     modifier isWeaponOwner(uint256 weapon) {
