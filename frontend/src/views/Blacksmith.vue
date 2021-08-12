@@ -436,7 +436,7 @@
                       variant="primary"
                       tagname="confirm_forge_weapon"
                       class="confirmReforge"
-                      @click="showReforge = false, showBlacksmith = true"
+                      @click="cancelReforge()"
                       v-tooltip="'Cancel Reforge'">
                       Cancel Reforge
                     </b-button>
@@ -478,7 +478,7 @@
                             variant="primary"
                             tagname="confirm_forge_weapon"
                             class="confirmReforge"
-                            @click="showReforge = false, showBlacksmith = true, showDustForge = false, showReforgeDust,false"
+                            @click="cancelReforge()"
                             v-tooltip="'Cancel Reforge'">
                             Cancel
                     </b-button>
@@ -732,16 +732,35 @@ export default Vue.extend({
     },
 
     displayWeaponReforge(){
-      return this.showReforge = true, this.showBlacksmith = false, this.showReforgeDust = false, this.showDustForge = false;
+      this.showReforge = true;
+      this.showBlacksmith = false;
+      this.showReforgeDust = false;
+      this.showDustForge = false;
     },
     displayDustReforge() {
-      return this.showReforge = true, this.showBlacksmith = false, this.showReforgeDust = true, this.showDustForge = false;
+      this.showReforge = true;
+      this.showBlacksmith = false;
+      this.showReforgeDust = true;
+      this.showDustForge = false;
     },
     displayDustCreation(){
-      return this.showReforge = true, this.showBlacksmith = false, this.showDustForge = true, this.showReforgeDust = false;
+      this.showReforge = true;
+      this.showBlacksmith = false;
+      this.showDustForge = true;
+      this.showReforgeDust = false;
     },
     displayBlacksmith(){
-      return this.showReforge = false, this.showBlacksmith = true, this.showDustForge = false, this.showReforgeDust = false;
+      this.showReforge = false;
+      this.showBlacksmith = true;
+      this.showDustForge = false;
+      this.showReforgeDust = false;
+    },
+
+    cancelReforge() {
+      this.showReforge = false;
+      this.showBlacksmith = true;
+      this.showDustForge = false;
+      this.showReforgeDust = false;
     },
 
     isWeaponRare() {
