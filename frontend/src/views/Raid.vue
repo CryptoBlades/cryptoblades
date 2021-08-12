@@ -2,20 +2,20 @@
   <div class="main-font">
     <div class="row">
       <div class="col-md-12 col-lg-6">
-        <h2>Dragon's Lair</h2>
+        <span class="bold raid-title-section">Dragon's Lair</span>
         <hr class="devider">
         <div class="row">
           <div class="col-md-12 col-lg-6 order-xs-last order-sm-last order-lg-first">
-            <ul class="list-group">
-              <li class="list-group-item d-flex justify-content-between align-items-center">
+            <ul class="list-group raid-details">
+              <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
                 Number of Raiders
                 <span class="badge badge-primary badge-pill">{{ raiderCount }}</span>
               </li>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
+              <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
                 Total Power
                 <span class="badge badge-primary badge-pill">{{ totalPower }}</span>
               </li>
-               <li class="list-group-item d-flex justify-content-between align-items-center">
+               <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
                  Boss Power
                 <span class="badge badge-primary badge-pill">{{ bossPower }}</span>
               </li>
@@ -47,17 +47,18 @@
             </div>
           </div>
         </div>
+        <hr class="devider">
       </div>
       <div class="col-md-12 col-lg-6 weap-char">
         <div class="row">
           <div class="col-xs-12 col-sm-12 col-lg-6 weap-box">
-            <h2>Weapon
+            <span class="raid-title-section bold">Weapon
                 <Hint
                 text="Your weapon multiplies your power<br>
                   <br>+Stats determine the multiplier
                   <br>Stat element match with character gives greater bonus"/>
                   <span class="float-right sub-text">Multiplier: x1.23</span>
-              </h2>
+              </span>
               <hr class="devider">
               <div class="header-row">
               <div v-if="selectedWeaponId" class="weapon-icon-wrapper">
@@ -68,11 +69,13 @@
               </b-button>
             </div>
             <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" class="raid-weapon-grid" />
+            <hr class="devider">
           </div>
           <div class="col-xs-12 col-sm-12 col-lg-6 char-box">
-            <h2>Choose a Character <span class="float-right sub-text">Power {{ 10000 }}</span></h2>
+            <span class="raid-title-section bold">Choose a Character <span class="float-right sub-text">Power {{ 10000 }}</span></span>
             <hr class="devider">
             <character-list :value="currentCharacterId" @input="setCurrentCharacter" class="raid-style" />
+            <hr class="devider">
           </div>
         </div>
       </div>
@@ -351,7 +354,7 @@ export default {
   display: block;
   width: 100%;
   padding: 0;
- height: 650px;
+ height: 473px;
  overflow-y: auto;
  overflow-x: hidden;
  border: 0.5px solid #1f1f1f;
@@ -411,7 +414,7 @@ export default {
 }
 
 .raid-weapon-grid {
-  height: 650px;
+  height: 473px;
   overflow-y: auto;
   border: 0.5px solid #1f1f1f;
 }
@@ -460,7 +463,7 @@ h2 > span.sub-text {
   line-height: 2;
 }
 hr.devider {
-   border: 0.5px solid #242423;
+  border: 0.5px solid #dabf75;
 }
 .container-fluid {
   margin-top: 500px;
@@ -606,6 +609,23 @@ hr.devider {
   align-items: center;
 }
 
+.raid-title-section {
+  font-size : 1.5em;
+  color : #dabf75;
+}
+
+.raid-details {
+  border: 1px solid;
+  border-radius: 5px;
+}
+
+.raid-details-text {
+  font-size: 1.2em;
+  color: #ccae4f;
+}
+.raid-details-text > span {
+  background-color: #5c6063;
+}
 .form-control.raid-id-selector {
   width: fit-content;
   height: fit-content;
