@@ -336,6 +336,9 @@
                   </template>
                   <b-form-input type="string"
                     class="modal-input" v-model="weaponRename" placeholder="New Name" />
+      <span v-if="isRenameProfanish">
+        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+      </span>
     </b-modal>
 
     <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
@@ -393,10 +396,6 @@
         1* Burn: 1 LB (15 Bonus Power/ 1500 Max).
       </div>
     </b-modal>
-              <span v-if="isRenameProfanish">
-                This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
-               </span>
-      </b-modal>
   </div>
 </template>
 
