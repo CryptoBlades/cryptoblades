@@ -793,12 +793,11 @@ export default Vue.extend({
       this.showBlacksmith = true;
       this.showDustForge = false;
       this.showReforgeDust = false;
-    },
-    cancelMassBurnToDust(){
-      return this.showReforge = false, this.showBlacksmith = true, this.showDustForge = false, this.showReforgeDust = false, this.burnWeaponIds = [];
+      this.burnWeaponIds = [];
+      this.hideWeapons = this.ownedWeaponIds;
     },
     clearAllMassBurn(){
-      return this.burnWeaponIds = [],  this.hideWeapons = [];
+      return this.burnWeaponIds = [],  this.hideWeapons = this.ownedWeaponIds;
     },
 
     isWeaponRare() {
