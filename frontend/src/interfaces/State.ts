@@ -72,6 +72,7 @@ export interface IState {
   ownedWeaponIds: number[];
   ownedShieldIds: number[];
   maxStamina: number;
+  ownedDust: string[];
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
