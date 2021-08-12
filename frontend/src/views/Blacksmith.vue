@@ -172,7 +172,7 @@
                     </div>
                     <h2 class="text-center">Lesser</h2>
                     <div class="boxed">
-                      <h2>{{this.getLesserDust()}}</h2>
+                      <h2>{{getLesserDust()}}</h2>
                     </div>
                     <div class="range">
                       <div class="sliderValue">
@@ -180,8 +180,8 @@
                       </div>
                       <div class="field">
                         <div class="value left">0</div>
-                        <input id="myRange" type="range" min="0" :max="this.getLesserDust()" value="0" steps="1">
-                        <div class="value right">{{this.getLesserDust()}}</div>
+                        <input id="myRange" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
+                        <div class="value right">{{getLesserDust()}}</div>
                       </div>
                     </div>
                   </div>
@@ -192,7 +192,7 @@
                     </div>
                     <h2 class="text-center">Greater</h2>
                     <div class="boxed">
-                      <h2>{{this.getGreaterDust()}}</h2>
+                      <h2>{{getGreaterDust()}}</h2>
                     </div>
                     <div class="range">
                       <div class="sliderValue">
@@ -200,8 +200,8 @@
                       </div>
                       <div class="field">
                         <div class="value left">0</div>
-                        <input id="myRange2" type="range" min="0" :max="this.getGreaterDust()" value="0" steps="1">
-                        <div class="value right">{{this.getGreaterDust()}}</div>
+                        <input id="myRange2" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
+                        <div class="value right">{{getGreaterDust()}}</div>
                       </div>
                       <b-button
                               variant="primary"
@@ -220,7 +220,7 @@
                     </div>
                     <h2 class="text-center">Powerful</h2>
                     <div class="boxed">
-                      <h2>{{this.getPowerfulDust()}}</h2>
+                      <h2>{{getPowerfulDust()}}</h2>
                     </div>
                     <div class="range">
                       <div class="sliderValue">
@@ -228,8 +228,8 @@
                       </div>
                       <div class="field">
                         <div class="value left">0</div>
-                        <input id="myRange3" type="range" min="0" :max="this.getPowerfulDust()" value="0" steps="1">
-                        <div class="value right">{{this.getPowerfulDust()}}</div>
+                        <input id="myRange3" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
+                        <div class="value right">{{getPowerfulDust()}}</div>
                       </div>
                     </div>
                   </div>
@@ -253,11 +253,11 @@
                                 v-tooltip="'Reforge selected weapon with dust'">
                           Confirm Reforge
                           <br>
-                          Use: {{this.lesserDust}} Lesser
+                          Use: {{lesserDust}} Lesser
                           <br>
-                          Use: {{this.greaterDust}} Greater
+                          Use: {{greaterDust}} Greater
                           <br>
-                          Use:{{this.powerfulDust}} Powerful
+                          Use:{{powerfulDust}} Powerful
                           <br>
                           ({{ dustReforgeCost }} SKILL)
                         </b-button>
@@ -481,11 +481,11 @@
       <br/>
       <div class="text-center" v-text="'Are you sure you want to reforge this weapon using:'" />
       <p class="text-center">
-        {{this.lesserDust}}: Lesser Dust
+        {{lesserDust}}: Lesser Dust
         <br>
-        {{this.greaterDust}}: Greater Dust
+        {{greaterDust}}: Greater Dust
         <br>
-        {{this.powerfulDust}}: Powerful Dust
+        {{powerfulDust}}: Powerful Dust
       </p>
       <div class="text-center">
         <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
