@@ -14,7 +14,7 @@
             @click="onForgeWeapon"
           />
         </div>
-        <div class="row mt-3" v-if="ownWeapons.length > 0">
+        <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
           <div class="col">
             <div class="d-flex justify-content-space-between">
               <h1>Weapons ({{ ownWeapons.length }})</h1>
@@ -243,7 +243,9 @@
               <weapon-grid v-model="reforgeWeaponId" />
             </div>
           </div>
+        </div>
 
+        <div class="row mt-3">
           <div class="col-md-12" v-if="showReforge && showReforgeDust === true">
             <div>
               <div class="col-lg-12 weapon-container">
@@ -363,6 +365,9 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <div class="row mt-3">
           <div class="col-md-12" v-if="showReforge && showReforgeDust === false">
             <div>
               <div class="col-lg-12">
@@ -488,8 +493,11 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
+
+
+
+          </div>
+        </div>
       </b-tab>
       <b-tab>
         <template #title>
