@@ -862,9 +862,9 @@ export default Vue.extend({
         {
           id: 'placeholder',
           type: 'shield',
-          nftPrice: 5,
+          nftPrice: 3,
           name: 'Shield',
-          description: 'A Templars Will Shield',
+          description: 'A Legendary Defender Shield',
           image: '',
         },
       ] as SkillShopListing[];
