@@ -122,7 +122,7 @@
                         v-tooltip="'Reforge selected weapon with dust'">
                   Mass Burn
                   <br>
-                  ({{this.burnCost * this.burnWeaponIds.length}} SKILL)
+                  ({{burnCost * burnWeaponIds.length }} SKILL)
                 </b-button>
                 <b-button
                         variant="primary"
@@ -293,13 +293,13 @@
                     <h2 class="text-center">Create Dust</h2>
                         <div class="dust-image1"></div>
                       <h2 class="text-center">Lesser</h2>
-                        <h2>{{this.getLesserDust()}}</h2>
+                        <h2>{{getLesserDust()}}</h2>
                         <div class="dust-image2"></div>
                       <h2 class="text-center">Greater</h2>
-                        <h2>{{this.getGreaterDust()}}</h2>
+                        <h2>{{getGreaterDust()}}</h2>
                         <div class="dust-image3"></div>
                       <h2 class="text-center">Powerful</h2>
-                        <h2>{{this.getPowerfulDust()}}</h2>
+                        <h2>{{getPowerfulDust()}}</h2>
                   </div>
                 </div>
               </div>
