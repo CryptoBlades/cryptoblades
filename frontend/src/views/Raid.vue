@@ -6,7 +6,7 @@
         <hr class="devider">
         <div class="row">
           <div class="col-md-12 col-lg-6 order-xs-last order-sm-last order-lg-first">
-            <ul class="list-group raid-details">
+            <ul class="list-group raid-details mb-4">
               <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
                 Number of Raiders
                 <span class="badge badge-primary badge-pill">{{ raiderCount }}</span>
@@ -20,10 +20,10 @@
                 <span class="badge badge-primary badge-pill">{{ bossPower }}</span>
               </li>
             </ul>
-            <h5 class="mt-3">
+            <span class="mt-3 bold raid-title-section">
               Drops
               <b-icon-question-circle v-tooltip="'Rewards are based on your contributed power relative to others.<br>Joining early gives up to 10% bonus.'"/>
-            </h5>
+            </span>
             <hr class="devider">
             <div class="drops">
               <div class="drops-icons">
@@ -32,7 +32,7 @@
                 <nft-icon :isDefault="true" :nft="{nftType: 'secret'}"/>
               </div>
               <br />
-              <span class="title">XP reward</span> {{ xpReward }}
+              <span class="bold raid-title-section">XP reward</span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }} </span>
             </div>
           </div>
           <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 order-xs-first order-sm-first boss-col">
@@ -380,15 +380,15 @@ export default {
 
 
 .raid-style >>> ul.character-list {
-    width: 100% !important;
-    margin: 0 auto;
-    display: grid;
-    justify-content: center;
-    align-content: center;
-    position: relative;
-  }
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
 .raid-style >>> ul.character-list > li.character {
-  margin: 0 auto;
+    margin: 0 auto;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 47%;
 }
 
 .raid-style >>> ul.character-list > li.character.selected {
@@ -560,6 +560,7 @@ hr.devider {
 .drops {
   margin-top: 1em;
 }
+
 .drops-icons {
   display: flex;
   flex-direction: row;
@@ -631,6 +632,13 @@ hr.devider {
   height: fit-content;
   margin: 5px;
   padding: 0;
+}
+
+.xp-reward {
+  background: #40422f;
+  border: 1px solid #727151;
+  padding: 4px;
+  border-radius: 25%;
 }
 
 @media (max-width: 1024px) {
