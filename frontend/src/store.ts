@@ -1317,16 +1317,6 @@ export function createStore(web3: Web3) {
       async burnWeapon({ state, dispatch }, { burnWeaponId}) {
         if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
 
-        await approveFee(
-          state.contracts().CryptoBlades!,
-          state.contracts().SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee()
-        );
-
         await state.contracts().CryptoBlades!.methods
           .burnWeapon(
             burnWeaponId
@@ -1356,16 +1346,28 @@ export function createStore(web3: Web3) {
 
       },
       async rerollTargets({state, dispatch }, { characterId, weaponId }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         if(isUndefined(characterId) || isUndefined(weaponId)) {
           return;
         }
+
+        await approveFee(
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.getRerollTargetsCost(characterId, weaponId)
+        );
+
         await state.contracts().CryptoBlades!.methods
           .rerollTargets(characterId, weaponId)
-          .send({ from: state.defaultAccount, gas: '500000' });
+          .send({ from: state.defaultAccount, gas: '500000'  });
 
         await Promise.all([
+          dispatch('fetchFightRewardSkill'),
           dispatch('fetchTargets', { characterId, weaponId }),
           dispatch('fetchRerollTargetsCost', { characterId, weaponId })
         ]);

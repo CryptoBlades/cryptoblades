@@ -481,7 +481,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return targets;
     }
 
-	 function rerollTargets(uint256 char, uint256 wep) public fightModifierChecks(char,wep) {
+	 function rerollTargets(uint256 char, uint256 wep) public fightModifierChecks(char,wep) onlyNonContract oncePerBlock(msg.sender) {
+		int128 usdCost = _getRerollTargetsCost(char, wep);
+	
+	    _payContractTokenOnly(msg.sender, usdToSkill(usdCost));
+		
         (int128 weaponMultTarget,,
             uint24 weaponBonusPower,
             ) = weapons.getFightData(wep, characters.getTrait(char));
@@ -494,14 +498,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         );
     }
 	
-	function getRerollTargetsCost(uint256 char, uint256 wep) public view returns (uint256) {
+	function _getRerollTargetsCost(uint256 char, uint256 wep) public view returns (int128) {
 		uint32[4] memory targets = getTargets(char, wep);
         int128 rerollCost = 0;
 		for(uint i = 0; i < targets.length; i++) { 		
 		 rerollCost = rerollCost.add(getTokenGainForFight(getMonsterPower(targets[i]),characters.getStaminaPoints(char) / staminaCostFight));
 		}
-        uint256 averageSkillReward = usdToSkill(rerollCost)  / targets.length;
-		return averageSkillReward * rerollFightCost / 100;	
+        int128 averageSkillReward = rerollCost  / int128(targets.length);
+		return averageSkillReward * rerollFightCost / int128(100);	
+	}	
+	
+	function getRerollTargetsCost(uint256 char, uint256 wep) public view returns (uint256) {
+		return usdToSkill(_getRerollTargetsCost(char,wep));	
 	}	
 	
 	function rerollTargetsInternal(uint24 playerPower,
