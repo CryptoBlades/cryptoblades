@@ -70,6 +70,9 @@
                   <span v-if="characterRename !== '' && (characterRename.length < 2 || characterRename.length > 24)">
                     Name must be 2 - 24 characters long.
                   </span>
+                  <span v-if="isRenameProfanish">
+                    This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+                  </span>
                 </b-modal>
         <b-modal class="centered-modal" ref="character-change-trait-modal"
                   @ok="changeCharacterTraitCall">
@@ -96,6 +99,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import { BModal, BvModalEvent } from 'bootstrap-vue';
 import Vue from 'vue';
+import { getCleanName, isProfaneIsh } from '../rename-censor';
 
 let getConsumablesCountInterval: any = null;
 
@@ -158,6 +162,14 @@ export default Vue.extend({
       }
 
       return availableTraits;
+    },
+
+    isRenameProfanish(): boolean {
+      return isProfaneIsh(this.characterRename);
+    },
+
+    cleanRename(): string {
+      return getCleanName(this.characterRename);
     }
   },
 
@@ -212,7 +224,7 @@ export default Vue.extend({
     },
     canRename() {
       //console.log('CR '+this.haveRename+' / '+this.currentCharacter+' / '+this.currentCharacter.id);
-      return this.haveRename > 0 && this.currentCharacter !== undefined && this.currentCharacter.id > 0;
+      return this.haveRename > 0 && this.currentCharacter !== undefined && this.currentCharacter.id >= 0;
     },
     openRenameCharacter() {
       (this.$refs['character-rename-modal'] as BModal).show();
@@ -264,7 +276,7 @@ export default Vue.extend({
       this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
       this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
       this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
-    }
+    },
   },
 
   components: {
