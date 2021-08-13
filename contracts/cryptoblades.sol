@@ -171,6 +171,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public totalMintPaymentSkillRefundable;
     mapping(address => MintPaymentSkillDeposited) mintPaymentSkillDepositeds;
 
+    mapping(uint256 => uint8) _targetRollOffset;
     uint8 rerollFightCost;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
@@ -298,7 +299,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint64 staminaTimestamp,
         uint256 hour,
         uint32 target
-    ) public pure {
+    ) public view {
 
         uint32[4] memory targets = getTargetsInternal(
             getPlayerPower(playerBasePower, wepMultiplier, wepBonusPower),
@@ -438,7 +439,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
         return traitBonus;
     }
-
+    function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
+        return (((attacker + 1) % 4) == defender); // Thanks to Tourist
+    }
     function getTargets(uint256 char, uint256 wep) public view returns (uint32[4] memory) {
         (int128 weaponMultTarget,,
             uint24 weaponBonusPower,
@@ -454,21 +457,21 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function getTargetsInternal(uint24 playerPower,
         uint64 staminaTimestamp,
         uint256 currentHour
-    ) private pure returns (uint32[4] memory) {
+    ) private view returns (uint32[4] memory) {
         // 4 targets, roll powers based on character + weapon power
         // trait bonuses not accounted for
         // targets expire on the hour
 
         uint256 baseSeed = RandomUtil.combineSeeds(
             RandomUtil.combineSeeds(staminaTimestamp,
-            currentHour),
+            now.div(1 hours)),
             playerPower
         );
 
         uint32[4] memory targets;
         for(uint i = 0; i < targets.length; i++) {
             // we alter seed per-index or they would be all the same
-            uint256 indexSeed = RandomUtil.combineSeeds(baseSeed, i);
+            uint256 indexSeed = RandomUtil.combineSeeds(baseSeed, RandomUtil.combineSeeds(i,_targetRollOffset[baseSeed]));
             targets[i] = uint32(
                 RandomUtil.plusMinus10PercentSeeded(playerPower, indexSeed) // power
                 | (uint32(indexSeed % 4) << 24) // trait
@@ -478,18 +481,42 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return targets;
     }
 
+	 function rerollTargets(uint256 char, uint256 wep) public fightModifierChecks(char,wep) {
+        (int128 weaponMultTarget,,
+            uint24 weaponBonusPower,
+            ) = weapons.getFightData(wep, characters.getTrait(char));
+			
+			
+        rerollTargetsInternal(
+            getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
+            characters.getStaminaTimestamp(char),
+            now.div(1 hours)
+        );
+    }
+	
 	function getRerollTargetsCost(uint256 char, uint256 wep) public view returns (uint256) {
 		uint32[4] memory targets = getTargets(char, wep);
         int128 rerollCost = 0;
 		for(uint i = 0; i < targets.length; i++) { 		
 		 rerollCost = rerollCost.add(getTokenGainForFight(getMonsterPower(targets[i]),characters.getStaminaPoints(char) / staminaCostFight));
 		}
-		return usdToSkill(rerollCost) * rerollFightCost / 100 / targets.length;	
+        uint256 averageSkillReward = usdToSkill(rerollCost)  / targets.length;
+		return averageSkillReward * rerollFightCost / 100;	
 	}	
-
-    function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
-        return (((attacker + 1) % 4) == defender); // Thanks to Tourist
-    }
+	
+	function rerollTargetsInternal(uint24 playerPower,
+        uint64 staminaTimestamp,
+        uint256 currentHour
+    ) private {
+	     uint256 baseSeed = RandomUtil.combineSeeds(
+            RandomUtil.combineSeeds(staminaTimestamp,
+            currentHour),
+            playerPower
+        );
+		// Increment the offset used for targets determination can overflow back to 0.
+		// 256 roll cycle should be more than enougth.
+		_targetRollOffset[baseSeed]++;	
+	}
 
     /*function mintPaymentSkillRefundable(address _minter) external view
         returns (uint256 _refundInGameOnlyFunds, uint256 _refundTokenRewards, uint256 _refundUserWallet) {

@@ -1355,7 +1355,21 @@ export function createStore(web3: Web3) {
         state.rerollTargetsCost = rerollCost;
 
       },
+      async rerollTargets({state, dispatch }, { characterId, weaponId }) {
+        if(featureFlagStakeOnly) return;
 
+        if(isUndefined(characterId) || isUndefined(weaponId)) {
+          return;
+        }
+        await state.contracts().CryptoBlades!.methods
+          .rerollTargets(characterId, weaponId)
+          .send({ from: state.defaultAccount, gas: '500000' });
+
+        await Promise.all([
+          dispatch('fetchTargets', { characterId, weaponId }),
+          dispatch('fetchRerollTargetsCost', { characterId, weaponId })
+        ]);
+      },
       async massBurnWeapons({ state, dispatch }, { burnWeaponIds}) {
         if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
 

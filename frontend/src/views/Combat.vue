@@ -69,7 +69,7 @@
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-link-others" tagname="choose_weapon">
                   Choose New Weapon
                 </b-button>
-                <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-reroll-t" tagname="reroll_targets">
+                <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="onRerollTargets()" id="gtag-reroll-t" tagname="reroll_targets">
                   Reroll Targets ({{formattedSkill(getRerollTargetsCost)}})
                 </b-button>
               </div>
@@ -223,7 +223,8 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'fetchRerollTargetsCost', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
+    ...mapActions(['fetchTargets', 'rerollTargets', 'fetchRerollTargetsCost', 'doEncounter',
+      'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -283,6 +284,14 @@ export default {
       if ((playerElement + 1) % 4 === enemyElement) return 1;
       if ((enemyElement + 1) % 4 === playerElement) return -1;
       return 0;
+    },
+    async onRerollTargets() {
+      if (this.selectedWeaponId === null || this.currentCharacterId === null) {
+        return;
+      }
+      await this.rerollTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
+      await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
+      await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
     },
     async onClickEncounter(targetToFight) {
       if (this.selectedWeaponId === null || this.currentCharacterId === null) {
