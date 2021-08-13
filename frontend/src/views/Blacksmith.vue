@@ -591,10 +591,6 @@ export default Vue.extend({
       (this.$refs['mass-dust-confirmation-modal'] as BModal).show();
     },
 
-    showReforgeBonuses() {
-      (this.$refs['reforge-bonuses-modal']as BModal).show();
-    },
-
     displayDustReforge() {
       this.showReforge = true;
       this.showBlacksmith = false;
@@ -636,12 +632,6 @@ export default Vue.extend({
       return this.ownWeapons.find(x => x.id === this.reforgeWeaponId);
     },
 
-    useDust(){
-      this.lesserDust = (document.getElementById('myRange')! as HTMLInputElement).value;
-      this.greaterDust = (document.getElementById('myRange2')! as HTMLInputElement).value;
-      this.powerfulDust = (document.getElementById('myRange3')! as HTMLInputElement).value;
-    },
-
     addBurnWeapon(id: number){
       this.burnWeaponIds.push(id.toString());
       this.hideWeapons = this.hideWeapons.filter(val => !this.burnWeaponIds.includes(val));
@@ -676,7 +666,6 @@ export default Vue.extend({
 
     async onReforgeWeaponWithDust() {
       try {
-        this.useDust();
         await this.reforgeWeaponWithDust({
           reforgeWeaponId: this.reforgeWeaponId,
           lesserDust: this.lesserDust,
