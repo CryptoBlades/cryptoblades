@@ -152,6 +152,7 @@ export function createStore(web3: Web3) {
       waxBridgeWithdrawableBnb: '0',
       waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
       waxBridgeTimeUntilLimitExpires: 0,
+      rerollTargetsCost:0,
     },
 
     getters: {
@@ -184,6 +185,9 @@ export function createStore(web3: Web3) {
 
           return targetsByWeaponId[weaponId] ?? [];
         };
+      },
+      getRerollTargetsCost(state: IState) {
+        return state.rerollTargetsCost;
       },
 
       getCharacterName(state: IState) {
@@ -1337,6 +1341,19 @@ export function createStore(web3: Web3) {
           dispatch('fetchFightRewardXp'),
           dispatch('fetchDustBalance')
         ]);
+      },
+      async fetchRerollTargetsCost({ state }, { characterId, weaponId }) {
+        if(featureFlagStakeOnly) return;
+
+        if(isUndefined(characterId) || isUndefined(weaponId)) {
+          return;
+        }
+
+        const rerollCost = await state.contracts().CryptoBlades!.methods
+          .getRerollTargetsCost(characterId, weaponId)
+          .call(defaultCallOptions(state));
+        state.rerollTargetsCost = rerollCost;
+
       },
 
       async massBurnWeapons({ state, dispatch }, { burnWeaponIds}) {

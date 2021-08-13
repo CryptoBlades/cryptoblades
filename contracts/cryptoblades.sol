@@ -68,6 +68,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         // migrateTo_5e833b0
         durabilityCostFight = 1;
+		
+        // migrateTo_???????
+        rerollFightCost = 20;
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
@@ -143,6 +146,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     Blacksmith public blacksmith;
 
+
     struct MintPayment {
         bytes32 blockHash;
         uint256 blockNumber;
@@ -166,6 +170,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     uint256 public totalMintPaymentSkillRefundable;
     mapping(address => MintPaymentSkillDeposited) mintPaymentSkillDepositeds;
+
+    uint8 rerollFightCost;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -471,6 +477,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         return targets;
     }
+
+	function getRerollTargetsCost(uint256 char, uint256 wep) public view returns (uint256) {
+		uint32[4] memory targets = getTargets(char, wep);
+        int128 rerollCost = 0;
+		for(uint i = 0; i < targets.length; i++) { 		
+		 rerollCost = rerollCost.add(getTokenGainForFight(getMonsterPower(targets[i]),characters.getStaminaPoints(char) / staminaCostFight));
+		}
+		return usdToSkill(rerollCost) * rerollFightCost / 100 / targets.length;	
+	}	
 
     function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
@@ -956,6 +971,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function setStaminaCostFight(uint8 points) public restricted {
         staminaCostFight = points;
+    }
+
+	function setRerollFightCost(uint8 percentage) public restricted {
+	    require(percentage >= 0, "Percentage too low");
+        require(percentage <= 100, "Percentage too high");
+        rerollFightCost = percentage;
     }
 
     function setDurabilityCostFight(uint8 points) public restricted {

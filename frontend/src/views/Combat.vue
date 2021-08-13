@@ -69,6 +69,9 @@
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-link-others" tagname="choose_weapon">
                   Choose New Weapon
                 </b-button>
+                <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-reroll-t" tagname="reroll_targets">
+                  Reroll Targets ({{formattedSkill(getRerollTargetsCost)}})
+                </b-button>
               </div>
 
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" :checkForDurability="true" />
@@ -175,6 +178,7 @@ export default {
     ...mapState(['currentCharacterId']),
     ...mapGetters([
       'getTargetsByCharacterIdAndWeaponId',
+      'getRerollTargetsCost',
       'ownCharacters',
       'ownWeapons',
       'currentCharacter',
@@ -207,6 +211,7 @@ export default {
         this.selectedWeaponId = null;
       }
       await this.fetchTargets({ characterId, weaponId });
+      await this.fetchRerollTargetsCost({ characterId, weaponId });
     },
 
     async updateResults([fightResults, error]) {
@@ -218,7 +223,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
+    ...mapActions(['fetchTargets', 'fetchRerollTargetsCost', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -310,6 +315,7 @@ export default {
 
         await this.fetchFightRewardSkill();
         await this.fetchFightRewardXp();
+        await this.fetchRerollTargetsCost({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
 
         this.error = null;
       } catch (e) {
@@ -642,6 +648,13 @@ h1 {
   margin-top: 30px;
 }
 #gtag-link-others {
+  margin: 0 auto;
+  display: block;
+  position: relative;
+  margin-top: 20px;
+  width: 100%;
+}
+#gtag-reroll-t {
   margin: 0 auto;
   display: block;
   position: relative;

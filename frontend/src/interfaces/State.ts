@@ -107,4 +107,5 @@ export interface IState {
   currentShieldId: number | null;
 
   nfts: Record<string, Record<number | string, Nft>>;
+  rerollTargetsCost: number;
 }
