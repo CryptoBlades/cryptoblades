@@ -109,6 +109,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
 
+
+    mapping(uint256 => uint16) private _randomCharacterSeed; 
+
     modifier restricted() {
         _restricted();
         _;
@@ -210,6 +213,14 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         tokens[id].trait = trait;
     }
 
+    function getRandomSeed(uint256 id) public view returns (uint16) {
+        return _randomCharacterSeed[id];
+    }
+
+    function setRandomSeed(uint256 id, uint16 newSeed) public restricted {
+        _randomCharacterSeed[id] = newSeed;
+    }
+
     function getXp(uint256 id) public view noFreshLookup(id) returns (uint32) {
         return tokens[id].xp;
     }
@@ -270,6 +281,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;
+        preTimestamp += _randomCharacterSeed[id];
+
         if(staminaPoints >= maxStamina) { // if stamina full, we reset timestamp and drain from that
             char.staminaTimestamp = uint64(now - getStaminaMaxWait() + drainTime);
         }

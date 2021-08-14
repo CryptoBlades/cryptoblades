@@ -564,7 +564,6 @@ export function createStore(web3: Web3) {
         Vue.set(state.weaponDurabilities, weaponId, durability);
       },
       updateWeaponRename(state: IState, { weaponId, renameString }) {
-        console.log('rename for ' + weaponId + ' is ' + renameString);
         if(renameString !== undefined){
           Vue.set(state.weaponRenames, weaponId, renameString);
         }
@@ -2243,6 +2242,51 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacter', id),
         ]);
       },
+      async fetchTotalSmokeBombsOwned({ state }) {
+        const { SmokeBombConsumables } = state.contracts();
+        if(!SmokeBombConsumables || !state.defaultAccount) return;
+        return await SmokeBombConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseSmokeBomb10({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, SmokeBombConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !SmokeBombConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchase10SmokeBombs(Web3.utils.toWei('0.1')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchTotalSmokeBombsOwned')
+        ]);
+      },
+      async useSmokeBomb({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, SmokeBombConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !SmokeBombConsumables || !state.defaultAccount) return;
+
+        await SmokeBombConsumables.methods
+          .useSmokeBomb(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchTotalSmokeBombsOwned', id),
+        ]);
+      }
     }
   });
 }

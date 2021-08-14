@@ -69,6 +69,14 @@
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-link-others" tagname="choose_weapon">
                   Choose New Weapon
                 </b-button>
+
+                <b-button v-if="selectedWeaponId" variant="primary" class="ml-3 smoke-bomb-button"
+                @click="useSmokeBombUI()" id="gtag-link-others" tagname="use_smokebomb"
+                :disabled="smokeBombs == 0">
+                  Use Smoke Bomb ({{this.smokeBombs}}) <Hint
+                    text="Get new enemies"
+                  />
+                </b-button>
               </div>
 
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" :checkForDurability="true" />
@@ -162,6 +170,8 @@ export default {
       selectedWeapon: null,
       fightMultiplier: Number(localStorage.getItem('fightMultiplier')),
       staminaPerFight: 40,
+      smokeBombs: 0,
+      intervalSmokeBombs: null
     };
   },
 
@@ -169,8 +179,8 @@ export default {
     this.intervalSeconds = setInterval(() => (this.timeSeconds = new Date().getSeconds()), 5000);
     this.intervalMinutes = setInterval(() => (this.timeMinutes = new Date().getMinutes()), 20000);
     this.staminaPerFight = 40 * Number(localStorage.getItem('fightMultiplier'));
+    this.intervalSmokeBombs = setInterval(async () => (this.smokeBombs = await this.fetchTotalSmokeBombsOwned()), 5000);
   },
-
   computed: {
     ...mapState(['currentCharacterId']),
     ...mapGetters([
@@ -201,6 +211,10 @@ export default {
     },
   },
 
+  beforeDestroy() {
+    clearInterval(this.intervalSmokeBombs);
+  },
+
   watch: {
     async selections([characterId, weaponId]) {
       if (!this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === weaponId)) {
@@ -218,7 +232,8 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchTotalSmokeBombsOwned',
+      'useSmokeBomb']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -373,6 +388,11 @@ export default {
 
       return choices;
     },
+
+    async useSmokeBombUI(){
+      await this.useSmokeBomb({ id: this.currentCharacter.id });
+      await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
+    }
   },
 
   components: {
@@ -588,6 +608,15 @@ h1 {
 .enemy-img {
   position: relative;
   top: -50px;
+}
+
+.smoke-bomb-button {
+  height: 40px;
+  line-height: 20px;
+}
+
+.smoke-bomb-button span {
+  display: inline-block;
 }
 
 @media (max-width: 1334px) {

@@ -938,6 +938,14 @@ export default Vue.extend({
           description: 'Changes character\'s trait to Lightning.',
           image: 'potion_05_te.png'
         },
+        {
+          id: 7,
+          type: 'SmokeBomb10',
+          nftPrice: 0.1,
+          name: '10 Smoke Bombs',
+          description: 'Get new enemies in combat.',
+          image: 'https://seiyria.com/gameicons-font/svg/smoke-bomb.svg'
+        },
       ] as SkillShopListing[];
 
       return nftList;

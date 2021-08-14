@@ -21,6 +21,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_EARTH = 4;
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_WATER = 5;
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_LIGHTNING = 6;
+    uint256 public constant ITEM_SMOKE_BOMB = 7;
 
     /* ========== STATE VARIABLES ========== */
 
@@ -35,6 +36,10 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     // keys: ITEM_ constant
     mapping(uint256 => address) public itemAddresses;
     mapping(uint256 => uint256) public itemFlatPrices;
+
+    /* ========== Events ========== */
+
+    event purchaseMade(address indexed buyer, uint256 item, uint8 amount, uint256 payed);
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -84,6 +89,13 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_EARTH] = 0.2 ether;
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER] = 0.2 ether;
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
+    }
+
+    function migrateTo_comingSoon(address _smokeBomb) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        itemAddresses[ITEM_SMOKE_BOMB] = _smokeBomb;
+     
+        itemFlatPrices[ITEM_SMOKE_BOMB] = 0.01 ether;
     }
 
     /* ========== VIEWS ========== */
@@ -154,12 +166,14 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         require(paying == itemFlatPrices[ITEM_CHARACTER_RENAME], 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_RENAME]);
         Consumables(itemAddresses[ITEM_CHARACTER_RENAME]).giveItem(msg.sender, 1);
+        purchaseMade(msg.sender, ITEM_CHARACTER_RENAME, 1, itemFlatPrices[ITEM_CHARACTER_RENAME]);
     }
     
     function purchaseCharacterRenameTagDeal(uint256 paying) public { // 4 for the price of 3
         require(paying == itemFlatPrices[ITEM_CHARACTER_RENAME] * 3, 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_RENAME] * 3);
         Consumables(itemAddresses[ITEM_CHARACTER_RENAME]).giveItem(msg.sender, 4);
+        purchaseMade(msg.sender, ITEM_CHARACTER_RENAME, 4, itemFlatPrices[ITEM_CHARACTER_RENAME] * 3);
     }
     
     /* ========== Weapon Rename ========== */
@@ -177,12 +191,14 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         require(paying == itemFlatPrices[ITEM_WEAPON_RENAME], 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_WEAPON_RENAME]);
         Consumables(itemAddresses[ITEM_WEAPON_RENAME]).giveItem(msg.sender, 1);
+        emit purchaseMade(msg.sender, ITEM_WEAPON_RENAME, 1, itemFlatPrices[ITEM_WEAPON_RENAME]);
     }
 
     function purchaseWeaponRenameTagDeal(uint256 paying) public { // 4 for the price of 3
         require(paying == itemFlatPrices[ITEM_WEAPON_RENAME] * 3, 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_WEAPON_RENAME] * 3);
         Consumables(itemAddresses[ITEM_WEAPON_RENAME]).giveItem(msg.sender, 4);
+        emit purchaseMade(msg.sender, ITEM_WEAPON_RENAME, 4, itemFlatPrices[ITEM_WEAPON_RENAME] * 3);
     }
 
      /* ========== Character Trait Change ========== */
@@ -203,23 +219,44 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         require(paying == itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_FIRE], 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_FIRE]);
         Consumables(itemAddresses[ITEM_CHARACTER_TRAITCHANGE_FIRE]).giveItem(msg.sender, 1);
+        emit purchaseMade(msg.sender, ITEM_CHARACTER_TRAITCHANGE_FIRE, 1, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_FIRE]);
     }
 
     function purchaseCharacterEarthTraitChange(uint256 paying) public {
         require(paying == itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_EARTH], 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_EARTH]);
         Consumables(itemAddresses[ITEM_CHARACTER_TRAITCHANGE_EARTH]).giveItem(msg.sender, 1);
+        emit purchaseMade(msg.sender, ITEM_CHARACTER_TRAITCHANGE_EARTH, 1, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_EARTH]);
     }
 
     function purchaseCharacterWaterTraitChange(uint256 paying) public {
         require(paying == itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER], 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER]);
         Consumables(itemAddresses[ITEM_CHARACTER_TRAITCHANGE_WATER]).giveItem(msg.sender, 1);
+        emit purchaseMade(msg.sender, ITEM_CHARACTER_TRAITCHANGE_WATER, 1, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER]);
     }
 
     function purchaseCharacterLightningTraitChange(uint256 paying) public {
         require(paying == itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING], 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING]);
         Consumables(itemAddresses[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING]).giveItem(msg.sender, 1);
+        emit purchaseMade(msg.sender, ITEM_CHARACTER_TRAITCHANGE_LIGHTNING, 1, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING]);
+    }
+
+    /* ========== Smoke Bomb ========== */
+      function setSmokeBombPrice(uint256 newPrice) external isAdmin {
+        require(newPrice > 0, 'invalid price');
+        itemFlatPrices[ITEM_SMOKE_BOMB] = newPrice;
+    }
+
+    function getSmokeBombPrice() public view returns (uint256){
+        return itemFlatPrices[ITEM_SMOKE_BOMB];
+    }
+
+     function purchase10SmokeBombs(uint256 paying) public { 
+        require(paying == itemFlatPrices[ITEM_SMOKE_BOMB] * 10, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_SMOKE_BOMB] * 10);
+        Consumables(itemAddresses[ITEM_SMOKE_BOMB]).giveItem(msg.sender, 10);
+        emit purchaseMade(msg.sender, ITEM_SMOKE_BOMB, 10, itemFlatPrices[ITEM_SMOKE_BOMB] * 10);
     }
 }
