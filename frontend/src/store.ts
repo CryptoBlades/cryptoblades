@@ -1349,7 +1349,8 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee()
+          cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee(),
+          { feeMultiplier: burnWeaponIds.length }
         );
 
         await state.contracts().CryptoBlades!.methods
