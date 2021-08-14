@@ -17,7 +17,7 @@ module.exports = async function (deployer, network, accounts) {
   const smokeBombConsumables = await deployProxy(SmokeBombConsumables, [Characters.address, randomsAddr], { deployer });
 
   const blacksmith = await upgradeProxy(Blacksmith.address, Blacksmith, { deployer });
-  await blacksmith.migrateTo_comingSoon(smokeBombConsumables.address);
+  await blacksmith.migrateTo_cdd5968(smokeBombConsumables.address);
 
   const smokeBombConsumable_GAME_ADMIN = await smokeBombConsumables.GAME_ADMIN();
   await smokeBombConsumables.grantRole(smokeBombConsumable_GAME_ADMIN, blacksmith.address);

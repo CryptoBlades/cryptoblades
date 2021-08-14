@@ -91,7 +91,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
     }
 
-    function migrateTo_comingSoon(address _smokeBomb) external {
+    function migrateTo_cdd5968(address _smokeBomb) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
         itemAddresses[ITEM_SMOKE_BOMB] = _smokeBomb;
      
