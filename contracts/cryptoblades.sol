@@ -94,7 +94,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         blacksmith = _blacksmith;
     }
 
-    function migrateTo_X() external {
+    function migrateTo_6a97bd1() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         rewardsClaimTaxMax = 2767011611056432742; // = ~0.15 = ~15%
