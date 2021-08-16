@@ -2,11 +2,11 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, { isUndefined } from 'lodash';
-import { toBN, bnMinimum } from './utils/common';
+import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
 import {
-  characterFromContract, targetFromContract, weaponFromContract, raidFromContract
+  characterFromContract, targetFromContract, weaponFromContract, shieldFromContract,
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
@@ -22,6 +22,8 @@ import {
 } from './feature-flags';
 import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
+import { Nft } from './interfaces/Nft';
+import { getWeaponNameFromSeed } from '@/weapon-name';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -90,20 +92,30 @@ export function createStore(web3: Web3) {
       directStakeBonusPercent: 10,
       ownedCharacterIds: [],
       ownedWeaponIds: [],
+      ownedShieldIds: [],
       maxStamina: 0,
       currentCharacterId: null,
+      ownedDust: [],
 
       characters: {},
       characterStaminas: {},
+      characterRenames: {},
       weapons: {},
       currentWeaponId: null,
+      currentNftType: null,
+      currentNftId: null,
       weaponDurabilities: {},
+      weaponRenames: {},
       maxDurability: 0,      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
 
       characterTransferCooldowns: {},
+
+      shields: {},
+      currentShieldId: null,
+      nfts: {},
 
       staking: {
         skill: { ...defaultStakeState },
@@ -169,8 +181,11 @@ export function createStore(web3: Web3) {
         };
       },
 
-      getCharacterName() {
+      getCharacterName(state: IState) {
         return (characterId: number) => {
+          if(state.characterRenames[characterId] !== undefined){
+            return state.characterRenames[characterId];
+          }
           return getCharacterNameFromSeed(characterId);
         };
       },
@@ -178,6 +193,12 @@ export function createStore(web3: Web3) {
       getCharacterStamina(state: IState) {
         return (characterId: number) => {
           return state.characterStaminas[characterId];
+        };
+      },
+
+      getCharacterRename(state: IState) {
+        return (characterId: number) => {
+          return state.characterRenames[characterId];
         };
       },
 
@@ -192,7 +213,20 @@ export function createStore(web3: Web3) {
           return state.weaponDurabilities[weaponId];
         };
       },
+      getWeaponRename(state: IState) {
+        return (weaponId: number) => {
+          return state.weaponRenames[weaponId];
+        };
+      },
+      getWeaponName(state: IState) {
+        return (weaponId: number, stars: number) => {
+          if(state.weaponRenames[weaponId] !== undefined) {
+            return state.weaponRenames[weaponId];
+          }
 
+          return getWeaponNameFromSeed(weaponId, stars);
+        };
+      },
       getExchangeUrl() {
         return 'https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
       },
@@ -209,6 +243,27 @@ export function createStore(web3: Web3) {
         };
       },
 
+      getPowerfulDust(state) {
+        return () => {
+          const dust = state.ownedDust[2];
+          return dust;
+        };
+      },
+
+      getLesserDust(state) {
+        return () => {
+          const dust = state.ownedDust[0];
+          return dust;
+        };
+      },
+
+      getGreaterDust(state) {
+        return () => {
+          const dust = state.ownedDust[1];
+          return dust;
+        };
+      },
+
       ownWeapons(state, getters) {
         return getters.weaponsWithIds(state.ownedWeaponIds);
       },
@@ -218,6 +273,45 @@ export function createStore(web3: Web3) {
           const weapons = weaponIds.map(id => state.weapons[+id]);
           if (weapons.some((w) => w === null)) return [];
           return weapons;
+        };
+      },
+
+      shieldsWithIds(state) {
+        return (shieldIds: (string | number)[]) => {
+          const shields = shieldIds.map(id => {
+            const shieldNft = state.shields[+id] as Nft;
+            if(!shieldNft) {
+              return;
+            }
+            shieldNft.type = 'shield';
+            return shieldNft;
+          });
+          if (shields.some((s) => s === null)) return [];
+          return shields;
+        };
+      },
+
+      nftsCount(state) {
+        let count = 0;
+        // add count of various nft types here
+        count += state.ownedShieldIds.length;
+        return count;
+      },
+
+      nftsWithIdType(state) {
+        return (nftIdTypes: { type: string, id: string | number }[]) => {
+          const nfts = nftIdTypes.map((idType) => {
+            const nft = state.nfts[idType.type] && state.nfts[idType.type][+(idType.id)];
+            if(!nft) {
+              return;
+            }
+            nft.type = idType.type;
+            nft.id = idType.id;
+            return nft;
+          });
+
+          if (nfts.some((t) => t === null)) return [];
+          return nfts;
         };
       },
 
@@ -289,7 +383,7 @@ export function createStore(web3: Web3) {
           const date = new Date();
 
           if (state.maxDurability !== currentDurability) {
-            date.setTime(date.getTime() + ((state.maxDurability - currentDurability) * (48 * 60000)));
+            date.setTime(date.getTime() + ((state.maxDurability - currentDurability) * (50 * 60000)));
           }
 
           return(`${
@@ -341,7 +435,7 @@ export function createStore(web3: Web3) {
 
       waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod(state): string {
         return bnMinimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
-      }
+      },
     },
 
     mutations: {
@@ -370,6 +464,10 @@ export function createStore(web3: Web3) {
 
       updateSkillBalance(state: IState, { skillBalance }) {
         state.skillBalance = skillBalance;
+      },
+
+      updateDustBalance(state: IState, { dustBalance }) {
+        state.ownedDust = dustBalance;
       },
 
       updateSkillRewards(state: IState, { skillRewards }: { skillRewards: string }) {
@@ -403,7 +501,7 @@ export function createStore(web3: Web3) {
       },
 
       updateUserDetails(state: IState, payload) {
-        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability'];
+        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability', 'ownedShieldIds'];
         for (const key of keysToAllow) {
           if (Object.hasOwnProperty.call(payload, key)) {
             Vue.set(state, key, payload[key]);
@@ -448,6 +546,12 @@ export function createStore(web3: Web3) {
         }
       },
 
+      addNewOwnedShieldId(state: IState, shieldId: number) {
+        if (!state.ownedShieldIds.includes(shieldId)) {
+          state.ownedShieldIds.push(shieldId);
+        }
+      },
+
       updateCharacter(state: IState, { characterId, character }) {
         Vue.set(state.characters, characterId, character);
       },
@@ -457,6 +561,14 @@ export function createStore(web3: Web3) {
         { characterId, characterTransferCooldown }: { characterId: number, characterTransferCooldown: ITransferCooldown }
       ) {
         Vue.set(state.characterTransferCooldowns, characterId, characterTransferCooldown);
+      },
+
+      updateShield(state: IState, { shieldId, shield }) {
+        Vue.set(state.shields, shieldId, shield);
+        if(!state.nfts.shield) {
+          Vue.set(state.nfts, 'shield', {});
+        }
+        Vue.set(state.nfts.shield, shieldId, shield);
       },
 
       updateWeapon(state: IState, { weaponId, weapon }) {
@@ -470,10 +582,20 @@ export function createStore(web3: Web3) {
       updateWeaponDurability(state: IState, { weaponId, durability }) {
         Vue.set(state.weaponDurabilities, weaponId, durability);
       },
+      updateWeaponRename(state: IState, { weaponId, renameString }) {
+        console.log('rename for ' + weaponId + ' is ' + renameString);
+        if(renameString !== undefined){
+          Vue.set(state.weaponRenames, weaponId, renameString);
+        }
+      },
       updateCharacterStamina(state: IState, { characterId, stamina }) {
         Vue.set(state.characterStaminas, characterId, stamina);
       },
-
+      updateCharacterRename(state: IState, { characterId, renameString }) {
+        if(renameString !== undefined){
+          Vue.set(state.characterRenames, characterId, renameString);
+        }
+      },
       updateTargets(state: IState, { characterId, weaponId, targets }) {
         if (!state.targetsByCharacterIdAndWeaponId[characterId]) {
           Vue.set(state.targetsByCharacterIdAndWeaponId, characterId, {});
@@ -509,7 +631,12 @@ export function createStore(web3: Web3) {
         state.waxBridgeWithdrawableBnb = payload.waxBridgeWithdrawableBnb;
         state.waxBridgeRemainingWithdrawableBnbDuringPeriod = payload.waxBridgeRemainingWithdrawableBnbDuringPeriod;
         state.waxBridgeTimeUntilLimitExpires = payload.waxBridgeTimeUntilLimitExpires;
-      }
+      },
+
+      setCurrentNft(state: IState, payload: {type: string, id: number} ) {
+        state.currentNftType = payload.type;
+        state.currentNftId = payload.id;
+      },
     },
 
     actions: {
@@ -520,7 +647,9 @@ export function createStore(web3: Web3) {
         await dispatch('pollAccountsAndNetwork');
 
         await dispatch('setupCharacterStaminas');
+        await dispatch('setupCharacterRenames');
         await dispatch('setupWeaponDurabilities');
+        await dispatch('setupWeaponRenames');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -575,7 +704,8 @@ export function createStore(web3: Web3) {
                   dispatch('fetchCharacter', characterId),
                   dispatch('fetchSkillBalance'),
                   dispatch('fetchFightRewardSkill'),
-                  dispatch('fetchFightRewardXp')
+                  dispatch('fetchFightRewardXp'),
+                  dispatch('fetchDustBalance')
                 ]);
               })
           );
@@ -594,6 +724,25 @@ export function createStore(web3: Web3) {
               await Promise.all([
                 dispatch('fetchWeapon', weaponId),
                 dispatch('fetchSkillBalance')
+              ]);
+            })
+          );
+
+          subscriptions.push(
+            state.contracts().Shields!.events.NewShield({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
+              if (err) {
+                console.error(err, data);
+                return;
+              }
+
+              const shieldId = data.returnValues.shield;
+
+              commit('addNewOwnedShieldId', shieldId);
+
+              await Promise.all([
+                dispatch('fetchShield', shieldId),
+                dispatch('fetchSkillBalance'),
+                dispatch('fetchDustBalance')
               ]);
             })
           );
@@ -696,7 +845,7 @@ export function createStore(web3: Web3) {
       },
 
       async fetchUserDetails({ dispatch }) {
-        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails')];
+        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails'), dispatch('fetchDustBalance')];
 
         if (!featureFlagStakeOnly) {
           promises.push(dispatch('fetchUserGameDetails'));
@@ -711,11 +860,13 @@ export function createStore(web3: Web3) {
         const [
           ownedCharacterIds,
           ownedWeaponIds,
+          ownedShieldIds,
           maxStamina,
           maxDurability,
         ] = await Promise.all([
           state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
           state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
+          state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)),
           state.contracts().Characters!.methods.maxStamina().call(defaultCallOptions(state)),
           state.contracts().Weapons!.methods.maxDurability().call(defaultCallOptions(state)),
         ]);
@@ -723,6 +874,7 @@ export function createStore(web3: Web3) {
         commit('updateUserDetails', {
           ownedCharacterIds: Array.from(ownedCharacterIds),
           ownedWeaponIds: Array.from(ownedWeaponIds),
+          ownedShieldIds: Array.from(ownedShieldIds),
           maxStamina: parseInt(maxStamina, 10),
           maxDurability: parseInt(maxDurability, 10),
         });
@@ -730,6 +882,7 @@ export function createStore(web3: Web3) {
         await Promise.all([
           dispatch('fetchCharacters', ownedCharacterIds),
           dispatch('fetchWeapons', ownedWeaponIds),
+          dispatch('fetchShields', ownedShieldIds),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
           dispatch('fetchFightGasOffset'),
@@ -757,6 +910,16 @@ export function createStore(web3: Web3) {
         await dispatch('fetchCharacters', ownedCharacterIds);
       },
 
+      async updateShieldIds({ state, dispatch, commit }) {
+        if(featureFlagStakeOnly) return;
+
+        const ownedShieldIds = await state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state));
+        commit('updateUserDetails', {
+          ownedShieldIds: Array.from(ownedShieldIds)
+        });
+        await dispatch('fetchShields', ownedShieldIds);
+      },
+
       async fetchSkillBalance({ state, commit, dispatch }) {
         const { defaultAccount } = state;
         if(!defaultAccount) return;
@@ -772,6 +935,20 @@ export function createStore(web3: Web3) {
             }
           })(),
           dispatch('fetchInGameOnlyFunds')
+        ]);
+      },
+
+      async fetchDustBalance({ state, commit }) {
+        const { defaultAccount } = state;
+        if(!defaultAccount) return;
+
+        await Promise.all([
+          (async () => {
+            const dustBalance = await state.contracts().Weapons!.methods
+              .getDustSupplies(defaultAccount)
+              .call(defaultCallOptions(state));
+            commit('updateDustBalance', { dustBalance });
+          })(),
         ]);
       },
 
@@ -856,7 +1033,7 @@ export function createStore(web3: Web3) {
         await Promise.all(weaponIds.map(id => dispatch('fetchWeapon', id)));
       },
 
-      async fetchWeapon({ state, commit }, weaponId: string | number) {
+      async fetchWeapon({ state, commit, dispatch }, weaponId: string | number) {
         const { Weapons } = state.contracts();
         if(!Weapons) return;
 
@@ -868,6 +1045,27 @@ export function createStore(web3: Web3) {
             );
 
             commit('updateWeapon', { weaponId, weapon });
+          })(),
+        ]);
+        dispatch('fetchWeaponDurability', weaponId);
+      },
+
+      async fetchShields({ dispatch }, shieldIds: (string | number)[]) {
+        await Promise.all(shieldIds.map(id => dispatch('fetchShield', id)));
+      },
+
+      async fetchShield({ state, commit }, shieldId: string | number) {
+        const { Shields } = state.contracts();
+        if(!Shields) return;
+
+        await Promise.all([
+          (async () => {
+            const shield = shieldFromContract(
+              shieldId,
+              await Shields.methods.get('' + shieldId).call(defaultCallOptions(state))
+            );
+
+            commit('updateShield', { shieldId, shield });
           })(),
         ]);
       },
@@ -897,6 +1095,33 @@ export function createStore(web3: Web3) {
         }
       },
 
+      async setupWeaponRenames({ state, dispatch }) {
+        const [
+          ownedWeaponIds
+        ] = await Promise.all([
+          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
+        ]);
+
+        for (const weapId of ownedWeaponIds) {
+          dispatch('fetchWeaponRename', weapId);
+        }
+      },
+
+      async setupWeaponsWithIdsRenames({ dispatch }, weaponIds: string[]) {
+        for (const weapId of weaponIds) {
+          dispatch('fetchWeaponRename', weapId);
+        }
+      },
+
+      async fetchWeaponRename({ state, commit }, weaponId: number) {
+        const renameString = await state.contracts().WeaponRenameTagConsumables!.methods
+          .getWeaponRename(weaponId)
+          .call(defaultCallOptions(state));
+        if(renameString !== '' && state.weaponRenames[weaponId] !== renameString){
+          commit('updateWeaponRename', { weaponId, renameString });
+        }
+      },
+
       async setupCharacterStaminas({ state, dispatch }) {
         const [
           ownedCharacterIds
@@ -921,7 +1146,30 @@ export function createStore(web3: Web3) {
           commit('updateCharacterStamina', { characterId, stamina });
         }
       },
+      async setupCharacterRenames({ state, dispatch }) {
+        const [
+          ownedCharacterIds
+        ] = await Promise.all([
+          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state))
+        ]);
 
+        for (const charId of ownedCharacterIds) {
+          dispatch('fetchCharacterRename', charId);
+        }
+      },
+      async setupCharactersWithIdsRenames({ dispatch }, characterIds: string[]) {
+        for (const charId of characterIds) {
+          dispatch('fetchCharacterRename', charId);
+        }
+      },
+      async fetchCharacterRename({ state, commit }, characterId: number) {
+        const renameString = await state.contracts().CharacterRenameTagConsumables!.methods
+          .getCharacterRename(characterId)
+          .call(defaultCallOptions(state));
+        if(renameString !== '' && state.characterRenames[characterId] !== renameString){
+          commit('updateCharacterRename', { characterId, renameString });
+        }
+      },
       async mintCharacter({ state, dispatch }) {
         if(featureFlagStakeOnly || !state.defaultAccount) return;
 
@@ -944,12 +1192,38 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeapon({ state, dispatch }) {
-        if(featureFlagStakeOnly || !state.defaultAccount) return;
+      async mintWeaponN({ state, dispatch }, {num}) {
+        const { CryptoBlades, SkillToken, Weapons } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
 
         await approveFee(
-          state.contracts().CryptoBlades!,
-          state.contracts().SkillToken,
+          CryptoBlades,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+          { feeMultiplier: num * 4 }
+        );
+
+        await CryptoBlades.methods.mintWeaponN(num).send({ from: state.defaultAccount, gas: '5000000' });
+
+        await Promise.all([
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('updateWeaponIds'),
+          dispatch('setupWeaponDurabilities')
+        ]);
+      },
+
+      async mintWeapon({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, Weapons } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+
+        await approveFee(
+          CryptoBlades,
+          SkillToken,
           state.defaultAccount,
           state.skillRewards,
           defaultCallOptions(state),
@@ -957,13 +1231,12 @@ export function createStore(web3: Web3) {
           cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
         );
 
-        await state.contracts().CryptoBlades!.methods.mintWeapon().send({
-          from: state.defaultAccount,
-        });
+        await CryptoBlades.methods.mintWeapon().send({ from: state.defaultAccount });
 
         await Promise.all([
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
+          dispatch('updateWeaponIds'),
           dispatch('setupWeaponDurabilities')
         ]);
       },
@@ -997,6 +1270,97 @@ export function createStore(web3: Web3) {
         ]);
       },
 
+      async reforgeWeaponWithDust({ state, dispatch }, { reforgeWeaponId, lesserDust, greaterDust, powerfulDust}) {
+        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
+
+        await approveFee(
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponWithDustFee()
+        );
+
+        await state.contracts().CryptoBlades!.methods
+          .reforgeWeaponWithDust(
+            reforgeWeaponId,
+            lesserDust,
+            greaterDust,
+            powerfulDust
+          )
+          .send({
+            from: state.defaultAccount,
+          });
+
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('fetchDustBalance')
+        ]);
+      },
+
+      async burnWeapon({ state, dispatch }, { burnWeaponId}) {
+        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
+
+        await approveFee(
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee()
+        );
+
+        await state.contracts().CryptoBlades!.methods
+          .burnWeapon(
+            burnWeaponId
+          )
+          .send({
+            from: state.defaultAccount,
+          });
+
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('fetchDustBalance')
+        ]);
+      },
+
+      async massBurnWeapons({ state, dispatch }, { burnWeaponIds}) {
+        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
+
+        await approveFee(
+          state.contracts().CryptoBlades!,
+          state.contracts().SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee(),
+          { feeMultiplier: burnWeaponIds.length }
+        );
+
+        await state.contracts().CryptoBlades!.methods
+          .burnWeapons(
+            burnWeaponIds
+          )
+          .send({
+            from: state.defaultAccount,
+          });
+
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchFightRewardXp'),
+          dispatch('fetchDustBalance')
+        ]);
+      },
+
       async fetchTargets({ state, commit }, { characterId, weaponId }) {
         if(featureFlagStakeOnly) return;
 
@@ -1012,18 +1376,20 @@ export function createStore(web3: Web3) {
         commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
       },
 
-      async doEncounter({ state, dispatch }, { characterId, weaponId, targetString }) {
+      async doEncounter({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier }) {
         if(featureFlagStakeOnly) return;
 
         const res = await state.contracts().CryptoBlades!.methods
           .fight(
             characterId,
             weaponId,
-            targetString
+            targetString,
+            fightMultiplier
           )
           .send({ from: state.defaultAccount, gas: '500000' });
 
         await dispatch('fetchTargets', { characterId, weaponId });
+
 
         const {
           /*owner,
@@ -1036,13 +1402,18 @@ export function createStore(web3: Web3) {
           skillGain
         } = res.events.FightOutcome.returnValues;
 
+        const {gasPrice} = await web3.eth.getTransaction(res.transactionHash);
+
+        const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
+
         await dispatch('fetchWeaponDurability', weaponId);
 
         return [parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
           playerRoll,
           enemyRoll,
           xpGain,
-          skillGain
+          skillGain,
+          bnbGasUsed
         ];
       },
 
@@ -1299,6 +1670,22 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async fetchNumberOfShieldListings({ state }, { nftContractAddr, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns an array of bignumbers (these are nft IDs)
+        //console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
+        void trait;
+        void stars;
+        return await NFTMarket.methods
+          .getNumberOfListingsForToken(
+            nftContractAddr
+            // TODO add contract function and filtering params
+          )
+          .call(defaultCallOptions(state));
+      },
+
       async fetchAllMarketCharacterNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, minLevel, maxLevel }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
@@ -1328,6 +1715,32 @@ export function createStore(web3: Web3) {
             stars
           )
           .call(defaultCallOptions(state));
+      },
+
+      async fetchAllMarketShieldNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, stars }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        //console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
+        void trait;
+        void stars;
+        const res = await NFTMarket.methods
+          .getListingSlice(
+            nftContractAddr,
+            pageNumber*limit, // startIndex
+            limit // length
+          )
+          .call(defaultCallOptions(state));
+        // returned values are: uint256 returnedCount, uint256[] ids, address[] sellers, uint256[] prices
+        // res[1][] refers to ids, which is what we're looking for
+        // this slice function returns the full length even if there are no items on that index
+        // we must cull the nonexistant items
+        const ids = [];
+        for(let i = 0; i < res[1].length; i++) {
+          if(res[1][i] !== '0' || res[3][i] !== '0') // id and price both 0, it's invalid
+            ids.push(res[1][i]);
+        }
+        return ids;
       },
 
       async fetchMarketNftIdsBySeller({ state }, { nftContractAddr, sellerAddr }) {
@@ -1383,13 +1796,13 @@ export function createStore(web3: Web3) {
       },
 
       async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price }: { nftContractAddr: string, tokenId: string, price: string }) {
-        const { NFTMarket, Weapons, Characters } = state.contracts();
-        if(!NFTMarket || !Weapons || !Characters) return;
+        const { NFTMarket, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTMarket || !Weapons || !Characters || !Shields) return;
 
         const NFTContract: Contract<IERC721> =
           nftContractAddr === Weapons.options.address
-            ? Weapons
-            : Characters;
+            ? Weapons : nftContractAddr === Characters.options.address
+              ? Characters : Shields;
 
         await NFTContract.methods
           .approve(NFTMarket.options.address, tokenId)
@@ -1405,6 +1818,9 @@ export function createStore(web3: Web3) {
           await dispatch('updateWeaponIds');
         else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
+        else if(nftContractAddr === Shields.options.address) {
+          await dispatch('updateShieldIds');
+        }
 
         const {
           seller,
@@ -1433,8 +1849,8 @@ export function createStore(web3: Web3) {
       },
 
       async cancelMarketListing({ state, dispatch }, { nftContractAddr, tokenId }: { nftContractAddr: string, tokenId: string }) {
-        const { NFTMarket, Weapons, Characters } = state.contracts();
-        if(!NFTMarket || !Weapons || !Characters) return;
+        const { NFTMarket, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTMarket || !Weapons || !Characters || !Shields) return;
 
         const res = await NFTMarket.methods
           .cancelListing(nftContractAddr, tokenId)
@@ -1446,6 +1862,9 @@ export function createStore(web3: Web3) {
           await dispatch('updateWeaponIds');
         else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
+        else if(nftContractAddr === Shields.options.address) {
+          await dispatch('updateShieldIds');
+        }
 
         const {
           seller,
@@ -1456,8 +1875,8 @@ export function createStore(web3: Web3) {
       },
 
       async purchaseMarketListing({ state, dispatch }, { nftContractAddr, tokenId, maxPrice }: { nftContractAddr: string, tokenId: string, maxPrice: string }) {
-        const { SkillToken, NFTMarket, Weapons, Characters } = state.contracts();
-        if(!NFTMarket || !Weapons || !Characters) return;
+        const { SkillToken, NFTMarket, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTMarket || !Weapons || !Characters || !Shields) return;
 
         await SkillToken.methods
           .approve(NFTMarket.options.address, maxPrice)
@@ -1473,6 +1892,9 @@ export function createStore(web3: Web3) {
           await dispatch('updateWeaponIds');
         else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
+        else if(nftContractAddr === Shields.options.address) {
+          await dispatch('updateShieldIds');
+        }
 
         const {
           seller,
@@ -1577,6 +1999,27 @@ export function createStore(web3: Web3) {
         return xpCharaIdPairs;
       },
 
+      async purchaseShield({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !state.defaultAccount) return;
+
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
+          .send({
+            from: state.defaultAccount
+          });
+
+        await Blacksmith.methods.purchaseShield().send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchTotalShieldSupply'),
+          dispatch('updateShieldIds'),
+        ]);
+      },
+
       async claimTokenRewards({ state, dispatch }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
@@ -1634,7 +2077,340 @@ export function createStore(web3: Web3) {
         await WaxBridge.methods.withdraw(state.waxBridgeWithdrawableBnb).send(defaultCallOptions(state));
 
         await dispatch('fetchWaxBridgeDetails');
-      }
+      },
+
+      async fetchTotalShieldSupply({ state }) {
+        const { Shields } = state.contracts();
+        if(!Shields || !state.defaultAccount) return;
+
+        return await Shields.methods.totalSupply().call(defaultCallOptions(state));
+      },
+
+      async fetchTotalRenameTags({ state }) {
+        const { CharacterRenameTagConsumables } = state.contracts();
+        //console.log(CharacterRenameTagConsumables+' / '+!state.defaultAccount);
+        if(!CharacterRenameTagConsumables || !state.defaultAccount) return;
+        return await CharacterRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseRenameTag({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseCharacterRenameTag(Web3.utils.toWei('0.1')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchTotalRenameTags')
+        ]);
+      },
+      async purchaseRenameTagDeal({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.3', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseCharacterRenameTagDeal(Web3.utils.toWei('0.3')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchTotalRenameTags')
+        ]);
+      },
+      async renameCharacter({ state, dispatch}, {id, name}) {
+        const { CryptoBlades, SkillToken, CharacterRenameTagConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterRenameTagConsumables || !state.defaultAccount) return;
+
+        await CharacterRenameTagConsumables.methods
+          .renameCharacter(id, name)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacterRename', id)
+        ]);
+      },
+      async fetchTotalWeaponRenameTags({ state }) {
+        const { WeaponRenameTagConsumables } = state.contracts();
+        if(!WeaponRenameTagConsumables || !state.defaultAccount) return;
+        return await WeaponRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseWeaponRenameTag({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseWeaponRenameTag(Web3.utils.toWei('0.1')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchTotalWeaponRenameTags')
+        ]);
+      },
+      async purchaseWeaponRenameTagDeal({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.3', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseWeaponRenameTagDeal(Web3.utils.toWei('0.3')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchTotalRenameTags')
+        ]);
+      },
+      async renameWeapon({ state, dispatch}, {id, name}) {
+        const { CryptoBlades, SkillToken, WeaponRenameTagConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !WeaponRenameTagConsumables || !state.defaultAccount) return;
+
+        await WeaponRenameTagConsumables.methods
+          .renameWeapon(id, name)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchWeaponRename', id)
+        ]);
+      },
+
+      async fetchTotalCharacterFireTraitChanges({ state }) {
+        const { CharacterFireTraitChangeConsumables } = state.contracts();
+        if(!CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
+        return await CharacterFireTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseCharacterFireTraitChange({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterFireTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseCharacterFireTraitChange(Web3.utils.toWei('0.2')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchTotalCharacterFireTraitChanges')
+        ]);
+      },
+      async changeCharacterTraitFire({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
+
+        await CharacterFireTraitChangeConsumables.methods
+          .changeCharacterTrait(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacter', id),
+        ]);
+      },
+
+      async fetchTotalCharacterEarthTraitChanges({ state }) {
+        const { CharacterEarthTraitChangeConsumables } = state.contracts();
+        if(!CharacterEarthTraitChangeConsumables || !state.defaultAccount) return;
+        return await CharacterEarthTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseCharacterEarthTraitChange({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterEarthTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseCharacterEarthTraitChange(Web3.utils.toWei('0.2')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchTotalCharacterEarthTraitChanges')
+        ]);
+      },
+      async changeCharacterTraitEarth({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterEarthTraitChangeConsumables || !state.defaultAccount) return;
+
+        await CharacterEarthTraitChangeConsumables.methods
+          .changeCharacterTrait(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacter', id),
+        ]);
+      },
+
+      async fetchTotalCharacterWaterTraitChanges({ state }) {
+        const { CharacterWaterTraitChangeConsumables } = state.contracts();
+        if(!CharacterWaterTraitChangeConsumables || !state.defaultAccount) return;
+        return await CharacterWaterTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseCharacterWaterTraitChange({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterWaterTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseCharacterWaterTraitChange(Web3.utils.toWei('0.2')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchTotalCharacterWaterTraitChanges')
+        ]);
+      },
+      async changeCharacterTraitWater({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterWaterTraitChangeConsumables || !state.defaultAccount) return;
+
+        await CharacterWaterTraitChangeConsumables.methods
+          .changeCharacterTrait(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacter', id),
+        ]);
+      },
+
+      async fetchTotalCharacterLightningTraitChanges({ state }) {
+        const { CharacterLightningTraitChangeConsumables } = state.contracts();
+        if(!CharacterLightningTraitChangeConsumables || !state.defaultAccount) return;
+        return await CharacterLightningTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseCharacterLightningTraitChange({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterLightningTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseCharacterLightningTraitChange(Web3.utils.toWei('0.2')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchTotalCharacterLightningTraitChanges')
+        ]);
+      },
+      async changeCharacterTraitLightning({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterLightningTraitChangeConsumables || !state.defaultAccount) return;
+
+        await CharacterLightningTraitChangeConsumables.methods
+          .changeCharacterTrait(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacter', id),
+        ]);
+      },
     }
   });
 }

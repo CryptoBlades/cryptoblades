@@ -1,5 +1,6 @@
 
-import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState } from './interfaces';
+import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement } from './interfaces';
+import { IShield } from './interfaces/Shield';
 
 export function traitNumberToName(traitNum: number): string {
   switch(traitNum) {
@@ -65,6 +66,34 @@ export function statNumberToName(statNum: number): string {
 
 export function getWeaponTraitFromProperties(properties: number): number {
   return (properties >> 3) & 0x3;
+}
+
+export function shieldFromContract(id: string | number, data: string[]): IShield {
+  const properties = data[0];
+  const stat1 = data[1];
+  const stat2 = data[2];
+  const stat3 = data[3];
+
+  const stat1Value = +stat1;
+  const stat2Value = +stat2;
+  const stat3Value = +stat3;
+
+  const statPattern = getStatPatternFromProperties(+properties);
+  const stat1Type = getStat1Trait(statPattern);
+  const stat2Type = getStat2Trait(statPattern);
+  const stat3Type = getStat3Trait(statPattern);
+
+  const traitNum = getWeaponTraitFromProperties(+properties);
+
+  const stars = (+properties) & 0x7;
+  return {
+    id: +id, properties,
+    element: traitNumberToName(traitNum),
+    stat1: statNumberToName(stat1Type), stat1Value, stat1Type,
+    stat2: statNumberToName(stat2Type), stat2Value, stat2Type,
+    stat3: statNumberToName(stat3Type), stat3Value, stat3Type,
+    stars,
+  };
 }
 
 export function weaponFromContract(id: string | number, data: string[]): IWeapon {

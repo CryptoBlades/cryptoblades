@@ -11,7 +11,7 @@
 
         <b-dropdown-item
           :disabled="!canClaimTokens"
-          @click="claimSkill(ClaimStage.WaxBridge)" class="gtag-link-others" tagname="claim_skill">
+          @click="onClaimTokens()" class="gtag-link-others" tagname="claim_skill">
             SKILL
             <div class="pl-3">{{ formattedSkillReward }}</div>
             <div class="pl-3">
@@ -66,10 +66,9 @@ import Vue from 'vue';
 import { Accessors } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import Web3 from 'web3';
-import { getCharacterNameFromSeed } from '../../character-name';
 import { ICharacter } from '@/interfaces';
-import { toBN } from '../../utils/common';
+import { toBN, fromWeiEther } from '../../utils/common';
+import { getCleanName } from '../../rename-censor';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -82,6 +81,7 @@ interface StoreMappedGetters {
   ownCharacters: ICharacter[];
   maxRewardsClaimTaxAsFactorBN: BigNumber;
   rewardsClaimTaxAsFactorBN: BigNumber;
+  getCharacterName(id: number): string;
 }
 
 interface StoreMappedActions {
@@ -105,11 +105,11 @@ export default Vue.extend({
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'ownCharacters', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN'
+      'ownCharacters', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName'
     ]) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
-      const skillRewards = Web3.utils.fromWei(this.skillRewards, 'ether');
+      const skillRewards = fromWeiEther(this.skillRewards);
       return `${toBN(skillRewards).toFixed(4)}`;
     },
 
@@ -121,7 +121,7 @@ export default Vue.extend({
       return this.xpRewardsForOwnedCharacters.map((xp, i) => {
         if(!this.ownCharacters[i]) return xp;
 
-        return `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}`;
+        return `${this.getCleanCharacterName(this.ownCharacters[i].id)} ${xp}`;
       });
     },
 
@@ -134,12 +134,12 @@ export default Vue.extend({
     },
 
     formattedTaxAmount(): string {
-      const skillRewards = Web3.utils.fromWei((parseFloat(this.skillRewards)* parseFloat(String(this.rewardsClaimTaxAsFactorBN))).toString(), 'ether');
+      const skillRewards = fromWeiEther(toBN(parseFloat(this.skillRewards)* parseFloat(String(this.rewardsClaimTaxAsFactorBN))).toString());
       return `${toBN(skillRewards).toFixed(4)}`;
     },
 
     formattedBonusLost(): string {
-      const skillLost = Web3.utils.fromWei((parseFloat(this.skillRewards)*this.directStakeBonusPercent/100).toString(), 'ether');
+      const skillLost = fromWeiEther(toBN(parseFloat(this.skillRewards)*this.directStakeBonusPercent/100).toString());
       return `${toBN(skillLost).toFixed(4)}`;
     },
 
@@ -188,6 +188,10 @@ export default Vue.extend({
         (this.$refs['stake-suggestion-modal'] as any).hide();
         (this.$refs['claim-confirmation-modal'] as any).show();
       }
+    },
+
+    getCleanCharacterName(id: number): string {
+      return getCleanName(this.getCharacterName(id));
     }
   }
 });

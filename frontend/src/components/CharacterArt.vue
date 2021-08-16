@@ -1,7 +1,7 @@
 <template>
   <div class="character-art" v-tooltip="tooltipHtml(character)" ref="el">
     <div class="trait" v-if="!portrait">
-      <span :class="trait.toLowerCase() + '-icon circle-element'"></span>
+      <span :class="characterTrait.toLowerCase() + '-icon circle-element'"></span>
     </div>
 
     <div class="placeholder d-flex align-items-start justify-content-center p-1"
@@ -23,7 +23,7 @@
     </div>
 
     <div class="name-lvl-container">
-      <div class="name black-outline" v-if="!portrait">{{ getCharacterName(character.id) }} </div>
+      <div class="name black-outline" v-if="!portrait">{{ getCleanCharacterName(character.id) }} </div>
       <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
     </div>
     <div class="score-id-container">
@@ -63,6 +63,7 @@ import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
 import { mapGetters, mapState } from 'vuex';
+import { getCleanName } from '../rename-censor';
 //import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
@@ -105,7 +106,7 @@ export default {
       modelLoader: null,
       textureLoader: null,
       body: null,
-      trait: CharacterTrait[this.character.trait],
+      trait: this.characterTrait,
       showPlaceholder: false,
       heroScore: 0
     };
@@ -117,8 +118,14 @@ export default {
       'getCharacterName',
       'transferCooldownOfCharacterId',
       'getCharacterUnclaimedXp',
-      'timeUntilCharacterHasMaxStamina'
+      'timeUntilCharacterHasMaxStamina',
+      'charactersWithIds',
     ]),
+
+    characterTrait() {
+      const characterWithId = this.charactersWithIds && this.charactersWithIds([this.character.id]);
+      return characterWithId && CharacterTrait[characterWithId[0].trait] || CharacterTrait[this.character.trait];
+    }
   },
 
   methods: {
@@ -136,6 +143,10 @@ export default {
       }
 
       return '';
+    },
+
+    getCleanCharacterName(id) {
+      return getCleanName(this.getCharacterName(id));
     },
 
     staminaToolTipHtml(time) {

@@ -1,8 +1,11 @@
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
+import Web3 from 'web3';
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
 BigNumber.config({ EXPONENTIAL_AT: 100 });
+
+export const apiUrl = (url: string) => `${process.env.VUE_APP_API_URL || 'https://api.cryptoblades.io'}/${url}`;
 
 export const getCurrentGasPrices = async () => {
   const response = await axios.get('https://www.gasnow.org/api/v3/gas/price');
@@ -15,11 +18,22 @@ export const getCurrentGasPrices = async () => {
 
 export const toBN = (value: string|number): BigNumber => {
   const valueString = typeof value === 'string' ? value : String(value);
-  if(!valueString.includes('.')) return new BigNumber(valueString);
 
-  return new BigNumber(valueString.substring(0, valueString.indexOf('.')));
+  return new BigNumber(valueString);
 };
 
 export const bnMinimum = (...values: string[]): BigNumber => {
   return BigNumber.minimum(...values);
+};
+
+export const fromWeiEther = (value: string|BigNumber): string => {
+  return new BigNumber(value).div('1000000000000000000').toFixed();
+};
+
+export const gasUsedToBnb = (gasUsed: number, gasPrice: string): string => {
+  const gasCost = gasUsed * Number(gasPrice);
+
+  const bnbGasCost =  Web3.utils.fromWei(gasCost.toString()).toString();
+
+  return  bnbGasCost;
 };

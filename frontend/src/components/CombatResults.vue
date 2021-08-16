@@ -8,12 +8,14 @@
       <span v-tooltip="convertWei(results[4])+' SKILL'">{{"and "+formattedSkill}}</span>
         <Hint text="SKILL earned is based on gas costs of the network plus a factor of your power" />
     </span>
+    <span>
+         {{ "You spent ~" + results[5]+" BNB with gas taxes"}}
+    </span>
   </div>
 </template>
 
 <script>
-import Web3 from 'web3';
-import { toBN } from '../utils/common';
+import { toBN, fromWeiEther } from '../utils/common';
 import Hint from '../components/Hint.vue';
 
 export default {
@@ -21,7 +23,7 @@ export default {
 
   computed: {
     formattedSkill() {
-      const skillBalance = Web3.utils.fromWei(this.results[4], 'ether');
+      const skillBalance = fromWeiEther(this.results[4]);
       return `${toBN(skillBalance).toFixed(6)} SKILL`;
     }
   },
@@ -31,10 +33,7 @@ export default {
       return this.results[0] ? 'You won the fight!' : 'You lost the fight!';
     },
     convertWei(wei) {
-      return Web3.utils.fromWei(
-        wei,
-        'ether'
-      );
+      return fromWeiEther(wei);
     }
   },
 

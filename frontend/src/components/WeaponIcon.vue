@@ -21,14 +21,20 @@
       </div>
 
       <div class="name">
-        {{ getWeaponNameFromSeed(weapon.id, weapon.stars) }}
+        {{ getCleanWeaponName(weapon.id, weapon.stars) }}
+      </div>
+
+      <div class="bonus-power">
+        <div v-if="weapon.lowStarBurnPoints > 0"><span>{{ weapon.lowStarBurnPoints }} LB</span></div>
+        <div v-if="weapon.fourStarBurnPoints > 0"><span>{{ weapon.fourStarBurnPoints }} 4B</span></div>
+        <div v-if="weapon.fiveStarBurnPoints > 0"><span>{{ weapon.fiveStarBurnPoints }} 5B</span></div>
       </div>
 
       <div>
         <div class="small-durability-bar"
         :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
         v-tooltip.bottom="`Durability: ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
-          Repairs 1 point every 48 minutes, durability will be full at: ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
+          Repairs 1 point every 50 minutes, durability will be full at: ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
       </div>
 
     </div>
@@ -55,7 +61,6 @@
 
 <script>
 import { getWeaponArt } from '../weapon-arts-placeholder';
-import { getWeaponNameFromSeed } from '../weapon-name';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import swordspecs from '../assets/swordspecs.json';
@@ -67,6 +72,7 @@ import { Stat1PercentForChar,
 } from '../interfaces';
 
 import { mapGetters, mapState } from 'vuex';
+import { getCleanName } from '../rename-censor';
 
 const bladeCount = 24;
 const crossGuardCount = 24;
@@ -96,7 +102,8 @@ export default {
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',
-      'timeUntilWeaponHasMaxDurability'
+      'timeUntilWeaponHasMaxDurability',
+      'getWeaponName'
     ]),
     tooltipHtml() {
       if(!this.weapon) return '';
@@ -203,9 +210,7 @@ export default {
   },
 
   methods: {
-    getWeaponNameFromSeed,
     getWeaponArt,
-
     init() {
       const container = this.$refs.el;
 
@@ -415,6 +420,10 @@ export default {
           this.renderer.render(this.scene, this.camera);
         }
       }
+    },
+
+    getCleanWeaponName(id, stars) {
+      return getCleanName(this.getWeaponName(id, stars));
     }
   },
   mounted() {
@@ -539,6 +548,14 @@ export default {
 
 .no-durability {
   opacity: 0.6;
+}
+
+.bonus-power {
+  position: absolute;
+  bottom: 40px;
+  right: 10%;
+  font-size: 0.6em;
+  text-align: right;
 }
 
 @keyframes glow-1 {

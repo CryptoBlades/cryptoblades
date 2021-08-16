@@ -113,13 +113,21 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
 
     modifier restricted() {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        _restricted();
         _;
     }
 
+    function _restricted() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+    }
+
     modifier noFreshLookup(uint256 id) {
-        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
+        _noFreshLookup(id);
         _;
+    }
+
+    function _noFreshLookup(uint256 id) internal view {
+        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
     }
 
     function transferCooldownEnd(uint256 tokenId) public override view returns (uint256) {
@@ -199,6 +207,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function getTrait(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return tokens[id].trait;
+    }
+
+    function setTrait(uint256 id, uint8 trait) public restricted {
+        tokens[id].trait = trait;
     }
 
     function getXp(uint256 id) public view noFreshLookup(id) returns (uint32) {
