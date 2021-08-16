@@ -396,8 +396,8 @@ export default {
     },
 
     stakeUnclaimedRewardsButtonShown() {
-      return stakeTypeThatCanHaveUnclaimedRewardsStakedTo === this.stakeType && this.isDeposit;
-      // return true;
+      return false;
+      // return stakeTypeThatCanHaveUnclaimedRewardsStakedTo === this.stakeType && this.isDeposit;
     },
 
     canStakeUnclaimedRewards() {
