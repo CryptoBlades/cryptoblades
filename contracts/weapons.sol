@@ -5,10 +5,14 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+<<<<<<< HEAD
+import "./interfaces/IERC721MintAccessSeededStars.sol";
+=======
 import "./Promos.sol";
+>>>>>>> 8fb07b76aafdcaf196671e39f7582dfc16026069
 import "./util.sol";
 
-contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
+contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IERC721MintAccessSeededStars {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint16;
@@ -209,6 +213,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         }
 
         return mintWeaponWithStars(minter, stars, seed);
+    }
+
+    function mintAccessSeededStars(address receiver, uint256 ref, uint256 seed, uint8 stars) external override
+        restricted returns(uint256) {
+        // for raids reward interface compatibility
+        return mintWeaponWithStars(receiver, stars, seed);
     }
 
     function mintWeaponWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
@@ -645,7 +655,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) public restricted {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
-        require(durabilityPoints >= amount, "Not enough durability!");
+        require(allowNegativeDurability || durabilityPoints >= amount, "Not enough durability!");
 
         uint64 drainTime = uint64(amount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that

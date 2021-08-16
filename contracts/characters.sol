@@ -103,6 +103,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     uint256 private lastMintedBlock;
     uint256 private firstMintedOfLastBlock;
+    
+    mapping(uint256 => uint256) public raidsDone;
+    mapping(uint256 => uint256) public raidsWon;
 
     uint256 public characterLimit;
 
@@ -263,10 +266,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint64(maxStamina * secondsPerStamina);
     }
 
-    function getFightDataAndDrainStamina(uint256 id, uint8 amount) public restricted returns(uint96) {
+    function getFightDataAndDrainStamina(uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
         Character storage char = tokens[id];
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
-        require(staminaPoints >= amount, "Not enough stamina!");
+        require(allowNegativeStamina || staminaPoints >= amount, "Not enough stamina!");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;
@@ -278,6 +281,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
         // bitwise magic to avoid stacking limitations later on
         return uint96(char.trait | (getPowerAtLevel(char.level) << 8) | (preTimestamp << 32));
+    }
+
+    function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
+        raidsDone[id] = raidsDone[id] + 1;
+        raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
+        gainXp(id, xp);
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {

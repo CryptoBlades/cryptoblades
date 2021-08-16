@@ -41,14 +41,19 @@ export interface IStakeOverviewState {
 }
 
 export interface IRaidState {
+  index: string;
   expectedFinishTime: string;
-  raiderCount: number;
-  bounty: string;
-  totalPower: string;
-  weaponDrops: string[];
-  staminaDrainSeconds: number;
+  raiderCount: string;
+  playerPower: string;
+  bossPower: string;
+  bossTrait: string;
+  status: string;
+  joinSkill: string;
+  staminaCost: string;
+  durabilityCost: string;
+  xpReward: string;
 
-  isOwnedCharacterRaidingById: Record<number, boolean>; // ?
+  //isOwnedCharacterRaidingById: Record<number, boolean>; // ?
 }
 
 export interface IState {
