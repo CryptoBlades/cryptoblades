@@ -10,7 +10,7 @@ import {
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
-  IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState
+  IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
@@ -45,6 +45,15 @@ function getStakingContracts(contracts: Contracts, stakeType: StakeType): Stakin
     StakingToken: contracts.staking[stakeType]?.StakingToken || null,
     RewardToken: contracts.SkillToken
   };
+}
+
+interface RaidData {
+  expectedFinishTime: string;
+  raiderCount: number;
+  bounty: string;
+  totalPower: string;
+  weaponDrops: string[];
+  staminaDrainSeconds: number;
 }
 
 type WaxBridgeDetailsPayload = Pick<
@@ -131,17 +140,13 @@ export function createStore(web3: Web3) {
       },
 
       raid: {
-        index: '0',
         expectedFinishTime: '0',
-        raiderCount: '0',
-        playerPower: '0',
-        bossPower: '0',
-        bossTrait: '0',
-        status: '0',
-        joinSkill: '0',
-        staminaCost: '0',
-        durabilityCost: '0',
-        xpReward: '0',
+        raiderCount: 0,
+        bounty: '0',
+        totalPower: '0',
+        weaponDrops: [],
+        staminaDrainSeconds: 0,
+        isOwnedCharacterRaidingById: {}
       },
 
       waxBridgeWithdrawableBnb: '0',
@@ -413,8 +418,10 @@ export function createStore(web3: Web3) {
         return (stakeType: StakeType): IStakeState => state.staking[stakeType];
       },
 
-      getRaidState(state): IRaidState {
-        return state.raid;
+      isOwnedCharacterRaiding(state) {
+        if(!featureFlagRaid) return false;
+
+        return (characterId: number): boolean => state.raid.isOwnedCharacterRaidingById[characterId] || false;
       },
 
       fightGasOffset(state) {
@@ -613,18 +620,17 @@ export function createStore(web3: Web3) {
         Vue.set(state.stakeOverviews, stakeType, data);
       },
 
-      updateRaidState(state: IState, payload: { raidState: IRaidState }) {
-        state.raid.index = payload.raidState.index;
-        state.raid.expectedFinishTime = payload.raidState.expectedFinishTime;
-        state.raid.raiderCount = payload.raidState.raiderCount;
-        state.raid.playerPower = payload.raidState.playerPower;
-        state.raid.bossPower = payload.raidState.bossPower;
-        state.raid.bossTrait = payload.raidState.bossTrait;
-        state.raid.status = payload.raidState.status;
-        state.raid.joinSkill = payload.raidState.joinSkill;
-        state.raid.staminaCost = payload.raidState.staminaCost;
-        state.raid.durabilityCost = payload.raidState.durabilityCost;
-        state.raid.xpReward = payload.raidState.xpReward;
+      updateRaidData(state, payload: RaidData) {
+        state.raid.expectedFinishTime = payload.expectedFinishTime;
+        state.raid.raiderCount = payload.raiderCount;
+        state.raid.bounty = payload.bounty;
+        state.raid.totalPower = payload.totalPower;
+        state.raid.weaponDrops = payload.weaponDrops;
+        state.raid.staminaDrainSeconds = payload.staminaDrainSeconds;
+      },
+
+      updateAllIsOwnedCharacterRaidingById(state, payload: Record<number, boolean>) {
+        state.raid.isOwnedCharacterRaidingById = payload;
       },
 
       updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
@@ -976,6 +982,8 @@ export function createStore(web3: Web3) {
 
       async fetchCharacters({ dispatch }, characterIds: (string | number)[]) {
         await Promise.all(characterIds.map(id => dispatch('fetchCharacter', id)));
+
+        await dispatch('fetchOwnedCharacterRaidStatus');
       },
 
       async fetchCharacter({ state, commit, dispatch }, characterId: string | number) {
@@ -1548,85 +1556,54 @@ export function createStore(web3: Web3) {
         await dispatch('fetchStakeDetails', { stakeType });
       },
 
-      async joinRaid({ state }, { characterId, weaponId }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        console.log('Within the join raid method...');
-
-        await Raid1!.methods
-          .joinRaid(characterId, weaponId)
-          .send(defaultCallOptions(state));
-
-        console.log('past the join raid await');
-      },
-
-      async fetchRaidState({ state, commit }) {
+      async fetchRaidData({ state, commit }) {
         if(featureFlagStakeOnly || !featureFlagRaid) return;
 
-        const Raid1 = state.contracts().Raid1!;
+        const RaidBasic = state.contracts().RaidBasic!;
 
-        await Promise.all([
-          (async () => {
-            const raidState: IRaidState = raidFromContract(
-              await Raid1.methods.getRaidData().call(defaultCallOptions(state))
-            );
-
-            commit('updateRaidState', { raidState });
-          })(),
+        const [
+          expectedFinishTime,
+          raiderCount,
+          bounty,
+          totalPower,
+          weaponDrops,
+          staminaDrainSeconds
+        ] = await Promise.all([
+          RaidBasic.methods.getExpectedFinishTime().call(defaultCallOptions(state)),
+          RaidBasic.methods.getRaiderCount().call(defaultCallOptions(state)),
+          Promise.resolve('0'),
+          RaidBasic.methods.getTotalPower().call(defaultCallOptions(state)),
+          RaidBasic.methods.getWeaponDrops().call(defaultCallOptions(state)),
+          RaidBasic.methods.getStaminaDrainSeconds().call(defaultCallOptions(state)),
         ]);
-      },
 
-      async fetchRaidRewards({ state }, { startIndex, endIndex }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .getEligibleRewardIndexes(
-            startIndex,
-            endIndex
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchRaidingCharacters({ state }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .getParticipatingCharacters()
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchRaidingWeapons({ state }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .getParticipatingWeapons()
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchRaidJoinEligibility({ state }, { characterID, weaponID }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .canJoinRaid(characterID, weaponID)
-          .call(defaultCallOptions(state));
-      },
-
-      async claimRaidRewards({ state }, { rewardIndex }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        const res = await Raid1!.methods
-          .claimReward(rewardIndex)
-          .send(defaultCallOptions(state));
-
-        // there may be other events fired that can be used to obtain the exact loot
-        // RewardedWeapon, RewardedJunk, RewardedTrinket, RewardedKeyBox etc
-        const rewards = {
-          rewardsClaimed: res.events.RewardClaimed.returnValues,
-          weapons: res.events.RewardedWeapon.returnValues,
-          junk: res.events.RewardedJunk.returnValues,
-          keybox: res.events.RewardedKeyBox.returnValues
+        const raidData: RaidData = {
+          expectedFinishTime,
+          raiderCount: parseInt(raiderCount, 10),
+          bounty,
+          totalPower,
+          weaponDrops,
+          staminaDrainSeconds: parseInt(staminaDrainSeconds, 10)
         };
-        return rewards;
+        commit('updateRaidData', raidData);
+      },
+
+      async fetchOwnedCharacterRaidStatus({ state, commit }) {
+        if(featureFlagStakeOnly || !featureFlagRaid) return;
+
+        const RaidBasic = state.contracts().RaidBasic!;
+
+        const ownedCharacterIds = _.clone(state.ownedCharacterIds);
+        const characterIsRaidingRes = await Promise.all(
+          ownedCharacterIds.map(
+            cid => RaidBasic.methods.isRaider('' + cid).call(defaultCallOptions(state))
+          )
+        );
+        const isOwnedCharacterRaiding: Record<number, boolean> = _.fromPairs(
+          _.zip(ownedCharacterIds, characterIsRaidingRes)
+        );
+
+        commit('updateAllIsOwnedCharacterRaidingById', isOwnedCharacterRaiding);
       },
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {

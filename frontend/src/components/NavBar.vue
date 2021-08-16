@@ -105,15 +105,6 @@ a.router-link-active {
 .dropdown-menu li a:hover {
   background: transparent !important;
 }
-@media (max-width: 1024px) {
- .navbar-expand-sm {
-    text-align: center;
-    margin: 0 auto;
-    display: block;
-  }
-}
-
-
 
 @media (max-width: 576px) {
   .main-nav {
@@ -136,11 +127,6 @@ a.router-link-active {
   .options-display-mobile {
     flex: 1;
     align-items: flex-end;
-  }
-  .navbar-expand-sm {
-    text-align: center;
-    margin: 0 auto;
-    display: block;
   }
 }
 </style>
