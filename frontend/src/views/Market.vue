@@ -195,7 +195,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData(),browseTabActive = false;skillShopTabActive = false">
+      <b-tab @click="clearData();loadMarketTaxes(),browseTabActive = false;skillShopTabActive = false">
         <template #title>
           Search NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons, Shields and Characters are NFTs of the ERC721 standard" />
@@ -671,11 +671,10 @@ import { market_blockchain as useBlockchain } from './../feature-flags';
 import { CharacterTransactionHistoryData, ICharacterHistory,
   IWeaponHistory, WeaponTransactionHistoryData,
   IShieldHistory, ShieldTransactionHistoryData } from '@/interfaces/History';
-import { getWeaponNameFromSeed } from '@/weapon-name';
-import { getCharacterNameFromSeed } from '@/character-name';
 import { getShieldNameFromSeed } from '@/shield-name';
 import { fromWeiEther, apiUrl } from '../utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
+import { getCleanName } from '../rename-censor';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
@@ -722,6 +721,8 @@ interface StoreMappedGetters {
   contracts: Contracts;
   ownCharacters: any[];
   totalShieldSupply: 0;
+  getCharacterName(id: string): string;
+  getWeaponName(id: string, stars: number): string;
 }
 
 export interface Nft {
@@ -764,6 +765,8 @@ interface StoreMappedActions {
   purchaseMarketListing(payload: { nftContractAddr: string, tokenId: string, maxPrice: string }): Promise<{ seller: string, nftID: string, price: string }>;
   fetchSellerOfNft(payload: { nftContractAddr: string, tokenId: string }): Promise<string>;
   fetchTotalShieldSupply(): Promise<number>;
+  setupWeaponsWithIdsRenames(weaponIds: string[]): Promise<void>;
+  setupCharactersWithIdsRenames(weaponIds: string[]): Promise<void>;
 }
 
 export default Vue.extend({
@@ -807,7 +810,7 @@ export default Vue.extend({
       'defaultAccount', 'weapons', 'characters', 'shields', 'ownedCharacterIds', 'ownedWeaponIds', 'ownedShieldIds',
     ]) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'contracts', 'ownCharacters', 'totalShieldSupply'
+      'contracts', 'ownCharacters', 'totalShieldSupply','getCharacterName','getWeaponName'
     ]) as Accessors<StoreMappedGetters>),
     ...mapGetters(['transferCooldownOfCharacterId']),
 
@@ -963,6 +966,8 @@ export default Vue.extend({
       'purchaseMarketListing',
       'fetchSellerOfNft',
       'fetchTotalShieldSupply',
+      'setupWeaponsWithIdsRenames',
+      'setupCharactersWithIdsRenames',
     ]) as StoreMappedActions),
 
     clearData() {
@@ -979,7 +984,6 @@ export default Vue.extend({
       this.currentPage = 1;
       this.listingSellPrice = '';
     },
-
 
     async loadMarketTaxes() {
       if(!this.characterMarketTax) {
@@ -1330,9 +1334,15 @@ export default Vue.extend({
         tokenId: this.search
       });
       this.searchResultsOwned = nftSeller === this.defaultAccount;
+      const url = new URL('https://api.cryptoblades.io/static/wallet/banned/' + nftSeller);
+      const data = await fetch(url.toString());
+      const banned = await data.json();
+      if(banned.banned) {
+        (this as any).$dialog.notify.error('Item not available!');
+      }
 
       const price = await this.lookupNftPrice(this.search);
-      if(price !== '0') {
+      if(price !== '0' && !banned.banned) {
         this.searchResults = [this.search];
       } else {
         this.searchResults = [];
@@ -1533,7 +1543,7 @@ export default Vue.extend({
             // eslint-disable-next-line prefer-const
             let items: WeaponTransactionHistoryData = {
               weaponId: weaponHistory[i].weaponId,
-              weaponName: getWeaponNameFromSeed(parseInt(weaponHistory[i].weaponId,10),weaponHistory[i].weaponStars),
+              weaponName: getCleanName(this.getWeaponName(weaponHistory[i].weaponId, weaponHistory[i].weaponStars)),
               weaponPrice: weaponHistory[i].price
             };
 
@@ -1574,7 +1584,7 @@ export default Vue.extend({
             // eslint-disable-next-line prefer-const
             let items: CharacterTransactionHistoryData = {
               charId: characterHistory[i].charId,
-              charName: getCharacterNameFromSeed(parseInt(characterHistory[i].charId,10)),
+              charName: getCleanName(this.getCharacterName(characterHistory[i].charId)),
               charPrice: characterHistory[i].price
             };
 
@@ -1743,12 +1753,22 @@ export default Vue.extend({
       this.selectedNftId = null;
 
       await this.fetchNftPrices(nftIds);
+      if(this.activeType === 'weapon') {
+        await this.setupWeaponsWithIdsRenames(nftIds);
+      } else if(this.activeType === 'character') {
+        await this.setupCharactersWithIdsRenames(nftIds);
+      }
     },
 
     async allSearchResults(nftIds: CharacterId[] | WeaponId[] | ShieldId[]) {
       this.selectedNftId = null;
 
       await this.fetchNftPrices(nftIds);
+      if(this.activeType === 'weapon') {
+        await this.setupWeaponsWithIdsRenames(nftIds);
+      } else if(this.activeType === 'character') {
+        await this.setupCharactersWithIdsRenames(nftIds);
+      }
     }
   },
 
