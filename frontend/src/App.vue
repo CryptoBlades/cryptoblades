@@ -686,7 +686,7 @@ div.bg-success {
 
 .content {
   padding: 0 1em;
-  height: auto;
+  height: calc(100vh - 56px);
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }
