@@ -6,7 +6,7 @@ import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
 import {
-  characterFromContract, targetFromContract, weaponFromContract, shieldFromContract,
+  characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,

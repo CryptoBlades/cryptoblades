@@ -1,5 +1,5 @@
 
-import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement } from './interfaces';
+import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState } from './interfaces';
 import { IShield } from './interfaces/Shield';
 
 export function traitNumberToName(traitNum: number): string {

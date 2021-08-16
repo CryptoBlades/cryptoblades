@@ -623,12 +623,14 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         );
     }
 
-    function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount) public
+    function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
         restricted noFreshLookup(id)
     returns (int128, int128, uint24, uint8) {
 
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
-        require(durabilityPoints >= drainAmount && promos.getBit(ownerOf(id), 4) == false, "Not enough durability!");
+        require((durabilityPoints >= drainAmount || allowNegativeDurability)
+            && promos.getBit(ownerOf(id), 4) == false,
+            "Not enough durability!");
 
         uint64 drainTime = uint64(drainAmount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
@@ -651,7 +653,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         );
     }
 
-    function drainDurability(uint256 id, uint8 amount) public restricted {
+    function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) public restricted {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require(allowNegativeDurability || durabilityPoints >= amount, "Not enough durability!");
 
