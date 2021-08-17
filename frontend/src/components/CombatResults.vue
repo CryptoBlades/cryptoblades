@@ -8,6 +8,18 @@
       <span v-tooltip="convertWei(results[4])+' SKILL'">{{"and "+formattedSkill}}</span>
         <Hint text="SKILL earned is based on gas costs of the network plus a factor of your power" />
     </span>
+    <span>
+         {{ "You spent ~" + results[5]+" BNB with gas taxes"}}
+    </span>
+
+    <div>
+      <ins class="adsbygoogle"
+          style="display:block"
+          data-ad-client="ca-pub-6717992096530538"
+          data-ad-slot="5115599573"
+          data-ad-format="auto"
+          data-full-width-responsive="true"></ins>
+    </div>
   </div>
 </template>
 
