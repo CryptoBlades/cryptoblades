@@ -193,6 +193,20 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return rewardsClaimTaxDuration;
     }
 
+    function getSkillToSubtractSingle(uint256 _needed, uint256 _available)
+        public
+        pure
+        returns (uint256 _used, uint256 _remainder) {
+
+        if(_needed <= _available) {
+            return (_needed, 0);
+        }
+
+        _needed -= _available;
+
+        return (_available, _needed);
+    }
+
     function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _skillNeeded)
         public
         pure
@@ -732,7 +746,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         oncePerBlock(msg.sender)
     {
         require(num > 0 && num <= 10);
-        _payContract(msg.sender, mintWeaponFee * num);
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * num));
 
         for (uint i = 0; i < num; i++) {
             weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))));
@@ -740,7 +754,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function mintWeapon() public onlyNonContract oncePerBlock(msg.sender) {
-        _payContract(msg.sender, mintWeaponFee);
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee));
 
         //uint256 seed = randoms.getRandomSeed(msg.sender);
         weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))));
@@ -912,13 +926,49 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             );
 
         // must use requestPayFromPlayer modifier to approve on the initial function!
+
+        return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
+    }
+
+    function _payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) internal
+        returns (
+            uint256 _fromInGameOnlyFunds,
+            uint256 _fromTokenRewards,
+            uint256 _fromUserWallet,
+            uint256 _fromStaked
+        ) {
+
+        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 _remainder) =
+            getSkillToSubtract(
+                inGameOnlyFunds[playerAddress],
+                tokenRewards[playerAddress],
+                convertedAmount
+            );
+
+        (uint256 fromUserWallet, uint256 fromStaked) =
+            getSkillToSubtractSingle(
+                _remainder,
+                skillToken.balanceOf(playerAddress)
+            );
+
+        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
+
+        stakeFromGameImpl.unstakeToGame(playerAddress, fromStaked);
+
+        return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet, fromStaked);
+    }
+
+    function _deductPlayerSkillStandard(
+        address playerAddress,
+        uint256 fromInGameOnlyFunds,
+        uint256 fromTokenRewards,
+        uint256 fromUserWallet
+    ) internal {
         totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
         inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
 
         tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
         skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
-
-        return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
 
     function _payPlayer(address playerAddress, int128 baseAmount) internal {

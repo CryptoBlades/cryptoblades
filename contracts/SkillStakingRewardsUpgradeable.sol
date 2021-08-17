@@ -4,7 +4,10 @@ import "./staking/StakingRewardsUpgradeable.sol";
 import "./interfaces/IStakeFromGame.sol";
 import "./cryptoblades.sol";
 
-contract SkillStakingRewardsUpgradeable is IStakeFromGame, StakingRewardsUpgradeable {
+contract SkillStakingRewardsUpgradeable is
+    IStakeFromGame,
+    StakingRewardsUpgradeable
+{
     /* ========== VIEWS ========== */
 
     function game() external view returns (CryptoBlades) {
@@ -28,6 +31,19 @@ contract SkillStakingRewardsUpgradeable is IStakeFromGame, StakingRewardsUpgrade
     {
         _stake(player, amount);
         stakingToken.safeTransferFrom(address(__game), address(this), amount);
+    }
+
+    function unstakeToGame(address player, uint256 amount)
+        external
+        override
+        normalMode
+        nonReentrant
+        whenNotPaused
+        onlyGame
+        updateReward(player)
+    {
+        _unstake(player, amount);
+        stakingToken.transfer(address(__game), amount);
     }
 
     /* ========== MODIFIERS ========== */
