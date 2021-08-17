@@ -5,11 +5,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
-<<<<<<< HEAD
 import "./interfaces/IERC721MintAccessSeededStars.sol";
-=======
 import "./Promos.sol";
->>>>>>> 8fb07b76aafdcaf196671e39f7582dfc16026069
 import "./util.sol";
 
 contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IERC721MintAccessSeededStars {
@@ -627,18 +624,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         restricted noFreshLookup(id)
     returns (int128, int128, uint24, uint8) {
 
-        uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
-        require((durabilityPoints >= drainAmount || allowNegativeDurability)
-            && promos.getBit(ownerOf(id), 4) == false,
-            "Not enough durability!");
-
-        uint64 drainTime = uint64(drainAmount * secondsPerDurability);
-        if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
-            durabilityTimestamp[id] = uint64(now - getDurabilityMaxWait() + drainTime);
-        }
-        else {
-            durabilityTimestamp[id] = uint64(durabilityTimestamp[id] + drainTime);
-        }
+        drainDurability(id, drainAmount, allowNegativeDurability);
         
         Weapon storage wep = tokens[id];
         return (
@@ -655,7 +641,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
 
     function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) public restricted {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
-        require(allowNegativeDurability || durabilityPoints >= amount, "Not enough durability!");
+        require((durabilityPoints >= amount || allowNegativeDurability)
+            && promos.getBit(ownerOf(id), 4) == false,
+            "Not enough durability!");
 
         uint64 drainTime = uint64(amount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that

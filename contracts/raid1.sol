@@ -165,8 +165,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         (/*int128 weaponMultTarget*/,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightData(weaponID, charTrait);
-        weapons.drainDurability(weaponID, uint8(durabilityCost), true);
+            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(weaponID, charTrait, uint8(durabilityCost), true);
         
         uint24 power = getPlayerFinalPower(
             game.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
@@ -191,7 +190,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             weaponID,
             game.usdToSkill(joinCost));
         
-        game.payContract(msg.sender, joinCost);
+        game.payContractTokenOnly(msg.sender, game.usdToSkill(joinCost));
     }
 
     function setRaidStatus(uint256 index, uint8 status) public restricted {
