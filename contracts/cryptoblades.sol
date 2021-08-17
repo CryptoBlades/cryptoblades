@@ -28,9 +28,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant MINT_PAYMENT_TIMEOUT = 200;
     uint256 public constant MINT_PAYMENT_RECLAIM_MINIMUM_WAIT_TIME = 3 hours;
 
-    int128 public constant REWARDS_CLAIM_TAX_MAX = 2767011611056432742; // = ~0.15 = ~15%
-    uint256 public constant REWARDS_CLAIM_TAX_DURATION = 15 days;
-
     Characters public characters;
     Weapons public weapons;
     IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
@@ -95,6 +92,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         blacksmith = _blacksmith;
+    }
+
+    function migrateTo_6a97bd1() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+
+        rewardsClaimTaxMax = 2767011611056432742; // = ~0.15 = ~15%
+        rewardsClaimTaxDuration = 15 days;
     }
 
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
@@ -167,6 +171,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public totalMintPaymentSkillRefundable;
     mapping(address => MintPaymentSkillDeposited) mintPaymentSkillDepositeds;
 
+    int128 private rewardsClaimTaxMax;
+    uint256 private rewardsClaimTaxDuration;
+
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
     event MintWeaponsSuccess(address indexed minter, uint32 count);
@@ -176,6 +183,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         skillToken.safeTransfer(msg.sender, amount);
+    }
+
+    function REWARDS_CLAIM_TAX_MAX() public view returns (int128) {
+        return rewardsClaimTaxMax;
+    }
+
+    function REWARDS_CLAIM_TAX_DURATION() public view returns (uint256) {
+        return rewardsClaimTaxDuration;
     }
 
     function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _skillNeeded)
@@ -476,7 +491,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
-    function mintPaymentSkillRefundable(address _minter) external view
+    /*function mintPaymentSkillRefundable(address _minter) external view
         returns (uint256 _refundInGameOnlyFunds, uint256 _refundTokenRewards, uint256 _refundUserWallet) {
 
         return (
@@ -621,7 +636,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if (mintPayments[_minter].count == 0) {
             delete mintPayments[_minter];
         }
-    }
+    }*/
 
     function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
 
@@ -656,7 +671,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeaponN(uint32 num)
+    /*function mintWeaponN(uint32 num)
         public
         onlyNonContract
         oncePerBlock(msg.sender)
@@ -709,6 +724,26 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         catch {
             emit MintWeaponsFailure(msg.sender, 1);
         }
+    }*/
+
+    function mintWeaponN(uint32 num)
+        public
+        onlyNonContract
+        oncePerBlock(msg.sender)
+    {
+        require(num > 0 && num <= 10);
+        _payContract(msg.sender, mintWeaponFee * num);
+
+        for (uint i = 0; i < num; i++) {
+            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))));
+        }
+    }
+
+    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender) {
+        _payContract(msg.sender, mintWeaponFee);
+
+        //uint256 seed = randoms.getRandomSeed(msg.sender);
+        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))));
     }
 
     function burnWeapon(uint256 burnID) public
@@ -950,6 +985,22 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         characters.setCharacterLimit(max);
     }
 
+    function setRewardsClaimTaxMax(int128 _rewardsClaimTaxMax) public restricted {
+        rewardsClaimTaxMax = _rewardsClaimTaxMax;
+    }
+
+    function setRewardsClaimTaxMaxAsRational(uint256 _numerator, uint256 _denominator) public restricted {
+        rewardsClaimTaxMax = ABDKMath64x64.divu(_numerator, _denominator);
+    }
+
+    function setRewardsClaimTaxMaxAsPercent(uint256 _percent) public restricted {
+        rewardsClaimTaxMax = ABDKMath64x64.divu(_percent, 100);
+    }
+
+    function setRewardsClaimTaxDuration(uint256 _rewardsClaimTaxDuration) public restricted {
+        rewardsClaimTaxDuration = _rewardsClaimTaxDuration;
+    }
+
     function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {
         totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
         inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
@@ -1034,15 +1085,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function _getRewardsClaimTax(address playerAddress) internal view returns (int128) {
         assert(_rewardsClaimTaxTimerStart[playerAddress] <= block.timestamp);
 
-        uint256 rewardsClaimTaxTimerEnd = _rewardsClaimTaxTimerStart[playerAddress].add(REWARDS_CLAIM_TAX_DURATION);
+        uint256 rewardsClaimTaxTimerEnd = _rewardsClaimTaxTimerStart[playerAddress].add(rewardsClaimTaxDuration);
 
         (, uint256 durationUntilNoTax) = rewardsClaimTaxTimerEnd.trySub(block.timestamp);
 
-        assert(0 <= durationUntilNoTax && durationUntilNoTax <= REWARDS_CLAIM_TAX_DURATION);
+        assert(0 <= durationUntilNoTax && durationUntilNoTax <= rewardsClaimTaxDuration);
 
-        int128 frac = ABDKMath64x64.divu(durationUntilNoTax, REWARDS_CLAIM_TAX_DURATION);
+        int128 frac = ABDKMath64x64.divu(durationUntilNoTax, rewardsClaimTaxDuration);
 
-        return REWARDS_CLAIM_TAX_MAX.mul(frac);
+        return rewardsClaimTaxMax.mul(frac);
     }
 
     function getOwnRewardsClaimTax() public view returns (int128) {
