@@ -1038,7 +1038,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
 
-        stakeFromGameImpl.unstakeToGame(playerAddress, fromStaked);
+        if(fromStaked > 0) {
+            stakeFromGameImpl.unstakeToGame(playerAddress, fromStaked);
+        }
 
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet, fromStaked);
     }
