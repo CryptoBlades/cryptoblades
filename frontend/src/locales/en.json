@@ -80,6 +80,7 @@
   },
   "on": "On",
   "off": "Off",
+<<<<<<< HEAD
   "trade": "Trade",
   "character": "Character",
   "characters": "Characters",
@@ -90,4 +91,7 @@
   "stats":"Stats",
   "bonusPower" : "Bonus Power",
   "elements": ["test", "test"]
+=======
+  "trade": "Trade"
+>>>>>>> 0caf7376a15c904c28fb7a00cba746117386775b
 }

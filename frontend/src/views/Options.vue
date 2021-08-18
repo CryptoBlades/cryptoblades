@@ -17,19 +17,19 @@
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>{{$t("options.graphic")}}</h4>
               <b-form-checkbox size="lg" :checked="showGraphics" @change="toggleGraphics()" switch>
-                <b class="float-left">{{ showGraphics ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ showGraphics ? $t("on") : $t("off") }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>{{$t("options.rewardBar")}}</h4>
               <b-form-checkbox size="lg" :checked="hideRewards" @change="toggleRewards()" switch>
-                <b class="float-left">{{ hideRewards ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ hideRewards ? $t("on") : $t("off")  }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>{{$t("options.walletWarning")}}</h4>
               <b-form-checkbox size="lg" :checked="hideWalletWarning" @change="toggleHideWalletWarning()" switch>
-                <b class="float-left">{{ hideWalletWarning ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ hideWalletWarning ? $t("on") : $t("off")  }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
@@ -151,7 +151,6 @@ export default Vue.extend({
     languages(): { [key: string]: string } {
       const rObj: { [key: string]: string } = {};
       for (const [key, value] of Object.entries(i18n.messages)) {
-        console.log(value);
         rObj[key] = value.name.toString();
       }
       return rObj;

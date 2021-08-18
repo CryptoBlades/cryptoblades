@@ -1,11 +1,9 @@
 <template>
   <div class="body main-font">
     <b-tabs justified>
-      <b-tab title="Weapons">
+      <b-tab :title="$t('weapons')">
         <div class="blank-slate" v-if="ownWeapons.length === 0">
-          You do not currently have any weapons.
-          <br>
-          You can forge one by clicking the button below.
+          <span v-html="$t('blacksmith.noWeapons')"/>
           <br>
           <br>
           <big-button
@@ -17,7 +15,7 @@
         <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
           <div class="col">
             <div class="d-flex justify-content-space-between">
-              <h1>Weapons ({{ ownWeapons.length }})</h1>
+              <h1>{{$t('weapons')}} ({{ ownWeapons.length }})</h1>
               <div class="d-flex justify-content-flex-end ml-auto">
                 <b-button
                   variant="primary"
@@ -25,7 +23,7 @@
                   @click="openRenameWeapon"
                   tagname="rename_weapon"
                   v-tooltip="'Rename Weapon'">
-                  Rename Weapon
+                  {{$t('blacksmith.renameWeapon')}}
                 </b-button>
                 <b-button
                         variant="primary"
@@ -34,7 +32,7 @@
                         @click="displayDustReforge()"
                         tagname="reforge_weapon"
                         v-tooltip="'Burn weapons to buff selected weapon'">
-                  Reforge with Dust
+                  {{$t('blacksmith.reforgeWithDust')}}
                 </b-button>
                 <b-button
                         variant="primary"
@@ -42,61 +40,63 @@
                         @click="displayDustCreation()"
                         tagname="reforge_weapon"
                         v-tooltip="'Burn weapons to buff selected weapon'">
-                  Create Dust
+                  {{$t('blacksmith.createDust')}}
                 </b-button>
                 <b-button
                         variant="primary"
                         class="ml-3"
                         @click="onForgeWeapon"
                         :disabled="disableForge"
-                        v-tooltip="'Forge new weapon'">
-                  <span v-if="disableForge">Cooling forge...</span>
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">Forge x1 ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i></span>
+                        v-tooltip="$t('blacksmith.forgeNew')">
+                  <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
+                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">{{$t('blacksmith.forge')}}Forge x1 ({{ forgeCost }} SKILL)
+                    <i class="fas fa-plus"></i>
+                  </span>
                 </b-button>
                 <b-button
                         variant="primary"
                         class="ml-3"
                         @click="onForgeWeaponx10()"
                         :disabled="disableForge"
-                        v-tooltip="'Forge new weapon'">
-                  <span v-if="disableForge">Cooling forge...</span>
+                        v-tooltip="$t('blacksmith.forgeNew')">
+                  <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i></span>
                 </b-button>
 
                 <b-icon-question-circle class="centered-icon" scale="1.5"
-                  v-on:click="onShowForgeDetails" v-tooltip.bottom="'Click for forge percentages'"/>
+                  v-on:click="onShowForgeDetails" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
 
-                <b-modal hide-footer ref="forge-details-modal" title="Forge Percentages">
+                <b-modal hide-footer ref="forge-details-modal" :title="$t('blacksmith.forgePercentages')">
                   <div>
-                    5+ star @ 1% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
+                    {{$t('blacksmith.forgePercentage.5star')}} {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    4+ star @ 6% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
+                    {{$t('blacksmith.forgePercentage.4star')}} {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    3+ star @ 21% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
+                    {{$t('blacksmith.forgePercentage.3star')}} {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    2+ star @ 56% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
+                    {{$t('blacksmith.forgePercentage.2star')}} {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    1+ star @ 100% chance.
+                    {{$t('blacksmith.forgePercentage.1star')}}
                   </div>
                 </b-modal>
 
                 <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
                   <template #modal-header>
                     <div v-if="!spin" class="new-weapon-header-text text-center">
-                      <strong>Forge results</strong>
+                      <strong>{{$t('blacksmith.forgeResults')}}</strong>
                     </div>
                     <div v-if="spin" class="new-weapon-header-text text-center">
-                      <strong>Forging swords...</strong>
+                      <strong>{{$t('blacksmith.forgingSwords')}}</strong>
                     </div>
                   </template>
                   <div class="text-center">
-                    <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                    <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                    <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                    <b-spinner v-if="spin" type="grow" :label="$t('loading')"></b-spinner>
+                    <b-spinner v-if="spin" type="grow" :label="$t('loading')"></b-spinner>
+                    <b-spinner v-if="spin" type="grow" :label="$t('loading')"></b-spinner>
                   </div>
                   <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
                   <template #modal-footer></template>
@@ -112,7 +112,7 @@
         <div class="row mt-3" v-if="showReforge && !showReforgeDust">
           <div class="col">
             <div class="d-flex justify-content-space-between">
-              <h1>Create Dust</h1>
+              <h1>{{$t('blacksmith.createDust')}}</h1>
               <div class="d-flex justify-content-flex-end ml-auto">
                 <b-button
                         variant="primary"
@@ -120,7 +120,7 @@
                         class="confirmReforge ml-3"
                         @click="showMassDustConfirmation"
                         v-tooltip="'Reforge selected weapon with dust'">
-                  Mass Burn
+                  {{$t('blacksmith.massBurn')}}
                   <br>
                   ({{burnCost * burnWeaponIds.length }} SKILL)
                 </b-button>
@@ -130,7 +130,7 @@
                         class="confirmReforge ml-3"
                         @click="cancelReforge()"
                         v-tooltip="'Cancel Reforge'">
-                        Cancel
+                        {{$t('blacksmith.cancel')}}
                 </b-button>
               </div>
             </div>
@@ -142,16 +142,16 @@
             <div>
               <div class="col-lg-12 weapon-container">
                 <div class="col-lg-12">
-                  <h1 class="text-center">Select the amount of dust you want to use to reforge this weapon!</h1>
+                  <h1 class="text-center">{{$t('blacksmith.selectDustAmount')}}</h1>
                 </div>
                 <div class="row">
                   <div class="col-lg-2"></div>
                   <div class="col-lg-2 dust-container" align="center">
                     <div class="dust">
-                      LB: <span class="text-warning">15 power per level</span>
+                      LB: <span class="text-warning">15 {{$t('blacksmith.powerPerLevel')}}</span>
                       <div class="dust-image1"></div>
                     </div>
-                    <h2 class="text-center">Lesser</h2>
+                    <h2 class="text-center">{{$t('blacksmith.lesser')}}</h2>
                     <div class="boxed">
                       <h2>{{lesserDust}}/{{getLesserDust()}}</h2>
                     </div>
@@ -168,10 +168,10 @@
                   </div>
                   <div class="col-lg-2 dust-container" align="center">
                     <div class="dust">
-                      4B: <span class="text-warning">30 power per level</span>
+                      4B: <span class="text-warning">30 {{$t('blacksmith.powerPerLevel')}}</span>
                       <div class="dust-image2"></div>
                     </div>
-                    <h2 class="text-center">Greater</h2>
+                    <h2 class="text-center">{{$t('blacksmith.greater')}}</h2>
                     <div class="boxed">
                       <h2>{{greaterDust}}/{{getGreaterDust()}}</h2>
                     </div>
@@ -188,10 +188,10 @@
                   </div>
                   <div class="col-lg-2 weapon-container dust-container" align="center">
                     <div class="dust">
-                      5B: <span class="text-warning">75 power per level</span>
+                      5B: <span class="text-warning">75 {{$t('blacksmith.powerPerLevel')}}</span>
                       <div class="dust-image3"></div>
                     </div>
-                    <h2 class="text-center">Powerful</h2>
+                    <h2 class="text-center">{{$t('blacksmith.powerful')}}</h2>
                     <div class="boxed">
                       <h2>{{powerfulDust}}/{{getPowerfulDust()}}</h2>
                     </div>
@@ -223,14 +223,14 @@
                                 tagname="confirm_forge_weapon"
                                 class="confirmReforge"
                                 @click="showDustReforgeConfirmation"
-                                v-tooltip="'Reforge selected weapon with dust'">
-                          Confirm Reforge
+                                v-tooltip="$t('blacksmith.reforgeSelectedWithDust')">
+                          {{$t('blacksmith.confirmReforge')}}
                           <br>
-                          Use: {{lesserDust}} Lesser
+                          {{$t('blacksmith.use')}}: {{lesserDust}}{{$t('blacksmith.lessser')}}
                           <br>
-                          Use: {{greaterDust}} Greater
+                          {{$t('blacksmith.use')}}: {{greaterDust}} {{$t('blacksmith.greater')}}
                           <br>
-                          Use: {{powerfulDust}} Powerful
+                          {{$t('blacksmith.use')}}: {{powerfulDust}} {{$t('blacksmith.powerful')}}
                           <br>
                           ({{ dustReforgeCost }} SKILL)
                         </b-button>
@@ -239,8 +239,8 @@
                                 tagname="confirm_forge_weapon"
                                 class="confirmReforge"
                                 @click="displayBlacksmith()"
-                                v-tooltip="'Cancel Reforge'">
-                          Cancel Reforge
+                                v-tooltip="$t('blacksmith.cancelReforge')">
+                          {{$t('blacksmith.cancelReforge')}}
                         </b-button>
                       </div>
                     </div>
@@ -257,7 +257,7 @@
               <div class="col-md-12">
                 <div class="row mobile-flip">
                   <div class="col-md-5 weapon-container" align="center">
-                    <h1 class="text-center">Select the weapon you wish to burn</h1>
+                    <h1 class="text-center">{{$t('blacksmith.selectBurnWeapon')}}</h1>
                     <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds"
                       :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon" />
                   </div>
@@ -269,9 +269,9 @@
                                 tagname="confirm_forge_weapon"
                                 class="multiForging"
                                 @click="clearAllMassBurn()"
-                                v-tooltip="'Clear all'"
+                                v-tooltip="$t('blacksmith.clearAll')"
                                 :disabled="burnWeaponIds === []">
-                          Clear all
+                          {{$t('blacksmith.clearAll')}}
                         </b-button>
                       </h1>
                       <div class="weapon-grid-container">
@@ -282,15 +282,15 @@
                   <div class="col-md-3 upgrade-container">
                 <div v-if="showReforge && showDustForge === true">
                   <div class="confirmReforge">
-                    <h2 class="text-center">Create Dust</h2>
+                    <h2 class="text-center">{{$t('blacksmith.createDust')}}</h2>
                         <div class="dust-image1"></div>
-                      <h2 class="text-center">Lesser</h2>
+                      <h2 class="text-center">{{$t('blacksmith.lesser')}}</h2>
                         <h2>{{getLesserDust()}}</h2>
                         <div class="dust-image2"></div>
-                      <h2 class="text-center">Greater</h2>
+                      <h2 class="text-center">{{$t('blacksmith.greater')}}</h2>
                         <h2>{{getGreaterDust()}}</h2>
                         <div class="dust-image3"></div>
-                      <h2 class="text-center">Powerful</h2>
+                      <h2 class="text-center">{{$t('blacksmith.powerful')}}</h2>
                         <h2>{{getPowerfulDust()}}</h2>
                   </div>
                 </div>
@@ -303,12 +303,12 @@
       </b-tab>
       <b-tab>
         <template #title>
-          Shields <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`You can buy shield in Skill shop tab in the market!`"/>
+          {{$t('Shields')}} <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('blacksmith.buyShield')"/>
         </template>
         <div class="row mt-3">
           <div class="col">
             <div class="d-flex justify-content-space-between">
-              <h1>Equipment ({{ nftsCount }})</h1>
+              <h1>{{$t('equipment')}} ({{ nftsCount }})</h1>
             </div>
             <nft-list v-if="nftsCount > 0" v-model="selectedNft"/>
           </div>
@@ -316,7 +316,8 @@
       </b-tab>
       <b-tab>
         <template #title>
-          Dust Storage <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Dust is gained by destroying weapons!`"/>
+          {{$t('blacksmith.dustStorage')}}
+            <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('blacksmith.dustGained')"/>
         </template>
         <dust-balance-display/>
       </b-tab>
@@ -324,12 +325,12 @@
     <b-modal class="centered-modal" ref="weapon-rename-modal"
                   @ok="renameWeaponCall()">
                   <template #modal-title>
-                    Rename Weapon
+                    {{$t('blacksmith.renameWeapon')}}
                   </template>
                   <b-form-input type="string"
-                    class="modal-input" v-model="weaponRename" placeholder="New Name" />
+                    class="modal-input" v-model="weaponRename" :placeholder="$t('blacksmith.newName')" />
       <span v-if="isRenameProfanish">
-        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+        {{$t('blacksmith.isProfanish')}} <em>{{cleanRename}}</em>
       </span>
     </b-modal>
 
@@ -337,7 +338,7 @@
              title="Dust Reforge Confirmation" @ok="onReforgeWeaponWithDust">
       <div class="row">
         <div class="headings">
-          <h2 class="text-center">Upgrade</h2>
+          <h2 class="text-center">{{$t('blacksmith.upgrade')}}</h2>
           <div class="weapon" v-if="reforgeWeaponId">
             <div v-if="$slots.above || $scopedSlots.above">
               <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
@@ -349,43 +350,43 @@
         </div>
       </div>
       <br/>
-      <div class="text-center" v-text="'Are you sure you want to reforge this weapon using:'" />
+      <div class="text-center" v-text="$t('blacksmith.reforgeConfirm')" />
       <p class="text-center">
-        {{lesserDust}} Lesser Dust
+        {{lesserDust}} {{$t('blacksmith.lesser')}} {{$t('blacksmith.dust')}}
         <br>
-        {{greaterDust}} Greater Dust
+        {{greaterDust}} {{$t('blacksmith.greater')}} {{$t('blacksmith.dust')}}
         <br>
-        {{powerfulDust}} Powerful Dust
+        {{powerfulDust}} {{$t('blacksmith.powerful')}} {{$t('blacksmith.dust')}}
       </p>
       <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" /> This process cannot be undone!
+        <b-icon icon="exclamation-circle" variant="danger" /> {{$t('blacksmith.cantBeUndone')}}
       </div>
     </b-modal>
 
-    <b-modal class="centered-modal text-center" ref="mass-dust-confirmation-modal" title="Reforge Confirmation" @ok="onMassBurnWeapons">
+    <b-modal class="centered-modal text-center" ref="mass-dust-confirmation-modal" :title="$t('blacksmith.reforgeConfirmation')" @ok="onMassBurnWeapons">
       <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] Please make sure you want to burn these weapons to dust the process is irreversible!
+        <b-icon icon="exclamation-circle" variant="danger" /> {{$t('blacksmith.burnWarning')}}
       </div>
       <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" /> No Refunds will be given for accidentally destroyed items!
+        <b-icon icon="exclamation-circle" variant="danger" /> {{$t('blacksmith.noRefunds')}}
       </div>
     </b-modal>
 
-    <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" title="Reforge Bonuses">
+    <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" :title="$t('blacksmith.reforgeBonuses')">
       <div>
-        5* Burn: 1 5B (75 Bonus Power / 600 Max).
+        {{$t('blacksmith.reforgeBonus.5star')}}
       </div>
       <div>
-        4* Burn: 1 4B (30 Bonus Power/ 750 Max).
+        {{$t('blacksmith.reforgeBonus.4star')}}
       </div>
       <div>
-        3* Burn: 3 LB (45 Bonus Power/ 1500 Max).
+        {{$t('blacksmith.reforgeBonus.3star')}}
       </div>
       <div>
-        2* Burn: 2 LB (30 Bonus Power/ 1500 Max).
+        {{$t('blacksmith.reforgeBonus.2star')}}
       </div>
       <div>
-        1* Burn: 1 LB (15 Bonus Power/ 1500 Max).
+        {{$t('blacksmith.reforgeBonus.1star')}}
       </div>
     </b-modal>
   </div>
