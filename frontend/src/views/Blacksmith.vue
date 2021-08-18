@@ -31,7 +31,7 @@
                         v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
                         @click="displayDustReforge()"
                         tagname="reforge_weapon"
-                        v-tooltip="'Burn weapons to buff selected weapon'">
+                        v-tooltip="$t('blacksmith.burnWeapons')">
                   {{$t('blacksmith.reforgeWithDust')}}
                 </b-button>
                 <b-button
@@ -39,7 +39,7 @@
                         class="ml-3"
                         @click="displayDustCreation()"
                         tagname="reforge_weapon"
-                        v-tooltip="'Burn weapons to buff selected weapon'">
+                        v-tooltip="$t('blacksmith.burnWeapons')">
                   {{$t('blacksmith.createDust')}}
                 </b-button>
                 <b-button
@@ -49,7 +49,7 @@
                         :disabled="disableForge"
                         v-tooltip="$t('blacksmith.forgeNew')">
                   <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">{{$t('blacksmith.forge')}}Forge x1 ({{ forgeCost }} SKILL)
+                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">{{$t('blacksmith.forge')}} x1 ({{ forgeCost }} SKILL)
                     <i class="fas fa-plus"></i>
                   </span>
                 </b-button>
@@ -60,7 +60,9 @@
                         :disabled="disableForge"
                         v-tooltip="$t('blacksmith.forgeNew')">
                   <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i></span>
+                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                    {{$t('blacksmith.forge')}} x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i>
+                  </span>
                 </b-button>
 
                 <b-icon-question-circle class="centered-icon" scale="1.5"
@@ -119,7 +121,7 @@
                         tagname="confirm_forge_weapon"
                         class="confirmReforge ml-3"
                         @click="showMassDustConfirmation"
-                        v-tooltip="'Reforge selected weapon with dust'">
+                        v-tooltip="$t('blacksmith.reforgeSelectedWithDust')">
                   {{$t('blacksmith.massBurn')}}
                   <br>
                   ({{burnCost * burnWeaponIds.length }} SKILL)
@@ -129,7 +131,7 @@
                         tagname="confirm_forge_weapon"
                         class="confirmReforge ml-3"
                         @click="cancelReforge()"
-                        v-tooltip="'Cancel Reforge'">
+                        v-tooltip="$t('blacksmith.cancelReforge')">
                         {{$t('blacksmith.cancel')}}
                 </b-button>
               </div>
@@ -224,9 +226,10 @@
                                 class="confirmReforge"
                                 @click="showDustReforgeConfirmation"
                                 v-tooltip="$t('blacksmith.reforgeSelectedWithDust')">
-                          {{$t('blacksmith.confirmReforge')}}
+                          <span>{{$t('blacksmith.confirmReforge')}}</span>
                           <br>
-                          {{$t('blacksmith.use')}}: {{lesserDust}}{{$t('blacksmith.lessser')}}
+                          <br>
+                          {{$t('blacksmith.use')}}: {{lesserDust}} {{$t('blacksmith.lesser')}}
                           <br>
                           {{$t('blacksmith.use')}}: {{greaterDust}} {{$t('blacksmith.greater')}}
                           <br>

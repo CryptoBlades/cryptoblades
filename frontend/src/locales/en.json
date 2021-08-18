@@ -36,6 +36,60 @@
     "welcome": "Start earning today!",
     "recruit": "Recruit"
   },
+  "blacksmith":{
+    "noWeapons": "You do not currently have any weapons <br> You can forge one by clicking the button below.",
+    "renameWeapon": "Rename Weapon",
+    "reforgeWithDust":"Reforge with Dust",
+    "burnWeapons":"Burn weapons to buff selected weapon",
+    "createDust":"Create Dust",
+    "forgeNew":"Forge New Weapon",
+    "forge": "Forge",
+    "coolingForge": "Cooling forge ...",
+    "clickForForgePercentages": "Click for forge percentages",
+    "forgePercentages":"Forge Percentages",
+    "forgePercentage":{
+      "5star": "5+ star @ 1% chance. Estimated cost",
+      "4star": "4+ star @ 6% chance. Estimated cost ",
+      "3star": "3+ star @ 21% chance. Estimated cost",
+      "2star": "2+ star @ 56% chance. Estimated cost",
+      "1star": "1+ star @ 100% chance."
+    },
+    "forgeResults": "Forge results",
+    "forgingSwords":"Forging swords...",
+    "massBurn": "Mass Burn",
+    "cancel": "Cancel",
+    "selectDustAmount":"Select the amount of dust you want to use to reforge this weapon!",
+    "powerPerLevel": "power per level",
+    "lesser": "Lesser",
+    "greater": "Greater",
+    "powerful":"Powerful",
+    "reforgeSelectedWithDust":"Reforge selected weapon with dust",
+    "confirmReforge":"Confirm Reforge",
+    "use": "Use",
+    "cancelReforge":"Cancel Reforge",
+    "selectBurnWeapon": "Select the weapon you wish to burn",
+    "clearAll": "Clear all",
+    "buyShield":"You can buy shield in Skill shop tab in the market!",
+    "dustStorage": "Dust Storage",
+    "dustGained": "Dust is gained by destroying weapons!",
+    "newName": "New Name",
+    "isProfanish": "This name contains profanish words and thus will be displayed as follows:",
+    "upgrade":"Upgrade",
+    "reforgeConfirm":"Are you sure you want to reforge this weapon using:",
+    "dust": "Dust",
+    "cantBeUndone": "This process cannot be undone!",
+    "reforgeConfirmation": "Reforge Confirmation",
+    "burnWarning":"[WARNING] Please make sure you want to burn these weapons to dust the process is irreversible!",
+    "noRefunds": "No Refunds will be given for accidentally destroyed items!",
+    "reforgeBonuses":"Reforge Bonuses",
+    "reforgeBonus":{
+      "5star": "5* Burn: 1 5B (75 Bonus Power / 600 Max).",
+      "4star": "4* Burn: 1 4B (30 Bonus Power/ 750 Max).",
+      "3star": "3* Burn: 3 LB (45 Bonus Power/ 1500 Max).",
+      "2star": "2* Burn: 2 LB (30 Bonus Power/ 1500 Max).",
+      "1star": "1* Burn: 1 LB (15 Bonus Power/ 1500 Max)."
+    }
+  },
   "options": {
     "title": "Options",
     "graphic": "3D Graphics",
@@ -80,18 +134,19 @@
   },
   "on": "On",
   "off": "Off",
-<<<<<<< HEAD
   "trade": "Trade",
   "character": "Character",
   "characters": "Characters",
+  "Shields": "Shields",
+  "Shield": "Shield",
   "level": "Level",
   "element": "Element",
+  "elements": "Elements",
+  "equipment": "Equipment",
   "weapon": "Weapon",
+  "weapons": "Weapons",
   "stars":"Stars",
   "stats":"Stats",
   "bonusPower" : "Bonus Power",
-  "elements": ["test", "test"]
-=======
-  "trade": "Trade"
->>>>>>> 0caf7376a15c904c28fb7a00cba746117386775b
+  "loading": "Loading..."
 }
