@@ -1,5 +1,13 @@
 <template>
   <div v-bind:class="isDefault ? 'default-icon-wrapper' : 'nft-icon-wrapper'">
+    <div v-if="isDefault" class="nft-icon">
+      <img class="default-placeholder" v-if="nft.type === 'weapon'" src="../assets/placeholder/sword-placeholder-1.png"
+        v-tooltip="'Weapons (2-5*)'"/>
+      <img class="default-placeholder" v-if="nft.type === 'junk'" src="../assets/bounty.png"
+        v-tooltip="'Junk (1-5*)'" />
+      <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
+        v-tooltip="'Secret (??)'" />
+    </div>
 
     <div v-if="!isDefault" class="nft-icon"
       v-tooltip="!isShop && { content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"

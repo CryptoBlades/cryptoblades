@@ -27,9 +27,9 @@
             <hr class="devider">
             <div class="drops">
               <div class="drops-icons">
-                <nft-icon :isDefault="true" :nft="{nftType: 'weapon'}" />
-                <nft-icon :isDefault="true" :nft="{nftType: 'junk'}"/>
-                <nft-icon :isDefault="true" :nft="{nftType: 'secret'}"/>
+                <nft-icon :isDefault="true" :nft="{ type: 'weapon' }" />
+                <nft-icon :isDefault="true" :nft="{ type: 'junk' }"/>
+                <nft-icon :isDefault="true" :nft="{ type: 'secret' }"/>
               </div>
               <br />
               <span class="bold raid-title-section">XP reward</span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }} </span>
@@ -57,7 +57,7 @@
                 text="Your weapon multiplies your power<br>
                   <br>+Stats determine the multiplier
                   <br>Stat element match with character gives greater bonus"/>
-                  <span class="float-right sub-text">Multiplier: x1.23</span>
+                  <span class="float-right sub-text">Multiplier: x{{ currentMultiplier }}</span>
               </span>
               <hr class="devider">
               <div class="header-row">
@@ -72,7 +72,7 @@
             <hr class="devider">
           </div>
           <div class="col-xs-12 col-sm-12 col-lg-6 char-box">
-            <span class="raid-title-section bold">Choose a Character <span class="float-right sub-text">Power {{ 10000 }}</span></span>
+            <span class="raid-title-section bold">Choose a Character <span class="float-right sub-text">Power {{ currentCharacterPower }}</span></span>
             <hr class="devider">
             <character-list :value="currentCharacterId" @input="setCurrentCharacter" class="raid-style" />
             <hr class="devider">
@@ -146,6 +146,8 @@ import WeaponIcon from '../components/WeaponIcon.vue';
 import Hint from '../components/Hint.vue';
 import NftIcon from '@/components/NftIcon.vue';
 import NftList from '@/components/smart/NftList.vue';
+import { GetTotalMultiplierForTrait } from '@/interfaces/Weapon';
+import { CharacterPower } from '@/interfaces';
 
 const dragonNames = [
   'Fudbringer',
@@ -195,6 +197,17 @@ export default {
     claimButtonActive() {
       return true;
       //return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
+    },
+
+    currentMultiplier() {
+      if(!this.selectedWeaponId) return '0';
+      const currentWeapon = this.ownWeapons[this.selectedWeaponId];
+      return GetTotalMultiplierForTrait(currentWeapon, this.currentCharacter.trait);
+    },
+
+    currentCharacterPower() {
+      if(!this.currentCharacter) return '0';
+      return CharacterPower(this.currentCharacter.level);
     }
   },
 
@@ -285,9 +298,9 @@ export default {
       // nfts.push(result.keybox.map(x => { return { nftType: 'keybox', nftId: x.tokenId }; }));
       // this.rewards = nfts;
       this.rewards = [
-        {nftType:'weapon', nftId:1, stars:2},
-        {nftType:'junk', nftId:1, stars:3},
-        {nftType:'keybox', nftId:1}
+        { type:'weapon', id: 1, stars: 2},
+        { type:'junk', id:1, stars:3 },
+        { type:'keybox', id:1 }
       ];
       this.$bvModal.show('rewardsModal');
       console.log('Reward claimed for '+rewardIndex);
