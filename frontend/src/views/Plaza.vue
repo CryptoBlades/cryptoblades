@@ -20,7 +20,9 @@
       />
       <div v-if="formatSkill() < recruitCost" >
         <br>
-        You can buy more SKILL from <a v-bind:href="`${getExchangeUrl}`" target="_blank">here</a>.
+        <i18n path="plaza.notEnoughSkill" tag="label" for="plaza.notEnoughSkillLink">
+          <a v-bind:href="`${getExchangeUrl}`" target="_blank">{{$t("plaza.notEnoughSkillLink")}}</a>
+        </i18n>
       </div>
     </div>
     <div class="row mt-3" v-if="ownCharacters.length > 0">

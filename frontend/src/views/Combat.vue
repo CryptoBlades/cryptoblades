@@ -2,17 +2,17 @@
   <div class="body main-font">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <div class="row" v-if="error !== null">
-        <div class="col error">Error: {{ error }}</div>
+        <div class="col error">{{$t('combat.error')}} {{ error }}</div>
       </div>
 
       <b-modal id="fightResultsModal" hide-footer title="Fight Results">
         <CombatResults v-if="resultsAvailable" :results="fightResults" />
-        <b-button class="mt-3" variant="primary" block @click="$bvModal.hide('fightResultsModal')">Close</b-button>
+        <b-button class="mt-3" variant="primary" block @click="$bvModal.hide('fightResultsModal')">{{$t('combat.close')}}</b-button>
       </b-modal>
 
       <div class="row">
         <div class="col">
-          <div class="message-box" v-if="!currentCharacter">You need to select a character to do battle.</div>
+          <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
 
           <div class="row">
             <div class="col-12 col-md-2 offset-md-5 text-center">
@@ -26,7 +26,7 @@
 
           <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">This weapon does not have enough durability.</div>
 
-          <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">You cannot do battle during the last 30 seconds of the hour. Stand fast!</div>
+          <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
         </div>
       </div>
 
@@ -38,7 +38,7 @@
             <div class="col">
               <div class="waiting" v-if="waitingResults" margin="auto">
                 <i class="fas fa-spinner fa-spin"></i>
-                Waiting for fight results...
+                {{$t('combat.waiting')}}
               </div>
             </div>
           </div>
@@ -67,7 +67,7 @@
                 </div>
 
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-link-others" tagname="choose_weapon">
-                  Choose New Weapon
+                  {{$t('combat.chooseNewWeapon')}}
                 </b-button>
               </div>
 
@@ -127,9 +127,9 @@
     </div>
 
     <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
-      <div v-if="ownWeapons.length === 0">You do not currently have any weapons. You can forge one at the Blacksmith.</div>
+      <div v-if="ownWeapons.length === 0">{{$t('combat.noWeapons')}}</div>
 
-      <div v-if="ownCharacters.length === 0">You do not currently have any characters. You can recruit one at the Plaza.</div>
+      <div v-if="ownCharacters.length === 0">{{$t('combat.noCharacters')}}</div>
     </div>
   </div>
 </template>
@@ -247,8 +247,8 @@ export default {
       const enemyRange = enemyMax - enemyMin;
       let rollingTotal = 0;
       // shortcut: if it is impossible for one side to win, just say so
-      if (playerMin > enemyMax) return 'Very Likely';
-      if (playerMax < enemyMin) return 'Unlikely';
+      if (playerMin > enemyMax) return this.$t('combat.winChances.veryLikely');
+      if (playerMax < enemyMin) this.$t('combat.winChances.unlikely');
 
       // case 1: player power is higher than enemy power
       if (playerMin >= enemyMin) {
@@ -269,10 +269,10 @@ export default {
         //since this is chance the enemy wins, we negate it
         rollingTotal = 1 - rollingTotal;
       }
-      if (rollingTotal <= 0.3) return 'Unlikely';
-      if (rollingTotal <= 0.5) return 'Possible';
-      if (rollingTotal <= 0.7) return 'Likely';
-      return 'Very Likely';
+      if (rollingTotal <= 0.3) return this.$t('combat.winChances.unlikely');
+      if (rollingTotal <= 0.5) return this.$t('combat.winChances.possible');
+      if (rollingTotal <= 0.7) return this.$t('combat.winChances.likely');
+      return this.$t('combat.winChances.veryLikely');
     },
     getElementAdvantage(playerElement, enemyElement) {
       if ((playerElement + 1) % 4 === enemyElement) return 1;

@@ -2,9 +2,9 @@
   <div class="body main-font">
     <b-navbar>
       <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
-      variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'"/>
+      variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="$t('ClaimRewardsBar.readyToClaim')"/>
 
-      <b-nav-item disabled><strong>Rewards</strong></b-nav-item>
+      <b-nav-item disabled><strong>{{$t('ClaimRewardsBar.rewards')}}</strong></b-nav-item>
 
       <b-nav-item
         class="ml-3"

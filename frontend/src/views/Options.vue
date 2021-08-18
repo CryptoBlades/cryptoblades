@@ -166,7 +166,6 @@ export default Vue.extend({
 
       Events.$emit('setting:useGraphics', { value: this.showGraphics });
     },
-
     toggleRewards() {
       this.hideRewards = !this.hideRewards;
       if (this.hideRewards) localStorage.setItem('hideRewards', 'true');
