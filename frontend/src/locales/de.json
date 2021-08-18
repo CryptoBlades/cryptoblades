@@ -1,0 +1,135 @@
+{
+  "name": "Deutsch",
+  "viewLink": {
+      "plaza": "Plaza",
+      "blacksmith": "Blacksmith",
+      "combat": "Combat",
+      "raid": "Raid",
+      "pvp": "PvP",
+      "market": "Market",
+      "stake": "Stake"
+  },
+  "ClaimRewardsBar":{
+    "rewards": "Rewards",
+    "earlyWithdrawTax": "Early Withdraw Tax",
+    "taxReduce":"Tax is being reduced by 1% per day",
+    "readyToClaim":"Rewards ready to claim!"
+  },
+  "CharacterDisplay":{
+    "loading":"Loading...",
+    "powerIncrease":"Power increases by 10 every level up, and multiplied every 10 level ups",
+    "power": "Power",
+    "level": "Level"
+    },
+  "EarningsCalculator":{
+    "nextMilestone": "Nächster Meilenstein",
+    "earningsCalculator": "Einkommensberechnung",
+    "milestoneBonus":"Verdiene {0} mehr pro Kampf ab ",
+    "currentPrices": "Aktuelle Preise",
+    "earnings": "Einkommen",
+    "winsPerDay": "Gewonnene Kämpfe am Tag",
+    "dailyProfit": "Täglicher Profit",
+    "monthlyProfit": "Monatlicher Profit"
+    
+  },
+  "plaza": {
+    "welcome": "Start earning today!"
+  },
+  "blacksmith":{
+    "noWeapons": "You do not currently have any weapons <br> You can forge one by clicking the button below.",
+    "reforge": "Reforge",
+    "coolingForge": "Cooling forge ...",
+    "forge": "Forge",
+    "forgePercentage":{
+      "5star": "5+ star @ 1% chance. Estimated cost",
+      "4star": "4+ star @ 6% chance. Estimated cost ",
+      "3star": "3+ star @ 21% chance. Estimated cost",
+      "2star": "2+ star @ 56% chance. Estimated cost",
+      "1star": "1+ star @ 100% chance."
+    },
+    "choose": "Choose Burn Weapon",
+    "confirmReforge":"Confirm Reforge",
+    "dangerRareWeapon": "This is a rare weapon!",
+    "dangerLB": "This item has been previously reforged and only half of each LBs will carry over!"
+    },
+    "combat":{
+      "error": "Error:",
+      "close": "Close",
+      "errors":{
+        "needToSelectChar": "You need to select a character to do battle.",
+        "notEnoughDurability":"This weapon does not have enough durability.",
+        "lastSeconds":"You cannot do battle during the last 30 seconds of the hour. Stand fast!"
+      },
+      "waiting":"Waiting for fight results...",
+      "chooseWeapon":"Choose a weapon",
+      "chooseWeaponHint":"Your weapon multiplies your power<br> <br>+Stats determine the multiplier <br>Stat element match with character gives greater bonus",
+      "chooseNewWeapon": "Choose New Weapon",
+      "elementHint":"The elements affect power:<br><br>Character vs Enemy: bonus or penalty as shown above<br>Character and Weapon match gives bonus",
+      "power": "Power",
+      "victory": "Victory",
+      "loading": "Loading...",
+      "noWeapons": "You do not currently have any weapons. You can forge one at the Blacksmith.",
+      "noCharacters":"You do not currently have any characters. You can recruit one at the Plaza.",
+      "winChances":{
+        "unlikely": "Unlikely",
+        "possible": "Possible",
+        "likely": "Likely",
+        "veryLikely": "Very Likely"
+
+      }
+
+    },
+  "options": {
+    "title": "Options",
+    "graphic": "3D Graphics",
+    "rewardBar": "Hide Rewards Bar",
+    "walletWarning": "Hide Wallet Warning",
+    "staminaFight": "Stamina Cost per Fight",
+    "language": "Sprache"
+  },
+  "app": {
+    "warning": {
+      "title": "Metamask Not Detected Or Incorrect Network",
+      "start": "Get Started With CryptoBlades",
+      "buttons": {
+        "addMetamask": "Add MetaMask",
+        "confMetamask": "Configure MetaMask",
+        "startMetamask": "Connect to MetaMask",
+        "network": "Switch to BSC Network",
+        "hide": "Hide Warning"
+      },
+      "errorMessage": {
+        "connecting": "Connecting to MetaMask...",
+        "success": "Success: MetaMask connected.",
+        "error": "Error: MetaMask could not get permissions.",
+        "welcome": "Welcome to CryptoBlades. Here is how you can get started."
+      },
+      "message": {
+        "hideWalletWarning": "You have hidden the wallet warning and it would now be displayed. If you are trying to play, please disable the option and follow the instructions, otherwise close and ignore.",
+        "instructions": "Get started in less than 10 minutes! To recruit your first character you need {recruitCost} SKILL and 0.001 BNB for gas. You will also need 0.0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!",
+        "inst1": "Buying BNB with fiat:",
+        "inst2": "Once you have BNB, go to ApeSwap to obtain SKILL tokens:",
+        "inst3": "Follow this tutorial to swap BNB for SKILL:",
+        "inst4": "That's it! Now you can create your first character:",
+        "watchVideo": "Watch {name}Video",
+        "questionDiscord": "If you have any questions, please join our Discord:"
+        
+      }
+    },
+    "notification": {
+      "link": "Check it out!"
+    }
+    
+  },
+  "on": "An",
+  "off": "Aus",
+  "trade": "Handel",
+  "character": "Charakter",
+  "characters": "Charaktere",
+  "level": "Level",
+  "element": "Element",
+  "weapon": "Waffe",
+  "stars":"Sterne",
+  "stats":"Attribute",
+  "bonusPower" : "Bonus-Power"
+}

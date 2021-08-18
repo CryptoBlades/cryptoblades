@@ -9,8 +9,32 @@
       "market": "Market",
       "stake": "Stake"
   },
+  "ClaimRewardsBar":{
+    "rewards": "Rewards",
+    "earlyWithdrawTax": "Early Withdraw Tax",
+    "taxReduce":"Tax is being reduced by 1% per day",
+    "readyToClaim":"Rewards ready to claim!"
+  },
+  "CharacterDisplay":{
+    "loading":"Loading...",
+    "powerIncrease":"Power increases by 10 every level up, and multiplied every 10 level ups",
+    "power": "Power",
+    "level": "Level"
+    },
+  "EarningsCalculator":{
+    "nextMilestone": "Next Milestone",
+    "earningsCalculator": "Earnings Calculator",
+    "milestoneBonus":"Earn {0} more per battle at",
+    "currentPrices": "Current prices",
+    "earnings": "Earnings",
+    "winsPerDay": "Wins # per day",
+    "dailyProfit": "Daily profit",
+    "monthlyProfit": "Monthly profit"
+    
+  },
   "plaza": {
-    "welcome": "Start earning today!"
+    "welcome": "Start earning today!",
+    "recruit": "Recruit"
   },
   "options": {
     "title": "Options",
@@ -56,5 +80,14 @@
   },
   "on": "On",
   "off": "Off",
-  "trade": "Trade"
+  "trade": "Trade",
+  "character": "Character",
+  "characters": "Characters",
+  "level": "Level",
+  "element": "Element",
+  "weapon": "Weapon",
+  "stars":"Stars",
+  "stats":"Stats",
+  "bonusPower" : "Bonus Power",
+  "elements": ["test", "test"]
 }
