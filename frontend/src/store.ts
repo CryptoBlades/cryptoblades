@@ -114,6 +114,8 @@ export function createStore(web3: Web3) {
       characterTransferCooldowns: {},
 
       shields: {},
+      junk: {},
+      keyboxes: {},
       currentShieldId: null,
       nfts: {},
 
@@ -569,6 +571,22 @@ export function createStore(web3: Web3) {
           Vue.set(state.nfts, 'shield', {});
         }
         Vue.set(state.nfts.shield, shieldId, shield);
+      },
+
+      updateJunk(state: IState, { junkId, junk }) {
+        Vue.set(state.junk, junkId, junk);
+        if(!state.nfts.junk) {
+          Vue.set(state.nfts, 'junk', {});
+        }
+        Vue.set(state.nfts.junk, junkId, junk);
+      },
+
+      updateKeyLootbox(state: IState, { keyLootboxId, keybox }) {
+        Vue.set(state.keyboxes, keyLootboxId, keybox);
+        if(!state.nfts.keybox) {
+          Vue.set(state.nfts, 'keybox', {});
+        }
+        Vue.set(state.nfts.keybox, keyLootboxId, keybox);
       },
 
       updateWeapon(state: IState, { weaponId, weapon }) {
@@ -1070,6 +1088,46 @@ export function createStore(web3: Web3) {
         ]);
       },
 
+      // async fetchJunks({ dispatch }, junkIds: (string | number)[]) {
+      //   await Promise.all(junkIds.map(id => dispatch('fetchJunk', id)));
+      // },
+
+      // async fetchJunk({ state, commit }, junkId: string | number) {
+      //   const { Junk } = state.contracts();
+      //   if(!Junk) return;
+
+      //   await Promise.all([
+      //     (async () => {
+      //       const junk = shieldFromContract(
+      //         junkId,
+      //         await Junk.methods.get('' + junkId).call(defaultCallOptions(state))
+      //       );
+
+      //       commit('updateJunk', { junkId, junk });
+      //     })(),
+      //   ]);
+      // },
+
+      // async fetchKeyLootboxes({ dispatch }, keyLootboxIds: (string | number)[]) {
+      //   await Promise.all(keyLootboxIds.map(id => dispatch('fetchKeyLootbox', id)));
+      // },
+
+      // async fetchKeyLootbox({ state, commit }, keyLootboxId: string | number) {
+      //   const { KeyLootbox } = state.contracts();
+      //   if(!KeyLootbox) return;
+
+      //   await Promise.all([
+      //     (async () => {
+      //       const keybox = shieldFromContract(
+      //         keyLootboxId,
+      //         await KeyLootbox.methods.get('' + keyLootboxId).call(defaultCallOptions(state))
+      //       );
+
+      //       commit('updateKeyLootbox', { keyLootboxId, keybox });
+      //     })(),
+      //   ]);
+      // },
+
       async setupWeaponDurabilities({ state, dispatch }) {
         const [
           ownedWeaponIds
@@ -1549,7 +1607,10 @@ export function createStore(web3: Web3) {
       },
 
       async joinRaid({ state }, { characterId, weaponId }) {
-        const Raid1 = state.contracts().Raid1!;
+        const { Raid1 } = state.contracts();
+        if(!Raid1) {
+          return;
+        }
 
         console.log('Within the join raid method...');
 

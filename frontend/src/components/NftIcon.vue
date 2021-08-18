@@ -45,7 +45,21 @@
         </div>
       </div>
 
-      <div v-if="nft.type !== 'shield'" class="nft-details">
+      <div v-if="nft.type === 'weapon'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
+
+      </div>
+
+      <div v-if="nft.type === 'junk'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
+        <img class="placeholder-shield" src="../assets/shield1.png" />
+        <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
+      </div>
+
+      <div v-if="nft.type === 'keybox'">
+        <img class="placeholder-shield" src="../assets/shield1.png" />
+        <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
+      </div>
+
+      <div v-if="nft.type !== 'shield' && nft.type !== 'junk' && nft.type !== 'keybox' && nft.type !== 'weapon'" class="nft-details">
         <img class="placeholder-consumable" :src="nft.image.startsWith('http') ? nft.image : imgPath(nft.image)"/>
         <span v-if="isShop" class="nft-supply">Owned: {{this.quantityOwned}}</span>
       </div>

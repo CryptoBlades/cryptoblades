@@ -110,6 +110,8 @@ export interface IState {
 
   shields: Record<number, IShield>;
   currentShieldId: number | null;
+  junk: Record<number, Nft>;
+  keyboxes: Record<number, Nft>;
 
   nfts: Record<string, Record<number | string, Nft>>;
 }

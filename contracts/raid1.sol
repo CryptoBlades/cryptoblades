@@ -324,7 +324,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function distributeKeyBox(address claimant, uint256 claimRaidIndex, uint256 seed) public restricted {
-        uint tokenID = rewardsERC721Seeded[REWARD_ERC721SEEDEDSTARS_WEAPON].mintAccessSeeded(
+        uint tokenID = rewardsERC721Seeded[REWARD_ERC721SEEDED_KEYBOX].mintAccessSeeded(
                 claimant, claimRaidIndex, seed
             );
         emit RewardedKeyBox(claimRaidIndex, claimant, tokenID);
@@ -411,7 +411,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         uint currentIndex = 0;
         for(uint i = startIndex; i <= endIndex; i++) {
             if(isEligibleForReward(i)) {
-                result[currentIndex] = i;
+                result[currentIndex++] = i;
             }
         }
         return result;

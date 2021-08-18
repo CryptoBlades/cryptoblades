@@ -108,7 +108,7 @@
               </div>
             </div>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'" v-if="claimButtonActive">
-              <big-button class="encounter-button btn-styled" :mainText="`Claim rewards`" @click="promptRewardClaim()" />
+              <big-button v-if="claimButtonActive" class="encounter-button btn-styled" :mainText="`Claim rewards`" @click="promptRewardClaim()" />
               <b-modal id="rewardsRaidPicker" title="Raid rewards selector" @ok="claimRewardIndex(rewardsRaidId)">
                 <div class="raid-picker">
                   Select a raid to claim rewards from:
@@ -118,7 +118,7 @@
                 </div>
               </b-modal>
               <b-modal id="rewardsModal" title="Raid rewards" size="lg">
-                <nft-list :nfts="rewards"/>
+                <nft-list :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
               </b-modal>
             </div>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
@@ -195,8 +195,7 @@ export default {
     },
 
     claimButtonActive() {
-      return true;
-      //return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
+      return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
     },
 
     currentMultiplier() {
@@ -223,14 +222,14 @@ export default {
     },
 
     async joinRaidMethod() {
-      if (this.selectedWeaponId === null || this.currentCharacterId === null) {
+      if (!this.selectedWeaponId || !this.currentCharacterId) {
         this.$dialog.notify.error('Check Character and Weapon Selection and try again...');
         return;
       }
 
       try {
         console.log('Trying to join raid...');
-        await this.joinRaid(this.currentCharacterId, this.selectedWeaponId);
+        await this.joinRaid({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId});
         console.log('Made it to the other side at least...');
       } catch (e) {
         console.error(e);
@@ -276,7 +275,6 @@ export default {
     promptRewardClaim() {
       // should offer a popup here to pick which index to claim
       // if only one index, then claim instantly
-      this.rewardIndexes = [1, 2, 3, 4];
       if(this.rewardIndexes !== null && this.rewardIndexes.length > 0) {
         if(this.rewardIndexes.length === 1) {
           this.claimRewardIndex(this.rewardIndexes[0]);
@@ -293,9 +291,9 @@ export default {
       //   rewardIndex
       // });
       // const nfts = [];
-      // nfts.push(result.weapons.map(x => { return { nftType: 'weapon', nftId: x.tokenId, stars: x.stars}; }));
-      // nfts.push(result.junk.map(x => { return { nftType: 'junk', nftId: x.tokenId, stars: x.stars}; }));
-      // nfts.push(result.keybox.map(x => { return { nftType: 'keybox', nftId: x.tokenId }; }));
+      // nfts.push(result.weapons.map(x => { return { type: 'weapon', id: x.tokenId, stars: x.stars}; }));
+      // nfts.push(result.junk.map(x => { return { type: 'junk', id: x.tokenId, stars: x.stars}; }));
+      // nfts.push(result.keybox.map(x => { return { type: 'keybox', id: x.tokenId }; }));
       // this.rewards = nfts;
       this.rewards = [
         { type:'weapon', id: 1, stars: 2},
@@ -304,6 +302,7 @@ export default {
       ];
       this.$bvModal.show('rewardsModal');
       console.log('Reward claimed for '+rewardIndex);
+      this.getRewardIndexes();
       //console.log('Result: '+result);
     },
 

@@ -24,7 +24,7 @@
     </div>
 
     <div v-if="!isShop">
-      <div class="filters row mt-2">
+      <div class="filters row mt-2" v-if="!isReward">
         <div v-if="!isMarket" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>Nft Type</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
@@ -167,6 +167,10 @@ export default Vue.extend({
       default: false,
     },
     isMarket: {
+      type: Boolean,
+      default: false,
+    },
+    isReward: {
       type: Boolean,
       default: false,
     },
