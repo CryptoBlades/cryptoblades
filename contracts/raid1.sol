@@ -60,17 +60,14 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     uint16 public xpReward;
 
     uint256 public raidIndex;
-    uint256 public historicalRaidIndex; // if we loop raid indices (ie 255 per cycle), this will be left unlooped
     // all (first) keys are raidIndex
     mapping(uint256 => uint8) public raidStatus;
-    mapping(uint256 => uint256) public raidHistoricalIndex;
     mapping(uint256 => uint256) public raidEndTime;
     mapping(uint256 => uint256) public raidSeed;
     mapping(uint256 => uint8) public raidBossTrait;
     mapping(uint256 => uint256) public raidBossPower;
     mapping(uint256 => uint256) public raidPlayerPower;
     mapping(uint256 => Raider[]) public raidParticipants;
-    mapping(uint256 => mapping(address => uint256)) public raidUserHistoricalIndex; // to check if indices & rewards are old
     mapping(uint256 => mapping(address => uint256[])) public raidParticipantIndices;
     mapping(uint256 => mapping(address => bool)) public raidRewardClaimed;
 
@@ -79,31 +76,28 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     mapping(uint256 => address) public links;
 
     event RaidStarted(uint256 indexed raidIndex,
-        uint256 indexed historicalRaidIndex,
         uint8 bossTrait,
         uint256 bossPower,
         uint256 endTime);
     event RaidJoined(uint256 raidIndex,
-        uint256 historicalRaidIndex,
         address indexed user,
         uint256 indexed character,
         uint256 indexed weapon,
         uint256 skillPaid);
     event RaidCompleted(uint256 indexed raidIndex,
-        uint256 indexed historicalRaidIndex,
         uint8 outcome,
         uint256 bossRoll,
         uint256 playerRoll);
     
     // reward specific events for analytics
-    event RewardClaimed(uint256 indexed historicalRaidIndex, address indexed user, uint256 characterCount);
-    event RewardedDustLB(uint256 indexed historicalRaidIndex, address indexed user, uint32 amount);
-    event RewardedDust4B(uint256 indexed historicalRaidIndex, address indexed user, uint32 amount);
-    event RewardedDust5B(uint256 indexed historicalRaidIndex, address indexed user, uint32 amount);
-    event RewardedWeapon(uint256 indexed historicalRaidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
-    event RewardedJunk(uint256 indexed historicalRaidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
-    event RewardedTrinket(uint256 indexed historicalRaidIndex, address indexed user, uint8 stars, uint256 effect, uint256 indexed tokenID);
-    event RewardedKeyBox(uint256 indexed historicalRaidIndex, address indexed user, uint256 indexed tokenID);
+    event RewardClaimed(uint256 indexed raidIndex, address indexed user, uint256 characterCount);
+    event RewardedDustLB(uint256 indexed raidIndex, address indexed user, uint32 amount);
+    event RewardedDust4B(uint256 indexed raidIndex, address indexed user, uint32 amount);
+    event RewardedDust5B(uint256 indexed raidIndex, address indexed user, uint32 amount);
+    event RewardedWeapon(uint256 indexed raidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
+    event RewardedJunk(uint256 indexed raidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
+    event RewardedTrinket(uint256 indexed raidIndex, address indexed user, uint8 stars, uint256 effect, uint256 indexed tokenID);
+    event RewardedKeyBox(uint256 indexed raidIndex, address indexed user, uint256 indexed tokenID);
 
     function initialize(address gameContract) public initializer {
         
@@ -121,21 +115,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         joinCost = ABDKMath64x64.fromUInt(0);// free (was going to be 10 USD)
         xpReward = 128 * 2; // 13 hour 20 min worth of fight xp, but we had double xp active on launch
     }
-
-    // TODO include in startRaid when we are looping indexes
-    /*function deleteRaidHistory(uint256 index) public restricted {
-        // used to clean raid history if we decide to loop indices
-        delete raidStatus[index];
-        delete raidHistoricalIndex[index];
-        delete raidEndTime[index];
-        delete raidSeed[index];
-        delete raidBossTrait[index];
-        delete raidBossPower[index];
-        delete raidPlayerPower[index];
-        delete raidParticipants[index];
-        // we can't delete users' data, but we track historicalIndex to see if they are valid
-        // that way they delete it themselves on next join
-    }*/
 
     modifier restricted() {
         _restricted();
@@ -158,14 +137,13 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     function startRaid(uint256 bossPower, uint8 bossTrait, uint256 durationMinutes) public restricted {
         raidStatus[raidIndex] = STATUS_STARTED;
-        raidHistoricalIndex[raidIndex] = historicalRaidIndex;
         raidBossPower[raidIndex] = bossPower;
         raidBossTrait[raidIndex] = bossTrait;
 
         uint256 endTime = now + (durationMinutes * 1 minutes);
         raidEndTime[raidIndex] = endTime;
 
-        emit RaidStarted(raidIndex, historicalRaidIndex, bossTrait, bossPower, endTime);
+        emit RaidStarted(raidIndex, bossTrait, bossPower, endTime);
     }
 
     function joinRaid(uint256 characterID, uint256 weaponID) public {
@@ -176,21 +154,12 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
-        if(raidUserHistoricalIndex[raidIndex][msg.sender] == historicalRaidIndex) {
-            // this user has joined this raid before (or it's the very first one, ever)
-            uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
-            for(uint i = 0; i < raiderIndices.length; i++) {
-                require(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID,
-                    "This weapon is already used in the raid");
-                require(raidParticipants[raidIndex][raiderIndices[i]].charID != characterID,
-                    "This character is already participating");
-            }
-        }
-        else {
-            // this raidIndex is being reused, delete old involvement data
-            delete raidParticipantIndices[raidIndex][msg.sender];
-            delete raidRewardClaimed[raidIndex][msg.sender];
-            raidUserHistoricalIndex[raidIndex][msg.sender] = historicalRaidIndex;
+        uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
+        for(uint i = 0; i < raiderIndices.length; i++) {
+            require(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID,
+                "This weapon is already used in the raid");
+            require(raidParticipants[raidIndex][raiderIndices[i]].charID != characterID,
+                "This character is already participating");
         }
 
         (uint8 charTrait, uint24 basePowerLevel, /*uint64 timestamp*/) =
@@ -223,7 +192,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         ));
 
         emit RaidJoined(raidIndex,
-            historicalRaidIndex,
             msg.sender,
             characterID,
             weaponID,
@@ -263,11 +231,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             RaidTrinket(links[LINK_TRINKET]).mint(
                 trinketWinner.owner, trinketStars, trinketEffect
             );
-        emit RewardedTrinket(historicalRaidIndex, trinketWinner.owner, trinketStars, trinketEffect, tokenID);
+        emit RewardedTrinket(raidIndex, trinketWinner.owner, trinketStars, trinketEffect, tokenID);
 
-        emit RaidCompleted(raidIndex, historicalRaidIndex, outcome, bossPower, roll);
+        emit RaidCompleted(raidIndex, outcome, bossPower, roll);
         raidIndex++;
-        historicalRaidIndex++;
     }
 
     function getPlayerFinalPower(uint24 playerPower, uint8 charTrait, uint8 bossTrait) public view returns(uint24) {
@@ -282,7 +249,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         bool victory = raidStatus[claimRaidIndex] == STATUS_WON;
         require(victory || raidStatus[claimRaidIndex] == STATUS_LOST, "Raid not over");
         require(raidRewardClaimed[claimRaidIndex][msg.sender] == false, "Already claimed");
-        require(raidUserHistoricalIndex[claimRaidIndex][msg.sender] == raidHistoricalIndex[claimRaidIndex]);
 
         uint256[] memory raiderIndices = raidParticipantIndices[claimRaidIndex][msg.sender];
         require(raiderIndices.length > 0, "None of your characters participated");
@@ -325,8 +291,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         // chances are a bit generous compared to weapon mints because stamina cost equals lost skill
         // That being said these rates stink if the oracle is 3x lower than real value.
         uint256 seed = RandomUtil.combineSeeds(raidSeed[claimRaidIndex], uint256(msg.sender));
-        // further use of claimRaidIndex is relevant to historicalIndex
-        claimRaidIndex = raidHistoricalIndex[claimRaidIndex];
 
         uint256 commonRoll = RandomUtil.randomSeededMinMax(1, 15 + comparedToAverage.mulu(85), seed);
         if(commonRoll > 20) { // Expected: ~75% (at least 25% at bottom, 90+% past 65% power)
@@ -479,8 +443,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     function isEligibleForReward(uint256 index) public view returns(bool) {
         return raidParticipantIndices[index][msg.sender].length > 0
             && raidRewardClaimed[index][msg.sender] == false
-            && (raidStatus[index] == STATUS_WON || raidStatus[index] == STATUS_LOST)
-            && raidUserHistoricalIndex[index][msg.sender] == raidHistoricalIndex[index];
+            && (raidStatus[index] == STATUS_WON || raidStatus[index] == STATUS_LOST);
     }
 
     function getParticipatingCharacters() public view returns(uint256[] memory) {
@@ -509,25 +472,26 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         || raidEndTime[raidIndex] <= now)
             return false;
         
-        if(raidUserHistoricalIndex[raidIndex][msg.sender] == historicalRaidIndex) {
-            uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
-            for(uint i = 0; i < raiderIndices.length; i++) {
-                if(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID
-                || raidParticipants[raidIndex][raiderIndices[i]].charID != characterID) {
-                    return false;
-                }
+        uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
+        for(uint i = 0; i < raiderIndices.length; i++) {
+            if(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID
+            || raidParticipants[raidIndex][raiderIndices[i]].charID != characterID) {
+                return false;
             }
         }
 
         return true;
     }
 
+    function getLinkAddress(uint256 linkIndex) public view returns (address) {
+        return links[linkIndex];
+    }
+
     function getRaidData() public view returns(
-        uint256 index, uint256 historicalIndex, uint256 endTime, uint256 raiderCount, uint256 playerPower, uint256 bossPower,
+        uint256 index, uint256 endTime, uint256 raiderCount, uint256 playerPower, uint256 bossPower,
         uint8 trait, uint8 status, uint256 joinSkill, uint64 stamina, uint64 durability, uint64 xp
     ) {
         index = raidIndex;
-        historicalIndex = historicalRaidIndex;
         endTime = raidEndTime[raidIndex];
         raiderCount = getRaidParticipantCount(raidIndex);
         playerPower = getRaidPlayerPower(raidIndex);
