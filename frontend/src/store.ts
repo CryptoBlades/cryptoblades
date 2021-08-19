@@ -17,8 +17,7 @@ import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
-  stakeOnly as featureFlagStakeOnly,
-  reforging as featureFlagReforging
+  stakeOnly as featureFlagStakeOnly
 } from './feature-flags';
 import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
@@ -175,6 +174,10 @@ export function createStore(web3: Web3) {
           }
         }
         return false;
+      },
+
+      stakedSkillBalanceThatCanBeSpent(state) {
+        return state.staking[stakeTypeThatCanHaveUnclaimedRewardsStakedTo].stakedBalance;
       },
 
       getTargetsByCharacterIdAndWeaponId(state: IState) {
@@ -940,7 +943,8 @@ export function createStore(web3: Web3) {
               commit('updateSkillBalance', { skillBalance });
             }
           })(),
-          dispatch('fetchInGameOnlyFunds')
+          dispatch('fetchInGameOnlyFunds'),
+          dispatch('fetchStakeDetails', { stakeType: stakeTypeThatCanHaveUnclaimedRewardsStakedTo })
         ]);
       },
 
@@ -1200,25 +1204,33 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeaponN({ state, dispatch }, {num, chosenElement}) {
+      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement }: { num: any, useStakedSkillOnly?: boolean, chosenElement: any }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
 
-        await approveFee(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-          { feeMultiplier: num * 4 * chosenElementFee}
-        );
+        if(useStakedSkillOnly) {
+          await CryptoBlades.methods
+            .mintWeaponNUsingStakedSkill(num, chosenElement)
+            .send({ from: state.defaultAccount, gas: '5000000' });
+        }
+        else {
+          await approveFee(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            state.skillRewards,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+            { feeMultiplier: num * 4 * chosenElementFee }
+          );
 
-        await CryptoBlades.methods.mintWeaponN(num, chosenElement).send({ from: state.defaultAccount, gas: '5000000' });
+          await CryptoBlades.methods.mintWeaponN(num, chosenElement).send({ from: state.defaultAccount, gas: '5000000' });
+        }
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
           dispatch('updateWeaponIds'),
@@ -1226,25 +1238,33 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeapon({ state, dispatch }, {chosenElement}) {
+      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement }: { useStakedSkillOnly?: boolean, chosenElement: any }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
 
-        await approveFee(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-          { feeMultiplier: chosenElementFee }
-        );
+        if(useStakedSkillOnly) {
+          await CryptoBlades.methods
+            .mintWeaponUsingStakedSkill(chosenElement)
+            .send({ from: state.defaultAccount });
+        }
+        else {
+          await approveFee(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            state.skillRewards,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+            { feeMultiplier: chosenElementFee }
+          );
 
-        await CryptoBlades.methods.mintWeapon(chosenElement).send({ from: state.defaultAccount });
+          await CryptoBlades.methods.mintWeapon(chosenElement).send({ from: state.defaultAccount });
+        }
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
           dispatch('updateWeaponIds'),
@@ -1252,60 +1272,101 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async reforgeWeapon({ state, dispatch }, { burnWeaponId, reforgeWeaponId }) {
-        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
+      async reforgeWeapon(
+        { state, dispatch },
+        { burnWeaponId, reforgeWeaponId, useStakedSkillOnly }: {
+          burnWeaponId: any, reforgeWeaponId: any, useStakedSkillOnly?: boolean
+        }
+      ) {
+        const { CryptoBlades, SkillToken } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
 
-        await approveFee(
-          state.contracts().CryptoBlades!,
-          state.contracts().SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee()
-        );
+        if(useStakedSkillOnly) {
+          await CryptoBlades.methods
+            .reforgeWeaponUsingStakedSkill(
+              reforgeWeaponId,
+              burnWeaponId
+            )
+            .send({
+              from: state.defaultAccount,
+            });
+        }
+        else {
+          await approveFee(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            state.skillRewards,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee()
+          );
 
-        await state.contracts().CryptoBlades!.methods
-          .reforgeWeapon(
-            reforgeWeaponId,
-            burnWeaponId
-          )
-          .send({
-            from: state.defaultAccount,
-          });
+          await CryptoBlades.methods
+            .reforgeWeapon(
+              reforgeWeaponId,
+              burnWeaponId
+            )
+            .send({
+              from: state.defaultAccount,
+            });
+        }
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
           dispatch('updateWeaponIds'),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp')
         ]);
       },
 
-      async reforgeWeaponWithDust({ state, dispatch }, { reforgeWeaponId, lesserDust, greaterDust, powerfulDust}) {
-        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
+      async reforgeWeaponWithDust(
+        { state, dispatch },
+        { reforgeWeaponId, lesserDust, greaterDust, powerfulDust, useStakedSkillOnly }: {
+          reforgeWeaponId: any, lesserDust: any, greaterDust: any, powerfulDust: any,
+          useStakedSkillOnly?: boolean
+        }
+      ) {
+        const { CryptoBlades, SkillToken } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
 
-        await approveFee(
-          state.contracts().CryptoBlades!,
-          state.contracts().SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponWithDustFee()
-        );
+        if(useStakedSkillOnly) {
+          await CryptoBlades.methods
+            .reforgeWeaponWithDustUsingStakedSkill(
+              reforgeWeaponId,
+              lesserDust,
+              greaterDust,
+              powerfulDust
+            )
+            .send({
+              from: state.defaultAccount,
+            });
+        }
+        else {
+          await approveFee(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            state.skillRewards,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponWithDustFee()
+          );
 
-        await state.contracts().CryptoBlades!.methods
-          .reforgeWeaponWithDust(
-            reforgeWeaponId,
-            lesserDust,
-            greaterDust,
-            powerfulDust
-          )
-          .send({
-            from: state.defaultAccount,
-          });
+          await CryptoBlades.methods
+            .reforgeWeaponWithDust(
+              reforgeWeaponId,
+              lesserDust,
+              greaterDust,
+              powerfulDust
+            )
+            .send({
+              from: state.defaultAccount,
+            });
+        }
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
           dispatch('updateWeaponIds'),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
@@ -1313,28 +1374,41 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async burnWeapon({ state, dispatch }, { burnWeaponId}) {
-        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
+      async burnWeapon({ state, dispatch }, { burnWeaponId, useStakedSkillOnly }: { burnWeaponId: any, useStakedSkillOnly?: boolean }) {
+        const { CryptoBlades, SkillToken } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
 
-        await approveFee(
-          state.contracts().CryptoBlades!,
-          state.contracts().SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee()
-        );
+        if(useStakedSkillOnly) {
+          await CryptoBlades.methods
+            .burnWeaponUsingStakedSkill(
+              burnWeaponId
+            )
+            .send({
+              from: state.defaultAccount,
+            });
+        }
+        else {
+          await approveFee(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            state.skillRewards,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee()
+          );
 
-        await state.contracts().CryptoBlades!.methods
-          .burnWeapon(
-            burnWeaponId
-          )
-          .send({
-            from: state.defaultAccount,
-          });
+          await CryptoBlades.methods
+            .burnWeapon(
+              burnWeaponId
+            )
+            .send({
+              from: state.defaultAccount,
+            });
+        }
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
           dispatch('updateWeaponIds'),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
@@ -1342,28 +1416,42 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async massBurnWeapons({ state, dispatch }, { burnWeaponIds}) {
-        if(featureFlagStakeOnly || !featureFlagReforging || !state.defaultAccount) return;
+      async massBurnWeapons({ state, dispatch }, { burnWeaponIds, useStakedSkillOnly }: { burnWeaponIds: any[], useStakedSkillOnly?: boolean }) {
+        const { CryptoBlades, SkillToken } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
 
-        await approveFee(
-          state.contracts().CryptoBlades!,
-          state.contracts().SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee()
-        );
+        if(useStakedSkillOnly) {
+          await CryptoBlades.methods
+            .burnWeaponsUsingStakedSkill(
+              burnWeaponIds
+            )
+            .send({
+              from: state.defaultAccount,
+            });
+        }
+        else {
+          await approveFee(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            state.skillRewards,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee(),
+            { feeMultiplier: burnWeaponIds.length }
+          );
 
-        await state.contracts().CryptoBlades!.methods
-          .burnWeapons(
-            burnWeaponIds
-          )
-          .send({
-            from: state.defaultAccount,
-          });
+          await CryptoBlades.methods
+            .burnWeapons(
+              burnWeaponIds
+            )
+            .send({
+              from: state.defaultAccount,
+            });
+        }
 
         await Promise.all([
+          dispatch('fetchSkillBalance'),
           dispatch('updateWeaponIds'),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),

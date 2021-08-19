@@ -195,7 +195,7 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData(),browseTabActive = false;skillShopTabActive = false">
+      <b-tab @click="clearData();loadMarketTaxes(),browseTabActive = false;skillShopTabActive = false">
         <template #title>
           Search NFTs
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons, Shields and Characters are NFTs of the ERC721 standard" />
