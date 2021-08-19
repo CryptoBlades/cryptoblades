@@ -30,6 +30,9 @@
                 <nft-icon :isDefault="true" :nft="{ type: 'weapon' }" />
                 <nft-icon :isDefault="true" :nft="{ type: 'junk' }"/>
                 <nft-icon :isDefault="true" :nft="{ type: 'secret' }"/>
+                <nft-icon :isDefault="true" :nft="{ type: 'lbdust' }"/>
+                <nft-icon :isDefault="true" :nft="{ type: '4bdust' }"/>
+                <nft-icon :isDefault="true" :nft="{ type: '5bdust' }"/>
               </div>
               <br />
               <span class="bold raid-title-section">XP reward</span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }} </span>

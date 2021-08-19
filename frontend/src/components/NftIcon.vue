@@ -9,6 +9,12 @@
         v-tooltip="'Junk (1-5*)'" />
       <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
         v-tooltip="'Secret (??)'" />
+      <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../assets/dusts/LesserDust.png"
+        v-tooltip="'Lesser Dust'" />
+      <img class="default-dust-placeholder" v-if="nft.type === '4bdust'" src="../assets/dusts/greaterDust.png"
+        v-tooltip="'Greater Dust'" />
+      <img class="default-dust-placeholder" v-if="nft.type === '5bdust'" src="../assets/dusts/powerfulDust.png"
+        v-tooltip="'Powerful Dust'" />
     </div>
 
     <div v-if="!isDefault" class="nft-icon"
@@ -221,6 +227,13 @@ export default {
   margin-left: 12px;
   margin-top: 8px;
   transform: scale(1);
+}
+.default-dust-placeholder {
+  max-width: 100px;
+  max-height: 100px;
+  margin-left: 12px;
+  margin-top: 20px;
+  transform: scale(1.5);
 }
 .placeholder-weapon {
   max-width: 180px;
