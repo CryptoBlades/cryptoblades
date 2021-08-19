@@ -510,10 +510,10 @@ export default Vue.extend({
     },
     stakedSkillBalanceThatCanBeSpent(){
       const stakedSkillBalanceThatCanBeSpent = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18)).toFixed(4);
-      if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost) < 0) {
+      if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost)*0.8 < 0) {
         this.disableUseStakedForForge = true;
       }
-      if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost)*10 < 0){
+      if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost)*10*0.8 < 0){
         this.disableX10ForgeWithStaked = true;
       }
     }
@@ -525,10 +525,10 @@ export default Vue.extend({
     const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
     this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
     const stakedSkillBalanceThatCanBeSpent = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18)).toFixed(4);
-    if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost) < 0) {
+    if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost)*0.8 < 0) {
       this.disableUseStakedForForge = true;
     }
-    if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost)*10 < 0){
+    if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost)*10*0.8 < 0){
       this.disableX10ForgeWithStaked = true;
     }
     const reforgeCost = await this.contracts.CryptoBlades.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
