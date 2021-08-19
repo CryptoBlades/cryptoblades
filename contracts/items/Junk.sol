@@ -5,20 +5,24 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
-import "../interfaces/IERC721MintAccessSeededStars.sol";
+import "../Promos.sol";
 
-contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IERC721MintAccessSeededStars {
+contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    function initialize () public initializer {
+    function initialize (Promos _promos) public initializer {
         __ERC721_init("CryptoBlades Junk", "CBJ");
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        promos = _promos;
     }
 
-    mapping(uint256 => uint8) public stars;
+    Promos public promos;
+
+    mapping(uint256 => uint8) public tokenStars;
     
     event Minted(uint256 indexed id, address indexed minter);
 
@@ -27,22 +31,24 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IER
         _;
     }
 
+    function get(uint256 id) public view
+        returns (
+            uint8 _stars
+    ) {
+        _stars = tokenStars[id];
+    }
+
     function mint(address minter, uint8 mintStars) public restricted returns(uint256) {
 
         uint256 tokenID = totalSupply();
-        stars[tokenID] = mintStars;
+        tokenStars[tokenID] = mintStars;
         _mint(minter, tokenID);
         emit Minted(tokenID, minter);
         return tokenID;
     }
 
-    function mintAccessSeededStars(
-        address receiver,
-        uint256 ref,
-        uint256 seed,
-        uint8 mintStars
-    ) external override restricted returns(uint256) {
-        return mint(receiver, mintStars);
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
 
 }

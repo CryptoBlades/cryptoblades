@@ -104,10 +104,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     uint256 private lastMintedBlock;
     uint256 private firstMintedOfLastBlock;
     
+    uint256 public characterLimit;
+
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
-
-    uint256 public characterLimit;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);

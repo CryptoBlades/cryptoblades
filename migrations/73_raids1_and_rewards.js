@@ -1,38 +1,39 @@
-const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
+const CryptoBlades = artifacts.require("CryptoBlades");
+const Characters = artifacts.require("Characters");
+const Weapons = artifacts.require("Weapons");
 const Raid1 = artifacts.require("Raid1");
-const Junk = artifacts.require("Junk");
 const KeyLootbox = artifacts.require("KeyLootbox");
 const RaidTrinket = artifacts.require("RaidTrinket");
-const CryptoBlades = artifacts.require("CryptoBlades");
-const Weapons = artifacts.require("Weapons");
-const Characters = artifacts.require("Characters");
+const Junk = artifacts.require("Junk");
 
 module.exports = async function (deployer, network, accounts) {
 
-  const junk = await deployProxy(Junk, [], { deployer });
-  const keyLootbox = await deployProxy(KeyLootbox, [], { deployer });
-  const raidTrinket = await deployProxy(RaidTrinket, [], { deployer });
-  const game = await CryptoBlades.deployed();
-  const weps = await Weapons.deployed();
-  const chars = await Characters.deployed();
+  const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
+  const chars = await upgradeProxy(Characters.address, Characters, { deployer });
+  const weps = await upgradeProxy(Weapons.address, Weapons, { deployer });
+
+  const promosAddress = await game.promos();
+
+  const keyLootbox = await deployProxy(KeyLootbox, [promosAddress], { deployer });
+  const raidTrinket = await deployProxy(RaidTrinket, [promosAddress], { deployer });
+  const junk = await deployProxy(Junk, [promosAddress], { deployer });
 
   const raid1 = await deployProxy(Raid1, [CryptoBlades.address], { deployer });
 
   const GAME_ADMIN = await raid1.GAME_ADMIN();
   await game.grantRole(GAME_ADMIN, raid1.address);
+  await chars.grantRole(GAME_ADMIN, raid1.address);
+  await weps.grantRole(GAME_ADMIN, raid1.address);
   await keyLootbox.grantRole(GAME_ADMIN, raid1.address);
   await raidTrinket.grantRole(GAME_ADMIN, raid1.address);
-  await weps.grantRole(GAME_ADMIN, raid1.address);
-  await chars.grantRole(GAME_ADMIN, raid1.address);
   await junk.grantRole(GAME_ADMIN, raid1.address);
 
-  const REWARD_ERC721SEEDED_KEYBOX = await raid1.REWARD_ERC721SEEDED_KEYBOX();
-  const REWARD_ERC721SEEDEDSTARS_TRINKET = await raid1.REWARD_ERC721SEEDEDSTARS_TRINKET();
-  const REWARD_ERC721SEEDEDSTARS_WEAPON = await raid1.REWARD_ERC721SEEDEDSTARS_WEAPON();
-  const REWARD_ERC721SEEDEDSTARS_JUNK = await raid1.REWARD_ERC721SEEDEDSTARS_JUNK();
-  await raid1.registerERC721RewardSeededAddress(keyLootbox.address, REWARD_ERC721SEEDED_KEYBOX);
-  await raid1.registerERC721RewardSeededStarsAddress(raidTrinket.address, REWARD_ERC721SEEDEDSTARS_TRINKET);
-  await raid1.registerERC721RewardSeededStarsAddress(weps.address, REWARD_ERC721SEEDEDSTARS_WEAPON);
-  await raid1.registerERC721RewardSeededStarsAddress(junk.address, REWARD_ERC721SEEDEDSTARS_JUNK);
+  const LINK_KEYBOX = await raid1.LINK_KEYBOX();
+  const LINK_TRINKET = await raid1.LINK_TRINKET();
+  const LINK_JUNK = await raid1.LINK_JUNK();
+  await raid1.registerLink(keyLootbox.address, LINK_KEYBOX);
+  await raid1.registerLink(raidTrinket.address, LINK_TRINKET);
+  await raid1.registerLink(junk.address, LINK_JUNK);
 };

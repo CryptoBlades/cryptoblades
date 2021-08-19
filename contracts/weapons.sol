@@ -5,11 +5,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
-import "./interfaces/IERC721MintAccessSeededStars.sol";
 import "./Promos.sol";
 import "./util.sol";
 
-contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IERC721MintAccessSeededStars {
+contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint16;
@@ -210,12 +209,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         }
 
         return mintWeaponWithStars(minter, stars, seed);
-    }
-
-    function mintAccessSeededStars(address receiver, uint256 ref, uint256 seed, uint8 stars) external override
-        restricted returns(uint256) {
-        // for raids reward interface compatibility
-        return mintWeaponWithStars(receiver, stars, seed);
     }
 
     function mintWeaponWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
@@ -454,6 +447,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, 
         require(uint256(supplies[0]) + amountLB <= 0xFFFFFFFF, "Dust LB supply capped");
         require(uint256(supplies[1]) + amount4B <= 0xFFFFFFFF, "Dust 4B supply capped");
         require(uint256(supplies[2]) + amount5B <= 0xFFFFFFFF, "Dust 5B supply capped");
+    }
+
+    function incrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) public restricted {
+        _incrementDustSupplies(playerAddress, amountLB, amount4B, amount5B);
     }
 
     function _incrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {

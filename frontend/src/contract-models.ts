@@ -152,16 +152,17 @@ export function targetFromContract(data: string): ITarget {
 
 export function raidFromContract(data: string[]): IRaidState {
   const index = data[0];
-  const expectedFinishTime = data[1];
-  const raiderCount = data[2];
-  const playerPower = data[3];
-  const bossPower = data[4];
-  const bossTrait = data[5];
-  const status = data[6];
-  const joinSkill = data[7];
-  const staminaCost = data[8];
-  const durabilityCost = data[9];
-  const xpReward = data[10];
+  //const historicalIndex = data[1];
+  const expectedFinishTime = data[2];
+  const raiderCount = data[3];
+  const playerPower = data[4];
+  const bossPower = data[5];
+  const bossTrait = data[6];
+  const status = data[7];
+  const joinSkill = data[8];
+  const staminaCost = data[9];
+  const durabilityCost = data[10];
+  const xpReward = data[11];
   return {
     index, expectedFinishTime, raiderCount, playerPower, bossPower, bossTrait, status,
     joinSkill, staminaCost, durabilityCost, xpReward

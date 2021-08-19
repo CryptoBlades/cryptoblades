@@ -5,27 +5,25 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
-import "../interfaces/ITransferCooldownable.sol";
-import "../interfaces/IERC721MintAccessSeededStars.sol";
+import "../Promos.sol";
 
-contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeable, ITransferCooldownable, IERC721MintAccessSeededStars {
+contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
-    bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
 
-    uint256 public constant TRANSFER_COOLDOWN = 1 days;
-
-    function initialize () public initializer {
-        __ERC721_init("CryptoBlades Trinket", "CBT");
+    function initialize (Promos _promos) public initializer {
+        __ERC721_init("CryptoBlades Trinket", "CBRT");
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        promos = _promos;
     }
 
-    mapping(uint256 => uint256) public override lastTransferTimestamp;
-
-    mapping(uint256 => uint8) public stars;
-    mapping(uint256 => uint256) public effect;
+    Promos public promos;
+    
+    mapping(uint256 => uint8) public tokenStars;
+    mapping(uint256 => uint256) public tokenEffect;
 
     event Minted(uint256 indexed id, address indexed minter);
 
@@ -34,52 +32,26 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         _;
     }
 
-    function __ITransferCooldownable_interfaceId() external pure returns (bytes4) {
-        return TransferCooldownableInterfaceId.interfaceId();
-    }
-
-    function transferCooldownEnd(uint256 tokenId) public override view returns (uint256) {
-        return lastTransferTimestamp[tokenId].add(TRANSFER_COOLDOWN);
-    }
-
-    function transferCooldownLeft(uint256 tokenId) public override view returns (uint256) {
-        (bool success, uint256 secondsLeft) =
-            lastTransferTimestamp[tokenId].trySub(
-                block.timestamp.sub(TRANSFER_COOLDOWN)
-            );
-
-        return success ? secondsLeft : 0;
+    function get(uint256 id) public view
+        returns (
+            uint8 _stars, uint256 _effect
+    ) {
+        _stars = tokenStars[id];
+        _effect = tokenEffect[id];
     }
 
     function mint(address minter, uint8 mintStars, uint256 mintEffect) public restricted returns(uint256) {
 
         uint256 tokenID = totalSupply();
-        stars[tokenID] = mintStars;
-        effect[tokenID] = mintEffect;
+        tokenStars[tokenID] = mintStars;
+        tokenEffect[tokenID] = mintEffect;
         _mint(minter, tokenID);
         emit Minted(tokenID, minter);
         return tokenID;
     }
     
-    function mintAccessSeededStars(
-        address receiver,
-        uint256 ref,
-        uint256 seed,
-        uint8 mintStars
-    ) external override restricted returns(uint256) {
-        return mint(receiver, mintStars, ref);
-    }
-
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
-        // when not minting or burning...
-        if(from != address(0) && to != address(0)) {
-            // only allow transferring a particular token every TRANSFER_COOLDOWN seconds
-            require(lastTransferTimestamp[tokenId] < block.timestamp.sub(TRANSFER_COOLDOWN), "Transfer cooldown");
-
-            if(!hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to)) {
-                lastTransferTimestamp[tokenId] = block.timestamp;
-            }
-        }
+        require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
 
 }

@@ -5,19 +5,23 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
-import "../interfaces/IERC721MintAccessSeeded.sol";
+import "../Promos.sol";
 
-contract KeyLootbox is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IERC721MintAccessSeeded {
+contract KeyLootbox is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
+    Promos public promos;
+    
     event Minted(uint256 indexed id, address indexed minter);
 
-    function initialize () public initializer {
+    function initialize (Promos _promos) public initializer {
         __ERC721_init("CryptoBlades Key Lootbox", "CBKBX");
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        promos = _promos;
     }
 
     modifier restricted() {
@@ -33,12 +37,8 @@ contract KeyLootbox is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokenID;
     }
 
-    function mintAccessSeeded(
-        address receiver,
-        uint256 ref,
-        uint256 seed
-    ) external override restricted returns(uint256) {
-        return mint(receiver);
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
 
 }

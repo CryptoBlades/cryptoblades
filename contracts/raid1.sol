@@ -5,11 +5,11 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "./cryptoblades.sol";
 import "./characters.sol";
 import "./weapons.sol";
+import "./Promos.sol";
 import "./util.sol";
-import "./interfaces/IRandoms.sol";
-import "./interfaces/IERC20MintAccess.sol";
-import "./interfaces/IERC721MintAccessSeeded.sol";
-import "./interfaces/IERC721MintAccessSeededStars.sol";
+import "./items/RaidTrinket.sol";
+import "./items/KeyLootbox.sol";
+import "./items/Junk.sol";
 
 contract Raid1 is Initializable, AccessControlUpgradeable {
 
@@ -36,20 +36,18 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     uint8 public constant STATUS_LOST = 3;
     uint8 public constant STATUS_PAUSED = 4; // in case of emergency
 
-    /*uint256 public constant REWARD_ERC20_DUST_LB = 0;
-    uint256 public constant REWARD_ERC20_DUST_4B = 1;
-    uint256 public constant REWARD_ERC20_DUST_5B = 2;*/
-    uint256 public constant REWARD_ERC721SEEDED_KEYBOX = 0;
-    uint256 public constant REWARD_ERC721SEEDEDSTARS_TRINKET = 0;
-    uint256 public constant REWARD_ERC721SEEDEDSTARS_WEAPON = 1;
-    uint256 public constant REWARD_ERC721SEEDEDSTARS_JUNK = 2;
+    // leaving link 0 empty intentionally
+    uint256 public constant LINK_TRINKET = 1;
+    uint256 public constant LINK_KEYBOX = 2;
+    uint256 public constant LINK_JUNK = 3;
 
     CryptoBlades public game;
     Characters public characters;
     Weapons public weapons;
+    Promos public promos;
 
     struct Raider {
-        uint256 owner;
+        address owner;
         uint256 charID;
         uint256 wepID;
         uint24 power;
@@ -62,40 +60,50 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     uint16 public xpReward;
 
     uint256 public raidIndex;
+    uint256 public historicalRaidIndex; // if we loop raid indices (ie 255 per cycle), this will be left unlooped
     // all (first) keys are raidIndex
     mapping(uint256 => uint8) public raidStatus;
+    mapping(uint256 => uint256) public raidHistoricalIndex;
     mapping(uint256 => uint256) public raidEndTime;
     mapping(uint256 => uint256) public raidSeed;
     mapping(uint256 => uint8) public raidBossTrait;
     mapping(uint256 => uint256) public raidBossPower;
     mapping(uint256 => uint256) public raidPlayerPower;
     mapping(uint256 => Raider[]) public raidParticipants;
-    mapping(uint256 => mapping(uint256/*address*/ => uint256[])) public raidParticipantIndices;
-    mapping(uint256 => mapping(uint256 => bool)) public raidRewardClaimed;
+    mapping(uint256 => mapping(address => uint256)) public raidUserHistoricalIndex; // to check if indices & rewards are old
+    mapping(uint256 => mapping(address => uint256[])) public raidParticipantIndices;
+    mapping(uint256 => mapping(address => bool)) public raidRewardClaimed;
 
-    // reward interface, keys are reward indices that are unique per-type
+    // link interface
     // the idea is to avoid littering the contract with variables for each type of reward
-    mapping(uint256 => IERC20MintAccess) public rewardsERC20;
-    mapping(uint256 => IERC721MintAccessSeeded) public rewardsERC721Seeded;
-    mapping(uint256 => IERC721MintAccessSeededStars) public rewardsERC721SeededStars;
+    mapping(uint256 => address) public links;
 
-    event RaidStarted(uint256 indexed raidIndex, uint8 bossTrait, uint256 bossPower, uint256 endTime);
+    event RaidStarted(uint256 indexed raidIndex,
+        uint256 indexed historicalRaidIndex,
+        uint8 bossTrait,
+        uint256 bossPower,
+        uint256 endTime);
     event RaidJoined(uint256 raidIndex,
+        uint256 historicalRaidIndex,
         address indexed user,
         uint256 indexed character,
         uint256 indexed weapon,
         uint256 skillPaid);
-    event RaidCompleted(uint256 indexed raidIndex, uint8 outcome, uint256 bossRoll, uint256 playerRoll);
+    event RaidCompleted(uint256 indexed raidIndex,
+        uint256 indexed historicalRaidIndex,
+        uint8 outcome,
+        uint256 bossRoll,
+        uint256 playerRoll);
     
     // reward specific events for analytics
-    event RewardClaimed(uint256 indexed raidIndex, address indexed user, uint256 characterCount);
-    /*event RewardedDustLB(uint256 indexed raidIndex, address indexed user, uint256 amount);
-    event RewardedDust4B(uint256 indexed raidIndex, address indexed user, uint256 amount);
-    event RewardedDust5B(uint256 indexed raidIndex, address indexed user, uint256 amount);*/
-    event RewardedWeapon(uint256 indexed raidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
-    event RewardedJunk(uint256 indexed raidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
-    event RewardedTrinket(uint256 indexed raidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
-    event RewardedKeyBox(uint256 indexed raidIndex, address indexed user, uint256 indexed tokenID);
+    event RewardClaimed(uint256 indexed historicalRaidIndex, address indexed user, uint256 characterCount);
+    event RewardedDustLB(uint256 indexed historicalRaidIndex, address indexed user, uint32 amount);
+    event RewardedDust4B(uint256 indexed historicalRaidIndex, address indexed user, uint32 amount);
+    event RewardedDust5B(uint256 indexed historicalRaidIndex, address indexed user, uint32 amount);
+    event RewardedWeapon(uint256 indexed historicalRaidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
+    event RewardedJunk(uint256 indexed historicalRaidIndex, address indexed user, uint8 stars, uint256 indexed tokenID);
+    event RewardedTrinket(uint256 indexed historicalRaidIndex, address indexed user, uint8 stars, uint256 effect, uint256 indexed tokenID);
+    event RewardedKeyBox(uint256 indexed historicalRaidIndex, address indexed user, uint256 indexed tokenID);
 
     function initialize(address gameContract) public initializer {
         
@@ -106,37 +114,58 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         game = CryptoBlades(gameContract);
         characters = Characters(game.characters());
         weapons = Weapons(game.weapons());
+        promos = Promos(game.promos());
 
         staminaCost = 192; // 5 mins each, or 16 hours
         durabilityCost = 20; // 48 mins each, or 16 hours
-        joinCost = ABDKMath64x64.fromUInt(10);// 10 usd
-        xpReward = 128; // 13 hour 20 min worth of fight xp
+        joinCost = ABDKMath64x64.fromUInt(0);// free (was going to be 10 USD)
+        xpReward = 128 * 2; // 13 hour 20 min worth of fight xp, but we had double xp active on launch
     }
 
+    // TODO include in startRaid when we are looping indexes
+    /*function deleteRaidHistory(uint256 index) public restricted {
+        // used to clean raid history if we decide to loop indices
+        delete raidStatus[index];
+        delete raidHistoricalIndex[index];
+        delete raidEndTime[index];
+        delete raidSeed[index];
+        delete raidBossTrait[index];
+        delete raidBossPower[index];
+        delete raidPlayerPower[index];
+        delete raidParticipants[index];
+        // we can't delete users' data, but we track historicalIndex to see if they are valid
+        // that way they delete it themselves on next join
+    }*/
+
     modifier restricted() {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        _restricted();
         _;
     }
 
-    function doRaid(uint256 bossPower, uint8 bossTrait, uint256 durationHours) public restricted {
+    function _restricted() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+    }
+
+    function doRaid(uint256 bossPower, uint8 bossTrait, uint256 durationMinutes) public restricted {
         require(raidStatus[raidIndex] != STATUS_PAUSED, "Raid paused");
 
         if(raidStatus[raidIndex] == STATUS_STARTED
         && raidParticipants[raidIndex].length > 0) {
             completeRaid();
         }
-        startRaid(bossPower, bossTrait, durationHours);
+        startRaid(bossPower, bossTrait, durationMinutes);
     }
 
-    function startRaid(uint256 bossPower, uint8 bossTrait, uint256 durationHours) public restricted {
+    function startRaid(uint256 bossPower, uint8 bossTrait, uint256 durationMinutes) public restricted {
         raidStatus[raidIndex] = STATUS_STARTED;
+        raidHistoricalIndex[raidIndex] = historicalRaidIndex;
         raidBossPower[raidIndex] = bossPower;
         raidBossTrait[raidIndex] = bossTrait;
 
-        uint256 endTime = now + (durationHours * 1 hours);
+        uint256 endTime = now + (durationMinutes * 1 minutes);
         raidEndTime[raidIndex] = endTime;
 
-        emit RaidStarted(raidIndex, bossTrait, bossPower, endTime);
+        emit RaidStarted(raidIndex, historicalRaidIndex, bossTrait, bossPower, endTime);
     }
 
     function joinRaid(uint256 characterID, uint256 weaponID) public {
@@ -147,12 +176,21 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
-        uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][uint256(msg.sender)];
-        for(uint i = 0; i < raiderIndices.length; i++) {
-            require(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID,
-                "This weapon is already used in the raid");
-            require(raidParticipants[raidIndex][raiderIndices[i]].charID != characterID,
-                "This character is already participating");
+        if(raidUserHistoricalIndex[raidIndex][msg.sender] == historicalRaidIndex) {
+            // this user has joined this raid before (or it's the very first one, ever)
+            uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
+            for(uint i = 0; i < raiderIndices.length; i++) {
+                require(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID,
+                    "This weapon is already used in the raid");
+                require(raidParticipants[raidIndex][raiderIndices[i]].charID != characterID,
+                    "This character is already participating");
+            }
+        }
+        else {
+            // this raidIndex is being reused, delete old involvement data
+            delete raidParticipantIndices[raidIndex][msg.sender];
+            delete raidRewardClaimed[raidIndex][msg.sender];
+            raidUserHistoricalIndex[raidIndex][msg.sender] = historicalRaidIndex;
         }
 
         (uint8 charTrait, uint24 basePowerLevel, /*uint64 timestamp*/) =
@@ -175,9 +213,9 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         raidPlayerPower[raidIndex] += power;
 
         uint8 wepStatPattern = weapons.getStatPattern(weaponID);
-        raidParticipantIndices[raidIndex][uint256(msg.sender)].push(raidParticipants[raidIndex].length);
+        raidParticipantIndices[raidIndex][msg.sender].push(raidParticipants[raidIndex].length);
         raidParticipants[raidIndex].push(Raider(
-            uint256(msg.sender),
+            msg.sender,
             characterID,
             weaponID,
             power,
@@ -185,12 +223,15 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         ));
 
         emit RaidJoined(raidIndex,
+            historicalRaidIndex,
             msg.sender,
             characterID,
             weaponID,
             game.usdToSkill(joinCost));
         
-        game.payContractTokenOnly(msg.sender, game.usdToSkill(joinCost));
+        if(joinCost > 0) {
+            game.payContractTokenOnly(msg.sender, game.usdToSkill(joinCost));
+        }
     }
 
     function setRaidStatus(uint256 index, uint8 status) public restricted {
@@ -217,14 +258,16 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         // since we pay out exactly one trinket per raid, we might as well do it here
         Raider memory trinketWinner = raidParticipants[raidIndex][seed % raidParticipants[raidIndex].length];
         uint8 trinketStars = uint8(seed % 5);
+        uint256 trinketEffect = (seed / 10) % 5;
         uint tokenID =
-            rewardsERC721SeededStars[REWARD_ERC721SEEDEDSTARS_TRINKET].mintAccessSeededStars(
-                address(trinketWinner.owner), raidIndex, seed, trinketStars
+            RaidTrinket(links[LINK_TRINKET]).mint(
+                trinketWinner.owner, trinketStars, trinketEffect
             );
-        emit RewardedTrinket(raidIndex, address(trinketWinner.owner), trinketStars, tokenID);
+        emit RewardedTrinket(historicalRaidIndex, trinketWinner.owner, trinketStars, trinketEffect, tokenID);
 
-        emit RaidCompleted(raidIndex, outcome, bossPower, roll);
+        emit RaidCompleted(raidIndex, historicalRaidIndex, outcome, bossPower, roll);
         raidIndex++;
+        historicalRaidIndex++;
     }
 
     function getPlayerFinalPower(uint24 playerPower, uint8 charTrait, uint8 bossTrait) public view returns(uint24) {
@@ -238,9 +281,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         //claimRaidIndex can act as a version integer if future rewards change
         bool victory = raidStatus[claimRaidIndex] == STATUS_WON;
         require(victory || raidStatus[claimRaidIndex] == STATUS_LOST, "Raid not over");
-        require(raidRewardClaimed[claimRaidIndex][uint256(msg.sender)] == false, "Already claimed");
+        require(raidRewardClaimed[claimRaidIndex][msg.sender] == false, "Already claimed");
+        require(raidUserHistoricalIndex[claimRaidIndex][msg.sender] == raidHistoricalIndex[claimRaidIndex]);
 
-        uint256[] memory raiderIndices = raidParticipantIndices[claimRaidIndex][uint256(msg.sender)];
+        uint256[] memory raiderIndices = raidParticipantIndices[claimRaidIndex][msg.sender];
         require(raiderIndices.length > 0, "None of your characters participated");
 
         int128 earlyBonus = ABDKMath64x64.divu(1,10); // up to 10%
@@ -266,7 +310,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             characters.processRaidParticipation(raider.charID, victory, uint16(earlyMultiplier.mulu(xpReward)));
         }
 
-        raidRewardClaimed[claimRaidIndex][uint256(msg.sender)] = true;
+        raidRewardClaimed[claimRaidIndex][msg.sender] = true;
         emit RewardClaimed(claimRaidIndex, msg.sender, raiderIndices.length);
     }
 
@@ -281,79 +325,94 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         // chances are a bit generous compared to weapon mints because stamina cost equals lost skill
         // That being said these rates stink if the oracle is 3x lower than real value.
         uint256 seed = RandomUtil.combineSeeds(raidSeed[claimRaidIndex], uint256(msg.sender));
+        // further use of claimRaidIndex is relevant to historicalIndex
+        claimRaidIndex = raidHistoricalIndex[claimRaidIndex];
 
-        uint256 commonRoll = RandomUtil.randomSeededMinMax(1, comparedToAverage.mulu(100), seed);
-        if(commonRoll > 20) { // Expected: ~72.4%
-            uint mod = seed % 8;
-            if(mod < 2) { // 1 star junk, 2 out of 8 (25%)
-                distributeJunk(msg.sender, claimRaidIndex, seed, 0);
+        uint256 commonRoll = RandomUtil.randomSeededMinMax(1, 15 + comparedToAverage.mulu(85), seed);
+        if(commonRoll > 20) { // Expected: ~75% (at least 25% at bottom, 90+% past 65% power)
+            uint mod = seed % 10;
+            if(mod < 2) { // 1 star junk, 2 out of 10 (20%)
+                distributeJunk(msg.sender, claimRaidIndex, 0);
             }
-            else if(mod < 4) { // 2 star junk, 2 out of 8 (25%)
-                distributeJunk(msg.sender, claimRaidIndex, seed, 1);
+            else if(mod < 4) { // 2 star junk, 2 out of 10 (20%)
+                distributeJunk(msg.sender, claimRaidIndex, 1);
             }
-            else if(mod < 6) { // 2 star weapon, 2 out of 8 (25%)
+            else if(mod < 6) { // 2 star weapon, 2 out of 10 (20%)
                 distributeWeapon(msg.sender, claimRaidIndex, seed, 1);
             }
-            else if(mod == 6) { // 3 star junk, 1 out of 8 (12.5%)
-                distributeJunk(msg.sender, claimRaidIndex, seed, 2);
+            else if(mod == 6) { // 3 star junk, 1 out of 10 (10%)
+                distributeJunk(msg.sender, claimRaidIndex, 2);
             }
-            else { // 3 star weapon, 1 out of 8 (12.5%)
+            else if(mod == 7) { // 1x LB Dust, 1 out of 10 (10%)
+                distributeLBDust(msg.sender, claimRaidIndex, 1);
+            }
+            else if(mod == 8) { // 2x LB Dust, 1 out of 10 (10%)
+                distributeLBDust(msg.sender, claimRaidIndex, 2);
+            }
+            else { // 3 star weapon, 1 out of 10 (10%)
                 distributeWeapon(msg.sender, claimRaidIndex, seed, 2);
             }
         }
 
         uint256 rareRoll = RandomUtil.randomSeededMinMax(1, 950 + comparedToAverage.mulu(50), seed + 1);
-        if(rareRoll > 950) { // Expected: ~5%
-            uint mod = (seed / 10) % 18;
-            if(mod < 8) { // key box, 8 out of 18 (44.444%)
+        if(rareRoll > 950) { // Expected: ~5% (0.72% at bottom, 15% at top, 8.43% middle)
+            uint mod = (seed / 10) % 20;
+            if(mod < 8) { // key box, 8 out of 20 (40%)
                 distributeKeyBox(msg.sender, claimRaidIndex, seed);
             }
-            else if(mod == 8) { // 5 star sword, 1 out of 18 (5.555%)
+            else if(mod == 8) { // 5 star sword, 1 out of 20 (5%)
                 distributeWeapon(msg.sender, claimRaidIndex, seed, 4);
             }
-            else if(mod == 9) { // 5 star junk, 1 out of 18 (5.555%)
-                distributeJunk(msg.sender, claimRaidIndex, seed, 4);
+            else if(mod == 9) { // 5 star junk, 1 out of 20 (5%)
+                distributeJunk(msg.sender, claimRaidIndex, 4);
             }
-            else if(mod < 14) { // 4 star sword, 4 out of 18 (22.222%)
+            else if(mod < 14) { // 4 star sword, 4 out of 20 (20%)
                 distributeWeapon(msg.sender, claimRaidIndex, seed, 3);
             }
-            else { // 4 star junk, 4 out of 18 (22.222%)
-                distributeJunk(msg.sender, claimRaidIndex, seed, 3);
+            else if(mod == 14) { // 1x 4B Dust, 1 out of 20 (5%)
+                distribute4BDust(msg.sender, claimRaidIndex, 1);
+            }
+            else if(mod == 15) { // 1x 5B Dust, 1 out of 20 (5%)
+                distribute5BDust(msg.sender, claimRaidIndex, 1);
+            }
+            else { // 4 star junk, 4 out of 20 (20%)
+                distributeJunk(msg.sender, claimRaidIndex, 3);
             }
         }
     }
 
-    function distributeKeyBox(address claimant, uint256 claimRaidIndex, uint256 seed) public restricted {
-        uint tokenID = rewardsERC721Seeded[REWARD_ERC721SEEDED_KEYBOX].mintAccessSeeded(
-                claimant, claimRaidIndex, seed
-            );
+    function distributeKeyBox(address claimant, uint256 claimRaidIndex, uint256 seed) private {
+        uint tokenID = KeyLootbox(links[LINK_KEYBOX]).mint(claimant);
         emit RewardedKeyBox(claimRaidIndex, claimant, tokenID);
     }
 
-    function distributeJunk(address claimant, uint256 claimRaidIndex, uint256 seed, uint8 stars) public restricted {
-        uint tokenID = rewardsERC721SeededStars[REWARD_ERC721SEEDEDSTARS_JUNK].mintAccessSeededStars(
-                claimant, claimRaidIndex, seed, stars
-            );
+    function distributeJunk(address claimant, uint256 claimRaidIndex, uint8 stars) private {
+        uint tokenID = Junk(links[LINK_JUNK]).mint(claimant, stars);
         emit RewardedJunk(claimRaidIndex, claimant, stars, tokenID);
     }
 
-    function distributeWeapon(address claimant, uint256 claimRaidIndex, uint256 seed, uint8 stars) public restricted {
-        uint tokenID = rewardsERC721SeededStars[REWARD_ERC721SEEDEDSTARS_WEAPON].mintAccessSeededStars(
-                claimant, claimRaidIndex, seed, stars
-            );
+    function distributeWeapon(address claimant, uint256 claimRaidIndex, uint256 seed, uint8 stars) private {
+        uint tokenID = weapons.mintWeaponWithStars(claimant, stars, seed / 100);
         emit RewardedWeapon(claimRaidIndex, claimant, stars, tokenID);
     }
 
-    function registerERC20RewardAddress(address addr, uint256 index) public restricted {
-        rewardsERC20[index] = IERC20MintAccess(addr);
+    function distributeLBDust(address claimant, uint256 claimRaidIndex, uint32 amount) private {
+        weapons.incrementDustSupplies(claimant, amount, 0, 0);
+        emit RewardedDustLB(claimRaidIndex, claimant, amount);
     }
 
-    function registerERC721RewardSeededAddress(address addr, uint256 index) public restricted {
-        rewardsERC721Seeded[index] = IERC721MintAccessSeeded(addr);
+    function distribute4BDust(address claimant, uint256 claimRaidIndex, uint32 amount) private {
+        weapons.incrementDustSupplies(claimant, 0, amount, 0);
+        emit RewardedDust4B(claimRaidIndex, claimant, amount);
     }
 
-    function registerERC721RewardSeededStarsAddress(address addr, uint256 index) public restricted {
-        rewardsERC721SeededStars[index] = IERC721MintAccessSeededStars(addr);
+    function distribute5BDust(address claimant, uint256 claimRaidIndex, uint32 amount) private {
+        weapons.incrementDustSupplies(claimant, 0, 0, amount);
+        emit RewardedDust5B(claimRaidIndex, claimant, amount);
+    }
+
+    function registerLink(address addr, uint256 index) public restricted {
+        links[index] = addr;
     }
 
     function setStaminaPointCost(uint8 points) public restricted {
@@ -418,13 +477,14 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function isEligibleForReward(uint256 index) public view returns(bool) {
-        return raidParticipantIndices[index][uint256(msg.sender)].length > 0
-            && raidRewardClaimed[index][uint256(msg.sender)] == false
-            && (raidStatus[index] == STATUS_WON || raidStatus[index] == STATUS_LOST);
+        return raidParticipantIndices[index][msg.sender].length > 0
+            && raidRewardClaimed[index][msg.sender] == false
+            && (raidStatus[index] == STATUS_WON || raidStatus[index] == STATUS_LOST)
+            && raidUserHistoricalIndex[index][msg.sender] == raidHistoricalIndex[index];
     }
 
     function getParticipatingCharacters() public view returns(uint256[] memory) {
-        uint256[] memory indices = raidParticipantIndices[raidIndex][uint256(msg.sender)];
+        uint256[] memory indices = raidParticipantIndices[raidIndex][msg.sender];
         uint256[] memory chars = new uint256[](indices.length);
         for(uint i = 0; i < indices.length; i++) {
             chars[i] = raidParticipants[raidIndex][i].charID;
@@ -433,7 +493,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
     
     function getParticipatingWeapons() public view returns(uint256[] memory) {
-        uint256[] memory indices = raidParticipantIndices[raidIndex][uint256(msg.sender)];
+        uint256[] memory indices = raidParticipantIndices[raidIndex][msg.sender];
         uint256[] memory weps = new uint256[](indices.length);
         for(uint i = 0; i < indices.length; i++) {
             weps[i] = raidParticipants[raidIndex][i].wepID;
@@ -449,11 +509,13 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         || raidEndTime[raidIndex] <= now)
             return false;
         
-        uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][uint256(msg.sender)];
-        for(uint i = 0; i < raiderIndices.length; i++) {
-            if(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID
-            || raidParticipants[raidIndex][raiderIndices[i]].charID != characterID) {
-                return false;
+        if(raidUserHistoricalIndex[raidIndex][msg.sender] == historicalRaidIndex) {
+            uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
+            for(uint i = 0; i < raiderIndices.length; i++) {
+                if(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID
+                || raidParticipants[raidIndex][raiderIndices[i]].charID != characterID) {
+                    return false;
+                }
             }
         }
 
@@ -461,10 +523,11 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function getRaidData() public view returns(
-        uint256 index, uint256 endTime, uint256 raiderCount, uint256 playerPower, uint256 bossPower,
+        uint256 index, uint256 historicalIndex, uint256 endTime, uint256 raiderCount, uint256 playerPower, uint256 bossPower,
         uint8 trait, uint8 status, uint256 joinSkill, uint64 stamina, uint64 durability, uint64 xp
     ) {
         index = raidIndex;
+        historicalIndex = historicalRaidIndex;
         endTime = raidEndTime[raidIndex];
         raiderCount = getRaidParticipantCount(raidIndex);
         playerPower = getRaidPlayerPower(raidIndex);
