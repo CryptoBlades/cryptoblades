@@ -110,8 +110,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         weapons = Weapons(game.weapons());
         promos = Promos(game.promos());
 
-        staminaCost = 192; // 5 mins each, or 16 hours
-        durabilityCost = 20; // 48 mins each, or 16 hours
+        staminaCost = 200; // 5 mins each, or 16.666 hours
+        durabilityCost = 20; // 50 mins each, or 16.666 hours
         joinCost = ABDKMath64x64.fromUInt(0);// free (was going to be 10 USD)
         xpReward = 128 * 2; // 13 hour 20 min worth of fight xp, but we had double xp active on launch
     }
