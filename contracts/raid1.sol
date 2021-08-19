@@ -51,7 +51,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         uint256 charID;
         uint256 wepID;
         uint24 power;
-        uint24 traitsCWS;//char trait, wep trait, wep statpattern
+        uint24 traitsCWS;//char trait, wep trait, wep statpattern, unused for now
     }
 
     uint64 public staminaCost;
@@ -112,7 +112,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
         staminaCost = 200; // 5 mins each, or 16.666 hours
         durabilityCost = 20; // 50 mins each, or 16.666 hours
-        joinCost = ABDKMath64x64.fromUInt(0);// free (was going to be 10 USD)
+        joinCost = 0;// free (was going to be 10 USD)
         xpReward = 128 * 2; // 13 hour 20 min worth of fight xp, but we had double xp active on launch
     }
 
@@ -147,10 +147,12 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function joinRaid(uint256 characterID, uint256 weaponID) public {
-        require(characters.ownerOf(characterID) == msg.sender);
+        require(characters.canRaid(msg.sender, characterID));
+        require(weapons.canRaid(msg.sender, weaponID));
+        /*require(characters.ownerOf(characterID) == msg.sender);
         require(weapons.ownerOf(weaponID) == msg.sender);
         require(characters.getStaminaPoints(characterID) > 0, "You cannot join with 0 character stamina");
-        require(weapons.getDurabilityPoints(weaponID) > 0, "You cannot join with 0 weapon durability");
+        require(weapons.getDurabilityPoints(weaponID) > 0, "You cannot join with 0 weapon durability");*/
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
@@ -163,7 +165,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
 
         (uint8 charTrait, uint24 basePowerLevel, /*uint64 timestamp*/) =
-            game.unpackFightData(characters.getFightDataAndDrainStamina(
+            unpackFightData(characters.getFightDataAndDrainStamina(
                                     characterID,
                                     uint8(staminaCost),
                                     true)
@@ -175,31 +177,32 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(weaponID, charTrait, uint8(durabilityCost), true);
         
         uint24 power = getPlayerFinalPower(
-            game.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
+            getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             charTrait,
             raidBossTrait[raidIndex]
         );
         raidPlayerPower[raidIndex] += power;
 
-        uint8 wepStatPattern = weapons.getStatPattern(weaponID);
+        //uint8 wepStatPattern = weapons.getStatPattern(weaponID);
         raidParticipantIndices[raidIndex][msg.sender].push(raidParticipants[raidIndex].length);
         raidParticipants[raidIndex].push(Raider(
             msg.sender,
             characterID,
             weaponID,
             power,
-            uint24(charTrait) | (uint24(weaponTrait) << 8) | ((uint24(wepStatPattern)) << 16)//traitCWS
+            0//uint24(charTrait) | (uint24(weaponTrait) << 8) | ((uint24(wepStatPattern)) << 16)//traitCWS
         ));
 
+        uint256 joinCostPaid = 0;
+        if(joinCost > 0) {
+            joinCostPaid = game.usdToSkill(joinCost);
+            game.payContractTokenOnly(msg.sender, joinCostPaid);
+        }
         emit RaidJoined(raidIndex,
             msg.sender,
             characterID,
             weaponID,
-            game.usdToSkill(joinCost));
-        
-        if(joinCost > 0) {
-            game.payContractTokenOnly(msg.sender, game.usdToSkill(joinCost));
-        }
+            joinCostPaid);
     }
 
     function setRaidStatus(uint256 index, uint8 status) public restricted {
@@ -237,8 +240,28 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         raidIndex++;
     }
 
+    function unpackFightData(uint96 playerData)
+        public pure returns (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) {
+
+        charTrait = uint8(playerData & 0xFF);
+        basePowerLevel = uint24((playerData >> 8) & 0xFFFFFF);
+        timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
+    }
+
+    function getPlayerPower(
+        uint24 basePower,
+        int128 weaponMultiplier,
+        uint24 bonusPower
+    ) public pure returns(uint24) {
+        return uint24(weaponMultiplier.mulu(basePower) + bonusPower);
+    }
+
+    function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
+        return (((attacker + 1) % 4) == defender); // Thanks to Tourist
+    }
+
     function getPlayerFinalPower(uint24 playerPower, uint8 charTrait, uint8 bossTrait) public view returns(uint24) {
-        if(game.isTraitEffectiveAgainst(charTrait, bossTrait))
+        if(isTraitEffectiveAgainst(charTrait, bossTrait))
             return uint24(ABDKMath64x64.divu(1075,1000).mulu(uint256(playerPower)));
         return playerPower;
     }
@@ -253,7 +276,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         uint256[] memory raiderIndices = raidParticipantIndices[claimRaidIndex][msg.sender];
         require(raiderIndices.length > 0, "None of your characters participated");
 
-        int128 earlyBonus = ABDKMath64x64.divu(1,10); // up to 10%
         uint256 earlyBonusCutoff = raidParticipants[claimRaidIndex].length/2+1; // first half of players
         // we grab raider info (power) and give out xp and raid stats
         for(uint i = 0; i < raiderIndices.length; i++) {
@@ -261,7 +283,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             Raider memory raider = raidParticipants[claimRaidIndex][raiderIndex];
             int128 earlyMultiplier = ABDKMath64x64.fromUInt(1).add(
                 raiderIndex < earlyBonusCutoff ?
-                    earlyBonus.mul(
+                    ABDKMath64x64.divu(1,10).mul( // early bonus, 10%
                         (earlyBonusCutoff-raiderIndex).divu(earlyBonusCutoff)
                     )
                     : ABDKMath64x64.fromUInt(0)
@@ -269,6 +291,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             if(victory) {
                 distributeRewards(
                     claimRaidIndex,
+                    raiderIndex,
                     ABDKMath64x64.divu(earlyMultiplier.mulu(raider.power),
                         raidPlayerPower[claimRaidIndex]/raidParticipants[claimRaidIndex].length)
                 );
@@ -282,6 +305,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     function distributeRewards(
         uint256 claimRaidIndex,
+        uint256 raiderIndex,
         int128 comparedToAverage
     ) private {
         // at most 2 types of rewards
@@ -290,7 +314,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         // rare: 4-5b dust, 4-5 star wep, 4-5 star junk, keybox
         // chances are a bit generous compared to weapon mints because stamina cost equals lost skill
         // That being said these rates stink if the oracle is 3x lower than real value.
-        uint256 seed = RandomUtil.combineSeeds(raidSeed[claimRaidIndex], uint256(msg.sender));
+        uint256 seed = uint256(keccak256(abi.encodePacked(raidSeed[claimRaidIndex], raiderIndex, uint256(msg.sender))));
 
         uint256 commonRoll = RandomUtil.randomSeededMinMax(1, 15 + comparedToAverage.mulu(85), seed);
         if(commonRoll > 20) { // Expected: ~75% (at least 25% at bottom, 90+% past 65% power)

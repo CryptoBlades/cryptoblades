@@ -695,6 +695,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint64(maxDurability * secondsPerDurability);
     }
 
+    function canRaid(address user, uint256 id) public view returns (bool) {
+        return ownerOf(id) == user && getDurabilityPoints(id) > 0;
+    }
+
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         if(promos.getBit(from, 4) && from != address(0) && to != address(0)) {
             require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to), "Transfer cooldown");

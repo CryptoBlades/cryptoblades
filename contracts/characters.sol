@@ -289,6 +289,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         gainXp(id, xp);
     }
 
+    function canRaid(address user, uint256 id) public view returns (bool) {
+        return ownerOf(id) == user && getStaminaPoints(id) > 0;
+    }
+
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to)) {
             require(balanceOf(to) < characterLimit, "Recv has too many characters");
