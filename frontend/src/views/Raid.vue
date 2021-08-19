@@ -2,7 +2,7 @@
   <div class="main-font">
     <div class="row">
       <div class="col-md-12 col-lg-6">
-        <span class="bold raid-title-section">Dragon's Lair</span>
+        <span class="bold raid-title-section">Hellborn raid</span>
         <hr class="devider">
         <div class="row">
           <div class="col-md-12 col-lg-6 order-xs-last order-sm-last order-lg-first">
@@ -45,7 +45,7 @@
                 <span class="lightning">ELEMENT: {{ bossTrait }} </span>
               </div>
               <div class="img-responsive boss-img">
-                <img src="../assets/DragonFlyIdle_512.gif" class="img-responsive" />
+                <img src="../assets/CB_Hellborn Brute.gif" class="img-responsive" />
               </div>
             </div>
           </div>
@@ -177,6 +177,14 @@ const dragonNames = [
   'Centralizer',
   'Exchange Tormentor',
   'Eater of Stakes'
+];
+
+const bossImages = [
+  '../assets/CB_Hellborn Brute.gif',
+  '../assets/CB_Hellborn Executioner.gif',
+  '../assets/CB_Hellborn Marauder.gif',
+  '../assets/CB_Hellborn Overlord.gif',
+  '../assets/CB_Hellborn Shaman.gif',
 ];
 
 export default {
@@ -339,6 +347,10 @@ export default {
 
     getBossName() {
       return dragonNames[this.raidIndex % dragonNames.length];
+    },
+
+    getBossImage() {
+      return bossImages[this.raidIndex % bossImages.length];
     },
 
     processRaidData() {
