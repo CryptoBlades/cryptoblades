@@ -38,6 +38,18 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _stars = tokenStars[id];
     }
 
+    function getOwned() public view returns(uint256[] memory) {
+        return getOwnedBy(msg.sender);
+    }
+
+    function getOwnedBy(address owner) public view returns(uint256[] memory) {
+        uint256[] memory tokens = new uint256[](balanceOf(owner));
+        for(uint256 i = 0; i < tokens.length; i++) {
+            tokens[i] = tokenOfOwnerByIndex(owner, i);
+        }
+        return tokens;
+    }
+
     function mint(address minter, uint8 mintStars) public restricted returns(uint256) {
 
         uint256 tokenID = totalSupply();

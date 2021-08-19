@@ -6,7 +6,7 @@ import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
 import {
-  characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract
+  characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract, junkFromContract
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
@@ -93,6 +93,8 @@ export function createStore(web3: Web3) {
       ownedCharacterIds: [],
       ownedWeaponIds: [],
       ownedShieldIds: [],
+      ownedJunkIds: [],
+      ownedKeyLootboxIds: [],
       maxStamina: 0,
       currentCharacterId: null,
       ownedDust: [],
@@ -297,6 +299,8 @@ export function createStore(web3: Web3) {
         let count = 0;
         // add count of various nft types here
         count += state.ownedShieldIds.length;
+        count += state.ownedJunkIds.length;
+        count += state.ownedKeyLootboxIds.length;
         return count;
       },
 
@@ -503,7 +507,7 @@ export function createStore(web3: Web3) {
       },
 
       updateUserDetails(state: IState, payload) {
-        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability', 'ownedShieldIds'];
+        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability', 'ownedShieldIds', 'ownedJunkIds', 'ownedKeyLootboxIds'];
         for (const key of keysToAllow) {
           if (Object.hasOwnProperty.call(payload, key)) {
             Vue.set(state, key, payload[key]);
@@ -879,12 +883,16 @@ export function createStore(web3: Web3) {
           ownedCharacterIds,
           ownedWeaponIds,
           ownedShieldIds,
+          ownedJunkIds,
+          ownedKeyLootboxIds,
           maxStamina,
           maxDurability,
         ] = await Promise.all([
           state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
           state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
           state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)),
+          state.contracts().Junk?.methods.getOwned().call(defaultCallOptions(state)) || [],
+          state.contracts().KeyLootbox?.methods.getOwned().call(defaultCallOptions(state)) || [],
           state.contracts().Characters!.methods.maxStamina().call(defaultCallOptions(state)),
           state.contracts().Weapons!.methods.maxDurability().call(defaultCallOptions(state)),
         ]);
@@ -893,6 +901,8 @@ export function createStore(web3: Web3) {
           ownedCharacterIds: Array.from(ownedCharacterIds),
           ownedWeaponIds: Array.from(ownedWeaponIds),
           ownedShieldIds: Array.from(ownedShieldIds),
+          ownedJunkIds: Array.from(ownedJunkIds),
+          ownedKeyLootboxIds: Array.from(ownedKeyLootboxIds),
           maxStamina: parseInt(maxStamina, 10),
           maxDurability: parseInt(maxDurability, 10),
         });
@@ -901,6 +911,8 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacters', ownedCharacterIds),
           dispatch('fetchWeapons', ownedWeaponIds),
           dispatch('fetchShields', ownedShieldIds),
+          dispatch('fetchJunk', ownedJunkIds),
+          dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
           dispatch('fetchFightGasOffset'),
@@ -936,6 +948,26 @@ export function createStore(web3: Web3) {
           ownedShieldIds: Array.from(ownedShieldIds)
         });
         await dispatch('fetchShields', ownedShieldIds);
+      },
+
+      async updateJunkIds({ state, dispatch, commit }) {
+        if(featureFlagStakeOnly) return;
+
+        const ownedJunkIds = await state.contracts().Junk!.methods.getOwned().call(defaultCallOptions(state));
+        commit('updateUserDetails', {
+          ownedJunkIds: Array.from(ownedJunkIds)
+        });
+        await dispatch('fetchShields', ownedJunkIds);
+      },
+
+      async updateKeyLootboxIds({ state, dispatch, commit }) {
+        if(featureFlagStakeOnly) return;
+
+        const ownedKeyLootboxIds = await state.contracts().KeyLootbox!.methods.getOwned().call(defaultCallOptions(state));
+        commit('updateUserDetails', {
+          ownedKeyLootboxIds: Array.from(ownedKeyLootboxIds)
+        });
+        await dispatch('fetchShields', ownedKeyLootboxIds);
       },
 
       async fetchSkillBalance({ state, commit, dispatch }) {
@@ -1088,45 +1120,32 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      // async fetchJunks({ dispatch }, junkIds: (string | number)[]) {
-      //   await Promise.all(junkIds.map(id => dispatch('fetchJunk', id)));
-      // },
+      async fetchJunks({ dispatch }, junkIds: (string | number)[]) {
+        await Promise.all(junkIds.map(id => dispatch('fetchJunk', id)));
+      },
 
-      // async fetchJunk({ state, commit }, junkId: string | number) {
-      //   const { Junk } = state.contracts();
-      //   if(!Junk) return;
+      async fetchJunk({ state, commit }, junkId: string | number) {
+        const { Junk } = state.contracts();
+        if(!Junk) return;
 
-      //   await Promise.all([
-      //     (async () => {
-      //       const junk = shieldFromContract(
-      //         junkId,
-      //         await Junk.methods.get('' + junkId).call(defaultCallOptions(state))
-      //       );
+        await Promise.all([
+          (async () => {
+            const junk = junkFromContract(
+              junkId,
+              await Junk.methods.get('' + junkId).call(defaultCallOptions(state))
+            );
 
-      //       commit('updateJunk', { junkId, junk });
-      //     })(),
-      //   ]);
-      // },
+            commit('updateJunk', { junkId, junk });
+          })(),
+        ]);
+      },
 
-      // async fetchKeyLootboxes({ dispatch }, keyLootboxIds: (string | number)[]) {
-      //   await Promise.all(keyLootboxIds.map(id => dispatch('fetchKeyLootbox', id)));
-      // },
-
-      // async fetchKeyLootbox({ state, commit }, keyLootboxId: string | number) {
-      //   const { KeyLootbox } = state.contracts();
-      //   if(!KeyLootbox) return;
-
-      //   await Promise.all([
-      //     (async () => {
-      //       const keybox = shieldFromContract(
-      //         keyLootboxId,
-      //         await KeyLootbox.methods.get('' + keyLootboxId).call(defaultCallOptions(state))
-      //       );
-
-      //       commit('updateKeyLootbox', { keyLootboxId, keybox });
-      //     })(),
-      //   ]);
-      // },
+      async fetchKeyLootboxes({ dispatch }, keyLootboxesIds: (string | number)[]) {
+        keyLootboxesIds.forEach(id => {
+          const keybox: Nft = { id, type: 'keybox' };
+          dispatch('updateKeyLootbox', { id, keybox });
+        });
+      },
 
       async setupWeaponDurabilities({ state, dispatch }) {
         const [
@@ -1672,20 +1691,30 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
-      async claimRaidRewards({ state }, { rewardIndex }) {
+      async claimRaidRewards({ state, commit }, { rewardIndex }) {
         const Raid1 = state.contracts().Raid1!;
 
         const res = await Raid1!.methods
           .claimReward(rewardIndex)
           .send(defaultCallOptions(state));
 
+        if(res.events.RewardedJunk) {
+          const junk = { id: res.events.RewardedJunk.returnValues.tokenId, type: 'junk', stars: res.events.RewardedJunk.returnValues.stars };
+          commit('updateJunk', { junkId: res.events.RewardedJunk.returnValues.tokenId, junk } );
+        }
+
+        if(res.events.RewardedKeyBox) {
+          const keybox = { id: res.events.RewardedKeyBox.returnValues.tokenId, type: 'keybox' };
+          commit('updateKeyLootbox', { keyLootboxId: res.events.RewardedKeyBox.returnValues.tokenId, keybox } );
+        }
+
         // there may be other events fired that can be used to obtain the exact loot
         // RewardedWeapon, RewardedJunk, RewardedTrinket, RewardedKeyBox etc
         const rewards = {
-          rewardsClaimed: res.events.RewardClaimed.returnValues,
-          weapons: res.events.RewardedWeapon.returnValues,
-          junk: res.events.RewardedJunk.returnValues,
-          keybox: res.events.RewardedKeyBox.returnValues
+          rewardsClaimed: res.events.RewardClaimed?.returnValues,
+          weapon: res.events.RewardedWeapon?.returnValues,
+          junk: res.events.RewardedJunk?.returnValues,
+          keybox: res.events.RewardedKeyBox?.returnValues
         };
         return rewards;
       },

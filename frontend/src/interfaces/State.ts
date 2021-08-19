@@ -76,6 +76,8 @@ export interface IState {
   ownedCharacterIds: number[];
   ownedWeaponIds: number[];
   ownedShieldIds: number[];
+  ownedJunkIds: number[];
+  ownedKeyLootboxIds: number[];
   maxStamina: number;
   ownedDust: string[];
 

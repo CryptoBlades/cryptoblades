@@ -1,5 +1,6 @@
 
 import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState } from './interfaces';
+import { Nft } from './interfaces/Nft';
 import { IShield } from './interfaces/Shield';
 
 export function traitNumberToName(traitNum: number): string {
@@ -66,6 +67,14 @@ export function statNumberToName(statNum: number): string {
 
 export function getWeaponTraitFromProperties(properties: number): number {
   return (properties >> 3) & 0x3;
+}
+
+export function junkFromContract(id: string | number, stars: string): Nft {
+  return {
+    id: +id,
+    type: 'junk',
+    stars: +stars,
+  };
 }
 
 export function shieldFromContract(id: string | number, data: string[]): IShield {

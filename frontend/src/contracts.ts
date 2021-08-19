@@ -167,6 +167,8 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     raidContracts.Raid1 = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
   }
 
+  //TODO: Setup Junk, KeyLootbox contracts here
+
   const marketContracts: MarketContracts = {};
   if(featureFlagMarket) {
     const marketContractAddr = process.env.VUE_APP_MARKET_CONTRACT_ADDRESS || (marketNetworks as Networks)[networkId]!.address;

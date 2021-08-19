@@ -1,8 +1,10 @@
 <template>
   <div v-bind:class="isDefault ? 'default-icon-wrapper' : 'nft-icon-wrapper'">
-    <div v-if="isDefault" class="nft-icon">
+    <div v-if="isDefault" class="nft-default-icon">
       <img class="default-placeholder" v-if="nft.type === 'weapon'" src="../assets/placeholder/sword-placeholder-1.png"
         v-tooltip="'Weapons (2-5*)'"/>
+      <div v-if="nft.type === 'weapon'" class="default-info">2-5*</div>
+
       <img class="default-placeholder" v-if="nft.type === 'junk'" src="../assets/bounty.png"
         v-tooltip="'Junk (1-5*)'" />
       <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
@@ -46,11 +48,27 @@
       </div>
 
       <div v-if="nft.type === 'weapon'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
+          <img class="placeholder-shield" src="../assets/placeholder/sword-placeholder-3.png" />
+          <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
 
+          <div v-if="!isShop" class="stats">
+          <div v-if="nft.stat1Value">
+            <span :class="nft.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
+            <span :class="nft.stat1.toLowerCase()">{{ nft.stat1 }} +{{ nft.stat1Value }}</span>
+          </div>
+          <div v-if="nft.stat2Value">
+            <span :class="nft.stat2.toLowerCase() + '-icon'" class="mr-1 icon"></span>
+            <span :class="nft.stat2.toLowerCase()">{{ nft.stat2 }} +{{ nft.stat2Value }}</span>
+          </div>
+          <div v-if="nft.stat3Value">
+            <span :class="nft.stat3.toLowerCase() + '-icon'" class="mr-1 icon"></span>
+            <span :class="nft.stat3.toLowerCase()">{{ nft.stat3 }} +{{ nft.stat3Value }}</span>
+          </div>
+        </div>
       </div>
 
       <div v-if="nft.type === 'junk'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
-        <img class="placeholder-shield" src="../assets/shield1.png" />
+        <img class="placeholder-shield" :src="getJunkArt(nft.id)" />
         <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
       </div>
 
@@ -69,6 +87,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+import { getJunkArt } from '../junk-arts-placeholder';
 
 export default {
   props: ['nft', 'isDefault', 'isShop', 'favorite'],
@@ -109,6 +128,7 @@ export default {
   },
 
   methods: {
+    getJunkArt,
     ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags',
       'fetchTotalCharacterFireTraitChanges', 'fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
@@ -170,6 +190,22 @@ export default {
   position: relative;
   background: rgba(255, 255, 255, 0.1);
 }
+.nft-default-icon{
+  height: 100%;
+  width: 100%;
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid #9e8a57;
+}
+
+.default-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
 .nft-icon-wrapper {
   width: 12em;
   height: 12em;

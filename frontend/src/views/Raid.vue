@@ -98,7 +98,7 @@
         <div class="raid-info-box mt-3">
           <div class="row">
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
-              <div class="float-lg-left text-sm-center mb-sm-2">
+              <div class="float-lg-left mb-sm-2">
                 <div class="finish">
                     <span class="title">Finishes on</span>
                     {{ expectedFinishTime }}
@@ -117,10 +117,10 @@
                   </select>
                 </div>
               </b-modal>
-              <b-modal id="rewardsModal" title="Raid rewards" size="lg">
-                <nft-list :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
-              </b-modal>
             </div>
+            <b-modal id="rewardsModal" title="Raid rewards" size="lg">
+              <nft-list :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
+            </b-modal>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
               <big-button class="encounter-button btn-styled" :mainText="`Sign up!`" v-tooltip="'Joining will cost 12h of stamina'" @click="joinRaidMethod()" />
             </div>
@@ -148,6 +148,8 @@ import NftIcon from '@/components/NftIcon.vue';
 import NftList from '@/components/smart/NftList.vue';
 import { GetTotalMultiplierForTrait } from '@/interfaces/Weapon';
 import { CharacterPower } from '@/interfaces';
+
+let interval = null;
 
 const dragonNames = [
   'Fudbringer',
@@ -287,22 +289,30 @@ export default {
 
     async claimRewardIndex(rewardIndex) {
       console.log('Attempting to claim reward index '+rewardIndex);
-      // const result = await this.claimRaidRewards({
-      //   rewardIndex
-      // });
-      // const nfts = [];
-      // nfts.push(result.weapons.map(x => { return { type: 'weapon', id: x.tokenId, stars: x.stars}; }));
-      // nfts.push(result.junk.map(x => { return { type: 'junk', id: x.tokenId, stars: x.stars}; }));
-      // nfts.push(result.keybox.map(x => { return { type: 'keybox', id: x.tokenId }; }));
-      // this.rewards = nfts;
-      this.rewards = [
-        { type:'weapon', id: 1, stars: 2},
-        { type:'junk', id:1, stars:3 },
-        { type:'keybox', id:1 }
-      ];
+      const result = await this.claimRaidRewards({
+        rewardIndex
+      });
+      console.log(JSON.stringify(result));
+      const nfts = [];
+      if(result.weapon) {
+        nfts.push({ type: 'weapon', id: result.weapon?.tokenId, stars: result.weapon?.stars }); //result.weapons?.map(x => { return { type: 'weapon', id: x.tokenId, stars: x.stars}; }));
+      }
+      if(result.junk) {
+        nfts.push({ type: 'junk', id: result.junk?.tokenId, stars: result.junk?.stars }); //result.junk?.map(x => { return { type: 'junk', id: x.tokenId, stars: x.stars}; }));
+      }
+      if(result.keybox) {
+        nfts.push({ type: 'keybox', id: result.keybox?.tokenId }); //result.keybox?.map(x => { return { type: 'keybox', id: x.tokenId }; }));
+      }
+
+      console.log('nfts ' + JSON.stringify(nfts));
+      this.rewards = nfts;
+      // this.rewards = [
+      //   { type:'weapon', id: 1, stars: 2},
+      //   { type:'junk', id:1, stars:3 },
+      //   { type:'keybox', id:1 }
+      // ];
       this.$bvModal.show('rewardsModal');
       console.log('Reward claimed for '+rewardIndex);
-      this.getRewardIndexes();
       //console.log('Result: '+result);
     },
 
@@ -316,12 +326,12 @@ export default {
       this.bossName = this.getBossName();
       this.raiderCount = raidData.raiderCount;
       this.totalPower = raidData.playerPower;
-      this.expectedFinishTime = raidData.expectedFinishTime;
+      this.expectedFinishTime = new Date(raidData.expectedFinishTime * 1000).toLocaleString();
       this.xpReward = raidData.xpReward;
       this.staminaCost = raidData.staminaCost;
       this.durabilityCost = raidData.durabilityCost;
       this.joinCost = raidData.joinSkill;
-      this.raidStatus = raidData.status;
+      this.raidStatus = raidData.status ? 'Preparation' : 'Finished';
       this.bossPower = raidData.bossPower;
       this.bossTrait = raidData.bossTrait;
     }
@@ -342,7 +352,15 @@ export default {
       this.fetchRaidState(),
     ]);
     this.processRaidData();
-    await this.getRewardIndexes();
+    interval = setInterval(async () => {
+      await this.getRewardIndexes();
+      await this.fetchRaidState();
+      this.expectedFinishTime = new Date(this.getRaidState()?.expectedFinishTime * 1000).toLocaleString();
+    }, 5000);
+  },
+
+  beforeDestroy() {
+    clearInterval(interval);
   },
 
   components: {
