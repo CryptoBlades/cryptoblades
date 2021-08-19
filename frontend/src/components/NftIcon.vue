@@ -73,12 +73,12 @@
         </div>
       </div>
 
-      <div v-if="nft.type === 'junk'" class="nft-details glow-container" ref="el" :class="['glow-0']">
+      <div v-if="nft.type === 'junk'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
         <img class="placeholder-junk" :src="getJunkArt(nft.id)" />
         <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
       </div>
 
-      <div v-if="nft.type === 'keybox'" class="nft-details glow-container"  ref="el">
+      <div v-if="nft.type === 'keybox'" class="nft-details">
         <img class="placeholder-keybox" src="../assets/bounty.png" />
         <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
       </div>
@@ -111,7 +111,7 @@ export default {
       let ttHtml = `
         ID: ${this.nft.id}
         <br>
-        ${Array(this.nft.stars && this.nft.stars + 1 || 0).fill('★').join('')}
+        ${Array(this.nft.stars !== null && this.nft.stars !== undefined && this.nft.stars + 1 || 0).fill('★').join('')}
       `;
       if(this.nft.level > 0) {
         ttHtml += `<br>Level ${this.nft.level + 1}`;

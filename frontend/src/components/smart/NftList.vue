@@ -253,7 +253,7 @@ export default Vue.extend({
           return [];
         }
       }
-      console.log(this.nftsToDisplay);
+
       return this.nftsWithIdType(this.nftsToDisplay).filter(Boolean);
     },
 
@@ -318,16 +318,6 @@ export default Vue.extend({
           break;
         }
       });
-
-      if(shieldIds.length > 0) {
-        await this.fetchShields(shieldIds);
-      }
-      if(junkIds.length > 0) {
-        await this.updateJunkIds();
-      }
-      if(keyLootboxIds.length > 0) {
-        await this.updateKeyLootboxIds();
-      }
     },
   },
 

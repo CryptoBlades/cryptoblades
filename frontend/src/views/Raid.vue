@@ -45,7 +45,7 @@
                 <span class="lightning">ELEMENT: {{ bossTrait }} </span>
               </div>
               <div class="img-responsive boss-img">
-                <img src="../assets/CB_Hellborn Brute.gif" class="img-responsive" />
+                <img :src="getBossArt(raidIndex)" class="img-responsive" />
               </div>
             </div>
           </div>
@@ -164,6 +164,7 @@ import NftIcon from '@/components/NftIcon.vue';
 import NftList from '@/components/smart/NftList.vue';
 import { GetTotalMultiplierForTrait } from '@/interfaces/Weapon';
 import { CharacterPower } from '@/interfaces';
+import { getBossArt } from '@/raid-boss-art-placeholder';
 
 let interval = null;
 
@@ -238,6 +239,7 @@ export default {
   },
 
   methods: {
+    getBossArt,
     ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid',
       'fetchRaidRewards', 'claimRaidRewards', 'fetchRaidingCharacters', 'fetchRaidingWeapons',
       'fetchRaidJoinEligibility']),
@@ -317,7 +319,7 @@ export default {
       const result = await this.claimRaidRewards({
         rewardIndex
       });
-      console.log('rewards ' + JSON.stringify(result));
+
       const nfts = [];
       if(result.weapon) {
         nfts.push({ type: 'weapon', id: result.weapon?.tokenID, stars: result.weapon?.stars }); //result.weapons?.map(x => { return { type: 'weapon', id: x.tokenId, stars: x.stars}; }));
@@ -329,7 +331,6 @@ export default {
         nfts.push({ type: 'keybox', id: result.keybox?.tokenID }); //result.keybox?.map(x => { return { type: 'keybox', id: x.tokenId }; }));
       }
 
-      console.log('nfts ' + JSON.stringify(nfts));
       this.rewards = nfts;
       // this.rewards = [
       //   { type:'weapon', id: 1, stars: 2},
@@ -575,9 +576,15 @@ hr.devider {
 }
 .boss-img {
   width: 100%;
+  height: 100%;
+  max-height: 413px;
+  text-align: center;
 }
 .boss-img > img {
   width: 100%;
+  height: 100%;
+  max-height: 413px;
+  max-width: 370px;
 }
 .boss-box {
   border: 0.5px solid #242423;
