@@ -305,6 +305,7 @@ export function createStore(web3: Web3) {
       },
 
       nftsWithIdType(state) {
+        console.log(JSON.stringify(state.nfts));
         return (nftIdTypes: { type: string, id: string | number }[]) => {
           const nfts = nftIdTypes.map((idType) => {
             const nft = state.nfts[idType.type] && state.nfts[idType.type][+(idType.id)];
@@ -891,8 +892,8 @@ export function createStore(web3: Web3) {
           state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
           state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
           state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)),
-          state.contracts().Junk?.methods.getOwned().call(defaultCallOptions(state)) || [],
-          state.contracts().KeyLootbox?.methods.getOwned().call(defaultCallOptions(state)) || [],
+          state.contracts().Junk!.methods.getOwned().call(defaultCallOptions(state)) || [],
+          state.contracts().KeyLootbox!.methods.getOwned().call(defaultCallOptions(state)) || [],
           state.contracts().Characters!.methods.maxStamina().call(defaultCallOptions(state)),
           state.contracts().Weapons!.methods.maxDurability().call(defaultCallOptions(state)),
         ]);
@@ -911,7 +912,7 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacters', ownedCharacterIds),
           dispatch('fetchWeapons', ownedWeaponIds),
           dispatch('fetchShields', ownedShieldIds),
-          dispatch('fetchJunk', ownedJunkIds),
+          dispatch('fetchJunks', ownedJunkIds),
           dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
@@ -957,7 +958,7 @@ export function createStore(web3: Web3) {
         commit('updateUserDetails', {
           ownedJunkIds: Array.from(ownedJunkIds)
         });
-        await dispatch('fetchShields', ownedJunkIds);
+        await dispatch('fetchJunks', ownedJunkIds);
       },
 
       async updateKeyLootboxIds({ state, dispatch, commit }) {
@@ -967,7 +968,7 @@ export function createStore(web3: Web3) {
         commit('updateUserDetails', {
           ownedKeyLootboxIds: Array.from(ownedKeyLootboxIds)
         });
-        await dispatch('fetchShields', ownedKeyLootboxIds);
+        await dispatch('fetchKeyLootboxes', ownedKeyLootboxIds);
       },
 
       async fetchSkillBalance({ state, commit, dispatch }) {
@@ -1140,10 +1141,10 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async fetchKeyLootboxes({ dispatch }, keyLootboxesIds: (string | number)[]) {
+      async fetchKeyLootboxes({ commit }, keyLootboxesIds: (string | number)[]) {
         keyLootboxesIds.forEach(id => {
           const keybox: Nft = { id, type: 'keybox' };
-          dispatch('updateKeyLootbox', { id, keybox });
+          commit('updateKeyLootbox', { keyLootboxId: id, keybox });
         });
       },
 
@@ -1691,21 +1692,21 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
-      async claimRaidRewards({ state, commit }, { rewardIndex }) {
+      async claimRaidRewards({ state, dispatch }, { rewardIndex }) {
         const Raid1 = state.contracts().Raid1!;
 
         const res = await Raid1!.methods
           .claimReward(rewardIndex)
           .send(defaultCallOptions(state));
 
+        console.log('res ' + JSON.stringify(res));
+
         if(res.events.RewardedJunk) {
-          const junk = { id: res.events.RewardedJunk.returnValues.tokenId, type: 'junk', stars: res.events.RewardedJunk.returnValues.stars };
-          commit('updateJunk', { junkId: res.events.RewardedJunk.returnValues.tokenId, junk } );
+          await dispatch('fetchJunk', '' + res.events.RewardedJunk.returnValues.tokenID);
         }
 
         if(res.events.RewardedKeyBox) {
-          const keybox = { id: res.events.RewardedKeyBox.returnValues.tokenId, type: 'keybox' };
-          commit('updateKeyLootbox', { keyLootboxId: res.events.RewardedKeyBox.returnValues.tokenId, keybox } );
+          await dispatch('fetchKeyLootboxes', ['' + res.events.RewardedKeyBox.returnValues.tokenID]);
         }
 
         // there may be other events fired that can be used to obtain the exact loot

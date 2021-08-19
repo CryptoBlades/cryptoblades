@@ -303,7 +303,8 @@
       </b-tab>
       <b-tab>
         <template #title>
-          Shields <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`You can buy shield in Skill shop tab in the market!`"/>
+          Equipment <b-icon-question-circle class="centered-icon" scale="0.8"
+            v-tooltip.bottom="`You can buy shield in Skill shop tab in the market and loot other nfts from Raids!`"/>
         </template>
         <div class="row mt-3">
           <div class="col">

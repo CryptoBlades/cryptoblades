@@ -73,13 +73,13 @@
         </div>
       </div>
 
-      <div v-if="nft.type === 'junk'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
-        <img class="placeholder-shield" :src="getJunkArt(nft.id)" />
+      <div v-if="nft.type === 'junk'" class="nft-details glow-container" ref="el" :class="['glow-0']">
+        <img class="placeholder-junk" :src="getJunkArt(nft.id)" />
         <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
       </div>
 
-      <div v-if="nft.type === 'keybox'">
-        <img class="placeholder-shield" src="../assets/shield1.png" />
+      <div v-if="nft.type === 'keybox'" class="nft-details glow-container"  ref="el">
+        <img class="placeholder-keybox" src="../assets/bounty.png" />
         <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
       </div>
 
@@ -111,7 +111,7 @@ export default {
       let ttHtml = `
         ID: ${this.nft.id}
         <br>
-        ${Array(this.nft.stars + 1).fill('★').join('')}
+        ${Array(this.nft.stars && this.nft.stars + 1 || 0).fill('★').join('')}
       `;
       if(this.nft.level > 0) {
         ttHtml += `<br>Level ${this.nft.level + 1}`;
@@ -247,6 +247,21 @@ export default {
   max-width: 160px;
   max-height: 200px;
   margin-top: -10px;
+}
+
+.placeholder-junk {
+  max-width: 160px;
+  max-height: 200px;
+  margin-top: 10px;
+  transform: scale(1.4);
+}
+
+.placeholder-keybox {
+  max-width: 160px;
+  max-height: 200px;
+  margin-top: 40px;
+  margin-left: 5px;
+  transform: scale(1.2);
 }
 
 .placeholder-consumable {

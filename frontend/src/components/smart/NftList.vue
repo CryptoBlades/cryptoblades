@@ -28,7 +28,7 @@
         <div v-if="!isMarket" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>Nft Type</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Shield']" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 'Shield', 'Junk', 'Keybox']" :value="x" :key="x">{{ x || 'Any' }}</option>
           </select>
         </div>
 
@@ -67,6 +67,9 @@
             Clear Filters
           </span>
         </b-button>
+      </div>
+      <div v-if="isReward && nonIgnoredNfts.length === 0">
+        Nothing dropped for you this time.
       </div>
       <ul class="nft-grid">
         <li class="nft" v-for="nft in nonIgnoredNfts" :key="`${nft.type}.${nft.id}`"
@@ -128,8 +131,8 @@ interface StoreMappedGetters {
 interface StoreMappedActions {
   purchaseShield(): Promise<void>;
   fetchShields(shieldIds: (string | number)[]): Promise<void>;
-  fetchJunk(junkIds: (string | number)[]): Promise<void>;
-  fetchKeyLootboxes(keyLootboxesIds: (string | number)[]): Promise<void>;
+  updateJunkIds(): Promise<void>;
+  updateKeyLootboxIds(): Promise<void>;
   purchaseRenameTag(): Promise<void>;
   purchaseRenameTagDeal(): Promise<void>;
   purchaseWeaponRenameTag(): Promise<void>;
@@ -250,7 +253,7 @@ export default Vue.extend({
           return [];
         }
       }
-
+      console.log(this.nftsToDisplay);
       return this.nftsWithIdType(this.nftsToDisplay).filter(Boolean);
     },
 
@@ -320,16 +323,16 @@ export default Vue.extend({
         await this.fetchShields(shieldIds);
       }
       if(junkIds.length > 0) {
-        await this.fetchShields(junkIds);
+        await this.updateJunkIds();
       }
       if(keyLootboxIds.length > 0) {
-        await this.fetchShields(keyLootboxIds);
+        await this.updateKeyLootboxIds();
       }
     },
   },
 
   methods: {
-    ...(mapActions(['purchaseShield', 'fetchShields', 'fetchJunk', 'fetchKeyLootboxes', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
+    ...(mapActions(['purchaseShield', 'fetchShields', 'updateJunkIds', 'updateKeyLootboxIds', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
       'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
       'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
       'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange'
@@ -448,13 +451,13 @@ export default Vue.extend({
     }
   },
 
-  mounted() {
+  async mounted() {
     this.checkStorageFavorite();
 
     if(!this.showGivenNftIdTypes) {
-      this.fetchShields(this.ownedShieldIds);
-      this.fetchJunk(this.ownedJunkIds);
-      this.fetchKeyLootboxes(this.ownedKeyLootboxIds);
+      await this.fetchShields(this.ownedShieldIds);
+      await this.updateJunkIds();
+      await this.updateKeyLootboxIds();
     }
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());

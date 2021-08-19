@@ -75,7 +75,7 @@
             <hr class="devider">
           </div>
           <div class="col-xs-12 col-sm-12 col-lg-6 char-box">
-            <span class="raid-title-section bold">Choose a Character <span class="float-right sub-text">Power {{ currentCharacterPower }}</span></span>
+            <span class="raid-title-section bold">Character <span class="float-right sub-text">Power {{ currentCharacterPower }}</span></span>
             <hr class="devider">
             <character-list :value="currentCharacterId" @input="setCurrentCharacter" class="raid-style" />
             <hr class="devider">
@@ -122,7 +122,20 @@
               </b-modal>
             </div>
             <b-modal id="rewardsModal" title="Raid rewards" size="lg">
-              <nft-list :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
+              <template #modal-header>
+                <div v-if="!spin" class="new-weapon-header-text text-center">
+                  <strong>Rewards</strong>
+                </div>
+                <div v-if="spin" class="new-weapon-header-text text-center">
+                  <strong>Claiming rewards...</strong>
+                </div>
+              </template>
+               <div class="text-center">
+                  <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                  <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                  <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                </div>
+              <nft-list v-if="!spin" :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
             </b-modal>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
               <big-button class="encounter-button btn-styled" :mainText="`Sign up!`" v-tooltip="'Joining will cost 12h of stamina'" @click="joinRaidMethod()" />
@@ -186,7 +199,8 @@ export default {
       bossTrait: null,
       rewardIndexes: null,
       rewardsRaidId: null,
-      rewards: null
+      rewards: null,
+      spin: false,
     };
   },
 
@@ -206,7 +220,7 @@ export default {
     currentMultiplier() {
       if(!this.selectedWeaponId) return '0';
       const currentWeapon = this.ownWeapons[this.selectedWeaponId];
-      return GetTotalMultiplierForTrait(currentWeapon, this.currentCharacter.trait);
+      return GetTotalMultiplierForTrait(currentWeapon, this.currentCharacter.trait).toFixed(2);
     },
 
     currentCharacterPower() {
@@ -295,16 +309,16 @@ export default {
       const result = await this.claimRaidRewards({
         rewardIndex
       });
-      console.log(JSON.stringify(result));
+      console.log('rewards ' + JSON.stringify(result));
       const nfts = [];
       if(result.weapon) {
-        nfts.push({ type: 'weapon', id: result.weapon?.tokenId, stars: result.weapon?.stars }); //result.weapons?.map(x => { return { type: 'weapon', id: x.tokenId, stars: x.stars}; }));
+        nfts.push({ type: 'weapon', id: result.weapon?.tokenID, stars: result.weapon?.stars }); //result.weapons?.map(x => { return { type: 'weapon', id: x.tokenId, stars: x.stars}; }));
       }
       if(result.junk) {
-        nfts.push({ type: 'junk', id: result.junk?.tokenId, stars: result.junk?.stars }); //result.junk?.map(x => { return { type: 'junk', id: x.tokenId, stars: x.stars}; }));
+        nfts.push({ type: 'junk', id: result.junk?.tokenID, stars: result.junk?.stars }); //result.junk?.map(x => { return { type: 'junk', id: x.tokenId, stars: x.stars}; }));
       }
       if(result.keybox) {
-        nfts.push({ type: 'keybox', id: result.keybox?.tokenId }); //result.keybox?.map(x => { return { type: 'keybox', id: x.tokenId }; }));
+        nfts.push({ type: 'keybox', id: result.keybox?.tokenID }); //result.keybox?.map(x => { return { type: 'keybox', id: x.tokenId }; }));
       }
 
       console.log('nfts ' + JSON.stringify(nfts));
@@ -314,7 +328,11 @@ export default {
       //   { type:'junk', id:1, stars:3 },
       //   { type:'keybox', id:1 }
       // ];
+      this.spin = true;
       this.$bvModal.show('rewardsModal');
+      setTimeout(() => {
+        this.spin = false;
+      }, 10000);
       console.log('Reward claimed for '+rewardIndex);
       //console.log('Result: '+result);
     },
@@ -355,9 +373,13 @@ export default {
       this.fetchRaidState(),
     ]);
     this.processRaidData();
+    await this.getRewardIndexes();
+    await this.fetchRaidState();
     interval = setInterval(async () => {
       await this.getRewardIndexes();
       await this.fetchRaidState();
+      this.raiderCount = this.getRaidState()?.raiderCount;
+      this.totalPower = this.getRaidState()?.playerPower;
       this.expectedFinishTime = new Date(this.getRaidState()?.expectedFinishTime * 1000).toLocaleString();
     }, 5000);
   },
@@ -598,7 +620,38 @@ hr.devider {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  width: 100%;
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 0.5px solid #1f1f1f;
+  height: 161px;
 }
+
+.drops-icons >>> ul {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.drops-icons::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(156, 109, 46, 0.3);
+	background-color: #F5F5F5;
+}
+
+.drops-icons::-webkit-scrollbar
+{
+	width: 10px;
+	background-color: #F5F5F5;
+}
+.drops-icons::-webkit-scrollbar-thumb
+{
+	background-color: #a3773e;
+	border: 2px solid #555555;
+}
+
+
 .encounter-button {
   display: block;
   top:0 !important;
