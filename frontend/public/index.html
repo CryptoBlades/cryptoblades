@@ -29,13 +29,6 @@
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-C5RLX74PEW"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){window.dataLayer.push(arguments);}
-    gtag('js', new Date());
-  
-    gtag('config', 'G-C5RLX74PEW');
-  </script>
   
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6717992096530538" crossorigin="anonymous"></script>
   <script>
@@ -44,11 +37,37 @@
 </head>
 
 <body>
+  <div id="cookies-eu-banner" data-wait-remove="250" style="display: none">
+    <span>
+      We use third-party cookies (Google Analytics) to offer a better browsing experience, analyze site traffic and serve targeted advertisements.
+      <br/>
+      By clicking accept, you consent to our privacy policy & use of third-party-cookies.
+    </span>
+    <br/>
+    <button id="cookies-eu-reject">Reject</button>
+    <button id="cookies-eu-accept">Accept</button>
+    <p>
+    </p>
+  </div>
   <noscript>
     <strong>We're sorry but CryptoBlades doesn't work properly without JavaScript enabled.
       Please enable it to continue.</strong>
   </noscript>
   <div id="app"></div>
+  <link rel="stylesheet" href="//rawcdn.githack.com/Alex-D/Cookies-EU-banner/2.0.0/css/cookies-eu-banner.default.css">
+  <script src="//rawcdn.githack.com/Alex-D/Cookies-EU-banner/2.0.0/dist/cookies-eu-banner.min.js"></script>
+  <script src="../node_modules/cookies-eu-banner/dist/cookies-eu-banner.min.js"></script>
+  <script>
+    new CookiesEuBanner(function () {
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        window.dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+      gtag('config', 'G-C5RLX74PEW');
+      console.log("LOAD GA");
+    },true);
+  </script>
   <!-- built files will be auto injected -->
 </body>
 
