@@ -240,7 +240,9 @@ export function createStore(web3: Web3) {
       getExchangeUrl() {
         return 'https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
       },
-
+      getExchangeTransakUrl() {
+        return 'https://global.transak.com/?apiKey=YOUR_PRODUCTION_API_KEY?defaultCryptoCurrency=BNB'; //INSERT API KEY TRANSAK
+      },
       ownCharacters(state, getters) {
         return getters.charactersWithIds(state.ownedCharacterIds);
       },
