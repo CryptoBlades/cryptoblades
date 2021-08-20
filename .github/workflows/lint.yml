@@ -10,6 +10,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Check lockfileVersion for root
+        run: |
+          test -f package-lock.json
+          test "$(jq '.lockfileVersion' package-lock.json)" -eq 1
+
+      - name: Check lockfileVersion for frontend
+        run: |
+          test -f frontend/package-lock.json
+          test "$(jq '.lockfileVersion' frontend/package-lock.json)" -eq 1
+
       - name: Use Node.js 14
         uses: actions/setup-node@v1
         with:
