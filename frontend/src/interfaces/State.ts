@@ -52,6 +52,7 @@ export interface IRaidState {
   staminaCost: string;
   durabilityCost: string;
   xpReward: string;
+  accountPower: string;
 
   //isOwnedCharacterRaidingById: Record<number, boolean>; // ?
 }
