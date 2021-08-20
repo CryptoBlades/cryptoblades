@@ -57,14 +57,19 @@
                         variant="primary"
                         class="ml-3"
                         @click="onForgeWeaponx10()"
-                        :disabled="disableForge"
-                        v-tooltip="$t('blacksmith.forgeNew')">
-                  <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                    {{$t('blacksmith.forge')}} x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i>
-                  </span>
+                        :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge )"
+                        v-tooltip="'Forge new weapon'">
+                  <span v-if="disableForge">Cooling forge...</span>
+                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i></span>
                 </b-button>
-
+                  <b-checkbox
+                    variant="primary"
+                    class="mx-3 my-auto"
+                    :disabled="disableUseStakedForForge"
+                    v-model="useStakedForForge">
+                    <span v-if="disableUseStakedForForge"> <b>Not enough staked SKILL<br></b></span>
+                    Spend Staked Funds <br> for 20% Discount!
+                  </b-checkbox>
                 <b-icon-question-circle class="centered-icon" scale="1.5"
                   v-on:click="onShowForgeDetails" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
 
@@ -306,7 +311,8 @@
       </b-tab>
       <b-tab>
         <template #title>
-          {{$t('Shields')}} <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('blacksmith.buyShield')"/>
+          Equipment <b-icon-question-circle class="centered-icon" scale="0.8"
+            v-tooltip.bottom="`You can buy shield in Skill shop tab in the market and loot other nfts from Raids!`"/>
         </template>
         <div class="row mt-3">
           <div class="col">
@@ -415,6 +421,7 @@ interface StoreMappedGetters {
   contracts: Contracts;
   ownWeapons: any[];
   nftsCount: number;
+  stakedSkillBalanceThatCanBeSpent: number;
 }
 
 interface Data {
@@ -443,6 +450,10 @@ interface Data {
   haveRename: string;
   onError: boolean;
   hideWeapons: any[];
+  useStakedForForge: boolean;
+  disableUseStakedForForge: boolean;
+  disableX10ForgeWithStaked: boolean;
+  forgeCostBN: BN;
 }
 
 export default Vue.extend({
@@ -473,6 +484,10 @@ export default Vue.extend({
       haveRename: '0',
       onError: false,
       hideWeapons: [],
+      useStakedForForge:false,
+      disableUseStakedForForge: false,
+      disableX10ForgeWithStaked: false,
+      forgeCostBN: new BN(0),
     } as Data;
   },
 
@@ -480,7 +495,8 @@ export default Vue.extend({
     ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
-      'getPowerfulDust', 'getGreaterDust', 'getLesserDust'
+      'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
+      'stakedSkillBalanceThatCanBeSpent'
     ]) as Accessors<StoreMappedGetters>),
 
     isRenameProfanish(): boolean {
@@ -496,6 +512,16 @@ export default Vue.extend({
     reforgeWeaponId() {
       this.showReforge = false;
       this.burnWeaponId = null;
+    },
+    stakedSkillBalanceThatCanBeSpent(){
+      const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
+
+      if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8))).isLessThan(0)) {
+        this.disableUseStakedForForge = true;
+      }
+      if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
+        this.disableX10ForgeWithStaked = true;
+      }
     }
   },
 
@@ -504,7 +530,15 @@ export default Vue.extend({
     const forgeCost = await this.contracts.CryptoBlades.methods.mintWeaponFee().call({ from: this.defaultAccount });
     const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
     this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
+    const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
+    this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
 
+    if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8))).isLessThan(0)) {
+      this.disableUseStakedForForge = true;
+    }
+    if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
+      this.disableX10ForgeWithStaked = true;
+    }
     const reforgeCost = await this.contracts.CryptoBlades.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
     const skillReforgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(reforgeCost).call({ from: this.defaultAccount });
     this.reforgeCost = new BN(skillReforgeCost).div(new BN(10).pow(18)).toFixed(4);
@@ -525,6 +559,11 @@ export default Vue.extend({
     ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN', 'renameWeapon',
       'fetchTotalWeaponRenameTags', 'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons']),
 
+    toggleCheckbox() {
+      this.useStakedForForge = !this.useStakedForForge;
+      if (this.useStakedForForge) localStorage.setItem('useStakedForForge', 'true');
+      else localStorage.setItem('useStakedForForge', 'false');
+    },
     async onForgeWeapon() {
       if(this.disableForge) return;
 
@@ -537,7 +576,7 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await this.mintWeapon();
+        await this.mintWeapon({ useStakedSkillOnly: this.useStakedForForge });
 
       } catch (e) {
         console.error(e);
@@ -561,7 +600,7 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await this.mintWeaponN({num: forgeMultiplier});
+        await await this.mintWeaponN({ num: forgeMultiplier, useStakedSkillOnly: this.useStakedForForge });
 
       } catch (e) {
         console.error(e);
