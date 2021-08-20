@@ -6,7 +6,8 @@ import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
 import {
-  characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract, junkFromContract
+  characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract,
+  trinketFromContract, junkFromContract
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
@@ -92,6 +93,7 @@ export function createStore(web3: Web3) {
       ownedCharacterIds: [],
       ownedWeaponIds: [],
       ownedShieldIds: [],
+      ownedTrinketIds: [],
       ownedJunkIds: [],
       ownedKeyLootboxIds: [],
       maxStamina: 0,
@@ -115,6 +117,7 @@ export function createStore(web3: Web3) {
       characterTransferCooldowns: {},
 
       shields: {},
+      trinkets: {},
       junk: {},
       keyboxes: {},
       currentShieldId: null,
@@ -302,6 +305,7 @@ export function createStore(web3: Web3) {
         let count = 0;
         // add count of various nft types here
         count += state.ownedShieldIds.length;
+        count += state.ownedTrinketIds.length;
         count += state.ownedJunkIds.length;
         count += state.ownedKeyLootboxIds.length;
         return count;
@@ -511,7 +515,8 @@ export function createStore(web3: Web3) {
       },
 
       updateUserDetails(state: IState, payload) {
-        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability', 'ownedShieldIds', 'ownedJunkIds', 'ownedKeyLootboxIds'];
+        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability',
+          'ownedShieldIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedKeyLootboxIds'];
         for (const key of keysToAllow) {
           if (Object.hasOwnProperty.call(payload, key)) {
             Vue.set(state, key, payload[key]);
@@ -579,6 +584,14 @@ export function createStore(web3: Web3) {
           Vue.set(state.nfts, 'shield', {});
         }
         Vue.set(state.nfts.shield, shieldId, shield);
+      },
+
+      updateTrinket(state: IState, { trinketId, trinket }) {
+        Vue.set(state.trinkets, trinketId, trinket);
+        if(!state.nfts.trinket) {
+          Vue.set(state.nfts, 'trinket', {});
+        }
+        Vue.set(state.nfts.trinket, trinketId, trinket);
       },
 
       updateJunk(state: IState, { junkId, junk }) {
@@ -887,6 +900,7 @@ export function createStore(web3: Web3) {
           ownedCharacterIds,
           ownedWeaponIds,
           ownedShieldIds,
+          ownedTrinketIds,
           ownedJunkIds,
           ownedKeyLootboxIds,
           maxStamina,
@@ -895,6 +909,7 @@ export function createStore(web3: Web3) {
           state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
           state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
           state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)),
+          state.contracts().RaidTrinket!.methods.getOwned().call(defaultCallOptions(state)) || [],
           state.contracts().Junk!.methods.getOwned().call(defaultCallOptions(state)) || [],
           state.contracts().KeyLootbox!.methods.getOwned().call(defaultCallOptions(state)) || [],
           state.contracts().Characters!.methods.maxStamina().call(defaultCallOptions(state)),
@@ -905,6 +920,7 @@ export function createStore(web3: Web3) {
           ownedCharacterIds: Array.from(ownedCharacterIds),
           ownedWeaponIds: Array.from(ownedWeaponIds),
           ownedShieldIds: Array.from(ownedShieldIds),
+          ownedTrinketIds: Array.from(ownedTrinketIds),
           ownedJunkIds: Array.from(ownedJunkIds),
           ownedKeyLootboxIds: Array.from(ownedKeyLootboxIds),
           maxStamina: parseInt(maxStamina, 10),
@@ -915,6 +931,7 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacters', ownedCharacterIds),
           dispatch('fetchWeapons', ownedWeaponIds),
           dispatch('fetchShields', ownedShieldIds),
+          dispatch('fetchTrinkets', ownedTrinketIds),
           dispatch('fetchJunks', ownedJunkIds),
           dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
           dispatch('fetchFightRewardSkill'),
@@ -952,6 +969,16 @@ export function createStore(web3: Web3) {
           ownedShieldIds: Array.from(ownedShieldIds)
         });
         await dispatch('fetchShields', ownedShieldIds);
+      },
+
+      async updateTrinketIds({ state, dispatch, commit }) {
+        if(featureFlagStakeOnly) return;
+
+        const ownedTrinketIds = await state.contracts().RaidTrinket!.methods.getOwned().call(defaultCallOptions(state));
+        commit('updateUserDetails', {
+          ownedTrinketIds: Array.from(ownedTrinketIds)
+        });
+        await dispatch('fetchTrinkets', ownedTrinketIds);
       },
 
       async updateJunkIds({ state, dispatch, commit }) {
@@ -1121,6 +1148,26 @@ export function createStore(web3: Web3) {
             );
 
             commit('updateShield', { shieldId, shield });
+          })(),
+        ]);
+      },
+
+      async fetchTrinkets({ dispatch }, trinketIds: (string | number)[]) {
+        await Promise.all(trinketIds.map(id => dispatch('fetchTrinket', id)));
+      },
+
+      async fetchTrinket({ state, commit }, trinketId: string | number) {
+        const { RaidTrinket } = state.contracts();
+        if(!RaidTrinket) return;
+
+        await Promise.all([
+          (async () => {
+            const trinket = trinketFromContract(
+              trinketId,
+              await RaidTrinket.methods.get('' + trinketId).call(defaultCallOptions(state))
+            );
+
+            commit('updateTrinket', { trinketId, trinket });
           })(),
         ]);
       },
@@ -1787,6 +1834,8 @@ export function createStore(web3: Web3) {
           .send(defaultCallOptions(state));
 
         console.log('res ' + JSON.stringify(res));
+
+        // claimreward does not reward trinket, those are given at raidcompletion by the bot
 
         if(res.events.RewardedJunk) {
           await dispatch('fetchJunk', '' + res.events.RewardedJunk.returnValues.tokenID);

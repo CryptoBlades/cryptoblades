@@ -309,7 +309,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         int128 comparedToAverage
     ) private {
         // at most 2 types of rewards
-        // dust is not implemented yet so we can expand with that later
         // common: Lb dust, 1-3 star junk, 3 star wep
         // rare: 4-5b dust, 4-5 star wep, 4-5 star junk, keybox
         // chances are a bit generous compared to weapon mints because stamina cost equals lost skill

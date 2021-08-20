@@ -69,6 +69,15 @@ export function getWeaponTraitFromProperties(properties: number): number {
   return (properties >> 3) & 0x3;
 }
 
+export function trinketFromContract(id: string | number, data: string[]): Nft {
+  return {
+    id: +id,
+    type: 'trinket',
+    stars: +data[0],
+    //effect: +data[1]
+  };
+}
+
 export function junkFromContract(id: string | number, stars: string): Nft {
   return {
     id: +id,

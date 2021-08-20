@@ -7,6 +7,8 @@
 
       <img class="default-placeholder" v-if="nft.type === 'junk'" src="../assets/bounty.png"
         v-tooltip="'Junk (1-5*)'" />
+      <img class="default-placeholder" v-if="nft.type === 'trinket'" src="../assets/trinkets/trinket1.png"
+        v-tooltip="'Trinket (1-5*)'" />
       <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
         v-tooltip="'Secret (??)'" />
       <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../assets/dusts/LesserDust.png"
@@ -73,6 +75,11 @@
         </div>
       </div>
 
+      <div v-if="nft.type === 'trinket'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
+        <img class="placeholder-trinket" :src="getTrinketArt(nft.id)" />
+        <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
+      </div>
+
       <div v-if="nft.type === 'junk'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
         <img class="placeholder-junk" :src="getJunkArt(nft.id)" />
         <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
@@ -83,7 +90,7 @@
         <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
       </div>
 
-      <div v-if="nft.type !== 'shield' && nft.type !== 'junk' && nft.type !== 'keybox' && nft.type !== 'weapon'" class="nft-details">
+      <div v-if="nft.type !== 'shield' && nft.type !== 'trinket' && nft.type !== 'junk' && nft.type !== 'keybox' && nft.type !== 'weapon'" class="nft-details">
         <img class="placeholder-consumable" :src="nft.image.startsWith('http') ? nft.image : imgPath(nft.image)"/>
         <span v-if="isShop" class="nft-supply">Owned: {{this.quantityOwned}}</span>
       </div>
@@ -94,6 +101,7 @@
 <script>
 import { mapActions } from 'vuex';
 import { getJunkArt } from '../junk-arts-placeholder';
+import { getTrinketArt } from '../trinket-arts-placeholder';
 
 export default {
   props: ['nft', 'isDefault', 'isShop', 'favorite'],
@@ -135,6 +143,7 @@ export default {
 
   methods: {
     getJunkArt,
+    getTrinketArt,
     ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags',
       'fetchTotalCharacterFireTraitChanges', 'fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
@@ -247,6 +256,13 @@ export default {
   max-width: 160px;
   max-height: 200px;
   margin-top: -10px;
+}
+
+.placeholder-trinket {
+  max-width: 160px;
+  max-height: 200px;
+  margin-top: 10px;
+  transform: scale(1.4);
 }
 
 .placeholder-junk {

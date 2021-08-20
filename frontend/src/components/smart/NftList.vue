@@ -28,7 +28,7 @@
         <div v-if="!isMarket" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>Nft Type</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Shield', 'Junk', 'Keybox']" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox']" :value="x" :key="x">{{ x || 'Any' }}</option>
           </select>
         </div>
 
@@ -119,11 +119,12 @@ export interface NftIdType {
   type: string;
 }
 
-type StoreMappedState = Pick<IState, 'ownedShieldIds' | 'ownedJunkIds' | 'ownedKeyLootboxIds'>;
+type StoreMappedState = Pick<IState, 'ownedShieldIds' | 'ownedTrinketIds' | 'ownedJunkIds' | 'ownedKeyLootboxIds'>;
 
 interface StoreMappedGetters {
   nftsWithIdType(nftIdType: NftIdType[]): Nft[];
   shieldsWithIds(ids: string[]): Nft[];
+  trinketWithIds(ids: string[]): Nft[];
   junkWithIds(ids: string[]): Nft[];
   keyLootboxesWithIds(ids: string[]): Nft[];
 }
@@ -131,6 +132,7 @@ interface StoreMappedGetters {
 interface StoreMappedActions {
   purchaseShield(): Promise<void>;
   fetchShields(shieldIds: (string | number)[]): Promise<void>;
+  updateTrinketIds(): Promise<void>;
   updateJunkIds(): Promise<void>;
   updateKeyLootboxIds(): Promise<void>;
   purchaseRenameTag(): Promise<void>;
@@ -226,8 +228,8 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['ownedShieldIds', 'ownedJunkIds', 'ownedKeyLootboxIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['shieldsWithIds', 'junkWithIds', 'keyLootboxesWithIds','nftsWithIdType']) as Accessors<StoreMappedGetters>),
+    ...(mapState(['ownedShieldIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedKeyLootboxIds']) as Accessors<StoreMappedState>),
+    ...(mapGetters(['shieldsWithIds', 'trinketWithIds', 'junkWithIds', 'keyLootboxesWithIds','nftsWithIdType']) as Accessors<StoreMappedGetters>),
 
     nftsToDisplay(): NftIdType[] {
       if (this.showGivenNftIdTypes) {
@@ -237,6 +239,7 @@ export default Vue.extend({
       const nfts: NftIdType[] = [];
       // push different kinds of nfts to nfts array here
       this.ownedShieldIds?.forEach(id => { nfts.push({ id, type: 'shield' }); });
+      this.ownedTrinketIds?.forEach(id => { nfts.push({ id, type: 'trinket' }); });
       this.ownedJunkIds?.forEach(id => { nfts.push({ id, type: 'junk' }); });
       this.ownedKeyLootboxIds?.forEach(id => { nfts.push({ id, type: 'keybox' }); });
 
@@ -303,12 +306,16 @@ export default Vue.extend({
   watch: {
     async nftsToDisplay(newNftsToDisplay: NftIdType[]) {
       const shieldIds: string[] = [];
+      const trinketIds: string[] = [];
       const junkIds: string[] = [];
       const keyLootboxIds: string[] = [];
       newNftsToDisplay.forEach(nft => {
         switch(nft.type) {
         case('shield'):
           shieldIds.push(nft.id.toString());
+          break;
+        case('trinket'):
+          trinketIds.push(nft.id.toString());
           break;
         case('junk'):
           junkIds.push(nft.id.toString());
@@ -322,7 +329,8 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['purchaseShield', 'fetchShields', 'updateJunkIds', 'updateKeyLootboxIds', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
+    ...(mapActions(['purchaseShield', 'fetchShields', 'updateTrinketIds',
+      'updateJunkIds', 'updateKeyLootboxIds', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
       'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
       'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
       'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange'
@@ -446,6 +454,7 @@ export default Vue.extend({
 
     if(!this.showGivenNftIdTypes) {
       await this.fetchShields(this.ownedShieldIds);
+      await this.updateTrinketIds();
       await this.updateJunkIds();
       await this.updateKeyLootboxIds();
     }

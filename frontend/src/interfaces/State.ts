@@ -76,6 +76,7 @@ export interface IState {
   ownedCharacterIds: number[];
   ownedWeaponIds: number[];
   ownedShieldIds: number[];
+  ownedTrinketIds: number[];
   ownedJunkIds: number[];
   ownedKeyLootboxIds: number[];
   maxStamina: number;
@@ -112,6 +113,7 @@ export interface IState {
 
   shields: Record<number, IShield>;
   currentShieldId: number | null;
+  trinkets: Record<number, Nft>;
   junk: Record<number, Nft>;
   keyboxes: Record<number, Nft>;
 
