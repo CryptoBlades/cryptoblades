@@ -2127,7 +2127,7 @@
     "events": {},
     "links": {},
     "address": "0x86Ab07F69046475D14d69127d76Cef9bA91fbC39",
-    "transactionHash": "0xe8bef17e6d4c9b46c7234cccd1827714eefc99801d18d8a104571b25623d751a"
+    "transactionHash": "0xc0388614d4e55ad3cc4cd3e781280ac3fd480a31e2f8bf38fecaf9efe0db50dc"
   },
   "build/contracts/RaidBasic.json": {
     "events": {},
