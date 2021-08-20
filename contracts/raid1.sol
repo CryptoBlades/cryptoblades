@@ -70,7 +70,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Raider[]) public raidParticipants;
     mapping(uint256 => mapping(address => uint256[])) public raidParticipantIndices;
     mapping(uint256 => mapping(address => bool)) public raidRewardClaimed;
-    mapping(uint256 => mapping(address => uint256)) public raidAccountPower;
 
     // link interface
     // the idea is to avoid littering the contract with variables for each type of reward
@@ -183,7 +182,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             raidBossTrait[raidIndex]
         );
         raidPlayerPower[raidIndex] += power;
-        raidAccountPower[raidIndex][msg.sender] += power;
 
         //uint8 wepStatPattern = weapons.getStatPattern(weaponID);
         raidParticipantIndices[raidIndex][msg.sender].push(raidParticipants[raidIndex].length);
@@ -489,8 +487,17 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         return weps;
     }
 
+    function getAccountsRaiderIndexes(uint256 index) public view returns(uint256[] memory){
+        return raidParticipantIndices[index][msg.sender];
+    }
+
     function getAccountsPower(uint256 index) public view returns(uint256) {
-        return raidAccountPower[index][msg.sender];
+        uint256 totalAccountPower = 0;
+        uint256[] memory raiderIndexes = getAccountsRaiderIndexes(index);
+        for(uint256 i = 0; i < raiderIndexes.length; i++) {
+            totalAccountPower += raidParticipants[index][raiderIndexes[i]].power;
+        }
+        return totalAccountPower;
     }
     
     function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {

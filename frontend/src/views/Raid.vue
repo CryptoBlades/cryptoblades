@@ -144,7 +144,7 @@
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
              <div class="float-lg-right text-sm-center mt-sm-2 text-center">
                 <div class="finish">
-                    <span class="title">Total Power:  {{accountPower}}</span>
+                    <span class="title">Your Power:  {{accountPower}}</span>
                   </div>
               </div>
             </div>
