@@ -28,6 +28,7 @@
             <div class="drops">
               <div class="drops-icons">
                 <nft-icon :isDefault="true" :nft="{ type: 'weapon' }" />
+                <nft-icon :isDefault="true" :nft="{ type: 'trinket' }"/>
                 <nft-icon :isDefault="true" :nft="{ type: 'junk' }"/>
                 <nft-icon :isDefault="true" :nft="{ type: 'secret' }"/>
                 <nft-icon :isDefault="true" :nft="{ type: 'lbdust' }"/>
@@ -322,21 +323,28 @@ export default {
 
       const nfts = [];
       if(result.weapon) {
-        nfts.push({ type: 'weapon', id: result.weapon?.tokenID, stars: result.weapon?.stars }); //result.weapons?.map(x => { return { type: 'weapon', id: x.tokenId, stars: x.stars}; }));
+        nfts.push({ type: 'weapon', id: result.weapon.tokenID, stars: result.weapon.stars });
       }
       if(result.junk) {
-        nfts.push({ type: 'junk', id: result.junk?.tokenID, stars: result.junk?.stars }); //result.junk?.map(x => { return { type: 'junk', id: x.tokenId, stars: x.stars}; }));
+        nfts.push({ type: 'junk', id: result.junk.tokenID, stars: result.junk.stars });
       }
       if(result.keybox) {
-        nfts.push({ type: 'keybox', id: result.keybox?.tokenID }); //result.keybox?.map(x => { return { type: 'keybox', id: x.tokenId }; }));
+        nfts.push({ type: 'keybox', id: result.keybox.tokenID });
+      }
+      if(result.trinket) {
+        nfts.push({ type: 'trinket', id: result.trinket.tokenID, effect: result.trinket.effect });
+      }
+      if(result.dustLb) {
+        nfts.push({ type: 'dustLb', id: 0, amount: result.dustLb.amount });
+      }
+      if(result.dust4b) {
+        nfts.push({ type: 'dust4b', id: 0, amount: result.dust4b.amount });
+      }
+      if(result.dust5b) {
+        nfts.push({ type: 'dust5b', id: 0, amount: result.dust5b.amount });
       }
 
       this.rewards = nfts;
-      // this.rewards = [
-      //   { type:'weapon', id: 1, stars: 2},
-      //   { type:'junk', id:1, stars:3 },
-      //   { type:'keybox', id:1 }
-      // ];
       this.spin = true;
       this.$bvModal.show('rewardsModal');
       setTimeout(() => {
@@ -391,9 +399,7 @@ export default {
     interval = setInterval(async () => {
       await this.getRewardIndexes();
       await this.fetchRaidState();
-      this.raiderCount = this.getRaidState()?.raiderCount;
-      this.totalPower = this.getRaidState()?.playerPower;
-      this.expectedFinishTime = new Date(this.getRaidState()?.expectedFinishTime * 1000).toLocaleString();
+      this.processRaidData();
     }, 5000);
   },
 

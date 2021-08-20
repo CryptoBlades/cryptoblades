@@ -7,7 +7,7 @@
 
       <img class="default-placeholder" v-if="nft.type === 'junk'" src="../assets/bounty.png"
         v-tooltip="'Junk (1-5*)'" />
-      <img class="default-placeholder" v-if="nft.type === 'trinket'" src="../assets/trinkets/trinket1.png"
+      <img class="default-trinket-placeholder" v-if="nft.type === 'trinket'" src="../assets/trinkets/trinket1.png"
         v-tooltip="'Trinket (1-5*)'" />
       <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
         v-tooltip="'Secret (??)'" />
@@ -75,6 +75,21 @@
         </div>
       </div>
 
+      <div v-if="nft.type === 'dustLb'" class="nft-details">
+        <img class="placeholder-dust" src="../assets/dusts/LesserDust.png" />
+        <div v-if="!isShop" class="amount">Amount {{ nft.amount }}</div>
+      </div>
+
+      <div v-if="nft.type === 'dust4b'" class="nft-details">
+        <img class="placeholder-dust" src="../assets/dusts/greaterDust.png" />
+        <div v-if="!isShop" class="amount">Amount {{ nft.amount }}</div>
+      </div>
+
+      <div v-if="nft.type === 'dust5b'" class="nft-details">
+        <img class="placeholder-dust" src="../assets/dusts/powerfulDust.png" />
+        <div v-if="!isShop" class="amount">Amount {{ nft.amount }}</div>
+      </div>
+
       <div v-if="nft.type === 'trinket'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
         <img class="placeholder-trinket" :src="getTrinketArt(nft.id)" />
         <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
@@ -90,7 +105,8 @@
         <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
       </div>
 
-      <div v-if="nft.type !== 'shield' && nft.type !== 'trinket' && nft.type !== 'junk' && nft.type !== 'keybox' && nft.type !== 'weapon'" class="nft-details">
+      <div v-if="nft.type !== 'shield' && nft.type !== 'trinket' && nft.type !== 'junk' && nft.type !== 'keybox' && nft.type !== 'weapon'
+        && nft.type !== 'dustLb' && nft.type !== 'dust4b' && nft.type !== 'dust5b'" class="nft-details">
         <img class="placeholder-consumable" :src="nft.image.startsWith('http') ? nft.image : imgPath(nft.image)"/>
         <span v-if="isShop" class="nft-supply">Owned: {{this.quantityOwned}}</span>
       </div>
@@ -111,12 +127,17 @@ export default {
   computed: {
     tooltipHtml() {
       if(!this.nft) return '';
+      if(this.nft.type === 'dustLb') return 'Lesser Dust';
+      if(this.nft.type === 'dust4b') return 'Greater Dust';
+      if(this.nft.type === 'dust5b') return 'Powerful Dust';
 
       const wrapInSpan = (spanClass, text) => {
         return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;
       };
 
       let ttHtml = `
+        ${this.nft.type[0].toUpperCase() + this.nft.type.slice(1)}
+        <br>
         ID: ${this.nft.id}
         <br>
         ${Array(this.nft.stars !== null && this.nft.stars !== undefined && this.nft.stars + 1 || 0).fill('★').join('')}
@@ -244,6 +265,13 @@ export default {
   margin-top: 20px;
   transform: scale(1.5);
 }
+.default-trinket-placeholder{
+  max-width: 100px;
+  max-height: 100px;
+  margin-left: 12px;
+  margin-top: 8px;
+  transform: scale(1.75);
+}
 .placeholder-weapon {
   max-width: 180px;
   max-height: 180px;
@@ -280,6 +308,13 @@ export default {
   transform: scale(1.2);
 }
 
+.placeholder-dust {
+  max-width: 160px;
+  max-height: 200px;
+  margin-top: 40px;
+  margin-left: 5px;
+}
+
 .placeholder-consumable {
   height: 100%;
   transform: scale(0.7);
@@ -297,7 +332,7 @@ export default {
   height: 100%;
 }
 
-.trait, .id, .stats {
+.trait, .id, .stats, .amount {
   position: absolute;
 }
 
@@ -305,6 +340,13 @@ export default {
   top: 8px;
   right: 10px;
   font-style: italic;
+}
+
+.amount {
+  bottom: 5px;
+  left: 0;
+  right: 0;
+  text-align: center;
 }
 
 .trait {
