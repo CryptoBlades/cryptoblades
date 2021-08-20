@@ -451,6 +451,7 @@ interface Data {
   useStakedForForge: boolean;
   disableUseStakedForForge: boolean;
   disableX10ForgeWithStaked: boolean;
+  forgeCostBN: BN;
 }
 
 export default Vue.extend({
@@ -483,7 +484,8 @@ export default Vue.extend({
       hideWeapons: [],
       useStakedForForge:false,
       disableUseStakedForForge: false,
-      disableX10ForgeWithStaked: false
+      disableX10ForgeWithStaked: false,
+      forgeCostBN: new BN(0),
     } as Data;
   },
 
@@ -510,11 +512,12 @@ export default Vue.extend({
       this.burnWeaponId = null;
     },
     stakedSkillBalanceThatCanBeSpent(){
-      const stakedSkillBalanceThatCanBeSpent = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18)).toFixed(4);
-      if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost) < 0) {
+      const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
+
+      if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8))).isLessThan(0)) {
         this.disableUseStakedForForge = true;
       }
-      if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost)*10 < 0){
+      if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
         this.disableX10ForgeWithStaked = true;
       }
     }
@@ -525,11 +528,13 @@ export default Vue.extend({
     const forgeCost = await this.contracts.CryptoBlades.methods.mintWeaponFee().call({ from: this.defaultAccount });
     const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
     this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
-    const stakedSkillBalanceThatCanBeSpent = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18)).toFixed(4);
-    if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost) < 0) {
+    const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
+    this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
+
+    if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8))).isLessThan(0)) {
       this.disableUseStakedForForge = true;
     }
-    if(Number(stakedSkillBalanceThatCanBeSpent) - Number(this.forgeCost)*10 < 0){
+    if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
       this.disableX10ForgeWithStaked = true;
     }
     const reforgeCost = await this.contracts.CryptoBlades.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
