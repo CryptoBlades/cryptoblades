@@ -221,10 +221,6 @@ export default {
     ...mapGetters(['ownCharacters', 'ownWeapons', 'ownCharacters', 'currentCharacter',
       'currentCharacterStamina', 'getWeaponDurability', 'contracts']),
 
-    selections() {
-      return [this.currentCharacterId, this.selectedWeaponId];
-    },
-
     claimButtonActive() {
       return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
     },
@@ -384,13 +380,13 @@ export default {
   },
 
   watch: {
-    async selections([weaponId]) {
-      if (!this.ownWeapons.find((weapon) => weapon && weapon.id === weaponId)) {
+    selectedWeaponId() {
+      if (!this.ownWeapons.filter(Boolean).find((weapon) => weapon && weapon.id === this.selectedWeaponId)) {
         this.selectedWeaponId = null;
       } else {
-        this.selectedWeapon = this.ownWeapons.find((weapon) => weapon && weapon.id === this.selectedWeaponId);
+        this.selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon && weapon.id === this.selectedWeaponId);
       }
-    },
+    }
   },
 
   async mounted() {
