@@ -166,22 +166,14 @@ contract StakingRewardsUpgradeable is
         nonReentrant
         updateReward(msg.sender)
     {
-        require(amount > 0, "Cannot withdraw 0");
         require(
             minimumStakeTime == 0 ||
                 block.timestamp.sub(_stakeTimestamp[msg.sender]) >=
                 minimumStakeTime,
             "Cannot withdraw until minimum staking time has passed"
         );
-        _totalSupply = _totalSupply.sub(amount);
-        _balances[msg.sender] = _balances[msg.sender].sub(amount);
-        if (_balances[msg.sender] == 0) {
-            _stakeTimestamp[msg.sender] = 0;
-        } else {
-            _stakeTimestamp[msg.sender] = block.timestamp;
-        }
+        _unstake(msg.sender, amount);
         stakingToken.safeTransfer(msg.sender, amount);
-        emit Withdrawn(msg.sender, amount);
     }
 
     function getReward()
@@ -352,6 +344,19 @@ contract StakingRewardsUpgradeable is
             _stakeTimestamp[staker] = block.timestamp;
         }
         emit Staked(staker, amount);
+    }
+
+    function _unstake(address staker, uint256 amount) internal
+    {
+        require(amount > 0, "Cannot withdraw 0");
+        _totalSupply = _totalSupply.sub(amount);
+        _balances[staker] = _balances[staker].sub(amount);
+        if (_balances[staker] == 0) {
+            _stakeTimestamp[staker] = 0;
+        } else {
+            _stakeTimestamp[staker] = block.timestamp;
+        }
+        emit Withdrawn(staker, amount);
     }
 
     /* ========== MODIFIERS ========== */
