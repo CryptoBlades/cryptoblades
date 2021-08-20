@@ -275,13 +275,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight * fightMultiplier));
+            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight * fightMultiplier, false));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(wep, charTrait,
-                durabilityCostFight * fightMultiplier);
+                durabilityCostFight * fightMultiplier, false);
 
         _verifyFight(
             basePowerLevel,
