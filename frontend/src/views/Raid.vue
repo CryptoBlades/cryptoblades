@@ -4,7 +4,7 @@
       <div class="col-md-12 col-lg-6">
         <span class="bold raid-title-section">Hellborn raid</span>
         <hr class="devider">
-        <div class="row">
+        <div class="row boss-row">
           <div class="col-md-12 col-lg-6 order-xs-last order-sm-last order-lg-first">
             <ul class="list-group raid-details mb-4">
               <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
@@ -43,7 +43,7 @@
             <div class="boss-box">
               <div class="raid-title">
                 <span class="title mr-3"> {{ bossName }} </span>
-                <span class="lightning">ELEMENT: {{ bossTrait }} </span>
+                <span :class="traitNumberToName(bossTrait).toLowerCase() + '-icon trait-icon'" />
               </div>
               <div class="img-responsive boss-img">
                 <img :src="getBossArt(raidIndex)" class="img-responsive" />
@@ -144,7 +144,7 @@
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
              <div class="float-lg-right text-sm-center mt-sm-2 text-center">
                 <div class="finish">
-                    <span class="title">Total Power:  10000</span>
+                    <span class="title">Total Power:  {{accountPower}}</span>
                   </div>
               </div>
             </div>
@@ -166,6 +166,7 @@ import NftList from '@/components/smart/NftList.vue';
 import { GetTotalMultiplierForTrait } from '@/interfaces/Weapon';
 import { CharacterPower } from '@/interfaces';
 import { getBossArt } from '@/raid-boss-art-placeholder';
+import { traitNumberToName } from '@/contract-models';
 
 let interval = null;
 
@@ -207,6 +208,7 @@ export default {
       raidStatus: null,
       bossPower: null,
       bossTrait: null,
+      accountPower: null,
       rewardIndexes: null,
       rewardsRaidId: null,
       rewards: null,
@@ -241,6 +243,7 @@ export default {
 
   methods: {
     getBossArt,
+    traitNumberToName,
     ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid',
       'fetchRaidRewards', 'claimRaidRewards', 'fetchRaidingCharacters', 'fetchRaidingWeapons',
       'fetchRaidJoinEligibility']),
@@ -376,6 +379,7 @@ export default {
       this.raidStatus = raidData.status ? 'Preparation' : 'Finished';
       this.bossPower = raidData.bossPower;
       this.bossTrait = raidData.bossTrait;
+      this.accountPower = raidData.accountPower;
     }
   },
 
@@ -462,7 +466,6 @@ export default {
     margin: 0 auto;
     flex-grow: 0;
     flex-shrink: 0;
-    flex-basis: 47%;
 }
 
 .raid-style >>> ul.character-list > li.character.selected {
@@ -579,6 +582,9 @@ hr.devider {
 .raid-header {
   border-bottom: 0.5px dashed rgb(49, 45, 40);
   margin-bottom: 20px;
+}
+.boss-row {
+  margin-bottom: -3px;
 }
 .boss-img {
   width: 100%;
@@ -750,6 +756,11 @@ hr.devider {
   border: 1px solid #727151;
   padding: 4px;
   border-radius: 25%;
+}
+
+.trait-icon {
+  transform: scale(1.5);
+  margin-left: -10px;
 }
 
 @media (max-width: 1024px) {

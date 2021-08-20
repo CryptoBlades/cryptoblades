@@ -70,6 +70,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Raider[]) public raidParticipants;
     mapping(uint256 => mapping(address => uint256[])) public raidParticipantIndices;
     mapping(uint256 => mapping(address => bool)) public raidRewardClaimed;
+    mapping(uint256 => mapping(address => uint256)) public raidAccountPower;
 
     // link interface
     // the idea is to avoid littering the contract with variables for each type of reward
@@ -182,6 +183,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             raidBossTrait[raidIndex]
         );
         raidPlayerPower[raidIndex] += power;
+        raidAccountPower[raidIndex][msg.sender] += power;
 
         //uint8 wepStatPattern = weapons.getStatPattern(weaponID);
         raidParticipantIndices[raidIndex][msg.sender].push(raidParticipants[raidIndex].length);
@@ -486,6 +488,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
         return weps;
     }
+
+    function getAccountsPower(uint256 index) public view returns(uint256) {
+        return raidAccountPower[index][msg.sender];
+    }
     
     function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
 
@@ -512,7 +518,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     function getRaidData() public view returns(
         uint256 index, uint256 endTime, uint256 raiderCount, uint256 playerPower, uint256 bossPower,
-        uint8 trait, uint8 status, uint256 joinSkill, uint64 stamina, uint64 durability, uint64 xp
+        uint8 trait, uint8 status, uint256 joinSkill, uint64 stamina, uint64 durability, uint64 xp, uint256 accountPower
     ) {
         index = raidIndex;
         endTime = raidEndTime[raidIndex];
@@ -525,5 +531,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         stamina = staminaCost;
         durability = durabilityCost;
         xp = xpReward;
+        accountPower = getAccountsPower(raidIndex);
     }
 }

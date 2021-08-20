@@ -148,6 +148,7 @@ export function createStore(web3: Web3) {
         staminaCost: '0',
         durabilityCost: '0',
         xpReward: '0',
+        accountPower: '0',
       },
 
       waxBridgeWithdrawableBnb: '0',
@@ -663,6 +664,7 @@ export function createStore(web3: Web3) {
         state.raid.staminaCost = payload.raidState.staminaCost;
         state.raid.durabilityCost = payload.raidState.durabilityCost;
         state.raid.xpReward = payload.raidState.xpReward;
+        state.raid.accountPower = payload.raidState.accountPower;
       },
 
       updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
