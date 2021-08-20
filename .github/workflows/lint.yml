@@ -43,7 +43,7 @@ jobs:
       - run: npm run build:frontend
 
       - name: Deploy testnet frontend
-        uses: netlify/actions/cli@master
+        uses: netlify/actions/cli@6c34c3fcafc69ac2e1d6dbf226560329c6dfc51b
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/testnet' }}
         with:
           args: deploy --dir=frontend/dist --prod
@@ -52,7 +52,7 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
 
       - name: Deploy mainnet frontend (must be published manually in Netlify UI)
-        uses: netlify/actions/cli@master
+        uses: netlify/actions/cli@6c34c3fcafc69ac2e1d6dbf226560329c6dfc51b
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/production' }}
         with:
           args: deploy --dir=frontend/dist --prod
