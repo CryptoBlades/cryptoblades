@@ -464,9 +464,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function isEligibleForReward(uint256 index) public view returns(bool) {
-        return raidParticipantIndices[index][msg.sender].length > 0
-            && raidRewardClaimed[index][msg.sender] == false
-            && (raidStatus[index] == STATUS_WON || raidStatus[index] == STATUS_LOST);
+        uint8 status = raidStatus[index];
+        return (status == STATUS_WON || status == STATUS_LOST)
+            && raidParticipantIndices[index][msg.sender].length > 0
+            && raidRewardClaimed[index][msg.sender] == false;
     }
 
     function getParticipatingCharacters() public view returns(uint256[] memory) {
