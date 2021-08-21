@@ -29,11 +29,6 @@
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-C5RLX74PEW"></script>
-  
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6717992096530538" crossorigin="anonymous"></script>
-  <script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
-  </script>
 </head>
 
 <body>
@@ -54,9 +49,8 @@
       Please enable it to continue.</strong>
   </noscript>
   <div id="app"></div>
-  <link rel="stylesheet" href="//rawcdn.githack.com/Alex-D/Cookies-EU-banner/2.0.0/css/cookies-eu-banner.default.css">
-  <script src="//rawcdn.githack.com/Alex-D/Cookies-EU-banner/2.0.0/dist/cookies-eu-banner.min.js"></script>
-  <script src="../node_modules/cookies-eu-banner/dist/cookies-eu-banner.min.js"></script>
+  <link rel="stylesheet" href="<%= BASE_URL %>../static/cookies-eu-banner/cookies-eu-banner.default.css">
+  <script src="<%= BASE_URL %>../static/cookies-eu-banner/cookies-eu-banner.min.js"></script>
   <script>
     new CookiesEuBanner(function () {
       window.dataLayer = window.dataLayer || [];
@@ -65,7 +59,13 @@
       }
       gtag('js', new Date());
       gtag('config', 'G-C5RLX74PEW');
-      console.log("LOAD GA");
+      console.log("loaded Analytics");
+
+      let adScript = document.createElement('script')
+      adScript.setAttribute('src', 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6717992096530538')
+      document.head.appendChild(adScript)
+      (adsbygoogle = window.adsbygoogle || []).push({});
+      console.log("loaded Ads");
     },true);
   </script>
   <!-- built files will be auto injected -->
