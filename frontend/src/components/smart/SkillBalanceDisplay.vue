@@ -9,7 +9,7 @@
         </div>
         <div class="buy-skill-modal-child">
               <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">Buy with FIAT</b-button>
+              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">Buy with Fiat</b-button>
         </div>
       </div>
     </b-modal>
