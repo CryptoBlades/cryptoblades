@@ -712,6 +712,8 @@ interface Data {
   shieldTransactionHistoryData: ShieldTransactionHistoryData[];
   shieldTransactionHistoryHeader: any;
   historyCounter: number;
+  staminaForExpScroll: number;
+  expFromExpScroll: number;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields' | 'ownedCharacterIds' | 'ownedWeaponIds' | 'ownedShieldIds'>;
@@ -764,6 +766,8 @@ interface StoreMappedActions {
   purchaseMarketListing(payload: { nftContractAddr: string, tokenId: string, maxPrice: string }): Promise<{ seller: string, nftID: string, price: string }>;
   fetchSellerOfNft(payload: { nftContractAddr: string, tokenId: string }): Promise<string>;
   fetchTotalShieldSupply(): Promise<number>;
+  fetchExpScrollsExpGain(): Promise<number>;
+  fetchExpScrollsStaminaCost(): Promise<number>;
 }
 
 export default Vue.extend({
@@ -798,10 +802,15 @@ export default Vue.extend({
       characterTransactionHistoryHeader: [],
       shieldTransactionHistoryData: [],
       shieldTransactionHistoryHeader: [],
-      historyCounter: 0
+      historyCounter: 0,
+      staminaForExpScroll: 0,
+      expFromExpScroll: 0
     } as Data;
   },
-
+  async created(){
+    this.staminaForExpScroll = await this.fetchExpScrollsStaminaCost();
+    this.expFromExpScroll = await this.fetchExpScrollsExpGain();
+  },
   computed: {
     ...(mapState([
       'defaultAccount', 'weapons', 'characters', 'shields', 'ownedCharacterIds', 'ownedWeaponIds', 'ownedShieldIds',
@@ -946,6 +955,14 @@ export default Vue.extend({
           description: 'Get new enemies in combat.',
           image: 'https://seiyria.com/gameicons-font/svg/smoke-bomb.svg'
         },
+        {
+          id: 8,
+          type: 'ExpScroll4',
+          nftPrice: 0.2,
+          name: '4 Exp Scrolls',
+          description: 'Character gains ' + this.expFromExpScroll + ' exp for ' + this.staminaForExpScroll + ' stamina.',
+          image: 'https://seiyria.com/gameicons-font/svg/scroll-unfurled.svg'
+        }
       ] as SkillShopListing[];
 
       return nftList;
@@ -971,6 +988,8 @@ export default Vue.extend({
       'purchaseMarketListing',
       'fetchSellerOfNft',
       'fetchTotalShieldSupply',
+      'fetchExpScrollsExpGain',
+      'fetchExpScrollsStaminaCost'
     ]) as StoreMappedActions),
 
     clearData() {

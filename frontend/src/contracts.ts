@@ -21,6 +21,7 @@ import { abi as characterEarthTraitChangeConsumablesAbi } from '../../build/cont
 import { abi as characterWaterTraitChangeConsumablesAbi } from '../../build/contracts/CharacterWaterTraitChangeConsumables.json';
 import { abi as characterLightningTraitChangeConsumablesAbi } from '../../build/contracts/CharacterLightningTraitChangeConsumables.json';
 import { abi as SmokeBombConsumablesAbi } from '../../build/contracts/SmokeBombConsumables.json';
+import { abi as ExpScrollConsumablesAbi } from '../../build/contracts/ExpScrollConsumables.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
@@ -163,6 +164,10 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const smokeBombAddr = await Blacksmith.methods.getAddressOfItem(smokeBombConsumablesIndex).call();
   const SmokeBombConsumables = new web3.eth.Contract(SmokeBombConsumablesAbi as Abi, smokeBombAddr);
 
+  const expScrollConsumablesIndex = await Blacksmith.methods.ITEM_EXP_SCROLL().call();
+  const expScrollAddr = await Blacksmith.methods.getAddressOfItem(expScrollConsumablesIndex).call();
+  const ExpScrollConsumables = new web3.eth.Contract(ExpScrollConsumablesAbi as Abi, expScrollAddr);
+
 
   const raidContracts: RaidContracts = {};
   if(featureFlagRaid) {
@@ -185,7 +190,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     ...stakingContracts,
     CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
-    SmokeBombConsumables,
+    SmokeBombConsumables, ExpScrollConsumables,
     ...raidContracts,
     ...marketContracts,
     WaxBridge,

@@ -90,7 +90,7 @@ export default {
     ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags',
       'fetchTotalCharacterFireTraitChanges', 'fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
-      'fetchTotalSmokeBombsOwned']),
+      'fetchTotalSmokeBombsOwned', 'fetchTotalExpScrollsOwned']),
 
     imgPath(img) {
       return this.images('./' + img);
@@ -137,6 +137,11 @@ export default {
       this.quantityOwned = await this.fetchTotalSmokeBombsOwned();
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalSmokeBombsOwned();
+      }, 3000);
+    } else if(this.nft.type === 'ExpScroll4') {
+      this.quantityOwned = await this.fetchTotalExpScrollsOwned();
+      this.fetchSupplyInterval = setInterval(async () => {
+        this.quantityOwned = await this.fetchTotalExpScrollsOwned();
       }, 3000);
     }
   },

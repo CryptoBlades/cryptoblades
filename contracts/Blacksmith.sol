@@ -22,6 +22,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_WATER = 5;
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_LIGHTNING = 6;
     uint256 public constant ITEM_SMOKE_BOMB = 7;
+    uint256 public constant ITEM_EXP_SCROLL = 8;
 
     /* ========== STATE VARIABLES ========== */
 
@@ -91,11 +92,14 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
     }
 
-    function migrateTo_cdd5968(address _smokeBomb) external {
+    function migrateTo_cdd5968(address _smokeBomb, address _expScroll) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        
         itemAddresses[ITEM_SMOKE_BOMB] = _smokeBomb;
-     
         itemFlatPrices[ITEM_SMOKE_BOMB] = 0.01 ether;
+
+        itemAddresses[ITEM_EXP_SCROLL] = _expScroll;
+        itemFlatPrices[ITEM_EXP_SCROLL] = 0.05 ether;
     }
 
     /* ========== VIEWS ========== */
@@ -258,5 +262,23 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_SMOKE_BOMB] * 10);
         Consumables(itemAddresses[ITEM_SMOKE_BOMB]).giveItem(msg.sender, 10);
         emit purchaseMade(msg.sender, ITEM_SMOKE_BOMB, 10, itemFlatPrices[ITEM_SMOKE_BOMB] * 10);
+    }
+
+
+    /* ========== Exp scroll ========== */
+      function setExpScrollPrice(uint256 newPrice) external isAdmin {
+        require(newPrice > 0, 'invalid price');
+        itemFlatPrices[ITEM_EXP_SCROLL] = newPrice;
+    }
+
+    function getExpScrollPrice() public view returns (uint256){
+        return itemFlatPrices[ITEM_EXP_SCROLL];
+    }
+
+     function purchase4ExpScrolls(uint256 paying) public { 
+        require(paying == itemFlatPrices[ITEM_EXP_SCROLL] * 4, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_EXP_SCROLL] * 4);
+        Consumables(itemAddresses[ITEM_EXP_SCROLL]).giveItem(msg.sender, 4);
+        emit purchaseMade(msg.sender, ITEM_EXP_SCROLL, 4, itemFlatPrices[ITEM_EXP_SCROLL] * 4);
     }
 }

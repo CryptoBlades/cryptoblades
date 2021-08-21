@@ -2286,6 +2286,61 @@ export function createStore(web3: Web3) {
         await Promise.all([
           dispatch('fetchTotalSmokeBombsOwned', id),
         ]);
+      },
+      async fetchTotalExpScrollsOwned({ state }) {
+        const { ExpScrollConsumables } = state.contracts();
+        if(!ExpScrollConsumables || !state.defaultAccount) return;
+        return await ExpScrollConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async fetchExpScrollsExpGain({ state }) {
+        const { ExpScrollConsumables } = state.contracts();
+        if(!ExpScrollConsumables || !state.defaultAccount) return;
+        return await ExpScrollConsumables.methods.getExpGain().call(defaultCallOptions(state));
+      },
+      async fetchExpScrollsStaminaCost({ state }) {
+        const { ExpScrollConsumables } = state.contracts();
+        if(!ExpScrollConsumables || !state.defaultAccount) return;
+        return await ExpScrollConsumables.methods.getStaminaCost().call(defaultCallOptions(state));
+      },
+      async purchaseExpScroll4({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, ExpScrollConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !ExpScrollConsumables || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchase4ExpScrolls(Web3.utils.toWei('0.2')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchTotalExpScrollsOwned')
+        ]);
+      },
+      async useExpScroll({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, ExpScrollConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !ExpScrollConsumables || !state.defaultAccount) return;
+
+        await ExpScrollConsumables.methods
+          .useExpScroll(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchTotalExpScrollsOwned'),
+          dispatch('fetchCharacter', id)
+        ]);
       }
     }
   });

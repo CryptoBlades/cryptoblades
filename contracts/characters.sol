@@ -315,4 +315,19 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function setCharacterLimit(uint256 max) public restricted {
         characterLimit = max;
     }
+
+    function drainStamina(uint256 id, uint8 amount) public restricted {
+        Character storage char = tokens[id];
+        uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
+        require(staminaPoints >= amount, "Not enough stamina!");
+
+        uint64 drainTime = uint64(amount * secondsPerStamina);
+
+        if(staminaPoints >= maxStamina) { // if stamina full, we reset timestamp and drain from that
+            char.staminaTimestamp = uint64(now - getStaminaMaxWait() + drainTime);
+        }
+        else {
+            char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
+        }
+    }
 }

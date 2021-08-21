@@ -29,6 +29,14 @@
           <div class="d-flex justify-content-space-between">
             <h1>Characters ({{ ownCharacters.length }} / 4)</h1>
             <b-button
+              v-if="canUseExpScroll()"
+              variant="primary"
+              class="ml-auto gtag-link-others"
+              @click="openUseExpScroll"
+              v-tooltip="'Read Exp Scroll'" tagname="use_exp_scroll">
+              Exp Scroll
+            </b-button>
+            <b-button
               v-if="canChangeTrait()"
               variant="primary"
               class="ml-auto gtag-link-others"
@@ -83,6 +91,16 @@
                     <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
                   </select>
                 </b-modal>
+        <b-modal class="centered-modal" ref="exp-scroll-modal"
+                  @ok="useExpScrollCall">
+                  <template #modal-title>
+                    Read Exp Scroll
+                  </template>
+                  <span>
+                    Character will use {{staminaForExpScroll}} stamina to read scroll and gain {{expFromExpScroll}} exp.<br/>
+                    <i>Experience gained from Exp Scroll is claimed automatically.</i>
+                  </span>
+                </b-modal>
       </div>
     </div>
   </div>
@@ -108,11 +126,14 @@ interface Data {
   haveChangeTraitWater: number;
   haveChangeTraitLightning: number;
   targetTrait: string;
+  haveExpScroll: number;
+  staminaForExpScroll: number;
+  expFromExpScroll: number;
 }
 
 export default Vue.extend({
   computed: {
-    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
+    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance', 'currentCharacterStamina']),
     ...mapGetters([
       'contracts',
       'ownCharacters',
@@ -165,6 +186,10 @@ export default Vue.extend({
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
+
+    this.staminaForExpScroll = await this.contracts.ExpScrollConsumables.methods.getStaminaCost().call();
+    this.expFromExpScroll = await this.contracts.ExpScrollConsumables.methods.getExpGain().call();
+
     this.loadConsumablesCount();
     getConsumablesCountInterval = setInterval(async () => {
       this.loadConsumablesCount();
@@ -185,15 +210,20 @@ export default Vue.extend({
       haveChangeTraitWater: 0,
       haveChangeTraitLightning: 0,
       targetTrait: '',
+      haveExpScroll: 0,
+      staminaForExpScroll: 0,
+      expFromExpScroll: 0
     } as Data;
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'renameCharacter','changeCharacterTraitLightning',
-      'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater', 'fetchTotalRenameTags',
+      'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater', 'useExpScroll',
+      'fetchTotalRenameTags',
       'fetchTotalCharacterFireTraitChanges','fetchTotalCharacterEarthTraitChanges',
-      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
+      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
+      'fetchTotalExpScrollsOwned']),
 
     async onMintCharacter() {
       try {
@@ -211,7 +241,6 @@ export default Vue.extend({
       return balance.isGreaterThanOrEqualTo(cost);
     },
     canRename() {
-      //console.log('CR '+this.haveRename+' / '+this.currentCharacter+' / '+this.currentCharacter.id);
       return this.haveRename > 0 && this.currentCharacter !== undefined && this.currentCharacter.id > 0;
     },
     openRenameCharacter() {
@@ -226,7 +255,6 @@ export default Vue.extend({
       await this.renameCharacter({id: this.currentCharacter.id, name: this.characterRename.trim()});
       this.haveRename = await this.fetchTotalRenameTags();
     },
-
     canChangeTrait() {
       return (this.haveChangeTraitFire > 0 || this.haveChangeTraitEarth > 0 || this.haveChangeTraitWater > 0 || this.haveChangeTraitLightning > 0)
         && this.currentCharacter !== undefined && this.currentCharacter.id >= 0;
@@ -257,6 +285,17 @@ export default Vue.extend({
         break;
       }
     },
+    canUseExpScroll() {
+      return this.haveExpScroll > 0 && this.currentCharacter !== undefined
+      && this.currentCharacter.id > 0 && this.currentCharacterStamina > this.staminaForExpScroll;
+    },
+    openUseExpScroll() {
+      (this.$refs['exp-scroll-modal'] as BModal).show();
+    },
+    async useExpScrollCall() {
+      await this.useExpScroll({id: this.currentCharacter.id });
+      this.haveExpScroll = await this.fetchTotalExpScrollsOwned();
+    },
 
     async loadConsumablesCount() {
       this.haveRename = await this.fetchTotalRenameTags(); // the other type of call returned 0 on testnet but not on local
@@ -264,6 +303,7 @@ export default Vue.extend({
       this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
       this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
       this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
+      this.haveExpScroll = await this.fetchTotalExpScrollsOwned();
     }
   },
 
