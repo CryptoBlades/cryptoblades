@@ -502,10 +502,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     
     function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
 
-        if(characters.getStaminaPoints(characterID) == 0
-        || weapons.getDurabilityPoints(weaponID) == 0
-        || raidStatus[raidIndex] != STATUS_STARTED
+        if(raidStatus[raidIndex] != STATUS_STARTED
         || raidEndTime[raidIndex] <= now)
+        || characters.getStaminaPoints(characterID) == 0
+        || weapons.getDurabilityPoints(weaponID) == 0
             return false;
         
         uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
