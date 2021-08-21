@@ -68,10 +68,10 @@
               </span>
               <hr class="devider">
               <div class="header-row">
-              <div v-if="selectedWeaponId" class="weapon-icon-wrapper">
-                <weapon-icon class="weapon-icon" :weapon="selectedWeapon" />
+              <div v-if="getSelectedWeapon" class="weapon-icon-wrapper">
+                <weapon-icon class="weapon-icon" :weapon="getSelectedWeapon" />
               </div>
-              <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null">
+              <b-button v-if="getSelectedWeapon" variant="primary" class="ml-3" @click="selectedWeaponId = null">
                 Choose New Weapon
               </b-button>
             </div>
@@ -247,6 +247,10 @@ export default {
     currentCharacterPower() {
       if(!this.currentCharacter) return '0';
       return CharacterPower(this.currentCharacter.level);
+    },
+
+    getSelectedWeapon() {
+      return this.ownWeapons.find(x => x.id === this.selectedWeaponId);
     }
   },
 
@@ -278,6 +282,7 @@ export default {
       try {
         console.log('Trying to join raid...');
         await this.joinRaid({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId});
+        this.selectedWeaponId = null;
         console.log('Made it to the other side at least...');
       } catch (e) {
         console.error(e);
@@ -286,7 +291,6 @@ export default {
 
       await this.getParticipatingCharacters();
       await this.getParticipatingWeapons();
-      this.selectedWeaponId = null;
     },
 
     async getParticipatingCharacters() {
@@ -403,14 +407,6 @@ export default {
   },
 
   watch: {
-    selectedWeaponId() {
-      if (!this.ownWeapons.filter(Boolean).find((weapon) => weapon && weapon.id === this.selectedWeaponId)) {
-        this.selectedWeaponId = null;
-      } else {
-        this.selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon && weapon.id === this.selectedWeaponId);
-      }
-    },
-
     async raidIndex() {
       await this.getParticipatingCharacters();
       await this.getParticipatingWeapons();

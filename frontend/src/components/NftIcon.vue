@@ -5,7 +5,7 @@
         v-tooltip="'Weapons (2-5*)'"/>
       <div v-if="nft.type === 'weapon'" class="default-info">2-5*</div>
 
-      <img class="default-placeholder" v-if="nft.type === 'junk'" src="../assets/bounty.png"
+      <img class="default-junk-placeholder" v-if="nft.type === 'junk'" src="../assets/junk/junk3.png"
         v-tooltip="'Junk (1-5*)'" />
       <img class="default-trinket-placeholder" v-if="nft.type === 'trinket'" src="../assets/trinkets/trinket1.png"
         v-tooltip="'Trinket (1-5*)'" />
@@ -325,6 +325,13 @@ export default {
   margin-left: 12px;
   margin-top: 8px;
   transform: scale(1.75);
+}
+.default-junk-placeholder{
+  max-width: 100px;
+  max-height: 100px;
+  margin-left: 12px;
+  margin-top: 12px;
+  transform: scale(1.6);
 }
 .placeholder-weapon {
   max-width: 180px;
