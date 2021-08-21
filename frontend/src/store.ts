@@ -148,6 +148,7 @@ export function createStore(web3: Web3) {
         staminaCost: '0',
         durabilityCost: '0',
         xpReward: '0',
+        accountPower: '0',
       },
 
       waxBridgeWithdrawableBnb: '0',
@@ -314,7 +315,6 @@ export function createStore(web3: Web3) {
       },
 
       nftsWithIdType(state) {
-        console.log(JSON.stringify(state.nfts));
         return (nftIdTypes: { type: string, id: string | number }[]) => {
           const nfts = nftIdTypes.map((idType) => {
             const nft = state.nfts[idType.type] && state.nfts[idType.type][+(idType.id)];
@@ -666,6 +666,7 @@ export function createStore(web3: Web3) {
         state.raid.staminaCost = payload.raidState.staminaCost;
         state.raid.durabilityCost = payload.raidState.durabilityCost;
         state.raid.xpReward = payload.raidState.xpReward;
+        state.raid.accountPower = payload.raidState.accountPower;
       },
 
       updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
@@ -1835,8 +1836,6 @@ export function createStore(web3: Web3) {
           .claimReward(rewardIndex)
           .send(defaultCallOptions(state));
 
-        console.log('res ' + JSON.stringify(res));
-
         // claimreward does not reward trinket, those are given at raidcompletion by the bot
 
         if(res.events.RewardedJunk) {
@@ -1853,6 +1852,10 @@ export function createStore(web3: Web3) {
           rewardsClaimed: res.events.RewardClaimed?.returnValues,
           weapon: res.events.RewardedWeapon?.returnValues,
           junk: res.events.RewardedJunk?.returnValues,
+          trinket: res.events.RewardedTrinket?.returnValues,
+          dustLb: res.events.RewardedDustLB?.returnValues,
+          dust4b: res.events.RewardedDust4B?.returnValues,
+          dust5b: res.events.RewardedDust5B?.returnValues,
           keybox: res.events.RewardedKeyBox?.returnValues
         };
         return rewards;

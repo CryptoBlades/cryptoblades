@@ -486,6 +486,19 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
         return weps;
     }
+
+    function getAccountsRaiderIndexes(uint256 index) public view returns(uint256[] memory){
+        return raidParticipantIndices[index][msg.sender];
+    }
+
+    function getAccountsPower(uint256 index) public view returns(uint256) {
+        uint256 totalAccountPower = 0;
+        uint256[] memory raiderIndexes = getAccountsRaiderIndexes(index);
+        for(uint256 i = 0; i < raiderIndexes.length; i++) {
+            totalAccountPower += raidParticipants[index][raiderIndexes[i]].power;
+        }
+        return totalAccountPower;
+    }
     
     function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
 
@@ -512,7 +525,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     function getRaidData() public view returns(
         uint256 index, uint256 endTime, uint256 raiderCount, uint256 playerPower, uint256 bossPower,
-        uint8 trait, uint8 status, uint256 joinSkill, uint64 stamina, uint64 durability, uint64 xp
+        uint8 trait, uint8 status, uint256 joinSkill, uint64 stamina, uint64 durability, uint64 xp, uint256 accountPower
     ) {
         index = raidIndex;
         endTime = raidEndTime[raidIndex];
@@ -525,5 +538,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         stamina = staminaCost;
         durability = durabilityCost;
         xp = xpReward;
+        accountPower = getAccountsPower(raidIndex);
     }
 }
