@@ -68,10 +68,10 @@
               </span>
               <hr class="devider">
               <div class="header-row">
-              <div v-if="getSelectedWeapon" class="weapon-icon-wrapper">
+              <div v-if="selectedWeaponId" class="weapon-icon-wrapper">
                 <weapon-icon class="weapon-icon" :weapon="getSelectedWeapon" />
               </div>
-              <b-button v-if="getSelectedWeapon" variant="primary" class="ml-3" @click="selectedWeaponId = null">
+              <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null">
                 Choose New Weapon
               </b-button>
             </div>

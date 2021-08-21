@@ -231,6 +231,7 @@ export default {
       this.scene.add(light);
     },
     setupModel() {
+      if(this.scene === null || this.scene === undefined) return;
       this.setupLighting();
       this.allLoaded = false;
       this.allLoadStarted = false;
