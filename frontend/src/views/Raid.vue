@@ -36,7 +36,10 @@
                 <nft-icon :isDefault="true" :nft="{ type: '5bdust' }"/>
               </div>
               <br />
-              <span class="bold raid-title-section">XP reward</span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }} </span>
+              <span class="bold raid-title-section">
+                XP reward</span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }}
+                <b-icon-question-circle v-tooltip="'XP will be automatically claimed by participating characters.'"/>
+              </span>
             </div>
           </div>
           <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 order-xs-first order-sm-first boss-col">
@@ -72,13 +75,21 @@
                 Choose New Weapon
               </b-button>
             </div>
-            <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" class="raid-weapon-grid" />
+            <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" class="raid-weapon-grid">
+              <template #sold="{ weapon: { id } }">
+                <div class="sold" v-if="participatingWeapons && participatingWeapons.find(x => +x === +id) !== undefined"><span>in raid</span></div>
+              </template>
+            </weapon-grid>
             <hr class="devider">
           </div>
           <div class="col-xs-12 col-sm-12 col-lg-6 char-box">
             <span class="raid-title-section bold">Character <span class="float-right sub-text">Power {{ currentCharacterPower }}</span></span>
             <hr class="devider">
-            <character-list :value="currentCharacterId" @input="setCurrentCharacter" class="raid-style" />
+            <character-list :value="currentCharacterId" @input="setCurrentCharacter" class="raid-style">
+              <template #sold="{ character: { id } }">
+                <div class="sold" v-if="participatingCharacters && participatingCharacters.find(x => +x === +id) !== undefined"><span>in raid</span></div>
+              </template>
+            </character-list>
             <hr class="devider">
           </div>
         </div>
@@ -213,6 +224,8 @@ export default {
       rewardsRaidId: null,
       rewards: null,
       spin: false,
+      participatingCharacters: [],
+      participatingWeapons: [],
     };
   },
 
@@ -256,6 +269,12 @@ export default {
         return;
       }
 
+      const canJoin = await this.canJoinRaid(this.currentCharacterId, this.selectedWeaponId);
+      if(!canJoin) {
+        this.$dialog.notify.error('Selected character and/or weapon was already locked in current raid...');
+        return;
+      }
+
       try {
         console.log('Trying to join raid...');
         await this.joinRaid({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId});
@@ -264,18 +283,22 @@ export default {
         console.error(e);
         this.$dialog.notify.error('Whoops...');
       }
+
+      await this.getParticipatingCharacters();
+      await this.getParticipatingWeapons();
+      this.selectedWeaponId = null;
     },
 
     async getParticipatingCharacters() {
       // gets the list of this player's raid locked characters
       // TODO store these?
-      await this.fetchRaidingCharacters();
+      this.participatingCharacters = await this.fetchRaidingCharacters();
     },
 
     async getParticipatingWeapons() {
       // gets the list of this player's raid locked weapons
       // TODO store these?
-      await this.fetchRaidingWeapons();
+      this.participatingWeapons = await this.fetchRaidingWeapons();
     },
 
     async canJoinRaid(characterID, weaponID) {
@@ -322,16 +345,16 @@ export default {
 
       const nfts = [];
       if(result.weapon) {
-        nfts.push({ type: 'weapon', id: result.weapon.tokenID, stars: result.weapon.stars });
+        nfts.push({ type: 'weapon', id: result.weapon.tokenID });
       }
       if(result.junk) {
-        nfts.push({ type: 'junk', id: result.junk.tokenID, stars: result.junk.stars });
+        nfts.push({ type: 'junk', id: result.junk.tokenID });
       }
       if(result.keybox) {
         nfts.push({ type: 'keybox', id: result.keybox.tokenID });
       }
       if(result.trinket) {
-        nfts.push({ type: 'trinket', id: result.trinket.tokenID, effect: result.trinket.effect });
+        nfts.push({ type: 'trinket', id: result.trinket.tokenID });
       }
       if(result.dustLb) {
         nfts.push({ type: 'dustLb', id: 0, amount: result.dustLb.amount });
@@ -386,6 +409,11 @@ export default {
       } else {
         this.selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon && weapon.id === this.selectedWeaponId);
       }
+    },
+
+    async raidIndex() {
+      await this.getParticipatingCharacters();
+      await this.getParticipatingWeapons();
     }
   },
 
@@ -393,6 +421,8 @@ export default {
     await Promise.all([
       this.fetchRaidState(),
     ]);
+    await this.getParticipatingCharacters();
+    await this.getParticipatingWeapons();
     this.processRaidData();
     await this.getRewardIndexes();
     await this.fetchRaidState();
