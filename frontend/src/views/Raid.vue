@@ -275,7 +275,8 @@ export default {
 
       const canJoin = await this.canJoinRaid(this.currentCharacterId, this.selectedWeaponId);
       if(!canJoin) {
-        this.$dialog.notify.error('Selected character and/or weapon was already locked in current raid...');
+        this.$dialog.notify.error(`Can't join... Make sure a raid is active, your stamina/durability are both > 0
+          and selected character/weapon are not locked in the raid already.`);
         return;
       }
 

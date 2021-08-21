@@ -510,8 +510,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         
         uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
         for(uint i = 0; i < raiderIndices.length; i++) {
-            if(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID
-            || raidParticipants[raidIndex][raiderIndices[i]].charID != characterID) {
+            if(raidParticipants[raidIndex][raiderIndices[i]].wepID == weaponID
+            || raidParticipants[raidIndex][raiderIndices[i]].charID == characterID) {
                 return false;
             }
         }
