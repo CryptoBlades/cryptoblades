@@ -155,7 +155,6 @@ import { mapActions, mapState } from 'vuex';
 
 import { formatDurationFromSeconds, secondsToDDHHMMSS } from '../../utils/date-time';
 import { isStakeType } from '../../interfaces/State';
-import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from '../../stake-types';
 
 const connectToWalletButtonLabel = 'Connect to wallet ↗';
 const amountIsTooBigButtonLabel = 'Amount is too big';
@@ -396,8 +395,8 @@ export default {
     },
 
     stakeUnclaimedRewardsButtonShown() {
-      return stakeTypeThatCanHaveUnclaimedRewardsStakedTo === this.stakeType && this.isDeposit;
-      // return true;
+      return false;
+      // return stakeTypeThatCanHaveUnclaimedRewardsStakedTo === this.stakeType && this.isDeposit;
     },
 
     canStakeUnclaimedRewards() {
