@@ -230,6 +230,7 @@
                                 tagname="confirm_forge_weapon"
                                 class="confirmReforge"
                                 @click="showDustReforgeConfirmation"
+                                :disabled="lesserDust == '0' && greaterDust == '0' && powerfulDust == '0'"
                                 v-tooltip="'Reforge selected weapon with dust'">
                           Confirm Reforge
                           <br>
