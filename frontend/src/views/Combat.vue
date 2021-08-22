@@ -73,9 +73,8 @@
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3 smoke-bomb-button"
                 @click="useSmokeBombUI()" id="gtag-link-others" tagname="use_smokebomb"
                 :disabled="smokeBombs == 0">
-                  Use Smoke Bomb ({{this.smokeBombs}}) <Hint
-                    text="Get new enemies"
-                  />
+                  Use Smoke Bomb ({{this.smokeBombs}}) <b-icon-question-circle class="centered-icon"
+                  scale="1.2" v-tooltip.top="'Find new enemies!'"/>
                 </b-button>
               </div>
 
@@ -610,13 +609,8 @@ h1 {
   top: -50px;
 }
 
-.smoke-bomb-button {
-  height: 40px;
-  line-height: 20px;
-}
-
-.smoke-bomb-button span {
-  display: inline-block;
+.smoke-bomb-button svg {
+  margin-left: 5px;
 }
 
 @media (max-width: 1334px) {

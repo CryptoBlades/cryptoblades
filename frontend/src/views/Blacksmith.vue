@@ -23,11 +23,12 @@
               <div class="d-flex justify-content-flex-end ml-auto">
               <b-button
                   variant="primary"
-                  v-if="canRename()"
+                  :disabled="!canRename()"
                   @click="openRenameWeapon"
                   tagname="rename_weapon"
-                  v-tooltip="'Rename Weapon'">
-                  Rename Weapon
+                  class="weapon-rename-button">
+                  Rename Weapon <b-icon-question-circle class="centered-icon"
+                  scale="1.2" v-tooltip.top="'Change weapon name!'"/>
                 </b-button>
 
                 <b-button
@@ -409,7 +410,7 @@ export default Vue.extend({
     BigButton,
     WeaponIcon,
     BModal,
-    NftList,
+    NftList
   },
 });
 </script>
@@ -465,5 +466,4 @@ export default Vue.extend({
   align-self: center;
   margin-left: 5px;
 }
-
 </style>

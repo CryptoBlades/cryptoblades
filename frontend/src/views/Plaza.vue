@@ -29,28 +29,29 @@
           <div class="d-flex justify-content-space-between">
             <h1>Characters ({{ ownCharacters.length }} / 4)</h1>
             <b-button
-              v-if="canUseExpScroll()"
+              :disabled="!canUseExpScroll()"
               variant="primary"
-              class="ml-auto gtag-link-others"
-              @click="openUseExpScroll"
-              v-tooltip="'Read Exp Scroll'" tagname="use_exp_scroll">
-              Exp Scroll
+              class="ml-auto gtag-link-others exp-scroll-button"
+              @click="openUseExpScroll" tagname="use_exp_scroll">
+              Exp Scroll <b-icon-question-circle class="centered-icon"
+                  scale="1.2" v-tooltip.top="'Read scroll for experience!'"/>
             </b-button>
             <b-button
-              v-if="canChangeTrait()"
+              :disabled="!canChangeTrait()"
               variant="primary"
-              class="ml-auto gtag-link-others"
+              class="ml-auto gtag-link-others change-trait-button"
               @click="openChangeTrait"
-              v-tooltip="'Change character\'s trait'" tagname="change_trait_character">
-              Change Trait
+              tagname="change_trait_character">
+              Change trait <b-icon-question-circle class="centered-icon"
+                  scale="1.2" v-tooltip.top="'Change character\'s trait!'"/>
             </b-button>
             <b-button
-              v-if="canRename()"
+              :disabled="!canRename()"
               variant="primary"
-              class="ml-auto gtag-link-others"
-              @click="openRenameCharacter"
-              v-tooltip="'Rename character'" tagname="rename_character">
-              Rename Character
+              class="ml-auto gtag-link-others rename-char-button"
+              @click="openRenameCharacter" tagname="rename_character">
+              Rename Character <b-icon-question-circle class="centered-icon"
+                  scale="1.2" v-tooltip.top="'Change character name!'"/>
             </b-button>
             <b-button
               v-if="ownCharacters.length < 4"
@@ -319,6 +320,12 @@ export default Vue.extend({
 .current-promotion {
   width: 40%;
   text-align: center;
+}
+
+.change-trait-button svg,
+.rename-char-button svg,
+.exp-scroll-button svg {
+  margin-left: 5px;
 }
 
 @media all and (max-width:  767.98px) {
