@@ -275,13 +275,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight * fightMultiplier));
+            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight * fightMultiplier, false));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(wep, charTrait,
-                durabilityCostFight * fightMultiplier);
+                durabilityCostFight * fightMultiplier, false);
 
         _verifyFight(
             basePowerLevel,
@@ -792,6 +792,19 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(num > 0 && num <= 10);
         for (uint i = 0; i < num; i++) {
             weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))), chosenElement);
+        }
+    }
+
+    function mintWeaponNforAddress(address _minter, uint32 num)
+        public
+        onlyNonContract
+        oncePerBlock(_minter)
+    {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(GAME_ADMIN, msg.sender), "Not admin");
+        require(num > 0 && num <= 50);
+
+        for (uint i = 0; i < num; i++) {
+            weapons.mint(_minter, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), _minter, i))), 100);
         }
     }
 

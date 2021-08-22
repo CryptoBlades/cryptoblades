@@ -24,11 +24,11 @@
     </div>
 
     <div v-if="!isShop">
-      <div class="filters row mt-2">
+      <div class="filters row mt-2" v-if="!isReward">
         <div v-if="!isMarket" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>Nft Type</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Shield']" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox']" :value="x" :key="x">{{ x || 'Any' }}</option>
           </select>
         </div>
 
@@ -67,6 +67,9 @@
             Clear Filters
           </span>
         </b-button>
+      </div>
+      <div v-if="isReward && nonIgnoredNfts.length === 0">
+        Nothing dropped for you this time.
       </div>
       <ul class="nft-grid">
         <li class="nft" v-for="nft in nonIgnoredNfts" :key="`${nft.type}.${nft.id}`"
@@ -114,18 +117,25 @@ interface Data {
 export interface NftIdType {
   id: number | string;
   type: string;
+  amount?: number;
 }
 
-type StoreMappedState = Pick<IState, 'ownedShieldIds'>;
+type StoreMappedState = Pick<IState, 'ownedShieldIds' | 'ownedTrinketIds' | 'ownedJunkIds' | 'ownedKeyLootboxIds'>;
 
 interface StoreMappedGetters {
   nftsWithIdType(nftIdType: NftIdType[]): Nft[];
   shieldsWithIds(ids: string[]): Nft[];
+  trinketWithIds(ids: string[]): Nft[];
+  junkWithIds(ids: string[]): Nft[];
+  keyLootboxesWithIds(ids: string[]): Nft[];
 }
 
 interface StoreMappedActions {
   purchaseShield(): Promise<void>;
   fetchShields(shieldIds: (string | number)[]): Promise<void>;
+  updateTrinketIds(): Promise<void>;
+  updateJunkIds(): Promise<void>;
+  updateKeyLootboxIds(): Promise<void>;
   purchaseRenameTag(): Promise<void>;
   purchaseRenameTagDeal(): Promise<void>;
   purchaseWeaponRenameTag(): Promise<void>;
@@ -167,6 +177,10 @@ export default Vue.extend({
       default: false,
     },
     isMarket: {
+      type: Boolean,
+      default: false,
+    },
+    isReward: {
       type: Boolean,
       default: false,
     },
@@ -215,8 +229,8 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['ownedShieldIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['shieldsWithIds','nftsWithIdType']) as Accessors<StoreMappedGetters>),
+    ...(mapState(['ownedShieldIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedKeyLootboxIds']) as Accessors<StoreMappedState>),
+    ...(mapGetters(['shieldsWithIds', 'trinketWithIds', 'junkWithIds', 'keyLootboxesWithIds','nftsWithIdType']) as Accessors<StoreMappedGetters>),
 
     nftsToDisplay(): NftIdType[] {
       if (this.showGivenNftIdTypes) {
@@ -226,6 +240,9 @@ export default Vue.extend({
       const nfts: NftIdType[] = [];
       // push different kinds of nfts to nfts array here
       this.ownedShieldIds?.forEach(id => { nfts.push({ id, type: 'shield' }); });
+      this.ownedTrinketIds?.forEach(id => { nfts.push({ id, type: 'trinket' }); });
+      this.ownedJunkIds?.forEach(id => { nfts.push({ id, type: 'junk' }); });
+      this.ownedKeyLootboxIds?.forEach(id => { nfts.push({ id, type: 'keybox' }); });
 
       return nfts;
     },
@@ -239,6 +256,11 @@ export default Vue.extend({
         default:
           return [];
         }
+      }
+
+      if(this.isReward && this.showGivenNftIdTypes) {
+        const rewardedDust = this.nftsToDisplay.filter(x => x.type?.startsWith('dust')).map(x => { return { type: x.type, id: 0, amount: x.amount }; });
+        return this.nftsWithIdType(this.nftsToDisplay).concat(rewardedDust).filter(Boolean);
       }
 
       return this.nftsWithIdType(this.nftsToDisplay).filter(Boolean);
@@ -290,21 +312,31 @@ export default Vue.extend({
   watch: {
     async nftsToDisplay(newNftsToDisplay: NftIdType[]) {
       const shieldIds: string[] = [];
+      const trinketIds: string[] = [];
+      const junkIds: string[] = [];
+      const keyLootboxIds: string[] = [];
       newNftsToDisplay.forEach(nft => {
         switch(nft.type) {
         case('shield'):
           shieldIds.push(nft.id.toString());
+          break;
+        case('trinket'):
+          trinketIds.push(nft.id.toString());
+          break;
+        case('junk'):
+          junkIds.push(nft.id.toString());
+          break;
+        case('keybox'):
+          keyLootboxIds.push(nft.id.toString());
+          break;
         }
       });
-
-      if(shieldIds.length > 0) {
-        await this.fetchShields(shieldIds);
-      }
     },
   },
 
   methods: {
-    ...(mapActions(['purchaseShield', 'fetchShields', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
+    ...(mapActions(['purchaseShield', 'fetchShields', 'updateTrinketIds',
+      'updateJunkIds', 'updateKeyLootboxIds', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
       'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
       'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
       'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange'
@@ -423,11 +455,14 @@ export default Vue.extend({
     }
   },
 
-  mounted() {
+  async mounted() {
     this.checkStorageFavorite();
 
     if(!this.showGivenNftIdTypes) {
-      this.fetchShields(this.ownedShieldIds);
+      await this.fetchShields(this.ownedShieldIds);
+      await this.updateTrinketIds();
+      await this.updateJunkIds();
+      await this.updateKeyLootboxIds();
     }
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());
