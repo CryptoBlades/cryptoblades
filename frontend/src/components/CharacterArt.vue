@@ -23,7 +23,7 @@
     </div>
 
     <div class="name-lvl-container">
-      <div class="name black-outline" v-if="!portrait">{{ getCharacterName(character.id) }} </div>
+      <div class="name black-outline" v-if="!portrait">{{ getCleanCharacterName(character.id) }} </div>
       <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
     </div>
     <div class="score-id-container">
@@ -63,6 +63,7 @@ import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
 import { mapGetters, mapState } from 'vuex';
+import { getCleanName } from '../rename-censor';
 //import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
@@ -142,6 +143,10 @@ export default {
       }
 
       return '';
+    },
+
+    getCleanCharacterName(id) {
+      return getCleanName(this.getCharacterName(id));
     },
 
     staminaToolTipHtml(time) {

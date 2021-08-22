@@ -5,8 +5,7 @@ import type {
   NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables,
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
   CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, SmokeBombConsumables,
-  ExpScrollConsumables
-} from '../../../build/abi-interfaces';
+  ExpScrollConsumables, Raid1, RaidTrinket, Junk, KeyLootbox} from '../../../build/abi-interfaces';
 import { StakeType } from './State';
 
 interface TypeSafeContract<Abi> {
@@ -40,5 +39,8 @@ export interface Contracts {
   CharacterWaterTraitChangeConsumables?: Contract <CharacterWaterTraitChangeConsumables>;
   CharacterLightningTraitChangeConsumables?: Contract <CharacterLightningTraitChangeConsumables>;
   SmokeBombConsumables?: Contract <SmokeBombConsumables>;
-  ExpScrollConsumables?: Contract <ExpScrollConsumables>;
+  ExpScrollConsumables?: Contract <ExpScrollConsumables>;  Raid1?: Contract<Raid1>;
+  RaidTrinket?: Contract<RaidTrinket>;
+  Junk?: Contract<Junk>;
+  KeyLootbox?: Contract<KeyLootbox>;
 }
