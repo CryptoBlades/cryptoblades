@@ -501,7 +501,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
     
     function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
-        return isRaidStarted() && haveEnoughEnergy(characterID, weaponID) && !areRaiding(characterID, weaponID);
+        return isRaidStarted()
+            && haveEnoughEnergy(characterID, weaponID)
+            && !isCharacterRaiding(characterID)
+            && !isWeaponRaiding(weaponID);
     }
 
     function haveEnoughEnergy(uint256 characterID, uint256 weaponID) public view returns(bool) {
@@ -509,14 +512,24 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function isRaidStarted() public view returns(bool) {
-        return raidStatus[raidIndex] != STATUS_STARTED || raidEndTime[raidIndex] <= now;
+        return raidStatus[raidIndex] == STATUS_STARTED || raidEndTime[raidIndex] > now;
     }
 
-    function areRaiding(uint256 characterID, uint256 weaponID) public view returns(bool) {
+    function isWeaponRaiding(uint256 weaponID) public view returns(bool) {
         uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
         for(uint i = 0; i < raiderIndices.length; i++) {
-            if(raidParticipants[raidIndex][raiderIndices[i]].wepID == weaponID
-            || raidParticipants[raidIndex][raiderIndices[i]].charID == characterID) {
+            if(raidParticipants[raidIndex][raiderIndices[i]].wepID == weaponID) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function isCharacterRaiding(uint256 characterID) public view returns(bool) {
+        uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
+        for(uint i = 0; i < raiderIndices.length; i++) {
+            if(raidParticipants[raidIndex][raiderIndices[i]].charID == characterID) {
                 return true;
             }
         }

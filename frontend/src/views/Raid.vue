@@ -259,7 +259,7 @@ export default {
     traitNumberToName,
     ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid',
       'fetchRaidRewards', 'claimRaidRewards', 'fetchRaidingCharacters', 'fetchRaidingWeapons',
-      'fetchIsRaidStarted', 'fetchHaveEnoughEnergy', 'fetchAreRaiding']),
+      'fetchIsRaidStarted', 'fetchHaveEnoughEnergy', 'fetchIsCharacterRaiding', 'fetchIsWeaponRaiding']),
     ...mapMutations(['setCurrentCharacter']),
     ...mapGetters(['getRaidState']),
 
@@ -274,13 +274,18 @@ export default {
       }
 
       const isRaidStarted = await this.isRaidStarted();
-      if(isRaidStarted) {
+      if(!isRaidStarted) {
         this.$dialog.notify.error('Raid has not started yet...');
         return;
       }
-      const areAlreadyRaiding = await this.areAlreadyRaiding(this.currentCharacterId, this.selectedWeaponId);
-      if(!areAlreadyRaiding) {
-        this.$dialog.notify.error('Selected character/weapon is locked in the raid already...');
+      const isCharacterRaiding = await this.isCharacterAlreadyRaiding(this.currentCharacterId);
+      if(isCharacterRaiding) {
+        this.$dialog.notify.error('Selected character is locked in the raid already...');
+        return;
+      }
+      const isWeaponRaiding = await this.isWeaponAlreadyRaiding(this.selectedWeaponId);
+      if(isWeaponRaiding) {
+        this.$dialog.notify.error('Selected weapon is locked in the raid already...');
         return;
       }
       const haveEnoughEnergy = await this.haveEnoughEnergy(this.currentCharacterId, this.selectedWeaponId);
@@ -313,9 +318,14 @@ export default {
       this.participatingWeapons = await this.fetchRaidingWeapons();
     },
 
-    async areAlreadyRaiding(characterID, weaponID) {
-      return await this.fetchAreRaiding({
-        characterID,
+    async isCharacterAlreadyRaiding(characterID) {
+      return await this.fetchIsCharacterRaiding({
+        characterID
+      });
+    },
+
+    async isWeaponAlreadyRaiding(weaponID) {
+      return await this.fetchIsWeaponRaiding({
         weaponID
       });
     },

@@ -1767,13 +1767,9 @@ export function createStore(web3: Web3) {
           return;
         }
 
-        console.log('Within the join raid method...');
-
         await Raid1!.methods
           .joinRaid(characterId, weaponId)
           .send(defaultCallOptions(state));
-
-        console.log('past the join raid await');
       },
 
       async fetchRaidState({ state, commit }) {
@@ -1843,11 +1839,19 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
-      async fetchAreRaiding({ state }, { characterID, weaponID }) {
+      async fetchIsCharacterRaiding({ state }, { characterID }) {
         const Raid1 = state.contracts().Raid1!;
 
         return await Raid1.methods
-          .areRaiding(characterID, weaponID)
+          .isCharacterRaiding(characterID)
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchIsWeaponRaiding({ state }, { weaponID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .isWeaponRaiding(weaponID)
           .call(defaultCallOptions(state));
       },
 
