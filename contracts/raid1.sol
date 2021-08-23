@@ -501,22 +501,40 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
     
     function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
+        return isRaidStarted()
+            && haveEnoughEnergy(characterID, weaponID)
+            && !isCharacterRaiding(characterID)
+            && !isWeaponRaiding(weaponID);
+    }
 
-        if(characters.getStaminaPoints(characterID) == 0
-        || weapons.getDurabilityPoints(weaponID) == 0
-        || raidStatus[raidIndex] != STATUS_STARTED
-        || raidEndTime[raidIndex] <= now)
-            return false;
-        
+    function haveEnoughEnergy(uint256 characterID, uint256 weaponID) public view returns(bool) {
+        return characters.getStaminaPoints(characterID) > 0 && weapons.getDurabilityPoints(weaponID) > 0;
+    }
+
+    function isRaidStarted() public view returns(bool) {
+        return raidStatus[raidIndex] == STATUS_STARTED || raidEndTime[raidIndex] > now;
+    }
+
+    function isWeaponRaiding(uint256 weaponID) public view returns(bool) {
         uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
         for(uint i = 0; i < raiderIndices.length; i++) {
-            if(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID
-            || raidParticipants[raidIndex][raiderIndices[i]].charID != characterID) {
-                return false;
+            if(raidParticipants[raidIndex][raiderIndices[i]].wepID == weaponID) {
+                return true;
             }
         }
 
-        return true;
+        return false;
+    }
+
+    function isCharacterRaiding(uint256 characterID) public view returns(bool) {
+        uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
+        for(uint i = 0; i < raiderIndices.length; i++) {
+            if(raidParticipants[raidIndex][raiderIndices[i]].charID == characterID) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     function getLinkAddress(uint256 linkIndex) public view returns (address) {
