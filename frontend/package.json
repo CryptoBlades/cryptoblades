@@ -20,6 +20,7 @@
     "bootstrap-vue": "^2.21.2",
     "bootstrap-vue-dialog": "^0.1.0",
     "censor-sensor": "^1.0.6",
+    "cookies-eu-banner": "^2.0.1",
     "core-js": "^3.6.5",
     "fantastical": "^2.0.1",
     "imagemin": "^7.0.1",
