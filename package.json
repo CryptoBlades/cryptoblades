@@ -13,6 +13,7 @@
     "@truffle/hdwallet-provider": "^1.2.6",
     "abdk-libraries-solidity": "2.4.0",
     "censor-sensor": "^1.0.6",
+    "cookies-eu-banner": "^2.0.1",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
