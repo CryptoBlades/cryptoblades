@@ -72,6 +72,7 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+import { apiUrl } from './utils/common';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -276,6 +277,9 @@ export default {
         .then(() => {
           this.errorMessage = 'Success: MetaMask connected.';
           this.isConnecting = false;
+
+          this.initializeStore();
+          this.toggleHideWalletWarning();
         })
         .catch(() => {
           this.errorMessage = 'Error: MetaMask could not get permissions.';
@@ -310,7 +314,7 @@ export default {
     },
 
     async checkNotifications() {
-      const response = await fetch('https://api.cryptoblades.io/static/notifications');
+      const response = await fetch(apiUrl('static/notifications'));
       const notifications = await response.json();
 
       const lastHash = localStorage.getItem('lastnotification');

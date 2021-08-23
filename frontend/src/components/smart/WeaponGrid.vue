@@ -1,26 +1,37 @@
 <template>
   <div>
-    <div class="filters row mt-2 pl-2">
-      <div class="col-sm-6 col-md-4 stars-elem">
+    <div class="filters row mt-2 pl-2" v-if="!newWeapon" @change="saveFilters()">
+      <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
         <strong>Stars</strong>
-        <select class="form-control" v-model="starFilter" @change="saveFilters()">
+        <select class="form-control" v-model="starFilter" >
           <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
 
-      <div class="col-sm-6 col-md-4 stars-elem">
+      <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
         <strong>Element</strong>
-        <select class="form-control" v-model="elementFilter" @change="saveFilters()">
+        <select class="form-control" v-model="elementFilter" >
           <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
         </select>
       </div>
 
-      <div class="col-2" v-if="isMarket">
-        <strong>Sort</strong>
-        <select class="form-control" v-model="priceSort" @change="saveFilters()">
-          <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
-        </select>
-      </div>
+      <template v-if="isMarket">
+        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
+          <strong>Min Price</strong>
+          <input class="form-control" type="number" v-model.trim="minPriceFilter" :min="0" placeholder="Min" />
+        </div>
+        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
+          <strong>Max Price</strong>
+          <input class="form-control" type="number" v-model.trim="maxPriceFilter" :min="0" placeholder="Max" />
+        </div>
+
+        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
+          <strong>Sort</strong>
+          <select class="form-control" v-model="priceSort" >
+            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
+          </select>
+        </div>
+      </template>
 
       <div v-if="showReforgedToggle" class="show-reforged">
         <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
@@ -33,9 +44,9 @@
       </div>
 
       <b-button
+        v-if="!newWeapon"
         variant="primary"
-        class="ml-3 clear-filters-button"
-        :class="{ 'mb-4': showReforgedToggle && showFavoriteToggle }"
+        class="clear-filters-button mb-3"
         @click="clearFilters"
       >
         <span>
@@ -87,6 +98,8 @@ interface StoreMappedActions {
 interface Data {
   starFilter: string;
   elementFilter: string;
+  minPriceFilter: string;
+  maxPriceFilter: string;
   favorites: Record<number, boolean>;
   priceSort: string;
   showReforgedWeapons: boolean;
@@ -167,12 +180,18 @@ export default Vue.extend({
       type: Boolean,
       default: false,
     },
+    newWeapon: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data() {
     return {
       starFilter: '',
       elementFilter: '',
+      minPriceFilter:'',
+      maxPriceFilter:'',
       favorites: {},
       priceSort: '',
       sorts,
@@ -202,6 +221,10 @@ export default Vue.extend({
     },
 
     nonIgnoredWeapons(): IWeapon[] {
+      if (this.newWeapon) {
+        return this.displayWeapons;
+      }
+
       let items: IWeapon[] = [];
       this.displayWeapons.forEach((x) => items.push(x));
 
@@ -261,6 +284,8 @@ export default Vue.extend({
         sessionStorage.setItem('market-weapon-starfilter', this.starFilter);
         sessionStorage.setItem('market-weapon-elementfilter', this.elementFilter);
         sessionStorage.setItem('market-weapon-price-order', this.priceSort);
+        sessionStorage.setItem('market-weapon-price-minfilter', this.minPriceFilter?''+this.minPriceFilter:'');
+        sessionStorage.setItem('market-weapon-price-maxfilter', this.maxPriceFilter?''+this.maxPriceFilter:'');
       } else {
         sessionStorage.setItem('weapon-starfilter', this.starFilter);
         sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
@@ -304,6 +329,8 @@ export default Vue.extend({
         sessionStorage.removeItem('market-weapon-starfilter');
         sessionStorage.removeItem('market-weapon-elementfilter');
         sessionStorage.removeItem('market-weapon-price-order');
+        sessionStorage.removeItem('market-weapon-price-minfilter');
+        sessionStorage.removeItem('market-weapon-price-maxfilter');
       } else {
         sessionStorage.removeItem('weapon-starfilter');
         sessionStorage.removeItem('weapon-elementfilter');
@@ -311,12 +338,15 @@ export default Vue.extend({
       this.elementFilter = '';
       this.starFilter = '';
       this.priceSort = '';
+      this.minPriceFilter= '';
+      this.maxPriceFilter= '';
 
       this.$emit('weapon-filters-changed');
     },
 
     onWeaponClick(id: number) {
       this.setCurrentWeapon(id);
+      this.$emit('chooseweapon', id);
       this.$emit('choose-weapon', id);
     },
 
@@ -338,6 +368,8 @@ export default Vue.extend({
       this.starFilter = sessionStorage.getItem('market-weapon-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('market-weapon-elementfilter') || '';
       this.priceSort = sessionStorage.getItem('market-weapon-price-order') || '';
+      this.minPriceFilter = sessionStorage.getItem('market-weapon-price-minfilter') || '';
+      this.maxPriceFilter = sessionStorage.getItem('market-weapon-price-maxfilter') || '';
     } else {
       this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
@@ -347,11 +379,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.stars-elem {
-  margin-bottom: 20px;
-  max-width: 300px;
-  width: 100%;
-}
+
 .filters {
    justify-content: center;
    width: 100%;
@@ -413,14 +441,11 @@ export default Vue.extend({
 }
 
 .clear-filters-button {
-  align-self: flex-end;
   height: fit-content;
-}
-
-.clear-filters-button {
   display: flex;
   flex-direction: row;
-  align-self: center;
+  align-self: flex-end;
+  margin:0 15px;
 }
 
 @media (max-width: 576px) {
@@ -437,12 +462,8 @@ export default Vue.extend({
 
   .clear-filters-button {
     width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-self: center;
     text-align: center;
     justify-content: center;
-    margin: 0 auto;
   }
 
   .ml-3 {

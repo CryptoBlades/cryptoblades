@@ -15,8 +15,8 @@
           <div class="message-box" v-if="!currentCharacter">You need to select a character to do battle.</div>
 
           <div class="row">
-            <div class="col-12 col-md-2 offset-md-5">
-              <div class="message-box" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
+            <div class="col-12 col-md-2 offset-md-5 text-center">
+              <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
                 You need {{ staminaPerFight }} stamina to do battle.
                 <h4>Stamina Cost Per Fight</h4>
                 <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()" class="ml-3"></b-form-select>
@@ -47,7 +47,7 @@
               <div class="header-row">
 
                 <div class="row mb-3 mt-3">
-                  <div class="col-12 col-md-2 offset-md-5">
+                  <div :class="['col-12', selectedWeaponId ? 'col-md-6 offset-md-3' : 'col-md-2 offset-md-5']">
                     <h4>Stamina Cost per Fight</h4>
                     <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
                   </div>
@@ -73,46 +73,49 @@
 
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" :checkForDurability="true" />
             </div>
-            <div class="row mb-3 flex-column enemy-container" v-if="targets.length > 0">
-              <div class="row">
-                <div class="col text-center">
-                  <div class="combat-hints">
-                    <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
-                    <span class="fire-icon" />
-                    <Hint
-                      text="The elements affect power:<br>
-                      <br>Character vs Enemy: bonus or penalty as shown above
-                      <br>Character and Weapon match gives bonus"
-                    />
-                  </div>
+            <div class="row mb-3 enemy-container" v-if="targets.length > 0">
+              <div class="col-12 text-center">
+                <div class="combat-hints">
+                  <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
+                  <span class="fire-icon" />
+                  <Hint
+                    text="The elements affect power:<br>
+                    <br>Character vs Enemy: bonus or penalty as shown above
+                    <br>Character and Weapon match gives bonus"
+                  />
                 </div>
               </div>
-              <div class="enemy-list">
-                <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 encounter" v-for="(e, i) in targets" :key="i">
-                  <div class="encounter-container">
-                    <div class="enemy-character">
-                      <div class="encounter-element">
-                        <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
-                      </div>
 
-                      <div class="mobile-divider mobile-img-adjustment">
-                        <img class="mr-auto ml-auto enemy-img" :src="getEnemyArt(e.power)" alt="Enemy" />
-                      </div>
-
-                      <div class="encounter-power">{{ e.power }} Power</div>
-
-                      <div class="xp-gain">+{{ getPotentialXp(e) }} XP</div>
+              <div class="col-12 col-md-6 col-xl-3 encounter" v-for="(e, i) in targets" :key="i">
+                <div class="encounter-container">
+                <div class="enemy-character">
+                  <div class="encounter-element">
+                      <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
                     </div>
 
-                    <div class="victory-chance">{{ getWinChance(e.power, e.trait) }} Victory</div>
-                    <big-button
+                    <div class="">
+                      <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" alt="Enemy" />
+                    </div>
+
+                    <div class="encounter-power">
+                      {{ e.power }} Power
+                    </div>
+
+                    <div class="xp-gain">
+                      +{{getPotentialXp(e)}} XP
+                    </div>
+                </div>
+
+                <div class="victory-chance">
+                  {{ getWinChance(e.power, e.trait) }} Victory
+                </div>
+                <big-button
                       class="encounter-button btn-styled"
                       :mainText="`Fight!`"
-                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults"
+                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId) || !charHasStamina()"
                       @click="onClickEncounter(e)"
                     />
-                    <p v-if="isLoadingTargets">Loading...</p>
-                  </div>
+                <p v-if="isLoadingTargets">Loading...</p>
                 </div>
               </div>
             </div>
@@ -210,7 +213,7 @@ export default {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
-      if (this.resultsAvailable) this.$bvModal.show('fightResultsModal');
+      if (this.resultsAvailable && error === null) this.$bvModal.show('fightResultsModal');
     },
   },
 
@@ -220,6 +223,9 @@ export default {
     getEnemyArt,
     weaponHasDurability(id) {
       return this.getWeaponDurability(id) >= this.fightMultiplier;
+    },
+    charHasStamina(){
+      return this.currentCharacterStamina >= this.staminaPerFight;
     },
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
@@ -278,16 +284,18 @@ export default {
         return;
       }
 
+      this.waitingResults = true;
+
       // Force a quick refresh of targets
       await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
       if (!this.targets.find((target) => target.original === targetToFight.original)) {
+        this.waitingResults = false;
         return;
       }
 
       this.fightResults = null;
       this.error = null;
-      this.waitingResults = true;
       this.setIsInCombat(this.waitingResults);
 
       try {
@@ -332,7 +340,7 @@ export default {
 
     setStaminaSelectorValues() {
       if(this.currentCharacterStamina < 40) {
-        return [{ value: null, text: 'You need more stamina to fight!', disabled: true }];
+        return [{ value: this.fightMultiplier, text: 'You need more stamina to fight!', disabled: true}];
       }
 
       const choices = [
@@ -574,6 +582,7 @@ h1 {
   width: 13em;
   position: relative;
   top: 3vw;
+  margin-top: 2em;
 }
 
 .enemy-img {
@@ -581,10 +590,16 @@ h1 {
   top: -50px;
 }
 
-@media (max-width: 1025px) {
+@media (max-width: 1334px) {
   .enemy-list {
-    flex-direction: column;
+    flex-flow: row wrap;
     align-items: center;
+  }
+  .enemy-list > .enemy-list-child{
+     flex-basis: 50%;
+  }
+  .encounter-button {
+    margin-top: 1.35em;
   }
 }
 
@@ -593,8 +608,13 @@ h1 {
   .encounter img {
     width: calc(100% - 60px);
   }
+  .enemy-list{
+    flex-direction:column;
+    align-items:center;
+  }
   .combat-enemy-container {
     flex-direction: column;
+    align-items: center;
   }
   .weapon-selection {
     border-right: none;
@@ -644,10 +664,6 @@ h1 {
     width: 100%;
     justify-content: center;
     display: block;
-  }
-
-  .encounter-button {
-    top: 10vw;
   }
 }
 </style>

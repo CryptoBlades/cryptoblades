@@ -2,6 +2,8 @@ import { ICharacter } from './Character';
 import { IWeapon } from './Weapon';
 import { ITarget } from './Target';
 import { Contracts } from './Contracts';
+import { Nft } from './Nft';
+import { IShield } from './Shield';
 
 export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2';
 export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2'];
@@ -68,17 +70,24 @@ export interface IState {
   directStakeBonusPercent: number;
   ownedCharacterIds: number[];
   ownedWeaponIds: number[];
+  ownedShieldIds: number[];
   maxStamina: number;
+  ownedDust: string[];
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
   characterStaminas: Record<number, number>;
+  characterRenames: Record<number, string>;
 
   currentWeaponId: number | null;
   weapons: Record<number, IWeapon>;
   weaponDurabilities: Record<number, number>;
+  weaponRenames: Record<number, string>;
   maxDurability: number;
   targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
+
+  currentNftType: string | null;
+  currentNftId: number | null;
 
   characterTransferCooldowns: Record<number, ITransferCooldown | undefined>;
 
@@ -93,4 +102,9 @@ export interface IState {
 
   isInCombat: boolean;
   isCharacterViewExpanded: boolean;
+
+  shields: Record<number, IShield>;
+  currentShieldId: number | null;
+
+  nfts: Record<string, Record<number | string, Nft>>;
 }
