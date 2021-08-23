@@ -281,10 +281,8 @@ export default {
       }
 
       try {
-        console.log('Trying to join raid...');
         await this.joinRaid({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId});
         this.selectedWeaponId = null;
-        console.log('Made it to the other side at least...');
       } catch (e) {
         console.error(e);
         this.$dialog.notify.error('Whoops...');
@@ -325,8 +323,6 @@ export default {
         startIndex,
         endIndex
       });
-      console.log('SI '+startIndex+' / EI '+endIndex);
-      console.log('RI '+this.rewardIndexes.length);
     },
 
     promptRewardClaim() {
@@ -343,7 +339,6 @@ export default {
     },
 
     async claimRewardIndex(rewardIndex) {
-      console.log('Attempting to claim reward index '+rewardIndex);
       const result = await this.claimRaidRewards({
         rewardIndex
       });
@@ -377,8 +372,6 @@ export default {
       setTimeout(() => {
         this.spin = false;
       }, 10000);
-      console.log('Reward claimed for '+rewardIndex);
-      //console.log('Result: '+result);
     },
 
     getBossName() {
