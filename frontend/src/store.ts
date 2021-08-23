@@ -1827,6 +1827,31 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async fetchIsRaidStarted({ state }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .isRaidStarted()
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchHaveEnoughEnergy({ state }, { characterID, weaponID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .haveEnoughEnergy(characterID, weaponID)
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchAreRaiding({ state }, { characterID, weaponID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .areRaiding(characterID, weaponID)
+          .call(defaultCallOptions(state));
+      },
+
+
       async claimRaidRewards({ state, dispatch }, { rewardIndex }) {
         const Raid1 = state.contracts().Raid1!;
 

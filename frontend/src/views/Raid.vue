@@ -259,7 +259,7 @@ export default {
     traitNumberToName,
     ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid',
       'fetchRaidRewards', 'claimRaidRewards', 'fetchRaidingCharacters', 'fetchRaidingWeapons',
-      'fetchRaidJoinEligibility']),
+      'fetchIsRaidStarted', 'fetchHaveEnoughEnergy', 'fetchAreRaiding']),
     ...mapMutations(['setCurrentCharacter']),
     ...mapGetters(['getRaidState']),
 
@@ -273,10 +273,19 @@ export default {
         return;
       }
 
-      const canJoin = await this.canJoinRaid(this.currentCharacterId, this.selectedWeaponId);
-      if(!canJoin) {
-        this.$dialog.notify.error(`Can't join... Make sure a raid is active, your stamina/durability are both > 0
-          and selected character/weapon are not locked in the raid already.`);
+      const isRaidStarted = await this.isRaidStarted();
+      if(isRaidStarted) {
+        this.$dialog.notify.error('Raid has not started yet...');
+        return;
+      }
+      const areAlreadyRaiding = await this.areAlreadyRaiding(this.currentCharacterId, this.selectedWeaponId);
+      if(!areAlreadyRaiding) {
+        this.$dialog.notify.error('Selected character/weapon is locked in the raid already...');
+        return;
+      }
+      const haveEnoughEnergy = await this.haveEnoughEnergy(this.currentCharacterId, this.selectedWeaponId);
+      if(!haveEnoughEnergy) {
+        this.$dialog.notify.error('Not enough stamina or durability...');
         return;
       }
 
@@ -304,8 +313,19 @@ export default {
       this.participatingWeapons = await this.fetchRaidingWeapons();
     },
 
-    async canJoinRaid(characterID, weaponID) {
-      return await this.fetchRaidJoinEligibility({
+    async areAlreadyRaiding(characterID, weaponID) {
+      return await this.fetchAreRaiding({
+        characterID,
+        weaponID
+      });
+    },
+
+    async isRaidStarted() {
+      return await this.fetchIsRaidStarted();
+    },
+
+    async haveEnoughEnergy(characterID, weaponID) {
+      return await this.fetchHaveEnoughEnergy({
         characterID,
         weaponID
       });
