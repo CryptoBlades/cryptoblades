@@ -5,7 +5,7 @@
         v-tooltip="'Weapons (2-5*)'"/>
       <div v-if="nft.type === 'weapon'" class="default-info">2-5*</div>
 
-      <img class="default-placeholder" v-if="nft.type === 'junk'" src="../assets/bounty.png"
+      <img class="default-junk-placeholder" v-if="nft.type === 'junk'" src="../assets/junk/junk3.png"
         v-tooltip="'Junk (1-5*)'" />
       <img class="default-trinket-placeholder" v-if="nft.type === 'trinket'" src="../assets/trinkets/trinket1.png"
         v-tooltip="'Trinket (1-5*)'" />
@@ -56,7 +56,17 @@
       </div>
 
       <div v-if="nft.type === 'weapon'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
-          <img class="placeholder-shield" src="../assets/placeholder/sword-placeholder-3.png" />
+          <img class="placeholder-weapon" :src="getWeaponArt(nft)" />
+
+          <div class="trait">
+            <span :class="nft.element.toLowerCase() + '-icon'"></span>
+            <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
+          </div>
+
+          <div class="name">
+            {{ getCleanWeaponName(nft.id, nft.stars) }}
+          </div>
+
           <div v-if="!isShop" class="id">ID {{ nft.id }}</div>
 
           <div v-if="!isShop" class="stats">
@@ -115,9 +125,12 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { getJunkArt } from '../junk-arts-placeholder';
 import { getTrinketArt } from '../trinket-arts-placeholder';
+import { getCleanName } from '../rename-censor';
+import { getWeaponArt } from '../weapon-arts-placeholder';
+import { Stat1PercentForChar, Stat2PercentForChar, Stat3PercentForChar } from '../interfaces';
 
 export default {
   props: ['nft', 'isDefault', 'isShop', 'favorite'],
@@ -125,6 +138,7 @@ export default {
 
   },
   computed: {
+    ...mapGetters(['getWeaponName', 'currentCharacter',]),
     tooltipHtml() {
       if(!this.nft) return '';
       if(this.nft.type === 'dustLb') return 'Lesser Dust';
@@ -133,6 +147,10 @@ export default {
 
       const wrapInSpan = (spanClass, text) => {
         return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;
+      };
+
+      const wrapInSpanTextOnly = (spanClass, text) => {
+        return `<span class="${spanClass.toLowerCase()}">${text}</span>`;
       };
 
       let ttHtml = `
@@ -149,6 +167,37 @@ export default {
       if(this.nft.element) {
         ttHtml += `<br>Element: ${wrapInSpan(this.nft.element, this.nft.element)}`;
       }
+
+      if(this.nft.stat1Value) {
+        ttHtml += `<br>${wrapInSpan(this.nft.stat1, this.nft.stat1)}: +${this.nft.stat1Value}`;
+        if(this.currentCharacter) {
+          ttHtml += ` (${wrapInSpanTextOnly(
+            this.currentCharacter.traitName,
+            '+'+Stat1PercentForChar(this.nft, +this.currentCharacter.trait)+'%')
+          })`;
+        }
+      }
+
+      if(this.nft.stat2Value) {
+        ttHtml += `<br>${wrapInSpan(this.nft.stat2, this.nft.stat2)}: +${this.nft.stat2Value}`;
+        if(this.currentCharacter) {
+          ttHtml += ` (${wrapInSpanTextOnly(
+            this.currentCharacter.traitName,
+            '+'+Stat2PercentForChar(this.nft, +this.currentCharacter.trait)+'%')
+          })`;
+        }
+      }
+
+      if(this.nft.stat3Value) {
+        ttHtml += `<br>${wrapInSpan(this.nft.stat3, this.nft.stat3)}: +${this.nft.stat3Value}`;
+        if(this.currentCharacter) {
+          ttHtml += ` (${wrapInSpanTextOnly(
+            this.currentCharacter.traitName,
+            '+'+Stat3PercentForChar(this.nft, +this.currentCharacter.trait)+'%')
+          })`;
+        }
+      }
+
       return ttHtml;
     }
   },
@@ -163,6 +212,7 @@ export default {
   },
 
   methods: {
+    getWeaponArt,
     getJunkArt,
     getTrinketArt,
     ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags',
@@ -171,6 +221,10 @@ export default {
 
     imgPath(img) {
       return this.images('./' + img);
+    },
+
+    getCleanWeaponName(id, stars) {
+      return getCleanName(this.getWeaponName(id, stars));
     }
   },
 
@@ -272,6 +326,13 @@ export default {
   margin-top: 8px;
   transform: scale(1.75);
 }
+.default-junk-placeholder{
+  max-width: 100px;
+  max-height: 100px;
+  margin-left: 12px;
+  margin-top: 12px;
+  transform: scale(1.6);
+}
 .placeholder-weapon {
   max-width: 180px;
   max-height: 180px;
@@ -340,6 +401,15 @@ export default {
   top: 8px;
   right: 10px;
   font-style: italic;
+}
+
+.name {
+  position: absolute;
+  bottom: 15px;
+  left: 12%;
+  right: 12%;
+  font-size: 0.9em;
+  text-align: center;
 }
 
 .amount {
