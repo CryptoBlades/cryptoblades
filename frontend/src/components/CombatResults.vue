@@ -1,16 +1,40 @@
 <template>
+  <div>
+    <div class="tob-bg-img promotion-decoration">
+      <img class="vertical-decoration bottom" src="../assets/border-element.png">
+    </div>
+    <div class="float-left crypto-warrior-image">
+      <img class="vertical-decoration" src="../assets/cryptowarrior.png">
+    </div>
   <div class="results-panel">
-    <span class="outcome">{{ getSuccessText() }}</span>
-    <span class="roll">{{ "You rolled "+results[1]+", Enemy rolled "+results[2] }}</span>
-    <span v-if="results[0]" class="reward">
-      {{ "You earned "+results[3]+" xp"}}
-      <br>
-      <span v-tooltip="convertWei(results[4])+' SKILL'">{{"and "+formattedSkill}}</span>
+    <div class="float-right">
+      <h1 class="text-center outcome">{{ getSuccessText() }}</h1>
+      <p> You gained:  <span class="text-success">{{results[3]+" xp"}}</span>
+        <br/>
+        You earned: <span class="text-success" v-tooltip="convertWei(results[4])+' SKILL'">{{formattedSkill}}</span>
         <Hint text="SKILL earned is based on gas costs of the network plus a factor of your power" />
-    </span>
-    <span>
-         {{ "You spent ~" + results[5]+" BNB with gas taxes"}}
-    </span>
+        <br/>
+        You spent ~ <span class="text-danger">{{results[5]}}</span> BNB on gas fees
+      </p>
+      <p>You rolled: <span class="text-success">{{results[1]}}</span>
+        <br/>
+        Enemy rolled: <span class="text-danger">{{results[2]}}</span>
+      </p>
+    </div>
+  </div>
+
+    <div class="bot-bg-img promotion-decoration">
+      <img src="../assets/border-element.png">
+    </div>
+
+    <div>
+      <ins class="adsbygoogle"
+          style="display:block"
+          data-ad-client="ca-pub-6717992096530538"
+          data-ad-slot="5115599573"
+          data-ad-format="auto"
+          data-full-width-responsive="true"></ins>
+    </div>
   </div>
 </template>
 
@@ -30,7 +54,7 @@ export default {
 
   methods: {
     getSuccessText() {
-      return this.results[0] ? 'You won the fight!' : 'You lost the fight!';
+      return this.results[0] ? 'VICTORY' : 'DEFEAT';
     },
     convertWei(wei) {
       return fromWeiEther(wei);
@@ -45,14 +69,9 @@ export default {
 
 <style>
 .results-panel {
-  width: 25em;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 4px #ffffff38;
-  border-radius: 5px;
-  padding: 0.5em;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row-reverse;
+  justify-content: space-around;
   align-items: center;
   margin: auto;
   text-align: center;
@@ -60,7 +79,8 @@ export default {
 .outcome {
   font-size: 2em;
   font-weight: bold;
-  padding: 0.5em;
+  padding: 0.1em;
+  margin-top: 0.25em;
 }
 .victory {
   color:greenyellow;
@@ -73,5 +93,8 @@ export default {
 }
 .reward {
   font-size: 1.5em;
+}
+.crypto-warrior-image {
+  max-width: 13em;
 }
 </style>

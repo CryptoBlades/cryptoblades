@@ -277,6 +277,9 @@ export default {
         .then(() => {
           this.errorMessage = 'Success: MetaMask connected.';
           this.isConnecting = false;
+
+          this.initializeStore();
+          this.toggleHideWalletWarning();
         })
         .catch(() => {
           this.errorMessage = 'Error: MetaMask could not get permissions.';
@@ -683,7 +686,7 @@ div.bg-success {
 
 .content {
   padding: 0 1em;
-  height: calc(100vh - 56px);
+  height: auto;
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }
