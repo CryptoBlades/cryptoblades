@@ -230,8 +230,8 @@ export default {
   },
 
   computed: {
-    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount']),
-    ...mapGetters(['ownCharacters', 'ownWeapons', 'ownCharacters', 'currentCharacter',
+    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'ownedCharacterIds', 'defaultAccount']),
+    ...mapGetters(['ownCharacters', 'ownWeapons', 'currentCharacter',
       'currentCharacterStamina', 'getWeaponDurability', 'contracts']),
 
     claimButtonActive() {
@@ -240,7 +240,8 @@ export default {
 
     currentMultiplier() {
       if(!this.selectedWeaponId) return '0';
-      const currentWeapon = this.ownWeapons[this.selectedWeaponId];
+      const currentWeapon = this.ownWeapons.find(x => x.id === this.selectedWeaponId);
+      if(!currentWeapon) return '0';
       return GetTotalMultiplierForTrait(currentWeapon, this.currentCharacter.trait).toFixed(2);
     },
 
@@ -259,7 +260,7 @@ export default {
     traitNumberToName,
     ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid',
       'fetchRaidRewards', 'claimRaidRewards', 'fetchRaidingCharacters', 'fetchRaidingWeapons',
-      'fetchIsRaidStarted', 'fetchHaveEnoughEnergy', 'fetchIsCharacterRaiding', 'fetchIsWeaponRaiding']),
+      'fetchIsRaidStarted', 'fetchHaveEnoughEnergy', 'fetchIsCharacterRaiding', 'fetchIsWeaponRaiding','fetchCharacters']),
     ...mapMutations(['setCurrentCharacter']),
     ...mapGetters(['getRaidState']),
 
@@ -402,6 +403,8 @@ export default {
       setTimeout(() => {
         this.spin = false;
       }, 10000);
+
+      await this.fetchCharacters(this.ownedCharacterIds);
     },
 
     getBossName() {

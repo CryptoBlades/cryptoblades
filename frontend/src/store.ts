@@ -1865,11 +1865,11 @@ export function createStore(web3: Web3) {
 
         // claimreward does not reward trinket, those are given at raidcompletion by the bot
 
-        if(res.events.RewardedJunk) {
+        if(res.events.RewardedJunk && res.events.RewardedJunk.returnValues) {
           await dispatch('fetchJunk', '' + res.events.RewardedJunk.returnValues.tokenID);
         }
 
-        if(res.events.RewardedKeyBox) {
+        if(res.events.RewardedKeyBox && res.events.RewardedKeyBox.returnValues) {
           await dispatch('fetchKeyLootboxes', ['' + res.events.RewardedKeyBox.returnValues.tokenID]);
         }
 
