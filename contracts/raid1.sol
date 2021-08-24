@@ -226,18 +226,39 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         uint8 outcome = roll > bossPower ? STATUS_WON : STATUS_LOST;
         raidStatus[raidIndex] = outcome;
 
-        // since we pay out exactly one trinket per raid, we might as well do it here
-        Raider memory trinketWinner = raidParticipants[raidIndex][seed % raidParticipants[raidIndex].length];
-        uint8 trinketStars = uint8(seed % 5);
-        uint256 trinketEffect = (seed / 10) % 5;
-        uint tokenID =
-            RaidTrinket(links[LINK_TRINKET]).mint(
-                trinketWinner.owner, trinketStars, trinketEffect
-            );
-        emit RewardedTrinket(raidIndex, trinketWinner.owner, trinketStars, trinketEffect, tokenID);
+        if(outcome == STATUS_WON) {
+            // since we pay out exactly one trinket per raid, we might as well do it here
+            Raider memory trinketWinner = raidParticipants[raidIndex][seed % raidParticipants[raidIndex].length];
+            uint8 trinketStars = getTrinketStarsFromSeed(seed);
+            uint256 trinketEffect = (seed / 100) % 5;
+            uint tokenID =
+                RaidTrinket(links[LINK_TRINKET]).mint(
+                    trinketWinner.owner, trinketStars, trinketEffect
+                );
+            emit RewardedTrinket(raidIndex, trinketWinner.owner, trinketStars, trinketEffect, tokenID);
+        }
 
         emit RaidCompleted(raidIndex, outcome, bossPower, roll);
         raidIndex++;
+    }
+
+    function getTrinketStarsFromSeed(uint256 seed) private pure returns(uint8 stars) {
+        uint256 roll = seed % 100;
+        if(roll < 1) {
+            return 4; // 5* at 1%
+        }
+        else if(roll < 6) { // 4* at 5%
+            return 3;
+        }
+        else if(roll < 21) { // 3* at 15%
+            return 2;
+        }
+        else if(roll < 56) { // 2* at 35%
+            return 1;
+        }
+        else {
+            return 0; // 1* at 44%
+        }
     }
 
     function unpackFightData(uint96 playerData)
