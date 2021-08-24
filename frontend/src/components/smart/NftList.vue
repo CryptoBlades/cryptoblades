@@ -253,6 +253,8 @@ export default Vue.extend({
     },
 
     displayNfts(): Nft[] {
+      if(!this.nftsToDisplay) return [];
+
       if(this.isMarket && this.showGivenNftIdTypes) {
         const type = this.nftIdTypes && this.nftIdTypes[0]?.type;
         switch(type) {
