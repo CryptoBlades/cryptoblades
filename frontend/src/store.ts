@@ -1770,13 +1770,9 @@ export function createStore(web3: Web3) {
           return;
         }
 
-        console.log('Within the join raid method...');
-
         await Raid1!.methods
           .joinRaid(characterId, weaponId)
           .send(defaultCallOptions(state));
-
-        console.log('past the join raid await');
       },
 
       async fetchRaidState({ state, commit }) {
@@ -1829,6 +1825,39 @@ export function createStore(web3: Web3) {
           .canJoinRaid(characterID, weaponID)
           .call(defaultCallOptions(state));
       },
+
+      async fetchIsRaidStarted({ state }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .isRaidStarted()
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchHaveEnoughEnergy({ state }, { characterID, weaponID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .haveEnoughEnergy(characterID, weaponID)
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchIsCharacterRaiding({ state }, { characterID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .isCharacterRaiding(characterID)
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchIsWeaponRaiding({ state }, { weaponID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .isWeaponRaiding(weaponID)
+          .call(defaultCallOptions(state));
+      },
+
 
       async claimRaidRewards({ state, dispatch }, { rewardIndex }) {
         const Raid1 = state.contracts().Raid1!;

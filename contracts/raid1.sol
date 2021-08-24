@@ -91,6 +91,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     
     // reward specific events for analytics
     event RewardClaimed(uint256 indexed raidIndex, address indexed user, uint256 characterCount);
+    event RewardXpBonus(uint256 indexed raidIndex, address indexed user, uint256 indexed charID, uint16 amount);
     event RewardedDustLB(uint256 indexed raidIndex, address indexed user, uint32 amount);
     event RewardedDust4B(uint256 indexed raidIndex, address indexed user, uint32 amount);
     event RewardedDust5B(uint256 indexed raidIndex, address indexed user, uint32 amount);
@@ -126,11 +127,15 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function doRaid(uint256 bossPower, uint8 bossTrait, uint256 durationMinutes) public restricted {
+        doRaidWithSeed(bossPower, bossTrait, durationMinutes, game.randoms().getRandomSeed(msg.sender));
+    }
+
+    function doRaidWithSeed(uint256 bossPower, uint8 bossTrait, uint256 durationMinutes, uint256 seed) public restricted {
         require(raidStatus[raidIndex] != STATUS_PAUSED, "Raid paused");
 
         if(raidStatus[raidIndex] == STATUS_STARTED
         && raidParticipants[raidIndex].length > 0) {
-            completeRaid();
+            completeRaidWithSeed(seed);
         }
         startRaid(bossPower, bossTrait, durationMinutes);
     }
@@ -174,7 +179,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         (/*int128 weaponMultTarget*/,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(weaponID, charTrait, uint8(durabilityCost), true);
+            /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(weaponID, charTrait, uint8(durabilityCost), true);
         
         uint24 power = getPlayerFinalPower(
             getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
@@ -226,18 +231,39 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         uint8 outcome = roll > bossPower ? STATUS_WON : STATUS_LOST;
         raidStatus[raidIndex] = outcome;
 
-        // since we pay out exactly one trinket per raid, we might as well do it here
-        Raider memory trinketWinner = raidParticipants[raidIndex][seed % raidParticipants[raidIndex].length];
-        uint8 trinketStars = uint8(seed % 5);
-        uint256 trinketEffect = (seed / 10) % 5;
-        uint tokenID =
-            RaidTrinket(links[LINK_TRINKET]).mint(
-                trinketWinner.owner, trinketStars, trinketEffect
-            );
-        emit RewardedTrinket(raidIndex, trinketWinner.owner, trinketStars, trinketEffect, tokenID);
+        if(outcome == STATUS_WON) {
+            // since we pay out exactly one trinket per raid, we might as well do it here
+            Raider memory trinketWinner = raidParticipants[raidIndex][seed % raidParticipants[raidIndex].length];
+            uint8 trinketStars = getTrinketStarsFromSeed(seed);
+            uint256 trinketEffect = (seed / 100) % 5;
+            uint tokenID =
+                RaidTrinket(links[LINK_TRINKET]).mint(
+                    trinketWinner.owner, trinketStars, trinketEffect
+                );
+            emit RewardedTrinket(raidIndex, trinketWinner.owner, trinketStars, trinketEffect, tokenID);
+        }
 
         emit RaidCompleted(raidIndex, outcome, bossPower, roll);
         raidIndex++;
+    }
+
+    function getTrinketStarsFromSeed(uint256 seed) private pure returns(uint8 stars) {
+        uint256 roll = seed % 100;
+        if(roll < 1) {
+            return 4; // 5* at 1%
+        }
+        else if(roll < 6) { // 4* at 5%
+            return 3;
+        }
+        else if(roll < 21) { // 3* at 15%
+            return 2;
+        }
+        else if(roll < 56) { // 2* at 35%
+            return 1;
+        }
+        else {
+            return 0; // 1* at 44%
+        }
     }
 
     function unpackFightData(uint96 playerData)
@@ -260,7 +286,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
-    function getPlayerFinalPower(uint24 playerPower, uint8 charTrait, uint8 bossTrait) public view returns(uint24) {
+    function getPlayerFinalPower(uint24 playerPower, uint8 charTrait, uint8 bossTrait) public pure returns(uint24) {
         if(isTraitEffectiveAgainst(charTrait, bossTrait))
             return uint24(ABDKMath64x64.divu(1075,1000).mulu(uint256(playerPower)));
         return playerPower;
@@ -345,7 +371,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         if(rareRoll > 950) { // Expected: ~5% (0.72% at bottom, 15% at top, 8.43% middle)
             uint mod = (seed / 10) % 20;
             if(mod < 8) { // key box, 8 out of 20 (40%)
-                distributeKeyBox(msg.sender, claimRaidIndex, seed);
+                distributeKeyBox(msg.sender, claimRaidIndex);
             }
             else if(mod == 8) { // 5 star sword, 1 out of 20 (5%)
                 distributeWeapon(msg.sender, claimRaidIndex, seed, 4);
@@ -366,9 +392,37 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
                 distributeJunk(msg.sender, claimRaidIndex, 3);
             }
         }
+
+        uint256 bonusXpRoll = RandomUtil.randomSeededMinMax(1, 2000, seed + 2); // 0.05% per point
+        if(bonusXpRoll <= 100) { // 5% for any bonus xp result
+            if(bonusXpRoll > 50) { // 2.5% for +25% xp
+                distributeBonusXp(msg.sender, claimRaidIndex, raiderIndex, uint16(ABDKMath64x64.divu(25,100).mulu(xpReward)));
+            }
+            else if(bonusXpRoll > 20) { // 1.5% for +150% xp
+                distributeBonusXp(msg.sender, claimRaidIndex, raiderIndex, uint16(ABDKMath64x64.divu(150,100).mulu(xpReward)));
+            }
+            else if(bonusXpRoll > 10) { // 0.5% for +275% xp
+                distributeBonusXp(msg.sender, claimRaidIndex, raiderIndex, uint16(ABDKMath64x64.divu(275,100).mulu(xpReward)));
+            }
+            else if(bonusXpRoll > 4) { // 0.3% for +525% xp
+                distributeBonusXp(msg.sender, claimRaidIndex, raiderIndex, uint16(ABDKMath64x64.divu(525,100).mulu(xpReward)));
+            }
+            else if(bonusXpRoll > 1) { // 0.15% for +1150% xp
+                distributeBonusXp(msg.sender, claimRaidIndex, raiderIndex, uint16(ABDKMath64x64.divu(1150,100).mulu(xpReward)));
+            }
+            else { // 0.05% for +2400% xp
+                distributeBonusXp(msg.sender, claimRaidIndex, raiderIndex, uint16(ABDKMath64x64.divu(2400,100).mulu(xpReward)));
+            }
+        }
     }
 
-    function distributeKeyBox(address claimant, uint256 claimRaidIndex, uint256 seed) private {
+    function distributeBonusXp(address claimant, uint256 claimRaidIndex, uint256 raiderIndex, uint16 amount) private {
+        uint256 charID = raidParticipants[claimRaidIndex][raiderIndex].charID;
+        characters.gainXp(charID, amount);
+        emit RewardXpBonus(claimRaidIndex, claimant, charID, amount);
+    }
+
+    function distributeKeyBox(address claimant, uint256 claimRaidIndex) private {
         uint tokenID = KeyLootbox(links[LINK_KEYBOX]).mint(claimant);
         emit RewardedKeyBox(claimRaidIndex, claimant, tokenID);
     }
@@ -501,22 +555,40 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
     
     function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
+        return isRaidStarted()
+            && haveEnoughEnergy(characterID, weaponID)
+            && !isCharacterRaiding(characterID)
+            && !isWeaponRaiding(weaponID);
+    }
 
-        if(characters.getStaminaPoints(characterID) == 0
-        || weapons.getDurabilityPoints(weaponID) == 0
-        || raidStatus[raidIndex] != STATUS_STARTED
-        || raidEndTime[raidIndex] <= now)
-            return false;
-        
+    function haveEnoughEnergy(uint256 characterID, uint256 weaponID) public view returns(bool) {
+        return characters.getStaminaPoints(characterID) > 0 && weapons.getDurabilityPoints(weaponID) > 0;
+    }
+
+    function isRaidStarted() public view returns(bool) {
+        return raidStatus[raidIndex] == STATUS_STARTED || raidEndTime[raidIndex] > now;
+    }
+
+    function isWeaponRaiding(uint256 weaponID) public view returns(bool) {
         uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
         for(uint i = 0; i < raiderIndices.length; i++) {
-            if(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID
-            || raidParticipants[raidIndex][raiderIndices[i]].charID != characterID) {
-                return false;
+            if(raidParticipants[raidIndex][raiderIndices[i]].wepID == weaponID) {
+                return true;
             }
         }
 
-        return true;
+        return false;
+    }
+
+    function isCharacterRaiding(uint256 characterID) public view returns(bool) {
+        uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
+        for(uint i = 0; i < raiderIndices.length; i++) {
+            if(raidParticipants[raidIndex][raiderIndices[i]].charID == characterID) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     function getLinkAddress(uint256 linkIndex) public view returns (address) {
