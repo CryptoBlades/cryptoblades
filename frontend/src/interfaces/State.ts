@@ -41,14 +41,20 @@ export interface IStakeOverviewState {
 }
 
 export interface IRaidState {
+  index: string;
   expectedFinishTime: string;
-  raiderCount: number;
-  bounty: string;
-  totalPower: string;
-  weaponDrops: string[];
-  staminaDrainSeconds: number;
+  raiderCount: string;
+  playerPower: string;
+  bossPower: string;
+  bossTrait: string;
+  status: string;
+  joinSkill: string;
+  staminaCost: string;
+  durabilityCost: string;
+  xpReward: string;
+  accountPower: string;
 
-  isOwnedCharacterRaidingById: Record<number, boolean>; // ?
+  //isOwnedCharacterRaidingById: Record<number, boolean>; // ?
 }
 
 export interface IState {
@@ -71,6 +77,9 @@ export interface IState {
   ownedCharacterIds: number[];
   ownedWeaponIds: number[];
   ownedShieldIds: number[];
+  ownedTrinketIds: number[];
+  ownedJunkIds: number[];
+  ownedKeyLootboxIds: number[];
   maxStamina: number;
   ownedDust: string[];
 
@@ -105,6 +114,9 @@ export interface IState {
 
   shields: Record<number, IShield>;
   currentShieldId: number | null;
+  trinkets: Record<number, Nft>;
+  junk: Record<number, Nft>;
+  keyboxes: Record<number, Nft>;
 
   nfts: Record<string, Record<number | string, Nft>>;
   rerollTargetsCost: number;

@@ -10,6 +10,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Check lockfileVersion for root
+        run: |
+          test -f package-lock.json
+          test "$(jq '.lockfileVersion' package-lock.json)" -eq 1
+
+      - name: Check lockfileVersion for frontend
+        run: |
+          test -f frontend/package-lock.json
+          test "$(jq '.lockfileVersion' frontend/package-lock.json)" -eq 1
+
       - name: Use Node.js 14
         uses: actions/setup-node@v1
         with:
@@ -33,7 +43,7 @@ jobs:
       - run: npm run build:frontend
 
       - name: Deploy testnet frontend
-        uses: netlify/actions/cli@master
+        uses: netlify/actions/cli@6c34c3fcafc69ac2e1d6dbf226560329c6dfc51b
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/testnet' }}
         with:
           args: deploy --dir=frontend/dist --prod
@@ -42,7 +52,7 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
 
       - name: Deploy mainnet frontend (must be published manually in Netlify UI)
-        uses: netlify/actions/cli@master
+        uses: netlify/actions/cli@6c34c3fcafc69ac2e1d6dbf226560329c6dfc51b
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/production' }}
         with:
           args: deploy --dir=frontend/dist --prod
