@@ -375,17 +375,18 @@ export default {
       });
 
       const nfts = [];
-      if(result.weapon) {
-        nfts.push({ type: 'weapon', id: result.weapon.tokenID });
+      if(result.weapons) {
+        result.weapons.forEach(x => {
+          nfts.push({ type: 'weapon', id: x.tokenID });
+        });
       }
-      if(result.junk) {
-        nfts.push({ type: 'junk', id: result.junk.tokenID });
+      if(result.junks) {
+        result.junks.forEach(x => {
+          nfts.push({ type: 'junk', id: x.tokenID });
+        });
       }
       if(result.keybox) {
         nfts.push({ type: 'keybox', id: result.keybox.tokenID });
-      }
-      if(result.trinket) {
-        nfts.push({ type: 'trinket', id: result.trinket.tokenID });
       }
       if(result.dustLb) {
         nfts.push({ type: 'dustLb', id: 0, amount: result.dustLb.amount });
@@ -453,7 +454,7 @@ export default {
       await this.getRewardIndexes();
       await this.fetchRaidState();
       this.processRaidData();
-    }, 5000);
+    }, 3000);
   },
 
   beforeDestroy() {

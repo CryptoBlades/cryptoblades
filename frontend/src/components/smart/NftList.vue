@@ -268,7 +268,11 @@ export default Vue.extend({
       if(this.isReward && this.showGivenNftIdTypes) {
         const rewardedDust = this.nftsToDisplay.filter(x => x.type?.startsWith('dust')).map(x => { return { type: x.type, id: 0, amount: x.amount }; });
         const rewardedWeapons = this.weaponsWithIds(this.nftsToDisplay.filter(x => x.type === 'weapon').map(x => x.id));
-        rewardedWeapons.forEach(x => x.type = 'weapon');
+        rewardedWeapons.forEach(x => {
+          if(x) {
+            x.type = 'weapon';
+          }
+        });
 
         return this.nftsWithIdType(this.nftsToDisplay).concat(rewardedDust).concat(rewardedWeapons).filter(Boolean);
       }
@@ -482,6 +486,31 @@ export default Vue.extend({
       await this.updateTrinketIds();
       await this.updateJunkIds();
       await this.updateKeyLootboxIds();
+    } else if(this.isReward) {
+      const shieldIds: string[] = [];
+      const junkIds: string[] = [];
+      const keyLootboxIds: string[] = [];
+      const weaponIds: string[] = [];
+      this.nftsToDisplay.forEach(nft => {
+        switch(nft.type) {
+        case('shield'):
+          shieldIds.push(nft.id.toString());
+          break;
+        case('junk'):
+          junkIds.push(nft.id.toString());
+          break;
+        case('keybox'):
+          keyLootboxIds.push(nft.id.toString());
+          break;
+        case('weapon'):
+          weaponIds.push(nft.id.toString());
+          break;
+        }
+      });
+
+      await this.fetchShields(shieldIds);
+      await this.fetchJunks(junkIds);
+      await this.fetchWeapons(weaponIds);
     }
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());

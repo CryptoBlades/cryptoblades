@@ -622,7 +622,6 @@ export function createStore(web3: Web3) {
         Vue.set(state.weaponDurabilities, weaponId, durability);
       },
       updateWeaponRename(state: IState, { weaponId, renameString }) {
-        console.log('rename for ' + weaponId + ' is ' + renameString);
         if(renameString !== undefined){
           Vue.set(state.weaponRenames, weaponId, renameString);
         }
@@ -1877,13 +1876,19 @@ export function createStore(web3: Web3) {
         // RewardedWeapon, RewardedJunk, RewardedTrinket, RewardedKeyBox etc
         const rewards = {
           rewardsClaimed: res.events.RewardClaimed?.returnValues,
-          weapon: res.events.RewardedWeapon?.returnValues,
-          junk: res.events.RewardedJunk?.returnValues,
-          trinket: res.events.RewardedTrinket?.returnValues,
+          weapons: res.events.RewardedWeapon && (res.events.RewardedWeapon.length ?
+            res.events.RewardedWeapon.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedWeapon.returnValues]),
+
+          junks: res.events.RewardedJunk && (res.events.RewardedJunk.length ?
+            res.events.RewardedJunk.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedJunk.returnValues]),
+
           dustLb: res.events.RewardedDustLB?.returnValues,
           dust4b: res.events.RewardedDust4B?.returnValues,
           dust5b: res.events.RewardedDust5B?.returnValues,
-          keybox: res.events.RewardedKeyBox?.returnValues
+          keybox: res.events.RewardedKeyBox?.returnValues,
+          bonusXp: res.events.RewardXpBonus?.returnValues
         };
         return rewards;
       },
