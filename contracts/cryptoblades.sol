@@ -68,9 +68,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         // migrateTo_5e833b0
         durabilityCostFight = 1;
-		
-        // migrateTo_???????
-        rerollFightCost = 20;
+	
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
@@ -99,7 +97,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         blacksmith = _blacksmith;
     }
-
+	
+    function migrateTo_PLACEHOLDER(uint8 _rerollFightCost) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+        rerollFightCost = _rerollFightCost;
+    }
+	
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint characterLimit;
     // config vars
