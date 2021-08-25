@@ -156,8 +156,9 @@
                     {{bonuxXpCharacterNames[i - 1]}}: +{{bonuxXpAmounts[i - 1]}} XP<br>
                   </span>
                 </div>
+                <br>
+                <p class="h2 text-center"><u>Loot</u></p>
               </div>
-              <strong v-if="!spin">Loot:</strong>
               <nft-list v-if="!spin" :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
             </b-modal>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">

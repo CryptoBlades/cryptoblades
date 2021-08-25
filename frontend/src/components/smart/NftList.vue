@@ -68,7 +68,7 @@
           </span>
         </b-button>
       </div>
-      <div v-if="isReward && nftIdTypes.length === 0">
+      <div class="centered-text-div" v-if="isReward && nftIdTypes.length === 0">
         Nothing dropped for you this time.
       </div>
       <ul class="nft-grid">
