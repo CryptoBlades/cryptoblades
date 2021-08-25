@@ -466,26 +466,18 @@ export default {
     }
   },
 
-  watch: {
-    async raidIndex() {
-      await this.getParticipatingCharacters();
-      await this.getParticipatingWeapons();
-    }
-  },
-
   async mounted() {
-    await Promise.all([
-      this.fetchRaidState(),
-    ]);
-    await this.getParticipatingCharacters();
-    await this.getParticipatingWeapons();
-    this.processRaidData();
     await this.getRewardIndexes();
     await this.fetchRaidState();
+    this.processRaidData();
+    await this.getParticipatingCharacters();
+    await this.getParticipatingWeapons();
     interval = setInterval(async () => {
       await this.getRewardIndexes();
       await this.fetchRaidState();
       this.processRaidData();
+      await this.getParticipatingCharacters();
+      await this.getParticipatingWeapons();
     }, 3000);
   },
 
