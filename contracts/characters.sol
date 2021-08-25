@@ -140,6 +140,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return success ? secondsLeft : 0;
     }
 
+    function burn(uint256 tokenId) public restricted {
+        _burn(tokenId);
+    }
+
     function get(uint256 id) public view noFreshLookup(id) returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
         Character memory c = tokens[id];
         CharacterCosmetics memory cc = cosmetics[id];
