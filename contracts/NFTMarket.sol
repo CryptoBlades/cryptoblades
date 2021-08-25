@@ -537,7 +537,7 @@ contract NFTMarket is
             int128 buyBackUSDValue = characterBuyBackNew + characterBuyBackPerLevel.mul(ABDKMath64x64.fromUInt(characterLevel));
             uint256 buyBackTokenValue = usdToSkill(buyBackUSDValue);
             if(buyBackTokenValue >= _price) {
-                _tokenAddress.safeTransferFrom(msg.sender, address(0), _id);
+                characters.burn(_id);
                 skillToken.safeTransferFrom(address(this), msg.sender, _price);
                 return true;
             }
