@@ -38,7 +38,9 @@
               <br />
               <span class="bold raid-title-section">
                 XP reward</span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }}
-                <b-icon-question-circle v-tooltip="'XP will be automatically claimed by participating characters.'"/>
+                <b-icon-question-circle
+                  v-tooltip="`XP will be automatically claimed by participating characters.<br>
+                    If your character performs exceptionally well they will be rewarded with up to +2400% bonus XP.`"/>
               </span>
             </div>
           </div>
