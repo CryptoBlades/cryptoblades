@@ -142,11 +142,22 @@
                   <strong>Claiming rewards...</strong>
                 </div>
               </template>
-               <div class="text-center">
-                  <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                  <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                  <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+              <div class="text-center">
+                <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+              </div>
+              <div class="text-center" v-if="!spin">
+                <strong>All participating characters got {{xpReward}} XP</strong><br>
+                <div v-if="bonuxXpCharacterNames && bonuxXpCharacterNames.length > 0">
+                  <strong>Following character(s) performed exceptionally well and were rewarded with bonus XP:</strong>
+                  <br>
+                  <span v-for="i in bonuxXpCharacterNames.length" :key="i">
+                    {{bonuxXpCharacterNames[i - 1]}}: +{{bonuxXpAmounts[i - 1]}} XP<br>
+                  </span>
                 </div>
+              </div>
+              <strong v-if="!spin">Loot:</strong>
               <nft-list v-if="!spin" :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
             </b-modal>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
@@ -226,13 +237,15 @@ export default {
       spin: false,
       participatingCharacters: [],
       participatingWeapons: [],
+      bonuxXpCharacterNames: [],
+      bonuxXpAmounts: [],
     };
   },
 
   computed: {
     ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'ownedCharacterIds', 'defaultAccount']),
     ...mapGetters(['ownCharacters', 'ownWeapons', 'currentCharacter',
-      'currentCharacterStamina', 'getWeaponDurability', 'contracts']),
+      'currentCharacterStamina', 'getWeaponDurability', 'contracts', 'getCharacterName']),
 
     claimButtonActive() {
       return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
@@ -370,6 +383,8 @@ export default {
     },
 
     async claimRewardIndex(rewardIndex) {
+      this.bonuxXpCharacterNames = [];
+      this.bonuxXpAmounts = [];
       const result = await this.claimRaidRewards({
         rewardIndex
       });
@@ -385,17 +400,31 @@ export default {
           nfts.push({ type: 'junk', id: x.tokenID });
         });
       }
-      if(result.keybox) {
-        nfts.push({ type: 'keybox', id: result.keybox.tokenID });
+      if(result.keyboxes) {
+        result.keybox.forEach(x => {
+          nfts.push({ type: 'keybox', id: x.tokenID });
+        });
       }
       if(result.dustLb) {
-        nfts.push({ type: 'dustLb', id: 0, amount: result.dustLb.amount });
+        result.dustLb.forEach(x => {
+          nfts.push({ type: 'dustLb', id: x.amount });
+        });
       }
       if(result.dust4b) {
-        nfts.push({ type: 'dust4b', id: 0, amount: result.dust4b.amount });
+        result.dust4b.forEach(x => {
+          nfts.push({ type: 'dust4b', id: x.amount });
+        });
       }
       if(result.dust5b) {
-        nfts.push({ type: 'dust5b', id: 0, amount: result.dust5b.amount });
+        result.dust5b.forEach(x => {
+          nfts.push({ type: 'dust4b', id: x.amount });
+        });
+      }
+      if(result.bonusXp) {
+        result.bonusXp.forEach(x => {
+          this.bonuxXpCharacterNames.push(this.getCharacterName(x.charID));
+          this.bonuxXpAmounts.push(this.getCharacterName(x.amount));
+        });
       }
 
       this.rewards = nfts;

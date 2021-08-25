@@ -68,7 +68,7 @@
           </span>
         </b-button>
       </div>
-      <div v-if="isReward && nonIgnoredNfts.length === 0">
+      <div v-if="isReward && nftIdTypes.length === 0">
         Nothing dropped for you this time.
       </div>
       <ul class="nft-grid">
@@ -137,6 +137,7 @@ interface StoreMappedActions {
   fetchJunks(junkIds: (string | number)[]): Promise<void>;
   fetchTrinkets(trinketIds: (string | number)[]): Promise<void>;
   fetchWeapons(weaponIds: (string | number)[]): Promise<void>;
+  fetchKeyLootboxes(keyLootboxIds: (string | number)[]): Promise<void>;
   updateTrinketIds(): Promise<void>;
   updateJunkIds(): Promise<void>;
   updateKeyLootboxIds(): Promise<void>;
@@ -352,13 +353,14 @@ export default Vue.extend({
 
       await this.fetchShields(shieldIds);
       await this.fetchJunks(junkIds);
+      await this.fetchKeyLootboxes(keyLootboxIds);
       await this.fetchTrinkets(trinketIds);
       await this.fetchWeapons(weaponIds);
     },
   },
 
   methods: {
-    ...(mapActions(['purchaseShield', 'fetchShields', 'fetchJunks', 'fetchTrinkets', 'fetchWeapons', 'updateTrinketIds',
+    ...(mapActions(['purchaseShield', 'fetchShields', 'fetchJunks', 'fetchTrinkets', 'fetchWeapons', 'fetchKeyLootboxes', 'updateTrinketIds',
       'updateJunkIds', 'updateKeyLootboxIds', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
       'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
       'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
@@ -442,7 +444,6 @@ export default Vue.extend({
 
     async buyItem(item: nftItem) {
       if(item.type === 'shield'){
-        console.log('buying shield');
         await this.purchaseShield();
       }
 
@@ -486,31 +487,6 @@ export default Vue.extend({
       await this.updateTrinketIds();
       await this.updateJunkIds();
       await this.updateKeyLootboxIds();
-    } else if(this.isReward) {
-      const shieldIds: string[] = [];
-      const junkIds: string[] = [];
-      const keyLootboxIds: string[] = [];
-      const weaponIds: string[] = [];
-      this.nftsToDisplay.forEach(nft => {
-        switch(nft.type) {
-        case('shield'):
-          shieldIds.push(nft.id.toString());
-          break;
-        case('junk'):
-          junkIds.push(nft.id.toString());
-          break;
-        case('keybox'):
-          keyLootboxIds.push(nft.id.toString());
-          break;
-        case('weapon'):
-          weaponIds.push(nft.id.toString());
-          break;
-        }
-      });
-
-      await this.fetchShields(shieldIds);
-      await this.fetchJunks(junkIds);
-      await this.fetchWeapons(weaponIds);
     }
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());
