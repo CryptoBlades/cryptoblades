@@ -216,7 +216,7 @@ export default {
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalSmokeBombsOwned();
       }, 3000);
-    } else if(this.nft.type === 'ExpScroll4') {
+    } else if(this.nft.type === 'ExpScroll') {
       this.quantityOwned = await this.fetchTotalExpScrollsOwned();
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalExpScrollsOwned();

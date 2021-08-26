@@ -99,7 +99,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_SMOKE_BOMB] = 0.01 ether;
 
         itemAddresses[ITEM_EXP_SCROLL] = _expScroll;
-        itemFlatPrices[ITEM_EXP_SCROLL] = 0.05 ether;
+        itemFlatPrices[ITEM_EXP_SCROLL] = 0.1 ether;
     }
 
     /* ========== VIEWS ========== */
@@ -275,10 +275,10 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         return itemFlatPrices[ITEM_EXP_SCROLL];
     }
 
-     function purchase4ExpScrolls(uint256 paying) public { 
-        require(paying == itemFlatPrices[ITEM_EXP_SCROLL] * 4, 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_EXP_SCROLL] * 4);
-        Consumables(itemAddresses[ITEM_EXP_SCROLL]).giveItem(msg.sender, 4);
-        emit purchaseMade(msg.sender, ITEM_EXP_SCROLL, 4, itemFlatPrices[ITEM_EXP_SCROLL] * 4);
+     function purchaseExpScroll(uint256 paying) public { 
+        require(paying == itemFlatPrices[ITEM_EXP_SCROLL], 'Invalid price');
+        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_EXP_SCROLL]);
+        Consumables(itemAddresses[ITEM_EXP_SCROLL]).giveItem(msg.sender, 1);
+        emit purchaseMade(msg.sender, ITEM_EXP_SCROLL, 1, itemFlatPrices[ITEM_EXP_SCROLL]);
     }
 }

@@ -1,7 +1,9 @@
 import {Nft} from './Nft';
 
-export interface SkillShopListing extends Nft {
-  isConsumable: boolean;
+export interface SkillShopListing {
+  id: string | number;
+  type: string;
+  nftPrice: string;
   name: string;
   description: string;
   image: string;

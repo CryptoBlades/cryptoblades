@@ -711,6 +711,11 @@ interface Data {
   shieldTransactionHistoryData: ShieldTransactionHistoryData[];
   shieldTransactionHistoryHeader: any;
   historyCounter: number;
+  characterRenamePrice: number;
+  weaponRenamePrice: number;
+  charChangeTraitPrice: number;
+  smokeBombPrice: number;
+  expScrollPrice: number;
   staminaForExpScroll: number;
   expFromExpScroll: number;
 }
@@ -769,6 +774,11 @@ interface StoreMappedActions {
   fetchTotalShieldSupply(): Promise<number>;
   fetchExpScrollsExpGain(): Promise<number>;
   fetchExpScrollsStaminaCost(): Promise<number>;
+  getCharRenameCost(): Promise<number>;
+  getWeaponRenameCost(): Promise<number>;
+  getCharChangeTraitCost(): Promise<number>;
+  getSmokeBombCost(): Promise<number>;
+  getExpScrollCost(): Promise<number>;
   setupWeaponsWithIdsRenames(weaponIds: string[]): Promise<void>;
   setupCharactersWithIdsRenames(weaponIds: string[]): Promise<void>;
 }
@@ -806,11 +816,21 @@ export default Vue.extend({
       shieldTransactionHistoryData: [],
       shieldTransactionHistoryHeader: [],
       historyCounter: 0,
+      characterRenamePrice: 0,
+      weaponRenamePrice: 0,
+      charChangeTraitPrice: 0,
+      smokeBombPrice: 0,
+      expScrollPrice: 0,
       staminaForExpScroll: 0,
       expFromExpScroll: 0
     } as Data;
   },
   async created(){
+    this.characterRenamePrice = parseFloat(this.convertWeiToSkill(await this.getCharRenameCost() + ''));
+    this.weaponRenamePrice = parseFloat(this.convertWeiToSkill(await this.getWeaponRenameCost() + ''));
+    this.charChangeTraitPrice = parseFloat(this.convertWeiToSkill(await this.getCharChangeTraitCost() + ''));
+    this.smokeBombPrice = parseFloat(this.convertWeiToSkill(await this.getSmokeBombCost() + ''));
+    this.expScrollPrice = parseFloat(this.convertWeiToSkill(await this.getExpScrollCost() + ''));
     this.staminaForExpScroll = await this.fetchExpScrollsStaminaCost();
     this.expFromExpScroll = await this.fetchExpScrollsExpGain();
   },
@@ -874,7 +894,7 @@ export default Vue.extend({
         {
           id: 'placeholder',
           type: 'shield',
-          nftPrice: 3,
+          nftPrice: '3',
           name: 'Shield',
           description: 'A Legendary Defender Shield',
           image: '',
@@ -887,17 +907,17 @@ export default Vue.extend({
     shopOffersNftList(): SkillShopListing[] {
       const nftList = [
         {
-          id: 0,
+          id: 2,
           type: 'CharacterRenameTag',
-          nftPrice: 0.1,
+          nftPrice: (this.characterRenamePrice).toFixed(2),
           name: 'Rename Tag',
           description: 'Renames one character.',
           image: 'scroll_06_te.png'
         },
         {
-          id: 0,
+          id: 1002,
           type: 'CharacterRenameTagDeal',
-          nftPrice: 0.3,
+          nftPrice: (this.characterRenamePrice * 3).toFixed(2),
           name: 'Rename Tag Deal',
           description: 'Renames 4 characters for the price of 3.',
           image: 'scroll_06_te4.png'
@@ -905,47 +925,47 @@ export default Vue.extend({
         {
           id: 1,
           type: 'WeaponRenameTag',
-          nftPrice: 0.1,
+          nftPrice: (this.weaponRenamePrice).toFixed(2),
           name: 'Weapon Tag',
           description: 'Renames a weapon.',
           image: 'rune_05_te.png'
         },
         {
-          id: 1,
+          id: 1001,
           type: 'WeaponRenameTagDeal',
-          nftPrice: 0.3,
+          nftPrice: (this.weaponRenamePrice * 3).toFixed(2),
           name: 'Weapon Tag Deal',
           description: 'Renames 4 weapons for the price of 3.',
           image: 'rune_05_te4.png'
         },
         {
-          id: 1,
+          id: 4,
           type: 'CharacterEarthTraitChange',
-          nftPrice: 0.2,
+          nftPrice: (this.charChangeTraitPrice).toFixed(2),
           name: 'Earth Character Trait',
           description: 'Changes character\'s trait to Earth.',
           image: 'potion_06_te.png'
         },
         {
-          id: 1,
+          id: 3,
           type: 'CharacterFireTraitChange',
-          nftPrice: 0.2,
+          nftPrice: (this.charChangeTraitPrice).toFixed(2),
           name: 'Fire Character Trait',
           description: 'Changes character\'s trait to Fire.',
           image: 'potion_09_te.png'
         },
         {
-          id: 1,
+          id: 5,
           type: 'CharacterWaterTraitChange',
-          nftPrice: 0.2,
+          nftPrice: (this.charChangeTraitPrice).toFixed(2),
           name: 'Water Character Trait',
           description: 'Changes character\'s trait to Water.',
           image: 'potion_07_te.png'
         },
         {
-          id: 1,
+          id: 6,
           type: 'CharacterLightningTraitChange',
-          nftPrice: 0.2,
+          nftPrice: (this.charChangeTraitPrice).toFixed(2),
           name: 'Lightning Character Trait',
           description: 'Changes character\'s trait to Lightning.',
           image: 'potion_05_te.png'
@@ -953,16 +973,16 @@ export default Vue.extend({
         {
           id: 7,
           type: 'SmokeBomb10',
-          nftPrice: 0.1,
+          nftPrice: (this.smokeBombPrice * 10).toFixed(2),
           name: '10 Smoke Bombs',
           description: 'Get new enemies in combat.',
           image: 'https://seiyria.com/gameicons-font/svg/smoke-bomb.svg'
         },
         {
           id: 8,
-          type: 'ExpScroll4',
-          nftPrice: 0.2,
-          name: '4 Exp Scrolls',
+          type: 'ExpScroll',
+          nftPrice: (this.expScrollPrice).toFixed(2),
+          name: 'Exp Scroll',
           description: 'Character gains ' + this.expFromExpScroll + ' exp for ' + this.staminaForExpScroll + ' stamina.',
           image: 'https://seiyria.com/gameicons-font/svg/scroll-unfurled.svg'
         }
@@ -992,6 +1012,11 @@ export default Vue.extend({
       'fetchSellerOfNft',
       'fetchTotalShieldSupply',
       'fetchExpScrollsExpGain',
+      'getExpScrollCost',
+      'getCharChangeTraitCost',
+      'getCharRenameCost',
+      'getWeaponRenameCost',
+      'getSmokeBombCost',
       'fetchExpScrollsStaminaCost',
       'setupWeaponsWithIdsRenames',
       'setupCharactersWithIdsRenames'
