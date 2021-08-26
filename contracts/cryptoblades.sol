@@ -26,9 +26,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     int128 public constant PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT =
         14757395258967641292; // 0.8 in fixed-point 64x64 format
 
-    // Payment must be recent enough that the hash is available for the payment block.
-    // Use 200 as a 'friendly' window of "You have 10 minutes."
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint256 public constant MINT_PAYMENT_TIMEOUT = 200;
+
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint256 public constant MINT_PAYMENT_RECLAIM_MINIMUM_WAIT_TIME = 3 hours;
 
     Characters public characters;
@@ -151,7 +152,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     Blacksmith public blacksmith;
 
     struct MintPayment {
+        // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
         bytes32 blockHash;
+
         uint256 blockNumber;
         address nftAddress;
         uint count;
@@ -159,6 +162,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     mapping(address => MintPayment) mintPayments;
 
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     struct MintPaymentSkillDeposited {
         uint256 skillDepositedFromWallet;
         uint256 skillDepositedFromRewards;
@@ -171,7 +175,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 refundClaimableTimestamp;
     }
 
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint256 public totalMintPaymentSkillRefundable;
+
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(address => MintPaymentSkillDeposited) mintPaymentSkillDepositeds;
 
     int128 private rewardsClaimTaxMax;
@@ -508,152 +515,44 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
-    /*function mintPaymentSkillRefundable(address _minter) external view
-        returns (uint256 _refundInGameOnlyFunds, uint256 _refundTokenRewards, uint256 _refundUserWallet) {
-
-        return (
-            mintPaymentSkillDepositeds[_minter].skillRefundableFromIgo,
-            mintPaymentSkillDepositeds[_minter].skillRefundableFromRewards,
-            mintPaymentSkillDepositeds[_minter].skillRefundableFromWallet
-        );
-    }
-
-    function mintPaymentSecondsUntilSkillRefundClaimable(address _minter) external view
-        returns (uint256) {
-
-        (bool success, uint256 result) =
-            mintPaymentSkillDepositeds[_minter].refundClaimableTimestamp.trySub(block.timestamp);
-
-        if(success) {
-            return result;
-        }
-        else {
-            return 0;
-        }
-    }
-
-    function checkIfMintPaymentExpiredAndRefunded() external {
-        _discardPaymentIfExpired(msg.sender);
-    }
-
-    function mintPaymentClaimRefund() external {
-        _discardPaymentIfExpired(msg.sender);
-
-        require(mintPaymentSkillDepositeds[msg.sender].refundClaimableTimestamp <= block.timestamp);
-
-        uint256 skillRefundableFromIgo = mintPaymentSkillDepositeds[msg.sender].skillRefundableFromIgo;
-        uint256 skillRefundableFromRewards = mintPaymentSkillDepositeds[msg.sender].skillRefundableFromRewards;
-        uint256 skillRefundableFromWallet = mintPaymentSkillDepositeds[msg.sender].skillRefundableFromWallet;
-
-        require(skillRefundableFromWallet > 0 || skillRefundableFromRewards > 0 || skillRefundableFromIgo > 0);
-
-        mintPaymentSkillDepositeds[msg.sender].skillRefundableFromIgo = 0;
-        mintPaymentSkillDepositeds[msg.sender].skillRefundableFromRewards = 0;
-        mintPaymentSkillDepositeds[msg.sender].skillRefundableFromWallet = 0;
-
-        totalMintPaymentSkillRefundable = totalMintPaymentSkillRefundable
-                .sub(skillRefundableFromWallet)
-                .sub(skillRefundableFromRewards)
-                .sub(skillRefundableFromIgo);
-
-        totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillRefundableFromIgo);
-        inGameOnlyFunds[msg.sender] = inGameOnlyFunds[msg.sender].add(skillRefundableFromIgo);
-
-        tokenRewards[msg.sender] = tokenRewards[msg.sender].add(skillRefundableFromRewards);
-        skillToken.transfer(msg.sender, skillRefundableFromWallet);
-    }
-
-    function _updatePaymentBlockHash(address _minter) internal {
-        if ((mintPayments[_minter].count > 0) &&
-            (mintPayments[_minter].blockHash == 0) &&
-            (mintPayments[_minter].blockNumber < block.number) &&
-            (mintPayments[_minter].blockNumber + MINT_PAYMENT_TIMEOUT >= block.number)) {
-
-            mintPayments[_minter].blockHash = blockhash(mintPayments[_minter].blockNumber);
-        }
-    }
-
-    function _discardPaymentIfExpired(address _minter) internal {
-        _updatePaymentBlockHash(_minter);
-        if ((mintPayments[_minter].count > 0) &&
-            (mintPayments[_minter].blockHash == 0)) {
-
-            uint256 depositedSkillFromWallet = mintPaymentSkillDepositeds[_minter].skillDepositedFromWallet;
-            uint256 depositedSkillFromRewards = mintPaymentSkillDepositeds[_minter].skillDepositedFromRewards;
-            uint256 depositedSkillFromIgo = mintPaymentSkillDepositeds[_minter].skillDepositedFromIgo;
-            mintPaymentSkillDepositeds[_minter].skillDepositedFromWallet = 0;
-            mintPaymentSkillDepositeds[_minter].skillDepositedFromRewards = 0;
-            mintPaymentSkillDepositeds[_minter].skillDepositedFromIgo = 0;
-
-            mintPaymentSkillDepositeds[_minter].skillRefundableFromWallet =
-                mintPaymentSkillDepositeds[_minter].skillRefundableFromWallet.add(depositedSkillFromWallet);
-            mintPaymentSkillDepositeds[_minter].skillRefundableFromRewards =
-                mintPaymentSkillDepositeds[_minter].skillRefundableFromRewards.add(depositedSkillFromRewards);
-            mintPaymentSkillDepositeds[_minter].skillRefundableFromIgo =
-                mintPaymentSkillDepositeds[_minter].skillRefundableFromIgo.add(depositedSkillFromIgo);
-
-            totalMintPaymentSkillRefundable = totalMintPaymentSkillRefundable
-                .add(depositedSkillFromWallet)
-                .add(depositedSkillFromRewards)
-                .add(depositedSkillFromIgo);
-            mintPaymentSkillDepositeds[_minter].refundClaimableTimestamp = block.timestamp + 3 hours;
-
-            delete mintPayments[_minter];
-        }
-    }
-
     function hasPaidForMint(uint32 _num) public view returns(bool){
         require(_num > 0);
-        return (
-            mintPayments[msg.sender].count == _num && (
-                mintPayments[msg.sender].blockHash != 0 ||
-                mintPayments[msg.sender].blockNumber + MINT_PAYMENT_TIMEOUT >= block.number
-            )
-        );
+        return (mintPayments[msg.sender].count == _num);
     }
 
-    function payForMint(address nftAddress, uint count) public {
-        _discardPaymentIfExpired(msg.sender);
+    modifier updateBlockHashesModifier() {
+        randoms.updateBlockHashes();
+        _;
+    }
 
-        require(
-            mintPaymentSkillDepositeds[msg.sender].skillRefundableFromWallet == 0 &&
-            mintPaymentSkillDepositeds[msg.sender].skillRefundableFromRewards == 0 &&
-            mintPaymentSkillDepositeds[msg.sender].skillRefundableFromIgo == 0
-        );
-
+    function payForMint(address nftAddress, uint count, bool useStakedOnly) public updateBlockHashesModifier {
         require(mintPayments[msg.sender].count == 0);
-
         require(nftAddress == address(weapons));
-        (uint256 _paidFeeFromInGameOnlyFunds, uint256 _paidFeeFromTokenRewards, uint256 _paidFeeFromUserWallet) =
-            _payContract(msg.sender, mintWeaponFee * int128(count));
-
         require(count == 1 || count == 10);
+
+        int128 feeInUsd = mintWeaponFee * int128(count);
+        if(useStakedOnly){
+            _payContractStakedOnly(msg.sender, usdToSkill(feeInUsd));
+        }else{
+            feeInUsd = feeInUsd.mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
+            _payContractConvertedSupportingStaked(msg.sender, usdToSkill(feeInUsd));
+        }
 
         mintPayments[msg.sender].count = count;
         mintPayments[msg.sender].nftAddress = nftAddress;
         mintPayments[msg.sender].blockNumber = block.number;
-        mintPayments[msg.sender].blockHash = 0;
-        mintPaymentSkillDepositeds[msg.sender].skillDepositedFromWallet =
-            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromWallet.add(_paidFeeFromUserWallet);
-        mintPaymentSkillDepositeds[msg.sender].skillDepositedFromRewards =
-            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromRewards.add(_paidFeeFromTokenRewards);
-        mintPaymentSkillDepositeds[msg.sender].skillDepositedFromIgo =
-            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromIgo.add(_paidFeeFromInGameOnlyFunds);
     }
 
     function _usePayment(address _minter, address nftAddress, uint count) internal {
-        _discardPaymentIfExpired(_minter);
-
         require(mintPayments[_minter].nftAddress == nftAddress);
         // Payment must commit in a block before being used.
         require(mintPayments[_minter].blockNumber < block.number);
 
         mintPayments[_minter].count = mintPayments[_minter].count.sub(count);
-        mintPayments[_minter].blockHash = bytes32(uint256(mintPayments[_minter].blockHash) + 1);
         if (mintPayments[_minter].count == 0) {
             delete mintPayments[_minter];
         }
-    }*/
+    }
 
     function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
 
@@ -688,122 +587,58 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    /*function mintWeaponN(uint32 num)
-        public
-        onlyNonContract
-        oncePerBlock(msg.sender)
+    function _mintWeaponNUsableByThisOnlyButExternalForReasons(address minter, uint num) external {
+        // the reason referred to in the function name is that we want to
+        // try-catch on this from within the same contract
+
+        require(num > 0 && num <= 50);
+        require(msg.sender == address(this));
+
+        for (uint i = 0; i < num; i++) {
+            bytes32 hash = randoms.getHistoricalBlockHashWithFallback(mintPayments[minter].blockNumber);
+
+            // Salt the hash with the unused payment count.
+            hash = bytes32(uint256(hash) + mintPayments[minter].count);
+
+            weapons.mint(minter, randoms.getRandomSeedUsingHash(minter, hash));
+            _usePayment(minter, address(weapons), 1);
+        }
+    }
+
+    function mintWeaponN(uint num) public
     {
-        require(num > 0 && num <= 1000);
-        _discardPaymentIfExpired(msg.sender);
+        require(num > 0 && num <= 10);
         require(mintPayments[msg.sender].count == num, "count mismatch");
 
         // the function below is external so we can try-catch on it
         try this._mintWeaponNUsableByThisOnlyButExternalForReasons(msg.sender, num) {
-            emit MintWeaponsSuccess(msg.sender, num);
+            emit MintWeaponsSuccess(msg.sender, uint32(num));
         }
         catch {
-            emit MintWeaponsFailure(msg.sender, num);
+            emit MintWeaponsFailure(msg.sender, uint32(num));
         }
     }
 
-    function _mintWeaponNUsableByThisOnlyButExternalForReasons(address _minter, uint32 num) external {
-        // the reason referred to in the function name is that we want to
-        // try-catch on this from within the same contract
-
-        require(msg.sender == address(this));
-
-        for (uint i = 0; i < num; i++) {
-            bytes32 hash = mintPayments[_minter].blockHash;
-            weapons.mint(_minter, randoms.getRandomSeedUsingHash(_minter, hash));
-            _usePayment(_minter, address(weapons), 1);
-        }
-
-        mintPaymentSkillDepositeds[_minter].skillDepositedFromWallet = 0;
-        mintPaymentSkillDepositeds[_minter].skillDepositedFromRewards = 0;
-        mintPaymentSkillDepositeds[_minter].skillDepositedFromIgo = 0;
+    function mintWeapon() public {
+        return mintWeaponN(1);
     }
 
-    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender)  {
-        _discardPaymentIfExpired(msg.sender);
-
-        require(mintPayments[msg.sender].count == 1, "count mismatch");
-
-        bytes32 hash = mintPayments[msg.sender].blockHash;
-        try weapons.mint(msg.sender, randoms.getRandomSeedUsingHash(msg.sender, hash)) {
-            _usePayment(msg.sender, address(weapons), 1);
-
-            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromWallet = 0;
-            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromRewards = 0;
-            mintPaymentSkillDepositeds[msg.sender].skillDepositedFromIgo = 0;
-
-            emit MintWeaponsSuccess(msg.sender, 1);
-        }
-        catch {
-            emit MintWeaponsFailure(msg.sender, 1);
-        }
-    }*/
-
-    function mintWeaponN(uint32 num)
-        external
-        onlyNonContract
-        oncePerBlock(msg.sender)
-    {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * num));
-        _mintWeaponNLogic(num);
-    }
-
-    function mintWeapon() external onlyNonContract oncePerBlock(msg.sender) {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee));
-        _mintWeaponLogic();
-    }
-
-    function mintWeaponNUsingStakedSkill(uint32 num)
-        external
-        onlyNonContract
-        oncePerBlock(msg.sender)
-    {
-        int128 discountedMintWeaponFee =
-            mintWeaponFee
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
-                .mul(ABDKMath64x64.fromUInt(num));
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
-
-        _mintWeaponNLogic(num);
-    }
-
-    function mintWeaponUsingStakedSkill() external onlyNonContract oncePerBlock(msg.sender) {
-        int128 discountedMintWeaponFee =
-            mintWeaponFee
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
-
-        _mintWeaponLogic();
-    }
-
-    function _mintWeaponNLogic(uint32 num) internal {
-        require(num > 0 && num <= 10);
-
-        for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))));
-        }
-    }
-
-    function mintWeaponNforAddress(address _minter, uint32 num)
+    function mintWeaponNforAddress(address minter, uint32 num)
         public
         onlyNonContract
-        oncePerBlock(_minter)
+        oncePerBlock(minter)
     {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(GAME_ADMIN, msg.sender), "Not admin");
-        require(num > 0 && num <= 50);
 
-        for (uint i = 0; i < num; i++) {
-            weapons.mint(_minter, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), _minter, i))));
+        if (mintPayments[msg.sender].count > 0) {
+            mintWeaponN(mintPayments[msg.sender].count);
         }
-    }
 
-    function _mintWeaponLogic() internal {
-        //uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))));
+        mintPayments[msg.sender].count = num;
+        mintPayments[msg.sender].nftAddress = address(weapons);
+        mintPayments[msg.sender].blockNumber = block.number - 1;
+
+        mintWeaponN(num);
     }
 
     function burnWeapon(uint256 burnID) external isWeaponOwner(burnID) {
