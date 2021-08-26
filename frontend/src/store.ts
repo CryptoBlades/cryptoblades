@@ -622,7 +622,6 @@ export function createStore(web3: Web3) {
         Vue.set(state.weaponDurabilities, weaponId, durability);
       },
       updateWeaponRename(state: IState, { weaponId, renameString }) {
-        console.log('rename for ' + weaponId + ' is ' + renameString);
         if(renameString !== undefined){
           Vue.set(state.weaponRenames, weaponId, renameString);
         }
@@ -1867,24 +1866,50 @@ export function createStore(web3: Web3) {
         // claimreward does not reward trinket, those are given at raidcompletion by the bot
 
         if(res.events.RewardedJunk) {
-          await dispatch('fetchJunk', '' + res.events.RewardedJunk.returnValues.tokenID);
+          const junkIds = res.events.RewardedJunk.length ?
+            res.events.RewardedJunk.map((x: { returnValues: { tokenID: any; }; }) => x.returnValues.tokenID) :
+            [res.events.RewardedJunk.returnValues.tokenID];
+          await dispatch('fetchJunks', junkIds);
         }
 
         if(res.events.RewardedKeyBox) {
-          await dispatch('fetchKeyLootboxes', ['' + res.events.RewardedKeyBox.returnValues.tokenID]);
+          const keyboxIds = res.events.RewardedKeyBox.length ?
+            res.events.RewardedKeyBox.map((x: { returnValues: { tokenID: any; }; }) => x.returnValues.tokenID) :
+            [res.events.RewardedKeyBox.returnValues.tokenID];
+          await dispatch('fetchKeyLootboxes', keyboxIds);
         }
 
         // there may be other events fired that can be used to obtain the exact loot
         // RewardedWeapon, RewardedJunk, RewardedTrinket, RewardedKeyBox etc
         const rewards = {
           rewardsClaimed: res.events.RewardClaimed?.returnValues,
-          weapon: res.events.RewardedWeapon?.returnValues,
-          junk: res.events.RewardedJunk?.returnValues,
-          trinket: res.events.RewardedTrinket?.returnValues,
-          dustLb: res.events.RewardedDustLB?.returnValues,
-          dust4b: res.events.RewardedDust4B?.returnValues,
-          dust5b: res.events.RewardedDust5B?.returnValues,
-          keybox: res.events.RewardedKeyBox?.returnValues
+          weapons: res.events.RewardedWeapon && (res.events.RewardedWeapon.length ?
+            res.events.RewardedWeapon.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedWeapon.returnValues]),
+
+          junks: res.events.RewardedJunk && (res.events.RewardedJunk.length ?
+            res.events.RewardedJunk.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedJunk.returnValues]),
+
+          keyboxes: res.events.RewardedKeyBox && (res.events.RewardedKeyBox.length ?
+            res.events.RewardedKeyBox.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedKeyBox.returnValues]),
+
+          bonusXp: res.events.RewardXpBonus && (res.events.RewardXpBonus.length ?
+            res.events.RewardXpBonus.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardXpBonus.returnValues]),
+
+          dustLb: res.events.RewardedDustLB && (res.events.RewardedDustLB.length ?
+            res.events.RewardedDustLB.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedDustLB.returnValues]),
+
+          dust4b: res.events.RewardedDust4B && (res.events.RewardedDust4B.length ?
+            res.events.RewardedDust4B.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedDust4B.returnValues]),
+
+          dust5b: res.events.RewardedDust5B && (res.events.RewardedDust5B.length ?
+            res.events.RewardedDust5B.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedDust5B.returnValues]),
         };
         return rewards;
       },

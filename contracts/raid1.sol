@@ -566,7 +566,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function isRaidStarted() public view returns(bool) {
-        return raidStatus[raidIndex] == STATUS_STARTED || raidEndTime[raidIndex] > now;
+        return raidStatus[raidIndex] == STATUS_STARTED && raidEndTime[raidIndex] > now;
     }
 
     function isWeaponRaiding(uint256 weaponID) public view returns(bool) {
