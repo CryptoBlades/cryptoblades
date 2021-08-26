@@ -90,7 +90,12 @@ contract ChainlinkRandoms is IRandoms, Pausable, AccessControl, VRFConsumerBase 
     }
 
     function updateBlockHashes() public override {
-        historicalBlockHashes[block.number-1] = blockhash(block.number-1);
+        for (uint i = 0; i < 256; i++) {
+            if (historicalBlockHashes[block.number - i] > 0) {
+                break;
+            }
+            historicalBlockHashes[block.number - i] = blockhash(block.number - i);
+        }
     }
 
     modifier updateBlockHashesModifier() {
