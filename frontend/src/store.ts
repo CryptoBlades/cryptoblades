@@ -1621,13 +1621,14 @@ export function createStore(web3: Web3) {
 
         await dispatch('fetchWeaponDurability', weaponId);
 
-        return [parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
+        return {
+          isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
           playerRoll,
           enemyRoll,
           xpGain,
           skillGain,
           bnbGasUsed
-        ];
+        };
       },
 
       async fetchStakeOverviewData({ getters, dispatch }) {
