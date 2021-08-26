@@ -8,17 +8,17 @@
     </div>
   <div class="results-panel">
     <div class="float-right">
-      <h1 class="text-center outcome">{{ getSuccessText() }}</h1>
-      <p> You gained:  <span class="text-success">{{results[3]+" xp"}}</span>
+      <h1 class="text-center outcome">{{formattedVictory}}</h1>
+      <p> You gained:  <span class="text-success">{{formattedXpGain}}</span>
         <br/>
-        You earned: <span class="text-success" v-tooltip="convertWei(results[4])+' SKILL'">{{formattedSkill}}</span>
+        You earned: <span class="text-success" v-tooltip="formattedSkillTooltip">{{formattedSkill}}</span>
         <Hint text="SKILL earned is based on gas costs of the network plus a factor of your power" />
         <br/>
-        You spent ~ <span class="text-danger">{{results[5]}}</span> BNB on gas fees
+        You spent ~ <span class="text-danger">{{fightResults.bnbGasUsed}}</span> BNB on gas fees
       </p>
-      <p>You rolled: <span class="text-success">{{results[1]}}</span>
+      <p>You rolled: <span class="text-success">{{fightResults.playerRoll}}</span>
         <br/>
-        Enemy rolled: <span class="text-danger">{{results[2]}}</span>
+        Enemy rolled: <span class="text-danger">{{fightResults.enemyRoll}}</span>
       </p>
     </div>
   </div>
@@ -38,33 +38,57 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import { toBN, fromWeiEther } from '../utils/common';
 import Hint from '../components/Hint.vue';
+import {PropType} from 'vue/types/options';
 
-export default {
-  props: ['results'],
+interface CombatResult {
+  isVictory: boolean;
+  playerRoll: string
+  enemyRoll: string;
+  xpGain: string;
+  skillGain: string;
+  bnbGasUsed: string;
+}
+
+export default Vue.extend({
+  props: {
+    fightResults: {
+      type: Object as PropType<CombatResult>,
+      default() {
+        return {} as CombatResult;
+      },
+    },
+  },
 
   computed: {
     formattedSkill() {
-      const skillBalance = fromWeiEther(this.results[4]);
+      const skillBalance = fromWeiEther(this.fightResults.skillGain);
       return `${toBN(skillBalance).toFixed(6)} SKILL`;
+    },
+    formattedSkillTooltip() {
+      return fromWeiEther(this.fightResults.skillGain)+' SKILL';
+    },
+    formattedVictory() {
+      return this.fightResults.isVictory ? 'VICTORY' : 'DEFEAT';
+    },
+    formattedXpGain() {
+      return this.fightResults.xpGain + ' xp';
     }
   },
 
+  mounted() {
+  },
+
   methods: {
-    getSuccessText() {
-      return this.results[0] ? 'VICTORY' : 'DEFEAT';
-    },
-    convertWei(wei) {
-      return fromWeiEther(wei);
-    }
   },
 
   components: {
     Hint,
   },
-};
+});
 </script>
 
 <style>
