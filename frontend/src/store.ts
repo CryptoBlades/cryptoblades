@@ -1895,9 +1895,9 @@ export function createStore(web3: Web3) {
             res.events.RewardedKeyBox.map((x: { returnValues: any; })=> x.returnValues) :
             [res.events.RewardedKeyBox.returnValues]),
 
-          bonusXp: res.events.RewardXpBonus && (res.events.RewardXpBonus.length ?
-            res.events.RewardXpBonus.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardXpBonus.returnValues]),
+          bonusXp: res.events.RewardedXpBonus && (res.events.RewardedXpBonus.length ?
+            res.events.RewardedXpBonus.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedXpBonus.returnValues]),
 
           dustLb: res.events.RewardedDustLB && (res.events.RewardedDustLB.length ?
             res.events.RewardedDustLB.map((x: { returnValues: any; })=> x.returnValues) :
