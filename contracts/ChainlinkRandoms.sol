@@ -25,6 +25,8 @@ contract ChainlinkRandoms is IRandoms, Pausable, AccessControl, VRFConsumerBase 
 
     uint256 private seed;
 
+    mapping(uint => bytes32) historicalBlockHashes;
+
     // BSC testnet details:
     // LINK token: 0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06
     // VRF Coordinator: 0xa555fC018435bef5A13C6c6870a9d4C11DEC329C
@@ -72,6 +74,28 @@ contract ChainlinkRandoms is IRandoms, Pausable, AccessControl, VRFConsumerBase 
 
     function unpause() external onlyOwner {
         _unpause();
+    }
+
+    function getHistoricalBlockHash(uint blockNumber) public override updateBlockHashesModifier returns (bytes32) {
+        require(blockNumber < block.number);
+        return historicalBlockHashes[blockNumber];
+    }
+
+    function getHistoricalBlockHashWithFallback(uint blockNumber) public override returns (bytes32) {
+        bytes32 hash = getHistoricalBlockHash(blockNumber);
+        if (hash == 0) {
+            hash = blockhash(block.number - 1);
+        }
+        return hash;
+    }
+
+    function updateBlockHashes() public override {
+        historicalBlockHashes[block.number-1] = blockhash(block.number-1);
+    }
+
+    modifier updateBlockHashesModifier() {
+        updateBlockHashes();
+        _;
     }
 
     /**
