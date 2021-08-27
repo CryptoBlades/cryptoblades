@@ -70,6 +70,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev gets the amount of SKILL required to enter the arena
     /// @param characterID the id of the character entering the arena
     function getEntryCost(uint256 characterID) public view returns (uint256) {
+        // TODO: use combat rewards formula
         int128 costInUsd = ABDKMath64x64.fromUInt(extraCostPerLevel.mulu(characters.getLevel(characterID))).add(baseEntryCost);
         return game.usdToSkill(costInUsd);
     }
@@ -79,6 +80,22 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 level = characters.getLevel(characterID);
 
         return uint8(level.div(10));
+    }
+
+    /// @dev finds an opponent for a character. If a battle is still pending, it charges a penalty
+    function findOpponent(uint256 characterID) public view returns (uint256) {
+        // TODO: implement (not final signature)
+    }
+
+    /// @dev starts the duel for a given character
+    function startDuel(uint256 characterID) public {
+        // TODO: implement (not final signature)
+    }
+
+    /// @dev withdraws a character from the arena.
+    /// if the character is in a battle, a penalty is charged
+    function withdraw(uint256 characterID) public {
+        // TODO: implement (not final signature)
     }
 
 }
