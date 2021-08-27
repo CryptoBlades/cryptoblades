@@ -138,7 +138,7 @@ module.exports = async function (deployer, network, accounts) {
     await charas.grantRole(charas_GAME_ADMIN, game.address);
     await weps.grantRole(weps_GAME_ADMIN, game.address);
     await promos.grantRole(promos_GAME_ADMIN, game.address);
-
+    await promos.grantRole(promos_GAME_ADMIN, charas.address);
 
     await game.grantRole(GAME_ADMIN, raid.address);
     await game.grantRole(GAME_ADMIN, blacksmith.address);
