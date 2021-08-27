@@ -38,7 +38,9 @@
               <br />
               <span class="bold raid-title-section">
                 XP reward</span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }}
-                <b-icon-question-circle v-tooltip="'XP will be automatically claimed by participating characters.'"/>
+                <b-icon-question-circle
+                  v-tooltip="`XP will be automatically claimed by participating characters.<br>
+                    If your character performs exceptionally well they will be rewarded with up to +2400% bonus XP.`"/>
               </span>
             </div>
           </div>
@@ -142,11 +144,23 @@
                   <strong>Claiming rewards...</strong>
                 </div>
               </template>
-               <div class="text-center">
-                  <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                  <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                  <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+              <div class="text-center">
+                <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+              </div>
+              <div class="text-center" v-if="!spin">
+                <strong>All participating characters got {{xpReward}} XP</strong><br>
+                <div v-if="bonuxXpCharacterNames && bonuxXpCharacterNames.length > 0">
+                  <strong>Following character(s) performed exceptionally well and were rewarded with bonus XP:</strong>
+                  <br>
+                  <span v-for="i in bonuxXpCharacterNames.length" :key="i">
+                    {{bonuxXpCharacterNames[i - 1]}}: +{{bonuxXpAmounts[i - 1]}} XP<br>
+                  </span>
                 </div>
+                <br>
+                <p class="h2 text-center"><u>Loot</u></p>
+              </div>
               <nft-list v-if="!spin" :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
             </b-modal>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
@@ -226,13 +240,15 @@ export default {
       spin: false,
       participatingCharacters: [],
       participatingWeapons: [],
+      bonuxXpCharacterNames: [],
+      bonuxXpAmounts: [],
     };
   },
 
   computed: {
-    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount']),
-    ...mapGetters(['ownCharacters', 'ownWeapons', 'ownCharacters', 'currentCharacter',
-      'currentCharacterStamina', 'getWeaponDurability', 'contracts']),
+    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'ownedCharacterIds', 'defaultAccount']),
+    ...mapGetters(['ownCharacters', 'ownWeapons', 'currentCharacter',
+      'currentCharacterStamina', 'getWeaponDurability', 'contracts', 'getCharacterName']),
 
     claimButtonActive() {
       return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
@@ -240,7 +256,8 @@ export default {
 
     currentMultiplier() {
       if(!this.selectedWeaponId) return '0';
-      const currentWeapon = this.ownWeapons[this.selectedWeaponId];
+      const currentWeapon = this.ownWeapons.find(x => x.id === this.selectedWeaponId);
+      if(!currentWeapon) return '0';
       return GetTotalMultiplierForTrait(currentWeapon, this.currentCharacter.trait).toFixed(2);
     },
 
@@ -259,7 +276,7 @@ export default {
     traitNumberToName,
     ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid',
       'fetchRaidRewards', 'claimRaidRewards', 'fetchRaidingCharacters', 'fetchRaidingWeapons',
-      'fetchIsRaidStarted', 'fetchHaveEnoughEnergy', 'fetchIsCharacterRaiding', 'fetchIsWeaponRaiding']),
+      'fetchIsRaidStarted', 'fetchHaveEnoughEnergy', 'fetchIsCharacterRaiding', 'fetchIsWeaponRaiding','fetchCharacters']),
     ...mapMutations(['setCurrentCharacter']),
     ...mapGetters(['getRaidState']),
 
@@ -369,31 +386,48 @@ export default {
     },
 
     async claimRewardIndex(rewardIndex) {
+      this.bonuxXpCharacterNames = [];
+      this.bonuxXpAmounts = [];
       const result = await this.claimRaidRewards({
         rewardIndex
       });
 
       const nfts = [];
-      if(result.weapon) {
-        nfts.push({ type: 'weapon', id: result.weapon.tokenID });
+      if(result.weapons) {
+        result.weapons.forEach(x => {
+          nfts.push({ type: 'weapon', id: x.tokenID });
+        });
       }
-      if(result.junk) {
-        nfts.push({ type: 'junk', id: result.junk.tokenID });
+      if(result.junks) {
+        result.junks.forEach(x => {
+          nfts.push({ type: 'junk', id: x.tokenID });
+        });
       }
-      if(result.keybox) {
-        nfts.push({ type: 'keybox', id: result.keybox.tokenID });
-      }
-      if(result.trinket) {
-        nfts.push({ type: 'trinket', id: result.trinket.tokenID });
+      if(result.keyboxes) {
+        result.keybox.forEach(x => {
+          nfts.push({ type: 'keybox', id: x.tokenID });
+        });
       }
       if(result.dustLb) {
-        nfts.push({ type: 'dustLb', id: 0, amount: result.dustLb.amount });
+        result.dustLb.forEach(x => {
+          nfts.push({ type: 'dustLb', id: x.amount });
+        });
       }
       if(result.dust4b) {
-        nfts.push({ type: 'dust4b', id: 0, amount: result.dust4b.amount });
+        result.dust4b.forEach(x => {
+          nfts.push({ type: 'dust4b', id: x.amount });
+        });
       }
       if(result.dust5b) {
-        nfts.push({ type: 'dust5b', id: 0, amount: result.dust5b.amount });
+        result.dust5b.forEach(x => {
+          nfts.push({ type: 'dust4b', id: x.amount });
+        });
+      }
+      if(result.bonusXp) {
+        result.bonusXp.forEach(x => {
+          this.bonuxXpCharacterNames.push(this.getCharacterName(x.charID));
+          this.bonuxXpAmounts.push(this.getCharacterName(x.amount));
+        });
       }
 
       this.rewards = nfts;
@@ -402,6 +436,8 @@ export default {
       setTimeout(() => {
         this.spin = false;
       }, 10000);
+
+      await this.fetchCharacters(this.ownedCharacterIds);
     },
 
     getBossName() {
@@ -430,27 +466,19 @@ export default {
     }
   },
 
-  watch: {
-    async raidIndex() {
-      await this.getParticipatingCharacters();
-      await this.getParticipatingWeapons();
-    }
-  },
-
   async mounted() {
-    await Promise.all([
-      this.fetchRaidState(),
-    ]);
-    await this.getParticipatingCharacters();
-    await this.getParticipatingWeapons();
-    this.processRaidData();
     await this.getRewardIndexes();
     await this.fetchRaidState();
+    this.processRaidData();
+    await this.getParticipatingCharacters();
+    await this.getParticipatingWeapons();
     interval = setInterval(async () => {
       await this.getRewardIndexes();
       await this.fetchRaidState();
       this.processRaidData();
-    }, 5000);
+      await this.getParticipatingCharacters();
+      await this.getParticipatingWeapons();
+    }, 3000);
   },
 
   beforeDestroy() {

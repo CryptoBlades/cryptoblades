@@ -91,7 +91,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     
     // reward specific events for analytics
     event RewardClaimed(uint256 indexed raidIndex, address indexed user, uint256 characterCount);
-    event RewardXpBonus(uint256 indexed raidIndex, address indexed user, uint256 indexed charID, uint16 amount);
+    event RewardedXpBonus(uint256 indexed raidIndex, address indexed user, uint256 indexed charID, uint16 amount);
     event RewardedDustLB(uint256 indexed raidIndex, address indexed user, uint32 amount);
     event RewardedDust4B(uint256 indexed raidIndex, address indexed user, uint32 amount);
     event RewardedDust5B(uint256 indexed raidIndex, address indexed user, uint32 amount);
@@ -419,7 +419,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     function distributeBonusXp(address claimant, uint256 claimRaidIndex, uint256 raiderIndex, uint16 amount) private {
         uint256 charID = raidParticipants[claimRaidIndex][raiderIndex].charID;
         characters.gainXp(charID, amount);
-        emit RewardXpBonus(claimRaidIndex, claimant, charID, amount);
+        emit RewardedXpBonus(claimRaidIndex, claimant, charID, amount);
     }
 
     function distributeKeyBox(address claimant, uint256 claimRaidIndex) private {
@@ -566,7 +566,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function isRaidStarted() public view returns(bool) {
-        return raidStatus[raidIndex] == STATUS_STARTED || raidEndTime[raidIndex] > now;
+        return raidStatus[raidIndex] == STATUS_STARTED && raidEndTime[raidIndex] > now;
     }
 
     function isWeaponRaiding(uint256 weaponID) public view returns(bool) {

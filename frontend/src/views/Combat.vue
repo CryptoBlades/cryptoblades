@@ -6,7 +6,7 @@
       </div>
 
       <b-modal id="fightResultsModal" hide-footer hide-header>
-        <CombatResults v-if="resultsAvailable" :results="fightResults" />
+        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" />
         <b-button class="mt-3" variant="primary" block @click="$bvModal.hide('fightResultsModal')">Close</b-button>
       </b-modal>
 
