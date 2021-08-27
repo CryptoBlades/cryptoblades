@@ -1,6 +1,7 @@
 const util = require("util");
 const fs = require("fs");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+const assert = require("assert");
 const SkillToken = artifacts.require("SkillToken");
 const ExperimentToken = artifacts.require("ExperimentToken");
 const ExperimentToken2 = artifacts.require("ExperimentToken2");
@@ -13,7 +14,7 @@ const LPStakingRewardsUpgradeable = artifacts.require(
 const LP2StakingRewardsUpgradeable = artifacts.require(
   "LP2StakingRewardsUpgradeable"
 );
-const assert = require("assert");
+const PvpArena = artifacts.require("PvpArena");
 const BasicPriceOracle = artifacts.require("BasicPriceOracle");
 const DummyRandoms = artifacts.require("DummyRandoms");
 const Characters = artifacts.require("Characters");
@@ -25,7 +26,6 @@ const RaidBasic = artifacts.require("RaidBasic");
 module.exports = async function (deployer, network, accounts) {
   let randoms, skillToken;
 
-  // tokens
   await deployer.deploy(SkillToken);
   const token = await SkillToken.deployed();
 
@@ -76,9 +76,7 @@ module.exports = async function (deployer, network, accounts) {
   assert(randoms != null, "Expected random to be set to a contract");
 
   const priceOracle = await deployProxy(BasicPriceOracle, [], { deployer });
-
   const charas = await deployProxy(Characters, [], { deployer });
-
   const weps = await deployProxy(Weapons, [], { deployer });
 
   const game = await deployProxy(
@@ -103,7 +101,6 @@ module.exports = async function (deployer, network, accounts) {
     await randoms.setMain(game.address);
   }
 
-  // Should this really be here?
   const raid = await deployProxy(RaidBasic, [game.address], { deployer });
 
   const GAME_ADMIN = await game.GAME_ADMIN();
@@ -119,4 +116,12 @@ module.exports = async function (deployer, network, accounts) {
   await deployProxy(NFTMarket, [SkillToken.address, CryptoBlades.address], {
     deployer,
   });
+
+  const pvpArena = await deployProxy(PvpArena, [game.address], { deployer });
+
+  const pvpArena_GAME_ADMIN = await pvpArena.GAME_ADMIN();
+
+  await game.grantRole(pvpArena_GAME_ADMIN, game.address);
+  await charas.grantRole(pvpArena_GAME_ADMIN, game.address);
+  await weps.grantRole(pvpArena_GAME_ADMIN, game.address);
 };

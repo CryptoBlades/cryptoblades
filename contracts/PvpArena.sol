@@ -11,6 +11,7 @@ import "./weapons.sol";
 // - [ ] use proper types for costs
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
+    bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     struct Fighter {
         uint256 characterID;
