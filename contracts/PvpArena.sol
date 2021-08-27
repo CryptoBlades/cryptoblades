@@ -24,8 +24,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     Weapons public weapons;
     IERC20 public skillToken;
 
-    /// @dev fighters available by level
-    mapping (uint256 => Fighter[]) private fightersByLevel;
+    /// @dev fighters available by tier (1-10, 11-20, etc...)
+    mapping (uint256 => Fighter[]) private fightersByTier;
     /// @dev the base cost required to enter the arena
     int128 public baseEntryCost;
     /// @dev additional cost per character level

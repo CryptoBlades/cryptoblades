@@ -22,6 +22,7 @@ const Weapons = artifacts.require("Weapons");
 const CryptoBlades = artifacts.require("CryptoBlades");
 const NFTMarket = artifacts.require("NFTMarket");
 const RaidBasic = artifacts.require("RaidBasic");
+const Promos = artifacts.require("Promos");
 
 module.exports = async function (deployer, network, accounts) {
   let randoms, skillToken;
@@ -118,10 +119,13 @@ module.exports = async function (deployer, network, accounts) {
   });
 
   const pvpArena = await deployProxy(PvpArena, [game.address], { deployer });
+  const promos = await deployProxy(Promos, [], { deployer });
 
   const pvpArena_GAME_ADMIN = await pvpArena.GAME_ADMIN();
+  const promos_GAME_ADMIN = await promos.GAME_ADMIN();
 
   await game.grantRole(pvpArena_GAME_ADMIN, game.address);
   await charas.grantRole(pvpArena_GAME_ADMIN, game.address);
   await weps.grantRole(pvpArena_GAME_ADMIN, game.address);
+  await promos.grantRole(promos_GAME_ADMIN, game.address);
 };
