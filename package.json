@@ -12,7 +12,6 @@
     "@openzeppelin/contracts-upgradeable": "^3.4.1",
     "@truffle/hdwallet-provider": "^1.2.6",
     "abdk-libraries-solidity": "2.4.0",
-    "censor-sensor": "^1.0.6",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {

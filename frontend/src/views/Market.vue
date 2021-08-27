@@ -66,7 +66,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -104,7 +104,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                      {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                      <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
 
@@ -146,7 +146,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -303,7 +303,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -340,7 +340,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -382,7 +382,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -478,9 +478,10 @@
                   <b-form-input type="number" :max="10000"
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
 
-                  <span v-if="listingSellPrice">Do you want to sell your {{activeType}} for {{Math.min(+listingSellPrice, 10000)}} SKILL?<br>
+                  <span v-if="listingSellPrice">
+                    Do you want to sell your {{activeType}} for <CurrencyConverter :skill="Math.min(+listingSellPrice, 10000)"/>?<br>
                   <i>The buyer will pay an extra {{activeListingMarketTax()}}% market fee for a total of
-                  {{calculatedBuyerCost(Math.min(+listingSellPrice, 10000))}} SKILL</i></span>
+                  <CurrencyConverter :skill="calculatedBuyerCost(Math.min(+listingSellPrice, 10000))"/></i></span>
                 </b-modal>
               </div>
 
@@ -658,6 +659,7 @@ import Vue from 'vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import Hint from '../components/Hint.vue';
+import CurrencyConverter from '../components/CurrencyConverter.vue';
 import Web3 from 'web3';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { Accessors } from 'vue/types/options';
@@ -770,7 +772,7 @@ interface StoreMappedActions {
 }
 
 export default Vue.extend({
-  components: { CharacterList, WeaponGrid, Hint, NftList },
+  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList },
 
   data() {
     return {
