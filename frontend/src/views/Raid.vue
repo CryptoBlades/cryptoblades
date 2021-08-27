@@ -410,23 +410,23 @@ export default {
       }
       if(result.dustLb) {
         result.dustLb.forEach(x => {
-          nfts.push({ type: 'dustLb', id: x.amount });
+          nfts.push({ type: 'dustLb', id: 0, amount: x.amount });
         });
       }
       if(result.dust4b) {
         result.dust4b.forEach(x => {
-          nfts.push({ type: 'dust4b', id: x.amount });
+          nfts.push({ type: 'dust4b', id: 0, amount: x.amount });
         });
       }
       if(result.dust5b) {
         result.dust5b.forEach(x => {
-          nfts.push({ type: 'dust4b', id: x.amount });
+          nfts.push({ type: 'dust5b', id: 0, amount: x.amount });
         });
       }
       if(result.bonusXp) {
         result.bonusXp.forEach(x => {
           this.bonuxXpCharacterNames.push(this.getCharacterName(x.charID));
-          this.bonuxXpAmounts.push(this.getCharacterName(x.amount));
+          this.bonuxXpAmounts.push(x.amount);
         });
       }
 
