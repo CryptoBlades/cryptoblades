@@ -21,7 +21,6 @@ const Weapons = artifacts.require("Weapons");
 const CryptoBlades = artifacts.require("CryptoBlades");
 const NFTMarket = artifacts.require("NFTMarket");
 const RaidBasic = artifacts.require("RaidBasic");
-writeFileAsync = util.promisify(fs.writeFile);
 
 module.exports = async function (deployer, network, accounts) {
   let randoms, skillToken;
@@ -117,18 +116,7 @@ module.exports = async function (deployer, network, accounts) {
 
   await priceOracle.setCurrentPrice(web3.utils.toWei("0.2", "ether")); // 1/5 SKILL per USD, AKA 5 USD per SKILL
 
-  await token.transferFrom(
-    token.address,
-    "0xC2573A26297a0c952C92bb48Fdcb6929524F7F48",
-    web3.utils.toWei("100", "kether")
-  ); // Philip Devine
-  await token.transferFrom(
-    token.address,
-    "0xa2bB660A6A3Bb5c74E36415ffe5D4862eFfc417A",
-    web3.utils.toWei("100", "kether")
-  ); // Raymond H.
-
-  await deployProxy(NFTMarket, [skillTokenAddress, CryptoBlades.address], {
+  await deployProxy(NFTMarket, [SkillToken.address, CryptoBlades.address], {
     deployer,
   });
 };
