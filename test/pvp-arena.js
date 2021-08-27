@@ -1,4 +1,4 @@
-const { expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
+const { expectRevert, expectEvent, time } = require('@openzeppelin/test-helpers');
 const _ = require('lodash');
 const BigNumber = require('bignumber.js');
 const web3 = require('web3');
@@ -25,6 +25,7 @@ contract('PvpArena', accounts => {
     await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[1]);
     await weapons.grantRole(await weapons.GAME_ADMIN(), accounts[0]);
     await market.grantRole(await market.GAME_ADMIN(), accounts[0]);
+
     await skillToken.transferFrom(skillToken.address, accounts[1], web3.utils.toWei('10', 'ether'));
     
     await priceOracle.setCurrentPrice('10');
@@ -35,12 +36,14 @@ contract('PvpArena', accounts => {
     const { tx: mintCharaTx } = await characters.mint(accounts[1], '123');
 
     const newCharaEvt = await expectEvent.inTransaction(mintCharaTx, characters, 'NewCharacter', { minter: accounts[1] });
+    await time.advanceBlock();
     return newCharaEvt.args.character;
   }
   async function createWeapon() {
     const { tx: mintWeaponTx } = await weapons.mint(accounts[1], '123');
 
     const newWeaponEvt = await expectEvent.inTransaction(mintWeaponTx, weapons, 'NewWeapon', { minter: accounts[1] });
+    await time.advanceBlock();
     return newWeaponEvt.args.weapon;
   }
 
@@ -58,12 +61,15 @@ contract('PvpArena', accounts => {
         console.log(`weapon`, weapon)
         characterId = await createCharacter();
         character = await characters.get(characterId);
+        console.log('character', character);
+        
 
         const cost = await pvpArena.getEntryCost(characterId);
         console.log(`cost`, cost)
         await skillToken.approve(pvpArena.address, cost);
         const enterArenaTx = await pvpArena.enterArena(characterId);
         enterArenaReceipt = await enterArenaTx.wait();
+
       });
 
       it('should lock the entry cost', async () => {

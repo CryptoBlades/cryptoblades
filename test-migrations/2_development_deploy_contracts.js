@@ -101,72 +101,72 @@ module.exports = async function (deployer, network, accounts) {
   );
 
   const charas_GAME_ADMIN = await charas.GAME_ADMIN();
-  await charas.grantRole(charas_GAME_ADMIN, game.address);
-
   const weps_GAME_ADMIN = await weps.GAME_ADMIN();
-  await weps.grantRole(weps_GAME_ADMIN, game.address);
-
+  
   if (typeof randoms.setMain === "function") {
     await randoms.setMain(game.address);
   }
-
-  const raid = await deployProxy(RaidBasic, [game.address], { deployer });
-
+  
+  const raid = await deployProxy(RaidBasic, [game.address], { deployer });  
   const GAME_ADMIN = await game.GAME_ADMIN();
-  await game.grantRole(GAME_ADMIN, raid.address);
+
   await token.transferFrom(
     token.address,
     game.address,
     web3.utils.toWei("0.5", "mether")
-  ); // megaether
+    ); // megaether
+    
+    await priceOracle.setCurrentPrice(web3.utils.toWei("0.2", "ether")); // 1/5 SKILL per USD, AKA 5 USD per SKILL
+    
+    await deployProxy(NFTMarket, [SkillToken.address, CryptoBlades.address], {
+      deployer,
+    });
+    
+    const pvpArena = await deployProxy(PvpArena, [game.address], { deployer });
+    const promos = await deployProxy(Promos, [], { deployer });
+    const characterRenameTagConsumables = await deployProxy(CharacterRenameTagConsumables, [charas.address], { deployer });
+    const weaponRenameTagConsumables = await deployProxy(WeaponRenameTagConsumables, [weps.address], { deployer });
+    const characterFireTraitChangeConsumables = await deployProxy(CharacterFireTraitChangeConsumables, [charas.address], { deployer });
+    const characterEarthTraitChangeConsumables = await deployProxy(CharacterEarthTraitChangeConsumables, [charas.address], { deployer });
+    const characterWaterTraitChangeConsumables = await deployProxy(CharacterWaterTraitChangeConsumables, [charas.address], { deployer });
+    const characterLightningTraitChangeConsumables = await deployProxy(CharacterLightningTraitChangeConsumables, [charas.address], { deployer });
+    
+    const pvpArena_GAME_ADMIN = await pvpArena.GAME_ADMIN();
+    const promos_GAME_ADMIN = await promos.GAME_ADMIN();
+    
+    await pvpArena.grantRole(pvpArena_GAME_ADMIN, game.address);
+    await charas.grantRole(charas_GAME_ADMIN, game.address);
+    await weps.grantRole(weps_GAME_ADMIN, game.address);
+    await promos.grantRole(promos_GAME_ADMIN, game.address);
 
-  await priceOracle.setCurrentPrice(web3.utils.toWei("0.2", "ether")); // 1/5 SKILL per USD, AKA 5 USD per SKILL
 
-  await deployProxy(NFTMarket, [SkillToken.address, CryptoBlades.address], {
-    deployer,
-  });
-
-  const pvpArena = await deployProxy(PvpArena, [game.address], { deployer });
-  const promos = await deployProxy(Promos, [], { deployer });
-  const characterRenameTagConsumables = await deployProxy(CharacterRenameTagConsumables, [charas.address], { deployer });
-  const weaponRenameTagConsumables = await deployProxy(WeaponRenameTagConsumables, [weps.address], { deployer });
-  const characterFireTraitChangeConsumables = await deployProxy(CharacterFireTraitChangeConsumables, [charas.address], { deployer });
-  const characterEarthTraitChangeConsumables = await deployProxy(CharacterEarthTraitChangeConsumables, [charas.address], { deployer });
-  const characterWaterTraitChangeConsumables = await deployProxy(CharacterWaterTraitChangeConsumables, [charas.address], { deployer });
-  const characterLightningTraitChangeConsumables = await deployProxy(CharacterLightningTraitChangeConsumables, [charas.address], { deployer });
-
-  const pvpArena_GAME_ADMIN = await pvpArena.GAME_ADMIN();
-  const promos_GAME_ADMIN = await promos.GAME_ADMIN();
-
-  await game.grantRole(pvpArena_GAME_ADMIN, game.address);
-  await charas.grantRole(pvpArena_GAME_ADMIN, game.address);
-  await weps.grantRole(pvpArena_GAME_ADMIN, game.address);
-  await promos.grantRole(promos_GAME_ADMIN, game.address);
-
-  await weps.migrateTo_e55d8c5();
-  await weps.migrateTo_aa9da90();
-  await weps.migrateTo_951a020();
-  await weps.migrateTo_surprise(promos.address);
-
-  await charas.migrateTo_1ee400a();
-  await charas.migrateTo_951a020();
-  await charas.migrateTo_ef994e2(promos.address); 
-  await charas.migrateTo_b627f23();
-
-  await shields.migrateTo_surprise(promos.address);
-
-  await game.migrateTo_ef994e2(promos.address);
-  await game.migrateTo_23b3a8b(skillStakingRewards.address);
-  await game.migrateTo_801f279();
-  await game.migrateTo_60872c8(blacksmith.address);
-
-  await blacksmith.migrateRandoms(randoms.address);
-  await blacksmith.migrateTo_61c10da(shields.address, game.address);
-  await blacksmith.migrateTo_16884dd(
-    characterRenameTagConsumables.address,
-    weaponRenameTagConsumables.address,
-    characterFireTraitChangeConsumables.address,
-    characterEarthTraitChangeConsumables.address,
+    await game.grantRole(GAME_ADMIN, raid.address);
+    await game.grantRole(GAME_ADMIN, blacksmith.address);
+    
+    await weps.migrateTo_e55d8c5();
+    await weps.migrateTo_aa9da90();
+    await weps.migrateTo_951a020();
+    await weps.migrateTo_surprise(promos.address);
+    
+    await charas.migrateTo_1ee400a();
+    await charas.migrateTo_951a020();
+    await charas.migrateTo_ef994e2(promos.address); 
+    await charas.migrateTo_b627f23();
+    
+    await shields.migrateTo_surprise(promos.address);
+    
+    await game.migrateTo_ef994e2(promos.address);
+    await game.migrateTo_23b3a8b(skillStakingRewards.address);
+    await game.migrateTo_801f279();
+    await game.migrateTo_60872c8(blacksmith.address);
+    
+    await blacksmith.migrateRandoms(randoms.address);
+    await blacksmith.migrateTo_61c10da(shields.address, game.address);
+    await blacksmith.migrateTo_16884dd(
+      characterRenameTagConsumables.address,
+      weaponRenameTagConsumables.address,
+      characterFireTraitChangeConsumables.address,
+      characterEarthTraitChangeConsumables.address,
     characterWaterTraitChangeConsumables.address,
     characterLightningTraitChangeConsumables.address
   );
