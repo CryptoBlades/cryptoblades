@@ -1,5 +1,3 @@
-const util = require("util");
-const fs = require("fs");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const assert = require("assert");
 const SkillToken = artifacts.require("SkillToken");
@@ -23,6 +21,14 @@ const CryptoBlades = artifacts.require("CryptoBlades");
 const NFTMarket = artifacts.require("NFTMarket");
 const RaidBasic = artifacts.require("RaidBasic");
 const Promos = artifacts.require("Promos");
+const Blacksmith = artifacts.require("Blacksmith");
+const Shields = artifacts.require("Shields");
+const CharacterRenameTagConsumables = artifacts.require("CharacterRenameTagConsumables");
+const WeaponRenameTagConsumables = artifacts.require("WeaponRenameTagConsumables");
+const CharacterFireTraitChangeConsumables = artifacts.require("CharacterFireTraitChangeConsumables");
+const CharacterEarthTraitChangeConsumables = artifacts.require("CharacterEarthTraitChangeConsumables");
+const CharacterWaterTraitChangeConsumables = artifacts.require("CharacterWaterTraitChangeConsumables");
+const CharacterLightningTraitChangeConsumables = artifacts.require("CharacterLightningTraitChangeConsumables");
 
 module.exports = async function (deployer, network, accounts) {
   let randoms, skillToken;
@@ -35,6 +41,8 @@ module.exports = async function (deployer, network, accounts) {
 
   await deployer.deploy(ExperimentToken2);
   const expToken2 = await ExperimentToken2.deployed();
+
+  const shields = await deployProxy(Shields, [], { deployer });
 
   // token setup for local dev
   await token.transferFrom(
@@ -53,24 +61,23 @@ module.exports = async function (deployer, network, accounts) {
     web3.utils.toWei("699", "ether")
   );
 
-  await deployProxy(
+  const skillStakingRewards = await deployProxy(
     SkillStakingRewardsUpgradeable,
     [accounts[0], accounts[0], token.address, token.address, 60],
     { deployer }
   );
-  await deployProxy(
+  const lpStakingRewards = await deployProxy(
     LPStakingRewardsUpgradeable,
     [accounts[0], accounts[0], token.address, expToken.address, 0],
     { deployer }
   );
-  await deployProxy(
+  const lp2StakingRewards = await deployProxy(
     LP2StakingRewardsUpgradeable,
     [accounts[0], accounts[0], token.address, expToken2.address, 0],
     { deployer }
   );
 
   randoms = await deployProxy(DummyRandoms, [], { deployer });
-
   skillToken = await SkillToken.deployed();
 
   assert(skillToken != null, "Expected skillToken to be set to a contract");
@@ -79,6 +86,7 @@ module.exports = async function (deployer, network, accounts) {
   const priceOracle = await deployProxy(BasicPriceOracle, [], { deployer });
   const charas = await deployProxy(Characters, [], { deployer });
   const weps = await deployProxy(Weapons, [], { deployer });
+  const blacksmith = await deployProxy(Blacksmith, [weps.address, randoms.address], { deployer });
 
   const game = await deployProxy(
     CryptoBlades,
@@ -120,6 +128,12 @@ module.exports = async function (deployer, network, accounts) {
 
   const pvpArena = await deployProxy(PvpArena, [game.address], { deployer });
   const promos = await deployProxy(Promos, [], { deployer });
+  const characterRenameTagConsumables = await deployProxy(CharacterRenameTagConsumables, [charas.address], { deployer });
+  const weaponRenameTagConsumables = await deployProxy(WeaponRenameTagConsumables, [weps.address], { deployer });
+  const characterFireTraitChangeConsumables = await deployProxy(CharacterFireTraitChangeConsumables, [charas.address], { deployer });
+  const characterEarthTraitChangeConsumables = await deployProxy(CharacterEarthTraitChangeConsumables, [charas.address], { deployer });
+  const characterWaterTraitChangeConsumables = await deployProxy(CharacterWaterTraitChangeConsumables, [charas.address], { deployer });
+  const characterLightningTraitChangeConsumables = await deployProxy(CharacterLightningTraitChangeConsumables, [charas.address], { deployer });
 
   const pvpArena_GAME_ADMIN = await pvpArena.GAME_ADMIN();
   const promos_GAME_ADMIN = await promos.GAME_ADMIN();
@@ -128,4 +142,32 @@ module.exports = async function (deployer, network, accounts) {
   await charas.grantRole(pvpArena_GAME_ADMIN, game.address);
   await weps.grantRole(pvpArena_GAME_ADMIN, game.address);
   await promos.grantRole(promos_GAME_ADMIN, game.address);
+
+  await weps.migrateTo_e55d8c5();
+  await weps.migrateTo_aa9da90();
+  await weps.migrateTo_951a020();
+  await weps.migrateTo_surprise(promos.address);
+
+  await charas.migrateTo_1ee400a();
+  await charas.migrateTo_951a020();
+  await charas.migrateTo_ef994e2(promos.address); 
+  await charas.migrateTo_b627f23();
+
+  await shields.migrateTo_surprise(promos.address);
+
+  await game.migrateTo_ef994e2(promos.address);
+  await game.migrateTo_23b3a8b(skillStakingRewards.address);
+  await game.migrateTo_801f279();
+  await game.migrateTo_60872c8(blacksmith.address);
+
+  await blacksmith.migrateRandoms(randoms.address);
+  await blacksmith.migrateTo_61c10da(shields.address, game.address);
+  await blacksmith.migrateTo_16884dd(
+    characterRenameTagConsumables.address,
+    weaponRenameTagConsumables.address,
+    characterFireTraitChangeConsumables.address,
+    characterEarthTraitChangeConsumables.address,
+    characterWaterTraitChangeConsumables.address,
+    characterLightningTraitChangeConsumables.address
+  );
 };
