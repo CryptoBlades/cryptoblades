@@ -11,8 +11,8 @@
 
 import Vue from 'vue';
 import {toBN} from '@/utils/common';
-import axios from 'axios';
 import Events from '@/events';
+import {mapState} from 'vuex';
 
 export default Vue.extend({
   props: {
@@ -39,11 +39,11 @@ export default Vue.extend({
   },
   data() {
     return {
-      skillPriceInUsd: 0,
       showValueInUsd: false,
     };
   },
   computed: {
+    ...mapState(['skillPriceInUsd']),
     formattedUsd(): string {
       return `$${(this.calculateSkillPriceInUsd()).toFixed(this.usdDecimals)}`;
     },
@@ -52,12 +52,6 @@ export default Vue.extend({
     },
   },
   methods: {
-    async fetchPrices(): Promise<void> {
-      if (!this.showValueInSkillOnly) {
-        const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
-        this.skillPriceInUsd = response.data?.cryptoblades.usd;
-      }
-    },
     calculateSkillPriceInUsd(): number {
       return this.skill as unknown as number * this.skillPriceInUsd as unknown as number;
     },
@@ -80,10 +74,9 @@ export default Vue.extend({
       this.showValueInUsd = localStorage.getItem('showSkillInUsd') === 'true';
     },
   },
-  async mounted() {
+  mounted() {
     this.checkStorage();
     Events.$on('setting:showSkillInUsd', () => this.checkStorage());
-    await this.fetchPrices();
   },
 });
 </script>
