@@ -1,9 +1,9 @@
 <template>
-  <span v-if="showValueInUsd">
-    {{ formattedUsd }}
-  </span>
-  <span v-else-if="!showValueInUsd || showValueInSkillOnly">
+  <span v-if="showValueInSkillOnly || !showValueInUsd">
     {{ formattedSkill }}
+  </span>
+  <span v-else-if="showValueInUsd">
+    {{ formattedUsd }}
   </span>
 </template>
 
@@ -16,10 +16,6 @@ import Events from '@/events';
 
 export default Vue.extend({
   props: {
-    showValueInSkillOnly: {
-      type: Boolean,
-      default: false
-    },
     skill: {
       type: String,
       default: '0'
@@ -35,11 +31,15 @@ export default Vue.extend({
     usdDecimals: {
       type: Number,
       default: 2
+    },
+    showValueInSkillOnly: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
     return {
-      skillPrice: 0,
+      skillPriceInUsd: 0,
       showValueInUsd: false,
     };
   },
@@ -55,11 +55,11 @@ export default Vue.extend({
     async fetchPrices(): Promise<void> {
       if (!this.showValueInSkillOnly) {
         const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
-        this.skillPrice = response.data?.cryptoblades.usd;
+        this.skillPriceInUsd = response.data?.cryptoblades.usd;
       }
     },
     calculateSkillPriceInUsd(): number {
-      return this.skill as unknown as number * this.skillPrice as unknown as number;
+      return this.skill as unknown as number * this.skillPriceInUsd as unknown as number;
     },
     calculateSkillWithDecimals(): string {
       const parsedSkill = toBN(this.skill);
