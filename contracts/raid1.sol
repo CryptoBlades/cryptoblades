@@ -41,6 +41,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     uint256 public constant LINK_KEYBOX = 2;
     uint256 public constant LINK_JUNK = 3;
 
+    uint256 public constant NUMBERPARAMETER_AUTO_DURATION = 1;
+
     CryptoBlades public game;
     Characters public characters;
     Weapons public weapons;
@@ -74,6 +76,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     // link interface
     // the idea is to avoid littering the contract with variables for each type of reward
     mapping(uint256 => address) public links;
+    // parameters to avoid littering the contract with more state vars
+    mapping(uint256 => uint256) public numberParameters;
 
     event RaidStarted(uint256 indexed raidIndex,
         uint8 bossTrait,
@@ -126,8 +130,22 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
     }
 
+    function doRaidAuto() public restricted {
+        uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1))));
+        uint256 power = ABDKMath64x64.divu(1,2).mulu(raidPlayerPower[raidIndex]);
+        uint8 trait = uint8(seed % 4);
+        uint256 duration = numberParameters[NUMBERPARAMETER_AUTO_DURATION];
+        if(power == 0) {
+            power = 50000;
+        }
+        if(duration == 0) {
+            duration = 480; // 8 hrs
+        }
+        doRaidWithSeed(power, trait, duration, seed);
+    }
+
     function doRaid(uint256 bossPower, uint8 bossTrait, uint256 durationMinutes) public restricted {
-        doRaidWithSeed(bossPower, bossTrait, durationMinutes, game.randoms().getRandomSeed(msg.sender));
+        doRaidWithSeed(bossPower, bossTrait, durationMinutes, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1)))));
     }
 
     function doRaidWithSeed(uint256 bossPower, uint8 bossTrait, uint256 durationMinutes, uint256 seed) public restricted {
@@ -216,7 +234,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function completeRaid() public restricted {
-        completeRaidWithSeed(game.randoms().getRandomSeed(msg.sender));
+        completeRaidWithSeed(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1)))));
     }
 
     function completeRaidWithSeed(uint256 seed) internal {
@@ -474,6 +492,14 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     function setXpReward(uint16 xp) public restricted {
         xpReward = xp;
+    }
+
+    function setNumberParameter(uint256 paramIndex, uint256 value) public restricted {
+        numberParameters[paramIndex] = value;
+    }
+
+    function getNumberParameter(uint256 paramIndex) public view returns(uint256) {
+        return numberParameters[paramIndex];
     }
 
     function getRaidStatus(uint256 index) public view returns(uint8) {
