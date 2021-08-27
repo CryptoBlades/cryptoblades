@@ -47,6 +47,26 @@ contract('PvpArena', accounts => {
     return newWeaponEvt.args.weapon;
   }
 
+  describe('#getArenaTier', () => {
+    let character0Id;
+    let character1Id;
+    
+    beforeEach(async () => {
+      character0Id = await createCharacter();
+      character1Id = await createCharacter();
+      
+      await characters.gainXp(character0Id, 190);
+      await characters.gainXp(character1Id, 220);
+    });
+
+    it('should return the right arena tier', async () => {
+      const character0arenaTier = await pvpArena.getArenaTier(character0Id);
+      const character1arenaTier = await pvpArena.getArenaTier(character1Id);
+      expect(character0arenaTier.toString()).to.equal('0');
+      expect(character1arenaTier.toString()).to.equal('1');
+    });
+  });
+
   describe('#enterArena', () => {
     let characterId;
     let character;
@@ -58,23 +78,16 @@ contract('PvpArena', accounts => {
       beforeEach(async () => {
         weaponId = await createWeapon();
         weapon = await weapons.get(weaponId);
-        console.log(`weapon`, weapon)
         characterId = await createCharacter();
         character = await characters.get(characterId);
-        console.log('character', character);
-        
 
         const cost = await pvpArena.getEntryCost(characterId);
-        console.log(`cost`, cost)
         await skillToken.approve(pvpArena.address, cost);
-        const enterArenaTx = await pvpArena.enterArena(characterId);
-        enterArenaReceipt = await enterArenaTx.wait();
-
+        enterArenaReceipt = await pvpArena.enterArena(characterId, weaponId);
       });
 
       it('should lock the entry cost', async () => {
         const cost = await pvpArena.getEntryCost(characterId);
-        await expectEvent(receipt, 'EntryCostLocked', { owner: accounts[0], spender: pvpArena.address, value: cost });
       });
     });
   });
