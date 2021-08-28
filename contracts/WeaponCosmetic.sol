@@ -19,7 +19,7 @@ contract WeaponCosmetic is Cosmetics {
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        
+
         weapons = _weapons;
         _maxCosmeticId = 2;
         _cosmeticAvailable[1] = true;
@@ -28,7 +28,7 @@ contract WeaponCosmetic is Cosmetics {
 
     function applyCosmetic(uint256 weaponId, uint32 cosmetic) public {
         if(appliedCosmetics[weaponId] != _noCosmetic){
-            _restoreCosmetic(cosmetic, 1);
+            _restoreCosmetic(appliedCosmetics[weaponId], 1);
         }
 
         useCosmetic(cosmetic, 1);
