@@ -105,7 +105,7 @@
             stamina </span>,
             <span class="badge badge-secondary">{{ durabilityCost }}
             durability </span> and
-            <span class="badge badge-secondary">{{ joinCost }}SKILL</span>
+            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" :skill-min-decimals="1"/></span>
           </div>
         </div>
       </div>
@@ -164,7 +164,8 @@
               <nft-list v-if="!spin" :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
             </b-modal>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
-              <big-button class="encounter-button btn-styled" :mainText="`Sign up!`" v-tooltip="'Joining will cost 12h of stamina'" @click="joinRaidMethod()" />
+              <big-button class="encounter-button btn-styled" :mainText="`Sign up!`"
+                          v-tooltip="`Joining will cost ${formatStaminaHours}h of stamina`" @click="joinRaidMethod()" />
             </div>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
              <div class="float-lg-right text-sm-center mt-sm-2 text-center">
@@ -192,6 +193,10 @@ import { GetTotalMultiplierForTrait } from '@/interfaces/Weapon';
 import { CharacterPower } from '@/interfaces';
 import { getBossArt } from '@/raid-boss-art-placeholder';
 import { traitNumberToName } from '@/contract-models';
+import CurrencyConverter from '@/components/CurrencyConverter';
+import {fromWeiEther} from '@/utils/common';
+import {staminaToHours} from '@/utils/date-time';
+
 
 let interval = null;
 
@@ -268,6 +273,10 @@ export default {
 
     getSelectedWeapon() {
       return this.ownWeapons.find(x => x.id === this.selectedWeaponId);
+    },
+
+    formatStaminaHours() {
+      return staminaToHours(this.staminaCost).toFixed(1);
     }
   },
 
@@ -279,6 +288,10 @@ export default {
       'fetchIsRaidStarted', 'fetchHaveEnoughEnergy', 'fetchIsCharacterRaiding', 'fetchIsWeaponRaiding','fetchCharacters']),
     ...mapMutations(['setCurrentCharacter']),
     ...mapGetters(['getRaidState']),
+
+    convertWeiToSkill(wei) {
+      return fromWeiEther(wei);
+    },
 
     weaponHasDurabilit(id) {
       return this.getWeaponDurability(id) > 0;
@@ -486,6 +499,7 @@ export default {
   },
 
   components: {
+    CurrencyConverter,
     BigButton,
     CharacterList,
     WeaponGrid,
