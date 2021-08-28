@@ -192,14 +192,14 @@ import Hint from '../components/Hint.vue';
 import NftIcon from '@/components/NftIcon.vue';
 import NftList from '@/components/smart/NftList.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
-import { GetTotalMultiplierForTrait } from '@/interfaces/Weapon';
+import { GetTotalMultiplierForTrait, IWeapon } from '@/interfaces/Weapon';
 import { CharacterPower, IRaidState, IState } from '@/interfaces';
 import { getBossArt } from '@/raid-boss-art-placeholder';
 import { traitNumberToName } from '@/contract-models';
 import { fromWeiEther } from '@/utils/common';
 import { staminaToHours } from '@/utils/date-time';
 import { Nft } from '@/interfaces/Nft';
-import { RaidRewards } from '@/interfaces/RaidRewards';
+import { RaidRewards, Weapon, Junk, Keybox, DustLb, Dust4b, Dust5b, BonusXp } from '@/interfaces/RaidRewards';
 
 
 interface RaidMappedActions {
@@ -224,7 +224,7 @@ interface RaidMappedGetters {
   getRaidState(): IRaidState;
 }
 
-let interval: any = null;
+let interval: number;
 
 const dragonNames = [
   'Fudbringer',
@@ -285,7 +285,7 @@ export default Vue.extend({
 
     currentMultiplier(): string {
       if(!this.selectedWeaponId) return '0';
-      const currentWeapon = this.ownWeapons.find((x: any) => x.id === this.selectedWeaponId);
+      const currentWeapon = this.ownWeapons.find((weapon: IWeapon) => weapon.id === +this.selectedWeaponId);
       if(!currentWeapon) return '0';
       return GetTotalMultiplierForTrait(currentWeapon, this.currentCharacter.trait).toFixed(2);
     },
@@ -295,8 +295,8 @@ export default Vue.extend({
       return CharacterPower(this.currentCharacter.level);
     },
 
-    getSelectedWeapon(): any {
-      return this.ownWeapons.find((x: any) => x.id === this.selectedWeaponId);
+    getSelectedWeapon(): IWeapon {
+      return this.ownWeapons.find((weapon: IWeapon) => weapon.id === +this.selectedWeaponId);
     },
 
     formatStaminaHours(): string {
@@ -327,7 +327,7 @@ export default Vue.extend({
       'getRaidState',
     ]) as RaidMappedGetters),
 
-    convertWeiToSkill(wei: any): string {
+    convertWeiToSkill(wei: string): string {
       return fromWeiEther(wei);
     },
 
@@ -386,23 +386,23 @@ export default Vue.extend({
       this.participatingWeapons = await this.fetchRaidingWeapons();
     },
 
-    async isCharacterAlreadyRaiding(characterID: string): Promise<any> {
+    async isCharacterAlreadyRaiding(characterID: string): Promise<boolean> {
       return await this.fetchIsCharacterRaiding({
         characterID
       });
     },
 
-    async isWeaponAlreadyRaiding(weaponID: string): Promise<any> {
+    async isWeaponAlreadyRaiding(weaponID: string): Promise<boolean> {
       return await this.fetchIsWeaponRaiding({
         weaponID
       });
     },
 
-    async isRaidStarted(): Promise<any> {
+    async isRaidStarted(): Promise<boolean> {
       return await this.fetchIsRaidStarted();
     },
 
-    async haveEnoughEnergy(characterID: string, weaponID: string): Promise<any>{
+    async haveEnoughEnergy(characterID: string, weaponID: string): Promise<boolean>{
       return await this.fetchHaveEnoughEnergy({
         characterID,
         weaponID
@@ -445,37 +445,37 @@ export default Vue.extend({
 
       const nfts: Nft[] = [];
       if(result.weapons) {
-        result.weapons.forEach((x: any) => {
+        result.weapons.forEach((x: Weapon) => {
           nfts.push({ type: 'weapon', id: x.tokenID });
         });
       }
       if(result.junks) {
-        result.junks.forEach((x: any) => {
+        result.junks.forEach((x: Junk) => {
           nfts.push({ type: 'junk', id: x.tokenID });
         });
       }
       if(result.keyboxes) {
-        result.keyboxes.forEach((x: any) => {
+        result.keyboxes.forEach((x: Keybox) => {
           nfts.push({ type: 'keybox', id: x.tokenID });
         });
       }
       if(result.dustLb) {
-        result.dustLb.forEach((x: any) => {
+        result.dustLb.forEach((x: DustLb) => {
           nfts.push({ type: 'dustLb', id: 0, amount: x.amount });
         });
       }
       if(result.dust4b) {
-        result.dust4b.forEach((x: any) => {
+        result.dust4b.forEach((x: Dust4b) => {
           nfts.push({ type: 'dust4b', id: 0, amount: x.amount });
         });
       }
       if(result.dust5b) {
-        result.dust5b.forEach((x: any) => {
+        result.dust5b.forEach((x: Dust5b) => {
           nfts.push({ type: 'dust5b', id: 0, amount: x.amount });
         });
       }
       if(result.bonusXp) {
-        result.bonusXp.forEach((x: any) => {
+        result.bonusXp.forEach((x: BonusXp) => {
           this.bonuxXpCharacterNames.push(this.getCharacterName(x.charID));
           this.bonuxXpAmounts.push(x.amount);
         });
@@ -526,7 +526,7 @@ export default Vue.extend({
       await (this as any).getParticipatingWeapons();
     };
     await refreshRaidData();
-    interval = setInterval(async () => {
+    interval = window.setInterval(async () => {
       await refreshRaidData();
     }, 3000);
   },
