@@ -1,4 +1,3 @@
-import {Nft} from './Nft';
 
 export interface SkillShopListing {
   id: string | number;
