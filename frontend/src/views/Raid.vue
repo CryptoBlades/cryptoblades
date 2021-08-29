@@ -15,9 +15,21 @@
                 Total Power
                 <span class="badge badge-primary badge-pill">{{ totalPower }}</span>
               </li>
-               <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
+              <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
                  Boss Power
                 <span class="badge badge-primary badge-pill">{{ bossPower }}</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text progress-container">
+                <div class="d-flex justify-content-between align-items-center raid-details-text" style="width: 100%;">
+                Victory chance
+                <span class="badge badge-primary badge-pill">{{ formattedWinChance }}</span>
+                </div>
+                <div class="progress" style="width: 100%">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated players-progress-bar"
+                    role="progressbar" :style="[{'width': formattedWinChance, 'background-color': calculateProgressBarColor()}]"></div>
+                  <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger boss-progress-bar"
+                    role="progressbar" :style="[{'width': (100 - calculateWinChance()) + '%'}]"></div>
+                </div>
               </li>
             </ul>
             <span class="mt-3 bold raid-title-section">
@@ -103,7 +115,7 @@
         </div>
       </div>
     </div>
-    <div class="container disclaimer-box">
+    <div class="container">
       <div class="row">
         <div class="col-12">
           <div class="text-center">
@@ -306,6 +318,10 @@ export default Vue.extend({
 
     formatStaminaHours(): string {
       return staminaToHours(+this.staminaCost).toFixed(1);
+    },
+
+    formattedWinChance(): string {
+      return `${this.calculateWinChance()}%`;
     }
   },
 
@@ -331,6 +347,20 @@ export default Vue.extend({
     ...(mapGetters([
       'getRaidState',
     ]) as RaidMappedGetters),
+
+    calculateWinChance(): string {
+      return (Math.min(Math.max(+this.totalPower / +this.bossPower / 2 * 100, 1), 99)).toFixed(0);
+    },
+
+    calculateProgressBarColor(): string {
+      if(+this.calculateWinChance() < 30){
+        return '#ccae4f';
+      } else if (+this.calculateWinChance() < 70){
+        return 'blue';
+      } else {
+        return 'green';
+      }
+    },
 
     convertWeiToSkill(wei: string): string {
       return fromWeiEther(wei);
@@ -563,10 +593,22 @@ export default Vue.extend({
   display: block;
   width: 100%;
   padding: 0;
- height: 473px;
- overflow-y: auto;
- overflow-x: hidden;
- border: 0.5px solid #1f1f1f;
+  height: 548px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 0.5px solid #1f1f1f;
+}
+
+.progress-container {
+  flex-direction: column;
+}
+
+.players-progress-bar {
+  animation-direction: reverse;
+}
+
+.boss-progress-bar {
+  animation-direction: normal;
 }
 
 .raid-style::-webkit-scrollbar-track
@@ -620,7 +662,7 @@ export default Vue.extend({
 }
 
 .raid-weapon-grid {
-  height: 473px;
+  height: 548px;
   overflow-y: auto;
   border: 0.5px solid #1f1f1f;
 }
@@ -673,11 +715,6 @@ hr.divider {
 }
 .container-fluid {
   margin-top: 500px;
-}
-.disclaimer-box {
-  margin-top: 20px;
-  border-top: 0.5px solid #242423;
-  padding: 20px;
 }
 .list-group {
   max-width: 100%;
