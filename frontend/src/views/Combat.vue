@@ -477,6 +477,7 @@ div.encounter.text-center {
   background: rgba(255, 255, 255, 0.1);
   width: 12em;
   height: 12em;
+  margin: 0 auto;
 }
 
 .encounter-container {
@@ -654,9 +655,6 @@ h1 {
 .header-row {
   display: block;
   text-align: center;
-}
-.weapon-icon-wrapper {
-  margin: 0 auto;
 }
 
 @media (max-width: 575.98px) {
