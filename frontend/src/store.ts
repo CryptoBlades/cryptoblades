@@ -723,13 +723,13 @@ export function createStore(web3: Web3) {
       },
 
       async pollSkillPriceInUsd({ state, commit }) {
-        async function fetchPriceData() {
+        const fetchPriceData = async () => {
           const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
           const skillPriceInUsd = response.data?.cryptoblades.usd;
           if (state.skillPriceInUsd !== skillPriceInUsd) {
             commit('setSkillPriceInUsd', skillPriceInUsd);
           }
-        }
+        };
         await fetchPriceData();
         setInterval(async () => {
           await fetchPriceData();
@@ -1815,10 +1815,7 @@ export function createStore(web3: Web3) {
         const Raid1 = state.contracts().Raid1!;
 
         return await Raid1.methods
-          .getEligibleRewardIndexes(
-            startIndex,
-            endIndex
-          )
+          .getEligibleRewardIndexes(startIndex, endIndex)
           .call(defaultCallOptions(state));
       },
 
