@@ -14,7 +14,7 @@ import {
   IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
+import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
@@ -1785,10 +1785,21 @@ export function createStore(web3: Web3) {
       },
 
       async joinRaid({ state }, { characterId, weaponId }) {
-        const { Raid1 } = state.contracts();
-        if(!Raid1) {
+        const { CryptoBlades, SkillToken, Raid1 } = state.contracts();
+        if(!Raid1 || !CryptoBlades || !SkillToken || !state.defaultAccount) {
           return;
         }
+
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          Raid1,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          () => Raid1.methods.getJoinCostInSkill()
+        );
 
         await Raid1!.methods
           .joinRaid(characterId, weaponId)
