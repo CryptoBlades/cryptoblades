@@ -857,6 +857,7 @@ hr.divider {
 
 .new-weapon-button {
   margin-left: 0;
+  margin-top: 20px;
 }
 
 .enemy-list[data-v-067077ae] {
