@@ -1798,7 +1798,9 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          () => Raid1.methods.getJoinCostInSkill()
+          raidsFunctions => raidsFunctions.getJoinCostInSkill(),
+          {},
+          true
         );
 
         await Raid1!.methods
