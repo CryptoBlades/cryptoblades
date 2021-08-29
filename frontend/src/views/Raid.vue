@@ -190,7 +190,7 @@ import BigButton from '../components/BigButton.vue';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import Hint from '../components/Hint.vue';
 import NftIcon from '@/components/NftIcon.vue';
-import NftList from '@/components/smart/NftList.vue';
+import NftList, { NftIdType } from '@/components/smart/NftList.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
 import { GetTotalMultiplierForTrait, IWeapon } from '@/interfaces/Weapon';
 import { CharacterPower, IRaidState, IState } from '@/interfaces';
@@ -198,7 +198,6 @@ import { getBossArt } from '@/raid-boss-art-placeholder';
 import { traitNumberToName } from '@/contract-models';
 import { fromWeiEther } from '@/utils/common';
 import { staminaToHours } from '@/utils/date-time';
-import { Nft } from '@/interfaces/Nft';
 import { RaidRewards, Weapon, Junk, Keybox, DustLb, Dust4b, Dust5b, BonusXp } from '@/interfaces/RaidRewards';
 
 
@@ -265,7 +264,7 @@ export default Vue.extend({
       accountPower: '',
       rewardsRaidId: '',
       rewardIndexes: [] as string[],
-      rewards: [] as Nft[],
+      rewards: [] as NftIdType[],
       spin: false,
       participatingCharacters: [] as string[],
       participatingWeapons: [] as string[],
@@ -443,7 +442,7 @@ export default Vue.extend({
         rewardIndex
       });
 
-      const nfts: Nft[] = [];
+      const nfts: NftIdType[] = [];
       if(result.weapons) {
         result.weapons.forEach((x: Weapon) => {
           nfts.push({ type: 'weapon', id: x.tokenID });
