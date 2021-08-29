@@ -217,7 +217,8 @@ export default {
     getTrinketArt,
     ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags',
       'fetchTotalCharacterFireTraitChanges', 'fetchTotalCharacterEarthTraitChanges',
-      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
+      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
+      'fetchOwnedWeaponCosmetics']),
 
     imgPath(img) {
       return this.images('./' + img);
@@ -263,6 +264,17 @@ export default {
       this.quantityOwned = await this.fetchTotalCharacterLightningTraitChanges();
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchTotalCharacterLightningTraitChanges();
+      }, 3000);
+    } else if(this.nft.type === 'WeaponCosmetic1') {
+      this.quantityOwned = await this.fetchOwnedWeaponCosmetics({cosmetic: 1});
+      this.fetchSupplyInterval = setInterval(async () => {
+        this.quantityOwned = await this.fetchOwnedWeaponCosmetics({cosmetic: 1});
+      }, 3000);
+    }
+    else if(this.nft.type === 'WeaponCosmetic2') {
+      this.quantityOwned = await this.fetchOwnedWeaponCosmetics({cosmetic: 2});
+      this.fetchSupplyInterval = setInterval(async () => {
+        this.quantityOwned = await this.fetchOwnedWeaponCosmetics({cosmetic: 2});
       }, 3000);
     }
   },

@@ -149,6 +149,7 @@ interface StoreMappedActions {
   purchaseCharacterEarthTraitChange(): Promise<void>;
   purchaseCharacterWaterTraitChange(): Promise<void>;
   purchaseCharacterLightningTraitChange(): Promise<void>;
+  purchaseWeaponCosmetic(obj: {cosmetic: number}): Promise<void>;
 }
 
 export default Vue.extend({
@@ -364,7 +365,8 @@ export default Vue.extend({
       'updateJunkIds', 'updateKeyLootboxIds', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
       'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
       'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
-      'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange'
+      'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange',
+      'purchaseWeaponCosmetic'
     ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
@@ -472,6 +474,12 @@ export default Vue.extend({
       }
       if(item.type === 'CharacterLightningTraitChange'){
         await this.purchaseCharacterLightningTraitChange();
+      }
+      if(item.type === 'WeaponCosmetic1'){
+        await this.purchaseWeaponCosmetic({cosmetic: 1});
+      }
+      if(item.type === 'WeaponCosmetic2'){
+        await this.purchaseWeaponCosmetic({cosmetic: 2});
       }
     },
     itemDescriptionHtml(item: SkillShopListing): string {

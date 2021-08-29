@@ -943,6 +943,22 @@ export default Vue.extend({
           description: 'Changes character\'s trait to Lightning.',
           image: 'potion_05_te.png'
         },
+        {
+          id: 1,
+          type: 'WeaponCosmetic1',
+          nftPrice: 0.1,
+          name: 'Weapon Comsetic 1',
+          description: 'Weapon Comsetic 1.',
+          image: 'https://seiyria.com/gameicons-font/svg/3d-hammer.svg'
+        },
+        {
+          id: 1,
+          type: 'WeaponCosmetic2',
+          nftPrice: 0.1,
+          name: 'Weapon Comsetic 2',
+          description: 'Weapon Comsetic 2.',
+          image: 'https://seiyria.com/gameicons-font/svg/algae.svg'
+        }
       ] as SkillShopListing[];
 
       return nftList;

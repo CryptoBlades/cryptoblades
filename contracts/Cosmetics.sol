@@ -21,8 +21,6 @@ contract Cosmetics is Initializable, AccessControlUpgradeable {
 
     uint32 internal constant _noCosmetic = 0;
 
-    uint32 internal _maxCosmeticId;
-
     function initialize()
         public
         initializer
@@ -38,7 +36,7 @@ contract Cosmetics is Initializable, AccessControlUpgradeable {
     }
 
     modifier cosmeticAvailable(uint32 cosmetic) {
-         require(_maxCosmeticId > 0 && _cosmeticAvailable[cosmetic], "Not available");
+         require(_cosmeticAvailable[cosmetic], "Not available");
         _;
     }
 
@@ -66,18 +64,13 @@ contract Cosmetics is Initializable, AccessControlUpgradeable {
         emit CosmeticUsed(msg.sender, cosmetic, amount);
     }
 
-    function _restoreCosmetic(uint32 cosmetic, uint32 amount) internal cosmeticAvailable(cosmetic) {
+    function _restoreCosmetic(uint32 cosmetic, uint32 amount) internal {
         owned[msg.sender][cosmetic] += amount;
         emit CosmeticRestored(msg.sender, cosmetic, amount);
     }
 
-    function getCosmeticsCount() public view returns(uint32[] memory) {
-        uint32[] memory cosmetics;
-        for(uint32 i = 1; i <= _maxCosmeticId; i++) {
-            if(!_cosmeticAvailable[i]) continue;
-            cosmetics[i] = owned[msg.sender][i];
-        }
-        return cosmetics;
+    function getCosmeticCount(uint32 cosmetic) public view returns(uint32) {
+        return owned[msg.sender][cosmetic];
     }
 
     function isCosmeticAvailable(uint32 cosmetic) public view returns (bool){
@@ -86,13 +79,6 @@ contract Cosmetics is Initializable, AccessControlUpgradeable {
 
     function toggleCosmeticAvailable(uint32 cosmetic, bool available) external isAdmin {
         _cosmeticAvailable[cosmetic] = available;
-        if(_maxCosmeticId < cosmetic){
-            _maxCosmeticId = cosmetic;
-        }
-    }
-
-    function setMaxCosmeticId(uint32 maxCosmeticId) external isAdmin {
-        _maxCosmeticId = maxCosmeticId; // no checks done on purpse, < 1 max id => disabled everything
     }
 
     function giveCosmeticByAdmin(address receiver, uint32 cosmetic, uint32 amount) external isAdmin cosmeticAvailable(cosmetic) {

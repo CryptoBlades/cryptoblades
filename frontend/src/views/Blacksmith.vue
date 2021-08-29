@@ -20,6 +20,14 @@
               <h1>Weapons ({{ ownWeapons.length }})</h1>
               <div class="d-flex justify-content-flex-end ml-auto">
                 <b-button
+                  v-if="canChangeSkin()"
+                  variant="primary"
+                  class="ml-auto gtag-link-others"
+                  @click="openChangeSkin"
+                  v-tooltip="'Change weapon\'s skin'" tagname="change_skin_weapon">
+                  Change Skin
+                </b-button>
+                <b-button
                   variant="primary"
                   v-if="canRename()"
                   @click="openRenameWeapon"
@@ -341,7 +349,18 @@
         This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
       </span>
     </b-modal>
-
+    <b-modal class="centered-modal" ref="weapon-change-skin-modal"
+                  @ok="changeWeaponSkinCall">
+                  <template #modal-title>
+                    Change Weapon's Skill
+                  </template>
+                  <span >
+                    Pick a skin to switch to.
+                  </span>
+                  <select class="form-control" v-model="targetSkin">
+                    <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+                  </select>
+                </b-modal>
     <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              title="Dust Reforge Confirmation" @ok="onReforgeWeaponWithDust">
       <div class="row">
@@ -453,6 +472,9 @@ interface Data {
   disableUseStakedForForge: boolean;
   disableX10ForgeWithStaked: boolean;
   forgeCostBN: BN;
+  targetSkin: string;
+  haveWeaponCosmetic1: number;
+  haveWeaponCosmetic2: number;
 }
 
 export default Vue.extend({
@@ -487,6 +509,9 @@ export default Vue.extend({
       disableUseStakedForForge: false,
       disableX10ForgeWithStaked: false,
       forgeCostBN: new BN(0),
+      targetSkin: '',
+      haveWeaponCosmetic1: 0,
+      haveWeaponCosmetic2: 0
     } as Data;
   },
 
@@ -504,6 +529,20 @@ export default Vue.extend({
 
     cleanRename(): string {
       return getCleanName(this.weaponRename);
+    },
+    availableSkins(): string[] {
+      const availableSkins = [];
+
+      availableSkins.push('No Skin');
+
+      if(this.haveWeaponCosmetic1 > 0) {
+        availableSkins.push('Cool Skin 1');
+      }
+      if(this.haveWeaponCosmetic2 > 0) {
+        availableSkins.push('Cool Skin 2');
+      }
+
+      return availableSkins;
     }
   },
 
@@ -550,13 +589,22 @@ export default Vue.extend({
     const skillBurnCost = await this.contracts.CryptoBlades.methods.usdToSkill(burnCost).call({ from: this.defaultAccount });
     this.burnCost = new BN(skillBurnCost).div(new BN(10).pow(18)).toFixed(4);
 
-    if(!this.contracts.WeaponRenameTagConsumables) return;
-    this.haveRename = await this.contracts.WeaponRenameTagConsumables.methods.getItemCount().call({ from: this.defaultAccount });
+    if(this.contracts.WeaponRenameTagConsumables)
+    {
+      this.haveRename = await this.contracts.WeaponRenameTagConsumables.methods.getItemCount().call({ from: this.defaultAccount });
+    }
+
+    if(this.contracts.WeaponCosmetics)
+    {
+      this.haveWeaponCosmetic1 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(1).call({ from: this.defaultAccount });
+      this.haveWeaponCosmetic2 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(2).call({ from: this.defaultAccount });
+    }
   },
 
   methods: {
     ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN', 'renameWeapon',
-      'fetchTotalWeaponRenameTags', 'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons']),
+      'fetchTotalWeaponRenameTags', 'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons',
+      'changeWeaponCosmetic', 'removeWeaponCosmetic']),
 
     toggleCheckbox() {
       this.useStakedForForge = !this.useStakedForForge;
@@ -752,7 +800,36 @@ export default Vue.extend({
       if(this.contracts.WeaponRenameTagConsumables) {
         this.haveRename = await this.contracts.WeaponRenameTagConsumables.methods.getItemCount().call({ from: this.defaultAccount });
       }
-    }
+    },
+    canChangeSkin() {
+      return this.reforgeWeaponId !== null; // show even if no owned cosmetics to allow removing cosmetic
+    },
+    openChangeSkin() {
+      (this.$refs['weapon-change-skin-modal'] as BModal).show();
+    },
+    async changeWeaponSkinCall() {
+      switch(this.targetSkin) {
+      case 'No Skin':
+        await this.removeWeaponCosmetic({ id: this.reforgeWeaponId });
+        if(this.contracts.WeaponCosmetics) {
+          this.haveWeaponCosmetic1 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(1).call({ from: this.defaultAccount });
+          this.haveWeaponCosmetic2 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(1).call({ from: this.defaultAccount });
+        }
+        break;
+      case 'Cool Skin 1':
+        await this.changeWeaponCosmetic({ id: this.reforgeWeaponId, cosmetic: 1 });
+        if(this.contracts.WeaponCosmetics) {
+          this.haveWeaponCosmetic1 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(1).call({ from: this.defaultAccount });
+        }
+        break;
+      case 'Cool Skin 2':
+        await this.changeWeaponCosmetic({ id: this.reforgeWeaponId, cosmetic: 2 });
+        if(this.contracts.WeaponCosmetics) {
+          this.haveWeaponCosmetic2 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(1).call({ from: this.defaultAccount });
+        }
+        break;
+      }
+    },
   },
 
   components: {

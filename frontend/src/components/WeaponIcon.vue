@@ -1,7 +1,7 @@
 <template>
   <div
     class="weapon-icon"
-    v-bind:class="[getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '']"
+    v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '') + ' ' + 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id)]"
     v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"
@@ -103,7 +103,8 @@ export default {
       'currentCharacter',
       'getWeaponDurability',
       'timeUntilWeaponHasMaxDurability',
-      'getWeaponName'
+      'getWeaponName',
+      'getWeaponCosmetic'
     ]),
     tooltipHtml() {
       if(!this.weapon) return '';
@@ -556,6 +557,14 @@ export default {
   right: 10%;
   font-size: 0.6em;
   text-align: right;
+}
+
+.weapon-cosmetic-applied-1{
+  border: 1px solid silver;
+}
+
+.weapon-cosmetic-applied-2{
+  border: 1px solid gold;
 }
 
 @keyframes glow-1 {

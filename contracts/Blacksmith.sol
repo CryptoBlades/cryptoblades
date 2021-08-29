@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "./interfaces/IRandoms.sol";
 import "./shields.sol";
 import "./Consumables.sol";
+import "./Cosmetics.sol";
 import "./weapons.sol";
 import "./cryptoblades.sol";
 
@@ -22,6 +23,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_WATER = 5;
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_LIGHTNING = 6;
 
+
+    uint256 public constant COSMETIC_ADDRESS_WEAPON = 1;
+
     /* ========== STATE VARIABLES ========== */
 
     Weapons public weapons;
@@ -35,6 +39,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     // keys: ITEM_ constant
     mapping(uint256 => address) public itemAddresses;
     mapping(uint256 => uint256) public itemFlatPrices;
+
+    mapping(uint256 => address) public cosmeticAddresses;
+    mapping(uint32 => uint256) public cosmeticWeaponFlatPrices;
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -84,6 +91,16 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_EARTH] = 0.2 ether;
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER] = 0.2 ether;
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
+    }
+
+    function migrateTo_eefb9b1(
+        address _weaponCosmetic
+    ) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        cosmeticAddresses[COSMETIC_ADDRESS_WEAPON] = _weaponCosmetic;
+       
+        cosmeticWeaponFlatPrices[1] = 0.1 ether;
+        cosmeticWeaponFlatPrices[2] = 0.1 ether;
     }
 
     /* ========== VIEWS ========== */
@@ -139,6 +156,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         return itemFlatPrices[itemIndex];
     }
 
+    function getAddressOfCosmetic(uint256 cosmeticIndex) public view returns(address) {
+        return cosmeticAddresses[cosmeticIndex];
+    }
     /* ========== Character Rename ========== */
     
     function setCharacterRenamePrice(uint256 newPrice) external isAdmin {
@@ -221,5 +241,22 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         require(paying == itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING], 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING]);
         Consumables(itemAddresses[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING]).giveItem(msg.sender, 1);
+    }
+
+
+    /* ========== Weapon cosmetics ========== */
+    function setWeaponCosmeticPrice(uint32 cosmetic, uint256 newPrice) external isAdmin {
+        require(cosmetic > 0 && newPrice > 0, 'invalid request');
+        cosmeticWeaponFlatPrices[cosmetic] = newPrice;
+    }
+
+     function getWeaponCosmeticPrice(uint32 cosmetic) public view returns (uint256){
+        return cosmeticWeaponFlatPrices[cosmetic];
+    }
+
+    function purchaseWeaponCosmetic(uint32 cosmetic, uint256 paying) public {
+        require(paying > 0 && paying == cosmeticWeaponFlatPrices[cosmetic], 'Invalid price');
+        game.payContractTokenOnly(msg.sender, cosmeticWeaponFlatPrices[cosmetic]);
+        Cosmetics(cosmeticAddresses[COSMETIC_ADDRESS_WEAPON]).giveCosmetic(msg.sender, cosmetic, 1);
     }
 }

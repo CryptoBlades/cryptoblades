@@ -111,6 +111,7 @@ export function createStore(web3: Web3) {
       currentNftId: null,
       weaponDurabilities: {},
       weaponRenames: {},
+      weaponCosmetics: {},
       maxDurability: 0,      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
@@ -238,6 +239,15 @@ export function createStore(web3: Web3) {
           }
 
           return getWeaponNameFromSeed(weaponId, stars);
+        };
+      },
+      getWeaponCosmetic(state: IState) {
+        return (weaponId: number) => {
+          if(state.weaponCosmetics[weaponId] !== undefined) {
+            return state.weaponCosmetics[weaponId];
+          }
+
+          return 0;
         };
       },
       getExchangeUrl() {
@@ -632,6 +642,9 @@ export function createStore(web3: Web3) {
           Vue.set(state.weaponRenames, weaponId, renameString);
         }
       },
+      updateWeaponCosmetic(state: IState, { weaponId, weaponCosmetic }) {
+        Vue.set(state.weaponCosmetics, weaponId, weaponCosmetic);
+      },
       updateCharacterStamina(state: IState, { characterId, stamina }) {
         Vue.set(state.characterStaminas, characterId, stamina);
       },
@@ -696,6 +709,7 @@ export function createStore(web3: Web3) {
         await dispatch('setupCharacterRenames');
         await dispatch('setupWeaponDurabilities');
         await dispatch('setupWeaponRenames');
+        await dispatch('setupWeaponCosmetics');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -1271,6 +1285,33 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
         if(renameString !== '' && state.weaponRenames[weaponId] !== renameString){
           commit('updateWeaponRename', { weaponId, renameString });
+        }
+      },
+
+      async setupWeaponCosmetics({ state, dispatch }) {
+        const [
+          ownedWeaponIds
+        ] = await Promise.all([
+          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
+        ]);
+
+        for (const weapId of ownedWeaponIds) {
+          dispatch('fetchWeaponCosmetic', weapId);
+        }
+      },
+
+      async setupWeaponsWithIdsCosmetics({ dispatch }, weaponIds: string[]) {
+        for (const weapId of weaponIds) {
+          dispatch('fetchWeaponCosmetic', weapId);
+        }
+      },
+
+      async fetchWeaponCosmetic({ state, commit }, weaponId: number) {
+        const weaponCosmetic = await state.contracts().WeaponCosmetics!.methods
+          .getWeaponCosmetic(weaponId)
+          .call(defaultCallOptions(state));
+        if(state.weaponCosmetics[weaponId] !== weaponCosmetic){
+          commit('updateWeaponCosmetic', { weaponId, weaponCosmetic });
         }
       },
 
@@ -2719,6 +2760,65 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacter', id),
         ]);
       },
+      async fetchOwnedWeaponCosmetics({ state }, {cosmetic}) {
+        const { WeaponCosmetics } = state.contracts();
+        if(!WeaponCosmetics || !state.defaultAccount) return;
+        return await WeaponCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
+      },
+      async purchaseWeaponCosmetic({ state, dispatch }, {cosmetic}) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !WeaponCosmetics || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseWeaponCosmetic(cosmetic, Web3.utils.toWei('0.1')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill')
+        ]);
+      },
+      async changeWeaponCosmetic({ state, dispatch}, { id, cosmetic }) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !WeaponCosmetics || !state.defaultAccount) return;
+
+        await WeaponCosmetics.methods
+          .applyCosmetic(id, cosmetic)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchWeaponCosmetic', id)
+        ]);
+      },
+      async removeWeaponCosmetic({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !WeaponCosmetics || !state.defaultAccount) return;
+
+        await WeaponCosmetics.methods
+          .removeCosmetic(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchWeaponCosmetic', id)
+        ]);
+      }
     }
   });
 }
