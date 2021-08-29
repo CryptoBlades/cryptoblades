@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-md-12 col-lg-6">
         <span class="bold raid-title-section">Hellborn raid</span>
-        <hr class="devider">
+        <hr class="divider">
         <div class="row boss-row">
           <div class="col-md-12 col-lg-6 order-xs-last order-sm-last order-lg-first">
             <ul class="list-group raid-details mb-4">
@@ -22,9 +22,10 @@
             </ul>
             <span class="mt-3 bold raid-title-section">
               Drops
-              <b-icon-question-circle v-tooltip="'Rewards are based on your contributed power relative to others.<br>Joining early gives up to 10% bonus.'"/>
+              <b-icon-question-circle class="rewards-tooltip"
+               v-tooltip="'Rewards are based on your contributed power relative to others.<br>Joining early gives up to 10% bonus.'"/>
             </span>
-            <hr class="devider">
+            <hr class="divider">
             <div class="drops">
               <div class="drops-icons">
                 <nft-icon :isDefault="true" :nft="{ type: 'weapon' }" />
@@ -36,7 +37,7 @@
                 <nft-icon :isDefault="true" :nft="{ type: '5bdust' }"/>
               </div>
               <br />
-              <span class="bold raid-title-section">
+              <span class="bold raid-title-section xp-reward-section">
                 XP reward</span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }}
                 <b-icon-question-circle
                   v-tooltip="`XP will be automatically claimed by participating characters.<br>
@@ -56,43 +57,48 @@
             </div>
           </div>
         </div>
-        <hr class="devider">
+        <hr class="divider">
       </div>
-      <div class="col-md-12 col-lg-6 weap-char">
+      <div class="col-md-12 col-lg-6">
         <div class="row">
           <div class="col-xs-12 col-sm-12 col-lg-6 weap-box">
-            <span class="raid-title-section bold">Weapon
+            <span class="raid-title-section bold">
+              <span>Weapon
                 <Hint
                 text="Your weapon multiplies your power<br>
                   <br>+Stats determine the multiplier
                   <br>Stat element match with character gives greater bonus"/>
-                  <span class="float-right sub-text">Multiplier: x{{ currentMultiplier }}</span>
+                  </span>
+                  <span class="float-right sub-text">
+                    Multiplier: x{{ currentMultiplier }}
+                  </span>
               </span>
-              <hr class="devider">
-              <div class="header-row">
+              <hr class="divider">
+            <div class="header-row">
               <div v-if="selectedWeaponId" class="weapon-icon-wrapper">
                 <weapon-icon class="weapon-icon" :weapon="getSelectedWeapon" />
               </div>
-              <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null">
+              <b-button v-if="selectedWeaponId" variant="primary" class="new-weapon-button" @click="selectedWeaponId = null">
                 Choose New Weapon
               </b-button>
             </div>
+
             <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" class="raid-weapon-grid">
               <template #sold="{ weapon: { id } }">
                 <div class="sold" v-if="participatingWeapons && participatingWeapons.find(x => +x === +id) !== undefined"><span>in raid</span></div>
               </template>
             </weapon-grid>
-            <hr class="devider">
+            <hr class="divider">
           </div>
           <div class="col-xs-12 col-sm-12 col-lg-6 char-box">
             <span class="raid-title-section bold">Character <span class="float-right sub-text">Power {{ currentCharacterPower }}</span></span>
-            <hr class="devider">
+            <hr class="divider">
             <character-list :value="currentCharacterId" @input="setCurrentCharacter" class="raid-style">
               <template #sold="{ character: { id } }">
                 <div class="sold" v-if="participatingCharacters && participatingCharacters.find(x => +x === +id) !== undefined"><span>in raid</span></div>
               </template>
             </character-list>
-            <hr class="devider">
+            <hr class="divider">
           </div>
         </div>
       </div>
@@ -113,8 +119,8 @@
     <div class="row">
       <div class="col-sm-12">
         <div class="raid-info-box mt-3">
-          <div class="row">
-            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
+          <div class="row raid-summary-container">
+            <div class='col-sm-4 raid-summary-text'>
               <div class="float-lg-left mb-sm-2">
                 <div class="finish">
                     <span class="title">Finishes on</span>
@@ -124,7 +130,7 @@
                   </div>
               </div>
             </div>
-            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'" v-if="claimButtonActive">
+            <div class="col-sm-8 row">
               <big-button v-if="claimButtonActive" class="encounter-button btn-styled" :mainText="`Claim rewards`" @click="promptRewardClaim()" />
               <b-modal id="rewardsRaidPicker" title="Raid rewards selector" @ok="claimRewardIndex(rewardsRaidId)">
                 <div class="raid-picker">
@@ -134,7 +140,7 @@
                   </select>
                 </div>
               </b-modal>
-            </div>
+
             <b-modal id="rewardsModal" title="Raid rewards" size="lg">
               <template #modal-header>
                 <div v-if="!spin" class="new-weapon-header-text text-center">
@@ -163,11 +169,11 @@
               </div>
               <nft-list v-if="!spin" :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
             </b-modal>
-            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
+
               <big-button class="encounter-button btn-styled" :mainText="`Sign up!`"
                           v-tooltip="`Joining will cost ${formatStaminaHours}h of stamina`" @click="joinRaidMethod()" />
             </div>
-            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
+            <div class='col-sm-4 raid-summary-text'>
              <div class="float-lg-right text-sm-center mt-sm-2 text-center">
                 <div class="finish">
                     <span class="title">Your Power:  {{accountPower}}</span>
@@ -175,8 +181,8 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
-      </div>
     </div>
  </div>
 </template>
@@ -548,6 +554,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+
 .raid-height {
   height: 500px !important;
 }
@@ -561,7 +568,6 @@ export default Vue.extend({
  overflow-x: hidden;
  border: 0.5px solid #1f1f1f;
 }
-
 
 .raid-style::-webkit-scrollbar-track
 {
@@ -580,14 +586,13 @@ export default Vue.extend({
 	border: 2px solid #555555;
 }
 
-
 .raid-style >>> ul.character-list {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
 }
 .raid-style >>> ul.character-list > li.character {
-    margin: 0 auto;
+    margin: 0 0 0 0;
     flex-grow: 0;
     flex-shrink: 0;
 }
@@ -663,7 +668,7 @@ h2 > span.sub-text {
   vertical-align: middle;
   line-height: 2;
 }
-hr.devider {
+hr.divider {
   border: 0.5px solid #dabf75;
 }
 .container-fluid {
@@ -766,6 +771,16 @@ hr.devider {
   flex-direction: row;
 }
 
+.raid-summary-text {
+    width: auto;
+    flex: none;
+}
+
+.raid-summary-container {
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
 .raiders,
 .drops {
   margin-top: 1em;
@@ -837,6 +852,11 @@ hr.devider {
   background: rgba(255, 255, 255, 0.1);
   width: 12em;
   height: 12em;
+  margin: 0 auto;
+}
+
+.new-weapon-button {
+  margin-left: 0;
 }
 
 .enemy-list[data-v-067077ae] {
@@ -851,9 +871,20 @@ hr.devider {
   align-items: center;
 }
 
+.xp-reward-section {
+  display: inline;
+}
+
+.rewards-tooltip {
+  margin: auto 0;
+}
+
 .raid-title-section {
   font-size : 1.5em;
   color : #dabf75;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .raid-details {
@@ -865,6 +896,7 @@ hr.devider {
   font-size: 1.2em;
   color: #ccae4f;
 }
+
 .raid-details-text > span {
   background-color: #5c6063;
 }
@@ -887,12 +919,23 @@ hr.devider {
   margin-left: -10px;
 }
 
-@media (max-width: 1024px) {
-  .weap-char {
-    margin-top: 50px;
-    border-top: dashed 1px #ccc;
-    padding-top : 20px;
-  }
+.header-row {
+  display: flex;
+  align-items: center;
+}
+
+.header-row h1 {
+  margin-left: 10px;
+  margin-bottom: 5px;
+}
+
+.header-row .hint {
+  font-size: 2em;
+}
+
+.header-row {
+  display: block;
+  text-align: center;
 }
 
 @media (max-width: 994px) {
