@@ -1,7 +1,7 @@
 <template>
   <div
     class="weapon-icon"
-    v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '') + ' ' + 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id)]"
+    v-bind:class="[getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '', 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id)]"
     v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"

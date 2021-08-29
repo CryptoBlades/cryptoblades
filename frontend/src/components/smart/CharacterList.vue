@@ -44,7 +44,7 @@
     <ul class="character-list">
       <li
         class="character"
-        :class="{ selected: value === c.id }"
+        :class="[value === c.id ? 'selected' : '',  'character-cosmetic-applied-' + getCharacterCosmetic(c.id)]"
         v-for="c in filteredCharacters"
         :key="c.id"
         @click="$emit('input', c.id)"
@@ -110,7 +110,7 @@ export default {
 
   computed: {
     ...mapState(['maxStamina', 'ownedCharacterIds']),
-    ...mapGetters(['getCharacterName', 'allStaminas', 'charactersWithIds']),
+    ...mapGetters(['getCharacterName', 'allStaminas', 'charactersWithIds', 'getCharacterCosmetic']),
 
     characterIdsToDisplay() {
       if(this.showGivenCharacterIds) {
@@ -281,6 +281,14 @@ export default {
   flex-direction: row;
   align-self: flex-end;
   margin:0 15px;
+}
+
+.character-cosmetic-applied-1 {
+  border: 1px solid gold;
+}
+
+.character-cosmetic-applied-2 {
+  border: 1px solid silver;
 }
 
 @media (max-width: 576px) {

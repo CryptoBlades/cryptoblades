@@ -958,6 +958,22 @@ export default Vue.extend({
           name: 'Weapon Comsetic 2',
           description: 'Weapon Comsetic 2.',
           image: 'https://seiyria.com/gameicons-font/svg/algae.svg'
+        },
+        {
+          id: 1,
+          type: 'CharacterCosmetic1',
+          nftPrice: 0.1,
+          name: 'Character Comsetic 1',
+          description: 'Character Comsetic 1.',
+          image: 'https://seiyria.com/gameicons-font/svg/abdominal-armor.svg'
+        },
+        {
+          id: 1,
+          type: 'CharacterCosmetic2',
+          nftPrice: 0.1,
+          name: 'Character Comsetic 2',
+          description: 'Character Comsetic 2.',
+          image: 'https://seiyria.com/gameicons-font/svg/american-football-player.svg'
         }
       ] as SkillShopListing[];
 

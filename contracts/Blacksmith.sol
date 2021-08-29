@@ -25,6 +25,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
 
     uint256 public constant COSMETIC_ADDRESS_WEAPON = 1;
+    uint256 public constant COSMETIC_ADDRESS_CHARACTER = 2;
 
     /* ========== STATE VARIABLES ========== */
 
@@ -42,6 +43,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     mapping(uint256 => address) public cosmeticAddresses;
     mapping(uint32 => uint256) public cosmeticWeaponFlatPrices;
+    mapping(uint32 => uint256) public cosmeticCharacterFlatPrices;
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -94,13 +96,19 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     }
 
     function migrateTo_eefb9b1(
-        address _weaponCosmetic
+        address _weaponCosmetic,
+        address _characterCosmetic
     ) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
         cosmeticAddresses[COSMETIC_ADDRESS_WEAPON] = _weaponCosmetic;
        
         cosmeticWeaponFlatPrices[1] = 0.1 ether;
         cosmeticWeaponFlatPrices[2] = 0.1 ether;
+
+        cosmeticAddresses[COSMETIC_ADDRESS_CHARACTER] = _characterCosmetic;
+       
+        cosmeticCharacterFlatPrices[1] = 0.1 ether;
+        cosmeticCharacterFlatPrices[2] = 0.1 ether;
     }
 
     /* ========== VIEWS ========== */
@@ -258,5 +266,21 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         require(paying > 0 && paying == cosmeticWeaponFlatPrices[cosmetic], 'Invalid price');
         game.payContractTokenOnly(msg.sender, cosmeticWeaponFlatPrices[cosmetic]);
         Cosmetics(cosmeticAddresses[COSMETIC_ADDRESS_WEAPON]).giveCosmetic(msg.sender, cosmetic, 1);
+    }
+
+    /* ========== Character cosmetics ========== */
+    function setCharacterCosmeticPrice(uint32 cosmetic, uint256 newPrice) external isAdmin {
+        require(cosmetic > 0 && newPrice > 0, 'invalid request');
+        cosmeticCharacterFlatPrices[cosmetic] = newPrice;
+    }
+
+     function getCharacterCosmeticPrice(uint32 cosmetic) public view returns (uint256){
+        return cosmeticCharacterFlatPrices[cosmetic];
+    }
+
+    function purchaseCharacterCosmetic(uint32 cosmetic, uint256 paying) public {
+        require(paying > 0 && paying == cosmeticCharacterFlatPrices[cosmetic], 'Invalid price');
+        game.payContractTokenOnly(msg.sender, cosmeticCharacterFlatPrices[cosmetic]);
+        Cosmetics(cosmeticAddresses[COSMETIC_ADDRESS_CHARACTER]).giveCosmetic(msg.sender, cosmetic, 1);
     }
 }

@@ -352,7 +352,7 @@
     <b-modal class="centered-modal" ref="weapon-change-skin-modal"
                   @ok="changeWeaponSkinCall">
                   <template #modal-title>
-                    Change Weapon's Skill
+                    Change Weapon's Skin
                   </template>
                   <span >
                     Pick a skin to switch to.
@@ -829,7 +829,7 @@ export default Vue.extend({
         }
         break;
       }
-    },
+    }
   },
 
   components: {

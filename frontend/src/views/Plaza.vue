@@ -29,6 +29,14 @@
           <div class="d-flex justify-content-space-between">
             <h1>Characters ({{ ownCharacters.length }} / 4)</h1>
             <b-button
+              v-if="canChangeSkin()"
+              variant="primary"
+              class="ml-auto gtag-link-others"
+              @click="openChangeSkin"
+              v-tooltip="'Change character\'s skin'" tagname="change_skin_character">
+              Change Skin
+            </b-button>
+            <b-button
               v-if="canChangeTrait()"
               variant="primary"
               class="ml-auto gtag-link-others"
@@ -86,6 +94,18 @@
                     <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
                   </select>
                 </b-modal>
+         <b-modal class="centered-modal" ref="character-change-skin-modal"
+                  @ok="changeCharacterSkinCall">
+                  <template #modal-title>
+                    Change Character's Skin
+                  </template>
+                  <span >
+                    Pick a skin to switch to.
+                  </span>
+                  <select class="form-control" v-model="targetSkin">
+                    <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+                  </select>
+                </b-modal>
       </div>
     </div>
   </div>
@@ -102,6 +122,7 @@ import Vue from 'vue';
 import { getCleanName, isProfaneIsh } from '../rename-censor';
 
 let getConsumablesCountInterval: any = null;
+let getCosmeticsCountInterval: any = null;
 
 interface Data {
   recruitCost: string;
@@ -111,7 +132,10 @@ interface Data {
   haveChangeTraitEarth: number;
   haveChangeTraitWater: number;
   haveChangeTraitLightning: number;
+  haveCharacterCosmetic1: number;
+  haveCharacterCosmetic2: number;
   targetTrait: string;
+  targetSkin: string;
 }
 
 export default Vue.extend({
@@ -170,6 +194,21 @@ export default Vue.extend({
 
     cleanRename(): string {
       return getCleanName(this.characterRename);
+    },
+
+    availableSkins(): string[] {
+      const availableSkins = [];
+
+      availableSkins.push('No Skin');
+
+      if(this.haveCharacterCosmetic1 > 0) {
+        availableSkins.push('Cool Skin 1');
+      }
+      if(this.haveCharacterCosmetic2 > 0) {
+        availableSkins.push('Cool Skin 2');
+      }
+
+      return availableSkins;
     }
   },
 
@@ -178,13 +217,20 @@ export default Vue.extend({
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     this.loadConsumablesCount();
+
     getConsumablesCountInterval = setInterval(async () => {
       this.loadConsumablesCount();
+    }, 3000);
+
+    this.loadCosmeticsCount();
+    getCosmeticsCountInterval = setInterval(async () => {
+      this.loadCosmeticsCount();
     }, 3000);
   },
 
   destroyed() {
     clearInterval(getConsumablesCountInterval);
+    clearInterval(getCosmeticsCountInterval);
   },
 
   data() {
@@ -196,7 +242,10 @@ export default Vue.extend({
       haveChangeTraitEarth: 0,
       haveChangeTraitWater: 0,
       haveChangeTraitLightning: 0,
+      haveCharacterCosmetic1: 0,
+      haveCharacterCosmetic2: 0,
       targetTrait: '',
+      targetSkin: ''
     } as Data;
   },
 
@@ -205,7 +254,8 @@ export default Vue.extend({
     ...mapActions(['mintCharacter', 'renameCharacter','changeCharacterTraitLightning',
       'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater', 'fetchTotalRenameTags',
       'fetchTotalCharacterFireTraitChanges','fetchTotalCharacterEarthTraitChanges',
-      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
+      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
+      'changeCharacterCosmetic', 'removeCharacterCosmetic', 'fetchOwnedCharacterCosmetics']),
 
     async onMintCharacter() {
       try {
@@ -277,6 +327,34 @@ export default Vue.extend({
       this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
       this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
     },
+
+    async loadCosmeticsCount() {
+      this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
+      this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
+    },
+    canChangeSkin() {
+      return this.currentCharacter !== undefined && this.currentCharacter.id >= 0; // show even if no owned cosmetics to allow removing cosmetic
+    },
+    openChangeSkin() {
+      (this.$refs['character-change-skin-modal'] as BModal).show();
+    },
+    async changeCharacterSkinCall() {
+      switch(this.targetSkin) {
+      case 'No Skin':
+        await this.removeCharacterCosmetic({ id: this.currentCharacter.id });
+        this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
+        this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
+        break;
+      case 'Cool Skin 1':
+        await this.changeCharacterCosmetic({ id: this.currentCharacter.id, cosmetic: 1 });
+        this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
+        break;
+      case 'Cool Skin 2':
+        await this.changeCharacterCosmetic({ id: this.currentCharacter.id, cosmetic: 2 });
+        this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
+        break;
+      }
+    }
   },
 
   components: {
