@@ -47,18 +47,21 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
   callOpts: WithOptionalFrom<Web3JsCallOptions>,
   approveOpts: WithOptionalFrom<Web3JsSendOptions>,
   fn: MethodsFunction<T>,
-  { feeMultiplier }: { feeMultiplier?: string | number } = {}
+  { feeMultiplier }: { feeMultiplier?: string | number } = {},
+  fnReturnsSkill: boolean = false,
 ) {
   const callOptsWithFrom: Web3JsCallOptions = { from, ...callOpts };
   const approveOptsWithFrom: Web3JsSendOptions = { from, ...approveOpts };
 
   let feeInSkill = new BigNumber(
-    await getFeeInSkillFromUsdFromAnyContract(
-      cryptoBladesContract,
-      feeContract,
-      callOptsWithFrom,
-      fn
-    )
+    fnReturnsSkill ?
+      await fn(feeContract.methods).call(callOptsWithFrom) :
+      await getFeeInSkillFromUsdFromAnyContract(
+        cryptoBladesContract,
+        feeContract,
+        callOptsWithFrom,
+        fn
+      )
   );
 
   if(feeMultiplier !== undefined) {
