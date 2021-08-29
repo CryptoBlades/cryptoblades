@@ -813,7 +813,7 @@ export default Vue.extend({
         await this.removeWeaponCosmetic({ id: this.reforgeWeaponId });
         if(this.contracts.WeaponCosmetics) {
           this.haveWeaponCosmetic1 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(1).call({ from: this.defaultAccount });
-          this.haveWeaponCosmetic2 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(1).call({ from: this.defaultAccount });
+          this.haveWeaponCosmetic2 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(2).call({ from: this.defaultAccount });
         }
         break;
       case 'Cool Skin 1':
@@ -825,7 +825,7 @@ export default Vue.extend({
       case 'Cool Skin 2':
         await this.changeWeaponCosmetic({ id: this.reforgeWeaponId, cosmetic: 2 });
         if(this.contracts.WeaponCosmetics) {
-          this.haveWeaponCosmetic2 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(1).call({ from: this.defaultAccount });
+          this.haveWeaponCosmetic2 = await this.contracts.WeaponCosmetics.methods.getCosmeticCount(2).call({ from: this.defaultAccount });
         }
         break;
       }
