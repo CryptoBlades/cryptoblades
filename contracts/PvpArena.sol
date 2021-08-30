@@ -13,7 +13,6 @@ import "./raid1.sol";
 // TODO:
 // - [ ] use proper types for costs
 contract PvpArena is Initializable, AccessControlUpgradeable {
-    using ABDKMath64x64 for int128;
     using SafeMath for uint256;
     using SafeMath for uint8;
 
@@ -23,7 +22,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 characterID;
         uint256 weaponID;
         uint256 shieldID;
-        uint256 wager;
+        /// @dev amount of skill wagered for this character
+        uint256 wagerAmount;
         bool useShield;
     }
 
@@ -34,11 +34,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     IERC20 public skillToken;
     Raid1 public raids;
 
-    // TODO: Update this to use combat prize formula
-    /// @dev the base cost required to enter the arena
-    int128 public baseEntryCost;
-    /// @dev additional cost per character level
-    int128 public extraCostPerLevel;
+    /// @dev how many times the cost of battling must be wagered to enter the arena
+    uint256 wageringFactor;
 
     /// @dev fighters available by tier (1-10, 11-20, etc...)
     mapping(uint8 => Fighter[]) private fightersByTier;
@@ -46,26 +43,26 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(address => Fighter[]) private fightersByPlayer;
 
     ///@dev mapping to track the characters used
-    mapping(uint256 => bool) public isCharacterUsed;
+    mapping(uint256 => bool) public charactersInUse;
 
     ///@dev mapping to track the weapons used
-    mapping(uint256 => bool) public isWeaponUsed;
+    mapping(uint256 => bool) public weaponsInUse;
 
     ///@dev mapping to track the shields used
-    mapping(uint256 => bool) public isShieldUsed;
+    mapping(uint256 => bool) public shieldsInUse;
 
-    modifier beforeEnteringArena(
+    modifier enteringArenaChecks(
         uint256 characterID,
         uint256 weaponID,
         uint256 shieldID,
         bool useShield
     ) {
         require(
-            isCharacterUsed[characterID] == false,
+            !charactersInUse[characterID],
             "The character is already in the arena"
         );
         require(
-            isWeaponUsed[characterID] == false,
+            !weaponsInUse[characterID],
             "The weapon is already in the arena"
         );
         require(
@@ -77,24 +74,26 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             "You don't own the given weapon"
         );
         require(
-            raids.isCharacterRaiding(characterID) == false,
+            !raids.isCharacterRaiding(characterID),
             "The given character is already raiding"
         );
         require(
-            raids.isWeaponRaiding(weaponID) == false,
+            !raids.isWeaponRaiding(weaponID),
             "The given weapon is already raiding"
         );
+
         if (useShield) {
             require(
                 shields.ownerOf(shieldID) == msg.sender,
                 "You don't own the given shield"
             );
             require(
-                isShieldUsed[shieldID] == false,
+                !shieldsInUse[shieldID],
                 "The shield is already in the arena"
             );
-            _;
+            // TODO: Check if shields are used in the arena somehow
         }
+
         _;
     }
 
@@ -113,9 +112,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         skillToken = IERC20(game.skillToken());
         raids = Raid1(raidContract);
 
-        // TODO: define the real values
-        baseEntryCost = 2;
-        extraCostPerLevel = ABDKMath64x64.divu(1, 10);
+        wageringFactor = 3;
     }
 
     /// @notice enter the arena with a character, a weapon and a shield(optional)
@@ -124,34 +121,39 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 weaponID,
         uint256 shieldID,
         bool useShield
-    ) public beforeEnteringArena(characterID, weaponID, shieldID, useShield) {
-        // TODOS:
-        // - [x] calculate wager cost
-        uint256 entryCost = getEntryCost(characterID);
+    ) public enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
+        uint256 wager = getEntryWager(characterID);
         uint8 tier = getArenaTier(characterID);
-        isCharacterUsed[characterID] = true;
-        isWeaponUsed[weaponID] = true;
-        if (useShield) isShieldUsed[shieldID] = true;
-        fightersByTier[tier].push(
-            Fighter(characterID, weaponID, shieldID, entryCost, useShield)
+
+        charactersInUse[characterID] = true;
+        weaponsInUse[weaponID] = true;
+
+        if (useShield) shieldsInUse[shieldID] = true;
+
+        Fighter memory fighter = Fighter(
+            characterID,
+            weaponID,
+            shieldID,
+            wager,
+            useShield
         );
-        fightersByPlayer[msg.sender].push(
-            Fighter(characterID, weaponID, shieldID, entryCost, useShield)
-        );
-        skillToken.transferFrom(msg.sender, address(this), entryCost);
+
+        fightersByTier[tier].push(fighter);
+        fightersByPlayer[msg.sender].push(fighter);
+
+        skillToken.transferFrom(msg.sender, address(this), wager);
     }
 
-    /// @notice gets the amount of SKILL that is wagered per duel
-    function getDuelCost() public view returns (uint256) {}
+    /// @notice gets the amount of SKILL that is risked per duel
+    function getDuelCost(uint256 characterID) public view returns (uint256) {
+        // FIXME: Use normal combat rewards formula. THIS IS JUST TEMPORARY CODE
+        return getArenaTier(characterID).add(1).mul(1000);
+    }
 
     /// @notice gets the amount of SKILL required to enter the arena
     /// @param characterID the id of the character entering the arena
-    function getEntryCost(uint256 characterID) public view returns (uint256) {
-        // TODO: use combat rewards formula
-        int128 costInUsd = ABDKMath64x64
-            .fromUInt(extraCostPerLevel.mulu(characters.getLevel(characterID)))
-            .add(baseEntryCost);
-        return game.usdToSkill(costInUsd);
+    function getEntryWager(uint256 characterID) public view returns (uint256) {
+        return getDuelCost(characterID).mul(wageringFactor);
     }
 
     /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
@@ -161,29 +163,47 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return uint8(level.div(10));
     }
 
-    /// @dev gets IDs of the sender's character's currently in the arena
+    /// @dev gets IDs of the sender's characters currently in the arena
     function getMyParticipatingCharacters()
         public
         view
         returns (uint256[] memory)
     {
-        // TODO: implement (not final signature)
-        // uint256 len = fightersByPlayer[msg.sender].length;
-        // uint256[] memory ids;
-        // for (uint256 i = 0; i < len; i++) {
-        //     ids[i] = fightersByPlayer[msg.sender][i].characterID;
-        // }
-        // return ids;
-        
+        uint256[] memory ids;
+
+        for (uint256 i = 0; i < fightersByPlayer[msg.sender].length; i++) {
+            ids[i] = fightersByPlayer[msg.sender][i].characterID;
+        }
+
+        return ids;
     }
 
-    /// @dev finds an opponent for a character. If a battle is still pending, it charges a penalty
-    function findOpponent(uint256 characterID) public view returns (uint256) {
+    /// @dev attempts to find an opponent for a character. If a battle is still pending, it charges a penalty and re-rolls the opponent
+    function requestOpponent(uint256 characterID) public returns (uint256) {
         // TODO: implement (not final signature)
     }
 
-    /// @dev starts the duel for a given character
-    function startDuel(uint256 characterID) public {
+    /// @dev checks if a character is in the arena
+    function isCharacterInArena(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return charactersInUse[characterID];
+    }
+
+    /// @dev checks if a weapon is in the arena
+    function isWeaponInArena(uint256 weaponID) public view returns (bool) {
+        return weaponsInUse[weaponID];
+    }
+
+    /// @dev checks if a shield is in the arena
+    function isShieldInArena(uint256 shieldID) public view returns (bool) {
+        return shieldsInUse[shieldID];
+    }
+
+    /// @dev performs a given character's duel against its opponent
+    function performDuel(uint256 characterID) public {
         // TODO: implement (not final signature)
     }
 
