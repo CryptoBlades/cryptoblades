@@ -84,6 +84,7 @@ interface Data {
   showGraphics: boolean;
   hideRewards: boolean;
   hideWalletWarning: boolean;
+  showSkillInUsd: boolean;
 }
 
 interface StoreMappedGetters {
@@ -102,6 +103,7 @@ export default Vue.extend({
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+    this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
   },
 
   data() {
@@ -109,6 +111,7 @@ export default Vue.extend({
       showGraphics: false,
       hideRewards: false,
       hideWalletWarning: false,
+      showSkillInUsd: false,
       ClaimStage
     } as Data;
   },
@@ -187,6 +190,14 @@ export default Vue.extend({
       else localStorage.setItem('hideWalletWarning', 'false');
 
       Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
+    },
+
+    toggleShowSkillInUsd() {
+      this.showSkillInUsd = !this.showSkillInUsd;
+      if (this.showSkillInUsd) localStorage.setItem('showSkillInUsd', 'true');
+      else localStorage.setItem('showSkillInUsd', 'false');
+
+      Events.$emit('setting:showSkillInUsd', { value: this.showSkillInUsd });
     },
   }
 });

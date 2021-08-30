@@ -14,7 +14,7 @@ import {
   IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
+import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
@@ -24,6 +24,7 @@ import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
 import { Nft } from './interfaces/Nft';
 import { getWeaponNameFromSeed } from '@/weapon-name';
+import axios from 'axios';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -79,6 +80,7 @@ export function createStore(web3: Web3) {
       accounts: [],
       defaultAccount: null,
       currentNetworkId: null,
+      skillPriceInUsd: 0,
 
       fightGasOffset: '0',
       fightBaseline: '0',
@@ -468,6 +470,10 @@ export function createStore(web3: Web3) {
         }
       },
 
+      setSkillPriceInUsd(state, payload) {
+        state.skillPriceInUsd = payload;
+      },
+
       setContracts(state: IState, payload) {
         state.contracts = payload;
       },
@@ -684,6 +690,7 @@ export function createStore(web3: Web3) {
         await dispatch('setUpContractEvents');
 
         await dispatch('pollAccountsAndNetwork');
+        await dispatch('pollSkillPriceInUsd');
 
         await dispatch('setupCharacterStaminas');
         await dispatch('setupCharacterRenames');
@@ -714,6 +721,22 @@ export function createStore(web3: Web3) {
           ]);
         }
       },
+
+      async pollSkillPriceInUsd({ state, commit }) {
+        const fetchPriceData = async () => {
+          const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
+          const skillPriceInUsd = response.data?.cryptoblades.usd;
+          if (state.skillPriceInUsd !== skillPriceInUsd) {
+            commit('setSkillPriceInUsd', skillPriceInUsd);
+          }
+        };
+        await fetchPriceData();
+        setInterval(async () => {
+          await fetchPriceData();
+        }, 30000);
+      },
+
+
 
       setUpContractEvents({ state, dispatch, commit }) {
         state.eventSubscriptions().forEach(sub => sub.unsubscribe());
@@ -1762,10 +1785,23 @@ export function createStore(web3: Web3) {
       },
 
       async joinRaid({ state }, { characterId, weaponId }) {
-        const { Raid1 } = state.contracts();
-        if(!Raid1) {
+        const { CryptoBlades, SkillToken, Raid1 } = state.contracts();
+        if(!Raid1 || !CryptoBlades || !SkillToken || !state.defaultAccount) {
           return;
         }
+
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          Raid1,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          raidsFunctions => raidsFunctions.getJoinCostInSkill(),
+          {},
+          true
+        );
 
         await Raid1!.methods
           .joinRaid(characterId, weaponId)
@@ -1792,10 +1828,7 @@ export function createStore(web3: Web3) {
         const Raid1 = state.contracts().Raid1!;
 
         return await Raid1.methods
-          .getEligibleRewardIndexes(
-            startIndex,
-            endIndex
-          )
+          .getEligibleRewardIndexes(startIndex, endIndex)
           .call(defaultCallOptions(state));
       },
 
