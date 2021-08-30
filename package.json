@@ -43,7 +43,7 @@
     "build": "truffle compile",
     "postbuild": "node scripts/generate-ts-from-abis.js",
     "test": "truffle test",
-    "test-local": "truffle test --migrations_directory migrations_null",
+    "test-local": "truffle test --migrations_directory test-migrations",
     "deploy": "truffle migrate --reset",
     "deploy-testnet": "truffle migrate --network bsctestnet",
     "postdeploy-testnet": "run-s \"backup-networks 97\" \"verify-contracts -- --network bsctestnet\"",
