@@ -14,7 +14,7 @@ import {
   IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
+import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
@@ -24,6 +24,7 @@ import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
 import { Nft } from './interfaces/Nft';
 import { getWeaponNameFromSeed } from '@/weapon-name';
+import axios from 'axios';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -79,6 +80,7 @@ export function createStore(web3: Web3) {
       accounts: [],
       defaultAccount: null,
       currentNetworkId: null,
+      skillPriceInUsd: 0,
 
       fightGasOffset: '0',
       fightBaseline: '0',
@@ -468,6 +470,10 @@ export function createStore(web3: Web3) {
         }
       },
 
+      setSkillPriceInUsd(state, payload) {
+        state.skillPriceInUsd = payload;
+      },
+
       setContracts(state: IState, payload) {
         state.contracts = payload;
       },
@@ -622,7 +628,6 @@ export function createStore(web3: Web3) {
         Vue.set(state.weaponDurabilities, weaponId, durability);
       },
       updateWeaponRename(state: IState, { weaponId, renameString }) {
-        console.log('rename for ' + weaponId + ' is ' + renameString);
         if(renameString !== undefined){
           Vue.set(state.weaponRenames, weaponId, renameString);
         }
@@ -685,6 +690,7 @@ export function createStore(web3: Web3) {
         await dispatch('setUpContractEvents');
 
         await dispatch('pollAccountsAndNetwork');
+        await dispatch('pollSkillPriceInUsd');
 
         await dispatch('setupCharacterStaminas');
         await dispatch('setupCharacterRenames');
@@ -715,6 +721,22 @@ export function createStore(web3: Web3) {
           ]);
         }
       },
+
+      async pollSkillPriceInUsd({ state, commit }) {
+        const fetchPriceData = async () => {
+          const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
+          const skillPriceInUsd = response.data?.cryptoblades.usd;
+          if (state.skillPriceInUsd !== skillPriceInUsd) {
+            commit('setSkillPriceInUsd', skillPriceInUsd);
+          }
+        };
+        await fetchPriceData();
+        setInterval(async () => {
+          await fetchPriceData();
+        }, 30000);
+      },
+
+
 
       setUpContractEvents({ state, dispatch, commit }) {
         state.eventSubscriptions().forEach(sub => sub.unsubscribe());
@@ -1624,13 +1646,14 @@ export function createStore(web3: Web3) {
 
         await dispatch('fetchWeaponDurability', weaponId);
 
-        return [parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
+        return {
+          isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
           playerRoll,
           enemyRoll,
           xpGain,
           skillGain,
           bnbGasUsed
-        ];
+        };
       },
 
       async fetchStakeOverviewData({ getters, dispatch }) {
@@ -1765,10 +1788,23 @@ export function createStore(web3: Web3) {
       },
 
       async joinRaid({ state }, { characterId, weaponId }) {
-        const { Raid1 } = state.contracts();
-        if(!Raid1) {
+        const { CryptoBlades, SkillToken, Raid1 } = state.contracts();
+        if(!Raid1 || !CryptoBlades || !SkillToken || !state.defaultAccount) {
           return;
         }
+
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          Raid1,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          raidsFunctions => raidsFunctions.getJoinCostInSkill(),
+          {},
+          true
+        );
 
         await Raid1!.methods
           .joinRaid(characterId, weaponId)
@@ -1795,10 +1831,7 @@ export function createStore(web3: Web3) {
         const Raid1 = state.contracts().Raid1!;
 
         return await Raid1.methods
-          .getEligibleRewardIndexes(
-            startIndex,
-            endIndex
-          )
+          .getEligibleRewardIndexes(startIndex, endIndex)
           .call(defaultCallOptions(state));
       },
 
@@ -1869,24 +1902,50 @@ export function createStore(web3: Web3) {
         // claimreward does not reward trinket, those are given at raidcompletion by the bot
 
         if(res.events.RewardedJunk) {
-          await dispatch('fetchJunk', '' + res.events.RewardedJunk.returnValues.tokenID);
+          const junkIds = res.events.RewardedJunk.length ?
+            res.events.RewardedJunk.map((x: { returnValues: { tokenID: any; }; }) => x.returnValues.tokenID) :
+            [res.events.RewardedJunk.returnValues.tokenID];
+          await dispatch('fetchJunks', junkIds);
         }
 
         if(res.events.RewardedKeyBox) {
-          await dispatch('fetchKeyLootboxes', ['' + res.events.RewardedKeyBox.returnValues.tokenID]);
+          const keyboxIds = res.events.RewardedKeyBox.length ?
+            res.events.RewardedKeyBox.map((x: { returnValues: { tokenID: any; }; }) => x.returnValues.tokenID) :
+            [res.events.RewardedKeyBox.returnValues.tokenID];
+          await dispatch('fetchKeyLootboxes', keyboxIds);
         }
 
         // there may be other events fired that can be used to obtain the exact loot
         // RewardedWeapon, RewardedJunk, RewardedTrinket, RewardedKeyBox etc
         const rewards = {
           rewardsClaimed: res.events.RewardClaimed?.returnValues,
-          weapon: res.events.RewardedWeapon?.returnValues,
-          junk: res.events.RewardedJunk?.returnValues,
-          trinket: res.events.RewardedTrinket?.returnValues,
-          dustLb: res.events.RewardedDustLB?.returnValues,
-          dust4b: res.events.RewardedDust4B?.returnValues,
-          dust5b: res.events.RewardedDust5B?.returnValues,
-          keybox: res.events.RewardedKeyBox?.returnValues
+          weapons: res.events.RewardedWeapon && (res.events.RewardedWeapon.length ?
+            res.events.RewardedWeapon.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedWeapon.returnValues]),
+
+          junks: res.events.RewardedJunk && (res.events.RewardedJunk.length ?
+            res.events.RewardedJunk.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedJunk.returnValues]),
+
+          keyboxes: res.events.RewardedKeyBox && (res.events.RewardedKeyBox.length ?
+            res.events.RewardedKeyBox.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedKeyBox.returnValues]),
+
+          bonusXp: res.events.RewardedXpBonus && (res.events.RewardedXpBonus.length ?
+            res.events.RewardedXpBonus.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedXpBonus.returnValues]),
+
+          dustLb: res.events.RewardedDustLB && (res.events.RewardedDustLB.length ?
+            res.events.RewardedDustLB.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedDustLB.returnValues]),
+
+          dust4b: res.events.RewardedDust4B && (res.events.RewardedDust4B.length ?
+            res.events.RewardedDust4B.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedDust4B.returnValues]),
+
+          dust5b: res.events.RewardedDust5B && (res.events.RewardedDust5B.length ?
+            res.events.RewardedDust5B.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedDust5B.returnValues]),
         };
         return rewards;
       },
