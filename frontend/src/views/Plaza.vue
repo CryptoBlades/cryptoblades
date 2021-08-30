@@ -29,6 +29,13 @@
           <div class="d-flex justify-content-space-between">
             <h1>Characters ({{ ownCharacters.length }} / 4)</h1>
             <b-button
+              v-if="canChangeSkin()"
+              variant="primary"
+              class="ml-auto gtag-link-others"
+              @click="openChangeSkin"
+              v-tooltip="'Change character\'s skin'" tagname="change_skin_character">
+              Change Skin
+            </b-button>
               v-if="ownCharacters.length < 4"
               :disabled="!canRecruit()"
               variant="primary"
@@ -44,6 +51,18 @@
             @input="setCurrentCharacter"
           />
         </div>
+         <b-modal class="centered-modal" ref="character-change-skin-modal"
+                  @ok="changeCharacterSkinCall">
+                  <template #modal-title>
+                    Change Character's Skin
+                  </template>
+                  <span >
+                    Pick a skin to switch to.
+                  </span>
+                  <select class="form-control" v-model="targetSkin">
+                    <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+                  </select>
+                </b-modal>
       </div>
     </div>
   </div>
@@ -57,9 +76,13 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import Vue from 'vue';
 
+let getCosmeticsCountInterval: any = null;
 
 interface Data {
   recruitCost: string;
+  haveCharacterCosmetic1: number;
+  haveCharacterCosmetic2: number;
+  targetSkin: string;
 }
 
 export default Vue.extend({
@@ -93,23 +116,50 @@ export default Vue.extend({
         experience: c.xp,
       };
     },
+    availableSkins(): string[] {
+      const availableSkins = [];
+
+      availableSkins.push('No Skin');
+
+      if(this.haveCharacterCosmetic1 > 0) {
+        availableSkins.push('Cool Skin 1');
+      }
+      if(this.haveCharacterCosmetic2 > 0) {
+        availableSkins.push('Cool Skin 2');
+      }
+
+      return availableSkins;
+    }
   },
 
   async created() {
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
+
+    this.loadCosmeticsCount();
+    getCosmeticsCountInterval = setInterval(async () => {
+      this.loadCosmeticsCount();
+    }, 3000);
+  },
+
+  destroyed() {
+    clearInterval(getCosmeticsCountInterval);
   },
 
   data() {
     return {
       recruitCost: '0',
+      haveCharacterCosmetic1: 0,
+      haveCharacterCosmetic2: 0,
+      targetSkin: ''
     } as Data;
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter',]),
+      'changeCharacterCosmetic', 'removeCharacterCosmetic', 'fetchOwnedCharacterCosmetics']),
 
     async onMintCharacter() {
       try {
@@ -126,6 +176,34 @@ export default Vue.extend({
       const balance = toBN(this.skillBalance);
       return balance.isGreaterThanOrEqualTo(cost);
     },
+
+    async loadCosmeticsCount() {
+      this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
+      this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
+    },
+    canChangeSkin() {
+      return this.currentCharacter !== undefined && this.currentCharacter.id >= 0; // show even if no owned cosmetics to allow removing cosmetic
+    },
+    openChangeSkin() {
+      (this.$refs['character-change-skin-modal'] as BModal).show();
+    },
+    async changeCharacterSkinCall() {
+      switch(this.targetSkin) {
+      case 'No Skin':
+        await this.removeCharacterCosmetic({ id: this.currentCharacter.id });
+        this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
+        this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
+        break;
+      case 'Cool Skin 1':
+        await this.changeCharacterCosmetic({ id: this.currentCharacter.id, cosmetic: 1 });
+        this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
+        break;
+      case 'Cool Skin 2':
+        await this.changeCharacterCosmetic({ id: this.currentCharacter.id, cosmetic: 2 });
+        this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
+        break;
+      }
+    }
   },
 
   components: {

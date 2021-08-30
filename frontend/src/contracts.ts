@@ -27,6 +27,8 @@ import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
+import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
+
 
 import Web3 from 'web3';
 import { Contracts, isStakeType, StakeType, StakingContracts } from './interfaces';
@@ -166,6 +168,10 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const cosmeticsWeaponAddr = await Blacksmith.methods.getAddressOfCosmetic(cosmeticsWeaponIndex).call();
   const WeaponCosmetics = new web3.eth.Contract(weaponCosmeticsAbi as Abi, cosmeticsWeaponAddr);
 
+  const cosmeticsCharacterIndex = await Blacksmith.methods.COSMETIC_ADDRESS_CHARACTER().call();
+  const cosmeticsCharacterAddr = await Blacksmith.methods.getAddressOfCosmetic(cosmeticsCharacterIndex).call();
+  const CharacterCosmetics = new web3.eth.Contract(characterCosmeticsAbi as Abi, cosmeticsCharacterAddr);
+
 
   const raidContracts: RaidContracts = {};
   let raidTrinketAddress = '';
@@ -205,7 +211,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
-    WeaponCosmetics,
+    WeaponCosmetics, CharacterCosmetics,
     ...raidContracts,
     ...marketContracts,
     WaxBridge,

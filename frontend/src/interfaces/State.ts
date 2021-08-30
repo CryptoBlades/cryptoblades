@@ -88,6 +88,7 @@ export interface IState {
   characters: Record<number, ICharacter>;
   characterStaminas: Record<number, number>;
   characterRenames: Record<number, string>;
+  characterCosmetics: Record<number, string>;
 
   currentWeaponId: number | null;
   weapons: Record<number, IWeapon>;
