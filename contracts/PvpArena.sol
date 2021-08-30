@@ -43,13 +43,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev IDs of characters in the arena per player
     mapping(address => uint256[]) private fightersByPlayer;
 
-    ///@dev mapping to track the characters used
+    ///@dev characters currently in the arena
     mapping(uint256 => bool) public charactersInUse;
 
-    ///@dev mapping to track the weapons used
+    ///@dev weapons currently in the arena
     mapping(uint256 => bool) public weaponsInUse;
 
-    ///@dev mapping to track the shields used
+    ///@dev shields currently in the arena
     mapping(uint256 => bool) public shieldsInUse;
 
     modifier enteringArenaChecks(
