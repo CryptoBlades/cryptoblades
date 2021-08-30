@@ -36,6 +36,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev fighters available by tier (1-10, 11-20, etc...)
     mapping (uint8 => Fighter[]) private fightersByTier;
+    /// @dev fighters by player address
+    mapping (address => Fighter[]) private fightersByPlayer;
 
     function initialize(address gameContract) public initializer {
         __AccessControl_init_unchained();
@@ -51,7 +53,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         extraCostPerLevel = ABDKMath64x64.divu(1, 10);
     }
 
-    /// @dev enter the arena with a character and a weapon
+    /// @notice enter the arena with a character and a weapon
     function enterArena(uint256 characterID, uint256 weaponID) public {
         // TODOS:
         // - [ ] check if character is not in the arena
@@ -67,7 +69,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         fightersByTier[tier].push(Fighter(characterID, weaponID, entryCost));
     }
 
-    /// @dev gets the amount of SKILL required to enter the arena
+    /// @notice gets the amount of SKILL that is wagered per duel
+    function getDuelCost() public view returns (uint256) {
+
+    }
+    /// @notice gets the amount of SKILL required to enter the arena
     /// @param characterID the id of the character entering the arena
     function getEntryCost(uint256 characterID) public view returns (uint256) {
         // TODO: use combat rewards formula
@@ -75,11 +81,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return game.usdToSkill(costInUsd);
     }
 
-    /// @dev gets the arena tier of a character
+
+    /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
     function getArenaTier(uint256 characterID) public view returns (uint8) {
         uint256 level = characters.getLevel(characterID);
 
         return uint8(level.div(10));
+    }
+
+    /// @dev gets IDs of the sender's character's currently in the arena
+    function getMyParticipatingCharacters() public view returns (uint256[] memory) {
+        // TODO: implement (not final signature)
     }
 
     /// @dev finds an opponent for a character. If a battle is still pending, it charges a penalty
@@ -94,7 +106,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev withdraws a character from the arena.
     /// if the character is in a battle, a penalty is charged
-    function withdraw(uint256 characterID) public {
+    function withdrawCharacter(uint256 characterID) public {
         // TODO: implement (not final signature)
     }
 
