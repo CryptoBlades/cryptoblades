@@ -1,7 +1,7 @@
 <template>
   <div
     class="weapon-icon"
-    v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '') + ' ' + 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id)]"
+    v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '')]"
     v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"
@@ -13,7 +13,8 @@
 
     <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
 
-      <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)" />
+      <div class="animation" v-bind:class="'weapon-animation-applied-' + weapon.id"/>
+      <img v-if="showPlaceholder" v-bind:class="'weapon-cosmetic-applied-' + weapon.id" class="placeholder" :src="getWeaponArt(weapon)" />
 
       <div class="trait">
         <span :class="weapon.element.toLowerCase() + '-icon'"></span>
@@ -490,12 +491,12 @@ export default {
 
 .favorite-star {
   position: absolute;
-  margin-left: 5px;
+  margin-left: 40px;
 }
 
 .id {
   top: 8px;
-  right: 10px;
+  left: 30px;
   font-style: italic;
 }
 
@@ -559,12 +560,104 @@ export default {
   text-align: right;
 }
 
+.animation {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
 .weapon-cosmetic-applied-1{
-  border: 1px solid silver;
+  filter: grayscale(100%);
 }
 
 .weapon-cosmetic-applied-2{
-  border: 1px solid gold;
+  filter: contrast(200%);
+}
+
+.weapon-cosmetic-applied-3{
+  filter: sepia(100%);
+}
+
+.weapon-cosmetic-applied-4{
+  filter: invert(100%);
+}
+
+.weapon-cosmetic-applied-5{
+  filter: blur(1px);
+}
+
+.weapon-cosmetic-applied-6{
+  animation: dropglow 500ms ease-out infinite alternate;
+}
+
+.weapon-cosmetic-applied-7{
+  animation: droprotateglow 1000ms ease-in-out infinite alternate;
+}
+
+.weapon-animation-applied-8{
+  width: 0;
+  height: 0;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  animation: backglow 500ms ease-out infinite alternate;
+  transform: scale(4);
+}
+
+.weapon-animation-applied-9{
+  filter: opacity(50%) blur(2px);
+  border-radius: 50%;
+  animation: circle 1500ms linear infinite;
+}
+
+.weapon-cosmetic-applied-10{
+  animation: ghost-item 1000ms ease-in-out infinite alternate;
+}
+
+.weapon-animation-applied-11{
+  background: radial-gradient(#ccc, #000);
+  animation: star-item 1000ms linear infinite;
+  clip-path: polygon(50% 0%, 68% 23%, 98% 35%, 79% 61%, 79% 91%, 49% 82%, 21% 91%, 21% 61%, 2% 35%, 32% 24%);
+}
+
+.weapon-animation-applied-12{
+  animation: nebula 1000ms ease-in-out infinite;
+  box-shadow: inset 0 0 50px #fff,
+  inset 20px 0 80px #f0f,
+  inset -20px 0 80px #0ff,
+  inset 20px 0 300px #f0f,
+  inset -20px 0 300px #0ff,
+  0 0 50px #fff,
+  -10px 0 80px #f0f,
+  10px 0 80px #0ff;
+}
+
+.weapon-animation-applied-13{
+  border-radius: 50%;
+  animation: nebula2 1000ms ease-in-out infinite;
+  box-shadow: inset 0 0 25px #fff,
+  inset 10px 0 40px #f0f,
+  inset -10px 0 40px #0ff,
+  inset 10px 0 150px #f0f,
+  inset -10px 0 150px #0ff,
+  0 0 25px #fff,
+  -5px 0 40px #f0f,
+  5px 0 40px #0ff;
+}
+
+.weapon-animation-applied-14{
+  border-radius: 50%;
+  animation: nebula3 1000ms ease-in infinite;
+}
+
+.weapon-animation-applied-15{
+  border-radius: 50%;
+  animation: nebula4 1000ms ease-in infinite;
+}
+
+.weapon-animation-applied-16{
+  border-radius: 50%;
+  animation: nebula5 1000ms ease-in infinite;
 }
 
 @keyframes glow-1 {
@@ -600,6 +693,198 @@ export default {
   }
   100% {
     box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
+  }
+}
+
+@keyframes dropglow {
+  0% {
+    filter: drop-shadow(0 0 10px crimson);
+  }
+  100% {
+    filter: drop-shadow(0 0 25px crimson);
+  }
+}
+
+@keyframes droprotateglow {
+  0% {
+    filter: drop-shadow(0 0 0.5rem navy);
+  }
+  100% {
+    filter: drop-shadow(0 0 1rem navy);
+  }
+}
+
+@keyframes backglow {
+  0% {
+    filter: drop-shadow(0 0 0.5rem navy);
+  }
+  100% {
+    filter: drop-shadow(0 0 1rem navy);
+  }
+}
+
+@keyframes backglow {
+  0% {
+    box-shadow: 0 0 10px 10px rgba(255, 0, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 7.5px 15px rgba(200, 0, 200, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 5px 20px rgba(0, 0, 255, 0.45);
+  }
+}
+
+@keyframes circle {
+  0% {
+    transform: rotate(360deg);
+    background: radial-gradient(circle at 8px 32px, #5cabff, #000);
+  }
+  50% {
+    transform: rotate(180deg);
+    background: radial-gradient(circle at 16px 32px, #5cabff, #000);
+  }
+  100% {
+    transform: rotate(0deg);
+    background: radial-gradient(circle at 8px 32px, #5cabff, #000);
+  }
+}
+
+@keyframes ghost-item {
+  0% {
+    filter: opacity(85%) drop-shadow(0 0 0.5rem navy);
+  }
+  100% {
+    filter: opacity(50%) drop-shadow(0 0 1rem navy);
+  }
+}
+
+@keyframes star-item {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes nebula {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes nebula2 {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes nebula3 {
+  0% {
+    box-shadow:
+      inset 0 0 12px #fff,      /* inner white */
+      inset 5px 0 20px #f0f,   /* inner left magenta short */
+      inset -5px 0 20px #0ff,  /* inner right cyan short */
+      inset 5px 0 75px #f0f,  /* inner left magenta broad */
+      inset -5px 0 75px #0ff, /* inner right cyan broad */
+      0 0 12px #fff,            /* outer white */
+      -2px 0 20px #f0f,        /* outer left magenta */
+      2px 0 20px #0ff;         /* outer right cyan */
+  }
+  50% {
+    box-shadow:
+      inset 0 0 6px #fff,      /* inner white */
+      inset 2px 0 10px #f0f,   /* inner left magenta short */
+      inset -2px 0 10px #0ff,  /* inner right cyan short */
+      inset 2px 0 50px #f0f,   /* inner left magenta broad */
+      inset -2px 0 50px #0ff,  /* inner right cyan broad */
+      0 0 6px #fff,            /* outer white */
+      -2px 0 10px #f0f,        /* outer left magenta */
+      2px 0 10px #0ff;         /* outer right cyan */
+  }
+  100% {
+    box-shadow:
+      inset 0 0 12px #fff,      /* inner white */
+      inset 5px 0 20px #f0f,   /* inner left magenta short */
+      inset -5px 0 20px #0ff,  /* inner right cyan short */
+      inset 5px 0 75px #f0f,  /* inner left magenta broad */
+      inset -5px 0 75px #0ff, /* inner right cyan broad */
+      0 0 12px #fff,            /* outer white */
+      -2px 0 20px #f0f,        /* outer left magenta */
+      2px 0 20px #0ff;         /* outer right cyan */
+  }
+}
+
+@keyframes nebula4 {
+  0% {
+    transform: rotate(0deg);
+    box-shadow:
+      inset 0 0 12px #fff,      /* inner white */
+      inset 5px 0 20px #f0f,   /* inner left magenta short */
+      inset -5px 0 20px #0ff,  /* inner right cyan short */
+      inset 5px 0 75px #f0f,  /* inner left magenta broad */
+      inset -5px 0 75px #0ff, /* inner right cyan broad */
+      0 0 12px #fff,            /* outer white */
+      -2px 0 20px #f0f,        /* outer left magenta */
+      2px 0 20px #0ff;         /* outer right cyan */
+  }
+  50% {
+    transform: rotate(180deg);
+    box-shadow:
+      inset 0 0 6px #fff,      /* inner white */
+      inset 2px 0 10px #f0f,   /* inner left magenta short */
+      inset -2px 0 10px #0ff,  /* inner right cyan short */
+      inset 2px 0 50px #f0f,   /* inner left magenta broad */
+      inset -2px 0 50px #0ff,  /* inner right cyan broad */
+      0 0 6px #fff,            /* outer white */
+      -2px 0 10px #f0f,        /* outer left magenta */
+      2px 0 10px #0ff;         /* outer right cyan */
+  }
+  100% {
+    transform: rotate(360deg);
+    box-shadow:
+      inset 0 0 12px #fff,      /* inner white */
+      inset 5px 0 20px #f0f,   /* inner left magenta short */
+      inset -5px 0 20px #0ff,  /* inner right cyan short */
+      inset 5px 0 75px #f0f,  /* inner left magenta broad */
+      inset -5px 0 75px #0ff, /* inner right cyan broad */
+      0 0 12px #fff,            /* outer white */
+      -2px 0 20px #f0f,        /* outer left magenta */
+      2px 0 20px #0ff;         /* outer right cyan */
+  }
+}
+
+@keyframes nebula5 {
+  0% {
+    box-shadow:
+      inset 0 0 12px #fff,      /* inner white */
+      inset 5px 0 20px #aaa,   /* inner left magenta short */
+      inset -5px 0 20px #ccc,  /* inner right cyan short */
+      inset 5px 0 75px #666,  /* inner left magenta broad */
+      inset -5px 0 75px #000; /* inner right cyan broad */
+  }
+  50% {
+    box-shadow:
+      inset 0 0 6px #fff,      /* inner white */
+      inset 2px 0 10px #aaa,   /* inner left magenta short */
+      inset -2px 0 10px #ccc,  /* inner right cyan short */
+      inset 2px 0 50px #666,   /* inner left magenta broad */
+      inset -2px 0 50px #000;  /* inner right cyan broad */
+  }
+  100% {
+    box-shadow:
+      inset 0 0 12px #fff,      /* inner white */
+      inset 5px 0 20px #aaa,   /* inner left magenta short */
+      inset -5px 0 20px #ccc,  /* inner right cyan short */
+      inset 5px 0 75px #666,  /* inner left magenta broad */
+      inset -5px 0 75px #000; /* inner right cyan broad */
   }
 }
 </style>

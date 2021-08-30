@@ -266,15 +266,15 @@ export default {
         this.quantityOwned = await this.fetchTotalCharacterLightningTraitChanges();
       }, 3000);
     } else if(this.nft.type === 'WeaponCosmetic1') {
-      this.quantityOwned = await this.fetchOwnedWeaponCosmetics({cosmetic: 1});
+      this.quantityOwned = await this.fetchOwnedWeaponCosmetics({ cosmetic: 1 });
       this.fetchSupplyInterval = setInterval(async () => {
-        this.quantityOwned = await this.fetchOwnedWeaponCosmetics({cosmetic: 1});
+        this.quantityOwned = await this.fetchOwnedWeaponCosmetics({ cosmetic: 2 });
       }, 3000);
     }
     else if(this.nft.type === 'WeaponCosmetic2') {
-      this.quantityOwned = await this.fetchOwnedWeaponCosmetics({cosmetic: 2});
+      this.quantityOwned = await this.fetchOwnedWeaponCosmetics({ cosmetic: 2 });
       this.fetchSupplyInterval = setInterval(async () => {
-        this.quantityOwned = await this.fetchOwnedWeaponCosmetics({cosmetic: 2});
+        this.quantityOwned = await this.fetchOwnedWeaponCosmetics({ cosmetic: 2 });
       }, 3000);
     }
   },

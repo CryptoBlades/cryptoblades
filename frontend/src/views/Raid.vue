@@ -105,7 +105,7 @@
             stamina </span>,
             <span class="badge badge-secondary">{{ durabilityCost }}
             durability </span> and
-            <span class="badge badge-secondary">{{ joinCost }}SKILL</span>
+            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" :skill-min-decimals="1"/></span>
           </div>
         </div>
       </div>
@@ -164,7 +164,8 @@
               <nft-list v-if="!spin" :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
             </b-modal>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
-              <big-button class="encounter-button btn-styled" :mainText="`Sign up!`" v-tooltip="'Joining will cost 12h of stamina'" @click="joinRaidMethod()" />
+              <big-button class="encounter-button btn-styled" :mainText="`Sign up!`"
+                          v-tooltip="`Joining will cost ${formatStaminaHours}h of stamina`" @click="joinRaidMethod()" />
             </div>
             <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
              <div class="float-lg-right text-sm-center mt-sm-2 text-center">
@@ -179,7 +180,9 @@
     </div>
  </div>
 </template>
-<script>
+<script lang="ts">
+
+import Vue from 'vue';
 import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
@@ -187,13 +190,40 @@ import BigButton from '../components/BigButton.vue';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import Hint from '../components/Hint.vue';
 import NftIcon from '@/components/NftIcon.vue';
-import NftList from '@/components/smart/NftList.vue';
-import { GetTotalMultiplierForTrait } from '@/interfaces/Weapon';
-import { CharacterPower } from '@/interfaces';
+import NftList, { NftIdType } from '@/components/smart/NftList.vue';
+import CurrencyConverter from '../components/CurrencyConverter.vue';
+import { GetTotalMultiplierForTrait, IWeapon } from '@/interfaces/Weapon';
+import { CharacterPower, IRaidState, IState } from '@/interfaces';
 import { getBossArt } from '@/raid-boss-art-placeholder';
 import { traitNumberToName } from '@/contract-models';
+import { fromWeiEther } from '@/utils/common';
+import { staminaToHours } from '@/utils/date-time';
+import { RaidRewards, Weapon, Junk, Keybox, DustLb, Dust4b, Dust5b, BonusXp } from '@/interfaces/RaidRewards';
 
-let interval = null;
+
+interface RaidMappedActions {
+  fetchRaidState(): Promise<void>;
+  joinRaid(payload: { characterId: string, weaponId: string}): Promise<void>;
+  fetchRaidRewards(payload: {startIndex: number, endIndex: string }): Promise<string[]>;
+  claimRaidRewards(payload: { rewardIndex: string }): Promise<RaidRewards>;
+  fetchRaidingCharacters(): Promise<string[]>;
+  fetchRaidingWeapons(): Promise<string[]>;
+  fetchIsRaidStarted(): Promise<boolean>;
+  fetchHaveEnoughEnergy(payload: { characterID: string, weaponID: string }): Promise<boolean>;
+  fetchIsCharacterRaiding(payload: { characterID: string }): Promise<boolean>;
+  fetchIsWeaponRaiding(payload: { weaponID: string }): Promise<boolean>;
+  fetchCharacters(payload: { characterIds: (string | number)[]}): Promise<void>;
+}
+
+interface RaidMappedMutations {
+  setCurrentCharacter(state: IState, characterId: number): void;
+}
+
+interface RaidMappedGetters {
+  getRaidState(): IRaidState;
+}
+
+let interval: number;
 
 const dragonNames = [
   'Fudbringer',
@@ -215,33 +245,31 @@ const bossImages = [
   '../assets/CB_Hellborn Shaman.gif',
 ];
 
-export default {
+export default Vue.extend({
   data() {
     return {
-      selectedWeaponId: null,
-      selectedWeapon: null,
-      error: null,
-      raidIndex: null,
-      bossName: null,
-      raiderCount: null,
-      totalPower: null,
-      expectedFinishTime: null,
-      xpReward: null,
-      staminaCost: null,
-      durabilityCost: null,
-      joinCost: null,
-      raidStatus: null,
-      bossPower: null,
-      bossTrait: null,
-      accountPower: null,
-      rewardIndexes: null,
-      rewardsRaidId: null,
-      rewards: null,
+      selectedWeaponId: '',
+      raidIndex: '',
+      bossName: '',
+      raiderCount: '',
+      totalPower: '',
+      expectedFinishTime: '',
+      xpReward: '',
+      staminaCost: '',
+      durabilityCost: '',
+      joinCost: '',
+      raidStatus: '',
+      bossPower: '',
+      bossTrait: '',
+      accountPower: '',
+      rewardsRaidId: '',
+      rewardIndexes: [] as string[],
+      rewards: [] as NftIdType[],
       spin: false,
-      participatingCharacters: [],
-      participatingWeapons: [],
-      bonuxXpCharacterNames: [],
-      bonuxXpAmounts: [],
+      participatingCharacters: [] as string[],
+      participatingWeapons: [] as string[],
+      bonuxXpCharacterNames: [] as string[],
+      bonuxXpAmounts: [] as string[],
     };
   },
 
@@ -250,118 +278,140 @@ export default {
     ...mapGetters(['ownCharacters', 'ownWeapons', 'currentCharacter',
       'currentCharacterStamina', 'getWeaponDurability', 'contracts', 'getCharacterName']),
 
-    claimButtonActive() {
+    claimButtonActive(): boolean {
       return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
     },
 
-    currentMultiplier() {
+    currentMultiplier(): string {
       if(!this.selectedWeaponId) return '0';
-      const currentWeapon = this.ownWeapons.find(x => x.id === this.selectedWeaponId);
+      const currentWeapon = this.ownWeapons.find((weapon: IWeapon) => weapon.id === +this.selectedWeaponId);
       if(!currentWeapon) return '0';
       return GetTotalMultiplierForTrait(currentWeapon, this.currentCharacter.trait).toFixed(2);
     },
 
-    currentCharacterPower() {
-      if(!this.currentCharacter) return '0';
+    currentCharacterPower(): number {
+      if(!this.currentCharacter) return 0;
       return CharacterPower(this.currentCharacter.level);
     },
 
-    getSelectedWeapon() {
-      return this.ownWeapons.find(x => x.id === this.selectedWeaponId);
+    getSelectedWeapon(): IWeapon {
+      return this.ownWeapons.find((weapon: IWeapon) => weapon.id === +this.selectedWeaponId);
+    },
+
+    formatStaminaHours(): string {
+      return staminaToHours(+this.staminaCost).toFixed(1);
     }
   },
 
   methods: {
     getBossArt,
     traitNumberToName,
-    ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid',
-      'fetchRaidRewards', 'claimRaidRewards', 'fetchRaidingCharacters', 'fetchRaidingWeapons',
-      'fetchIsRaidStarted', 'fetchHaveEnoughEnergy', 'fetchIsCharacterRaiding', 'fetchIsWeaponRaiding','fetchCharacters']),
-    ...mapMutations(['setCurrentCharacter']),
-    ...mapGetters(['getRaidState']),
+    ...(mapActions([
+      'fetchRaidState',
+      'joinRaid',
+      'fetchRaidRewards',
+      'claimRaidRewards',
+      'fetchRaidingCharacters',
+      'fetchRaidingWeapons',
+      'fetchIsRaidStarted',
+      'fetchHaveEnoughEnergy',
+      'fetchIsCharacterRaiding',
+      'fetchIsWeaponRaiding',
+      'fetchCharacters'
+    ]) as RaidMappedActions),
+    ...(mapMutations([
+      'setCurrentCharacter'
+    ]) as RaidMappedMutations),
+    ...(mapGetters([
+      'getRaidState',
+    ]) as RaidMappedGetters),
 
-    weaponHasDurabilit(id) {
+    convertWeiToSkill(wei: string): string {
+      return fromWeiEther(wei);
+    },
+
+    weaponHasDurability(id: number): boolean{
       return this.getWeaponDurability(id) > 0;
     },
 
-    async joinRaidMethod() {
+    async joinRaidMethod(): Promise<void> {
       if (!this.selectedWeaponId || !this.currentCharacterId) {
-        this.$dialog.notify.error('Check Character and Weapon Selection and try again...');
+        (this as any).$dialog.notify.error('Check Character and Weapon Selection and try again...');
         return;
       }
 
       const isRaidStarted = await this.isRaidStarted();
       if(!isRaidStarted) {
-        this.$dialog.notify.error('Raid has not started yet...');
+        (this as any).$dialog.notify.error('Raid has not started yet...');
         return;
       }
       const isCharacterRaiding = await this.isCharacterAlreadyRaiding(this.currentCharacterId);
       if(isCharacterRaiding) {
-        this.$dialog.notify.error('Selected character is locked in the raid already...');
+        (this as any).$dialog.notify.error('Selected character is locked in the raid already...');
         return;
       }
       const isWeaponRaiding = await this.isWeaponAlreadyRaiding(this.selectedWeaponId);
       if(isWeaponRaiding) {
-        this.$dialog.notify.error('Selected weapon is locked in the raid already...');
+        (this as any).$dialog.notify.error('Selected weapon is locked in the raid already...');
         return;
       }
       const haveEnoughEnergy = await this.haveEnoughEnergy(this.currentCharacterId, this.selectedWeaponId);
       if(!haveEnoughEnergy) {
-        this.$dialog.notify.error('Not enough stamina or durability...');
+        (this as any).$dialog.notify.error('Not enough stamina or durability...');
         return;
       }
 
       try {
         await this.joinRaid({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId});
-        this.selectedWeaponId = null;
+        this.selectedWeaponId = '';
       } catch (e) {
         console.error(e);
-        this.$dialog.notify.error('Whoops...');
+        (this as any).$dialog.notify.error('Whoops...');
       }
 
       await this.getParticipatingCharacters();
       await this.getParticipatingWeapons();
     },
 
-    async getParticipatingCharacters() {
+    async getParticipatingCharacters(): Promise<void> {
       // gets the list of this player's raid locked characters
       // TODO store these?
       this.participatingCharacters = await this.fetchRaidingCharacters();
     },
 
-    async getParticipatingWeapons() {
+    async getParticipatingWeapons(): Promise<void> {
       // gets the list of this player's raid locked weapons
       // TODO store these?
       this.participatingWeapons = await this.fetchRaidingWeapons();
     },
 
-    async isCharacterAlreadyRaiding(characterID) {
+    async isCharacterAlreadyRaiding(characterID: string): Promise<boolean> {
       return await this.fetchIsCharacterRaiding({
         characterID
       });
     },
 
-    async isWeaponAlreadyRaiding(weaponID) {
+    async isWeaponAlreadyRaiding(weaponID: string): Promise<boolean> {
       return await this.fetchIsWeaponRaiding({
         weaponID
       });
     },
 
-    async isRaidStarted() {
+    async isRaidStarted(): Promise<boolean> {
       return await this.fetchIsRaidStarted();
     },
 
-    async haveEnoughEnergy(characterID, weaponID) {
+    async haveEnoughEnergy(characterID: string, weaponID: string): Promise<boolean>{
       return await this.fetchHaveEnoughEnergy({
         characterID,
         weaponID
       });
     },
 
-    async getRewardIndexes() {
-      if(this.raidIndex === null || this.raidIndex === undefined)
+    async getRewardIndexes(): Promise<void> {
+      if(!this.raidIndex)
         return;
-      let startIndex = this.raidIndex-21; // one week worth
+      let startIndex = +this.raidIndex-21; // one week worth
       if(startIndex < 0)
         startIndex = 0;
       const endIndex = this.raidIndex;
@@ -372,7 +422,7 @@ export default {
       });
     },
 
-    promptRewardClaim() {
+    promptRewardClaim(): void {
       // should offer a popup here to pick which index to claim
       // if only one index, then claim instantly
       if(this.rewardIndexes !== null && this.rewardIndexes.length > 0) {
@@ -380,51 +430,51 @@ export default {
           this.claimRewardIndex(this.rewardIndexes[0]);
         }
         else {
-          this.$bvModal.show('rewardsRaidPicker');
+          (this as any).$bvModal.show('rewardsRaidPicker');
         }
       }
     },
 
-    async claimRewardIndex(rewardIndex) {
+    async claimRewardIndex(rewardIndex: string): Promise<void> {
       this.bonuxXpCharacterNames = [];
       this.bonuxXpAmounts = [];
       const result = await this.claimRaidRewards({
         rewardIndex
       });
 
-      const nfts = [];
+      const nfts: NftIdType[] = [];
       if(result.weapons) {
-        result.weapons.forEach(x => {
+        result.weapons.forEach((x: Weapon) => {
           nfts.push({ type: 'weapon', id: x.tokenID });
         });
       }
       if(result.junks) {
-        result.junks.forEach(x => {
+        result.junks.forEach((x: Junk) => {
           nfts.push({ type: 'junk', id: x.tokenID });
         });
       }
       if(result.keyboxes) {
-        result.keybox.forEach(x => {
+        result.keyboxes.forEach((x: Keybox) => {
           nfts.push({ type: 'keybox', id: x.tokenID });
         });
       }
       if(result.dustLb) {
-        result.dustLb.forEach(x => {
+        result.dustLb.forEach((x: DustLb) => {
           nfts.push({ type: 'dustLb', id: 0, amount: x.amount });
         });
       }
       if(result.dust4b) {
-        result.dust4b.forEach(x => {
+        result.dust4b.forEach((x: Dust4b) => {
           nfts.push({ type: 'dust4b', id: 0, amount: x.amount });
         });
       }
       if(result.dust5b) {
-        result.dust5b.forEach(x => {
+        result.dust5b.forEach((x: Dust5b) => {
           nfts.push({ type: 'dust5b', id: 0, amount: x.amount });
         });
       }
       if(result.bonusXp) {
-        result.bonusXp.forEach(x => {
+        result.bonusXp.forEach((x: BonusXp) => {
           this.bonuxXpCharacterNames.push(this.getCharacterName(x.charID));
           this.bonuxXpAmounts.push(x.amount);
         });
@@ -432,7 +482,7 @@ export default {
 
       this.rewards = nfts;
       this.spin = true;
-      this.$bvModal.show('rewardsModal');
+      (this as any).$bvModal.show('rewardsModal');
       setTimeout(() => {
         this.spin = false;
       }, 10000);
@@ -440,21 +490,21 @@ export default {
       await this.fetchCharacters(this.ownedCharacterIds);
     },
 
-    getBossName() {
-      return dragonNames[this.raidIndex % dragonNames.length];
+    getBossName(): string {
+      return dragonNames[+this.raidIndex % dragonNames.length];
     },
 
-    getBossImage() {
-      return bossImages[this.raidIndex % bossImages.length];
+    getBossImage(): string {
+      return bossImages[+this.raidIndex % bossImages.length];
     },
 
-    processRaidData() {
+    processRaidData(): void {
       const raidData = this.getRaidState();
       this.raidIndex = raidData.index;
       this.bossName = this.getBossName();
       this.raiderCount = raidData.raiderCount;
       this.totalPower = raidData.playerPower;
-      this.expectedFinishTime = new Date(raidData.expectedFinishTime * 1000).toLocaleString();
+      this.expectedFinishTime = new Date(+raidData.expectedFinishTime * 1000).toLocaleString();
       this.xpReward = raidData.xpReward;
       this.staminaCost = raidData.staminaCost;
       this.durabilityCost = raidData.durabilityCost;
@@ -467,17 +517,16 @@ export default {
   },
 
   async mounted() {
-    await this.getRewardIndexes();
-    await this.fetchRaidState();
-    this.processRaidData();
-    await this.getParticipatingCharacters();
-    await this.getParticipatingWeapons();
-    interval = setInterval(async () => {
-      await this.getRewardIndexes();
-      await this.fetchRaidState();
-      this.processRaidData();
-      await this.getParticipatingCharacters();
-      await this.getParticipatingWeapons();
+    const refreshRaidData = async () => {
+      await (this as any).getRewardIndexes();
+      await (this as any).fetchRaidState();
+      (this as any).processRaidData();
+      await (this as any).getParticipatingCharacters();
+      await (this as any).getParticipatingWeapons();
+    };
+    await refreshRaidData();
+    interval = window.setInterval(async () => {
+      await refreshRaidData();
     }, 3000);
   },
 
@@ -486,6 +535,7 @@ export default {
   },
 
   components: {
+    CurrencyConverter,
     BigButton,
     CharacterList,
     WeaponGrid,
@@ -494,7 +544,7 @@ export default {
     NftIcon,
     NftList
   },
-};
+});
 </script>
 
 <style scoped>
