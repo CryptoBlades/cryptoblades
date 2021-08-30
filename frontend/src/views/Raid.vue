@@ -593,7 +593,7 @@ export default Vue.extend({
   display: block;
   width: 100%;
   padding: 0;
-  height: 548px;
+  height: 577px;
   overflow-y: auto;
   overflow-x: hidden;
   border: 0.5px solid #1f1f1f;
@@ -662,7 +662,7 @@ export default Vue.extend({
 }
 
 .raid-weapon-grid {
-  height: 548px;
+  height: 577px;
   overflow-y: auto;
   border: 0.5px solid #1f1f1f;
 }
