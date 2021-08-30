@@ -59,32 +59,47 @@
         </div>
       </li>
     </ul>
+
     <b-modal class="centered-modal" ref="character-rename-modal"
-                  @ok="renameCharacterCall">
-                  <template #modal-title>
-                    Rename Character
-                  </template>
-                  <b-form-input type="string"
-                    class="modal-input" v-model="characterRename" placeholder="New Name" />
-                  <span v-if="characterRename !== '' && (characterRename.length < 2 || characterRename.length > 24)">
-                    Name must be 2 - 24 characters long.
-                  </span>
-                  <span v-if="isRenameProfanish">
-                    This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
-                  </span>
-                </b-modal>
-        <b-modal class="centered-modal" ref="character-change-trait-modal"
-                  @ok="changeCharacterTraitCall">
-                  <template #modal-title>
-                    Change Character's Trait
-                  </template>
-                  <span >
-                    Pick a trait to switch to.
-                  </span>
-                  <select class="form-control" v-model="targetTrait">
-                    <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
-                  </select>
-                </b-modal>
+      @ok="renameCharacterCall">
+      <template #modal-title>
+        Rename Character
+      </template>
+      <b-form-input type="string"
+        class="modal-input" v-model="characterRename" placeholder="New Name" />
+      <span v-if="characterRename !== '' && (characterRename.length < 2 || characterRename.length > 24)">
+        Name must be 2 - 24 characters long.
+      </span>
+      <span v-if="isRenameProfanish">
+        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+      </span>
+    </b-modal>
+
+    <b-modal class="centered-modal" ref="character-change-trait-modal"
+      @ok="changeCharacterTraitCall">
+      <template #modal-title>
+        Change Character's Trait
+      </template>
+      <span >
+        Pick a trait to switch to.
+      </span>
+      <select class="form-control" v-model="targetTrait">
+        <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
+      </select>
+    </b-modal>
+
+    <b-modal class="centered-modal" ref="character-change-skin-modal"
+      @ok="changeCharacterSkinCall">
+      <template #modal-title>
+        Change Character's Skin
+      </template>
+      <span >
+        Pick a skin to switch to.
+      </span>
+      <select class="form-control" v-model="targetSkin">
+        <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+      </select>
+    </b-modal>
   </div>
 </template>
 
@@ -142,7 +157,10 @@ export default {
       haveChangeTraitLightning: 0,
       targetTrait: '',
       currentCharacterId: null,
-      options: []
+      options: [],
+      haveCharacterCosmetic1: 0,
+      haveCharacterCosmetic2: 0,
+      targetSkin: ''
     };
   },
 
@@ -186,6 +204,10 @@ export default {
       return +this.haveChangeTraitFire + +this.haveChangeTraitEarth + +this.haveChangeTraitLightning + +this.haveChangeTraitWater;
     },
 
+    totalCosmeticChanges() {
+      return +this.haveCharacterCosmetic1 + +this.haveCharacterCosmetic2;
+    },
+
     isRenameProfanish() {
       return isProfaneIsh(this.characterRename);
     },
@@ -211,6 +233,21 @@ export default {
 
       return availableTraits;
     },
+
+    availableSkins() {
+      const availableSkins = [];
+
+      availableSkins.push('No Skin');
+
+      if(this.haveCharacterCosmetic1 > 0) {
+        availableSkins.push('Cool Skin 1');
+      }
+      if(this.haveCharacterCosmetic2 > 0) {
+        availableSkins.push('Cool Skin 2');
+      }
+
+      return availableSkins;
+    }
   },
 
   watch: {
@@ -223,7 +260,8 @@ export default {
     ...mapActions(['fetchCharacters','fetchTotalRenameTags','renameCharacter','changeCharacterTraitLightning',
       'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater',
       'fetchTotalCharacterFireTraitChanges','fetchTotalCharacterEarthTraitChanges',
-      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
+      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
+      'fetchOwnedCharacterCosmetics','changeCharacterCosmetic','removeCharacterCosmetic']),
 
     getCharacterArt,
 
@@ -278,6 +316,12 @@ export default {
           amount: this.totalTraitChanges,
           handler: this.openChangeTrait
         },
+        {
+          name: 'Change Skin',
+          amount: this.totalCosmeticChanges,
+          handler: this.openChangeSkin,
+          hasDefaultOption: true,
+        },
       ];
     },
 
@@ -324,6 +368,36 @@ export default {
       }
       this.updateOptions();
     },
+
+    async loadCosmeticsCount() {
+      this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
+      this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
+      console.log(this.haveCharacterCosmetic1, this.haveCharacterCosmetic2);
+      this.updateOptions();
+    },
+
+    openChangeSkin(id) {
+      this.currentCharacterId = id;
+      (this.$refs['character-change-skin-modal']).show();
+    },
+    async changeCharacterSkinCall() {
+      switch(this.targetSkin) {
+      case 'No Skin':
+        await this.removeCharacterCosmetic({ id: this.currentCharacterId });
+        this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
+        this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
+        break;
+      case 'Cool Skin 1':
+        await this.changeCharacterCosmetic({ id: this.currentCharacterId, cosmetic: 1 });
+        this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
+        break;
+      case 'Cool Skin 2':
+        await this.changeCharacterCosmetic({ id: this.currentCharacterId, cosmetic: 2 });
+        this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
+        break;
+      }
+      this.updateOptions();
+    }
   },
 
   components: {
@@ -340,7 +414,8 @@ export default {
       this.maxPriceFilter = sessionStorage.getItem('character-price-maxfilter') || '';
     }
     await this.loadConsumablesCount();
-  }
+    await this.loadCosmeticsCount();
+  },
 };
 </script>
 

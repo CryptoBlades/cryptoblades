@@ -12,7 +12,7 @@
     </div>
 
     <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
-
+      <!-- below use of weapon.id is for test purpose, should be replaced with getWeaponCosmetic(weapon.id) -->
       <div class="animation" v-bind:class="'weapon-animation-applied-' + weapon.id"/>
       <img v-if="showPlaceholder" v-bind:class="'weapon-cosmetic-applied-' + weapon.id" class="placeholder" :src="getWeaponArt(weapon)" />
 
