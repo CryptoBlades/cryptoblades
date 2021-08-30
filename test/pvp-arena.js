@@ -279,7 +279,7 @@ contract("PvpArena", (accounts) => {
       });
     });
 
-    it.only("should return the ids of the characters I have in the arena", async () => {
+    it("should return the ids of the characters I have in the arena", async () => {
       const myParticipatingCharacters =
         await pvpArena.getMyParticipatingCharacters({ from: accounts[3] });
 
