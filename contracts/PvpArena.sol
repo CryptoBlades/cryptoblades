@@ -61,10 +61,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             !charactersInUse[characterID],
             "The character is already in the arena"
         );
-        require(
-            !weaponsInUse[characterID],
-            "The weapon is already in the arena"
-        );
+        require(!weaponsInUse[weaponID], "The weapon is already in the arena");
         require(
             characters.ownerOf(characterID) == msg.sender,
             "You don't own the given character"
@@ -99,7 +96,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     function initialize(
         address gameContract,
-        address shieldContract,
+        address shieldsContract,
         address raidContract
     ) public initializer {
         __AccessControl_init_unchained();
@@ -108,14 +105,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         game = CryptoBlades(gameContract);
         characters = Characters(game.characters());
         weapons = Weapons(game.weapons());
-        shields = Shields(shieldContract);
+        shields = Shields(shieldsContract);
         skillToken = IERC20(game.skillToken());
         raids = Raid1(raidContract);
 
         wageringFactor = 3;
     }
 
-    /// @notice enter the arena with a character, a weapon and a shield(optional)
+    /// @notice enter the arena with a character, a weapon and optionally a shield
     function enterArena(
         uint256 characterID,
         uint256 weaponID,

@@ -8,11 +8,11 @@ const Shields = artifacts.require('Shields');
  * @param {string} receiver address of who receives the character
  * @param {string} seed seed for generating the character
  * @param {Characters} [context.characters] instance of the Characters contract
- * 
- * @return {Promise<string>} characterID of the newly created character
+ *
+ * @return {Promise<string>} ID of the newly created character
  */
 async function createCharacter(receiver, seed, context = {}) {
-  const characters = context.characters || await Characters.deployed();
+  const characters = context.characters || (await Characters.deployed());
 
   const { tx: mintCharaTx } = await characters.mint(receiver, seed);
 
@@ -25,11 +25,11 @@ async function createCharacter(receiver, seed, context = {}) {
  * @param {string} receiver address of who receives the weapon
  * @param {string} seed seed for generating the weapon
  * @param {Weapons} [context.weapons] instance of the Weapons contract
- * 
- * @return {Promise<string>} weaponID of the newly created weapon
+ *
+ * @return {Promise<string>} ID of the newly created weapon
  */
 async function createWeapon(receiver, seed, context = {}) {
-  const weapons = context.weapons || await Weapons.deployed();
+  const weapons = context.weapons || (await Weapons.deployed());
   const { tx: mintWeaponTx } = await weapons.mint(receiver, seed);
 
   const newWeaponEvt = await expectEvent.inTransaction(mintWeaponTx, weapons, 'NewWeapon', { minter: receiver });
@@ -40,21 +40,21 @@ async function createWeapon(receiver, seed, context = {}) {
 /**
  * @param {string} receiver address of who receives the shield
  * @param {string} seed seed for generating the shield
- * @param {Weapons} [context.shields] instance of the Shields contract
- * 
- * @return {Promise<string>} shieldID of the newly created weapon
+ * @param {Shields} [context.shields] instance of the Shields contract
+ *
+ * @return {Promise<string>} ID of the newly created shield
  */
 async function createShield(receiver, seed, context = {}) {
-  const shields = context.shields || await Shields.deployed();
+  const shields = context.shields || (await Shields.deployed());
   const { tx: mintShieldTx } = await shields.mint(receiver, seed);
 
   const newShieldEvt = await expectEvent.inTransaction(mintShieldTx, Shields, 'NewShield', { minter: receiver });
   await time.advanceBlock();
-  return newShieldEvt.args.tokenID;
+  return newShieldEvt.args.shield;
 }
 
 module.exports = {
   createCharacter,
   createWeapon,
-  createShield
+  createShield,
 };
