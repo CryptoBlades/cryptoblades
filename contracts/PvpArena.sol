@@ -10,8 +10,6 @@ import "./weapons.sol";
 import "./shields.sol";
 import "./raid1.sol";
 
-// TODO:
-// - [ ] use proper types for costs
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
     using SafeMath for uint8;
