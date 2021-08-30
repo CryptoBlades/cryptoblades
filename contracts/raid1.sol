@@ -553,7 +553,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         uint256[] memory indices = raidParticipantIndices[raidIndex][msg.sender];
         uint256[] memory chars = new uint256[](indices.length);
         for(uint i = 0; i < indices.length; i++) {
-            chars[i] = raidParticipants[raidIndex][i].charID;
+            chars[i] = raidParticipants[raidIndex][indices[i]].charID;
         }
         return chars;
     }
@@ -562,7 +562,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         uint256[] memory indices = raidParticipantIndices[raidIndex][msg.sender];
         uint256[] memory weps = new uint256[](indices.length);
         for(uint i = 0; i < indices.length; i++) {
-            weps[i] = raidParticipants[raidIndex][i].wepID;
+            weps[i] = raidParticipants[raidIndex][indices[i]].wepID;
         }
         return weps;
     }

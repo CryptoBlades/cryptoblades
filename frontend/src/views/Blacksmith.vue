@@ -20,14 +20,6 @@
               <h1>Weapons ({{ ownWeapons.length }})</h1>
               <div class="d-flex justify-content-flex-end ml-auto">
                 <b-button
-                  variant="primary"
-                  v-if="canRename()"
-                  @click="openRenameWeapon"
-                  tagname="rename_weapon"
-                  v-tooltip="'Rename Weapon'">
-                  Rename Weapon
-                </b-button>
-                <b-button
                         variant="primary"
                         class="ml-3"
                         v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
@@ -330,17 +322,6 @@
         <dust-balance-display/>
       </b-tab>
     </b-tabs>
-    <b-modal class="centered-modal" ref="weapon-rename-modal"
-                  @ok="renameWeaponCall()">
-                  <template #modal-title>
-                    Rename Weapon
-                  </template>
-                  <b-form-input type="string"
-                    class="modal-input" v-model="weaponRename" placeholder="New Name" />
-      <span v-if="isRenameProfanish">
-        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
-      </span>
-    </b-modal>
 
     <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              title="Dust Reforge Confirmation" @ok="onReforgeWeaponWithDust">
@@ -412,7 +393,6 @@ import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
-import { getCleanName, isProfaneIsh } from '../rename-censor';
 
 type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds'>;
 
@@ -445,8 +425,6 @@ interface Data {
   dust: string[],
   allowDustForge: false,
   burnWeaponIds: any[],
-  weaponRename: string;
-  haveRename: string;
   onError: boolean;
   hideWeapons: any[];
   useStakedForForge: boolean;
@@ -479,8 +457,6 @@ export default Vue.extend({
       dust: [],
       allowDustForge: false,
       burnWeaponIds: [],
-      weaponRename: '',
-      haveRename: '0',
       onError: false,
       hideWeapons: [],
       useStakedForForge:false,
@@ -497,14 +473,6 @@ export default Vue.extend({
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
       'stakedSkillBalanceThatCanBeSpent'
     ]) as Accessors<StoreMappedGetters>),
-
-    isRenameProfanish(): boolean {
-      return isProfaneIsh(this.weaponRename);
-    },
-
-    cleanRename(): string {
-      return getCleanName(this.weaponRename);
-    }
   },
 
   watch: {
@@ -549,14 +517,11 @@ export default Vue.extend({
     const burnCost = await this.contracts.CryptoBlades.methods.burnWeaponFee().call({ from: this.defaultAccount });
     const skillBurnCost = await this.contracts.CryptoBlades.methods.usdToSkill(burnCost).call({ from: this.defaultAccount });
     this.burnCost = new BN(skillBurnCost).div(new BN(10).pow(18)).toFixed(4);
-
-    if(!this.contracts.WeaponRenameTagConsumables) return;
-    this.haveRename = await this.contracts.WeaponRenameTagConsumables.methods.getItemCount().call({ from: this.defaultAccount });
   },
 
   methods: {
-    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN', 'renameWeapon',
-      'fetchTotalWeaponRenameTags', 'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons']),
+    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
+      'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons']),
 
     toggleCheckbox() {
       this.useStakedForForge = !this.useStakedForForge;
@@ -737,22 +702,6 @@ export default Vue.extend({
         (this as any).$dialog.notify.error('Could not burn sword: insufficient funds or transaction denied.');
       }
     },
-    canRename() {
-      return this.reforgeWeaponId !== null && +this.haveRename > 0;
-    },
-    openRenameWeapon() {
-      (this.$refs['weapon-rename-modal'] as BModal).show();
-    },
-    async renameWeaponCall() {
-      if(this.weaponRename === '' || this.reforgeWeaponId === null){
-        return;
-      }
-
-      await this.renameWeapon({id: this.reforgeWeaponId, name: this.weaponRename});
-      if(this.contracts.WeaponRenameTagConsumables) {
-        this.haveRename = await this.contracts.WeaponRenameTagConsumables.methods.getItemCount().call({ from: this.defaultAccount });
-      }
-    }
   },
 
   components: {
