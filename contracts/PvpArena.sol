@@ -37,10 +37,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev how many times the cost of battling must be wagered to enter the arena
     uint256 wageringFactor;
 
-    /// @dev fighters available by tier (1-10, 11-20, etc...)
-    mapping(uint8 => Fighter[]) private fightersByTier;
-    /// @dev fighters by player address
-    mapping(address => Fighter[]) private fightersByPlayer;
+    /// @dev Fighter by characterID
+    mapping(uint256 => Fighter) public fightersByCharacterID;
+
+    /// @dev IDs of characters available by tier (1-10, 11-20, etc...)
+    mapping(uint8 => uint256[]) private fightersByTier;
+    /// @dev IDs of characters in the arena per player
+    mapping(address => uint256[]) private fightersByPlayer;
 
     ///@dev mapping to track the characters used
     mapping(uint256 => bool) public charactersInUse;
@@ -127,16 +130,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         if (useShield) shieldsInUse[shieldID] = true;
 
-        Fighter memory fighter = Fighter(
+        fightersByTier[tier].push(characterID);
+        fightersByPlayer[msg.sender].push(characterID);
+        fightersByCharacterID[characterID] = Fighter(
             characterID,
             weaponID,
             shieldID,
             wager,
             useShield
         );
-
-        fightersByTier[tier].push(fighter);
-        fightersByPlayer[msg.sender].push(fighter);
 
         skillToken.transferFrom(msg.sender, address(this), wager);
     }
@@ -166,13 +168,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint256[] memory)
     {
-        uint256[] memory ids;
-
-        for (uint256 i = 0; i < fightersByPlayer[msg.sender].length; i++) {
-            ids[i] = fightersByPlayer[msg.sender][i].characterID;
-        }
-
-        return ids;
+        return fightersByPlayer[msg.sender];
     }
 
     /// @dev attempts to find an opponent for a character. If a battle is still pending, it charges a penalty and re-rolls the opponent
