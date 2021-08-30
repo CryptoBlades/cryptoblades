@@ -29,6 +29,7 @@ const CharacterFireTraitChangeConsumables = artifacts.require("CharacterFireTrai
 const CharacterEarthTraitChangeConsumables = artifacts.require("CharacterEarthTraitChangeConsumables");
 const CharacterWaterTraitChangeConsumables = artifacts.require("CharacterWaterTraitChangeConsumables");
 const CharacterLightningTraitChangeConsumables = artifacts.require("CharacterLightningTraitChangeConsumables");
+const Raid1= artifacts.require("Raid1");
 
 module.exports = async function (deployer, network, accounts) {
   let randoms, skillToken;
@@ -122,7 +123,8 @@ module.exports = async function (deployer, network, accounts) {
       deployer,
     });
     
-    const pvpArena = await deployProxy(PvpArena, [game.address], { deployer });
+    const raid1= await deployProxy(Raid1,[game.address],{deployer});
+    const pvpArena = await deployProxy(PvpArena, [game.address,shields.address,raid1.address], { deployer });
     const promos = await deployProxy(Promos, [], { deployer });
     const characterRenameTagConsumables = await deployProxy(CharacterRenameTagConsumables, [charas.address], { deployer });
     const weaponRenameTagConsumables = await deployProxy(WeaponRenameTagConsumables, [weps.address], { deployer });

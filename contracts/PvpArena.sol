@@ -7,6 +7,8 @@ import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./cryptoblades.sol";
 import "./characters.sol";
 import "./weapons.sol";
+import "./shields.sol";
+import "./raid1.sol";
 
 // TODO:
 // - [ ] use proper types for costs
@@ -20,13 +22,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     struct Fighter {
         uint256 characterID;
         uint256 weaponID;
+        uint256 shieldID;
         uint256 wager;
+        bool useShield;
     }
 
     CryptoBlades public game;
     Characters public characters;
     Weapons public weapons;
+    Shields public shields;
     IERC20 public skillToken;
+    Raid1 public raids;
 
     // TODO: Update this to use combat prize formula
     /// @dev the base cost required to enter the arena
@@ -35,53 +41,118 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     int128 public extraCostPerLevel;
 
     /// @dev fighters available by tier (1-10, 11-20, etc...)
-    mapping (uint8 => Fighter[]) private fightersByTier;
+    mapping(uint8 => Fighter[]) private fightersByTier;
     /// @dev fighters by player address
-    mapping (address => Fighter[]) private fightersByPlayer;
+    mapping(address => Fighter[]) private fightersByPlayer;
 
-    function initialize(address gameContract) public initializer {
+    ///@dev mapping to track the characters used
+    mapping(uint256 => bool) public isCharacterUsed;
+
+    ///@dev mapping to track the weapons used
+    mapping(uint256 => bool) public isWeaponUsed;
+
+    ///@dev mapping to track the shields used
+    mapping(uint256 => bool) public isShieldUsed;
+
+    modifier beforeEnteringArena(
+        uint256 characterID,
+        uint256 weaponID,
+        uint256 shieldID,
+        bool useShield
+    ) {
+        require(
+            isCharacterUsed[characterID] == false,
+            "The character is already in the arena"
+        );
+        require(
+            isWeaponUsed[characterID] == false,
+            "The weapon is already in the arena"
+        );
+        require(
+            characters.ownerOf(characterID) == msg.sender,
+            "You don't own the given character"
+        );
+        require(
+            weapons.ownerOf(weaponID) == msg.sender,
+            "You don't own the given weapon"
+        );
+        require(
+            raids.isCharacterRaiding(characterID) == false,
+            "The given character is already raiding"
+        );
+        require(
+            raids.isWeaponRaiding(weaponID) == false,
+            "The given weapon is already raiding"
+        );
+        if (useShield) {
+            require(
+                shields.ownerOf(shieldID) == msg.sender,
+                "You don't own the given shield"
+            );
+            require(
+                isShieldUsed[shieldID] == false,
+                "The shield is already in the arena"
+            );
+            _;
+        }
+        _;
+    }
+
+    function initialize(
+        address gameContract,
+        address shieldContract,
+        address raidContract
+    ) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         game = CryptoBlades(gameContract);
         characters = Characters(game.characters());
         weapons = Weapons(game.weapons());
+        shields = Shields(shieldContract);
         skillToken = IERC20(game.skillToken());
+        raids = Raid1(raidContract);
 
         // TODO: define the real values
         baseEntryCost = 2;
         extraCostPerLevel = ABDKMath64x64.divu(1, 10);
     }
 
-    /// @notice enter the arena with a character and a weapon
-    function enterArena(uint256 characterID, uint256 weaponID) public {
+    /// @notice enter the arena with a character, a weapon and a shield(optional)
+    function enterArena(
+        uint256 characterID,
+        uint256 weaponID,
+        uint256 shieldID,
+        bool useShield
+    ) public beforeEnteringArena(characterID, weaponID, shieldID, useShield) {
         // TODOS:
-        // - [ ] check if character is not in the arena
-        // - [ ] check if weapon is not in the arena
         // - [x] calculate wager cost
-        // - [ ] check if character is sender's
         uint256 entryCost = getEntryCost(characterID);
-
-
         uint8 tier = getArenaTier(characterID);
-
-        fightersByTier[tier].push(Fighter(characterID, weaponID, entryCost));
-
+        isCharacterUsed[characterID] = true;
+        isWeaponUsed[weaponID] = true;
+        if (useShield) isShieldUsed[shieldID] = true;
+        fightersByTier[tier].push(
+            Fighter(characterID, weaponID, shieldID, entryCost, useShield)
+        );
+        fightersByPlayer[msg.sender].push(
+            Fighter(characterID, weaponID, shieldID, entryCost, useShield)
+        );
         skillToken.transferFrom(msg.sender, address(this), entryCost);
     }
 
     /// @notice gets the amount of SKILL that is wagered per duel
-    function getDuelCost() public view returns (uint256) {
+    function getDuelCost() public view returns (uint256) {}
 
-    }
     /// @notice gets the amount of SKILL required to enter the arena
     /// @param characterID the id of the character entering the arena
     function getEntryCost(uint256 characterID) public view returns (uint256) {
         // TODO: use combat rewards formula
-        int128 costInUsd = ABDKMath64x64.fromUInt(extraCostPerLevel.mulu(characters.getLevel(characterID))).add(baseEntryCost);
+        int128 costInUsd = ABDKMath64x64
+            .fromUInt(extraCostPerLevel.mulu(characters.getLevel(characterID)))
+            .add(baseEntryCost);
         return game.usdToSkill(costInUsd);
     }
-
 
     /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
     function getArenaTier(uint256 characterID) public view returns (uint8) {
@@ -91,8 +162,19 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev gets IDs of the sender's character's currently in the arena
-    function getMyParticipatingCharacters() public view returns (uint256[] memory) {
+    function getMyParticipatingCharacters()
+        public
+        view
+        returns (uint256[] memory)
+    {
         // TODO: implement (not final signature)
+        // uint256 len = fightersByPlayer[msg.sender].length;
+        // uint256[] memory ids;
+        // for (uint256 i = 0; i < len; i++) {
+        //     ids[i] = fightersByPlayer[msg.sender][i].characterID;
+        // }
+        // return ids;
+        
     }
 
     /// @dev finds an opponent for a character. If a battle is still pending, it charges a penalty
@@ -110,5 +192,4 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function withdrawCharacter(uint256 characterID) public {
         // TODO: implement (not final signature)
     }
-
 }

@@ -80,11 +80,15 @@ contract('PvpArena', accounts => {
         weapon = await weapons.get(weaponId);
         characterId = await createCharacter();
         character = await characters.get(characterId);
-
-        const cost = await pvpArena.getEntryCost(characterId);
-        await skillToken.approve(pvpArena.address, cost);
-        enterArenaReceipt = await pvpArena.enterArena(characterId, weaponId);
       });
+
+      it("shoul enter in arena:",async()=>{
+        const cost = await pvpArena.getEntryCost(characterId);
+        await skillToken.approve(pvpArena.address, cost,{from:accounts[1]});
+        enterArenaReceipt = await pvpArena.enterArena(characterId, weaponId,0,false,{from:accounts[1]});
+        let isCharacterUsed= await pvpArena.isCharacterUsed(characterId);
+        expect(isCharacterUsed).to.equal(true);
+      })
 
       it('should lock the entry cost', async () => {
         const cost = await pvpArena.getEntryCost(characterId);
