@@ -1,7 +1,5 @@
-const { expectRevert, expectEvent, time } = require('@openzeppelin/test-helpers');
-const _ = require('lodash');
-const BigNumber = require('bignumber.js');
 const web3 = require('web3');
+const helpers = require('./helpers');
 
 const SkillToken = artifacts.require('SkillToken');
 const Characters = artifacts.require('Characters');
@@ -31,29 +29,14 @@ contract('PvpArena', accounts => {
     await priceOracle.setCurrentPrice('10');
   });
 
-  // TODO: move to test utilities
-  async function createCharacter() {
-    const { tx: mintCharaTx } = await characters.mint(accounts[1], '123');
-
-    const newCharaEvt = await expectEvent.inTransaction(mintCharaTx, characters, 'NewCharacter', { minter: accounts[1] });
-    await time.advanceBlock();
-    return newCharaEvt.args.character;
-  }
-  async function createWeapon() {
-    const { tx: mintWeaponTx } = await weapons.mint(accounts[1], '123');
-
-    const newWeaponEvt = await expectEvent.inTransaction(mintWeaponTx, weapons, 'NewWeapon', { minter: accounts[1] });
-    await time.advanceBlock();
-    return newWeaponEvt.args.weapon;
-  }
 
   describe('#getArenaTier', () => {
     let character0Id;
     let character1Id;
     
     beforeEach(async () => {
-      character0Id = await createCharacter();
-      character1Id = await createCharacter();
+      character0Id = await helpers.createCharacter(accounts[1], '123', { characters });
+      character1Id = await helpers.createCharacter(accounts[1], '456', { characters });
       
       await characters.gainXp(character0Id, 190);
       await characters.gainXp(character1Id, 220);
@@ -76,9 +59,9 @@ contract('PvpArena', accounts => {
 
     describe('happy path', async () => {
       beforeEach(async () => {
-        weaponId = await createWeapon();
+        weaponId = await helpers.createWeapon(accounts[0], '123', { weapons });
         weapon = await weapons.get(weaponId);
-        characterId = await createCharacter();
+        characterId = await helpers.createCharacter(accounts[0], '123', { characters });
         character = await characters.get(characterId);
 
         const cost = await pvpArena.getEntryCost(characterId);
