@@ -62,11 +62,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // - [ ] check if character is sender's
         uint256 entryCost = getEntryCost(characterID);
 
-        skillToken.transferFrom(msg.sender, address(this), entryCost);
 
         uint8 tier = getArenaTier(characterID);
 
         fightersByTier[tier].push(Fighter(characterID, weaponID, entryCost));
+
+        skillToken.transferFrom(msg.sender, address(this), entryCost);
     }
 
     /// @notice gets the amount of SKILL that is wagered per duel
