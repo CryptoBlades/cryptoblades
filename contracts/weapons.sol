@@ -51,11 +51,17 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         // Hence, we keep registering the interface despite not actually implementing the interface.
         _registerInterface(0xe62e6974); // TransferCooldownableInterfaceId.interfaceId()
     }
-    
+
     function migrateTo_surprise(Promos _promos) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         promos = _promos;
+    }
+
+    function migrateFeaturesEnabled() public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        featuresEnabled = BIT_FEATURE_TRANSFER;
     }
 
     /*
@@ -118,6 +124,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     mapping(address => uint256) burnDust; // user address : burned item dust counts
 
     Promos public promos;
+
+    uint256 public constant BIT_FEATURE_TRANSFER = 1;
+    uint256 featuresEnabled;
 
     event Burned(address indexed owner, uint256 indexed burned);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
@@ -628,7 +637,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     returns (int128, int128, uint24, uint8) {
 
         drainDurability(id, drainAmount, allowNegativeDurability);
-        
+
         Weapon storage wep = tokens[id];
         return (
             oneFrac.add(powerMultPerPointBasic.mul(
@@ -701,11 +710,29 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint64(maxDurability * secondsPerDurability);
     }
 
+    function setFeatureEnabled(uint256 bit, bool enabled) public restricted {
+        if (enabled) {
+            featuresEnabled |= bit;
+        } else {
+            featuresEnabled &= ~bit;
+        }
+    }
+
+    function _isFeatureEnabled(uint256 bit) private view returns (bool) {
+        return (featuresEnabled & bit) == bit;
+    }
+
     function canRaid(address user, uint256 id) public view returns (bool) {
         return ownerOf(id) == user && getDurabilityPoints(id) > 0;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        // Always allow minting and burning.
+        if(from != address(0) && to != address(0)) {
+            // But other transfers require the feature to be enabled.
+            require(_isFeatureEnabled(BIT_FEATURE_TRANSFER));
+        }
+
         if(promos.getBit(from, 4) && from != address(0) && to != address(0)) {
             require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to), "Transfer cooldown");
         }
