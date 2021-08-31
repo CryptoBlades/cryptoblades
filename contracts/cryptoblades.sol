@@ -178,6 +178,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 private rewardsClaimTaxDuration;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
+    event UnlikelyFight(address indexed owner, uint256 tokens, bool indexed win); // includes would-be tokens for lost fights
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
     event MintWeaponsSuccess(address indexed minter, uint32 count);
     event MintWeaponsFailure(address indexed minter, uint32 count);
@@ -385,8 +386,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
+        bool unlikely = isUnlikely(uint24(getPlayerTraitBonusAgainst(traitsCWE).mulu(playerFightPower)), targetPower);
+
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
         uint256 tokens = usdToSkill(getTokenGainForFight(targetPower, fightMultiplier));
+        if(unlikely) {
+            emit UnlikelyFight(msg.sender, tokens, playerRoll >= monsterRoll);
+        }
 
         if(playerRoll < monsterRoll) {
             tokens = 0;
@@ -401,9 +407,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         tokenRewards[msg.sender] += tokens;
         xpRewards[char] += xp;
 
-        // if (playerRoll > monsterRoll && isUnlikely(uint24(getPlayerTraitBonusAgainst(traitsCWE).mulu(playerFightPower)), targetPower)) {
-        //     blacksmith.giveTicket(msg.sender, 1);
-        // }
+        if (playerRoll >= monsterRoll && unlikely) {
+            blacksmith.giveTicket(msg.sender, 1);
+        }
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
