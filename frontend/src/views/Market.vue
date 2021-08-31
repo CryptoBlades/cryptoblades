@@ -24,6 +24,12 @@
                   @click="searchAllWeaponListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_weapons">Browse Weapons</b-button>
               </div>
 
+              <div class="col">
+                <b-button
+                  variant="primary"
+                  @click="searchAllShieldListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_shields">Browse Shields</b-button>
+              </div>
+
               <div class="col"></div>
             </div>
 
@@ -36,7 +42,8 @@
                 first-number
                 last-number
                 v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
-                  searchAllCharacterListings(currentPage - 1)"
+                  (activeType == 'character' && searchAllCharacterListings(currentPage - 1)) ||
+                  (activeType == 'shield' && searchAllShieldListings(currentPage - 1))"
               ></b-pagination>
 
               <weapon-grid
@@ -59,7 +66,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -97,7 +104,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                      {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                      <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
 
@@ -119,15 +126,57 @@
                 </template>
               </character-list>
 
+              <nft-list
+                v-on:nft-filters-changed="searchAllShieldListings(0)"
+                v-if="activeType === 'shield'"
+                :showGivenNftIdTypes="true"
+                :nftIdTypes="allSearchResults.map(id => { return { id: id, type: 'shield' }; })"
+                :showLimit="shieldShowLimit"
+                :showReforgedToggle="false"
+                :showFavoriteToggle="false"
+                :isMarket="true"
+                v-model="selectedNftId"
+                :canFavorite="false">
+
+                <template #above="{ nft: { id } }">
+                  <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
+                    <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'"
+                      v-tooltip.top="{ content: maxPrecisionSkill(nftPricesById[id]) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
+                      >
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
+                      </span>
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      @click="selectedNftId = id; purchaseNft();"
+                      variant="primary"
+                      class="gtag-link-others">
+                      {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
+                    </b-button>
+                  </div>
+                </template>
+
+                <template #sold="{ nft: { id } }">
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
+                </template>
+
+              </nft-list>
+
               <b-pagination class="customPagination"
                 v-if="allSearchResults && allSearchResults.length > 0"
                 align="center" v-model="currentPage"
                 :total-rows="allListingsAmount"
-                :per-page="activeType === 'weapon' ? weaponShowLimit : characterShowLimit"
+                :per-page="activeType === 'weapon' ? weaponShowLimit :
+                  (activeType === 'character' ? characterShowLimit : shieldShowLimit)"
                 first-number
                 last-number
                 v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
-                  searchAllCharacterListings(currentPage - 1)"
+                  (activeType == 'character' && searchAllCharacterListings(currentPage - 1)) ||
+                  (activeType == 'shield' && searchAllShieldListings(currentPage - 1))"
               ></b-pagination>
             </div>
 
@@ -146,10 +195,10 @@
         </div>
       </b-tab>
 
-      <b-tab @click="clearData(),browseTabActive = false;skillShopTabActive = false">
+      <b-tab @click="clearData();loadMarketTaxes(),browseTabActive = false;skillShopTabActive = false">
         <template #title>
           Search NFTs
-          <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
+          <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons, Shields and Characters are NFTs of the ERC721 standard" />
         </template>
 
         <div class="row mt-3">
@@ -190,6 +239,20 @@
               <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
+                  :disabled="!search"
+                  @click="searchListingsByNftId('shield')"  class="gtag-link-others" tagname="search_shield_id">Search Shield ID</b-button>
+              </div>
+
+              <div class="col">
+                <b-button
+                  variant="primary"
+                  :disabled="!search"
+                  @click="searchListingsBySeller('shield')"  class="gtag-link-others" tagname="shields_seller">Shields by Seller</b-button>
+              </div>
+
+              <div class="col-4 col-md-3 col-lg-2">
+                <b-button
+                  variant="primary"
                   @click="searchOwnListings('weapon')"  class="gtag-link-others" tagname="search_own_weapons">Search My Weapons</b-button>
               </div>
 
@@ -197,6 +260,12 @@
                 <b-button
                   variant="primary"
                   @click="searchOwnListings('character')"  class="gtag-link-others" tagname="search_own_characters">Search My Characters</b-button>
+              </div>
+
+              <div class="col-4 col-md-3 col-lg-2">
+                <b-button
+                  variant="primary"
+                  @click="searchOwnListings('shield')"  class="gtag-link-others" tagname="search_own_shields">Search My Shields</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2">
@@ -234,7 +303,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -271,7 +340,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -293,6 +362,46 @@
                 </template>
 
               </character-list>
+
+              <nft-list
+                v-if="activeType === 'shield'"
+                :showGivenNftIdTypes="true"
+                :showReforgedToggle="false"
+                :showFavoriteToggle="false"
+                :nftIdTypes="searchResults.map(id => { return { id: id, type: 'shield' }; })"
+                :showLimit="shieldShowLimit"
+                :isMarket="true"
+                v-model="selectedNftId"
+                :canFavorite="false">
+
+                <template #above="{ nft: { id } }">
+                  <div class="d-flex flex-column align-items-center justify-content-center m-top-negative-5">
+                    <span class="d-block text-center fix-h24" v-if="nftPricesById[id]">
+                      <span v-if="convertWeiToSkill(nftPricesById[id]) !== '0'"
+                      v-tooltip.top="{ content: maxPrecisionSkill(nftPricesById[id]) , trigger: (isMobile() ? 'click' : 'hover') }"
+                      @mouseover="hover = !isMobile() || true"
+                      @mouseleave="hover = !isMobile()"
+                      >
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
+                      </span>
+                    </span>
+                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <b-button
+                      v-if="id !== null && !searchResultsOwned"
+                      :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
+                      @click="selectedNftId = id; purchaseNft();"
+                      variant="primary"
+                      class="gtag-link-others">
+                      {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
+                    </b-button>
+                  </div>
+                </template>
+
+                <template #sold="{ nft: { id } }">
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
+                </template>
+
+              </nft-list>
             </div>
           </div>
         </div>
@@ -333,6 +442,12 @@
               <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
+                  @click="activeType = 'shield'"  class="gtag-link-others" tagname="show_shields_market">Show Shields</b-button>
+              </div>
+
+              <div class="col-4 col-md-3 col-lg-2 mb-2">
+                <b-button
+                  variant="primary"
                   v-if="activeType === 'weapon'"
                    class="gtag-link-others" tagname="add_listing_weapon"
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
@@ -347,6 +462,14 @@
                   @click="showListingSetupModal()">List Character <b-icon-question-circle :hidden=!characterMarketTax
                   v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
 
+                <b-button
+                  variant="primary"
+                  v-if="activeType === 'shield'"
+                   class="gtag-link-others" tagname="add_listing_shield"
+                  :disabled="selectedNftId === null || selectedNftOnCooldown"
+                  @click="showListingSetupModal()">List Shield <b-icon-question-circle :hidden=!shieldMarketTax
+                  v-tooltip.bottom="shieldMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
+
                 <b-modal class="centered-modal" ref="listing-setup-modal"
                   @ok="!priceChangeModal ? addListingForNft() : updateNftListingPrice()">
                   <template #modal-title>
@@ -355,9 +478,10 @@
                   <b-form-input type="number" :max="10000"
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
 
-                  <span v-if="listingSellPrice">Do you want to sell your {{activeType}} for {{Math.min(+listingSellPrice, 10000)}} SKILL?<br>
+                  <span v-if="listingSellPrice">
+                    Do you want to sell your {{activeType}} for <CurrencyConverter :skill="Math.min(+listingSellPrice, 10000)"/>?<br>
                   <i>The buyer will pay an extra {{activeListingMarketTax()}}% market fee for a total of
-                  {{calculatedBuyerCost(Math.min(+listingSellPrice, 10000))}} SKILL</i></span>
+                  <CurrencyConverter :skill="calculatedBuyerCost(Math.min(+listingSellPrice, 10000))"/></i></span>
                 </b-modal>
               </div>
 
@@ -422,6 +546,37 @@
               </div>
 
               <div class="col-4 col-md-3 col-lg-2">
+                <b-button
+                  variant="primary"
+                   class="gtag-link-others" tagname="show_shields_sold"
+                  @click="showShieldsSoldModal()"> Shields Sold
+                  <b-icon-question-circle v-tooltip.bottom="'View shields you have sold.'"/>
+                </b-button>
+
+                <b-modal class="centered-modal " ref="shields-sold-modal">
+
+                    <template #modal-header>
+                         <div class="transaction-history-header-text">
+                           Shield Transaction History
+                         </div>
+                    </template>
+                    <div v-if="historyCounter > 0">
+                      <b-table class="transaction-history-text" :items="shieldTransactionHistoryData" :fields="sieldTransactionHistoryHeader"></b-table>
+                    </div>
+                    <div v-if="historyCounter === 0">
+                      <p>It's seems like there's nothing here.</p>
+                      <p>For tips on how to list NFTs, you may click this <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">link</a></strong></p>
+                    </div>
+                    <template #modal-footer>
+                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('shields-sold-modal')">Ok</b-button>
+                    </template>
+
+
+                </b-modal>
+
+              </div>
+
+              <div class="col-4 col-md-3 col-lg-2">
               </div>
             </div>
 
@@ -438,6 +593,14 @@
               <character-list
                 :showFilters="true"
                 v-model="selectedNftId"
+              />
+            </div>
+
+            <div class="sell-grid" v-if="activeType === 'shield'">
+              <nft-list
+                :isShop="false"
+                v-model="selectedNftId"
+                :canFavorite="false"
               />
             </div>
           </div>
@@ -474,12 +637,12 @@
            <div class="row">
             <div class="col-sm-4 special-offer-items">
               <div class="special-offer-bg">
-                 <nft-list :isShop="true" :nfts="specialOffersNftList"/>
+                 <nft-list :isShop="true" :nftIdTypes="specialOffersNftList"/>
               </div>
             </div>
             <div class="col-sm-8 shop-items">
               <div class="shop-items">
-                <nft-list :isShop="true" :nfts="shopOffersNftList"/>
+                <nft-list :isShop="true" :nftIdTypes="shopOffersNftList"/>
               </div>
             </div>
             <img class="shop-horizontal-divider" src="../assets/divider4.png" />
@@ -496,31 +659,36 @@ import Vue from 'vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import Hint from '../components/Hint.vue';
+import CurrencyConverter from '../components/CurrencyConverter.vue';
 import Web3 from 'web3';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { Accessors } from 'vue/types/options';
 import { Contract, Contracts, IState } from '../interfaces';
-import { Characters, Weapons } from '../../../build/abi-interfaces';
+import { Characters, Weapons, Shields } from '../../../build/abi-interfaces';
+import { SkillShopListing } from '../interfaces/SkillShopListing';
 import BigNumber from 'bignumber.js';
 import { BModal } from 'bootstrap-vue';
 import { traitNameToNumber } from '@/contract-models';
 import { market_blockchain as useBlockchain } from './../feature-flags';
-import { CharacterTransactionHistoryData, ICharacterHistory, IWeaponHistory, WeaponTransactionHistoryData } from '@/interfaces/History';
-import { getWeaponNameFromSeed } from '@/weapon-name';
-import { getCharacterNameFromSeed } from '@/character-name';
+import { CharacterTransactionHistoryData, ICharacterHistory,
+  IWeaponHistory, WeaponTransactionHistoryData,
+  IShieldHistory, ShieldTransactionHistoryData } from '@/interfaces/History';
+import { getShieldNameFromSeed } from '@/shield-name';
 import { fromWeiEther, apiUrl } from '../utils/common';
-import NftList from '@/components/smart/NftList.vue';
+import NftList, { NftIdType } from '@/components/smart/NftList.vue';
+import { getCleanName } from '../rename-censor';
 
-type SellType = 'weapon' | 'character';
+type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
 type CharacterId = string;
-type NftId = WeaponId | CharacterId;
+type ShieldId = string;
+type NftId = WeaponId | CharacterId | ShieldId;
 
 interface Data {
   activeType: SellType;
   search: string;
-  searchResults: CharacterId[] | WeaponId[];
-  allSearchResults: CharacterId[] | WeaponId[];
+  searchResults: CharacterId[] | WeaponId[] | NftIdType[];
+  allSearchResults: CharacterId[] | WeaponId[] | NftIdType[];
   searchResultsOwned: boolean;
   selectedNftId: NftId | null;
   marketOutcome: string | null;
@@ -528,8 +696,10 @@ interface Data {
   nftPricesById: Record<string, string>;
   characterMarketTax: string;
   weaponMarketTax: string ;
+  shieldMarketTax: string;
   characterShowLimit: number;
   weaponShowLimit: number;
+  shieldShowLimit: number;
   allListingsAmount: number;
   currentPage: number;
   browseTabActive: boolean;
@@ -540,10 +710,12 @@ interface Data {
   weaponTransactionHistoryHeader: any;
   characterTransactionHistoryData: CharacterTransactionHistoryData[];
   characterTransactionHistoryHeader: any;
+  shieldTransactionHistoryData: ShieldTransactionHistoryData[];
+  shieldTransactionHistoryHeader: any;
   historyCounter: number;
 }
 
-type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'ownedCharacterIds' | 'ownedWeaponIds'>;
+type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields' | 'ownedCharacterIds' | 'ownedWeaponIds' | 'ownedShieldIds'>;
 
 const defaultLimit = 40;
 
@@ -551,11 +723,13 @@ interface StoreMappedGetters {
   contracts: Contracts;
   ownCharacters: any[];
   totalShieldSupply: 0;
+  getCharacterName(id: string): string;
+  getWeaponName(id: string, stars: number): string;
 }
 
 export interface Nft {
-  nftId: string;
-  nftType: string;
+  id: string;
+  type: string;
   stars?: number;
   element?: string;
   stat1?: string;
@@ -565,6 +739,10 @@ export interface Nft {
   stat2Value?: number;
   stat3Value?: number;
   nftPrice?: number;
+  isConsumable: boolean;
+  name: string;
+  description: string;
+  image: string;
 }
 
 interface StoreMappedActions {
@@ -573,8 +751,10 @@ interface StoreMappedActions {
     nftContractAddr: string, limit: number, pageNumber: number, trait: number, minLevel: number, maxLevel: number
   }): Promise<string[]>;
   fetchAllMarketWeaponNftIdsPage(payload: { nftContractAddr: string, limit: number, pageNumber: number, trait: number, stars: number }): Promise<string[]>;
+  fetchAllMarketShieldNftIdsPage(payload: { nftContractAddr: string, limit: number, pageNumber: number, trait: number, stars: number }): Promise<string[]>;
   fetchNumberOfWeaponListings(payload: { nftContractAddr: string, trait: number, stars: number }): Promise<number>;
   fetchNumberOfCharacterListings(payload: { nftContractAddr: string, trait: number, minLevel: number, maxLevel: number}): Promise<number>;
+  fetchNumberOfShieldListings(payload: { nftContractAddr: string, trait: number, stars: number}): Promise<number>;
   fetchMarketNftIdsBySeller(payload: { nftContractAddr: string, sellerAddr: string }): Promise<string[]>;
   fetchMarketNftPrice(payload: { nftContractAddr: string, tokenId: string | number }): Promise<string>;
   fetchMarketTax(payload: { nftContractAddr: string }): Promise<string>;
@@ -586,10 +766,13 @@ interface StoreMappedActions {
   cancelMarketListing(payload: { nftContractAddr: string, tokenId: string }): Promise<{ seller: string, nftID: string }>;
   purchaseMarketListing(payload: { nftContractAddr: string, tokenId: string, maxPrice: string }): Promise<{ seller: string, nftID: string, price: string }>;
   fetchSellerOfNft(payload: { nftContractAddr: string, tokenId: string }): Promise<string>;
+  fetchTotalShieldSupply(): Promise<number>;
+  setupWeaponsWithIdsRenames(weaponIds: string[]): Promise<void>;
+  setupCharactersWithIdsRenames(weaponIds: string[]): Promise<void>;
 }
 
 export default Vue.extend({
-  components: { CharacterList, WeaponGrid, Hint, NftList },
+  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList },
 
   data() {
     return {
@@ -604,8 +787,10 @@ export default Vue.extend({
       nftPricesById: {},
       characterMarketTax: '',
       weaponMarketTax: '',
+      shieldMarketTax: '',
       characterShowLimit: 40,
       weaponShowLimit: 60,
+      shieldShowLimit: 60,
       allListingsAmount: 0,
       currentPage: 1,
       browseTabActive: true,
@@ -616,16 +801,18 @@ export default Vue.extend({
       weaponTransactionHistoryHeader: [],
       characterTransactionHistoryData: [],
       characterTransactionHistoryHeader: [],
+      shieldTransactionHistoryData: [],
+      shieldTransactionHistoryHeader: [],
       historyCounter: 0
     } as Data;
   },
 
   computed: {
     ...(mapState([
-      'defaultAccount', 'weapons', 'characters', 'ownedCharacterIds', 'ownedWeaponIds'
+      'defaultAccount', 'weapons', 'characters', 'shields', 'ownedCharacterIds', 'ownedWeaponIds', 'ownedShieldIds',
     ]) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'contracts', 'ownCharacters', 'totalShieldSupply'
+      'contracts', 'ownCharacters', 'totalShieldSupply','getCharacterName','getWeaponName'
     ]) as Accessors<StoreMappedGetters>),
     ...mapGetters(['transferCooldownOfCharacterId']),
 
@@ -641,10 +828,17 @@ export default Vue.extend({
       return this.contracts.Characters!;
     },
 
+    Shields(): Contract<Shields> {
+      // we use x! here because we assert that they're set already in created()
+      // this helps with typings
+      return this.contracts.Shields!;
+    },
+
     contractAddress(): string {
       return this.activeType === 'weapon'
         ? this.Weapons.options.address
-        : this.Characters.options.address;
+        : (this.activeType === 'character' ? this.Characters.options.address
+          : this.Shields.options.address);
     },
 
     buyableNftSelected(): boolean {
@@ -659,29 +853,97 @@ export default Vue.extend({
 
     selectedNftOnCooldown(): boolean {
       return this.selectedNftId !== null
-      && (this.activeType === 'weapon'
+      && (this.activeType === 'weapon' || this.activeType === 'shield'
         ? false
         : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
     },
 
     canPurchase(): boolean {
-      return this.activeType === 'weapon' || this.ownCharacters.length < 4 ;
+      return this.activeType === 'weapon' || this.activeType === 'shield' || this.ownCharacters.length < 4 ;
     },
 
-    specialOffersNftList(): Nft[] {
+    specialOffersNftList(): SkillShopListing[] {
       const nftList = [
         {
-          nftId: 'placeholder',
-          nftType: 'shield',
-          nftPrice: 5
+          id: 'placeholder',
+          type: 'shield',
+          nftPrice: 3,
+          name: 'Shield',
+          description: 'A Legendary Defender Shield',
+          image: '',
         },
-      ];
+      ] as SkillShopListing[];
 
       return nftList;
     },
 
-    shopOffersNftList(): Nft[] {
-      const nftList = [] as Nft[];
+    shopOffersNftList(): SkillShopListing[] {
+      const nftList = [
+        {
+          id: 0,
+          type: 'CharacterRenameTag',
+          nftPrice: 0.1,
+          name: 'Rename Tag',
+          description: 'Renames one character.',
+          image: 'scroll_06_te.png'
+        },
+        {
+          id: 0,
+          type: 'CharacterRenameTagDeal',
+          nftPrice: 0.3,
+          name: 'Rename Tag Deal',
+          description: 'Renames 4 characters for the price of 3.',
+          image: 'scroll_06_te4.png'
+        },
+        {
+          id: 1,
+          type: 'WeaponRenameTag',
+          nftPrice: 0.1,
+          name: 'Weapon Tag',
+          description: 'Renames a weapon.',
+          image: 'rune_05_te.png'
+        },
+        {
+          id: 1,
+          type: 'WeaponRenameTagDeal',
+          nftPrice: 0.3,
+          name: 'Weapon Tag Deal',
+          description: 'Renames 4 weapons for the price of 3.',
+          image: 'rune_05_te4.png'
+        },
+        {
+          id: 1,
+          type: 'CharacterEarthTraitChange',
+          nftPrice: 0.2,
+          name: 'Earth Character Trait',
+          description: 'Changes character\'s trait to Earth.',
+          image: 'potion_06_te.png'
+        },
+        {
+          id: 1,
+          type: 'CharacterFireTraitChange',
+          nftPrice: 0.2,
+          name: 'Fire Character Trait',
+          description: 'Changes character\'s trait to Fire.',
+          image: 'potion_09_te.png'
+        },
+        {
+          id: 1,
+          type: 'CharacterWaterTraitChange',
+          nftPrice: 0.2,
+          name: 'Water Character Trait',
+          description: 'Changes character\'s trait to Water.',
+          image: 'potion_07_te.png'
+        },
+        {
+          id: 1,
+          type: 'CharacterLightningTraitChange',
+          nftPrice: 0.2,
+          name: 'Lightning Character Trait',
+          description: 'Changes character\'s trait to Lightning.',
+          image: 'potion_05_te.png'
+        },
+      ] as SkillShopListing[];
 
       return nftList;
     }
@@ -692,8 +954,10 @@ export default Vue.extend({
       'fetchAllMarketNftIds',
       'fetchAllMarketCharacterNftIdsPage',
       'fetchAllMarketWeaponNftIdsPage',
+      'fetchAllMarketShieldNftIdsPage',
       'fetchNumberOfWeaponListings',
       'fetchNumberOfCharacterListings',
+      'fetchNumberOfShieldListings',
       'fetchMarketNftIdsBySeller',
       'fetchMarketNftPrice',
       'fetchMarketTax',
@@ -703,6 +967,9 @@ export default Vue.extend({
       'cancelMarketListing',
       'purchaseMarketListing',
       'fetchSellerOfNft',
+      'fetchTotalShieldSupply',
+      'setupWeaponsWithIdsRenames',
+      'setupCharactersWithIdsRenames',
     ]) as StoreMappedActions),
 
     clearData() {
@@ -720,7 +987,6 @@ export default Vue.extend({
       this.listingSellPrice = '';
     },
 
-
     async loadMarketTaxes() {
       if(!this.characterMarketTax) {
         const tax = await this.getMarketTax(this.Characters.options.address) as string;
@@ -729,6 +995,10 @@ export default Vue.extend({
       if(!this.weaponMarketTax) {
         const tax = await this.getMarketTax(this.Weapons.options.address) as string;
         this.weaponMarketTax = this.convertMarketTax(tax);
+      }
+      if(!this.shieldMarketTax) {
+        const tax = await this.getMarketTax(this.Shields.options.address) as string;
+        this.shieldMarketTax = this.convertMarketTax(tax);
       }
     },
 
@@ -744,23 +1014,24 @@ export default Vue.extend({
       });
     },
 
-    async lookupNftPrice(nftId: NftId) {
+    async lookupNftPrice(id: NftId) {
       if(!this.contractAddress) return;
 
       return await this.fetchMarketNftPrice({
         nftContractAddr: this.contractAddress,
-        tokenId: nftId,
+        tokenId: id,
       });
     },
 
     async fetchNftPrices(nftIds: NftId[]) {
       if(!this.contractAddress) return;
 
-      await Promise.all(nftIds.map(async nftId => {
-        const price = (await this.lookupNftPrice(nftId))!;
+      this.nftPricesById = {};
+      await Promise.all(nftIds.map(async id => {
+        const price = (await this.lookupNftPrice(id))!;
 
         void price;
-        this.nftPricesById[nftId] = price;
+        this.nftPricesById[id] = price;
       }));
     },
 
@@ -776,7 +1047,10 @@ export default Vue.extend({
 
       const results = await this.addMarketListing({
         nftContractAddr: this.contractAddress,
-        tokenId: this.selectedNftId,
+        // nft-list keys have a typeid format, e.g. shield0
+        tokenId: this.activeType === 'weapon' || this.activeType === 'character'
+          ? this.selectedNftId
+          : this.selectedNftId.split('.')[1],
         price: this.convertSkillToWei(val.toString()),
       });
 
@@ -798,7 +1072,9 @@ export default Vue.extend({
 
       const results = await this.changeMarketListingPrice({
         nftContractAddr: this.contractAddress,
-        tokenId: this.selectedNftId,
+        tokenId: this.activeType === 'weapon' || this.activeType === 'character'
+          ? this.selectedNftId
+          : this.selectedNftId.split('.')[1],
         newPrice: this.convertSkillToWei(val.toString())
       });
 
@@ -814,6 +1090,10 @@ export default Vue.extend({
 
       const price = await this.lookupNftPrice(this.selectedNftId);
       if(!price) return;
+
+      if(this.activeType !== 'weapon' && this.activeType !== 'character') {
+        this.selectedNftId = this.selectedNftId.split('.')[1];
+      }
 
       const skillChainPrice = this.convertStringToDecimal(this.convertWeiToSkill(price), 2);
       const skillUIPrice = this.convertStringToDecimal(this.convertWeiToSkill(this.nftPricesById[this.selectedNftId]), 2);
@@ -837,7 +1117,7 @@ export default Vue.extend({
 
       this.allSearchResults = results2;
 
-      this.allSearchResults = Array.from(this.allSearchResults).filter((x: any) => x.id !== this.selectedNftId);
+      this.allSearchResults = Array.from(this.allSearchResults as string[]).filter((x: any) => x.id !== this.selectedNftId);
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = 'Successfully purchased '
@@ -854,7 +1134,9 @@ export default Vue.extend({
 
       const results = await this.cancelMarketListing({
         nftContractAddr: this.contractAddress,
-        tokenId: this.selectedNftId,
+        tokenId: this.activeType === 'weapon' || this.activeType === 'character'
+          ? this.selectedNftId
+          : this.selectedNftId.split('.')[1],
       });
 
       this.waitingMarketOutcome = false;
@@ -986,6 +1268,64 @@ export default Vue.extend({
       this.allSearchResults = weapons.idResults;
     },
 
+    async searchAllShieldListings(page: number) {
+      this.activeType = 'shield';
+      this.marketOutcome = null;
+      this.waitingMarketOutcome = true;
+      this.currentPage = page + 1;
+
+      if(useBlockchain === true)
+        await this.searchAllShieldListingsThroughChain(page);
+      else
+        await this.searchAllShieldListingsThroughAPI(page);
+
+      // searchResultsOwned does not mesh with this function
+      // will need per-result checking of it, OR filtering out own NFTs
+      //this.searchResultsOwned = nftSeller === this.defaultAccount;
+      this.searchResultsOwned = false; // temp
+
+      this.waitingMarketOutcome = false;
+      this.marketOutcome = null;
+    },
+
+    async searchAllShieldListingsThroughChain(page: number) {
+      const filterStar = this.nftStarFilter() !== 0 ? this.nftStarFilter() - 1 : 255;
+      this.allListingsAmount = await this.fetchNumberOfShieldListings({
+        nftContractAddr: this.contractAddress,
+        trait: traitNameToNumber(this.nftTraitFilter()),
+        stars: filterStar
+      });
+
+      this.allSearchResults = await this.fetchAllMarketShieldNftIdsPage({
+        nftContractAddr: this.contractAddress,
+        limit: this.shieldShowLimit || defaultLimit,
+        pageNumber: page,
+        trait: traitNameToNumber(this.nftTraitFilter()),
+        stars: filterStar
+      });
+    },
+
+    async searchAllShieldListingsThroughAPI(page: number) {
+      const url = new URL(apiUrl('static/market/shield'));
+      const params = {
+        element: '' + this.nftTraitFilter(),
+        minStars: '' + this.nftStarFilter(),
+        maxStars: '' + this.nftStarFilter(),
+        sortBy: '' + this.nftPriceOrder() ? 'price' : '',
+        sortDir: '' + this.nftPriceOrder(),
+        pageSize: '' + (this.shieldShowLimit || defaultLimit),
+        pageNum: '' + page,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const shieldsData = await fetch(url.toString());
+      const shields = await shieldsData.json();
+
+      this.allListingsAmount = shields.page.total;
+      this.allSearchResults = shields.idResults;
+    },
+
     async searchListingsByNftId(type: SellType) {
       this.activeType = type;
       this.marketOutcome = null;
@@ -996,9 +1336,15 @@ export default Vue.extend({
         tokenId: this.search
       });
       this.searchResultsOwned = nftSeller === this.defaultAccount;
+      const url = new URL('https://api.cryptoblades.io/static/wallet/banned/' + nftSeller);
+      const data = await fetch(url.toString());
+      const banned = await data.json();
+      if(banned.banned) {
+        (this as any).$dialog.notify.error('Item not available!');
+      }
 
       const price = await this.lookupNftPrice(this.search);
-      if(price !== '0') {
+      if(price !== '0' && !banned.banned) {
         this.searchResults = [this.search];
       } else {
         this.searchResults = [];
@@ -1040,8 +1386,10 @@ export default Vue.extend({
 
     async searchListingsBySellerThroughAPI(){
       this.searchResults = this.activeType === 'weapon' ?
-        await this.searchWeaponListingsBySeller(this.search):
-        await this.searchCharacterListingsBySeller(this.search);
+        await this.searchWeaponListingsBySeller(this.search)
+        : (this.activeType === 'character' ?
+          await this.searchCharacterListingsBySeller(this.search)
+          : await this.searchShieldListingsBySeller(this.search));
 
       this.searchResultsOwned = false;
     },
@@ -1077,7 +1425,9 @@ export default Vue.extend({
     async searchOwnListingsThroughAPI(){
       this.searchResults = this.activeType === 'weapon' ?
         await this.searchWeaponListingsBySeller(this.defaultAccount as string):
-        await this.searchCharacterListingsBySeller(this.defaultAccount as string);
+        (this.activeType === 'character' ?
+          await this.searchCharacterListingsBySeller(this.defaultAccount as string)
+          : await this.searchShieldListingsBySeller(this.defaultAccount as string));
     },
 
     async searchCharacterListingsBySeller(sellerAddress: string): Promise<string[]>{
@@ -1119,6 +1469,25 @@ export default Vue.extend({
       const weaponsData = await fetch(url.toString());
       const weapons = await weaponsData.json();
       return weapons.idResults;
+    },
+
+    async searchShieldListingsBySeller(sellerAddress: string): Promise<NftIdType[]>{
+      const url = new URL(apiUrl('static/market/shield'));
+      const params = {
+        element: '' + this.nftTraitFilter(),
+        minStars: '' + this.nftStarFilter(),
+        maxStars: '' + this.nftStarFilter(),
+        sortBy: '' + this.nftPriceOrder() ? 'price' : '',
+        sortDir: '' + this.nftPriceOrder(),
+        pageSize: '' + (this.shieldShowLimit || defaultLimit),
+        sellerAddress: '' + sellerAddress,
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const shieldsData = await fetch(url.toString());
+      const shields = await shieldsData.json();
+      return shields.idResults;
     },
 
     async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
@@ -1176,7 +1545,7 @@ export default Vue.extend({
             // eslint-disable-next-line prefer-const
             let items: WeaponTransactionHistoryData = {
               weaponId: weaponHistory[i].weaponId,
-              weaponName: getWeaponNameFromSeed(parseInt(weaponHistory[i].weaponId,10),weaponHistory[i].weaponStars),
+              weaponName: getCleanName(this.getWeaponName(weaponHistory[i].weaponId, weaponHistory[i].weaponStars)),
               weaponPrice: weaponHistory[i].price
             };
 
@@ -1217,7 +1586,7 @@ export default Vue.extend({
             // eslint-disable-next-line prefer-const
             let items: CharacterTransactionHistoryData = {
               charId: characterHistory[i].charId,
-              charName: getCharacterNameFromSeed(parseInt(characterHistory[i].charId,10)),
+              charName: getCleanName(this.getCharacterName(characterHistory[i].charId)),
               charPrice: characterHistory[i].price
             };
 
@@ -1228,10 +1597,53 @@ export default Vue.extend({
 
       (this.$refs['characters-sold-modal'] as BModal).show();
     },
+    async showShieldsSoldModal() {
+      const shieldHistory: IShieldHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      this.shieldTransactionHistoryHeader = [
+        {
+          key: 'shieldId',
+          sortable: true,
+          label: 'Shield ID'
+        },
+        {
+          key: 'shieldName',
+          sortable: true,
+          label: 'Name'
+        },
+        {
+          key: 'shieldPrice',
+          label: 'Price',
+          sortable: true,
+        }
+      ];
+
+      if(shieldHistory.length === 0){
+        this.historyCounter = 0;
+      }
+      else{
+        this.historyCounter = shieldHistory.length;
+        for (let i = 0; i<shieldHistory.length; ++i){
+          if(shieldHistory[i].type === 'shield' && shieldHistory !== undefined){
+            // eslint-disable-next-line prefer-const
+            let items: ShieldTransactionHistoryData = {
+              shieldId: shieldHistory[i].shieldId,
+              shieldName: getShieldNameFromSeed(parseInt(shieldHistory[i].shieldId,10),shieldHistory[i].shieldStars),
+              shieldPrice: shieldHistory[i].price
+            };
+
+            this.shieldTransactionHistoryData.push(items);
+          }
+        }
+      }
+
+      (this.$refs['shields-sold-modal'] as BModal).show();
+    },
+
 
     resetTransactionHistoryValues(modalName: string){
       this.characterTransactionHistoryData = [];
       this.weaponTransactionHistoryData = [];
+      this.shieldTransactionHistoryData = [];
       (this.$refs[modalName] as BModal).hide();
     },
 
@@ -1294,6 +1706,21 @@ export default Vue.extend({
       return sessionStorage.getItem('market-weapon-price-maxfilter') ? (sessionStorage.getItem('market-weapon-price-maxfilter') as string) : '';
     },
 
+    nftTypeFilter(): string {
+      return sessionStorage.getItem('market-nft-elementfilter') ? (sessionStorage.getItem('market-nft-elementfilter') as string).toLowerCase() : '';    },
+
+    nftTraitFilter(): string {
+      return sessionStorage.getItem('market-nft-elementfilter') ? (sessionStorage.getItem('market-nft-elementfilter') as string).toLowerCase() : '';
+    },
+
+    nftStarFilter(): number {
+      return sessionStorage.getItem('market-nft-starfilter') ? +(sessionStorage.getItem('market-nft-starfilter') as string) : 0;
+    },
+
+    nftPriceOrder(): string {
+      return sessionStorage.getItem('market-nft-price-order') ? (sessionStorage.getItem('market-nft-price-order') as string) : '';
+    },
+
     convertStringToDecimal(val: string, maxDecimals: number) {
       return new BigNumber(val).toFixed(maxDecimals);
     },
@@ -1304,6 +1731,10 @@ export default Vue.extend({
 
       if(this.activeType === 'character'){
         return this.characterMarketTax;
+      }
+
+      if(this.activeType === 'shield'){
+        return this.shieldMarketTax;
       }
 
       return '0';
@@ -1320,16 +1751,26 @@ export default Vue.extend({
 
   watch: {
 
-    async searchResults(nftIds: CharacterId[] | WeaponId[]) {
+    async searchResults(nftIds: CharacterId[] | WeaponId[] | ShieldId[]) {
       this.selectedNftId = null;
 
       await this.fetchNftPrices(nftIds);
+      if(this.activeType === 'weapon') {
+        await this.setupWeaponsWithIdsRenames(nftIds);
+      } else if(this.activeType === 'character') {
+        await this.setupCharactersWithIdsRenames(nftIds);
+      }
     },
 
-    async allSearchResults(nftIds: CharacterId[] | WeaponId[]) {
+    async allSearchResults(nftIds: CharacterId[] | WeaponId[] | ShieldId[]) {
       this.selectedNftId = null;
 
       await this.fetchNftPrices(nftIds);
+      if(this.activeType === 'weapon') {
+        await this.setupWeaponsWithIdsRenames(nftIds);
+      } else if(this.activeType === 'character') {
+        await this.setupCharactersWithIdsRenames(nftIds);
+      }
     }
   },
 
@@ -1355,7 +1796,7 @@ export default Vue.extend({
   },
 
   mounted() {
-    assert.ok(this.contracts.Weapons && this.contracts.Characters, 'Expected required contracts to be available');
+    assert.ok(this.contracts.Weapons && this.contracts.Characters && this.contracts.Shields, 'Expected required contracts to be available');
   },
 });
 </script>

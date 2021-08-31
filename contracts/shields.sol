@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "./Promos.sol";
 import "./util.sol";
 
 contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
@@ -24,6 +25,12 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         defenseMultPerPointBasic =  ABDKMath64x64.divu(1, 400); // 0.25%
         defenseMultPerPointDEF = defenseMultPerPointBasic.mul(ABDKMath64x64.divu(103, 100)); // 0.2575% (+3%)
         defenseMultPerPointMatching = defenseMultPerPointBasic.mul(ABDKMath64x64.divu(107, 100)); // 0.2675% (+7%)
+    }
+
+    function migrateTo_surprise(Promos _promos) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        promos = _promos;
     }
 
     /*
@@ -64,6 +71,8 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     uint256 public constant maxDurability = 20;
     uint256 public constant secondsPerDurability = 3000; //50 * 60
+
+    Promos public promos;
 
     event NewShield(uint256 indexed shield, address indexed minter);
 
@@ -119,8 +128,8 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function mintForPurchase(address buyer) external restricted {
-        require(totalSupply() < 10000, "Out of stock"); // temporary restriction
-        mint(buyer, uint256(keccak256(abi.encodePacked(buyer, block.timestamp, blockhash(block.number - 1)))));
+        require(totalSupply() < 25000, "Out of stock"); // temporary restriction
+        mint(buyer, uint256(keccak256(abi.encodePacked(buyer, blockhash(block.number - 1)))));
     }
 
     function mint(address minter, uint256 seed) public restricted returns(uint256) {
@@ -371,7 +380,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         else {
             durabilityTimestamp[id] = uint64(durabilityTimestamp[id] + drainTime);
         }
-        
+
         Shield storage shd = tokens[id];
         return (
             shieldBaseMultiplier.add(defenseMultPerPointBasic.mul(
@@ -428,5 +437,9 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function getDurabilityMaxWait() public pure returns (uint64) {
         return uint64(maxDurability * secondsPerDurability);
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
 }
