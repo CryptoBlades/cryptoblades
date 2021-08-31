@@ -1372,7 +1372,6 @@ export function createStore(web3: Web3) {
         await Promise.all([
           dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp'),
           dispatch('updateWeaponIds'),
           dispatch('setupWeaponDurabilities')
         ]);
@@ -1406,7 +1405,6 @@ export function createStore(web3: Web3) {
         await Promise.all([
           dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp'),
           dispatch('updateWeaponIds'),
           dispatch('setupWeaponDurabilities')
         ]);
