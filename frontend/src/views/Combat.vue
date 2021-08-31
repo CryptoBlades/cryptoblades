@@ -5,8 +5,8 @@
         <div class="col error">Error: {{ error }}</div>
       </div>
 
-      <b-modal id="fightResultsModal" hide-footer title="Fight Results">
-        <CombatResults v-if="resultsAvailable" :results="fightResults" />
+      <b-modal id="fightResultsModal" hide-footer hide-header>
+        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" />
         <b-button class="mt-3" variant="primary" block @click="$bvModal.hide('fightResultsModal')">Close</b-button>
       </b-modal>
 
@@ -112,7 +112,7 @@
                 <big-button
                       class="encounter-button btn-styled"
                       :mainText="`Fight!`"
-                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId)"
+                      :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId) || !charHasStamina()"
                       @click="onClickEncounter(e)"
                     />
                 <p v-if="isLoadingTargets">Loading...</p>
@@ -223,6 +223,9 @@ export default {
     getEnemyArt,
     weaponHasDurability(id) {
       return this.getWeaponDurability(id) >= this.fightMultiplier;
+    },
+    charHasStamina(){
+      return this.currentCharacterStamina >= this.staminaPerFight;
     },
     getCharacterTrait(trait) {
       return CharacterTrait[trait];
@@ -474,6 +477,7 @@ div.encounter.text-center {
   background: rgba(255, 255, 255, 0.1);
   width: 12em;
   height: 12em;
+  margin: 0 auto;
 }
 
 .encounter-container {
@@ -651,9 +655,6 @@ h1 {
 .header-row {
   display: block;
   text-align: center;
-}
-.weapon-icon-wrapper {
-  margin: 0 auto;
 }
 
 @media (max-width: 575.98px) {
