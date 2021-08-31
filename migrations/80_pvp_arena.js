@@ -5,7 +5,7 @@ const PvpArena = artifacts.require("PvpArena");
 const Shields = artifacts.require("Shields");
 const Raid1 = artifacts.require("Raid1");
 
-module.exports = function (deployer) {
+module.exports = async function (deployer) {
   const game = await CryptoBlades.deployed();
   const shields = await Shields.deployed();
   const raids = await Raid1.deployed();
