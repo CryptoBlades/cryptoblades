@@ -1,13 +1,18 @@
 export interface Nft {
-  nftId: number | string;
-  nftType: string;
+  id: number | string;
+  type?: string;
   stars?: number;
   element?: string;
-  stat1Trait?: string;
-  stat2Trait?: string;
-  stat3Trait?: string;
-  stat1?: number;
-  stat2?: number;
-  stat3?: number;
+  stat1Type?: number;
+  stat2Type?: number;
+  stat3Type?: number;
+  stat1?: string;
+  stat2?: string;
+  stat3?: string;
+  stat1Value?: number;
+  stat2Value?: number;
+  stat3Value?: number;
   nftPrice?: number;
+  amount?: number;
+  effect?: number;
 }
