@@ -68,7 +68,7 @@
           </span>
         </b-button>
       </div>
-      <div v-if="isReward && nonIgnoredNfts.length === 0">
+      <div class="centered-text-div" v-if="isReward && nftIdTypes.length === 0">
         Nothing dropped for you this time.
       </div>
       <ul class="nft-grid">
@@ -137,6 +137,7 @@ interface StoreMappedActions {
   fetchJunks(junkIds: (string | number)[]): Promise<void>;
   fetchTrinkets(trinketIds: (string | number)[]): Promise<void>;
   fetchWeapons(weaponIds: (string | number)[]): Promise<void>;
+  fetchKeyLootboxes(keyLootboxIds: (string | number)[]): Promise<void>;
   updateTrinketIds(): Promise<void>;
   updateJunkIds(): Promise<void>;
   updateKeyLootboxIds(): Promise<void>;
@@ -253,6 +254,8 @@ export default Vue.extend({
     },
 
     displayNfts(): Nft[] {
+      if(!this.nftsToDisplay) return [];
+
       if(this.isMarket && this.showGivenNftIdTypes) {
         const type = this.nftIdTypes && this.nftIdTypes[0]?.type;
         switch(type) {
@@ -266,7 +269,11 @@ export default Vue.extend({
       if(this.isReward && this.showGivenNftIdTypes) {
         const rewardedDust = this.nftsToDisplay.filter(x => x.type?.startsWith('dust')).map(x => { return { type: x.type, id: 0, amount: x.amount }; });
         const rewardedWeapons = this.weaponsWithIds(this.nftsToDisplay.filter(x => x.type === 'weapon').map(x => x.id));
-        rewardedWeapons.forEach(x => x.type = 'weapon');
+        rewardedWeapons.forEach(x => {
+          if(x) {
+            x.type = 'weapon';
+          }
+        });
 
         return this.nftsWithIdType(this.nftsToDisplay).concat(rewardedDust).concat(rewardedWeapons).filter(Boolean);
       }
@@ -346,13 +353,14 @@ export default Vue.extend({
 
       await this.fetchShields(shieldIds);
       await this.fetchJunks(junkIds);
+      await this.fetchKeyLootboxes(keyLootboxIds);
       await this.fetchTrinkets(trinketIds);
       await this.fetchWeapons(weaponIds);
     },
   },
 
   methods: {
-    ...(mapActions(['purchaseShield', 'fetchShields', 'fetchJunks', 'fetchTrinkets', 'fetchWeapons', 'updateTrinketIds',
+    ...(mapActions(['purchaseShield', 'fetchShields', 'fetchJunks', 'fetchTrinkets', 'fetchWeapons', 'fetchKeyLootboxes', 'updateTrinketIds',
       'updateJunkIds', 'updateKeyLootboxIds', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
       'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
       'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
@@ -436,7 +444,6 @@ export default Vue.extend({
 
     async buyItem(item: nftItem) {
       if(item.type === 'shield'){
-        console.log('buying shield');
         await this.purchaseShield();
       }
 
