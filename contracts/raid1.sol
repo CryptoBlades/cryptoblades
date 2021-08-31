@@ -451,7 +451,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function distributeWeapon(address claimant, uint256 claimRaidIndex, uint256 seed, uint8 stars) private {
-        uint tokenID = weapons.mintWeaponWithStars(claimant, stars, seed / 100);
+        uint tokenID = weapons.mintWeaponWithStars(claimant, stars, seed / 100, 100);
         emit RewardedWeapon(claimRaidIndex, claimant, stars, tokenID);
     }
 
