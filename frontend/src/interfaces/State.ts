@@ -63,6 +63,7 @@ export interface IState {
   accounts: string[];
   defaultAccount: string | null;
   currentNetworkId: number | null;
+  skillPriceInUsd: number;
 
   fightGasOffset: string;
   fightBaseline: string;

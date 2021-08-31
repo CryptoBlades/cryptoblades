@@ -50,6 +50,7 @@ There are optional environment variables, most of which have sensible defaults i
 - `npm run lint` - run lint checking for all modules
 - `npm run contract:prepare` - extract the ABI and re-compile Truffle contracts
 - `npm run contract:deploy` - deploy the Truffle contracts for testing
+- `npm run test-local` - run test and ignore unnecessary migrations (only for the local contracts).
 
 ## Errors
 - If you run into any error at all during the build process you may need to reset [Ganache](https://www.trufflesuite.com/ganache) by deleting previous workspaces and going through the Ganache setup process again including importing a new account for Metamask.
