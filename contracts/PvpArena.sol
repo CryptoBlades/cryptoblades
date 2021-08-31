@@ -119,7 +119,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 weaponID,
         uint256 shieldID,
         bool useShield
-    ) public enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
+    ) external enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
         uint256 wager = getEntryWager(characterID);
         uint8 tier = getArenaTier(characterID);
 
@@ -170,7 +170,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev attempts to find an opponent for a character. If a battle is still pending, it charges a penalty and re-rolls the opponent
-    function requestOpponent(uint256 characterID) public returns (uint256) {
+    function requestOpponent(uint256 characterID) external {
         // TODO: implement (not final signature)
     }
 
@@ -194,13 +194,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev performs a given character's duel against its opponent
-    function performDuel(uint256 characterID) public {
+    function performDuel(uint256 characterID) external {
         // TODO: implement (not final signature)
     }
 
     /// @dev withdraws a character from the arena.
     /// if the character is in a battle, a penalty is charged
-    function withdrawCharacter(uint256 characterID) public {
+    function withdrawCharacter(uint256 characterID) external {
         // TODO: implement (not final signature)
     }
 }
