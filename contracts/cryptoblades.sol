@@ -981,24 +981,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _;
     }
 
-    modifier requestPayFromPlayer(int128 usdAmount) {
-        _requestPayFromPlayer(usdAmount);
-        _;
-    }
-
-    function _requestPayFromPlayer(int128 usdAmount) internal view {
-        uint256 skillAmount = usdToSkill(usdAmount);
-
-        (,, uint256 fromUserWallet) =
-            getSkillToSubtract(
-                inGameOnlyFunds[msg.sender],
-                tokenRewards[msg.sender],
-                skillAmount
-            );
-
-        require(skillToken.balanceOf(msg.sender) >= fromUserWallet);
-    }
-
     function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
         _payPlayerConverted(playerAddress, convertedAmount);
     }
