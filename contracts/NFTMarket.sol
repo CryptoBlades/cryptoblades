@@ -56,7 +56,7 @@ contract NFTMarket is
         weapons = _weaponsContract;
     }
 
-    function migrateTo_PLACEHOLDER(IPriceOracle _priceOracleSkillPerUsd) external {
+    function migrateTo_2316231(IPriceOracle _priceOracleSkillPerUsd) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
