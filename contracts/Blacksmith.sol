@@ -2,6 +2,8 @@ pragma solidity ^0.6.5;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./interfaces/IRandoms.sol";
 import "./shields.sol";
 import "./Consumables.sol";
@@ -9,6 +11,7 @@ import "./weapons.sol";
 import "./cryptoblades.sol";
 
 contract Blacksmith is Initializable, AccessControlUpgradeable {
+    using SafeERC20 for IERC20;
     /* ========== CONSTANTS ========== */
 
     bytes32 public constant GAME = keccak256("GAME");
@@ -90,6 +93,12 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
+    function recoverToken(address tokenAddress, uint256 amount) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        IERC20(tokenAddress).safeTransfer(msg.sender, amount);
+    }
+
     // function spendTicket(uint32 _num) external {
     //     require(_num > 0);
     //     require(tickets[msg.sender] >= _num, "Not enough tickets");
@@ -140,7 +149,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     }
 
     /* ========== Character Rename ========== */
-    
+
     function setCharacterRenamePrice(uint256 newPrice) external isAdmin {
         require(newPrice > 0, 'invalid price');
         itemFlatPrices[ITEM_CHARACTER_RENAME] = newPrice;
@@ -155,13 +164,13 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_RENAME]);
         Consumables(itemAddresses[ITEM_CHARACTER_RENAME]).giveItem(msg.sender, 1);
     }
-    
+
     function purchaseCharacterRenameTagDeal(uint256 paying) public { // 4 for the price of 3
         require(paying == itemFlatPrices[ITEM_CHARACTER_RENAME] * 3, 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_RENAME] * 3);
         Consumables(itemAddresses[ITEM_CHARACTER_RENAME]).giveItem(msg.sender, 4);
     }
-    
+
     /* ========== Weapon Rename ========== */
 
     function setWeaponRenamePrice(uint256 newPrice) external isAdmin {
