@@ -56,6 +56,14 @@ contract NFTMarket is
         weapons = _weaponsContract;
     }
 
+    function migrateTo_PLACEHOLDER(IPriceOracle _priceOracleSkillPerUsd) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
+        addFee = ABDKMath64x64.divu(2, 100);    // 0.02 usd;
+        changeFee = ABDKMath64x64.divu(0, 100); // 0.00 usd;
+    }
+
     // basic listing; we can easily offer other types (auction / buy it now)
     // if the struct can be extended, that's one way, otherwise different mapping per type.
     struct Listing {
@@ -69,7 +77,6 @@ contract NFTMarket is
     // ############
     IERC20 public skillToken; //0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
     address public taxRecipient; //game contract
-    //IPriceOracle public priceOracleSkillPerUsd; // we may want this for dynamic pricing
 
     // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
     mapping(address => mapping(uint256 => Listing)) private listings;
@@ -94,6 +101,10 @@ contract NFTMarket is
 
     Weapons internal weapons;
     Characters internal characters;
+
+    IPriceOracle public priceOracleSkillPerUsd;
+    int128 public addFee;
+    int128 public changeFee;
 
     // ############
     // Events
@@ -452,6 +463,8 @@ contract NFTMarket is
         isValidERC721(_tokenAddress)
         isNotListed(_tokenAddress, _id)
     {
+        skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(addFee));
+
         listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price);
         listedTokenIDs[address(_tokenAddress)].add(_id);
 
@@ -478,6 +491,8 @@ contract NFTMarket is
         isListed(_tokenAddress, _id)
         isSeller(_tokenAddress, _id)
     {
+        skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(changeFee));
+
         listings[address(_tokenAddress)][_id].price = _newPrice;
         emit ListingPriceChange(
             msg.sender,
@@ -534,6 +549,16 @@ contract NFTMarket is
             _id,
             finalPrice
         );
+    }
+
+    function setAddValue(uint256 cents) public restricted {
+        require(cents <= 100, "AddValue too high");
+        addFee = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setChangeValue(uint256 cents) public restricted {
+        require(cents <= 100, "ChangeValue too high");
+        changeFee = ABDKMath64x64.divu(cents, 100);
     }
 
     function setTaxRecipient(address _taxRecipient) public restricted {
@@ -604,6 +629,10 @@ contract NFTMarket is
 
     function recoverSkill(uint256 amount) public restricted {
         skillToken.safeTransfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
+    }
+
+    function usdToSkill(int128 usdAmount) public view returns (uint256) {
+        return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
     }
 
     function onERC721Received(
