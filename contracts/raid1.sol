@@ -42,6 +42,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     uint256 public constant LINK_JUNK = 3;
 
     uint256 public constant NUMBERPARAMETER_AUTO_DURATION = 1;
+    uint256 public constant NUMBERPARAMETER_AUTO_BOSSPOWER_PERCENT = uint256(keccak256("BOSSPOWER_PERCENT"));
 
     CryptoBlades public game;
     Characters public characters;
@@ -132,12 +133,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     function doRaidAuto() public restricted {
         uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1))));
-        uint256 power = ABDKMath64x64.divu(1,2).mulu(raidPlayerPower[raidIndex]);
+        uint256 power = ABDKMath64x64.divu(numberParameters[NUMBERPARAMETER_AUTO_BOSSPOWER_PERCENT],100)
+            .mulu(raidPlayerPower[raidIndex]);
         uint8 trait = uint8(seed % 4);
         uint256 duration = numberParameters[NUMBERPARAMETER_AUTO_DURATION];
-        if(power == 0) {
-            power = 50000;
-        }
         if(duration == 0) {
             duration = 480; // 8 hrs
         }
@@ -246,7 +245,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         // we could also not include bossPower in the roll to have slightly higher chances of failure
         // with bosspower added to roll ceiling the likelyhood of a win is: playerPower / bossPower
         uint256 roll = RandomUtil.randomSeededMinMax(0,raidPlayerPower[raidIndex]+bossPower, seed);
-        uint8 outcome = roll > bossPower ? STATUS_WON : STATUS_LOST;
+        uint8 outcome = roll >= bossPower ? STATUS_WON : STATUS_LOST;
         raidStatus[raidIndex] = outcome;
 
         if(outcome == STATUS_WON) {
