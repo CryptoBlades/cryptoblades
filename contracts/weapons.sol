@@ -58,12 +58,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         promos = _promos;
     }
 
-    function migrateFeaturesEnabled() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-
-        featuresEnabled = BIT_FEATURE_TRANSFER;
-    }
-
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-128
@@ -125,8 +119,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     Promos public promos;
 
-    uint256 public constant BIT_FEATURE_TRANSFER = 1;
-    uint256 featuresEnabled;
+    uint256 public constant BIT_FEATURE_TRANSFER_BLOCKED = 1;
+    
+    uint256 public constant NUMBERPARAMETER_FEATURE_BITS = uint256(keccak256("FEATURE_BITS"));
+
+    mapping(uint256 => uint256) public numberParameters;
 
     event Burned(address indexed owner, uint256 indexed burned);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
@@ -712,14 +709,14 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function setFeatureEnabled(uint256 bit, bool enabled) public restricted {
         if (enabled) {
-            featuresEnabled |= bit;
+            numberParameters[NUMBERPARAMETER_FEATURE_BITS] |= bit;
         } else {
-            featuresEnabled &= ~bit;
+            numberParameters[NUMBERPARAMETER_FEATURE_BITS] &= ~bit;
         }
     }
 
     function _isFeatureEnabled(uint256 bit) private view returns (bool) {
-        return (featuresEnabled & bit) == bit;
+        return (numberParameters[NUMBERPARAMETER_FEATURE_BITS] & bit) == bit;
     }
 
     function canRaid(address user, uint256 id) public view returns (bool) {
@@ -730,11 +727,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         // Always allow minting and burning.
         if(from != address(0) && to != address(0)) {
             // But other transfers require the feature to be enabled.
-            require(_isFeatureEnabled(BIT_FEATURE_TRANSFER));
-        }
+            require(_isFeatureEnabled(BIT_FEATURE_TRANSFER_BLOCKED) == false);
 
-        if(promos.getBit(from, 4) && from != address(0) && to != address(0)) {
-            require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to), "Transfer cooldown");
+            if(promos.getBit(from, 4)) { // bad actors, they can transfer to market but nowhere else
+                require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to), "Transfer cooldown");
+            }
         }
     }
 }
