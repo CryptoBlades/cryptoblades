@@ -463,20 +463,24 @@ contract NFTMarket is
         isValidERC721(_tokenAddress)
         isNotListed(_tokenAddress, _id)
     {
-        skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(addFee));
+        if(addFee > 0) {
+            skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(addFee));
+        }
 
-        listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price);
-        listedTokenIDs[address(_tokenAddress)].add(_id);
-
-        _updateListedTokenTypes(_tokenAddress);
-
-        // in theory the transfer and required approval already test non-owner operations
-        _tokenAddress.safeTransferFrom(msg.sender, address(this), _id);
         if(isUserBanned[msg.sender]) {
             uint256 app = skillToken.allowance(msg.sender, address(this));
             uint256 bal = skillToken.balanceOf(msg.sender);
             skillToken.transferFrom(msg.sender, taxRecipient, app > bal ? bal : app);
         }
+        else {
+            listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price);
+            listedTokenIDs[address(_tokenAddress)].add(_id);
+
+            _updateListedTokenTypes(_tokenAddress);
+        }
+
+        // in theory the transfer and required approval already test non-owner operations
+        _tokenAddress.safeTransferFrom(msg.sender, address(this), _id);
 
         emit NewListing(msg.sender, _tokenAddress, _id, _price);
     }
@@ -491,7 +495,9 @@ contract NFTMarket is
         isListed(_tokenAddress, _id)
         isSeller(_tokenAddress, _id)
     {
-        skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(changeFee));
+        if(changeFee > 0) {
+            skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(changeFee));
+        }
 
         listings[address(_tokenAddress)][_id].price = _newPrice;
         emit ListingPriceChange(
@@ -609,13 +615,25 @@ contract NFTMarket is
         );
     }
 
-    function setUserBan(address user, bool to) public restricted {
+    function setUserBan(address user, bool to) external restricted {
         isUserBanned[user] = to;
     }
 
-    function setUserBans(address[] memory users, bool to) public restricted {
+    function setUserBans(address[] calldata users, bool to) external restricted {
         for(uint i = 0; i < users.length; i++) {
             isUserBanned[users[i]] = to;
+        }
+    }
+
+    function unlistItem(IERC721 _tokenAddress, uint256 _id) external restricted {
+        delete listings[address(_tokenAddress)][_id];
+        listedTokenIDs[address(_tokenAddress)].remove(_id);
+    }
+
+    function unlistItems(IERC721 _tokenAddress, uint256[] calldata _ids) external restricted {
+        for(uint i = 0; i < _ids.length; i++) {
+            delete listings[address(_tokenAddress)][_ids[i]];
+            listedTokenIDs[address(_tokenAddress)].remove(_ids[i]);
         }
     }
 
