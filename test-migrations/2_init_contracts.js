@@ -1,48 +1,30 @@
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
-const assert = require("assert");
+const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+const assert = require('assert');
 
-const SkillToken = artifacts.require("SkillToken");
-const ExperimentToken = artifacts.require("ExperimentToken");
-const ExperimentToken2 = artifacts.require("ExperimentToken2");
-const SkillStakingRewardsUpgradeable = artifacts.require(
-  "SkillStakingRewardsUpgradeable"
-);
-const LPStakingRewardsUpgradeable = artifacts.require(
-  "LPStakingRewardsUpgradeable"
-);
-const LP2StakingRewardsUpgradeable = artifacts.require(
-  "LP2StakingRewardsUpgradeable"
-);
-const PvpArena = artifacts.require("PvpArena");
-const BasicPriceOracle = artifacts.require("BasicPriceOracle");
-const DummyRandoms = artifacts.require("DummyRandoms");
-const Characters = artifacts.require("Characters");
-const Weapons = artifacts.require("Weapons");
-const CryptoBlades = artifacts.require("CryptoBlades");
-const NFTMarket = artifacts.require("NFTMarket");
-const RaidBasic = artifacts.require("RaidBasic");
-const Promos = artifacts.require("Promos");
-const Blacksmith = artifacts.require("Blacksmith");
-const Shields = artifacts.require("Shields");
-const CharacterRenameTagConsumables = artifacts.require(
-  "CharacterRenameTagConsumables"
-);
-const WeaponRenameTagConsumables = artifacts.require(
-  "WeaponRenameTagConsumables"
-);
-const CharacterFireTraitChangeConsumables = artifacts.require(
-  "CharacterFireTraitChangeConsumables"
-);
-const CharacterEarthTraitChangeConsumables = artifacts.require(
-  "CharacterEarthTraitChangeConsumables"
-);
-const CharacterWaterTraitChangeConsumables = artifacts.require(
-  "CharacterWaterTraitChangeConsumables"
-);
-const CharacterLightningTraitChangeConsumables = artifacts.require(
-  "CharacterLightningTraitChangeConsumables"
-);
-const Raid1 = artifacts.require("Raid1");
+const SkillToken = artifacts.require('SkillToken');
+const ExperimentToken = artifacts.require('ExperimentToken');
+const ExperimentToken2 = artifacts.require('ExperimentToken2');
+const SkillStakingRewardsUpgradeable = artifacts.require('SkillStakingRewardsUpgradeable');
+const LPStakingRewardsUpgradeable = artifacts.require('LPStakingRewardsUpgradeable');
+const LP2StakingRewardsUpgradeable = artifacts.require('LP2StakingRewardsUpgradeable');
+const PvpArena = artifacts.require('PvpArena');
+const BasicPriceOracle = artifacts.require('BasicPriceOracle');
+const DummyRandoms = artifacts.require('DummyRandoms');
+const Characters = artifacts.require('Characters');
+const Weapons = artifacts.require('Weapons');
+const CryptoBlades = artifacts.require('CryptoBlades');
+const NFTMarket = artifacts.require('NFTMarket');
+const RaidBasic = artifacts.require('RaidBasic');
+const Promos = artifacts.require('Promos');
+const Blacksmith = artifacts.require('Blacksmith');
+const Shields = artifacts.require('Shields');
+const CharacterRenameTagConsumables = artifacts.require('CharacterRenameTagConsumables');
+const WeaponRenameTagConsumables = artifacts.require('WeaponRenameTagConsumables');
+const CharacterFireTraitChangeConsumables = artifacts.require('CharacterFireTraitChangeConsumables');
+const CharacterEarthTraitChangeConsumables = artifacts.require('CharacterEarthTraitChangeConsumables');
+const CharacterWaterTraitChangeConsumables = artifacts.require('CharacterWaterTraitChangeConsumables');
+const CharacterLightningTraitChangeConsumables = artifacts.require('CharacterLightningTraitChangeConsumables');
+const Raid1 = artifacts.require('Raid1');
 
 module.exports = async function (deployer, network, accounts) {
   let randoms, skillToken;
@@ -59,21 +41,9 @@ module.exports = async function (deployer, network, accounts) {
   const shields = await deployProxy(Shields, [], { deployer });
 
   // token setup for local dev
-  await token.transferFrom(
-    token.address,
-    accounts[0],
-    web3.utils.toWei("1", "kether")
-  ); // 1000 skill, test token value is $5 usd
-  await expToken.transferFrom(
-    expToken.address,
-    accounts[0],
-    web3.utils.toWei("599", "ether")
-  );
-  await expToken2.transferFrom(
-    expToken2.address,
-    accounts[0],
-    web3.utils.toWei("699", "ether")
-  );
+  await token.transferFrom(token.address, accounts[0], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
+  await expToken.transferFrom(expToken.address, accounts[0], web3.utils.toWei('599', 'ether'));
+  await expToken2.transferFrom(expToken2.address, accounts[0], web3.utils.toWei('699', 'ether'));
 
   const skillStakingRewards = await deployProxy(
     SkillStakingRewardsUpgradeable,
@@ -94,74 +64,50 @@ module.exports = async function (deployer, network, accounts) {
   randoms = await deployProxy(DummyRandoms, [], { deployer });
   skillToken = await SkillToken.deployed();
 
-  assert(skillToken != null, "Expected skillToken to be set to a contract");
-  assert(randoms != null, "Expected random to be set to a contract");
+  assert(skillToken != null, 'Expected skillToken to be set to a contract');
+  assert(randoms != null, 'Expected random to be set to a contract');
 
   const priceOracle = await deployProxy(BasicPriceOracle, [], { deployer });
   const charas = await deployProxy(Characters, [], { deployer });
   const weps = await deployProxy(Weapons, [], { deployer });
-  const blacksmith = await deployProxy(
-    Blacksmith,
-    [weps.address, randoms.address],
-    { deployer }
-  );
+  const blacksmith = await deployProxy(Blacksmith, [weps.address, randoms.address], { deployer });
 
   const game = await deployProxy(
     CryptoBlades,
-    [
-      skillToken.address,
-      charas.address,
-      weps.address,
-      priceOracle.address,
-      randoms.address,
-    ],
+    [skillToken.address, charas.address, weps.address, priceOracle.address, randoms.address],
     { deployer }
   );
 
   const charas_GAME_ADMIN = await charas.GAME_ADMIN();
   const weps_GAME_ADMIN = await weps.GAME_ADMIN();
 
-  if (typeof randoms.setMain === "function") {
+  if (typeof randoms.setMain === 'function') {
     await randoms.setMain(game.address);
   }
 
   const raid = await deployProxy(RaidBasic, [game.address], { deployer });
   const GAME_ADMIN = await game.GAME_ADMIN();
 
-  await token.transferFrom(
-    token.address,
-    game.address,
-    web3.utils.toWei("0.5", "mether")
-  );
+  await token.transferFrom(token.address, game.address, web3.utils.toWei('0.5', 'mether'));
 
-  await priceOracle.setCurrentPrice(web3.utils.toWei("0.2", "ether")); // 1/5 SKILL per USD, AKA 5 USD per SKILL
+  await priceOracle.setCurrentPrice(web3.utils.toWei('0.2', 'ether')); // 1/5 SKILL per USD, AKA 5 USD per SKILL
 
   await deployProxy(NFTMarket, [SkillToken.address, CryptoBlades.address], {
     deployer,
   });
 
   const raid1 = await deployProxy(Raid1, [game.address], { deployer });
-  const pvpArena = await deployProxy(
-    PvpArena,
-    [game.address, shields.address, raid1.address],
-    { deployer }
-  );
+  const pvpArena = await deployProxy(PvpArena, [game.address, shields.address, raid1.address, randoms.address], {
+    deployer,
+  });
   const promos = await deployProxy(Promos, [], { deployer });
-  const characterRenameTagConsumables = await deployProxy(
-    CharacterRenameTagConsumables,
-    [charas.address],
-    { deployer }
-  );
-  const weaponRenameTagConsumables = await deployProxy(
-    WeaponRenameTagConsumables,
-    [weps.address],
-    { deployer }
-  );
-  const characterFireTraitChangeConsumables = await deployProxy(
-    CharacterFireTraitChangeConsumables,
-    [charas.address],
-    { deployer }
-  );
+  const characterRenameTagConsumables = await deployProxy(CharacterRenameTagConsumables, [charas.address], {
+    deployer,
+  });
+  const weaponRenameTagConsumables = await deployProxy(WeaponRenameTagConsumables, [weps.address], { deployer });
+  const characterFireTraitChangeConsumables = await deployProxy(CharacterFireTraitChangeConsumables, [charas.address], {
+    deployer,
+  });
   const characterEarthTraitChangeConsumables = await deployProxy(
     CharacterEarthTraitChangeConsumables,
     [charas.address],
