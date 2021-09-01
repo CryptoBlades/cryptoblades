@@ -142,13 +142,13 @@ ${fns}
 let generationInterfaceOutput = "import { Web3JsAbiCall } from '../abi-common';\n";
 const contracts = new Set();
 
-for(const buildArtifact of shell.ls('../build/contracts/*.json')) {
+for(const buildArtifact of shell.ls('build/contracts/*.json')) {
     const data = JSON.parse(shell.cat(buildArtifact));
 
     generationInterfaceOutput += generateAbiInterfaceTs(data.contractName, data.abi);
     contracts.add(buildArtifact);
 }
 
-shell.ShellString(generationInterfaceOutput).to('../build/abi-interfaces.ts');
+shell.ShellString(generationInterfaceOutput).to('build/abi-interfaces.ts');
 
 console.log(`Generated build/abi-interfaces.ts from ${contracts.size} contracts`);
