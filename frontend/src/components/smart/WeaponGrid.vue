@@ -65,6 +65,7 @@
         "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
+        <nft-options-dropdown :nftId="weapon.id" :options="options" class="nft-options"/>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
         </div>
@@ -74,6 +75,18 @@
         <slot name="sold" :weapon="weapon"></slot>
       </li>
     </ul>
+
+    <b-modal class="centered-modal" ref="weapon-rename-modal"
+                  @ok="renameWeaponCall()">
+                  <template #modal-title>
+                    Rename Weapon
+                  </template>
+                  <b-form-input type="string"
+                    class="modal-input" v-model="weaponRename" placeholder="New Name" />
+      <span v-if="isRenameProfanish">
+        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+      </span>
+    </b-modal>
   </div>
 </template>
 
@@ -84,6 +97,10 @@ import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
 import WeaponIcon from '../WeaponIcon.vue';
+import { NftOption } from '../NftOptionsDropdown.vue';
+import { BModal } from 'bootstrap-vue';
+import { getCleanName, isProfaneIsh } from '../../rename-censor';
+import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 
@@ -93,6 +110,8 @@ interface StoreMappedGetters {
 
 interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
+  renameWeapon(arg: {id: number, name: string}): Promise<void>;
+  fetchTotalWeaponRenameTags(): Promise<number>;
 }
 
 interface Data {
@@ -104,6 +123,10 @@ interface Data {
   priceSort: string;
   showReforgedWeapons: boolean;
   showFavoriteWeapons: boolean;
+  options: NftOption[];
+  haveRename: number;
+  weaponRename: string;
+  currentWeaponId: number | string | null;
 }
 
 const sorts = [
@@ -197,11 +220,16 @@ export default Vue.extend({
       sorts,
       showReforgedWeapons: this.showReforgedWeaponsDefVal,
       showFavoriteWeapons: this.showFavoriteWeaponsDefVal,
+      options: [],
+      haveRename: 0,
+      weaponRename: '',
+      currentWeaponId: null,
     } as Data;
   },
 
   components: {
-    WeaponIcon
+    WeaponIcon,
+    NftOptionsDropdown
   },
 
   computed: {
@@ -267,6 +295,14 @@ export default Vue.extend({
 
       return favoriteWeapons.concat(items);
     },
+
+    isRenameProfanish(): boolean {
+      return isProfaneIsh(this.weaponRename);
+    },
+
+    cleanRename(): string {
+      return getCleanName(this.weaponRename);
+    }
   },
 
   watch: {
@@ -276,7 +312,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['fetchWeapons']) as StoreMappedActions),
+    ...(mapActions(['fetchWeapons','renameWeapon','fetchTotalWeaponRenameTags']) as StoreMappedActions),
     ...(mapMutations(['setCurrentWeapon'])),
 
     saveFilters() {
@@ -355,10 +391,32 @@ export default Vue.extend({
       if (favoritesFromStorage) {
         this.favorites = JSON.parse(favoritesFromStorage);
       }
+    },
+
+    openRenameWeapon(id: number | string) {
+      this.currentWeaponId = id;
+      (this.$refs['weapon-rename-modal'] as BModal).show();
+    },
+    async renameWeaponCall() {
+      if(!this.currentWeaponId) return;
+      await this.renameWeapon({id: +this.currentWeaponId, name: this.weaponRename});
+      this.haveRename = await this.fetchTotalWeaponRenameTags();
+      this.updateOptions();
+      this.weaponRename = '';
+    },
+
+    updateOptions() {
+      this.options = [
+        {
+          name: 'Rename',
+          amount: this.haveRename,
+          handler: this.openRenameWeapon
+        },
+      ];
     }
   },
 
-  mounted() {
+  async mounted() {
 
     this.checkStorageFavorite();
 
@@ -374,6 +432,9 @@ export default Vue.extend({
       this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
     }
+
+    this.haveRename = await this.fetchTotalWeaponRenameTags();
+    this.updateOptions();
   },
 });
 </script>
@@ -513,5 +574,11 @@ export default Vue.extend({
 
 .fix-h24 {
   height: 24px;
+}
+
+.nft-options {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 </style>

@@ -14,7 +14,7 @@ import {
   IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
+import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
@@ -723,13 +723,13 @@ export function createStore(web3: Web3) {
       },
 
       async pollSkillPriceInUsd({ state, commit }) {
-        async function fetchPriceData() {
+        const fetchPriceData = async () => {
           const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
           const skillPriceInUsd = response.data?.cryptoblades.usd;
           if (state.skillPriceInUsd !== skillPriceInUsd) {
             commit('setSkillPriceInUsd', skillPriceInUsd);
           }
-        }
+        };
         await fetchPriceData();
         setInterval(async () => {
           await fetchPriceData();
@@ -1344,13 +1344,14 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly }: { num: any, useStakedSkillOnly?: boolean }) {
+      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement }: { num: any, useStakedSkillOnly?: boolean, chosenElement: any }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+        const chosenElementFee = chosenElement === 100 ? 1 : 2;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
-            .mintWeaponNUsingStakedSkill(num)
+            .mintWeaponNUsingStakedSkill(num, chosenElement)
             .send({ from: state.defaultAccount, gas: '5000000' });
         }
         else {
@@ -1362,28 +1363,28 @@ export function createStore(web3: Web3) {
             defaultCallOptions(state),
             defaultCallOptions(state),
             cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-            { feeMultiplier: num * 4 }
+            { feeMultiplier: num * 4 * chosenElementFee }
           );
 
-          await CryptoBlades.methods.mintWeaponN(num).send({ from: state.defaultAccount, gas: '5000000' });
+          await CryptoBlades.methods.mintWeaponN(num, chosenElement).send({ from: state.defaultAccount, gas: '5000000' });
         }
 
         await Promise.all([
           dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp'),
           dispatch('updateWeaponIds'),
           dispatch('setupWeaponDurabilities')
         ]);
       },
 
-      async mintWeapon({ state, dispatch }, { useStakedSkillOnly }: { useStakedSkillOnly?: boolean } = {}) {
+      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement }: { useStakedSkillOnly?: boolean, chosenElement: any }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+        const chosenElementFee = chosenElement === 100 ? 1 : 2;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
-            .mintWeaponUsingStakedSkill()
+            .mintWeaponUsingStakedSkill(chosenElement)
             .send({ from: state.defaultAccount });
         }
         else {
@@ -1394,16 +1395,16 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
+            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+            { feeMultiplier: chosenElementFee }
           );
 
-          await CryptoBlades.methods.mintWeapon().send({ from: state.defaultAccount });
+          await CryptoBlades.methods.mintWeapon(chosenElement).send({ from: state.defaultAccount });
         }
 
         await Promise.all([
           dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp'),
           dispatch('updateWeaponIds'),
           dispatch('setupWeaponDurabilities')
         ]);
@@ -1621,7 +1622,7 @@ export function createStore(web3: Web3) {
             targetString,
             fightMultiplier
           )
-          .send({ from: state.defaultAccount, gas: '500000' });
+          .send({ from: state.defaultAccount, gas: '200000' });
 
         await dispatch('fetchTargets', { characterId, weaponId });
 
@@ -1785,10 +1786,23 @@ export function createStore(web3: Web3) {
       },
 
       async joinRaid({ state }, { characterId, weaponId }) {
-        const { Raid1 } = state.contracts();
-        if(!Raid1) {
+        const { CryptoBlades, SkillToken, Raid1 } = state.contracts();
+        if(!Raid1 || !CryptoBlades || !SkillToken || !state.defaultAccount) {
           return;
         }
+
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          Raid1,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          raidsFunctions => raidsFunctions.getJoinCostInSkill(),
+          {},
+          true
+        );
 
         await Raid1!.methods
           .joinRaid(characterId, weaponId)
@@ -1815,10 +1829,7 @@ export function createStore(web3: Web3) {
         const Raid1 = state.contracts().Raid1!;
 
         return await Raid1.methods
-          .getEligibleRewardIndexes(
-            startIndex,
-            endIndex
-          )
+          .getEligibleRewardIndexes(startIndex, endIndex)
           .call(defaultCallOptions(state));
       },
 

@@ -178,6 +178,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 private rewardsClaimTaxDuration;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
+    //event UnlikelyFight(address indexed owner, uint256 tokens, bool indexed win); // includes would-be tokens for lost fights
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
     event MintWeaponsSuccess(address indexed minter, uint32 count);
     event MintWeaponsFailure(address indexed minter, uint32 count);
@@ -341,7 +342,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(foundMatch, "Target invalid");
     }
 
-    function isUnlikely(uint24 pp, uint24 ep)
+    /*function isUnlikely(uint24 pp, uint24 ep)
         private
         pure
         returns(bool)
@@ -371,7 +372,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
 
         return rollingTotal <= 300 ? true : false;
-    }
+    }*/
 
     function performFight(
         uint256 char,
@@ -385,8 +386,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
+        //bool unlikely = isUnlikely(uint24(getPlayerTraitBonusAgainst(traitsCWE).mulu(playerFightPower)), targetPower);
+
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
         uint256 tokens = usdToSkill(getTokenGainForFight(targetPower, fightMultiplier));
+        /*if(unlikely) {
+            emit UnlikelyFight(msg.sender, tokens, playerRoll >= monsterRoll);
+        }*/
 
         if(playerRoll < monsterRoll) {
             tokens = 0;
@@ -401,9 +407,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         tokenRewards[msg.sender] += tokens;
         xpRewards[char] += xp;
 
-        // if (playerRoll > monsterRoll && isUnlikely(uint24(getPlayerTraitBonusAgainst(traitsCWE).mulu(playerFightPower)), targetPower)) {
-        //     blacksmith.giveTicket(msg.sender, 1);
-        // }
+        /*if (playerRoll >= monsterRoll && unlikely) {
+            blacksmith.giveTicket(msg.sender, 1);
+        }*/
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
@@ -612,7 +618,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         );
     }
 
-    function payForMint(address nftAddress, uint count) public {
+    function payForMint(address nftAddress, uint count, uint16 chosenElementFee) public {
         _discardPaymentIfExpired(msg.sender);
 
         require(
@@ -625,7 +631,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         require(nftAddress == address(weapons));
         (uint256 _paidFeeFromInGameOnlyFunds, uint256 _paidFeeFromTokenRewards, uint256 _paidFeeFromUserWallet) =
-            _payContract(msg.sender, mintWeaponFee * int128(count));
+            _payContract(msg.sender, mintWeaponFee * int128(count) * chosenElementFee);
 
         require(count == 1 || count == 10);
 
@@ -679,7 +685,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
             weapons.performMintWeapon(msg.sender,
-                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100)),
+                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100), 100),
                 weapons.getRandomStat(4, 200, seed, 101),
                 0, // stat2
                 0, // stat3
@@ -698,7 +704,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(mintPayments[msg.sender].count == num, "count mismatch");
 
         // the function below is external so we can try-catch on it
-        try this._mintWeaponNUsableByThisOnlyButExternalForReasons(msg.sender, num) {
+        try this._mintWeaponNUsableByThisOnlyButExternalForReasons(msg.sender, num, chosenElement) {
             emit MintWeaponsSuccess(msg.sender, num);
         }
         catch {
@@ -706,7 +712,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function _mintWeaponNUsableByThisOnlyButExternalForReasons(address _minter, uint32 num) external {
+    function _mintWeaponNUsableByThisOnlyButExternalForReasons(address _minter, uint32 num, uint256 chosenElement) external {
         // the reason referred to in the function name is that we want to
         // try-catch on this from within the same contract
 
@@ -714,7 +720,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         for (uint i = 0; i < num; i++) {
             bytes32 hash = mintPayments[_minter].blockHash;
-            weapons.mint(_minter, randoms.getRandomSeedUsingHash(_minter, hash));
+            weapons.mint(_minter, randoms.getRandomSeedUsingHash(_minter, hash), chosenElement);
             _usePayment(_minter, address(weapons), 1);
         }
 
@@ -723,13 +729,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         mintPaymentSkillDepositeds[_minter].skillDepositedFromIgo = 0;
     }
 
-    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender)  {
+    function mintWeapon(uint256 chosenElement) public onlyNonContract oncePerBlock(msg.sender)  {
         _discardPaymentIfExpired(msg.sender);
 
         require(mintPayments[msg.sender].count == 1, "count mismatch");
 
         bytes32 hash = mintPayments[msg.sender].blockHash;
-        try weapons.mint(msg.sender, randoms.getRandomSeedUsingHash(msg.sender, hash)) {
+        try weapons.mint(msg.sender, randoms.getRandomSeedUsingHash(msg.sender, hash), chosenElement) {
             _usePayment(msg.sender, address(weapons), 1);
 
             mintPaymentSkillDepositeds[msg.sender].skillDepositedFromWallet = 0;
@@ -743,48 +749,55 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }*/
 
-    function mintWeaponN(uint32 num)
+    function mintWeaponN(uint32 num, uint8 chosenElement)
         external
         onlyNonContract
         oncePerBlock(msg.sender)
+        isSupportedElement(chosenElement)
     {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * num));
-        _mintWeaponNLogic(num);
+        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * num * chosenElementFee));
+        _mintWeaponNLogic(num, chosenElement);
     }
 
-    function mintWeapon() external onlyNonContract oncePerBlock(msg.sender) {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee));
-        _mintWeaponLogic();
+    function mintWeapon(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) isSupportedElement(chosenElement) {
+        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * chosenElementFee));
+        _mintWeaponLogic(chosenElement);
     }
 
-    function mintWeaponNUsingStakedSkill(uint32 num)
+    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement)
         external
         onlyNonContract
         oncePerBlock(msg.sender)
+        isSupportedElement(chosenElement)
     {
+        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
             mintWeaponFee
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
-                .mul(ABDKMath64x64.fromUInt(num));
+                .mul(ABDKMath64x64.fromUInt(num))
+                .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
 
-        _mintWeaponNLogic(num);
+        _mintWeaponNLogic(num, chosenElement);
     }
 
-    function mintWeaponUsingStakedSkill() external onlyNonContract oncePerBlock(msg.sender) {
+    function mintWeaponUsingStakedSkill(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) isSupportedElement(chosenElement){
+        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
             mintWeaponFee
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
+                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
+                .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
 
-        _mintWeaponLogic();
+        _mintWeaponLogic(chosenElement);
     }
 
-    function _mintWeaponNLogic(uint32 num) internal {
+    function _mintWeaponNLogic(uint32 num, uint8 chosenElement) internal {
         require(num > 0 && num <= 10);
-
         for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))));
+            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))), chosenElement);
         }
     }
 
@@ -797,13 +810,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(num > 0 && num <= 50);
 
         for (uint i = 0; i < num; i++) {
-            weapons.mint(_minter, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), _minter, i))));
+            weapons.mint(_minter, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), _minter, i))), 100);
         }
     }
 
-    function _mintWeaponLogic() internal {
+    function _mintWeaponLogic(uint8 chosenElement) internal {
         //uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))));
+        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
     function burnWeapon(uint256 burnID) external isWeaponOwner(burnID) {
@@ -924,6 +937,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         lastBlockNumberCalled[user] = block.number;
     }
 
+    modifier isSupportedElement(uint8 element) {
+    _isSupportedElement(element);
+    _;
+    }
+
+    function _isSupportedElement(uint8 element) internal pure {
+        require(element == 100 || (element>= 0 && element<= 3), "Not supported element");
+    }
+
     modifier isWeaponOwner(uint256 weapon) {
         _isWeaponOwner(weapon);
         _;
@@ -965,24 +987,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _;
     }
 
-    modifier requestPayFromPlayer(int128 usdAmount) {
-        _requestPayFromPlayer(usdAmount);
-        _;
-    }
-
-    function _requestPayFromPlayer(int128 usdAmount) internal view {
-        uint256 skillAmount = usdToSkill(usdAmount);
-
-        (,, uint256 fromUserWallet) =
-            getSkillToSubtract(
-                inGameOnlyFunds[msg.sender],
-                tokenRewards[msg.sender],
-                skillAmount
-            );
-
-        require(skillToken.balanceOf(msg.sender) >= fromUserWallet);
-    }
-
     function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
         _payPlayerConverted(playerAddress, convertedAmount);
     }
@@ -1022,6 +1026,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 tokenRewards[playerAddress],
                 convertedAmount
             );
+
+        require(skillToken.balanceOf(playerAddress) >= fromUserWallet,
+            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(convertedAmount))));
 
         _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
 
