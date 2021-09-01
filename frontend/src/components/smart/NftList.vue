@@ -149,8 +149,8 @@ interface StoreMappedActions {
   purchaseCharacterEarthTraitChange(): Promise<void>;
   purchaseCharacterWaterTraitChange(): Promise<void>;
   purchaseCharacterLightningTraitChange(): Promise<void>;
-  purchaseWeaponCosmetic(obj: {cosmetic: number}): Promise<void>;
-  purchaseCharacterCosmetic(obj: {cosmetic: number}): Promise<void>;
+  purchaseWeaponCosmetic(obj: {cosmetic: number, price: number}): Promise<void>;
+  purchaseCharacterCosmetic(obj: {cosmetic: number, price: number}): Promise<void>;
 }
 
 export default Vue.extend({
@@ -476,17 +476,11 @@ export default Vue.extend({
       if(item.type === 'CharacterLightningTraitChange'){
         await this.purchaseCharacterLightningTraitChange();
       }
-      if(item.type === 'WeaponCosmetic1'){
-        await this.purchaseWeaponCosmetic({cosmetic: 1});
+      if(item.type === 'WeaponCosmetic'){
+        await this.purchaseWeaponCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});
       }
-      if(item.type === 'WeaponCosmetic2'){
-        await this.purchaseWeaponCosmetic({cosmetic: 2});
-      }
-      if(item.type === 'CharacterCosmetic1'){
-        await this.purchaseCharacterCosmetic({cosmetic: 1});
-      }
-      if(item.type === 'CharacterCosmetic2'){
-        await this.purchaseCharacterCosmetic({cosmetic: 2});
+      if(item.type === 'CharacterCosmetic'){
+        await this.purchaseCharacterCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});
       }
     },
     itemDescriptionHtml(item: SkillShopListing): string {

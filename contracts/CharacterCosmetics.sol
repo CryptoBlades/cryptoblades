@@ -21,8 +21,9 @@ contract CharacterCosmetics is Cosmetics {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         characters = _characters;
-        _cosmeticAvailable[1] = true;
-        _cosmeticAvailable[2] = true;
+        for(uint8 i = 1; i < 19; i++) {
+            _cosmeticAvailable[i] = true;
+        }        
     }
 
     function applyCosmetic(uint256 characterId, uint32 cosmetic) public {

@@ -101,14 +101,33 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     ) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
         cosmeticAddresses[COSMETIC_ADDRESS_WEAPON] = _weaponCosmetic;
+        cosmeticAddresses[COSMETIC_ADDRESS_CHARACTER] = _characterCosmetic;      
        
-        cosmeticWeaponFlatPrices[1] = 0.1 ether;
-        cosmeticWeaponFlatPrices[2] = 0.1 ether;
+       // basic effects
+       for(uint32 i = 1; i < 6; i++) {
+            cosmeticWeaponFlatPrices[i] = 0.1 ether;
+            cosmeticCharacterFlatPrices[i] = 0.1 ether;
+        }
+        
+        // premium effects weapons
+        for(uint32 i = 6; i < 16; i++) {
+            cosmeticWeaponFlatPrices[i] = 0.5 ether;
+        }
+        // plain borders weapons
+        cosmeticWeaponFlatPrices[16] = 0.4 ether;
+        cosmeticWeaponFlatPrices[17] = 0.3 ether;
+        cosmeticWeaponFlatPrices[18] = 0.2 ether;
+        cosmeticWeaponFlatPrices[19] = 0.1 ether;
 
-        cosmeticAddresses[COSMETIC_ADDRESS_CHARACTER] = _characterCosmetic;
-       
-        cosmeticCharacterFlatPrices[1] = 0.1 ether;
-        cosmeticCharacterFlatPrices[2] = 0.1 ether;
+        // premium effects characters
+        for(uint32 i = 6; i < 15; i++) {
+            cosmeticCharacterFlatPrices[i] = 0.5 ether;
+        }        
+        // plain borders characters
+        cosmeticCharacterFlatPrices[15] = 0.4 ether;
+        cosmeticCharacterFlatPrices[16] = 0.3 ether;
+        cosmeticCharacterFlatPrices[17] = 0.2 ether;
+        cosmeticCharacterFlatPrices[18] = 0.1 ether;
     }
 
     /* ========== VIEWS ========== */

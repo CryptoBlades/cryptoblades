@@ -41,6 +41,7 @@
 
           <character-list
             :value="currentCharacterId"
+            :showNftOptions="true"
             @input="setCurrentCharacter"
           />
         </div>

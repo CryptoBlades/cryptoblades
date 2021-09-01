@@ -103,7 +103,7 @@
               </div>
             </div>
             <div class="" v-if="showBlacksmith">
-              <weapon-grid v-model="reforgeWeaponId" />
+              <weapon-grid :showNftOptions="true" v-model="reforgeWeaponId" />
             </div>
           </div>
         </div>

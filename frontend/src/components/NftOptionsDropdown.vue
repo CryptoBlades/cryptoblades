@@ -55,6 +55,10 @@ export default Vue.extend({
   pointer-events: none;
 }
 
+.dropdown-item {
+  padding: 0;
+}
+
 .options-dropdown .btn:not(.disabled):not(:disabled):hover {
   background: #545b62;
   border: 0 !important;

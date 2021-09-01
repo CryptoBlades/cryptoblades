@@ -39,6 +39,12 @@
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
+              <h4>Show Cosmetics</h4>
+              <b-form-checkbox size="lg" :checked="showCosmetics" @change="toggleShowCosmetics()" switch>
+                <b class="float-left">{{ showCosmetics ? 'On' : 'Off' }}</b>
+              </b-form-checkbox>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Stamina Cost per Fight</h4>
               <b-form-select size="lg" v-model="fightMultiplier" @change="setFightMultiplier()">
                 <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
@@ -81,6 +87,7 @@ interface Data {
   hideAdvanced: boolean;
   hideWalletWarning: boolean;
   showSkillInUsd: boolean;
+  showCosmetics: boolean;
   fightMultiplier: number;
 }
 
@@ -102,6 +109,10 @@ export default Vue.extend({
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
+    if(!localStorage.getItem('showCosmetics')) {
+      localStorage.setItem('showCosmetics', 'true');
+    }
+    this.showCosmetics = localStorage.getItem('showCosmetics') === 'true';
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
   },
   data() {
@@ -111,6 +122,7 @@ export default Vue.extend({
       hideAdvanced: false,
       hideWalletWarning: false,
       showSkillInUsd: false,
+      showCosmetics: true,
       fightMultiplier: 1,
       checked: false,
       ClaimStage,
@@ -203,6 +215,14 @@ export default Vue.extend({
       else localStorage.setItem('showSkillInUsd', 'false');
 
       Events.$emit('setting:showSkillInUsd', { value: this.showSkillInUsd });
+    },
+
+    toggleShowCosmetics() {
+      this.showCosmetics = !this.showCosmetics;
+      if (this.showCosmetics) localStorage.setItem('showCosmetics', 'true');
+      else localStorage.setItem('showCosmetics', 'false');
+
+      Events.$emit('setting:showCosmetics', { value: this.showCosmetics });
     },
 
     setFightMultiplier() {

@@ -44,7 +44,7 @@
     <ul class="character-list">
       <li
         class="character"
-        :class="[value === c.id ? 'selected' : '',  'character-cosmetic-applied-' + getCharacterCosmetic(c.id)]"
+        :class="[value === c.id ? 'selected' : '', showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : '']"
         v-for="c in filteredCharacters"
         :key="c.id"
         @click="$emit('input', c.id)"
@@ -53,9 +53,10 @@
           <slot name="above" :character="c"></slot>
         </div>
         <slot name="sold" :character="c"></slot>
-        <nft-options-dropdown :nftId="c.id" :options="options" class="nft-options"/>
-        <div class="art">
-          <CharacterArt :character="c" :isMarket="isMarket"/>
+        <nft-options-dropdown v-if="showNftOptions" :nftId="c.id" :options="options" class="nft-options"/>
+        <div class="art" >
+          <div class="animation" />
+          <CharacterArt :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(c.id) : '']" :character="c" :isMarket="isMarket"/>
         </div>
       </li>
     </ul>
@@ -109,6 +110,7 @@ import { getCharacterArt } from '../../character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
+import Events from '@/events';
 
 const sorts = [
   { name: 'Any', dir: '' },
@@ -138,6 +140,10 @@ export default {
     isMarket: {
       type: Boolean,
       default: false
+    },
+    showNftOptions: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -160,7 +166,20 @@ export default {
       options: [],
       haveCharacterCosmetic1: 0,
       haveCharacterCosmetic2: 0,
-      targetSkin: ''
+      haveCharacterCosmetics: [0],
+      targetSkin: '',
+      showCosmetics: true,
+      characterCosmeticsNames: [
+        'Character Grayscale','Character Contrast',
+        'Character Sepia','Character Invert',
+        'Character Blur','Character Fire Glow',
+        'Character Earth Glow','Character Lightning Glow',
+        'Character Water Glow','Character Rainbow Glow',
+        'Character Dark Glow','Ghost Character',
+        'Character Police Lights','Character Neon Border',
+        'Character Diamond Border','Character Gold Border',
+        'Character Silver Border','Character Bronze Border',
+      ]
     };
   },
 
@@ -205,7 +224,9 @@ export default {
     },
 
     totalCosmeticChanges() {
-      return +this.haveCharacterCosmetic1 + +this.haveCharacterCosmetic2;
+      let count = 0;
+      this.haveCharacterCosmetics.forEach(x => count += +x);
+      return count;
     },
 
     isRenameProfanish() {
@@ -239,11 +260,10 @@ export default {
 
       availableSkins.push('No Skin');
 
-      if(this.haveCharacterCosmetic1 > 0) {
-        availableSkins.push('Cool Skin 1');
-      }
-      if(this.haveCharacterCosmetic2 > 0) {
-        availableSkins.push('Cool Skin 2');
+      for(let i = 0; i < 18; i++) {
+        if(+this.haveCharacterCosmetics[i] > 0) {
+          availableSkins.push(this.characterCosmeticsNames[i]);
+        }
       }
 
       return availableSkins;
@@ -370,9 +390,10 @@ export default {
     },
 
     async loadCosmeticsCount() {
-      this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
-      this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
-      console.log(this.haveCharacterCosmetic1, this.haveCharacterCosmetic2);
+      this.haveCharacterCosmetics = [];
+      for(let i = 1; i < 21; i++) {
+        this.haveCharacterCosmetics.push(await this.fetchOwnedCharacterCosmetics({cosmetic: i}));
+      }
       this.updateOptions();
     },
 
@@ -381,23 +402,23 @@ export default {
       (this.$refs['character-change-skin-modal']).show();
     },
     async changeCharacterSkinCall() {
-      switch(this.targetSkin) {
-      case 'No Skin':
-        await this.removeCharacterCosmetic({ id: this.currentCharacterId });
-        this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
-        this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
-        break;
-      case 'Cool Skin 1':
-        await this.changeCharacterCosmetic({ id: this.currentCharacterId, cosmetic: 1 });
-        this.haveCharacterCosmetic1 = await this.fetchOwnedCharacterCosmetics({cosmetic: 1});
-        break;
-      case 'Cool Skin 2':
-        await this.changeCharacterCosmetic({ id: this.currentCharacterId, cosmetic: 2 });
-        this.haveCharacterCosmetic2 = await this.fetchOwnedCharacterCosmetics({cosmetic: 2});
-        break;
+      if(!this.currentCharacterId) return;
+      // +1 as cosmetics have 1 (not 0) based ids
+      const selectedSkinId = this.characterCosmeticsNames.findIndex(x => x === this.targetSkin) + 1;
+      if(selectedSkinId === 0) {
+        await this.removeCharacterCosmetic({ id: +this.currentCharacterId });
+        await this.loadCosmeticsCount();
+      } else {
+        await this.changeCharacterCosmetic({ id: +this.currentCharacterId, cosmetic: selectedSkinId });
+        await this.loadCosmeticsCount();
       }
+
       this.updateOptions();
-    }
+    },
+
+    checkStorage() {
+      this.showCosmetics = localStorage.getItem('showCosmetics') === 'true';
+    },
   },
 
   components: {
@@ -413,6 +434,9 @@ export default {
       this.minPriceFilter = sessionStorage.getItem('character-price-minfilter') || '';
       this.maxPriceFilter = sessionStorage.getItem('character-price-maxfilter') || '';
     }
+    this.checkStorage();
+    Events.$on('setting:showCosmetics', () => this.checkStorage());
+
     await this.loadConsumablesCount();
     await this.loadCosmeticsCount();
   },
@@ -420,7 +444,7 @@ export default {
 </script>
 
 <style scoped>
-
+@import '../../styles/character-cosmetics.css';
 .filters {
    justify-content: center;
    width: 100%;
@@ -497,14 +521,6 @@ export default {
   flex-direction: row;
   align-self: flex-end;
   margin:0 15px;
-}
-
-.character-cosmetic-applied-1 {
-  border: 1px solid gold;
-}
-
-.character-cosmetic-applied-2 {
-  border: 1px solid silver;
 }
 
 @media (max-width: 576px) {

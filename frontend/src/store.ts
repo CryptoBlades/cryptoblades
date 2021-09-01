@@ -2798,13 +2798,13 @@ export function createStore(web3: Web3) {
         if(!WeaponCosmetics || !state.defaultAccount) return;
         return await WeaponCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
       },
-      async purchaseWeaponCosmetic({ state, dispatch }, {cosmetic}) {
+      async purchaseWeaponCosmetic({ state, dispatch }, {cosmetic, price}) {
         const { CryptoBlades, SkillToken, WeaponCosmetics, Blacksmith } = state.contracts();
         if(!CryptoBlades || !WeaponCosmetics || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
+            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
             .send({
               from: state.defaultAccount
             });
@@ -2812,7 +2812,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseWeaponCosmetic(cosmetic, Web3.utils.toWei('0.1')).send({
+        await Blacksmith.methods.purchaseWeaponCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2857,13 +2857,13 @@ export function createStore(web3: Web3) {
         if(!CharacterCosmetics || !state.defaultAccount) return;
         return await CharacterCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
       },
-      async purchaseCharacterCosmetic({ state, dispatch }, {cosmetic}) {
+      async purchaseCharacterCosmetic({ state, dispatch }, {cosmetic, price}) {
         const { CryptoBlades, SkillToken, CharacterCosmetics, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterCosmetics || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
+            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
             .send({
               from: state.defaultAccount
             });
@@ -2871,7 +2871,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterCosmetic(cosmetic, Web3.utils.toWei('0.1')).send({
+        await Blacksmith.methods.purchaseCharacterCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
           from: state.defaultAccount,
           gas: '500000'
         });

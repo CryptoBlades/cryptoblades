@@ -21,8 +21,9 @@ contract WeaponCosmetics is Cosmetics {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         weapons = _weapons;
-        _cosmeticAvailable[1] = true;
-        _cosmeticAvailable[2] = true;
+        for(uint8 i = 1; i < 20; i++) {
+            _cosmeticAvailable[i] = true;
+        }
     }
 
     function applyCosmetic(uint256 weaponId, uint32 cosmetic) public {

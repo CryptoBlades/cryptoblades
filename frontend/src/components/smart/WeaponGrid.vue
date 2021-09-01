@@ -65,7 +65,7 @@
         "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
-        <nft-options-dropdown :nftId="weapon.id" :options="options" class="nft-options"/>
+        <nft-options-dropdown v-if="showNftOptions" :nftId="weapon.id" :options="options" class="nft-options"/>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
         </div>
@@ -142,10 +142,10 @@ interface Data {
   options: NftOption[];
   haveRename: number;
   weaponRename: string;
-  haveWeaponCosmetic1: number;
-  haveWeaponCosmetic2: number;
+  haveWeaponCosmetics: number[];
   targetSkin: string;
   currentWeaponId: number | string | null;
+  weaponCosmeticsNames: string[];
 }
 
 const sorts = [
@@ -226,6 +226,10 @@ export default Vue.extend({
       type: Boolean,
       default: false,
     },
+    showNftOptions: {
+      type: Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -242,10 +246,20 @@ export default Vue.extend({
       options: [],
       haveRename: 0,
       weaponRename: '',
-      haveWeaponCosmetic1: 0,
-      haveWeaponCosmetic2: 0,
+      haveWeaponCosmetics: [],
       targetSkin: '',
       currentWeaponId: null,
+      weaponCosmeticsNames: [
+        'Weapon Grayscale','Weapon Contrast',
+        'Weapon Sepia','Weapon Invert',
+        'Weapon Blur','Weapon Fire Glow',
+        'Weapon Earth Glow','Weapon Lightning Glow',
+        'Weapon Water Glow','Weapon Rainbow Glow',
+        'Weapon Dark Glow','Ghost Weapon',
+        'Weapon Police Lights','Weapon Neon Border',
+        'Weapon Rotating Neon Border', 'Weapon Diamond Border',
+        'Weapon Gold Border','Weapon Silver Border','Weapon Bronze Border',
+      ]
     } as Data;
   },
 
@@ -331,18 +345,19 @@ export default Vue.extend({
 
       availableSkins.push('No Skin');
 
-      if(this.haveWeaponCosmetic1 > 0) {
-        availableSkins.push('Cool Skin 1');
-      }
-      if(this.haveWeaponCosmetic2 > 0) {
-        availableSkins.push('Cool Skin 2');
+      for(let i = 0; i < 19; i++) {
+        if(+this.haveWeaponCosmetics[i] > 0) {
+          availableSkins.push(this.weaponCosmeticsNames[i]);
+        }
       }
 
       return availableSkins;
     },
 
     totalCosmeticChanges(): number {
-      return +this.haveWeaponCosmetic1 + +this.haveWeaponCosmetic2;
+      let count = 0;
+      this.haveWeaponCosmetics.forEach(x => count += +x);
+      return count;
     },
   },
 
@@ -447,26 +462,29 @@ export default Vue.extend({
       this.weaponRename = '';
     },
 
+    async loadCosmeticsCount() {
+      this.haveWeaponCosmetics = [];
+      for(let i = 1; i < 22; i++) {
+        this.haveWeaponCosmetics.push(await this.fetchOwnedWeaponCosmetics({cosmetic: i}));
+      }
+      this.updateOptions();
+    },
+
     openChangeSkin(id: number | string) {
       this.currentWeaponId = id;
       (this.$refs['weapon-change-skin-modal'] as BModal).show();
     },
     async changeWeaponSkinCall() {
       if(!this.currentWeaponId) return;
-      switch(this.targetSkin) {
-      case 'No Skin':
+      // +1 because cosmetics are 1 (not 0) based
+      const selectedSkinId = this.weaponCosmeticsNames.findIndex(x => x === this.targetSkin) + 1;
+      if(selectedSkinId === 0) {
         await this.removeWeaponCosmetic({ id: +this.currentWeaponId });
-        this.haveWeaponCosmetic1 = await this.fetchOwnedWeaponCosmetics({ cosmetic: 1 });
-        this.haveWeaponCosmetic2 = await this.fetchOwnedWeaponCosmetics({ cosmetic: 2 });
-        break;
-      case 'Cool Skin 1':
-        await this.changeWeaponCosmetic({ id: +this.currentWeaponId, cosmetic: 1 });
-        this.haveWeaponCosmetic1 = await this.fetchOwnedWeaponCosmetics({ cosmetic: 1 });
-        break;
-      case 'Cool Skin 2':
-        await this.changeWeaponCosmetic({ id: +this.currentWeaponId, cosmetic: 2 });
-        this.haveWeaponCosmetic2 = await this.fetchOwnedWeaponCosmetics({ cosmetic: 2 });
-        break;
+        await this.loadCosmeticsCount();
+      } else {
+        await this.changeWeaponCosmetic({ id: +this.currentWeaponId, cosmetic: selectedSkinId });
+        this.haveWeaponCosmetics[selectedSkinId - 1] = await this.fetchOwnedWeaponCosmetics({cosmetic: selectedSkinId});
+        await this.loadCosmeticsCount();
       }
 
       this.updateOptions();
@@ -507,10 +525,7 @@ export default Vue.extend({
     }
 
     this.haveRename = await this.fetchTotalWeaponRenameTags();
-    this.haveWeaponCosmetic1 = await this.fetchOwnedWeaponCosmetics({ cosmetic: 1 });
-    this.haveWeaponCosmetic2 = await this.fetchOwnedWeaponCosmetics({ cosmetic: 2 });
-
-    this.updateOptions();
+    await this.loadCosmeticsCount();
   },
 });
 </script>
@@ -543,7 +558,7 @@ export default Vue.extend({
   border-radius: 5px;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .weapon.selected {
