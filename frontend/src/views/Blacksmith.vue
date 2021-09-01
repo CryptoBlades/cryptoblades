@@ -39,17 +39,18 @@
                 <b-button
                         variant="primary"
                         class="ml-3"
-                        @click="onForgeWeapon"
+                        @click="onClickForge(0)"
                         :disabled="disableForge"
                         v-tooltip="'Forge new weapon'">
                   <span v-if="disableForge">Cooling forge...</span>
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">Forge x1 ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i></span>
                 </b-button>
+
                 <b-button
                         variant="primary"
                         class="ml-3"
-                        @click="onForgeWeaponx10()"
-                        :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge )"
+                        @click="onClickForge(1)"
+                        :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
                         v-tooltip="'Forge new weapon'">
                   <span v-if="disableForge">Cooling forge...</span>
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i></span>
@@ -83,6 +84,39 @@
                   </div>
                 </b-modal>
 
+                <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element" @hide="onHideModal">
+                  <div class="row justify-content-md-center select-elements-container">
+                    <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
+                    <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
+                    <div id="earth-border" v-on:click="setChosenElement($event, 1)"> </div>
+                    <div id="lightning-border" v-on:click="setChosenElement($event, 2)"> </div>
+                    <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
+                  </div>
+                  <div class="row justify-content-md-center margin-top">
+                    <b-button
+                      v-if="clickedForgeButton === 0"
+                      variant="primary"
+                      class="row justify-content-md-center"
+                      @click="onForgeWeapon"
+                      :disabled="disableConfirmButton"
+                      v-tooltip="'Forge new weapon'">
+                        <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                          Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee).toFixed(2)}} SKILL)
+                        </span>
+                    </b-button>
+                    <b-button
+                      v-if="clickedForgeButton === 1"
+                      variant="primary"
+                      class="row justify-content-md-center"
+                      @click="onForgeWeaponx10"
+                      :disabled="disableConfirmButton"
+                      v-tooltip="'Forge new weapon'">
+                        <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                          Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee * 10).toFixed(2)}} SKILL)
+                        </span>
+                    </b-button>
+                  </div>
+                </b-modal>
                 <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
                   <template #modal-header>
                     <div v-if="!spin" class="new-weapon-header-text text-center">
@@ -417,6 +451,10 @@ interface Data {
   disableForge: boolean;
   newForged: number[];
   currentListofWeapons: string[];
+  selectedElement: number | null,
+  chosenElementFee: number | null,
+  disableConfirmButton: boolean,
+  clickedForgeButton: number | null,
   spin: boolean;
   lesserDust: string,
   greaterDust: string,
@@ -452,6 +490,10 @@ export default Vue.extend({
       disableForge: false,
       newForged: [],
       currentListofWeapons: [],
+      selectedElement: null,
+      chosenElementFee: null,
+      disableConfirmButton: true,
+      clickedForgeButton: null,
       spin: false,
       lesserDust: '0',
       greaterDust: '0',
@@ -536,6 +578,8 @@ export default Vue.extend({
     async onForgeWeapon() {
       if(this.disableForge) return;
 
+      (this.$refs['forge-element-selector-modal']as BModal).hide();
+
       const forgeMultiplier = 1;
 
       this.disableForge = true;
@@ -545,7 +589,7 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await this.mintWeapon({ useStakedSkillOnly: this.useStakedForForge });
+        await this.mintWeapon({ useStakedSkillOnly: this.useStakedForForge, chosenElement: this.selectedElement });
 
       } catch (e) {
         console.error(e);
@@ -560,6 +604,8 @@ export default Vue.extend({
     async onForgeWeaponx10(){
       if(this.disableForge) return;
 
+      (this.$refs['forge-element-selector-modal']as BModal).hide();
+
       this.disableForge = true;
       const forgeMultiplier = 10;
 
@@ -569,7 +615,7 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await await this.mintWeaponN({ num: forgeMultiplier, useStakedSkillOnly: this.useStakedForForge });
+        await await this.mintWeaponN({ num: forgeMultiplier, useStakedSkillOnly: this.useStakedForForge, chosenElement: this.selectedElement });
 
       } catch (e) {
         console.error(e);
@@ -593,6 +639,28 @@ export default Vue.extend({
 
     onShowForgeDetails() {
       (this.$refs['forge-details-modal'] as BModal).show();
+    },
+
+    onClickForge(i: number) {
+      this.clickedForgeButton = i;
+      this.chosenElementFee = null;
+      (this.$refs['forge-element-selector-modal']as BModal).show();
+    },
+
+    setChosenElement(ele: any, i: number) {
+      this.selectedElement = i;
+      this.chosenElementFee = i === 100 ? 1 : 2;
+      ele.srcElement.classList.toggle('done');
+      Array.from(ele.srcElement.parentNode.childNodes).forEach((child: any) => {
+        if (child !== ele.srcElement && child.classList.contains('done') === true){
+          child.classList.toggle('done');
+        }
+      });
+      this.disableConfirmButton = false;
+    },
+
+    showReforgeConfirmation() {
+      (this.$refs['reforge-confirmation-modal'] as BModal).show();
     },
 
     showDustReforgeConfirmation() {
@@ -707,6 +775,10 @@ export default Vue.extend({
         (this as any).$dialog.notify.error('Could not burn sword: insufficient funds or transaction denied.');
       }
     },
+
+    onHideModal(){
+      this.disableConfirmButton = true;
+    }
   },
 
   components: {
@@ -721,6 +793,127 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+
+
+#random-border{
+  background-image: url('../assets/questionmark-icon.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#random-border:hover{
+  background-image: url('../assets/questionmark-icon-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#random-border.done {
+  background-image: url('../assets/questionmark-icon-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#fire-border{
+  background-image: url('../assets/elements/fire.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#fire-border:hover{
+  background-image: url('../assets/elements/fire-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#fire-border.done {
+  background-image: url('../assets/elements/fire-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#earth-border{
+  background-image: url('../assets/elements/earth.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#earth-border:hover{
+  background-image: url('../assets/elements/earth-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#earth-border.done {
+  background-image: url('../assets/elements/earth-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#lightning-border{
+  background-image: url('../assets/elements/lightning.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#lightning-border:hover{
+  background-image: url('../assets/elements/lightning-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#lightning-border.done {
+  background-image: url('../assets/elements/lightning-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#water-border{
+  background-image: url('../assets/elements/water.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#water-border:hover{
+  background-image: url('../assets/elements/water-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#water-border.done {
+  background-image: url('../assets/elements/water-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
 
 .new-weapon-header-text{
    color: #9e8a57;
@@ -787,6 +980,24 @@ export default Vue.extend({
 .centered-icon {
   align-self: center;
   margin-left: 5px;
+}
+
+.elements-modal{
+  width: 10%;
+  height: 10%;
+  margin-left: 3%;
+  margin-right: 3%;
+}
+
+img.elements-modal:hover {
+  transform:scale(1.4)
+}
+
+.margin-top{
+  margin-top: 1.7em;
+}
+.select-elements-container {
+  margin-top: 0.7em;
 }
 
 @media (max-width: 1000px) {
