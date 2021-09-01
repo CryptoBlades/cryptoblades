@@ -489,7 +489,7 @@ export default {
 
 .favorite-star {
   position: absolute;
-  margin-left: 40px;
+  margin-left: 110px;
 }
 
 .id {
