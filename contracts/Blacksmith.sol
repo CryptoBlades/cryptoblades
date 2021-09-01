@@ -25,14 +25,15 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_WATER = 5;
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_LIGHTNING = 6;
 
+    uint256 public constant NUMBERPARAMETER_GIVEN_TICKETS = uint256(keccak256("GIVEN_TICKETS"));
+    uint256 public constant NUMBERPARAMETER_SPENT_TICKETS = uint256(keccak256("SPENT_TICKETS"));
+
     /* ========== STATE VARIABLES ========== */
 
     Weapons public weapons;
     IRandoms public randoms;
 
     mapping(address => uint32) public tickets;
-    uint256 public givenTickets; // includes spent
-    uint256 public spentTickets;
 
     Shields public shields;
     CryptoBlades public game;
@@ -40,6 +41,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     // keys: ITEM_ constant
     mapping(uint256 => address) public itemAddresses;
     mapping(uint256 => uint256) public itemFlatPrices;
+
+    mapping(uint256 => uint256) public numberParameters;
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -105,19 +108,19 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     //     require(_num > 0);
     //     require(tickets[msg.sender] >= _num, "Not enough tickets");
     //     tickets[msg.sender] -= _num;
-    //     spentTickets += _num;
+    //     numberParameters[NUMBERPARAMETER_SPENT_TICKETS] += _num;
 
     //     for (uint256 i = 0; i < _num; i++) {
     //         weapons.mint(
     //             msg.sender,
-    //             // TODO: Do the thing we do in cryptoblades.sol to "lock in" the user into a given blockhash
+    //             // TODO: Ensure no exploiting possible
     //         );
     //     }
     // }
 
     function giveTicket(address _player, uint32 _num) external onlyGame {
         tickets[_player] += _num;
-        givenTickets += _num;
+        numberParameters[NUMBERPARAMETER_GIVEN_TICKETS] += _num;
     }
 
     function purchaseShield() public {
