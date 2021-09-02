@@ -20,6 +20,11 @@
 
         <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank"><i class="fa fa-book mr-2"></i>Wiki <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
 
+        <b-dropdown-item @click.native="$router.push('nft-display')">
+          <img src="https://seiyria.com/gameicons-font/svg/crystal-ball.svg" class="nft-display-icon"/>
+           NFT Display
+        </b-dropdown-item>
+
         </b-dropdown-group>
         <hr class="border-light">
 
@@ -203,4 +208,10 @@ export default Vue.extend({
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.nft-display-icon {
+  margin-left: -3px;
+  height: 20px;
+  filter: invert(75%) sepia(8%) saturate(243%) hue-rotate(8deg) brightness(96%) contrast(81%);
+}
+</style>
