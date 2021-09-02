@@ -42,13 +42,14 @@ async function createCharacter(receiver, seed, context = {}) {
 /**
  * @param {string} receiver address of who receives the weapon
  * @param {string} seed seed for generating the weapon
+ * @param {number} element weapon element
  * @param {Weapons} [context.weapons] instance of the Weapons contract
  *
  * @return {Promise<string>} ID of the newly created weapon
  */
-async function createWeapon(receiver, seed, context = {}) {
+async function createWeapon(receiver, seed, element = 0, context = {}) {
   const weapons = context.weapons || (await Weapons.deployed());
-  const { tx: mintWeaponTx } = await weapons.mint(receiver, seed);
+  const { tx: mintWeaponTx } = await weapons.mint(receiver, seed, element);
 
   const newWeaponEvt = await expectEvent.inTransaction(mintWeaponTx, weapons, 'NewWeapon', { minter: receiver });
   await time.advanceBlock();

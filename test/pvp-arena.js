@@ -21,7 +21,7 @@ contract("PvpArena", (accounts) => {
     const characterID = await helpers.createCharacter(account, seed, {
       characters,
     });
-    const weaponID = await helpers.createWeapon(account, seed, {
+    const weaponID = await helpers.createWeapon(account, seed, 0, {
       weapons,
     });
 
@@ -109,7 +109,7 @@ contract("PvpArena", (accounts) => {
     let cost;
 
     beforeEach(async () => {
-      weaponId = await helpers.createWeapon(accounts[1], "123", { weapons });
+      weaponId = await helpers.createWeapon(accounts[1], "123", 0, { weapons });
       shieldId = await helpers.createShield(accounts[1], "123", { shields });
       characterID = await helpers.createCharacter(accounts[1], "123", {
         characters,
@@ -160,8 +160,10 @@ contract("PvpArena", (accounts) => {
       let weapon2Id;
 
       beforeEach(async () => {
-        await helpers.createWeapon(accounts[1], "123", { weapons });
-        weapon2Id = await helpers.createWeapon(accounts[1], "123", { weapons });
+        await helpers.createWeapon(accounts[1], "123", 0, { weapons });
+        weapon2Id = await helpers.createWeapon(accounts[1], "123", 0, {
+          weapons,
+        });
         characterID = await helpers.createCharacter(accounts[1], "123", {
           characters,
         });
@@ -219,7 +221,9 @@ contract("PvpArena", (accounts) => {
           characters,
         });
 
-        weapon2Id = await helpers.createWeapon(accounts[1], "123", { weapons });
+        weapon2Id = await helpers.createWeapon(accounts[1], "123", 0, {
+          weapons,
+        });
         shieldId = await helpers.createShield(accounts[1], "446", { shields });
 
         cost = await pvpArena.getEntryWager(character2Id, {
@@ -294,13 +298,13 @@ contract("PvpArena", (accounts) => {
       character1ID = await helpers.createCharacter(accounts[3], "123", {
         characters,
       });
-      const weapon1Id = await helpers.createWeapon(accounts[3], "125", {
+      const weapon1Id = await helpers.createWeapon(accounts[3], "125", 0, {
         weapons,
       });
       character2Id = await helpers.createCharacter(accounts[3], "125", {
         characters,
       });
-      const weapon2Id = await helpers.createWeapon(accounts[3], "123", {
+      const weapon2Id = await helpers.createWeapon(accounts[3], "123", 0, {
         weapons,
       });
 
@@ -347,7 +351,7 @@ contract("PvpArena", (accounts) => {
       character1ID = await helpers.createCharacter(accounts[1], "111", {
         characters,
       });
-      weapon1ID = await helpers.createWeapon(accounts[1], "111", {
+      weapon1ID = await helpers.createWeapon(accounts[1], "111", 0, {
         weapons,
       });
     });

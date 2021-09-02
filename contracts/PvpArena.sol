@@ -4,6 +4,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "./util.sol";
 import "./interfaces/IRandoms.sol";
 import "./cryptoblades.sol";
 import "./characters.sol";
@@ -14,14 +15,6 @@ import "./raid1.sol";
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
     using SafeMath for uint8;
-
-    bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
-
-    event NewDuel(
-        uint256 indexed attacker,
-        uint256 indexed defender,
-        uint256 timestamp
-    );
 
     struct Fighter {
         uint256 characterID;
@@ -38,6 +31,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 createdAt;
     }
 
+    bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+
     CryptoBlades public game;
     Characters public characters;
     Weapons public weapons;
@@ -47,28 +42,34 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     IRandoms public randoms;
 
     /// @dev how many times the cost of battling must be wagered to enter the arena
-    uint256 private wageringFactor;
+    uint256 public wageringFactor;
     /// @dev amount of time a character is unattackable
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
     uint256 public decisionSeconds;
 
     /// @dev last time a character was involved in activity that makes it untattackable
-    mapping(uint256 => uint256) lastActivityByCharacter;
+    mapping(uint256 => uint256) private _lastActivityByCharacter;
     /// @dev Fighter by characterID
-    mapping(uint256 => Fighter) private fightersByCharacter;
+    mapping(uint256 => Fighter) private _fightersByCharacter;
     /// @dev IDs of characters available by tier (1-10, 11-20, etc...)
-    mapping(uint8 => uint256[]) private fightersByTier;
+    mapping(uint8 => uint256[]) private _fightersByTier;
     /// @dev IDs of characters in the arena per player
-    mapping(address => uint256[]) private fightersByPlayer;
+    mapping(address => uint256[]) private _fightersByPlayer;
     /// @dev Active duel by characterID currently attacking
-    mapping(uint256 => Duel) public duelByAttacker;
+    mapping(uint256 => Duel) private _duelByAttacker;
     ///@dev characters currently in the arena
-    mapping(uint256 => bool) public charactersInUse;
+    mapping(uint256 => bool) private _charactersInArena;
     ///@dev weapons currently in the arena
-    mapping(uint256 => bool) public weaponsInUse;
+    mapping(uint256 => bool) private _weaponsInArena;
     ///@dev shields currently in the arena
-    mapping(uint256 => bool) public shieldsInUse;
+    mapping(uint256 => bool) private _shieldsInArena;
+
+    event NewDuel(
+        uint256 indexed attacker,
+        uint256 indexed defender,
+        uint256 timestamp
+    );
 
     modifier characterInArena(uint256 characterID) {
         require(
@@ -95,7 +96,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             !isCharacterInArena(characterID),
             "The character is already in the arena"
         );
-        require(!weaponsInUse[weaponID], "The weapon is already in the arena");
+        require(
+            !_weaponsInArena[weaponID],
+            "The weapon is already in the arena"
+        );
         require(
             characters.ownerOf(characterID) == msg.sender,
             "You don't own the given character"
@@ -119,7 +123,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 "You don't own the given shield"
             );
             require(
-                !shieldsInUse[shieldID],
+                !_shieldsInArena[shieldID],
                 "The shield is already in the arena"
             );
         }
@@ -159,14 +163,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 wager = getEntryWager(characterID);
         uint8 tier = getArenaTier(characterID);
 
-        charactersInUse[characterID] = true;
-        weaponsInUse[weaponID] = true;
+        _charactersInArena[characterID] = true;
+        _weaponsInArena[weaponID] = true;
 
-        if (useShield) shieldsInUse[shieldID] = true;
+        if (useShield) _shieldsInArena[shieldID] = true;
 
-        fightersByTier[tier].push(characterID);
-        fightersByPlayer[msg.sender].push(characterID);
-        fightersByCharacter[characterID] = Fighter(
+        _fightersByTier[tier].push(characterID);
+        _fightersByPlayer[msg.sender].push(characterID);
+        _fightersByCharacter[characterID] = Fighter(
             characterID,
             weaponID,
             shieldID,
@@ -190,20 +194,24 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint8 tier = getArenaTier(characterID);
 
         require(
-            fightersByTier[tier].length != 0,
+            _fightersByTier[tier].length != 0,
             "No opponents available for this character's level"
         );
 
-        uint256 randomIndex = randoms.getRandomSeed(msg.sender) %
-            fightersByTier[tier].length;
+        uint256 seed = randoms.getRandomSeed(msg.sender);
+        uint256 randomIndex = RandomUtil.randomSeededMinMax(
+            0,
+            _fightersByTier[tier].length - 1,
+            seed
+        );
 
         uint256 opponentID;
         bool foundOpponent = false;
 
         // run through fighters from a random starting point until we find one or none are available
-        for (uint256 i = 0; i < fightersByTier[tier].length; i++) {
-            uint256 index = (randomIndex + i) % fightersByTier[tier].length;
-            uint256 candidateID = fightersByTier[tier][index];
+        for (uint256 i = 0; i < _fightersByTier[tier].length; i++) {
+            uint256 index = (randomIndex + i) % _fightersByTier[tier].length;
+            uint256 candidateID = _fightersByTier[tier][index];
             if (candidateID == characterID) continue;
             if (!isCharacterAttackable(candidateID)) continue;
             foundOpponent = true;
@@ -213,18 +221,20 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         require(foundOpponent, "No opponent found");
 
-        duelByAttacker[characterID] = Duel(
+        _duelByAttacker[characterID] = Duel(
             characterID,
             opponentID,
             block.timestamp
         );
 
         // lock the cost of the duel
-        fightersByCharacter[characterID].lockedWager = getDuelCost(characterID);
+        _fightersByCharacter[characterID].lockedWager = getDuelCost(
+            characterID
+        );
 
         // mark both characters as unattackable
-        lastActivityByCharacter[characterID] = block.timestamp;
-        lastActivityByCharacter[opponentID] = block.timestamp;
+        _lastActivityByCharacter[characterID] = block.timestamp;
+        _lastActivityByCharacter[opponentID] = block.timestamp;
 
         emit NewDuel(characterID, opponentID, block.timestamp);
     }
@@ -251,7 +261,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the amount of SKILL that is risked per duel
     function getDuelCost(uint256 characterID) public view returns (uint256) {
-        // FIXME: Use normal combat rewards formula. THIS IS JUST TEMPORARY CODE
+        // FIXME: Use real formula. THIS IS JUST TEMPORARY CODE
         return getArenaTier(characterID).add(1).mul(1000);
     }
 
@@ -274,7 +284,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint256[] memory)
     {
-        return fightersByPlayer[msg.sender];
+        return _fightersByPlayer[msg.sender];
     }
 
     /// @dev checks if a character is in the arena
@@ -283,27 +293,27 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (bool)
     {
-        return charactersInUse[characterID];
+        return _charactersInArena[characterID];
     }
 
     /// @dev checks if a weapon is in the arena
     function isWeaponInArena(uint256 weaponID) public view returns (bool) {
-        return weaponsInUse[weaponID];
+        return _weaponsInArena[weaponID];
     }
 
     /// @dev checks if a shield is in the arena
     function isShieldInArena(uint256 shieldID) public view returns (bool) {
-        return shieldsInUse[shieldID];
+        return _shieldsInArena[shieldID];
     }
 
     /// @dev get a character's amount of wager that is locked
     function getLockedWager(uint256 characterID) public view returns (uint256) {
-        return fightersByCharacter[characterID].lockedWager;
+        return _fightersByCharacter[characterID].lockedWager;
     }
 
     /// @dev get an attacker's opponent
     function getOpponent(uint256 characterID) public view returns (uint256) {
-        return duelByAttacker[characterID].defenderID;
+        return _duelByAttacker[characterID].defenderID;
     }
 
     /// @dev wether or not the character is still in time to start a duel
@@ -313,7 +323,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         returns (bool)
     {
         return
-            duelByAttacker[characterID].createdAt.add(decisionSeconds) >
+            _duelByAttacker[characterID].createdAt.add(decisionSeconds) >
             block.timestamp;
     }
 
@@ -323,13 +333,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (bool)
     {
-        uint256 lastActivity = lastActivityByCharacter[characterID];
+        uint256 lastActivity = _lastActivityByCharacter[characterID];
 
         return lastActivity.add(unattackableSeconds) <= block.timestamp;
     }
 
     /// @dev updates the last activity timestamp of a character
     function _updateLastActivityTimestamp(uint256 characterID) private {
-        lastActivityByCharacter[characterID] = block.timestamp;
+        _lastActivityByCharacter[characterID] = block.timestamp;
     }
 }
