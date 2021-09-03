@@ -2730,6 +2730,206 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacter', id),
         ]);
       },
+
+      async configureMetaMask({ state, dispatch }) {
+        if (state.currentNetworkId === 97) {
+          await dispatch('configureBscTestNet');
+        } else if(state.currentNetworkId === 56) {
+          await dispatch('configureBscMainNet');
+        } else if(state.currentNetworkId === 128) {
+          await dispatch('configureHecoMainNet');
+        } else if(state.currentNetworkId === 256) {
+          await dispatch('configureHecoTestNet');
+        }
+      },
+
+      async configureBscMainNet() {
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x38' }],
+          });
+        } catch (switchError) {
+          try {
+            await (web3.currentProvider as any).request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x38',
+                  chainName: 'Binance Smart Chain Mainnet',
+                  nativeCurrency: {
+                    name: 'Binance Coin',
+                    symbol: 'BNB',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                  blockExplorerUrls: ['https://bscscan.com/'],
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error(addError);
+          }
+        }
+
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
+                symbol: 'SKILL',
+                decimals: 18,
+                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+              },
+            },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      },
+
+      async configureBscTestNet() {
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x61' }],
+          });
+        } catch (switchError) {
+          try {
+            await (web3.currentProvider as any).request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x61',
+                  chainName: 'Binance Smart Chain Testnet',
+                  nativeCurrency: {
+                    name: 'Binance Coin',
+                    symbol: 'BNB',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+                  blockExplorerUrls: ['https://testnet.bscscan.com'],
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error(addError);
+          }
+        }
+
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: '0xcaf53066e36eef55ed0663419adff6e503bd134f',
+                symbol: 'SKILL',
+                decimals: 18,
+                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+              },
+            },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      },
+
+      async configureHecoMainNet() {
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x80' }],
+          });
+        } catch (switchError) {
+          try {
+            await (web3.currentProvider as any).request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x80',
+                  chainName: 'Heco-Mainnet',
+                  nativeCurrency: {
+                    name: 'Huobi Token',
+                    symbol: 'HT',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://http-mainnet-node.huobichain.com'],
+                  blockExplorerUrls: ['https://hecoinfo.com'],
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error(addError);
+          }
+        }
+
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab', //replace with heco-mainnet skill token address
+                symbol: 'SKILL',
+                decimals: 18,
+                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+              },
+            },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      },
+
+      async configureHecoTestNet() {
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x100' }],
+          });
+        } catch (switchError) {
+          try {
+            await (web3.currentProvider as any).request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x100',
+                  chainName: 'Heco-Testnet',
+                  nativeCurrency: {
+                    name: 'Huobi Token',
+                    symbol: 'HT',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://http-testnet.hecochain.com'],
+                  blockExplorerUrls: ['https://testnet.hecoinfo.com'],
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error(addError);
+          }
+        }
+
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab', //replace with heco-testnet skill token address
+                symbol: 'SKILL',
+                decimals: 18,
+                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+              },
+            },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      },
     }
   });
 }

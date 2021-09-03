@@ -46,7 +46,13 @@ interface MarketContracts {
   NFTMarket?: Contracts['NFTMarket'];
 }
 
-const networkId = process.env.VUE_APP_NETWORK_ID || '5777';
+function getConfigValue(key: string): string {
+  const chain = localStorage.getItem('currentChain') || 'BSC';
+  const configKey = key + '_' + chain;
+  return process.env[configKey] || '';
+}
+
+const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
 
 type Networks = Partial<Record<string, { address: string }>>;
 
@@ -102,7 +108,7 @@ async function setUpStakingContracts(web3: Web3) {
     };
   }
 
-  const skillTokenAddress = process.env.VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS || (skillTokenNetworks as Networks)[networkId]!.address;
+  const skillTokenAddress = getConfigValue('VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS') || (skillTokenNetworks as Networks)[networkId]!.address;
   const SkillToken = new web3.eth.Contract(erc20Abi as Abi, skillTokenAddress);
 
   return {
@@ -119,7 +125,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     return stakingContracts;
   }
 
-  const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as Networks)[networkId]!.address;
+  const cryptoBladesContractAddr = getConfigValue('VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS') || (cryptoBladesNetworks as Networks)[networkId]!.address;
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as Abi, cryptoBladesContractAddr);
   const [charactersAddr, weaponsAddr, randomsAddr, blacksmithAddr] = await Promise.all([
@@ -168,7 +174,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   let keyboxAddress = '';
   let junkAddress = '';
   if(featureFlagRaid) {
-    const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as Networks)[networkId]!.address;
+    const raidContractAddr = getConfigValue('VUE_APP_RAID_CONTRACT_ADDRESS') || (raidNetworks as Networks)[networkId]!.address;
 
     const Raid1 = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
     raidContracts.Raid1 = Raid1;
@@ -188,12 +194,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   const marketContracts: MarketContracts = {};
   if(featureFlagMarket) {
-    const marketContractAddr = process.env.VUE_APP_MARKET_CONTRACT_ADDRESS || (marketNetworks as Networks)[networkId]!.address;
+    const marketContractAddr = getConfigValue('VUE_APP_MARKET_CONTRACT_ADDRESS') || (marketNetworks as Networks)[networkId]!.address;
 
     marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as Abi, marketContractAddr);
   }
 
-  const waxBridgeContractAddr = process.env.VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS || (waxBridgeNetworks as Networks)[networkId]!.address;
+  const waxBridgeContractAddr = getConfigValue('VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS') || (waxBridgeNetworks as Networks)[networkId]!.address;
   const WaxBridge = new web3.eth.Contract(waxBridgeAbi as Abi, waxBridgeContractAddr);
 
   return {

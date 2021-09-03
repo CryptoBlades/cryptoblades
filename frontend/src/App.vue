@@ -10,7 +10,7 @@
         <span class="starter-panel-heading">Metamask Not Detected Or Incorrect Network</span>
         <div class="center">
           <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning" />
-          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError" />
+          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetamask" v-if="showNetworkError" />
           <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
         </div>
       </div>
@@ -24,7 +24,7 @@
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <div>
-          <big-button class="button mm-button" :mainText="`Configure MetaMask`" @click="configureMetaMask" />
+          <big-button class="button mm-button" :mainText="`Configure MetaMask`" @click="configureMetamask" />
           <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button" :mainText="`Connect to MetaMask`" @click="connectMetamask" />
         </div>
         <div class="seperator"></div>
@@ -140,6 +140,7 @@ export default {
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
+      'configureMetaMask'
     ]),
 
     async updateCharacterStamina(id) {
@@ -171,101 +172,8 @@ export default {
       const onboarding = new MetaMaskOnboarding();
       onboarding.startOnboarding();
     },
-    async configureMetaMask() {
-      const web3 = this.web3.currentProvider;
-      if (this.currentNetworkId === 97) {
-        try {
-          await web3.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x61' }],
-          });
-        } catch (switchError) {
-          try {
-            await web3.request({
-              method: 'wallet_addEthereumChain',
-              params: [
-                {
-                  chainId: '0x61',
-                  chainName: 'Binance Smart Chain Testnet',
-                  nativeCurrency: {
-                    name: 'Binance Coin',
-                    symbol: 'BNB',
-                    decimals: 18,
-                  },
-                  rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
-                  blockExplorerUrls: ['https://testnet.bscscan.com'],
-                },
-              ],
-            });
-          } catch (addError) {
-            console.error(addError);
-          }
-        }
-
-        try {
-          await web3.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: '0xcaf53066e36eef55ed0663419adff6e503bd134f',
-                symbol: 'SKILL',
-                decimals: 18,
-                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
-              },
-            },
-          });
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        {
-          try {
-            await web3.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: '0x38' }],
-            });
-          } catch (switchError) {
-            try {
-              await web3.request({
-                method: 'wallet_addEthereumChain',
-                params: [
-                  {
-                    chainId: '0x38',
-                    chainName: 'Binance Smart Chain Mainnet',
-                    nativeCurrency: {
-                      name: 'Binance Coin',
-                      symbol: 'BNB',
-                      decimals: 18,
-                    },
-                    rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                    blockExplorerUrls: ['https://bscscan.com/'],
-                  },
-                ],
-              });
-            } catch (addError) {
-              console.error(addError);
-            }
-          }
-
-          try {
-            await web3.request({
-              method: 'wallet_watchAsset',
-              params: {
-                type: 'ERC20',
-                options: {
-                  address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
-                  symbol: 'SKILL',
-                  decimals: 18,
-                  image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
-                },
-              },
-            });
-          } catch (error) {
-            console.error(error);
-          }
-        }
-      }
+    async configureMetamask() {
+      await this.configureMetaMask();
     },
 
     async connectMetamask() {
