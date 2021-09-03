@@ -177,7 +177,7 @@ contract("PvpArena", (accounts) => {
           pvpArena.enterArena(characterID, weapon2Id, 0, false, {
             from: accounts[1],
           }),
-          "The character is already in the arena"
+          "Character already in arena"
         );
       });
     });
@@ -210,7 +210,7 @@ contract("PvpArena", (accounts) => {
           pvpArena.enterArena(character2Id, weaponId, 0, false, {
             from: accounts[1],
           }),
-          "The weapon is already in the arena"
+          "Weapon already in arena"
         );
       });
     });
@@ -276,7 +276,7 @@ contract("PvpArena", (accounts) => {
           pvpArena.enterArena(otherCharacterId, weaponId, 0, false, {
             from: accounts[1],
           }),
-          "You don't own the given character"
+          "Not character owner"
         );
       });
     });

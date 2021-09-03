@@ -92,40 +92,22 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID,
         bool useShield
     ) {
-        require(
-            !isCharacterInArena(characterID),
-            "The character is already in the arena"
-        );
-        require(
-            !_weaponsInArena[weaponID],
-            "The weapon is already in the arena"
-        );
+        require(!isCharacterInArena(characterID), "Character already in arena");
+        require(!_weaponsInArena[weaponID], "Weapon already in arena");
         require(
             characters.ownerOf(characterID) == msg.sender,
-            "You don't own the given character"
+            "Not character owner"
         );
-        require(
-            weapons.ownerOf(weaponID) == msg.sender,
-            "You don't own the given weapon"
-        );
-        require(
-            !raids.isCharacterRaiding(characterID),
-            "The given character is already raiding"
-        );
-        require(
-            !raids.isWeaponRaiding(weaponID),
-            "The given weapon is already raiding"
-        );
+        require(weapons.ownerOf(weaponID) == msg.sender, "Not weapon owner");
+        require(!raids.isCharacterRaiding(characterID), "Character is in raid");
+        require(!raids.isWeaponRaiding(weaponID), "Weapon is in raid");
 
         if (useShield) {
             require(
                 shields.ownerOf(shieldID) == msg.sender,
-                "You don't own the given shield"
+                "Not shield owner"
             );
-            require(
-                !_shieldsInArena[shieldID],
-                "The shield is already in the arena"
-            );
+            require(!_shieldsInArena[shieldID], "Shield already in arena");
         }
 
         _;
@@ -175,8 +157,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             weaponID,
             shieldID,
             wager,
-            useShield,
-            0
+            0,
+            useShield
         );
 
         // character starts unattackable
