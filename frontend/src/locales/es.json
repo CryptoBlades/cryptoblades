@@ -1,0 +1,60 @@
+{
+  "language": "Spanish",
+  "view-link": {
+      "plaza": "Plaza",
+      "blacksmith": "Herrería",
+      "combat": "Combate",
+      "raid": "Raid",
+      "pvp": "PvP",
+      "market": "Mercado",
+      "stake": "Stake"
+  },
+  "plaza": {
+    "welcome": "¡Comenzá a ganar hoy!"
+  },
+  "options": {
+      "title": "",
+      "graphic": "",
+      "rewardBar": "",
+      "walletWarning": "",
+      "staminaFight": "",
+      "language": ""
+  },
+  "app": {
+    "warning": {
+      "title": "Metamask No Detectado o en Red Incorrecta",
+      "buttons": {
+        "addMetamask": "Agregar MetaMask",
+        "confMetamask": "Configurar MetaMask",
+        "startMetamask": "Conectar con MetaMask",
+        "network": "Cambiar a la Red BSC",
+        "hide": "Ocultar Advertencia"
+      },
+      "errorMessage": {
+        "connecting": "Conectandose a MetaMask...",
+        "success": "Completado: MetaMask conectado.",
+        "error": "Error: MetaMask no pudo conseguir los permisos.",
+        "welcome": "Bienvenido a CryptoBlades. Aquí está como puedes empezar."
+      },
+      "message": {
+        "hideWalletWarning": "Ocultaste la advertencia de tu billetera que ahora deberías ver. Si estás intentando jugar, por favor desabilita la opción y sigue las instrucciones, sino cerrala e ignorala.",
+        "instructions": "Empezá en menos de 10 minutos! Para reclutar tu primer personaje necesitas {recruitCost} SKILL y 0.001 BNB para gas. También necesitaras 0.0015 BNB para hacer tu primeras batallas, pero no te preocupes, ganas el dinero de la batalla en SKILL inmediatamente!",
+        "inst1": "Comprar BNB con Fiat:",
+        "inst2": "Una vez que tenés BNB, ve a ApeSwap para obterner tokens de SKILL:",
+        "inst3": "Seguí este tutorial para intercambiar BNB por SKILL:",
+        "inst4": "Listo! Ahora podes crear tu primer personaje:",
+        "watchVideo": "Ver Video {name}",
+        "questionDiscord": "Si tienes alguna pregunta, por favor usa nuestro Discord:"
+      }
+    },
+    "notification": {
+      "link": "¡Mirá esto!"
+    },
+    "navBar": {
+      "link": "¡Mirá esto!"
+    
+  },
+  "on": "Prendido",
+  "off": "Apagado",
+  "trade": "Intercambio"
+}
