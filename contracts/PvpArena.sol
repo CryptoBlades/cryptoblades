@@ -226,6 +226,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev performs a given character's duel against its opponent
     function performDuel(uint256 characterID) external {
         // TODO: implement (not final signature)
+        // - [ ] verify opponent is assigned
+        // - [ ] verify character is within decision seconds
+        // - [ ] calculate winner
+        // - [ ] distribute bounty
+        // - [ ] update both characters' last activity timestamp
+        // - [ ] remove loser from arena if wager is zero
     }
 
     /// @dev withdraws a character from the arena.
