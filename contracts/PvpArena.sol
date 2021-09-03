@@ -131,8 +131,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         randoms = IRandoms(randomsContract);
 
         wageringFactor = 3;
-        unattackableSeconds = 60 * 1;
-        decisionSeconds = 60 * 3;
+        unattackableSeconds = 2 minutes;
+        decisionSeconds = 3 minutes;
     }
 
     /// @notice enter the arena with a character, a weapon and optionally a shield
