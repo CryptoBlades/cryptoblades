@@ -1075,11 +1075,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 fromTokenRewards,
         uint256 fromUserWallet
     ) internal {
-        totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
-        inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
+        if(fromInGameOnlyFunds > 0) {
+            totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
+            inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
+        }
 
-        tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
-        skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
+        if(fromTokenRewards > 0) {
+            tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
+        }
+
+        if(fromUserWallet > 0) {
+            skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
+        }
     }
 
     function _payPlayer(address playerAddress, int128 baseAmount) internal {
