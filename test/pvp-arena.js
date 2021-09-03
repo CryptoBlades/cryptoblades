@@ -249,7 +249,7 @@ contract("PvpArena", (accounts) => {
           pvpArena.enterArena(character2Id, weapon2Id, shieldId, true, {
             from: accounts[1],
           }),
-          "The shield is already in the arena"
+          "Shield already in arena"
         );
       });
     });
