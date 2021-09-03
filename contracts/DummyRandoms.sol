@@ -22,6 +22,10 @@ contract DummyRandoms is IRandoms, HasMain {
         return uint256(keccak256(abi.encodePacked(user, seed, block.timestamp)));
     }
 
+    function getRandomSeedUsingHash(address user, bytes32 hash) external view override returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(user, seed, hash, block.timestamp)));
+    }
+
     // Mutative
     function setRandomNumberForTestingPurposes(uint256 randomValue) external {
         seed = randomValue;

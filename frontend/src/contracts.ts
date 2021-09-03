@@ -9,9 +9,20 @@ import { networks as lp2TokenNetworks } from '../../build/contracts/ExperimentTo
 import { abi as stakingRewardsAbi } from '../../build/contracts/IStakingRewards.json';
 
 import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../build/contracts/CryptoBlades.json';
-import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/RaidBasic.json';
+import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/Raid1.json';
 import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
+import { abi as blacksmithAbi } from '../../build/contracts/Blacksmith.json';
+import { abi as shieldsAbi } from '../../build/contracts/Shields.json';
+import { abi as weaponRenameTagConsumablesAbi } from '../../build/contracts/WeaponRenameTagConsumables.json';
+import { abi as characterRenameTagConsumablesAbi } from '../../build/contracts/CharacterRenameTagConsumables.json';
+import { abi as characterFireTraitChangeConsumablesAbi } from '../../build/contracts/CharacterFireTraitChangeConsumables.json';
+import { abi as characterEarthTraitChangeConsumablesAbi } from '../../build/contracts/CharacterEarthTraitChangeConsumables.json';
+import { abi as characterWaterTraitChangeConsumablesAbi } from '../../build/contracts/CharacterWaterTraitChangeConsumables.json';
+import { abi as characterLightningTraitChangeConsumablesAbi } from '../../build/contracts/CharacterLightningTraitChangeConsumables.json';
+import { abi as raidTrinketAbi } from '../../build/contracts/RaidTrinket.json';
+import { abi as keyboxAbi } from '../../build/contracts/KeyLootbox.json';
+import { abi as junkAbi } from '../../build/contracts/Junk.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
@@ -28,7 +39,7 @@ import {
 } from './feature-flags';
 
 interface RaidContracts {
-  RaidBasic?: Contracts['RaidBasic'];
+  Raid1?: Contracts['Raid1'];
 }
 
 interface MarketContracts {
@@ -111,21 +122,69 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const cryptoBladesContractAddr = process.env.VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS || (cryptoBladesNetworks as Networks)[networkId]!.address;
 
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as Abi, cryptoBladesContractAddr);
-  const [charactersAddr, weaponsAddr, randomsAddr] = await Promise.all([
+  const [charactersAddr, weaponsAddr, randomsAddr, blacksmithAddr] = await Promise.all([
     CryptoBlades.methods.characters().call(),
     CryptoBlades.methods.weapons().call(),
     CryptoBlades.methods.randoms().call(),
+    CryptoBlades.methods.blacksmith().call(),
   ]);
   const Randoms = new web3.eth.Contract(randomsAbi as Abi, randomsAddr);
   const Characters = new web3.eth.Contract(charactersAbi as Abi, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
+  const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
+
+  const shieldsAddr = await Blacksmith.methods.shields().call();
+  const Shields = new web3.eth.Contract(shieldsAbi as Abi, shieldsAddr);
+
+  const weaponRenameTagConsumablesIndex = await Blacksmith.methods.ITEM_WEAPON_RENAME().call();
+  const weaponRenameTagConsumablesAddr = await Blacksmith.methods.getAddressOfItem(weaponRenameTagConsumablesIndex).call();
+  const WeaponRenameTagConsumables = new web3.eth.Contract(weaponRenameTagConsumablesAbi as Abi, weaponRenameTagConsumablesAddr);
+
+  const characterRenameTagConsumablesIndex = await Blacksmith.methods.ITEM_CHARACTER_RENAME().call();
+  const characterRenameTagConsumablesAddr = await Blacksmith.methods.getAddressOfItem(characterRenameTagConsumablesIndex).call();
+  const CharacterRenameTagConsumables = new web3.eth.Contract(characterRenameTagConsumablesAbi as Abi, characterRenameTagConsumablesAddr);
+
+  const CharacterFireTraitChangeConsumablesIndex = await Blacksmith.methods.ITEM_CHARACTER_TRAITCHANGE_FIRE().call();
+  const characterFireTraitChangeConsumablesAddr = await Blacksmith.methods.getAddressOfItem(CharacterFireTraitChangeConsumablesIndex).call();
+  const CharacterFireTraitChangeConsumables = new web3.eth.Contract(characterFireTraitChangeConsumablesAbi as Abi, characterFireTraitChangeConsumablesAddr);
+
+  const CharacterEarthTraitChangeConsumablesIndex = await Blacksmith.methods.ITEM_CHARACTER_TRAITCHANGE_EARTH().call();
+  const characterEarthTraitChangeConsumablesAddr = await Blacksmith.methods.getAddressOfItem(CharacterEarthTraitChangeConsumablesIndex).call();
+  const CharacterEarthTraitChangeConsumables = new web3.eth.Contract(characterEarthTraitChangeConsumablesAbi as Abi, characterEarthTraitChangeConsumablesAddr);
+
+  const CharacterWaterTraitChangeConsumablesIndex = await Blacksmith.methods.ITEM_CHARACTER_TRAITCHANGE_WATER().call();
+  const characterWaterTraitChangeConsumablesAddr = await Blacksmith.methods.getAddressOfItem(CharacterWaterTraitChangeConsumablesIndex).call();
+  const CharacterWaterTraitChangeConsumables = new web3.eth.Contract(characterWaterTraitChangeConsumablesAbi as Abi, characterWaterTraitChangeConsumablesAddr);
+
+  const CharacterLightningTraitChangeConsumablesIndex = await Blacksmith.methods.ITEM_CHARACTER_TRAITCHANGE_LIGHTNING().call();
+  const characterLightningTraitChangeConsumablesAddr = await Blacksmith.methods.getAddressOfItem(CharacterLightningTraitChangeConsumablesIndex).call();
+  const CharacterLightningTraitChangeConsumables = new web3.eth.Contract(characterLightningTraitChangeConsumablesAbi as Abi,
+    characterLightningTraitChangeConsumablesAddr);
+
+
 
   const raidContracts: RaidContracts = {};
+  let raidTrinketAddress = '';
+  let keyboxAddress = '';
+  let junkAddress = '';
   if(featureFlagRaid) {
     const raidContractAddr = process.env.VUE_APP_RAID_CONTRACT_ADDRESS || (raidNetworks as Networks)[networkId]!.address;
 
-    raidContracts.RaidBasic = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
+    const Raid1 = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
+    raidContracts.Raid1 = Raid1;
+
+    // for the time being, junk, keylootbox and trinket are dependent on raids for the address
+    const RAID_LINK_TRINKET = await Raid1.methods.LINK_TRINKET().call();
+    const RAID_LINK_KEYBOX = await Raid1.methods.LINK_KEYBOX().call();
+    const RAID_LINK_JUNK = await Raid1.methods.LINK_JUNK().call();
+    raidTrinketAddress = await Raid1.methods.getLinkAddress(RAID_LINK_TRINKET).call();
+    keyboxAddress = await Raid1.methods.getLinkAddress(RAID_LINK_KEYBOX).call();
+    junkAddress = await Raid1.methods.getLinkAddress(RAID_LINK_JUNK).call();
   }
+
+  const RaidTrinket = new web3.eth.Contract(raidTrinketAbi as Abi, raidTrinketAddress);
+  const KeyLootbox = new web3.eth.Contract(keyboxAbi as Abi, keyboxAddress);
+  const Junk = new web3.eth.Contract(junkAbi as Abi, junkAddress);
 
   const marketContracts: MarketContracts = {};
   if(featureFlagMarket) {
@@ -139,7 +198,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   return {
     ...stakingContracts,
-    CryptoBlades, Randoms, Characters, Weapons,
+    CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
+    CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
+    RaidTrinket, KeyLootbox, Junk,
     ...raidContracts,
     ...marketContracts,
     WaxBridge,

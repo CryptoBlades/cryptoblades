@@ -6,6 +6,7 @@ const TruffleConfig = require('@truffle/config');
 const TruffleProvider = require('@truffle/provider');
 const Web3 = require('web3');
 const yargs = require('yargs/yargs');
+const Graph = require('graph-data-structure');
 
 const proxyAdminAbi = [
     {
@@ -42,6 +43,49 @@ const proxyAdminAbi = [
     }
 ];
 
+async function getProxyImplementation(admin, proxyAddress) {
+    try {
+        return await admin.methods.getProxyImplementation(proxyAddress).call();
+    }
+    catch(err) {
+        return null;
+    }
+}
+
+function createInheritanceGraph(buildArtifacts) {
+    const g = Graph();
+
+    for(const buildArtifact of buildArtifacts) {
+        const { contractName, ast: { nodes } } = JSON.parse(shell.cat(buildArtifact));
+
+        const contractDefNode = nodes.find(node => node.nodeType === 'ContractDefinition');
+
+        assert.ok(contractDefNode);
+
+        g.addNode(contractName);
+        for(const baseContract of contractDefNode.baseContracts) {
+            g.addEdge(contractName, baseContract.baseName.name);
+        }
+    }
+
+    return g;
+}
+
+function isUpgradeableContract(buildArtifact, inheritanceGraph) {
+    const { contractName } = JSON.parse(shell.cat(buildArtifact));
+
+    try {
+        inheritanceGraph.shortestPath(contractName, 'Initializable');
+        return true;
+    }
+    catch(err) {
+        if(/No path found/ig.test(err.message)) {
+            return false;
+        }
+        else throw err;
+    }
+}
+
 async function main() {
     shell.pushd(path.join(__dirname, '..'));
 
@@ -50,18 +94,8 @@ async function main() {
             default: 'development',
             string: true
         })
-        .option('known-proxy-contract-name', {
-            alias: ['c'],
-            default: [],
-            array: true
-        })
-        .option('force-lookup', {
-            alias: ['L'],
-            default: false,
-            boolean: true
-        })
         .argv;
-    const { network, knownProxyContractName, forceLookup } = argv;
+    const { network } = argv;
 
     const truffleConfig = TruffleConfig.detect();
     const truffleProvider = TruffleProvider.create(truffleConfig.networks[network]);
@@ -71,49 +105,49 @@ async function main() {
     const networkId = await web3.eth.net.getId();
 
     const [ozFile] = shell.ls(`.openzeppelin/*-${chainId}.json`);
-    const { admin: { address: adminAddress }, impls } = JSON.parse(shell.cat(ozFile));
+    const { admin: { address: adminAddress } } = JSON.parse(shell.cat(ozFile));
 
     const admin = new web3.eth.Contract(proxyAdminAbi, adminAddress);
 
-    // console.log(
-    //     'the owner of the admin is:',
-    //     await admin.methods.owner().call()
-    // );
+    const allBuildArtifacts = Array.from(shell.ls('build/contracts/*.json'));
 
-    const txHashToImplAddressMap = {};
-    for (const hash in impls) {
-        const { address, txHash } = impls[hash];
+    const implAddressesEntries = await Promise.all(
+        allBuildArtifacts.map(async buildArtifact => {
+            const { networks } = JSON.parse(shell.cat(buildArtifact));
+            const network = networks[networkId];
+            if(network) {
+                const { address: proxyAddress } = network;
 
-        assert(!(txHash in txHashToImplAddressMap));
-
-        txHashToImplAddressMap[txHash] = address;
-    }
-
-    const contractsToVerify = [];
-
-    for (const buildArtifact of shell.ls('build/contracts/*.json')) {
-        const { contractName, networks } = JSON.parse(shell.cat(buildArtifact));
-
-        const network = networks[networkId];
-        if (network) {
-            const { address: proxyAddress, transactionHash: proxyTransactionHash } = network;
-            let implAddress = txHashToImplAddressMap[proxyTransactionHash];
-
-            if ((!implAddress || forceLookup) && proxyAddress && knownProxyContractName.includes(contractName)) {
-                implAddress = await admin.methods.getProxyImplementation(proxyAddress).call();
+                return [buildArtifact, await getProxyImplementation(admin, proxyAddress)];
             }
+        })
+    );
 
-            if(implAddress) {
-                contractsToVerify.push(`${contractName}@${implAddress}`);
-            }
+    const implAddresses = Object.fromEntries(implAddressesEntries.filter(Boolean));
+    const inheritanceGraph = createInheritanceGraph(allBuildArtifacts);
+
+    const plainContractsToVerify = [];
+    const implContractsToVerify = [];
+
+    for (const buildArtifact in implAddresses) {
+        const { contractName } = JSON.parse(shell.cat(buildArtifact));
+        const implAddress = implAddresses[buildArtifact];
+
+        assert.strictEqual(!!implAddress, isUpgradeableContract(buildArtifact, inheritanceGraph));
+
+        if(implAddress) {
+            implContractsToVerify.push(`${contractName}@${implAddress}`);
+        }
+        else {
+            plainContractsToVerify.push(contractName);
         }
     }
 
     console.log();
-    console.log('This script intentionally does not actually run the verification. To do that, run this following command manually:');
+    console.log(`Verifying: ${plainContractsToVerify.join(' ')} ${implContractsToVerify.join(' ')}`);
     console.log();
-    console.log(`    npx truffle run verify ${contractsToVerify.join(' ')} --network ${network}`);
-    console.log();
+
+    shell.exec(`npx truffle run verify ${plainContractsToVerify.join(' ')} ${implContractsToVerify.join(' ')} --network ${network}`);
 
     shell.popd();
 
