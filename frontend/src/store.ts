@@ -2115,8 +2115,8 @@ export function createStore(web3: Web3) {
       },
 
       async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price }: { nftContractAddr: string, tokenId: string, price: string }) {
-        const { NFTMarket, Weapons, Characters, Shields } = state.contracts();
-        if(!NFTMarket || !Weapons || !Characters || !Shields) return;
+        const { CryptoBlades, SkillToken, NFTMarket, Weapons, Characters, Shields } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !NFTMarket || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
 
         const NFTContract: Contract<IERC721> =
           nftContractAddr === Weapons.options.address
@@ -2126,6 +2126,18 @@ export function createStore(web3: Web3) {
         await NFTContract.methods
           .approve(NFTMarket.options.address, tokenId)
           .send(defaultCallOptions(state));
+
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          NFTMarket,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          nftMarketFuctions => nftMarketFuctions.addFee(),
+          {},
+        );
 
         const res = await NFTMarket.methods
           .addListing(nftContractAddr, tokenId, price)
@@ -2150,8 +2162,20 @@ export function createStore(web3: Web3) {
       },
 
       async changeMarketListingPrice({ state }, { nftContractAddr, tokenId, newPrice }: { nftContractAddr: string, tokenId: string, newPrice: string }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
+        const { CryptoBlades, SkillToken, NFTMarket } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !NFTMarket || !state.defaultAccount) return;
+
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          NFTMarket,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          nftMarketFuctions => nftMarketFuctions.changeFee(),
+          {},
+        );
 
         const res = await NFTMarket.methods
           .changeListingPrice(nftContractAddr, tokenId, newPrice)

@@ -67,6 +67,7 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
   if(feeMultiplier !== undefined) {
     feeInSkill = feeInSkill.times(feeMultiplier);
   }
+  console.log('feeInSkill: ' + feeInSkill.toString());
 
   try {
     feeInSkill = await cryptoBladesContract.methods
@@ -74,6 +75,7 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
       .call(callOptsWithFrom)
       .then(n => new BigNumber(n));
 
+    console.log('skill needed from wallet: ' + feeInSkill.toString());
   }
   catch(err) {
     const paidByRewardPool = feeInSkill.lte(skillRewardsAvailable);
@@ -87,9 +89,11 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
     .allowance(from, cryptoBladesContract.options.address)
     .call(callOptsWithFrom);
 
-  if(feeInSkill.lte(allowance)) {
-    return null;
-  }
+  console.log('current allowance ' + allowance.toString());
+
+  // if(feeInSkill.lte(allowance)) {
+  //   return null;
+  // }
 
   return await skillToken.methods
     .approve(cryptoBladesContract.options.address, feeInSkill.toString())
