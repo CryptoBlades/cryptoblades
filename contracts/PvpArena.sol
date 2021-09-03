@@ -15,6 +15,7 @@ import "./raid1.sol";
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
     using SafeMath for uint8;
+    using ABDKMath64x64 for int128;
 
     struct Fighter {
         uint256 characterID;
@@ -69,6 +70,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 indexed attacker,
         uint256 indexed defender,
         uint256 timestamp
+    );
+    event DuelFinished(
+        uint256 indexed attacker,
+        uint256 indexed defender,
+        uint256 timestamp,
+        bool attackerWon
     );
 
     modifier characterInArena(uint256 characterID) {
@@ -224,19 +231,39 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev performs a given character's duel against its opponent
-    function performDuel(uint256 characterID) external {
+    function performDuel(uint256 attackerID) external {
         // TODO: implement (not final signature)
         // - [x] verify opponent is assigned
         // - [x] verify character is within decision seconds
-        // - [ ] calculate winner
+        // - [x] calculate winner
+        // - [x] consider elemental bonus
         // - [ ] distribute bounty
         // - [ ] update both characters' last activity timestamp
         // - [ ] remove loser from arena if wager is zero
         require(
-            isAttackerWithinDecisionTime(characterID),
+            isAttackerWithinDecisionTime(attackerID),
             "Decision time expired"
         );
-        uint256 opponent = getOpponent(characterID);
+        uint256 defenderID = getOpponent(attackerID);
+        uint8 defenderTrait = characters.getTrait(defenderID);
+        uint8 attackerTrait = characters.getTrait(attackerID);
+
+        uint24 attackerRoll = _getCharacterPowerRoll(
+            attackerID,
+            defenderTrait,
+            true
+        );
+        uint24 defenderRoll = _getCharacterPowerRoll(
+            defenderID,
+            attackerTrait,
+            false
+        );
+
+        bool attackerWon = attackerRoll >= defenderRoll;
+
+        emit DuelFinished(attackerID, defenderID, block.timestamp, attackerWon);
+
+        // TODO: Finish
     }
 
     /// @dev withdraws a character from the arena.
@@ -336,5 +363,50 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev updates the last activity timestamp of a character
     function _updateLastActivityTimestamp(uint256 characterID) private {
         _lastActivityByCharacter[characterID] = block.timestamp;
+    }
+
+    function _getCharacterPowerRoll(
+        uint256 characterID,
+        uint8 opponentTrait,
+        bool applyTraitBonus
+    ) private view returns (uint24) {
+        // TODO:
+        // - [ ] consider shield
+        uint8 trait = characters.getTrait(characterID);
+        uint24 basePower = characters.getPower(characterID);
+        uint256 weaponID = _fightersByCharacter[characterID].weaponID;
+        uint256 seed = randoms.getRandomSeed(msg.sender);
+
+        (
+            ,
+            int128 weaponMultFight,
+            uint24 weaponBonusPower,
+            uint8 weaponTrait
+        ) = weapons.getFightData(weaponID, trait);
+
+        uint24 traitsCWE = uint24(
+            trait |
+                (uint24(weaponTrait) << 8) |
+                ((opponentTrait & 0xFF000000) >> 8)
+        );
+
+        int128 playerTraitBonus = 1;
+        if (applyTraitBonus) {
+            playerTraitBonus = game.getPlayerTraitBonusAgainst(traitsCWE);
+        }
+        // FIXME: Should probably calculate on one side only
+
+        uint256 playerFightPower = game.getPlayerPower(
+            basePower,
+            weaponMultFight,
+            weaponBonusPower
+        );
+
+        uint256 playerPower = RandomUtil.plusMinus10PercentSeeded(
+            playerFightPower,
+            seed
+        );
+
+        return uint24(playerTraitBonus.mulu(playerPower));
     }
 }
