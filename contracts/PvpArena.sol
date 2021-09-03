@@ -22,8 +22,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID;
         /// @dev amount of skill wagered for this character
         uint256 wager;
-        bool useShield;
         uint256 lockedWager;
+        bool useShield;
     }
     struct Duel {
         uint256 attackerID;
@@ -193,15 +193,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         uint8 tier = getArenaTier(characterID);
 
+        uint256[] storage fightersInTier = _fightersByTier[tier];
+
         require(
-            _fightersByTier[tier].length != 0,
+            fightersInTier.length != 0,
             "No opponents available for this character's level"
         );
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
             0,
-            _fightersByTier[tier].length - 1,
+            fightersInTier.length - 1,
             seed
         );
 
@@ -209,9 +211,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         bool foundOpponent = false;
 
         // run through fighters from a random starting point until we find one or none are available
-        for (uint256 i = 0; i < _fightersByTier[tier].length; i++) {
-            uint256 index = (randomIndex + i) % _fightersByTier[tier].length;
-            uint256 candidateID = _fightersByTier[tier][index];
+        for (uint256 i = 0; i < fightersInTier.length; i++) {
+            uint256 index = (randomIndex + i) % fightersInTier.length;
+            uint256 candidateID = fightersInTier[index];
             if (candidateID == characterID) continue;
             if (!isCharacterAttackable(candidateID)) continue;
             foundOpponent = true;
