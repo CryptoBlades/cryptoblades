@@ -36,6 +36,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import { apiUrl } from '../utils/common';
 
 export default {
   data() {
@@ -47,7 +48,7 @@ export default {
 
   async created() {
     this.waitingLeaderboardOutcome = true;
-    const leaderboardData = await fetch('https://api.cryptoblades.io/static/leaderboard');
+    const leaderboardData = await fetch(apiUrl('static/leaderboard'));
     const leaderboards = await leaderboardData.json();
 
     this.leaderboards = leaderboards.leaderboard;

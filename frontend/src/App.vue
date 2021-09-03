@@ -72,6 +72,7 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+import { apiUrl } from './utils/common';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -276,6 +277,9 @@ export default {
         .then(() => {
           this.errorMessage = 'Success: MetaMask connected.';
           this.isConnecting = false;
+
+          this.initializeStore();
+          this.toggleHideWalletWarning();
         })
         .catch(() => {
           this.errorMessage = 'Error: MetaMask could not get permissions.';
@@ -310,24 +314,24 @@ export default {
     },
 
     async checkNotifications() {
-      const response = await fetch('https://api.cryptoblades.io/static/notifications');
+      const response = await fetch(apiUrl('static/notifications'));
       const notifications = await response.json();
 
       const lastHash = localStorage.getItem('lastnotification');
       let shouldContinue = true;
 
-      notifications.forEach((notif) => {
+      notifications.forEach((notification) => {
         if (!shouldContinue) return;
 
-        if (lastHash === notif.hash) {
+        if (lastHash === notification.hash) {
           shouldContinue = false;
           return;
         }
 
         this.$dialog.notify.warning(
-          `${notif.title}
+          `${notification.title}
           <br>
-          <a href="${notif.link}" target="_blank">Check it out!</a>
+          <a href="${notification.link}" target="_blank">Check it out!</a>
           `,
           {
             timeout: 300000,
@@ -682,7 +686,7 @@ div.bg-success {
 
 .content {
   padding: 0 1em;
-  height: calc(100vh - 56px);
+  height: auto;
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }

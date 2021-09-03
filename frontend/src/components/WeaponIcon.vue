@@ -21,7 +21,7 @@
       </div>
 
       <div class="name">
-        {{ getWeaponNameFromSeed(weapon.id, weapon.stars) }}
+        {{ getCleanWeaponName(weapon.id, weapon.stars) }}
       </div>
 
       <div class="bonus-power">
@@ -61,7 +61,6 @@
 
 <script>
 import { getWeaponArt } from '../weapon-arts-placeholder';
-import { getWeaponNameFromSeed } from '../weapon-name';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import swordspecs from '../assets/swordspecs.json';
@@ -73,6 +72,7 @@ import { Stat1PercentForChar,
 } from '../interfaces';
 
 import { mapGetters, mapState } from 'vuex';
+import { getCleanName } from '../rename-censor';
 
 const bladeCount = 24;
 const crossGuardCount = 24;
@@ -102,7 +102,8 @@ export default {
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',
-      'timeUntilWeaponHasMaxDurability'
+      'timeUntilWeaponHasMaxDurability',
+      'getWeaponName'
     ]),
     tooltipHtml() {
       if(!this.weapon) return '';
@@ -209,9 +210,7 @@ export default {
   },
 
   methods: {
-    getWeaponNameFromSeed,
     getWeaponArt,
-
     init() {
       const container = this.$refs.el;
 
@@ -421,6 +420,10 @@ export default {
           this.renderer.render(this.scene, this.camera);
         }
       }
+    },
+
+    getCleanWeaponName(id, stars) {
+      return getCleanName(this.getWeaponName(id, stars));
     }
   },
   mounted() {
@@ -486,12 +489,12 @@ export default {
 
 .favorite-star {
   position: absolute;
-  margin-left: 5px;
+  margin-left: 110px;
 }
 
 .id {
   top: 8px;
-  right: 10px;
+  left: 30px;
   font-style: italic;
 }
 
