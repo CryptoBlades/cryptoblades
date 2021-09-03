@@ -1333,7 +1333,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee(),
-          { allowInGameOnlyFunds: true }
+          { allowInGameOnlyFunds: false }
         );
 
         await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
