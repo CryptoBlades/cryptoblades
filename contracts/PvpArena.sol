@@ -131,8 +131,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         randoms = IRandoms(randomsContract);
 
         wageringFactor = 3;
-        unattackableSeconds = 60 * 1;
-        decisionSeconds = 60 * 3;
+        unattackableSeconds = 2 minutes;
+        decisionSeconds = 3 minutes;
     }
 
     /// @notice enter the arena with a character, a weapon and optionally a shield
@@ -226,12 +226,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev performs a given character's duel against its opponent
     function performDuel(uint256 characterID) external {
         // TODO: implement (not final signature)
-        // - [ ] verify opponent is assigned
-        // - [ ] verify character is within decision seconds
+        // - [x] verify opponent is assigned
+        // - [x] verify character is within decision seconds
         // - [ ] calculate winner
         // - [ ] distribute bounty
         // - [ ] update both characters' last activity timestamp
         // - [ ] remove loser from arena if wager is zero
+        require(
+            isAttackerWithinDecisionTime(characterID),
+            "Decision time expired"
+        );
+        uint256 opponent = getOpponent(characterID);
     }
 
     /// @dev withdraws a character from the arena.
