@@ -37,7 +37,7 @@
         "welcome": "Bienvenido a CryptoBlades. Aquí está como puedes empezar."
       },
       "message": {
-        "hideWalletWarning": "Ocultaste la advertencia de tu billetera que ahora deberías ver. Si estás intentando jugar, por favor desabilita la opción y sigue las instrucciones, sino cerrala e ignorala."
+        "hideWalletWarning": "Ocultaste la advertencia de tu billetera que ahora deberías ver. Si estás intentando jugar, por favor desabilita la opción y sigue las instrucciones, sino cerrala e ignorala.",
         "instructions": "Empezá en menos de 10 minutos! Para reclutar tu primer personaje necesitas {recruitCost} SKILL y 0.001 BNB para gas. También necesitaras 0.0015 BNB para hacer tu primeras batallas, pero no te preocupes, ganas el dinero de la batalla en SKILL inmediatamente!",
         "inst1": "Comprar BNB con Fiat:",
         "inst2": "Una vez que tenés BNB, ve a ApeSwap para obterner tokens de SKILL:",
