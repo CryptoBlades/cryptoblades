@@ -123,7 +123,7 @@
             stamina </span>,
             <span class="badge badge-secondary">{{ durabilityCost }}
             durability </span> and
-            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" :skill-min-decimals="1"/></span>
+            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" :skillMinDecimals="0" :skillMaxDecimals="5"/></span>
           </div>
         </div>
       </div>
@@ -349,7 +349,7 @@ export default Vue.extend({
     ]) as RaidMappedGetters),
 
     calculateWinChance(): string {
-      return (Math.min(Math.max(+this.totalPower / +this.bossPower / 2 * 100, 1), 99)).toFixed(0);
+      return (Math.min(Math.max(+this.totalPower / +this.bossPower / 2 * 100, 0), 99.99)).toFixed(2);
     },
 
     calculateProgressBarColor(): string {
