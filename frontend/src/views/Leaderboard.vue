@@ -37,6 +37,7 @@
 <script>
 import { mapState } from 'vuex';
 import { apiUrl } from '../utils/common';
+import { APIHandledCall } from '../utils/api-helper';
 
 export default {
   data() {
@@ -48,23 +49,22 @@ export default {
 
   async created() {
     this.waitingLeaderboardOutcome = true;
-    const leaderboardData = await fetch(apiUrl('static/leaderboard'));
 
-    if(leaderboardData.status === 429){
-      this.$dialog.notify.error('You are making too many requests. Please try again in 1 minute.');
-      this.waitingLeaderboardOutcome = false;
-      return;
-    }
-
-    const leaderboards = await leaderboardData.json();
-
-    this.leaderboards = leaderboards.leaderboard;
-    this.waitingLeaderboardOutcome = false;
+    await new APIHandledCall()
+      .onTooManyRequests(this.warnTooManyRequests)
+      .onSuccess((data) => {
+        this.leaderboards = data.leaderboard;
+      })
+      .always(() => this.waitingLeaderboardOutcome = false)
+      .get(apiUrl('static/leaderboard'));
   },
 
   methods: {
     matchesCharIdOrWallet(str) {
       return str.includes(this.defaultAcccount) || this.ownedCharacterIds.some(x => str.includes(`(ID ${x})`));
+    },
+    warnTooManyRequests() {
+      this.$dialog.notify.error('You are making too many requests. Please try again in 1 minute.');
     }
   },
 

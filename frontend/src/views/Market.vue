@@ -677,6 +677,7 @@ import { getShieldNameFromSeed } from '@/shield-name';
 import { fromWeiEther, apiUrl } from '../utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
 import { getCleanName } from '../rename-censor';
+import { APIHandledCall } from '../utils/api-helper';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
@@ -1184,11 +1185,13 @@ export default Vue.extend({
 
       url.search = new URLSearchParams(params).toString();
 
-      const charactersData = await this.fetchEnhanced(url.toString());
-      const characters = await charactersData.json();
-
-      this.allListingsAmount = characters.page.total;
-      this.allSearchResults = characters.idResults;
+      await new APIHandledCall()
+        .onTooManyRequests(this.warnTooManyRequests)
+        .onSuccess((data) => {
+          this.allListingsAmount = data.page.total;
+          this.allSearchResults = data.idResults;
+        })
+        .get(url.toString());
     },
 
     async searchAllCharacterListingsThroughChain(page: number) {
@@ -1215,10 +1218,10 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
       this.currentPage = page + 1;
 
-      //if(useBlockchain === true)
-      //  await this.searchAllWeaponListingsThroughChain(page);
-      //else
-      await this.searchAllWeaponListingsThroughAPI(page);
+      if(useBlockchain === true)
+        await this.searchAllWeaponListingsThroughChain(page);
+      else
+        await this.searchAllWeaponListingsThroughAPI(page);
 
       // searchResultsOwned does not mesh with this function
       // will need per-result checking of it, OR filtering out own NFTs
@@ -1246,7 +1249,7 @@ export default Vue.extend({
       });
     },
     async searchAllWeaponListingsThroughAPI(page: number) {
-      const url = apiUrl('static/market/weapon');
+      const url = new URL(apiUrl('static/market/weapon'));
       const params = {
         element: '' + this.weaponTraitFilter(),
         minStars: '' + this.weaponStarFilter(),
@@ -1259,14 +1262,15 @@ export default Vue.extend({
         pageNum: '' + page,
       };
 
-      console.log(url);
       url.search = new URLSearchParams(params).toString();
 
-      const weaponsData = await this.fetchEnhanced(url.toString());
-      const weapons = await weaponsData.json();
-
-      this.allListingsAmount = weapons.page.total;
-      this.allSearchResults = weapons.idResults;
+      await new APIHandledCall()
+        .onTooManyRequests(this.warnTooManyRequests)
+        .onSuccess((data) => {
+          this.allListingsAmount = data.page.total;
+          this.allSearchResults = data.idResults;
+        })
+        .get(url.toString());
     },
 
     async searchAllShieldListings(page: number) {
@@ -1446,9 +1450,17 @@ export default Vue.extend({
 
       url.search = new URLSearchParams(params).toString();
 
-      const charactersData = await this.fetchEnhanced(url.toString());
-      const characters = await charactersData.json();
-      return characters.idResults;
+      let toReturn: string[];
+      toReturn = [];
+
+      await new APIHandledCall()
+        .onTooManyRequests(this.warnTooManyRequests)
+        .onSuccess((data) => {
+          toReturn = data.idResults;
+        })
+        .get(url.toString());
+
+      return toReturn;
     },
 
     async searchWeaponListingsBySeller(sellerAddress: string): Promise<string[]>{
@@ -1467,9 +1479,17 @@ export default Vue.extend({
 
       url.search = new URLSearchParams(params).toString();
 
-      const weaponsData = await this.fetchEnhanced(url.toString());
-      const weapons = await weaponsData.json();
-      return weapons.idResults;
+      let toReturn: string[];
+      toReturn = [];
+
+      await new APIHandledCall()
+        .onTooManyRequests(this.warnTooManyRequests)
+        .onSuccess((data) => {
+          toReturn = data.idResults;
+        })
+        .get(url.toString());
+
+      return toReturn;
     },
 
     async searchShieldListingsBySeller(sellerAddress: string): Promise<NftIdType[]>{
@@ -1494,9 +1514,17 @@ export default Vue.extend({
     async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
       const url = new URL(apiUrl(`static/market/transactions/${sellerAddress}`));
 
-      const weaponsData = await this.fetchEnhanced(url.toString());
-      const weapons = await weaponsData.json();
-      return weapons.results;
+      let toReturn: any[];
+      toReturn = [];
+
+      await new APIHandledCall()
+        .onTooManyRequests(this.warnTooManyRequests)
+        .onSuccess((data) => {
+          toReturn = data.results;
+        })
+        .get(url.toString());
+
+      return toReturn;
     },
 
     async showWeaponsSoldModal() {
@@ -1748,23 +1776,8 @@ export default Vue.extend({
     maxPrecisionSkill(listedPrice: string): string {
       return this.convertStringToDecimal(this.convertWeiToSkill(listedPrice), 8);
     },
-
-    async fetchEnhanced(url: string): Promise<any>{
-      const result = await fetch(url);
-      await this.checkResponse(result);
-      return result;
-    },
-
-    async checkResponse(response: any) {
-      if(response.status === 429){
-        (this as any).$dialog.notify.error('You are making too many requests. Please try again in 1 minute.');
-      }
-
-      if(response.status !== 200){
-        this.waitingMarketOutcome = false;
-        const errorBody = await response.json();
-        throw new Error(errorBody || 'error');
-      }
+    warnTooManyRequests() {
+      (this as any).$dialog.notify.error('You are making too many requests. Please try again in 1 minute.');
     }
   },
 
