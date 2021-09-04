@@ -56,3 +56,11 @@ There are optional environment variables, most of which have sensible defaults i
 - If you run into any error at all during the build process you may need to reset [Ganache](https://www.trufflesuite.com/ganache) by deleting previous workspaces and going through the Ganache setup process again including importing a new account for Metamask.
 - Artifacts are from different compiler runs `- rm -rf build/`
 
+
+## Testing locally
+
+To run tests locally, first turn on the test network:
+`truffle develop --network test --log`
+
+Then run:
+`npm test-local`
