@@ -40,3 +40,27 @@ export interface CharacterTransactionHistoryData{
   charName: string;
   charPrice: number;
 }
+
+export interface IShieldHistory{
+  buyerAddress: string;
+  price: number;
+  sellerAddress: string;
+  stat1Element: string;
+  stat1Value: number;
+  stat2Element: string;
+  stat2Value: number;
+  stat3Element: string;
+  stat3Value: number;
+  timestamp: string;
+  type: string;
+  shieldElement: string;
+  shieldId: string;
+  shieldStars: number;
+  id: string;
+}
+
+export interface ShieldTransactionHistoryData{
+  shieldId: string;
+  shieldName: string;
+  shieldPrice: number;
+}

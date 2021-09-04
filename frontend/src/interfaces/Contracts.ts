@@ -2,7 +2,9 @@ import { Contract as Web3EthContract } from 'web3-eth-contract';
 import type {
   IERC20, IStakingRewards,
   CryptoBlades, Characters, Weapons, RaidBasic, IRandoms,
-  NFTMarket, WaxBridge, Blacksmith
+  NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables,
+  WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
+  CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox
 } from '../../../build/abi-interfaces';
 import { StakeType } from './State';
 
@@ -29,4 +31,15 @@ export interface Contracts {
   RaidBasic?: Contract<RaidBasic>;
   NFTMarket?: Contract<NFTMarket>;
   WaxBridge?: Contract<WaxBridge>;
+  Shields?: Contract<Shields>;
+  CharacterRenameTagConsumables?: Contract<CharacterRenameTagConsumables>;
+  WeaponRenameTagConsumables?: Contract<WeaponRenameTagConsumables>;
+  CharacterFireTraitChangeConsumables?: Contract <CharacterFireTraitChangeConsumables>;
+  CharacterEarthTraitChangeConsumables?: Contract <CharacterEarthTraitChangeConsumables>;
+  CharacterWaterTraitChangeConsumables?: Contract <CharacterWaterTraitChangeConsumables>;
+  CharacterLightningTraitChangeConsumables?: Contract <CharacterLightningTraitChangeConsumables>;
+  Raid1?: Contract<Raid1>;
+  RaidTrinket?: Contract<RaidTrinket>;
+  Junk?: Contract<Junk>;
+  KeyLootbox?: Contract<KeyLootbox>;
 }

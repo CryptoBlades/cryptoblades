@@ -88,6 +88,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         uint8 version;
         uint256 seed;
     }
+    struct CharacterPVEStats {
+        uint32 wins;
+        uint32 losses;
+    }
 
     Character[] private tokens;
     CharacterCosmetics[] private cosmetics;
@@ -105,6 +109,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     uint256 private firstMintedOfLastBlock;
 
     uint256 public characterLimit;
+
+    mapping(uint256 => uint256) public raidsDone;
+    mapping(uint256 => uint256) public raidsWon;
+
+    CharacterPVEStats[] private pveStats;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -151,6 +160,18 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             getRandomCosmetic(cc.seed, 5, 22), // boots
             getRandomCosmetic(cc.seed, 6, 2) // race
         );
+    }
+
+    function getPVEStats(uint256 id) public view noFreshLookup(id) returns (uint32 wins, uint32 losses) {
+        return (pveStats[id].wins, pveStats[id].losses);
+    }
+
+    function incrementPVEWins(uint256 id) external restricted() {
+        pveStats[id].wins++;
+    }
+
+    function incrementPVELosses(uint256 id) external restricted() {
+        pveStats[id].losses++;
     }
 
     function getRandomCosmetic(uint256 seed, uint256 seed2, uint16 limit) private pure returns (uint16) {
@@ -206,6 +227,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokens[id].trait;
     }
 
+    function setTrait(uint256 id, uint8 trait) public restricted {
+        tokens[id].trait = trait;
+    }
+
     function getXp(uint256 id) public view noFreshLookup(id) returns (uint32) {
         return tokens[id].xp;
     }
@@ -259,10 +284,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint64(maxStamina * secondsPerStamina);
     }
 
-    function getFightDataAndDrainStamina(uint256 id, uint8 amount) public restricted returns(uint96) {
+    function getFightDataAndDrainStamina(uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
         Character storage char = tokens[id];
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
-        require(staminaPoints >= amount, "Not enough stamina!");
+        require(allowNegativeStamina || staminaPoints >= amount, "Not enough stamina!");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;
@@ -274,6 +299,16 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
         // bitwise magic to avoid stacking limitations later on
         return uint96(char.trait | (getPowerAtLevel(char.level) << 8) | (preTimestamp << 32));
+    }
+
+    function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
+        raidsDone[id] = raidsDone[id] + 1;
+        raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
+        gainXp(id, xp);
+    }
+
+    function canRaid(address user, uint256 id) public view returns (bool) {
+        return ownerOf(id) == user && getStaminaPoints(id) > 0;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {

@@ -33,6 +33,12 @@
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
+              <h4>Show SKILL values in USD</h4>
+              <b-form-checkbox size="lg" :checked="showSkillInUsd" @change="toggleShowSkillInUsd()" switch>
+                <b class="float-left">{{ showSkillInUsd ? 'On' : 'Off' }}</b>
+              </b-form-checkbox>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Stamina Cost per Fight</h4>
               <b-form-select size="lg" v-model="fightMultiplier" @change="setFightMultiplier()">
                 <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
@@ -74,6 +80,7 @@ interface Data {
   hideRewards: boolean;
   hideAdvanced: boolean;
   hideWalletWarning: boolean;
+  showSkillInUsd: boolean;
   fightMultiplier: number;
 }
 
@@ -94,6 +101,7 @@ export default Vue.extend({
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+    this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
   },
   data() {
@@ -102,6 +110,7 @@ export default Vue.extend({
       hideRewards: false,
       hideAdvanced: false,
       hideWalletWarning: false,
+      showSkillInUsd: false,
       fightMultiplier: 1,
       checked: false,
       ClaimStage,
@@ -186,6 +195,14 @@ export default Vue.extend({
       else localStorage.setItem('hideWalletWarning', 'false');
 
       Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
+    },
+
+    toggleShowSkillInUsd() {
+      this.showSkillInUsd = !this.showSkillInUsd;
+      if (this.showSkillInUsd) localStorage.setItem('showSkillInUsd', 'true');
+      else localStorage.setItem('showSkillInUsd', 'false');
+
+      Events.$emit('setting:showSkillInUsd', { value: this.showSkillInUsd });
     },
 
     setFightMultiplier() {

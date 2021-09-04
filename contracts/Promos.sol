@@ -26,6 +26,9 @@ contract Promos is Initializable, AccessControlUpgradeable {
 
     mapping(address => uint256) public bits;
     uint256 public constant BIT_FIRST_CHARACTER = 1;
+    uint256 public constant BIT_FOUNDER_SHIELD = 2;
+    uint256 public constant BIT_BAD_ACTOR = 4;
+    uint256 public constant BIT_LEGENDARY_DEFENDER = 8;
 
     int128 public firstCharacterPromoInGameOnlyFundsGivenInUsd;
 
@@ -34,15 +37,25 @@ contract Promos is Initializable, AccessControlUpgradeable {
         _;
     }
 
-    function setBit(address user, uint256 bit) public restricted {
+    function setBit(address user, uint256 bit) external restricted {
         bits[user] |= bit;
+    }
+
+    function setBits(address[] memory user, uint256 bit) public restricted {
+        for(uint i = 0; i < user.length; i++)
+            bits[user[i]] |= bit;
     }
 
     function unsetBit(address user, uint256 bit) public restricted {
         bits[user] &= ~bit;
     }
 
-    function getBit(address user, uint256 bit) public view returns (bool) {
+    function unsetBits(address[] memory user, uint256 bit) public restricted {
+        for(uint i = 0; i < user.length; i++)
+            bits[user[i]] &= ~bit;
+    }
+
+    function getBit(address user, uint256 bit) external view returns (bool) {
         return (bits[user] & bit) == bit;
     }
 

@@ -28,7 +28,6 @@
         <div v-if="ownCharacters.length > 0">
           <div class="d-flex justify-content-space-between">
             <h1>Characters ({{ ownCharacters.length }} / 4)</h1>
-
             <b-button
               v-if="ownCharacters.length < 4"
               :disabled="!canRecruit()"
@@ -50,15 +49,20 @@
   </div>
 </template>
 
-<script>
+<script lang='ts'>
 import BN from 'bignumber.js';
-
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
+import Vue from 'vue';
 
-export default {
+
+interface Data {
+  recruitCost: string;
+}
+
+export default Vue.extend({
   computed: {
     ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
     ...mapGetters([
@@ -71,7 +75,7 @@ export default {
       'getExchangeUrl',
     ]),
 
-    character() {
+    character(): any {
       if (!this.currentCharacter) {
         return {
           id: null,
@@ -94,26 +98,24 @@ export default {
   async created() {
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
-    this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
-
-    console.log(this.recruitCost, this.formatSkill());
+    this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
   },
 
   data() {
     return {
-      recruitCost: this.recruitCost
-    };
+      recruitCost: '0',
+    } as Data;
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
-    ...mapActions(['mintCharacter']),
+    ...mapActions(['mintCharacter',]),
 
     async onMintCharacter() {
       try {
         await this.mintCharacter();
       } catch (e) {
-        this.$dialog.notify.error('Could not mint character: insufficient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not mint character: insufficient funds or transaction denied.');
       }
     },
     formatSkill() {
@@ -123,14 +125,14 @@ export default {
       const cost = toBN(this.recruitCost);
       const balance = toBN(this.skillBalance);
       return balance.isGreaterThanOrEqualTo(cost);
-    }
+    },
   },
 
   components: {
     BigButton,
     CharacterList,
   },
-};
+});
 </script>
 
 <style scoped>

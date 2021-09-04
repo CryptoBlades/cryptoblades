@@ -1,8 +1,10 @@
 
-import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement } from './interfaces';
+import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState } from './interfaces';
+import { Nft } from './interfaces/Nft';
+import { IShield } from './interfaces/Shield';
 
 export function traitNumberToName(traitNum: number): string {
-  switch(traitNum) {
+  switch(+traitNum) {
   case WeaponElement.Fire:        return 'Fire';
   case WeaponElement.Earth:       return 'Earth';
   case WeaponElement.Water:       return 'Water';
@@ -67,6 +69,51 @@ export function getWeaponTraitFromProperties(properties: number): number {
   return (properties >> 3) & 0x3;
 }
 
+export function trinketFromContract(id: string | number, data: string[]): Nft {
+  return {
+    id: +id,
+    type: 'trinket',
+    stars: +data[0],
+    //effect: +data[1]
+  };
+}
+
+export function junkFromContract(id: string | number, stars: string): Nft {
+  return {
+    id: +id,
+    type: 'junk',
+    stars: +stars,
+  };
+}
+
+export function shieldFromContract(id: string | number, data: string[]): IShield {
+  const properties = data[0];
+  const stat1 = data[1];
+  const stat2 = data[2];
+  const stat3 = data[3];
+
+  const stat1Value = +stat1;
+  const stat2Value = +stat2;
+  const stat3Value = +stat3;
+
+  const statPattern = getStatPatternFromProperties(+properties);
+  const stat1Type = getStat1Trait(statPattern);
+  const stat2Type = getStat2Trait(statPattern);
+  const stat3Type = getStat3Trait(statPattern);
+
+  const traitNum = getWeaponTraitFromProperties(+properties);
+
+  const stars = (+properties) & 0x7;
+  return {
+    id: +id, properties,
+    element: traitNumberToName(traitNum),
+    stat1: statNumberToName(stat1Type), stat1Value, stat1Type,
+    stat2: statNumberToName(stat2Type), stat2Value, stat2Type,
+    stat3: statNumberToName(stat3Type), stat3Value, stat3Type,
+    stars,
+  };
+}
+
 export function weaponFromContract(id: string | number, data: string[]): IWeapon {
   const properties = data[0];
   const stat1 = data[1];
@@ -118,5 +165,24 @@ export function targetFromContract(data: string): ITarget {
     original: data,
     power: n & 0b11111111_11111111_11111111,
     trait: n >> 24
+  };
+}
+
+export function raidFromContract(data: string[]): IRaidState {
+  const index = data[0];
+  const expectedFinishTime = data[1];
+  const raiderCount = data[2];
+  const playerPower = data[3];
+  const bossPower = data[4];
+  const bossTrait = data[5];
+  const status = data[6];
+  const joinSkill = data[7];
+  const staminaCost = data[8];
+  const durabilityCost = data[9];
+  const xpReward = data[10];
+  const accountPower = data[11];
+  return {
+    index, expectedFinishTime, raiderCount, playerPower, bossPower, bossTrait, status,
+    joinSkill, staminaCost, durabilityCost, xpReward, accountPower
   };
 }

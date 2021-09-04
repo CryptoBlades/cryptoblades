@@ -20,6 +20,11 @@
 
         <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank"><i class="fa fa-book mr-2"></i>Wiki <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
 
+        <b-dropdown-item @click.native="$router.push('nft-display')">
+          <img src="https://seiyria.com/gameicons-font/svg/crystal-ball.svg" class="nft-display-icon"/>
+           NFT Display
+        </b-dropdown-item>
+
         </b-dropdown-group>
         <hr class="border-light">
 
@@ -84,6 +89,7 @@ interface Data {
   showGraphics: boolean;
   hideRewards: boolean;
   hideWalletWarning: boolean;
+  showSkillInUsd: boolean;
 }
 
 interface StoreMappedGetters {
@@ -102,6 +108,7 @@ export default Vue.extend({
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+    this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
   },
 
   data() {
@@ -109,6 +116,7 @@ export default Vue.extend({
       showGraphics: false,
       hideRewards: false,
       hideWalletWarning: false,
+      showSkillInUsd: false,
       ClaimStage
     } as Data;
   },
@@ -188,8 +196,22 @@ export default Vue.extend({
 
       Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
     },
+
+    toggleShowSkillInUsd() {
+      this.showSkillInUsd = !this.showSkillInUsd;
+      if (this.showSkillInUsd) localStorage.setItem('showSkillInUsd', 'true');
+      else localStorage.setItem('showSkillInUsd', 'false');
+
+      Events.$emit('setting:showSkillInUsd', { value: this.showSkillInUsd });
+    },
   }
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.nft-display-icon {
+  margin-left: -3px;
+  height: 20px;
+  filter: invert(75%) sepia(8%) saturate(243%) hue-rotate(8deg) brightness(96%) contrast(81%);
+}
+</style>
