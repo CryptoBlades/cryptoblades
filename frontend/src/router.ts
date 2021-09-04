@@ -47,7 +47,7 @@ function createRouter() {
       { path: '/stake', name: 'select-stake-type', component: SelectStakeType },
       { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
       { path: '/options', name: 'options', component: Options },
-      { path: '/nft-display', component: NftDisplay },
+      { path: '/nft-display', name: 'nft-display', component: NftDisplay },
       { path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true }
     ]
   });
