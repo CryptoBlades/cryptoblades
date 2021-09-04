@@ -1358,7 +1358,7 @@ export function createStore(web3: Web3) {
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
-            .mintWeaponNUsingStakedSkill(num)
+            .mintWeaponNUsingStakedSkill(num, chosenElement)
             .send({ from: state.defaultAccount, gas: '5000000' });
         }
         else {
@@ -1373,7 +1373,7 @@ export function createStore(web3: Web3) {
             { feeMultiplier: num * 4 * chosenElementFee }
           );
 
-          await CryptoBlades.methods.mintWeaponN(num).send({ from: state.defaultAccount, gas: '5000000' });
+          await CryptoBlades.methods.mintWeaponN(num, chosenElement).send({ from: state.defaultAccount, gas: '5000000' });
         }
 
         await Promise.all([
@@ -1391,7 +1391,7 @@ export function createStore(web3: Web3) {
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
-            .mintWeaponUsingStakedSkill()
+            .mintWeaponUsingStakedSkill(chosenElement)
             .send({ from: state.defaultAccount });
         }
         else {
@@ -1406,7 +1406,7 @@ export function createStore(web3: Web3) {
             { feeMultiplier: chosenElementFee }
           );
 
-          await CryptoBlades.methods.mintWeapon().send({ from: state.defaultAccount });
+          await CryptoBlades.methods.mintWeapon(chosenElement).send({ from: state.defaultAccount });
         }
 
         await Promise.all([
