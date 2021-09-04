@@ -153,6 +153,13 @@ export function createStore(web3: Web3) {
         accountPower: '0',
       },
 
+      pvp: {
+        type: '0',
+        wageredSkill: '0',
+        arenaTier: '0',
+        participatingCharacters: [],
+      },
+
       waxBridgeWithdrawableBnb: '0',
       waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
       waxBridgeTimeUntilLimitExpires: 0,
@@ -2727,6 +2734,17 @@ export function createStore(web3: Web3) {
 
         await Promise.all([
           dispatch('fetchCharacter', id),
+        ]);
+      },
+      async enterArena({state, dispatch}, {characterID,weaponID}){
+
+        const { PvpArena } = state.contracts();
+        if(!PvpArena || !state.defaultAccount) return;
+
+        await PvpArena.methods.enterArena(characterID,weaponID,0,false).send({from: state.defaultAccount});
+
+        await Promise.all([
+          dispatch('fetchArenaStatus'),
         ]);
       },
     }

@@ -4,7 +4,7 @@
           <span v-text="arsenalPreparationHeaderText"/>
         </b-col>
         <b-col id= "find-opponent-header" cols="2">
-          <span v-text="findOpponentHeaderText"/>
+          <span v-text="findOpponentHeaderText" @click="findOpponent"/>
         </b-col>
         <b-col id="arena-header" cols="5">
           <span v-text="arenaHeaderText"/>
@@ -14,6 +14,7 @@
 
 <script>
 import PvPConstants from '../../utils/constants/pvp-constants';
+import {mapActions} from 'vuex';
 
 export default {
   data() {
@@ -23,6 +24,16 @@ export default {
       arenaHeaderText: PvPConstants.ARENA_HEADER_TEXT,
     };
   },
+
+  methods: {
+    ...mapActions(['enterArena']),
+
+    async findOpponent(){
+      await this.enterArena(1,1);
+    },
+  },
+
+
 
 };
 </script>

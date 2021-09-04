@@ -57,6 +57,13 @@ export interface IRaidState {
   //isOwnedCharacterRaidingById: Record<number, boolean>; // ?
 }
 
+export interface IPvPState {
+  type: string;
+  wageredSkill: string;
+  arenaTier: string;
+  participatingCharacters: string[];
+}
+
 export interface IState {
   contracts: () => Contracts;
   eventSubscriptions: () => IWeb3EventSubscription[];
@@ -105,6 +112,8 @@ export interface IState {
   stakeOverviews: Record<StakeType, IStakeOverviewState>;
 
   raid: IRaidState;
+
+  pvp: IPvPState;
 
   waxBridgeWithdrawableBnb: string;
   waxBridgeRemainingWithdrawableBnbDuringPeriod: string;
