@@ -1324,11 +1324,13 @@ export default Vue.extend({
 
       url.search = new URLSearchParams(params).toString();
 
-      const shieldsData = await fetch(url.toString());
-      const shields = await shieldsData.json();
-
-      this.allListingsAmount = shields.page.total;
-      this.allSearchResults = shields.idResults;
+      await new APIHandledCall()
+        .onTooManyRequests(this.warnTooManyRequests)
+        .onSuccess((data) => {
+          this.allListingsAmount = data.page.total;
+          this.allSearchResults = data.idResults;
+        })
+        .get(url.toString());
     },
 
     async searchListingsByNftId(type: SellType) {
@@ -1342,14 +1344,22 @@ export default Vue.extend({
       });
       this.searchResultsOwned = nftSeller === this.defaultAccount;
       const url = new URL('https://api.cryptoblades.io/static/wallet/banned/' + nftSeller);
-      const data = await fetch(url.toString());
-      const banned = await data.json();
-      if(banned.banned) {
-        (this as any).$dialog.notify.error('Item not available!');
-      }
+
+      let banned: boolean;
+      banned = false;
+
+      await new APIHandledCall()
+        .onTooManyRequests(this.warnTooManyRequests)
+        .onSuccess((data) => {
+          if(data.banned) {
+            (this as any).$dialog.notify.error('Item not available!');
+            banned = true;
+          }
+        })
+        .get(url.toString());
 
       const price = await this.lookupNftPrice(this.search);
-      if(price !== '0' && !banned.banned) {
+      if(price !== '0' && !banned) {
         this.searchResults = [this.search];
       } else {
         this.searchResults = [];
@@ -1506,9 +1516,17 @@ export default Vue.extend({
 
       url.search = new URLSearchParams(params).toString();
 
-      const shieldsData = await fetch(url.toString());
-      const shields = await shieldsData.json();
-      return shields.idResults;
+      let toReturn: NftIdType[];
+      toReturn = [];
+
+      await new APIHandledCall()
+        .onTooManyRequests(this.warnTooManyRequests)
+        .onSuccess((data) => {
+          toReturn = data.idResults;
+        })
+        .get(url.toString());
+
+      return toReturn;
     },
 
     async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
