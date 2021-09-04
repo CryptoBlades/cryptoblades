@@ -68,8 +68,6 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
     feeInSkill = feeInSkill.times(feeMultiplier);
   }
 
-  console.log(feeInSkill);
-
   try {
     feeInSkill = await cryptoBladesContract.methods
       .getSkillNeededFromUserWallet(from, feeInSkill.toString())
