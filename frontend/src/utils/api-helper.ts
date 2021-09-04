@@ -33,26 +33,27 @@ export class APIHandledCall {
     {
       const result = await fetch(url);
 
-      let stop: boolean;
-      stop = false;
-
       if(result.status === TOO_MANY_REQUESTS_RESPONSE && this.on429Callback !== undefined){
         this.on429Callback();
-        stop = true;
+        return;
       }
 
-      if(!stop && result.status !== OK_RESPONSE && this.onFailCallBack !== undefined){
+      if(result.status !== OK_RESPONSE && this.onFailCallBack !== undefined){
         this.onFailCallBack();
-        stop = true;
+        return;
       }
 
-      if(!stop && this.onSuccessCallBack !== undefined){
+      if(this.onSuccessCallBack !== undefined){
         const resultData = await result.json();
         this.onSuccessCallBack(resultData);
       }
     }
     catch(ex){
       console.log(ex);
+
+      if(this.onFailCallBack !== undefined){
+        this.onFailCallBack();
+      }
     }
     finally{
       if(this.alwaysCallBack !== undefined){
