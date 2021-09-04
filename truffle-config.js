@@ -85,6 +85,34 @@ module.exports = {
       gas: 5600000,
       skipDryRun: true
     },
+    hecotestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.BINANCE_MAINNET_WALLET_PRIVATE_KEY,
+        process.env.HECO_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'wss://ws-testnet.hecochain.com'
+        }
+      )),
+      network_id: 0x100,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      gas: 5600000,
+      skipDryRun: true
+    },
+    hecomainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.HECO_MAINNET_WALLET_PRIVATE_KEY,
+        process.env.HECO_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://http-mainnet-node.huobichain.com'
+        }
+      )),
+      network_id: 0x80,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      gas: 5600000,
+      skipDryRun: true
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
@@ -136,7 +164,8 @@ module.exports = {
     "truffle-contract-size"
   ],
   api_keys: {
-    bscscan: process.env.BSCSCAN_API_KEY
+    bscscan: process.env.BSCSCAN_API_KEY,
+    hecoinfo: process.env.HECOINFO_API_KEY
   },
   // subscribers: {
   //   abisToTs: require('./truffle-subscriber-abis-to-ts.js')

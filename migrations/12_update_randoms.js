@@ -11,9 +11,9 @@ module.exports = async function (deployer, network) {
   if (network === 'development' || network === 'development-fork') {
     await upgradeProxy(DummyRandoms.address, DummyRandoms, { deployer });
   }
-  else if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'bscmainnet' || network === 'bscmainnet-fork') {
+  else if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'bscmainnet' || network === 'bscmainnet-fork'  || network === 'hecotestnet') {
     let openZeppelinRelayerAddress, linkToken, vrfCoordinator, keyHash, fee;
-    if (network === 'bsctestnet' || network === 'bsctestnet-fork') {
+    if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'hecotestnet') {
       openZeppelinRelayerAddress = '0x6c0ca2a5f6ef7d33f18ac8abb285466279bd7917';
 
       linkToken = '0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06';
