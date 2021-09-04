@@ -26,6 +26,7 @@ import { abi as junkAbi } from '../../build/contracts/Junk.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
+import config from '../app-config.json';
 
 import Web3 from 'web3';
 import { Contracts, isStakeType, StakeType, StakingContracts } from './interfaces';
@@ -46,10 +47,18 @@ interface MarketContracts {
   NFTMarket?: Contracts['NFTMarket'];
 }
 
+interface Config {
+  environments: Record<string, Chain>;
+}
+
+interface Chain {
+  chains: Record<string, Record<string, string>>;
+}
+
 function getConfigValue(key: string): string {
+  const env = process.env.NODE_ENV || 'production';
   const chain = localStorage.getItem('currentChain') || 'BSC';
-  const configKey = key + '_' + chain;
-  return process.env[configKey] || '';
+  return (config as Config).environments[env].chains[chain][key];
 }
 
 const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
