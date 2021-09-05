@@ -38,7 +38,8 @@
                 v-visible="allSearchResults && allSearchResults.length > 0"
                 align="center" v-model="currentPage"
                 :total-rows="allListingsAmount"
-                :per-page="activeType === 'weapon' ? weaponShowLimit : characterShowLimit"
+                :per-page="activeType === 'weapon' ? weaponShowLimit :
+                  (activeType === 'character' ? characterShowLimit : shieldShowLimit)"
                 first-number
                 last-number
                 v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
