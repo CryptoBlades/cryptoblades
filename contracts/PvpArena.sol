@@ -14,6 +14,7 @@ import "./raid1.sol";
 
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
+    using ABDKMath64x64 for int128;
     using SafeMath for uint8;
 
     struct Fighter {
@@ -41,6 +42,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     Raid1 public raids;
     IRandoms public randoms;
 
+    /// @dev the base amount wagered per duel in dollars
+    int128 private _baseWagerUSD;
+    /// @dev how much extra USD is wagered per level tier
+    int128 private _tierWagerUSD;
     /// @dev how many times the cost of battling must be wagered to enter the arena
     uint256 public wageringFactor;
     /// @dev amount of time a character is unattackable
@@ -130,7 +135,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         raids = Raid1(raidContract);
         randoms = IRandoms(randomsContract);
 
+        // TODO: Tweak these values, they are placeholders
         wageringFactor = 3;
+        _baseWagerUSD = ABDKMath64x64.divu(500, 100); // $5
+        _tierWagerUSD = ABDKMath64x64.divu(50, 100); // $0.5
         unattackableSeconds = 2 minutes;
         decisionSeconds = 3 minutes;
     }
@@ -245,8 +253,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the amount of SKILL that is risked per duel
     function getDuelCost(uint256 characterID) public view returns (uint256) {
-        // FIXME: Use real formula. THIS IS JUST TEMPORARY CODE
-        return getArenaTier(characterID).add(1).mul(1000);
+        int128 tierExtra = ABDKMath64x64
+            .divu(getArenaTier(characterID).mul(100), 100)
+            .mul(_tierWagerUSD);
+
+        return game.usdToSkill(_baseWagerUSD.add(tierExtra));
     }
 
     /// @notice gets the amount of SKILL required to enter the arena
