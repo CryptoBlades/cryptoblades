@@ -14,6 +14,10 @@ const PvpArena = artifacts.require("PvpArena");
 const BasicPriceOracle = artifacts.require("BasicPriceOracle");
 const DummyRandoms = artifacts.require("DummyRandoms");
 
+const { BN } = web3.utils;
+
+// TODO: Should find a sustainable way to make tests properly independent from each other
+
 contract("PvpArena", (accounts) => {
   let pvpArena, characters, weapons, shields, priceOracle, randoms;
 
@@ -28,6 +32,7 @@ contract("PvpArena", (accounts) => {
     await helpers.levelUpTo(characterID, tier * 10, { characters });
 
     const cost = await pvpArena.getEntryWager(characterID, { from: account });
+
     await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
       from: account,
     });
@@ -46,6 +51,8 @@ contract("PvpArena", (accounts) => {
     pvpArena = await PvpArena.deployed();
     priceOracle = await BasicPriceOracle.deployed();
     randoms = await DummyRandoms.deployed();
+
+    await priceOracle.setCurrentPrice(web3.utils.toWei("1", "ether")); // 1/5 SKILL per USD, AKA 5 USD per SKILL
 
     await skillToken.transferFrom(
       skillToken.address,
@@ -67,11 +74,26 @@ contract("PvpArena", (accounts) => {
       accounts[4],
       web3.utils.toWei("1", "kether")
     );
+    await skillToken.transferFrom(
+      skillToken.address,
+      accounts[5],
+      web3.utils.toWei("1", "kether")
+    );
 
     await characters.grantRole(await characters.GAME_ADMIN(), accounts[0]);
     await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[1]);
     await weapons.grantRole(await weapons.GAME_ADMIN(), accounts[0]);
     await shields.grantRole(await shields.GAME_ADMIN(), accounts[0]);
+  });
+
+  describe("#getDuelCost", () => {
+    it("should return the correct cost", async () => {
+      const tier = 5;
+      const charID = await createCharacterInPvpTier(accounts[5], tier, "888");
+      const cost = await pvpArena.getDuelCost(charID, { from: accounts[1] });
+
+      expect(cost.toString()).to.be.equal(web3.utils.toWei("7.5"));
+    });
   });
 
   describe("#getArenaTier", () => {
@@ -380,17 +402,17 @@ contract("PvpArena", (accounts) => {
         });
       });
 
-      it("should not consider the character requesting an opponent", async () => {
-        const characterID = await createCharacterInPvpTier(accounts[4], 5);
+      it("should not consider characters owned by the sender", async () => {
+        const characterID = await createCharacterInPvpTier(accounts[1], 8);
 
         await expectRevert(
           pvpArena.requestOpponent(characterID, {
-            from: accounts[4],
+            from: accounts[1],
           }),
           "No opponent found"
         );
       });
-      it("should not consider characters owned by the sender");
+
       it('should only consider "attackable" characters');
     });
 
