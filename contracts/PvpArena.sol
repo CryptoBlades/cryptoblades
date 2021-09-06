@@ -282,6 +282,60 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return _fightersByPlayer[msg.sender];
     }
 
+    /// @dev returns the senders fighters in the arena
+    function _getMyFighters() internal view returns (Fighter[] memory) {
+        uint256[] memory characterIDs = getMyParticipatingCharacters();
+        Fighter[] memory fighters = new Fighter[](characterIDs.length);
+
+        for (uint256 i = 0; i < characterIDs.length; i++) {
+            fighters[i] = _fightersByCharacter[characterIDs[i]];
+        }
+
+        return fighters;
+    }
+
+    /// @dev returns the IDs of the sender's weapons currently in the arena
+    function getMyParticipatingWeapons()
+        external
+        view
+        returns (uint256[] memory)
+    {
+        Fighter[] memory fighters = _getMyFighters();
+        uint256[] memory weaponIDs = new uint256[](fighters.length);
+
+        for (uint256 i = 0; i < fighters.length; i++) {
+            weaponIDs[i] = fighters[i].weaponID;
+        }
+
+        return weaponIDs;
+    }
+
+    /// @dev returns the IDs of the sender's shields currently in the arena
+    function getMyParticipatingShields()
+        external
+        view
+        returns (uint256[] memory)
+    {
+        Fighter[] memory fighters = _getMyFighters();
+        uint256 shieldsCount = 0;
+
+        for (uint256 i = 0; i < fighters.length; i++) {
+            if (fighters[i].useShield) shieldsCount++;
+        }
+
+        uint256[] memory shieldIDs = new uint256[](shieldsCount);
+        uint256 shieldIDsIndex = 0;
+
+        for (uint256 i = 0; i < fighters.length; i++) {
+            if (fighters[i].useShield) {
+                shieldIDs[shieldIDsIndex] = fighters[i].shieldID;
+                shieldIDsIndex++;
+            }
+        }
+
+        return shieldIDs;
+    }
+
     /// @dev checks if a character is in the arena
     function isCharacterInArena(uint256 characterID)
         public
