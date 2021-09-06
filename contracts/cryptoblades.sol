@@ -231,13 +231,17 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (_inGameOnlyFunds, _tokenRewards, _skillNeeded);
     }
 
-    function getSkillNeededFromUserWallet(address playerAddress, uint256 skillNeeded)
+    function getSkillNeededFromUserWallet(address playerAddress, uint256 skillNeeded, bool allowInGameOnlyFunds)
         public
         view
         returns (uint256 skillNeededFromUserWallet) {
 
+        uint256 inGameOnlyFundsToUse = 0;
+        if (allowInGameOnlyFunds) {
+            inGameOnlyFundsToUse = inGameOnlyFunds[playerAddress];
+        }
         (,, skillNeededFromUserWallet) = getSkillToSubtract(
-            inGameOnlyFunds[playerAddress],
+            inGameOnlyFundsToUse,
             tokenRewards[playerAddress],
             skillNeeded
         );
