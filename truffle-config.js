@@ -57,13 +57,6 @@ module.exports = {
       network_id: process.env.ETH_DEV_RPC_NETWORK_ID || '*',       // Any network (default: none)
       gas: parseInt(process.env.ETH_DEV_RPC_GAS, 10) || 67219750 // required for deploy, otherwise it throws weird require-errors on constructor
     },
-    test: {
-      host: 'localhost',
-      gas: 6721975, // required for deploy, otherwise it throws weird require-errors on constructor
-      port: 9545,
-      network_id: '*', // Any network (default: none)
-      defaultEtherBalance: 1000,
-    },
     bsctestnet: {
       provider: () => new HDWalletProvider(hdWalletProviderOptions(
         process.env.BINANCE_WALLET_PRIVATE_KEY,

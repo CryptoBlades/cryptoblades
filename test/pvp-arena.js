@@ -6,17 +6,7 @@ const {
 } = require("@openzeppelin/test-helpers");
 const helpers = require("./helpers");
 
-const SkillToken = artifacts.require("SkillToken");
-const Characters = artifacts.require("Characters");
-const Weapons = artifacts.require("Weapons");
-const Shields = artifacts.require("Shields");
-const PvpArena = artifacts.require("PvpArena");
-const BasicPriceOracle = artifacts.require("BasicPriceOracle");
-const DummyRandoms = artifacts.require("DummyRandoms");
-
 const { BN } = web3.utils;
-
-// TODO: Should find a sustainable way to make tests properly independent from each other
 
 contract("PvpArena", (accounts) => {
   let pvpArena, characters, weapons, shields, priceOracle, randoms;
@@ -44,13 +34,14 @@ contract("PvpArena", (accounts) => {
   }
 
   beforeEach(async () => {
-    skillToken = await SkillToken.deployed();
-    characters = await Characters.deployed();
-    weapons = await Weapons.deployed();
-    shields = await Shields.deployed();
-    pvpArena = await PvpArena.deployed();
-    priceOracle = await BasicPriceOracle.deployed();
-    randoms = await DummyRandoms.deployed();
+    contracts = await helpers.prepareContracts(accounts);
+    skillToken = contracts.skillToken;
+    characters = contracts.characters;
+    weapons = contracts.weapons;
+    shields = contracts.shields;
+    randoms = contracts.randoms;
+    priceOracle = contracts.priceOracle;
+    pvpArena = contracts.pvpArena;
 
     await priceOracle.setCurrentPrice(web3.utils.toWei("1", "ether")); // 1/5 SKILL per USD, AKA 5 USD per SKILL
 
@@ -64,26 +55,6 @@ contract("PvpArena", (accounts) => {
       accounts[2],
       web3.utils.toWei("1", "kether")
     );
-    await skillToken.transferFrom(
-      skillToken.address,
-      accounts[3],
-      web3.utils.toWei("1", "kether")
-    );
-    await skillToken.transferFrom(
-      skillToken.address,
-      accounts[4],
-      web3.utils.toWei("1", "kether")
-    );
-    await skillToken.transferFrom(
-      skillToken.address,
-      accounts[5],
-      web3.utils.toWei("1", "kether")
-    );
-    await skillToken.transferFrom(
-      skillToken.address,
-      accounts[6],
-      web3.utils.toWei("1", "kether")
-    );
 
     await characters.grantRole(await characters.GAME_ADMIN(), accounts[0]);
     await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[1]);
@@ -94,7 +65,7 @@ contract("PvpArena", (accounts) => {
   describe("#getDuelCost", () => {
     it("should return the correct cost", async () => {
       const tier = 5;
-      const charID = await createCharacterInPvpTier(accounts[5], tier, "888");
+      const charID = await createCharacterInPvpTier(accounts[1], tier, "888");
       const cost = await pvpArena.getDuelCost(charID, { from: accounts[1] });
 
       expect(cost.toString()).to.be.equal(web3.utils.toWei("7.5"));
@@ -103,24 +74,24 @@ contract("PvpArena", (accounts) => {
 
   describe("#getMyParticipatingWeapons", () => {
     it("should return the sender's weapons currently in the arena", async () => {
-      const charID = await helpers.createCharacter(accounts[6], "123", {
+      const charID = await helpers.createCharacter(accounts[1], "123", {
         characters,
       });
-      const weaponID = await helpers.createWeapon(accounts[6], "123", 0, {
+      const weaponID = await helpers.createWeapon(accounts[1], "123", 0, {
         weapons,
       });
 
-      const cost = await pvpArena.getEntryWager(charID, { from: accounts[6] });
+      const cost = await pvpArena.getEntryWager(charID, { from: accounts[1] });
 
       await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
-        from: accounts[6],
+        from: accounts[1],
       });
       await pvpArena.enterArena(charID, weaponID, 0, false, {
-        from: accounts[6],
+        from: accounts[1],
       });
 
       const myWeapons = await pvpArena.getMyParticipatingWeapons({
-        from: accounts[6],
+        from: accounts[1],
       });
 
       expect(myWeapons[0].toString()).to.equal(weaponID.toString());
@@ -129,27 +100,27 @@ contract("PvpArena", (accounts) => {
 
   describe("#getMyParticipatingShields", () => {
     it("should return the sender's shields currently in the arena", async () => {
-      const charID = await helpers.createCharacter(accounts[5], "123", {
+      const charID = await helpers.createCharacter(accounts[1], "123", {
         characters,
       });
-      const shieldID = await helpers.createShield(accounts[5], "123", {
+      const shieldID = await helpers.createShield(accounts[1], "123", {
         shields,
       });
-      const weaponID = await helpers.createWeapon(accounts[5], "123", 0, {
+      const weaponID = await helpers.createWeapon(accounts[1], "123", 0, {
         weapons,
       });
 
-      const cost = await pvpArena.getEntryWager(charID, { from: accounts[5] });
+      const cost = await pvpArena.getEntryWager(charID, { from: accounts[1] });
 
       await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
-        from: accounts[5],
+        from: accounts[1],
       });
       await pvpArena.enterArena(charID, weaponID, shieldID, true, {
-        from: accounts[5],
+        from: accounts[1],
       });
 
       const myShields = await pvpArena.getMyParticipatingShields({
-        from: accounts[5],
+        from: accounts[1],
       });
 
       expect(myShields[0].toString()).to.equal(shieldID.toString());
@@ -250,12 +221,26 @@ contract("PvpArena", (accounts) => {
         characterID = await helpers.createCharacter(accounts[1], "123", {
           characters,
         });
+
+        const cost = await pvpArena.getEntryWager(characterID, {
+          from: accounts[1],
+        });
+        await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+          from: accounts[1],
+        });
         pvpArena.enterArena(characterID, weaponId, 0, false, {
           from: accounts[1],
         });
       });
 
       it("should revert", async () => {
+        const cost = await pvpArena.getEntryWager(characterID, {
+          from: accounts[1],
+        });
+        await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+          from: accounts[1],
+        });
+
         await expectRevert(
           pvpArena.enterArena(characterID, weapon2Id, 0, false, {
             from: accounts[1],
@@ -378,42 +363,42 @@ contract("PvpArena", (accounts) => {
     let character2ID;
 
     beforeEach(async () => {
-      character1ID = await helpers.createCharacter(accounts[3], "123", {
+      character1ID = await helpers.createCharacter(accounts[1], "123", {
         characters,
       });
-      const weapon1Id = await helpers.createWeapon(accounts[3], "125", 0, {
+      const weapon1Id = await helpers.createWeapon(accounts[1], "125", 0, {
         weapons,
       });
-      character2ID = await helpers.createCharacter(accounts[3], "125", {
+      character2ID = await helpers.createCharacter(accounts[1], "125", {
         characters,
       });
-      const weapon2Id = await helpers.createWeapon(accounts[3], "123", 0, {
+      const weapon2Id = await helpers.createWeapon(accounts[1], "123", 0, {
         weapons,
       });
 
       cost = await pvpArena.getEntryWager(character1ID, {
-        from: accounts[3],
+        from: accounts[1],
       });
       await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
-        from: accounts[3],
+        from: accounts[1],
       });
       await pvpArena.enterArena(character1ID, weapon1Id, 0, false, {
-        from: accounts[3],
+        from: accounts[1],
       });
       cost = await pvpArena.getEntryWager(character2ID, {
-        from: accounts[3],
+        from: accounts[1],
       });
       await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
-        from: accounts[3],
+        from: accounts[1],
       });
       await pvpArena.enterArena(character2ID, weapon2Id, 0, false, {
-        from: accounts[3],
+        from: accounts[1],
       });
     });
 
     it("should return the ids of the characters I have in the arena", async () => {
       const myParticipatingCharacters =
-        await pvpArena.getMyParticipatingCharacters({ from: accounts[3] });
+        await pvpArena.getMyParticipatingCharacters({ from: accounts[1] });
 
       expect(myParticipatingCharacters[0].toString()).to.equal(
         character1ID.toString()

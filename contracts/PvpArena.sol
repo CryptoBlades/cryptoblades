@@ -4,6 +4,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "hardhat/console.sol";
 import "./util.sol";
 import "./interfaces/IRandoms.sol";
 import "./cryptoblades.sol";
