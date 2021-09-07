@@ -8,7 +8,7 @@
 1. Install [MetaMask](https://metamask.io/).
 1. Create a new connection to connect to Ganache with these settings: http://localhost:7545, any name, any chain id
 1. In Ganache, click the key icon on the right side of any address and grab the private key.
-1. In MetaMask, create a new account, import from private key, and paste the key in there. 
+1. In MetaMask, create a new account, import from private key, and paste the key in there.
 
 You should now have 100 fake eth! You're now fake rich.
 
@@ -21,6 +21,7 @@ You should now have 100 fake eth! You're now fake rich.
 1. `npm run start:frontend`
 
 For Windows developers experiencing errors follow these steps:
+
 1. `rm -r build`
 1. `npm run contract:prepare` (this builds your contracts)
 1. `rm -r build/contracts`
@@ -53,14 +54,12 @@ There are optional environment variables, most of which have sensible defaults i
 - `npm run test-local` - run test and ignore unnecessary migrations (only for the local contracts).
 
 ## Errors
+
 - If you run into any error at all during the build process you may need to reset [Ganache](https://www.trufflesuite.com/ganache) by deleting previous workspaces and going through the Ganache setup process again including importing a new account for Metamask.
 - Artifacts are from different compiler runs `- rm -rf build/`
 
-
 ## Testing locally
 
-To run tests locally, first turn on the test network:
-`truffle develop --network test --log`
+To run tests locally simply run
 
-Then run:
-`npm test-local`
+`npm run test:local`
