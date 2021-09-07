@@ -58,6 +58,7 @@ contract("PvpArena", (accounts) => {
 
     await characters.grantRole(await characters.GAME_ADMIN(), accounts[0]);
     await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[1]);
+    await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[2]);
     await weapons.grantRole(await weapons.GAME_ADMIN(), accounts[0]);
     await shields.grantRole(await shields.GAME_ADMIN(), accounts[0]);
   });
@@ -433,11 +434,11 @@ contract("PvpArena", (accounts) => {
         character0ID = await createCharacterInPvpTier(accounts[1], 2, "000");
         character2ID = await createCharacterInPvpTier(accounts[1], 3, "222");
         character3ID = await createCharacterInPvpTier(accounts[2], 2, "333");
-
-        await time.increase(await pvpArena.unattackableSeconds());
       });
 
       it("should only pick characters from the same tier", async () => {
+        await time.increase(await pvpArena.unattackableSeconds());
+
         const { tx } = await pvpArena.requestOpponent(character0ID, {
           from: accounts[1],
         });
@@ -449,6 +450,8 @@ contract("PvpArena", (accounts) => {
       });
 
       it("should not consider characters owned by the sender", async () => {
+        await time.increase(await pvpArena.unattackableSeconds());
+
         const characterID = await createCharacterInPvpTier(accounts[1], 8);
 
         await expectRevert(
@@ -459,7 +462,20 @@ contract("PvpArena", (accounts) => {
         );
       });
 
-      it('should only consider "attackable" characters');
+      it('should only consider "attackable" characters', async () => {
+        const character1ID = await createCharacterInPvpTier(accounts[1], 7);
+
+        await time.increase(await pvpArena.unattackableSeconds());
+
+        const character2ID = await createCharacterInPvpTier(accounts[2], 7);
+
+        await expectRevert(
+          pvpArena.requestOpponent(character1ID, {
+            from: accounts[1],
+          }),
+          "No opponent found"
+        );
+      });
     });
 
     describe("character not in the arena", () => {
@@ -472,11 +488,35 @@ contract("PvpArena", (accounts) => {
     });
 
     describe("opponent found", () => {
-      it("should lock 1 duel's cost from wagered skill");
+      it("emits the NewDuel event", async () => {
+        const character1ID = await createCharacterInPvpTier(accounts[1], 4);
+        const character2ID = await createCharacterInPvpTier(accounts[2], 4);
+
+        await time.increase(await pvpArena.unattackableSeconds());
+
+        const { tx } = await pvpArena.requestOpponent(character1ID, {
+          from: accounts[1],
+        });
+
+        await expectEvent.inTransaction(tx, pvpArena, "NewDuel", {
+          attacker: character1ID,
+          defender: character2ID,
+        });
+      });
     });
 
     describe("no opponent found", () => {
-      it("should revert");
+      it("should revert", async () => {
+        const character1ID = await createCharacterInPvpTier(accounts[1], 6);
+        const character2ID = await createCharacterInPvpTier(accounts[2], 6);
+
+        await expectRevert(
+          pvpArena.requestOpponent(character1ID, {
+            from: accounts[1],
+          }),
+          "No opponent found"
+        );
+      });
     });
 
     describe("decision time expired", () => {
