@@ -13,6 +13,7 @@ import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
 import "./weapons.sol";
+import "./cryptoblades.sol";
 
 // *****************************************************************************
 // *** NOTE: almost all uses of _tokenAddress in this contract are UNSAFE!!! ***
@@ -464,7 +465,7 @@ contract NFTMarket is
         isNotListed(_tokenAddress, _id)
     {
         if(addFee > 0) {
-            skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(addFee));
+            payTax(usdToSkill(addFee));
         }
 
         if(isUserBanned[msg.sender]) {
@@ -496,7 +497,7 @@ contract NFTMarket is
         isSeller(_tokenAddress, _id)
     {
         if(changeFee > 0) {
-            skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(changeFee));
+            payTax(usdToSkill(changeFee));
         }
 
         listings[address(_tokenAddress)][_id].price = _newPrice;
@@ -540,7 +541,7 @@ contract NFTMarket is
         listedTokenIDs[address(_tokenAddress)].remove(_id);
         _updateListedTokenTypes(_tokenAddress);
 
-        skillToken.safeTransferFrom(msg.sender, taxRecipient, taxAmount);
+        payTax(taxAmount);
         skillToken.safeTransferFrom(
             msg.sender,
             listing.seller,
@@ -613,6 +614,11 @@ contract NFTMarket is
             _tokenAddress,
             ABDKMath64x64.divu(_percent, 100)
         );
+    }
+
+    function payTax(uint256 amount) internal {
+        skillToken.safeTransferFrom(msg.sender, taxRecipient, amount);
+        CryptoBlades(taxRecipient).trackIncome(amount);
     }
 
     function setUserBan(address user, bool to) external restricted {
