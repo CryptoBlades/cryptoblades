@@ -1034,6 +1034,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             && (userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] <= vars[VAR_DAILY_MAX_CLAIM]
                 || userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] < now - 1 days)
         );
+        userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
 
         // Tax goes to game contract itself, which would mean
         // transferring from the game contract to ...itself.
