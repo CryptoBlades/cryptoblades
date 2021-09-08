@@ -740,10 +740,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _payPlayerConverted(playerAddress, convertedAmount);
     }
 
-    function approveContractWeaponFor(uint256 weaponID, address playerAddress) public restricted {
-        _approveContractWeaponFor(weaponID, playerAddress);
-    }
-
     function payContractTokenOnly(address playerAddress, uint256 convertedAmount) public restricted {
         _payContractTokenOnly(playerAddress, convertedAmount);
     }
@@ -844,14 +840,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _payPlayerConverted(address playerAddress, uint256 convertedAmount) internal {
         skillToken.safeTransfer(playerAddress, convertedAmount);
-    }
-
-    function _approveContractCharacterFor(uint256 characterID, address playerAddress) internal {
-        characters.approve(playerAddress, characterID);
-    }
-
-    function _approveContractWeaponFor(uint256 weaponID, address playerAddress) internal {
-        weapons.approve(playerAddress, weaponID);
     }
 
     function setCharacterMintValue(uint256 cents) public restricted {
