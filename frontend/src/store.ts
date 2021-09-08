@@ -1428,7 +1428,8 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee()
+          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee(),
+          { allowInGameOnlyFunds: false }
         );
 
         await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
@@ -1459,7 +1460,7 @@ export function createStore(web3: Web3) {
             defaultCallOptions(state),
             defaultCallOptions(state),
             cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-            { feeMultiplier: num * 4 * chosenElementFee }
+            { feeMultiplier: num * 4 * chosenElementFee, allowInGameOnlyFunds: true }
           );
 
           await CryptoBlades.methods.mintWeaponN(num, chosenElement).send({ from: state.defaultAccount, gas: '5000000' });
@@ -1492,7 +1493,7 @@ export function createStore(web3: Web3) {
             defaultCallOptions(state),
             defaultCallOptions(state),
             cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-            { feeMultiplier: chosenElementFee }
+            { feeMultiplier: chosenElementFee, allowInGameOnlyFunds: true }
           );
 
           await CryptoBlades.methods.mintWeapon(chosenElement).send({ from: state.defaultAccount });
