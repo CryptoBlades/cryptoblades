@@ -1170,7 +1170,7 @@ export default Vue.extend({
     async searchAllCharacterListingsThroughAPI(page: number) {
       const url = new URL(apiUrl('static/market/character'));
       const params = {
-        element: '' + this.characterTraitFilter(),
+        element: '' + this.upperFirstChar(this.characterTraitFilter()),
         minLevel: '' + this.characterMinLevelFilter(),
         maxLevel: '' + this.characterMaxLevelFilter(),
         sortBy: '' + this.characterPriceOrder() ? 'price' : '',
@@ -1247,9 +1247,9 @@ export default Vue.extend({
     async searchAllWeaponListingsThroughAPI(page: number) {
       const url = new URL(apiUrl('static/market/weapon'));
       const params = {
-        element: '' + this.weaponTraitFilter(),
-        minStars: '' + this.weaponStarFilter(),
-        maxStars: '' + this.weaponStarFilter(),
+        element: '' + this.upperFirstChar(this.weaponTraitFilter()),
+        minStars: '' + (this.weaponStarFilter() !== 0 ?  this.weaponStarFilter() - 1 : 0),
+        maxStars: '' + (this.weaponStarFilter() !== 0 ?  this.weaponStarFilter() - 1 : 4),
         sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
         sortDir: '' + this.weaponPriceOrder(),
         minPrice: '' + this.weaponMinPriceFilter(),
@@ -1307,9 +1307,9 @@ export default Vue.extend({
     async searchAllShieldListingsThroughAPI(page: number) {
       const url = new URL(apiUrl('static/market/shield'));
       const params = {
-        element: '' + this.nftTraitFilter(),
-        minStars: '' + this.nftStarFilter(),
-        maxStars: '' + this.nftStarFilter(),
+        element: '' + this.upperFirstChar(this.nftTraitFilter()),
+        minStars: '' + (this.nftStarFilter() !== 0 ?  this.nftStarFilter() - 1 : 0),
+        maxStars: '' + (this.nftStarFilter() !== 0 ?  this.nftStarFilter() - 1 : 4),
         sortBy: '' + this.nftPriceOrder() ? 'price' : '',
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
@@ -1432,7 +1432,7 @@ export default Vue.extend({
     async searchCharacterListingsBySeller(sellerAddress: string): Promise<string[]>{
       const url = new URL(apiUrl('static/market/character'));
       const params = {
-        element: '' + this.characterTraitFilter(),
+        element: '' + this.upperFirstChar(this.characterTraitFilter()),
         minLevel: '' + this.characterMinLevelFilter(),
         maxLevel: '' + this.characterMaxLevelFilter(),
         sortBy: '' + this.characterPriceOrder() ? 'price' : '',
@@ -1452,9 +1452,9 @@ export default Vue.extend({
     async searchWeaponListingsBySeller(sellerAddress: string): Promise<string[]>{
       const url = new URL(apiUrl('static/market/weapon'));
       const params = {
-        element: '' + this.weaponTraitFilter(),
-        minStars: '' + this.weaponStarFilter(),
-        maxStars: '' + this.weaponStarFilter(),
+        element: '' + this.upperFirstChar(this.weaponTraitFilter()),
+        minStars: '' + (this.weaponStarFilter() !== 0 ?  this.weaponStarFilter() - 1 : 0),
+        maxStars: '' + (this.weaponStarFilter() !== 0 ?  this.weaponStarFilter() - 1 : 4),
         sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
         sortDir: '' + this.weaponPriceOrder(),
         minPrice: '' + this.weaponMinPriceFilter(),
@@ -1473,9 +1473,9 @@ export default Vue.extend({
     async searchShieldListingsBySeller(sellerAddress: string): Promise<NftIdType[]>{
       const url = new URL(apiUrl('static/market/shield'));
       const params = {
-        element: '' + this.nftTraitFilter(),
-        minStars: '' + this.nftStarFilter(),
-        maxStars: '' + this.nftStarFilter(),
+        element: '' + this.upperFirstChar(this.nftTraitFilter()),
+        minStars: '' + (this.nftStarFilter() !== 0 ?  this.nftStarFilter() - 1 : 0),
+        maxStars: '' + (this.nftStarFilter() !== 0 ?  this.nftStarFilter() - 1 : 4),
         sortBy: '' + this.nftPriceOrder() ? 'price' : '',
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
@@ -1761,6 +1761,14 @@ export default Vue.extend({
       }
 
       return defaultLimit;
+    },
+
+    upperFirstChar(input: string): string {
+      if(input === ''){
+        return '';
+      }
+
+      return input[0].toUpperCase() + input.slice(1);
     }
 
   },
