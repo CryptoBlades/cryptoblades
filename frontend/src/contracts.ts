@@ -164,12 +164,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const CharacterLightningTraitChangeConsumables = new web3.eth.Contract(characterLightningTraitChangeConsumablesAbi as Abi,
     characterLightningTraitChangeConsumablesAddr);
 
-  const cosmeticsWeaponIndex = await Blacksmith.methods.COSMETIC_ADDRESS_WEAPON().call();
-  const cosmeticsWeaponAddr = await Blacksmith.methods.getAddressOfCosmetic(cosmeticsWeaponIndex).call();
+  const cosmeticsWeaponIndex = await Blacksmith.methods.ITEM_COSMETIC_WEAPON().call();
+  const cosmeticsWeaponAddr = await Blacksmith.methods.getAddressOfItem(cosmeticsWeaponIndex).call();
   const WeaponCosmetics = new web3.eth.Contract(weaponCosmeticsAbi as Abi, cosmeticsWeaponAddr);
 
-  const cosmeticsCharacterIndex = await Blacksmith.methods.COSMETIC_ADDRESS_CHARACTER().call();
-  const cosmeticsCharacterAddr = await Blacksmith.methods.getAddressOfCosmetic(cosmeticsCharacterIndex).call();
+  const cosmeticsCharacterIndex = await Blacksmith.methods.ITEM_COSMETIC_CHARACTER().call();
+  const cosmeticsCharacterAddr = await Blacksmith.methods.getAddressOfItem(cosmeticsCharacterIndex).call();
   const CharacterCosmetics = new web3.eth.Contract(characterCosmeticsAbi as Abi, cosmeticsCharacterAddr);
 
 

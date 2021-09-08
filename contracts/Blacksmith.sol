@@ -25,12 +25,12 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_EARTH = 4;
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_WATER = 5;
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_LIGHTNING = 6;
+    uint256 public constant ITEM_COSMETIC_WEAPON = 7;
+    uint256 public constant ITEM_COSMETIC_CHARACTER = 8;
 
     uint256 public constant NUMBERPARAMETER_GIVEN_TICKETS = uint256(keccak256("GIVEN_TICKETS"));
     uint256 public constant NUMBERPARAMETER_SPENT_TICKETS = uint256(keccak256("SPENT_TICKETS"));
 
-    uint256 public constant COSMETIC_ADDRESS_WEAPON = 1;
-    uint256 public constant COSMETIC_ADDRESS_CHARACTER = 2;
     /* ========== STATE VARIABLES ========== */
 
     Weapons public weapons;
@@ -46,7 +46,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public itemFlatPrices;
 
     mapping(uint256 => uint256) public numberParameters;
-    mapping(uint256 => address) public cosmeticAddresses;
+
     mapping(uint32 => uint256) public cosmeticWeaponFlatPrices;
     mapping(uint32 => uint256) public cosmeticCharacterFlatPrices;    /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -103,8 +103,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         address _characterCosmetic
     ) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-        cosmeticAddresses[COSMETIC_ADDRESS_WEAPON] = _weaponCosmetic;
-        cosmeticAddresses[COSMETIC_ADDRESS_CHARACTER] = _characterCosmetic;      
+
+        itemAddresses[ITEM_COSMETIC_WEAPON] = _weaponCosmetic;
+        itemAddresses[ITEM_COSMETIC_CHARACTER] = _characterCosmetic;      
        
        // basic effects
        for(uint32 i = 1; i < 6; i++) {
@@ -192,10 +193,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function getFlatPriceOfItem(uint256 itemIndex) public view returns(uint256) {
         return itemFlatPrices[itemIndex];
-    }
-
-    function getAddressOfCosmetic(uint256 cosmeticIndex) public view returns(address) {
-        return cosmeticAddresses[cosmeticIndex];
     }
     /* ========== Character Rename ========== */
 
@@ -295,7 +292,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     function purchaseWeaponCosmetic(uint32 cosmetic, uint256 paying) public {
         require(paying > 0 && paying == cosmeticWeaponFlatPrices[cosmetic], 'Invalid price');
         game.payContractTokenOnly(msg.sender, cosmeticWeaponFlatPrices[cosmetic]);
-        Cosmetics(cosmeticAddresses[COSMETIC_ADDRESS_WEAPON]).giveCosmetic(msg.sender, cosmetic, 1);
+        Cosmetics(itemAddresses[ITEM_COSMETIC_WEAPON]).giveCosmetic(msg.sender, cosmetic, 1);
     }
 
     /* ========== Character cosmetics ========== */
@@ -311,6 +308,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     function purchaseCharacterCosmetic(uint32 cosmetic, uint256 paying) public {
         require(paying > 0 && paying == cosmeticCharacterFlatPrices[cosmetic], 'Invalid price');
         game.payContractTokenOnly(msg.sender, cosmeticCharacterFlatPrices[cosmetic]);
-        Cosmetics(cosmeticAddresses[COSMETIC_ADDRESS_CHARACTER]).giveCosmetic(msg.sender, cosmetic, 1);
+        Cosmetics(itemAddresses[ITEM_COSMETIC_CHARACTER]).giveCosmetic(msg.sender, cosmetic, 1);
     }
 }
