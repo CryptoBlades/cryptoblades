@@ -1,68 +1,45 @@
 <template>
   <div>
     <span
-      v-bind:id="getWeaponElement"
-      v-if="type === weapon_nft"/>
-    <span
-      v-bind:id="getCharacterElement"
-      v-if="type === character_nft"/>
-    <span
-      v-bind:id="getShieldElement"
-      v-if="type === shield_nft"/>
+      :id="`${setIdForElement()}`"
+    />
+
   </div>
 </template>
 
 <script>
-import Weapons from '../../utils/constants/mocked-weapons';
+import { mapGetters } from 'vuex';
 import PvPConstants from '../../utils/constants/pvp-constants';
 
 export default {
+
   props:{
-    nftId: Number,
-    type: String,
+    trait: String
   },
-  data(){
-    return {
-      character_nft:PvPConstants.CHARACTER_NFT,
-      weapon_nft:PvPConstants.WEAPON_NFT,
-      shield_nft:PvPConstants.SHIELD_NFT,
-    };
-  },
+
   computed: {
-    getWeaponElement(){
-      let searchedElement;
-      const nftId = this.nftId;
+    ...mapGetters(['currentCharacter']),
+  },
 
-      Object.entries(Weapons).map(function(weaponsArray) {
-        weaponsArray[1].forEach(weapon => {
-          if(nftId === weapon.id){
-            searchedElement = weapon.element;
-          }
-        });
-      });
+  methods:{
 
-      if(searchedElement === PvPConstants.FIRE_ELEMENT){
+    setIdForElement(){
+      if(this.trait === PvPConstants.FIRE_ELEMENT){
         return 'fire-element';
       }
-      else if (searchedElement === PvPConstants.EARTH_ELEMENT){
+      else if(this.trait === PvPConstants.EARTH_ELEMENT){
         return 'earth-element';
       }
-      else if (searchedElement === PvPConstants.LIGHTNING_ELEMENT){
+      else if(this.trait === PvPConstants.LIGHTNING_ELEMENT){
         return 'lightning-element';
       }
-      else if (searchedElement === PvPConstants.WATER_ELEMENT){
+      else if(this.trait === PvPConstants.WATER_ELEMENT){
         return 'water-element';
       }
+      else return '';
+    },
+  },
 
-      return '';
-    },
-    getCharacterElement(){
-      return '';
-    },
-    getShieldElement(){
-      return '';
-    },
-  }
 };
 </script>
 

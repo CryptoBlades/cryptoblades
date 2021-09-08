@@ -66,6 +66,12 @@ export default {
   border: 1px solid #968332;
 }
 
+.pvp-divider-header-line {
+  border-top: 1px solid #968332;
+  height: 1px;
+  margin-top: 12px;
+}
+
 .character-header-container {
   font-weight: bold;
   justify-content: center;

@@ -58,10 +58,22 @@ export interface IRaidState {
 }
 
 export interface IPvPState {
-  type: string;
-  wageredSkill: string;
-  arenaTier: string;
+  type: string | number;
+  entryWager: string | number;
+  wageredSkill: string | number;
+  arenaTier: string | number;
   participatingCharacters: string[];
+  duelCost: string | number;
+  isAttackerWithinDecisionTime: boolean;
+  isCharacterAttackable: boolean;
+  isCharacterInArena: boolean;
+  isWeaponInArena: boolean;
+  isShieldInArena: boolean;
+}
+
+export interface IInventory{
+  id: number,
+  name: string;
 }
 
 export interface IState {
@@ -106,6 +118,8 @@ export interface IState {
   currentNftType: string | null;
   currentNftId: number | null;
 
+  currentTab: number;
+
   characterTransferCooldowns: Record<number, ITransferCooldown | undefined>;
 
   staking: Record<StakeType, IStakeState>;
@@ -114,6 +128,8 @@ export interface IState {
   raid: IRaidState;
 
   pvp: IPvPState;
+
+  inventory: IInventory[];
 
   waxBridgeWithdrawableBnb: string;
   waxBridgeRemainingWithdrawableBnbDuringPeriod: string;

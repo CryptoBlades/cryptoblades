@@ -3,16 +3,21 @@
         <b-col id="arsenal-preparation-content" cols="5">
             <b-row id="slider-buttons">
               <b-col
-                  v-for="character in getCharacterList()"
+                  v-for="character in ownCharacters"
                   :key="character.id">
-                  <div class="active-indicator">
-                    <div class="character-buttons">
+                  <div
+                      :class="`${setListClassForChar(character.id,currentCharacterId)}`"
+                      @click="setCurrentCharacter(character.id)">
+                    <div>
+                      <img
+                        class="character-buttons"
+                        :src="getCharacterArt(character)" />
                     </div>
                   </div>
               </b-col>
             </b-row>
           <b-row id="slider-content">
-              <b-col cols="4">
+              <b-col>
                 <b-row id="equipped-weapon-container">
                   <b-col>
                     <div id="equipped-weapon-header">
@@ -23,7 +28,11 @@
                 </b-row>
                 <b-row id="equipped-weapon-container">
                   <b-col>
-                    <div id="equipped-weapon-content">
+                    <div>
+                      <img
+                        id="equipped-weapon-content"
+                        :src="getWeaponArt(currentWeapon)"
+                        />
                     </div>
                   </b-col>
                 </b-row>
@@ -42,35 +51,36 @@
                   </b-col>
                 </b-row>
               </b-col>
-              <b-col cols="4">
+              <b-col>
                 <b-carousel
-                    controls>
+                    :interval="sliding"
+                    no-wrap
+                    >
                   <b-carousel-slide
-                        v-for="character in getCharacterList()"
+                        v-for="character in ownCharacters"
                         :key="character.id">
                     <template #img>
                       <img
                         id="character-image"
-                        :src="character.img">
+                        :src="getCharacterArt(currentCharacter)"/>
                     </template>
                   </b-carousel-slide>
                 </b-carousel>
               </b-col>
-              <b-col cols="4">
+              <b-col>
                 <b-row id="character-name">
                   <b-col>
                     <div class="character-info-container">
-                      Ankitarla Kathassily
+                      <span v-text="getCharacterName(currentCharacterId)" />
                     </div>
                     <div class="character-info-container">
                       <span id="character-level-label"> Level </span>
-                      <span id="character-level-value"> 28 </span>
+                      <span id="character-level-value" v-text="currentCharacter.level + 1" />
                     </div>
                   </b-col>
                   <b-col cols="1">
                     <char-element
-                      :nftId="getCharacterElement"
-                      :type="weapon_nft"></char-element>
+                      :trait="currentCharacter.trait"></char-element>
                   </b-col>
                 </b-row>
               </b-col>
@@ -85,87 +95,106 @@
           <b-row class="inventory-pseudo-tabs">
             <b-col
               class="inventory-tab-button-container"
-              v-for="inventoryTabs in inventoryTabNames"
-              :key="inventoryTabs.id">
+              v-for="inventoryTab in inventoryTabNames"
+              :key="inventoryTab.id">
               <button
                 class="inventory-tab-button"
-                v-text="inventoryTabs.value"></button>
+                v-text="inventoryTab.name"
+                @click="setCurrentTab(inventoryTab.id)"></button>
             </b-col>
           </b-row>
           <b-row class="inventory-weapon-container"
-            v-for="inventoryRows in numberOfRows"
-            :key="inventoryRows">
+              v-if="getCurrentTab === 0">
               <b-col>
                 <b-row>
-                  <b-col>
-                    <div id="inventory-weapon-content">
+                  <b-col
+                    v-for="weapon in ownWeapons"
+                    :key="weapon.id">
+                    <div
+                      :class="`${setListClassForWeapon(weapon.id,currentWeaponId)}`"
+                      @click="setCurrentWeapon(weapon.id)">
+                      <div>
+                        <img
+                          class="inventory-weapon-content"
+                          :src="getWeaponArt(weapon)"/>
+                      </div>
                     </div>
                   </b-col>
                 </b-row>
               </b-col>
           </b-row>
-          <b-row class="inventory-weapon-container">
-              <b-col>
-                <b-row>
-                  <b-col>
-                    <div id="inventory-weapon-content-dashed">
-                    </div>
-                  </b-col>
-                </b-row>
-              </b-col>
+          <b-row class="inventory-shield-container"
+              v-if="getCurrentTab === 1">
+              Shield NFTs
           </b-row>
         </b-col>
   </b-row>
 </template>
 
 <script>
-
-import PvPConstants from '../../utils/constants/pvp-constants';
-import character from '../../assets/placeholder/chara-0.png';
+import { getCharacterArt } from '../../character-arts-placeholder';
+import { getWeaponArt } from '../../weapon-arts-placeholder';
 import Hint from '../Hint.vue';
 import Element from '../smart/Element.vue';
+import { mapGetters, mapMutations, mapState } from 'vuex';
 
 export default {
   data(){
     return {
-      character_nft: PvPConstants.CHARACTER_NFT,
-      weapon_nft: PvPConstants.WEAPON_NFT,
-      shield_nft: PvPConstants.SHIELD_NFT,
+      sliding: 0,
     };
-  },
-  methods:{
-    getCharacterList(){
-      const characters = [
-        {id: '0', name: 'Tirasthu Lithuir', img: character},
-        {id: '1', name: 'Voir Ghuru', img: character},
-        {id: '2', name: 'Voir Ghuru', img: character},
-        {id: '3', name: 'Voir Ghuru', img: character},
-      ];
-
-      return characters;
-    },
   },
 
   computed: {
-    numberOfRows() {
-      const checkExcessRow = PvPConstants.NUMBER_OF_SWORDS%8;
-      let rowCount = (PvPConstants.NUMBER_OF_SWORDS/8);
-      if (checkExcessRow > 0){
-        return rowCount = Math.floor(rowCount)+1;
-      }
-      else{
-        return rowCount;
-      }
-    },
-    numberOfWeapons(){
-      return PvPConstants.NUMBER_OF_SWORDS;
-    },
+    ...mapState(['currentCharacterId','currentWeaponId']),
+    ...mapGetters([
+      'currentWeapon',
+      'getInventoryState',
+      'currentCharacter',
+      'ownCharacters',
+      'ownWeapons',
+      'getCharacterName',
+      'getWeaponName',
+      'getCurrentTab'
+    ]),
+
     inventoryTabNames(){
-      return PvPConstants.INVENTORY_TAB_NAMES;
+      return this.getInventoryState;
     },
-    getCharacterElement(){
-      return 0;
-    }
+  },
+
+  methods:{
+    ...mapMutations([
+      'setCurrentCharacter',
+      'setCurrentWeapon',
+      'setCurrentTab'
+    ]),
+
+    getCharacterArt,
+
+    getWeaponArt,
+
+    setListClassForChar(characterId,currentCharacterId){
+      if (characterId === currentCharacterId){
+        return 'active-indicator';
+      }
+
+      else return 'inactive-indicator';
+    },
+
+    setListClassForWeapon(weaponId,currentWeaponId){
+      if (weaponId === currentWeaponId){
+        return 'selected-weapon';
+      }
+
+      else return 'unselected-weapon';
+    },
+
+    created(){
+      this.setCurrentWeapon(this.ownWeapons[0].id);
+    },
+
+
   },
 
   components: {
@@ -196,12 +225,6 @@ export default {
 
 /* PvP Character Styles */
 
-.pvp-divider-header-line {
-  border-top: 1px solid #968332;
-  height: 1px;
-  margin-top: 12px;
-}
-
 #slider-buttons {
   border-bottom: 2px solid #968332;
   margin-bottom: 50px;
@@ -209,17 +232,27 @@ export default {
 }
 
 .character-buttons {
-  background: antiquewhite;
-  background-image: url("https://seiyria.com/gameicons-font/svg/character.svg");
+  background: transparent;
   border: 2px solid #968332;
   border-radius: 10%;
   height: 80px;
   width: 80px;
   margin: 3px auto;
+  overflow: hidden;
 }
 
 .active-indicator {
   border: 1px dashed #968332;
+  border-radius: 10%;
+  background:transparent;
+  margin: 3px auto;
+  height:90px;
+  width: 90px;
+}
+
+
+.inactive-indicator {
+  border: 1px none transparent;
   border-radius: 10%;
   margin: 3px auto;
   height:90px;
@@ -267,8 +300,7 @@ export default {
 }
 
 #equipped-weapon-content {
-  background: antiquewhite;
-  background-image: url("https://seiyria.com/gameicons-font/svg/broadsword.svg");
+  background: transparent;
   border: 4px solid #968332;
   border-radius: 10%;
   height: 80px;
@@ -319,14 +351,31 @@ export default {
   margin-top: 50px;
 }
 
-#inventory-weapon-content {
-  background: antiquewhite;
-  background-image: url("https://seiyria.com/gameicons-font/svg/broadsword.svg");
-  border: 4px solid #968332;
+.selected-weapon {
+  background: transparent;
+  border: 1px dashed #968332;
+  border-radius: 10%;
+  height: 60px;
+  width: 60px;
+  margin: 10px auto;
+}
+
+.unselected-weapon {
+  background: transparent;
+  border: 1px none transparent;
+  border-radius: 10%;
+  height: 60px;
+  width: 60px;
+  margin: 10px auto;
+}
+
+.inventory-weapon-content {
+  background: transparent;
+  border: 2px solid #968332;
   border-radius: 10%;
   height: 50px;
   width: 50px;
-  margin: 10px auto;
+  margin: 3px auto;
 }
 
 #inventory-weapon-content-dashed {

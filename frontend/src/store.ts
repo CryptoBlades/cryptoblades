@@ -11,14 +11,15 @@ import {
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
-  IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState
+  IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState, IPvPState, IInventory,
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
-  stakeOnly as featureFlagStakeOnly
+  stakeOnly as featureFlagStakeOnly,
+  // pvp as featureFlagPvP,
 } from './feature-flags';
 import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
@@ -109,6 +110,7 @@ export function createStore(web3: Web3) {
       currentWeaponId: null,
       currentNftType: null,
       currentNftId: null,
+      currentTab: 0,
       weaponDurabilities: {},
       weaponRenames: {},
       maxDurability: 0,      isInCombat: false,
@@ -155,10 +157,19 @@ export function createStore(web3: Web3) {
 
       pvp: {
         type: '0',
+        entryWager: '0',
         wageredSkill: '0',
         arenaTier: '0',
         participatingCharacters: [],
+        duelCost: '0',
+        isAttackerWithinDecisionTime: false,
+        isCharacterAttackable: false,
+        isCharacterInArena: false,
+        isWeaponInArena: false,
+        isShieldInArena: false,
       },
+
+      inventory: [],
 
       waxBridgeWithdrawableBnb: '0',
       waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
@@ -440,6 +451,31 @@ export function createStore(web3: Web3) {
         return state.raid;
       },
 
+      getPvPState(state): IPvPState {
+        return state.pvp;
+      },
+
+      getCurrentTab(state): number {
+        return state.currentTab;
+      },
+
+      getInventoryState(state): IInventory[]{
+
+        const swordTab = {
+          id: 0,
+          name: 'Sword'
+        };
+        const shieldTab = {
+          id: 1,
+          name: 'Shield'
+        };
+
+        state.inventory.push(swordTab);
+        state.inventory.push(shieldTab);
+
+        return state.inventory;
+      },
+
       fightGasOffset(state) {
         return state.fightGasOffset;
       },
@@ -689,6 +725,59 @@ export function createStore(web3: Web3) {
         state.currentNftType = payload.type;
         state.currentNftId = payload.id;
       },
+
+      updateArenaType(state: IState, payload: {type: string | number}){
+        state.pvp.type = payload.type;
+      },
+
+      updateEntryWager(state: IState, payload: {entryWager: string | number}){
+        state.pvp.entryWager = payload.entryWager;
+      },
+
+      updateWageredSkill(state: IState, payload: {wageredSkill: string | number}){
+        state.pvp.wageredSkill = payload.wageredSkill;
+      },
+
+      updateArenaTier(state: IState, payload: {arenaTier: string | number}){
+        state.pvp.arenaTier = payload.arenaTier;
+      },
+
+      updateParticipatingCharacters(state: IState, payload: {participatingCharacters: string[]}){
+        for (let i=0; i<=payload.participatingCharacters.length; i++){
+          if (!state.pvp.participatingCharacters.includes(payload.participatingCharacters[i])){
+            state.pvp.participatingCharacters.push(payload.participatingCharacters[i]);
+          }
+        }
+      },
+
+      updateDuelCost(state: IState, payload: {duelCost: string | number}){
+        state.pvp.duelCost = payload.duelCost;
+      },
+
+      updateIsAttackerWithinDecisionTime(state: IState, payload: {isAttackerWithinDecisionTime: boolean}){
+        state.pvp.isAttackerWithinDecisionTime = payload.isAttackerWithinDecisionTime;
+      },
+
+      updateIsCharacterAttackable(state: IState, payload: {isCharacterAttackable: boolean}){
+        state.pvp.isCharacterAttackable = payload.isCharacterAttackable;
+      },
+
+      updateIsCharacterInArena(state: IState, payload: {isCharacterInArena: boolean}){
+        state.pvp.isCharacterInArena = payload.isCharacterInArena;
+      },
+
+      updateIsWeaponInArena(state: IState, payload: {isWeaponInArena: boolean}){
+        state.pvp.isWeaponInArena = payload.isWeaponInArena;
+      },
+
+      updateIsShieldInArena(state: IState, payload: {isShieldInArena: boolean}){
+        state.pvp.isShieldInArena = payload.isShieldInArena;
+      },
+
+      setCurrentTab(state: IState, currentTab: number){
+        state.currentTab = currentTab;
+      }
+
     },
 
     actions: {
@@ -2737,16 +2826,162 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacter', id),
         ]);
       },
-      async enterArena({state, dispatch}, {characterID,weaponID}){
 
+      async fetchArenaType ({commit}){
+
+        const type = '0';
+
+        commit('updateArenaType', {type});
+      },
+
+      async fetchEntryWager ({state, commit}, {characterID}){
         const { PvpArena } = state.contracts();
-        if(!PvpArena || !state.defaultAccount) return;
+        if (!PvpArena) return;
 
-        await PvpArena.methods.enterArena(characterID,weaponID,0,false).send({from: state.defaultAccount});
+        const entryWager = await PvpArena!.methods
+          .getEntryWager(characterID)
+          .call(defaultCallOptions(state));
 
-        await Promise.all([
-          dispatch('fetchArenaStatus'),
-        ]);
+        commit('updateEntryWager', { entryWager });
+
+        return entryWager;
+      },
+
+      async fetchWageredSkill ({state, commit}, {characterID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const wageredSkill = await PvpArena!.methods
+          .getLockedWager(characterID)
+          .call(defaultCallOptions(state));
+
+        commit('updateWageredSkill', { wageredSkill });
+
+        return wageredSkill;
+      },
+
+      async fetchArenaTier ({state, commit}, {characterID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const arenaTier = await PvpArena!.methods
+          .getArenaTier(characterID)
+          .call(defaultCallOptions(state));
+
+
+        commit('updateArenaTier', { arenaTier });
+
+        return arenaTier;
+      },
+
+      async fetchParticipatingCharacters ({state, commit}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const participatingCharacters = await PvpArena!.methods
+          .getMyParticipatingCharacters()
+          .call(defaultCallOptions(state));
+
+        commit('updateParticipatingCharacters', { participatingCharacters });
+
+        return participatingCharacters;
+      },
+
+      async fetchDuelCost ({state, commit},{characterID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const duelCost = await PvpArena!.methods
+          .getDuelCost(characterID)
+          .call(defaultCallOptions(state));
+
+        commit('updateDuelCost', { duelCost });
+
+        return duelCost;
+      },
+
+      async fetchIsAttackerWithinDecisionTime ({state, commit}, {characterID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const isAttackerWithinDecisionTime = await PvpArena!.methods
+          .isAttackerWithinDecisionTime(characterID)
+          .call(defaultCallOptions(state));
+
+        commit('updateIsAttackerWithinDecisionTime', { isAttackerWithinDecisionTime });
+
+        return isAttackerWithinDecisionTime;
+      },
+
+      async fetchIsCharacterAttackable ({state, commit}, {characterID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const isCharacterAttackable = await PvpArena!.methods
+          .isCharacterAttackable(characterID)
+          .call(defaultCallOptions(state));
+
+        commit('updateIsCharacterAttackable', { isCharacterAttackable });
+
+        return isCharacterAttackable;
+      },
+
+      async fetchIsCharacterInArena ({state, commit}, {characterID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const isCharacterInArena = await PvpArena!.methods
+          .isCharacterInArena(characterID)
+          .call(defaultCallOptions(state));
+
+        commit('updateIsCharacterInArena', { isCharacterInArena });
+
+        return isCharacterInArena;
+      },
+
+      async fetchIsWeaponInArena ({state, commit}, {weaponID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const isWeaponInArena = await PvpArena!.methods
+          .isWeaponInArena(weaponID)
+          .call(defaultCallOptions(state));
+
+        commit('updateIsWeaponInArena', { isWeaponInArena });
+
+        return isWeaponInArena;
+      },
+
+      async fetchIsShieldInArena ({state, commit}, {shieldID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const isShieldInArena = await PvpArena!.methods
+          .isShieldInArena(shieldID)
+          .call(defaultCallOptions(state));
+
+        commit('updateIsShieldInArena', { isShieldInArena });
+
+        return isShieldInArena;
+      },
+
+      async enterArena ({state}, {characterID}){
+        const { SkillToken, PvpArena } = state.contracts();
+        if(!SkillToken || !PvpArena) return;
+
+        const entryWager = await PvpArena!.methods
+          .getEntryWager(characterID)
+          .call(defaultCallOptions(state));
+
+        try{
+          await SkillToken.methods
+            .approve(PvpArena.options.address, web3.utils.toWei(entryWager, 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err){
+          console.error(err);
+        }
       },
     }
   });

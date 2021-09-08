@@ -4,7 +4,7 @@
           <span v-text="arsenalPreparationHeaderText"/>
         </b-col>
         <b-col id= "find-opponent-header" cols="2">
-          <span v-text="findOpponentHeaderText" @click="findOpponent"/>
+          <span v-text="findOpponentHeaderText"/>
         </b-col>
         <b-col id="arena-header" cols="5">
           <span v-text="arenaHeaderText"/>
@@ -14,7 +14,6 @@
 
 <script>
 import PvPConstants from '../../utils/constants/pvp-constants';
-import {mapActions} from 'vuex';
 
 export default {
   data() {
@@ -26,12 +25,25 @@ export default {
   },
 
   methods: {
-    ...mapActions(['enterArena']),
-
-    async findOpponent(){
-      await this.enterArena(1,1);
+    getArenaState(){
+      this.$store.dispatch('fetchArenaType');
+      this.$store.dispatch('fetchEntryWager',{characterID: 0});
+      this.$store.dispatch('fetchArenaTier',{characterID: 0});
+      this.$store.dispatch('fetchWageredSkill',{characterID: 0});
+      this.$store.dispatch('fetchParticipatingCharacters');
+      this.$store.dispatch('fetchDuelCost',{characterID: 0});
+      this.$store.dispatch('fetchIsAttackerWithinDecisionTime',{characterID: 0});
+      this.$store.dispatch('fetchIsCharacterAttackable',{characterID: 0});
+      this.$store.dispatch('fetchIsCharacterInArena',{characterID: 0});
+      this.$store.dispatch('fetchIsWeaponInArena',{weaponID: 0});
+      this.$store.dispatch('fetchIsShieldInArena',{shieldID: 0});
+      this.$store.dispatch('enterArena',{characterID: 0});
     },
   },
+
+  mounted(){
+  },
+
 
 
 
