@@ -23,7 +23,7 @@
 
         <div class="character-data-column dark-bg-text">
           <span v-if="!isLoadingCharacter" class="name bold character-name">{{
-            getCharacterName(currentCharacterId)
+            getCleanCharacterName(currentCharacterId)
           }} <span :class="traits[currentCharacter.trait].toLowerCase() + '-icon trait-icon'"></span></span>
           <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
           <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
@@ -54,7 +54,7 @@
           @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
         >
           <div class="name-list">
-            {{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+            {{ getCleanCharacterName(c.id) }} Lv.{{ c.level + 1}}
           </div>
           <div class="small-stamina-char"
             :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
@@ -74,7 +74,7 @@
           @click="!getIsInCombat && setCurrentCharacter(c.id)"
         >
         <div class="name-list"
-        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+        >{{ getCleanCharacterName(c.id) }} Lv.{{ c.level + 1}}
           <small-bar
             :showMinimalVersion="true"
             v-if="!isLoadingCharacter"
@@ -97,9 +97,9 @@ import { CharacterPower, CharacterTrait } from '../../interfaces';
 import EarningsCalculator from './EarningsCalculator.vue';
 import { RequiredXp } from '../../interfaces';
 import Hint from '../Hint.vue';
-import Web3 from 'web3';
-import BN from 'bignumber.js';
 import Vue from 'vue';
+import { toBN, fromWeiEther } from '../../utils/common';
+import { getCleanName } from '../../rename-censor';
 
 export default Vue.extend({
   components: {
@@ -132,7 +132,7 @@ export default Vue.extend({
     filteredCharactersForList(): any {
       const items: any  = this.ownCharacters;
       return items;
-    }
+    },
   },
 
   data() {
@@ -160,9 +160,13 @@ export default Vue.extend({
     },
 
     formattedSkill(skill: number): number {
-      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
-      return new BN(skillBalance).toNumber();
+      const skillBalance = fromWeiEther(skill.toString());
+      return toBN(skillBalance).toNumber();
     },
+
+    getCleanCharacterName(id: string): string {
+      return getCleanName(this.getCharacterName(id));
+    }
   },
 });
 </script>
@@ -304,7 +308,6 @@ li.character-highlight{
 
 .trait-icon {
   position: relative;
-  border: 1px solid rgb(236, 236, 236);
   border-radius: 15px;
   top: 5px;
   left: 5px;

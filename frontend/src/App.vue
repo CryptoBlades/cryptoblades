@@ -30,8 +30,8 @@
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>
-            Get started in less than 10 minutes! To recruit your first character you need {{recruitCost}} SKILL and .001 BNB for gas.
-            You will also need .0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
+            Get started in less than 10 minutes! To recruit your first character you need {{ recruitCost }} SKILL and .001 BNB for gas. You will also need .0015
+            BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
           </p>
           <ul class="unstyled-list">
             <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
@@ -72,9 +72,11 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+import { apiUrl } from './utils/common';
 
 Vue.directive('visible', (el, bind) => {
-  el.style.visibility=(bind.value) ? 'visible' : 'hidden';});
+  el.style.visibility = bind.value ? 'visible' : 'hidden';
+});
 
 export default {
   inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
@@ -89,7 +91,7 @@ export default {
     errorMessage: '',
     hideWalletWarning: false,
     isConnecting: false,
-    recruitCost: ''
+    recruitCost: '',
   }),
 
   computed: {
@@ -133,8 +135,8 @@ export default {
     ...mapActions([
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
-      'fetchWeaponTransferCooldownForOwnWeapons',
       'fetchCharacterTransferCooldownForOwnCharacters',
+      'setupWeaponDurabilities',
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
@@ -155,11 +157,13 @@ export default {
     async initializeRecruitCost() {
       const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
-      this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
+      this.recruitCost = BN(skillRecruitCost)
+        .div(BN(10).pow(18))
+        .toFixed(4);
     },
     data() {
       return {
-        recruitCost: this.recruitCost
+        recruitCost: this.recruitCost,
       };
     },
 
@@ -268,10 +272,14 @@ export default {
       const web3 = this.web3.currentProvider;
       this.isConnecting = true;
       this.errorMessage = 'Connecting to MetaMask...';
-      web3.request({method: 'eth_requestAccounts'})
+      web3
+        .request({ method: 'eth_requestAccounts' })
         .then(() => {
           this.errorMessage = 'Success: MetaMask connected.';
           this.isConnecting = false;
+
+          this.initializeStore();
+          this.toggleHideWalletWarning();
         })
         .catch(() => {
           this.errorMessage = 'Error: MetaMask could not get permissions.';
@@ -296,7 +304,7 @@ export default {
         (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
       ) {
         this.$dialog.notify.warning(
-          `You have hidden the wallet warning and it would now be displayed. If you are trying to play, 
+          `You have hidden the wallet warning and it would now be displayed. If you are trying to play,
         please disable the option and follow the instructions, otherwise close and ignore.`,
           {
             timeout: 0,
@@ -306,25 +314,24 @@ export default {
     },
 
     async checkNotifications() {
-      const response = await fetch('https://api.cryptoblades.io/static/notifications');
+      const response = await fetch(apiUrl('static/notifications'));
       const notifications = await response.json();
 
       const lastHash = localStorage.getItem('lastnotification');
       let shouldContinue = true;
 
-      notifications.forEach(notif => {
+      notifications.forEach((notification) => {
+        if (!shouldContinue) return;
 
-        if(!shouldContinue) return;
-
-        if(lastHash === notif.hash) {
+        if (lastHash === notification.hash) {
           shouldContinue = false;
           return;
         }
 
         this.$dialog.notify.warning(
-          `${notif.title}
+          `${notification.title}
           <br>
-          <a href="${notif.link}" target="_blank">Check it out!</a>
+          <a href="${notification.link}" target="_blank">Check it out!</a>
           `,
           {
             timeout: 300000,
@@ -333,7 +340,7 @@ export default {
       });
 
       localStorage.setItem('lastnotification', notifications[0].hash);
-    }
+    },
   },
 
   mounted() {
@@ -363,7 +370,6 @@ export default {
     });
 
     this.showWarningDialog();
-
   },
 
   async created() {
@@ -392,7 +398,7 @@ export default {
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
         this.fetchCharacterTransferCooldownForOwnCharacters(),
-        this.fetchWeaponTransferCooldownForOwnWeapons(),
+        this.setupWeaponDurabilities(),
         this.fetchWaxBridgeDetails(),
         this.fetchRewardsClaimTax(),
       ]);
@@ -416,6 +422,7 @@ export default {
     if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
     if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
     if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
+    if (!localStorage.getItem('fightMultiplier')) localStorage.setItem('fightMultiplier', '1');
 
     this.checkNotifications();
     this.initializeRecruitCost();
@@ -431,32 +438,16 @@ export default {
 
 <style>
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
-  font-weight: 900;
+  font-weight: 600;
   text-align: center;
-  background: linear-gradient(to right, rgb(248, 218, 136) 20%, rgb(88, 82, 23) 40%, rgb(87, 87, 34) 60%, rgb(177, 150, 92) 80%);
-  background-size: 200% auto;
-  color: #000;
-  background-clip: text;
-  text-fill-color: transparent;
-  text-shadow: 0px 2px 3px rgba(0,0,0,0.4),
-               0px 4px 7px rgba(0,0,0,0.1),
-               0px 9px 12px rgba(0,0,0,0.1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shine 1s linear infinite;
-  @keyframes shine {
-    to {
-      background-position: 200% center;
-    }
-  }
 }
-hr.hr-divider{
+hr.hr-divider {
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
 }
 body {
   margin: 0;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
 }
 
 .no-margin {
@@ -629,8 +620,8 @@ button.close {
   border-color: #9e8a57 !important;
 }
 
-.b-pagination > li > .page-link{
-  color:#9e8a57;
+.b-pagination > li > .page-link {
+  color: #9e8a57;
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
   border-color: #9e8a576e;
 }
@@ -695,9 +686,8 @@ div.bg-success {
 
 .content {
   padding: 0 1em;
-  height: calc(100vh - 56px);
-  background: rgb(20, 20, 20);
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  height: auto;
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }
 
@@ -764,8 +754,16 @@ div.bg-success {
   align-items: center;
 }
 
-
 .border-main {
   border: 1px solid #9e8a57;
+}
+
+@media all and (max-width: 767.98px) {
+  .content {
+    padding: 10px;
+  }
+  .dark-bg-text {
+    width: 100%;
+  }
 }
 </style>

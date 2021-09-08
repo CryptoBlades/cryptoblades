@@ -20,6 +20,17 @@
 
 require('dotenv').config();
 
+function hdWalletProviderOptions(privateKeyEnvVarValue, mnemonicPhraseEnvVarValue, otherOpts) {
+  const opts = { ...otherOpts };
+  if(privateKeyEnvVarValue) {
+    opts.privateKeys = [privateKeyEnvVarValue];
+  }
+  else {
+    opts.mnemonic = mnemonicPhraseEnvVarValue;
+  }
+  return opts;
+}
+
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 module.exports = {
@@ -47,9 +58,13 @@ module.exports = {
       gas: parseInt(process.env.ETH_DEV_RPC_GAS, 10) || 67219750 // required for deploy, otherwise it throws weird require-errors on constructor
     },
     bsctestnet: {
-      provider: () => new HDWalletProvider(
-        process.env.BINANCE_WALLET_MNEMONIC, 'https://data-seed-prebsc-2-s2.binance.org:8545/'
-      ),
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.BINANCE_WALLET_PRIVATE_KEY,
+        process.env.BINANCE_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://data-seed-prebsc-2-s2.binance.org:8545/'
+        }
+      )),
       network_id: 0x61,
       confirmations: 10,
       timeoutBlocks: 200,
@@ -57,9 +72,13 @@ module.exports = {
       skipDryRun: true
     },
     bscmainnet: {
-      provider: () => new HDWalletProvider(
-        process.env.BINANCE_MAINNET_WALLET_MNEMONIC, 'https://bsc-dataseed.binance.org/'
-      ),
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.BINANCE_MAINNET_WALLET_PRIVATE_KEY,
+        process.env.BINANCE_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://bsc-dataseed.binance.org/'
+        }
+      )),
       network_id: 0x38,
       confirmations: 10,
       timeoutBlocks: 200,
@@ -113,7 +132,8 @@ module.exports = {
     }
   },
   plugins: [
-    "truffle-plugin-verify"
+    "truffle-plugin-verify",
+    "truffle-contract-size"
   ],
   api_keys: {
     bscscan: process.env.BSCSCAN_API_KEY

@@ -9,6 +9,5 @@ module.exports = async function (deployer) {
   await newCharas.migrateTo_1ee400a();
 
   const game = await CryptoBlades.deployed();
-  const newGame = await upgradeProxy(game.address, CryptoBlades, { deployer });
-  await newGame.migrateTo_1ee400a();
+  await upgradeProxy(game.address, CryptoBlades, { deployer });
 };

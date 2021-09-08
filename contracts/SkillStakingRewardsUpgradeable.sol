@@ -4,15 +4,20 @@ import "./staking/StakingRewardsUpgradeable.sol";
 import "./interfaces/IStakeFromGame.sol";
 import "./cryptoblades.sol";
 
-contract SkillStakingRewardsUpgradeable is IStakeFromGame, StakingRewardsUpgradeable {
-    /* ========== STATE VARIABLES ========== */
+contract SkillStakingRewardsUpgradeable is
+    IStakeFromGame,
+    StakingRewardsUpgradeable
+{
+    /* ========== VIEWS ========== */
 
-    CryptoBlades public game;
+    function game() external view returns (CryptoBlades) {
+        return __game;
+    }
 
     /* ========== RESTRICTED FUNCTIONS ========== */
 
     function migrateTo_23b3a8b(CryptoBlades _game) external onlyOwner {
-        game = _game;
+        __game = _game;
     }
 
     function stakeFromGame(address player, uint256 amount)
@@ -25,13 +30,26 @@ contract SkillStakingRewardsUpgradeable is IStakeFromGame, StakingRewardsUpgrade
         updateReward(player)
     {
         _stake(player, amount);
-        stakingToken.safeTransferFrom(address(game), address(this), amount);
+        stakingToken.safeTransferFrom(address(__game), address(this), amount);
+    }
+
+    function unstakeToGame(address player, uint256 amount)
+        external
+        override
+        normalMode
+        nonReentrant
+        whenNotPaused
+        onlyGame
+        updateReward(player)
+    {
+        _unstake(player, amount);
+        stakingToken.transfer(address(__game), amount);
     }
 
     /* ========== MODIFIERS ========== */
 
     modifier onlyGame() {
-        require(msg.sender == address(game), "Only callable by game");
+        require(msg.sender == address(__game), "Only callable by game");
         _;
     }
 }

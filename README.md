@@ -15,7 +15,7 @@ You should now have 100 fake eth! You're now fake rich.
 ## Frontend Setup
 
 1. `npm install`
-1. Create a new file named `.env` in the 'frontend' directory alongside `.env.mainnet` and `.env.testnet` [**Edit this file to include the following lines of code**](https://github.com/CryptoBlades/cryptoblades/blob/main/frontend/.env.testnet#L1-L5)
+1. `mv .env.local .env` (copy the example env to your local so it can be used)
 1. `npm run contract:prepare` (this builds your contracts)
 1. `npm run contract:deploy` (this deploys your contracts to your local blockchain)
 1. `npm run start:frontend`
@@ -31,15 +31,11 @@ For Windows developers experiencing errors follow these steps:
 
 If you're using VSCode, we recommend these extensions: Auto Rename Tag, EditorConfig for VSCode, Eslint, Github Pull Requests, Gitlens, Javascript and Typescript, Live Share, Solidity, Typescript Hero, Vetur
 
-## Truffle Environment Variables
+## Environment Variables
 
-Truffle also supports some environment variables, if you create a `.env` file in the root you can specify:
+There are optional environment variables, most of which have sensible defaults if copied from `.env.local`:
 
-- `ETH_DEV_RPC_HOST`
-- `ETH_DEV_RPC_PORT`
-- `ETH_DEV_RPC_NETWORK_ID`
-- `ETH_DEV_RPC_GAS`
-- `BINANCE_WALLET_MNEMONIC`
+- `VUE_APP_API_URL` - the API URL to use - defaults to prod (which will throw CORS errors on local)
 
 ## Structure
 

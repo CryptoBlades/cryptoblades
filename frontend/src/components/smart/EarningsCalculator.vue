@@ -30,6 +30,10 @@
                   <input class="stat-slider" type="range" min="1" max="255" v-model="levelSliderValue" />
                   <b-form-input class="stat-input" type="number" v-model="levelSliderValue" :min="1" :max="255" />
                 </div>
+                <span>Stamina</span>
+                <select class="form-control wep-trait-form" v-model="staminaSelectValue">
+                  <option v-for="x in [40,80,120,160,200]" :value="x" :key="x">{{ x }}</option>
+                </select>
               </div>
 
               <div class="calculator-earnings">
@@ -37,10 +41,10 @@
                   <span class="calculator-subheader">Current prices (USD)</span>
                   <div class="prices-div">
                     <div class="token-price-div">
-                      BNB: <b-form-input class="price-input" type="number" v-model="bnbPrice" />
+                       BNB: <b-form-label class="price-input" type="number" v-model="bnbPrice" /> <span class="text-white"> ${{bnbPrice }}</span>
                     </div>
                     <div class="token-price-div">
-                      SKILL: <b-form-input class="price-input" type="number" v-model="skillPrice" />
+                     SKILL:  <b-form-label class="price-input" type="number" v-model="skillPrice" /> <span class="text-white"> ${{skillPrice }}</span>
                     </div>
                   </div>
                 </div>
@@ -141,8 +145,7 @@ import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, We
 import axios from 'axios';
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import Web3 from 'web3';
-import BN from 'bignumber.js';
+import { toBN, fromWeiEther } from '../../utils/common';
 
 interface PriceJson {
   binancecoin: CoinPrice;
@@ -171,6 +174,7 @@ export default Vue.extend({
     return {
       characterElementValue: '',
       levelSliderValue: 1,
+      staminaSelectValue: 40,
       starsValue: 1,
       wepElementValue: '',
       wepFirstStatElementValue: '',
@@ -212,6 +216,7 @@ export default Vue.extend({
     onReset() {
       this.characterElementValue = '';
       this.levelSliderValue =  1;
+      this.staminaSelectValue = 40;
       this.starsValue =  1;
       this.wepElementValue =  '';
       this.wepFirstStatElementValue =  '';
@@ -264,16 +269,23 @@ export default Vue.extend({
       const weapon = this.getWeapon();
       const characterTrait = CharacterTrait[this.characterElementValue as keyof typeof CharacterTrait];
       const weaponMultiplier = GetTotalMultiplierForTrait(weapon, characterTrait);
+      const fights = this.getNumberOfFights(this.staminaSelectValue);
 
       const totalPower = this.getTotalPower(CharacterPower(this.levelSliderValue - 1), weaponMultiplier, this.wepBonusPowerSliderValue);
-      const averageReward = this.getAverageRewardForPower(totalPower);
-      const averageFightProfit = averageReward * this.skillPrice - fightBnbFee;
+      const averageDailyReward = this.getAverageRewardForPower(totalPower) *7.2 +
+        this.formattedSkill(this.fightGasOffset) * fights;
+      const averageFightProfit = averageDailyReward * this.skillPrice / 7.2;
       for(let i = 1; i < 8; i++) {
-        const averageDailyProfitForCharacter = averageFightProfit * i - (7 - i) * fightBnbFee;
+        const averageDailyProfitForCharacter = averageFightProfit * i -
+          ((this.getNumberOfFights(this.staminaSelectValue) * fightBnbFee));
         const averageDailyProfitForAllCharacter = 4 * averageDailyProfitForCharacter;
         const averageMonthlyProfitForAllCharacter = 30 * averageDailyProfitForAllCharacter;
         this.calculationResults.push([averageDailyProfitForCharacter, averageDailyProfitForAllCharacter, averageMonthlyProfitForAllCharacter]);
       }
+    },
+
+    getNumberOfFights(stamina: number) {
+      return 288 / stamina;
     },
 
     getWeapon(): IWeapon {
@@ -293,7 +305,7 @@ export default Vue.extend({
     },
 
     getAverageRewardForPower(power: number): number {
-      return this.formattedSkill(this.fightGasOffset) + (this.formattedSkill(this.fightBaseline) * Math.sqrt(power / 1000));
+      return (this.formattedSkill(this.fightBaseline) * Math.sqrt(power / 1000));
     },
 
     getNextMilestoneBonus(level: number): string {
@@ -315,13 +327,13 @@ export default Vue.extend({
     },
 
     formattedSkill(skill: number): number {
-      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
-      return new BN(skillBalance).toNumber();
+      const skillBalance = fromWeiEther(skill.toString());
+      return toBN(skillBalance).toNumber();
     },
 
     stringFormattedSkill(skill: number): string {
-      const skillBalance = Web3.utils.fromWei(skill.toString(), 'ether');
-      return new BN(skillBalance).toFixed(6);
+      const skillBalance = fromWeiEther(skill.toString());
+      return toBN(skillBalance).toFixed(6);
     },
 
     getColoringClass(i: number): string {
@@ -539,13 +551,23 @@ export default Vue.extend({
   color: red;
 }
 
+.centered-icon {
+  align-self: center;
+  margin-left: 5px;
+}
+
 .btn-small {
   font-size: small;
   margin-top: 5px;
 }
 
-.centered-icon {
-  align-self: center;
-  margin-left: 5px;
+@media (max-width: 576px) {
+  .calculator {
+    flex-direction: column;
+  }
+  .calculator-character, .calculator-weapon {
+    justify-self: center;
+    width: 100%;
+  }
 }
 </style>

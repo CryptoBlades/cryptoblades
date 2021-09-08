@@ -14,8 +14,7 @@ module.exports = async function (deployer) {
   await newWeps.migrateTo_aa9da90();
 
   const game = await CryptoBlades.deployed();
-  const newGame = await upgradeProxy(game.address, CryptoBlades, { deployer });
-  await newGame.migrateTo_aa9da90();
+  await upgradeProxy(game.address, CryptoBlades, { deployer });
 
   const raidBasic = await RaidBasic.deployed();
   await upgradeProxy(raidBasic.address, RaidBasic, { deployer });

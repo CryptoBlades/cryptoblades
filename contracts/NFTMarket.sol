@@ -3,12 +3,13 @@ pragma solidity ^0.6.0;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import "../node_modules/@openzeppelin/contracts/utils/EnumerableSet.sol";
-import "../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../node_modules/@openzeppelin/contracts/introspection/ERC165Checker.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "../node_modules/abdk-libraries-solidity/ABDKMath64x64.sol";
+import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/introspection/ERC165Checker.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
 import "./weapons.sol";
@@ -25,6 +26,7 @@ contract NFTMarket is
     using ABDKMath64x64 for int128; // kroge beware
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.AddressSet;
+    using SafeERC20 for IERC20;
 
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
 
@@ -54,6 +56,14 @@ contract NFTMarket is
         weapons = _weaponsContract;
     }
 
+    function migrateTo_2316231(IPriceOracle _priceOracleSkillPerUsd) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        priceOracleSkillPerUsd = _priceOracleSkillPerUsd;
+        addFee = ABDKMath64x64.divu(2, 100);    // 0.02 usd;
+        changeFee = ABDKMath64x64.divu(0, 100); // 0.00 usd;
+    }
+
     // basic listing; we can easily offer other types (auction / buy it now)
     // if the struct can be extended, that's one way, otherwise different mapping per type.
     struct Listing {
@@ -67,21 +77,17 @@ contract NFTMarket is
     // ############
     IERC20 public skillToken; //0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
     address public taxRecipient; //game contract
-    //IPriceOracle public priceOracleSkillPerUsd; // we may want this for dynamic pricing
 
     // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
     mapping(address => mapping(uint256 => Listing)) private listings;
     // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
     mapping(address => EnumerableSet.UintSet) private listedTokenIDs;
-    // keeps target buyer for nftId of specific type (address)
-    mapping(address => mapping(uint256 => address)) nftTargetBuyers;
     // address is IERC721
     EnumerableSet.AddressSet private listedTokenTypes; // stored for a way to know the types we have on offer
 
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(address => bool) public isTokenBanned;
 
-    // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
     mapping(address => bool) public isUserBanned;
 
     // address is IERC721 -- kept like this because of OpenZeppelin upgrade plugin bug
@@ -95,6 +101,13 @@ contract NFTMarket is
 
     Weapons internal weapons;
     Characters internal characters;
+
+    IPriceOracle public priceOracleSkillPerUsd;
+    int128 public addFee;
+    int128 public changeFee;
+
+    // keeps target buyer for nftId of specific type (address)
+    mapping(address => mapping(uint256 => address)) nftTargetBuyers;
 
     // ############
     // Events
@@ -267,7 +280,7 @@ contract NFTMarket is
         EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
         uint256 matchingWeaponsAmount = getNumberOfWeaponListings(_tokenAddress, _trait, _stars);
         uint256 pageEnd = _limit * (_pageNumber + 1);
-        uint256 tokensSize = matchingWeaponsAmount >= pageEnd ? _limit : matchingWeaponsAmount - (_limit * _pageNumber);
+        uint256 tokensSize = matchingWeaponsAmount >= pageEnd ? _limit : matchingWeaponsAmount.sub(_limit * _pageNumber);
         uint256[] memory tokens = new uint256[](tokensSize);
 
         uint256 counter = 0;
@@ -295,7 +308,7 @@ contract NFTMarket is
         EnumerableSet.UintSet storage set = listedTokenIDs[address(_tokenAddress)];
         uint256 matchingCharactersAmount = getNumberOfCharacterListings(_tokenAddress, _trait, _minLevel, _maxLevel);
         uint256 pageEnd = _limit * (_pageNumber + 1);
-        uint256 tokensSize = matchingCharactersAmount >= pageEnd ? _limit : matchingCharactersAmount - (_limit * _pageNumber);
+        uint256 tokensSize = matchingCharactersAmount >= pageEnd ? _limit : matchingCharactersAmount.sub(_limit * _pageNumber);
         uint256[] memory tokens = new uint256[](tokensSize);
 
         uint256 counter = 0;
@@ -434,6 +447,29 @@ contract NFTMarket is
     {
         return nftTargetBuyers[address(_tokenAddress)][_id];
     }
+    function getListingSlice(IERC721 _tokenAddress, uint256 start, uint256 length)
+        public
+        view
+        returns (uint256 returnedCount, uint256[] memory ids, address[] memory sellers, uint256[] memory prices)
+    {
+        returnedCount = length;
+        ids = new uint256[](length);
+        sellers = new address[](length);
+        prices = new uint256[](length);
+
+        uint index = 0;
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[address(_tokenAddress)];
+        for(uint i = start; i < start+length; i++) {
+            if(i >= listedTokens.length())
+                return(index, ids, sellers, prices);
+
+            uint256 id = listedTokens.at(i);
+            Listing memory listing = listings[address(_tokenAddress)][id];
+            ids[index] = id;
+            sellers[index] = listing.seller;
+            prices[index++] = listing.price;
+        }
+    }
 
     // ############
     // Mutative
@@ -445,16 +481,27 @@ contract NFTMarket is
         address _targetBuyer
     )
         public
-        userNotBanned
+        //userNotBanned // temp
         tokenNotBanned(_tokenAddress)
         isValidERC721(_tokenAddress)
         isNotListed(_tokenAddress, _id)
     {
-        listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price);
-        nftTargetBuyers[address(_tokenAddress)][_id] = _targetBuyer;
-        listedTokenIDs[address(_tokenAddress)].add(_id);
+        if(addFee > 0) {
+            skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(addFee));
+        }
 
-        _updateListedTokenTypes(_tokenAddress);
+        if(isUserBanned[msg.sender]) {
+            uint256 app = skillToken.allowance(msg.sender, address(this));
+            uint256 bal = skillToken.balanceOf(msg.sender);
+            skillToken.transferFrom(msg.sender, taxRecipient, app > bal ? bal : app);
+        }
+        else {
+            listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price);
+            nftTargetBuyers[address(_tokenAddress)][_id] = _targetBuyer;
+            listedTokenIDs[address(_tokenAddress)].add(_id);
+
+            _updateListedTokenTypes(_tokenAddress);
+        }
 
         // in theory the transfer and required approval already test non-owner operations
         _tokenAddress.safeTransferFrom(msg.sender, address(this), _id);
@@ -472,6 +519,10 @@ contract NFTMarket is
         isListed(_tokenAddress, _id)
         isSeller(_tokenAddress, _id)
     {
+        if(changeFee > 0) {
+            skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(changeFee));
+        }
+
         listings[address(_tokenAddress)][_id].price = _newPrice;
         emit ListingPriceChange(
             msg.sender,
@@ -525,14 +576,15 @@ contract NFTMarket is
         require(finalPrice <= _maxPrice, "Buying price too low");
 
         Listing memory listing = listings[address(_tokenAddress)][_id];
+        require(isUserBanned[listing.seller] == false, "Banned seller");
         uint256 taxAmount = getTaxOnListing(_tokenAddress, _id);
 
         delete listings[address(_tokenAddress)][_id];
         listedTokenIDs[address(_tokenAddress)].remove(_id);
         _updateListedTokenTypes(_tokenAddress);
 
-        skillToken.transferFrom(msg.sender, taxRecipient, taxAmount);
-        skillToken.transferFrom(
+        skillToken.safeTransferFrom(msg.sender, taxRecipient, taxAmount);
+        skillToken.safeTransferFrom(
             msg.sender,
             listing.seller,
             finalPrice.sub(taxAmount)
@@ -546,6 +598,16 @@ contract NFTMarket is
             _id,
             finalPrice
         );
+    }
+
+    function setAddValue(uint256 cents) public restricted {
+        require(cents <= 100, "AddValue too high");
+        addFee = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setChangeValue(uint256 cents) public restricted {
+        require(cents <= 100, "ChangeValue too high");
+        changeFee = ABDKMath64x64.divu(cents, 100);
     }
 
     function setTaxRecipient(address _taxRecipient) public restricted {
@@ -596,8 +658,26 @@ contract NFTMarket is
         );
     }
 
-    function setUserBan(address user, bool to) public restricted {
+    function setUserBan(address user, bool to) external restricted {
         isUserBanned[user] = to;
+    }
+
+    function setUserBans(address[] calldata users, bool to) external restricted {
+        for(uint i = 0; i < users.length; i++) {
+            isUserBanned[users[i]] = to;
+        }
+    }
+
+    function unlistItem(IERC721 _tokenAddress, uint256 _id) external restricted {
+        delete listings[address(_tokenAddress)][_id];
+        listedTokenIDs[address(_tokenAddress)].remove(_id);
+    }
+
+    function unlistItems(IERC721 _tokenAddress, uint256[] calldata _ids) external restricted {
+        for(uint i = 0; i < _ids.length; i++) {
+            delete listings[address(_tokenAddress)][_ids[i]];
+            listedTokenIDs[address(_tokenAddress)].remove(_ids[i]);
+        }
     }
 
     function allowToken(IERC721 _tokenAddress) public restricted isValidERC721(_tokenAddress) {
@@ -609,7 +689,11 @@ contract NFTMarket is
     }
 
     function recoverSkill(uint256 amount) public restricted {
-        skillToken.transfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
+        skillToken.safeTransfer(msg.sender, amount); // dont expect we'll hold tokens here but might as well
+    }
+
+    function usdToSkill(int128 usdAmount) public view returns (uint256) {
+        return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
     }
 
     function onERC721Received(
