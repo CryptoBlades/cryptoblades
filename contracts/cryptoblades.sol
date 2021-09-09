@@ -1008,7 +1008,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             );
 
         tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
-        if (fromUserWallet) {
+        if (fromUserWallet > 0) {
             skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
         }
     }
