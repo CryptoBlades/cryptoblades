@@ -535,19 +535,18 @@ contract("PvpArena", (accounts) => {
         "221"
       );
 
-      let getMyParticipatingCharacters =
+      let myParticipatingCharacters =
         await pvpArena.getMyParticipatingCharacters({
           from: accounts[1],
         });
 
       await pvpArena.withdrawCharacter(character1ID, { from: accounts[1] });
-      getMyParticipatingCharacters =
-        await pvpArena.getMyParticipatingCharacters({ from: accounts[1] });
-      const foundCharacter = getMyParticipatingCharacters.some(
-        (characterID) => {
-          characterID.toString() === character1ID.toString();
-        }
-      );
+      myParticipatingCharacters = await pvpArena.getMyParticipatingCharacters({
+        from: accounts[1],
+      });
+      const foundCharacter = myParticipatingCharacters.some((characterID) => {
+        characterID.toString() === character1ID.toString();
+      });
 
       expect(foundCharacter).to.equal(false);
       const isCharacterInArena = await pvpArena.isCharacterInArena(
@@ -556,7 +555,7 @@ contract("PvpArena", (accounts) => {
       expect(isCharacterInArena).to.equal(false);
     });
 
-    it("should return the wager upon withdrawal", async () => {
+    it("should refund the wager upon withdrawal", async () => {
       const character2ID = await createCharacterInPvpTier(
         accounts[1],
         1,
