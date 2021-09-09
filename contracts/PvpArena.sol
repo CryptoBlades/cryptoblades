@@ -257,7 +257,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         Fighter storage fighter = _fightersByCharacter[characterID];
         uint256 wager = fighter.wager;
         _removeCharacterFromArena(characterID);
-        if (isAttackerWithinDecisionTime(characterID)) {
+        if (isCharacterDueling(characterID)) {
             skillToken.safeTransfer(msg.sender, wager.sub(wager.div(4)));
         } else {
             skillToken.safeTransfer(msg.sender, wager);
