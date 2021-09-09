@@ -1,4 +1,5 @@
 const { expectEvent, time } = require('@openzeppelin/test-helpers');
+const prepareContracts = require('./prepareContracts');
 
 const Characters = artifacts.require('Characters');
 const Weapons = artifacts.require('Weapons');
@@ -107,4 +108,5 @@ module.exports = {
   createShield,
   levelUpTo,
   getExpForLevel,
+  prepareContracts,
 };
