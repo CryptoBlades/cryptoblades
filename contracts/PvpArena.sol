@@ -413,9 +413,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (bool)
     {
-        return
-            _duelByAttacker[characterID].createdAt.add(decisionSeconds) >
-            block.timestamp;
+        return isAttackerWithinDecisionTime(characterID);
     }
 
     /// @dev wether or not a character can appear as someone's opponent
