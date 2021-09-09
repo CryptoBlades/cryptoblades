@@ -13,8 +13,10 @@ module.exports = async function (deployer, network, accounts) {
       lpTokenAddress = '0x0dEB588c1EC6f1D9f348126D401f05c4c7B7a80c';
     }
     else if(network === 'hecomainnet') {
-      skillTokenAddress = await SkillToken.deployed();
-      lpTokenAddress = await ExperimentToken.deployed();
+      const skillToken = await SkillToken.deployed();
+      skillTokenAddress = skillToken.address;
+      const lpToken = await ExperimentToken.deployed();
+      lpTokenAddress = lpToken.address;
     }
 
     await deployProxy(LPStakingRewardsUpgradeable, [accounts[0], rewardDistributorAddress, skillTokenAddress, lpTokenAddress, 0], { deployer });

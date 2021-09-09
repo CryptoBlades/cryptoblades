@@ -14,8 +14,10 @@ module.exports = async function (deployer, network, accounts) {
       lpTokenAddress = '0xC19dfd34D3ba5816dF9CBDaa02D32A9F8dc6F6fC';
     }
     else if(network === 'hecomainnet') {
-      skillTokenAddress = await SkillToken.deployed();
-      lpTokenAddress = await ExperimentToken.deployed();
+      const skillToken = await SkillToken.deployed();
+      skillTokenAddress = skillToken.address;
+      const lpToken = await ExperimentToken.deployed();
+      lpTokenAddress = lpToken.address;
     }
     else assert.fail('Should never happen - but just in case');
 

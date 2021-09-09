@@ -49,6 +49,8 @@
     "postdeploy-testnet": "run-s \"backup-networks 97\" \"verify-contracts -- --network bsctestnet\"",
     "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet",
     "postdeploy-mainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 56\" \"verify-contracts -- --network bscmainnet\"",
+    "deploy-hecomainnet-warning-be-careful-this-is-prod": "truffle migrate --network hecomainnet",
+    "postdeploy-hecomainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 128\" \"verify-contracts -- --network hecomainnet\"",
     "deploy-mainnet-dry-run": "truffle migrate --network bscmainnet --dry-run",
     "backup-networks": "node scripts/manage-networks.js backup",
     "verify-contracts": "node scripts/verify-contracts.js"

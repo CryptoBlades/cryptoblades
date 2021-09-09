@@ -14,9 +14,11 @@ module.exports = async function (deployer, network) {
     }
     else if(network === 'hecomainnet') {
       await deployer.deploy(SkillToken);
-      skillTokenAddress = await SkillToken.deployed();
+      const skillToken = await SkillToken.deployed();
+      skillTokenAddress = skillToken.address;
       await deployer.deploy(ExperimentToken);
-      lpTokenAddress = await ExperimentToken.deployed();
+      const lpToken = await ExperimentToken.deployed();
+      lpTokenAddress = lpToken.address
     }
     else assert.fail('Should never happen - but just in case');
 

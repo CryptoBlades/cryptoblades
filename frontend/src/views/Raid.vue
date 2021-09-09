@@ -26,9 +26,9 @@
                 </div>
                 <div class="progress" style="width: 100%">
                   <div class="progress-bar progress-bar-striped progress-bar-animated players-progress-bar"
-                    role="progressbar" :style="[{'width': formattedWinChance, 'background-color': calculateProgressBarColor()}]"></div>
+                    role="progressbar" :style="[{'width': calculatePlayersProgressBarWidth(), 'background-color': calculateProgressBarColor()}]"></div>
                   <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger boss-progress-bar"
-                    role="progressbar" :style="[{'width': (100 - calculateWinChance()) + '%'}]"></div>
+                    role="progressbar" :style="[{'width': calculateBossProgressBarWidth() }]"></div>
                 </div>
               </li>
             </ul>
@@ -360,6 +360,14 @@ export default Vue.extend({
       } else {
         return 'green';
       }
+    },
+
+    calculatePlayersProgressBarWidth(): string {
+      return `${Math.round(+this.calculateWinChance())}%`;
+    },
+
+    calculateBossProgressBarWidth(): string {
+      return `${Math.round(100 - +this.calculateWinChance())}%`;
     },
 
     convertWeiToSkill(wei: string): string {
