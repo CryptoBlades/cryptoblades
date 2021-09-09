@@ -36,6 +36,10 @@ module.exports = async function (deployer, network) {
 
     skillToken = await IERC20.at('0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab');
   }
+  else if(network === 'hecomainnet') {
+    randoms = await ChainlinkRandoms.deployed();
+    skillToken = await SkillToken.deployed();
+  }
 
   assert(skillToken != null, 'Expected skillToken to be set to a contract');
   assert(randoms != null, 'Expected random to be set to a contract');
