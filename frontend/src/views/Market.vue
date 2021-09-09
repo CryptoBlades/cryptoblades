@@ -504,7 +504,7 @@
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
                   <b-form-input class="modal-input" v-model="listingTargetBuyer" placeholder="Target Buyer Address (optional)" />
                   <span v-if="listingSellPrice">
-                    Do you want to sell your {{activeType}} for <CurrencyConverter :skill="Math.min(+listingSellPrice, 10000)"/>?<br>
+                    Do you want to sell your {{activeType}} for <CurrencyConverter :skill="Math.min(+listingSellPrice, 10000).toString()"/>?<br>
                   <i>The buyer will pay an extra {{activeListingMarketTax()}}% market fee for a total of
                   <CurrencyConverter :skill="calculatedBuyerCost(Math.min(+listingSellPrice, 10000))"/></i></span>
                 </b-modal>
