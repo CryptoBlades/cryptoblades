@@ -535,15 +535,13 @@ contract("PvpArena", (accounts) => {
         "221"
       );
 
-      let myParticipatingCharacters =
+      await pvpArena.withdrawCharacter(character1ID, { from: accounts[1] });
+
+      const myParticipatingCharacters =
         await pvpArena.getMyParticipatingCharacters({
           from: accounts[1],
         });
 
-      await pvpArena.withdrawCharacter(character1ID, { from: accounts[1] });
-      myParticipatingCharacters = await pvpArena.getMyParticipatingCharacters({
-        from: accounts[1],
-      });
       const foundCharacter = myParticipatingCharacters.some((characterID) => {
         characterID.toString() === character1ID.toString();
       });
