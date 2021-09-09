@@ -3,6 +3,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "hardhat/console.sol";
 import "./util.sol";
@@ -17,6 +18,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
     using SafeMath for uint8;
+    using SafeERC20 for IERC20;
 
     struct Fighter {
         uint256 characterID;
@@ -90,6 +92,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             "Character is not owned by sender"
         );
         _;
+    }
+
+    modifier restricted() {
+        _restricted();
+        _;
+    }
+
+    function _restricted() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
     }
 
     modifier enteringArenaChecks(
@@ -239,8 +250,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev withdraws a character from the arena.
     /// if the character is in a battle, a penalty is charged
-    function withdrawCharacter(uint256 characterID) external {
-        // TODO: implement (not final signature)
+    function withdrawCharacter(uint256 characterID)
+        external
+        isOwnedCharacter(characterID)
+    {
+        Fighter storage fighter = _fightersByCharacter[characterID];
+        uint256 wager = fighter.wager;
+        _removeCharacterFromArena(characterID);
+        if (isAttackerWithinDecisionTime(characterID)) {
+            skillToken.safeTransfer(msg.sender, wager.sub(wager.div(4)));
+        } else {
+            skillToken.safeTransfer(msg.sender, wager);
+        }
     }
 
     /// @dev requests a new opponent for a fee
@@ -270,7 +291,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
     function getArenaTier(uint256 characterID) public view returns (uint8) {
         uint256 level = characters.getLevel(characterID);
-
         return uint8(level.div(10));
     }
 
@@ -366,8 +386,29 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return _duelByAttacker[characterID].defenderID;
     }
 
+    /// @dev get amount wagered for a given character
+    function getCharacterWager(uint256 characterID)
+        public
+        view
+        returns (uint256)
+    {
+        return _fightersByCharacter[characterID].wager;
+    }
+
     /// @dev wether or not the character is still in time to start a duel
     function isAttackerWithinDecisionTime(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return
+            _duelByAttacker[characterID].createdAt.add(decisionSeconds) >
+            block.timestamp;
+    }
+
+    /// @dev wether or not the character is already in a duel
+    /// TODO adjust this formula to use the right checks when the duel struct is ready
+    function isCharacterDueling(uint256 characterID)
         public
         view
         returns (bool)
@@ -391,5 +432,30 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev updates the last activity timestamp of a character
     function _updateLastActivityTimestamp(uint256 characterID) private {
         _lastActivityByCharacter[characterID] = block.timestamp;
+    }
+
+    /// @dev removes a character from the arena's state
+    function _removeCharacterFromArena(uint256 characterID) private {
+        require(isCharacterInArena(characterID), "Character not in arena");
+        Fighter storage fighter = _fightersByCharacter[characterID];
+
+        uint256 weaponID = fighter.weaponID;
+        uint256 shieldID = fighter.shieldID;
+
+        delete _fightersByCharacter[characterID];
+
+        uint256[] storage playerFighters = _fightersByPlayer[msg.sender];
+        playerFighters[characterID] = playerFighters[playerFighters.length - 1];
+        playerFighters.pop();
+
+        uint8 tier = getArenaTier(characterID);
+
+        uint256[] storage tierFighters = _fightersByTier[tier];
+        tierFighters[characterID] = tierFighters[tierFighters.length - 1];
+        tierFighters.pop();
+
+        _charactersInArena[characterID] = false;
+        _weaponsInArena[weaponID] = false;
+        _shieldsInArena[shieldID] = false;
     }
 }
