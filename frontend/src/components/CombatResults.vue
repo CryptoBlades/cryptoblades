@@ -24,7 +24,7 @@
           </b-col>
         </b-row>
       </b-container>
-      <h6 class="text-left gas-spent">You spent {{fightResults.bnbGasUsed}} BNB on gas fees </h6>
+      <h6 class="text-left gas-spent">You spent {{fightResults.bnbGasUsed}} {{gasToken}} on gas fees </h6>
       <img src="../assets/divider4.png" class="expander-divider">
       <b-container>
         <b-row>
@@ -58,7 +58,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { toBN, fromWeiEther } from '../utils/common';
+import { toBN, fromWeiEther, chainToToken } from '../utils/common';
 import Hint from '../components/Hint.vue';
 import {PropType} from 'vue/types/options';
 import axios from 'axios';
@@ -85,6 +85,7 @@ export default Vue.extend({
   data() {
     return {
       skillPrice: 0,
+      gasToken: '',
     };
   },
 
@@ -117,6 +118,8 @@ export default Vue.extend({
   },
 
   async mounted() {
+    this.gasToken = chainToToken(localStorage.getItem('currentChain') || 'BSC');
+    console.log(this.gasToken);
     await this.fetchPrices();
   },
 

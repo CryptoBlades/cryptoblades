@@ -68,11 +68,12 @@
 
 <script lang="ts">
 import Events from '../events';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { Accessors } from 'vue/types/options';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../utils/common';
+import { getConfigValue } from '@/contracts';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -82,6 +83,7 @@ interface StoreMappedState {
 interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
   setUpContracts(): Promise<void>;
+  initialize(): Promise<void>;
   configureMetaMask(): Promise<void>;
 }
 interface Data {
@@ -159,7 +161,8 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['claimTokenRewards','setUpContracts','configureMetaMask']) as StoreMappedActions),
+    ...(mapActions(['claimTokenRewards','setUpContracts','initialize','configureMetaMask']) as StoreMappedActions),
+    ...mapMutations(['setNetworkId']),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
@@ -223,12 +226,12 @@ export default Vue.extend({
       Events.$emit('setting:fightMultiplier', { value: this.fightMultiplier });
     },
 
-    setCurrentChain() {
+    async setCurrentChain() {
       localStorage.setItem('currentChain', this.currentChain);
-      this.setUpContracts();
-      this.configureMetaMask();
-
+      this.setNetworkId(+getConfigValue('VUE_APP_NETWORK_ID'));
+      await this.configureMetaMask();
       Events.$emit('setting:currentChain', { value: this.currentChain });
+      window.location.reload();
     },
   },
 });

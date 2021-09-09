@@ -37,3 +37,14 @@ export const gasUsedToBnb = (gasUsed: number, gasPrice: string): string => {
 
   return  bnbGasCost;
 };
+
+export const chainToToken = (chain: string): string => {
+  switch(chain.toUpperCase()) {
+  case 'BSC':
+    return 'BNB';
+  case 'HECO':
+    return 'HT';
+  default:
+    return 'BNB';
+  }
+};

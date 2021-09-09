@@ -45,6 +45,7 @@
     "test": "truffle test",
     "deploy": "truffle migrate --reset",
     "deploy-testnet": "truffle migrate --network bsctestnet",
+    "deploy-hecotestnet": "truffle migrate --network hecotestnet",
     "postdeploy-testnet": "run-s \"backup-networks 97\" \"verify-contracts -- --network bsctestnet\"",
     "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet",
     "postdeploy-mainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 56\" \"verify-contracts -- --network bscmainnet\"",

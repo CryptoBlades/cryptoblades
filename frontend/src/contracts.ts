@@ -55,13 +55,13 @@ interface Chain {
   chains: Record<string, Record<string, string>>;
 }
 
-function getConfigValue(key: string): string {
+export function getConfigValue(key: string): string {
   const env = process.env.NODE_ENV || 'production';
   const chain = localStorage.getItem('currentChain') || 'BSC';
   return (config as Config).environments[env].chains[chain][key];
 }
 
-const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
+let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
 
 type Networks = Partial<Record<string, { address: string }>>;
 
@@ -102,6 +102,7 @@ function getStakingContractsInfoWithDefaults(): Partial<Record<StakeType, Partia
 }
 
 async function setUpStakingContracts(web3: Web3) {
+  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
   const stakingContractsInfo = getStakingContractsInfoWithDefaults();
 
   const staking: StakingContracts = {};
@@ -110,7 +111,6 @@ async function setUpStakingContracts(web3: Web3) {
     const stakingContractInfo = stakingContractsInfo[stakeType]!;
 
     if(!stakingContractInfo.stakingRewardsAddress || !stakingContractInfo.stakingTokenAddress) continue;
-
     staking[stakeType] = {
       StakingRewards: new web3.eth.Contract(stakingRewardsAbi as Abi, stakingContractInfo.stakingRewardsAddress),
       StakingToken: new web3.eth.Contract(erc20Abi as Abi, stakingContractInfo.stakingTokenAddress)
@@ -128,6 +128,7 @@ async function setUpStakingContracts(web3: Web3) {
 }
 
 export async function setUpContracts(web3: Web3): Promise<Contracts> {
+
   const stakingContracts = await setUpStakingContracts(web3);
 
   if (featureFlagStakeOnly) {
@@ -135,7 +136,6 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   }
 
   const cryptoBladesContractAddr = getConfigValue('VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS') || (cryptoBladesNetworks as Networks)[networkId]!.address;
-
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as Abi, cryptoBladesContractAddr);
   const [charactersAddr, weaponsAddr, randomsAddr, blacksmithAddr] = await Promise.all([
     CryptoBlades.methods.characters().call(),
@@ -143,6 +143,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     CryptoBlades.methods.randoms().call(),
     CryptoBlades.methods.blacksmith().call(),
   ]);
+
   const Randoms = new web3.eth.Contract(randomsAbi as Abi, randomsAddr);
   const Characters = new web3.eth.Contract(charactersAbi as Abi, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);

@@ -2919,7 +2919,7 @@ export function createStore(web3: Web3) {
             params: {
               type: 'ERC20',
               options: {
-                address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab', //replace with heco-testnet skill token address
+                address: '0xd13B8cB5875be9aCb863febC8832848e31461158',
                 symbol: 'SKILL',
                 decimals: 18,
                 image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
