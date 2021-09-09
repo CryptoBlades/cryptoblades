@@ -239,22 +239,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         );
     }
 
-    function getMyCharacters() public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](characters.balanceOf(msg.sender));
-        for(uint256 i = 0; i < tokens.length; i++) {
-            tokens[i] = characters.tokenOfOwnerByIndex(msg.sender, i);
-        }
-        return tokens;
-    }
-
-    function getMyWeapons() public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](weapons.balanceOf(msg.sender));
-        for(uint256 i = 0; i < tokens.length; i++) {
-            tokens[i] = weapons.tokenOfOwnerByIndex(msg.sender, i);
-        }
-        return tokens;
-    }
-
     function unpackFightData(uint96 playerData)
         public pure returns (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) {
 
