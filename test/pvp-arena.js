@@ -6,7 +6,7 @@ const {
 } = require("@openzeppelin/test-helpers");
 const helpers = require("./helpers");
 
-const { BN } = web3.utils;
+const { BN, toBN } = web3.utils;
 
 contract("PvpArena", (accounts) => {
   let pvpArena, characters, weapons, shields, priceOracle, randoms;
@@ -410,8 +410,6 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe("#leaveArena", () => {});
-
   describe("#requestOpponent", () => {
     let character1ID;
     let weapon1ID;
@@ -521,6 +519,84 @@ contract("PvpArena", (accounts) => {
 
     describe("decision time expired", () => {
       it("should revert");
+    });
+  });
+
+  describe("#withdrawCharacter", () => {
+    it("should withdraw the character from the arena", async () => {
+      const character1ID = await createCharacterInPvpTier(
+        accounts[1],
+        2,
+        "000"
+      );
+      const character2ID = await createCharacterInPvpTier(
+        accounts[1],
+        2,
+        "221"
+      );
+
+      await pvpArena.withdrawCharacter(character1ID, { from: accounts[1] });
+
+      const myParticipatingCharacters =
+        await pvpArena.getMyParticipatingCharacters({
+          from: accounts[1],
+        });
+
+      const foundCharacter = myParticipatingCharacters.some((characterID) => {
+        characterID.toString() === character1ID.toString();
+      });
+
+      expect(foundCharacter).to.equal(false);
+      const isCharacterInArena = await pvpArena.isCharacterInArena(
+        character1ID
+      );
+      expect(isCharacterInArena).to.equal(false);
+    });
+
+    it("should refund the wager upon withdrawal", async () => {
+      const character2ID = await createCharacterInPvpTier(
+        accounts[1],
+        1,
+        "222"
+      );
+      const characterWager = await pvpArena.getCharacterWager(character2ID);
+      const previousBalance = await skillToken.balanceOf(accounts[1]);
+      await pvpArena.withdrawCharacter(character2ID, { from: accounts[1] });
+
+      const newBalance = await skillToken.balanceOf(accounts[1]);
+
+      expect(newBalance.toString()).to.equal(
+        previousBalance.add(characterWager).toString()
+      );
+    });
+    it("should return the wager minus the penalty if the character is in a duel", async () => {
+      const character1ID = await createCharacterInPvpTier(
+        accounts[1],
+        4,
+        "222"
+      );
+      const character2ID = await createCharacterInPvpTier(
+        accounts[2],
+        4,
+        "221"
+      );
+
+      const characterWager = await pvpArena.getCharacterWager(character1ID);
+      const previousBalance = await skillToken.balanceOf(accounts[1]);
+
+      const wagerMinusPenalty = toBN(characterWager - characterWager * 0.25);
+
+      await time.increase(await pvpArena.unattackableSeconds());
+      await pvpArena.requestOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      await pvpArena.withdrawCharacter(character1ID, { from: accounts[1] });
+      const newBalance = await skillToken.balanceOf(accounts[1]);
+
+      expect(newBalance.toString()).to.equal(
+        previousBalance.add(wagerMinusPenalty).toString()
+      );
     });
   });
 });
