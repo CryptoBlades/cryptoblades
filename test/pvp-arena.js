@@ -605,7 +605,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe.only("#reRollOpponent", () => {
+  describe("#reRollOpponent", () => {
     it("fails if character is not dueling", async () => {
       const character1ID = await createCharacterInPvpTier(accounts[1], 2);
       await createCharacterInPvpTier(accounts[2], 2);
