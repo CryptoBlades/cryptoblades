@@ -193,54 +193,24 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterInArena(characterID)
         isOwnedCharacter(characterID)
     {
-        uint8 tier = getArenaTier(characterID);
+        _assignOpponent(characterID);
+    }
 
-        uint256[] storage fightersInTier = _fightersByTier[tier];
+    /// @dev requests a new opponent for a fee
+    function reRollOpponent(uint256 characterID)
+        external
+        characterInArena(characterID)
+        isOwnedCharacter(characterID)
+    {
+        require(isCharacterDueling(characterID), "Character is not dueling");
 
-        require(
-            fightersInTier.length != 0,
-            "No opponents available for this character's level"
+        skillToken.transferFrom(
+            msg.sender,
+            address(this),
+            getDuelCost(characterID).div(4)
         );
 
-        uint256 seed = randoms.getRandomSeed(msg.sender);
-        uint256 randomIndex = RandomUtil.randomSeededMinMax(
-            0,
-            fightersInTier.length - 1,
-            seed
-        );
-
-        uint256 opponentID;
-        bool foundOpponent = false;
-
-        // run through fighters from a random starting point until we find one or none are available
-        for (uint256 i = 0; i < fightersInTier.length; i++) {
-            uint256 index = (randomIndex + i) % fightersInTier.length;
-            uint256 candidateID = fightersInTier[index];
-            if (candidateID == characterID) continue;
-            if (!isCharacterAttackable(candidateID)) continue;
-            foundOpponent = true;
-            opponentID = candidateID;
-            break;
-        }
-
-        require(foundOpponent, "No opponent found");
-
-        _duelByAttacker[characterID] = Duel(
-            characterID,
-            opponentID,
-            block.timestamp
-        );
-
-        // lock the cost of the duel
-        _fightersByCharacter[characterID].lockedWager = getDuelCost(
-            characterID
-        );
-
-        // mark both characters as unattackable
-        _lastActivityByCharacter[characterID] = block.timestamp;
-        _lastActivityByCharacter[opponentID] = block.timestamp;
-
-        emit NewDuel(characterID, opponentID, block.timestamp);
+        _assignOpponent(characterID);
     }
 
     /// @dev performs a given character's duel against its opponent
@@ -262,15 +232,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         } else {
             skillToken.safeTransfer(msg.sender, wager);
         }
-    }
-
-    /// @dev requests a new opponent for a fee
-    function reRollOpponent(uint256 characterID) external {
-        // TODO:
-        // - [ ] check if character is currently attacking
-        // - [ ] check if penalty can be paid
-        // - [ ] charge penalty
-        // - [ ] find a new opponent
     }
 
     /// @dev gets the amount of SKILL that is risked per duel
@@ -301,18 +262,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         returns (uint256[] memory)
     {
         return _fightersByPlayer[msg.sender];
-    }
-
-    /// @dev returns the senders fighters in the arena
-    function _getMyFighters() internal view returns (Fighter[] memory) {
-        uint256[] memory characterIDs = getMyParticipatingCharacters();
-        Fighter[] memory fighters = new Fighter[](characterIDs.length);
-
-        for (uint256 i = 0; i < characterIDs.length; i++) {
-            fighters[i] = _fightersByCharacter[characterIDs[i]];
-        }
-
-        return fighters;
     }
 
     /// @dev returns the IDs of the sender's weapons currently in the arena
@@ -455,5 +404,69 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
+    }
+
+    /// @dev attempts to find an opponent for a character.
+    function _assignOpponent(uint256 characterID) private {
+        uint8 tier = getArenaTier(characterID);
+
+        uint256[] storage fightersInTier = _fightersByTier[tier];
+
+        require(
+            fightersInTier.length != 0,
+            "No opponents available for this character's level"
+        );
+
+        uint256 seed = randoms.getRandomSeed(msg.sender);
+        uint256 randomIndex = RandomUtil.randomSeededMinMax(
+            0,
+            fightersInTier.length - 1,
+            seed
+        );
+
+        uint256 opponentID;
+        bool foundOpponent = false;
+
+        // run through fighters from a random starting point until we find one or none are available
+        for (uint256 i = 0; i < fightersInTier.length; i++) {
+            uint256 index = (randomIndex + i) % fightersInTier.length;
+            uint256 candidateID = fightersInTier[index];
+            if (candidateID == characterID) continue;
+            if (!isCharacterAttackable(candidateID)) continue;
+            foundOpponent = true;
+            opponentID = candidateID;
+            break;
+        }
+
+        require(foundOpponent, "No opponent found");
+
+        _duelByAttacker[characterID] = Duel(
+            characterID,
+            opponentID,
+            block.timestamp
+        );
+
+        // lock the cost of the duel
+        _fightersByCharacter[characterID].lockedWager = getDuelCost(
+            characterID
+        );
+
+        // mark both characters as unattackable
+        _lastActivityByCharacter[characterID] = block.timestamp;
+        _lastActivityByCharacter[opponentID] = block.timestamp;
+
+        emit NewDuel(characterID, opponentID, block.timestamp);
+    }
+
+    /// @dev returns the senders fighters in the arena
+    function _getMyFighters() internal view returns (Fighter[] memory) {
+        uint256[] memory characterIDs = getMyParticipatingCharacters();
+        Fighter[] memory fighters = new Fighter[](characterIDs.length);
+
+        for (uint256 i = 0; i < characterIDs.length; i++) {
+            fighters[i] = _fightersByCharacter[characterIDs[i]];
+        }
+
+        return fighters;
     }
 }

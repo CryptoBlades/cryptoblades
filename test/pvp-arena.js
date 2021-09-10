@@ -55,6 +55,11 @@ contract("PvpArena", (accounts) => {
       accounts[2],
       web3.utils.toWei("1", "kether")
     );
+    await skillToken.transferFrom(
+      skillToken.address,
+      accounts[3],
+      web3.utils.toWei("1", "kether")
+    );
 
     await characters.grantRole(await characters.GAME_ADMIN(), accounts[0]);
     await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[1]);
@@ -597,6 +602,88 @@ contract("PvpArena", (accounts) => {
       expect(newBalance.toString()).to.equal(
         previousBalance.add(wagerMinusPenalty).toString()
       );
+    });
+  });
+
+  describe("#reRollOpponent", () => {
+    it("fails if character is not dueling", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      await createCharacterInPvpTier(accounts[2], 2);
+
+      await expectRevert(
+        pvpArena.reRollOpponent(character1ID, {
+          from: accounts[1],
+        }),
+        "Character is not dueling"
+      );
+    });
+
+    it("transfers skill from the sender to the contract", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      const character2ID = await createCharacterInPvpTier(accounts[2], 2);
+      const character3ID = await createCharacterInPvpTier(accounts[3], 2);
+
+      await time.increase(await pvpArena.unattackableSeconds());
+
+      await pvpArena.requestOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      const previousBalance = await skillToken.balanceOf(accounts[1]);
+
+      await pvpArena.reRollOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      const newBalance = await skillToken.balanceOf(accounts[1]);
+
+      const duelCost = await pvpArena.getDuelCost(character1ID);
+
+      const reRollPenalty = toBN(duelCost * 0.25);
+
+      expect(newBalance.toString()).to.equal(
+        previousBalance.sub(reRollPenalty).toString()
+      );
+    });
+
+    it("can not re roll the same opponent", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      const character2ID = await createCharacterInPvpTier(accounts[2], 2);
+
+      await time.increase(await pvpArena.unattackableSeconds());
+
+      await pvpArena.requestOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      await expectRevert(
+        pvpArena.reRollOpponent(character1ID, {
+          from: accounts[1],
+        }),
+        "No opponent found"
+      );
+    });
+
+    it("assigns a new opponent", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      const character2ID = await createCharacterInPvpTier(accounts[2], 2);
+
+      await time.increase(await pvpArena.unattackableSeconds());
+
+      await pvpArena.requestOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      await time.increase(await pvpArena.unattackableSeconds());
+
+      const { tx } = await pvpArena.reRollOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      await expectEvent.inTransaction(tx, pvpArena, "NewDuel", {
+        attacker: character1ID,
+        defender: character2ID,
+      });
     });
   });
 });
