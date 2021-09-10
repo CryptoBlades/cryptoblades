@@ -102,6 +102,20 @@ async function levelUpTo(characterID, level, context = {}) {
   await characters.gainXp(characterID, requiredExp);
 }
 
+/**
+ * Ensures that a random result will always be the same for a given seed
+ * WARNING: This forwards time to a future date
+ * This is sensitive to time changes so it can break easily
+ * TODO: Find a more maintainable way to do this
+ *
+ * @param {number} seed
+ * @param {DummyRandom} randoms A DummyRandoms instance
+ */
+async function setDeterministicRandomSeed(seed, timestamp, randoms) {
+  randoms.setRandomNumberForTestingPurposes(seed);
+  await time.increaseTo(timestamp);
+}
+
 module.exports = {
   createCharacter,
   createWeapon,
@@ -109,4 +123,5 @@ module.exports = {
   levelUpTo,
   getExpForLevel,
   prepareContracts,
+  setDeterministicRandomSeed,
 };

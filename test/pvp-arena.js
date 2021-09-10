@@ -516,10 +516,6 @@ contract("PvpArena", (accounts) => {
         );
       });
     });
-
-    describe("decision time expired", () => {
-      it("should revert");
-    });
   });
 
   describe("#withdrawCharacter", () => {
@@ -569,6 +565,7 @@ contract("PvpArena", (accounts) => {
         previousBalance.add(characterWager).toString()
       );
     });
+
     it("should return the wager minus the penalty if the character is in a duel", async () => {
       const character1ID = await createCharacterInPvpTier(
         accounts[1],
@@ -597,6 +594,116 @@ contract("PvpArena", (accounts) => {
       expect(newBalance.toString()).to.equal(
         previousBalance.add(wagerMinusPenalty).toString()
       );
+    });
+
+    describe("decision time expired", () => {
+      it("should subtract the penalty from the refunded amount");
+    });
+  });
+
+  describe.only("#performDuel", async () => {
+    describe("happy path", () => {
+      describe("attacker wins", () => {
+        let character1ID;
+        let character2ID;
+        let previousBalance;
+        let duelTx;
+        let event;
+        let character2Wager;
+        let character1Wager;
+
+        beforeEach(async () => {
+          // This is sensitive to time changes so it can break easily
+          // TODO: Find a more maintainable way to do this
+          await helpers.setDeterministicRandomSeed(4, 5_000_000_000, randoms);
+
+          character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
+          character2ID = await createCharacterInPvpTier(accounts[2], 2, "221");
+          await time.increase(await pvpArena.unattackableSeconds());
+          await pvpArena.requestOpponent(character1ID, {
+            from: accounts[1],
+          });
+          character1Wager = await pvpArena.getCharacterWager(character1ID, {
+            from: accounts[1],
+          });
+          character2Wager = await pvpArena.getCharacterWager(character2ID, {
+            from: accounts[2],
+          });
+
+          const { tx } = await pvpArena.performDuel(character1ID, {
+            from: accounts[1],
+          });
+          duelTx = tx;
+          previousBalance = await skillToken.balanceOf(accounts[1]);
+          event = await expectEvent.inTransaction(
+            duelTx,
+            pvpArena,
+            "DuelFinished"
+          );
+        });
+
+        it("should properly process the duel", async () => {
+          // NOTE: Due to limitations with random generation, all test cases for this scenario are in one block
+          const duelCost = await pvpArena.getDuelCost(character1ID, {
+            from: accounts[1],
+          });
+
+          const rewards = await pvpArena.getMyRewards({ from: accounts[1] });
+
+          const bounty = duelCost.mul(toBN(2));
+          const poolTax = bounty.mul(toBN(15)).div(toBN(100));
+          const winnerReward = bounty.sub(poolTax).sub(duelCost);
+
+          expect(rewards.toString()).to.equal(winnerReward.toString());
+          const character2NewWager = await pvpArena.getCharacterWager(
+            character2ID,
+            {
+              from: accounts[2],
+            }
+          );
+
+          expect(character2Wager.toString()).to.equal(
+            character2NewWager.sub(duelCost).toString()
+          );
+
+          const character1NewWager = await pvpArena.getCharacterWager(
+            character1ID,
+            {
+              from: accounts[1],
+            }
+          );
+
+          expect(character1NewWager.toString()).to.equal(
+            character1Wager.toString()
+          );
+        });
+      });
+
+      describe("with effective traits", () => {
+        it("should affect the attackers power");
+        it("should not affect the defender's power");
+      });
+
+      describe("attacker loses", () => {
+        it("should pay the defender their prize");
+
+        it("should remove battleCost from the attacker's wager");
+
+        it("should save the ranking prize pool");
+      });
+      it("should emit the DuelFinished event");
+    });
+
+    describe("decision time expired", () => {
+      it("should revert");
+    });
+
+    describe("character not in a duel", () => {
+      it("should revert");
+    });
+
+    describe("character is not the sender's", () => {
+      it("should revert");
     });
   });
 });

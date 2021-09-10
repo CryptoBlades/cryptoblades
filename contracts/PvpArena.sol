@@ -36,6 +36,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 createdAt;
     }
 
+    struct BountyDistribution {
+        uint256 winnerReward;
+        uint256 loserPayment;
+        uint256 rankingPoolTax;
+    }
+
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     CryptoBlades public game;
@@ -50,6 +56,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     int128 private _baseWagerUSD;
     /// @dev how much extra USD is wagered per level tier
     int128 private _tierWagerUSD;
+    /// @dev how much of a duel's bounty is sent to the rankings pool
+    uint256 private _rankingsPoolTaxPercent;
     /// @dev how many times the cost of battling must be wagered to enter the arena
     uint256 public wageringFactor;
     /// @dev amount of time a character is unattackable
@@ -67,12 +75,16 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(address => uint256[]) private _fightersByPlayer;
     /// @dev Active duel by characterID currently attacking
     mapping(uint256 => Duel) private _duelByAttacker;
-    ///@dev characters currently in the arena
+    /// @dev characters currently in the arena
     mapping(uint256 => bool) private _charactersInArena;
-    ///@dev weapons currently in the arena
+    /// @dev weapons currently in the arena
     mapping(uint256 => bool) private _weaponsInArena;
-    ///@dev shields currently in the arena
+    /// @dev shields currently in the arena
     mapping(uint256 => bool) private _shieldsInArena;
+    /// @dev earnings earned by player
+    mapping(address => uint256) private _rewardsByPlayer;
+    /// @dev accumulated rewards per tier
+    mapping(uint8 => uint256) private _rankingsPoolByTier;
 
     event NewDuel(
         uint256 indexed attacker,
@@ -83,6 +95,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 indexed attacker,
         uint256 indexed defender,
         uint256 timestamp,
+        uint256 attackerRoll,
+        uint256 defenderRoll,
         bool attackerWon
     );
 
@@ -158,6 +172,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         wageringFactor = 3;
         _baseWagerUSD = ABDKMath64x64.divu(500, 100); // $5
         _tierWagerUSD = ABDKMath64x64.divu(50, 100); // $0.5
+        _rankingsPoolTaxPercent = 15;
         unattackableSeconds = 2 minutes;
         decisionSeconds = 3 minutes;
     }
@@ -257,9 +272,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // - [x] verify character is within decision seconds
         // - [x] calculate winner
         // - [x] consider elemental bonus
-        // - [ ] distribute bounty
+        // - [ ] update isCharacterDueling
+        // - [x] add tracking for earnings
+        // - [x] distribute earnings
         // - [ ] update both characters' last activity timestamp
-        // - [ ] remove loser from arena if wager is zero
+        // - [x] remove loser from arena if wager is zero
         require(
             isAttackerWithinDecisionTime(attackerID),
             "Decision time expired"
@@ -279,11 +296,50 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             false
         );
 
-        bool attackerWon = attackerRoll >= defenderRoll;
+        console.log("attackerRoll: %s", attackerRoll);
+        console.log("defenderRoll: %s", defenderRoll);
 
-        emit DuelFinished(attackerID, defenderID, block.timestamp, attackerWon);
+        uint256 winnerID = attackerRoll >= defenderRoll
+            ? attackerID
+            : defenderID;
+        uint256 loserID = attackerRoll >= defenderRoll
+            ? defenderID
+            : attackerID;
+        address winner = characters.ownerOf(winnerID);
 
-        // TODO: Finish
+        console.log("attacker won: %s", attackerRoll >= defenderRoll);
+
+        emit DuelFinished(
+            attackerID,
+            defenderID,
+            block.timestamp,
+            attackerRoll,
+            defenderRoll,
+            attackerRoll >= defenderRoll
+        );
+
+        BountyDistribution
+            memory bountyDistribution = _getDuelBountyDistribution(attackerID);
+
+        console.log("losers wager %s", _fightersByCharacter[loserID].wager);
+        console.log("winners reward %s", bountyDistribution.winnerReward);
+        _rewardsByPlayer[winner] = _rewardsByPlayer[winner].add(
+            bountyDistribution.winnerReward
+        );
+        _fightersByCharacter[loserID].wager = _fightersByCharacter[loserID]
+            .wager
+            .sub(bountyDistribution.loserPayment);
+
+        console.log("losers wager %s", _fightersByCharacter[loserID].wager);
+
+        if (_fightersByCharacter[loserID].wager == 0) {
+            _removeCharacterFromArena(loserID);
+        }
+
+        // add to the rankings pool
+        _rankingsPoolByTier[getArenaTier(attackerID)].add(
+            bountyDistribution.rankingPoolTax
+        );
     }
 
     /// @dev withdraws a character from the arena.
@@ -309,6 +365,35 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // - [ ] check if penalty can be paid
         // - [ ] charge penalty
         // - [ ] find a new opponent
+    }
+
+    /// @dev returns the SKILL amounts distributed to the winner and the ranking pool
+    function _getDuelBountyDistribution(uint256 attackerID)
+        private
+        view
+        returns (BountyDistribution memory bountyDistribution)
+    {
+        uint256 duelCost = getDuelCost(attackerID);
+        uint256 bounty = duelCost.mul(2);
+        console.log("duel cost is %s", duelCost);
+        console.log("bounty %s", bounty);
+        console.log("rankTax percent %s", _rankingsPoolTaxPercent);
+        uint256 poolTax = _rankingsPoolTaxPercent.mul(bounty).div(100);
+        console.log("Done math");
+
+        console.log("poolTax: %s", poolTax);
+        uint256 reward = bounty.sub(poolTax).sub(duelCost);
+
+        return BountyDistribution(reward, duelCost, poolTax);
+    }
+
+    /// @dev gets the player's unclaimed rewards
+    function getMyRewards() public view returns (uint256) {
+        return _rewardsByPlayer[msg.sender];
+    }
+
+    function getRankingRewardsPool(uint8 tier) public view returns (uint256) {
+        return _rankingsPoolByTier[tier];
     }
 
     /// @dev gets the amount of SKILL that is risked per duel
@@ -495,12 +580,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 ((opponentTrait & 0xFF000000) >> 8)
         );
 
-        int128 playerTraitBonus = 1;
+        int128 playerTraitBonus = ABDKMath64x64.fromUInt(1);
         if (applyTraitBonus) {
             playerTraitBonus = game.getPlayerTraitBonusAgainst(traitsCWE);
         }
         // FIXME: Should probably calculate on one side only
-
         uint256 playerFightPower = game.getPlayerPower(
             basePower,
             weaponMultFight,
@@ -511,9 +595,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             playerFightPower,
             seed
         );
+        console.log("Player power is %s", playerPower);
+        console.log("PlayerTraitBonus is %s", uint256(playerTraitBonus));
 
         return uint24(playerTraitBonus.mulu(playerPower));
     }
+
     /// @dev removes a character from the arena's state
     function _removeCharacterFromArena(uint256 characterID) private {
         require(isCharacterInArena(characterID), "Character not in arena");
