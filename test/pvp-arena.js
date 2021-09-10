@@ -605,7 +605,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe("#reRollOpponent", () => {
+  describe.only("#reRollOpponent", () => {
     it("fails if character is not dueling", async () => {
       const character1ID = await createCharacterInPvpTier(accounts[1], 2);
       await createCharacterInPvpTier(accounts[2], 2);
@@ -639,7 +639,7 @@ contract("PvpArena", (accounts) => {
 
       const duelCost = await pvpArena.getDuelCost(character1ID);
 
-      const reRollPenalty = toBN(duelCost * 0.25);
+      const reRollPenalty = duelCost.div(toBN(4));
 
       expect(newBalance.toString()).to.equal(
         previousBalance.sub(reRollPenalty).toString()
@@ -664,7 +664,7 @@ contract("PvpArena", (accounts) => {
       );
     });
 
-    it("assigns a new opponent", async () => {
+    it("can re roll the same opponent if enough time has passed", async () => {
       const character1ID = await createCharacterInPvpTier(accounts[1], 2);
       const character2ID = await createCharacterInPvpTier(accounts[2], 2);
 
@@ -683,6 +683,43 @@ contract("PvpArena", (accounts) => {
       await expectEvent.inTransaction(tx, pvpArena, "NewDuel", {
         attacker: character1ID,
         defender: character2ID,
+      });
+    });
+
+    it("assigns a new opponent", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      await createCharacterInPvpTier(accounts[2], 2);
+      await createCharacterInPvpTier(accounts[3], 2);
+
+      await time.increase(await pvpArena.unattackableSeconds());
+
+      const requestOpponent = await pvpArena.requestOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      const duelEvent = await expectEvent.inTransaction(
+        requestOpponent.tx,
+        pvpArena,
+        "NewDuel"
+      );
+
+      const previouslyDueledPlayer = duelEvent.args.defender;
+
+      let playerToDuelAfterReRoll;
+
+      if (previouslyDueledPlayer === "1") {
+        playerToDuelAfterReRoll = "2";
+      } else {
+        playerToDuelAfterReRoll = "1";
+      }
+
+      const reRoll = await pvpArena.reRollOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      await expectEvent.inTransaction(reRoll.tx, pvpArena, "NewDuel", {
+        attacker: character1ID,
+        defender: playerToDuelAfterReRoll,
       });
     });
   });

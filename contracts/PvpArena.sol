@@ -204,13 +204,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         require(isCharacterDueling(characterID), "Character is not dueling");
 
+        _assignOpponent(characterID);
+
         skillToken.transferFrom(
             msg.sender,
             address(this),
             getDuelCost(characterID).div(4)
         );
-
-        _assignOpponent(characterID);
     }
 
     /// @dev performs a given character's duel against its opponent
