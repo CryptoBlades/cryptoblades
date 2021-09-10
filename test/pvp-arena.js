@@ -620,8 +620,8 @@ contract("PvpArena", (accounts) => {
 
     it("transfers skill from the sender to the contract", async () => {
       const character1ID = await createCharacterInPvpTier(accounts[1], 2);
-      const character2ID = await createCharacterInPvpTier(accounts[2], 2);
-      const character3ID = await createCharacterInPvpTier(accounts[3], 2);
+      await createCharacterInPvpTier(accounts[2], 2);
+      await createCharacterInPvpTier(accounts[3], 2);
 
       await time.increase(await pvpArena.unattackableSeconds());
 
@@ -648,7 +648,7 @@ contract("PvpArena", (accounts) => {
 
     it("can not re roll the same opponent", async () => {
       const character1ID = await createCharacterInPvpTier(accounts[1], 2);
-      const character2ID = await createCharacterInPvpTier(accounts[2], 2);
+      await createCharacterInPvpTier(accounts[2], 2);
 
       await time.increase(await pvpArena.unattackableSeconds());
 
