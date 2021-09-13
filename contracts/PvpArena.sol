@@ -51,6 +51,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     Raid1 public raids;
     IRandoms public randoms;
 
+    /// @dev how much of a duel's bounty is sent to the rankings pool
     uint8 private _rankingsPoolTaxPercent;
     /// @dev how many times the cost of battling must be wagered to enter the arena
     uint8 public wageringFactor;
@@ -58,7 +59,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     int128 private _baseWagerUSD;
     /// @dev how much extra USD is wagered per level tier
     int128 private _tierWagerUSD;
-    /// @dev how much of a duel's bounty is sent to the rankings pool
     /// @dev amount of time a character is unattackable
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
