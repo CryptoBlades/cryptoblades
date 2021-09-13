@@ -73,6 +73,7 @@ import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import { apiUrl } from './utils/common';
+import { getConfigValue } from './contracts';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -173,7 +174,7 @@ export default {
       onboarding.startOnboarding();
     },
     async configureMetamask() {
-      await this.configureMetaMask();
+      await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
 
     async connectMetamask() {

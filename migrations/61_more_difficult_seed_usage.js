@@ -8,9 +8,9 @@ module.exports = async function (deployer, network, accounts) {
   const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
   const blacksmith = await upgradeProxy(Blacksmith.address, Blacksmith, { deployer });
 
-  if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecotestnet' || network === 'hecomainnet') {
+  if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecotestnet' || network === 'hecomainnet' || network === 'okexmainnet' || network === 'okextestnet') {
     let openZeppelinRelayerAddress, linkToken, vrfCoordinator, keyHash, fee;
-    if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'hecotestnet') {
+    if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'hecotestnet' || network === 'okextestnet') {
       openZeppelinRelayerAddress = '0x6c0ca2a5f6ef7d33f18ac8abb285466279bd7917';
 
       linkToken = '0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06';
@@ -26,7 +26,7 @@ module.exports = async function (deployer, network, accounts) {
       keyHash = '0xc251acd21ec4fb7f31bb8868288bfdbaeb4fbfec2df3735ddbd4f7dc8d60103c';
       fee = web3.utils.toWei('0.2', 'ether');
     }
-    else if(network === 'hecomainnet') {
+    else if(network === 'hecomainnet' || network === 'okexmainnet') {
       openZeppelinRelayerAddress = '0x0000000000000000000000000000000000000000';
 
       linkToken = '0x0000000000000000000000000000000000000000';

@@ -10,7 +10,7 @@
     "@chainlink/contracts": "^0.1.7",
     "@openzeppelin/contracts": "^3.4.1",
     "@openzeppelin/contracts-upgradeable": "^3.4.1",
-    "@truffle/hdwallet-provider": "^1.2.6",
+    "@truffle/hdwallet-provider": "^1.5.0",
     "abdk-libraries-solidity": "2.4.0",
     "dotenv": "^8.2.0"
   },
@@ -47,6 +47,8 @@
     "deploy-testnet": "truffle migrate --network bsctestnet",
     "deploy-hecotestnet": "truffle migrate --network hecotestnet",
     "postdeploy-testnet": "run-s \"backup-networks 97\" \"verify-contracts -- --network bsctestnet\"",
+    "deploy-okextestnet": "truffle migrate --network okextestnet",
+    "postdeploy-okextestnet": "run-s \"backup-networks 65\" \"verify-contracts -- --network okextestnet\"",
     "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet",
     "postdeploy-mainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 56\" \"verify-contracts -- --network bscmainnet\"",
     "deploy-hecomainnet-warning-be-careful-this-is-prod": "truffle migrate --network hecomainnet",

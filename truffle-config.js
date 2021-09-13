@@ -87,7 +87,7 @@ module.exports = {
     },
     hecotestnet: {
       provider: () => new HDWalletProvider(hdWalletProviderOptions(
-        process.env.BINANCE_MAINNET_WALLET_PRIVATE_KEY,
+        process.env.HECO_TESTNET_WALLET_PRIVATE_KEY,
         process.env.HECO_TESTNET_WALLET_MNEMONIC,
         {
           providerOrUrl: 'wss://ws-testnet.hecochain.com'
@@ -108,6 +108,36 @@ module.exports = {
         }
       )),
       network_id: 0x80,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      gas: 5600000,
+      skipDryRun: true
+    },
+    okextestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.OKEX_TESTNET_WALLET_PRIVATE_KEY,
+        process.env.OKEX_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://exchaintestrpc.okex.org',
+          pollingInterval: 10000000,
+        }
+      )),
+      network_id: 0x41,
+      confirmations: 5,
+      timeoutBlocks: 200,
+      gasPrice: 320000000,
+      skipDryRun: true,
+      networkCheckTimeout: 10000000
+    },
+    okexmainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.OKEX_MAINNET_WALLET_PRIVATE_KEY,
+        process.env.OKEX_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://exchainrpc.okex.org'
+        }
+      )),
+      network_id: 0x42,
       confirmations: 10,
       timeoutBlocks: 200,
       gas: 5600000,
@@ -165,7 +195,8 @@ module.exports = {
   ],
   api_keys: {
     bscscan: process.env.BSCSCAN_API_KEY,
-    hecoinfo: process.env.HECOINFO_API_KEY
+    hecoinfo: process.env.HECOINFO_API_KEY,
+    OKLink: process.env.OKLINK_API_KEY
   },
   // subscribers: {
   //   abisToTs: require('./truffle-subscriber-abis-to-ts.js')

@@ -4,12 +4,12 @@ const SkillStakingRewardsUpgradeable = artifacts.require("SkillStakingRewardsUpg
 const SkillToken = artifacts.require("SkillToken");
 
 module.exports = async function (deployer, network, accounts) {
-  if (network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecomainnet') {
+  if (network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecomainnet' || network === 'okexmainnet') {
     let skillTokenAddress;
     if(network === 'bscmainnet' || network === 'bscmainnet-fork') {
       skillTokenAddress = '0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab';
     }
-    else if(network === 'hecomainnet') {
+    else if(network === 'hecomainnet' || network === 'okexmainnet') {
       const skillToken = await SkillToken.deployed();
       skillTokenAddress = skillToken.address;
     }

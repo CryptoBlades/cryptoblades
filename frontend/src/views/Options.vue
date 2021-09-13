@@ -52,9 +52,10 @@
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Current chain</h4>
               <b-form-select size="lg" v-model="currentChain" @change="setCurrentChain()">
-                  <b-form-select-option value="BSC">BSC</b-form-select-option>
-                  <b-form-select-option value="HECO">HECO</b-form-select-option>
-                </b-form-select>
+                <b-form-select-option v-for="chain in supportedChains" :key="chain" :value="chain">
+                  {{chain}}
+                </b-form-select-option>
+              </b-form-select>
             </b-list-group-item>
           </b-list-group>
         </div>
@@ -74,6 +75,7 @@ import { Accessors } from 'vue/types/options';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../utils/common';
 import { getConfigValue } from '@/contracts';
+import config from '../../app-config.json';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -84,7 +86,7 @@ interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
   setUpContracts(): Promise<void>;
   initialize(): Promise<void>;
-  configureMetaMask(): Promise<void>;
+  configureMetaMask(networkId: number): Promise<void>;
 }
 interface Data {
   showGraphics: boolean;
@@ -94,6 +96,7 @@ interface Data {
   showSkillInUsd: boolean;
   fightMultiplier: number;
   currentChain: string;
+  supportedChains: string[];
 }
 
 interface StoreMappedGetters {
@@ -116,6 +119,7 @@ export default Vue.extend({
     this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
     this.currentChain = localStorage.getItem('currentChain') || 'BSC';
+    this.supportedChains = config.supportedChains.split(',');
   },
   data() {
     return {
@@ -128,6 +132,7 @@ export default Vue.extend({
       currentChain: 'BSC',
       checked: false,
       ClaimStage,
+      supportedChains: []
     } as Data;
   },
 
@@ -228,8 +233,7 @@ export default Vue.extend({
 
     async setCurrentChain() {
       localStorage.setItem('currentChain', this.currentChain);
-      this.setNetworkId(+getConfigValue('VUE_APP_NETWORK_ID'));
-      await this.configureMetaMask();
+      await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
       Events.$emit('setting:currentChain', { value: this.currentChain });
       window.location.reload();
     },
