@@ -295,9 +295,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         // add to the rankings pool
-        _rankingsPoolByTier[getArenaTier(attackerID)].add(
-            bountyDistribution.rankingPoolTax
-        );
+        _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
+            getArenaTier(attackerID)
+        ].add(bountyDistribution.rankingPoolTax);
     }
 
     /// @dev withdraws a character and its items from the arena.

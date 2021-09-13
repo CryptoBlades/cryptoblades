@@ -789,8 +789,20 @@ contract("PvpArena", (accounts) => {
           expect(character1NewWager.toString()).to.equal(
             character1Wager.toString()
           );
+        });
 
-          // TODO: should save the ranking prize pool
+        only("should save the ranking prize pool", async () => {
+          const tier = await pvpArena.getArenaTier(character1ID, {
+            from: accounts[1],
+          });
+          const rewardsInPool = await pvpArena.getRankingRewardsPool(tier, {
+            from: accounts[1],
+          });
+
+          expect(rewardsInPool.toString()).to.equal(poolTax.toString());
+        });
+        it("should emit the DuelFinished event", () => {
+          expectEvent.inTransaction(duelTx, pvpArena, "DuelFinished");
         });
       });
 
@@ -864,13 +876,67 @@ contract("PvpArena", (accounts) => {
       });
 
       describe("attacker loses", () => {
-        it("should pay the defender their prize");
+        let character1ID;
+        let character2ID;
+        let weapon1ID;
+        let weapon2ID;
+        let duelTx;
+
+        beforeEach(async () => {
+          weapon1ID = await helpers.createWeapon(
+            accounts[1],
+            "111",
+            helpers.elements.water,
+            {
+              weapons,
+            }
+          );
+          weapon2ID = await helpers.createWeapon(
+            accounts[2],
+            "111",
+            helpers.elements.fire,
+            {
+              weapons,
+            }
+          );
+
+          character1ID = await createCharacterInPvpTier(
+            accounts[1],
+            2,
+            "222",
+            weapon1ID
+          );
+          character2ID = await createCharacterInPvpTier(
+            accounts[2],
+            2,
+            "222",
+            weapon2ID
+          );
+
+          await characters.setTrait(character1ID, helpers.elements.lightning, {
+            from: accounts[0],
+          });
+          await characters.setTrait(character2ID, helpers.elements.water, {
+            from: accounts[0],
+          });
+
+          await time.increase(await pvpArena.unattackableSeconds());
+          await pvpArena.requestOpponent(character1ID, {
+            from: accounts[1],
+          });
+
+          const { tx } = await pvpArena.performDuel(character1ID, {
+            from: accounts[1],
+          });
+          duelTx = tx;
+        });
+
+        it("should pay the defender their prize", () => {});
 
         it("should remove battleCost from the attacker's wager");
 
         it("should save the ranking prize pool");
       });
-      it("should emit the DuelFinished event");
     });
 
     describe("decision time expired", () => {
