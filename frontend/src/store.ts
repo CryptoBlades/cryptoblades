@@ -929,8 +929,8 @@ export function createStore(web3: Web3) {
           maxStamina,
           maxDurability,
         ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
-          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
+          dispatch('getAccountCharacters'),
+          dispatch('getAccountWeapons'),
           state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)),
           state.contracts().RaidTrinket!.methods.getOwned().call(defaultCallOptions(state)) || [],
           state.contracts().Junk!.methods.getOwned().call(defaultCallOptions(state)) || [],
@@ -964,20 +964,20 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async updateWeaponIds({ state, dispatch, commit }) {
+      async updateWeaponIds({ dispatch, commit }) {
         if(featureFlagStakeOnly) return;
 
-        const ownedWeaponIds = await state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state));
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
         commit('updateUserDetails', {
           ownedWeaponIds: Array.from(ownedWeaponIds)
         });
         await dispatch('fetchWeapons', ownedWeaponIds);
       },
 
-      async updateCharacterIds({ state, dispatch, commit }) {
+      async updateCharacterIds({ dispatch, commit }) {
         if(featureFlagStakeOnly) return;
 
-        const ownedCharacterIds = await state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state));
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
         commit('updateUserDetails', {
           ownedCharacterIds: Array.from(ownedCharacterIds)
         });
@@ -1222,12 +1222,8 @@ export function createStore(web3: Web3) {
         });
       },
 
-      async setupWeaponDurabilities({ state, dispatch }) {
-        const [
-          ownedWeaponIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
-        ]);
+      async setupWeaponDurabilities({ dispatch }) {
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
 
         for (const weapId of ownedWeaponIds) {
           dispatch('fetchWeaponDurability', weapId);
@@ -1247,12 +1243,8 @@ export function createStore(web3: Web3) {
         }
       },
 
-      async setupWeaponRenames({ state, dispatch }) {
-        const [
-          ownedWeaponIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
-        ]);
+      async setupWeaponRenames({ dispatch }) {
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
 
         for (const weapId of ownedWeaponIds) {
           dispatch('fetchWeaponRename', weapId);
@@ -1274,12 +1266,8 @@ export function createStore(web3: Web3) {
         }
       },
 
-      async setupCharacterStaminas({ state, dispatch }) {
-        const [
-          ownedCharacterIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state))
-        ]);
+      async setupCharacterStaminas({ dispatch }) {
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
 
         for (const charId of ownedCharacterIds) {
           dispatch('fetchCharacterStamina', charId);
@@ -1298,12 +1286,26 @@ export function createStore(web3: Web3) {
           commit('updateCharacterStamina', { characterId, stamina });
         }
       },
-      async setupCharacterRenames({ state, dispatch }) {
-        const [
-          ownedCharacterIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state))
-        ]);
+      async getAccountCharacters({state}) {
+        if(!state.defaultAccount) return;
+        const numberOfCharacters = parseInt(await state.contracts().Characters!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
+        const characters = await Promise.all(
+          [...Array(numberOfCharacters).keys()].map((_, i) =>
+            state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+        );
+        return characters;
+      },
+      async getAccountWeapons({state}) {
+        if(!state.defaultAccount) return;
+        const numberOfWeapons = parseInt(await state.contracts().Weapons!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
+        const weapons = await Promise.all(
+          [...Array(numberOfWeapons).keys()]
+            .map((_, i) => state.contracts().Weapons!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+        );
+        return weapons;
+      },
+      async setupCharacterRenames({ dispatch }) {
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
 
         for (const charId of ownedCharacterIds) {
           dispatch('fetchCharacterRename', charId);
