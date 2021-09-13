@@ -8,12 +8,17 @@
                   <div
                       :class="`${setListClassForChar(character.id,currentCharacterId)}`"
                       @click="setCurrentCharacter(character.id)">
-                    <div>
+                    <div class="character-head-container">
                       <img
                         class="character-buttons"
-                        :src="getCharacterArt(character)" />
+                        :src="getCharacterHeadArt(character)"/>
+                      <span id="character-head-level-label"> Level </span>
+                      <span id="character-head-level-value" v-text="currentCharacter.level + 1" />
+                      <char-element id="character-head-element" :trait="character.trait"></char-element>
                     </div>
                   </div>
+                  <span id="character-name"
+                            v-text="getCharacterName(character.id)"></span><br>
               </b-col>
             </b-row>
           <b-row id="slider-content">
@@ -132,7 +137,7 @@
 </template>
 
 <script>
-import { getCharacterArt } from '../../character-arts-placeholder';
+import { getCharacterArt, getCharacterHeadArt } from '../../character-arts-placeholder';
 import { getWeaponArt } from '../../weapon-arts-placeholder';
 import Hint from '../Hint.vue';
 import Element from '../smart/Element.vue';
@@ -171,6 +176,8 @@ export default {
     ]),
 
     getCharacterArt,
+
+    getCharacterHeadArt,
 
     getWeaponArt,
 
@@ -228,7 +235,7 @@ export default {
 #slider-buttons {
   border-bottom: 2px solid #968332;
   margin-bottom: 50px;
-  padding-bottom: 20px;
+  padding-bottom: 40px;
 }
 
 .character-buttons {
@@ -241,12 +248,30 @@ export default {
   overflow: hidden;
 }
 
+#character-head-level-label {
+  text-align: left;
+  font-size: 9px;
+  color: #968332;
+}
+
+#character-head-level-value {
+  text-align: left;
+  font-size: 9px;
+  color: white;
+}
+
+#character-head-element {
+  position: absolute;
+  top: 35%;
+  left: 58%;
+}
+
 .active-indicator {
   border: 1px dashed #968332;
   border-radius: 10%;
   background:transparent;
   margin: 3px auto;
-  height:90px;
+  height:auto;
   width: 90px;
 }
 
@@ -255,7 +280,7 @@ export default {
   border: 1px none transparent;
   border-radius: 10%;
   margin: 3px auto;
-  height:90px;
+  height:auto;
   width: 90px;
 }
 

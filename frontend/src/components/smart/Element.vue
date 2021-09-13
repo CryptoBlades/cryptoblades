@@ -51,6 +51,7 @@ export default {
   border-radius: 50%;
   height: 30px;
   width: 30px;
+  background: black;
 }
 
 #earth-element {
@@ -59,6 +60,7 @@ export default {
   border-radius: 50%;
   height: 30px;
   width: 30px;
+  background: black;
 }
 
 #lightning-element {
@@ -67,6 +69,7 @@ export default {
   border-radius: 50%;
   height: 30px;
   width: 30px;
+  background: black;
 }
 
 #water-element {
@@ -75,6 +78,7 @@ export default {
   border-radius: 50%;
   height: 30px;
   width: 30px;
+  background: black;
 }
 /* Element Style */
 </style>

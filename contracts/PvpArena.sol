@@ -3,7 +3,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "hardhat/console.sol";
 import "./util.sol";
 import "./interfaces/IRandoms.sol";
 import "./cryptoblades.sol";
@@ -14,7 +16,9 @@ import "./raid1.sol";
 
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
+    using ABDKMath64x64 for int128;
     using SafeMath for uint8;
+    using SafeERC20 for IERC20;
 
     struct Fighter {
         uint256 characterID;
@@ -41,6 +45,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     Raid1 public raids;
     IRandoms public randoms;
 
+    /// @dev the base amount wagered per duel in dollars
+    int128 private _baseWagerUSD;
+    /// @dev how much extra USD is wagered per level tier
+    int128 private _tierWagerUSD;
     /// @dev how many times the cost of battling must be wagered to enter the arena
     uint256 public wageringFactor;
     /// @dev amount of time a character is unattackable
@@ -84,6 +92,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             "Character is not owned by sender"
         );
         _;
+    }
+
+    modifier restricted() {
+        _restricted();
+        _;
+    }
+
+    function _restricted() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
     }
 
     modifier enteringArenaChecks(
@@ -130,7 +147,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         raids = Raid1(raidContract);
         randoms = IRandoms(randomsContract);
 
+        // TODO: Tweak these values, they are placeholders
         wageringFactor = 3;
+        _baseWagerUSD = ABDKMath64x64.divu(500, 100); // $5
+        _tierWagerUSD = ABDKMath64x64.divu(50, 100); // $0.5
         unattackableSeconds = 2 minutes;
         decisionSeconds = 3 minutes;
     }
@@ -173,6 +193,221 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterInArena(characterID)
         isOwnedCharacter(characterID)
     {
+        _assignOpponent(characterID);
+    }
+
+    /// @dev requests a new opponent for a fee
+    function reRollOpponent(uint256 characterID)
+        external
+        characterInArena(characterID)
+        isOwnedCharacter(characterID)
+    {
+        require(isCharacterDueling(characterID), "Character is not dueling");
+
+        _assignOpponent(characterID);
+
+        skillToken.transferFrom(
+            msg.sender,
+            address(this),
+            getDuelCost(characterID).div(4)
+        );
+    }
+
+    /// @dev performs a given character's duel against its opponent
+    function performDuel(uint256 characterID) external {
+        // TODO: implement (not final signature)
+    }
+
+    /// @dev withdraws a character from the arena.
+    /// if the character is in a battle, a penalty is charged
+    function withdrawCharacter(uint256 characterID)
+        external
+        isOwnedCharacter(characterID)
+    {
+        Fighter storage fighter = _fightersByCharacter[characterID];
+        uint256 wager = fighter.wager;
+        _removeCharacterFromArena(characterID);
+        if (isCharacterDueling(characterID)) {
+            skillToken.safeTransfer(msg.sender, wager.sub(wager.div(4)));
+        } else {
+            skillToken.safeTransfer(msg.sender, wager);
+        }
+    }
+
+    /// @dev gets the amount of SKILL that is risked per duel
+    function getDuelCost(uint256 characterID) public view returns (uint256) {
+        int128 tierExtra = ABDKMath64x64
+            .divu(getArenaTier(characterID).mul(100), 100)
+            .mul(_tierWagerUSD);
+
+        return game.usdToSkill(_baseWagerUSD.add(tierExtra));
+    }
+
+    /// @notice gets the amount of SKILL required to enter the arena
+    /// @param characterID the id of the character entering the arena
+    function getEntryWager(uint256 characterID) public view returns (uint256) {
+        return getDuelCost(characterID).mul(wageringFactor);
+    }
+
+    /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
+    function getArenaTier(uint256 characterID) public view returns (uint8) {
+        uint256 level = characters.getLevel(characterID);
+        return uint8(level.div(10));
+    }
+
+    /// @dev gets IDs of the sender's characters currently in the arena
+    function getMyParticipatingCharacters()
+        public
+        view
+        returns (uint256[] memory)
+    {
+        return _fightersByPlayer[msg.sender];
+    }
+
+    /// @dev returns the IDs of the sender's weapons currently in the arena
+    function getMyParticipatingWeapons()
+        external
+        view
+        returns (uint256[] memory)
+    {
+        Fighter[] memory fighters = _getMyFighters();
+        uint256[] memory weaponIDs = new uint256[](fighters.length);
+
+        for (uint256 i = 0; i < fighters.length; i++) {
+            weaponIDs[i] = fighters[i].weaponID;
+        }
+
+        return weaponIDs;
+    }
+
+    /// @dev returns the IDs of the sender's shields currently in the arena
+    function getMyParticipatingShields()
+        external
+        view
+        returns (uint256[] memory)
+    {
+        Fighter[] memory fighters = _getMyFighters();
+        uint256 shieldsCount = 0;
+
+        for (uint256 i = 0; i < fighters.length; i++) {
+            if (fighters[i].useShield) shieldsCount++;
+        }
+
+        uint256[] memory shieldIDs = new uint256[](shieldsCount);
+        uint256 shieldIDsIndex = 0;
+
+        for (uint256 i = 0; i < fighters.length; i++) {
+            if (fighters[i].useShield) {
+                shieldIDs[shieldIDsIndex] = fighters[i].shieldID;
+                shieldIDsIndex++;
+            }
+        }
+
+        return shieldIDs;
+    }
+
+    /// @dev checks if a character is in the arena
+    function isCharacterInArena(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return _charactersInArena[characterID];
+    }
+
+    /// @dev checks if a weapon is in the arena
+    function isWeaponInArena(uint256 weaponID) public view returns (bool) {
+        return _weaponsInArena[weaponID];
+    }
+
+    /// @dev checks if a shield is in the arena
+    function isShieldInArena(uint256 shieldID) public view returns (bool) {
+        return _shieldsInArena[shieldID];
+    }
+
+    /// @dev get a character's amount of wager that is locked
+    function getLockedWager(uint256 characterID) public view returns (uint256) {
+        return _fightersByCharacter[characterID].lockedWager;
+    }
+
+    /// @dev get an attacker's opponent
+    function getOpponent(uint256 characterID) public view returns (uint256) {
+        return _duelByAttacker[characterID].defenderID;
+    }
+
+    /// @dev get amount wagered for a given character
+    function getCharacterWager(uint256 characterID)
+        public
+        view
+        returns (uint256)
+    {
+        return _fightersByCharacter[characterID].wager;
+    }
+
+    /// @dev wether or not the character is still in time to start a duel
+    function isAttackerWithinDecisionTime(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return
+            _duelByAttacker[characterID].createdAt.add(decisionSeconds) >
+            block.timestamp;
+    }
+
+    /// @dev wether or not the character is already in a duel
+    /// TODO adjust this formula to use the right checks when the duel struct is ready
+    function isCharacterDueling(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return isAttackerWithinDecisionTime(characterID);
+    }
+
+    /// @dev wether or not a character can appear as someone's opponent
+    function isCharacterAttackable(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        uint256 lastActivity = _lastActivityByCharacter[characterID];
+
+        return lastActivity.add(unattackableSeconds) <= block.timestamp;
+    }
+
+    /// @dev updates the last activity timestamp of a character
+    function _updateLastActivityTimestamp(uint256 characterID) private {
+        _lastActivityByCharacter[characterID] = block.timestamp;
+    }
+
+    /// @dev removes a character from the arena's state
+    function _removeCharacterFromArena(uint256 characterID) private {
+        require(isCharacterInArena(characterID), "Character not in arena");
+        Fighter storage fighter = _fightersByCharacter[characterID];
+
+        uint256 weaponID = fighter.weaponID;
+        uint256 shieldID = fighter.shieldID;
+
+        delete _fightersByCharacter[characterID];
+
+        uint256[] storage playerFighters = _fightersByPlayer[msg.sender];
+        playerFighters[characterID] = playerFighters[playerFighters.length - 1];
+        playerFighters.pop();
+
+        uint8 tier = getArenaTier(characterID);
+
+        uint256[] storage tierFighters = _fightersByTier[tier];
+        tierFighters[characterID] = tierFighters[tierFighters.length - 1];
+        tierFighters.pop();
+
+        _charactersInArena[characterID] = false;
+        _weaponsInArena[weaponID] = false;
+        _shieldsInArena[shieldID] = false;
+    }
+
+    /// @dev attempts to find an opponent for a character.
+    function _assignOpponent(uint256 characterID) private {
         uint8 tier = getArenaTier(characterID);
 
         uint256[] storage fightersInTier = _fightersByTier[tier];
@@ -223,107 +458,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         emit NewDuel(characterID, opponentID, block.timestamp);
     }
 
-    /// @dev performs a given character's duel against its opponent
-    function performDuel(uint256 characterID) external {
-        // TODO: implement (not final signature)
-    }
+    /// @dev returns the senders fighters in the arena
+    function _getMyFighters() internal view returns (Fighter[] memory) {
+        uint256[] memory characterIDs = getMyParticipatingCharacters();
+        Fighter[] memory fighters = new Fighter[](characterIDs.length);
 
-    /// @dev withdraws a character from the arena.
-    /// if the character is in a battle, a penalty is charged
-    function withdrawCharacter(uint256 characterID) external {
-        // TODO: implement (not final signature)
-    }
+        for (uint256 i = 0; i < characterIDs.length; i++) {
+            fighters[i] = _fightersByCharacter[characterIDs[i]];
+        }
 
-    /// @dev requests a new opponent for a fee
-    function reRollOpponent(uint256 characterID) external {
-        // TODO:
-        // - [ ] check if character is currently attacking
-        // - [ ] check if penalty can be paid
-        // - [ ] charge penalty
-        // - [ ] find a new opponent
-    }
-
-    /// @dev gets the amount of SKILL that is risked per duel
-    function getDuelCost(uint256 characterID) public view returns (uint256) {
-        // FIXME: Use real formula. THIS IS JUST TEMPORARY CODE
-        return getArenaTier(characterID).add(1).mul(1000);
-    }
-
-    /// @notice gets the amount of SKILL required to enter the arena
-    /// @param characterID the id of the character entering the arena
-    function getEntryWager(uint256 characterID) public view returns (uint256) {
-        return getDuelCost(characterID).mul(wageringFactor);
-    }
-
-    /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
-    function getArenaTier(uint256 characterID) public view returns (uint8) {
-        uint256 level = characters.getLevel(characterID);
-
-        return uint8(level.div(10));
-    }
-
-    /// @dev gets IDs of the sender's characters currently in the arena
-    function getMyParticipatingCharacters()
-        public
-        view
-        returns (uint256[] memory)
-    {
-        return _fightersByPlayer[msg.sender];
-    }
-
-    /// @dev checks if a character is in the arena
-    function isCharacterInArena(uint256 characterID)
-        public
-        view
-        returns (bool)
-    {
-        return _charactersInArena[characterID];
-    }
-
-    /// @dev checks if a weapon is in the arena
-    function isWeaponInArena(uint256 weaponID) public view returns (bool) {
-        return _weaponsInArena[weaponID];
-    }
-
-    /// @dev checks if a shield is in the arena
-    function isShieldInArena(uint256 shieldID) public view returns (bool) {
-        return _shieldsInArena[shieldID];
-    }
-
-    /// @dev get a character's amount of wager that is locked
-    function getLockedWager(uint256 characterID) public view returns (uint256) {
-        return _fightersByCharacter[characterID].lockedWager;
-    }
-
-    /// @dev get an attacker's opponent
-    function getOpponent(uint256 characterID) public view returns (uint256) {
-        return _duelByAttacker[characterID].defenderID;
-    }
-
-    /// @dev wether or not the character is still in time to start a duel
-    function isAttackerWithinDecisionTime(uint256 characterID)
-        public
-        view
-        returns (bool)
-    {
-        return
-            _duelByAttacker[characterID].createdAt.add(decisionSeconds) >
-            block.timestamp;
-    }
-
-    /// @dev wether or not a character can appear as someone's opponent
-    function isCharacterAttackable(uint256 characterID)
-        public
-        view
-        returns (bool)
-    {
-        uint256 lastActivity = _lastActivityByCharacter[characterID];
-
-        return lastActivity.add(unattackableSeconds) <= block.timestamp;
-    }
-
-    /// @dev updates the last activity timestamp of a character
-    function _updateLastActivityTimestamp(uint256 characterID) private {
-        _lastActivityByCharacter[characterID] = block.timestamp;
+        return fighters;
     }
 }
