@@ -501,9 +501,13 @@ contract("PvpArena", (accounts) => {
     });
 
     describe("opponent found", () => {
-      it("should emit the NewDuel event", async () => {
-        const character1ID = await createCharacterInPvpTier(accounts[1], 4);
-        const character2ID = await createCharacterInPvpTier(accounts[2], 4);
+      let character1ID;
+      let character2ID;
+      let duelTx;
+
+      beforeEach(async () => {
+        character1ID = await createCharacterInPvpTier(accounts[1], 4);
+        character2ID = await createCharacterInPvpTier(accounts[2], 4);
 
         await time.increase(await pvpArena.unattackableSeconds());
 
@@ -511,7 +515,11 @@ contract("PvpArena", (accounts) => {
           from: accounts[1],
         });
 
-        await expectEvent.inTransaction(tx, pvpArena, "NewDuel", {
+        duelTx = tx;
+      });
+
+      it("should emit the NewDuel event", async () => {
+        await expectEvent.inTransaction(duelTx, pvpArena, "NewDuel", {
           attacker: character1ID,
           defender: character2ID,
         });
