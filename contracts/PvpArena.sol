@@ -218,9 +218,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // TODO: implement (not final signature)
     }
 
-    /// @dev withdraws a character from the arena.
+    /// @dev withdraws a character and its items from the arena.
     /// if the character is in a battle, a penalty is charged
-    function withdrawCharacter(uint256 characterID)
+    function withdrawFromArena(uint256 characterID)
         external
         isOwnedCharacter(characterID)
     {
