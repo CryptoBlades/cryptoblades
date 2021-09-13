@@ -5,6 +5,13 @@ const Characters = artifacts.require('Characters');
 const Weapons = artifacts.require('Weapons');
 const Shields = artifacts.require('Shields');
 
+const elements = {
+  fire: 0,
+  earth: 1,
+  lightning: 2,
+  water: 3,
+};
+
 // NOTE: Duplicated from the Characters contract, must be updated if it is changed
 const experienceTable = [
   16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 33, 36, 39, 42, 46, 50, 55, 60, 66, 72, 79, 86, 94, 103, 113, 124, 136, 149,
@@ -102,6 +109,20 @@ async function levelUpTo(characterID, level, context = {}) {
   await characters.gainXp(characterID, requiredExp);
 }
 
+/**
+ * Ensures that a random result will always be the same for a given seed
+ * WARNING: This forwards time to a future date
+ * This is sensitive to time changes so it can break easily
+ * TODO: Find a more maintainable way to do this
+ *
+ * @param {number} seed
+ * @param {DummyRandom} randoms A DummyRandoms instance
+ */
+async function setDeterministicRandomSeed(seed, timestamp, randoms) {
+  randoms.setRandomNumberForTestingPurposes(seed);
+  await time.increaseTo(timestamp);
+}
+
 module.exports = {
   createCharacter,
   createWeapon,
@@ -109,4 +130,6 @@ module.exports = {
   levelUpTo,
   getExpForLevel,
   prepareContracts,
+  setDeterministicRandomSeed,
+  elements,
 };
