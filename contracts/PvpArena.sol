@@ -18,7 +18,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
     using SafeMath for uint8;
-    using ABDKMath64x64 for int128;
     using SafeERC20 for IERC20;
 
     struct Fighter {
@@ -51,14 +50,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     Raid1 public raids;
     IRandoms public randoms;
 
+    uint8 private _rankingsPoolTaxPercent;
+    /// @dev how many times the cost of battling must be wagered to enter the arena
+    uint8 public wageringFactor;
     /// @dev the base amount wagered per duel in dollars
     int128 private _baseWagerUSD;
     /// @dev how much extra USD is wagered per level tier
     int128 private _tierWagerUSD;
     /// @dev how much of a duel's bounty is sent to the rankings pool
-    uint256 private _rankingsPoolTaxPercent;
-    /// @dev how many times the cost of battling must be wagered to enter the arena
-    uint256 public wageringFactor;
     /// @dev amount of time a character is unattackable
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
@@ -264,9 +263,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             false
         );
 
-        console.log("attackerRoll: %s", attackerRoll);
-        console.log("defenderRoll: %s", defenderRoll);
-
         uint256 winnerID = attackerRoll >= defenderRoll
             ? attackerID
             : defenderID;
@@ -274,8 +270,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ? defenderID
             : attackerID;
         address winner = characters.ownerOf(winnerID);
-
-        console.log("attacker won: %s", attackerRoll >= defenderRoll);
 
         emit DuelFinished(
             attackerID,
@@ -330,13 +324,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         uint256 duelCost = getDuelCost(attackerID);
         uint256 bounty = duelCost.mul(2);
-        console.log("duel cost is %s", duelCost);
-        console.log("bounty %s", bounty);
-        console.log("rankTax percent %s", _rankingsPoolTaxPercent);
         uint256 poolTax = _rankingsPoolTaxPercent.mul(bounty).div(100);
-        console.log("Done math");
 
-        console.log("poolTax: %s", poolTax);
         uint256 reward = bounty.sub(poolTax).sub(duelCost);
 
         return BountyDistribution(reward, duelCost, poolTax);
@@ -519,6 +508,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         );
 
         int128 playerTraitBonus = ABDKMath64x64.fromUInt(1);
+
         if (applyTraitBonus) {
             playerTraitBonus = game.getPlayerTraitBonusAgainst(traitsCWE);
         }
@@ -533,8 +523,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             playerFightPower,
             seed
         );
-        console.log("Player power is %s", playerPower);
-        console.log("PlayerTraitBonus is %s", uint256(playerTraitBonus));
 
         return uint24(playerTraitBonus.mulu(playerPower));
     }

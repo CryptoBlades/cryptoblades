@@ -36,6 +36,7 @@ contract("PvpArena", (accounts) => {
     await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
       from: account,
     });
+
     await pvpArena.enterArena(characterID, weaponIDToUse, 0, false, {
       from: account,
     });
@@ -80,8 +81,7 @@ contract("PvpArena", (accounts) => {
 
   describe("#getDuelCost", () => {
     it("should return the correct cost", async () => {
-      const tier = 5;
-      const charID = await createCharacterInPvpTier(accounts[1], tier, "888");
+      const charID = await createCharacterInPvpTier(accounts[1], 5, "888");
       const cost = await pvpArena.getDuelCost(charID, { from: accounts[1] });
 
       expect(cost.toString()).to.be.equal(web3.utils.toWei("7.5"));
@@ -674,91 +674,23 @@ contract("PvpArena", (accounts) => {
   // NOTE: Some tests in this block depend on a deterministic random output.
   // at this point we can do this in a very limited way, so tests in here are very
   // fragile, depending both in block time and other tests
-  describe("#performDuel", async () => {
+  describe.only("#performDuel", async () => {
     describe("happy path", () => {
       describe("attacker wins", () => {
         let character1ID;
         let character2ID;
+        let character1Wager;
+        let character2Wager;
         let duelEvent;
+        let bounty;
+        let poolTax;
+        let winnerReward;
 
         beforeEach(async () => {
-          // This is sensitive to time changes so it can break easily
-          // TODO: Find a more maintainable way to do this
-          await helpers.setDeterministicRandomSeed(4, 5_000_000_000, randoms);
-          character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
-          character2ID = await createCharacterInPvpTier(accounts[2], 2, "221");
-
-          await time.increase(await pvpArena.unattackableSeconds());
-          await pvpArena.requestOpponent(character1ID, {
-            from: accounts[1],
-          });
-
-          const { tx } = await pvpArena.performDuel(character1ID, {
-            from: accounts[1],
-          });
-          previousBalance = await skillToken.balanceOf(accounts[1]);
-          duelEvent = await expectEvent.inTransaction(
-            tx,
-            pvpArena,
-            "DuelFinished"
-          );
-        });
-
-        it("should properly process the duel", async () => {
-          // NOTE: Due to limitations with random generation, all test cases for this scenario are in one block
-          const duelCost = await pvpArena.getDuelCost(character1ID, {
-            from: accounts[1],
-          });
-
-          const rewards = await pvpArena.getMyRewards({ from: accounts[1] });
-
-          const bounty = duelCost.mul(toBN(2));
-          const poolTax = bounty.mul(toBN(15)).div(toBN(100));
-          const winnerReward = bounty.sub(poolTax).sub(duelCost);
-
-          expect(rewards.toString()).to.equal(winnerReward.toString());
-
-          const character2NewWager = await pvpArena.getCharacterWager(
-            character2ID,
-            {
-              from: accounts[2],
-            }
-          );
-
-          // should remove battleCost from the defender's wager
-          expect(character2NewWager.toString()).to.equal(
-            character2Wager.sub(duelCost).toString()
-          );
-
-          const character1NewWager = await pvpArena.getCharacterWager(
-            character1ID,
-            {
-              from: accounts[1],
-            }
-          );
-
-          // should not change attacker's wager
-          expect(character1NewWager.toString()).to.equal(
-            character1Wager.toString()
-          );
-
-          // TODO: should save the ranking prize pool
-        });
-      });
-
-      describe("with effective traits", () => {
-        let character1ID;
-        let character2ID;
-        let duelEvent;
-        let weapon1ID;
-        let weapon2ID;
-
-        beforeEach(async () => {
-          // This is sensitive to time changes so it can break easily
-          // TODO: Find a more maintainable way to do this
-          await helpers.setDeterministicRandomSeed(4, 5_000_100_000, randoms);
-
-          weapon1ID = helpers.createWeapon(
+          // We create 2 identical characters with identical weapons, then
+          // we make 1 effective against the other so that the result is always
+          // the same
+          const weapon1ID = await helpers.createWeapon(
             accounts[1],
             "111",
             helpers.elements.water,
@@ -766,7 +698,7 @@ contract("PvpArena", (accounts) => {
               weapons,
             }
           );
-          weapon2ID = helpers.createWeapon(
+          const weapon2ID = await helpers.createWeapon(
             accounts[2],
             "111",
             helpers.elements.fire,
@@ -788,6 +720,125 @@ contract("PvpArena", (accounts) => {
             weapon2ID
           );
 
+          await characters.setTrait(character1ID, helpers.elements.water, {
+            from: accounts[0],
+          });
+          await characters.setTrait(character2ID, helpers.elements.fire, {
+            from: accounts[0],
+          });
+
+          await time.increase(await pvpArena.unattackableSeconds());
+          await pvpArena.requestOpponent(character1ID, {
+            from: accounts[1],
+          });
+
+          character1Wager = await pvpArena.getCharacterWager(character1ID, {
+            from: accounts[1],
+          });
+          character2Wager = await pvpArena.getCharacterWager(character2ID, {
+            from: accounts[2],
+          });
+
+          const { tx } = await pvpArena.performDuel(character1ID, {
+            from: accounts[1],
+          });
+          previousBalance = await skillToken.balanceOf(accounts[1]);
+          duelEvent = await expectEvent.inTransaction(
+            tx,
+            pvpArena,
+            "DuelFinished"
+          );
+
+          duelTx = tx;
+          duelCost = await pvpArena.getDuelCost(character1ID, {
+            from: accounts[1],
+          });
+
+          bounty = duelCost.mul(toBN(2));
+          poolTax = bounty.mul(toBN(15)).div(toBN(100));
+          winnerReward = bounty.sub(poolTax).sub(duelCost);
+        });
+
+        it("should add to the winner's rewards balance", async () => {
+          const rewards = await pvpArena.getMyRewards({ from: accounts[1] });
+
+          expect(rewards.toString()).to.equal(winnerReward.toString());
+        });
+
+        it("should remove the duel cost from the loser's wager", async () => {
+          const character2NewWager = await pvpArena.getCharacterWager(
+            character2ID,
+            {
+              from: accounts[2],
+            }
+          );
+
+          // should remove battleCost from the defender's wager
+          expect(character2NewWager.toString()).to.equal(
+            character2Wager.sub(duelCost).toString()
+          );
+        });
+        it("should not change attacker's wager", async () => {
+          const character1NewWager = await pvpArena.getCharacterWager(
+            character1ID,
+            {
+              from: accounts[1],
+            }
+          );
+
+          expect(character1NewWager.toString()).to.equal(
+            character1Wager.toString()
+          );
+
+          // TODO: should save the ranking prize pool
+        });
+      });
+
+      describe("attacker is effective against defender", () => {
+        let character1ID;
+        let character2ID;
+        let weapon1ID;
+        let weapon2ID;
+        let duelTx;
+
+        beforeEach(async () => {
+          weapon1ID = await helpers.createWeapon(
+            accounts[1],
+            "111",
+            helpers.elements.water,
+            {
+              weapons,
+            }
+          );
+          weapon2ID = await helpers.createWeapon(
+            accounts[2],
+            "111",
+            helpers.elements.fire,
+            {
+              weapons,
+            }
+          );
+
+          character1ID = await createCharacterInPvpTier(
+            accounts[1],
+            2,
+            "222",
+            weapon1ID
+          );
+          character2ID = await createCharacterInPvpTier(
+            accounts[2],
+            2,
+            "222",
+            weapon2ID
+          );
+
+          await characters.setTrait(character1ID, helpers.elements.water, {
+            from: accounts[0],
+          });
+          await characters.setTrait(character2ID, helpers.elements.fire, {
+            from: accounts[0],
+          });
+
           await time.increase(await pvpArena.unattackableSeconds());
           await pvpArena.requestOpponent(character1ID, {
             from: accounts[1],
@@ -796,21 +847,19 @@ contract("PvpArena", (accounts) => {
           const { tx } = await pvpArena.performDuel(character1ID, {
             from: accounts[1],
           });
+          duelTx = tx;
+        });
 
-          duelEvent = await expectEvent.inTransaction(
-            tx,
+        it("should apply bonus to the attacker", async () => {
+          const duelEvent = await expectEvent.inTransaction(
+            duelTx,
             pvpArena,
             "DuelFinished"
           );
-        });
 
-        it("should properly process the duel", async () => {
-          const weapon1Stats = await weapons.getStats(weapon1ID);
-          const weapon2Stats = await weapons.getStats(weapon2ID);
-          console.log(`weapon1Stats`, weapon1Stats);
-          console.log(`weapon2Stats`, weapon2Stats);
-          // Should affect the attacker's power
-          // Should not affect the defender's power
+          expect(Number(duelEvent.args.attackerRoll)).to.be.gt(
+            Number(duelEvent.args.defenderRoll)
+          );
         });
       });
 
