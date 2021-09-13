@@ -681,7 +681,7 @@ contract("PvpArena", (accounts) => {
   // NOTE: Some tests in this block depend on a deterministic random output.
   // at this point we can do this in a very limited way, so tests in here are very
   // fragile, depending both in block time and other tests
-  describe.only("#performDuel", async () => {
+  describe("#performDuel", async () => {
     describe("happy path", () => {
       describe("attacker wins", () => {
         let character1ID;
