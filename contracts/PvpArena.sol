@@ -27,7 +27,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID;
         /// @dev amount of skill wagered for this character
         uint256 wager;
-        uint256 lockedWager;
         bool useShield;
     }
     struct Duel {
@@ -199,7 +198,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             weaponID,
             shieldID,
             wager,
-            0,
             useShield
         );
 
@@ -251,11 +249,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             characterID,
             opponentID,
             block.timestamp
-        );
-
-        // lock the cost of the duel
-        _fightersByCharacter[characterID].lockedWager = getDuelCost(
-            characterID
         );
 
         // mark both characters as unattackable
@@ -321,16 +314,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         BountyDistribution
             memory bountyDistribution = _getDuelBountyDistribution(attackerID);
 
-        console.log("losers wager %s", _fightersByCharacter[loserID].wager);
-        console.log("winners reward %s", bountyDistribution.winnerReward);
         _rewardsByPlayer[winner] = _rewardsByPlayer[winner].add(
             bountyDistribution.winnerReward
         );
         _fightersByCharacter[loserID].wager = _fightersByCharacter[loserID]
             .wager
             .sub(bountyDistribution.loserPayment);
-
-        console.log("losers wager %s", _fightersByCharacter[loserID].wager);
 
         if (_fightersByCharacter[loserID].wager == 0) {
             _removeCharacterFromArena(loserID);
@@ -497,11 +486,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev checks if a shield is in the arena
     function isShieldInArena(uint256 shieldID) public view returns (bool) {
         return _shieldsInArena[shieldID];
-    }
-
-    /// @dev get a character's amount of wager that is locked
-    function getLockedWager(uint256 characterID) public view returns (uint256) {
-        return _fightersByCharacter[characterID].lockedWager;
     }
 
     /// @dev get an attacker's opponent

@@ -11,13 +11,23 @@ const { BN, toBN } = web3.utils;
 contract("PvpArena", (accounts) => {
   let pvpArena, characters, weapons, shields, priceOracle, randoms;
 
-  async function createCharacterInPvpTier(account, tier, seed = "123") {
+  async function createCharacterInPvpTier(
+    account,
+    tier,
+    seed = "123",
+    weaponID = null
+  ) {
     const characterID = await helpers.createCharacter(account, seed, {
       characters,
     });
-    const weaponID = await helpers.createWeapon(account, seed, 0, {
-      weapons,
-    });
+
+    let weaponIDToUse = weaponID;
+
+    if (!weaponIDToUse) {
+      weaponIDToUse = await helpers.createWeapon(account, seed, 0, {
+        weapons,
+      });
+    }
 
     await helpers.levelUpTo(characterID, tier * 10, { characters });
 
@@ -26,7 +36,7 @@ contract("PvpArena", (accounts) => {
     await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
       from: account,
     });
-    await pvpArena.enterArena(characterID, weaponID, 0, false, {
+    await pvpArena.enterArena(characterID, weaponIDToUse, 0, false, {
       from: account,
     });
 
@@ -601,42 +611,34 @@ contract("PvpArena", (accounts) => {
     });
   });
 
+  // NOTE: Some tests in this block depend on a deterministic random output.
+  // at this point we can do this in a very limited way, so tests in here are very
+  // fragile, depending both in block time and other tests
   describe.only("#performDuel", async () => {
     describe("happy path", () => {
       describe("attacker wins", () => {
         let character1ID;
         let character2ID;
-        let previousBalance;
-        let duelTx;
-        let event;
-        let character2Wager;
-        let character1Wager;
+        let duelEvent;
 
         beforeEach(async () => {
           // This is sensitive to time changes so it can break easily
           // TODO: Find a more maintainable way to do this
           await helpers.setDeterministicRandomSeed(4, 5_000_000_000, randoms);
-
           character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
           character2ID = await createCharacterInPvpTier(accounts[2], 2, "221");
+
           await time.increase(await pvpArena.unattackableSeconds());
           await pvpArena.requestOpponent(character1ID, {
             from: accounts[1],
-          });
-          character1Wager = await pvpArena.getCharacterWager(character1ID, {
-            from: accounts[1],
-          });
-          character2Wager = await pvpArena.getCharacterWager(character2ID, {
-            from: accounts[2],
           });
 
           const { tx } = await pvpArena.performDuel(character1ID, {
             from: accounts[1],
           });
-          duelTx = tx;
           previousBalance = await skillToken.balanceOf(accounts[1]);
-          event = await expectEvent.inTransaction(
-            duelTx,
+          duelEvent = await expectEvent.inTransaction(
+            tx,
             pvpArena,
             "DuelFinished"
           );
@@ -655,6 +657,7 @@ contract("PvpArena", (accounts) => {
           const winnerReward = bounty.sub(poolTax).sub(duelCost);
 
           expect(rewards.toString()).to.equal(winnerReward.toString());
+
           const character2NewWager = await pvpArena.getCharacterWager(
             character2ID,
             {
@@ -662,8 +665,9 @@ contract("PvpArena", (accounts) => {
             }
           );
 
-          expect(character2Wager.toString()).to.equal(
-            character2NewWager.sub(duelCost).toString()
+          // should remove battleCost from the defender's wager
+          expect(character2NewWager.toString()).to.equal(
+            character2Wager.sub(duelCost).toString()
           );
 
           const character1NewWager = await pvpArena.getCharacterWager(
@@ -673,15 +677,81 @@ contract("PvpArena", (accounts) => {
             }
           );
 
+          // should not change attacker's wager
           expect(character1NewWager.toString()).to.equal(
             character1Wager.toString()
           );
+
+          // TODO: should save the ranking prize pool
         });
       });
 
       describe("with effective traits", () => {
-        it("should affect the attackers power");
-        it("should not affect the defender's power");
+        let character1ID;
+        let character2ID;
+        let duelEvent;
+        let weapon1ID;
+        let weapon2ID;
+
+        beforeEach(async () => {
+          // This is sensitive to time changes so it can break easily
+          // TODO: Find a more maintainable way to do this
+          await helpers.setDeterministicRandomSeed(4, 5_000_100_000, randoms);
+
+          weapon1ID = helpers.createWeapon(
+            accounts[1],
+            "111",
+            helpers.elements.water,
+            {
+              weapons,
+            }
+          );
+          weapon2ID = helpers.createWeapon(
+            accounts[2],
+            "111",
+            helpers.elements.fire,
+            {
+              weapons,
+            }
+          );
+
+          character1ID = await createCharacterInPvpTier(
+            accounts[1],
+            2,
+            "222",
+            weapon1ID
+          );
+          character2ID = await createCharacterInPvpTier(
+            accounts[2],
+            2,
+            "222",
+            weapon2ID
+          );
+
+          await time.increase(await pvpArena.unattackableSeconds());
+          await pvpArena.requestOpponent(character1ID, {
+            from: accounts[1],
+          });
+
+          const { tx } = await pvpArena.performDuel(character1ID, {
+            from: accounts[1],
+          });
+
+          duelEvent = await expectEvent.inTransaction(
+            tx,
+            pvpArena,
+            "DuelFinished"
+          );
+        });
+
+        it("should properly process the duel", async () => {
+          const weapon1Stats = await weapons.getStats(weapon1ID);
+          const weapon2Stats = await weapons.getStats(weapon2ID);
+          console.log(`weapon1Stats`, weapon1Stats);
+          console.log(`weapon2Stats`, weapon2Stats);
+          // Should affect the attacker's power
+          // Should not affect the defender's power
+        });
       });
 
       describe("attacker loses", () => {
