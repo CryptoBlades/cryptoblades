@@ -2897,17 +2897,11 @@ export function createStore(web3: Web3) {
         return entryWager;
       },
 
-      async fetchWageredSkill ({state, commit}, {characterID}){
+      async fetchWageredSkill ({state}){
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
 
-        const wageredSkill = await PvpArena!.methods
-          .getLockedWager(characterID)
-          .call(defaultCallOptions(state));
-
-        commit('updateWageredSkill', { wageredSkill });
-
-        return wageredSkill;
+        return '';
       },
 
       async fetchArenaTier ({state, commit}, {characterID}){

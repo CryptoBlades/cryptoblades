@@ -38,7 +38,7 @@ export default {
       this.$store.dispatch('fetchArenaType');
       this.$store.dispatch('fetchEntryWager',{characterID: this.currentCharacterId});
       this.$store.dispatch('fetchArenaTier',{characterID: this.currentCharacterId});
-      this.$store.dispatch('fetchWageredSkill',{characterID: this.currentCharacterId});
+      // this.$store.dispatch('fetchWageredSkill',{characterID: this.currentCharacterId});
       this.$store.dispatch('fetchParticipatingCharacters');
       this.$store.dispatch('fetchDuelCost',{characterID: this.currentCharacterId});
       this.$store.dispatch('fetchIsAttackerWithinDecisionTime',{characterID: this.currentCharacterId});
