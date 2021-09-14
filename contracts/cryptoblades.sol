@@ -26,12 +26,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     int128 public constant PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT =
         14757395258967641292; // 0.8 in fixed-point 64x64 format
 
-<<<<<<< HEAD
-    // Payment must be recent enough that the hash is available for the payment block.
-    // Use 200 as a 'friendly' window of "You have 10 minutes."
-    uint256 public constant MINT_PAYMENT_TIMEOUT = 200;
-    uint256 public constant MINT_PAYMENT_RECLAIM_MINIMUM_WAIT_TIME = 3 hours;
-
     uint256 public constant VAR_HOURLY_INCOME = uint256(keccak256("HOURLY_INCOME"));
     uint256 public constant VAR_HOURLY_FIGHTS = uint256(keccak256("HOURLY_FIGHTS"));
     uint256 public constant VAR_HOURLY_POWER_SUM = uint256(keccak256("HOURLY_POWER_SUM"));
@@ -46,8 +40,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = uint256(keccak256("DAILY_CLAIMED_AMOUNT"));
     uint256 public constant USERVAR_CLAIM_TIMESTAMP = uint256(keccak256("CLAIM_TIMESTAMP"));
 
-=======
->>>>>>> main
     Characters public characters;
     Weapons public weapons;
     IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
@@ -199,11 +191,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
-<<<<<<< HEAD
-    //event MintWeaponsSuccess(address indexed minter, uint32 count);
-    //event MintWeaponsFailure(address indexed minter, uint32 count);
-=======
->>>>>>> main
 
     function recoverSkill(uint256 amount) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
