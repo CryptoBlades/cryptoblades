@@ -36,7 +36,7 @@ contract RaidBasic is Initializable, Raid {
         // we may want to have a specific lockout in the future
         characters.setStaminaTimestamp(characterID, uint64(now + (staminaDrain)));
         // TODO fix raids
-        int128 traitMultiplier = 0;/*game.getPlayerTraitBonusAgainst(
+        /*int128 traitMultiplier = 0;/*game.getPlayerTraitBonusAgainst(
             characters.getTrait(characterID),
             weapons.getTrait(weaponID),
             bossTrait
