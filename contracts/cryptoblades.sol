@@ -26,6 +26,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     int128 public constant PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT =
         14757395258967641292; // 0.8 in fixed-point 64x64 format
 
+<<<<<<< HEAD
     // Payment must be recent enough that the hash is available for the payment block.
     // Use 200 as a 'friendly' window of "You have 10 minutes."
     uint256 public constant MINT_PAYMENT_TIMEOUT = 200;
@@ -45,6 +46,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = uint256(keccak256("DAILY_CLAIMED_AMOUNT"));
     uint256 public constant USERVAR_CLAIM_TIMESTAMP = uint256(keccak256("CLAIM_TIMESTAMP"));
 
+=======
+>>>>>>> main
     Characters public characters;
     Weapons public weapons;
     IERC20 public skillToken;//0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab;
@@ -196,8 +199,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
+<<<<<<< HEAD
     //event MintWeaponsSuccess(address indexed minter, uint32 count);
     //event MintWeaponsFailure(address indexed minter, uint32 count);
+=======
+>>>>>>> main
 
     function recoverSkill(uint256 amount) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
@@ -261,22 +267,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             tokenRewards[playerAddress],
             skillNeeded
         );
-    }
-
-    function getMyCharacters() public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](characters.balanceOf(msg.sender));
-        for(uint256 i = 0; i < tokens.length; i++) {
-            tokens[i] = characters.tokenOfOwnerByIndex(msg.sender, i);
-        }
-        return tokens;
-    }
-
-    function getMyWeapons() public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](weapons.balanceOf(msg.sender));
-        for(uint256 i = 0; i < tokens.length; i++) {
-            tokens[i] = weapons.tokenOfOwnerByIndex(msg.sender, i);
-        }
-        return tokens;
     }
 
     function unpackFightData(uint96 playerData)
@@ -722,7 +712,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _isSupportedElement(uint8 element) internal pure {
-        require(element == 100 || (element>= 0 && element<= 3), "Not supported element");
+        require(element == 100 || (element>= 0 && element<= 3));
     }
 
     modifier isWeaponOwner(uint256 weapon) {
@@ -731,7 +721,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _isWeaponOwner(uint256 weapon) internal view {
-        require(weapons.ownerOf(weapon) == msg.sender, "Not the weapon owner");
+        require(weapons.ownerOf(weapon) == msg.sender);
     }
 
     modifier isWeaponsOwner(uint256[] memory weaponArray) {
@@ -741,7 +731,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _isWeaponsOwner(uint256[] memory weaponArray) internal view {
         for(uint i = 0; i < weaponArray.length; i++) {
-            require(weapons.ownerOf(weaponArray[i]) == msg.sender, "Not the weapon owner");
+            require(weapons.ownerOf(weaponArray[i]) == msg.sender);
         }
     }
 
@@ -751,7 +741,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _isCharacterOwner(uint256 character) internal view {
-        require(characters.ownerOf(character) == msg.sender, "Not the character owner");
+        require(characters.ownerOf(character) == msg.sender);
     }
 
     modifier isTargetValid(uint256 character, uint256 weapon, uint32 target) {
@@ -768,10 +758,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
         _payPlayerConverted(playerAddress, convertedAmount);
-    }
-
-    function approveContractWeaponFor(uint256 weaponID, address playerAddress) public restricted {
-        _approveContractWeaponFor(weaponID, playerAddress);
     }
 
     function payContractTokenOnly(address playerAddress, uint256 convertedAmount) public restricted {
@@ -911,14 +897,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         skillToken.safeTransfer(playerAddress, convertedAmount);
     }
 
-    function _approveContractCharacterFor(uint256 characterID, address playerAddress) internal {
-        characters.approve(playerAddress, characterID);
-    }
-
-    function _approveContractWeaponFor(uint256 weaponID, address playerAddress) internal {
-        weapons.approve(playerAddress, weaponID);
-    }
-
     function setCharacterMintValue(uint256 cents) public restricted {
         mintCharacterFee = ABDKMath64x64.divu(cents, 100);
     }
@@ -961,18 +939,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function setFightXpGain(uint256 average) public restricted {
         fightXpGain = average;
-    }
-
-    function setCharacterLimit(uint256 max) public restricted {
-        characters.setCharacterLimit(max);
-    }
-
-    function setRewardsClaimTaxMax(int128 _rewardsClaimTaxMax) public restricted {
-        rewardsClaimTaxMax = _rewardsClaimTaxMax;
-    }
-
-    function setRewardsClaimTaxMaxAsRational(uint256 _numerator, uint256 _denominator) public restricted {
-        rewardsClaimTaxMax = ABDKMath64x64.divu(_numerator, _denominator);
     }
 
     function setRewardsClaimTaxMaxAsPercent(uint256 _percent) public restricted {
