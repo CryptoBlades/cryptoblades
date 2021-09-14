@@ -307,6 +307,10 @@ export function createStore(web3: Web3) {
         };
       },
 
+      ownShields(state, getters) {
+        return getters.shieldsWithIds(state.ownedShieldIds);
+      },
+
       shieldsWithIds(state) {
         return (shieldIds: (string | number)[]) => {
           const shields = shieldIds.map(id => {
@@ -457,6 +461,12 @@ export function createStore(web3: Web3) {
 
       getCurrentTab(state): number {
         return state.currentTab;
+      },
+
+      currentShield(state) {
+        if (state.currentShieldId === null) return null;
+
+        return state.shields[state.currentShieldId];
       },
 
       getInventoryState(state): IInventory[]{
@@ -776,6 +786,10 @@ export function createStore(web3: Web3) {
 
       setCurrentTab(state: IState, currentTab: number){
         state.currentTab = currentTab;
+      },
+
+      setCurrentShield(state: IState, currentShieldId: number) {
+        state.currentShieldId = currentShieldId;
       }
 
     },
@@ -2966,7 +2980,7 @@ export function createStore(web3: Web3) {
         return isShieldInArena;
       },
 
-      async enterArena ({state}, {characterID}){
+      async enterArena ({state}, {characterID, weaponID, shieldID, useShield}){
         const { SkillToken, PvpArena } = state.contracts();
         if(!SkillToken || !PvpArena) return;
 
@@ -2980,6 +2994,17 @@ export function createStore(web3: Web3) {
             .send({
               from: state.defaultAccount
             });
+        } catch(err){
+          console.error(err);
+        }
+
+        try{
+          await PvpArena.methods
+            .enterArena(characterID, weaponID, shieldID, useShield)
+            .send({
+              from: state.defaultAccount
+            });
+
         } catch(err){
           console.error(err);
         }

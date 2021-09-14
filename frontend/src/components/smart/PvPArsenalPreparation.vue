@@ -35,9 +35,15 @@
                   <b-col>
                     <div>
                       <img
+                        v-if="this.ownWeapons.length >0"
                         id="equipped-weapon-content"
                         :src="getWeaponArt(currentWeapon)"
                         />
+                      <div
+                        v-if="this.ownWeapons.length <=0"
+                        id="equipped-weapon-content">
+                        No Weapon Detected
+                      </div>
                     </div>
                   </b-col>
                 </b-row>
@@ -51,7 +57,17 @@
                 </b-row>
                 <b-row id="equipped-shield-container">
                   <b-col>
-                    <div id="equipped-shield-content">
+                    <div>
+                      <img
+                        v-if="this.ownShields.length > 0"
+                        id="equipped-shield-content"
+                        :src="getShieldArt(currentShield.id)"
+                        />
+                      <div
+                        v-if="this.ownShields.length <=0"
+                        id="equipped-shield-content">
+                        No Shield Detected
+                      </div>
                     </div>
                   </b-col>
                 </b-row>
@@ -110,7 +126,7 @@
           </b-row>
           <b-row class="inventory-weapon-container"
               v-if="getCurrentTab === 0">
-              <b-col>
+              <b-col v-if="this.ownWeapons.length > 0">
                 <b-row>
                   <b-col
                     v-for="weapon in ownWeapons"
@@ -127,10 +143,36 @@
                   </b-col>
                 </b-row>
               </b-col>
+
+              <b-col v-if="this.ownWeapons.length <= 0">
+                You do not have any weapons.
+              </b-col>
           </b-row>
           <b-row class="inventory-shield-container"
               v-if="getCurrentTab === 1">
-              Shield NFTs
+              <b-col v-if="this.ownShields.length > 0">
+                <b-row>
+                  <b-col
+                    v-for="shield in ownShields"
+                    :key="shield.id">
+                    <div
+                      :class="`${setListClassForShield(shield.id,currentShield.id)}`"
+                      @click="setCurrentShield(shield.id)">
+                      <div>
+                        <img
+                          class="inventory-weapon-content"
+                          :src="getShieldArt(shield.id)"/>
+                      </div>
+                    </div>
+                  </b-col>
+                </b-row>
+              </b-col>
+
+              <b-col v-if="this.ownShields.length <= 0">
+                <div>
+                  You do not have any shields.
+                </div>
+              </b-col>
           </b-row>
         </b-col>
   </b-row>
@@ -142,6 +184,9 @@ import { getWeaponArt } from '../../weapon-arts-placeholder';
 import Hint from '../Hint.vue';
 import Element from '../smart/Element.vue';
 import { mapGetters, mapMutations, mapState } from 'vuex';
+import foundersShield from '../../assets/shield1.png';
+import legendaryShield from '../../assets/shield2.png';
+
 
 export default {
   data(){
@@ -156,8 +201,10 @@ export default {
       'currentWeapon',
       'getInventoryState',
       'currentCharacter',
+      'currentShield',
       'ownCharacters',
       'ownWeapons',
+      'ownShields',
       'getCharacterName',
       'getWeaponName',
       'getCurrentTab'
@@ -170,6 +217,7 @@ export default {
 
   methods:{
     ...mapMutations([
+      'setCurrentShield',
       'setCurrentCharacter',
       'setCurrentWeapon',
       'setCurrentTab'
@@ -197,11 +245,35 @@ export default {
       else return 'unselected-weapon';
     },
 
-    created(){
-      this.setCurrentWeapon(this.ownWeapons[0].id);
+    setListClassForShield(shieldId,currentShieldId){
+      if (shieldId === currentShieldId){
+        return 'selected-shield';
+      }
+
+      else return 'unselected-shield';
+    },
+
+    getShieldArt(shieldId) {
+      if(shieldId <= 10000){
+        return foundersShield;
+      }
+      else if (shieldId > 10000 || shieldId <= 25000){
+        return legendaryShield;
+      }
+      else{
+        return '';
+      }
     },
 
 
+  },
+
+  created(){
+    if(this.ownShields.length > 0){
+      this.setCurrentShield(this.ownShields[0].id);
+    }
+    this.setCurrentCharacter(this.ownCharacters[0].id);
+    this.setCurrentWeapon(this.ownWeapons[0]);
   },
 
   components: {
@@ -346,8 +418,6 @@ export default {
 }
 
 #equipped-shield-content {
-  background: antiquewhite;
-  background-image: url("https://seiyria.com/gameicons-font/svg/shield.svg");
   border: 4px solid #968332;
   border-radius: 10%;
   height: 80px;
@@ -376,6 +446,10 @@ export default {
   margin-top: 50px;
 }
 
+.inventory-shield-container {
+  margin-top: 50px;
+}
+
 .selected-weapon {
   background: transparent;
   border: 1px dashed #968332;
@@ -386,6 +460,24 @@ export default {
 }
 
 .unselected-weapon {
+  background: transparent;
+  border: 1px none transparent;
+  border-radius: 10%;
+  height: 60px;
+  width: 60px;
+  margin: 10px auto;
+}
+
+.selected-shield {
+  background: transparent;
+  border: 1px dashed #968332;
+  border-radius: 10%;
+  height: 60px;
+  width: 60px;
+  margin: 10px auto;
+}
+
+.unselected-shield {
   background: transparent;
   border: 1px none transparent;
   border-radius: 10%;

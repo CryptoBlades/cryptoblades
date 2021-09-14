@@ -4,7 +4,9 @@
           <span v-text="arsenalPreparationHeaderText"/>
         </b-col>
         <b-col id= "find-opponent-header" cols="2">
-          <span v-text="findOpponentHeaderText"/>
+          <span
+          v-text="findOpponentHeaderText"
+          @click="enterArena"/>
         </b-col>
         <b-col id="arena-header" cols="5">
           <span v-text="arenaHeaderText"/>
@@ -13,6 +15,7 @@
 </template>
 
 <script>
+import { mapActions, mapGetters, mapState } from 'vuex';
 import PvPConstants from '../../utils/constants/pvp-constants';
 
 export default {
@@ -24,24 +27,26 @@ export default {
     };
   },
 
-  methods: {
-    getArenaState(){
-      this.$store.dispatch('fetchArenaType');
-      this.$store.dispatch('fetchEntryWager',{characterID: 0});
-      this.$store.dispatch('fetchArenaTier',{characterID: 0});
-      this.$store.dispatch('fetchWageredSkill',{characterID: 0});
-      this.$store.dispatch('fetchParticipatingCharacters');
-      this.$store.dispatch('fetchDuelCost',{characterID: 0});
-      this.$store.dispatch('fetchIsAttackerWithinDecisionTime',{characterID: 0});
-      this.$store.dispatch('fetchIsCharacterAttackable',{characterID: 0});
-      this.$store.dispatch('fetchIsCharacterInArena',{characterID: 0});
-      this.$store.dispatch('fetchIsWeaponInArena',{weaponID: 0});
-      this.$store.dispatch('fetchIsShieldInArena',{shieldID: 0});
-      this.$store.dispatch('enterArena',{characterID: 0});
-    },
+  computed:{
+    ...mapState(['currentCharacterId','currentWeaponId']),
+    ...mapGetters([
+      'currentWeapon',
+      'currentCharacter',
+      'currentShield'
+    ]),
   },
 
-  mounted(){
+  methods: {
+
+    ...mapActions(['enterArena']),
+
+    enterArena(){
+      this.$store.dispatch('enterArena',
+        {characterID: this.currentCharacterId,
+          weaponID: this.currentWeaponId,
+          shieldID: 0,
+          useShield: false});
+    }
   },
 
 
