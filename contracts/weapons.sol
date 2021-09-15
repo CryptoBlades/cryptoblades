@@ -7,8 +7,10 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./Promos.sol";
 import "./util.sol";
+import "./IReforgeable.sol";
+import "./ISalvageable.sol";
 
-contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
+contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable, IReforgeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint16;
@@ -125,7 +127,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     mapping(uint256 => uint256) public numberParameters;
 
-    event Burned(address indexed owner, uint256 indexed burned);
+    event Burned(address indexed owner, uint256 indexed burned, address indexed nftAddress);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
     event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
@@ -323,7 +325,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokens[id].properties;
     }
 
-    function getStars(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getStars(uint256 id) public view override noFreshLookup(id) returns (uint8) {
         return getStarsFromProperties(getProperties(id));
     }
 
@@ -439,26 +441,15 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         burnDust[playerAddress] = burnDustValue;
     }
 
-    function _decrementDustSuppliesCheck(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
+    function _decrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
         uint32[] memory supplies = getDustSupplies(playerAddress);
         require(supplies[0] >= amountLB, "Dust LB supply needed");
         require(supplies[1] >= amount4B, "Dust 4B supply needed");
         require(supplies[2] >= amount5B, "Dust 5B supply needed");
-    }
-
-    function _decrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
-        uint32[] memory supplies = getDustSupplies(playerAddress);
         supplies[0] -= amountLB;
         supplies[1] -= amount4B;
         supplies[2] -= amount5B;
         _setDustSupplies(playerAddress, supplies[0], supplies[1], supplies[2]);
-    }
-
-    function _incrementDustSuppliesCheck(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
-        uint32[] memory supplies = getDustSupplies(playerAddress);
-        require(uint256(supplies[0]) + amountLB <= 0xFFFFFFFF, "Dust LB supply capped");
-        require(uint256(supplies[1]) + amount4B <= 0xFFFFFFFF, "Dust 4B supply capped");
-        require(uint256(supplies[2]) + amount5B <= 0xFFFFFFFF, "Dust 5B supply capped");
     }
 
     function incrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) public restricted {
@@ -466,26 +457,29 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _incrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
-        _incrementDustSuppliesCheck(playerAddress, amountLB, amount4B, amount5B);
         uint32[] memory supplies = getDustSupplies(playerAddress);
+        require(uint256(supplies[0]) + amountLB <= 0xFFFFFFFF, "Dust LB supply capped");
+        require(uint256(supplies[1]) + amount4B <= 0xFFFFFFFF, "Dust 4B supply capped");
+        require(uint256(supplies[2]) + amount5B <= 0xFFFFFFFF, "Dust 5B supply capped");
         supplies[0] += amountLB;
         supplies[1] += amount4B;
         supplies[2] += amount5B;
         _setDustSupplies(playerAddress, supplies[0], supplies[1], supplies[2]);
     }
 
-    function _calculateBurnValues(uint256 burnID) public view returns(uint8[] memory) {
-        uint8[] memory values = new uint8[](3);
+    function _calculateReforgeableValues(IReforgeable reforgeable, uint256 burnID) public view returns(uint8[3] memory values) {
+        values = _calculateSalvageableValues(reforgeable, burnID);
 
         // Carried burn points.
-        WeaponBurnPoints storage burningbp = burnPoints[burnID];
-        values[0] = (burningbp.lowStarBurnPoints + 1) / 2;
-        values[1] = (burningbp.fourStarBurnPoints + 1) / 2;
-        values[2] = (burningbp.fiveStarBurnPoints + 1) / 2;
+        (uint8 pointsLB, uint8 points4B, uint8 points5B) = reforgeable.getBurnPoints(burnID);
+        values[0] += (pointsLB + 1) / 2;
+        values[1] += (points4B + 1) / 2;
+        values[2] += (points5B + 1) / 2;
+    }
 
+    function _calculateSalvageableValues(ISalvageable salvageable, uint256 burnID) public view returns(uint8[3] memory values) {
         // Stars-based burn points.
-        Weapon storage burning = tokens[burnID];
-        uint8 stars = getStarsFromProperties(burning.properties);
+        uint8 stars = salvageable.getStars(burnID);
         if(stars < 3) { // 1-3 star
             values[0] += uint8(burnPointMultiplier * (stars + 1));
         }
@@ -495,31 +489,26 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         else if(stars == 4) { // 5 star
             values[2] += uint8(burnPointMultiplier);
         }
-
-        return values;
     }
 
-    function burn(uint256 burnID) public restricted {
-        uint8[] memory values = _calculateBurnValues(burnID);
+    function burnReforgeable(IReforgeable reforgeable, uint256 burnID) public restricted {
+        _burnToDust(address(reforgeable), burnID, _calculateReforgeableValues(reforgeable, burnID));
+    }
 
+    function burnSalvageable(ISalvageable salvageable, uint256 burnID) public restricted {
+        _burnToDust(address(salvageable), burnID, _calculateSalvageableValues(salvageable, burnID));
+    }
+
+    function _burnToDust(address nftAddress, uint256 burnID, uint8[3] memory values) internal {
         address burnOwner = ownerOf(burnID);
-
-        // While this may seem redundant, _burn could fail so
-        // dust cannot be pre-incremented.
-        _incrementDustSuppliesCheck(burnOwner, values[0], values[1], values[2]);
-
         _burn(burnID);
         if(promos.getBit(burnOwner, 4) == false)
             _incrementDustSupplies(burnOwner, values[0], values[1], values[2]);
-
-        emit Burned(
-            burnOwner,
-            burnID
-        );
+        emit Burned(burnOwner, burnID, nftAddress);
     }
 
     function reforge(uint256 reforgeID, uint256 burnID) public restricted {
-        uint8[] memory values = _calculateBurnValues(burnID);
+        uint8[3] memory values = _calculateReforgeableValues(this, burnID);
 
         // Note: preexisting issue of applying burn points even if _burn fails.
         if(promos.getBit(ownerOf(reforgeID), 4) == false)
@@ -538,10 +527,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function reforgeWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) public restricted {
-        // While this may seem redundant, _applyBurnPoints could fail so
-        // dust cannot be pre-decremented.
-        _decrementDustSuppliesCheck(ownerOf(reforgeID), amountLB, amount4B, amount5B);
-
         if(promos.getBit(ownerOf(reforgeID), 4) == false)
             _applyBurnPoints(reforgeID, amountLB, amount4B, amount5B);
         _decrementDustSupplies(ownerOf(reforgeID), amountLB, amount4B, amount5B);
@@ -723,7 +708,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return ownerOf(id) == user && getDurabilityPoints(id) > 0;
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+    function _beforeTokenTransfer(address from, address to, uint256 /*tokenId*/) internal override {
         // Always allow minting and burning.
         if(from != address(0) && to != address(0)) {
             // But other transfers require the feature to be enabled.
@@ -733,5 +718,16 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
                 require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to), "Transfer cooldown");
             }
         }
+    }
+
+    function discard(uint256 id) public override {
+        _burn(id);
+    }
+
+    function getBurnPoints(uint256 id) public override view returns (uint8 pointsLB, uint8 points4B, uint8 points5B){
+        WeaponBurnPoints storage burningbp = burnPoints[id];
+        pointsLB = burningbp.lowStarBurnPoints;
+        points4B = burningbp.fourStarBurnPoints;
+        points5B = burningbp.fiveStarBurnPoints;
     }
 }

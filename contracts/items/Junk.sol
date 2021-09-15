@@ -6,8 +6,9 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../Promos.sol";
+import "../ISalvageable.sol";
 
-contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
+contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable, ISalvageable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
@@ -59,8 +60,15 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokenID;
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+    function _beforeTokenTransfer(address from, address to, uint256 /*tokenId*/) internal override {
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
 
+    function discard(uint256 id) public override {
+        _burn(id);
+    }
+
+    function getStars(uint256 id) public override view returns (uint8) {
+        return get(id);
+    }
 }

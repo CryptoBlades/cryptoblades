@@ -14,6 +14,8 @@ import "./Promos.sol";
 import "./weapons.sol";
 import "./util.sol";
 import "./Blacksmith.sol";
+import "./Junk.sol";
+import "./shields.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -99,6 +101,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         rewardsClaimTaxDuration = 15 days;
     }
 
+    function migrateTo_addJunk(Junk _junk) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+
+        junk = _junk;
+    }
+
+    function migrateTo_addShields(Shields _shields) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+
+        shields = _shields;
+    }
+
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint characterLimit;
     // config vars
@@ -171,6 +185,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     int128 private rewardsClaimTaxMax;
     uint256 private rewardsClaimTaxDuration;
+
+    Junk junk;
+    Shields shields;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -552,49 +569,67 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
-    function burnWeapon(uint256 burnID) external isWeaponOwner(burnID) {
+    function burnJunk(uint256 burnID) external isOwner(junk, burnID) {
         _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee));
-
-        _burnWeaponLogic(burnID);
+        _burnSalvageableLogic(junk, burnID);
     }
 
-    function burnWeapons(uint256[] calldata burnIDs) external isWeaponsOwner(burnIDs) {
+    function burnJunk(uint256[] calldata burnIDs) external isOwnerOfMultiple(junk, burnIDs) {
         _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length))));
-
-        _burnWeaponsLogic(burnIDs);
+        _burnSalvageablesLogic(junk, burnIDs);
     }
 
-    function reforgeWeapon(uint256 reforgeID, uint256 burnID) external isWeaponOwner(reforgeID) isWeaponOwner(burnID) {
+    function burnShield(uint256 burnID) external isOwner(shields, burnID) {
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee));
+        _burnSalvageableLogic(shields, burnID);
+    }
+
+    function burnShields(uint256[] calldata burnIDs) external isOwnerOfMultiple(shields, burnIDs) {
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length))));
+        _burnSalvageablesLogic(shields, burnIDs);
+    }
+
+    function burnWeapon(uint256 burnID) external isOwner(weapons, burnID) {
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee));
+        _burnReforgeableLogic(weapons, burnID);
+    }
+
+    function burnWeapons(uint256[] calldata burnIDs) external isOwnerOfMultiple(weapons, burnIDs) {
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length))));
+        _burnReforgeablesLogic(weapons, burnIDs);
+    }
+
+    function reforgeWeapon(uint256 reforgeID, uint256 burnID) external isOwner(weapons, reforgeID) isOwner(weapons, burnID) {
         _payContractConvertedSupportingStaked(msg.sender, usdToSkill(reforgeWeaponFee));
 
         _reforgeWeaponLogic(reforgeID, burnID);
     }
 
-    function reforgeWeaponWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) external isWeaponOwner(reforgeID) {
+    function reforgeWeaponWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) external isOwner(weapons, reforgeID) {
         _payContractConvertedSupportingStaked(msg.sender, usdToSkill(reforgeWeaponWithDustFee));
 
         _reforgeWeaponWithDustLogic(reforgeID, amountLB, amount4B, amount5B);
     }
 
-    function burnWeaponUsingStakedSkill(uint256 burnID) external isWeaponOwner(burnID) {
+    function burnWeaponUsingStakedSkill(uint256 burnID) external isOwner(weapons, burnID) {
         int128 discountedBurnWeaponFee =
             burnWeaponFee.mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
         _payContractStakedOnly(msg.sender, usdToSkill(discountedBurnWeaponFee));
 
-        _burnWeaponLogic(burnID);
+        _burnReforgeableLogic(weapons, burnID);
     }
 
-    function burnWeaponsUsingStakedSkill(uint256[] calldata burnIDs) external isWeaponsOwner(burnIDs) {
+    function burnWeaponsUsingStakedSkill(uint256[] calldata burnIDs) external isOwnerOfMultiple(weapons, burnIDs) {
         int128 discountedBurnWeaponFee =
             burnWeaponFee
                 .mul(ABDKMath64x64.fromUInt(burnIDs.length))
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
         _payContractStakedOnly(msg.sender, usdToSkill(discountedBurnWeaponFee));
 
-        _burnWeaponsLogic(burnIDs);
+        _burnReforgeablesLogic(weapons, burnIDs);
     }
 
-    function reforgeWeaponUsingStakedSkill(uint256 reforgeID, uint256 burnID) external isWeaponOwner(reforgeID) isWeaponOwner(burnID) {
+    function reforgeWeaponUsingStakedSkill(uint256 reforgeID, uint256 burnID) external isOwner(weapons, reforgeID) isOwner(weapons, burnID) {
         int128 discountedReforgeWeaponFee =
             reforgeWeaponFee
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
@@ -603,7 +638,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _reforgeWeaponLogic(reforgeID, burnID);
     }
 
-    function reforgeWeaponWithDustUsingStakedSkill(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) external isWeaponOwner(reforgeID) {
+    function reforgeWeaponWithDustUsingStakedSkill(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) external isOwner(weapons, reforgeID) {
         int128 discountedReforgeWeaponWithDustFee =
             reforgeWeaponWithDustFee
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
@@ -612,13 +647,23 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _reforgeWeaponWithDustLogic(reforgeID, amountLB, amount4B, amount5B);
     }
 
-    function _burnWeaponLogic(uint256 burnID) internal {
-        weapons.burn(burnID);
+    function _burnReforgeableLogic(IReforgeable reforgeable, uint256 burnID) internal {
+        weapons.burnReforgeable(reforgeable, burnID);
     }
 
-    function _burnWeaponsLogic(uint256[] memory burnIDs) internal {
+    function _burnReforgeablesLogic(IReforgeable reforgeable, uint256[] memory burnIDs) internal {
         for(uint i = 0; i < burnIDs.length; i++) {
-            weapons.burn(burnIDs[i]);
+            weapons.burnReforgeable(reforgeable, burnIDs[i]);
+        }
+    }
+
+    function _burnSalvageableLogic(ISalvageable salvageable, uint256 burnID) internal {
+        weapons.burnSalvageable(salvageable, burnID);
+    }
+
+    function _burnSalvageablesLogic(ISalvageable salvageable, uint256[] memory burnIDs) internal {
+        for(uint i = 0; i < burnIDs.length; i++) {
+            weapons.burnSalvageable(salvageable, burnIDs[i]);
         }
     }
 
@@ -637,8 +682,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     modifier fightModifierChecks(uint256 character, uint256 weapon) {
         _onlyNonContract();
-        _isCharacterOwner(character);
-        _isWeaponOwner(weapon);
+        _isOwner(characters, character);
+        _isOwner(weapons, weapon);
         _;
     }
 
@@ -679,33 +724,24 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(element == 100 || (element>= 0 && element<= 3));
     }
 
-    modifier isWeaponOwner(uint256 weapon) {
-        _isWeaponOwner(weapon);
+    modifier isOwner(IERC721Upgradeable token, uint256 id) {
+        _isOwner(token, id);
         _;
     }
 
-    function _isWeaponOwner(uint256 weapon) internal view {
-        require(weapons.ownerOf(weapon) == msg.sender);
+    function _isOwner(IERC721Upgradeable token, uint256 id) internal view {
+        require(token.ownerOf(id) == msg.sender);
     }
 
-    modifier isWeaponsOwner(uint256[] memory weaponArray) {
-        _isWeaponsOwner(weaponArray);
+    modifier isOwnerOfMultiple(IERC721Upgradeable token, uint256[] memory ids) {
+        _isOwnerOfMultiple(token, ids);
         _;
     }
 
-    function _isWeaponsOwner(uint256[] memory weaponArray) internal view {
-        for(uint i = 0; i < weaponArray.length; i++) {
-            require(weapons.ownerOf(weaponArray[i]) == msg.sender);
+    function _isOwnerOfMultiple(IERC721Upgradeable token, uint256[] memory ids) internal view {
+        for(uint i = 0; i < ids.length; i++) {
+            require(token.ownerOf(ids[i]) == msg.sender);
         }
-    }
-
-    modifier isCharacterOwner(uint256 character) {
-        _isCharacterOwner(character);
-        _;
-    }
-
-    function _isCharacterOwner(uint256 character) internal view {
-        require(characters.ownerOf(character) == msg.sender);
     }
 
     modifier isTargetValid(uint256 character, uint256 weapon, uint32 target) {
