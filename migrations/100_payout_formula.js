@@ -12,6 +12,8 @@ module.exports = async function (deployer, network, accounts) {
         await game.VAR_HOURLY_POWER_AVERAGE(),
         await game.VAR_DAILY_MAX_CLAIM(),
         await game.VAR_HOURLY_TIMESTAMP(),
+        await game.VAR_CLAIM_DEPOSIT_AMOUNT(),
+        await game.VAR_PARAM_DAILY_CLAIM_DEPOSIT_PERCENT(),
     ]
     let varValues = [
         29, // VAR_PARAM_DAILY_CLAIM_FIGHTS_LIMIT
@@ -19,7 +21,9 @@ module.exports = async function (deployer, network, accounts) {
         250000000000000, // VAR_HOURLY_PAY_PER_FIGHT (0.00025 ether)
         15000, // VAR_HOURLY_POWER_AVERAGE
         7250000000000000,// VAR_DAILY_MAX_CLAIM
-        Date.now()// VAR_HOURLY_TIMESTAMP
+        Date.now(),// VAR_HOURLY_TIMESTAMP
+        web3.utils.toWei('1', 'ether'),//VAR_CLAIM_DEPOSIT_AMOUNT
+        10,//VAR_PARAM_DAILY_CLAIM_DEPOSIT_PERCENT
     ];
     await game.setVars(varFields, varValues);
     

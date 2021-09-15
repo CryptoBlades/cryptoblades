@@ -26,19 +26,24 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     int128 public constant PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT =
         14757395258967641292; // 0.8 in fixed-point 64x64 format
 
-    uint256 public constant VAR_HOURLY_INCOME = uint256(keccak256("HOURLY_INCOME"));
-    uint256 public constant VAR_HOURLY_FIGHTS = uint256(keccak256("HOURLY_FIGHTS"));
-    uint256 public constant VAR_HOURLY_POWER_SUM = uint256(keccak256("HOURLY_POWER_SUM"));
-    uint256 public constant VAR_HOURLY_POWER_AVERAGE = uint256(keccak256("HOURLY_POWER_AVERAGE"));
-    uint256 public constant VAR_HOURLY_PAY_PER_FIGHT = uint256(keccak256("HOURLY_PAY_PER_FIGHT"));
-    uint256 public constant VAR_HOURLY_TIMESTAMP = uint256(keccak256("HOURLY_TIMESTAMP"));
-    uint256 public constant VAR_DAILY_MAX_CLAIM = uint256(keccak256("DAILY_MAX_CLAIM"));
-    uint256 public constant VAR_CLAIM_DEPOSIT_ = uint256(keccak256("DAILY_MAX_CLAIM"));
-    uint256 public constant VAR_PARAM_PAYOUT_INCOME_PERCENT = uint256(keccak256("PARAM_PAYOUT_INCOME_PERCENT"));
-    uint256 public constant VAR_PARAM_DAILY_CLAIM_FIGHTS_LIMIT = uint256(keccak256("PARAM_DAILY_CLAIM_FIGHTS_LIMIT"));
+    // Mapped variables (vars[]) keys, one value per key
+    // Using small numbers for now to save on contract size (3% for 13 vars vs using uint256(keccak256("name"))!)
+    // Can be migrated later via setVars if needed
+    uint256 public constant VAR_HOURLY_INCOME = 1;
+    uint256 public constant VAR_HOURLY_FIGHTS = 2;
+    uint256 public constant VAR_HOURLY_POWER_SUM = 3;
+    uint256 public constant VAR_HOURLY_POWER_AVERAGE = 4;
+    uint256 public constant VAR_HOURLY_PAY_PER_FIGHT = 5;
+    uint256 public constant VAR_HOURLY_TIMESTAMP = 6;
+    uint256 public constant VAR_DAILY_MAX_CLAIM = 7;
+    uint256 public constant VAR_CLAIM_DEPOSIT_AMOUNT = 8;
+    uint256 public constant VAR_PARAM_PAYOUT_INCOME_PERCENT = 9;
+    uint256 public constant VAR_PARAM_DAILY_CLAIM_FIGHTS_LIMIT = 10;
+    uint256 public constant VAR_PARAM_DAILY_CLAIM_DEPOSIT_PERCENT = 11;
 
-    uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = uint256(keccak256("DAILY_CLAIMED_AMOUNT"));
-    uint256 public constant USERVAR_CLAIM_TIMESTAMP = uint256(keccak256("CLAIM_TIMESTAMP"));
+    // Mapped user variable(userVars[]) keys, one value per wallet
+    uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
+    uint256 public constant USERVAR_CLAIM_TIMESTAMP = 10002;
 
     Characters public characters;
     Weapons public weapons;
@@ -193,7 +198,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
 
     function recoverSkill(uint256 amount) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         skillToken.safeTransfer(msg.sender, amount);
     }
@@ -332,7 +337,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 i = targets.length;
             }
         }
-        require(foundMatch, "Target invalid");
+        require(foundMatch);
     }
 
     function performFight(
@@ -562,7 +567,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         onlyNonContract
         oncePerBlock(_minter)
     {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(GAME_ADMIN, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(GAME_ADMIN, msg.sender));
         require(num > 0 && num <= 50);
 
         for (uint i = 0; i < num; i++) {
@@ -654,7 +659,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function migrateRandoms(IRandoms _newRandoms) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
         randoms = _newRandoms;
     }
 
@@ -729,18 +734,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _isCharacterOwner(uint256 character) internal view {
         require(characters.ownerOf(character) == msg.sender);
-    }
-
-    modifier isTargetValid(uint256 character, uint256 weapon, uint32 target) {
-        bool foundMatch = false;
-        uint32[4] memory targets = getTargets(character, weapon);
-        for(uint i = 0; i < targets.length; i++) {
-            if(targets[i] == target) {
-                foundMatch = true;
-            }
-        }
-        require(foundMatch, "Target invalid");
-        _;
     }
 
     function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
@@ -906,7 +899,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function setReforgeWeaponValue(uint256 cents) public restricted {
         int128 newReforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
-        require(newReforgeWeaponFee > burnWeaponFee, "Reforge fee must include burn fee");
+        require(newReforgeWeaponFee > burnWeaponFee);
         reforgeWeaponWithDustFee = newReforgeWeaponFee - burnWeaponFee;
         reforgeWeaponFee = newReforgeWeaponFee;
     }
@@ -971,29 +964,64 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function claimTokenRewards() public {
-        claimTokenRewards(tokenRewards[msg.sender]);
+        claimTokenRewards(getRemainingTokenClaimAmountPreTax());
     }
 
-    function claimTokenRewards(uint256 _tokenRewards) public {
-        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(_tokenRewards);
-        userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] += _tokenRewards;
+    function claimTokenRewards(uint256 _claimingAmount) public {
+        // safemath throws error on negative
+        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(_claimingAmount);
 
-        uint256 _tokenRewardsToPayOut = _tokenRewards.sub(
-            _getRewardsClaimTax(msg.sender).mulu(_tokenRewards)
-        );
+        if(isDailyTokenClaimAmountExpired()) {
+            userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
+            userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] = 0;
+        }
+        uint256 claimedToday = userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT];
+        require(_claimingAmount <= getRemainingTokenClaimAmountPreTax());
+        userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] += _claimingAmount;
 
-        require(_tokenRewardsToPayOut <= tokenRewards[msg.sender]
-            && _tokenRewardsToPayOut <= vars[VAR_DAILY_MAX_CLAIM]
-            && (userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] <= vars[VAR_DAILY_MAX_CLAIM]
-                || userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] < now - 1 days)
+        uint256 _tokenRewardsToPayOut = _claimingAmount.sub(
+            _getRewardsClaimTax(msg.sender).mulu(_claimingAmount)
         );
-        userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
 
         // Tax goes to game contract itself, which would mean
         // transferring from the game contract to ...itself.
         // So we don't need to do anything with the tax part of the rewards.
         if(promos.getBit(msg.sender, 4) == false)
             _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
+    }
+
+    function isDailyTokenClaimAmountExpired() public view returns (bool) {
+        return userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] <= now - 1 days;
+    }
+
+    function getClaimedTokensToday() public view returns (uint256) {
+        // if claim timestamp is older than a day, it's reset to 0
+        return isDailyTokenClaimAmountExpired() ? 0 : userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT];
+    }
+
+    function getRemainingTokenClaimAmountPreTax() public view returns (uint256) {
+        // used to get how much can be withdrawn until the daily withdraw timer expires
+        uint256 max = getMaxTokenClaimAmountPreTax();
+        uint256 claimed = getClaimedTokensToday();
+        if(claimed >= max)
+            return 0; // all tapped out for today
+        uint256 remainingOfMax = max-claimed;
+        return tokenRewards[msg.sender] >= remainingOfMax ? remainingOfMax : tokenRewards[msg.sender];
+    }
+
+    function getMaxTokenClaimAmountPreTax() public view returns(uint256) {
+        // if tokenRewards is above VAR_CLAIM_DEPOSIT_AMOUNT, we let them withdraw more
+        // this function does not account for amount already withdrawn today
+        if(tokenRewards[msg.sender] >= vars[VAR_CLAIM_DEPOSIT_AMOUNT]) { // deposit bonus active
+            // max is either 10% of amount above deposit, or 2x the regular limit, whichever is higher
+            uint256 aboveDepositAdjusted = ABDKMath64x64.divu(vars[VAR_PARAM_DAILY_CLAIM_DEPOSIT_PERCENT],100)
+                .mulu(tokenRewards[msg.sender]-vars[VAR_CLAIM_DEPOSIT_AMOUNT]); // 10% above deposit
+            if(aboveDepositAdjusted > vars[VAR_DAILY_MAX_CLAIM] * 2) {
+                return aboveDepositAdjusted;
+            }
+            return vars[VAR_DAILY_MAX_CLAIM] * 2;
+        }
+        return vars[VAR_DAILY_MAX_CLAIM];
     }
 
     function stakeUnclaimedRewards() external {
