@@ -929,8 +929,8 @@ export function createStore(web3: Web3) {
           maxStamina,
           maxDurability,
         ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
-          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
+          dispatch('getAccountCharacters'),
+          dispatch('getAccountWeapons'),
           state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)),
           state.contracts().RaidTrinket!.methods.getOwned().call(defaultCallOptions(state)) || [],
           state.contracts().Junk!.methods.getOwned().call(defaultCallOptions(state)) || [],
@@ -964,20 +964,20 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async updateWeaponIds({ state, dispatch, commit }) {
+      async updateWeaponIds({ dispatch, commit }) {
         if(featureFlagStakeOnly) return;
 
-        const ownedWeaponIds = await state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state));
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
         commit('updateUserDetails', {
           ownedWeaponIds: Array.from(ownedWeaponIds)
         });
         await dispatch('fetchWeapons', ownedWeaponIds);
       },
 
-      async updateCharacterIds({ state, dispatch, commit }) {
+      async updateCharacterIds({ dispatch, commit }) {
         if(featureFlagStakeOnly) return;
 
-        const ownedCharacterIds = await state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state));
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
         commit('updateUserDetails', {
           ownedCharacterIds: Array.from(ownedCharacterIds)
         });
@@ -1222,12 +1222,8 @@ export function createStore(web3: Web3) {
         });
       },
 
-      async setupWeaponDurabilities({ state, dispatch }) {
-        const [
-          ownedWeaponIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
-        ]);
+      async setupWeaponDurabilities({ dispatch }) {
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
 
         for (const weapId of ownedWeaponIds) {
           dispatch('fetchWeaponDurability', weapId);
@@ -1247,12 +1243,8 @@ export function createStore(web3: Web3) {
         }
       },
 
-      async setupWeaponRenames({ state, dispatch }) {
-        const [
-          ownedWeaponIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
-        ]);
+      async setupWeaponRenames({ dispatch }) {
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
 
         for (const weapId of ownedWeaponIds) {
           dispatch('fetchWeaponRename', weapId);
@@ -1274,12 +1266,8 @@ export function createStore(web3: Web3) {
         }
       },
 
-      async setupCharacterStaminas({ state, dispatch }) {
-        const [
-          ownedCharacterIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state))
-        ]);
+      async setupCharacterStaminas({ dispatch }) {
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
 
         for (const charId of ownedCharacterIds) {
           dispatch('fetchCharacterStamina', charId);
@@ -1298,12 +1286,26 @@ export function createStore(web3: Web3) {
           commit('updateCharacterStamina', { characterId, stamina });
         }
       },
-      async setupCharacterRenames({ state, dispatch }) {
-        const [
-          ownedCharacterIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state))
-        ]);
+      async getAccountCharacters({state}) {
+        if(!state.defaultAccount) return;
+        const numberOfCharacters = parseInt(await state.contracts().Characters!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
+        const characters = await Promise.all(
+          [...Array(numberOfCharacters).keys()].map((_, i) =>
+            state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+        );
+        return characters;
+      },
+      async getAccountWeapons({state}) {
+        if(!state.defaultAccount) return;
+        const numberOfWeapons = parseInt(await state.contracts().Weapons!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
+        const weapons = await Promise.all(
+          [...Array(numberOfWeapons).keys()]
+            .map((_, i) => state.contracts().Weapons!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+        );
+        return weapons;
+      },
+      async setupCharacterRenames({ dispatch }) {
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
 
         for (const charId of ownedCharacterIds) {
           dispatch('fetchCharacterRename', charId);
@@ -2089,6 +2091,19 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async fetchMarketNftTargetBuyer({ state }, { nftContractAddr, tokenId }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns the listing's target buyer address
+        return await NFTMarket.methods
+          .getTargetBuyer(
+            nftContractAddr,
+            tokenId
+          )
+          .call(defaultCallOptions(state));
+      },
+
       async fetchMarketTax({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
@@ -2115,7 +2130,8 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
-      async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price }: { nftContractAddr: string, tokenId: string, price: string }) {
+      async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price, targetBuyer }:
+      { nftContractAddr: string, tokenId: string, price: string, targetBuyer: string }) {
         const { CryptoBlades, SkillToken, NFTMarket, Weapons, Characters, Shields } = state.contracts();
         if(!CryptoBlades || !SkillToken || !NFTMarket || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
 
@@ -2141,7 +2157,7 @@ export function createStore(web3: Web3) {
         );
 
         const res = await NFTMarket.methods
-          .addListing(nftContractAddr, tokenId, price)
+          .addListing(nftContractAddr, tokenId, price, targetBuyer)
           .send({
             from: state.defaultAccount,
           });
@@ -2190,6 +2206,25 @@ export function createStore(web3: Web3) {
         } = res.events.ListingPriceChange.returnValues;
 
         return { seller, nftID, newPrice } as { seller: string, nftID: string, newPrice: string };
+      },
+
+      async changeMarketListingTargetBuyer({ state }, { nftContractAddr, tokenId, newTargetBuyer }:
+      { nftContractAddr: string, tokenId: string, newTargetBuyer: string }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        const res = await NFTMarket.methods
+          .changeListingTargetBuyer(nftContractAddr, tokenId, newTargetBuyer)
+          .send({
+            from: state.defaultAccount,
+          });
+
+        const {
+          seller,
+          nftID
+        } = res.events.ListingTargetBuyerChange.returnValues;
+
+        return { seller, nftID, newTargetBuyer } as { seller: string, nftID: string, newTargetBuyer: string };
       },
 
       async cancelMarketListing({ state, dispatch }, { nftContractAddr, tokenId }: { nftContractAddr: string, tokenId: string }) {
