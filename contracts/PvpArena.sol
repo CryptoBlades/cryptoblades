@@ -436,7 +436,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint8 tier = getArenaTier(characterID);
 
         uint256 fighterPoints = _characterRankingPoints[characterID];
-
         uint256 firstRankingPlayer = _rankingByTier[tier][0];
         uint256 firstRankingPlayerPoints = _characterRankingPoints[
             firstRankingPlayer
@@ -557,9 +556,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev function where admins can seta character's ranking points
-    function _setRankingPoints(uint256 characterID, uint8 newRankingPoints)
-        private
-        restricted
+    function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
+        public
     {
         _characterRankingPoints[characterID] = newRankingPoints;
     }
