@@ -85,8 +85,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev accumulated rewards per tier
     mapping(uint8 => uint256) private _rankingsPoolByTier;
     /// @dev ranking by tier
-    mapping(uint8[] => uint256) private _rankingByTier;
-    /// @dev character ranking points
+    mapping(uint8 => uint256[3]) private _rankingByTier;
+    /// @dev rankPoints by character
     mapping(uint256 => uint8) private _characterRankingPoints;
 
     event NewDuel(
@@ -450,6 +450,25 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
     }
 
+    /// @dev get the top players of a tier
+    function getTopTierPlayers(uint256 characterID)
+        public
+        view
+        returns (uint256[3] memory)
+    {
+        uint8 tier = getArenaTier(characterID);
+        return _rankingByTier[tier];
+    }
+
+    /// @dev get the player's ranking points
+    function getCharacterRankingPoints(uint256 characterID)
+        public
+        view
+        returns (uint256)
+    {
+        return _characterRankingPoints[characterID];
+    }
+
     /// @dev checks if a character is in the arena
     function isCharacterInArena(uint256 characterID)
         public
@@ -515,6 +534,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev updates the last activity timestamp of a character
     function _updateLastActivityTimestamp(uint256 characterID) private {
         _lastActivityByCharacter[characterID] = block.timestamp;
+    }
+
+    /// @dev function where admins can seta character's ranking points
+    function _setRankingPoints(uint256 characterID, uint8 newRankingPoints)
+        private
+        restricted
+    {
+        _characterRankingPoints[characterID] = newRankingPoints;
     }
 
     function _getCharacterPowerRoll(uint256 characterID, uint8 opponentTrait)
