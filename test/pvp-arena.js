@@ -221,7 +221,7 @@ contract("PvpArena", (accounts) => {
         const isCharacterInArena = await pvpArena.isCharacterInArena(
           characterID
         );
-        const fighter = await pvpArena.fightersByCharacter(characterID);
+        const fighter = await pvpArena.fighterByCharacter(characterID);
 
         expect(isCharacterInArena).to.equal(true);
         expect(fighter.characterID.toString()).to.equal(

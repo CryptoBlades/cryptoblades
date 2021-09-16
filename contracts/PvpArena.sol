@@ -65,7 +65,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint256 public decisionSeconds;
 
     /// @dev Fighter by characterID
-    mapping(uint256 => Fighter) public fightersByCharacter;
+    mapping(uint256 => Fighter) public fighterByCharacter;
     /// @dev Active duel by characterID currently attacking
     mapping(uint256 => Duel) public duelByAttacker;
     /// @dev last time a character was involved in activity that makes it untattackable
@@ -193,7 +193,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         _fightersByTier[tier].push(characterID);
         _fightersByPlayer[msg.sender].push(characterID);
-        fightersByCharacter[characterID] = Fighter(
+        fighterByCharacter[characterID] = Fighter(
             characterID,
             weaponID,
             shieldID,
@@ -275,11 +275,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _rewardsByPlayer[winner] = _rewardsByPlayer[winner].add(
             bountyDistribution.winnerReward
         );
-        fightersByCharacter[loserID].wager = fightersByCharacter[loserID]
+        fighterByCharacter[loserID].wager = fighterByCharacter[loserID]
             .wager
             .sub(bountyDistribution.loserPayment);
 
-        if (fightersByCharacter[loserID].wager == 0) {
+        if (fighterByCharacter[loserID].wager == 0) {
             _removeCharacterFromArena(loserID);
         }
 
@@ -300,7 +300,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         external
         isOwnedCharacter(characterID)
     {
-        Fighter storage fighter = fightersByCharacter[characterID];
+        Fighter storage fighter = fighterByCharacter[characterID];
         uint256 wager = fighter.wager;
         _removeCharacterFromArena(characterID);
 
@@ -437,7 +437,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint256)
     {
-        return fightersByCharacter[characterID].wager;
+        return fighterByCharacter[characterID].wager;
     }
 
     /// @dev wether or not the character is still in time to start a duel
@@ -482,7 +482,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // - [ ] consider shield
         uint8 trait = characters.getTrait(characterID);
         uint24 basePower = characters.getPower(characterID);
-        uint256 weaponID = fightersByCharacter[characterID].weaponID;
+        uint256 weaponID = fighterByCharacter[characterID].weaponID;
         uint256 seed = randoms.getRandomSeed(msg.sender);
 
         (
@@ -541,12 +541,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev removes a character from the arena's state
     function _removeCharacterFromArena(uint256 characterID) private {
         require(isCharacterInArena(characterID), "Character not in arena");
-        Fighter storage fighter = fightersByCharacter[characterID];
+        Fighter storage fighter = fighterByCharacter[characterID];
 
         uint256 weaponID = fighter.weaponID;
         uint256 shieldID = fighter.shieldID;
 
-        delete fightersByCharacter[characterID];
+        delete fighterByCharacter[characterID];
 
         uint256[] storage playerFighters = _fightersByPlayer[msg.sender];
         playerFighters[characterID] = playerFighters[playerFighters.length - 1];
@@ -617,7 +617,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         Fighter[] memory fighters = new Fighter[](characterIDs.length);
 
         for (uint256 i = 0; i < characterIDs.length; i++) {
-            fighters[i] = fightersByCharacter[characterIDs[i]];
+            fighters[i] = fighterByCharacter[characterIDs[i]];
         }
 
         return fighters;
