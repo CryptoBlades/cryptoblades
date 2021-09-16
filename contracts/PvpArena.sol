@@ -63,6 +63,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
     uint256 public decisionSeconds;
+    /// @dev amount of points earned by winning a fight
+    uint8 public winningPoints;
+    /// @dev amount of points lost by losing fight
+    uint8 public losingPoints;
 
     /// @dev Fighter by characterID
     mapping(uint256 => Fighter) public fighterByCharacter;
@@ -87,7 +91,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev ranking by tier
     mapping(uint8 => uint256[3]) private _rankingByTier;
     /// @dev rankPoints by character
-    mapping(uint256 => uint8) private _characterRankingPoints;
+    mapping(uint256 => uint256) private _characterRankingPoints;
 
     event NewDuel(
         uint256 indexed attacker,
@@ -178,6 +182,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _rankingsPoolTaxPercent = 15;
         unattackableSeconds = 2 minutes;
         decisionSeconds = 3 minutes;
+        winningPoints = 5;
+        losingPoints = 3;
     }
 
     /// @notice enter the arena with a character, a weapon and optionally a shield
@@ -288,6 +294,19 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _removeCharacterFromArena(loserID);
         }
 
+        // add ranking points to the winner
+        _characterRankingPoints[winnerID] = _characterRankingPoints[winnerID]
+            .add(winningPoints);
+        // subtract ranking points to the loser
+        if (_characterRankingPoints[loserID] <= 3) {
+            _characterRankingPoints[loserID] = 0;
+        } else {
+            _characterRankingPoints[loserID] = _characterRankingPoints[loserID]
+                .sub(losingPoints);
+        }
+
+        // update the tier's ranking after a fight
+        updateTierRanks(attackerID);
         // add to the rankings pool
         _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
             getArenaTier(attackerID)
@@ -412,24 +431,24 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return shieldIDs;
     }
 
-    ///@dev another update approach
+    ///@dev update the respective character's tier rank
     function updateTierRanks(uint256 characterID) public {
         uint8 tier = getArenaTier(characterID);
 
-        uint8 fighterPoints = _characterRankingPoints[characterID];
+        uint256 fighterPoints = _characterRankingPoints[characterID];
 
         uint256 firstRankingPlayer = _rankingByTier[tier][0];
-        uint8 firstRankingPlayerPoints = _characterRankingPoints[
+        uint256 firstRankingPlayerPoints = _characterRankingPoints[
             firstRankingPlayer
         ];
 
         uint256 secondRankingPlayer = _rankingByTier[tier][1];
-        uint8 secondRankingPlayerPoints = _characterRankingPoints[
+        uint256 secondRankingPlayerPoints = _characterRankingPoints[
             secondRankingPlayer
         ];
 
         uint256 thirdRankingPlayer = _rankingByTier[tier][2];
-        uint8 thirdRankingPlayerPoints = _characterRankingPoints[
+        uint256 thirdRankingPlayerPoints = _characterRankingPoints[
             thirdRankingPlayer
         ];
 
