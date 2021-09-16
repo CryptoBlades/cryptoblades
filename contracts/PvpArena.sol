@@ -64,16 +64,16 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev amount of time an attacker has to make a decision
     uint256 public decisionSeconds;
 
+    /// @dev Fighter by characterID
+    mapping(uint256 => Fighter) public fightersByCharacter;
+    /// @dev Active duel by characterID currently attacking
+    mapping(uint256 => Duel) public duelByAttacker;
     /// @dev last time a character was involved in activity that makes it untattackable
     mapping(uint256 => uint256) private _lastActivityByCharacter;
-    /// @dev Fighter by characterID
-    mapping(uint256 => Fighter) private _fightersByCharacter;
     /// @dev IDs of characters available by tier (1-10, 11-20, etc...)
     mapping(uint8 => uint256[]) private _fightersByTier;
     /// @dev IDs of characters in the arena per player
     mapping(address => uint256[]) private _fightersByPlayer;
-    /// @dev Active duel by characterID currently attacking
-    mapping(uint256 => Duel) private _duelByAttacker;
     /// @dev characters currently in the arena
     mapping(uint256 => bool) private _charactersInArena;
     /// @dev weapons currently in the arena
@@ -193,7 +193,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         _fightersByTier[tier].push(characterID);
         _fightersByPlayer[msg.sender].push(characterID);
-        _fightersByCharacter[characterID] = Fighter(
+        fightersByCharacter[characterID] = Fighter(
             characterID,
             weaponID,
             shieldID,
@@ -275,11 +275,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _rewardsByPlayer[winner] = _rewardsByPlayer[winner].add(
             bountyDistribution.winnerReward
         );
-        _fightersByCharacter[loserID].wager = _fightersByCharacter[loserID]
+        fightersByCharacter[loserID].wager = fightersByCharacter[loserID]
             .wager
             .sub(bountyDistribution.loserPayment);
 
-        if (_fightersByCharacter[loserID].wager == 0) {
+        if (fightersByCharacter[loserID].wager == 0) {
             _removeCharacterFromArena(loserID);
         }
 
@@ -291,7 +291,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _updateLastActivityTimestamp(attackerID);
         _updateLastActivityTimestamp(defenderID);
 
-        _duelByAttacker[attackerID].isPending = false;
+        duelByAttacker[attackerID].isPending = false;
     }
 
     /// @dev withdraws a character and its items from the arena.
@@ -300,7 +300,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         external
         isOwnedCharacter(characterID)
     {
-        Fighter storage fighter = _fightersByCharacter[characterID];
+        Fighter storage fighter = fightersByCharacter[characterID];
         uint256 wager = fighter.wager;
         _removeCharacterFromArena(characterID);
 
@@ -428,7 +428,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev get an attacker's opponent
     function getOpponent(uint256 characterID) public view returns (uint256) {
-        return _duelByAttacker[characterID].defenderID;
+        return duelByAttacker[characterID].defenderID;
     }
 
     /// @dev get amount wagered for a given character
@@ -437,7 +437,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint256)
     {
-        return _fightersByCharacter[characterID].wager;
+        return fightersByCharacter[characterID].wager;
     }
 
     /// @dev wether or not the character is still in time to start a duel
@@ -447,14 +447,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         returns (bool)
     {
         return
-            _duelByAttacker[characterID].createdAt.add(decisionSeconds) >
+            duelByAttacker[characterID].createdAt.add(decisionSeconds) >
             block.timestamp;
     }
 
     /// @dev wether or not the character is the attacker in a duel
     // and has not performed an action
     function hasPendingDuel(uint256 characterID) public view returns (bool) {
-        return _duelByAttacker[characterID].isPending;
+        return duelByAttacker[characterID].isPending;
     }
 
     /// @dev wether or not a character can appear as someone's opponent
@@ -482,7 +482,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // - [ ] consider shield
         uint8 trait = characters.getTrait(characterID);
         uint24 basePower = characters.getPower(characterID);
-        uint256 weaponID = _fightersByCharacter[characterID].weaponID;
+        uint256 weaponID = fightersByCharacter[characterID].weaponID;
         uint256 seed = randoms.getRandomSeed(msg.sender);
 
         (
@@ -541,12 +541,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev removes a character from the arena's state
     function _removeCharacterFromArena(uint256 characterID) private {
         require(isCharacterInArena(characterID), "Character not in arena");
-        Fighter storage fighter = _fightersByCharacter[characterID];
+        Fighter storage fighter = fightersByCharacter[characterID];
 
         uint256 weaponID = fighter.weaponID;
         uint256 shieldID = fighter.shieldID;
 
-        delete _fightersByCharacter[characterID];
+        delete fightersByCharacter[characterID];
 
         uint256[] storage playerFighters = _fightersByPlayer[msg.sender];
         playerFighters[characterID] = playerFighters[playerFighters.length - 1];
@@ -597,7 +597,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         require(foundOpponent, "No opponent found");
 
-        _duelByAttacker[characterID] = Duel(
+        duelByAttacker[characterID] = Duel(
             characterID,
             opponentID,
             block.timestamp,
@@ -617,7 +617,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         Fighter[] memory fighters = new Fighter[](characterIDs.length);
 
         for (uint256 i = 0; i < characterIDs.length; i++) {
-            fighters[i] = _fightersByCharacter[characterIDs[i]];
+            fighters[i] = fightersByCharacter[characterIDs[i]];
         }
 
         return fighters;

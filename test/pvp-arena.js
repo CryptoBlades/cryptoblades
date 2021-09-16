@@ -221,8 +221,12 @@ contract("PvpArena", (accounts) => {
         const isCharacterInArena = await pvpArena.isCharacterInArena(
           characterID
         );
+        const fighter = await pvpArena.fightersByCharacter(characterID);
 
         expect(isCharacterInArena).to.equal(true);
+        expect(fighter.characterID.toString()).to.equal(
+          toBN(characterID).toString()
+        );
       });
     });
 
