@@ -1,14 +1,15 @@
 <template>
   <b-row class="pvp-content">
-        <b-col id="arsenal-preparation-content" cols="5">
+        <b-col id="arsenal-preparation-content">
             <b-row id="slider-buttons">
               <b-col
                   v-for="character in ownCharacters"
                   :key="character.id">
                   <div
                       :class="`${setListClassForChar(character.id,currentCharacterId)}`"
-                      @click="setCurrentCharacter(character.id)">
+                      @click="updateCharacterDetails(character.id)">
                     <div class="character-head-container">
+                      <span :class="`${setCharacterPvPStatus(character.id)}`"></span>
                       <img
                         class="character-buttons"
                         :src="getCharacterHeadArt(character)"/>
@@ -23,28 +24,29 @@
             </b-row>
           <b-row id="slider-content">
               <b-col>
-                <b-row id="equipped-weapon-container">
+                <b-row class="equipped-weapon-container">
                   <b-col>
                     <div id="equipped-weapon-header">
-                         WEAPON
+                         SWORD
                          <Hint text="Placeholder for weapon hint text"/>
                     </div>
                   </b-col>
                 </b-row>
-                <b-row id="equipped-weapon-container">
+                <b-row class="equipped-weapon-container">
                   <b-col>
-                    <div>
+                    <div
+                        id="equipped-weapon"
+                        @click="setCurrentTab(0); hideShieldInventory();">
                       <img
                         v-if="this.ownWeapons.length >0"
-                        id="equipped-weapon-content"
+                        class="equipped-weapon-content"
                         :src="getWeaponArt(currentWeapon)"
                         />
-                      <div
-                        v-if="this.ownWeapons.length <=0"
-                        id="equipped-weapon-content">
+                    </div>
+                    <div class="equipped-weapon-content no-equip"
+                        v-if="this.ownWeapons.length <=0">
                         No Weapon Detected
                       </div>
-                    </div>
                   </b-col>
                 </b-row>
                 <b-row id="equipped-shield-container">
@@ -57,17 +59,18 @@
                 </b-row>
                 <b-row id="equipped-shield-container">
                   <b-col>
-                    <div>
+                    <div
+                        id="equipped-shield"
+                        @click="setCurrentTab(1); hideWeaponInventory();">
                       <img
                         v-if="this.ownShields.length > 0"
-                        id="equipped-shield-content"
+                        class="equipped-shield-content"
                         :src="getShieldArt(currentShield.id)"
                         />
-                      <div
-                        v-if="this.ownShields.length <=0"
-                        id="equipped-shield-content">
+                    </div>
+                    <div class="equipped-shield-content no-equip"
+                        v-if="this.ownShields.length <=0">
                         No Shield Detected
-                      </div>
                     </div>
                   </b-col>
                 </b-row>
@@ -93,88 +96,29 @@
                   <b-col>
                     <div class="character-info-container">
                       <span v-text="getCharacterName(currentCharacterId)" />
+                      <char-element
+                      :trait="currentCharacter.trait"></char-element>
                     </div>
                     <div class="character-info-container">
                       <span id="character-level-label"> Level </span>
                       <span id="character-level-value" v-text="currentCharacter.level + 1" />
                     </div>
-                  </b-col>
-                  <b-col cols="1">
-                    <char-element
-                      :trait="currentCharacter.trait"></char-element>
-                  </b-col>
-                </b-row>
-              </b-col>
-          </b-row>
-        </b-col>
-        <b-col id="find-opponent-divider">
-        </b-col>
-        <b-col id= "find-opponent-content" cols="2">
-        </b-col>
-        <b-col id="inventory-content" cols="5">
-
-          <b-row class="inventory-pseudo-tabs">
-            <b-col
-              class="inventory-tab-button-container"
-              v-for="inventoryTab in inventoryTabNames"
-              :key="inventoryTab.id">
-              <button
-                class="inventory-tab-button"
-                v-text="inventoryTab.name"
-                @click="setCurrentTab(inventoryTab.id)"></button>
-            </b-col>
-          </b-row>
-          <b-row class="inventory-weapon-container"
-              v-if="getCurrentTab === 0">
-              <b-col v-if="this.ownWeapons.length > 0">
-                <b-row>
-                  <b-col
-                    v-for="weapon in ownWeapons"
-                    :key="weapon.id">
-                    <div
-                      :class="`${setListClassForWeapon(weapon.id,currentWeaponId)}`"
-                      @click="setCurrentWeapon(weapon.id)">
-                      <div>
-                        <img
-                          class="inventory-weapon-content"
-                          :src="getWeaponArt(weapon)"/>
-                      </div>
+                    <div class="character-info-container">
+                      <pvp-arena-details></pvp-arena-details>
                     </div>
                   </b-col>
                 </b-row>
               </b-col>
-
-              <b-col v-if="this.ownWeapons.length <= 0">
-                You do not have any weapons.
-              </b-col>
-          </b-row>
-          <b-row class="inventory-shield-container"
-              v-if="getCurrentTab === 1">
-              <b-col v-if="this.ownShields.length > 0">
-                <b-row>
-                  <b-col
-                    v-for="shield in ownShields"
-                    :key="shield.id">
-                    <div
-                      :class="`${setListClassForShield(shield.id,currentShield.id)}`"
-                      @click="setCurrentShield(shield.id)">
-                      <div>
-                        <img
-                          class="inventory-weapon-content"
-                          :src="getShieldArt(shield.id)"/>
-                      </div>
-                    </div>
-                  </b-col>
-                </b-row>
-              </b-col>
-
-              <b-col v-if="this.ownShields.length <= 0">
-                <div>
-                  You do not have any shields.
-                </div>
-              </b-col>
           </b-row>
         </b-col>
+
+          <b-popover :show.sync="showWeaponInventory" custom-class="equipped-container" target="equipped-weapon" triggers="click" placement="right">
+              <pvp-inventory></pvp-inventory>
+          </b-popover>
+
+          <b-popover :show.sync="showShieldInventory" custom-class="equipped-container" target="equipped-shield" triggers="click" placement="right">
+              <pvp-inventory></pvp-inventory>
+          </b-popover>
   </b-row>
 </template>
 
@@ -186,20 +130,23 @@ import Element from '../smart/Element.vue';
 import { mapGetters, mapMutations, mapState } from 'vuex';
 import foundersShield from '../../assets/shield1.png';
 import legendaryShield from '../../assets/shield2.png';
+import PvPArenaDetails from '../smart/PvPArenaDetails.vue';
+import PvPInventory from './PvPInventory.vue';
 
 
 export default {
   data(){
     return {
       sliding: 0,
+      showWeaponInventory: false,
+      showShieldInventory: false,
     };
   },
 
   computed: {
-    ...mapState(['currentCharacterId','currentWeaponId']),
+    ...mapState(['currentCharacterId','currentWeaponId','pvp']),
     ...mapGetters([
       'currentWeapon',
-      'getInventoryState',
       'currentCharacter',
       'currentShield',
       'ownCharacters',
@@ -210,17 +157,14 @@ export default {
       'getCurrentTab'
     ]),
 
-    inventoryTabNames(){
-      return this.getInventoryState;
-    },
   },
 
   methods:{
     ...mapMutations([
-      'setCurrentShield',
       'setCurrentCharacter',
-      'setCurrentWeapon',
-      'setCurrentTab'
+      'setCurrentTab',
+      'setCurrentShield',
+      'setCurrentWeapon'
     ]),
 
     getCharacterArt,
@@ -229,28 +173,29 @@ export default {
 
     getWeaponArt,
 
+    hideWeaponInventory(){
+      this.showWeaponInventory = false;
+    },
+
+    hideShieldInventory(){
+      this.showShieldInventory = false;
+    },
+
     setListClassForChar(characterId,currentCharacterId){
       if (characterId === currentCharacterId){
         return 'active-indicator';
       }
-
       else return 'inactive-indicator';
     },
 
-    setListClassForWeapon(weaponId,currentWeaponId){
-      if (weaponId === currentWeaponId){
-        return 'selected-weapon';
+    setCharacterPvPStatus(characterID){
+      this.$store.dispatch('fetchParticipatingCharacters');
+
+      if(this.pvp.participatingCharacters.includes(characterID.toString())){
+        return 'character-in-pvp';
       }
+      else return 'character-not-in-pvp';
 
-      else return 'unselected-weapon';
-    },
-
-    setListClassForShield(shieldId,currentShieldId){
-      if (shieldId === currentShieldId){
-        return 'selected-shield';
-      }
-
-      else return 'unselected-shield';
     },
 
     getShieldArt(shieldId) {
@@ -265,6 +210,15 @@ export default {
       }
     },
 
+    updateCharacterDetails(characterID){
+      this.setCurrentCharacter(characterID);
+
+      this.$store.dispatch('fetchEntryWager',{characterID});
+      this.$store.dispatch('fetchWageredSkill',{characterID});
+      this.$store.dispatch('fetchDuelCost',{characterID});
+      this.$store.dispatch('fetchIsCharacterInArena',{characterID});
+    },
+
 
   },
 
@@ -272,33 +226,54 @@ export default {
     if(this.ownShields.length > 0){
       this.setCurrentShield(this.ownShields[0].id);
     }
+    this.setCurrentWeapon(this.ownWeapons[0].id);
     this.setCurrentCharacter(this.ownCharacters[0].id);
-    this.setCurrentWeapon(this.ownWeapons[0]);
+    this.$store.dispatch('fetchParticipatingCharacters');
+    this.$store.dispatch('fetchParticipatingWeapons');
+    this.$store.dispatch('fetchParticipatingShields');
+    this.$store.dispatch('fetchIsCharacterInArena',{characterID: this.currentCharacterId});
   },
 
   components: {
     Hint,
     'char-element': Element,
+    'pvp-arena-details': PvPArenaDetails,
+    'pvp-inventory': PvPInventory,
   },
 };
 </script>
 
 <style>
+
+.equipped-container {
+  width: 600px !important;
+  height: auto;
+  background-color: transparent;
+}
+
+#equipped-weapon {
+  cursor: pointer;
+}
+
+#equipped-shield {
+  cursor: pointer;
+}
+
+.no-equip {
+  cursor: not-allowed;
+}
+
+/* PvP Popover Styles */
+.popover-body {
+  background-color: black;
+}
+/* PvP Popover Styles */
+
 /* PvP Content Styles */
 .pvp-content {
   text-align:center;
   margin-bottom: 50px;
   margin-top: 10px;
-}
-
-#find-opponent-divider {
-  border-left: 1px solid #968332;
-  border-width: thin;
-  height: 400px;
-  width: 1px;
-  position: absolute;
-  left: 50%;
-  margin-left: -3px;
 }
 
 
@@ -334,8 +309,8 @@ export default {
 
 #character-head-element {
   position: absolute;
-  top: 35%;
-  left: 58%;
+  top: 38%;
+  left: 53%;
 }
 
 .active-indicator {
@@ -347,6 +322,10 @@ export default {
   width: 90px;
 }
 
+.active-indicator:hover {
+  cursor: pointer;
+}
+
 
 .inactive-indicator {
   border: 1px none transparent;
@@ -354,6 +333,10 @@ export default {
   margin: 3px auto;
   height:auto;
   width: 90px;
+}
+
+.inactive-indicator:hover {
+  cursor:pointer;
 }
 
 #character-image {
@@ -366,25 +349,23 @@ export default {
 }
 
 #character-name {
-  text-align: right;
+  text-align: left;
   color: white;
   font-weight: bolder;
   font-size: 16px;
 }
 
 #character-level-label {
-  text-align: right;
   font-size: 12px;
   color: #968332;
 }
 
 #character-level-value {
-  text-align: right;
   font-size: 12px;
   color: white;
 }
 
-#equipped-weapon-container {
+.equipped-weapon-container {
   margin-top: 10px;
   margin-bottom: 10px;
 }
@@ -396,7 +377,7 @@ export default {
   margin:auto;
 }
 
-#equipped-weapon-content {
+.equipped-weapon-content {
   background: transparent;
   border: 4px solid #968332;
   border-radius: 10%;
@@ -417,7 +398,7 @@ export default {
   margin:auto;
 }
 
-#equipped-shield-content {
+.equipped-shield-content {
   border: 4px solid #968332;
   border-radius: 10%;
   height: 80px;
@@ -427,85 +408,25 @@ export default {
 
 /* PvP Character Styles */
 
-/* PvP Inventory Styles */
-
-.inventory-pseudo-tabs {
-  margin: 10px auto;
+/* PvP Status Styles */
+.character-in-pvp {
+    color: white;
+    height: 20px;
+    width: 80px;
+    background-color: rgb(187, 33, 0);
+    border-radius: 10%;
+    transform: rotate(30deg);
+    position: absolute;
+    left: 38%;
+    top: 20%;
+    z-index: 100;
 }
 
-.inventory-tab-button {
-  border: 1px solid #968332;
-  border-radius: 2%;
-  background: #32343C;
-  color: #968332;
-  width: 100%;
-  margin: auto;
+.character-in-pvp::before {
+  content: "IN PVP";
 }
+/* PvP Status Styles */
 
-.inventory-weapon-container {
-  margin-top: 50px;
-}
-
-.inventory-shield-container {
-  margin-top: 50px;
-}
-
-.selected-weapon {
-  background: transparent;
-  border: 1px dashed #968332;
-  border-radius: 10%;
-  height: 60px;
-  width: 60px;
-  margin: 10px auto;
-}
-
-.unselected-weapon {
-  background: transparent;
-  border: 1px none transparent;
-  border-radius: 10%;
-  height: 60px;
-  width: 60px;
-  margin: 10px auto;
-}
-
-.selected-shield {
-  background: transparent;
-  border: 1px dashed #968332;
-  border-radius: 10%;
-  height: 60px;
-  width: 60px;
-  margin: 10px auto;
-}
-
-.unselected-shield {
-  background: transparent;
-  border: 1px none transparent;
-  border-radius: 10%;
-  height: 60px;
-  width: 60px;
-  margin: 10px auto;
-}
-
-.inventory-weapon-content {
-  background: transparent;
-  border: 2px solid #968332;
-  border-radius: 10%;
-  height: 50px;
-  width: 50px;
-  margin: 3px auto;
-}
-
-#inventory-weapon-content-dashed {
-  background: transparent;
-  border: 1px dashed #968332;
-  border-radius: 10%;
-  height: 50px;
-  width: 50px;
-  margin: 10px auto;
-}
-
-
-/* PvP Inventory Styles */
 
 /* PvP Content Styles */
 </style>

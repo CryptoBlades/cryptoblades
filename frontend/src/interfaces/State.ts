@@ -59,16 +59,20 @@ export interface IRaidState {
 
 export interface IPvPState {
   type: string | number;
+  page: string | number;
   entryWager: string | number;
   wageredSkill: string | number;
   arenaTier: string | number;
   participatingCharacters: string[];
+  participatingWeapons: string[];
+  participatingShields: string[];
   duelCost: string | number;
   isAttackerWithinDecisionTime: boolean;
   isCharacterAttackable: boolean;
   isCharacterInArena: boolean;
   isWeaponInArena: boolean;
   isShieldInArena: boolean;
+  defenderID: string;
 }
 
 export interface IInventory{

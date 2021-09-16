@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
-import _, { isUndefined } from 'lodash';
+import _, { isUndefined, parseInt } from 'lodash';
 import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
@@ -19,7 +19,6 @@ import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './c
 import {
   raid as featureFlagRaid,
   stakeOnly as featureFlagStakeOnly,
-  // pvp as featureFlagPvP,
 } from './feature-flags';
 import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
@@ -113,7 +112,8 @@ export function createStore(web3: Web3) {
       currentTab: 0,
       weaponDurabilities: {},
       weaponRenames: {},
-      maxDurability: 0,      isInCombat: false,
+      maxDurability: 0,
+      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
@@ -157,16 +157,20 @@ export function createStore(web3: Web3) {
 
       pvp: {
         type: '0',
+        page: '0',
         entryWager: '0',
         wageredSkill: '0',
         arenaTier: '0',
-        participatingCharacters: [],
+        participatingCharacters:[],
+        participatingWeapons:[],
+        participatingShields:[],
         duelCost: '0',
         isAttackerWithinDecisionTime: false,
         isCharacterAttackable: false,
         isCharacterInArena: false,
         isWeaponInArena: false,
         isShieldInArena: false,
+        defenderID: '1'
       },
 
       inventory: [],
@@ -740,11 +744,15 @@ export function createStore(web3: Web3) {
         state.pvp.type = payload.type;
       },
 
-      updateEntryWager(state: IState, payload: {entryWager: string | number}){
+      updateArenaPage(state: IState, payload: {page: string | number}){
+        state.pvp.page = payload.page;
+      },
+
+      updateEntryWager(state: IState, payload: {entryWager: string}){
         state.pvp.entryWager = payload.entryWager;
       },
 
-      updateWageredSkill(state: IState, payload: {wageredSkill: string | number}){
+      updateWageredSkill(state: IState, payload: {wageredSkill: string}){
         state.pvp.wageredSkill = payload.wageredSkill;
       },
 
@@ -753,9 +761,25 @@ export function createStore(web3: Web3) {
       },
 
       updateParticipatingCharacters(state: IState, payload: {participatingCharacters: string[]}){
-        for (let i=0; i<=payload.participatingCharacters.length; i++){
+        for (let i=0; i<payload.participatingCharacters.length; i++){
           if (!state.pvp.participatingCharacters.includes(payload.participatingCharacters[i])){
             state.pvp.participatingCharacters.push(payload.participatingCharacters[i]);
+          }
+        }
+      },
+
+      updateParticipatingWeapons(state: IState, payload: {participatingWeapons: string[]}){
+        for (let i=0; i<payload.participatingWeapons.length; i++){
+          if (!state.pvp.participatingWeapons.includes(payload.participatingWeapons[i])){
+            state.pvp.participatingWeapons.push(payload.participatingWeapons[i]);
+          }
+        }
+      },
+
+      updateParticipatingShields(state: IState, payload: {participatingShields: string[]}){
+        for (let i=0; i<payload.participatingShields.length; i++){
+          if (!state.pvp.participatingShields.includes(payload.participatingShields[i])){
+            state.pvp.participatingShields.push(payload.participatingShields[i]);
           }
         }
       },
@@ -790,6 +814,10 @@ export function createStore(web3: Web3) {
 
       setCurrentShield(state: IState, currentShieldId: number) {
         state.currentShieldId = currentShieldId;
+      },
+
+      updateDefenderID(state: IState, payload: {defenderID: string}){
+        state.pvp.defenderID = payload.defenderID;
       }
 
     },
@@ -2884,24 +2912,40 @@ export function createStore(web3: Web3) {
         commit('updateArenaType', {type});
       },
 
+      async fetchArenaPage ({commit}, {page}){
+        commit('updateArenaPage', { page });
+      },
+
       async fetchEntryWager ({state, commit}, {characterID}){
         const { PvpArena } = state.contracts();
         if (!PvpArena) return;
 
-        const entryWager = await PvpArena!.methods
-          .getEntryWager(characterID)
-          .call(defaultCallOptions(state));
+        try{
+          const entryWager = await PvpArena!.methods
+            .getEntryWager(characterID)
+            .call(defaultCallOptions(state));
 
-        commit('updateEntryWager', { entryWager });
 
-        return entryWager;
+          commit('updateEntryWager', { entryWager });
+
+          return entryWager;
+        } catch(err){
+          console.log(err);
+        }
+
       },
 
-      async fetchWageredSkill ({state}){
+      async fetchWageredSkill ({state, commit}, {characterID}){
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
 
-        return '';
+        const wageredSkill = await PvpArena.methods
+          .getCharacterWager(characterID)
+          .call(defaultCallOptions(state));
+
+        commit('updateWageredSkill',{ wageredSkill });
+
+        return wageredSkill;
       },
 
       async fetchArenaTier ({state, commit}, {characterID}){
@@ -2911,7 +2955,6 @@ export function createStore(web3: Web3) {
         const arenaTier = await PvpArena!.methods
           .getArenaTier(characterID)
           .call(defaultCallOptions(state));
-
 
         commit('updateArenaTier', { arenaTier });
 
@@ -2929,6 +2972,32 @@ export function createStore(web3: Web3) {
         commit('updateParticipatingCharacters', { participatingCharacters });
 
         return participatingCharacters;
+      },
+
+      async fetchParticipatingWeapons ({state, commit}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const participatingWeapons = await PvpArena!.methods
+          .getMyParticipatingWeapons()
+          .call(defaultCallOptions(state));
+
+        commit('updateParticipatingWeapons', { participatingWeapons });
+
+        return participatingWeapons;
+      },
+
+      async fetchParticipatingShields ({state, commit}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        const participatingShields = await PvpArena!.methods
+          .getMyParticipatingShields()
+          .call(defaultCallOptions(state));
+
+        commit('updateParticipatingCharacters', { participatingShields });
+
+        return participatingShields;
       },
 
       async fetchDuelCost ({state, commit},{characterID}){
@@ -3009,7 +3078,7 @@ export function createStore(web3: Web3) {
         return isShieldInArena;
       },
 
-      async enterArena ({state}, {characterID, weaponID, shieldID, useShield}){
+      async enterArena ({state, dispatch}, {characterID, weaponID, shieldID, useShield}){
         const { SkillToken, PvpArena } = state.contracts();
         if(!SkillToken || !PvpArena) return;
 
@@ -3019,7 +3088,7 @@ export function createStore(web3: Web3) {
 
         try{
           await SkillToken.methods
-            .approve(PvpArena.options.address, web3.utils.toWei(entryWager, 'ether'))
+            .approve(PvpArena.options.address, entryWager)
             .send({
               from: state.defaultAccount
             });
@@ -3037,7 +3106,103 @@ export function createStore(web3: Web3) {
         } catch(err){
           console.error(err);
         }
+
+        dispatch('fetchSkillBalance');
+        dispatch('fetchWageredSkill', { characterID });
+        dispatch('fetchParticipatingCharacters');
+        dispatch('fetchParticipatingWeapons');
+        dispatch('fetchParticipatingShields');
       },
+
+      async getOpponent({state}, {characterID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        try{
+          await PvpArena!.methods
+            .requestOpponent(characterID)
+            .call(defaultCallOptions(state));
+        } catch(err){
+          console.log(err);
+        }
+
+        PvpArena.getPastEvents('NewDuel',function(error,event){
+          console.log(event);
+        });
+
+      },
+      async reRollOpponent({state, dispatch}, {characterID}){
+        const { PvpArena } = state.contracts();
+        if (!PvpArena) return;
+
+        try{
+          await PvpArena.methods
+            .reRollOpponent(characterID)
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err){
+          console.log(err);
+        }
+
+        dispatch('fetchSkillBalance');
+
+      },
+      async getDefenderID({state, commit}, {characterID}){
+        const { PvpArena } = state.contracts();
+        if (!PvpArena) return;
+
+        try{
+          const defenderID = await PvpArena!.methods
+            .getOpponent(characterID)
+            .call(defaultCallOptions(state));
+
+          commit('updateDefenderID', {defenderID});
+
+          return defenderID;
+
+        } catch(err){
+          console.log(err);
+        }
+      },
+      async performDuel({state, dispatch}, {characterID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+        let duelResult;
+
+        try{
+          duelResult = await PvpArena.methods
+            .performDuel(characterID)
+            .send({
+              from: state.defaultAccount
+            });
+        }catch(err){
+          console.log(err);
+        }
+
+        dispatch('fetchSkillBalance');
+
+        return duelResult;
+
+      },
+      async withdrawFromArena({state, dispatch}, {characterID}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        try{
+          await PvpArena.methods
+            .withdrawFromArena(characterID)
+            .send({
+              from: state.defaultAccount
+            });
+        }catch(err){
+          console.log(err);
+        }
+
+        dispatch('fetchSkillBalance');
+        dispatch('fetchParticipatingCharacters');
+
+      }
     }
   });
 }

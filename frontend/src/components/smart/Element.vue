@@ -3,7 +3,6 @@
     <span
       :id="`${setIdForElement()}`"
     />
-
   </div>
 </template>
 

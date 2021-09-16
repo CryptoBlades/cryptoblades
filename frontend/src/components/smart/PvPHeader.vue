@@ -1,55 +1,31 @@
 <template>
       <b-row class="pvp-header">
-        <b-col id="arsenal-preparation-header" cols="5">
-          <span v-text="arsenalPreparationHeaderText"/>
-        </b-col>
-        <b-col id= "find-opponent-header" cols="2">
+        <b-col class="page-header">
           <span
-          v-text="findOpponentHeaderText"
-          @click="enterArena"/>
-        </b-col>
-        <b-col id="arena-header" cols="5">
-          <span v-text="arenaHeaderText"/>
+                v-text="arsenalPreparationHeaderText"
+                v-if="this.pvp.page === '0'"/>
+          <span
+                v-text="arenaHeaderText"
+                v-if="this.pvp.page === '1'"/>
         </b-col>
       </b-row>
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import PvPConstants from '../../utils/constants/pvp-constants';
 
 export default {
   data() {
     return {
       arsenalPreparationHeaderText: PvPConstants.ARSENAL_PREPARATION_HEADER_TEXT,
-      findOpponentHeaderText: PvPConstants.FIND_OPPONENT_HEADER_TEXT,
       arenaHeaderText: PvPConstants.ARENA_HEADER_TEXT,
     };
   },
 
-  computed:{
-    ...mapState(['currentCharacterId','currentWeaponId']),
-    ...mapGetters([
-      'currentWeapon',
-      'currentCharacter',
-      'currentShield'
-    ]),
-  },
-
-  methods: {
-
-    ...mapActions(['enterArena']),
-
-    enterArena(){
-      this.$store.dispatch('enterArena',
-        {characterID: this.currentCharacterId,
-          weaponID: this.currentWeaponId,
-          shieldID: 0,
-          useShield: false});
-    }
-  },
-
-
+  computed: {
+    ...mapState(['pvp']),
+  }
 
 
 };
@@ -63,32 +39,16 @@ export default {
   margin-top: 50px;
 }
 
-#arsenal-preparation-header {
+.page-header {
   font-weight: bold;
   border-bottom: 3px solid #968332;
   padding-bottom: 20px;
+  font-size: 50px;
+  text-shadow: 0 0 10px black, 0 0 20px #fff;
 }
 
-#find-opponent-header {
-  font-weight: bold;
-}
-
-#arena-header {
-  font-weight: bold;
-  border-bottom: 3px solid #968332;
-  padding-bottom: 20px;
-}
-
-#arsenal-preparation-header:hover {
-  color: antiquewhite;
-}
-
-#find-opponent-header:hover {
-  color: black;
-}
-
-#arena-header:hover {
-  color: antiquewhite;
+.page-header:hover {
+  cursor: none;
 }
 /* PvP Header Styles */
 
