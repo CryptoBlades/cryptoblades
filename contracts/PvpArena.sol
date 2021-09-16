@@ -428,6 +428,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev get an attacker's opponent
     function getOpponent(uint256 characterID) public view returns (uint256) {
+        require(hasPendingDuel(characterID), "Character has no pending duel");
         return duelByAttacker[characterID].defenderID;
     }
 

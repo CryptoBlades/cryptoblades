@@ -459,11 +459,16 @@ contract("PvpArena", (accounts) => {
         const { tx } = await pvpArena.requestOpponent(character0ID, {
           from: accounts[1],
         });
+        const opponentID = await pvpArena.getOpponent(character0ID, {
+          from: accounts[1],
+        });
 
         await expectEvent.inTransaction(tx, pvpArena, "NewDuel", {
           attacker: character0ID,
           defender: character3ID,
         });
+
+        expect(opponentID.toString()).to.equal(character3ID.toString());
       });
 
       it("should not consider characters owned by the sender", async () => {
@@ -1171,6 +1176,42 @@ contract("PvpArena", (accounts) => {
           attacker: character1ID,
           defender: playerToDuelAfterReRoll,
         });
+      });
+    });
+  });
+  describe("getOpponent", () => {
+    describe("with pending duel", () => {
+      let character0ID;
+      let character1ID;
+
+      beforeEach(async () => {
+        character0ID = await createCharacterInPvpTier(accounts[1], 1);
+        character1ID = await createCharacterInPvpTier(accounts[2], 1);
+
+        await time.increase(await pvpArena.unattackableSeconds());
+
+        await pvpArena.requestOpponent(character0ID, {
+          from: accounts[1],
+        });
+      });
+
+      it("returns the opponent", async () => {
+        const opponentID = await pvpArena.getOpponent(character0ID);
+      });
+    });
+
+    describe("without pending duel", () => {
+      let characterID;
+
+      beforeEach(async () => {
+        characterID = await createCharacterInPvpTier(accounts[1], 1);
+      });
+
+      it("reverts", async () => {
+        expectRevert(
+          pvpArena.getOpponent(characterID),
+          "Character has no pending duel"
+        );
       });
     });
   });
