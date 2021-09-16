@@ -204,7 +204,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             wager,
             useShield
         );
-
+        // update tier ranking
+        updateTierRanks(characterID);
         // character starts unattackable
         _updateLastActivityTimestamp(characterID);
 
