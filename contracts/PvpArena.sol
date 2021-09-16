@@ -84,6 +84,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(address => uint256) private _rewardsByPlayer;
     /// @dev accumulated rewards per tier
     mapping(uint8 => uint256) private _rankingsPoolByTier;
+    /// @dev ranking by tier
+    mapping(uint8[] => uint256) private _rankingByTier;
+    /// @dev character ranking points
+    mapping(uint256 => uint8) private _characterRankingPoints;
 
     event NewDuel(
         uint256 indexed attacker,
@@ -405,6 +409,45 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         return shieldIDs;
+    }
+
+    ///@dev another update approach
+    function updateTierRanks(uint256 characterID) public {
+        uint8 tier = getArenaTier(characterID);
+
+        uint8 fighterPoints = _characterRankingPoints[characterID];
+
+        uint256 firstRankingPlayer = _rankingByTier[tier][0];
+        uint8 firstRankingPlayerPoints = _characterRankingPoints[
+            firstRankingPlayer
+        ];
+
+        uint256 secondRankingPlayer = _rankingByTier[tier][1];
+        uint8 secondRankingPlayerPoints = _characterRankingPoints[
+            secondRankingPlayer
+        ];
+
+        uint256 thirdRankingPlayer = _rankingByTier[tier][2];
+        uint8 thirdRankingPlayerPoints = _characterRankingPoints[
+            thirdRankingPlayer
+        ];
+
+        if (fighterPoints >= thirdRankingPlayerPoints) {
+            _rankingByTier[tier][2] = characterID;
+            thirdRankingPlayer = characterID;
+        }
+        if (thirdRankingPlayerPoints >= secondRankingPlayerPoints) {
+            _rankingByTier[tier][1] = thirdRankingPlayer;
+            _rankingByTier[tier][2] = secondRankingPlayer;
+            thirdRankingPlayer = _rankingByTier[tier][2];
+            secondRankingPlayer = _rankingByTier[tier][1];
+        }
+        if (secondRankingPlayerPoints >= firstRankingPlayerPoints) {
+            _rankingByTier[tier][0] = secondRankingPlayer;
+            _rankingByTier[tier][1] = firstRankingPlayer;
+            secondRankingPlayer = _rankingByTier[tier][1];
+            firstRankingPlayer = _rankingByTier[tier][0];
+        }
     }
 
     /// @dev checks if a character is in the arena
