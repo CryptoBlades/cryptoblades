@@ -47,6 +47,7 @@
     "deploy": "truffle migrate --reset",
     "deploy-testnet": "truffle migrate --network bsctestnet",
     "deploy-hecotestnet": "truffle migrate --network hecotestnet",
+    "postdeploy-hecotestnet": "run-s \"backup-networks 256\" \"verify-contracts -- --network hecotestnet\"",
     "postdeploy-testnet": "run-s \"backup-networks 97\" \"verify-contracts -- --network bsctestnet\"",
     "deploy-okextestnet": "truffle migrate --network okextestnet",
     "postdeploy-okextestnet": "run-s \"backup-networks 65\" \"verify-contracts -- --network okextestnet\"",
