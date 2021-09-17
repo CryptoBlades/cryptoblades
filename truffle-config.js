@@ -122,12 +122,10 @@ module.exports = {
           pollingInterval: 10000000,
         }
       )),
+      gasPrice: 1000000000,
       network_id: 0x41,
-      confirmations: 5,
       timeoutBlocks: 200,
-      gasPrice: 320000000,
-      skipDryRun: true,
-      networkCheckTimeout: 10000000
+      skipDryRun: true
     },
     okexmainnet: {
       provider: () => new HDWalletProvider(hdWalletProviderOptions(
@@ -137,6 +135,7 @@ module.exports = {
           providerOrUrl: 'https://exchainrpc.okex.org'
         }
       )),
+      gasPrice: 1000000000,
       network_id: 0x42,
       confirmations: 10,
       timeoutBlocks: 200,

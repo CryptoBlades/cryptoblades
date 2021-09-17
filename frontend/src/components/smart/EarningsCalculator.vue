@@ -151,6 +151,7 @@ interface PriceJson {
   binancecoin: CoinPrice;
   cryptoblades: CoinPrice;
   'huobi-token': CoinPrice;
+  okexchain: CoinPrice;
 }
 
 interface CoinPrice {
@@ -176,6 +177,8 @@ export default Vue.extend({
         return this.bnbPrice;
       case 'HT':
         return this.htPrice;
+      case 'OKT':
+        return this.oktPrice;
       default:
         return this.bnbPrice;
       }
@@ -198,6 +201,7 @@ export default Vue.extend({
       wepBonusPowerSliderValue: 0,
       bnbPrice: 0,
       htPrice: 0,
+      oktPrice: 0,
       skillPrice: 0,
       calculationResults: [] as number[][],
       gasToken: '',
@@ -262,11 +266,12 @@ export default Vue.extend({
     },
 
     async fetchPrices() {
-      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin,huobi-token&vs_currencies=usd');
+      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin,huobi-token,okexchain&vs_currencies=usd');
       const data = response.data as PriceJson;
       this.bnbPrice = data?.binancecoin.usd;
       this.skillPrice = data?.cryptoblades.usd;
       this.htPrice = data?.['huobi-token'].usd;
+      this.oktPrice = data?.okexchain.usd;
     },
 
     canCalculate(): boolean {

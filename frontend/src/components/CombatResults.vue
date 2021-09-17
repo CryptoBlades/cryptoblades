@@ -119,7 +119,6 @@ export default Vue.extend({
 
   async mounted() {
     this.gasToken = chainToToken(localStorage.getItem('currentChain') || 'BSC');
-    console.log(this.gasToken);
     await this.fetchPrices();
   },
 

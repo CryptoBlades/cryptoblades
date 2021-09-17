@@ -44,6 +44,8 @@ export const chainToToken = (chain: string): string => {
     return 'BNB';
   case 'HECO':
     return 'HT';
+  case 'OKEX':
+    return 'OKT';
   default:
     return 'BNB';
   }
