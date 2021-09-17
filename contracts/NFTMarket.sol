@@ -13,6 +13,7 @@ import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
 import "./weapons.sol";
+import "./cryptoblades.sol";
 
 // *****************************************************************************
 // *** NOTE: almost all uses of _tokenAddress in this contract are UNSAFE!!! ***
@@ -106,6 +107,9 @@ contract NFTMarket is
     int128 public addFee;
     int128 public changeFee;
 
+    // keeps target buyer for nftId of specific type (address)
+    mapping(address => mapping(uint256 => address)) nftTargetBuyers;
+
     // ############
     // Events
     // ############
@@ -113,13 +117,20 @@ contract NFTMarket is
         address indexed seller,
         IERC721 indexed nftAddress,
         uint256 indexed nftID,
-        uint256 price
+        uint256 price,
+        address targetBuyer
     );
     event ListingPriceChange(
         address indexed seller,
         IERC721 indexed nftAddress,
         uint256 indexed nftID,
         uint256 newPrice
+    );
+    event ListingTargetBuyerChange(
+        address indexed seller,
+        IERC721 indexed nftAddress,
+        uint256 indexed nftID,
+        address newTargetBuyer
     );
     event CancelledListing(
         address indexed seller,
@@ -187,6 +198,11 @@ contract NFTMarket is
 
     modifier userNotBanned() {
         require(isUserBanned[msg.sender] == false, "Forbidden access");
+        _;
+    }
+
+    modifier userAllowedToPurchase(IERC721 _tokenAddress, uint256 _id) {
+        require(nftTargetBuyers[address(_tokenAddress)][_id] == address(0) || nftTargetBuyers[address(_tokenAddress)][_id] == msg.sender, "Not target buyer");
         _;
     }
 
@@ -425,6 +441,13 @@ contract NFTMarket is
             );
     }
 
+    function getTargetBuyer(IERC721 _tokenAddress, uint256 _id)
+        public
+        view
+        returns (address)
+    {
+        return nftTargetBuyers[address(_tokenAddress)][_id];
+    }
     function getListingSlice(IERC721 _tokenAddress, uint256 start, uint256 length)
         public
         view
@@ -455,7 +478,8 @@ contract NFTMarket is
     function addListing(
         IERC721 _tokenAddress,
         uint256 _id,
-        uint256 _price
+        uint256 _price,
+        address _targetBuyer
     )
         public
         //userNotBanned // temp
@@ -464,7 +488,7 @@ contract NFTMarket is
         isNotListed(_tokenAddress, _id)
     {
         if(addFee > 0) {
-            skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(addFee));
+            payTax(usdToSkill(addFee));
         }
 
         if(isUserBanned[msg.sender]) {
@@ -474,6 +498,7 @@ contract NFTMarket is
         }
         else {
             listings[address(_tokenAddress)][_id] = Listing(msg.sender, _price);
+            nftTargetBuyers[address(_tokenAddress)][_id] = _targetBuyer;
             listedTokenIDs[address(_tokenAddress)].add(_id);
 
             _updateListedTokenTypes(_tokenAddress);
@@ -482,7 +507,7 @@ contract NFTMarket is
         // in theory the transfer and required approval already test non-owner operations
         _tokenAddress.safeTransferFrom(msg.sender, address(this), _id);
 
-        emit NewListing(msg.sender, _tokenAddress, _id, _price);
+        emit NewListing(msg.sender, _tokenAddress, _id, _price, _targetBuyer);
     }
 
     function changeListingPrice(
@@ -496,7 +521,7 @@ contract NFTMarket is
         isSeller(_tokenAddress, _id)
     {
         if(changeFee > 0) {
-            skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(changeFee));
+            payTax(usdToSkill(changeFee));
         }
 
         listings[address(_tokenAddress)][_id].price = _newPrice;
@@ -505,6 +530,25 @@ contract NFTMarket is
             _tokenAddress,
             _id,
             _newPrice
+        );
+    }
+
+    function changeListingTargetBuyer(
+        IERC721 _tokenAddress,
+        uint256 _id,
+        address _newTargetBuyer
+    )
+        public
+        userNotBanned
+        isListed(_tokenAddress, _id)
+        isSeller(_tokenAddress, _id)
+    {
+        nftTargetBuyers[address(_tokenAddress)][_id] = _newTargetBuyer;
+        emit ListingTargetBuyerChange(
+            msg.sender,
+            _tokenAddress,
+            _id,
+            _newTargetBuyer
         );
     }
 
@@ -528,7 +572,7 @@ contract NFTMarket is
         IERC721 _tokenAddress,
         uint256 _id,
         uint256 _maxPrice
-    ) public userNotBanned isListed(_tokenAddress, _id) {
+    ) public userNotBanned isListed(_tokenAddress, _id) userAllowedToPurchase(_tokenAddress, _id) {
         uint256 finalPrice = getFinalPrice(_tokenAddress, _id);
         require(finalPrice <= _maxPrice, "Buying price too low");
 
@@ -540,7 +584,7 @@ contract NFTMarket is
         listedTokenIDs[address(_tokenAddress)].remove(_id);
         _updateListedTokenTypes(_tokenAddress);
 
-        skillToken.safeTransferFrom(msg.sender, taxRecipient, taxAmount);
+        payTax(taxAmount);
         skillToken.safeTransferFrom(
             msg.sender,
             listing.seller,
@@ -613,6 +657,11 @@ contract NFTMarket is
             _tokenAddress,
             ABDKMath64x64.divu(_percent, 100)
         );
+    }
+
+    function payTax(uint256 amount) internal {
+        skillToken.safeTransferFrom(msg.sender, taxRecipient, amount);
+        CryptoBlades(taxRecipient).trackIncome(amount);
     }
 
     function setUserBan(address user, bool to) external restricted {
