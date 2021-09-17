@@ -487,7 +487,7 @@ contract NFTMarket is
         isNotListed(_tokenAddress, _id)
     {
         if(addFee > 0) {
-            skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(addFee));
+            skillToken.safeTransferFrom(msg.sender, taxRecipient, usdToSkill(addFee));
         }
 
         if(isUserBanned[msg.sender]) {
@@ -520,7 +520,7 @@ contract NFTMarket is
         isSeller(_tokenAddress, _id)
     {
         if(changeFee > 0) {
-            skillToken.safeTransferFrom(msg.sender, address(this), usdToSkill(changeFee));
+            skillToken.safeTransferFrom(msg.sender, taxRecipient, usdToSkill(changeFee));
         }
 
         listings[address(_tokenAddress)][_id].price = _newPrice;
