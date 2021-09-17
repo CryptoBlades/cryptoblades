@@ -191,8 +191,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     int128 private rewardsClaimTaxMax;
     uint256 private rewardsClaimTaxDuration;
 
-    mapping(uint256 => uint256) vars;
-    mapping(address => mapping(uint256 => uint256)) userVars;
+    mapping(uint256 => uint256) public vars;
+    mapping(address => mapping(uint256 => uint256)) public userVars;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -867,6 +867,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             vars[VAR_HOURLY_FIGHTS] = 0;
             vars[VAR_HOURLY_POWER_SUM] = 0;
         }
+    }
+
+    function trackIncome(uint256 income) public restricted {
+        _trackIncome(income);
+    }
+
+    function _trackIncome(uint256 income) internal {
+        //vars[VAR_HOURLY_INCOME] += income;
+        //updateHourlyPayouts();
     }
 
     function _payPlayer(address playerAddress, int128 baseAmount) internal {
