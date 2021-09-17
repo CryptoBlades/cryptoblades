@@ -869,15 +869,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function trackIncome(uint256 income) public restricted {
-        _trackIncome(income);
-    }
-
-    function _trackIncome(uint256 income) internal {
-        //vars[VAR_HOURLY_INCOME] += income;
-        //updateHourlyPayouts();
-    }
-
     function _payPlayer(address playerAddress, int128 baseAmount) internal {
         _payPlayerConverted(playerAddress, usdToSkill(baseAmount));
     }
@@ -888,14 +879,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function setCharacterMintValue(uint256 cents) public restricted {
         mintCharacterFee = ABDKMath64x64.divu(cents, 100);
-    }
-
-    function setFightRewardBaselineValue(uint256 tenthcents) public restricted {
-        fightRewardBaseline = ABDKMath64x64.divu(tenthcents, 1000); // !!! THIS TAKES TENTH OF CENTS !!!
-    }
-
-    function setFightRewardGasOffsetValue(uint256 cents) public restricted {
-        fightRewardGasOffset = ABDKMath64x64.divu(cents, 100);
     }
 
     function setWeaponMintValue(uint256 cents) public restricted {
