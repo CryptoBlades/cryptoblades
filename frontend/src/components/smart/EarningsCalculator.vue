@@ -41,10 +41,10 @@
                   <span class="calculator-subheader">Current prices (USD)</span>
                   <div class="prices-div">
                     <div class="token-price-div">
-                       BNB: <b-form-label class="price-input" type="number" v-model="bnbPrice" /> <span class="text-white"> ${{bnbPrice }}</span>
+                      {{gasToken}}: <span class="text-white"> ${{currentTokenPrice}}</span>
                     </div>
                     <div class="token-price-div">
-                     SKILL:  <b-form-label class="price-input" type="number" v-model="skillPrice" /> <span class="text-white"> ${{skillPrice }}</span>
+                     SKILL: <b-form-label class="price-input" type="number" v-model="skillPrice" /> <span class="text-white"> ${{skillPrice }}</span>
                     </div>
                   </div>
                 </div>
@@ -141,6 +141,7 @@
 </template>
 
 <script lang="ts">
+import { getConfigValue } from '@/contracts';
 import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, WeaponTrait } from '@/interfaces';
 import axios from 'axios';
 import Vue from 'vue';
@@ -150,6 +151,8 @@ import { toBN, fromWeiEther } from '../../utils/common';
 interface PriceJson {
   binancecoin: CoinPrice;
   cryptoblades: CoinPrice;
+  'huobi-token': CoinPrice;
+  okexchain: CoinPrice;
 }
 
 interface CoinPrice {
@@ -168,6 +171,19 @@ export default Vue.extend({
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
+
+    currentTokenPrice(): number {
+      switch(this.gasToken) {
+      case 'BNB':
+        return this.bnbPrice;
+      case 'HT':
+        return this.htPrice;
+      case 'OKT':
+        return this.oktPrice;
+      default:
+        return this.bnbPrice;
+      }
+    },
   },
 
   data() {
@@ -185,8 +201,11 @@ export default Vue.extend({
       wepThirdStatSliderValue: 4,
       wepBonusPowerSliderValue: 0,
       bnbPrice: 0,
+      htPrice: 0,
+      oktPrice: 0,
       skillPrice: 0,
       calculationResults: [] as number[][],
+      gasToken: '',
     };
   },
 
@@ -248,10 +267,12 @@ export default Vue.extend({
     },
 
     async fetchPrices() {
-      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
+      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin,huobi-token,okexchain&vs_currencies=usd');
       const data = response.data as PriceJson;
       this.bnbPrice = data?.binancecoin.usd;
       this.skillPrice = data?.cryptoblades.usd;
+      this.htPrice = data?.['huobi-token'].usd;
+      this.oktPrice = data?.okexchain.usd;
     },
 
     canCalculate(): boolean {
@@ -348,6 +369,10 @@ export default Vue.extend({
       this.wepThirdStatSliderValue = this.getMinRoll(value);
     }
   },
+
+  mounted() {
+    this.gasToken = getConfigValue('currencyToken') || 'BNB';
+  }
 });
 </script>
 <style scoped>

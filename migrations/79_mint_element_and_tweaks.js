@@ -29,9 +29,9 @@ module.exports = async function (deployer, network, accounts) {
   if (network === 'development' || network === 'development-fork') {
     await upgradeProxy(DummyRandoms.address, DummyRandoms, { deployer });
   }
-  else if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'bscmainnet' || network === 'bscmainnet-fork') {
+  else if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecotestnet' || network === 'hecomainnet' || network === 'okexmainnet' || network === 'okextestnet') {
     let openZeppelinRelayerAddress, linkToken, vrfCoordinator, keyHash, fee;
-    if (network === 'bsctestnet' || network === 'bsctestnet-fork') {
+    if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'hecotestnet' || network === 'okextestnet') {
       openZeppelinRelayerAddress = '0x6c0ca2a5f6ef7d33f18ac8abb285466279bd7917';
 
       linkToken = '0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06';
@@ -45,6 +45,14 @@ module.exports = async function (deployer, network, accounts) {
       linkToken = '0x404460C6A5EdE2D891e8297795264fDe62ADBB75';
       vrfCoordinator = '0x747973a5A2a4Ae1D3a8fDF5479f1514F65Db9C31';
       keyHash = '0xc251acd21ec4fb7f31bb8868288bfdbaeb4fbfec2df3735ddbd4f7dc8d60103c';
+      fee = web3.utils.toWei('0.2', 'ether');
+    }
+    else if(network === 'hecomainnet' || network === 'okexmainnet') {
+      openZeppelinRelayerAddress = '0x0000000000000000000000000000000000000000';
+
+      linkToken = '0x0000000000000000000000000000000000000000';
+      vrfCoordinator = '0x0000000000000000000000000000000000000000';
+      keyHash = '0x0000000000000000000000000000000000000000';
       fee = web3.utils.toWei('0.2', 'ether');
     }
     else assert.fail('Should never happen - but just in case');

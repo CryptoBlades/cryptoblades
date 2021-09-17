@@ -21,12 +21,13 @@ import {
   stakeOnly as featureFlagStakeOnly,
   reforging as featureFlagReforging
 } from './feature-flags';
+import { getConfigValue } from './contracts';
 
 let expectedNetworkId: number | null = null;
-if(process.env.VUE_APP_EXPECTED_NETWORK_ID) {
-  expectedNetworkId = parseInt(process.env.VUE_APP_EXPECTED_NETWORK_ID, 10);
+if(getConfigValue('VUE_APP_EXPECTED_NETWORK_ID')) {
+  expectedNetworkId = parseInt(getConfigValue('VUE_APP_EXPECTED_NETWORK_ID'), 10);
 }
-const expectedNetworkName = process.env.VUE_APP_EXPECTED_NETWORK_NAME;
+const expectedNetworkName = getConfigValue('VUE_APP_EXPECTED_NETWORK_NAME');
 
 const web3 = new Web3(Web3.givenProvider || process.env.VUE_APP_WEB3_FALLBACK_PROVIDER);
 
