@@ -5,21 +5,10 @@
               <b-col
                   v-for="character in ownCharacters"
                   :key="character.id">
-                  <div
-                      :class="`${setListClassForChar(character.id,currentCharacterId)}`"
-                      @click="updateCharacterDetails(character.id)">
-                    <div class="character-head-container">
-                      <span :class="`${setCharacterPvPStatus(character.id)}`"></span>
-                      <img
-                        class="character-buttons"
-                        :src="getCharacterHeadArt(character)"/>
-                      <span id="character-head-level-label"> Level </span>
-                      <span id="character-head-level-value" v-text="currentCharacter.level + 1" />
-                      <char-element id="character-head-element" :trait="character.trait"></char-element>
-                    </div>
-                  </div>
-                  <span id="character-name"
-                            v-text="getCharacterName(character.id)"></span><br>
+                <character-button
+                  :character="character"
+                  :currentCharacterId="currentCharacterId"
+                  :inPvP="true"></character-button>
               </b-col>
             </b-row>
           <b-row id="slider-content">
@@ -123,7 +112,7 @@
 </template>
 
 <script>
-import { getCharacterArt, getCharacterHeadArt } from '../../character-arts-placeholder';
+import { getCharacterArt } from '../../character-arts-placeholder';
 import { getWeaponArt } from '../../weapon-arts-placeholder';
 import Hint from '../Hint.vue';
 import Element from '../smart/Element.vue';
@@ -132,6 +121,7 @@ import foundersShield from '../../assets/shield1.png';
 import legendaryShield from '../../assets/shield2.png';
 import PvPArenaDetails from '../smart/PvPArenaDetails.vue';
 import PvPInventory from './PvPInventory.vue';
+import CharacterButton from './CharacterButton.vue';
 
 
 export default {
@@ -144,7 +134,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['currentCharacterId','currentWeaponId','pvp']),
+    ...mapState(['currentCharacterId','currentWeaponId']),
     ...mapGetters([
       'currentWeapon',
       'currentCharacter',
@@ -169,8 +159,6 @@ export default {
 
     getCharacterArt,
 
-    getCharacterHeadArt,
-
     getWeaponArt,
 
     hideWeaponInventory(){
@@ -179,23 +167,6 @@ export default {
 
     hideShieldInventory(){
       this.showShieldInventory = false;
-    },
-
-    setListClassForChar(characterId,currentCharacterId){
-      if (characterId === currentCharacterId){
-        return 'active-indicator';
-      }
-      else return 'inactive-indicator';
-    },
-
-    setCharacterPvPStatus(characterID){
-      this.$store.dispatch('fetchParticipatingCharacters');
-
-      if(this.pvp.participatingCharacters.includes(characterID.toString())){
-        return 'character-in-pvp';
-      }
-      else return 'character-not-in-pvp';
-
     },
 
     getShieldArt(shieldId) {
@@ -210,15 +181,6 @@ export default {
       }
     },
 
-    updateCharacterDetails(characterID){
-      this.setCurrentCharacter(characterID);
-
-      this.$store.dispatch('fetchEntryWager',{characterID});
-      this.$store.dispatch('fetchWageredSkill',{characterID});
-      this.$store.dispatch('fetchDuelCost',{characterID});
-      this.$store.dispatch('fetchIsCharacterInArena',{characterID});
-    },
-
 
   },
 
@@ -231,7 +193,10 @@ export default {
     this.$store.dispatch('fetchParticipatingCharacters');
     this.$store.dispatch('fetchParticipatingWeapons');
     this.$store.dispatch('fetchParticipatingShields');
-    this.$store.dispatch('fetchIsCharacterInArena',{characterID: this.currentCharacterId});
+    this.$store.dispatch('fetchIsCharacterInArena',{character: this.ownCharacters[0].id});
+    this.$store.dispatch('fetchEntryWager',{characterID: this.ownCharacters[0].id});
+    this.$store.dispatch('fetchWageredSkill',{characterID: this.ownCharacters[0].id});
+    this.$store.dispatch('fetchDuelCost',{characterID: this.ownCharacters[0].id});
   },
 
   components: {
@@ -239,6 +204,7 @@ export default {
     'char-element': Element,
     'pvp-arena-details': PvPArenaDetails,
     'pvp-inventory': PvPInventory,
+    'character-button': CharacterButton,
   },
 };
 </script>
@@ -283,60 +249,6 @@ export default {
   border-bottom: 2px solid #968332;
   margin-bottom: 50px;
   padding-bottom: 40px;
-}
-
-.character-buttons {
-  background: transparent;
-  border: 2px solid #968332;
-  border-radius: 10%;
-  height: 80px;
-  width: 80px;
-  margin: 3px auto;
-  overflow: hidden;
-}
-
-#character-head-level-label {
-  text-align: left;
-  font-size: 9px;
-  color: #968332;
-}
-
-#character-head-level-value {
-  text-align: left;
-  font-size: 9px;
-  color: white;
-}
-
-#character-head-element {
-  position: absolute;
-  top: 38%;
-  left: 53%;
-}
-
-.active-indicator {
-  border: 1px dashed #968332;
-  border-radius: 10%;
-  background:transparent;
-  margin: 3px auto;
-  height:auto;
-  width: 90px;
-}
-
-.active-indicator:hover {
-  cursor: pointer;
-}
-
-
-.inactive-indicator {
-  border: 1px none transparent;
-  border-radius: 10%;
-  margin: 3px auto;
-  height:auto;
-  width: 90px;
-}
-
-.inactive-indicator:hover {
-  cursor:pointer;
 }
 
 #character-image {
@@ -407,25 +319,6 @@ export default {
 }
 
 /* PvP Character Styles */
-
-/* PvP Status Styles */
-.character-in-pvp {
-    color: white;
-    height: 20px;
-    width: 80px;
-    background-color: rgb(187, 33, 0);
-    border-radius: 10%;
-    transform: rotate(30deg);
-    position: absolute;
-    left: 38%;
-    top: 20%;
-    z-index: 100;
-}
-
-.character-in-pvp::before {
-  content: "IN PVP";
-}
-/* PvP Status Styles */
 
 
 /* PvP Content Styles */

@@ -1,5 +1,5 @@
 
-import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState } from './interfaces';
+import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState, IPvPFighterState } from './interfaces';
 import { Nft } from './interfaces/Nft';
 import { IShield } from './interfaces/Shield';
 
@@ -184,5 +184,16 @@ export function raidFromContract(data: string[]): IRaidState {
   return {
     index, expectedFinishTime, raiderCount, playerPower, bossPower, bossTrait, status,
     joinSkill, staminaCost, durabilityCost, xpReward, accountPower
+  };
+}
+
+export function pvpFighterFromContract(data: [string,string,string,string,boolean]): IPvPFighterState {
+  const characterID = data[0];
+  const weaponID = data[1];
+  const shieldID = data[2];
+  const wageredSkill = data[3];
+  const useShield = data[4];
+  return {
+    characterID, weaponID, shieldID, wageredSkill, useShield
   };
 }

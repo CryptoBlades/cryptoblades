@@ -28,5 +28,20 @@ module.exports = async function (deployer, network, accounts) {
     await token.transferFrom(token.address, accounts[1], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
     await expToken.transferFrom(expToken.address, accounts[1], web3.utils.toWei('599', 'ether'));
     await expToken2.transferFrom(expToken2.address, accounts[1], web3.utils.toWei('699', 'ether'));
+
+    // token setup for local dev
+    await token.transferFrom(token.address, accounts[2], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
+    await expToken.transferFrom(expToken.address, accounts[2], web3.utils.toWei('599', 'ether'));
+    await expToken2.transferFrom(expToken2.address, accounts[2], web3.utils.toWei('699', 'ether'));
+
+    // token setup for local dev
+    await token.transferFrom(token.address, accounts[3], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
+    await expToken.transferFrom(expToken.address, accounts[3], web3.utils.toWei('599', 'ether'));
+    await expToken2.transferFrom(expToken2.address, accounts[3], web3.utils.toWei('699', 'ether'));
+
+    // token setup for local dev
+    await token.transferFrom(token.address, accounts[4], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
+    await expToken.transferFrom(expToken.address, accounts[4], web3.utils.toWei('599', 'ether'));
+    await expToken2.transferFrom(expToken2.address, accounts[4], web3.utils.toWei('699', 'ether'));
   }
 };

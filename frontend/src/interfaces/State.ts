@@ -57,6 +57,14 @@ export interface IRaidState {
   //isOwnedCharacterRaidingById: Record<number, boolean>; // ?
 }
 
+export interface IPvPFighterState {
+  characterID: string;
+  weaponID: string;
+  shieldID: string;
+  wageredSkill: string;
+  useShield: boolean;
+}
+
 export interface IPvPState {
   type: string | number;
   page: string | number;
@@ -66,6 +74,7 @@ export interface IPvPState {
   participatingCharacters: string[];
   participatingWeapons: string[];
   participatingShields: string[];
+  currentPvPCharacterId: number | null;
   duelCost: string | number;
   isAttackerWithinDecisionTime: boolean;
   isCharacterAttackable: boolean;

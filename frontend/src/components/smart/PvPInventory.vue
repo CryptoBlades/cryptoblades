@@ -138,7 +138,7 @@ export default {
   },
 
   created(){
-    if(this.ownShields !== null || this.ownShields !== undefined){
+    if(this.ownShields.length > 0){
       this.setCurrentShield(this.ownShields[0].id);
     }
   }
