@@ -1,6 +1,18 @@
 <template>
   <div class="skill-balance-display">
-    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="'Buy SKILL'" @click="onBuySkill">
+    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="'Buy SKILL'" @click="showModal">
+      <b-modal size="xl" class="centered-modal " ref="mass-dust-confirmation-modal" title="BUY SKILL" ok-only>
+      <div class="buy-skill-modal">
+        <div class="buy-skill-modal-child">
+         <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
+              <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">Buy with Crypto</b-button>
+        </div>
+        <div class="buy-skill-modal-child">
+              <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
+              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">Buy with Fiat</b-button>
+        </div>
+      </div>
+    </b-modal>
       <!-- <i class="fa fa-plus gtag-link-others" tagname="buy_skill"></i> -->
       <img src="../../assets/addButton.png" class="add-button gtag-link-others"  tagname="buy_skill">
     </div>
@@ -33,10 +45,12 @@ import { mapActions, mapState, mapGetters } from 'vuex';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { IState } from '@/interfaces';
 import { formatDurationFromSeconds } from '@/utils/date-time';
+import { BModal } from 'bootstrap-vue';
 
 type StoreMappedState = Pick<IState, 'skillRewards' | 'skillBalance' | 'inGameOnlyFunds' | 'waxBridgeWithdrawableBnb' | 'waxBridgeTimeUntilLimitExpires'>;
 
 interface StoreMappedGetters {
+  getExchangeTransakUrl: string;
   getExchangeUrl: string;
   availableBNB: string;
 }
@@ -52,7 +66,8 @@ export default Vue.extend({
       'waxBridgeTimeUntilLimitExpires']) as Accessors<StoreMappedState>),
     ...(mapGetters({
       availableBNB: 'waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod',
-      getExchangeUrl: 'getExchangeUrl'
+      getExchangeUrl: 'getExchangeUrl',
+      getExchangeTransakUrl: 'getExchangeTransakUrl'
     }) as Accessors<StoreMappedGetters>),
 
     formattedTotalSkillBalance(): string {
@@ -135,15 +150,21 @@ export default Vue.extend({
     onBuySkill() {
       window.open(this.getExchangeUrl, '_blank');
     },
-
+    onBuyTransak() {
+      window.open(this.getExchangeTransakUrl, '_blank');
+    },
     async onWithdrawBNB() {
       if(!this.canWithdrawBnb) return;
 
       await this.withdrawBnbFromWaxBridge();
+    },
+    showModal() {
+      (this.$refs['mass-dust-confirmation-modal'] as BModal).show();
     }
   },
 
   components: {
+    BModal
   }
 });
 </script>
@@ -169,5 +190,30 @@ export default Vue.extend({
 }
 .add-button:hover {
   cursor: pointer;
+}
+.buy-skill-modal {
+  display: flex;
+  justify-content: space-between;
+}
+.buy-skill-modal-child{
+  width: 50%;
+  height: 300px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10%;
+  display: flex;
+  flex-direction: column;
+}
+.img-apeswap{
+  width:100%;
+  max-width: 250px;
+  height: auto;
+  margin-bottom: 30px;
+}
+.img-transak{
+  width:100%;
+  max-width: 250px;
+    height: auto;
+  margin-bottom: 30px;
 }
 </style>

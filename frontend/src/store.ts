@@ -26,6 +26,9 @@ import { Nft } from './interfaces/Nft';
 import { getWeaponNameFromSeed } from '@/weapon-name';
 import axios from 'axios';
 
+const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
+const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
+
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
 interface SetEventSubscriptionsPayload {
@@ -243,7 +246,9 @@ export function createStore(web3: Web3) {
       getExchangeUrl() {
         return 'https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
       },
-
+      getExchangeTransakUrl() {
+        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&defaultCryptoCurrency=BNB';
+      },
       ownCharacters(state, getters) {
         return getters.charactersWithIds(state.ownedCharacterIds);
       },
