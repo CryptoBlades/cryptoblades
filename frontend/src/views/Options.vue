@@ -119,7 +119,7 @@ export default Vue.extend({
     this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
     this.currentChain = localStorage.getItem('currentChain') || 'BSC';
-    this.supportedChains = config.supportedChains.split(',');
+    this.supportedChains = config.supportedChains;
   },
   data() {
     return {
@@ -233,9 +233,8 @@ export default Vue.extend({
 
     async setCurrentChain() {
       localStorage.setItem('currentChain', this.currentChain);
-      await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
       Events.$emit('setting:currentChain', { value: this.currentChain });
-      window.location.reload();
+      await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
   },
 });

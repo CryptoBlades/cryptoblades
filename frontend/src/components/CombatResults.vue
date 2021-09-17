@@ -58,10 +58,11 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { toBN, fromWeiEther, chainToToken } from '../utils/common';
+import { toBN, fromWeiEther } from '../utils/common';
 import Hint from '../components/Hint.vue';
 import {PropType} from 'vue/types/options';
 import axios from 'axios';
+import { getConfigValue } from '@/contracts';
 
 interface CombatResult {
   isVictory: boolean;
@@ -118,7 +119,7 @@ export default Vue.extend({
   },
 
   async mounted() {
-    this.gasToken = chainToToken(localStorage.getItem('currentChain') || 'BSC');
+    this.gasToken = getConfigValue('currencyToken') || 'BNB';
     await this.fetchPrices();
   },
 

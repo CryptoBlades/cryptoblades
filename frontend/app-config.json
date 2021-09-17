@@ -1,5 +1,5 @@
 {
-  "supportedChains":"BSC,HECO",
+  "supportedChains":["BSC","HECO"],
   "environments": {
     "test": {
       "chains": {
@@ -23,7 +23,14 @@
           "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
           "VUE_APP_RAID_CONTRACT_ADDRESS":"0x86Ab07F69046475D14d69127d76Cef9bA91fbC39",
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x9E47585eC2f55E2e48D3645090136426BF67745B",
-          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x18e608D58Ba392b72A9df5bE5bd8afBe9134A20d"
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x18e608D58Ba392b72A9df5bE5bd8afBe9134A20d",
+
+          "chainId": "0x61",
+          "currencyName": "Binance Coin",
+          "currencySymbol": "BNB",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+          "blockExplorerUrls": ["https://testnet.bscscan.com"]
         },
         "HECO": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -45,13 +52,20 @@
           "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x7368594e52AF313Ef4981E05Cab9D4241232c308",
           "VUE_APP_RAID_CONTRACT_ADDRESS":"0x8E4c5D174F98bDB7955D7b9F76461006633E3668",
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x953D2511DB2388Dc872Ea4199F2a83d1978B17fC",
-          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x605CC16927A0bDD3B88D581c6dE3399f30EbF6da"
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x605CC16927A0bDD3B88D581c6dE3399f30EbF6da",
+
+          "chainId": "0x100",
+          "currencyName": "Huobi Token",
+          "currencySymbol": "HT",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://http-testnet.hecochain.com"],
+          "blockExplorerUrls": ["https://testnet.hecoinfo.com"]
         },
         "OKEX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
           "VUE_APP_NETWORK_ID":"65",
           "VUE_APP_EXPECTED_NETWORK_ID":"65",
-          "VUE_APP_EXPECTED_NETWORK_NAME":"OKEx Chain Testnet",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"OKExChain Testnet",
           
           "VUE_APP_STAKE_TYPES_AVAILABLE":"",
           "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
@@ -67,7 +81,14 @@
           "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"",
           "VUE_APP_RAID_CONTRACT_ADDRESS":"",
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"",
-          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":""
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"",
+
+          "chainId": "0x41",
+          "currencyName": "OKExChain",
+          "currencySymbol": "OKT",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://exchaintestrpc.okex.org"],
+          "blockExplorerUrls": ["https://www.oklink.com/okexchain-test/"]
         }
       }
     },
@@ -93,7 +114,14 @@
           "VUE_APP_RAID_CONTRACT_ADDRESS":"0x1067d34D7bEBe2BE81657e8a2E3CFEBb0161F96b",
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x90099dA42806b21128A094C713347C7885aF79e2",
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
-          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam"
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
+
+          "chainId": "0x38",
+          "currencyName": "Binance Coin",
+          "currencySymbol": "BNB",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://bsc-dataseed.binance.org/"],
+          "blockExplorerUrls": ["https://bscscan.com/"]
         },
         "HECO": {
           "VUE_APP_NETWORK_ID":"128",
@@ -115,12 +143,19 @@
           "VUE_APP_RAID_CONTRACT_ADDRESS":"0xa75203D757Bb4cAF4cc008d8B16b36B2EE74c77e",
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xEb0EdFAfa6984f602E0932d50A18D047866DE7a6",
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x2e6016Fe42460Df6a0e731Fb88aa6FEA47fD3BE3",
-          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam"
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
+
+          "chainId": "0x80",
+          "currencyName": "Huobi Token",
+          "currencySymbol": "HT",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://http-mainnet.hecochain.com"],
+          "blockExplorerUrls": ["https://hecoinfo.com"]
         },
         "OKEX": {
           "VUE_APP_NETWORK_ID":"66",
           "VUE_APP_EXPECTED_NETWORK_ID":"66",
-          "VUE_APP_EXPECTED_NETWORK_NAME":"OKEx Chain Mainnet",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"OKExChain Mainnet",
           
           "VUE_APP_STAKE_TYPES_AVAILABLE":"skill,skill2",
           "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
@@ -137,7 +172,14 @@
           "VUE_APP_RAID_CONTRACT_ADDRESS":"0xE03d0D78f78721591725882100f2852cd078B8F8",
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xc5CddCb2E5aB6D03Ecb9Ca836dbd3569626D0201",
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x3C8D825Ee903f9aEcEf495aC7F07d700f8a29dA7",
-          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam"
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
+
+          "chainId": "0x42",
+          "currencyName": "OKExChain",
+          "currencySymbol": "OKT",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://exchainrpc.okex.org"],
+          "blockExplorerUrls": ["https://www.oklink.com/okexchain/"]
         }
       }
     }

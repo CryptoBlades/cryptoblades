@@ -52,10 +52,10 @@ interface Config {
 }
 
 interface Chain {
-  chains: Record<string, Record<string, string>>;
+  chains: Record<string, Record<string, any>>;
 }
 
-export function getConfigValue(key: string): string {
+export function getConfigValue(key: string): any {
   if(process.env.NODE_ENV === 'development') return '';
   const env = process.env.NODE_ENV || 'production';
   const chain = localStorage.getItem('currentChain') || 'BSC';

@@ -277,8 +277,10 @@ export default {
         });
       }
     });
-
     this.showWarningDialog();
+    if(this.hideWalletWarning) {
+      this.configureMetamask();
+    }
   },
 
   async created() {

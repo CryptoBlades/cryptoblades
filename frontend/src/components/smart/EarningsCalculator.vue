@@ -141,11 +141,12 @@
 </template>
 
 <script lang="ts">
+import { getConfigValue } from '@/contracts';
 import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, WeaponTrait } from '@/interfaces';
 import axios from 'axios';
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import { toBN, fromWeiEther, chainToToken } from '../../utils/common';
+import { toBN, fromWeiEther } from '../../utils/common';
 
 interface PriceJson {
   binancecoin: CoinPrice;
@@ -370,7 +371,7 @@ export default Vue.extend({
   },
 
   mounted() {
-    this.gasToken = chainToToken(localStorage.getItem('currentChain') || 'BSC');
+    this.gasToken = getConfigValue('currencyToken') || 'BNB';
   }
 });
 </script>
