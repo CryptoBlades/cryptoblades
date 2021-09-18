@@ -472,8 +472,9 @@ contract("PvpArena", (accounts) => {
       });
 
       it("should not consider characters owned by the sender", async () => {
+        
+        const character2ID = await createCharacterInPvpTier(accounts[1], 8);
         await time.increase(await pvpArena.unattackableSeconds());
-
         const characterID = await createCharacterInPvpTier(accounts[1], 8);
 
         await expectRevert(
@@ -1008,14 +1009,15 @@ contract("PvpArena", (accounts) => {
 
       beforeEach(async () => {
         characterID = await createCharacterInPvpTier(accounts[1], 2, "222");
-        await createCharacterInPvpTier(accounts[1], 2, "222");
+        await createCharacterInPvpTier(accounts[2], 2, "222");
 
         await time.increase(await pvpArena.unattackableSeconds());
         await pvpArena.requestOpponent(characterID, {
           from: accounts[1],
         });
 
-        await time.increase(await pvpArena.decisionSeconds());
+        const decisionSeconds = await pvpArena.decisionSeconds();
+        await time.increase(decisionSeconds);
       });
 
       it("should revert", async () => {
