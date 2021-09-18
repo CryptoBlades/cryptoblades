@@ -57,7 +57,7 @@ interface Chain {
 
 export function getConfigValue(key: string): any {
   if(process.env.NODE_ENV === 'development') return '';
-  const env = process.env.NODE_ENV || 'production';
+  const env = window.location.href.startsWith('test') ? 'test' : 'production';
   const chain = localStorage.getItem('currentChain') || 'BSC';
   return (config as Config).environments[env].chains[chain][key];
 }
