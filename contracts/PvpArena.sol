@@ -432,7 +432,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     ///@dev update the respective character's tier rank
-    function updateTierRanks(uint256 characterID) public {
+    function updateTierRanks(uint256 characterID) internal {
         uint8 tier = getArenaTier(characterID);
 
         uint256 fighterPoints = _characterRankingPoints[characterID];
@@ -454,18 +454,31 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         if (fighterPoints >= thirdRankingPlayerPoints) {
             _rankingByTier[tier][2] = characterID;
             thirdRankingPlayer = characterID;
+            thirdRankingPlayerPoints = _characterRankingPoints[characterID];
         }
         if (thirdRankingPlayerPoints >= secondRankingPlayerPoints) {
             _rankingByTier[tier][1] = thirdRankingPlayer;
             _rankingByTier[tier][2] = secondRankingPlayer;
             thirdRankingPlayer = _rankingByTier[tier][2];
+            thirdRankingPlayerPoints = _characterRankingPoints[
+                _rankingByTier[tier][2]
+            ];
             secondRankingPlayer = _rankingByTier[tier][1];
+            secondRankingPlayerPoints = _characterRankingPoints[
+                _rankingByTier[tier][1]
+            ];
         }
         if (secondRankingPlayerPoints >= firstRankingPlayerPoints) {
             _rankingByTier[tier][0] = secondRankingPlayer;
             _rankingByTier[tier][1] = firstRankingPlayer;
             secondRankingPlayer = _rankingByTier[tier][1];
+            secondRankingPlayerPoints = _characterRankingPoints[
+                _rankingByTier[tier][1]
+            ];
             firstRankingPlayer = _rankingByTier[tier][0];
+            firstRankingPlayerPoints = _characterRankingPoints[
+                _rankingByTier[tier][0]
+            ];
         }
     }
 

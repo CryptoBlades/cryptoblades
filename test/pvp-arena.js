@@ -1010,7 +1010,7 @@ contract("PvpArena", (accounts) => {
         character3ID = await createCharacterInPvpTier(accounts[1], 2, "222");
         character4ID = await createCharacterInPvpTier(accounts[2], 2, "223");
         character5ID = await createCharacterInPvpTier(accounts[2], 2, "224");
-        character6ID = await createCharacterInPvpTier(accounts[2], 2, "225");
+        character6ID = await createCharacterInPvpTier(accounts[2], 2, "224");
         // setting 40 ranking points
         await pvpArena.setRankingPoints(character2ID, 90, {
           from: accounts[0],
@@ -1019,20 +1019,20 @@ contract("PvpArena", (accounts) => {
         await pvpArena.setRankingPoints(character1ID, 10, {
           from: accounts[0],
         });
-        // setting 90 ranking points
-        await pvpArena.setRankingPoints(character3ID, 68, {
+        await pvpArena.setRankingPoints(character3ID, 87, {
           from: accounts[0],
         });
+        // setting 90 ranking points
         await pvpArena.setRankingPoints(character4ID, 19, {
           from: accounts[0],
         });
         await pvpArena.setRankingPoints(character5ID, 67, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character6ID, 97, {
+        await pvpArena.setRankingPoints(character6ID, 60, {
           from: accounts[0],
         });
-        await pvpArena.updateTierRanks(character1ID);
+
         let playerTier = await pvpArena.getTopTierPlayers(character1ID, {
           from: accounts[1],
         });
@@ -1041,13 +1041,13 @@ contract("PvpArena", (accounts) => {
           const pointz = await pvpArena.getCharacterRankingPoints(player, {
             from: accounts[2],
           });
-          console.log("character points", pointz.toString());
           console.log("characterID", player.toString());
-        });
-        await pvpArena.updateTierRanks(character1ID, {
-          from: accounts[1],
+          console.log("character points", pointz.toString());
         });
 
+        playerTier = await pvpArena.getTopTierPlayers(character1ID, {
+          from: accounts[1],
+        });
         console.log("first rank", playerTier[0].toString());
         console.log("second rank", playerTier[1].toString());
         console.log("third rank", playerTier[2].toString());
