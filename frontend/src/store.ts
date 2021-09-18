@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
-import _, { isUndefined, parseInt } from 'lodash';
+import _, { isUndefined, parseInt, toInteger } from 'lodash';
 import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
@@ -3158,9 +3158,11 @@ export function createStore(web3: Web3) {
         dispatch('fetchParticipatingShields');
       },
 
-      async getOpponent({state}, {characterID}){
+      async getOpponent({state, dispatch}, {characterID}){
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
+
+        let duelByAttacker;
 
         try{
           await PvpArena!.methods
@@ -3173,22 +3175,39 @@ export function createStore(web3: Web3) {
         }
 
         try{
-          const duelByAttacker = await PvpArena.methods
+          duelByAttacker = await PvpArena.methods
             .duelByAttacker(characterID)
             .call(defaultCallOptions(state));
-
-          console.log(duelByAttacker);
 
         }catch(err){
           console.log(err);
         }
 
+        console.log(duelByAttacker);
 
+        dispatch('fetchSkillBalance');
+        dispatch('getDefenderID',{ characterID });
+
+        return duelByAttacker;
 
       },
       async reRollOpponent({state, dispatch}, {characterID}){
-        const { PvpArena } = state.contracts();
-        if (!PvpArena) return;
+        const { PvpArena, SkillToken } = state.contracts();
+        if (!PvpArena || !SkillToken) return;
+
+        const reRollCost = toInteger(state.pvp.duelCost)/4;
+
+        let duelByAttacker;
+
+        try{
+          await SkillToken.methods
+            .approve(PvpArena.options.address, reRollCost.toString())
+            .send({
+              from: state.defaultAccount
+            });
+        }catch(err){
+          console.log(err);
+        }
 
         try{
           await PvpArena.methods
@@ -3200,7 +3219,21 @@ export function createStore(web3: Web3) {
           console.log(err);
         }
 
+        try{
+          duelByAttacker = await PvpArena.methods
+            .duelByAttacker(characterID)
+            .call(defaultCallOptions(state));
+
+        }catch(err){
+          console.log(err);
+        }
+
         dispatch('fetchSkillBalance');
+        dispatch('getDefenderID',{ characterID });
+
+        console.log(duelByAttacker);
+
+        return duelByAttacker;
 
       },
       async getDefenderID({state, commit}, {characterID}){

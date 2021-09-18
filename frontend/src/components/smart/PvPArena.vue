@@ -47,16 +47,10 @@ export default {
 
     async findOpponent(characterID){
       this.$store.dispatch('getOpponent', {characterID});
-      const defenderID = await this.$store.dispatch('getDefenderID', {characterID});
-
-      console.log(defenderID);
     },
 
     async reRollOpponent(characterID){
       this.$store.dispatch('reRollOpponent',{characterID});
-      const defenderID = await this.$store.dispatch('getDefenderID', {characterID});
-
-      console.log(defenderID);
     },
 
     async performDuel(characterID){
