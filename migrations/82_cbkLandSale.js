@@ -9,7 +9,7 @@ module.exports = async function (deployer, network, accounts) {
  
  
  const blacksmith = await upgradeProxy(Blacksmith.address, Blacksmith, { deployer });
-  await blacksmith.migrateTo_cbkLand(cbkLandSale.address);
+  await blacksmith.migrateTo_bcdf4c(cbkLandSale.address);
 
   const cbkLandSale_GAME_ADMIN = await cbkLandSale.GAME_ADMIN();
   await cbkLandSale.grantRole(cbkLandSale_GAME_ADMIN, blacksmith.address);

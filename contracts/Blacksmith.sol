@@ -99,7 +99,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
     }
 
-    function migrateTo_cbkLand(CBKLandSale _cbkLandSale) external {
+    function migrateTo_bcdf4c(CBKLandSale _cbkLandSale) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         cbkLandSale = _cbkLandSale;
