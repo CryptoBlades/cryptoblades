@@ -92,7 +92,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     modifier chunkAvailable(uint16 chunkId) {
         require(chunkId <= MAX_CHUNK_ID, "Chunk not valid");
         require(!chunkReserved[chunkId], "Chunk reserved");
-        require(chunkT2LandSales[chunkId] <= _allowedLandSalePerChunk, "Chunk not available");
+        require(chunkT2LandSales[chunkId] < _allowedLandSalePerChunk, "Chunk not available");
         require(_chunkAvailableForT2(chunkId), "Chunk overpopulated");
         _;
     }
