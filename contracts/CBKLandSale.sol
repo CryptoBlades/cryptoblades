@@ -1,0 +1,273 @@
+pragma solidity ^0.6.5;
+
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+
+
+contract CBKLandSale is Initializable, AccessControlUpgradeable {
+
+    bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+
+     /* ========== EVENTS ========== */
+    event T1Given(address indexed owner, uint32 stamp);
+    event T2Given(address indexed owner, uint16 chunkId);
+    event T3Given(address indexed owner, uint16 chunkId);
+
+
+    /* ========== LAND SALE INFO ========== */
+    uint8 private constant NO_LAND = 0;
+    uint8 public constant TIER_ONE = 1;
+    uint8 public constant TIER_TWO = 2;
+    uint8 public constant TIER_THREE = 3;
+    uint16 private constant MAX_CHUNK_ID = 9999; // 100 x 100
+
+    struct purchaseInfo {
+        address buyer;
+        uint8 purchasedTier;
+        uint32 stamp; // chunkId or roundrobin stamp
+    }
+
+    uint256 private totalSales;
+    mapping(uint256 => purchaseInfo) public sales; // Needed to build info for APIs
+    mapping(address => purchaseInfo) public purchaseAddressMapping;
+    mapping(uint8 => uint32) public availableLand; // Land that is up for sale. 
+
+    /* ========== T1 LAND SALE INFO ========== */
+    // T1 land is sold with no exact coordinates commitment and assigned based on round robin
+    // once minting is done. For now the player gets a stamp which can reflect PROJECTED land coordinates
+    // should it need be.
+    uint32 private t1LandsSold;
+
+
+
+    /* ========== T2 LAND SALE INFO ========== */
+    uint32 private t2LandsSold;
+    uint16 private chunksWithLand;
+
+    uint8 private constant MAX_LAND = 100;
+    uint8 private _allowedLandSalePerChunk;
+    uint8 private _allowedLandOffset; // Max allowed deviation allowed from theoretical average
+
+    // T2 sold per chunk
+    mapping(uint16 => uint8) public chunkT2LandSales;
+
+
+    /* ========== T3 LAND SALE INFO ========== */
+    uint32 private t3LandsSold;
+    mapping(uint16 => address) public chunkT3LandSoldTo;
+
+
+    /* ========== RESERVED CHUNKS SALE INFO ========== */
+    mapping(uint16 => bool) public chunkReserved;
+    
+    bool internal _enabled;
+
+    function initialize()
+        public
+        initializer
+    {
+        __AccessControl_init_unchained();
+
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        _enabled = true;
+
+        _allowedLandOffset = 2;
+        _allowedLandSalePerChunk = 99; // At least 1 reserved for T3
+        availableLand[TIER_ONE] = 1000; // Placeholder value
+        availableLand[TIER_TWO] = 100; // Placeholder value
+        availableLand[TIER_THREE] = 10; // Placeholder value
+    }
+
+    modifier isAdmin() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        _;
+    }
+
+    modifier saleAllowed() {
+        require(_enabled, "Sales disabled");
+        _;
+    }
+
+    modifier chunkAvailable(uint16 chunkId) {
+        require(chunkId <= MAX_CHUNK_ID, "Chunk not valid");
+        require(!chunkReserved[chunkId], "Chunk reserved");
+        require(chunkT2LandSales[chunkId] <= _allowedLandSalePerChunk, "Chunk not available");
+        require(_chunkAvailableForT2(chunkId), "Chunk overpopulated");
+        _;
+    }
+
+    // Will not overcomplicate the math on this one. Keeping it simple on purpose for gas cost.
+    // Limited to t2 because T3 not many and T1 round robins
+    function _chunkAvailableForT2(uint16 chunkId) internal view returns (bool) {
+        return chunksWithLand == 0 ||
+            (chunkT2LandSales[chunkId] + 1 < _allowedLandOffset + t2LandsSold / chunksWithLand);
+    }
+
+    modifier t3Available(uint16 chunkId) {
+        require(_chunkAvailableForT3(chunkId), "T3 not available");
+        _;
+    }
+
+    function _chunkAvailableForT3(uint16 chunkId) internal view returns (bool) {
+        return chunkT3LandSoldTo[chunkId] == address(0);
+    }
+
+    modifier tierAvailable(uint8 tier) {
+        require(availableLand[tier] > 0, "Tier not available");
+        _;
+    }
+
+    modifier canPurchase(address buyer) {
+        require(purchaseAddressMapping[buyer].purchasedTier == NO_LAND, "Cannot purchase more than one land");
+        _;
+    }
+
+    modifier restricted() {
+        _restricted();
+        _;
+    }
+
+    function _restricted() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+    }
+
+    function giveT1Land(address buyer) public saleAllowed tierAvailable(TIER_ONE) canPurchase(buyer) restricted {
+        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_ONE, t1LandsSold);
+        sales[totalSales++] = purchaseAddressMapping[buyer];
+        emit T1Given(buyer, t1LandsSold);
+        t1LandsSold++;
+        availableLand[TIER_ONE]--;
+    }
+
+    function giveT2Land(address buyer, uint16 chunkId) public saleAllowed tierAvailable(TIER_TWO) canPurchase(buyer) chunkAvailable(chunkId) restricted {
+        // First t2 sale
+        if(chunkT2LandSales[chunkId] == 0){
+            chunksWithLand++;
+        }
+
+        t2LandsSold++;
+        chunkT2LandSales[chunkId]++;
+
+        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_TWO, uint32(chunkId));
+        sales[totalSales++] = purchaseAddressMapping[buyer];
+        availableLand[TIER_TWO]--;
+
+        emit T2Given(buyer, chunkId);
+    }
+
+    function giveT3Land(address buyer, uint16 chunkId) public saleAllowed tierAvailable(TIER_THREE) canPurchase(buyer) t3Available(chunkId) restricted {
+        t3LandsSold++;
+        
+        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_THREE, chunkId);
+        sales[totalSales++] = purchaseAddressMapping[buyer];
+        availableLand[TIER_THREE]--;
+        chunkT3LandSoldTo[chunkId] = buyer;
+        emit T3Given(buyer, chunkId);
+    }
+
+    function salesAllowed() public view returns (bool){
+        return _enabled;
+    }
+
+    function getAllowedLandOffset()  public view returns (uint8){
+        return _allowedLandOffset;
+    }
+
+    function checkIfChunkAvailable(uint8 tier, uint16 chunkId) public view returns (bool){
+        if(chunkReserved[chunkId]){
+            return false;
+        }
+
+        if(chunkId > MAX_CHUNK_ID){
+            return false;
+        }
+
+        if(tier == TIER_ONE){
+            return availableLand[TIER_ONE] > 0;
+        }
+
+        if(tier == TIER_TWO){
+            return availableLand[TIER_TWO] > 0
+                    && chunkT2LandSales[TIER_TWO] < _allowedLandSalePerChunk
+                    && _chunkAvailableForT2(chunkId);
+        }
+
+        if(tier == TIER_THREE){
+            return availableLand[TIER_THREE] > 0
+                    && chunkT2LandSales[TIER_TWO] < _allowedLandSalePerChunk
+                    && _chunkAvailableForT3(chunkId);
+        }
+
+        return false;
+    }
+
+    function checkChunkReserved(uint16 chunkId) public view returns (bool){
+        return chunkReserved[chunkId];
+    }
+
+    function checkChunkEstimatedPopulation(uint16 chunkId) public view returns (uint8) {
+        if(chunkReserved[chunkId]) {
+            return MAX_LAND;
+        }
+
+        // Round robin applied, assume no chunks are reserved for simplicity
+        uint8 projectedT1Population = uint8(t1LandsSold / MAX_CHUNK_ID);
+        
+        // Round not over but already passed over chunk
+        if(chunkId < t1LandsSold % MAX_CHUNK_ID){
+            projectedT1Population++;
+        }
+
+        return chunkT2LandSales[chunkId] // T2 sales
+            + (_chunkAvailableForT3(chunkId) ? 0 : 1) // T3 if sold
+            +  projectedT1Population; // T1 sales
+    }
+
+    function getAvailableLand()  public view returns (uint32, uint32, uint32) {
+        return (availableLand[TIER_ONE], availableLand[TIER_TWO], availableLand[TIER_THREE]);
+    }
+
+    function getAvailableLandPerChunk()  public view returns (uint8) {
+        return _allowedLandSalePerChunk;
+    }
+
+    function getSoldLand()  public view returns (uint32, uint32, uint32) {
+        return (t1LandsSold, t2LandsSold, t3LandsSold);
+    }
+
+    function getPurchase()  public view returns (uint8, uint32) {
+        return (purchaseAddressMapping[msg.sender].purchasedTier, purchaseAddressMapping[msg.sender].stamp);
+    }
+
+    function getSalesCount() public view returns (uint256){
+        return totalSales;
+    }
+
+    function getPurchaseBySale(uint256 sale)  public view returns (address, uint8, uint32) {
+        return (sales[sale].buyer, sales[sale].purchasedTier, sales[sale].stamp);
+    }
+
+    function toggleSaleAllowed(bool allowed) external isAdmin {
+        _enabled = allowed;
+    }
+
+    function reserveChunks(uint16[] calldata chunkIds, bool reserve) external isAdmin {
+        for (uint256 i = 0; i < chunkIds.length; i++) {
+            chunkReserved[chunkIds[i]] = reserve;
+        }
+    }
+
+    function setAllowedLandOffset(uint8 allowedOffset) external isAdmin {
+        _allowedLandOffset = allowedOffset;
+    }
+
+    function setAllowedLandPerChunk(uint8 allowedLandSalePerChunk) external isAdmin {
+        _allowedLandSalePerChunk = allowedLandSalePerChunk;
+    }
+
+    function setAvailableLand(uint8 tier, uint8 available) external isAdmin {
+        require(tier >= TIER_ONE && tier <= TIER_THREE, "Invalid tier");
+        availableLand[tier] = available;
+    }
+}
