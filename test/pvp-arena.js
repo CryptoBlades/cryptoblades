@@ -472,7 +472,6 @@ contract("PvpArena", (accounts) => {
       });
 
       it("should not consider characters owned by the sender", async () => {
-        
         const character2ID = await createCharacterInPvpTier(accounts[1], 8);
         await time.increase(await pvpArena.unattackableSeconds());
         const characterID = await createCharacterInPvpTier(accounts[1], 8);
@@ -570,22 +569,39 @@ contract("PvpArena", (accounts) => {
         2,
         "221"
       );
-
-      await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
-
-      const myParticipatingCharacters =
+      let myParticipatingCharacters =
         await pvpArena.getMyParticipatingCharacters({
           from: accounts[1],
         });
 
-      const foundCharacter = myParticipatingCharacters.some((characterID) => {
-        characterID.toString() === character1ID.toString();
+      let foundCharacter = myParticipatingCharacters.some((characterID) => {
+        return characterID.toString() === character1ID.toString();
+      });
+      expect(foundCharacter).to.equal(true);
+
+      await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+
+      myParticipatingCharacters = await pvpArena.getMyParticipatingCharacters({
+        from: accounts[1],
+      });
+
+      foundCharacter = myParticipatingCharacters.some((characterID) => {
+        return characterID.toString() === character1ID.toString();
       });
 
       expect(foundCharacter).to.equal(false);
-      const isCharacterInArena = await pvpArena.isCharacterInArena(
-        character1ID
-      );
+      let isCharacterInArena = await pvpArena.isCharacterInArena(character1ID);
+      expect(isCharacterInArena).to.equal(false);
+
+      await pvpArena.withdrawFromArena(character2ID, { from: accounts[1] });
+
+      myParticipatingCharacters = await pvpArena.getMyParticipatingCharacters({
+        from: accounts[1],
+      });
+
+      expect(myParticipatingCharacters.length).to.equal(0);
+
+      isCharacterInArena = await pvpArena.isCharacterInArena(character2ID);
       expect(isCharacterInArena).to.equal(false);
     });
 
