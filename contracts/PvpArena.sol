@@ -444,8 +444,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     ///@dev update the respective character's tier rank
     function updateTierRanks(uint256 characterID) internal {
         uint8 tier = getArenaTier(characterID);
-
         uint256 fighterPoints = _characterRankingPoints[characterID];
+
         uint256 firstRankingPlayer = _rankingByTier[tier][0];
         uint256 firstRankingPlayerPoints = _characterRankingPoints[
             firstRankingPlayer
@@ -583,6 +583,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         public
     {
         _characterRankingPoints[characterID] = newRankingPoints;
+        updateTierRanks(characterID);
     }
 
     function _getCharacterPowerRoll(uint256 characterID, uint8 opponentTrait)
