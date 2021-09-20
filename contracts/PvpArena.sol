@@ -4,6 +4,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "hardhat/console.sol";
 import "./util.sol";
@@ -19,6 +20,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
     using SafeMath for uint8;
     using SafeERC20 for IERC20;
+    using EnumerableSet for EnumerableSet.UintSet;
 
     struct Fighter {
         uint256 characterID;
@@ -75,9 +77,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev last time a character was involved in activity that makes it untattackable
     mapping(uint256 => uint256) private _lastActivityByCharacter;
     /// @dev IDs of characters available by tier (1-10, 11-20, etc...)
-    mapping(uint8 => uint256[]) private _fightersByTier;
+    mapping(uint8 => EnumerableSet.UintSet) private _fightersByTier;
     /// @dev IDs of characters in the arena per player
-    mapping(address => uint256[]) private _fightersByPlayer;
+    mapping(address => EnumerableSet.UintSet) private _fightersByPlayer;
     /// @dev characters currently in the arena
     mapping(uint256 => bool) private _charactersInArena;
     /// @dev weapons currently in the arena
@@ -201,8 +203,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         if (useShield) _shieldsInArena[shieldID] = true;
 
-        _fightersByTier[tier].push(characterID);
-        _fightersByPlayer[msg.sender].push(characterID);
+        _fightersByTier[tier].add(characterID);
+        _fightersByPlayer[msg.sender].add(characterID);
         fighterByCharacter[characterID] = Fighter(
             characterID,
             weaponID,
@@ -224,6 +226,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterInArena(characterID)
         isOwnedCharacter(characterID)
     {
+        require(!hasPendingDuel(characterID), "Opponent already requested");
         _assignOpponent(characterID);
     }
 
@@ -386,7 +389,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint256[] memory)
     {
-        return _fightersByPlayer[msg.sender];
+        uint256 length = _fightersByPlayer[msg.sender].length();
+        uint256[] memory values = new uint256[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            values[i] = _fightersByPlayer[msg.sender].at(i);
+        }
+
+        return values;
     }
 
     /// @dev returns the IDs of the sender's weapons currently in the arena
@@ -650,15 +660,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         delete fighterByCharacter[characterID];
 
-        uint256[] storage playerFighters = _fightersByPlayer[msg.sender];
-        playerFighters[characterID] = playerFighters[playerFighters.length - 1];
-        playerFighters.pop();
+        _fightersByPlayer[msg.sender].remove(characterID);
 
         uint8 tier = getArenaTier(characterID);
 
-        uint256[] storage tierFighters = _fightersByTier[tier];
-        tierFighters[characterID] = tierFighters[tierFighters.length - 1];
-        tierFighters.pop();
+        _fightersByTier[tier].remove(characterID);
 
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
@@ -669,30 +675,35 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function _assignOpponent(uint256 characterID) private {
         uint8 tier = getArenaTier(characterID);
 
-        uint256[] storage fightersInTier = _fightersByTier[tier];
+        EnumerableSet.UintSet storage fightersInTier = _fightersByTier[tier];
 
         require(
-            fightersInTier.length != 0,
+            fightersInTier.length() != 0,
             "No opponents available for this character's level"
         );
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
             0,
-            fightersInTier.length - 1,
+            fightersInTier.length() - 1,
             seed
         );
 
         uint256 opponentID;
         bool foundOpponent = false;
+        uint256 fighterCount = fightersInTier.length();
 
         // run through fighters from a random starting point until we find one or none are available
-        for (uint256 i = 0; i < fightersInTier.length; i++) {
-            uint256 index = (randomIndex + i) % fightersInTier.length;
-            uint256 candidateID = fightersInTier[index];
+        for (uint256 i = 0; i < fighterCount; i++) {
+            uint256 index = (randomIndex + i) % fighterCount;
+            uint256 candidateID = fightersInTier.at(index);
+
             if (candidateID == characterID) continue;
             if (!isCharacterAttackable(candidateID)) continue;
-            if (characters.ownerOf(candidateID) == characters.ownerOf(characterID)) continue;
+            if (
+                characters.ownerOf(candidateID) ==
+                characters.ownerOf(characterID)
+            ) continue;
 
             foundOpponent = true;
             opponentID = candidateID;
