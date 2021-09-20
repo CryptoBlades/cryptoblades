@@ -370,11 +370,11 @@ contract("PvpArena", (accounts) => {
     });
 
     describe("character is in a raid", () => {
-      it("should revert", () => {});
+      it("should revert");
     });
 
     describe("weapon is in a raid", () => {
-      it("should revert", () => {});
+      it("should revert");
     });
   });
 
@@ -732,9 +732,6 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  // NOTE: Some tests in this block depend on a deterministic random output.
-  // at this point we can do this in a very limited way, so tests in here are very
-  // fragile, depending both in block time and other tests
   describe("#performDuel", async () => {
     describe("happy path", () => {
       describe("attacker wins", () => {
@@ -839,6 +836,7 @@ contract("PvpArena", (accounts) => {
             character2Wager.sub(duelCost).toString()
           );
         });
+
         it("should not change attacker's wager", async () => {
           const character1NewWager = await pvpArena.getCharacterWager(
             character1ID,
@@ -1099,7 +1097,7 @@ contract("PvpArena", (accounts) => {
     });
 
     describe("#reRollOpponent", () => {
-      it("fails if character is not dueling", async () => {
+      it("should fail if character is not dueling", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         await createCharacterInPvpTier(accounts[2], 2);
 
@@ -1111,7 +1109,7 @@ contract("PvpArena", (accounts) => {
         );
       });
 
-      it("transfers skill from the sender to the contract", async () => {
+      it("should transfer skill from the sender to the contract", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         await createCharacterInPvpTier(accounts[2], 2);
         await createCharacterInPvpTier(accounts[3], 2);
@@ -1139,7 +1137,7 @@ contract("PvpArena", (accounts) => {
         );
       });
 
-      it("can not re roll the same opponent", async () => {
+      it("should not re roll the same opponent", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         await createCharacterInPvpTier(accounts[2], 2);
 
@@ -1157,7 +1155,7 @@ contract("PvpArena", (accounts) => {
         );
       });
 
-      it("can re roll the same opponent if enough time has passed", async () => {
+      it("should re roll the same opponent if enough time has passed", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         const character2ID = await createCharacterInPvpTier(accounts[2], 2);
 
@@ -1179,7 +1177,7 @@ contract("PvpArena", (accounts) => {
         });
       });
 
-      it("assigns a new opponent", async () => {
+      it("should assign a new opponent", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         await createCharacterInPvpTier(accounts[2], 2);
         await createCharacterInPvpTier(accounts[3], 2);
@@ -1217,7 +1215,8 @@ contract("PvpArena", (accounts) => {
       });
     });
   });
-  describe("getOpponent", () => {
+
+  describe("#getOpponent", () => {
     describe("with pending duel", () => {
       let character0ID;
       let character1ID;
@@ -1233,7 +1232,7 @@ contract("PvpArena", (accounts) => {
         });
       });
 
-      it("returns the opponent", async () => {
+      it("should return the opponent", async () => {
         const opponentID = await pvpArena.getOpponent(character0ID);
       });
     });
@@ -1245,7 +1244,7 @@ contract("PvpArena", (accounts) => {
         characterID = await createCharacterInPvpTier(accounts[1], 1);
       });
 
-      it("reverts", async () => {
+      it("should revert", async () => {
         expectRevert(
           pvpArena.getOpponent(characterID),
           "Character has no pending duel"

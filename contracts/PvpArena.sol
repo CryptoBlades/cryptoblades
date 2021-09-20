@@ -576,10 +576,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         EnumerableSet.UintSet storage fightersInTier = _fightersByTier[tier];
 
-        require(
-            fightersInTier.length() != 0,
-            "No opponents available for this character's level"
-        );
+        require(fightersInTier.length() != 0, "No opponents available in tier");
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
