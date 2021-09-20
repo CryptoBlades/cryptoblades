@@ -1126,6 +1126,8 @@ contract("PvpArena", (accounts) => {
         expect(playerTier[0].toString()).to.equal(charID.toString());
       });
       it("should update the ranks after a fight, adding ranking points to the winner and subtracting to the loser", async () => {
+        const losingPoints = await pvpArena.losingPoints();
+        const winningPoints = await pvpArena.winningPoints();
         weapon1ID = await helpers.createWeapon(
           accounts[1],
           "111",
@@ -1143,69 +1145,95 @@ contract("PvpArena", (accounts) => {
           }
         );
 
-        character1ID = await createCharacterInPvpTier(
+        character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
+        character2ID = await createCharacterInPvpTier(
           accounts[1],
           2,
           "222",
           weapon1ID
         );
-        character2ID = await createCharacterInPvpTier(
+        character3ID = await createCharacterInPvpTier(
           accounts[2],
           2,
           "222",
           weapon2ID
         );
-        character3ID = await createCharacterInPvpTier(accounts[2], 2, "222");
-        const duelCost = await pvpArena.getDuelCost(character1ID, {
+        character4ID = await createCharacterInPvpTier(accounts[2], 2, "222");
+        const duelCost = await pvpArena.getDuelCost(character2ID, {
           from: accounts[1],
         });
 
-        await characters.setTrait(character1ID, helpers.elements.fire, {
-          from: accounts[0],
-        });
         await characters.setTrait(character2ID, helpers.elements.water, {
           from: accounts[0],
         });
+        await characters.setTrait(character3ID, helpers.elements.fire, {
+          from: accounts[0],
+        });
+        // we set the ranking points to determine the tier, char2 being the first, followed by char 1 and then char3
+        await pvpArena.setRankingPoints(character1ID, 10, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character2ID, 34, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character3ID, 35, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character4ID, 33, {
+          from: accounts[0],
+        });
 
-        await pvpArena.setRankingPoints(character1ID, 34, {
-          from: accounts[0],
-        });
-        await pvpArena.setRankingPoints(character2ID, 35, {
-          from: accounts[0],
-        });
-        await pvpArena.setRankingPoints(character2ID, 33, {
-          from: accounts[0],
-        });
-
-        character1Wager = await pvpArena.getCharacterWager(character1ID, {
+        let playerTier = await pvpArena.getTopTierPlayers(character2ID, {
           from: accounts[1],
         });
-        character2Wager = await pvpArena.getCharacterWager(character2ID, {
-          from: accounts[2],
-        });
+        console.log("initial top1", playerTier[0].toString());
+        console.log("initial top2", playerTier[1].toString());
+        console.log("initial top3", playerTier[2].toString());
+        // get the previous and post ranking points for winner and loser
+        const character2PreviousPoints =
+          await pvpArena.getCharacterRankingPoints(character2ID, {
+            from: accounts[1],
+          });
+        const character3PreviousPoints =
+          await pvpArena.getCharacterRankingPoints(character3ID, {
+            from: accounts[2],
+          });
 
-        const playerTier = await pvpArena.getTopTierPlayers(character1ID, {
-          from: accounts[1],
-        });
-
-        playerTier.map(async (player) => {
-          let playerPoints = await pvpArena.getCharacterRankingPoints(player);
-          console.log("player points", playerPoints.toString());
-        });
         await time.increase(await pvpArena.unattackableSeconds());
-        await pvpArena.requestOpponent(character1ID, {
+        await pvpArena.requestOpponent(character2ID, {
           from: accounts[1],
         });
-
-        const { tx } = await pvpArena.performDuel(character1ID, {
+        // perform a duel making sure character1 is always going to win
+        const { tx } = await pvpArena.performDuel(character2ID, {
           from: accounts[1],
         });
+        // get the post ranking points
+        const character2NewPoints = await pvpArena.getCharacterRankingPoints(
+          character2ID,
+          {
+            from: accounts[1],
+          }
+        );
+        const character3NewPoints = await pvpArena.getCharacterRankingPoints(
+          character3ID,
+          {
+            from: accounts[2],
+          }
+        );
+        playerTier = await pvpArena.getTopTierPlayers(character2ID, {
+          from: accounts[1],
+        });
+        expect(character2NewPoints.toString()).to.equal(
+          character2PreviousPoints.add(winningPoints).toString()
+        );
+        expect(character3NewPoints.toString()).to.equal(
+          character3PreviousPoints.sub(losingPoints).toString()
+        );
 
-        // keeping these for a bit
-        duelTx = tx;
-        bounty = duelCost.mul(toBN(2));
-        poolTax = bounty.mul(toBN(15)).div(toBN(100));
-        winnerReward = bounty.sub(poolTax).sub(duelCost);
+        console.log("final top1", playerTier[0].toString());
+        console.log("final top2", playerTier[1].toString());
+        console.log("final top3", playerTier[2].toString());
+        expect(playerTier[0].toString()).to.equal(character2ID).toString();
       });
     });
 

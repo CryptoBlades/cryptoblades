@@ -309,7 +309,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         // update the tier's ranking after a fight
-        updateTierRanks(attackerID);
+        updateTierRanks(winnerID);
+
         // add to the rankings pool
         _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
             getArenaTier(attackerID)
