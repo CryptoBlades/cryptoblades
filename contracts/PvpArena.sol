@@ -91,7 +91,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev accumulated rewards per tier
     mapping(uint8 => uint256) private _rankingsPoolByTier;
     /// @dev ranking by tier
-    mapping(uint8 => uint256[3]) private _rankingByTier;
+    mapping(uint8 => uint256[4]) private _rankingByTier;
     /// @dev rankPoints by character
     mapping(uint256 => uint256) private _characterRankingPoints;
 
@@ -310,7 +310,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         // update the tier's ranking after a fight
         updateTierRanks(winnerID);
-
         // add to the rankings pool
         _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
             getArenaTier(attackerID)
@@ -443,6 +442,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     ///@dev update the respective character's tier rank
+    function updateTiers(uint256 characterID) internal {
+        uint8 tier = getArenaTier(characterID);
+        uint256 fighterPoints = _characterRankingPoints[characterID];
+
+        /// check if the fighter is in the top ranks
+        /// save the index if he is, then compare downwards
+        /// compare with the 4th player
+        /// if he is higher iterate upwards
+    }
+
+    ///@dev update the respective character's tier rank
     function updateTierRanks(uint256 characterID) internal {
         uint8 tier = getArenaTier(characterID);
         uint256 fighterPoints = _characterRankingPoints[characterID];
@@ -461,7 +471,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 thirdRankingPlayerPoints = _characterRankingPoints[
             thirdRankingPlayer
         ];
-
+        // check if he is the first or the second
         if (fighterPoints >= thirdRankingPlayerPoints) {
             _rankingByTier[tier][2] = characterID;
             thirdRankingPlayer = characterID;
