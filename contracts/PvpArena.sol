@@ -82,8 +82,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => bool) private _weaponsInArena;
     /// @dev shields currently in the arena
     mapping(uint256 => bool) private _shieldsInArena;
-    /// @dev earnings earned by player
-    mapping(address => uint256) private _rewardsByPlayer;
+    /// @dev duel earnings per character
+    mapping(uint256 => uint256) private _duelEarningsPerCharacter;
     /// @dev accumulated rewards per tier
     mapping(uint8 => uint256) private _rankingsPoolByTier;
 
@@ -261,8 +261,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ? defenderID
             : attackerID;
 
-        address winner = characters.ownerOf(winnerID);
-
         emit DuelFinished(
             attackerID,
             defenderID,
@@ -275,9 +273,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         BountyDistribution
             memory bountyDistribution = _getDuelBountyDistribution(attackerID);
 
-        _rewardsByPlayer[winner] = _rewardsByPlayer[winner].add(
-            bountyDistribution.winnerReward
-        );
+        _duelEarningsPerCharacter[winnerID] = _duelEarningsPerCharacter[
+            winnerID
+        ].add(bountyDistribution.winnerReward);
         fighterByCharacter[loserID].wager = fighterByCharacter[loserID]
             .wager
             .sub(bountyDistribution.loserPayment);
@@ -305,13 +303,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         Fighter storage fighter = fighterByCharacter[characterID];
         uint256 wager = fighter.wager;
+        uint256 amountToTransfer = getCharacterUnclaimedEarnings(characterID);
+
+        // This sets earnings to 0
         _removeCharacterFromArena(characterID);
 
         if (hasPendingDuel(characterID)) {
-            skillToken.safeTransfer(msg.sender, wager.sub(wager.div(4)));
+            amountToTransfer = amountToTransfer.add(wager.sub(wager.div(4)));
         } else {
-            skillToken.safeTransfer(msg.sender, wager);
+            amountToTransfer = amountToTransfer.add(wager);
         }
+
+        skillToken.safeTransfer(msg.sender, amountToTransfer);
     }
 
     /// @dev returns the SKILL amounts distributed to the winner and the ranking pool
@@ -329,9 +332,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return BountyDistribution(reward, duelCost, poolTax);
     }
 
-    /// @dev gets the player's unclaimed rewards
-    function getMyRewards() public view returns (uint256) {
-        return _rewardsByPlayer[msg.sender];
+    /// @dev gets the character's unclaimed earnings
+    function getCharacterUnclaimedEarnings(uint256 characterID)
+        public
+        view
+        returns (uint256)
+    {
+        require(
+            characters.ownerOf(characterID) == msg.sender,
+            "Not character owner"
+        );
+        return _duelEarningsPerCharacter[characterID];
     }
 
     function getRankingRewardsPool(uint8 tier) public view returns (uint256) {
@@ -568,6 +579,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
+        _duelEarningsPerCharacter[characterID] = 0;
     }
 
     /// @dev attempts to find an opponent for a character.
@@ -620,6 +632,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _lastActivityByCharacter[opponentID] = block.timestamp;
 
         emit NewDuel(characterID, opponentID, block.timestamp);
+    }
+
+    /// @dev Transfers a character's unclaimed earnings to it's owner
+    function _payCharacterEarnings(uint256 characterID) private {
+        address owner = characters.ownerOf(characterID);
+        uint256 earnings = getCharacterUnclaimedEarnings(characterID);
+
+        require(earnings > 0, "No earnings to withdraw");
+        _duelEarningsPerCharacter[characterID] = 0;
+
+        skillToken.safeTransfer(owner, earnings);
     }
 
     /// @dev returns the senders fighters in the arena
