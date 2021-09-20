@@ -21,7 +21,7 @@
 <script>
 import { mapState, mapGetters, mapMutations } from 'vuex';
 import { getCharacterHeadArt } from '../../character-arts-placeholder';
-import Element from '../smart/Element.vue';
+import Element from './Element.vue';
 
 export default {
   props: ['character','currentCharacterId','inPvP'],
@@ -45,17 +45,22 @@ export default {
       else return 'inactive-indicator';
     },
 
-    updateCharacterDetails(characterID){
+    async updateCharacterDetails(characterID){
       if(this.inPvP){
         this.setCurrentCharacter(characterID);
       }else{
         this.setCurrentPvPCharacter(characterID);
       }
 
-      this.$store.dispatch('fetchEntryWager',{characterID});
-      this.$store.dispatch('fetchWageredSkill',{characterID});
-      this.$store.dispatch('fetchDuelCost',{characterID});
-      this.$store.dispatch('fetchIsCharacterInArena',{characterID});
+      await this.$store.dispatch('fetchEntryWager',{characterID});
+      await this.$store.dispatch('fetchWageredSkill',{characterID});
+      await this.$store.dispatch('fetchDuelCost',{characterID});
+      await this.$store.dispatch('fetchIsCharacterInArena',{characterID});
+      await this.$store.dispatch('resetDuelByAttacker');
+      await this.$store.dispatch('getDuelByAttacker',{characterID});
+
+      this.clearAllTicker();
+      this.ticker();
     },
 
     setCharacterPvPStatus(characterID){
@@ -66,6 +71,50 @@ export default {
       }
       else return 'character-not-in-pvp';
 
+    },
+    ticker(){
+      window.setInterval(this.getDecisionTime, 1000);
+    },
+
+    getDecisionTime(){
+      const decisionTimeInterval = (this.pvp.duelByAttacker.createdAt * 1000) + (180000);
+
+      const decisionTime = new Date(decisionTimeInterval);
+
+      const currentDate = new Date();
+
+      const distance =  decisionTime - currentDate;
+
+      const minutes = new Date(distance).getMinutes();
+      const seconds = new Date(distance).getSeconds();
+
+      let formattedMinutes;
+      let formattedSeconds;
+
+      if(minutes < 10 ){
+        formattedMinutes = `0${minutes.toString()}`;
+      } else{
+        formattedMinutes = minutes.toString();
+      }
+      if(seconds < 10 ){
+        formattedSeconds = `0${seconds.toString()}`;
+      } else {
+        formattedSeconds = seconds.toString();
+      }
+
+      this.$store.dispatch('fetchDecisionTime',{decisionTime:`${formattedMinutes}:${formattedSeconds}`});
+
+      if(distance < 0 || !this.pvp.duelByAttacker.isPending){
+        this.$store.dispatch('fetchDecisionTime',{decisionTime:'00:00'});
+        this.clearAllTicker();
+      }
+    },
+
+    clearAllTicker(){
+      this.$store.dispatch('fetchDecisionTime',{decisionTime:'00:00'});
+      for(let i=0;i<999999;i++){
+        clearInterval(i);
+      }
     },
 
   },
@@ -114,6 +163,13 @@ export default {
   width: 80px;
   margin: 3px auto;
   overflow: hidden;
+}
+
+#character-name {
+  text-align: left;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 #character-head-level-label {

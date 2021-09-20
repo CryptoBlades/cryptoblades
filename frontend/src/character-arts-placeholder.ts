@@ -22,6 +22,14 @@ export function getCharacterArt(character: ICharacter) {
   return allImages[character.id % allImages.length];
 }
 
+export function getCharacterArtById(characterId: number) {
+  if (!characterId) {
+    return null;
+  }
+
+  return allImages[characterId % allImages.length];
+}
+
 export function getCharacterHeadArt(character: ICharacter){
   if(!character) {
     return null;

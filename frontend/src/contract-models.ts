@@ -1,5 +1,5 @@
 
-import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState, IPvPFighterState } from './interfaces';
+import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState, IPvPFighterState, IDuelByAttacker } from './interfaces';
 import { Nft } from './interfaces/Nft';
 import { IShield } from './interfaces/Shield';
 
@@ -195,5 +195,17 @@ export function pvpFighterFromContract(data: [string,string,string,string,boolea
   const useShield = data[4];
   return {
     characterID, weaponID, shieldID, wageredSkill, useShield
+  };
+}
+
+export function duelByAttackerFromContract(data: [string,string,string,boolean]): IDuelByAttacker {
+  const attackerId = data[0];
+  const attackerTrait = '0';
+  const defenderId = data[1];
+  const defenderTrait = '0';
+  const createdAt = data[2];
+  const isPending = data[3];
+  return {
+    attackerId,attackerTrait,defenderId,defenderTrait,createdAt,isPending
   };
 }

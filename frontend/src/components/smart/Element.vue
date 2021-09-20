@@ -7,17 +7,12 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import PvPConstants from '../../utils/constants/pvp-constants';
 
 export default {
 
   props:{
     trait: String
-  },
-
-  computed: {
-    ...mapGetters(['currentCharacter']),
   },
 
   methods:{

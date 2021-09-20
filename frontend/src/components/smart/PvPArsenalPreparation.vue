@@ -5,10 +5,10 @@
               <b-col
                   v-for="character in ownCharacters"
                   :key="character.id">
-                <character-button
+                <pvp-character
                   :character="character"
                   :currentCharacterId="currentCharacterId"
-                  :inPvP="true"></character-button>
+                  :inPvP="true"></pvp-character>
               </b-col>
             </b-row>
           <b-row id="slider-content">
@@ -121,7 +121,7 @@ import foundersShield from '../../assets/shield1.png';
 import legendaryShield from '../../assets/shield2.png';
 import PvPArenaDetails from '../smart/PvPArenaDetails.vue';
 import PvPInventory from './PvPInventory.vue';
-import CharacterButton from './CharacterButton.vue';
+import PvPCharacter from './PvPCharacter.vue';
 
 
 export default {
@@ -204,7 +204,7 @@ export default {
     'char-element': Element,
     'pvp-arena-details': PvPArenaDetails,
     'pvp-inventory': PvPInventory,
-    'character-button': CharacterButton,
+    'pvp-character': PvPCharacter,
   },
 };
 </script>
@@ -263,7 +263,7 @@ export default {
 #character-name {
   text-align: left;
   color: white;
-  font-weight: bolder;
+  font-weight: bold;
   font-size: 16px;
 }
 

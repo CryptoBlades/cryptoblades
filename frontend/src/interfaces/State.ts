@@ -81,7 +81,18 @@ export interface IPvPState {
   isCharacterInArena: boolean;
   isWeaponInArena: boolean;
   isShieldInArena: boolean;
-  defenderID: string;
+  duelByAttacker: IDuelByAttacker;
+  decisionTime: string;
+}
+
+export interface IDuelByAttacker {
+  attackerId: string;
+  attackerTrait: string | undefined;
+  defenderId: string;
+  defenderTrait: string | undefined;
+  createdAt: string;
+  isPending: boolean;
+
 }
 
 export interface IInventory{

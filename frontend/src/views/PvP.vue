@@ -3,7 +3,7 @@
         <pvp-header>
         </pvp-header>
 
-        <pvp-divider v-if="pvp.page === '0'">
+        <pvp-divider>
         </pvp-divider>
 
         <pvp-arsenal-preparation v-if="pvp.page === '0'">
