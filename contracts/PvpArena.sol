@@ -692,6 +692,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             uint256 candidateID = fightersInTier[index];
             if (candidateID == characterID) continue;
             if (!isCharacterAttackable(candidateID)) continue;
+            if (characters.ownerOf(candidateID) == characters.ownerOf(characterID)) continue;
+
             foundOpponent = true;
             opponentID = candidateID;
             break;
