@@ -732,9 +732,6 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  // NOTE: Some tests in this block depend on a deterministic random output.
-  // at this point we can do this in a very limited way, so tests in here are very
-  // fragile, depending both in block time and other tests
   describe("#performDuel", async () => {
     describe("happy path", () => {
       describe("attacker wins", () => {
@@ -839,6 +836,7 @@ contract("PvpArena", (accounts) => {
             character2Wager.sub(duelCost).toString()
           );
         });
+
         it("should not change attacker's wager", async () => {
           const character1NewWager = await pvpArena.getCharacterWager(
             character1ID,
@@ -1217,7 +1215,8 @@ contract("PvpArena", (accounts) => {
       });
     });
   });
-  describe("getOpponent", () => {
+
+  describe("#getOpponent", () => {
     describe("with pending duel", () => {
       let character0ID;
       let character1ID;
