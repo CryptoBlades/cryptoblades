@@ -442,6 +442,26 @@ contract("PvpArena", (accounts) => {
       });
     });
 
+    describe("with pending duel", () => {
+      let character0ID;
+
+      beforeEach(async () => {
+        character0ID = await createCharacterInPvpTier(accounts[1], 2, "000");
+        character1ID = await createCharacterInPvpTier(accounts[2], 2, "111");
+        character2ID = await createCharacterInPvpTier(accounts[2], 2, "222");
+
+        await time.increase(await pvpArena.unattackableSeconds());
+      });
+
+      it("reverts", async () => {
+        await pvpArena.requestOpponent(character0ID, { from: accounts[1] });
+        await expectRevert(
+          pvpArena.requestOpponent(character0ID, { from: accounts[1] }),
+          "Opponent already requested"
+        );
+      });
+    });
+
     describe("finding opponents", () => {
       let character0ID;
       let character2ID;

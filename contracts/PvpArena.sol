@@ -215,6 +215,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterInArena(characterID)
         isOwnedCharacter(characterID)
     {
+        require(!hasPendingDuel(characterID), "Opponent already requested");
         _assignOpponent(characterID);
     }
 
