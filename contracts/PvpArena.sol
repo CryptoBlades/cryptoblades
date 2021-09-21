@@ -86,14 +86,16 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => bool) private _weaponsInArena;
     /// @dev shields currently in the arena
     mapping(uint256 => bool) private _shieldsInArena;
-    /// @dev duel earnings per character
-    mapping(uint256 => uint256) private _duelEarningsByCharacter;
+    /// @dev earnings earned by player
+    mapping(address => uint256) private _rewardsByPlayer;
     /// @dev accumulated rewards per tier
     mapping(uint8 => uint256) private _rankingsPoolByTier;
     /// @dev ranking by tier
     mapping(uint8 => uint256[4]) private _rankingByTier;
     /// @dev rankPoints by character
     mapping(uint256 => uint256) private _characterRankingPoints;
+    /// @dev characters by ranking
+    mapping(uint256 => uint256) private _charactersByRanking;
 
     event NewDuel(
         uint256 indexed attacker,
@@ -212,8 +214,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             wager,
             useShield
         );
-        // update tier ranking
-        updateTierRanks(characterID);
+        // check if tiers are empty and update them if they are empty
+        if (_charactersByRanking[tier] < _rankingByTier[tier].length) {
+            _rankingByTier[tier][_charactersByRanking[tier]] = characterID;
+        }
+        _charactersByRanking[tier]++;
         // character starts unattackable
         _updateLastActivityTimestamp(characterID);
 
@@ -272,6 +277,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ? defenderID
             : attackerID;
 
+        address winner = characters.ownerOf(winnerID);
+
         emit DuelFinished(
             attackerID,
             defenderID,
@@ -284,8 +291,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         BountyDistribution
             memory bountyDistribution = _getDuelBountyDistribution(attackerID);
 
-        _duelEarningsByCharacter[winnerID] = _duelEarningsByCharacter[winnerID]
-            .add(bountyDistribution.winnerReward);
+        _rewardsByPlayer[winner] = _rewardsByPlayer[winner].add(
+            bountyDistribution.winnerReward
+        );
         fighterByCharacter[loserID].wager = fighterByCharacter[loserID]
             .wager
             .sub(bountyDistribution.loserPayment);
@@ -306,7 +314,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         // update the tier's ranking after a fight
-        updateTierRanks(winnerID);
+        //update winner here
+        processWinner(winnerID);
+        //update loser here
+
         // add to the rankings pool
         _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
             getArenaTier(attackerID)
@@ -318,6 +329,72 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         duelByAttacker[attackerID].isPending = false;
     }
 
+    ///@dev function to update the winner player
+    function processWinner(uint256 winnerID) internal {
+        uint256 winnerPoints = _characterRankingPoints[winnerID];
+        uint8 tier = getArenaTier(winnerID);
+        uint256[4] storage winnerTier = _rankingByTier[tier];
+        uint256 winnerPosition;
+        bool winnerFound;
+
+        // check if winner is withing the top 4
+        for (uint8 i = 0; i < winnerTier.length; i++) {
+            if (winnerID == winnerTier[i]) {
+                winnerPosition = i;
+                winnerFound = true;
+                break;
+            }
+        }
+        // if he is found, compare him to the lower index positions
+        if (winnerFound) {
+            for (uint256 i = winnerPosition; i >= 0; i--) {
+                if (i <= 0) {
+                    break;
+                }
+                if (
+                    _characterRankingPoints[winnerTier[winnerPosition]] >=
+                    _characterRankingPoints[winnerTier[winnerPosition - 1]]
+                ) {
+                    uint256 newPosition = winnerTier[winnerPosition - 1];
+                    winnerTier[winnerPosition - 1] = winnerTier[winnerPosition];
+                    winnerTier[winnerPosition] = newPosition;
+                    winnerPosition = winnerPosition - 1;
+                } else {
+                    break;
+                }
+            }
+        }
+        // else if winner is not found compare it to the lower end
+        else if (
+            winnerPoints >=
+            _characterRankingPoints[winnerTier[winnerTier.length - 1]]
+        ) {
+            console.log("this happened with", winnerPoints);
+            for (uint256 i = winnerTier[winnerTier.length - 1]; i >= 0; i--) {
+                if (i <= 0) {
+                    break;
+                }
+                console.log("i es", i);
+
+                if (winnerPoints >= _characterRankingPoints[winnerTier[i]]) {
+                    uint256 newPosition = winnerTier[winnerTier.length - 1];
+                    winnerTier[winnerTier.length - 2] = winnerTier[
+                        winnerTier.length - 1
+                    ];
+                    winnerTier[winnerTier.length - 1] = newPosition;
+                }
+            }
+        } else {
+            console.log(
+                winnerPoints,
+                "is less than pos 4 ",
+                _characterRankingPoints[winnerTier[winnerTier.length - 1]]
+            );
+        }
+    }
+
+    function processLoser(uint256 loserID) internal {}
+
     /// @dev withdraws a character and its items from the arena.
     /// if the character is in a battle, a penalty is charged
     function withdrawFromArena(uint256 characterID)
@@ -326,48 +403,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         Fighter storage fighter = fighterByCharacter[characterID];
         uint256 wager = fighter.wager;
-        uint256 amountToTransfer = getUnclaimedDuelEarnings(characterID);
-
-        // This sets the character's earnings to 0
         _removeCharacterFromArena(characterID);
 
         if (hasPendingDuel(characterID)) {
-            amountToTransfer = amountToTransfer.add(wager.sub(wager.div(4)));
+            skillToken.safeTransfer(msg.sender, wager.sub(wager.div(4)));
         } else {
-            amountToTransfer = amountToTransfer.add(wager);
+            skillToken.safeTransfer(msg.sender, wager);
         }
-
-        skillToken.safeTransfer(msg.sender, amountToTransfer);
-    }
-
-    /// @dev withdraws a character's unclaimed duel earnings
-    function withdrawDuelEarnings(uint256 characterID)
-        external
-        isOwnedCharacter(characterID)
-    {
-        uint256 amountToTransfer = getUnclaimedDuelEarnings(characterID);
-        require(amountToTransfer > 0, "No unclaimed earnings");
-
-        _duelEarningsByCharacter[characterID] = 0;
-
-        skillToken.safeTransfer(msg.sender, amountToTransfer);
-    }
-
-    /// @dev withdraw all duel earnings
-    function withdrawAllDuelEarnings() external {
-        EnumerableSet.UintSet storage fighters = _fightersByPlayer[msg.sender];
-        uint256 amountToTransfer;
-
-        for (uint256 i = 0; i < fighters.length(); i++) {
-            amountToTransfer = amountToTransfer.add(
-                getUnclaimedDuelEarnings(fighters.at(i))
-            );
-            _duelEarningsByCharacter[fighters.at(i)] = 0;
-        }
-
-        require(amountToTransfer > 0, "No unclaimed earnings");
-
-        skillToken.safeTransfer(msg.sender, amountToTransfer);
     }
 
     /// @dev returns the SKILL amounts distributed to the winner and the ranking pool
@@ -385,27 +427,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return BountyDistribution(reward, duelCost, poolTax);
     }
 
-    /// @dev gets the character's unclaimed earnings
-    function getUnclaimedDuelEarnings(uint256 characterID)
-        public
-        view
-        returns (uint256)
-    {
-        return _duelEarningsByCharacter[characterID];
-    }
-
-    /// @dev gets the sum of all the sender's characters' unclaimed earnings
-    function getAllUnclaimedDuelEarnings() external view returns (uint256) {
-        EnumerableSet.UintSet storage playerFighters = _fightersByPlayer[
-            msg.sender
-        ];
-        uint256 sum;
-
-        for (uint256 i = 0; i < playerFighters.length(); i++) {
-            sum = sum.add(_duelEarningsByCharacter[playerFighters.at(i)]);
-        }
-
-        return sum;
+    /// @dev gets the player's unclaimed rewards
+    function getMyRewards() public view returns (uint256) {
+        return _rewardsByPlayer[msg.sender];
     }
 
     function getRankingRewardsPool(uint8 tier) public view returns (uint256) {
@@ -496,102 +520,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// save the index if he is, then compare upwards
     /// compare with the 4th player
     /// if he is higher iterate upwards
-    function updateTiers(uint256 characterID) internal {
-        uint8 tier = getArenaTier(characterID);
-        uint256 fighterPoints = _characterRankingPoints[characterID];
-        uint256 posIndex;
-        uint256 newPositionId;
-
-        // check if the character is within the top 4 and save the index
-        for (uint256 i = 0; i > _rankingByTier[tier].length; i++) {
-            if (characterID == _rankingByTier[tier][i]) {
-                posIndex = i;
-                if (
-                    _characterRankingPoints[_rankingByTier[tier][posIndex]] >=
-                    _characterRankingPoints[_rankingByTier[tier][posIndex - 1]]
-                ) {
-                    newPositionId = _rankingByTier[tier][posIndex];
-                    _rankingByTier[tier][posIndex] = _rankingByTier[tier][
-                        posIndex - 1
-                    ];
-                    _rankingByTier[tier][posIndex - 1] = newPositionId;
-                }
-            }
-            // else check if it's bigger than the 4th after that start the for loop
-            else if (
-                _characterRankingPoints[characterID] >=
-                _characterRankingPoints[
-                    _rankingByTier[tier][_rankingByTier[tier].length - 1]
-                ]
-            ) {
-                for (uint256 i = _rankingByTier[tier].length - 1; i <= 0; i--) {
-                    if (
-                        _characterRankingPoints[characterID] >=
-                        _characterRankingPoints[_rankingByTier[tier][i]]
-                    ) {
-                        newPositionId = _rankingByTier[tier][i];
-                        _rankingByTier[tier][i] = characterID;
-                        if (i <= _rankingByTier[tier].length - 1) {
-                            _rankingByTier[tier][i + 1] = newPositionId;
-                        }
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
-    }
+    /// program the enter arena score processing
 
     ///@dev update the respective character's tier rank
-    function updateTierRanks(uint256 characterID) internal {
-        uint8 tier = getArenaTier(characterID);
-        uint256 fighterPoints = _characterRankingPoints[characterID];
-
-        uint256 firstRankingPlayer = _rankingByTier[tier][0];
-        uint256 firstRankingPlayerPoints = _characterRankingPoints[
-            firstRankingPlayer
-        ];
-
-        uint256 secondRankingPlayer = _rankingByTier[tier][1];
-        uint256 secondRankingPlayerPoints = _characterRankingPoints[
-            secondRankingPlayer
-        ];
-
-        uint256 thirdRankingPlayer = _rankingByTier[tier][2];
-        uint256 thirdRankingPlayerPoints = _characterRankingPoints[
-            thirdRankingPlayer
-        ];
-        // check if he is the first or the second
-        if (fighterPoints >= thirdRankingPlayerPoints) {
-            _rankingByTier[tier][2] = characterID;
-            thirdRankingPlayer = characterID;
-            thirdRankingPlayerPoints = _characterRankingPoints[characterID];
-        }
-        if (thirdRankingPlayerPoints >= secondRankingPlayerPoints) {
-            _rankingByTier[tier][1] = thirdRankingPlayer;
-            _rankingByTier[tier][2] = secondRankingPlayer;
-            thirdRankingPlayer = _rankingByTier[tier][2];
-            thirdRankingPlayerPoints = _characterRankingPoints[
-                _rankingByTier[tier][2]
-            ];
-            secondRankingPlayer = _rankingByTier[tier][1];
-            secondRankingPlayerPoints = _characterRankingPoints[
-                _rankingByTier[tier][1]
-            ];
-        }
-        if (secondRankingPlayerPoints >= firstRankingPlayerPoints) {
-            _rankingByTier[tier][0] = secondRankingPlayer;
-            _rankingByTier[tier][1] = firstRankingPlayer;
-            secondRankingPlayer = _rankingByTier[tier][1];
-            secondRankingPlayerPoints = _characterRankingPoints[
-                _rankingByTier[tier][1]
-            ];
-            firstRankingPlayer = _rankingByTier[tier][0];
-            firstRankingPlayerPoints = _characterRankingPoints[
-                _rankingByTier[tier][0]
-            ];
-        }
-    }
 
     /// @dev get the top players of a tier
     function getTopTierPlayers(uint256 characterID)
@@ -684,7 +615,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         public
     {
         _characterRankingPoints[characterID] = newRankingPoints;
-        updateTierRanks(characterID);
     }
 
     function _getCharacterPowerRoll(uint256 characterID, uint8 opponentTrait)
@@ -771,7 +701,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
-        _duelEarningsByCharacter[characterID] = 0;
     }
 
     /// @dev attempts to find an opponent for a character.
@@ -780,7 +709,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         EnumerableSet.UintSet storage fightersInTier = _fightersByTier[tier];
 
-        require(fightersInTier.length() != 0, "No opponents available in tier");
+        require(
+            fightersInTier.length() != 0,
+            "No opponents available for this character's level"
+        );
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
