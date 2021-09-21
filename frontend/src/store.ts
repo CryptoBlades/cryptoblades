@@ -4,7 +4,7 @@ import Web3 from 'web3';
 import _, { isUndefined, parseInt, toInteger } from 'lodash';
 import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
-import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
+import { getConfigValue, INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
 import {
   characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract,
   trinketFromContract, junkFromContract, pvpFighterFromContract, duelByAttackerFromContract
@@ -2329,8 +2329,8 @@ export function createStore(web3: Web3) {
 
       async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price, targetBuyer }:
       { nftContractAddr: string, tokenId: string, price: string, targetBuyer: string }) {
-        const { NFTMarket, Weapons, Characters, Shields } = state.contracts();
-        if(!NFTMarket || !Weapons || !Characters || !Shields) return;
+        const { CryptoBlades, SkillToken, NFTMarket, Weapons, Characters, Shields } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !NFTMarket || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
 
         const NFTContract: Contract<IERC721> =
           nftContractAddr === Weapons.options.address
@@ -2340,6 +2340,18 @@ export function createStore(web3: Web3) {
         await NFTContract.methods
           .approve(NFTMarket.options.address, tokenId)
           .send(defaultCallOptions(state));
+
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          NFTMarket,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          nftMarketFuctions => nftMarketFuctions.addFee(),
+          {},
+        );
 
         const res = await NFTMarket.methods
           .addListing(nftContractAddr, tokenId, price, targetBuyer)
@@ -2364,8 +2376,20 @@ export function createStore(web3: Web3) {
       },
 
       async changeMarketListingPrice({ state }, { nftContractAddr, tokenId, newPrice }: { nftContractAddr: string, tokenId: string, newPrice: string }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
+        const { CryptoBlades, SkillToken, NFTMarket } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !NFTMarket || !state.defaultAccount) return;
+
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          NFTMarket,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          nftMarketFuctions => nftMarketFuctions.changeFee(),
+          {},
+        );
 
         const res = await NFTMarket.methods
           .changeListingPrice(nftContractAddr, tokenId, newPrice)
@@ -3356,8 +3380,87 @@ export function createStore(web3: Web3) {
       },
       async fetchDecisionTime({commit},{decisionTime}){
         commit('updateDecisionTime',{decisionTime});
-      }
+      },
 
+      async configureMetaMask({ dispatch }) {
+        const currentNetwork = await web3.eth.net.getId();
+        if(currentNetwork === +getConfigValue('VUE_APP_NETWORK_ID')) return;
+        dispatch('configureChainNet', {
+          networkId: +getConfigValue('VUE_APP_NETWORK_ID'),
+          chainId: getConfigValue('chainId'),
+          chainName: getConfigValue('VUE_APP_EXPECTED_NETWORK_NAME'),
+          currencyName: getConfigValue('currencyName'),
+          currencySymbol: getConfigValue('currencySymbol'),
+          currencyDecimals: +getConfigValue('currencyDecimals'),
+          rpcUrls: getConfigValue('rpcUrls'),
+          blockExplorerUrls: getConfigValue('blockExplorerUrls'),
+          skillAddress: getConfigValue('VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS')
+        });
+      },
+
+      async configureChainNet(
+        { commit },
+        { networkId, chainId, chainName, currencyName, currencySymbol, currencyDecimals, rpcUrls, blockExplorerUrls, skillAddress }:
+        { networkId: number,
+          chainId: string,
+          chainName: string,
+          currencyName: string,
+          currencySymbol: string,
+          currencyDecimals: number,
+          rpcUrls: string[],
+          blockExplorerUrls: string[],
+          skillAddress: string,
+        })
+      {
+        commit('setNetworkId', networkId);
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId }],
+          });
+        } catch (switchError) {
+          try {
+            await (web3.currentProvider as any).request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId,
+                  chainName,
+                  nativeCurrency: {
+                    name: currencyName,
+                    symbol: currencySymbol,
+                    decimals: currencyDecimals,
+                  },
+                  rpcUrls,
+                  blockExplorerUrls,
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error(addError);
+            return;
+          }
+        }
+
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: skillAddress,
+                symbol: 'SKILL',
+                decimals: 18,
+                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+              },
+            },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+
+        window.location.reload();
+      }
     }
   });
 }

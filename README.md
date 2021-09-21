@@ -63,3 +63,6 @@ There are optional environment variables, most of which have sensible defaults i
 To run tests locally simply run
 
 `npm run test:local`
+## Config
+- All network config is in app-config.json
+- If you want to add a new network: add it's configuration in app-config.json and add update currentTokenPrice getter in EarningsCalculator.
