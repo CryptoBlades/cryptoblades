@@ -4,7 +4,7 @@ import { Nft } from './interfaces/Nft';
 import { IShield } from './interfaces/Shield';
 
 export function traitNumberToName(traitNum: number): string {
-  switch(traitNum) {
+  switch(+traitNum) {
   case WeaponElement.Fire:        return 'Fire';
   case WeaponElement.Earth:       return 'Earth';
   case WeaponElement.Water:       return 'Water';
@@ -180,8 +180,9 @@ export function raidFromContract(data: string[]): IRaidState {
   const staminaCost = data[8];
   const durabilityCost = data[9];
   const xpReward = data[10];
+  const accountPower = data[11];
   return {
     index, expectedFinishTime, raiderCount, playerPower, bossPower, bossTrait, status,
-    joinSkill, staminaCost, durabilityCost, xpReward
+    joinSkill, staminaCost, durabilityCost, xpReward, accountPower
   };
 }

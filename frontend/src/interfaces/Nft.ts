@@ -13,4 +13,6 @@ export interface Nft {
   stat2Value?: number;
   stat3Value?: number;
   nftPrice?: number;
+  amount?: number;
+  effect?: number;
 }

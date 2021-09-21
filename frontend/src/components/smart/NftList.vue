@@ -117,6 +117,7 @@ interface Data {
 export interface NftIdType {
   id: number | string;
   type: string;
+  amount?: number;
 }
 
 type StoreMappedState = Pick<IState, 'ownedShieldIds' | 'ownedTrinketIds' | 'ownedJunkIds' | 'ownedKeyLootboxIds'>;
@@ -255,6 +256,11 @@ export default Vue.extend({
         default:
           return [];
         }
+      }
+
+      if(this.isReward && this.showGivenNftIdTypes) {
+        const rewardedDust = this.nftsToDisplay.filter(x => x.type?.startsWith('dust')).map(x => { return { type: x.type, id: 0, amount: x.amount }; });
+        return this.nftsWithIdType(this.nftsToDisplay).concat(rewardedDust).filter(Boolean);
       }
 
       return this.nftsWithIdType(this.nftsToDisplay).filter(Boolean);
