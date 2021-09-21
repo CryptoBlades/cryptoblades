@@ -104,13 +104,16 @@
                     <div class="xp-gain">
                       +{{getPotentialXp(e)}} XP
                     </div>
+
+                    <div class="skill-gain">
+                      + ~{{formattedSkill(targetExpectedPayouts[i])}}
+                    </div>
                 </div>
 
                 <div class="victory-chance">
                   {{ getWinChance(e.power, e.trait) }} Victory
                 </div>
                 <big-button
-                      v-tooltip.bottom="targetExpectedPayouts.length === 4 && `Expected payout: ${formattedSkill(targetExpectedPayouts[i])}`"
                       class="encounter-button btn-styled"
                       :mainText="`Fight!`"
                       :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId) || !charHasStamina()"
@@ -502,14 +505,16 @@ div.encounter.text-center {
 }
 
 .xp-gain,
-.encounter-power {
+.encounter-power,
+.skill-gain {
   color: #9e8a57 !important;
 }
 
 .xp-gain,
 .encounter-power,
 .encounter-element,
-.victory-chance {
+.victory-chance,
+.skill-gain {
   position: absolute;
 }
 
@@ -519,12 +524,17 @@ div.encounter.text-center {
 }
 
 .encounter-power {
-  bottom: 50px;
+  bottom: 60px;
   font-size: 1.5em;
 }
 
 .xp-gain {
-  bottom: 25px;
+  bottom: 40px;
+  font-size: 1em;
+}
+
+.skill-gain {
+  bottom: 20px;
   font-size: 1em;
 }
 
