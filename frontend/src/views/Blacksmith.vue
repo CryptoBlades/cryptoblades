@@ -8,7 +8,7 @@
           <br>
           <big-button
             class="button"
-            :mainText="`Forge sword for ${forgeCost} SKILL`"
+            :mainText="$t('blacksmith.forgeSwordFor') + ` ${forgeCost} SKILL`"
             @click="onForgeWeapon"
           />
         </div>
@@ -22,7 +22,7 @@
                   v-if="canRename()"
                   @click="openRenameWeapon"
                   tagname="rename_weapon"
-                  v-tooltip="'Rename Weapon'">
+                  v-tooltip="$t('blacksmith.renameWeapon')">
                   {{$t('blacksmith.renameWeapon')}}
                 </b-button>
                 <b-button
@@ -59,7 +59,7 @@
                         @click="onForgeWeaponx10()"
                         :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge )"
                         v-tooltip="'Forge new weapon'">
-                  <span v-if="disableForge">Cooling forge...</span>
+                  <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i></span>
                 </b-button>
                   <b-checkbox
@@ -67,8 +67,8 @@
                     class="mx-3 my-auto"
                     :disabled="disableUseStakedForForge"
                     v-model="useStakedForForge">
-                    <span v-if="disableUseStakedForForge"> <b>Not enough staked SKILL<br></b></span>
-                    Spend Staked Funds <br> for 20% Discount!
+                    <span v-if="disableUseStakedForForge"> <b>{{$t('blacksmith.notEnoughStakedSkill')}}<br></b></span>
+                    {{$t('blacksmith.spendStakedFunds')}}
                   </b-checkbox>
                 <b-icon-question-circle class="centered-icon" scale="1.5"
                   v-on:click="onShowForgeDetails" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
@@ -311,8 +311,8 @@
       </b-tab>
       <b-tab>
         <template #title>
-          Equipment <b-icon-question-circle class="centered-icon" scale="0.8"
-            v-tooltip.bottom="`You can buy shield in Skill shop tab in the market and loot other nfts from Raids!`"/>
+          {{$t('equipment')}} <b-icon-question-circle class="centered-icon" scale="0.8"
+            v-tooltip.bottom="$t('buyShield')"/>
         </template>
         <div class="row mt-3">
           <div class="col">
@@ -580,7 +580,7 @@ export default Vue.extend({
 
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+        (this as any).$dialog.notify.error((this as any).$t('blacksmith.couldNotForge'));
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
