@@ -10,18 +10,7 @@
       "stake": "Stake"
   },
   "plaza": {
-<<<<<<< HEAD
-    "welcome": "Commence a gagner dès aujourd'hui !",
-    "notEnoughSkill": "You don't have enough Skill. Buy more {0}",
-    "notEnoughSkillLink": "here",
-    "characters": "Characters",
-    "recruitNew": "Recruit new character",
-    "recruit": "Recruit",
-    "mintError":"Could not mint character: insufficient funds or transaction denied."
-
-=======
     "welcome": "Commence a gagner dès aujourd'hui !"
->>>>>>> 0caf7376a15c904c28fb7a00cba746117386775b
   },
   "options": {
     "title": "Options",
