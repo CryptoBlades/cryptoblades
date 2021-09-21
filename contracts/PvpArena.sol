@@ -341,6 +341,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _duelEarningsByCharacter[fighters.at(i)] = 0;
         }
 
+        require(amountToTransfer > 0, "No unclaimed earnings");
+
         skillToken.safeTransfer(msg.sender, amountToTransfer);
     }
 
