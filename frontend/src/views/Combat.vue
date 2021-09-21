@@ -110,6 +110,7 @@
                   {{ getWinChance(e.power, e.trait) }} Victory
                 </div>
                 <big-button
+                      v-tooltip.bottom="targetExpectedPayouts.length === 4 && `Expected payout: ${formattedSkill(targetExpectedPayouts[i])}`"
                       class="encounter-button btn-styled"
                       :mainText="`Fight!`"
                       :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId) || !charHasStamina()"
@@ -162,6 +163,7 @@ export default {
       selectedWeapon: null,
       fightMultiplier: Number(localStorage.getItem('fightMultiplier')),
       staminaPerFight: 40,
+      targetExpectedPayouts: [],
     };
   },
 
@@ -207,6 +209,7 @@ export default {
         this.selectedWeaponId = null;
       }
       await this.fetchTargets({ characterId, weaponId });
+      await this.getExpectedPayouts();
     },
 
     async updateResults([fightResults, error]) {
@@ -218,7 +221,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -288,6 +291,7 @@ export default {
 
       // Force a quick refresh of targets
       await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
+      await this.getExpectedPayouts();
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
       if (!this.targets.find((target) => target.original === targetToFight.original)) {
         this.waitingResults = false;
@@ -373,6 +377,14 @@ export default {
 
       return choices;
     },
+
+    async getExpectedPayouts() {
+      this.targetExpectedPayouts = [];
+      await this.targets.forEach(async (t) => {
+        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower(t.power);
+        this.targetExpectedPayouts.push(expectedPayout);
+      });
+    }
   },
 
   components: {
