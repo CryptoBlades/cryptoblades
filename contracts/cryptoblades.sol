@@ -845,7 +845,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function updateHourlyPayouts() internal {
         // Could be done by a bot instead?
-        if(vars[VAR_HOURLY_TIMESTAMP] - now >= 1 hours) {
+        if(now - vars[VAR_HOURLY_TIMESTAMP] >= 1 hours) {
             vars[VAR_HOURLY_TIMESTAMP] = now;
 
             uint256 payPerFight = ABDKMath64x64.divu(vars[VAR_PARAM_PAYOUT_INCOME_PERCENT],100)
