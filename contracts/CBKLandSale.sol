@@ -31,6 +31,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     mapping(uint256 => purchaseInfo) public sales; // Needed to build info for APIs
     mapping(address => purchaseInfo) public purchaseAddressMapping;
     mapping(uint8 => uint32) public availableLand; // Land that is up for sale. 
+    mapping(uint16 => uint16) public chunkZoneLandSales;
 
     /* ========== T1 LAND SALE INFO ========== */
     // T1 land is sold with no exact coordinates commitment and assigned based on round robin
@@ -148,6 +149,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
         t2LandsSold++;
         chunkT2LandSales[chunkId]++;
+        chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
 
         purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_TWO, uint32(chunkId));
         sales[totalSales++] = purchaseAddressMapping[buyer];
@@ -163,7 +165,13 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         sales[totalSales++] = purchaseAddressMapping[buyer];
         availableLand[TIER_THREE]--;
         chunkT3LandSoldTo[chunkId] = buyer;
+        chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
+
         emit T3Given(buyer, chunkId);
+    }
+
+    function chunkIdToZoneId(uint32 chunkId) internal pure returns (uint8){
+        return uint8(10 * (chunkId / 1000) + (chunkId % 100) / 10);
     }
 
     function salesAllowed() public view returns (bool){
@@ -206,22 +214,54 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         return chunkReserved[chunkId];
     }
 
-    function checkChunkEstimatedPopulation(uint16 chunkId) public view returns (uint8) {
-        if(chunkReserved[chunkId]) {
-            return MAX_LAND;
+    function getAllZonesPopulation() public view returns (uint16[] memory) {
+        uint16[] memory toReturn = new uint16[](100);
+
+        for (uint8 i = 0; i < 100; i++) {
+            toReturn[i] = chunkZoneLandSales[i];
         }
 
-        // Round robin applied, assume no chunks are reserved for simplicity
-        uint8 projectedT1Population = uint8(t1LandsSold / MAX_CHUNK_ID);
-        
-        // Round not over but already passed over chunk
-        if(chunkId < t1LandsSold % MAX_CHUNK_ID){
-            projectedT1Population++;
+        return toReturn;
+    }
+
+    function getZonePopulation(uint16[] memory zoneIds) public view returns (uint16[] memory) {
+        require(zoneIds.length > 0 && zoneIds.length <= 100, "invalid request");
+        uint16[] memory toReturn = new uint16[](zoneIds.length);
+
+        for (uint8 i = 0; i < zoneIds.length; i++) {
+            toReturn[i] = chunkZoneLandSales[zoneIds[i]];
         }
 
-        return chunkT2LandSales[chunkId] // T2 sales
-            + (_chunkAvailableForT3(chunkId) ? 0 : 1) // T3 if sold
-            +  projectedT1Population; // T1 sales
+        return toReturn;
+    }
+
+    function getZoneChunkPopulation(uint8 zoneId) public view returns (uint8[] memory) {
+        require(zoneId < 100, "invalid request");
+        uint8 zoneX = zoneId % 10;
+        uint8 zoneY = zoneId / 10;
+
+        uint8[] memory toReturn = new uint8[](100);
+        uint8 counter = 0;
+
+        for(uint16 j = zoneY * 1000; j < zoneY * 1000 + 1000; j += 100) {
+            for(uint16 i = zoneX * 10; i < zoneX * 10 + 10; i++) {
+                uint16 projectedId = i + j;
+                toReturn[counter++] = chunkT2LandSales[projectedId] + (chunkT3LandSoldTo[projectedId] != address(0) ? 1 : 0);
+            }
+        }
+
+        return toReturn;
+    }
+
+    function getChunkPopulation(uint16[] memory chunkIds) public view returns (uint8[] memory) {
+        require(chunkIds.length > 0 && chunkIds.length <= 100, "invalid request");
+        uint8[] memory toReturn = new uint8[](chunkIds.length);
+
+        for (uint8 i = 0; i < chunkIds.length; i++) {
+            toReturn[i] = chunkT2LandSales[chunkIds[i]] + (chunkT3LandSoldTo[chunkIds[i]] != address(0) ? 1 : 0);
+        }
+
+        return toReturn;
     }
 
     function getAvailableLand()  public view returns (uint32, uint32, uint32) {
