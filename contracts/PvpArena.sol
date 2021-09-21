@@ -347,53 +347,37 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
         // if he is found, compare him to the lower index positions
         if (winnerFound) {
-            for (uint256 i = winnerPosition; i >= 0; i--) {
-                if (i <= 0) {
-                    break;
-                }
-                if (
-                    _characterRankingPoints[winnerTier[winnerPosition]] >=
-                    _characterRankingPoints[winnerTier[winnerPosition - 1]]
-                ) {
-                    uint256 newPosition = winnerTier[winnerPosition - 1];
-                    winnerTier[winnerPosition - 1] = winnerTier[winnerPosition];
-                    winnerTier[winnerPosition] = newPosition;
-                    winnerPosition = winnerPosition - 1;
-                } else {
-                    break;
-                }
-            }
+            winnerPosition = winnerPosition;
         }
-        // else if winner is not found compare it to the lower end
+        // else, compare it to the 4th one, if he is higher then replace the position and start the loop.
         else if (
             winnerPoints >=
             _characterRankingPoints[winnerTier[winnerTier.length - 1]]
         ) {
-            console.log("this happened with", winnerPoints);
-            for (uint256 i = winnerTier[winnerTier.length - 1]; i >= 0; i--) {
-                if (i <= 0) {
-                    break;
-                }
-                console.log("i es", i);
-
-                if (winnerPoints >= _characterRankingPoints[winnerTier[i]]) {
-                    uint256 newPosition = winnerTier[winnerTier.length - 1];
-                    winnerTier[winnerTier.length - 2] = winnerTier[
-                        winnerTier.length - 1
-                    ];
-                    winnerTier[winnerTier.length - 1] = newPosition;
-                }
+            winnerPosition = winnerTier[winnerTier.length - 1];
+            winnerTier[winnerTier.length - 1] = winnerID;
+        }
+        for (uint256 i = winnerPosition; i >= 0; i--) {
+            if (i <= 0) {
+                break;
             }
-        } else {
-            console.log(
-                winnerPoints,
-                "is less than pos 4 ",
-                _characterRankingPoints[winnerTier[winnerTier.length - 1]]
-            );
+            if (
+                _characterRankingPoints[winnerTier[winnerPosition]] >=
+                _characterRankingPoints[winnerTier[winnerPosition - 1]]
+            ) {
+                uint256 newPosition = winnerTier[winnerPosition - 1];
+                winnerTier[winnerPosition - 1] = winnerTier[winnerPosition];
+                winnerTier[winnerPosition] = newPosition;
+                winnerPosition = winnerPosition - 1;
+            } else {
+                break;
+            }
         }
     }
 
-    function processLoser(uint256 loserID) internal {}
+    function processLoser(uint256 loserID) internal {
+        // this is the same as the processWinner but inversely
+    }
 
     /// @dev withdraws a character and its items from the arena.
     /// if the character is in a battle, a penalty is charged

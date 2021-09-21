@@ -1367,25 +1367,23 @@ contract("PvpArena", (accounts) => {
         await pvpArena.setRankingPoints(character5ID, 31, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character6ID, 28, {
+        await pvpArena.setRankingPoints(character6ID, 30, {
           from: accounts[0],
         });
-
         await time.increase(await pvpArena.unattackableSeconds());
         await pvpArena.requestOpponent(character6ID, {
           from: accounts[2],
         });
-        // perform a duel making sure character1 is always going to win
+
+        // perform a duel making sure character6 is always going to win
         await pvpArena.performDuel(character6ID, {
           from: accounts[2],
         });
         const playerTier = await pvpArena.getTopTierPlayers(character1ID);
-        playerTier.map(async (player) => {
-          points = await pvpArena.getCharacterRankingPoints(player);
-          console.log("playerID", player.toString());
-          console.log("with", points.toString());
-        });
+        // expect the last character to be the first one, climibing through the entire ladder
+        expect(playerTier[0].toString()).to.equal(character6ID).toString();
       });
+      it("should process the loser", async () => {});
     });
 
     describe("decision time expired", () => {
