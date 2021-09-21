@@ -38,6 +38,7 @@
   },
   "blacksmith":{
     "noWeapons": "You do not currently have any weapons <br> You can forge one by clicking the button below.",
+    "forgeSwordFor": "Forge sword for",
     "renameWeapon": "Rename Weapon",
     "reforgeWithDust":"Reforge with Dust",
     "burnWeapons":"Burn weapons to buff selected weapon",
@@ -45,6 +46,8 @@
     "forgeNew":"Forge New Weapon",
     "forge": "Forge",
     "coolingForge": "Cooling forge ...",
+    "notEnoughStakedSkill": "Not enough staked SKILL!",
+    "spendStakedFunds" : "Spend Staked Funds <br> for 20% Discount!",
     "clickForForgePercentages": "Click for forge percentages",
     "forgePercentages":"Forge Percentages",
     "forgePercentage":{
@@ -69,7 +72,7 @@
     "cancelReforge":"Cancel Reforge",
     "selectBurnWeapon": "Select the weapon you wish to burn",
     "clearAll": "Clear all",
-    "buyShield":"You can buy shield in Skill shop tab in the market!",
+    "buyShield":"You can buy shield in Skill shop tab in the market and loot other nfts from Raids!",
     "dustStorage": "Dust Storage",
     "dustGained": "Dust is gained by destroying weapons!",
     "newName": "New Name",
@@ -88,6 +91,34 @@
       "3star": "3* Burn: 3 LB (45 Bonus Power/ 1500 Max).",
       "2star": "2* Burn: 2 LB (30 Bonus Power/ 1500 Max).",
       "1star": "1* Burn: 1 LB (15 Bonus Power/ 1500 Max)."
+    },
+    "couldNotForge": "Could not forge sword: insuffucient funds or transaction denied.",
+    "couldNotReforge":"Could not ReForge sword: insufficient funds / Dust or transaction denied.",
+    "couldNotBurn": "Could not burn sword: insufficient funds or transaction denied."
+  },
+  "combat":{
+    "error": "Error:",
+    "close": "Close",
+    "errors":{
+      "needToSelectChar": "You need to select a character to do battle.",
+      "notEnoughDurability":"This weapon does not have enough durability.",
+      "lastSeconds":"You cannot do battle during the last 30 seconds of the hour. Stand fast!"
+    },
+    "waiting":"Waiting for fight results...",
+    "chooseWeapon":"Choose a weapon",
+    "chooseWeaponHint":"Your weapon multiplies your power<br> <br>+Stats determine the multiplier <br>Stat element match with character gives greater bonus",
+    "chooseNewWeapon": "Choose New Weapon",
+    "elementHint":"The elements affect power:<br><br>Character vs Enemy: bonus or penalty as shown above<br>Character and Weapon match gives bonus",
+    "power": "Power",
+    "victory": "Victory",
+    "loading": "Loading...",
+    "noWeapons": "You do not currently have any weapons. You can forge one at the Blacksmith.",
+    "noCharacters":"You do not currently have any characters. You can recruit one at the Plaza.",
+    "winChances":{
+      "unlikely": "Unlikely",
+      "possible": "Possible",
+      "likely": "Likely",
+      "veryLikely": "Very Likely"
     }
   },
   "options": {
@@ -95,6 +126,7 @@
     "graphic": "3D Graphics",
     "rewardBar": "Hide Rewards Bar",
     "walletWarning": "Hide Wallet Warning",
+    "selectStaminaFight": "Please select Stamina Cost per Fight",
     "staminaFight": "Stamina Cost per Fight",
     "language": "Language"
   },
@@ -124,13 +156,11 @@
         "inst4": "That's it! Now you can create your first character:",
         "watchVideo": "Watch {name}Video",
         "questionDiscord": "If you have any questions, please join our Discord:"
-        
       }
     },
     "notification": {
       "link": "Check it out!"
     }
-    
   },
   "on": "On",
   "off": "Off",

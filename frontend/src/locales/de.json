@@ -38,6 +38,7 @@
 
   "blacksmith":{
     "noWeapons": "Du hast keine Waffen <br> Du kannst Waffen schmieden, indem du unten auf den Knopf klickst",
+    "forgeSwordFor": "Schwert schmieden ",
     "renameWeapon": "Waffe umbenennen",
     "reforgeWithDust":"Mit Staub umschieden",
     "burnWeapons":"Verbrenne Waffen, um andere zu Stärken",
@@ -45,6 +46,8 @@
     "forgeNew":"Neue Waffe schmieden",
     "forge": "Schmieden",
     "coolingForge": "Schmiede muss sich abkühlen ...",
+    "notEnoughStakedSkill": "Nicht genug staked SKILL!",
+    "spendStakedFunds" : "Spend Staked Funds <br> for 20% Discount!",
     "clickForForgePercentages": "Klick für Schmiedewahrscheinlichkeiten",
     "forgePercentages":"Schmiede Wahrscheinlichkeiten",
     "forgePercentage":{
@@ -88,7 +91,10 @@
       "3star": "3* Verbrennung: 3 LB (45 Bonusstärke / 1500 Max).",
       "2star": "2* Verbrennung: 2 LB (30 Bonusstärke / 1500 Max).",
       "1star": "1* Verbrennung: 1 LB (15 Bonusstärke / 1500 Max)."
-    }
+    },
+    "couldNotForge": "Could not forge sword: insuffucient funds or transaction denied.",
+    "couldNotReforge":"Could not ReForge sword: insufficient funds / Dust or transaction denied.",
+    "couldNotBurn": "Could not burn sword: insufficient funds or transaction denied."
   },
     "combat":{
       "error": "Error:",
@@ -113,7 +119,6 @@
         "possible": "Possible",
         "likely": "Likely",
         "veryLikely": "Very Likely"
-
       }
     },
   "options": {
@@ -151,13 +156,11 @@
         "inst4": "That's it! Now you can create your first character:",
         "watchVideo": "Watch {name}Video",
         "questionDiscord": "If you have any questions, please join our Discord:"
-        
       }
     },
     "notification": {
       "link": "Check it out!"
     }
-    
   },
   "on": "An",
   "off": "Aus",
