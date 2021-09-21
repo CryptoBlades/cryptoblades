@@ -380,7 +380,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint24(target & 0xFFFFFF);
     }
 
-    function getTokenGainForFight(uint24 monsterPower) internal view returns (uint256) {
+    function getTokenGainForFight(uint24 monsterPower) public view returns (uint256) {
         // monsterPower / avgPower * payPerFight * powerMultiplier
         return ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
             .mul(
@@ -752,8 +752,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 convertedAmount
             );
 
-        tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
-        skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
+        _deductPlayerSkillStandard(playerAddress, 0, fromTokenRewards, fromUserWallet);
     }
 
     function _payContract(address playerAddress, int128 usdAmount) internal
