@@ -468,7 +468,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 }
             }
             // else check if it's bigger than the 4th after that start the for loop
-            if (
+            else if (
                 _characterRankingPoints[characterID] >=
                 _characterRankingPoints[
                     _rankingByTier[tier][_rankingByTier[tier].length - 1]
