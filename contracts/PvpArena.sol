@@ -442,14 +442,54 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     ///@dev update the respective character's tier rank
+    /// check if the fighter is in the top ranks
+    /// save the index if he is, then compare upwards
+    /// compare with the 4th player
+    /// if he is higher iterate upwards
     function updateTiers(uint256 characterID) internal {
         uint8 tier = getArenaTier(characterID);
         uint256 fighterPoints = _characterRankingPoints[characterID];
+        uint256 posIndex;
+        uint256 newPositionId;
 
-        /// check if the fighter is in the top ranks
-        /// save the index if he is, then compare downwards
-        /// compare with the 4th player
-        /// if he is higher iterate upwards
+        // check if the character is within the top 4 and save the index
+        for (uint256 i = 0; i > _rankingByTier[tier].length; i++) {
+            if (characterID == _rankingByTier[tier][i]) {
+                posIndex = i;
+                if (
+                    _characterRankingPoints[_rankingByTier[tier][posIndex]] >=
+                    _characterRankingPoints[_rankingByTier[tier][posIndex - 1]]
+                ) {
+                    newPositionId = _rankingByTier[tier][posIndex];
+                    _rankingByTier[tier][posIndex] = _rankingByTier[tier][
+                        posIndex - 1
+                    ];
+                    _rankingByTier[tier][posIndex - 1] = newPositionId;
+                }
+            }
+            // else check if it's bigger than the 4th after that start the for loop
+            if (
+                _characterRankingPoints[characterID] >=
+                _characterRankingPoints[
+                    _rankingByTier[tier][_rankingByTier[tier].length - 1]
+                ]
+            ) {
+                for (uint256 i = _rankingByTier[tier].length - 1; i <= 0; i--) {
+                    if (
+                        _characterRankingPoints[characterID] >=
+                        _characterRankingPoints[_rankingByTier[tier][i]]
+                    ) {
+                        newPositionId = _rankingByTier[tier][i];
+                        _rankingByTier[tier][i] = characterID;
+                        if (i <= _rankingByTier[tier].length - 1) {
+                            _rankingByTier[tier][i + 1] = newPositionId;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     ///@dev update the respective character's tier rank
@@ -507,7 +547,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function getTopTierPlayers(uint256 characterID)
         public
         view
-        returns (uint256[3] memory)
+        returns (uint256[4] memory)
     {
         uint8 tier = getArenaTier(characterID);
         return _rankingByTier[tier];
