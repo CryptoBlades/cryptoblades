@@ -1,4 +1,4 @@
-import { abi as erc20Abi } from '../../build/contracts/ERC20.json';
+import { abi as erc20Abi } from '../../build/contracts/IERC20.json';
 
 import { networks as skillStakingRewardsNetworks } from '../../build/contracts/SkillStakingRewardsUpgradeable.json';
 import { networks as lpStakingRewardsNetworks } from '../../build/contracts/LPStakingRewardsUpgradeable.json';
