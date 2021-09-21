@@ -6,7 +6,7 @@ const {
 } = require("@openzeppelin/test-helpers");
 const helpers = require("./helpers");
 
-const { BN, toBN } = web3.utils;
+const { BN, toBN, fromWei } = web3.utils;
 
 contract("PvpArena", (accounts) => {
   let pvpArena, characters, weapons, shields, priceOracle, randoms;
@@ -370,11 +370,11 @@ contract("PvpArena", (accounts) => {
     });
 
     describe("character is in a raid", () => {
-      it("should revert", () => {});
+      it("should revert");
     });
 
     describe("weapon is in a raid", () => {
-      it("should revert", () => {});
+      it("should revert");
     });
   });
 
@@ -727,14 +727,184 @@ contract("PvpArena", (accounts) => {
       expect(myShields.length).to.equal(0);
     });
 
+    describe("with unclaimed earnings", async () => {
+      describe("happy path", () => {
+        let character1ID;
+        let character2ID;
+        let unclaimedEarnings;
+        let wager;
+
+        beforeEach(async () => {
+          const weapon1ID = await helpers.createWeapon(
+            accounts[1],
+            "111",
+            helpers.elements.water,
+            {
+              weapons,
+            }
+          );
+          const weapon2ID = await helpers.createWeapon(
+            accounts[2],
+            "111",
+            helpers.elements.fire,
+            {
+              weapons,
+            }
+          );
+
+          character1ID = await createCharacterInPvpTier(
+            accounts[1],
+            2,
+            "222",
+            weapon1ID
+          );
+          character2ID = await createCharacterInPvpTier(
+            accounts[2],
+            2,
+            "222",
+            weapon2ID
+          );
+
+          await characters.setTrait(character1ID, helpers.elements.water, {
+            from: accounts[0],
+          });
+          await characters.setTrait(character2ID, helpers.elements.fire, {
+            from: accounts[0],
+          });
+
+          await time.increase(await pvpArena.unattackableSeconds());
+          await pvpArena.requestOpponent(character1ID, {
+            from: accounts[1],
+          });
+          await pvpArena.performDuel(character1ID, {
+            from: accounts[1],
+          });
+          wager = await pvpArena.getCharacterWager(character1ID);
+          unclaimedEarnings = await pvpArena.getUnclaimedDuelEarnings(
+            character1ID,
+            {
+              from: accounts[1],
+            }
+          );
+        });
+
+        it("should pay the owner the character's earnings", async () => {
+          const previousBalance = await skillToken.balanceOf(accounts[1]);
+          await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+
+          const newUnclaimedEarnings = await pvpArena.getUnclaimedDuelEarnings(
+            character1ID,
+            {
+              from: accounts[1],
+            }
+          );
+
+          const balance = await skillToken.balanceOf(accounts[1]);
+
+          expect(newUnclaimedEarnings.toString()).to.equal(toBN(0).toString());
+
+          expect(balance.toString()).to.equal(
+            toBN(unclaimedEarnings).add(previousBalance).add(wager).toString()
+          );
+        });
+      });
+
+      describe("with pending duel", () => {
+        let character1ID;
+        let character2ID;
+        let unclaimedEarnings;
+        let wager;
+
+        beforeEach(async () => {
+          const weapon1ID = await helpers.createWeapon(
+            accounts[1],
+            "111",
+            helpers.elements.water,
+            {
+              weapons,
+            }
+          );
+          const weapon2ID = await helpers.createWeapon(
+            accounts[2],
+            "111",
+            helpers.elements.fire,
+            {
+              weapons,
+            }
+          );
+
+          character1ID = await createCharacterInPvpTier(
+            accounts[1],
+            2,
+            "222",
+            weapon1ID
+          );
+          character2ID = await createCharacterInPvpTier(
+            accounts[2],
+            2,
+            "222",
+            weapon2ID
+          );
+
+          await characters.setTrait(character1ID, helpers.elements.water, {
+            from: accounts[0],
+          });
+          await characters.setTrait(character2ID, helpers.elements.fire, {
+            from: accounts[0],
+          });
+
+          await time.increase(await pvpArena.unattackableSeconds());
+          await pvpArena.requestOpponent(character1ID, {
+            from: accounts[1],
+          });
+          await pvpArena.performDuel(character1ID, {
+            from: accounts[1],
+          });
+          wager = await pvpArena.getCharacterWager(character1ID);
+          unclaimedEarnings = await pvpArena.getUnclaimedDuelEarnings(
+            character1ID,
+            {
+              from: accounts[1],
+            }
+          );
+
+          await time.increase(await pvpArena.unattackableSeconds());
+
+          await pvpArena.requestOpponent(character1ID, {
+            from: accounts[1],
+          });
+        });
+
+        it("should return unclaimed earnings minus the penalty from the refunded amount", async () => {
+          const previousBalance = await skillToken.balanceOf(accounts[1]);
+          await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+
+          const newUnclaimedEarnings = await pvpArena.getUnclaimedDuelEarnings(
+            character1ID,
+            {
+              from: accounts[1],
+            }
+          );
+
+          const balance = await skillToken.balanceOf(accounts[1]);
+
+          expect(newUnclaimedEarnings.toString()).to.equal(toBN(0).toString());
+
+          expect(balance.toString()).to.equal(
+            toBN(unclaimedEarnings)
+              .add(previousBalance)
+              .add(wager.sub(wager.div(toBN(4))))
+              .toString()
+          );
+        });
+      });
+    });
+
     describe("decision time expired", () => {
       it("should subtract the penalty from the refunded amount");
     });
   });
 
-  // NOTE: Some tests in this block depend on a deterministic random output.
-  // at this point we can do this in a very limited way, so tests in here are very
-  // fragile, depending both in block time and other tests
   describe("#performDuel", async () => {
     describe("happy path", () => {
       describe("attacker wins", () => {
@@ -820,10 +990,17 @@ contract("PvpArena", (accounts) => {
           winnerReward = bounty.sub(poolTax).sub(duelCost);
         });
 
-        it("should add to the winner's rewards balance", async () => {
-          const rewards = await pvpArena.getMyRewards({ from: accounts[1] });
+        it("should add to the winner's earnings balance", async () => {
+          const unclaimedEarnings = await pvpArena.getUnclaimedDuelEarnings(
+            character1ID,
+            {
+              from: accounts[1],
+            }
+          );
 
-          expect(rewards.toString()).to.equal(winnerReward.toString());
+          expect(unclaimedEarnings.toString()).to.equal(
+            winnerReward.toString()
+          );
         });
 
         it("should remove the duel cost from the loser's wager", async () => {
@@ -839,6 +1016,7 @@ contract("PvpArena", (accounts) => {
             character2Wager.sub(duelCost).toString()
           );
         });
+
         it("should not change attacker's wager", async () => {
           const character1NewWager = await pvpArena.getCharacterWager(
             character1ID,
@@ -1020,9 +1198,16 @@ contract("PvpArena", (accounts) => {
         });
 
         it("should pay the defender their prize", async () => {
-          const rewards = await pvpArena.getMyRewards({ from: accounts[2] });
+          const unclaimedEarnings = await pvpArena.getUnclaimedDuelEarnings(
+            character2ID,
+            {
+              from: accounts[2],
+            }
+          );
 
-          expect(rewards.toString()).to.equal(winnerReward.toString());
+          expect(unclaimedEarnings.toString()).to.equal(
+            winnerReward.toString()
+          );
         });
 
         it("should remove the duel cost from the attacker's wager", async () => {
@@ -1296,7 +1481,7 @@ contract("PvpArena", (accounts) => {
     });
 
     describe("#reRollOpponent", () => {
-      it("fails if character is not dueling", async () => {
+      it("should fail if character is not dueling", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         await createCharacterInPvpTier(accounts[2], 2);
 
@@ -1308,7 +1493,7 @@ contract("PvpArena", (accounts) => {
         );
       });
 
-      it("transfers skill from the sender to the contract", async () => {
+      it("should transfer skill from the sender to the contract", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         await createCharacterInPvpTier(accounts[2], 2);
         await createCharacterInPvpTier(accounts[3], 2);
@@ -1336,7 +1521,7 @@ contract("PvpArena", (accounts) => {
         );
       });
 
-      it("can not re roll the same opponent", async () => {
+      it("should not re roll the same opponent", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         await createCharacterInPvpTier(accounts[2], 2);
 
@@ -1354,7 +1539,7 @@ contract("PvpArena", (accounts) => {
         );
       });
 
-      it("can re roll the same opponent if enough time has passed", async () => {
+      it("should re roll the same opponent if enough time has passed", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         const character2ID = await createCharacterInPvpTier(accounts[2], 2);
 
@@ -1376,7 +1561,7 @@ contract("PvpArena", (accounts) => {
         });
       });
 
-      it("assigns a new opponent", async () => {
+      it("should assign a new opponent", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         await createCharacterInPvpTier(accounts[2], 2);
         await createCharacterInPvpTier(accounts[3], 2);
@@ -1414,7 +1599,8 @@ contract("PvpArena", (accounts) => {
       });
     });
   });
-  describe("getOpponent", () => {
+
+  describe("#getOpponent", () => {
     describe("with pending duel", () => {
       let character0ID;
       let character1ID;
@@ -1430,7 +1616,7 @@ contract("PvpArena", (accounts) => {
         });
       });
 
-      it("returns the opponent", async () => {
+      it("should return the opponent", async () => {
         const opponentID = await pvpArena.getOpponent(character0ID);
       });
     });
@@ -1442,10 +1628,370 @@ contract("PvpArena", (accounts) => {
         characterID = await createCharacterInPvpTier(accounts[1], 1);
       });
 
-      it("reverts", async () => {
+      it("should revert", async () => {
         expectRevert(
           pvpArena.getOpponent(characterID),
           "Character has no pending duel"
+        );
+      });
+    });
+  });
+
+  describe("#getUnclaimedDuelEarnings", () => {
+    let character1ID;
+    let character2ID;
+
+    beforeEach(async () => {
+      const weapon1ID = await helpers.createWeapon(
+        accounts[1],
+        "111",
+        helpers.elements.water,
+        { weapons }
+      );
+      const weapon2ID = await helpers.createWeapon(
+        accounts[2],
+        "111",
+        helpers.elements.fire,
+        { weapons }
+      );
+
+      character1ID = await createCharacterInPvpTier(
+        accounts[1],
+        1,
+        "999",
+        weapon1ID
+      );
+      character2ID = await createCharacterInPvpTier(
+        accounts[2],
+        1,
+        "999",
+        weapon2ID
+      );
+
+      await characters.setTrait(character1ID, helpers.elements.water, {
+        from: accounts[0],
+      });
+      await characters.setTrait(character2ID, helpers.elements.fire, {
+        from: accounts[0],
+      });
+
+      await time.increase(await pvpArena.unattackableSeconds());
+
+      await pvpArena.requestOpponent(character1ID, { from: accounts[1] });
+
+      await pvpArena.performDuel(character1ID, { from: accounts[1] });
+    });
+
+    it("should return the character's unclaimed earnings", async () => {
+      const earnings = await pvpArena.getUnclaimedDuelEarnings(character1ID, {
+        from: accounts[1],
+      });
+
+      const duelCost = await pvpArena.getDuelCost(character1ID);
+      const bounty = duelCost.mul(toBN(2));
+      const poolTax = bounty.mul(toBN(15)).div(toBN(100));
+      const winnerReward = bounty.sub(poolTax).sub(duelCost);
+
+      expect(earnings.toString()).to.equal(winnerReward.toString());
+    });
+  });
+
+  describe("#getAllUnclaimedDuelEarnings", () => {
+    let character1ID;
+    beforeEach(async () => {
+      const weapon1ID = await helpers.createWeapon(
+        accounts[1],
+        "111",
+        helpers.elements.water,
+        { weapons }
+      );
+      const weapon2ID = await helpers.createWeapon(
+        accounts[1],
+        "111",
+        helpers.elements.water,
+        { weapons }
+      );
+      const weapon3ID = await helpers.createWeapon(
+        accounts[2],
+        "111",
+        helpers.elements.fire,
+        { weapons }
+      );
+
+      character1ID = await createCharacterInPvpTier(
+        accounts[1],
+        1,
+        "999",
+        weapon1ID
+      );
+      const character2ID = await createCharacterInPvpTier(
+        accounts[1],
+        1,
+        "999",
+        weapon2ID
+      );
+      const character3ID = await createCharacterInPvpTier(
+        accounts[2],
+        1,
+        "999",
+        weapon3ID
+      );
+
+      await characters.setTrait(character1ID, helpers.elements.water, {
+        from: accounts[0],
+      });
+      await characters.setTrait(character2ID, helpers.elements.water, {
+        from: accounts[0],
+      });
+      await characters.setTrait(character3ID, helpers.elements.fire, {
+        from: accounts[0],
+      });
+
+      await time.increase(await pvpArena.unattackableSeconds());
+
+      await pvpArena.requestOpponent(character1ID, { from: accounts[1] });
+      await pvpArena.performDuel(character1ID, { from: accounts[1] });
+
+      await time.increase(await pvpArena.unattackableSeconds());
+
+      await pvpArena.requestOpponent(character2ID, { from: accounts[1] });
+      await pvpArena.performDuel(character2ID, { from: accounts[1] });
+    });
+
+    it("should return the sum off all unclaimed earnings of the sender's fighters", async () => {
+      const totalEarnings = await pvpArena.getAllUnclaimedDuelEarnings({
+        from: accounts[1],
+      });
+      const duelCost = await pvpArena.getDuelCost(character1ID);
+      const bounty = duelCost.mul(toBN(2));
+      const poolTax = bounty.mul(toBN(15)).div(toBN(100));
+      const winnerReward = bounty.sub(poolTax).sub(duelCost);
+
+      expect(totalEarnings.toString()).to.equal(
+        winnerReward.mul(toBN(2)).toString()
+      );
+    });
+  });
+
+  describe("#withdrawDuelEarnings", () => {
+    describe("with unclaimed earnings", () => {
+      let character1ID;
+      let earnings;
+      let balance;
+
+      beforeEach(async () => {
+        const weapon1ID = await helpers.createWeapon(
+          accounts[1],
+          "111",
+          helpers.elements.water,
+          { weapons }
+        );
+        const weapon2ID = await helpers.createWeapon(
+          accounts[1],
+          "111",
+          helpers.elements.water,
+          { weapons }
+        );
+        const weapon3ID = await helpers.createWeapon(
+          accounts[2],
+          "111",
+          helpers.elements.fire,
+          { weapons }
+        );
+
+        character1ID = await createCharacterInPvpTier(
+          accounts[1],
+          1,
+          "999",
+          weapon1ID
+        );
+        const character2ID = await createCharacterInPvpTier(
+          accounts[1],
+          1,
+          "999",
+          weapon2ID
+        );
+        const character3ID = await createCharacterInPvpTier(
+          accounts[2],
+          1,
+          "999",
+          weapon3ID
+        );
+
+        await characters.setTrait(character1ID, helpers.elements.water, {
+          from: accounts[0],
+        });
+        await characters.setTrait(character2ID, helpers.elements.water, {
+          from: accounts[0],
+        });
+        await characters.setTrait(character3ID, helpers.elements.fire, {
+          from: accounts[0],
+        });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+
+        await pvpArena.requestOpponent(character1ID, { from: accounts[1] });
+        await pvpArena.performDuel(character1ID, { from: accounts[1] });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+
+        await pvpArena.requestOpponent(character1ID, { from: accounts[1] });
+        await pvpArena.performDuel(character1ID, { from: accounts[1] });
+
+        earnings = pvpArena.getUnclaimedDuelEarnings(character1ID, {
+          from: accounts[1],
+        });
+
+        balance = await skillToken.balanceOf(accounts[1]);
+      });
+
+      it("should send the unclaimed earnings to the sender", async () => {
+        await pvpArena.withdrawDuelEarnings(character1ID, {
+          from: accounts[1],
+        });
+
+        const newBalance = await skillToken.balanceOf(accounts[1]);
+        const duelCost = await pvpArena.getDuelCost(character1ID);
+        const bounty = duelCost.mul(toBN(2));
+        const poolTax = bounty.mul(toBN(15)).div(toBN(100));
+        const winnerReward = bounty.sub(poolTax).sub(duelCost);
+
+        expect(newBalance.toString()).to.equal(
+          balance.add(winnerReward.mul(toBN(2))).toString()
+        );
+      });
+
+      it("should reset unclaimed earnings of the character", async () => {
+        await pvpArena.withdrawDuelEarnings(character1ID, {
+          from: accounts[1],
+        });
+        const newEarnings = await pvpArena.getUnclaimedDuelEarnings(
+          character1ID,
+          {
+            from: accounts[1],
+          }
+        );
+
+        expect(newEarnings.toString()).to.equal(toBN(0).toString());
+      });
+    });
+
+    describe("without unclaimed earnings", () => {
+      let characterID;
+
+      beforeEach(async () => {
+        characterID = await createCharacterInPvpTier(accounts[1], 1, "111");
+      });
+
+      it("should revert", async () => {
+        await expectRevert(
+          pvpArena.withdrawDuelEarnings(characterID, {
+            from: accounts[1],
+          }),
+          "No unclaimed earnings"
+        );
+      });
+    });
+  });
+
+  describe("#withdrawAllDuelEarnings", () => {
+    describe("with unclaimed earnings", () => {
+      beforeEach(async () => {
+        const weapon1ID = await helpers.createWeapon(
+          accounts[1],
+          "111",
+          helpers.elements.water,
+          { weapons }
+        );
+        const weapon2ID = await helpers.createWeapon(
+          accounts[1],
+          "111",
+          helpers.elements.water,
+          { weapons }
+        );
+        const weapon3ID = await helpers.createWeapon(
+          accounts[2],
+          "111",
+          helpers.elements.fire,
+          { weapons }
+        );
+
+        const character1ID = await createCharacterInPvpTier(
+          accounts[1],
+          1,
+          "999",
+          weapon1ID
+        );
+        const character2ID = await createCharacterInPvpTier(
+          accounts[1],
+          1,
+          "999",
+          weapon2ID
+        );
+        const character3ID = await createCharacterInPvpTier(
+          accounts[2],
+          1,
+          "999",
+          weapon3ID
+        );
+
+        await characters.setTrait(character1ID, helpers.elements.water, {
+          from: accounts[0],
+        });
+        await characters.setTrait(character2ID, helpers.elements.water, {
+          from: accounts[0],
+        });
+        await characters.setTrait(character3ID, helpers.elements.fire, {
+          from: accounts[0],
+        });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+
+        await pvpArena.requestOpponent(character1ID, { from: accounts[1] });
+        await pvpArena.performDuel(character1ID, { from: accounts[1] });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+
+        await pvpArena.requestOpponent(character2ID, { from: accounts[1] });
+        await pvpArena.performDuel(character2ID, { from: accounts[1] });
+      });
+
+      it("should transfer the sum of all unclaimed earnings to the sender", async () => {
+        const balance = await skillToken.balanceOf(accounts[1]);
+
+        const earnings = await pvpArena.getAllUnclaimedDuelEarnings({
+          from: accounts[1],
+        });
+
+        await pvpArena.withdrawAllDuelEarnings({
+          from: accounts[1],
+        });
+
+        const newBalance = await skillToken.balanceOf(accounts[1]);
+
+        expect(newBalance.toString()).to.equal(
+          balance.add(earnings).toString()
+        );
+      });
+
+      it("should set all unclaimed earnings to 0", async () => {
+        await pvpArena.withdrawAllDuelEarnings({
+          from: accounts[1],
+        });
+        const newEarnings = await pvpArena.getAllUnclaimedDuelEarnings({
+          from: accounts[1],
+        });
+        expect(newEarnings.toString()).to.equal(toBN(0).toString());
+      });
+    });
+
+    describe("without unclaimed earnings", () => {
+      it("should revert", async () => {
+        await expectRevert(
+          pvpArena.withdrawAllDuelEarnings({
+            from: accounts[1],
+          }),
+          "No unclaimed earnings"
         );
       });
     });
