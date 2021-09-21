@@ -830,7 +830,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         if(fromUserWallet > 0) {
             skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
-            trackIncome(fromUserWallet);
+            _trackIncome(fromUserWallet);
         }
     }
 
