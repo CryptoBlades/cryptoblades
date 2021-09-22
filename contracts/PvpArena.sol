@@ -317,7 +317,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         //update winner here
         processWinner(winnerID);
         //update loser here
-
+        processLoser(loserID);
         // add to the rankings pool
         _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
             getArenaTier(attackerID)
@@ -376,7 +376,37 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function processLoser(uint256 loserID) internal {
-        // this is the same as the processWinner but inversely
+        uint256 loserPoints = _characterRankingPoints[loserID];
+        uint8 tier = getArenaTier(loserID);
+        uint256[4] storage loserTier = _rankingByTier[tier];
+        uint256 loserPosition;
+        bool loserFound;
+        for (uint8 i = 0; i < loserTier.length; i++) {
+            if (loserID == loserTier[i]) {
+                loserPosition = i;
+                loserFound = true;
+                break;
+            }
+        }
+
+        if (loserFound) {
+            for (uint256 i = loserPosition; i <= loserTier.length - 1; i++) {
+                if (i >= loserTier.length - 1) {
+                    break;
+                }
+                if (
+                    _characterRankingPoints[loserTier[loserPosition]] <=
+                    _characterRankingPoints[loserTier[loserPosition + 1]]
+                ) {
+                    uint256 newPosition = loserTier[loserPosition + 1];
+                    loserTier[loserPosition + 1] = loserTier[loserPosition];
+                    loserTier[loserPosition] = newPosition;
+                    loserPosition = loserPosition + 1;
+                } else {
+                    break;
+                }
+            }
+        }
     }
 
     /// @dev withdraws a character and its items from the arena.

@@ -1383,7 +1383,217 @@ contract("PvpArena", (accounts) => {
         // expect the last character to be the first one, climibing through the entire ladder
         expect(playerTier[0].toString()).to.equal(character6ID).toString();
       });
-      it("should process the loser", async () => {});
+      it("should process the scores satisfactorily if not enough players are in the tier", async () => {
+        weapon1ID = await helpers.createWeapon(
+          accounts[2],
+          "111",
+          helpers.elements.water,
+          {
+            weapons,
+          }
+        );
+        weapon2ID = await helpers.createWeapon(
+          accounts[1],
+          "111",
+          helpers.elements.fire,
+          {
+            weapons,
+          }
+        );
+        character1ID = await createCharacterInPvpTier(
+          accounts[1],
+          2,
+          "222",
+          weapon2ID
+        );
+        character2ID = await createCharacterInPvpTier(
+          accounts[2],
+          2,
+          "222",
+          weapon1ID
+        );
+        await characters.setTrait(character2ID, helpers.elements.water, {
+          from: accounts[0],
+        });
+        await characters.setTrait(character1ID, helpers.elements.fire, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character1ID, 15, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character2ID, 13, {
+          from: accounts[0],
+        });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character2ID, {
+          from: accounts[2],
+        });
+
+        // perform a duel making sure character1 is always going to lose
+        await pvpArena.performDuel(character2ID, {
+          from: accounts[2],
+        });
+
+        let playerTier = await pvpArena.getTopTierPlayers(character1ID);
+        playerTier.map(async (player) => {
+          const points = await pvpArena.getCharacterRankingPoints(player);
+          console.log(
+            "player ID",
+            player.toString(),
+            "with score",
+            points.toString()
+          );
+        });
+      });
+      it("should not process the loser if he is not within the top 4", async () => {
+        weapon1ID = await helpers.createWeapon(
+          accounts[2],
+          "111",
+          helpers.elements.water,
+          {
+            weapons,
+          }
+        );
+        weapon2ID = await helpers.createWeapon(
+          accounts[1],
+          "111",
+          helpers.elements.fire,
+          {
+            weapons,
+          }
+        );
+        character1ID = await createCharacterInPvpTier(
+          accounts[1],
+          2,
+          "222",
+          weapon2ID
+        );
+        character2ID = await createCharacterInPvpTier(accounts[2], 2);
+        character3ID = await createCharacterInPvpTier(accounts[2], 2, "222");
+        character4ID = await createCharacterInPvpTier(accounts[2], 2, "222");
+        character5ID = await createCharacterInPvpTier(
+          accounts[2],
+          2,
+          "222",
+          weapon1ID
+        );
+
+        await characters.setTrait(character5ID, helpers.elements.water, {
+          from: accounts[0],
+        });
+        await characters.setTrait(character1ID, helpers.elements.fire, {
+          from: accounts[0],
+        });
+        // we set the ranking points to determine the tier, char1 being the first, followed by char 2 and then char4
+        await pvpArena.setRankingPoints(character1ID, 35, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character2ID, 34, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character3ID, 33, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character4ID, 32, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character5ID, 10, {
+          from: accounts[0],
+        });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character5ID, {
+          from: accounts[2],
+        });
+        let player1Points = await pvpArena.getCharacterRankingPoints(
+          character1ID
+        );
+        let player5Points = await pvpArena.getCharacterRankingPoints(
+          character5ID
+        );
+        // perform a duel making sure character1 is always going to lose
+        await pvpArena.performDuel(character5ID, {
+          from: accounts[2],
+        });
+
+        // get the post  duel ranking points
+        playerTier = await pvpArena.getTopTierPlayers(character1ID, {
+          from: accounts[1],
+        });
+        const isCharacterInTier = playerTier.some((player) => {
+          player.toString() === character5ID.toString();
+        });
+        expect(isCharacterInTier).to.equal(false);
+        expect(playerTier[3].toString()).to.equal(character1ID.toString());
+      });
+      it("should process the loser and downgrade his rank accordingly", async () => {
+        weapon1ID = await helpers.createWeapon(
+          accounts[2],
+          "111",
+          helpers.elements.water,
+          {
+            weapons,
+          }
+        );
+        weapon2ID = await helpers.createWeapon(
+          accounts[1],
+          "111",
+          helpers.elements.fire,
+          {
+            weapons,
+          }
+        );
+        character1ID = await createCharacterInPvpTier(
+          accounts[1],
+          2,
+          "222",
+          weapon2ID
+        );
+        character2ID = await createCharacterInPvpTier(accounts[2], 2);
+        character3ID = await createCharacterInPvpTier(accounts[2], 2, "222");
+        character4ID = await createCharacterInPvpTier(
+          accounts[2],
+          2,
+          "222",
+          weapon1ID
+        );
+
+        await characters.setTrait(character4ID, helpers.elements.water, {
+          from: accounts[0],
+        });
+        await characters.setTrait(character1ID, helpers.elements.fire, {
+          from: accounts[0],
+        });
+        // we set the ranking points to determine the tier, char1 being the first, followed by char 2 and then char4
+        await pvpArena.setRankingPoints(character1ID, 35, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character2ID, 34, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character3ID, 33, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character4ID, 32, {
+          from: accounts[0],
+        });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character4ID, {
+          from: accounts[2],
+        });
+        // perform a duel making sure character1 is always going to lose
+        await pvpArena.performDuel(character4ID, {
+          from: accounts[2],
+        });
+
+        // get the post  duel ranking points
+        playerTier = await pvpArena.getTopTierPlayers(character1ID, {
+          from: accounts[1],
+        });
+        expect(playerTier[3].toString()).to.equal(character1ID.toString());
+      });
     });
 
     describe("decision time expired", () => {
