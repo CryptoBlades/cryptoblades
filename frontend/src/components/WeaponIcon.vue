@@ -489,12 +489,12 @@ export default {
 
 .favorite-star {
   position: absolute;
-  margin-left: 5px;
+  margin-left: 110px;
 }
 
 .id {
   top: 8px;
-  right: 10px;
+  left: 30px;
   font-style: italic;
 }
 

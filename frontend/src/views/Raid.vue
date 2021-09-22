@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-md-12 col-lg-6">
         <span class="bold raid-title-section">Hellborn raid</span>
-        <hr class="devider">
+        <hr class="divider">
         <div class="row boss-row">
           <div class="col-md-12 col-lg-6 order-xs-last order-sm-last order-lg-first">
             <ul class="list-group raid-details mb-4">
@@ -15,16 +15,29 @@
                 Total Power
                 <span class="badge badge-primary badge-pill">{{ totalPower }}</span>
               </li>
-               <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
+              <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
                  Boss Power
                 <span class="badge badge-primary badge-pill">{{ bossPower }}</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text progress-container">
+                <div class="d-flex justify-content-between align-items-center raid-details-text" style="width: 100%;">
+                Victory chance
+                <span class="badge badge-primary badge-pill">{{ formattedWinChance }}</span>
+                </div>
+                <div class="progress" style="width: 100%">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated players-progress-bar"
+                    role="progressbar" :style="[{'width': calculatePlayersProgressBarWidth(), 'background-color': calculateProgressBarColor()}]"></div>
+                  <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger boss-progress-bar"
+                    role="progressbar" :style="[{'width': calculateBossProgressBarWidth() }]"></div>
+                </div>
               </li>
             </ul>
             <span class="mt-3 bold raid-title-section">
               Drops
-              <b-icon-question-circle v-tooltip="'Rewards are based on your contributed power relative to others.<br>Joining early gives up to 10% bonus.'"/>
+              <b-icon-question-circle class="rewards-tooltip"
+               v-tooltip="'Rewards are based on your contributed power relative to others.<br>Joining early gives up to 10% bonus.'"/>
             </span>
-            <hr class="devider">
+            <hr class="divider">
             <div class="drops">
               <div class="drops-icons">
                 <nft-icon :isDefault="true" :nft="{ type: 'weapon' }" />
@@ -36,7 +49,7 @@
                 <nft-icon :isDefault="true" :nft="{ type: '5bdust' }"/>
               </div>
               <br />
-              <span class="bold raid-title-section">
+              <span class="bold raid-title-section xp-reward-section">
                 XP reward</span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }}
                 <b-icon-question-circle
                   v-tooltip="`XP will be automatically claimed by participating characters.<br>
@@ -47,7 +60,7 @@
           <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 order-xs-first order-sm-first boss-col">
             <div class="boss-box">
               <div class="raid-title">
-                <span class="title mr-3"> {{ bossName }} </span>
+                <span class="title mr-3"> #{{ raidIndex }} {{ bossName }} </span>
                 <span :class="traitNumberToName(bossTrait).toLowerCase() + '-icon trait-icon'" />
               </div>
               <div class="img-responsive boss-img">
@@ -56,48 +69,53 @@
             </div>
           </div>
         </div>
-        <hr class="devider">
+        <hr class="divider">
       </div>
-      <div class="col-md-12 col-lg-6 weap-char">
+      <div class="col-md-12 col-lg-6">
         <div class="row">
           <div class="col-xs-12 col-sm-12 col-lg-6 weap-box">
-            <span class="raid-title-section bold">Weapon
+            <span class="raid-title-section bold">
+              <span>Weapon
                 <Hint
                 text="Your weapon multiplies your power<br>
                   <br>+Stats determine the multiplier
                   <br>Stat element match with character gives greater bonus"/>
-                  <span class="float-right sub-text">Multiplier: x{{ currentMultiplier }}</span>
+                  </span>
+                  <span class="float-right sub-text">
+                    Multiplier: x{{ currentMultiplier }}
+                  </span>
               </span>
-              <hr class="devider">
-              <div class="header-row">
+              <hr class="divider">
+            <div class="header-row">
               <div v-if="selectedWeaponId" class="weapon-icon-wrapper">
                 <weapon-icon class="weapon-icon" :weapon="getSelectedWeapon" />
               </div>
-              <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null">
+              <b-button v-if="selectedWeaponId" variant="primary" class="new-weapon-button" @click="selectedWeaponId = null">
                 Choose New Weapon
               </b-button>
             </div>
+
             <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" class="raid-weapon-grid">
               <template #sold="{ weapon: { id } }">
                 <div class="sold" v-if="participatingWeapons && participatingWeapons.find(x => +x === +id) !== undefined"><span>in raid</span></div>
               </template>
             </weapon-grid>
-            <hr class="devider">
+            <hr class="divider">
           </div>
           <div class="col-xs-12 col-sm-12 col-lg-6 char-box">
             <span class="raid-title-section bold">Character <span class="float-right sub-text">Power {{ currentCharacterPower }}</span></span>
-            <hr class="devider">
+            <hr class="divider">
             <character-list :value="currentCharacterId" @input="setCurrentCharacter" class="raid-style">
               <template #sold="{ character: { id } }">
                 <div class="sold" v-if="participatingCharacters && participatingCharacters.find(x => +x === +id) !== undefined"><span>in raid</span></div>
               </template>
             </character-list>
-            <hr class="devider">
+            <hr class="divider">
           </div>
         </div>
       </div>
     </div>
-    <div class="container disclaimer-box">
+    <div class="container">
       <div class="row">
         <div class="col-12">
           <div class="text-center">
@@ -105,7 +123,7 @@
             stamina </span>,
             <span class="badge badge-secondary">{{ durabilityCost }}
             durability </span> and
-            <span class="badge badge-secondary">{{ joinCost }}SKILL</span>
+            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" :skillMinDecimals="0" :skillMaxDecimals="5"/></span>
           </div>
         </div>
       </div>
@@ -113,8 +131,8 @@
     <div class="row">
       <div class="col-sm-12">
         <div class="raid-info-box mt-3">
-          <div class="row">
-            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
+          <div class="row raid-summary-container">
+            <div class='col-sm-4 raid-summary-text'>
               <div class="float-lg-left mb-sm-2">
                 <div class="finish">
                     <span class="title">Finishes on</span>
@@ -124,7 +142,7 @@
                   </div>
               </div>
             </div>
-            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'" v-if="claimButtonActive">
+            <div class="col-sm-8 row">
               <big-button v-if="claimButtonActive" class="encounter-button btn-styled" :mainText="`Claim rewards`" @click="promptRewardClaim()" />
               <b-modal id="rewardsRaidPicker" title="Raid rewards selector" @ok="claimRewardIndex(rewardsRaidId)">
                 <div class="raid-picker">
@@ -134,7 +152,7 @@
                   </select>
                 </div>
               </b-modal>
-            </div>
+
             <b-modal id="rewardsModal" title="Raid rewards" size="lg">
               <template #modal-header>
                 <div v-if="!spin" class="new-weapon-header-text text-center">
@@ -163,10 +181,11 @@
               </div>
               <nft-list v-if="!spin" :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
             </b-modal>
-            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
-              <big-button class="encounter-button btn-styled" :mainText="`Sign up!`" v-tooltip="'Joining will cost 12h of stamina'" @click="joinRaidMethod()" />
+
+              <big-button class="encounter-button btn-styled" :mainText="`Sign up!`"
+                          v-tooltip="`Joining will cost ${formatStaminaHours}h of stamina`" @click="joinRaidMethod()" />
             </div>
-            <div v-bind:class="claimButtonActive ? 'col-sm-3' : 'col-sm-4'">
+            <div class='col-sm-4 raid-summary-text'>
              <div class="float-lg-right text-sm-center mt-sm-2 text-center">
                 <div class="finish">
                     <span class="title">Your Power:  {{accountPower}}</span>
@@ -174,12 +193,14 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
-      </div>
     </div>
  </div>
 </template>
-<script>
+<script lang="ts">
+
+import Vue from 'vue';
 import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
@@ -187,13 +208,40 @@ import BigButton from '../components/BigButton.vue';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import Hint from '../components/Hint.vue';
 import NftIcon from '@/components/NftIcon.vue';
-import NftList from '@/components/smart/NftList.vue';
-import { GetTotalMultiplierForTrait } from '@/interfaces/Weapon';
-import { CharacterPower } from '@/interfaces';
+import NftList, { NftIdType } from '@/components/smart/NftList.vue';
+import CurrencyConverter from '../components/CurrencyConverter.vue';
+import { GetTotalMultiplierForTrait, IWeapon } from '@/interfaces/Weapon';
+import { CharacterPower, IRaidState, IState } from '@/interfaces';
 import { getBossArt } from '@/raid-boss-art-placeholder';
 import { traitNumberToName } from '@/contract-models';
+import { fromWeiEther } from '@/utils/common';
+import { staminaToHours } from '@/utils/date-time';
+import { RaidRewards, Weapon, Junk, Keybox, DustLb, Dust4b, Dust5b, BonusXp } from '@/interfaces/RaidRewards';
 
-let interval = null;
+
+interface RaidMappedActions {
+  fetchRaidState(): Promise<void>;
+  joinRaid(payload: { characterId: string, weaponId: string}): Promise<void>;
+  fetchRaidRewards(payload: {startIndex: number, endIndex: string }): Promise<string[]>;
+  claimRaidRewards(payload: { rewardIndex: string }): Promise<RaidRewards>;
+  fetchRaidingCharacters(): Promise<string[]>;
+  fetchRaidingWeapons(): Promise<string[]>;
+  fetchIsRaidStarted(): Promise<boolean>;
+  fetchHaveEnoughEnergy(payload: { characterID: string, weaponID: string }): Promise<boolean>;
+  fetchIsCharacterRaiding(payload: { characterID: string }): Promise<boolean>;
+  fetchIsWeaponRaiding(payload: { weaponID: string }): Promise<boolean>;
+  fetchCharacters(payload: { characterIds: (string | number)[]}): Promise<void>;
+}
+
+interface RaidMappedMutations {
+  setCurrentCharacter(state: IState, characterId: number): void;
+}
+
+interface RaidMappedGetters {
+  getRaidState(): IRaidState;
+}
+
+let interval: number;
 
 const dragonNames = [
   'Fudbringer',
@@ -215,33 +263,31 @@ const bossImages = [
   '../assets/CB_Hellborn Shaman.gif',
 ];
 
-export default {
+export default Vue.extend({
   data() {
     return {
-      selectedWeaponId: null,
-      selectedWeapon: null,
-      error: null,
-      raidIndex: null,
-      bossName: null,
-      raiderCount: null,
-      totalPower: null,
-      expectedFinishTime: null,
-      xpReward: null,
-      staminaCost: null,
-      durabilityCost: null,
-      joinCost: null,
-      raidStatus: null,
-      bossPower: null,
-      bossTrait: null,
-      accountPower: null,
-      rewardIndexes: null,
-      rewardsRaidId: null,
-      rewards: null,
+      selectedWeaponId: '',
+      raidIndex: '',
+      bossName: '',
+      raiderCount: '',
+      totalPower: '',
+      expectedFinishTime: '',
+      xpReward: '',
+      staminaCost: '',
+      durabilityCost: '',
+      joinCost: '',
+      raidStatus: '',
+      bossPower: '',
+      bossTrait: '',
+      accountPower: '',
+      rewardsRaidId: '',
+      rewardIndexes: [] as string[],
+      rewards: [] as NftIdType[],
       spin: false,
-      participatingCharacters: [],
-      participatingWeapons: [],
-      bonuxXpCharacterNames: [],
-      bonuxXpAmounts: [],
+      participatingCharacters: [] as string[],
+      participatingWeapons: [] as string[],
+      bonuxXpCharacterNames: [] as string[],
+      bonuxXpAmounts: [] as string[],
     };
   },
 
@@ -250,118 +296,166 @@ export default {
     ...mapGetters(['ownCharacters', 'ownWeapons', 'currentCharacter',
       'currentCharacterStamina', 'getWeaponDurability', 'contracts', 'getCharacterName']),
 
-    claimButtonActive() {
+    claimButtonActive(): boolean {
       return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
     },
 
-    currentMultiplier() {
+    currentMultiplier(): string {
       if(!this.selectedWeaponId) return '0';
-      const currentWeapon = this.ownWeapons.find(x => x.id === this.selectedWeaponId);
+      const currentWeapon = this.ownWeapons.find((weapon: IWeapon) => weapon.id === +this.selectedWeaponId);
       if(!currentWeapon) return '0';
       return GetTotalMultiplierForTrait(currentWeapon, this.currentCharacter.trait).toFixed(2);
     },
 
-    currentCharacterPower() {
-      if(!this.currentCharacter) return '0';
+    currentCharacterPower(): number {
+      if(!this.currentCharacter) return 0;
       return CharacterPower(this.currentCharacter.level);
     },
 
-    getSelectedWeapon() {
-      return this.ownWeapons.find(x => x.id === this.selectedWeaponId);
+    getSelectedWeapon(): IWeapon {
+      return this.ownWeapons.find((weapon: IWeapon) => weapon.id === +this.selectedWeaponId);
+    },
+
+    formatStaminaHours(): string {
+      return staminaToHours(+this.staminaCost).toFixed(1);
+    },
+
+    formattedWinChance(): string {
+      return `${this.calculateWinChance()}%`;
     }
   },
 
   methods: {
     getBossArt,
     traitNumberToName,
-    ...mapActions(['fetchRaidState', 'fetchOwnedCharacterRaidStatus', 'joinRaid',
-      'fetchRaidRewards', 'claimRaidRewards', 'fetchRaidingCharacters', 'fetchRaidingWeapons',
-      'fetchIsRaidStarted', 'fetchHaveEnoughEnergy', 'fetchIsCharacterRaiding', 'fetchIsWeaponRaiding','fetchCharacters']),
-    ...mapMutations(['setCurrentCharacter']),
-    ...mapGetters(['getRaidState']),
+    ...(mapActions([
+      'fetchRaidState',
+      'joinRaid',
+      'fetchRaidRewards',
+      'claimRaidRewards',
+      'fetchRaidingCharacters',
+      'fetchRaidingWeapons',
+      'fetchIsRaidStarted',
+      'fetchHaveEnoughEnergy',
+      'fetchIsCharacterRaiding',
+      'fetchIsWeaponRaiding',
+      'fetchCharacters'
+    ]) as RaidMappedActions),
+    ...(mapMutations([
+      'setCurrentCharacter'
+    ]) as RaidMappedMutations),
+    ...(mapGetters([
+      'getRaidState',
+    ]) as RaidMappedGetters),
 
-    weaponHasDurabilit(id) {
+    calculateWinChance(): string {
+      return (Math.min(Math.max(+this.totalPower / +this.bossPower / 2 * 100, 0), 99.99)).toFixed(2);
+    },
+
+    calculateProgressBarColor(): string {
+      if(+this.calculateWinChance() < 30){
+        return '#ccae4f';
+      } else if (+this.calculateWinChance() < 70){
+        return 'blue';
+      } else {
+        return 'green';
+      }
+    },
+
+    calculatePlayersProgressBarWidth(): string {
+      return `${Math.round(+this.calculateWinChance())}%`;
+    },
+
+    calculateBossProgressBarWidth(): string {
+      return `${Math.round(100 - +this.calculateWinChance())}%`;
+    },
+
+    convertWeiToSkill(wei: string): string {
+      return fromWeiEther(wei);
+    },
+
+    weaponHasDurability(id: number): boolean{
       return this.getWeaponDurability(id) > 0;
     },
 
-    async joinRaidMethod() {
+    async joinRaidMethod(): Promise<void> {
       if (!this.selectedWeaponId || !this.currentCharacterId) {
-        this.$dialog.notify.error('Check Character and Weapon Selection and try again...');
+        (this as any).$dialog.notify.error('Check Character and Weapon Selection and try again...');
         return;
       }
 
       const isRaidStarted = await this.isRaidStarted();
       if(!isRaidStarted) {
-        this.$dialog.notify.error('Raid has not started yet...');
+        (this as any).$dialog.notify.error('Raid has not started yet...');
         return;
       }
       const isCharacterRaiding = await this.isCharacterAlreadyRaiding(this.currentCharacterId);
       if(isCharacterRaiding) {
-        this.$dialog.notify.error('Selected character is locked in the raid already...');
+        (this as any).$dialog.notify.error('Selected character is locked in the raid already...');
         return;
       }
       const isWeaponRaiding = await this.isWeaponAlreadyRaiding(this.selectedWeaponId);
       if(isWeaponRaiding) {
-        this.$dialog.notify.error('Selected weapon is locked in the raid already...');
+        (this as any).$dialog.notify.error('Selected weapon is locked in the raid already...');
         return;
       }
       const haveEnoughEnergy = await this.haveEnoughEnergy(this.currentCharacterId, this.selectedWeaponId);
       if(!haveEnoughEnergy) {
-        this.$dialog.notify.error('Not enough stamina or durability...');
+        (this as any).$dialog.notify.error('Not enough stamina or durability...');
         return;
       }
 
       try {
         await this.joinRaid({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId});
-        this.selectedWeaponId = null;
+        this.selectedWeaponId = '';
       } catch (e) {
         console.error(e);
-        this.$dialog.notify.error('Whoops...');
+        (this as any).$dialog.notify.error('Whoops...');
       }
 
       await this.getParticipatingCharacters();
       await this.getParticipatingWeapons();
     },
 
-    async getParticipatingCharacters() {
+    async getParticipatingCharacters(): Promise<void> {
       // gets the list of this player's raid locked characters
       // TODO store these?
       this.participatingCharacters = await this.fetchRaidingCharacters();
     },
 
-    async getParticipatingWeapons() {
+    async getParticipatingWeapons(): Promise<void> {
       // gets the list of this player's raid locked weapons
       // TODO store these?
       this.participatingWeapons = await this.fetchRaidingWeapons();
     },
 
-    async isCharacterAlreadyRaiding(characterID) {
+    async isCharacterAlreadyRaiding(characterID: string): Promise<boolean> {
       return await this.fetchIsCharacterRaiding({
         characterID
       });
     },
 
-    async isWeaponAlreadyRaiding(weaponID) {
+    async isWeaponAlreadyRaiding(weaponID: string): Promise<boolean> {
       return await this.fetchIsWeaponRaiding({
         weaponID
       });
     },
 
-    async isRaidStarted() {
+    async isRaidStarted(): Promise<boolean> {
       return await this.fetchIsRaidStarted();
     },
 
-    async haveEnoughEnergy(characterID, weaponID) {
+    async haveEnoughEnergy(characterID: string, weaponID: string): Promise<boolean>{
       return await this.fetchHaveEnoughEnergy({
         characterID,
         weaponID
       });
     },
 
-    async getRewardIndexes() {
-      if(this.raidIndex === null || this.raidIndex === undefined)
+    async getRewardIndexes(): Promise<void> {
+      if(!this.raidIndex)
         return;
-      let startIndex = this.raidIndex-21; // one week worth
+      let startIndex = +this.raidIndex-21; // one week worth
       if(startIndex < 0)
         startIndex = 0;
       const endIndex = this.raidIndex;
@@ -372,7 +466,7 @@ export default {
       });
     },
 
-    promptRewardClaim() {
+    promptRewardClaim(): void {
       // should offer a popup here to pick which index to claim
       // if only one index, then claim instantly
       if(this.rewardIndexes !== null && this.rewardIndexes.length > 0) {
@@ -380,51 +474,51 @@ export default {
           this.claimRewardIndex(this.rewardIndexes[0]);
         }
         else {
-          this.$bvModal.show('rewardsRaidPicker');
+          (this as any).$bvModal.show('rewardsRaidPicker');
         }
       }
     },
 
-    async claimRewardIndex(rewardIndex) {
+    async claimRewardIndex(rewardIndex: string): Promise<void> {
       this.bonuxXpCharacterNames = [];
       this.bonuxXpAmounts = [];
       const result = await this.claimRaidRewards({
         rewardIndex
       });
 
-      const nfts = [];
+      const nfts: NftIdType[] = [];
       if(result.weapons) {
-        result.weapons.forEach(x => {
+        result.weapons.forEach((x: Weapon) => {
           nfts.push({ type: 'weapon', id: x.tokenID });
         });
       }
       if(result.junks) {
-        result.junks.forEach(x => {
+        result.junks.forEach((x: Junk) => {
           nfts.push({ type: 'junk', id: x.tokenID });
         });
       }
       if(result.keyboxes) {
-        result.keybox.forEach(x => {
+        result.keyboxes.forEach((x: Keybox) => {
           nfts.push({ type: 'keybox', id: x.tokenID });
         });
       }
       if(result.dustLb) {
-        result.dustLb.forEach(x => {
+        result.dustLb.forEach((x: DustLb) => {
           nfts.push({ type: 'dustLb', id: 0, amount: x.amount });
         });
       }
       if(result.dust4b) {
-        result.dust4b.forEach(x => {
+        result.dust4b.forEach((x: Dust4b) => {
           nfts.push({ type: 'dust4b', id: 0, amount: x.amount });
         });
       }
       if(result.dust5b) {
-        result.dust5b.forEach(x => {
+        result.dust5b.forEach((x: Dust5b) => {
           nfts.push({ type: 'dust5b', id: 0, amount: x.amount });
         });
       }
       if(result.bonusXp) {
-        result.bonusXp.forEach(x => {
+        result.bonusXp.forEach((x: BonusXp) => {
           this.bonuxXpCharacterNames.push(this.getCharacterName(x.charID));
           this.bonuxXpAmounts.push(x.amount);
         });
@@ -432,7 +526,7 @@ export default {
 
       this.rewards = nfts;
       this.spin = true;
-      this.$bvModal.show('rewardsModal');
+      (this as any).$bvModal.show('rewardsModal');
       setTimeout(() => {
         this.spin = false;
       }, 10000);
@@ -440,21 +534,21 @@ export default {
       await this.fetchCharacters(this.ownedCharacterIds);
     },
 
-    getBossName() {
-      return dragonNames[this.raidIndex % dragonNames.length];
+    getBossName(): string {
+      return dragonNames[+this.raidIndex % dragonNames.length];
     },
 
-    getBossImage() {
-      return bossImages[this.raidIndex % bossImages.length];
+    getBossImage(): string {
+      return bossImages[+this.raidIndex % bossImages.length];
     },
 
-    processRaidData() {
+    processRaidData(): void {
       const raidData = this.getRaidState();
       this.raidIndex = raidData.index;
       this.bossName = this.getBossName();
       this.raiderCount = raidData.raiderCount;
       this.totalPower = raidData.playerPower;
-      this.expectedFinishTime = new Date(raidData.expectedFinishTime * 1000).toLocaleString();
+      this.expectedFinishTime = new Date(+raidData.expectedFinishTime * 1000).toLocaleString();
       this.xpReward = raidData.xpReward;
       this.staminaCost = raidData.staminaCost;
       this.durabilityCost = raidData.durabilityCost;
@@ -467,17 +561,16 @@ export default {
   },
 
   async mounted() {
-    await this.getRewardIndexes();
-    await this.fetchRaidState();
-    this.processRaidData();
-    await this.getParticipatingCharacters();
-    await this.getParticipatingWeapons();
-    interval = setInterval(async () => {
-      await this.getRewardIndexes();
-      await this.fetchRaidState();
-      this.processRaidData();
-      await this.getParticipatingCharacters();
-      await this.getParticipatingWeapons();
+    const refreshRaidData = async () => {
+      await (this as any).getRewardIndexes();
+      await (this as any).fetchRaidState();
+      (this as any).processRaidData();
+      await (this as any).getParticipatingCharacters();
+      await (this as any).getParticipatingWeapons();
+    };
+    await refreshRaidData();
+    interval = window.setInterval(async () => {
+      await refreshRaidData();
     }, 3000);
   },
 
@@ -486,6 +579,7 @@ export default {
   },
 
   components: {
+    CurrencyConverter,
     BigButton,
     CharacterList,
     WeaponGrid,
@@ -494,10 +588,11 @@ export default {
     NftIcon,
     NftList
   },
-};
+});
 </script>
 
 <style scoped>
+
 .raid-height {
   height: 500px !important;
 }
@@ -506,12 +601,23 @@ export default {
   display: block;
   width: 100%;
   padding: 0;
- height: 473px;
- overflow-y: auto;
- overflow-x: hidden;
- border: 0.5px solid #1f1f1f;
+  height: 577px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 0.5px solid #1f1f1f;
 }
 
+.progress-container {
+  flex-direction: column;
+}
+
+.players-progress-bar {
+  animation-direction: reverse;
+}
+
+.boss-progress-bar {
+  animation-direction: normal;
+}
 
 .raid-style::-webkit-scrollbar-track
 {
@@ -530,14 +636,13 @@ export default {
 	border: 2px solid #555555;
 }
 
-
 .raid-style >>> ul.character-list {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
 }
 .raid-style >>> ul.character-list > li.character {
-    margin: 0 auto;
+    margin: 0 0 0 0;
     flex-grow: 0;
     flex-shrink: 0;
 }
@@ -565,7 +670,7 @@ export default {
 }
 
 .raid-weapon-grid {
-  height: 473px;
+  height: 577px;
   overflow-y: auto;
   border: 0.5px solid #1f1f1f;
 }
@@ -613,16 +718,11 @@ h2 > span.sub-text {
   vertical-align: middle;
   line-height: 2;
 }
-hr.devider {
+hr.divider {
   border: 0.5px solid #dabf75;
 }
 .container-fluid {
   margin-top: 500px;
-}
-.disclaimer-box {
-  margin-top: 20px;
-  border-top: 0.5px solid #242423;
-  padding: 20px;
 }
 .list-group {
   max-width: 100%;
@@ -716,6 +816,16 @@ hr.devider {
   flex-direction: row;
 }
 
+.raid-summary-text {
+    width: auto;
+    flex: none;
+}
+
+.raid-summary-container {
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
 .raiders,
 .drops {
   margin-top: 1em;
@@ -787,6 +897,12 @@ hr.devider {
   background: rgba(255, 255, 255, 0.1);
   width: 12em;
   height: 12em;
+  margin: 0 auto;
+}
+
+.new-weapon-button {
+  margin-left: 0;
+  margin-top: 20px;
 }
 
 .enemy-list[data-v-067077ae] {
@@ -801,9 +917,20 @@ hr.devider {
   align-items: center;
 }
 
+.xp-reward-section {
+  display: inline;
+}
+
+.rewards-tooltip {
+  margin: auto 0;
+}
+
 .raid-title-section {
   font-size : 1.5em;
   color : #dabf75;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .raid-details {
@@ -815,6 +942,7 @@ hr.devider {
   font-size: 1.2em;
   color: #ccae4f;
 }
+
 .raid-details-text > span {
   background-color: #5c6063;
 }
@@ -837,12 +965,23 @@ hr.devider {
   margin-left: -10px;
 }
 
-@media (max-width: 1024px) {
-  .weap-char {
-    margin-top: 50px;
-    border-top: dashed 1px #ccc;
-    padding-top : 20px;
-  }
+.header-row {
+  display: flex;
+  align-items: center;
+}
+
+.header-row h1 {
+  margin-left: 10px;
+  margin-bottom: 5px;
+}
+
+.header-row .hint {
+  font-size: 2em;
+}
+
+.header-row {
+  display: block;
+  text-align: center;
 }
 
 @media (max-width: 994px) {

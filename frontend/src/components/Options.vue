@@ -12,20 +12,25 @@
 
         <b-dropdown-item @click="onClaimTokens()"><i class="fa fa-coins mr-2"></i>Claim Skill </b-dropdown-item>
 
-        <b-dropdown-item @click.native="$router.push('leaderboard')" class="gtag-link-others" tagname="leaderboard_screen">
+        <b-dropdown-item :to="{ name: 'leaderboard' }" class="gtag-link-others" tagname="leaderboard_screen">
         <i class="fa fa-trophy mr-2"></i>Leaderboard
         </b-dropdown-item>
 
-        <b-dropdown-item @click.native="$router.push('portal')"><i class="fa fa-dungeon mr-2"></i>Portal</b-dropdown-item>
+        <b-dropdown-item :to="{ name: 'portal' }"><i class="fa fa-dungeon mr-2"></i>Portal</b-dropdown-item>
 
         <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank"><i class="fa fa-book mr-2"></i>Wiki <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
+
+        <b-dropdown-item :to="{ name: 'nft-display' }">
+          <img src="https://seiyria.com/gameicons-font/svg/crystal-ball.svg" class="nft-display-icon"/>
+           NFT Display
+        </b-dropdown-item>
 
         </b-dropdown-group>
         <hr class="border-light">
 
         <b-dropdown-group class="mb-2">
 
-       <b-dropdown-item  @click.native="$router.push('options')">
+       <b-dropdown-item :to="{ name: 'options' }">
         <i class="fa fa-cog mr-2"></i>Options
         </b-dropdown-item>
         </b-dropdown-group>
@@ -203,4 +208,10 @@ export default Vue.extend({
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.nft-display-icon {
+  margin-left: -3px;
+  height: 20px;
+  filter: invert(75%) sepia(8%) saturate(243%) hue-rotate(8deg) brightness(96%) contrast(81%);
+}
+</style>
