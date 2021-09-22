@@ -90,14 +90,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(address => uint256) private _rewardsByPlayer;
     /// @dev accumulated rewards per tier
     mapping(uint8 => uint256) private _rankingsPoolByTier;
+    /// @dev duel earnings per character
+    mapping(uint256 => uint256) private _duelEarningsByCharacter;
     /// @dev ranking by tier
     mapping(uint8 => uint256[4]) private _rankingByTier;
     /// @dev rankPoints by character
     mapping(uint256 => uint256) private _characterRankingPoints;
     /// @dev characters by ranking
     mapping(uint256 => uint256) private _charactersByRanking;
-    /// @dev duel earnings per character
-    mapping(uint256 => uint256) private _duelEarningsByCharacter;
 
     event NewDuel(
         uint256 indexed attacker,
@@ -279,8 +279,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ? defenderID
             : attackerID;
 
-        address winner = characters.ownerOf(winnerID);
-
         emit DuelFinished(
             attackerID,
             defenderID,
@@ -293,9 +291,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         BountyDistribution
             memory bountyDistribution = _getDuelBountyDistribution(attackerID);
 
-        _rewardsByPlayer[winner] = _rewardsByPlayer[winner].add(
-            bountyDistribution.winnerReward
-        );
         _duelEarningsByCharacter[winnerID] = _duelEarningsByCharacter[winnerID]
             .add(bountyDistribution.winnerReward);
         fighterByCharacter[loserID].wager = fighterByCharacter[loserID]
@@ -316,12 +311,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _characterRankingPoints[loserID] = _characterRankingPoints[loserID]
                 .sub(losingPoints);
         }
-
-        // update the tier's ranking after a fight
-        //update winner here
+        //update winner
         processWinner(winnerID);
-        //update loser here
+        //update loser
         processLoser(loserID);
+
         // add to the rankings pool
         _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
             getArenaTier(attackerID)
@@ -331,86 +325,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _updateLastActivityTimestamp(defenderID);
 
         duelByAttacker[attackerID].isPending = false;
-    }
-
-    ///@dev function to update the winner player
-    function processWinner(uint256 winnerID) internal {
-        uint256 winnerPoints = _characterRankingPoints[winnerID];
-        uint8 tier = getArenaTier(winnerID);
-        uint256[4] storage winnerTier = _rankingByTier[tier];
-        uint256 winnerPosition;
-        bool winnerFound;
-
-        // check if winner is withing the top 4
-        for (uint8 i = 0; i < winnerTier.length; i++) {
-            if (winnerID == winnerTier[i]) {
-                winnerPosition = i;
-                winnerFound = true;
-                break;
-            }
-        }
-        // if he is found, compare him to the lower index positions
-        if (winnerFound) {
-            winnerPosition = winnerPosition;
-        }
-        // else, compare it to the 4th one, if he is higher then replace the position and start the loop.
-        else if (
-            winnerPoints >=
-            _characterRankingPoints[winnerTier[winnerTier.length - 1]]
-        ) {
-            winnerPosition = winnerTier[winnerTier.length - 1];
-            winnerTier[winnerTier.length - 1] = winnerID;
-        }
-        for (uint256 i = winnerPosition; i >= 0; i--) {
-            if (i <= 0) {
-                break;
-            }
-            if (
-                _characterRankingPoints[winnerTier[winnerPosition]] >=
-                _characterRankingPoints[winnerTier[winnerPosition - 1]]
-            ) {
-                uint256 newPosition = winnerTier[winnerPosition - 1];
-                winnerTier[winnerPosition - 1] = winnerTier[winnerPosition];
-                winnerTier[winnerPosition] = newPosition;
-                winnerPosition = winnerPosition - 1;
-            } else {
-                break;
-            }
-        }
-    }
-
-    function processLoser(uint256 loserID) internal {
-        uint256 loserPoints = _characterRankingPoints[loserID];
-        uint8 tier = getArenaTier(loserID);
-        uint256[4] storage loserTier = _rankingByTier[tier];
-        uint256 loserPosition;
-        bool loserFound;
-        for (uint8 i = 0; i < loserTier.length; i++) {
-            if (loserID == loserTier[i]) {
-                loserPosition = i;
-                loserFound = true;
-                break;
-            }
-        }
-
-        if (loserFound) {
-            for (uint256 i = loserPosition; i <= loserTier.length - 1; i++) {
-                if (i >= loserTier.length - 1) {
-                    break;
-                }
-                if (
-                    _characterRankingPoints[loserTier[loserPosition]] <=
-                    _characterRankingPoints[loserTier[loserPosition + 1]]
-                ) {
-                    uint256 newPosition = loserTier[loserPosition + 1];
-                    loserTier[loserPosition + 1] = loserTier[loserPosition];
-                    loserTier[loserPosition] = newPosition;
-                    loserPosition = loserPosition + 1;
-                } else {
-                    break;
-                }
-            }
-        }
     }
 
     /// @dev withdraws a character and its items from the arena.
@@ -503,11 +417,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return sum;
     }
 
-    /// @dev gets the player's unclaimed rewards
-    function getMyRewards() public view returns (uint256) {
-        return _rewardsByPlayer[msg.sender];
-    }
-
     function getRankingRewardsPool(uint8 tier) public view returns (uint256) {
         return _rankingsPoolByTier[tier];
     }
@@ -592,6 +501,85 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     ///@dev update the respective character's tier rank
+    ///@dev function to update the winner player
+    function processWinner(uint256 winnerID) internal {
+        uint256 winnerPoints = _characterRankingPoints[winnerID];
+        uint8 tier = getArenaTier(winnerID);
+        uint256[4] storage winnerTier = _rankingByTier[tier];
+        uint256 winnerPosition;
+        bool winnerFound;
+
+        // check if winner is withing the top 4
+        for (uint8 i = 0; i < winnerTier.length; i++) {
+            if (winnerID == winnerTier[i]) {
+                winnerPosition = i;
+                winnerFound = true;
+                break;
+            }
+        }
+        // if he is found, compare him to the lower index positions
+        if (winnerFound) {
+            winnerPosition = winnerPosition;
+        }
+        // else, compare it to the 4th one, if he is higher then replace the position and start the loop.
+        else if (
+            winnerPoints >=
+            _characterRankingPoints[winnerTier[winnerTier.length - 1]]
+        ) {
+            winnerPosition = winnerTier[winnerTier.length - 1];
+            winnerTier[winnerTier.length - 1] = winnerID;
+        }
+        for (uint256 i = winnerPosition; i >= 0; i--) {
+            if (i <= 0) {
+                break;
+            }
+            if (
+                _characterRankingPoints[winnerTier[winnerPosition]] >=
+                _characterRankingPoints[winnerTier[winnerPosition - 1]]
+            ) {
+                uint256 newPosition = winnerTier[winnerPosition - 1];
+                winnerTier[winnerPosition - 1] = winnerTier[winnerPosition];
+                winnerTier[winnerPosition] = newPosition;
+                winnerPosition = winnerPosition - 1;
+            } else {
+                break;
+            }
+        }
+    }
+
+    function processLoser(uint256 loserID) internal {
+        uint256 loserPoints = _characterRankingPoints[loserID];
+        uint8 tier = getArenaTier(loserID);
+        uint256[4] storage loserTier = _rankingByTier[tier];
+        uint256 loserPosition;
+        bool loserFound;
+        for (uint8 i = 0; i < loserTier.length; i++) {
+            if (loserID == loserTier[i]) {
+                loserPosition = i;
+                loserFound = true;
+                break;
+            }
+        }
+
+        if (loserFound) {
+            for (uint256 i = loserPosition; i <= loserTier.length - 1; i++) {
+                if (i >= loserTier.length - 1) {
+                    break;
+                }
+                if (
+                    _characterRankingPoints[loserTier[loserPosition]] <=
+                    _characterRankingPoints[loserTier[loserPosition + 1]]
+                ) {
+                    uint256 newPosition = loserTier[loserPosition + 1];
+                    loserTier[loserPosition + 1] = loserTier[loserPosition];
+                    loserTier[loserPosition] = newPosition;
+                    loserPosition = loserPosition + 1;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
 
     /// @dev get the top players of a tier
     function getTopTierPlayers(uint256 characterID)
