@@ -1663,6 +1663,12 @@ export function createStore(web3: Web3) {
         return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(state));
       },
 
+      async fetchRemainingTokenClaimAmountPreTax({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
+      },
+
       async fetchStakeOverviewData({ getters, dispatch }) {
         await Promise.all(
           (getters.availableStakeTypes as StakeType[])
