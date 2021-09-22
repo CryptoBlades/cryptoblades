@@ -104,6 +104,10 @@
                     <div class="xp-gain">
                       +{{getPotentialXp(e)}} XP
                     </div>
+
+                    <div class="skill-gain">
+                      + ~{{formattedSkill(targetExpectedPayouts[i])}}
+                    </div>
                 </div>
 
                 <div class="victory-chance">
@@ -162,6 +166,7 @@ export default {
       selectedWeapon: null,
       fightMultiplier: Number(localStorage.getItem('fightMultiplier')),
       staminaPerFight: 40,
+      targetExpectedPayouts: [],
     };
   },
 
@@ -207,6 +212,7 @@ export default {
         this.selectedWeaponId = null;
       }
       await this.fetchTargets({ characterId, weaponId });
+      await this.getExpectedPayouts();
     },
 
     async updateResults([fightResults, error]) {
@@ -218,7 +224,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -288,6 +294,7 @@ export default {
 
       // Force a quick refresh of targets
       await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
+      await this.getExpectedPayouts();
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
       if (!this.targets.find((target) => target.original === targetToFight.original)) {
         this.waitingResults = false;
@@ -373,6 +380,14 @@ export default {
 
       return choices;
     },
+
+    async getExpectedPayouts() {
+      this.targetExpectedPayouts = [];
+      await this.targets.forEach(async (t) => {
+        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower(t.power);
+        this.targetExpectedPayouts.push(expectedPayout);
+      });
+    }
   },
 
   components: {
@@ -490,14 +505,16 @@ div.encounter.text-center {
 }
 
 .xp-gain,
-.encounter-power {
+.encounter-power,
+.skill-gain {
   color: #9e8a57 !important;
 }
 
 .xp-gain,
 .encounter-power,
 .encounter-element,
-.victory-chance {
+.victory-chance,
+.skill-gain {
   position: absolute;
 }
 
@@ -507,12 +524,17 @@ div.encounter.text-center {
 }
 
 .encounter-power {
-  bottom: 50px;
+  bottom: 60px;
   font-size: 1.5em;
 }
 
 .xp-gain {
-  bottom: 25px;
+  bottom: 40px;
+  font-size: 1em;
+}
+
+.skill-gain {
+  bottom: 20px;
   font-size: 1em;
 }
 

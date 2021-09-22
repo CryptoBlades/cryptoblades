@@ -1625,7 +1625,7 @@ export function createStore(web3: Web3) {
             targetString,
             fightMultiplier
           )
-          .send({ from: state.defaultAccount, gas: '200000' });
+          .send({ from: state.defaultAccount, gas: '300000' });
 
         await dispatch('fetchTargets', { characterId, weaponId });
 
@@ -1655,6 +1655,12 @@ export function createStore(web3: Web3) {
           skillGain,
           bnbGasUsed
         };
+      },
+
+      async fetchExpectedPayoutForMonsterPower({ state }, power) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(state));
       },
 
       async fetchStakeOverviewData({ getters, dispatch }) {
