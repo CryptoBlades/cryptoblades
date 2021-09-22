@@ -40,6 +40,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_PARAM_PAYOUT_INCOME_PERCENT = 9;
     uint256 public constant VAR_PARAM_DAILY_CLAIM_FIGHTS_LIMIT = 10;
     uint256 public constant VAR_PARAM_DAILY_CLAIM_DEPOSIT_PERCENT = 11;
+    uint256 public constant VAR_PARAM_MAX_FIGHT_PAYOUT = 12;
 
     // Mapped user variable(userVars[]) keys, one value per wallet
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
@@ -382,14 +383,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getTokenGainForFight(uint24 monsterPower) public view returns (uint256) {
         // monsterPower / avgPower * payPerFight * powerMultiplier
-        return ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
-            .mul(
-                ABDKMath64x64.sqrt(
-                    // Performance optimization: 1000 = getPowerAtLevel(0)
-                    ABDKMath64x64.divu(monsterPower, 1000)
-                )
-            )
+        uint256 amount = ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
             .mulu(vars[VAR_HOURLY_PAY_PER_FIGHT]);
+        if(amount > vars[VAR_PARAM_MAX_FIGHT_PAYOUT])
+            return vars[VAR_PARAM_MAX_FIGHT_PAYOUT];
+        return amount;
     }
 
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
@@ -804,6 +802,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         if(fromStaked > 0) {
             stakeFromGameImpl.unstakeToGame(playerAddress, fromStaked);
+            _trackIncome(fromStaked);
         }
 
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet, fromStaked);
@@ -811,6 +810,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _payContractStakedOnly(address playerAddress, uint256 convertedAmount) internal {
         stakeFromGameImpl.unstakeToGame(playerAddress, convertedAmount);
+        _trackIncome(convertedAmount);
     }
 
     function _deductPlayerSkillStandard(
@@ -851,12 +851,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             uint256 payPerFight = ABDKMath64x64.divu(vars[VAR_PARAM_PAYOUT_INCOME_PERCENT],100)
                 .mulu(vars[VAR_HOURLY_INCOME]);
             uint256 fights = vars[VAR_HOURLY_FIGHTS];
-            if(fights > 0) { // div by 0 check
+            if(fights > 1000) { // doubles as a div by 0 check
                 payPerFight /= fights;
                 vars[VAR_HOURLY_POWER_AVERAGE] = vars[VAR_HOURLY_POWER_SUM] / fights;
             }
             else {
-                payPerFight /= 10000;
+                payPerFight /= 1000;
                 vars[VAR_HOURLY_POWER_AVERAGE] = 15000;
             }
 
