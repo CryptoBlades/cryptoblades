@@ -56,6 +56,15 @@
         <div class="seperator"></div>
         <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
       </div>
+      <div class="ad-container">
+        <Adsense
+          data-ad-client="ca-pub-6717992096530538"
+          data-ad-slot="5115599573"
+          data-ad-format="auto"
+          data-full-width-responsive="yes"
+          >
+        </Adsense>
+      </div>
     </div>
   </div>
 </template>

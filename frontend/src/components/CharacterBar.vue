@@ -1,13 +1,15 @@
 <template>
   <div class="character-bar">
     <character-display />
-
-    <ins class="adsbygoogle"
-        style="display:block"
-        data-ad-client="ca-pub-6717992096530538"
-        data-ad-slot="5115599573"
-        data-ad-format="auto"
-        data-full-width-responsive="true"></ins>
+        <div class="ad-container">
+        <Adsense
+          data-ad-client="ca-pub-6717992096530538"
+          data-ad-slot="5115599573"
+          data-ad-format="auto"
+          data-full-width-responsive="yes"
+          >
+        </Adsense>
+      </div>
 
     <img src="../assets/infoDivider.png" class="info-divider">
   </div>

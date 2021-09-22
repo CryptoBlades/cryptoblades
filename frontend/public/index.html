@@ -51,7 +51,7 @@
   <div id="app"></div>
   <link rel="stylesheet" href="<%= BASE_URL %>../static/cookies-eu-banner/cookies-eu-banner.default.css">
   <script src="<%= BASE_URL %>../static/cookies-eu-banner/cookies-eu-banner.min.js"></script>
-  <script>
+   <script>
     new CookiesEuBanner(function () {
       window.dataLayer = window.dataLayer || [];
       function gtag() {
@@ -61,13 +61,13 @@
       gtag('config', 'G-C5RLX74PEW');
       console.log("loaded Analytics");
 
-      let adScript = document.createElement('script')
-      adScript.setAttribute('src', 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6717992096530538')
-      document.head.appendChild(adScript)
-      (adsbygoogle = window.adsbygoogle || []).push({});
-      console.log("loaded Ads");
+      // let adScript = document.createElement('script')
+      // adScript.setAttribute('src', 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6717992096530538')
+      // document.head.appendChild(adScript)
+      // (adsbygoogle = window.adsbygoogle || []).push({});
+      // console.log("loaded Ads");
     },true);
-  </script>
+  </script> 
   <!-- built files will be auto injected -->
 </body>
 

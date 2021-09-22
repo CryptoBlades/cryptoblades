@@ -40,18 +40,17 @@
       </b-container>
     </div>
   </div>
-
     <div class="bot-bg-img promotion-decoration">
       <img src="../assets/border-element.png">
     </div>
-
-    <div>
-      <ins class="adsbygoogle"
-          style="display:block"
+        <div>
+      <Adsense
           data-ad-client="ca-pub-6717992096530538"
           data-ad-slot="5115599573"
           data-ad-format="auto"
-          data-full-width-responsive="true"></ins>
+          data-full-width-responsive="yes"
+          >
+        </Adsense>
     </div>
   </div>
 </template>
