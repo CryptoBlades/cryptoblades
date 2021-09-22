@@ -28,7 +28,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     }
 
     uint256 private totalSales;
-    mapping(uint256 => purchaseInfo) public sales; // Needed to build info for APIs
+    mapping(uint256 => purchaseInfo) public sales; // Put all sales in an mapping for easier tracking
     mapping(address => purchaseInfo) public purchaseAddressMapping;
     mapping(uint8 => uint32) public availableLand; // Land that is up for sale. 
     mapping(uint16 => uint16) public chunkZoneLandSales;
@@ -43,7 +43,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
     /* ========== T2 LAND SALE INFO ========== */
     uint32 private t2LandsSold;
-    uint16 private chunksWithLand;
+    uint16 private chunksWithT2Land;
 
     uint8 private constant MAX_LAND = 100;
     uint8 private _allowedLandSalePerChunk;
@@ -101,8 +101,8 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     // Will not overcomplicate the math on this one. Keeping it simple on purpose for gas cost.
     // Limited to t2 because T3 not many and T1 round robins
     function _chunkAvailableForT2(uint16 chunkId) internal view returns (bool) {
-        return chunksWithLand == 0 ||
-            (chunkT2LandSales[chunkId] + 1 < _allowedLandOffset + t2LandsSold / chunksWithLand);
+        return chunksWithT2Land == 0 ||
+            (chunkT2LandSales[chunkId] + 1 < _allowedLandOffset + t2LandsSold / chunksWithT2Land);
     }
 
     modifier t3Available(uint16 chunkId) {
@@ -144,7 +144,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     function giveT2Land(address buyer, uint16 chunkId) public saleAllowed tierAvailable(TIER_TWO) canPurchase(buyer) chunkAvailable(chunkId) restricted {
         // First t2 sale
         if(chunkT2LandSales[chunkId] == 0){
-            chunksWithLand++;
+            chunksWithT2Land++;
         }
 
         t2LandsSold++;
@@ -158,7 +158,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         emit T2Given(buyer, chunkId);
     }
 
-    function giveT3Land(address buyer, uint16 chunkId) public saleAllowed tierAvailable(TIER_THREE) canPurchase(buyer) t3Available(chunkId) restricted {
+    function giveT3Land(address buyer, uint16 chunkId) public saleAllowed tierAvailable(TIER_THREE) canPurchase(buyer) chunkAvailable(chunkId) t3Available(chunkId) restricted {
         t3LandsSold++;
         
         purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_THREE, chunkId);
@@ -274,6 +274,10 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
     function getSoldLand()  public view returns (uint32, uint32, uint32) {
         return (t1LandsSold, t2LandsSold, t3LandsSold);
+    }
+
+    function getPopulatedT2Chunks()  public view returns (uint16) {
+        return chunksWithT2Land;
     }
 
     function getPurchase()  public view returns (uint8, uint32) {
