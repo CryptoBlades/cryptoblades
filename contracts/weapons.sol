@@ -15,6 +15,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades weapon", "CBW");
@@ -139,6 +140,15 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
     }
 
+    modifier minterOnly() {
+        _minterOnly();
+        _;
+    }
+
+    function _minterOnly() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), "Not minter");
+    }
+
     modifier noFreshLookup(uint256 id) {
         _noFreshLookup(id);
         _;
@@ -194,7 +204,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _bonusPower = getBonusPower(id);
     }
 
-    function mint(address minter, uint256 seed, uint8 chosenElement) public restricted returns(uint256) {
+    function mint(address minter, uint256 seed, uint8 chosenElement) public minterOnly returns(uint256) {
         uint256 stars;
         uint256 roll = seed % 100;
         // will need revision, possibly manual configuration if we support more than 5 stars
@@ -217,7 +227,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return mintWeaponWithStars(minter, stars, seed, chosenElement);
     }
 
-    function mintWeaponWithStars(address minter, uint256 stars, uint256 seed, uint8 chosenElement) public restricted returns(uint256) {
+    function mintWeaponWithStars(address minter, uint256 stars, uint256 seed, uint8 chosenElement) public minterOnly returns(uint256) {
         require(stars < 8, "Stars parameter too high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
@@ -234,7 +244,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 properties,
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
-    ) public restricted returns(uint256) {
+    ) public minterOnly returns(uint256) {
 
         uint256 tokenID = tokens.length;
 
