@@ -59,7 +59,7 @@
               >
                 <span
                   class="d-block text-center fix-h24"
-                  v-if="nftPriceInSkill() !== '0'"
+                  v-if="nftPrice && nftPrice !== '0'"
                 >
                   <span
                     v-tooltip.top="{
@@ -74,7 +74,7 @@
                   </span>
                 </span>
                 <b-button
-                  v-if="nftPriceInSkill() !== '0'"
+                  v-if="nftPrice && nftPrice !== '0'"
                   @click="
                     nftId = id;
                     purchaseNft();
@@ -93,7 +93,7 @@
             class="character-list"
             :characterIds="[this.character.id]"
             :showGivenCharacterIds="true"
-            :isMarket="nftPriceInSkill() !== '0'"
+            :isMarket="nftPrice && nftPrice !== '0'"
             :nftDisplay="true"
           >
             <template #above="{ character: { id } }">
@@ -109,7 +109,7 @@
               >
                 <span
                   class="d-block text-center fix-h24"
-                  v-if="nftPriceInSkill() !== '0'"
+                  v-if="nftPrice && nftPrice !== '0'"
                 >
                   <span
                     v-tooltip.top="{
@@ -124,7 +124,7 @@
                 </span>
 
                 <b-button
-                  v-if="nftPriceInSkill() !== '0'"
+                  v-if="nftPrice && nftPrice !== '0'"
                   @click="
                     selectedNftId = id;
                     canPurchase && purchaseNft();
@@ -165,7 +165,7 @@
               >
                 <span
                   class="d-block text-center fix-h24"
-                  v-if="nftPriceInSkill() !== '0'"
+                  v-if="nftPrice && nftPrice !== '0'"
                 >
                   <span
                     v-tooltip.top="{
@@ -180,7 +180,7 @@
                   </span>
                 </span>
                 <b-button
-                  v-if="nftPriceInSkill() !== '0'"
+                  v-if="nftPrice && nftPrice !== '0'"
                   @click="
                     selectedNftId = id;
                     purchaseNft();
