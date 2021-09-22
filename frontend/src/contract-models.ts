@@ -1,5 +1,5 @@
 
-import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState, IPvPFighterState, IDuelByAttacker } from './interfaces';
+import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState, IPvPFighterState, IDuelByAttacker, IDuelResult } from './interfaces';
 import { Nft } from './interfaces/Nft';
 import { IShield } from './interfaces/Shield';
 
@@ -207,5 +207,19 @@ export function duelByAttackerFromContract(data: [string,string,string,boolean])
   const isPending = data[3];
   return {
     attackerId,attackerTrait,defenderId,defenderTrait,createdAt,isPending
+  };
+}
+
+export function duelResultFromContract(data: [string,string,string,string,string,boolean]): IDuelResult {
+  const attackerId = data[0];
+  const defenderId = data[1];
+  const timestamp = data[2];
+  const attackerRoll = data[3];
+  const defenderRoll = data[4];
+  const attackerWon = data[5];
+
+  console.log(data);
+  return {
+    attackerId,attackerRoll,attackerWon,defenderId,defenderRoll,timestamp
   };
 }

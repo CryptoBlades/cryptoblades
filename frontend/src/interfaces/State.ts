@@ -92,7 +92,15 @@ export interface IDuelByAttacker {
   defenderTrait: string | undefined;
   createdAt: string;
   isPending: boolean;
+}
 
+export interface IDuelResult {
+  attackerId: string;
+  attackerRoll: string;
+  attackerWon: boolean;
+  defenderId: string;
+  defenderRoll: string;
+  timestamp: string;
 }
 
 export interface IInventory{

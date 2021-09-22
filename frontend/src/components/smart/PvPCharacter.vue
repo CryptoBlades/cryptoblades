@@ -51,13 +51,14 @@ export default {
       }else{
         this.setCurrentPvPCharacter(characterID);
       }
-
-      await this.$store.dispatch('fetchEntryWager',{characterID});
-      await this.$store.dispatch('fetchWageredSkill',{characterID});
-      await this.$store.dispatch('fetchDuelCost',{characterID});
-      await this.$store.dispatch('fetchIsCharacterInArena',{characterID});
-      await this.$store.dispatch('resetDuelByAttacker');
-      await this.$store.dispatch('getDuelByAttacker',{characterID});
+      await Promise.all([
+        this.$store.dispatch('fetchEntryWager',{characterID}),
+        this.$store.dispatch('fetchWageredSkill',{characterID}),
+        this.$store.dispatch('fetchDuelCost',{characterID}),
+        this.$store.dispatch('fetchIsCharacterInArena',{characterID}),
+        this.$store.dispatch('resetDuelByAttacker'),
+        this.$store.dispatch('getDuelByAttacker',{characterID}),
+      ]);
 
       this.clearAllTicker();
       this.ticker();
@@ -147,7 +148,6 @@ export default {
     position: absolute;
     left: 38%;
     top: 20%;
-    z-index: 100;
 }
 
 .character-in-pvp::before {

@@ -15,7 +15,8 @@
                         <pvp-weapon
                           :weapon="weapon"
                           :currentWeaponId="currentWeaponId"
-                          :inPvP="false"></pvp-weapon>
+                          :inPvP="false"
+                          :isEquipContainer="false"></pvp-weapon>
                   </b-col>
                 </b-row>
               </b-col>
@@ -33,7 +34,8 @@
                       <pvp-shield
                         :shield="shield"
                         :currentShieldId="currentShield.id"
-                        :inPvP="false"></pvp-shield>
+                        :inPvP="false"
+                        :isEquipContainer="false"></pvp-shield>
                   </b-col>
                 </b-row>
               </b-col>
@@ -88,6 +90,8 @@ export default {
 <style>
 
 .inventory-container {
+  height: auto;
+  width: auto;
   font-weight: bold;
   text-align: center;
   color: white;

@@ -34,7 +34,6 @@ export default {
 .pvp-divider {
   text-align: center;
   margin-bottom: 50px;
-  margin-top: 50px;
 }
 
 .pvp-divider-header {

@@ -1,9 +1,13 @@
 <template>
   <div>
+    <div>
+    <pvp-divider>
+    </pvp-divider>
+    </div>
 
-    <button @click="goTo">----Arsenal Preparation</button>
-
-    <b-row id="arena-character-buttons">
+    <b-row
+      id="arena-character-buttons"
+      v-if="!isDuelResult">
       <b-col
         v-for="character in inPvPCharacters"
         :key="character.id">
@@ -15,12 +19,25 @@
     </b-row>
 
     <b-row>
+      <div
+        class="go-back-container">
+        <span
+            @click="goTo">
+          <img
+            id="go-back-img"
+            src="../../assets/go-back.svg"/>GO BACK</span>
+      </div>
+    </b-row>
+
+    <b-row
+      v-if="!isDuelResult">
       <div class="timer-container">
         <span id="timer" v-text="this.pvp.decisionTime"/>
       </div>
     </b-row>
 
-    <b-row>
+    <b-row
+      v-if="!isDuelResult">
       <b-col>
         <b-row>
           <pvp-fighter
@@ -78,9 +95,43 @@
       </b-col>
     </b-row>
 
-    <b-row class="arena-footer">
+    <b-row
+      v-if="isDuelResult">
+      <div class="duel-result-container">
+        <div class="duel-result">
+         <p
+          class="duel-result-text"
+          v-if="duelResult.attackerWon">YOU WIN</p>
+         <p
+          class="duel-result-text"
+          v-if="!duelResult.attackerWon">YOU LOST</p>
+          <span
+          class="duel-result-roll-label">You rolled</span>
+         <span
+          class="duel-result-roll-value"
+          v-text="duelResult.attackerRoll"/><br>
+          <span
+          class="duel-result-roll-label">Enemy rolled</span>
+         <span
+          class="duel-result-roll-value"
+          v-text="duelResult.defenderRoll"/><br>
+        <div
+          class="duel-result-ok-button">
+         <span
+            @click="isDuelResult = !isDuelResult">OK</span>
+        </div>
+        </div>
+      </div>
     </b-row>
 
+    <div class="arena-footer">
+    </div>
+
+    <pvp-duel
+      v-if="isPerformDuel"
+      :attackerId="this.duelResult.attackerId"
+      :defenderId="this.duelResult.defenderId"
+      :isWon="true"></pvp-duel>
 
   </div>
 </template>
@@ -89,8 +140,18 @@
 import { mapGetters, mapMutations, mapState } from 'vuex';
 import PvPCharacter from './PvPCharacter.vue';
 import PvPFighter from './PvPFighter.vue';
+import PvPDuel from './PvPDuel.vue';
+import PvPDivider from './PvPDivider.vue';
 
 export default {
+
+  data(){
+    return{
+      isPerformDuel: false,
+      isDuelResult: false,
+      duelResult: null,
+    };
+  },
 
   computed:{
     ...mapState(['pvp']),
@@ -124,7 +185,12 @@ export default {
 
     async performDuel(characterID){
       this.clearAllTicker();
-      console.log(await this.$store.dispatch('performDuel',{characterID}));
+      this.duelResult = await this.$store.dispatch('performDuel',{characterID});
+      this.isPerformDuel = true;
+      this.isDuelResult = true;
+      setTimeout(() => {
+        this.isPerformDuel = false;
+      },6000);
     },
 
     async withdrawFromArena(characterID){
@@ -181,7 +247,7 @@ export default {
   },
 
   async created(){
-    this.setCurrentPvPCharacter(this.pvp.participatingCharacters[0]);
+    this.setCurrentPvPCharacter(this.currentPvPCharacterId);
     await this.$store.dispatch('getDuelByAttacker',{characterID: this.currentPvPCharacterId});
     this.clearAllTicker();
     this.ticker();
@@ -189,7 +255,9 @@ export default {
 
   components:{
     'pvp-character': PvPCharacter,
-    'pvp-fighter': PvPFighter
+    'pvp-fighter': PvPFighter,
+    'pvp-duel': PvPDuel,
+    'pvp-divider': PvPDivider,
   }
 
 };
@@ -245,6 +313,23 @@ export default {
   width: 25px;
 }
 
+.go-back-container {
+  margin-bottom: 10px;
+  height: 25px;
+  width: 200px;
+  cursor: pointer;
+}
+
+.go-back-container:hover {
+  text-shadow: 0 0 10px #fff, 0 0 20px #fff;
+  animation: burn 1s 1 forwards;
+}
+
+#go-back-img {
+  height: 25px;
+  width: 25px;
+}
+
 .reroll-container {
   margin: auto;
   height: 25px;
@@ -278,6 +363,61 @@ export default {
 #timer {
   color: white;
   font-size: 50px;
+}
+
+.duel-result-container {
+  background-image: url('../../assets/duel-result-bg.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-color: transparent;
+  background-position-x: -83px;
+  background-position-y: -16px;
+  height: 600px;
+  width: 500px;
+  margin: auto;
+  filter: drop-shadow( 0px 0px 10px #fff);
+}
+
+.duel-result {
+  position: relative;
+  top: 50px;
+  text-align: center;
+}
+
+.duel-result-ok-button {
+  font-weight: bold;
+  font-size: 20px;
+  margin: 90px auto;
+  height: 30px;
+  width: 100px;
+  box-shadow: -10px 10px 20px #000;
+  color: #fff;
+}
+
+.duel-result-ok-button:hover {
+  cursor: pointer;
+}
+
+.duel-result-text {
+  font-size: 30px;
+  font-weight: bold;
+  font-family: initial;
+  letter-spacing: 10px;
+  color: #000;
+}
+
+.duel-result-roll-label {
+  margin-right: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #000;
+}
+
+.duel-result-roll-value {
+  font-size: 15px;
+  letter-spacing: 1px;
+  font-weight: bold;
+  color: #fff;
 }
 
 @keyframes burn {

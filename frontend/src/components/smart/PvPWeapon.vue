@@ -1,23 +1,108 @@
 <template>
+<div>
     <div
-        :class="`${setListClassForWeapon(weapon.id,currentWeaponId)}`"
-        @click="setCurrentWeapon(weapon.id)">
+      v-if="!isEquipContainer"
+      :class="`${setListClassForWeapon(weapon.id,currentWeaponId)}`"
+      @click="setCurrentWeapon(weapon.id)">
       <div>
+          <div
+            v-if="weapon.stars >=0 || weapon.stars <=2"
+            id="inventory-weapon-trait-1">
+              <span>
+                <img
+                  class="inventory-weapon-trait-img"
+                  :src="getElementIcon(weapon.stat1Type)"/>
+                    <span :class="getElementColor(weapon.stat1Type)">{{weapon.stat1}}</span>
+                    <span class="inventory-weapon-trait-value">{{weapon.stat1Value}}</span>
+              </span>
+          </div>
+          <div
+            v-if="weapon.stars === 3"
+            id="inventory-weapon-trait-2">
+              <span>
+                <img
+                  class="inventory-weapon-trait-img"
+                  :src="getElementIcon(weapon.stat2Type)"/>
+                    <span :class="getElementColor(weapon.stat2Type)">{{weapon.stat2}}</span>
+                    <span class="inventory-weapon-trait-value">{{weapon.stat2Value}}</span>
+              </span>
+          </div>
+          <div
+            v-if="weapon.stars === 4"
+            id="inventory-weapon-trait-3">
+              <span>
+                <img
+                  class="inventory-weapon-trait-img"
+                  :src="getElementIcon(weapon.stat3Type)"/>
+                    <span :class="getElementColor(weapon.stat3Type)">{{weapon.stat3}}</span>
+                    <span class="inventory-weapon-trait-value">{{weapon.stat3Value}}</span>
+              </span>
+          </div>
+
           <span :class="`${setWeaponPvPStatus(weapon.id)}`"></span>
           <img
             class="inventory-weapon-content"
             :src="getWeaponArt(weapon)"/>
       </div>
     </div>
+
+    <div
+      v-if="isEquipContainer"
+      class="unselected-equipped-weapon"
+      >
+        <div
+          v-if="weapon.stars >=0 || weapon.stars <=2"
+          id="inventory-equipped-weapon-trait-1">
+            <span>
+              <img
+                class="inventory-equipped-weapon-trait-img"
+                :src="getElementIcon(weapon.stat1Type)"/>
+                  <span :class="getElementColor(weapon.stat1Type)">{{weapon.stat1}}</span>
+                  <span class="inventory-equipped-weapon-trait-value">{{weapon.stat1Value}}</span>
+            </span>
+        </div>
+        <div
+          v-if="weapon.stars === 3"
+          id="inventory-equipped-weapon-trait-2">
+            <span>
+              <img
+                class="inventory-equipped-weapon-trait-img"
+                :src="getElementIcon(weapon.stat2Type)"/>
+                  <span :class="getElementColor(weapon.stat2Type)">{{weapon.stat2}}</span>
+                  <span class="inventory-equipped-weapon-trait-value">{{weapon.stat2Value}}</span>
+            </span>
+        </div>
+        <div
+          v-if="weapon.stars === 4"
+          id="inventory-equipped-weapon-trait-3">
+            <span>
+              <img
+                class="inventory-equipped-weapon-trait-img"
+                :src="getElementIcon(weapon.stat3Type)"/>
+                  <span :class="getElementColor(weapon.stat3Type)">{{weapon.stat3}}</span>
+                  <span class="inventory-equipped-weapon-trait-value">{{weapon.stat3Value}}</span>
+            </span>
+        </div>
+
+
+        <img
+          class="inventory-equipped-weapon-content"
+          :src="getWeaponArt(weapon)"/>
+    </div>
+</div>
 </template>
 
 <script>
 import { mapMutations, mapState } from 'vuex';
 import { getWeaponArt } from '../../weapon-arts-placeholder';
+import fireIcon  from '../../assets/elements/fire.png';
+import earthIcon  from '../../assets/elements/earth.png';
+import lightningIcon  from '../../assets/elements/lightning.png';
+import waterIcon  from '../../assets/elements/water.png';
 
 export default {
 
-  props: ['weapon','currentWeaponId','inPvP'],
+  props: ['weapon','currentWeaponId','inPvP','isEquipContainer'],
 
   computed: {
     ...mapState(['pvp']),
@@ -45,6 +130,40 @@ export default {
       else return 'weapon-not-in-pvp';
 
     },
+
+    getElementIcon(statType){
+      if (statType === 0){
+        return fireIcon;
+      }
+      else if (statType === 1){
+        return earthIcon;
+      }
+      else if (statType === 2){
+        return lightningIcon;
+      }
+      else if (statType === 3){
+        return waterIcon;
+      }
+      else
+        return '';
+    },
+
+    getElementColor(statType){
+      if (statType === 0){
+        return 'inventory-weapon-trait-label-fire';
+      }
+      else if (statType === 1){
+        return 'inventory-weapon-trait-label-earth';
+      }
+      else if (statType === 2){
+        return 'inventory-weapon-trait-label-lightning';
+      }
+      else if (statType === 3){
+        return 'inventory-weapon-trait-label-water';
+      }
+      else
+        return 'inventory-weapon-trait-label-pwr';
+    },
   }
 };
 </script>
@@ -54,8 +173,8 @@ export default {
   background: transparent;
   border: 1px dashed #968332;
   border-radius: 10%;
-  height: 60px;
-  width: 60px;
+  height: 90px;
+  width: 90px;
   margin: 10px auto;
 }
 
@@ -67,9 +186,15 @@ export default {
   background: transparent;
   border: 1px none transparent;
   border-radius: 10%;
-  height: 60px;
-  width: 60px;
+  height: 90px;
+  width: 90px;
   margin: 10px auto;
+}
+
+.unselected-equipped-weapon {
+  background: transparent;
+  height: 80px;
+  width: 80px;
 }
 
 .unselected-weapon:hover {
@@ -80,23 +205,104 @@ export default {
   background: transparent;
   border: 2px solid #968332;
   border-radius: 10%;
-  height: 50px;
-  width: 50px;
+  height: 80px;
+  width: 80px;
   margin: 3px auto;
+}
+
+.inventory-equipped-weapon-content {
+  background: transparent;
+  height: 70px;
+  width: 70px;
+  margin: auto;
+}
+
+.inventory-weapon-trait-img {
+  height: 20px;
+  width: 20px;
+}
+
+.inventory-equipped-weapon-trait-img {
+  height: 15px;
+  width: 15px;
+}
+
+.inventory-weapon-trait-label-fire{
+  margin-right: 5px;
+  color: red;
+}
+
+.inventory-weapon-trait-label-earth{
+  margin-right: 5px;
+  color: green;
+}
+
+.inventory-weapon-trait-label-lightning{
+  margin-right: 5px;
+  color: yellow;
+}
+
+.inventory-weapon-trait-label-water{
+  margin-right: 5px;
+  color: cyan;
+}
+
+.inventory-weapon-trait-label-pwr{
+  margin-right: 5px;
+  color: white;
+}
+
+.inventory-weapon-trait-value, .inventory-equipped-weapon-trait-value {
+  color: white;
+}
+
+#inventory-weapon-trait-1 {
+  position: absolute;
+  top: 15px;
+  left: 30px;
+}
+
+
+#inventory-weapon-trait-2 {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+}
+
+#inventory-weapon-trait-3 {
+  position: absolute;
+  top: 45px;
+  left: 30px;
+}
+
+#inventory-equipped-weapon-trait-1 {
+  font-size: 15px;
+  position: absolute;
+}
+
+#inventory-equipped-weapon-trait-2 {
+  font-size: 15px;
+  position: absolute;
+  top: 25px;
+}
+
+#inventory-equipped-weapon-trait-3 {
+  font-size: 15px;
+  position: absolute;
+  top: 44px;
 }
 
 /* PvP Status Styles */
 .weapon-in-pvp {
     color: white;
     height: 20px;
-    width: 50px;
+    width: 75px;
     background-color: rgb(187, 33, 0);
     border-radius: 10%;
     transform: rotate(30deg);
     position: absolute;
-    left: 30%;
-    top: 20%;
-    z-index: 100;
+    left: 28%;
+    top: 30%;
 }
 
 .weapon-in-pvp::before {

@@ -13,7 +13,7 @@
 
 <script>
 import BN from 'bignumber.js';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 import PvPConstants from '../../utils/constants/pvp-constants';
 
 export default {
@@ -62,6 +62,7 @@ export default {
 
   methods: {
     ...mapActions(['enterArena']),
+    ...mapMutations(['setCurrentPvPCharacter']),
 
     enterArena(){
       this.$store.dispatch('enterArena',
@@ -74,6 +75,7 @@ export default {
     goTo(){
       this.$store.dispatch('fetchArenaPage', {page: '1'});
       this.$store.dispatch('fetchParticipatingCharacters');
+      this.setCurrentPvPCharacter(this.currentCharacterId);
     },
 
     arenaAction(){

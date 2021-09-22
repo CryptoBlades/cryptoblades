@@ -1,6 +1,10 @@
 <template>
   <b-row class="pvp-content">
         <b-col id="arsenal-preparation-content">
+
+            <pvp-divider>
+            </pvp-divider>
+
             <b-row id="slider-buttons">
               <b-col
                   v-for="character in ownCharacters"
@@ -26,11 +30,15 @@
                     <div
                         id="equipped-weapon"
                         @click="setCurrentTab(0); hideShieldInventory();">
-                      <img
-                        v-if="this.ownWeapons.length >0"
-                        class="equipped-weapon-content"
-                        :src="getWeaponArt(currentWeapon)"
-                        />
+                      <div
+                        class="equipped-weapon-content">
+                        <pvp-weapon
+                          v-if="this.ownWeapons.length !== 0"
+                          :weapon="currentWeapon"
+                          :currentWeaponId="currentWeaponId"
+                          :inPvP="false"
+                          :isEquipContainer="true"></pvp-weapon>
+                      </div>
                     </div>
                     <div class="equipped-weapon-content no-equip"
                         v-if="this.ownWeapons.length <=0">
@@ -51,11 +59,15 @@
                     <div
                         id="equipped-shield"
                         @click="setCurrentTab(1); hideWeaponInventory();">
-                      <img
-                        v-if="this.ownShields.length > 0"
-                        class="equipped-shield-content"
-                        :src="getShieldArt(currentShield.id)"
-                        />
+                      <div
+                        v-if="this.ownShields.length !== 0"
+                        class="equipped-shield-content">
+                        <pvp-shield
+                          :shield="currentShield"
+                          :currentShieldId="currentShield.id"
+                          :inPvP="false"
+                          :isEquipContainer="true"></pvp-shield>
+                      </div>
                     </div>
                     <div class="equipped-shield-content no-equip"
                         v-if="this.ownShields.length <=0">
@@ -101,11 +113,11 @@
           </b-row>
         </b-col>
 
-          <b-popover :show.sync="showWeaponInventory" custom-class="equipped-container" target="equipped-weapon" triggers="click" placement="right">
+          <b-popover :show.sync="showWeaponInventory" :custom-class="`${getPopoverClass(0)}`" target="equipped-weapon" triggers="click" placement="right">
               <pvp-inventory></pvp-inventory>
           </b-popover>
 
-          <b-popover :show.sync="showShieldInventory" custom-class="equipped-container" target="equipped-shield" triggers="click" placement="right">
+          <b-popover :show.sync="showShieldInventory" :custom-class="`${getPopoverClass(1)}`" target="equipped-shield" triggers="click" placement="right">
               <pvp-inventory></pvp-inventory>
           </b-popover>
   </b-row>
@@ -122,6 +134,9 @@ import legendaryShield from '../../assets/shield2.png';
 import PvPArenaDetails from '../smart/PvPArenaDetails.vue';
 import PvPInventory from './PvPInventory.vue';
 import PvPCharacter from './PvPCharacter.vue';
+import PvPDivider from './PvPDivider.vue';
+import PvPWeapon from './PvPWeapon.vue';
+import PvPShield from './PvPShield.vue';
 
 
 export default {
@@ -181,6 +196,21 @@ export default {
       }
     },
 
+    getPopoverClass(nftType){
+      if (this.ownWeapons.length > 1 && nftType === 0) {
+        return 'equipped-container-multiple';
+      }
+      else if (this.ownWeapons.length === 1) {
+        return 'equipped-container';
+      }
+
+      if (this.ownShields.length > 1 && nftType === 1) {
+        return 'equipped-container-multiple';
+      }
+      else if (this.ownShields.length === 1) {
+        return 'equipped-container';
+      }
+    },
 
   },
 
@@ -205,6 +235,9 @@ export default {
     'pvp-arena-details': PvPArenaDetails,
     'pvp-inventory': PvPInventory,
     'pvp-character': PvPCharacter,
+    'pvp-divider': PvPDivider,
+    'pvp-weapon': PvPWeapon,
+    'pvp-shield': PvPShield
   },
 };
 </script>
@@ -212,9 +245,17 @@ export default {
 <style>
 
 .equipped-container {
-  width: 600px !important;
   height: auto;
   background-color: transparent;
+  box-shadow: 0 0 10px #fff
+}
+
+.equipped-container-multiple {
+  height: 300px;
+  background-color: transparent;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  box-shadow: 0 0 10px #fff
 }
 
 #equipped-weapon {
