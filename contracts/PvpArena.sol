@@ -759,6 +759,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
+        _duelEarningsByCharacter[characterID] = 0;
     }
 
     /// @dev attempts to find an opponent for a character.
@@ -767,10 +768,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         EnumerableSet.UintSet storage fightersInTier = _fightersByTier[tier];
 
-        require(
-            fightersInTier.length() != 0,
-            "No opponents available for this character's level"
-        );
+        require(fightersInTier.length() != 0, "No opponents available in tier");
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
