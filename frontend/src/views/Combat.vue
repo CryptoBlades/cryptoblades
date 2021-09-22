@@ -106,7 +106,7 @@
                     </div>
 
                     <div class="skill-gain">
-                      + ~{{formattedSkill(targetExpectedPayouts[i])}}
+                      + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
                     </div>
                 </div>
 
@@ -166,7 +166,7 @@ export default {
       selectedWeapon: null,
       fightMultiplier: Number(localStorage.getItem('fightMultiplier')),
       staminaPerFight: 40,
-      targetExpectedPayouts: [],
+      targetExpectedPayouts: new Array(4),
     };
   },
 
@@ -212,6 +212,9 @@ export default {
         this.selectedWeaponId = null;
       }
       await this.fetchTargets({ characterId, weaponId });
+    },
+
+    async targets() {
       await this.getExpectedPayouts();
     },
 
@@ -294,7 +297,6 @@ export default {
 
       // Force a quick refresh of targets
       await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
-      await this.getExpectedPayouts();
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
       if (!this.targets.find((target) => target.original === targetToFight.original)) {
         this.waitingResults = false;
@@ -382,11 +384,13 @@ export default {
     },
 
     async getExpectedPayouts() {
-      this.targetExpectedPayouts = [];
-      await this.targets.forEach(async (t) => {
-        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower(t.power);
-        this.targetExpectedPayouts.push(expectedPayout);
-      });
+      if(!this.targets) return;
+      const expectedPayouts = new Array(4);
+      for(let i = 0; i < this.targets.length; i++) {
+        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower(this.targets[i].power);
+        expectedPayouts[i] = expectedPayout;
+      }
+      this.targetExpectedPayouts = expectedPayouts;
     }
   },
 
