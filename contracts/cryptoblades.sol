@@ -873,7 +873,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _payPlayerConverted(address playerAddress, uint256 convertedAmount) internal {
-        skillToken.safeTransfer(playerAddress, convertedAmount);
+        skillToken.transfer(playerAddress, convertedAmount);
     }
 
     function setCharacterMintValue(uint256 cents) public restricted {
@@ -959,15 +959,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function claimTokenRewards(uint256 _claimingAmount) public {
-        // safemath throws error on negative
-        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(_claimingAmount);
 
         if(isDailyTokenClaimAmountExpired()) {
             userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
             userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] = 0;
         }
-        uint256 claimedToday = userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT];
         require(_claimingAmount <= getRemainingTokenClaimAmountPreTax());
+        // safemath throws error on negative
+        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(_claimingAmount);
         userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] += _claimingAmount;
 
         uint256 _tokenRewardsToPayOut = _claimingAmount.sub(
