@@ -304,14 +304,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 wager = fighter.wager;
         uint256 amountToTransfer = getUnclaimedDuelEarnings(characterID);
 
-        // This sets the character's earnings to 0
-        _removeCharacterFromArena(characterID);
-
         if (hasPendingDuel(characterID)) {
             amountToTransfer = amountToTransfer.add(wager.sub(wager.div(4)));
         } else {
             amountToTransfer = amountToTransfer.add(wager);
         }
+
+        // This also sets the character's earnings to 0
+        _removeCharacterFromArena(characterID);
 
         skillToken.safeTransfer(msg.sender, amountToTransfer);
     }
@@ -608,6 +608,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID = fighter.shieldID;
 
         delete fighterByCharacter[characterID];
+        delete duelByAttacker[characterID];
 
         _fightersByPlayer[msg.sender].remove(characterID);
 

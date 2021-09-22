@@ -897,6 +897,14 @@ contract("PvpArena", (accounts) => {
               .toString()
           );
         });
+
+        it("should reset the character's duel", async () => {
+          await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+
+          const hasPendingDuel = await pvpArena.hasPendingDuel(character1ID);
+
+          expect(hasPendingDuel).to.equal(false);
+        });
       });
     });
 
