@@ -1805,7 +1805,7 @@ contract("PvpArena", (accounts) => {
       });
     });
   });
-  describe.only("#rankingBehaviour", () => {
+  describe("#rankingBehaviour", () => {
     describe("entering the arena ", () => {
       it("should fill the rank with the first 4 players", async () => {
         character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");

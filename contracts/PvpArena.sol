@@ -95,7 +95,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev ranking by tier
     mapping(uint8 => uint256[]) private _rankingByTier;
     /// @dev rankPoints by character
-    mapping(uint256 => uint256) private _characterRankingPoints;
+    mapping(uint256 => uint256) public characterRankingPoints;
 
     event NewDuel(
         uint256 indexed attacker,
@@ -301,13 +301,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         // add ranking points to the winner
-        _characterRankingPoints[winnerID] = _characterRankingPoints[winnerID]
-            .add(winningPoints);
+        characterRankingPoints[winnerID] = characterRankingPoints[winnerID].add(
+            winningPoints
+        );
         // subtract ranking points to the loser
-        if (_characterRankingPoints[loserID] <= 3) {
-            _characterRankingPoints[loserID] = 0;
+        if (characterRankingPoints[loserID] <= 3) {
+            characterRankingPoints[loserID] = 0;
         } else {
-            _characterRankingPoints[loserID] = _characterRankingPoints[loserID]
+            characterRankingPoints[loserID] = characterRankingPoints[loserID]
                 .sub(losingPoints);
         }
         //update winner
@@ -501,7 +502,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     ///@dev function to update the rank of the winner
     function processWinner(uint256 winnerID) internal {
-        uint256 winnerPoints = _characterRankingPoints[winnerID];
+        uint256 winnerPoints = characterRankingPoints[winnerID];
         uint8 tier = getArenaTier(winnerID);
         uint256[] storage winnerTier = _rankingByTier[tier];
         uint256 winnerPosition;
@@ -522,7 +523,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // else, compare it to the 4th one, if he is higher then replace the position and start the loop.
         else if (
             winnerPoints >=
-            _characterRankingPoints[winnerTier[winnerTier.length - 1]]
+            characterRankingPoints[winnerTier[winnerTier.length - 1]]
         ) {
             winnerPosition = winnerTier[winnerTier.length - 1];
             winnerTier[winnerTier.length - 1] = winnerID;
@@ -532,8 +533,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 break;
             }
             if (
-                _characterRankingPoints[winnerTier[winnerPosition]] >=
-                _characterRankingPoints[winnerTier[winnerPosition - 1]]
+                characterRankingPoints[winnerTier[winnerPosition]] >=
+                characterRankingPoints[winnerTier[winnerPosition - 1]]
             ) {
                 uint256 newPosition = winnerTier[winnerPosition - 1];
                 winnerTier[winnerPosition - 1] = winnerTier[winnerPosition];
@@ -546,7 +547,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     ///@dev function to update the rank of the loser
     function processLoser(uint256 loserID) internal {
-        uint256 loserPoints = _characterRankingPoints[loserID];
+        uint256 loserPoints = characterRankingPoints[loserID];
         uint8 tier = getArenaTier(loserID);
         uint256[] storage loserTier = _rankingByTier[tier];
         uint256 loserPosition;
@@ -572,7 +573,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 }
                 if (
                     loserPoints <=
-                    _characterRankingPoints[loserTier[loserPosition + 1]]
+                    characterRankingPoints[loserTier[loserPosition + 1]]
                 ) {
                     uint256 newPosition = loserTier[loserPosition + 1];
                     loserTier[loserPosition + 1] = loserTier[loserPosition];
@@ -600,7 +601,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint256)
     {
-        return _characterRankingPoints[characterID];
+        return characterRankingPoints[characterID];
     }
 
     /// @dev checks if a character is in the arena
@@ -675,7 +676,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         public
         restricted
     {
-        _characterRankingPoints[characterID] = newRankingPoints;
+        characterRankingPoints[characterID] = newRankingPoints;
     }
 
     function _getCharacterPowerRoll(uint256 characterID, uint8 opponentTrait)
