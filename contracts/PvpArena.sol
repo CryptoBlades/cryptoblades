@@ -88,8 +88,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => bool) private _weaponsInArena;
     /// @dev shields currently in the arena
     mapping(uint256 => bool) private _shieldsInArena;
-    /// @dev earnings earned by player
-    mapping(address => uint256) private _rewardsByPlayer;
     /// @dev accumulated rewards per tier
     mapping(uint8 => uint256) private _rankingsPoolByTier;
     /// @dev duel earnings per character
@@ -501,8 +499,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return shieldIDs;
     }
 
-    ///@dev update the respective character's tier rank
-    ///@dev function to update the winner player
+    ///@dev function to update the rank of the winner
     function processWinner(uint256 winnerID) internal {
         uint256 winnerPoints = _characterRankingPoints[winnerID];
         uint8 tier = getArenaTier(winnerID);
@@ -547,12 +544,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
     }
 
+    ///@dev function to update the rank of the loser
     function processLoser(uint256 loserID) internal {
         uint256 loserPoints = _characterRankingPoints[loserID];
         uint8 tier = getArenaTier(loserID);
         uint256[] storage loserTier = _rankingByTier[tier];
         uint256 loserPosition;
         bool loserFound;
+
+        // check if the loser is within the top 4 players
         for (uint8 i = 0; i < loserTier.length; i++) {
             if (loserID == loserTier[i]) {
                 loserPosition = i;
@@ -560,7 +560,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 break;
             }
         }
-
+        // if he is found, compare him to the upper positions and replace the rank accordingly
         if (loserFound) {
             for (
                 loserPosition;
@@ -571,7 +571,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                     break;
                 }
                 if (
-                    _characterRankingPoints[loserTier[loserPosition]] <=
+                    loserPoints <=
                     _characterRankingPoints[loserTier[loserPosition + 1]]
                 ) {
                     uint256 newPosition = loserTier[loserPosition + 1];
@@ -673,6 +673,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev function where admins can seta character's ranking points
     function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
         public
+        restricted
     {
         _characterRankingPoints[characterID] = newRankingPoints;
     }
