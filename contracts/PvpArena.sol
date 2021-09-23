@@ -69,6 +69,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint8 public winningPoints;
     /// @dev amount of points lost by losing fight
     uint8 public losingPoints;
+    /// @dev amount of players that are considered for the top ranking
+    uint8 public _maxCharactersPerRank;
 
     /// @dev Fighter by characterID
     mapping(uint256 => Fighter) public fighterByCharacter;
@@ -93,11 +95,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev duel earnings per character
     mapping(uint256 => uint256) private _duelEarningsByCharacter;
     /// @dev ranking by tier
-    mapping(uint8 => uint256[4]) private _rankingByTier;
+    mapping(uint8 => uint256[]) private _rankingByTier;
     /// @dev rankPoints by character
     mapping(uint256 => uint256) private _characterRankingPoints;
-    /// @dev characters by ranking
-    mapping(uint256 => uint256) private _charactersByRanking;
 
     event NewDuel(
         uint256 indexed attacker,
@@ -190,6 +190,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         decisionSeconds = 3 minutes;
         winningPoints = 5;
         losingPoints = 3;
+        _maxCharactersPerRank = 4;
     }
 
     /// @notice enter the arena with a character, a weapon and optionally a shield
@@ -217,10 +218,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             useShield
         );
         // check if tiers are empty and update them if they are empty
-        if (_charactersByRanking[tier] < _rankingByTier[tier].length) {
-            _rankingByTier[tier][_charactersByRanking[tier]] = characterID;
+        uint256 fightersAmount = _fightersByTier[tier].length();
+        if (fightersAmount <= _maxCharactersPerRank) {
+            _rankingByTier[tier].push(characterID);
         }
-        _charactersByRanking[tier]++;
         // character starts unattackable
         _updateLastActivityTimestamp(characterID);
 
@@ -505,7 +506,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function processWinner(uint256 winnerID) internal {
         uint256 winnerPoints = _characterRankingPoints[winnerID];
         uint8 tier = getArenaTier(winnerID);
-        uint256[4] storage winnerTier = _rankingByTier[tier];
+        uint256[] storage winnerTier = _rankingByTier[tier];
         uint256 winnerPosition;
         bool winnerFound;
 
@@ -550,7 +551,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function processLoser(uint256 loserID) internal {
         uint256 loserPoints = _characterRankingPoints[loserID];
         uint8 tier = getArenaTier(loserID);
-        uint256[4] storage loserTier = _rankingByTier[tier];
+        uint256[] storage loserTier = _rankingByTier[tier];
         uint256 loserPosition;
         bool loserFound;
         for (uint8 i = 0; i < loserTier.length; i++) {
@@ -585,7 +586,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function getTopTierPlayers(uint256 characterID)
         public
         view
-        returns (uint256[4] memory)
+        returns (uint256[] memory)
     {
         uint8 tier = getArenaTier(characterID);
         return _rankingByTier[tier];

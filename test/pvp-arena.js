@@ -1232,7 +1232,7 @@ contract("PvpArena", (accounts) => {
         });
       });
     });
-    describe("ranking interactions", () => {
+    describe.only("ranking interactions", () => {
       beforeEach(async () => {});
 
       it("should fill the rank with the first 4 players", async () => {
