@@ -371,7 +371,7 @@ export default Vue.extend({
   },
 
   mounted() {
-    this.gasToken = getConfigValue('currencyToken') || 'BNB';
+    this.gasToken = getConfigValue('currencySymbol') || 'BNB';
   }
 });
 </script>
