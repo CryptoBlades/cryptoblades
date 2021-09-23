@@ -191,23 +191,26 @@
       }
     },
     "links": {},
-    "address": "0x9de48972261924Cd0652D357a9700D615Dd6c05B",
-    "transactionHash": "0x376fe85f89e76d1899ab28c500b70bb873da7aa881b855327e152fba90e79c71"
+    "address": "0x413A7553Bfce459FB69ebE5a0587d6C5447BA3c5",
+    "transactionHash": "0x849865c85bd285f47ac7d1e98676491cbb7b178d6d2cd50e62e6ecc7211fb75b"
   },
   "build/contracts/CharacterEarthTraitChangeConsumables.json": {
     "events": {},
     "links": {},
-    "address": "0x5A76Ba4f13eA0D1F0dB22CdfE2420Df25D46a3dC"
+    "address": "0x5A76Ba4f13eA0D1F0dB22CdfE2420Df25D46a3dC",
+    "transactionHash": "0x9a62dd2820595393dd57ffb3352cd4bbea986be80d441c75ee6972168c90a64c"
   },
   "build/contracts/CharacterFireTraitChangeConsumables.json": {
     "events": {},
     "links": {},
-    "address": "0xA1fa3E149c3e7d5af8Cd1EFED039FC64ff8260a3"
+    "address": "0xA1fa3E149c3e7d5af8Cd1EFED039FC64ff8260a3",
+    "transactionHash": "0x325c51bd62644cd3ab81213a89b707eb341e0b8d69c8d320d6398c72e9f0de86"
   },
   "build/contracts/CharacterLightningTraitChangeConsumables.json": {
     "events": {},
     "links": {},
-    "address": "0x118de12Cc76615d6E0e8F883ca9DAE5F6F503940"
+    "address": "0x118de12Cc76615d6E0e8F883ca9DAE5F6F503940",
+    "transactionHash": "0x191585652482d0f9545f225165e914bcaef6ba62a451c2b8fc628111293e4fbf"
   },
   "build/contracts/CharacterRenameTagConsumables.json": {
     "events": {},
@@ -418,7 +421,8 @@
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {},
     "links": {},
-    "address": "0x9e6b9853cF82f169D6D64d0272E0c6407275Eb93"
+    "address": "0x9e6b9853cF82f169D6D64d0272E0c6407275Eb93",
+    "transactionHash": "0x304b19b69e301bdc13bb79b261bbfd33ac88b71047a21ae4d9b993d635d2b2dd"
   },
   "build/contracts/CryptoBlades.json": {
     "events": {
