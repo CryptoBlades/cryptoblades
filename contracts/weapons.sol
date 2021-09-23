@@ -25,7 +25,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function migrateTo_e55d8c5() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         burnPointMultiplier = 2;
         lowStarBurnPowerPerPoint = 15;
@@ -34,7 +34,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function migrateTo_aa9da90() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         oneFrac = ABDKMath64x64.fromUInt(1);
         powerMultPerPointBasic =  ABDKMath64x64.divu(1, 400);// 0.25%
@@ -43,7 +43,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function migrateTo_951a020() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         // Apparently ERC165 interfaces cannot be removed in this version of the OpenZeppelin library.
         // But if we remove the registration, then while local deployments would not register the interface ID,
@@ -54,7 +54,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function migrateTo_surprise(Promos _promos) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         promos = _promos;
     }
@@ -137,7 +137,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        needRole(hasRole(GAME_ADMIN, msg.sender));
     }
 
     modifier minterOnly() {
@@ -146,7 +146,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _minterOnly() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), "Not minter");
+        needRole(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender));
+    }
+
+    function needRole(bool statement) internal view {
+        require(statement, "NR");
     }
 
     modifier noFreshLookup(uint256 id) {
@@ -155,7 +159,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _noFreshLookup(uint256 id) internal view {
-        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
+        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "NFL");
     }
 
     function getStats(uint256 id) internal view
@@ -228,7 +232,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function mintWeaponWithStars(address minter, uint256 stars, uint256 seed, uint8 chosenElement) public minterOnly returns(uint256) {
-        require(stars < 8, "Stars parameter too high! (max 7)");
+        require(stars < 8, "Stars high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
         return performMintWeapon(minter,
