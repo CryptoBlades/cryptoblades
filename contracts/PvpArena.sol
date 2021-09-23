@@ -530,8 +530,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             winnerPosition = winnerTier[winnerTier.length - 1];
             winnerTier[winnerTier.length - 1] = winnerID;
         }
-        for (uint256 i = winnerPosition; i >= 0; i--) {
-            if (i <= 0) {
+        for (winnerPosition; winnerPosition >= 0; winnerPosition--) {
+            if (winnerPosition <= 0) {
                 break;
             }
             if (
@@ -541,7 +541,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 uint256 newPosition = winnerTier[winnerPosition - 1];
                 winnerTier[winnerPosition - 1] = winnerTier[winnerPosition];
                 winnerTier[winnerPosition] = newPosition;
-                winnerPosition = winnerPosition - 1;
             } else {
                 break;
             }
@@ -563,8 +562,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         if (loserFound) {
-            for (uint256 i = loserPosition; i <= loserTier.length - 1; i++) {
-                if (i >= loserTier.length - 1) {
+            for (
+                loserPosition;
+                loserPosition <= loserTier.length - 1;
+                loserPosition++
+            ) {
+                if (loserPosition >= loserTier.length - 1) {
                     break;
                 }
                 if (
@@ -574,7 +577,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                     uint256 newPosition = loserTier[loserPosition + 1];
                     loserTier[loserPosition + 1] = loserTier[loserPosition];
                     loserTier[loserPosition] = newPosition;
-                    loserPosition = loserPosition + 1;
                 } else {
                     break;
                 }
