@@ -4,16 +4,17 @@ import Web3 from 'web3';
 import _, { isUndefined } from 'lodash';
 import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
-import { INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
+import { getConfigValue, INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
 import {
-  characterFromContract, targetFromContract, weaponFromContract, shieldFromContract,
+  characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract,
+  trinketFromContract, junkFromContract
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
-  IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType
+  IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
-import { approveFee, getFeeInSkillFromUsd } from './contract-call-utils';
+import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
@@ -23,6 +24,7 @@ import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
 import { Nft } from './interfaces/Nft';
 import { getWeaponNameFromSeed } from '@/weapon-name';
+import axios from 'axios';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -44,15 +46,6 @@ function getStakingContracts(contracts: Contracts, stakeType: StakeType): Stakin
     StakingToken: contracts.staking[stakeType]?.StakingToken || null,
     RewardToken: contracts.SkillToken
   };
-}
-
-interface RaidData {
-  expectedFinishTime: string;
-  raiderCount: number;
-  bounty: string;
-  totalPower: string;
-  weaponDrops: string[];
-  staminaDrainSeconds: number;
 }
 
 type WaxBridgeDetailsPayload = Pick<
@@ -87,6 +80,7 @@ export function createStore(web3: Web3) {
       accounts: [],
       defaultAccount: null,
       currentNetworkId: null,
+      skillPriceInUsd: 0,
 
       fightGasOffset: '0',
       fightBaseline: '0',
@@ -101,6 +95,9 @@ export function createStore(web3: Web3) {
       ownedCharacterIds: [],
       ownedWeaponIds: [],
       ownedShieldIds: [],
+      ownedTrinketIds: [],
+      ownedJunkIds: [],
+      ownedKeyLootboxIds: [],
       maxStamina: 0,
       currentCharacterId: null,
       ownedDust: [],
@@ -122,6 +119,9 @@ export function createStore(web3: Web3) {
       characterTransferCooldowns: {},
 
       shields: {},
+      trinkets: {},
+      junk: {},
+      keyboxes: {},
       currentShieldId: null,
       nfts: {},
 
@@ -139,13 +139,18 @@ export function createStore(web3: Web3) {
       },
 
       raid: {
+        index: '0',
         expectedFinishTime: '0',
-        raiderCount: 0,
-        bounty: '0',
-        totalPower: '0',
-        weaponDrops: [],
-        staminaDrainSeconds: 0,
-        isOwnedCharacterRaidingById: {}
+        raiderCount: '0',
+        playerPower: '0',
+        bossPower: '0',
+        bossTrait: '0',
+        status: '0',
+        joinSkill: '0',
+        staminaCost: '0',
+        durabilityCost: '0',
+        xpReward: '0',
+        accountPower: '0',
       },
 
       waxBridgeWithdrawableBnb: '0',
@@ -303,6 +308,9 @@ export function createStore(web3: Web3) {
         let count = 0;
         // add count of various nft types here
         count += state.ownedShieldIds.length;
+        count += state.ownedTrinketIds.length;
+        count += state.ownedJunkIds.length;
+        count += state.ownedKeyLootboxIds.length;
         return count;
       },
 
@@ -421,10 +429,8 @@ export function createStore(web3: Web3) {
         return (stakeType: StakeType): IStakeState => state.staking[stakeType];
       },
 
-      isOwnedCharacterRaiding(state) {
-        if(!featureFlagRaid) return false;
-
-        return (characterId: number): boolean => state.raid.isOwnedCharacterRaidingById[characterId] || false;
+      getRaidState(state): IRaidState {
+        return state.raid;
       },
 
       fightGasOffset(state) {
@@ -462,6 +468,10 @@ export function createStore(web3: Web3) {
         else {
           state.defaultAccount = null;
         }
+      },
+
+      setSkillPriceInUsd(state, payload) {
+        state.skillPriceInUsd = payload;
       },
 
       setContracts(state: IState, payload) {
@@ -511,7 +521,8 @@ export function createStore(web3: Web3) {
       },
 
       updateUserDetails(state: IState, payload) {
-        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability', 'ownedShieldIds'];
+        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability',
+          'ownedShieldIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedKeyLootboxIds'];
         for (const key of keysToAllow) {
           if (Object.hasOwnProperty.call(payload, key)) {
             Vue.set(state, key, payload[key]);
@@ -581,6 +592,30 @@ export function createStore(web3: Web3) {
         Vue.set(state.nfts.shield, shieldId, shield);
       },
 
+      updateTrinket(state: IState, { trinketId, trinket }) {
+        Vue.set(state.trinkets, trinketId, trinket);
+        if(!state.nfts.trinket) {
+          Vue.set(state.nfts, 'trinket', {});
+        }
+        Vue.set(state.nfts.trinket, trinketId, trinket);
+      },
+
+      updateJunk(state: IState, { junkId, junk }) {
+        Vue.set(state.junk, junkId, junk);
+        if(!state.nfts.junk) {
+          Vue.set(state.nfts, 'junk', {});
+        }
+        Vue.set(state.nfts.junk, junkId, junk);
+      },
+
+      updateKeyLootbox(state: IState, { keyLootboxId, keybox }) {
+        Vue.set(state.keyboxes, keyLootboxId, keybox);
+        if(!state.nfts.keybox) {
+          Vue.set(state.nfts, 'keybox', {});
+        }
+        Vue.set(state.nfts.keybox, keyLootboxId, keybox);
+      },
+
       updateWeapon(state: IState, { weaponId, weapon }) {
         Vue.set(state.weapons, weaponId, weapon);
       },
@@ -593,7 +628,6 @@ export function createStore(web3: Web3) {
         Vue.set(state.weaponDurabilities, weaponId, durability);
       },
       updateWeaponRename(state: IState, { weaponId, renameString }) {
-        console.log('rename for ' + weaponId + ' is ' + renameString);
         if(renameString !== undefined){
           Vue.set(state.weaponRenames, weaponId, renameString);
         }
@@ -623,17 +657,19 @@ export function createStore(web3: Web3) {
         Vue.set(state.stakeOverviews, stakeType, data);
       },
 
-      updateRaidData(state, payload: RaidData) {
-        state.raid.expectedFinishTime = payload.expectedFinishTime;
-        state.raid.raiderCount = payload.raiderCount;
-        state.raid.bounty = payload.bounty;
-        state.raid.totalPower = payload.totalPower;
-        state.raid.weaponDrops = payload.weaponDrops;
-        state.raid.staminaDrainSeconds = payload.staminaDrainSeconds;
-      },
-
-      updateAllIsOwnedCharacterRaidingById(state, payload: Record<number, boolean>) {
-        state.raid.isOwnedCharacterRaidingById = payload;
+      updateRaidState(state: IState, payload: { raidState: IRaidState }) {
+        state.raid.index = payload.raidState.index;
+        state.raid.expectedFinishTime = payload.raidState.expectedFinishTime;
+        state.raid.raiderCount = payload.raidState.raiderCount;
+        state.raid.playerPower = payload.raidState.playerPower;
+        state.raid.bossPower = payload.raidState.bossPower;
+        state.raid.bossTrait = payload.raidState.bossTrait;
+        state.raid.status = payload.raidState.status;
+        state.raid.joinSkill = payload.raidState.joinSkill;
+        state.raid.staminaCost = payload.raidState.staminaCost;
+        state.raid.durabilityCost = payload.raidState.durabilityCost;
+        state.raid.xpReward = payload.raidState.xpReward;
+        state.raid.accountPower = payload.raidState.accountPower;
       },
 
       updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
@@ -654,6 +690,7 @@ export function createStore(web3: Web3) {
         await dispatch('setUpContractEvents');
 
         await dispatch('pollAccountsAndNetwork');
+        await dispatch('pollSkillPriceInUsd');
 
         await dispatch('setupCharacterStaminas');
         await dispatch('setupCharacterRenames');
@@ -684,6 +721,22 @@ export function createStore(web3: Web3) {
           ]);
         }
       },
+
+      async pollSkillPriceInUsd({ state, commit }) {
+        const fetchPriceData = async () => {
+          const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
+          const skillPriceInUsd = response.data?.cryptoblades.usd;
+          if (state.skillPriceInUsd !== skillPriceInUsd) {
+            commit('setSkillPriceInUsd', skillPriceInUsd);
+          }
+        };
+        await fetchPriceData();
+        setInterval(async () => {
+          await fetchPriceData();
+        }, 30000);
+      },
+
+
 
       setUpContractEvents({ state, dispatch, commit }) {
         state.eventSubscriptions().forEach(sub => sub.unsubscribe());
@@ -870,12 +923,18 @@ export function createStore(web3: Web3) {
           ownedCharacterIds,
           ownedWeaponIds,
           ownedShieldIds,
+          ownedTrinketIds,
+          ownedJunkIds,
+          ownedKeyLootboxIds,
           maxStamina,
           maxDurability,
         ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state)),
-          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state)),
+          dispatch('getAccountCharacters'),
+          dispatch('getAccountWeapons'),
           state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)),
+          state.contracts().RaidTrinket!.methods.getOwned().call(defaultCallOptions(state)) || [],
+          state.contracts().Junk!.methods.getOwned().call(defaultCallOptions(state)) || [],
+          state.contracts().KeyLootbox!.methods.getOwned().call(defaultCallOptions(state)) || [],
           state.contracts().Characters!.methods.maxStamina().call(defaultCallOptions(state)),
           state.contracts().Weapons!.methods.maxDurability().call(defaultCallOptions(state)),
         ]);
@@ -884,6 +943,9 @@ export function createStore(web3: Web3) {
           ownedCharacterIds: Array.from(ownedCharacterIds),
           ownedWeaponIds: Array.from(ownedWeaponIds),
           ownedShieldIds: Array.from(ownedShieldIds),
+          ownedTrinketIds: Array.from(ownedTrinketIds),
+          ownedJunkIds: Array.from(ownedJunkIds),
+          ownedKeyLootboxIds: Array.from(ownedKeyLootboxIds),
           maxStamina: parseInt(maxStamina, 10),
           maxDurability: parseInt(maxDurability, 10),
         });
@@ -892,6 +954,9 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacters', ownedCharacterIds),
           dispatch('fetchWeapons', ownedWeaponIds),
           dispatch('fetchShields', ownedShieldIds),
+          dispatch('fetchTrinkets', ownedTrinketIds),
+          dispatch('fetchJunks', ownedJunkIds),
+          dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
           dispatch('fetchFightGasOffset'),
@@ -899,20 +964,20 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async updateWeaponIds({ state, dispatch, commit }) {
+      async updateWeaponIds({ dispatch, commit }) {
         if(featureFlagStakeOnly) return;
 
-        const ownedWeaponIds = await state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state));
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
         commit('updateUserDetails', {
           ownedWeaponIds: Array.from(ownedWeaponIds)
         });
         await dispatch('fetchWeapons', ownedWeaponIds);
       },
 
-      async updateCharacterIds({ state, dispatch, commit }) {
+      async updateCharacterIds({ dispatch, commit }) {
         if(featureFlagStakeOnly) return;
 
-        const ownedCharacterIds = await state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state));
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
         commit('updateUserDetails', {
           ownedCharacterIds: Array.from(ownedCharacterIds)
         });
@@ -927,6 +992,36 @@ export function createStore(web3: Web3) {
           ownedShieldIds: Array.from(ownedShieldIds)
         });
         await dispatch('fetchShields', ownedShieldIds);
+      },
+
+      async updateTrinketIds({ state, dispatch, commit }) {
+        if(featureFlagStakeOnly) return;
+
+        const ownedTrinketIds = await state.contracts().RaidTrinket!.methods.getOwned().call(defaultCallOptions(state));
+        commit('updateUserDetails', {
+          ownedTrinketIds: Array.from(ownedTrinketIds)
+        });
+        await dispatch('fetchTrinkets', ownedTrinketIds);
+      },
+
+      async updateJunkIds({ state, dispatch, commit }) {
+        if(featureFlagStakeOnly) return;
+
+        const ownedJunkIds = await state.contracts().Junk!.methods.getOwned().call(defaultCallOptions(state));
+        commit('updateUserDetails', {
+          ownedJunkIds: Array.from(ownedJunkIds)
+        });
+        await dispatch('fetchJunks', ownedJunkIds);
+      },
+
+      async updateKeyLootboxIds({ state, dispatch, commit }) {
+        if(featureFlagStakeOnly) return;
+
+        const ownedKeyLootboxIds = await state.contracts().KeyLootbox!.methods.getOwned().call(defaultCallOptions(state));
+        commit('updateUserDetails', {
+          ownedKeyLootboxIds: Array.from(ownedKeyLootboxIds)
+        });
+        await dispatch('fetchKeyLootboxes', ownedKeyLootboxIds);
       },
 
       async fetchSkillBalance({ state, commit, dispatch }) {
@@ -986,8 +1081,6 @@ export function createStore(web3: Web3) {
 
       async fetchCharacters({ dispatch }, characterIds: (string | number)[]) {
         await Promise.all(characterIds.map(id => dispatch('fetchCharacter', id)));
-
-        await dispatch('fetchOwnedCharacterRaidStatus');
       },
 
       async fetchCharacter({ state, commit, dispatch }, characterId: string | number) {
@@ -1082,12 +1175,55 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async setupWeaponDurabilities({ state, dispatch }) {
-        const [
-          ownedWeaponIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
+      async fetchTrinkets({ dispatch }, trinketIds: (string | number)[]) {
+        await Promise.all(trinketIds.map(id => dispatch('fetchTrinket', id)));
+      },
+
+      async fetchTrinket({ state, commit }, trinketId: string | number) {
+        const { RaidTrinket } = state.contracts();
+        if(!RaidTrinket) return;
+
+        await Promise.all([
+          (async () => {
+            const trinket = trinketFromContract(
+              trinketId,
+              await RaidTrinket.methods.get('' + trinketId).call(defaultCallOptions(state))
+            );
+
+            commit('updateTrinket', { trinketId, trinket });
+          })(),
         ]);
+      },
+
+      async fetchJunks({ dispatch }, junkIds: (string | number)[]) {
+        await Promise.all(junkIds.map(id => dispatch('fetchJunk', id)));
+      },
+
+      async fetchJunk({ state, commit }, junkId: string | number) {
+        const { Junk } = state.contracts();
+        if(!Junk) return;
+
+        await Promise.all([
+          (async () => {
+            const junk = junkFromContract(
+              junkId,
+              await Junk.methods.get('' + junkId).call(defaultCallOptions(state))
+            );
+
+            commit('updateJunk', { junkId, junk });
+          })(),
+        ]);
+      },
+
+      async fetchKeyLootboxes({ commit }, keyLootboxesIds: (string | number)[]) {
+        keyLootboxesIds.forEach(id => {
+          const keybox: Nft = { id, type: 'keybox' };
+          commit('updateKeyLootbox', { keyLootboxId: id, keybox });
+        });
+      },
+
+      async setupWeaponDurabilities({ dispatch }) {
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
 
         for (const weapId of ownedWeaponIds) {
           dispatch('fetchWeaponDurability', weapId);
@@ -1107,12 +1243,8 @@ export function createStore(web3: Web3) {
         }
       },
 
-      async setupWeaponRenames({ state, dispatch }) {
-        const [
-          ownedWeaponIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
-        ]);
+      async setupWeaponRenames({ dispatch }) {
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
 
         for (const weapId of ownedWeaponIds) {
           dispatch('fetchWeaponRename', weapId);
@@ -1134,12 +1266,8 @@ export function createStore(web3: Web3) {
         }
       },
 
-      async setupCharacterStaminas({ state, dispatch }) {
-        const [
-          ownedCharacterIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state))
-        ]);
+      async setupCharacterStaminas({ dispatch }) {
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
 
         for (const charId of ownedCharacterIds) {
           dispatch('fetchCharacterStamina', charId);
@@ -1158,12 +1286,26 @@ export function createStore(web3: Web3) {
           commit('updateCharacterStamina', { characterId, stamina });
         }
       },
-      async setupCharacterRenames({ state, dispatch }) {
-        const [
-          ownedCharacterIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state))
-        ]);
+      async getAccountCharacters({state}) {
+        if(!state.defaultAccount) return;
+        const numberOfCharacters = parseInt(await state.contracts().Characters!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
+        const characters = await Promise.all(
+          [...Array(numberOfCharacters).keys()].map((_, i) =>
+            state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+        );
+        return characters;
+      },
+      async getAccountWeapons({state}) {
+        if(!state.defaultAccount) return;
+        const numberOfWeapons = parseInt(await state.contracts().Weapons!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
+        const weapons = await Promise.all(
+          [...Array(numberOfWeapons).keys()]
+            .map((_, i) => state.contracts().Weapons!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+        );
+        return weapons;
+      },
+      async setupCharacterRenames({ dispatch }) {
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
 
         for (const charId of ownedCharacterIds) {
           dispatch('fetchCharacterRename', charId);
@@ -1192,7 +1334,8 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee()
+          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee(),
+          { allowInGameOnlyFunds: false }
         );
 
         await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
@@ -1204,13 +1347,14 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly }: { num: any, useStakedSkillOnly?: boolean }) {
+      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement }: { num: any, useStakedSkillOnly?: boolean, chosenElement: any }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+        const chosenElementFee = chosenElement === 100 ? 1 : 2;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
-            .mintWeaponNUsingStakedSkill(num)
+            .mintWeaponNUsingStakedSkill(num, chosenElement)
             .send({ from: state.defaultAccount, gas: '5000000' });
         }
         else {
@@ -1222,28 +1366,28 @@ export function createStore(web3: Web3) {
             defaultCallOptions(state),
             defaultCallOptions(state),
             cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-            { feeMultiplier: num * 4 }
+            { feeMultiplier: num * 4 * chosenElementFee, allowInGameOnlyFunds: true }
           );
 
-          await CryptoBlades.methods.mintWeaponN(num).send({ from: state.defaultAccount, gas: '5000000' });
+          await CryptoBlades.methods.mintWeaponN(num, chosenElement).send({ from: state.defaultAccount, gas: '5000000' });
         }
 
         await Promise.all([
           dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp'),
           dispatch('updateWeaponIds'),
           dispatch('setupWeaponDurabilities')
         ]);
       },
 
-      async mintWeapon({ state, dispatch }, { useStakedSkillOnly }: { useStakedSkillOnly?: boolean } = {}) {
+      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement }: { useStakedSkillOnly?: boolean, chosenElement: any }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+        const chosenElementFee = chosenElement === 100 ? 1 : 2;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
-            .mintWeaponUsingStakedSkill()
+            .mintWeaponUsingStakedSkill(chosenElement)
             .send({ from: state.defaultAccount });
         }
         else {
@@ -1254,16 +1398,16 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee()
+            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+            { feeMultiplier: chosenElementFee, allowInGameOnlyFunds: true }
           );
 
-          await CryptoBlades.methods.mintWeapon().send({ from: state.defaultAccount });
+          await CryptoBlades.methods.mintWeapon(chosenElement).send({ from: state.defaultAccount });
         }
 
         await Promise.all([
           dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp'),
           dispatch('updateWeaponIds'),
           dispatch('setupWeaponDurabilities')
         ]);
@@ -1481,7 +1625,7 @@ export function createStore(web3: Web3) {
             targetString,
             fightMultiplier
           )
-          .send({ from: state.defaultAccount, gas: '500000' });
+          .send({ from: state.defaultAccount, gas: '300000' });
 
         await dispatch('fetchTargets', { characterId, weaponId });
 
@@ -1503,13 +1647,26 @@ export function createStore(web3: Web3) {
 
         await dispatch('fetchWeaponDurability', weaponId);
 
-        return [parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
+        return {
+          isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
           playerRoll,
           enemyRoll,
           xpGain,
           skillGain,
           bnbGasUsed
-        ];
+        };
+      },
+
+      async fetchExpectedPayoutForMonsterPower({ state }, power) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(state));
+      },
+
+      async fetchRemainingTokenClaimAmountPreTax({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
       },
 
       async fetchStakeOverviewData({ getters, dispatch }) {
@@ -1643,54 +1800,167 @@ export function createStore(web3: Web3) {
         await dispatch('fetchStakeDetails', { stakeType });
       },
 
-      async fetchRaidData({ state, commit }) {
-        if(featureFlagStakeOnly || !featureFlagRaid) return;
+      async joinRaid({ state }, { characterId, weaponId }) {
+        const { CryptoBlades, SkillToken, Raid1 } = state.contracts();
+        if(!Raid1 || !CryptoBlades || !SkillToken || !state.defaultAccount) {
+          return;
+        }
 
-        const RaidBasic = state.contracts().RaidBasic!;
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          Raid1,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          raidsFunctions => raidsFunctions.getJoinCostInSkill(),
+          {},
+          true
+        );
 
-        const [
-          expectedFinishTime,
-          raiderCount,
-          bounty,
-          totalPower,
-          weaponDrops,
-          staminaDrainSeconds
-        ] = await Promise.all([
-          RaidBasic.methods.getExpectedFinishTime().call(defaultCallOptions(state)),
-          RaidBasic.methods.getRaiderCount().call(defaultCallOptions(state)),
-          Promise.resolve('0'),
-          RaidBasic.methods.getTotalPower().call(defaultCallOptions(state)),
-          RaidBasic.methods.getWeaponDrops().call(defaultCallOptions(state)),
-          RaidBasic.methods.getStaminaDrainSeconds().call(defaultCallOptions(state)),
-        ]);
-
-        const raidData: RaidData = {
-          expectedFinishTime,
-          raiderCount: parseInt(raiderCount, 10),
-          bounty,
-          totalPower,
-          weaponDrops,
-          staminaDrainSeconds: parseInt(staminaDrainSeconds, 10)
-        };
-        commit('updateRaidData', raidData);
+        await Raid1!.methods
+          .joinRaid(characterId, weaponId)
+          .send(defaultCallOptions(state));
       },
 
-      async fetchOwnedCharacterRaidStatus({ state, commit }) {
+      async fetchRaidState({ state, commit }) {
         if(featureFlagStakeOnly || !featureFlagRaid) return;
 
-        const RaidBasic = state.contracts().RaidBasic!;
+        const Raid1 = state.contracts().Raid1!;
 
-        const ownedCharacterIds = _.clone(state.ownedCharacterIds);
-        const characterIsRaidingRes = await Promise.all(
-          ownedCharacterIds.map(
-            cid => RaidBasic.methods.isRaider('' + cid).call(defaultCallOptions(state))
-          )
-        );
-        const isOwnedCharacterRaiding: Record<number, boolean> = _.fromPairs(
-          _.zip(ownedCharacterIds, characterIsRaidingRes)
-        );
+        await Promise.all([
+          (async () => {
+            const raidState: IRaidState = raidFromContract(
+              await Raid1.methods.getRaidData().call(defaultCallOptions(state))
+            );
 
-        commit('updateAllIsOwnedCharacterRaidingById', isOwnedCharacterRaiding);
+            commit('updateRaidState', { raidState });
+          })(),
+        ]);
+      },
+
+      async fetchRaidRewards({ state }, { startIndex, endIndex }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .getEligibleRewardIndexes(startIndex, endIndex)
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchRaidingCharacters({ state }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .getParticipatingCharacters()
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchRaidingWeapons({ state }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .getParticipatingWeapons()
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchRaidJoinEligibility({ state }, { characterID, weaponID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .canJoinRaid(characterID, weaponID)
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchIsRaidStarted({ state }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .isRaidStarted()
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchHaveEnoughEnergy({ state }, { characterID, weaponID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .haveEnoughEnergy(characterID, weaponID)
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchIsCharacterRaiding({ state }, { characterID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .isCharacterRaiding(characterID)
+          .call(defaultCallOptions(state));
+      },
+
+      async fetchIsWeaponRaiding({ state }, { weaponID }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        return await Raid1.methods
+          .isWeaponRaiding(weaponID)
+          .call(defaultCallOptions(state));
+      },
+
+
+      async claimRaidRewards({ state, dispatch }, { rewardIndex }) {
+        const Raid1 = state.contracts().Raid1!;
+
+        const res = await Raid1!.methods
+          .claimReward(rewardIndex)
+          .send(defaultCallOptions(state));
+
+        // claimreward does not reward trinket, those are given at raidcompletion by the bot
+
+        if(res.events.RewardedJunk) {
+          const junkIds = res.events.RewardedJunk.length ?
+            res.events.RewardedJunk.map((x: { returnValues: { tokenID: any; }; }) => x.returnValues.tokenID) :
+            [res.events.RewardedJunk.returnValues.tokenID];
+          await dispatch('fetchJunks', junkIds);
+        }
+
+        if(res.events.RewardedKeyBox) {
+          const keyboxIds = res.events.RewardedKeyBox.length ?
+            res.events.RewardedKeyBox.map((x: { returnValues: { tokenID: any; }; }) => x.returnValues.tokenID) :
+            [res.events.RewardedKeyBox.returnValues.tokenID];
+          await dispatch('fetchKeyLootboxes', keyboxIds);
+        }
+
+        // there may be other events fired that can be used to obtain the exact loot
+        // RewardedWeapon, RewardedJunk, RewardedTrinket, RewardedKeyBox etc
+        const rewards = {
+          rewardsClaimed: res.events.RewardClaimed?.returnValues,
+          weapons: res.events.RewardedWeapon && (res.events.RewardedWeapon.length ?
+            res.events.RewardedWeapon.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedWeapon.returnValues]),
+
+          junks: res.events.RewardedJunk && (res.events.RewardedJunk.length ?
+            res.events.RewardedJunk.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedJunk.returnValues]),
+
+          keyboxes: res.events.RewardedKeyBox && (res.events.RewardedKeyBox.length ?
+            res.events.RewardedKeyBox.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedKeyBox.returnValues]),
+
+          bonusXp: res.events.RewardedXpBonus && (res.events.RewardedXpBonus.length ?
+            res.events.RewardedXpBonus.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedXpBonus.returnValues]),
+
+          dustLb: res.events.RewardedDustLB && (res.events.RewardedDustLB.length ?
+            res.events.RewardedDustLB.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedDustLB.returnValues]),
+
+          dust4b: res.events.RewardedDust4B && (res.events.RewardedDust4B.length ?
+            res.events.RewardedDust4B.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedDust4B.returnValues]),
+
+          dust5b: res.events.RewardedDust5B && (res.events.RewardedDust5B.length ?
+            res.events.RewardedDust5B.map((x: { returnValues: any; })=> x.returnValues) :
+            [res.events.RewardedDust5B.returnValues]),
+        };
+        return rewards;
       },
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
@@ -1833,6 +2103,19 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async fetchMarketNftTargetBuyer({ state }, { nftContractAddr, tokenId }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        // returns the listing's target buyer address
+        return await NFTMarket.methods
+          .getTargetBuyer(
+            nftContractAddr,
+            tokenId
+          )
+          .call(defaultCallOptions(state));
+      },
+
       async fetchMarketTax({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
@@ -1859,9 +2142,10 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
-      async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price }: { nftContractAddr: string, tokenId: string, price: string }) {
-        const { NFTMarket, Weapons, Characters, Shields } = state.contracts();
-        if(!NFTMarket || !Weapons || !Characters || !Shields) return;
+      async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price, targetBuyer }:
+      { nftContractAddr: string, tokenId: string, price: string, targetBuyer: string }) {
+        const { CryptoBlades, SkillToken, NFTMarket, Weapons, Characters, Shields } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !NFTMarket || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
 
         const NFTContract: Contract<IERC721> =
           nftContractAddr === Weapons.options.address
@@ -1872,8 +2156,20 @@ export function createStore(web3: Web3) {
           .approve(NFTMarket.options.address, tokenId)
           .send(defaultCallOptions(state));
 
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          NFTMarket,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          nftMarketFuctions => nftMarketFuctions.addFee(),
+          {},
+        );
+
         const res = await NFTMarket.methods
-          .addListing(nftContractAddr, tokenId, price)
+          .addListing(nftContractAddr, tokenId, price, targetBuyer)
           .send({
             from: state.defaultAccount,
           });
@@ -1895,8 +2191,20 @@ export function createStore(web3: Web3) {
       },
 
       async changeMarketListingPrice({ state }, { nftContractAddr, tokenId, newPrice }: { nftContractAddr: string, tokenId: string, newPrice: string }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
+        const { CryptoBlades, SkillToken, NFTMarket } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !NFTMarket || !state.defaultAccount) return;
+
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          NFTMarket,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          nftMarketFuctions => nftMarketFuctions.changeFee(),
+          {},
+        );
 
         const res = await NFTMarket.methods
           .changeListingPrice(nftContractAddr, tokenId, newPrice)
@@ -1910,6 +2218,25 @@ export function createStore(web3: Web3) {
         } = res.events.ListingPriceChange.returnValues;
 
         return { seller, nftID, newPrice } as { seller: string, nftID: string, newPrice: string };
+      },
+
+      async changeMarketListingTargetBuyer({ state }, { nftContractAddr, tokenId, newTargetBuyer }:
+      { nftContractAddr: string, tokenId: string, newTargetBuyer: string }) {
+        const { NFTMarket } = state.contracts();
+        if(!NFTMarket) return;
+
+        const res = await NFTMarket.methods
+          .changeListingTargetBuyer(nftContractAddr, tokenId, newTargetBuyer)
+          .send({
+            from: state.defaultAccount,
+          });
+
+        const {
+          seller,
+          nftID
+        } = res.events.ListingTargetBuyerChange.returnValues;
+
+        return { seller, nftID, newTargetBuyer } as { seller: string, nftID: string, newTargetBuyer: string };
       },
 
       async cancelMarketListing({ state, dispatch }, { nftContractAddr, tokenId }: { nftContractAddr: string, tokenId: string }) {
@@ -2475,6 +2802,86 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacter', id),
         ]);
       },
+
+      async configureMetaMask({ dispatch }) {
+        const currentNetwork = await web3.eth.net.getId();
+        if(currentNetwork === +getConfigValue('VUE_APP_NETWORK_ID')) return;
+        dispatch('configureChainNet', {
+          networkId: +getConfigValue('VUE_APP_NETWORK_ID'),
+          chainId: getConfigValue('chainId'),
+          chainName: getConfigValue('VUE_APP_EXPECTED_NETWORK_NAME'),
+          currencyName: getConfigValue('currencyName'),
+          currencySymbol: getConfigValue('currencySymbol'),
+          currencyDecimals: +getConfigValue('currencyDecimals'),
+          rpcUrls: getConfigValue('rpcUrls'),
+          blockExplorerUrls: getConfigValue('blockExplorerUrls'),
+          skillAddress: getConfigValue('VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS')
+        });
+      },
+
+      async configureChainNet(
+        { commit },
+        { networkId, chainId, chainName, currencyName, currencySymbol, currencyDecimals, rpcUrls, blockExplorerUrls, skillAddress }:
+        { networkId: number,
+          chainId: string,
+          chainName: string,
+          currencyName: string,
+          currencySymbol: string,
+          currencyDecimals: number,
+          rpcUrls: string[],
+          blockExplorerUrls: string[],
+          skillAddress: string,
+        })
+      {
+        commit('setNetworkId', networkId);
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId }],
+          });
+        } catch (switchError) {
+          try {
+            await (web3.currentProvider as any).request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId,
+                  chainName,
+                  nativeCurrency: {
+                    name: currencyName,
+                    symbol: currencySymbol,
+                    decimals: currencyDecimals,
+                  },
+                  rpcUrls,
+                  blockExplorerUrls,
+                },
+              ],
+            });
+          } catch (addError) {
+            console.error(addError);
+            return;
+          }
+        }
+
+        try {
+          await (web3.currentProvider as any).request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: skillAddress,
+                symbol: 'SKILL',
+                decimals: 18,
+                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+              },
+            },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+
+        window.location.reload();
+      }
     }
   });
 }

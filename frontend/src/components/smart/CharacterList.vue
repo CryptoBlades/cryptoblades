@@ -49,15 +49,42 @@
         :key="c.id"
         @click="$emit('input', c.id)"
       >
-        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+        <div :class="nftDisplay ? 'above-wrapper-nft-display' : 'above-wrapper'" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :character="c"></slot>
         </div>
         <slot name="sold" :character="c"></slot>
+        <nft-options-dropdown :nftId="c.id" :options="options" class="nft-options"/>
         <div class="art">
           <CharacterArt :character="c" :isMarket="isMarket"/>
         </div>
       </li>
     </ul>
+    <b-modal class="centered-modal" ref="character-rename-modal"
+                  @ok="renameCharacterCall">
+                  <template #modal-title>
+                    Rename Character
+                  </template>
+                  <b-form-input type="string"
+                    class="modal-input" v-model="characterRename" placeholder="New Name" />
+                  <span v-if="characterRename !== '' && (characterRename.length < 2 || characterRename.length > 24)">
+                    Name must be 2 - 24 characters long.
+                  </span>
+                  <span v-if="isRenameProfanish">
+                    This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+                  </span>
+                </b-modal>
+        <b-modal class="centered-modal" ref="character-change-trait-modal"
+                  @ok="changeCharacterTraitCall">
+                  <template #modal-title>
+                    Change Character's Trait
+                  </template>
+                  <span >
+                    Pick a trait to switch to.
+                  </span>
+                  <select class="form-control" v-model="targetTrait">
+                    <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
+                  </select>
+                </b-modal>
   </div>
 </template>
 
@@ -65,6 +92,8 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
+import NftOptionsDropdown from '../NftOptionsDropdown.vue';
+import { getCleanName, isProfaneIsh } from '../../rename-censor';
 
 const sorts = [
   { name: 'Any', dir: '' },
@@ -94,6 +123,10 @@ export default {
     isMarket: {
       type: Boolean,
       default: false
+    },
+    nftDisplay: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -105,6 +138,15 @@ export default {
       maxPriceFilter:'',
       priceSort: '',
       sorts,
+      haveRename: 0,
+      characterRename: '',
+      haveChangeTraitFire: 0,
+      haveChangeTraitEarth: 0,
+      haveChangeTraitWater: 0,
+      haveChangeTraitLightning: 0,
+      targetTrait: '',
+      currentCharacterId: null,
+      options: []
     };
   },
 
@@ -142,7 +184,37 @@ export default {
       }
 
       return items;
-    }
+    },
+
+    totalTraitChanges() {
+      return +this.haveChangeTraitFire + +this.haveChangeTraitEarth + +this.haveChangeTraitLightning + +this.haveChangeTraitWater;
+    },
+
+    isRenameProfanish() {
+      return isProfaneIsh(this.characterRename);
+    },
+
+    cleanRename() {
+      return getCleanName(this.characterRename);
+    },
+
+    availableTraits() {
+      const availableTraits = [];
+      if(this.haveChangeTraitFire > 0) {
+        availableTraits.push('Fire');
+      }
+      if(this.haveChangeTraitEarth > 0) {
+        availableTraits.push('Earth');
+      }
+      if(this.haveChangeTraitWater > 0) {
+        availableTraits.push('Water');
+      }
+      if(this.haveChangeTraitLightning > 0) {
+        availableTraits.push('Lightning');
+      }
+
+      return availableTraits;
+    },
   },
 
   watch: {
@@ -152,7 +224,10 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchCharacters']),
+    ...mapActions(['fetchCharacters','fetchTotalRenameTags','renameCharacter','changeCharacterTraitLightning',
+      'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater',
+      'fetchTotalCharacterFireTraitChanges','fetchTotalCharacterEarthTraitChanges',
+      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
 
     getCharacterArt,
 
@@ -185,13 +260,82 @@ export default {
 
       this.$emit('character-filters-changed');
     },
+
+    async loadConsumablesCount() {
+      this.haveRename = await this.fetchTotalRenameTags();
+      this.haveChangeTraitFire = await this.fetchTotalCharacterFireTraitChanges();
+      this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
+      this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
+      this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
+      this.updateOptions();
+    },
+
+    updateOptions() {
+      this.options = [
+        {
+          name: 'Rename',
+          amount: this.haveRename,
+          handler: this.openRenameCharacter
+        },
+        {
+          name: 'Change Trait',
+          amount: this.totalTraitChanges,
+          handler: this.openChangeTrait
+        },
+      ];
+    },
+
+    openRenameCharacter(id) {
+      this.currentCharacterId = id;
+      (this.$refs['character-rename-modal']).show();
+    },
+    async renameCharacterCall(bvModalEvt) {
+      if(this.characterRename.length < 2 || this.characterRename.length > 24){
+        bvModalEvt.preventDefault();
+        return;
+      }
+
+      await this.renameCharacter({id: this.currentCharacterId, name: this.characterRename.trim()});
+      this.haveRename = await this.fetchTotalRenameTags();
+      this.updateOptions();
+    },
+
+    openChangeTrait(id) {
+      this.currentCharacterId = id;
+      (this.$refs['character-change-trait-modal']).show();
+    },
+    async changeCharacterTraitCall(bvModalEvt) {
+      if(!this.targetTrait) {
+        bvModalEvt.preventDefault();
+      }
+      switch(this.targetTrait) {
+      case 'Fire':
+        await this.changeCharacterTraitFire({ id: this.currentCharacterId });
+        this.haveChangeTraitFire = await this.fetchTotalCharacterFireTraitChanges();
+        break;
+      case 'Earth' :
+        await this.changeCharacterTraitEarth({ id: this.currentCharacterId });
+        this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
+        break;
+      case 'Water':
+        await this.changeCharacterTraitWater({ id: this.currentCharacterId });
+        this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
+        break;
+      case 'Lightning':
+        await this.changeCharacterTraitLightning({ id: this.currentCharacterId });
+        this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
+        break;
+      }
+      this.updateOptions();
+    },
   },
 
   components: {
     CharacterArt,
+    NftOptionsDropdown,
   },
 
-  mounted() {
+  async mounted() {
     this.levelFilter = localStorage.getItem('character-levelfilter') || '';
     this.elementFilter = localStorage.getItem('character-elementfilter') || '';
     if(this.isMarket) {
@@ -199,6 +343,7 @@ export default {
       this.minPriceFilter = sessionStorage.getItem('character-price-minfilter') || '';
       this.maxPriceFilter = sessionStorage.getItem('character-price-maxfilter') || '';
     }
+    await this.loadConsumablesCount();
   }
 };
 </script>
@@ -266,6 +411,7 @@ export default {
   box-shadow: 0 0 8px #ffd400;
 }
 
+.above-wrapper-nft-display,
 .above-wrapper {
   position: absolute;
   top: 270px;
@@ -273,6 +419,10 @@ export default {
   right: 0;
   z-index: 100;
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+}
+
+.above-wrapper-nft-display {
+  top: 220px;
 }
 
 .clear-filters-button {
@@ -322,5 +472,11 @@ export default {
 
 .fix-h24 {
   height: 24px;
+}
+
+.nft-options {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 </style>

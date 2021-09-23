@@ -20,20 +20,12 @@
               <h1>Weapons ({{ ownWeapons.length }})</h1>
               <div class="d-flex justify-content-flex-end ml-auto">
                 <b-button
-                  variant="primary"
-                  v-if="canRename()"
-                  @click="openRenameWeapon"
-                  tagname="rename_weapon"
-                  v-tooltip="'Rename Weapon'">
-                  Rename Weapon
-                </b-button>
-                <b-button
                         variant="primary"
                         class="ml-3"
                         v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
                         @click="displayDustReforge()"
                         tagname="reforge_weapon"
-                        v-tooltip="'Burn weapons to buff selected weapon'">
+                        v-tooltip="'Use Dust to buff selected weapon'">
                   Reforge with Dust
                 </b-button>
                 <b-button
@@ -41,49 +33,91 @@
                         class="ml-3"
                         @click="displayDustCreation()"
                         tagname="reforge_weapon"
-                        v-tooltip="'Burn weapons to buff selected weapon'">
+                        v-tooltip="'Burn weapons to create Dust'">
                   Create Dust
                 </b-button>
                 <b-button
                         variant="primary"
                         class="ml-3"
-                        @click="onForgeWeapon"
+                        @click="onClickForge(0)"
                         :disabled="disableForge"
-                        v-tooltip="'Forge new weapon'">
+                        v-tooltip="'Forge a new weapon'">
                   <span v-if="disableForge">Cooling forge...</span>
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">Forge x1 ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i></span>
                 </b-button>
+
                 <b-button
                         variant="primary"
                         class="ml-3"
-                        @click="onForgeWeaponx10()"
-                        :disabled="disableForge"
-                        v-tooltip="'Forge new weapon'">
+                        @click="onClickForge(1)"
+                        :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
+                        v-tooltip="'Forge 10 new weapons'">
                   <span v-if="disableForge">Cooling forge...</span>
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i></span>
+                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">Forge x10 ({{ forgeCost*10 }} SKILL)
+                    <i class="fas fa-plus"></i></span>
                 </b-button>
-
+                  <b-checkbox
+                    variant="primary"
+                    class="mx-3 my-auto"
+                    :disabled="disableUseStakedForForge"
+                    v-model="useStakedForForge">
+                    <span v-if="disableUseStakedForForge"> <b>Not enough staked SKILL<br></b></span>
+                    Spend Staked Funds <br> for 20% Discount!
+                  </b-checkbox>
                 <b-icon-question-circle class="centered-icon" scale="1.5"
                   v-on:click="onShowForgeDetails" v-tooltip.bottom="'Click for forge percentages'"/>
 
                 <b-modal hide-footer ref="forge-details-modal" title="Forge Percentages">
                   <div>
-                    5+ star @ 1% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
+                    5* @ 1% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    4+ star @ 6% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
+                    4*+ @ 6% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    3+ star @ 21% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
+                    3*+ @ 21% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    2+ star @ 56% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
+                    2*+ @ 56% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    1+ star @ 100% chance.
+                    1* @ 100% chance.
                   </div>
                 </b-modal>
 
+                <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element" @hide="onHideModal">
+                  <div class="row justify-content-md-center select-elements-container">
+                    <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
+                    <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
+                    <div id="earth-border" v-on:click="setChosenElement($event, 1)"> </div>
+                    <div id="lightning-border" v-on:click="setChosenElement($event, 2)"> </div>
+                    <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
+                  </div>
+                  <div class="row justify-content-md-center margin-top">
+                    <b-button
+                      v-if="clickedForgeButton === 0"
+                      variant="primary"
+                      class="row justify-content-md-center"
+                      @click="onForgeWeapon"
+                      :disabled="disableConfirmButton"
+                      v-tooltip="'Forge a new weapon'">
+                        <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                          Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee).toFixed(2)}} SKILL)
+                        </span>
+                    </b-button>
+                    <b-button
+                      v-if="clickedForgeButton === 1"
+                      variant="primary"
+                      class="row justify-content-md-center"
+                      @click="onForgeWeaponx10"
+                      :disabled="disableConfirmButton"
+                      v-tooltip="'Forge 10 new weapons'">
+                        <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                          Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee * 10).toFixed(2)}} SKILL)
+                        </span>
+                    </b-button>
+                  </div>
+                </b-modal>
                 <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
                   <template #modal-header>
                     <div v-if="!spin" class="new-weapon-header-text text-center">
@@ -119,8 +153,9 @@
                         tagname="confirm_forge_weapon"
                         class="confirmReforge ml-3"
                         @click="showMassDustConfirmation"
-                        v-tooltip="'Reforge selected weapon with dust'">
-                  Mass Burn
+                        v-tooltip="'Burn selected weapon(s) to Dust'"
+                        :disabled="burnWeaponIds.length === 0">
+                  Burn: {{burnWeaponIds.length}} Weapons
                   <br>
                   ({{burnCost * burnWeaponIds.length }} SKILL)
                 </b-button>
@@ -129,8 +164,8 @@
                         tagname="confirm_forge_weapon"
                         class="confirmReforge ml-3"
                         @click="cancelReforge()"
-                        v-tooltip="'Cancel Reforge'">
-                        Cancel
+                        v-tooltip="'Cancel Weapon Dusting'">
+                        Cancel Dusting
                 </b-button>
               </div>
             </div>
@@ -142,7 +177,7 @@
             <div>
               <div class="col-lg-12 weapon-container">
                 <div class="col-lg-12">
-                  <h1 class="text-center">Select the amount of dust you want to use to reforge this weapon!</h1>
+                  <h1 class="text-center">Select the amount of Dust you want to use to reforge this weapon!</h1>
                 </div>
                 <div class="row">
                   <div class="col-lg-2"></div>
@@ -223,7 +258,8 @@
                                 tagname="confirm_forge_weapon"
                                 class="confirmReforge"
                                 @click="showDustReforgeConfirmation"
-                                v-tooltip="'Reforge selected weapon with dust'">
+                                :disabled="lesserDust == '0' && greaterDust == '0' && powerfulDust == '0'"
+                                v-tooltip="'Reforge selected weapon with Dust'">
                           Confirm Reforge
                           <br>
                           Use: {{lesserDust}} Lesser
@@ -303,7 +339,8 @@
       </b-tab>
       <b-tab>
         <template #title>
-          Shields <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`You can buy shield in Skill shop tab in the market!`"/>
+          Equipment <b-icon-question-circle class="centered-icon" scale="0.8"
+            v-tooltip.bottom="`You can buy a shield in the Skill Shop tab on the market page and loot other NFTs from Raids!`"/>
         </template>
         <div class="row mt-3">
           <div class="col">
@@ -316,22 +353,11 @@
       </b-tab>
       <b-tab>
         <template #title>
-          Dust Storage <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Dust is gained by destroying weapons!`"/>
+          Dust Storage <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Dust is gained by burning weapons.`"/>
         </template>
         <dust-balance-display/>
       </b-tab>
     </b-tabs>
-    <b-modal class="centered-modal" ref="weapon-rename-modal"
-                  @ok="renameWeaponCall()">
-                  <template #modal-title>
-                    Rename Weapon
-                  </template>
-                  <b-form-input type="string"
-                    class="modal-input" v-model="weaponRename" placeholder="New Name" />
-      <span v-if="isRenameProfanish">
-        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
-      </span>
-    </b-modal>
 
     <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              title="Dust Reforge Confirmation" @ok="onReforgeWeaponWithDust">
@@ -364,28 +390,29 @@
 
     <b-modal class="centered-modal text-center" ref="mass-dust-confirmation-modal" title="Reforge Confirmation" @ok="onMassBurnWeapons">
       <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] Please make sure you want to burn these weapons to dust the process is irreversible!
+        <b-icon icon="exclamation-circle" variant="danger" /> Please confirm you want to burn these {{burnWeaponIds.length}} weapon(s) to Dust.
+        This process cannot be undone!
       </div>
       <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" /> No Refunds will be given for accidentally destroyed items!
+        <b-icon icon="exclamation-circle" variant="danger" /> No refunds will be given for accidentally burned items!
       </div>
     </b-modal>
 
     <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" title="Reforge Bonuses">
       <div>
-        5* Burn: 1 5B (75 Bonus Power / 600 Max).
+        5* Burn: 1 5B (75 Bonus Power | 600 Max).
       </div>
       <div>
-        4* Burn: 1 4B (30 Bonus Power/ 750 Max).
+        4* Burn: 1 4B (30 Bonus Power | 750 Max).
       </div>
       <div>
-        3* Burn: 3 LB (45 Bonus Power/ 1500 Max).
+        3* Burn: 3 LB (45 Bonus Power | 1500 Max).
       </div>
       <div>
-        2* Burn: 2 LB (30 Bonus Power/ 1500 Max).
+        2* Burn: 2 LB (30 Bonus Power | 1500 Max).
       </div>
       <div>
-        1* Burn: 1 LB (15 Bonus Power/ 1500 Max).
+        1* Burn: 1 LB (15 Bonus Power | 1500 Max).
       </div>
     </b-modal>
   </div>
@@ -403,7 +430,6 @@ import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
-import { getCleanName, isProfaneIsh } from '../rename-censor';
 
 type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds'>;
 
@@ -411,6 +437,7 @@ interface StoreMappedGetters {
   contracts: Contracts;
   ownWeapons: any[];
   nftsCount: number;
+  stakedSkillBalanceThatCanBeSpent: number;
 }
 
 interface Data {
@@ -428,6 +455,10 @@ interface Data {
   disableForge: boolean;
   newForged: number[];
   currentListofWeapons: string[];
+  selectedElement: number | null,
+  chosenElementFee: number | null,
+  disableConfirmButton: boolean,
+  clickedForgeButton: number | null,
   spin: boolean;
   lesserDust: string,
   greaterDust: string,
@@ -435,10 +466,12 @@ interface Data {
   dust: string[],
   allowDustForge: false,
   burnWeaponIds: any[],
-  weaponRename: string;
-  haveRename: string;
   onError: boolean;
   hideWeapons: any[];
+  useStakedForForge: boolean;
+  disableUseStakedForForge: boolean;
+  disableX10ForgeWithStaked: boolean;
+  forgeCostBN: BN;
 }
 
 export default Vue.extend({
@@ -458,6 +491,10 @@ export default Vue.extend({
       disableForge: false,
       newForged: [],
       currentListofWeapons: [],
+      selectedElement: null,
+      chosenElementFee: null,
+      disableConfirmButton: true,
+      clickedForgeButton: null,
       spin: false,
       lesserDust: '0',
       greaterDust: '0',
@@ -465,10 +502,12 @@ export default Vue.extend({
       dust: [],
       allowDustForge: false,
       burnWeaponIds: [],
-      weaponRename: '',
-      haveRename: '0',
       onError: false,
       hideWeapons: [],
+      useStakedForForge:false,
+      disableUseStakedForForge: false,
+      disableX10ForgeWithStaked: false,
+      forgeCostBN: new BN(0),
     } as Data;
   },
 
@@ -476,22 +515,25 @@ export default Vue.extend({
     ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
-      'getPowerfulDust', 'getGreaterDust', 'getLesserDust'
+      'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
+      'stakedSkillBalanceThatCanBeSpent'
     ]) as Accessors<StoreMappedGetters>),
-
-    isRenameProfanish(): boolean {
-      return isProfaneIsh(this.weaponRename);
-    },
-
-    cleanRename(): string {
-      return getCleanName(this.weaponRename);
-    }
   },
 
   watch: {
     reforgeWeaponId() {
       this.showReforge = false;
       this.burnWeaponId = null;
+    },
+    stakedSkillBalanceThatCanBeSpent(){
+      const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
+
+      if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8))).isLessThan(0)) {
+        this.disableUseStakedForForge = true;
+      }
+      if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
+        this.disableX10ForgeWithStaked = true;
+      }
     }
   },
 
@@ -500,7 +542,15 @@ export default Vue.extend({
     const forgeCost = await this.contracts.CryptoBlades.methods.mintWeaponFee().call({ from: this.defaultAccount });
     const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
     this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
+    const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
+    this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
 
+    if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8))).isLessThan(0)) {
+      this.disableUseStakedForForge = true;
+    }
+    if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
+      this.disableX10ForgeWithStaked = true;
+    }
     const reforgeCost = await this.contracts.CryptoBlades.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
     const skillReforgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(reforgeCost).call({ from: this.defaultAccount });
     this.reforgeCost = new BN(skillReforgeCost).div(new BN(10).pow(18)).toFixed(4);
@@ -512,17 +562,21 @@ export default Vue.extend({
     const burnCost = await this.contracts.CryptoBlades.methods.burnWeaponFee().call({ from: this.defaultAccount });
     const skillBurnCost = await this.contracts.CryptoBlades.methods.usdToSkill(burnCost).call({ from: this.defaultAccount });
     this.burnCost = new BN(skillBurnCost).div(new BN(10).pow(18)).toFixed(4);
-
-    if(!this.contracts.WeaponRenameTagConsumables) return;
-    this.haveRename = await this.contracts.WeaponRenameTagConsumables.methods.getItemCount().call({ from: this.defaultAccount });
   },
 
   methods: {
-    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN', 'renameWeapon',
-      'fetchTotalWeaponRenameTags', 'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons']),
+    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
+      'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons']),
 
+    toggleCheckbox() {
+      this.useStakedForForge = !this.useStakedForForge;
+      if (this.useStakedForForge) localStorage.setItem('useStakedForForge', 'true');
+      else localStorage.setItem('useStakedForForge', 'false');
+    },
     async onForgeWeapon() {
       if(this.disableForge) return;
+
+      (this.$refs['forge-element-selector-modal']as BModal).hide();
 
       const forgeMultiplier = 1;
 
@@ -533,11 +587,11 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await this.mintWeapon();
+        await this.mintWeapon({ useStakedSkillOnly: this.useStakedForForge, chosenElement: this.selectedElement });
 
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not forge sword: Insuffucient funds or transaction was denied.');
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
@@ -548,6 +602,8 @@ export default Vue.extend({
     async onForgeWeaponx10(){
       if(this.disableForge) return;
 
+      (this.$refs['forge-element-selector-modal']as BModal).hide();
+
       this.disableForge = true;
       const forgeMultiplier = 10;
 
@@ -557,11 +613,11 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await this.mintWeaponN({num: forgeMultiplier});
+        await await this.mintWeaponN({ num: forgeMultiplier, useStakedSkillOnly: this.useStakedForForge, chosenElement: this.selectedElement });
 
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not forge sword: Insuffucient funds or transaction was denied.');
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
@@ -581,6 +637,28 @@ export default Vue.extend({
 
     onShowForgeDetails() {
       (this.$refs['forge-details-modal'] as BModal).show();
+    },
+
+    onClickForge(i: number) {
+      this.clickedForgeButton = i;
+      this.chosenElementFee = null;
+      (this.$refs['forge-element-selector-modal']as BModal).show();
+    },
+
+    setChosenElement(ele: any, i: number) {
+      this.selectedElement = i;
+      this.chosenElementFee = i === 100 ? 1 : 2;
+      ele.srcElement.classList.toggle('done');
+      Array.from(ele.srcElement.parentNode.childNodes).forEach((child: any) => {
+        if (child !== ele.srcElement && child.classList.contains('done') === true){
+          child.classList.toggle('done');
+        }
+      });
+      this.disableConfirmButton = false;
+    },
+
+    showReforgeConfirmation() {
+      (this.$refs['reforge-confirmation-modal'] as BModal).show();
     },
 
     showDustReforgeConfirmation() {
@@ -679,7 +757,7 @@ export default Vue.extend({
 
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error('Could not ReForge sword: insufficient funds / Dust or transaction denied.');
+        (this as any).$dialog.notify.error('Could not reforge sword: Insufficient funds, Dust, or transaction was denied.');
       }
     },
 
@@ -692,24 +770,12 @@ export default Vue.extend({
         this.burnWeaponId = null;
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error('Could not burn sword: insufficient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not burn sword: Insufficient funds or transaction was denied.');
       }
     },
-    canRename() {
-      return this.reforgeWeaponId !== null && +this.haveRename > 0;
-    },
-    openRenameWeapon() {
-      (this.$refs['weapon-rename-modal'] as BModal).show();
-    },
-    async renameWeaponCall() {
-      if(this.weaponRename === '' || this.reforgeWeaponId === null){
-        return;
-      }
 
-      await this.renameWeapon({id: this.reforgeWeaponId, name: this.weaponRename});
-      if(this.contracts.WeaponRenameTagConsumables) {
-        this.haveRename = await this.contracts.WeaponRenameTagConsumables.methods.getItemCount().call({ from: this.defaultAccount });
-      }
+    onHideModal(){
+      this.disableConfirmButton = true;
     }
   },
 
@@ -725,6 +791,127 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+
+
+#random-border{
+  background-image: url('../assets/questionmark-icon.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#random-border:hover{
+  background-image: url('../assets/questionmark-icon-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#random-border.done {
+  background-image: url('../assets/questionmark-icon-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#fire-border{
+  background-image: url('../assets/elements/fire.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#fire-border:hover{
+  background-image: url('../assets/elements/fire-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#fire-border.done {
+  background-image: url('../assets/elements/fire-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#earth-border{
+  background-image: url('../assets/elements/earth.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#earth-border:hover{
+  background-image: url('../assets/elements/earth-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#earth-border.done {
+  background-image: url('../assets/elements/earth-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#lightning-border{
+  background-image: url('../assets/elements/lightning.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#lightning-border:hover{
+  background-image: url('../assets/elements/lightning-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#lightning-border.done {
+  background-image: url('../assets/elements/lightning-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#water-border{
+  background-image: url('../assets/elements/water.png');
+  background-size: 4em 4em;
+  background-repeat: no-repeat;
+  width: 4em;
+  height: 4em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#water-border:hover{
+  background-image: url('../assets/elements/water-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
+
+#water-border.done {
+  background-image: url('../assets/elements/water-45.png');
+  background-position: center;
+  border: 2px solid white;
+  transform: rotate(45deg);
+}
 
 .new-weapon-header-text{
    color: #9e8a57;
@@ -791,6 +978,24 @@ export default Vue.extend({
 .centered-icon {
   align-self: center;
   margin-left: 5px;
+}
+
+.elements-modal{
+  width: 10%;
+  height: 10%;
+  margin-left: 3%;
+  margin-right: 3%;
+}
+
+img.elements-modal:hover {
+  transform:scale(1.4)
+}
+
+.margin-top{
+  margin-top: 1.7em;
+}
+.select-elements-container {
+  margin-top: 0.7em;
 }
 
 @media (max-width: 1000px) {

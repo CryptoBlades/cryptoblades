@@ -12,20 +12,25 @@
 
         <b-dropdown-item @click="onClaimTokens()"><i class="fa fa-coins mr-2"></i>Claim Skill </b-dropdown-item>
 
-        <b-dropdown-item @click.native="$router.push('leaderboard')" class="gtag-link-others" tagname="leaderboard_screen">
+        <b-dropdown-item :to="{ name: 'leaderboard' }" class="gtag-link-others" tagname="leaderboard_screen">
         <i class="fa fa-trophy mr-2"></i>Leaderboard
         </b-dropdown-item>
 
-        <b-dropdown-item @click.native="$router.push('portal')"><i class="fa fa-dungeon mr-2"></i>Portal</b-dropdown-item>
+        <b-dropdown-item :to="{ name: 'portal' }"><i class="fa fa-dungeon mr-2"></i>Portal</b-dropdown-item>
 
         <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank"><i class="fa fa-book mr-2"></i>Wiki <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
+
+        <b-dropdown-item :to="{ name: 'nft-display' }">
+          <img src="https://seiyria.com/gameicons-font/svg/crystal-ball.svg" class="nft-display-icon"/>
+           NFT Display
+        </b-dropdown-item>
 
         </b-dropdown-group>
         <hr class="border-light">
 
         <b-dropdown-group class="mb-2">
 
-       <b-dropdown-item  @click.native="$router.push('options')">
+       <b-dropdown-item :to="{ name: 'options' }">
         <i class="fa fa-cog mr-2"></i>Options
         </b-dropdown-item>
         </b-dropdown-group>
@@ -84,6 +89,7 @@ interface Data {
   showGraphics: boolean;
   hideRewards: boolean;
   hideWalletWarning: boolean;
+  showSkillInUsd: boolean;
 }
 
 interface StoreMappedGetters {
@@ -102,6 +108,7 @@ export default Vue.extend({
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+    this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
   },
 
   data() {
@@ -109,6 +116,7 @@ export default Vue.extend({
       showGraphics: false,
       hideRewards: false,
       hideWalletWarning: false,
+      showSkillInUsd: false,
       ClaimStage
     } as Data;
   },
@@ -188,8 +196,22 @@ export default Vue.extend({
 
       Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
     },
+
+    toggleShowSkillInUsd() {
+      this.showSkillInUsd = !this.showSkillInUsd;
+      if (this.showSkillInUsd) localStorage.setItem('showSkillInUsd', 'true');
+      else localStorage.setItem('showSkillInUsd', 'false');
+
+      Events.$emit('setting:showSkillInUsd', { value: this.showSkillInUsd });
+    },
   }
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.nft-display-icon {
+  margin-left: -3px;
+  height: 20px;
+  filter: invert(75%) sepia(8%) saturate(243%) hue-rotate(8deg) brightness(96%) contrast(81%);
+}
+</style>

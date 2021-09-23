@@ -13,4 +13,14 @@ export interface Nft {
   stat2Value?: number;
   stat3Value?: number;
   nftPrice?: number;
+  amount?: number;
+  effect?: number;
+}
+
+export type NftType = 'weapon' | 'character' | 'shield';
+
+export const allNftTypes: NftType[] = ['weapon', 'character', 'shield'];
+
+export function isNftType(nftType: string): nftType is NftType {
+  return allNftTypes.includes(nftType as NftType);
 }
