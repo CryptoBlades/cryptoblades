@@ -70,7 +70,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev amount of points lost by losing fight
     uint8 public losingPoints;
     /// @dev amount of players that are considered for the top ranking
-    uint8 public _maxCharactersPerRank;
+    uint8 private _maxCharactersPerRank;
 
     /// @dev Fighter by characterID
     mapping(uint256 => Fighter) public fighterByCharacter;
