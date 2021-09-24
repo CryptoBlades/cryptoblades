@@ -129,7 +129,7 @@ export default Vue.extend({
     },
 
     canClaimTokens(): boolean {
-      if(toBN(this.skillRewards).lte(0)) {
+      if(toBN(this.skillRewards).lte(0) || toBN(this.remainingTokenClaimAmountPreTax).lte(0)) {
         return false;
       }
 
