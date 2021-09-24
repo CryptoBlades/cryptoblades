@@ -227,15 +227,15 @@ export default Vue.extend({
 });
 </script>
 
-<style>
+<style scoped>
 
 .rewards-claimable-icon {
   margin-right: 5px;
   align-self: center;
 }
 
-.rewards-info .dropdown-item.disabled {
-  opacity: 50%;
+.rewards-info >>> .dropdown-item.disabled {
+  opacity: 50% !important;
 }
 
 </style>
