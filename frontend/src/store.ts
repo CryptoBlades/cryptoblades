@@ -241,7 +241,7 @@ export function createStore(web3: Web3) {
         };
       },
       getExchangeUrl() {
-        return  getConfigValue('exchangeUrl');
+        return getConfigValue('exchangeUrl');
       },
 
       ownCharacters(state, getters) {
@@ -1664,6 +1664,7 @@ export function createStore(web3: Web3) {
       },
 
       async fetchRemainingTokenClaimAmountPreTax({ state }) {
+        if(!_.isFunction(state.contracts)) return;
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
         return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
