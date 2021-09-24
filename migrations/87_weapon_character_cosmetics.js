@@ -1,5 +1,6 @@
 const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
+const CryptoBlades = artifacts.require("CryptoBlades");
 const Blacksmith = artifacts.require("Blacksmith");
 const Weapons = artifacts.require("Weapons");
 const WeaponCosmetics = artifacts.require("WeaponCosmetics");
@@ -7,7 +8,10 @@ const Characters = artifacts.require("Characters");
 const CharacterCosmetics = artifacts.require("CharacterCosmetics");
 
 module.exports = async function (deployer, network, accounts) {
-  const weapons = await Weapons.deployed();
+
+  await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
+
+  const weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
   
   const weaponCosmetics = await deployProxy(WeaponCosmetics, [weapons.address], { deployer });
   
