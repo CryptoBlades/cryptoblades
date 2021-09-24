@@ -53,7 +53,7 @@
                         :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
                         v-tooltip="'Forge 10 new weapons'">
                   <span v-if="disableForge">Cooling forge...</span>
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">Forge x10 ({{ forgeCost*10 }} SKILL)
+                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">Forge x10 ({{ (forgeCost*10).toFixed(4) }} SKILL)
                     <i class="fas fa-plus"></i></span>
                 </b-button>
                   <b-checkbox
@@ -85,7 +85,7 @@
                   </div>
                 </b-modal>
 
-                <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element" @hide="onHideModal">
+                <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element">
                   <div class="row justify-content-md-center select-elements-container">
                     <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
                     <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
@@ -430,8 +430,9 @@ import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
+import { fromWeiEther, toBN } from '@/utils/common';
 
-type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds'>;
+type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds' | 'skillBalance'>;
 
 interface StoreMappedGetters {
   contracts: Contracts;
@@ -457,7 +458,6 @@ interface Data {
   currentListofWeapons: string[];
   selectedElement: number | null,
   chosenElementFee: number | null,
-  disableConfirmButton: boolean,
   clickedForgeButton: number | null,
   spin: boolean;
   lesserDust: string,
@@ -493,7 +493,6 @@ export default Vue.extend({
       currentListofWeapons: [],
       selectedElement: null,
       chosenElementFee: null,
-      disableConfirmButton: true,
       clickedForgeButton: null,
       spin: false,
       lesserDust: '0',
@@ -512,12 +511,17 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds']) as Accessors<StoreMappedState>),
+    ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds','skillBalance']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
       'stakedSkillBalanceThatCanBeSpent'
     ]) as Accessors<StoreMappedGetters>),
+
+    disableConfirmButton(): boolean {
+      return this.selectedElement === null || !this.chosenElementFee ||
+        toBN(fromWeiEther(this.skillBalance)).lt(this.forgeCostBN.times(this.chosenElementFee).times(this.clickedForgeButton ? 10 : 1));
+    }
   },
 
   watch: {
@@ -595,6 +599,7 @@ export default Vue.extend({
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
+        this.selectedElement = null;
       }
       this.relayFunction(forgeMultiplier);
     },
@@ -621,6 +626,7 @@ export default Vue.extend({
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
+        this.selectedElement = null;
       }
       this.relayFunction(forgeMultiplier);
 
@@ -654,7 +660,6 @@ export default Vue.extend({
           child.classList.toggle('done');
         }
       });
-      this.disableConfirmButton = false;
     },
 
     showReforgeConfirmation() {
@@ -773,10 +778,6 @@ export default Vue.extend({
         (this as any).$dialog.notify.error('Could not burn sword: Insufficient funds or transaction was denied.');
       }
     },
-
-    onHideModal(){
-      this.disableConfirmButton = true;
-    }
   },
 
   components: {
