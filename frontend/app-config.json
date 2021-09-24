@@ -121,7 +121,8 @@
           "currencySymbol": "BNB",
           "currencyDecimals": "18",
           "rpcUrls": ["https://bsc-dataseed.binance.org/"],
-          "blockExplorerUrls": ["https://bscscan.com/"]
+          "blockExplorerUrls": ["https://bscscan.com/"],
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab"
         },
         "HECO": {
           "VUE_APP_NETWORK_ID":"128",
@@ -150,7 +151,8 @@
           "currencySymbol": "HT",
           "currencyDecimals": "18",
           "rpcUrls": ["https://http-mainnet.hecochain.com"],
-          "blockExplorerUrls": ["https://hecoinfo.com"]
+          "blockExplorerUrls": ["https://hecoinfo.com"],
+          "exchangeUrl": "https://swap.butterswap.me/#/swap?outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405"
         },
         "OKEX": {
           "VUE_APP_NETWORK_ID":"66",
@@ -179,7 +181,8 @@
           "currencySymbol": "OKT",
           "currencyDecimals": "18",
           "rpcUrls": ["https://exchainrpc.okex.org"],
-          "blockExplorerUrls": ["https://www.oklink.com/okexchain/"]
+          "blockExplorerUrls": ["https://www.oklink.com/okexchain/"],
+          "exchangeUrl": ""
         }
       }
     }
