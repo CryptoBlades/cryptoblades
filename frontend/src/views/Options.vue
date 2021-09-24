@@ -127,7 +127,7 @@ export default Vue.extend({
     if(!localStorage.getItem('showCosmetics')) {
       localStorage.setItem('showCosmetics', 'true');
     }
-    this.showCosmetics = localStorage.getItem('showCosmetics') === 'true';
+    this.showCosmetics = localStorage.getItem('showCosmetics') !== 'false';
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
     this.currentChain = localStorage.getItem('currentChain') || 'BSC';
     this.supportedChains = config.supportedChains;

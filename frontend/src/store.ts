@@ -1292,12 +1292,8 @@ export function createStore(web3: Web3) {
         }
       },
 
-      async setupWeaponCosmetics({ state, dispatch }) {
-        const [
-          ownedWeaponIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyWeapons().call(defaultCallOptions(state))
-        ]);
+      async setupWeaponCosmetics({ dispatch }) {
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
 
         for (const weapId of ownedWeaponIds) {
           dispatch('fetchWeaponCosmetic', weapId);
@@ -1319,7 +1315,7 @@ export function createStore(web3: Web3) {
         }
       },
 
-      async setupCharacterStaminas({ state, dispatch }) {
+      async setupCharacterStaminas({ dispatch }) {
         const ownedCharacterIds = await dispatch('getAccountCharacters');
 
         for (const charId of ownedCharacterIds) {
@@ -1377,12 +1373,8 @@ export function createStore(web3: Web3) {
           commit('updateCharacterRename', { characterId, renameString });
         }
       },
-      async setupCharacterCosmetics({ state, dispatch }) {
-        const [
-          ownedCharacterIds
-        ] = await Promise.all([
-          state.contracts().CryptoBlades!.methods.getMyCharacters().call(defaultCallOptions(state))
-        ]);
+      async setupCharacterCosmetics({ dispatch }) {
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
 
         for (const charId of ownedCharacterIds) {
           dispatch('fetchCharacterCosmetic', charId);

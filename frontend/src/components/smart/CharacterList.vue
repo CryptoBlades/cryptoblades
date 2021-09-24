@@ -421,7 +421,7 @@ export default {
     },
 
     checkStorage() {
-      this.showCosmetics = localStorage.getItem('showCosmetics') === 'true';
+      this.showCosmetics = localStorage.getItem('showCosmetics') !== 'false';
     },
   },
 
