@@ -127,10 +127,16 @@
     <div class="arena-footer">
     </div>
 
-    <pvp-duel
+    <!-- <pvp-duel
       v-if="isPerformDuel"
       :attackerId="this.duelResult.attackerId"
       :defenderId="this.duelResult.defenderId"
+      :isWon="true"></pvp-duel> -->
+
+    <pvp-duel
+      v-if="isPerformDuel"
+      :attackerId="1"
+      :defenderId="2"
       :isWon="true"></pvp-duel>
 
   </div>
@@ -147,7 +153,7 @@ export default {
 
   data(){
     return{
-      isPerformDuel: false,
+      isPerformDuel: true,
       isDuelResult: false,
       duelResult: null,
     };
