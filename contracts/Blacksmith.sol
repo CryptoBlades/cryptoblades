@@ -25,8 +25,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_EARTH = 4;
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_WATER = 5;
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_LIGHTNING = 6;
-    uint256 public constant ITEM_COSMETIC_WEAPON = 7;
-    uint256 public constant ITEM_COSMETIC_CHARACTER = 8;
+    uint256 public constant ITEM_COSMETIC_WEAPON = 7; // series
+    uint256 public constant ITEM_COSMETIC_CHARACTER = 8; // series
 
     uint256 public constant NUMBERPARAMETER_GIVEN_TICKETS = uint256(keccak256("GIVEN_TICKETS"));
     uint256 public constant NUMBERPARAMETER_SPENT_TICKETS = uint256(keccak256("SPENT_TICKETS"));
@@ -47,8 +47,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     mapping(uint256 => uint256) public numberParameters;
 
-    mapping(uint32 => uint256) public cosmeticWeaponFlatPrices;
-    mapping(uint32 => uint256) public cosmeticCharacterFlatPrices;    /* ========== INITIALIZERS AND MIGRATORS ========== */
+    mapping(uint256 => mapping(uint256 => uint256)) public itemSeriesFlatPrices;
+
+    /* ========== INITIALIZERS AND MIGRATORS ========== */
 
     function initialize(Weapons _weapons, IRandoms _randoms)
         public
@@ -98,42 +99,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
     }
 
-    function migrateTo_eefb9b1(
-        address _weaponCosmetic,
-        address _characterCosmetic
-    ) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-
-        itemAddresses[ITEM_COSMETIC_WEAPON] = _weaponCosmetic;
-        itemAddresses[ITEM_COSMETIC_CHARACTER] = _characterCosmetic;      
-       
-       // basic effects
-       for(uint32 i = 1; i < 6; i++) {
-            cosmeticWeaponFlatPrices[i] = 0.1 ether;
-            cosmeticCharacterFlatPrices[i] = 0.1 ether;
-        }
-        
-        // premium effects weapons
-        for(uint32 i = 6; i < 16; i++) {
-            cosmeticWeaponFlatPrices[i] = 0.5 ether;
-        }
-        // plain borders weapons
-        cosmeticWeaponFlatPrices[16] = 0.4 ether;
-        cosmeticWeaponFlatPrices[17] = 0.3 ether;
-        cosmeticWeaponFlatPrices[18] = 0.2 ether;
-        cosmeticWeaponFlatPrices[19] = 0.1 ether;
-
-        // premium effects characters
-        for(uint32 i = 6; i < 15; i++) {
-            cosmeticCharacterFlatPrices[i] = 0.5 ether;
-        }        
-        // plain borders characters
-        cosmeticCharacterFlatPrices[15] = 0.4 ether;
-        cosmeticCharacterFlatPrices[16] = 0.3 ether;
-        cosmeticCharacterFlatPrices[17] = 0.2 ether;
-        cosmeticCharacterFlatPrices[18] = 0.1 ether;
-    }
-
     /* ========== VIEWS ========== */
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -180,9 +145,13 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         _;
     }
 
-     modifier isAdmin() {
-         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+    modifier isAdmin() {
+         _isAdmin();
         _;
+    }
+    
+    function _isAdmin() internal view {
+         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
     }
 
     /* ========== Generic Getters ========== */
@@ -194,6 +163,30 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     function getFlatPriceOfItem(uint256 itemIndex) public view returns(uint256) {
         return itemFlatPrices[itemIndex];
     }
+
+    function getFlatPriceOfSeriesItem(uint256 itemIndex, uint256 seriesIndex) public view returns(uint256) {
+        return itemSeriesFlatPrices[itemIndex][seriesIndex];
+    }
+
+    /* ========== Generic Setters ========== */
+
+    function setAddressOfItem(uint256 itemIndex, address to) external isAdmin {
+        itemAddresses[itemIndex] = to;
+    }
+
+    function setFlatPriceOfItem(uint256 itemIndex, uint256 flatWeiPrice) external isAdmin {
+        itemFlatPrices[itemIndex] = flatWeiPrice;
+    }
+
+    function setFlatPriceOfItemSeries(uint256 itemIndex,
+        uint256[] calldata seriesIndices,
+        uint256[] calldata seriesPrices
+    ) external isAdmin {
+        for(uint i = 0; i < seriesIndices.length; i++) {
+            itemSeriesFlatPrices[itemIndex][seriesIndices[i]] = seriesPrices[i];
+        }
+    }
+
     /* ========== Character Rename ========== */
 
     function setCharacterRenamePrice(uint256 newPrice) external isAdmin {
@@ -282,32 +275,32 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     /* ========== Weapon cosmetics ========== */
     function setWeaponCosmeticPrice(uint32 cosmetic, uint256 newPrice) external isAdmin {
         require(cosmetic > 0 && newPrice > 0, 'invalid request');
-        cosmeticWeaponFlatPrices[cosmetic] = newPrice;
+        itemSeriesFlatPrices[ITEM_COSMETIC_WEAPON][cosmetic] = newPrice;
     }
 
      function getWeaponCosmeticPrice(uint32 cosmetic) public view returns (uint256){
-        return cosmeticWeaponFlatPrices[cosmetic];
+        return itemSeriesFlatPrices[ITEM_COSMETIC_WEAPON][cosmetic];
     }
 
     function purchaseWeaponCosmetic(uint32 cosmetic, uint256 paying) public {
-        require(paying > 0 && paying == cosmeticWeaponFlatPrices[cosmetic], 'Invalid price');
-        game.payContractTokenOnly(msg.sender, cosmeticWeaponFlatPrices[cosmetic]);
+        require(paying > 0 && paying == itemSeriesFlatPrices[ITEM_COSMETIC_WEAPON][cosmetic], 'Invalid price');
+        game.payContractTokenOnly(msg.sender, itemSeriesFlatPrices[ITEM_COSMETIC_WEAPON][cosmetic]);
         Cosmetics(itemAddresses[ITEM_COSMETIC_WEAPON]).giveCosmetic(msg.sender, cosmetic, 1);
     }
 
     /* ========== Character cosmetics ========== */
     function setCharacterCosmeticPrice(uint32 cosmetic, uint256 newPrice) external isAdmin {
         require(cosmetic > 0 && newPrice > 0, 'invalid request');
-        cosmeticCharacterFlatPrices[cosmetic] = newPrice;
+        itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic] = newPrice;
     }
 
      function getCharacterCosmeticPrice(uint32 cosmetic) public view returns (uint256){
-        return cosmeticCharacterFlatPrices[cosmetic];
+        return itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic];
     }
 
     function purchaseCharacterCosmetic(uint32 cosmetic, uint256 paying) public {
-        require(paying > 0 && paying == cosmeticCharacterFlatPrices[cosmetic], 'Invalid price');
-        game.payContractTokenOnly(msg.sender, cosmeticCharacterFlatPrices[cosmetic]);
+        require(paying > 0 && paying == itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic], 'Invalid price');
+        game.payContractTokenOnly(msg.sender, itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic]);
         Cosmetics(itemAddresses[ITEM_COSMETIC_CHARACTER]).giveCosmetic(msg.sender, cosmetic, 1);
     }
 }
