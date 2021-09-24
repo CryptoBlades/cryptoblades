@@ -231,8 +231,14 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return mintWeaponWithStars(minter, stars, seed, chosenElement);
     }
 
+    function mintGiveawayWeapon(address to, uint256 stars, uint8 chosenElement) external minterOnly returns(uint256) {
+        // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
+        return mintWeaponWithStars(to, stars, uint256(keccak256(abi.encodePacked(now, tokens.length))), chosenElement);
+    }
+
     function mintWeaponWithStars(address minter, uint256 stars, uint256 seed, uint8 chosenElement) public minterOnly returns(uint256) {
-        require(stars < 8, "Stars high! (max 7)");
+        require(stars < 8);
+        require(chosenElement == 100 || (chosenElement>= 0 && chosenElement<= 3));
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
         return performMintWeapon(minter,
