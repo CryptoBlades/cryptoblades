@@ -138,7 +138,7 @@
               </div>
             </div>
             <div class="" v-if="showBlacksmith">
-              <weapon-grid v-model="reforgeWeaponId" />
+              <weapon-grid :showNftOptions="true" v-model="reforgeWeaponId" />
             </div>
           </div>
         </div>
@@ -358,7 +358,6 @@
         <dust-balance-display/>
       </b-tab>
     </b-tabs>
-
     <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              title="Dust Reforge Confirmation" @ok="onReforgeWeaponWithDust">
       <div class="row">
@@ -472,6 +471,9 @@ interface Data {
   disableUseStakedForForge: boolean;
   disableX10ForgeWithStaked: boolean;
   forgeCostBN: BN;
+  targetSkin: string;
+  haveWeaponCosmetic1: number;
+  haveWeaponCosmetic2: number;
 }
 
 export default Vue.extend({
@@ -507,6 +509,9 @@ export default Vue.extend({
       disableUseStakedForForge: false,
       disableX10ForgeWithStaked: false,
       forgeCostBN: new BN(0),
+      targetSkin: '',
+      haveWeaponCosmetic1: 0,
+      haveWeaponCosmetic2: 0
     } as Data;
   },
 
