@@ -11,8 +11,8 @@
 
         <b-dropdown-item
           :disabled="!canClaimTokens"
-          @click="onClaimTokens()" class="gtag-link-others" tagname="claim_skill"
-           v-tooltip.bottom="'Tax is being reduced by 1% per day.' + (!canClaimTokens ? withdrawalInfoText : '')">
+          @click="onClaimTokens()" class="rewards-info gtag-link-others" tagname="claim_skill"
+           v-tooltip.bottom="'Tax is being reduced by 1% per day. ' + (!canClaimTokens ? withdrawalInfoText : '')">
             SKILL
             <div class="pl-3">{{ formattedSkillReward }}</div>
             <div class="pl-3">
@@ -227,11 +227,15 @@ export default Vue.extend({
 });
 </script>
 
-<style scoped>
+<style>
 
 .rewards-claimable-icon {
   margin-right: 5px;
   align-self: center;
+}
+
+.rewards-info .dropdown-item.disabled {
+  opacity: 50%;
 }
 
 </style>
