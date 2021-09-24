@@ -47,11 +47,15 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
   callOpts: WithOptionalFrom<Web3JsCallOptions>,
   approveOpts: WithOptionalFrom<Web3JsSendOptions>,
   fn: MethodsFunction<T>,
-  { feeMultiplier }: { feeMultiplier?: string | number } = {},
-  fnReturnsSkill: boolean = false,
+  { feeMultiplier, allowInGameOnlyFunds }: { feeMultiplier?: string | number, allowInGameOnlyFunds?: boolean } = {},
+  fnReturnsSkill: boolean = false
 ) {
   const callOptsWithFrom: Web3JsCallOptions = { from, ...callOpts };
   const approveOptsWithFrom: Web3JsSendOptions = { from, ...approveOpts };
+
+  if(allowInGameOnlyFunds === undefined) {
+    allowInGameOnlyFunds = true;
+  }
 
   let feeInSkill = new BigNumber(
     fnReturnsSkill ?
@@ -70,10 +74,9 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
 
   try {
     feeInSkill = await cryptoBladesContract.methods
-      .getSkillNeededFromUserWallet(from, feeInSkill.toString())
+      .getSkillNeededFromUserWallet(from, feeInSkill.toString(), allowInGameOnlyFunds)
       .call(callOptsWithFrom)
       .then(n => new BigNumber(n));
-
   }
   catch(err) {
     const paidByRewardPool = feeInSkill.lte(skillRewardsAvailable);
@@ -84,7 +87,7 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
   }
 
   const allowance = await skillToken.methods
-    .allowance(from, cryptoBladesContract.options.address)
+    .allowance(from, feeContract !== cryptoBladesContract ? feeContract.options.address : cryptoBladesContract.options.address)
     .call(callOptsWithFrom);
 
   if(feeInSkill.lte(allowance)) {
@@ -92,7 +95,7 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
   }
 
   return await skillToken.methods
-    .approve(cryptoBladesContract.options.address, feeInSkill.toString())
+    .approve(feeContract !== cryptoBladesContract ? feeContract.options.address : cryptoBladesContract.options.address, feeInSkill.toString())
     .send(approveOptsWithFrom);
 }
 
@@ -104,7 +107,7 @@ export async function approveFee(
   callOpts: WithOptionalFrom<Web3JsCallOptions>,
   approveOpts: WithOptionalFrom<Web3JsSendOptions>,
   fn: CryptoBladesMethodsFunction,
-  opts: { feeMultiplier?: string | number } = {}
+  opts: { feeMultiplier?: string | number, allowInGameOnlyFunds?: boolean } = {}
 ) {
   return await approveFeeFromAnyContract(
     cryptoBladesContract,

@@ -25,7 +25,7 @@
                         v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
                         @click="displayDustReforge()"
                         tagname="reforge_weapon"
-                        v-tooltip="'Burn weapons to buff selected weapon'">
+                        v-tooltip="'Use Dust to buff selected weapon'">
                   Reforge with Dust
                 </b-button>
                 <b-button
@@ -33,7 +33,7 @@
                         class="ml-3"
                         @click="displayDustCreation()"
                         tagname="reforge_weapon"
-                        v-tooltip="'Burn weapons to buff selected weapon'">
+                        v-tooltip="'Burn weapons to create Dust'">
                   Create Dust
                 </b-button>
                 <b-button
@@ -41,7 +41,7 @@
                         class="ml-3"
                         @click="onClickForge(0)"
                         :disabled="disableForge"
-                        v-tooltip="'Forge new weapon'">
+                        v-tooltip="'Forge a new weapon'">
                   <span v-if="disableForge">Cooling forge...</span>
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">Forge x1 ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i></span>
                 </b-button>
@@ -51,9 +51,10 @@
                         class="ml-3"
                         @click="onClickForge(1)"
                         :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
-                        v-tooltip="'Forge new weapon'">
+                        v-tooltip="'Forge 10 new weapons'">
                   <span v-if="disableForge">Cooling forge...</span>
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">x10 ({{ forgeCost*10 }} SKILL) <i class="fas fa-plus"></i></span>
+                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">Forge x10 ({{ (forgeCost*10).toFixed(4) }} SKILL)
+                    <i class="fas fa-plus"></i></span>
                 </b-button>
                   <b-checkbox
                     variant="primary"
@@ -68,23 +69,23 @@
 
                 <b-modal hide-footer ref="forge-details-modal" title="Forge Percentages">
                   <div>
-                    5+ star @ 1% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
+                    5* @ 1% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    4+ star @ 6% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
+                    4*+ @ 6% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    3+ star @ 21% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
+                    3*+ @ 21% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    2+ star @ 56% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
+                    2*+ @ 56% chance. Estimated cost {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
                   </div>
                   <div>
-                    1+ star @ 100% chance.
+                    1* @ 100% chance.
                   </div>
                 </b-modal>
 
-                <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element" @hide="onHideModal">
+                <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element">
                   <div class="row justify-content-md-center select-elements-container">
                     <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
                     <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
@@ -99,7 +100,7 @@
                       class="row justify-content-md-center"
                       @click="onForgeWeapon"
                       :disabled="disableConfirmButton"
-                      v-tooltip="'Forge new weapon'">
+                      v-tooltip="'Forge a new weapon'">
                         <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                           Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee).toFixed(2)}} SKILL)
                         </span>
@@ -110,7 +111,7 @@
                       class="row justify-content-md-center"
                       @click="onForgeWeaponx10"
                       :disabled="disableConfirmButton"
-                      v-tooltip="'Forge new weapon'">
+                      v-tooltip="'Forge 10 new weapons'">
                         <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                           Forge ({{Number.parseFloat(forgeCost * this.chosenElementFee * 10).toFixed(2)}} SKILL)
                         </span>
@@ -152,8 +153,9 @@
                         tagname="confirm_forge_weapon"
                         class="confirmReforge ml-3"
                         @click="showMassDustConfirmation"
-                        v-tooltip="'Reforge selected weapon with dust'">
-                  Mass Burn
+                        v-tooltip="'Burn selected weapon(s) to Dust'"
+                        :disabled="burnWeaponIds.length === 0">
+                  Burn: {{burnWeaponIds.length}} Weapons
                   <br>
                   ({{burnCost * burnWeaponIds.length }} SKILL)
                 </b-button>
@@ -162,8 +164,8 @@
                         tagname="confirm_forge_weapon"
                         class="confirmReforge ml-3"
                         @click="cancelReforge()"
-                        v-tooltip="'Cancel Reforge'">
-                        Cancel
+                        v-tooltip="'Cancel Weapon Dusting'">
+                        Cancel Dusting
                 </b-button>
               </div>
             </div>
@@ -175,7 +177,7 @@
             <div>
               <div class="col-lg-12 weapon-container">
                 <div class="col-lg-12">
-                  <h1 class="text-center">Select the amount of dust you want to use to reforge this weapon!</h1>
+                  <h1 class="text-center">Select the amount of Dust you want to use to reforge this weapon!</h1>
                 </div>
                 <div class="row">
                   <div class="col-lg-2"></div>
@@ -257,7 +259,7 @@
                                 class="confirmReforge"
                                 @click="showDustReforgeConfirmation"
                                 :disabled="lesserDust == '0' && greaterDust == '0' && powerfulDust == '0'"
-                                v-tooltip="'Reforge selected weapon with dust'">
+                                v-tooltip="'Reforge selected weapon with Dust'">
                           Confirm Reforge
                           <br>
                           Use: {{lesserDust}} Lesser
@@ -338,7 +340,7 @@
       <b-tab>
         <template #title>
           Equipment <b-icon-question-circle class="centered-icon" scale="0.8"
-            v-tooltip.bottom="`You can buy shield in Skill shop tab in the market and loot other nfts from Raids!`"/>
+            v-tooltip.bottom="`You can buy a shield in the Skill Shop tab on the market page and loot other NFTs from Raids!`"/>
         </template>
         <div class="row mt-3">
           <div class="col">
@@ -351,7 +353,7 @@
       </b-tab>
       <b-tab>
         <template #title>
-          Dust Storage <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Dust is gained by destroying weapons!`"/>
+          Dust Storage <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Dust is gained by burning weapons.`"/>
         </template>
         <dust-balance-display/>
       </b-tab>
@@ -387,28 +389,29 @@
 
     <b-modal class="centered-modal text-center" ref="mass-dust-confirmation-modal" title="Reforge Confirmation" @ok="onMassBurnWeapons">
       <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" /> [WARNING] Please make sure you want to burn these weapons to dust the process is irreversible!
+        <b-icon icon="exclamation-circle" variant="danger" /> Please confirm you want to burn these {{burnWeaponIds.length}} weapon(s) to Dust.
+        This process cannot be undone!
       </div>
       <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" /> No Refunds will be given for accidentally destroyed items!
+        <b-icon icon="exclamation-circle" variant="danger" /> No refunds will be given for accidentally burned items!
       </div>
     </b-modal>
 
     <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" title="Reforge Bonuses">
       <div>
-        5* Burn: 1 5B (75 Bonus Power / 600 Max).
+        5* Burn: 1 5B (75 Bonus Power | 600 Max).
       </div>
       <div>
-        4* Burn: 1 4B (30 Bonus Power/ 750 Max).
+        4* Burn: 1 4B (30 Bonus Power | 750 Max).
       </div>
       <div>
-        3* Burn: 3 LB (45 Bonus Power/ 1500 Max).
+        3* Burn: 3 LB (45 Bonus Power | 1500 Max).
       </div>
       <div>
-        2* Burn: 2 LB (30 Bonus Power/ 1500 Max).
+        2* Burn: 2 LB (30 Bonus Power | 1500 Max).
       </div>
       <div>
-        1* Burn: 1 LB (15 Bonus Power/ 1500 Max).
+        1* Burn: 1 LB (15 Bonus Power | 1500 Max).
       </div>
     </b-modal>
   </div>
@@ -426,8 +429,9 @@ import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
+import { fromWeiEther, toBN } from '@/utils/common';
 
-type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds'>;
+type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards'>;
 
 interface StoreMappedGetters {
   contracts: Contracts;
@@ -453,7 +457,6 @@ interface Data {
   currentListofWeapons: string[];
   selectedElement: number | null,
   chosenElementFee: number | null,
-  disableConfirmButton: boolean,
   clickedForgeButton: number | null,
   spin: boolean;
   lesserDust: string,
@@ -492,7 +495,6 @@ export default Vue.extend({
       currentListofWeapons: [],
       selectedElement: null,
       chosenElementFee: null,
-      disableConfirmButton: true,
       clickedForgeButton: null,
       spin: false,
       lesserDust: '0',
@@ -514,12 +516,22 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds']) as Accessors<StoreMappedState>),
+    ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds','skillBalance', 'inGameOnlyFunds', 'skillRewards']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
       'stakedSkillBalanceThatCanBeSpent'
     ]) as Accessors<StoreMappedGetters>),
+
+    totalSkillBalance(): BN {
+      console.log(toBN(fromWeiEther(this.skillRewards)).plus(toBN(fromWeiEther(this.inGameOnlyFunds))).plus(toBN(fromWeiEther(this.skillBalance))).toString());
+      return toBN(fromWeiEther(this.skillRewards)).plus(toBN(fromWeiEther(this.inGameOnlyFunds))).plus(toBN(fromWeiEther(this.skillBalance)));
+    },
+
+    disableConfirmButton(): boolean {
+      return this.selectedElement === null || !this.chosenElementFee ||
+        this.totalSkillBalance.lt(this.forgeCostBN.times(this.chosenElementFee).times(this.clickedForgeButton ? 10 : 1));
+    }
   },
 
   watch: {
@@ -593,10 +605,11 @@ export default Vue.extend({
 
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not forge sword: Insuffucient funds or transaction was denied.');
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
+        this.selectedElement = null;
       }
       this.relayFunction(forgeMultiplier);
     },
@@ -619,10 +632,11 @@ export default Vue.extend({
 
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error('Could not forge sword: insuffucient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not forge sword: Insuffucient funds or transaction was denied.');
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
+        this.selectedElement = null;
       }
       this.relayFunction(forgeMultiplier);
 
@@ -656,7 +670,6 @@ export default Vue.extend({
           child.classList.toggle('done');
         }
       });
-      this.disableConfirmButton = false;
     },
 
     showReforgeConfirmation() {
@@ -759,7 +772,7 @@ export default Vue.extend({
 
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error('Could not ReForge sword: insufficient funds / Dust or transaction denied.');
+        (this as any).$dialog.notify.error('Could not reforge sword: Insufficient funds, Dust, or transaction was denied.');
       }
     },
 
@@ -772,13 +785,9 @@ export default Vue.extend({
         this.burnWeaponId = null;
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error('Could not burn sword: insufficient funds or transaction denied.');
+        (this as any).$dialog.notify.error('Could not burn sword: Insufficient funds or transaction was denied.');
       }
     },
-
-    onHideModal(){
-      this.disableConfirmButton = true;
-    }
   },
 
   components: {

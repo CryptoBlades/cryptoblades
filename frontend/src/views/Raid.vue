@@ -26,9 +26,9 @@
                 </div>
                 <div class="progress" style="width: 100%">
                   <div class="progress-bar progress-bar-striped progress-bar-animated players-progress-bar"
-                    role="progressbar" :style="[{'width': formattedWinChance, 'background-color': calculateProgressBarColor()}]"></div>
+                    role="progressbar" :style="[{'width': calculatePlayersProgressBarWidth(), 'background-color': calculateProgressBarColor()}]"></div>
                   <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger boss-progress-bar"
-                    role="progressbar" :style="[{'width': (100 - calculateWinChance()) + '%'}]"></div>
+                    role="progressbar" :style="[{'width': calculateBossProgressBarWidth() }]"></div>
                 </div>
               </li>
             </ul>
@@ -60,7 +60,7 @@
           <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 order-xs-first order-sm-first boss-col">
             <div class="boss-box">
               <div class="raid-title">
-                <span class="title mr-3"> {{ bossName }} </span>
+                <span class="title mr-3"> #{{ raidIndex }} {{ bossName }} </span>
                 <span :class="traitNumberToName(bossTrait).toLowerCase() + '-icon trait-icon'" />
               </div>
               <div class="img-responsive boss-img">
@@ -123,7 +123,7 @@
             stamina </span>,
             <span class="badge badge-secondary">{{ durabilityCost }}
             durability </span> and
-            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" :skill-min-decimals="1"/></span>
+            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" :skillMinDecimals="0" :skillMaxDecimals="5"/></span>
           </div>
         </div>
       </div>
@@ -349,7 +349,7 @@ export default Vue.extend({
     ]) as RaidMappedGetters),
 
     calculateWinChance(): string {
-      return (Math.min(Math.max(+this.totalPower / +this.bossPower / 2 * 100, 1), 99)).toFixed(0);
+      return (Math.min(Math.max(+this.totalPower / +this.bossPower / 2 * 100, 0), 99.99)).toFixed(2);
     },
 
     calculateProgressBarColor(): string {
@@ -360,6 +360,14 @@ export default Vue.extend({
       } else {
         return 'green';
       }
+    },
+
+    calculatePlayersProgressBarWidth(): string {
+      return `${Math.round(+this.calculateWinChance())}%`;
+    },
+
+    calculateBossProgressBarWidth(): string {
+      return `${Math.round(100 - +this.calculateWinChance())}%`;
     },
 
     convertWeiToSkill(wei: string): string {

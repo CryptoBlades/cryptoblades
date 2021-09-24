@@ -49,7 +49,7 @@
         :key="c.id"
         @click="$emit('input', c.id)"
       >
-        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+        <div :class="nftDisplay ? 'above-wrapper-nft-display' : 'above-wrapper'" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :character="c"></slot>
         </div>
         <slot name="sold" :character="c"></slot>
@@ -138,6 +138,10 @@ export default {
       default: 0
     },
     isMarket: {
+      type: Boolean,
+      default: false
+    },
+    nftDisplay: {
       type: Boolean,
       default: false
     },
@@ -506,6 +510,7 @@ export default {
   box-shadow: 0 0 8px #ffd400;
 }
 
+.above-wrapper-nft-display,
 .above-wrapper {
   position: absolute;
   top: 270px;
@@ -513,6 +518,10 @@ export default {
   right: 0;
   z-index: 100;
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+}
+
+.above-wrapper-nft-display {
+  top: 220px;
 }
 
 .clear-filters-button {

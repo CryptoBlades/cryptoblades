@@ -104,6 +104,10 @@
                     <div class="xp-gain">
                       +{{getPotentialXp(e)}} XP
                     </div>
+
+                    <div class="skill-gain">
+                      + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
+                    </div>
                 </div>
 
                 <div class="victory-chance">
@@ -162,6 +166,7 @@ export default {
       selectedWeapon: null,
       fightMultiplier: Number(localStorage.getItem('fightMultiplier')),
       staminaPerFight: 40,
+      targetExpectedPayouts: new Array(4),
     };
   },
 
@@ -209,6 +214,10 @@ export default {
       await this.fetchTargets({ characterId, weaponId });
     },
 
+    async targets() {
+      await this.getExpectedPayouts();
+    },
+
     async updateResults([fightResults, error]) {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
@@ -218,7 +227,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -373,6 +382,16 @@ export default {
 
       return choices;
     },
+
+    async getExpectedPayouts() {
+      if(!this.targets) return;
+      const expectedPayouts = new Array(4);
+      for(let i = 0; i < this.targets.length; i++) {
+        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower(this.targets[i].power);
+        expectedPayouts[i] = expectedPayout;
+      }
+      this.targetExpectedPayouts = expectedPayouts;
+    }
   },
 
   components: {
@@ -490,14 +509,16 @@ div.encounter.text-center {
 }
 
 .xp-gain,
-.encounter-power {
+.encounter-power,
+.skill-gain {
   color: #9e8a57 !important;
 }
 
 .xp-gain,
 .encounter-power,
 .encounter-element,
-.victory-chance {
+.victory-chance,
+.skill-gain {
   position: absolute;
 }
 
@@ -507,12 +528,17 @@ div.encounter.text-center {
 }
 
 .encounter-power {
-  bottom: 50px;
+  bottom: 60px;
   font-size: 1.5em;
 }
 
 .xp-gain {
-  bottom: 25px;
+  bottom: 40px;
+  font-size: 1em;
+}
+
+.skill-gain {
+  bottom: 20px;
   font-size: 1em;
 }
 
