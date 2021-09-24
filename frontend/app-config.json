@@ -36,7 +36,7 @@
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
           "VUE_APP_NETWORK_ID":"256",
           "VUE_APP_EXPECTED_NETWORK_ID":"256",
-          "VUE_APP_EXPECTED_NETWORK_NAME":"Heco-Testnet",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Huobi ECO Chain Testnet",
           
           "VUE_APP_STAKE_TYPES_AVAILABLE":"",
           "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
@@ -121,28 +121,29 @@
           "currencySymbol": "BNB",
           "currencyDecimals": "18",
           "rpcUrls": ["https://bsc-dataseed.binance.org/"],
-          "blockExplorerUrls": ["https://bscscan.com/"]
+          "blockExplorerUrls": ["https://bscscan.com/"],
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab"
         },
         "HECO": {
           "VUE_APP_NETWORK_ID":"128",
           "VUE_APP_EXPECTED_NETWORK_ID":"128",
-          "VUE_APP_EXPECTED_NETWORK_NAME":"Heco-Mainnet",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Huobi ECO Chain Mainnet",
 
-          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill,skill2",
-          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill2",
-          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0xE088ab579668fC49428b18AaB1A488f4f3A94032",
-          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0xE088ab579668fC49428b18AaB1A488f4f3A94032",
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
+          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"",
           "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
           "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
-          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0xd54E98e6B8661Eff807619507aaa67d469DCC7d3",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0x6109A500e5b9CE40FFe075Ea3A6beA6e93c23BcF",
           "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
           "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"",
           "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
 
-          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x381988F31C56356D80cd50bE77C26ed7798599a9",
-          "VUE_APP_RAID_CONTRACT_ADDRESS":"0xa75203D757Bb4cAF4cc008d8B16b36B2EE74c77e",
-          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xEb0EdFAfa6984f602E0932d50A18D047866DE7a6",
-          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x2e6016Fe42460Df6a0e731Fb88aa6FEA47fD3BE3",
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x29869EDb088466a49f75654d8F04edd16Bf60e75",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0x0aBb23EA06960608a4fa1529678C9abc208b4E8d",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x0f6dAA5F4b4277BE496c80aeCD0D101b8dEE6440",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xc64AB1928e8B7a1631F2B1D5d6EE907E6D7F053F",
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
 
           "chainId": "0x80",
@@ -150,7 +151,8 @@
           "currencySymbol": "HT",
           "currencyDecimals": "18",
           "rpcUrls": ["https://http-mainnet.hecochain.com"],
-          "blockExplorerUrls": ["https://hecoinfo.com"]
+          "blockExplorerUrls": ["https://hecoinfo.com"],
+          "exchangeUrl": "https://swap.butterswap.me/#/swap?outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405"
         },
         "OKEX": {
           "VUE_APP_NETWORK_ID":"66",
@@ -179,7 +181,8 @@
           "currencySymbol": "OKT",
           "currencyDecimals": "18",
           "rpcUrls": ["https://exchainrpc.okex.org"],
-          "blockExplorerUrls": ["https://www.oklink.com/okexchain/"]
+          "blockExplorerUrls": ["https://www.oklink.com/okexchain/"],
+          "exchangeUrl": ""
         }
       }
     }

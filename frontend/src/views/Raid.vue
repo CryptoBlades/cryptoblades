@@ -60,7 +60,7 @@
           <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 order-xs-first order-sm-first boss-col">
             <div class="boss-box">
               <div class="raid-title">
-                <span class="title mr-3"> {{ bossName }} </span>
+                <span class="title mr-3"> #{{ raidIndex }} {{ bossName }} </span>
                 <span :class="traitNumberToName(bossTrait).toLowerCase() + '-icon trait-icon'" />
               </div>
               <div class="img-responsive boss-img">

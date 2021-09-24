@@ -273,7 +273,7 @@ export function createStore(web3: Web3) {
         };
       },
       getExchangeUrl() {
-        return 'https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
+        return  getConfigValue('exchangeUrl');
       },
 
       ownCharacters(state, getters) {
@@ -1822,7 +1822,7 @@ export function createStore(web3: Web3) {
             targetString,
             fightMultiplier
           )
-          .send({ from: state.defaultAccount, gas: '200000' });
+          .send({ from: state.defaultAccount, gas: '300000' });
 
         await dispatch('fetchTargets', { characterId, weaponId });
 
@@ -1852,6 +1852,18 @@ export function createStore(web3: Web3) {
           skillGain,
           bnbGasUsed
         };
+      },
+
+      async fetchExpectedPayoutForMonsterPower({ state }, power) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(state));
+      },
+
+      async fetchRemainingTokenClaimAmountPreTax({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
       },
 
       async fetchStakeOverviewData({ getters, dispatch }) {
