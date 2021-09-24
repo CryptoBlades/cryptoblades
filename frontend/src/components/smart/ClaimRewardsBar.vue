@@ -9,7 +9,8 @@
       <b-nav-item
         class="ml-3"
         :disabled="!canClaimTokens"
-        @click="onClaimTokens()"><!-- moved gtag-link below b-nav-item -->
+        @click="onClaimTokens()"
+        v-tooltip.bottom="!canClaimTokens ? withdrawalInfoText : ''"><!-- moved gtag-link below b-nav-item -->
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="'Tax is being reduced by 1% per day.' + getTaxTimerNextTick">
           <strong>SKILL</strong> {{ formattedSkillReward }}
           <strong>Early Withdraw Tax</strong> {{ formattedRewardsClaimTax }}
