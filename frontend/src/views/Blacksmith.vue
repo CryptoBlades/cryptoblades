@@ -138,7 +138,7 @@
               </div>
             </div>
             <div class="" v-if="showBlacksmith">
-              <weapon-grid v-model="reforgeWeaponId" />
+              <weapon-grid :showNftOptions="true" v-model="reforgeWeaponId" />
             </div>
           </div>
         </div>
@@ -358,7 +358,6 @@
         <dust-balance-display/>
       </b-tab>
     </b-tabs>
-
     <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              title="Dust Reforge Confirmation" @ok="onReforgeWeaponWithDust">
       <div class="row">
@@ -432,7 +431,7 @@ import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
 
-type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds' | 'skillBalance'>;
+type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards'>;
 
 interface StoreMappedGetters {
   contracts: Contracts;
@@ -472,6 +471,9 @@ interface Data {
   disableUseStakedForForge: boolean;
   disableX10ForgeWithStaked: boolean;
   forgeCostBN: BN;
+  targetSkin: string;
+  haveWeaponCosmetic1: number;
+  haveWeaponCosmetic2: number;
 }
 
 export default Vue.extend({
@@ -507,20 +509,28 @@ export default Vue.extend({
       disableUseStakedForForge: false,
       disableX10ForgeWithStaked: false,
       forgeCostBN: new BN(0),
+      targetSkin: '',
+      haveWeaponCosmetic1: 0,
+      haveWeaponCosmetic2: 0
     } as Data;
   },
 
   computed: {
-    ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds','skillBalance']) as Accessors<StoreMappedState>),
+    ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds','skillBalance', 'inGameOnlyFunds', 'skillRewards']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
       'stakedSkillBalanceThatCanBeSpent'
     ]) as Accessors<StoreMappedGetters>),
 
+    totalSkillBalance(): BN {
+      console.log(toBN(fromWeiEther(this.skillRewards)).plus(toBN(fromWeiEther(this.inGameOnlyFunds))).plus(toBN(fromWeiEther(this.skillBalance))).toString());
+      return toBN(fromWeiEther(this.skillRewards)).plus(toBN(fromWeiEther(this.inGameOnlyFunds))).plus(toBN(fromWeiEther(this.skillBalance)));
+    },
+
     disableConfirmButton(): boolean {
       return this.selectedElement === null || !this.chosenElementFee ||
-        toBN(fromWeiEther(this.skillBalance)).lt(this.forgeCostBN.times(this.chosenElementFee).times(this.clickedForgeButton ? 10 : 1));
+        this.totalSkillBalance.lt(this.forgeCostBN.times(this.chosenElementFee).times(this.clickedForgeButton ? 10 : 1));
     }
   },
 

@@ -489,10 +489,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 convertedAmount = usdToSkill(mintCharacterFee);
         _payContractTokenOnly(msg.sender, convertedAmount);
 
-        if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
-            _giveInGameOnlyFundsFromContractBalance(msg.sender, usdToSkill(promos.firstCharacterPromoInGameOnlyFundsGivenInUsd()));
-        }
-
         uint256 seed = randoms.getRandomSeed(msg.sender);
         characters.mint(msg.sender, seed);
 
@@ -512,14 +508,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         external
         onlyNonContract
         oncePerBlock(msg.sender)
-        isSupportedElement(chosenElement)
     {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * num * chosenElementFee));
         _mintWeaponNLogic(num, chosenElement);
     }
 
-    function mintWeapon(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) isSupportedElement(chosenElement) {
+    function mintWeapon(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * chosenElementFee));
         _mintWeaponLogic(chosenElement);
@@ -529,7 +524,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         external
         onlyNonContract
         oncePerBlock(msg.sender)
-        isSupportedElement(chosenElement)
     {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
@@ -542,7 +536,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _mintWeaponNLogic(num, chosenElement);
     }
 
-    function mintWeaponUsingStakedSkill(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) isSupportedElement(chosenElement){
+    function mintWeaponUsingStakedSkill(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
             mintWeaponFee
@@ -694,15 +688,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function _oncePerBlock(address user) internal {
         require(lastBlockNumberCalled[user] < block.number, "OCB");
         lastBlockNumberCalled[user] = block.number;
-    }
-
-    modifier isSupportedElement(uint8 element) {
-    _isSupportedElement(element);
-    _;
-    }
-
-    function _isSupportedElement(uint8 element) internal pure {
-        require(element == 100 || (element>= 0 && element<= 3));
     }
 
     modifier isWeaponOwner(uint256 weapon) {
