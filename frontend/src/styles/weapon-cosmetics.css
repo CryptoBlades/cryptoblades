@@ -1,0 +1,89 @@
+@import './cosmetic-animations.css';
+.animation {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.weapon-cosmetic-applied-1{
+  filter: grayscale(100%);
+}
+
+.weapon-cosmetic-applied-2{
+  filter: contrast(200%);
+}
+
+.weapon-cosmetic-applied-3{
+  filter: sepia(100%);
+}
+
+.weapon-cosmetic-applied-4{
+  filter: invert(100%);
+}
+
+.weapon-cosmetic-applied-5{
+  filter: blur(1px);
+}
+
+.weapon-cosmetic-applied-6{
+  animation: dropglow-fire 500ms ease-out infinite alternate;
+}
+
+.weapon-cosmetic-applied-7{
+  animation: dropglow-earth 1000ms ease-out infinite alternate;
+}
+
+.weapon-cosmetic-applied-8{
+  animation: dropglow-lightning 1000ms ease-out infinite alternate;
+}
+
+.weapon-cosmetic-applied-9{
+  animation: dropglow-water 1000ms ease-out infinite alternate;
+}
+
+.weapon-cosmetic-applied-10{
+  animation: dropglow-rainbow 3000ms ease-out infinite alternate;
+}
+
+.weapon-cosmetic-applied-11{
+  animation: droprotateglow 1000ms ease-in-out infinite alternate;
+}
+
+.weapon-cosmetic-applied-12{
+  animation: ghost-item 1000ms ease-in-out infinite alternate;
+}
+
+.weapon-animation-applied-13{
+  width: 0;
+  height: 0;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  animation: backglow 500ms ease-out infinite alternate;
+  transform: scale(4);
+}
+
+.weapon-animation-applied-14{
+  animation: nebula3 1000ms ease-in infinite;
+}
+
+.weapon-animation-applied-15{
+  animation: nebula4 1000ms ease-in infinite;
+}
+
+.weapon-animation-applied-16{
+  border: 2.5px solid #b9f2ff;
+}
+
+.weapon-animation-applied-17{
+  border: 2.5px solid gold;
+}
+
+.weapon-animation-applied-18{
+  border: 2.5px solid silver;
+}
+
+.weapon-animation-applied-19{
+  border: 2.5px solid #CD7F32;
+}
