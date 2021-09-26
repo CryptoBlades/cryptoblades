@@ -4,7 +4,8 @@ import type {
   CryptoBlades, Characters, Weapons, RaidBasic, IRandoms,
   NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables,
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
-  CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox, PvpArena
+  CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox, PvpArena,
+  WeaponCosmetics, CharacterCosmetics
 } from '../../../build/abi-interfaces';
 import { StakeType } from './State';
 
@@ -43,4 +44,6 @@ export interface Contracts {
   Junk?: Contract<Junk>;
   KeyLootbox?: Contract<KeyLootbox>;
   PvpArena?: Contract<PvpArena>;
+  WeaponCosmetics?: Contract<WeaponCosmetics>;
+  CharacterCosmetics?: Contract<CharacterCosmetics>;
 }
