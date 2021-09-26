@@ -145,7 +145,7 @@ import { getConfigValue } from '@/contracts';
 import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, WeaponTrait } from '@/interfaces';
 import axios from 'axios';
 import Vue from 'vue';
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { toBN, fromWeiEther } from '../../utils/common';
 
 interface PriceJson {
@@ -210,6 +210,7 @@ export default Vue.extend({
   },
 
   methods: {
+    ...mapActions(['fetchExpectedPayoutForMonsterPower']),
     async onShowEarningsCalculator() {
       if(this.currentCharacter !== null) {
         this.characterElementValue = CharacterTrait[this.currentCharacter.trait];
