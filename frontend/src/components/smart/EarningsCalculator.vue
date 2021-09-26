@@ -284,7 +284,7 @@ export default Vue.extend({
       return true;
     },
 
-    calculateEarnings() {
+    async calculateEarnings() {
       if(!this.canCalculate()) return;
       this.calculationResults = [];
       const fightBnbFee = 0.0007 * this.bnbPrice;
@@ -294,7 +294,7 @@ export default Vue.extend({
       const fights = this.getNumberOfFights(this.staminaSelectValue);
 
       const totalPower = this.getTotalPower(CharacterPower(this.levelSliderValue - 1), weaponMultiplier, this.wepBonusPowerSliderValue);
-      const averageDailyReward = this.getAverageRewardForPower(totalPower) *7.2 +
+      const averageDailyReward = await this.getAverageRewardForPower(totalPower) *7.2 +
         this.formattedSkill(this.fightGasOffset) * fights;
       const averageFightProfit = averageDailyReward * this.skillPrice / 7.2;
       for(let i = 1; i < 8; i++) {
@@ -326,8 +326,8 @@ export default Vue.extend({
       return characterPower * weaponMultiplier + Number(bonusPower);
     },
 
-    getAverageRewardForPower(power: number): number {
-      return (this.formattedSkill(this.fightBaseline) * Math.sqrt(power / 1000));
+    async getAverageRewardForPower(power: number) {
+      return this.fetchExpectedPayoutForMonsterPower(power);
     },
 
     getNextMilestoneBonus(level: number): string {
