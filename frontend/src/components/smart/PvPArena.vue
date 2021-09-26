@@ -50,13 +50,13 @@
       <b-col>
         <b-row>
           <div
-            v-if="!this.pvp.duelByAttacker.isPending"
+            v-if="!getIsShown"
             class="find-opponent-container"
             @click="findOpponent(currentPvPCharacterId)">
               <img id="find-opponent-img" src="../../assets/winged-shield.svg"/>
           </div>
           <div
-            v-if="this.pvp.duelByAttacker.isPending"
+            v-if="getIsShown"
             class="duel-container">
               <img
                   id="duel-img"
@@ -68,13 +68,13 @@
           <div
             class="withdraw-container">
               <span
-                @click="withdrawFromArena(currentPvPCharacterId)">
+                @click="characterWithdraw()">
                 <img
                   id="withdraw-img"
                   src="../../assets/run.svg"/>WITHDRAW</span>
           </div>
           <div
-            v-if="this.pvp.duelByAttacker.isPending"
+            v-if="getIsShown"
             class="reroll-container">
               <span
                 @click="reRollOpponent(currentPvPCharacterId)">
@@ -83,14 +83,55 @@
                   src="../../assets/rolling-dices.svg"/>REROLL</span>
           </div>
         </b-row>
+        <b-row>
+          <div
+            class="total-duel-earnings-container">
+              <span
+                @click="checkIfWithdrawableAllUnclaimed"
+                class="total-duel-earnings-label">
+                Total Duel Earnings
+                <span class="total-duel-earnings-value"> {{getAllUnclaimedDuelEarnings}}</span>Skill</span>
+          </div>
+        </b-row>
+        <b-row>
+          <div
+            class="duel-earnings-container">
+              <span
+                @click="checkIfWithdrawableUnclaimedById"
+                class="duel-earnings-label">
+                Duel Earnings
+                <span class="total-duel-earnings-value"> {{getDuelEarnings}}</span>Skill</span>
+          </div>
+        </b-row>
+        <b-row>
+            <b-col>
+              <div class="pvp-rewards-container">
+                <span class="pvp-rewards-header">PvP Rewards</span>
+                <div
+                  class="arena-tier-container">
+                    <span
+                      class="arena-tier-label">
+                        Arena Tier
+                      <span class="arena-tier-value">{{getRewardsArenaTier}}</span></span>
+                </div>
+                <div
+                  class="ranking-rewards-pool-container">
+                    <span
+                      class="ranking-rewards-pool-label">
+                        Rewards Pool
+                      <span class="ranking-rewards-pool-value"> {{getRankingRewardsPool}}</span>Skill</span>
+                </div>
+              </div>
+            </b-col>
+          </b-row>
       </b-col>
 
       <b-col>
         <b-row>
-        <pvp-fighter
-          :characterId="this.pvp.duelByAttacker.defenderId"
-          :show="this.pvp.duelByAttacker.isPending"
-          :isAttacker="false"></pvp-fighter>
+          <pvp-fighter
+            :characterId="this.pvp.duelByAttacker.defenderId"
+            :show="getIsShown"
+            :isAttacker="false"></pvp-fighter>
         </b-row>
       </b-col>
     </b-row>
@@ -127,17 +168,53 @@
     <div class="arena-footer">
     </div>
 
-    <!-- <pvp-duel
+    <pvp-duel
       v-if="isPerformDuel"
       :attackerId="this.duelResult.attackerId"
       :defenderId="this.duelResult.defenderId"
-      :isWon="true"></pvp-duel> -->
-
-    <pvp-duel
-      v-if="isPerformDuel"
-      :attackerId="1"
-      :defenderId="2"
       :isWon="true"></pvp-duel>
+
+    <b-modal id="withdraw-warning" title="STOP RIGHT THERE!" ok-only>
+      <span class="withdraw-modal-question">Come on, you can't withdraw
+        <span class="withdraw-modal-variable">{{getDuelEarnings}}</span> earnings.</span>
+    </b-modal>
+
+    <b-modal
+        id='withdraw-duel-earnings'
+        title="WITHDRAW DUEL EARNINGS"
+        @ok="withdrawUnclaimedDuelEarningsByCharacterId(currentPvPCharacterId)">
+      <span class="withdraw-modal-question">Are you sure you want to withdraw
+        <span class="withdraw-modal-variable">{{getDuelEarnings}}</span> Skill?</span>
+    </b-modal>
+
+    <b-modal
+        id='withdraw-all-duel-earnings'
+        title="WITHDRAW TOTAL DUEL EARNINGS"
+        @ok="withdrawAllUnclaimedDuelEarnings()">
+      <span class="withdraw-modal-question">Are you sure you want to withdraw
+        <span class="withdraw-modal-variable">{{getAllUnclaimedDuelEarnings}}</span> Skill?</span>
+    </b-modal>
+
+    <b-modal
+      id="withdraw-character"
+      title="WITHDRAW CHARACTER"
+      @ok="withdrawFromArena(currentPvPCharacterId)">
+        <span class="withdraw-modal-question">Are you sure you want to withdraw
+          <span class ="withdraw-modal-variable">{{getCharacterName(currentPvPCharacterId)}}</span> ?
+        </span><br>
+      <div class="withdraw-skill-balance-container">
+        <div class="withdraw-skill-balance-header">Skill Balance</div>
+        <div class="withdraw-skill-balance-content">
+
+        <span class="withdraw-skill-balance-label">Duel Earnings</span>
+        <span class="withdraw-skill-balance-value">{{getDuelEarnings}}</span><br>
+        <span class="withdraw-skill-balance-label">Wagered Skill</span>
+        <span class="withdraw-skill-balance-value">{{getWageredSkill}}</span><br>
+        <span class="withdraw-skill-balance-label">Total Withdrawable Skill</span>
+        <span class="withdraw-skill-balance-value">{{getTotalWithdrawableSkill}}</span><br>
+        </div>
+      </div>
+    </b-modal>
 
   </div>
 </template>
@@ -148,14 +225,19 @@ import PvPCharacter from './PvPCharacter.vue';
 import PvPFighter from './PvPFighter.vue';
 import PvPDuel from './PvPDuel.vue';
 import PvPDivider from './PvPDivider.vue';
+import BN from 'bignumber.js';
 
 export default {
 
   data(){
     return{
-      isPerformDuel: true,
+      isPerformDuel: false,
       isDuelResult: false,
       duelResult: null,
+      allUnclaimedDuelEarnings: '',
+      duelEarnings: '',
+      totalWithdrawableSkill: '',
+      isShown: false
     };
   },
 
@@ -163,16 +245,60 @@ export default {
     ...mapState(['pvp']),
     ...mapGetters([
       'inPvPCharacters',
-      'currentPvPCharacterId'
+      'currentPvPCharacterId',
+      'getCharacterName'
     ]),
 
+    getIsShown(){
+      return this.pvp.duelByAttacker.isPending && this.pvp.decisionTime !== '00:00';
+    },
+
+    getTotalWithdrawableSkill(){
+      const duelEarnings = new BN(this.pvp.rewards.unclaimedDuelEarningsById).div(new BN(10).pow(18)).toFixed(4);
+      const wageredSkill = new BN(this.pvp.wageredSkill).div(new BN(10).pow(18)).toFixed(4);
+      const totalWithdrawableSkill = (parseFloat(duelEarnings) + parseFloat(wageredSkill)).toFixed(4);
+      return totalWithdrawableSkill;
+    },
+
+    getWageredSkill(){
+      const wageredSkill = new BN(this.pvp.wageredSkill).div(new BN(10).pow(18)).toFixed(4);
+      return wageredSkill;
+    },
+
+    getDuelEarnings(){
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      this.duelEarnings = new BN(this.pvp.rewards.unclaimedDuelEarningsById).div(new BN(10).pow(18)).toFixed(4);
+      return this.duelEarnings;
+    },
+    getAllUnclaimedDuelEarnings(){
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      this.allUnclaimedDuelEarnings = new BN(this.pvp.rewards.allUnclaimedDuelEarnings).div(new BN(10).pow(18)).toFixed(4);
+      return this.allUnclaimedDuelEarnings;
+    },
+
+    getRewardsArenaTier(){
+      const rewardsArenaTier = this.pvp.rewards.tier;
+      return rewardsArenaTier;
+    },
+
+    getRankingRewardsPool(){
+      const rankingRewardsPool = new BN(this.pvp.rewards.rankingRewardsPool).div(new BN(10).pow(18)).toFixed(4);
+      return rankingRewardsPool;
+    }
   },
 
   methods:{
-    ...mapMutations(['setCurrentPvPCharacter']),
+    ...mapMutations([
+      'setCurrentCharacter',
+    ]),
 
-    goTo(){
-      this.$store.dispatch('fetchArenaPage', {page: '0'});
+    async goTo(){
+      this.setCurrentCharacter(this.currentPvPCharacterId);
+
+      await Promise.all([
+        this.$store.dispatch('updatePvPDetails', {characterID: this.currentPvPCharacterId}),
+        this.$store.dispatch('fetchArenaPage', {page: '0'})
+      ]);
     },
 
     async findOpponent(characterID){
@@ -190,12 +316,13 @@ export default {
     },
 
     async performDuel(characterID){
-      this.clearAllTicker();
       this.duelResult = await this.$store.dispatch('performDuel',{characterID});
       this.isPerformDuel = true;
       this.isDuelResult = true;
       setTimeout(() => {
         this.isPerformDuel = false;
+        this.clearAllTicker();
+        this.ticker();
       },6000);
     },
 
@@ -203,6 +330,15 @@ export default {
       const inDuel = this.pvp.duelByAttacker.isPending;
 
       this.$store.dispatch('withdrawFromArena',{inDuel,characterID});
+    },
+    async withdrawUnclaimedDuelEarningsByCharacterId(characterID){
+      await this.$store.dispatch('withdrawUnclaimedDuelEarningsById',{ characterID });
+    },
+    async withdrawAllUnclaimedDuelEarnings(){
+      await this.$store.dispatch('withdrawAllUnclaimedDuelEarnings');
+    },
+    async getFighter(characterID){
+      console.log(await this.$store.dispatch('fetchFighterByCharacterId', { characterID }));
     },
 
     ticker(){
@@ -250,11 +386,35 @@ export default {
       }
     },
 
+    characterWithdraw(){
+      this.$bvModal.show('withdraw-character');
+    },
+
+    checkIfWithdrawableAllUnclaimed(){
+      if(this.allUnclaimedDuelEarnings !== '0.0000'){
+        this.$bvModal.show('withdraw-all-duel-earnings');
+      }
+      else{
+        this.$bvModal.show('withdraw-warning');
+      }
+    },
+
+    checkIfWithdrawableUnclaimedById(){
+      if(this.duelEarnings !== '0.0000'){
+        this.$bvModal.show('withdraw-duel-earnings');
+      }
+      else{
+        this.$bvModal.show('withdraw-warning');
+      }
+    }
+
   },
 
   async created(){
-    this.setCurrentPvPCharacter(this.currentPvPCharacterId);
-    await this.$store.dispatch('getDuelByAttacker',{characterID: this.currentPvPCharacterId});
+    await Promise.all([
+      this.$store.dispatch('fetchUnclaimedDuelEarningsById', { characterID: this.currentPvPCharacterId }),
+      this.$store.dispatch('fetchAllUnclaimedDuelEarnings')
+    ]);
     this.clearAllTicker();
     this.ticker();
   },
@@ -381,7 +541,7 @@ export default {
   height: 600px;
   width: 500px;
   margin: auto;
-  filter: drop-shadow( 0px 0px 10px #fff);
+  animation: glow 3s infinite linear;
 }
 
 .duel-result {
@@ -426,12 +586,186 @@ export default {
   color: #fff;
 }
 
+.total-duel-earnings-container{
+  margin: 20px auto;
+  height: 25px;
+  width: auto;
+  cursor: pointer;
+}
+
+.total-duel-earnings-container:hover{
+  text-shadow: 0 0 10px #fff, 0 0 20px #fff;
+  animation: burn 1s 1 forwards;
+}
+
+.total-duel-earnings-label{
+  font-size: 20px;
+  font-weight: bolder;
+  color: #968332;
+  letter-spacing: 1px;
+}
+
+.total-duel-earnings-value{
+  font-size: 15px;
+  margin-left: 10px;
+  margin-right: 10px;
+  color: #fff;
+}
+
+.duel-earnings-container{
+  margin: 20px auto;
+  height: 25px;
+  width: auto;
+  cursor: pointer;
+}
+
+.duel-earnings-container:hover{
+  text-shadow: 0 0 10px #fff, 0 0 20px #fff;
+  animation: burn 1s 1 forwards;
+}
+
+.duel-earnings-label{
+  font-size: 20px;
+  font-weight: bolder;
+  color: #968332;
+  letter-spacing: 1px;
+}
+
+.duel-earnings-value{
+  font-size: 15px;
+  margin-left: 10px;
+  margin-right: 10px;
+  color: #fff;
+}
+.arena-tier-container {
+  margin: auto;
+  height: 25px;
+}
+
+.arena-tier-label {
+  font-size: 15px;
+  font-weight: bolder;
+  color: #968332;
+  letter-spacing: 1px;
+}
+
+.arena-tier-value {
+  font-size: 15px;
+  color: #fff;
+}
+
+.ranking-rewards-pool-container {
+  margin: auto;
+  height: 25px;
+  width: auto;
+}
+
+.ranking-rewards-pool-label {
+  font-size: 15px;
+  font-weight: bolder;
+  color: #968332;
+  letter-spacing: 1px;
+}
+
+.ranking-rewards-pool-value {
+  font-size: 15px;
+  margin-right: 10px;
+  color: #fff;
+}
+
+.pvp-rewards-container {
+  cursor: none;
+  margin: 40px auto;
+  text-align: center;
+  box-shadow: 0 0 10px #fff;
+  border: 2px solid #968332;
+  border-radius: 10px;
+}
+
+.pvp-rewards-header {
+  font-size: 20px;
+  font-weight: bolder;
+  color: #968332;
+  letter-spacing: 1px;
+}
+
+.not-withdrawable {
+  cursor: not-allowed;
+}
+
+.withdraw-character {
+  height: 200px;
+}
+
+.withdraw-modal-question {
+  font-size: 15px;
+  font-weight: bold;
+  color:#968332;
+}
+
+.withdraw-modal-variable {
+  font-size: 15px;
+  font-weight: bold;
+  color:#fff;
+}
+
+.withdraw-skill-balance-container {
+  width: 80%;
+  margin: 10px auto;
+  text-align: center;
+}
+
+.withdraw-skill-balance-header {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.withdraw-skill-balance-content {
+  margin-top: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px #000;
+}
+
+.withdraw-skill-balance-label {
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-right: 5px;
+}
+
+.withdraw-skill-balance-value {
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.modal-title {
+  font-size: 25px;
+  letter-spacing: 2px;
+  font-weight: bold;
+  color: #968332;
+}
+
+
 @keyframes burn {
   from {
     filter: drop-shadow( 0px 0px 0px #968332);
   }
   to {
     filter: drop-shadow( 0px 0px 50px #fff);
+  }
+}
+
+@keyframes glow {
+  0% {
+    filter: drop-shadow( 0px 0px 0px #fff);
+  }
+  50% {
+    filter: drop-shadow( 0px 0px 10px #fff);
+  }
+  100% {
+    filter: drop-shadow( 0px 0px 0px #fff);
   }
 }
 

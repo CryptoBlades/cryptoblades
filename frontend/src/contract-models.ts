@@ -189,24 +189,25 @@ export function raidFromContract(data: string[]): IRaidState {
 
 export function pvpFighterFromContract(data: [string,string,string,string,boolean]): IPvPFighterState {
   const characterID = data[0];
+  const characterTrait = '0';
   const weaponID = data[1];
+  const weapon = null;
   const shieldID = data[2];
+  const shield = null;
   const wageredSkill = data[3];
   const useShield = data[4];
   return {
-    characterID, weaponID, shieldID, wageredSkill, useShield
+    characterID, characterTrait, weaponID, weapon, shieldID, shield, wageredSkill, useShield
   };
 }
 
 export function duelByAttackerFromContract(data: [string,string,string,boolean]): IDuelByAttacker {
   const attackerId = data[0];
-  const attackerTrait = '0';
   const defenderId = data[1];
-  const defenderTrait = '0';
   const createdAt = data[2];
   const isPending = data[3];
   return {
-    attackerId,attackerTrait,defenderId,defenderTrait,createdAt,isPending
+    attackerId,defenderId,createdAt,isPending
   };
 }
 

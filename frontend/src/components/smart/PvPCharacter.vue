@@ -34,7 +34,12 @@ export default {
   methods: {
     ...mapMutations([
       'setCurrentCharacter',
-      'setCurrentPvPCharacter']),
+      'setCurrentPvPCharacter',
+      'setCurrentWeapon',
+      'setCurrentShield',
+      'updateIsWeaponInArena',
+      'updateIsShieldInArena'
+    ]),
 
     getCharacterHeadArt,
 
@@ -48,24 +53,35 @@ export default {
     async updateCharacterDetails(characterID){
       if(this.inPvP){
         this.setCurrentCharacter(characterID);
+        await this.$store.dispatch('updatePvPDetails', { characterID });
       }else{
         this.setCurrentPvPCharacter(characterID);
+        await this.$store.dispatch('updatePvPDetails', { characterID });
       }
       await Promise.all([
-        this.$store.dispatch('fetchEntryWager',{characterID}),
-        this.$store.dispatch('fetchWageredSkill',{characterID}),
-        this.$store.dispatch('fetchDuelCost',{characterID}),
-        this.$store.dispatch('fetchIsCharacterInArena',{characterID}),
-        this.$store.dispatch('resetDuelByAttacker'),
-        this.$store.dispatch('getDuelByAttacker',{characterID}),
+        this.$store.dispatch('fetchIsCharacterInArena', { characterID }),
+        this.$store.dispatch('fetchEntryWager',{ characterID }),
+        this.$store.dispatch('fetchUnclaimedDuelEarningsById', { characterID }),
+        this.$store.dispatch('fetchAllUnclaimedDuelEarnings'),
+        this.$store.dispatch('fetchPvPTraitBonusAgainst',{
+          characterTrait: this.pvp.attackerFighter.characterTrait,
+          weaponTrait: this.getWeaponElementNum(this.pvp.attackerFighter.weapon.element),
+          opponentTrait: this.pvp.defenderFighter.characterTrait
+        })
       ]);
+      if(this.pvp.isCharacterInArena){
+        this.setCurrentWeapon(null);
+        this.updateIsWeaponInArena({isWeaponInArena: true});
+        this.setCurrentShield(null);
+        this.updateIsShieldInArena({isShieldInArena: false});
+      }
 
       this.clearAllTicker();
       this.ticker();
     },
 
     setCharacterPvPStatus(characterID){
-      this.$store.dispatch('fetchParticipatingCharacters');
+      this.$store.dispatch('updatePvPDetails', { characterID });
 
       if(this.pvp.participatingCharacters.includes(characterID.toString())){
         return 'character-in-pvp';
@@ -117,14 +133,19 @@ export default {
         clearInterval(i);
       }
     },
-
-  },
-
-  created(){
-    if(this.inPvP){
-      this.setCurrentCharacter(this.currentCharacterId);
-    }else{
-      this.setCurrentPvPCharacter(this.currentCharacterId);
+    getWeaponElementNum(weaponElement){
+      if(weaponElement.toUpperCase() === 'FIRE'){
+        return '0';
+      }
+      else if (weaponElement.toUpperCase() === 'EARTH'){
+        return '1';
+      }
+      else if (weaponElement.toUpperCase() === 'LIGHTNING'){
+        return '2';
+      }
+      else if (weaponElement.toUpperCase() === 'WATER'){
+        return '3';
+      }
     }
   },
 
@@ -186,8 +207,7 @@ export default {
 
 #character-head-element {
   position: absolute;
-  top: 38%;
-  left: 53%;
+  top: 55px;
 }
 
 .active-indicator {

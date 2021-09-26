@@ -52,7 +52,7 @@ export default {
   width: 100%;
   background-color: #000;
   z-index: 9999999;
-  /* animation: fade 6s 1 forwards; */
+  animation: fade 6s 1 forwards;
 }
 
 .slice-container {

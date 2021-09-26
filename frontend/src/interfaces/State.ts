@@ -59,8 +59,11 @@ export interface IRaidState {
 
 export interface IPvPFighterState {
   characterID: string;
+  characterTrait: string;
   weaponID: string;
+  weapon: IWeapon | null;
   shieldID: string;
+  shield: IShield | null;
   wageredSkill: string;
   useShield: boolean;
 }
@@ -75,21 +78,23 @@ export interface IPvPState {
   participatingWeapons: string[];
   participatingShields: string[];
   currentPvPCharacterId: number | null;
+  traitBonus: string;
+  attackerFighter: IPvPFighterState;
+  defenderFighter: IPvPFighterState;
   duelCost: string | number;
   isAttackerWithinDecisionTime: boolean;
   isCharacterAttackable: boolean;
   isCharacterInArena: boolean;
   isWeaponInArena: boolean;
   isShieldInArena: boolean;
-  duelByAttacker: IDuelByAttacker;
+  duelByAttacker: IDuelByAttacker | null;
   decisionTime: string;
+  rewards: IPvPReward;
 }
 
 export interface IDuelByAttacker {
   attackerId: string;
-  attackerTrait: string | undefined;
   defenderId: string;
-  defenderTrait: string | undefined;
   createdAt: string;
   isPending: boolean;
 }
@@ -106,6 +111,18 @@ export interface IDuelResult {
 export interface IInventory{
   id: number,
   name: string;
+}
+
+export interface IFilter{
+  element: string;
+  stars: number;
+}
+
+export interface IPvPReward{
+  tier: string,
+  rankingRewardsPool: string,
+  allUnclaimedDuelEarnings: string;
+  unclaimedDuelEarningsById: string;
 }
 
 export interface IState {
@@ -162,6 +179,9 @@ export interface IState {
   pvp: IPvPState;
 
   inventory: IInventory[];
+
+  weaponFilter: IFilter;
+  shieldFilter: IFilter;
 
   waxBridgeWithdrawableBnb: string;
   waxBridgeRemainingWithdrawableBnbDuringPeriod: string;

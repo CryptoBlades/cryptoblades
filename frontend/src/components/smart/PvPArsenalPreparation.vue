@@ -31,6 +31,7 @@
                         id="equipped-weapon"
                         @click="setCurrentTab(0); hideShieldInventory();">
                       <div
+                        v-if="!this.pvp.isCharacterInArena"
                         class="equipped-weapon-content">
                         <pvp-weapon
                           v-if="this.ownWeapons.length !== 0"
@@ -41,9 +42,13 @@
                       </div>
                     </div>
                     <div class="equipped-weapon-content no-equip"
-                        v-if="this.ownWeapons.length <=0">
+                        v-if="this.ownWeapons.length <=0 && !this.pvp.isCharacterInArena">
                         No Weapon Detected
-                      </div>
+                    </div>
+                    <div class="equipped-weapon-content no-equip"
+                      v-if="this.pvp.isCharacterInArena">
+                        Character is in arena
+                    </div>
                   </b-col>
                 </b-row>
                 <b-row id="equipped-shield-container">
@@ -60,19 +65,23 @@
                         id="equipped-shield"
                         @click="setCurrentTab(1); hideWeaponInventory();">
                       <div
-                        v-if="this.ownShields.length !== 0"
+                        v-if="!this.pvp.isCharacterInArena && this.ownShields.length !== 0"
                         class="equipped-shield-content">
                         <pvp-shield
                           :shield="currentShield"
-                          :currentShieldId="currentShield.id"
                           :inPvP="false"
                           :isEquipContainer="true"></pvp-shield>
                       </div>
                     </div>
                     <div class="equipped-shield-content no-equip"
-                        v-if="this.ownShields.length <=0">
+                        v-if="this.ownShields.length <=0 && !this.pvp.isCharacterInArena">
                         No Shield Detected
                     </div>
+                    <div class="equipped-shield-content no-equip"
+                      v-if="this.pvp.isCharacterInArena">
+                        Character is in arena
+                    </div>
+
                   </b-col>
                 </b-row>
               </b-col>
@@ -112,14 +121,21 @@
               </b-col>
           </b-row>
         </b-col>
-
-          <b-popover :show.sync="showWeaponInventory" :custom-class="`${getPopoverClass(0)}`" target="equipped-weapon" triggers="click" placement="right">
-              <pvp-inventory></pvp-inventory>
-          </b-popover>
-
-          <b-popover :show.sync="showShieldInventory" :custom-class="`${getPopoverClass(1)}`" target="equipped-shield" triggers="click" placement="right">
-              <pvp-inventory></pvp-inventory>
-          </b-popover>
+        <b-popover
+          :show.sync="showWeaponInventory"
+          :custom-class="`${getPopoverClass(0)}`"
+          target="equipped-weapon"
+          triggers="click"
+          placement="right">
+            <pvp-inventory></pvp-inventory>
+        </b-popover>
+        <b-popover
+          :show.sync="showShieldInventory"
+          :custom-class="`${getPopoverClass(1)}`"
+          target="equipped-shield" triggers="click"
+          placement="right">
+            <pvp-inventory></pvp-inventory>
+        </b-popover>
   </b-row>
 </template>
 
@@ -149,13 +165,14 @@ export default {
   },
 
   computed: {
-    ...mapState(['currentCharacterId','currentWeaponId']),
+    ...mapState(['currentCharacterId','currentWeaponId','pvp']),
     ...mapGetters([
       'currentWeapon',
       'currentCharacter',
       'currentShield',
       'ownCharacters',
       'ownWeapons',
+      'filteredWeapons',
       'ownShields',
       'getCharacterName',
       'getWeaponName',
@@ -166,10 +183,11 @@ export default {
 
   methods:{
     ...mapMutations([
-      'setCurrentCharacter',
       'setCurrentTab',
       'setCurrentShield',
-      'setCurrentWeapon'
+      'setCurrentWeapon',
+      'updateIsWeaponInArena',
+      'updateIsShieldInArena'
     ]),
 
     getCharacterArt,
@@ -197,36 +215,29 @@ export default {
     },
 
     getPopoverClass(nftType){
-      if (this.ownWeapons.length > 1 && nftType === 0) {
+      if (this.filteredWeapons.length > 3 && nftType === 0) {
         return 'equipped-container-multiple';
       }
-      else if (this.ownWeapons.length === 1) {
+      else if (this.filteredWeapons.length <= 3) {
         return 'equipped-container';
       }
 
-      if (this.ownShields.length > 1 && nftType === 1) {
+      if (this.ownShields.length > 3 && nftType === 1) {
         return 'equipped-container-multiple';
       }
-      else if (this.ownShields.length === 1) {
+      else if (this.ownShields.length <= 3) {
         return 'equipped-container';
       }
     },
 
   },
+  async created(){
+    this.setCurrentWeapon(null);
+    this.updateIsWeaponInArena({isWeaponInArena: true});
+    this.setCurrentShield(null);
+    this.updateIsShieldInArena({isShieldInArena: false});
 
-  created(){
-    if(this.ownShields.length > 0){
-      this.setCurrentShield(this.ownShields[0].id);
-    }
-    this.setCurrentWeapon(this.ownWeapons[0].id);
-    this.setCurrentCharacter(this.ownCharacters[0].id);
-    this.$store.dispatch('fetchParticipatingCharacters');
-    this.$store.dispatch('fetchParticipatingWeapons');
-    this.$store.dispatch('fetchParticipatingShields');
-    this.$store.dispatch('fetchIsCharacterInArena',{character: this.ownCharacters[0].id});
-    this.$store.dispatch('fetchEntryWager',{characterID: this.ownCharacters[0].id});
-    this.$store.dispatch('fetchWageredSkill',{characterID: this.ownCharacters[0].id});
-    this.$store.dispatch('fetchDuelCost',{characterID: this.ownCharacters[0].id});
+    await this.$store.dispatch('fetchIsCharacterInArena', { characterID: this.currentCharacterId });
   },
 
   components: {
@@ -245,17 +256,11 @@ export default {
 <style>
 
 .equipped-container {
-  height: auto;
   background-color: transparent;
-  box-shadow: 0 0 10px #fff
 }
 
 .equipped-container-multiple {
-  height: 300px;
   background-color: transparent;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  box-shadow: 0 0 10px #fff
 }
 
 #equipped-weapon {
@@ -273,6 +278,11 @@ export default {
 /* PvP Popover Styles */
 .popover-body {
   background-color: black;
+  height: 300px;
+  width: 500px;
+  box-shadow: 0 0 10px #fff;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 /* PvP Popover Styles */
 

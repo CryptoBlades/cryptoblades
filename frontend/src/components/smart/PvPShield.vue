@@ -1,9 +1,25 @@
 <template>
 <div>
     <div
-      v-if="!isEquipContainer"
-      :class="`${setListClassForShield(shield.id,currentShieldId)}`"
-      @click="setCurrentShield(shield.id)">
+      v-if="!isEquipContainer && shield === null"
+      :class="`${setListClassForNoShield(shield)}`"
+      @click="updateShieldDetails(null)">
+        <img
+          class="inventory-shield-content"
+          src="../../assets/shield-disabled.svg"/>
+    </div>
+    <div
+      v-if="isEquipContainer && shield === null"
+      class= "unselected-equipped-shield"
+      @click="updateShieldDetails(null)">
+        <img
+          class="inventory-equipped-shield-content"
+          src="../../assets/shield-disabled.svg"/>
+    </div>
+    <div
+      v-if="!isEquipContainer && shield !== null"
+      :class="`${setListClassForShield(shield.id)}`"
+      @click="updateShieldDetails(shield.id)">
       <div>
         <div
             v-if="shield.stars >=0 || shield.stars <=2"
@@ -40,6 +56,10 @@
         </div>
 
         <span :class="`${setShieldPvPStatus(shield.id)}`"></span>
+        <shield-element
+              id="inventory-shield-element"
+              :trait="`${getShieldElementNum(shield.element)}`">
+        </shield-element>
         <img
             class="inventory-shield-content"
             :src="getShieldArt(shield.id)"/>
@@ -47,7 +67,7 @@
     </div>
 
     <div
-      v-if="isEquipContainer"
+      v-if="isEquipContainer && shield !== null"
       class="unselected-equipped-shield"
       >
         <div
@@ -84,11 +104,15 @@
             </span>
         </div>
 
-
+        <shield-element
+              id="inventory-equipped-shield-element"
+              :trait="`${getShieldElementNum(shield.element)}`">
+        </shield-element>
         <img
           class="inventory-equipped-shield-content"
           :src="getShieldArt(shield.id)"/>
     </div>
+
 </div>
 </template>
 
@@ -101,21 +125,31 @@ import fireIcon  from '../../assets/elements/fire.png';
 import earthIcon  from '../../assets/elements/earth.png';
 import lightningIcon  from '../../assets/elements/lightning.png';
 import waterIcon  from '../../assets/elements/water.png';
+import Element from './Element.vue';
 
 export default {
-  props: ['shield','currentShieldId', 'inPvP', 'isEquipContainer'],
+  props: ['shield', 'inPvP', 'isEquipContainer'],
 
   computed: {
-    ...mapState(['pvp']),
+    ...mapState(['pvp','currentShieldId']),
   },
 
   methods:{
     ...mapMutations([
       'setCurrentShield',
+      'updateIsShieldInArena'
     ]),
 
-    setListClassForShield(shieldId,currentShieldId){
-      if (shieldId === currentShieldId){
+    setListClassForShield(shieldId){
+      if (shieldId === this.currentShieldId){
+        return 'selected-shield';
+      }
+
+      else return 'unselected-shield';
+    },
+
+    setListClassForNoShield(shieldId){
+      if(shieldId === this.currentShieldId){
         return 'selected-shield';
       }
 
@@ -177,11 +211,48 @@ export default {
       else
         return 'inventory-shield-trait-label-pwr';
     },
+
+    async updateShieldDetails(shieldID){
+      this.setCurrentShield(shieldID);
+
+      if(shieldID === null){
+        this.updateIsShieldInArena({isShieldInArena: false});
+      }
+
+      if(shieldID !== null){
+        await this.$store.dispatch('fetchIsShieldInArena', {shieldID});
+      }
+    },
+    getShieldElementNum(shieldElement){
+      if(shieldElement.toUpperCase() === 'FIRE'){
+        return '0';
+      }
+      else if (shieldElement.toUpperCase() === 'EARTH'){
+        return '1';
+      }
+      else if (shieldElement.toUpperCase() === 'LIGHTNING'){
+        return '2';
+      }
+      else if (shieldElement.toUpperCase() === 'WATER'){
+        return '3';
+      }
+    },
+  },
+
+  components: {
+    'shield-element': Element
   }
+
 };
 </script>
 
 <style>
+.no-equipped-shield {
+  font-size: 15px;
+  text-align: center;
+
+}
+
 .selected-shield {
   background: transparent;
   border: 1px dashed #968332;
@@ -271,21 +342,21 @@ export default {
 
 #inventory-shield-trait-1 {
   position: absolute;
+  margin-left: 5px;
   top: 15px;
-  left: 30px;
 }
 
 
 #inventory-shield-trait-2 {
   position: absolute;
-  top: 30px;
-  left: 30px;
+  margin-left: 5px;
+  top: 35px;
 }
 
 #inventory-shield-trait-3 {
   position: absolute;
-  top: 45px;
-  left: 30px;
+  margin-left: 5px;
+  top: 55px;
 }
 
 #inventory-equipped-shield-trait-1 {
@@ -303,6 +374,18 @@ export default {
   font-size: 15px;
   position: absolute;
   top: 44px;
+}
+
+#inventory-shield-element {
+  position: absolute;
+  margin-left: 5px;
+  top: 65px;
+}
+
+#inventory-equipped-shield-element {
+  position: absolute;
+  margin-left: -10px;
+  top: 55px;
 }
 
 /* PvP Status Styles */

@@ -1,9 +1,26 @@
 <template>
 <div>
+
     <div
-      v-if="!isEquipContainer"
+      v-if="!isEquipContainer && weapon === null"
+      :class="`${setListClassForNoWeapon(weapon, currentWeaponId)}`"
+      @click="updateWeaponDetails(null)">
+        <img
+          class="inventory-weapon-content"
+          src="../../assets/drop-weapon.svg"/>
+    </div>
+    <div
+      v-if="isEquipContainer && weapon === null"
+      class= "unselected-equipped-weapon"
+      @click="updateWeaponDetails(null)">
+        <img
+          class="inventory-equipped-weapon-content"
+          src="../../assets/drop-weapon.svg"/>
+    </div>
+    <div
+      v-if="!isEquipContainer && weapon !== null"
       :class="`${setListClassForWeapon(weapon.id,currentWeaponId)}`"
-      @click="setCurrentWeapon(weapon.id)">
+      @click="updateWeaponDetails(weapon.id)">
       <div>
           <div
             v-if="weapon.stars >=0 || weapon.stars <=2"
@@ -40,14 +57,17 @@
           </div>
 
           <span :class="`${setWeaponPvPStatus(weapon.id)}`"></span>
+            <weapon-element
+              id="inventory-weapon-element"
+              :trait="`${getWeaponElementNum(weapon.element)}`">
+            </weapon-element>
           <img
             class="inventory-weapon-content"
             :src="getWeaponArt(weapon)"/>
       </div>
     </div>
-
     <div
-      v-if="isEquipContainer"
+      v-if="isEquipContainer && weapon !== null"
       class="unselected-equipped-weapon"
       >
         <div
@@ -84,7 +104,10 @@
             </span>
         </div>
 
-
+        <weapon-element
+              id="inventory-equipped-weapon-element"
+              :trait="`${getWeaponElementNum(weapon.element)}`">
+        </weapon-element>
         <img
           class="inventory-equipped-weapon-content"
           :src="getWeaponArt(weapon)"/>
@@ -99,6 +122,7 @@ import fireIcon  from '../../assets/elements/fire.png';
 import earthIcon  from '../../assets/elements/earth.png';
 import lightningIcon  from '../../assets/elements/lightning.png';
 import waterIcon  from '../../assets/elements/water.png';
+import Element from './Element.vue';
 
 export default {
 
@@ -109,7 +133,10 @@ export default {
   },
 
   methods: {
-    ...mapMutations(['setCurrentWeapon']),
+    ...mapMutations([
+      'setCurrentWeapon',
+      'updateIsWeaponInArena'
+    ]),
 
     getWeaponArt,
 
@@ -117,7 +144,12 @@ export default {
       if (weaponId === currentWeaponId){
         return 'selected-weapon';
       }
-
+      else return 'unselected-weapon';
+    },
+    setListClassForNoWeapon(weaponId, currentWeaponId){
+      if(weaponId === currentWeaponId){
+        return 'selected-weapon';
+      }
       else return 'unselected-weapon';
     },
 
@@ -164,6 +196,36 @@ export default {
       else
         return 'inventory-weapon-trait-label-pwr';
     },
+
+    async updateWeaponDetails(weaponID){
+      this.setCurrentWeapon(weaponID);
+
+      if(weaponID === null){
+        this.updateIsWeaponInArena({isWeaponInArena: true});
+      }
+
+      if(weaponID !== null){
+        await this.$store.dispatch('fetchIsWeaponInArena', { weaponID });
+      }
+    },
+    getWeaponElementNum(weaponElement){
+      if(weaponElement.toUpperCase() === 'FIRE'){
+        return '0';
+      }
+      else if (weaponElement.toUpperCase() === 'EARTH'){
+        return '1';
+      }
+      else if (weaponElement.toUpperCase() === 'LIGHTNING'){
+        return '2';
+      }
+      else if (weaponElement.toUpperCase() === 'WATER'){
+        return '3';
+      }
+    },
+  },
+
+  components:{
+    'weapon-element': Element
   }
 };
 </script>
@@ -258,21 +320,20 @@ export default {
 
 #inventory-weapon-trait-1 {
   position: absolute;
+  margin-left: 5px;
   top: 15px;
-  left: 30px;
 }
-
 
 #inventory-weapon-trait-2 {
   position: absolute;
-  top: 30px;
-  left: 30px;
+  margin-left: 5px;
+  top: 35px;
 }
 
 #inventory-weapon-trait-3 {
   position: absolute;
-  top: 45px;
-  left: 30px;
+  margin-left: 5px;
+  top: 55px;
 }
 
 #inventory-equipped-weapon-trait-1 {
@@ -290,6 +351,18 @@ export default {
   font-size: 15px;
   position: absolute;
   top: 44px;
+}
+
+#inventory-weapon-element {
+  position: absolute;
+  margin-left: 5px;
+  top: 65px;
+}
+
+#inventory-equipped-weapon-element {
+  position: absolute;
+  margin-left: -10px;
+  top: 55px;
 }
 
 /* PvP Status Styles */
