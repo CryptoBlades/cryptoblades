@@ -57,6 +57,18 @@
             <b-row>
               <b-col>
                 <div class="fighter-combat-details">
+                  <b-row class="fighter-level-container" >
+                    <b-col>
+                      <div>
+                        <span class="fighter-combat-details-label">Level</span>
+                      </div>
+                    </b-col>
+                    <b-col>
+                      <div>
+                        <span class=fighter-combat-details-value>{{characterLevel + 1}}</span>
+                      </div>
+                    </b-col>
+                  </b-row>
                   <b-row class="fighter-combat-tier-container">
                     <b-col>
                       <span class="fighter-combat-details-label">Tier </span>
@@ -75,7 +87,7 @@
                     </b-col>
                     <b-col>
                       <div>
-                        <span class=fighter-combat-details-value>200000</span>
+                        <span class=fighter-combat-details-value>{{CharacterPower(characterLevel)}}</span>
                       </div>
                     </b-col>
                   </b-row>
@@ -132,6 +144,7 @@ import CharacterElement from '../smart/Element.vue';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
 import BN from 'bignumber.js';
+import { CharacterPower } from '../../interfaces';
 
 export default {
   props: ['characterId', 'show', 'isAttacker'],
@@ -140,7 +153,8 @@ export default {
     return{
       fighter: null,
       weapon: null,
-      duelEarning: ''
+      duelEarning: '',
+      characterLevel: null
     };
   },
 
@@ -182,6 +196,8 @@ export default {
   methods:{
     getCharacterArtById,
 
+    CharacterPower,
+
     getFighterArt(characterId){
       if (this.show){
         return getCharacterArtById(characterId);
@@ -204,7 +220,13 @@ export default {
     }
   },
   async created(){
-    this.$store.dispatch('fetchPvPTraitBonusAgainst',{
+    if(this.isAttacker){
+      this.characterLevel = await this.$store.dispatch('fetchCharacterLevelForPvP',{ characterID: this.characterId });
+    }
+    if(this.pvp.defenderFighter.characterID !== null){
+      this.characterLevel = await this.$store.dispatch('fetchCharacterLevelForPvP',{ characterID: this.characterId });
+    }
+    await this.$store.dispatch('fetchPvPTraitBonusAgainst',{
       characterTrait: this.pvp.attackerFighter.characterTrait,
       weaponTrait: this.getWeaponElementNum(this.pvp.attackerFighter.weapon.element),
       opponentTrait: this.pvp.defenderFighter.characterTrait

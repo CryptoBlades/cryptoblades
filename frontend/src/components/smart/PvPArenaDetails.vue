@@ -143,7 +143,7 @@ export default {
         await Promise.all([
           this.$store.dispatch('fetchIsCharacterInArena',{characterID: this.currentCharacterId}),
           this.$store.dispatch('fetchIsWeaponInArena',{ weaponID: this.currentWeaponId }),
-          this.updateIsShieldInArena({ isShieldInArena: true })
+          this.updateIsShieldInArena({ isShieldInArena: false })
         ]);
       }
       else if (!canEnterArena){

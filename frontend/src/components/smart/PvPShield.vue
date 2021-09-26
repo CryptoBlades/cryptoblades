@@ -60,6 +60,7 @@
               id="inventory-shield-element"
               :trait="`${getShieldElementNum(shield.element)}`">
         </shield-element>
+        <span id="inventory-shield-stars">{{shield.stars + 1}}&#9733;</span>
         <img
             class="inventory-shield-content"
             :src="getShieldArt(shield.id)"/>
@@ -108,6 +109,7 @@
               id="inventory-equipped-shield-element"
               :trait="`${getShieldElementNum(shield.element)}`">
         </shield-element>
+        <span id="inventory-equipped-shield-stars">{{shield.stars + 1}}&#9733;</span>
         <img
           class="inventory-equipped-shield-content"
           :src="getShieldArt(shield.id)"/>
@@ -386,6 +388,20 @@ export default {
   position: absolute;
   margin-left: -10px;
   top: 55px;
+}
+
+#inventory-shield-stars {
+  position: absolute;
+  margin-left: 55px;
+  top: 70px;
+  color: #fff;
+}
+
+#inventory-equipped-shield-stars {
+  position: absolute;
+  margin-left: 45px;
+  top: 55px;
+  color: #fff;
 }
 
 /* PvP Status Styles */

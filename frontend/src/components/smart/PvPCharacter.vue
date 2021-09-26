@@ -58,6 +58,12 @@ export default {
         this.setCurrentPvPCharacter(characterID);
         await this.$store.dispatch('updatePvPDetails', { characterID });
       }
+
+      this.setCurrentWeapon(null);
+      this.updateIsWeaponInArena({isWeaponInArena: true});
+      this.setCurrentShield(null);
+      this.updateIsShieldInArena({isShieldInArena: false});
+
       await Promise.all([
         this.$store.dispatch('fetchIsCharacterInArena', { characterID }),
         this.$store.dispatch('fetchEntryWager',{ characterID }),
@@ -69,12 +75,7 @@ export default {
           opponentTrait: this.pvp.defenderFighter.characterTrait
         })
       ]);
-      if(this.pvp.isCharacterInArena){
-        this.setCurrentWeapon(null);
-        this.updateIsWeaponInArena({isWeaponInArena: true});
-        this.setCurrentShield(null);
-        this.updateIsShieldInArena({isShieldInArena: false});
-      }
+
 
       this.clearAllTicker();
       this.ticker();
@@ -147,6 +148,36 @@ export default {
         return '3';
       }
     }
+  },
+
+  async created(){
+    if(this.inPvP){
+      this.setCurrentCharacter(this.currentCharacterId);
+      await this.$store.dispatch('updatePvPDetails', { characterID: this.currentCharacterId });
+    }else{
+      this.setCurrentPvPCharacter(this.currentCharacterId);
+      await this.$store.dispatch('updatePvPDetails', { characterID: this.currentCharacterId });
+    }
+
+    this.setCurrentWeapon(null);
+    this.updateIsWeaponInArena({isWeaponInArena: true});
+    this.setCurrentShield(null);
+    this.updateIsShieldInArena({isShieldInArena: false});
+
+    await Promise.all([
+      this.$store.dispatch('fetchIsCharacterInArena', { characterID: this.currentCharacterId }),
+      this.$store.dispatch('fetchEntryWager',{ characterID: this.currentCharacterId }),
+      this.$store.dispatch('fetchUnclaimedDuelEarningsById', { characterID: this.currentCharacterId }),
+      this.$store.dispatch('fetchAllUnclaimedDuelEarnings'),
+      this.$store.dispatch('fetchPvPTraitBonusAgainst',{
+        characterTrait: this.pvp.attackerFighter.characterTrait,
+        weaponTrait: this.getWeaponElementNum(this.pvp.attackerFighter.weapon.element),
+        opponentTrait: this.pvp.defenderFighter.characterTrait
+      })
+    ]);
+
+    this.clearAllTicker();
+    this.ticker();
   },
 
   components:{

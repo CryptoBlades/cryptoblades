@@ -49,6 +49,12 @@
         :key="c.id"
         @click="$emit('input', c.id)"
       >
+      <div v-if="`${setCharacterPvPStatusVisibility(c.id)}`">
+      <span
+        :class="`${setCharacterPvPStatus(c.id)}`">
+        <span>IN PVP</span>
+      </span>
+      </div>
         <div :class="nftDisplay ? 'above-wrapper-nft-display' : 'above-wrapper'" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :character="c"></slot>
         </div>
@@ -151,7 +157,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['maxStamina', 'ownedCharacterIds']),
+    ...mapState(['maxStamina', 'ownedCharacterIds', 'pvp']),
     ...mapGetters(['getCharacterName', 'allStaminas', 'charactersWithIds']),
 
     characterIdsToDisplay() {
@@ -230,6 +236,24 @@ export default {
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
 
     getCharacterArt,
+
+    setCharacterPvPStatus(characterID){
+      this.$store.dispatch('updatePvPDetails',{ characterID });
+
+      if(this.pvp.participatingCharacters.includes(characterID.toString())){
+        return 'main-character-in-pvp';
+      }
+      else return 'main-character-not-in-pvp';
+    },
+
+    setCharacterPvPStatusVisibility(characterID){
+      this.$store.dispatch('updatePvPDetails',{ characterID });
+
+      if(this.pvp.participatingCharacters.includes(characterID.toString())){
+        return true;
+      }
+      else return false;
+    },
 
     saveFilters() {
       sessionStorage.setItem('character-levelfilter', this.levelFilter);
@@ -445,6 +469,33 @@ export default {
     text-align: center;
     justify-content: center;
   }
+}
+
+.main-character-in-pvp {
+  height: 40px;
+  width: 300px;
+  background-color: rgb(187, 33, 0);
+  transform: rotate(30deg);
+  left: -40px;
+  position: absolute;
+  top: 150px;
+  z-index: 100;
+}
+
+.main-character-in-pvp span {
+  text-align: center;
+  width: auto;
+  color: white;
+  display: block;
+  font-size: 30px;
+  font-weight: bold;
+  line-height: 40px;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+  text-transform: uppercase;
+}
+
+.main-character-not-in-pvp span {
+  display: none;
 }
 
 .sold {

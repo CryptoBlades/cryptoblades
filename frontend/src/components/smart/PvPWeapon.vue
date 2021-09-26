@@ -61,6 +61,7 @@
               id="inventory-weapon-element"
               :trait="`${getWeaponElementNum(weapon.element)}`">
             </weapon-element>
+            <span id="inventory-weapon-stars">{{weapon.stars + 1}}&#9733;</span>
           <img
             class="inventory-weapon-content"
             :src="getWeaponArt(weapon)"/>
@@ -108,6 +109,7 @@
               id="inventory-equipped-weapon-element"
               :trait="`${getWeaponElementNum(weapon.element)}`">
         </weapon-element>
+        <span id="inventory-equipped-weapon-stars">{{weapon.stars + 1}}&#9733;</span>
         <img
           class="inventory-equipped-weapon-content"
           :src="getWeaponArt(weapon)"/>
@@ -357,6 +359,20 @@ export default {
   position: absolute;
   margin-left: 5px;
   top: 65px;
+}
+
+#inventory-weapon-stars {
+  position: absolute;
+  margin-left: 55px;
+  top: 70px;
+  color: #fff;
+}
+
+#inventory-equipped-weapon-stars {
+  position: absolute;
+  margin-left: 45px;
+  top: 55px;
+  color: #fff;
 }
 
 #inventory-equipped-weapon-element {

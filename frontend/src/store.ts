@@ -3760,6 +3760,21 @@ export function createStore(web3: Web3) {
           console.log('Fetch PvP Trait Bonus Against Error Log: '+ err);
         }
       },
+      async fetchCharacterLevelForPvP({state},{characterID}){
+        const { Characters } = state.contracts();
+        if(!Characters) return;
+
+        try{
+          const character = characterFromContract(
+            characterID,
+            await Characters.methods.get('' + characterID).call(defaultCallOptions(state))
+          );
+
+          return character.level;
+        }catch(err){
+          console.log('Fetch Character for PvP Error Log: ' + err);
+        }
+      },
       async configureMetaMask({ dispatch }) {
         const currentNetwork = await web3.eth.net.getId();
         if(currentNetwork === +getConfigValue('VUE_APP_NETWORK_ID')) return;

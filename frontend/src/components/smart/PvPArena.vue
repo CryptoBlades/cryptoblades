@@ -141,26 +141,42 @@
       <div class="duel-result-container">
         <div class="duel-result">
          <p
-          class="duel-result-text"
+          class="duel-win-result-text"
           v-if="duelResult.attackerWon">YOU WIN</p>
          <p
-          class="duel-result-text"
+          class="duel-lose-result-text"
           v-if="!duelResult.attackerWon">YOU LOST</p>
           <span
-          class="duel-result-roll-label">You rolled</span>
-         <span
-          class="duel-result-roll-value"
-          v-text="duelResult.attackerRoll"/><br>
-          <span
-          class="duel-result-roll-label">Enemy rolled</span>
-         <span
-          class="duel-result-roll-value"
-          v-text="duelResult.defenderRoll"/><br>
-        <div
-          class="duel-result-ok-button">
-         <span
-            @click="isDuelResult = !isDuelResult">OK</span>
+              class="duel-result-roll-label">You rolled
+            </span>
+            <span
+              class="duel-result-roll-value"
+              v-text="duelResult.attackerRoll"/><br>
+            <span
+              class="duel-result-roll-label">Enemy rolled
+            </span>
+            <span
+              class="duel-result-roll-value"
+              v-text="duelResult.defenderRoll"/><br>
         </div>
+        <div class="duel-result-rewards">
+            <span
+              class="duel-result-rewards-label">Reward
+            </span>
+            <span
+              class="duel-result-rewards-value"
+              v-text="getDuelReward"/><br>
+            <span
+              class="duel-result-rewards-label">Duel Earnings
+            </span>
+            <span
+              class="duel-result-rewards-value"
+              v-text="getDuelEarnings"/><br>
+        </div>
+        <div class="duel-result-ok-button">
+              <span
+                @click="isDuelResult = !isDuelResult">OK
+              </span>
         </div>
       </div>
     </b-row>
@@ -237,7 +253,9 @@ export default {
       allUnclaimedDuelEarnings: '',
       duelEarnings: '',
       totalWithdrawableSkill: '',
-      isShown: false
+      isShown: false,
+      previousDuelReward: '',
+      newDuelReward: ''
     };
   },
 
@@ -248,6 +266,11 @@ export default {
       'currentPvPCharacterId',
       'getCharacterName'
     ]),
+
+    getDuelReward(){
+      const duelReward = Math.abs(parseFloat(this.newDuelReward) - parseFloat(this.previousDuelReward)).toFixed(4);
+      return duelReward;
+    },
 
     getIsShown(){
       return this.pvp.duelByAttacker.isPending && this.pvp.decisionTime !== '00:00';
@@ -316,6 +339,8 @@ export default {
     },
 
     async performDuel(characterID){
+      this.previousDuelReward = '';
+      this.previousDuelReward = this.duelEarnings;
       this.duelResult = await this.$store.dispatch('performDuel',{characterID});
       this.isPerformDuel = true;
       this.isDuelResult = true;
@@ -324,6 +349,8 @@ export default {
         this.clearAllTicker();
         this.ticker();
       },6000);
+      this.newDuelReward = '';
+      this.newDuelReward = this.duelEarnings;
     },
 
     async withdrawFromArena(characterID){
@@ -548,12 +575,14 @@ export default {
   position: relative;
   top: 50px;
   text-align: center;
+  height: 200px;
 }
 
 .duel-result-ok-button {
+  text-align: center;
   font-weight: bold;
   font-size: 20px;
-  margin: 90px auto;
+  margin: 180px auto;
   height: 30px;
   width: 100px;
   box-shadow: -10px 10px 20px #000;
@@ -564,19 +593,77 @@ export default {
   cursor: pointer;
 }
 
-.duel-result-text {
+.duel-win-result-text {
+  margin-bottom: 30px;
   font-size: 30px;
-  font-weight: bold;
+  font-weight: 900;
   font-family: initial;
   letter-spacing: 10px;
+  color: #ffd20b;
+  text-shadow: 0 0 10px #000, 0 0 20px #fff;
+}
+
+.duel-win-result-text::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    height: 80%;
+    width: 40%;
+    background-image: url("../../assets/victory-banner.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    filter: drop-shadow(0 0 10px #000) drop-shadow(0 0 20px #fff) drop-shadow(0 0 30px #ffd20b);
+    z-index: -1;
+}
+
+.duel-lose-result-text {
+  margin-bottom: 20px;
+  font-size: 30px;
+  font-weight: 900;
+  font-family: initial;
+  letter-spacing: 10px;
+  color: rgb(107, 8, 8);
+  text-shadow: 0 0 5px #000, 0 0 5px #fff;
+}
+
+.duel-lose-result-text::before {
+    content: "";
+    position: absolute;
+    height: 90%;
+    width: 46%;
+    background-image: url("../../assets/blood.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    filter: drop-shadow(0 0 10px #000) drop-shadow(0 0 20px #fff) drop-shadow(0 0 30px #000);
+    opacity: 0.8;
+    z-index: -1;
+}
+
+.duel-result-rewards {
+  text-align: center;
+  font-weight: 900;
+  font-size: 20px;
+  margin: 60px auto;
+}
+
+.duel-result-rewards-label {
+  font-size: 15px;
+  font-weight: 900;
   color: #000;
+}
+
+.duel-result-rewards-value {
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
 }
 
 .duel-result-roll-label {
   margin-right: 10px;
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 900;
   color: #000;
+  text-shadow: 0 0 10px #fff;
 }
 
 .duel-result-roll-value {
@@ -584,6 +671,7 @@ export default {
   letter-spacing: 1px;
   font-weight: bold;
   color: #fff;
+  text-shadow: 0 0 10px #000;
 }
 
 .total-duel-earnings-container{

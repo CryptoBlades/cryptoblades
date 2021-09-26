@@ -219,7 +219,6 @@ export function duelResultFromContract(data: [string,string,string,string,string
   const defenderRoll = data[4];
   const attackerWon = data[5];
 
-  console.log(data);
   return {
     attackerId,attackerRoll,attackerWon,defenderId,defenderRoll,timestamp
   };
