@@ -977,6 +977,302 @@ export default Vue.extend({
           description: 'Changes character\'s trait to Lightning.',
           image: 'potion_05_te.png'
         },
+        {
+          id: 1,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Grayscale',
+          description: '',
+          image: ''
+        },
+        {
+          id: 2,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Contrast',
+          description: 'Increased contrast',
+          image: ''
+        },
+        {
+          id: 3,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Sepia',
+          description: '',
+          image: ''
+        },
+        {
+          id: 4,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Invert',
+          description: 'Inverted colors',
+          image: ''
+        },
+        {
+          id: 5,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Blur',
+          description: 'Blurred weapon',
+          image: ''
+        },
+        {
+          id: 6,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Fire Glow',
+          description: 'Glows with fire power',
+          image: ''
+        },
+        {
+          id: 7,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Earth Glow',
+          description: 'Glows with earth power',
+          image: ''
+        },
+        {
+          id: 8,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Lightning Glow',
+          description: 'Glows with lightning power',
+          image: ''
+        },
+        {
+          id: 9,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Water Glow',
+          description: 'Glows with water power',
+          image: ''
+        },
+        {
+          id: 10,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Rainbow Glow',
+          description: 'Glows with all elements powers',
+          image: ''
+        },
+        {
+          id: 11,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Dark Glow',
+          description: 'Glows with the dark',
+          image: ''
+        },
+        {
+          id: 12,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Ghost Weapon',
+          description: 'Ghost effect',
+          image: ''
+        },
+        {
+          id: 13,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Police Lights',
+          description: 'Police Lights background',
+          image: ''
+        },
+        {
+          id: 14,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Neon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 15,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Rotating Neon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 16,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.4,
+          name: 'Diamond Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 17,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.3,
+          name: 'Gold Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 18,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.2,
+          name: 'Silver Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 19,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Bronze Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 1,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Grayscale',
+          description: '',
+          image: ''
+        },
+        {
+          id: 2,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Contrast',
+          description: 'Increased contrast',
+          image: ''
+        },
+        {
+          id: 3,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Sepia',
+          description: '',
+          image: ''
+        },
+        {
+          id: 4,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Invert',
+          description: 'Inverted colors',
+          image: ''
+        },
+        {
+          id: 5,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Blur',
+          description: 'Blurred character',
+          image: ''
+        },
+        {
+          id: 6,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Fire Glow',
+          description: 'Glows with fire power',
+          image: ''
+        },
+        {
+          id: 7,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Earth Glow',
+          description: 'Glows with earth power',
+          image: ''
+        },
+        {
+          id: 8,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Lightning Glow',
+          description: 'Glows with lightning power',
+          image: ''
+        },
+        {
+          id: 9,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Water Glow',
+          description: 'Glows with water power',
+          image: ''
+        },
+        {
+          id: 10,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Rainbow Glow',
+          description: 'Glows with all elements powers',
+          image: ''
+        },
+        {
+          id: 11,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Dark Glow',
+          description: 'Glows with the dark',
+          image: ''
+        },
+        {
+          id: 12,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Ghost Character',
+          description: 'Ghost effect',
+          image: ''
+        },
+        {
+          id: 13,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Police Lights',
+          description: 'Police lights background',
+          image: ''
+        },
+        {
+          id: 14,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Neon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 15,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.4,
+          name: 'Character Diamond Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 16,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.3,
+          name: 'Character Gold Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 17,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.2,
+          name: 'Character Silver Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 18,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Bronze Border',
+          description: '',
+          image: ''
+        },
       ] as SkillShopListing[];
 
       return nftList;

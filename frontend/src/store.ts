@@ -105,12 +105,14 @@ export function createStore(web3: Web3) {
       characters: {},
       characterStaminas: {},
       characterRenames: {},
+      characterCosmetics: {},
       weapons: {},
       currentWeaponId: null,
       currentNftType: null,
       currentNftId: null,
       weaponDurabilities: {},
       weaponRenames: {},
+      weaponCosmetics: {},
       maxDurability: 0,      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
@@ -215,6 +217,12 @@ export function createStore(web3: Web3) {
         };
       },
 
+      getCharacterCosmetic(state: IState) {
+        return (characterId: number) => {
+          return state.characterCosmetics[characterId];
+        };
+      },
+
       getCharacterUnclaimedXp(state: IState) {
         return (characterId: number) => {
           return state.xpRewards[characterId];
@@ -240,8 +248,17 @@ export function createStore(web3: Web3) {
           return getWeaponNameFromSeed(weaponId, stars);
         };
       },
+      getWeaponCosmetic(state: IState) {
+        return (weaponId: number) => {
+          if(state.weaponCosmetics[weaponId] !== undefined) {
+            return state.weaponCosmetics[weaponId];
+          }
+
+          return 0;
+        };
+      },
       getExchangeUrl() {
-        return 'https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
+        return getConfigValue('exchangeUrl');
       },
 
       ownCharacters(state, getters) {
@@ -632,6 +649,9 @@ export function createStore(web3: Web3) {
           Vue.set(state.weaponRenames, weaponId, renameString);
         }
       },
+      updateWeaponCosmetic(state: IState, { weaponId, weaponCosmetic }) {
+        Vue.set(state.weaponCosmetics, weaponId, weaponCosmetic);
+      },
       updateCharacterStamina(state: IState, { characterId, stamina }) {
         Vue.set(state.characterStaminas, characterId, stamina);
       },
@@ -639,6 +659,9 @@ export function createStore(web3: Web3) {
         if(renameString !== undefined){
           Vue.set(state.characterRenames, characterId, renameString);
         }
+      },
+      updateCharacterCosmetic(state: IState, { characterId, characterCosmetic }) {
+        Vue.set(state.characterCosmetics, characterId, characterCosmetic);
       },
       updateTargets(state: IState, { characterId, weaponId, targets }) {
         if (!state.targetsByCharacterIdAndWeaponId[characterId]) {
@@ -694,8 +717,11 @@ export function createStore(web3: Web3) {
 
         await dispatch('setupCharacterStaminas');
         await dispatch('setupCharacterRenames');
+        await dispatch('setupCharacterCosmetics');
+
         await dispatch('setupWeaponDurabilities');
         await dispatch('setupWeaponRenames');
+        await dispatch('setupWeaponCosmetics');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -1266,6 +1292,29 @@ export function createStore(web3: Web3) {
         }
       },
 
+      async setupWeaponCosmetics({ dispatch }) {
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
+
+        for (const weapId of ownedWeaponIds) {
+          dispatch('fetchWeaponCosmetic', weapId);
+        }
+      },
+
+      async setupWeaponsWithIdsCosmetics({ dispatch }, weaponIds: string[]) {
+        for (const weapId of weaponIds) {
+          dispatch('fetchWeaponCosmetic', weapId);
+        }
+      },
+
+      async fetchWeaponCosmetic({ state, commit }, weaponId: number) {
+        const weaponCosmetic = await state.contracts().WeaponCosmetics!.methods
+          .getWeaponCosmetic(weaponId)
+          .call(defaultCallOptions(state));
+        if(state.weaponCosmetics[weaponId] !== weaponCosmetic){
+          commit('updateWeaponCosmetic', { weaponId, weaponCosmetic });
+        }
+      },
+
       async setupCharacterStaminas({ dispatch }) {
         const ownedCharacterIds = await dispatch('getAccountCharacters');
 
@@ -1322,6 +1371,26 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
         if(renameString !== '' && state.characterRenames[characterId] !== renameString){
           commit('updateCharacterRename', { characterId, renameString });
+        }
+      },
+      async setupCharacterCosmetics({ dispatch }) {
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
+
+        for (const charId of ownedCharacterIds) {
+          dispatch('fetchCharacterCosmetic', charId);
+        }
+      },
+      async setupCharactersWithIdsCosmetics({ dispatch }, characterIds: string[]) {
+        for (const charId of characterIds) {
+          dispatch('fetchCharacterCosmetic', charId);
+        }
+      },
+      async fetchCharacterCosmetic({ state, commit }, characterId: number) {
+        const characterCosmetic = await state.contracts().CharacterCosmetics!.methods
+          .getCharacterCosmetic(characterId)
+          .call(defaultCallOptions(state));
+        if(state.characterCosmetics[characterId] !== characterCosmetic){
+          commit('updateCharacterCosmetic', { characterId, characterCosmetic });
         }
       },
       async mintCharacter({ state, dispatch }) {
@@ -1664,6 +1733,7 @@ export function createStore(web3: Web3) {
       },
 
       async fetchRemainingTokenClaimAmountPreTax({ state }) {
+        if(!_.isFunction(state.contracts)) return;
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
         return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
@@ -2800,6 +2870,124 @@ export function createStore(web3: Web3) {
 
         await Promise.all([
           dispatch('fetchCharacter', id),
+        ]);
+      },
+      async fetchOwnedWeaponCosmetics({ state }, {cosmetic}) {
+        const { WeaponCosmetics } = state.contracts();
+        if(!WeaponCosmetics || !state.defaultAccount) return;
+        return await WeaponCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
+      },
+      async purchaseWeaponCosmetic({ state, dispatch }, {cosmetic, price}) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !WeaponCosmetics || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseWeaponCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill')
+        ]);
+      },
+      async changeWeaponCosmetic({ state, dispatch}, { id, cosmetic }) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !WeaponCosmetics || !state.defaultAccount) return;
+
+        await WeaponCosmetics.methods
+          .applyCosmetic(id, cosmetic)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchWeaponCosmetic', id)
+        ]);
+      },
+      async removeWeaponCosmetic({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !WeaponCosmetics || !state.defaultAccount) return;
+
+        await WeaponCosmetics.methods
+          .removeCosmetic(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchWeaponCosmetic', id)
+        ]);
+      },
+      async fetchOwnedCharacterCosmetics({ state }, {cosmetic}) {
+        const { CharacterCosmetics } = state.contracts();
+        if(!CharacterCosmetics || !state.defaultAccount) return;
+        return await CharacterCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
+      },
+      async purchaseCharacterCosmetic({ state, dispatch }, {cosmetic, price}) {
+        const { CryptoBlades, SkillToken, CharacterCosmetics, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterCosmetics || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseCharacterCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill')
+        ]);
+      },
+      async changeCharacterCosmetic({ state, dispatch}, { id, cosmetic }) {
+        const { CryptoBlades, SkillToken, CharacterCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterCosmetics || !state.defaultAccount) return;
+
+        await CharacterCosmetics.methods
+          .applyCosmetic(id, cosmetic)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacterCosmetic', id)
+        ]);
+      },
+      async removeCharacterCosmetic({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterCosmetics || !state.defaultAccount) return;
+
+        await CharacterCosmetics.methods
+          .removeCosmetic(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacterCosmetic', id)
         ]);
       },
 
