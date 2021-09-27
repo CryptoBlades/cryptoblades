@@ -999,16 +999,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return vars[VAR_DAILY_MAX_CLAIM];
     }
 
-    function stakeUnclaimedRewards() external {
-        uint256 _tokenRewards = tokenRewards[msg.sender];
-        tokenRewards[msg.sender] = 0;
-
-        if(promos.getBit(msg.sender, 4) == false) {
-            skillToken.approve(address(stakeFromGameImpl), _tokenRewards);
-            stakeFromGameImpl.stakeFromGame(msg.sender, _tokenRewards);
-        }
-    }
-
     function claimXpRewards() public {
         // our characters go to the tavern to rest
         // they meditate on what they've learned
