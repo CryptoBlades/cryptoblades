@@ -840,10 +840,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return fighters;
     }
 
-    function _resetRanking(uint256 characterID) public {
-        // give this a thought, we need to remove it from the ranking mapping
+    function _resetRanking(uint256 characterID) internal {
         characterRankingPoints[characterID] = 0;
         processLoser(characterID);
-        //check if he is withing the top 4
     }
 }
