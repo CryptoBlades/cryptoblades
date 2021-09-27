@@ -830,4 +830,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         return fighters;
     }
+    function _resetRanking(characterID) internal {
+        uint8 tier = getArenaTier(characterID);
+        characterRankingPoints[characterID] = 0;
+            //check if he is withing the top 4
+    }
+    function _tierAdvanceReset internal {
+
+    }
 }
