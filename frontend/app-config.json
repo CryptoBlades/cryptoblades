@@ -61,7 +61,7 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://http-testnet.hecochain.com"],
           "blockExplorerUrls": ["https://testnet.hecoinfo.com"],
-          "exchangeUrl": "https://swap.butterswap.me/#/swap?outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405"
+          "exchangeUrl": "https://swap.butterswap.me/#/swap?inputCurrency=HT&outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405"
         },
         "OKEX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
