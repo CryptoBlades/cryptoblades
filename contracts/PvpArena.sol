@@ -525,6 +525,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         for (winnerPosition; winnerPosition > 0; winnerPosition--) {
+            // break the loop if it is 0 since it is either the first one or not in the ranks
             if (winnerPosition == 0) {
                 break;
             }
