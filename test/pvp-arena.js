@@ -1805,8 +1805,16 @@ contract("PvpArena", (accounts) => {
       });
     });
   });
-  describe("#rankingBehaviour", () => {
+  describe.only("rankingBehaviour", () => {
     describe("entering the arena ", () => {
+      let character1ID;
+      let character2ID;
+      let character3ID;
+      let character4ID;
+      let character5ID;
+      let character6ID;
+      let weapon1ID;
+      let weapon2ID;
       it("should fill the rank with the first 4 players", async () => {
         character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
         character2ID = await createCharacterInPvpTier(accounts[1], 2, "222");
@@ -1888,7 +1896,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[2],
         });
 
-        // perform a duel making sure character1 is always going to win
+        // perform a duel making sure character4 is always going to win
         await pvpArena.performDuel(character4ID, {
           from: accounts[2],
         });
@@ -1901,7 +1909,7 @@ contract("PvpArena", (accounts) => {
         );
 
         // get the post  duel ranking points
-        playerTier = await pvpArena.getTopTierPlayers(character1ID, {
+        const playerTier = await pvpArena.getTopTierPlayers(character1ID, {
           from: accounts[1],
         });
         // expect the last player to be the first
@@ -2039,7 +2047,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[2],
         });
 
-        let playerTier = await pvpArena.getTopTierPlayers(character1ID);
+        const playerTier = await pvpArena.getTopTierPlayers(character1ID);
 
         expect(playerTier[0].toString()).to.equal(character2ID).toString();
         expect(playerTier[1].toString()).to.equal(character1ID).toString();
@@ -2107,21 +2115,16 @@ contract("PvpArena", (accounts) => {
         await pvpArena.requestOpponent(character5ID, {
           from: accounts[2],
         });
-        let player1Points = await pvpArena.getCharacterRankingPoints(
-          character1ID
-        );
-        let player5Points = await pvpArena.getCharacterRankingPoints(
-          character5ID
-        );
         // perform a duel making sure character1 is always going to lose
         await pvpArena.performDuel(character5ID, {
           from: accounts[2],
         });
 
         // get the post  duel ranking points
-        playerTier = await pvpArena.getTopTierPlayers(character1ID, {
+        const playerTier = await pvpArena.getTopTierPlayers(character1ID, {
           from: accounts[1],
         });
+
         const isCharacterInTier = playerTier.some((player) => {
           player.toString() === character5ID.toString();
         });
