@@ -1805,7 +1805,7 @@ contract("PvpArena", (accounts) => {
       });
     });
   });
-  describe.only("rankingBehaviour", () => {
+  describe("rankingBehaviour", () => {
     describe("entering the arena ", () => {
       let character1ID;
       let character2ID;

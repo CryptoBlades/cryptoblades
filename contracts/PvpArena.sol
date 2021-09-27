@@ -516,22 +516,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // else, compare it to the last one, if he is higher then replace the position and start the loop.
         if (
             winnerPoints >=
-            characterRankingPoints[
+            getCharacterRankingPoints(
                 winnerRankingTier[winnerRankingTier.length - 1]
-            ]
+            )
         ) {
             winnerPosition = winnerRankingTier[winnerRankingTier.length - 1];
             winnerRankingTier[winnerRankingTier.length - 1] = winnerID;
         }
 
         for (winnerPosition; winnerPosition > 0; winnerPosition--) {
-            // break the loop if it is 0 since it is either the first one or not in the ranks
-            if (winnerPosition == 0) {
-                break;
-            }
             if (
-                characterRankingPoints[winnerRankingTier[winnerPosition]] >=
-                characterRankingPoints[winnerRankingTier[winnerPosition - 1]]
+                getCharacterRankingPoints(winnerRankingTier[winnerPosition]) >=
+                getCharacterRankingPoints(winnerRankingTier[winnerPosition - 1])
             ) {
                 uint256 updatePlayerPosition = winnerRankingTier[
                     winnerPosition - 1
@@ -571,7 +567,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ) {
                 if (
                     loserPoints <=
-                    characterRankingPoints[loserRankingTier[loserPosition + 1]]
+                    getCharacterRankingPoints(
+                        loserRankingTier[loserPosition + 1]
+                    )
                 ) {
                     uint256 updatePlayerPosition = loserRankingTier[
                         loserPosition + 1
@@ -840,7 +838,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return fighters;
     }
 
-    function _resetRanking(uint256 characterID) internal {
+    function _resetCharacterRankingPoints(uint256 characterID) internal {
         characterRankingPoints[characterID] = 0;
         processLoser(characterID);
     }
