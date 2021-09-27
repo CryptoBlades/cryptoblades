@@ -304,7 +304,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterRankingPoints[winnerID] = characterRankingPoints[winnerID].add(
             winningPoints
         );
-        // subtract ranking points to the loser
+        // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract loserPoints
         if (characterRankingPoints[loserID] <= 3) {
             characterRankingPoints[loserID] = 0;
         } else {
@@ -503,55 +503,54 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function processWinner(uint256 winnerID) private {
         uint256 winnerPoints = characterRankingPoints[winnerID];
         uint8 tier = getArenaTier(winnerID);
-        uint256[] storage winnerRankingTier = _rankingByTier[tier];
-        uint256 winnerRanking;
+        uint256[] storage ranking = _rankingByTier[tier];
+        uint256 winnerPosition;
+        bool winnerInRanking;
 
         // check if winner is withing the top 4
-        for (uint8 i = 0; i < winnerRankingTier.length; i++) {
-            if (winnerID == winnerRankingTier[i]) {
-                winnerRanking = i;
+        for (uint8 i = 0; i < ranking.length; i++) {
+            if (winnerID == ranking[i]) {
+                winnerPosition = i;
+                winnerInRanking = true;
                 break;
             }
         }
-        // compare it to the last one, if he is higher then replace the position and start the loop.
+        // if the player is not in the ranking we check if we can replace him for the last one of the ranking
         if (
+            !winnerInRanking &&
             winnerPoints >=
-            getCharacterRankingPoints(
-                winnerRankingTier[winnerRankingTier.length - 1]
-            )
+            getCharacterRankingPoints(ranking[ranking.length - 1])
         ) {
-            winnerRanking = winnerRankingTier[winnerRankingTier.length - 1];
-            winnerRankingTier[winnerRankingTier.length - 1] = winnerID;
+            ranking[ranking.length - 1] = winnerID;
+            winnerPosition = ranking.length - 1;
         }
 
-        for (winnerRanking; winnerRanking > 0; winnerRanking--) {
+        for (winnerPosition; winnerPosition > 0; winnerPosition--) {
             if (
-                getCharacterRankingPoints(winnerRankingTier[winnerRanking]) >=
-                getCharacterRankingPoints(winnerRankingTier[winnerRanking - 1])
+                getCharacterRankingPoints(ranking[winnerPosition]) >=
+                getCharacterRankingPoints(ranking[winnerPosition - 1])
             ) {
-                uint256 newRanking = winnerRankingTier[winnerRanking - 1];
-                winnerRankingTier[winnerRanking - 1] = winnerRankingTier[
-                    winnerRanking
-                ];
-                winnerRankingTier[winnerRanking] = newRanking;
+                uint256 oldCharacter = ranking[winnerPosition - 1];
+                ranking[winnerPosition - 1] = winnerID;
+                ranking[winnerPosition] = oldCharacter;
             } else {
                 break;
             }
         }
     }
 
-    ///@dev updates the rank of the loser of a duel
+    /// @dev updates the rank of the loser of a duel
     function processLoser(uint256 loserID) private {
         uint256 loserPoints = characterRankingPoints[loserID];
         uint8 tier = getArenaTier(loserID);
-        uint256[] storage loserRankingTier = _rankingByTier[tier];
-        uint256 loserRanking;
+        uint256[] storage ranking = _rankingByTier[tier];
+        uint256 loserPosition;
         bool loserFound;
 
         // check if the loser is in the top 4
-        for (uint8 i = 0; i < loserRankingTier.length; i++) {
-            if (loserID == loserRankingTier[i]) {
-                loserRanking = i;
+        for (uint8 i = 0; i < ranking.length; i++) {
+            if (loserID == ranking[i]) {
+                loserPosition = i;
                 loserFound = true;
                 break;
             }
@@ -559,21 +558,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // if he is found, compare him to the lower positions and replace the rank accordingly
         if (loserFound) {
             for (
-                loserRanking;
-                loserRanking < loserRankingTier.length - 1;
-                loserRanking++
+                loserPosition;
+                loserPosition < ranking.length - 1;
+                loserPosition++
             ) {
                 if (
                     loserPoints <=
-                    getCharacterRankingPoints(
-                        loserRankingTier[loserRanking + 1]
-                    )
+                    getCharacterRankingPoints(ranking[loserPosition + 1])
                 ) {
-                    uint256 newRanking = loserRankingTier[loserRanking + 1];
-                    loserRankingTier[loserRanking + 1] = loserRankingTier[
-                        loserRanking
-                    ];
-                    loserRankingTier[loserRanking] = newRanking;
+                    uint256 oldCharacter = ranking[loserPosition + 1];
+                    ranking[loserPosition + 1] = loserID;
+                    ranking[loserPosition] = oldCharacter;
                 } else {
                     break;
                 }
@@ -591,10 +586,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256[] memory topRankers = new uint256[](
             _rankingByTier[tier].length
         );
-        // we return only the top {3} players
+        // we return only the top 3 players
         for (uint256 i = 0; i < _rankingByTier[tier].length; i++) {
             topRankers[i] = _rankingByTier[tier][i];
         }
+
         return topRankers;
     }
 
@@ -834,8 +830,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return fighters;
     }
 
+    /// @dev returns the senders fighters in the arena
     function _resetCharacterRankingPoints(uint256 characterID) internal {
         characterRankingPoints[characterID] = 0;
+        //this is not final, but processing the loser will update the ranks leaving this player in the 4th position, which will be quickly replaced by other players
         processLoser(characterID);
     }
 }
