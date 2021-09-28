@@ -563,7 +563,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 loserPosition++
             ) {
                 if (
-                    rankingPoints <=
+                    rankingPoints <
                     getCharacterRankingPoints(ranking[loserPosition + 1])
                 ) {
                     uint256 oldCharacter = ranking[loserPosition + 1];
@@ -583,11 +583,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         returns (uint256[] memory)
     {
         uint8 tier = getArenaTier(characterID);
+        uint arrayLength;
+        // we return only the top 3 players, returning the array without the pivot ranker if he exists
+        if(_rankingByTier[tier].length == _maxCharactersPerRanking){
+             arrayLength = _rankingByTier[tier].length - 1;
+        } else {
+            arrayLength = _rankingByTier[tier].length; 
+        }
         uint256[] memory topRankers = new uint256[](
-            _rankingByTier[tier].length
+            arrayLength
         );
-        // we return only the top 3 players
-        for (uint256 i = 0; i < _rankingByTier[tier].length; i++) {
+        for (uint256 i = 0; i < arrayLength; i++) {
             topRankers[i] = _rankingByTier[tier][i];
         }
 

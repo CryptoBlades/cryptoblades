@@ -1818,17 +1818,17 @@ contract("PvpArena", (accounts) => {
       it("should fill the rank with the first 4 players", async () => {
         character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
         character2ID = await createCharacterInPvpTier(accounts[1], 2, "222");
-        character3ID = await createCharacterInPvpTier(accounts[2], 2, "222");
         //this char will be in a different tier
-        character4ID = await createCharacterInPvpTier(accounts[2], 3, "222");
+        character3ID = await createCharacterInPvpTier(accounts[2], 3, "222");
+        character4ID = await createCharacterInPvpTier(accounts[2], 2, "222");
         character5ID = await createCharacterInPvpTier(accounts[2], 2, "222");
         character6ID = await createCharacterInPvpTier(accounts[1], 2, "222");
-        const characterTier = await pvpArena.getTopTierPlayers(character1ID, {
+        const characterTier = await pvpArena.getTierTopRankers(character1ID, {
           from: accounts[1],
         });
 
         expect(characterTier[0].toString()).to.equal(character1ID.toString());
-        expect(characterTier[3].toString()).to.equal(character5ID.toString());
+        expect(characterTier[2].toString()).to.equal(character4ID.toString());
       });
     });
     describe("after the fight", () => {
@@ -1909,12 +1909,12 @@ contract("PvpArena", (accounts) => {
         );
 
         // get the post  duel ranking points
-        const playerTier = await pvpArena.getTopTierPlayers(character1ID, {
+        const playerTier = await pvpArena.getTierTopRankers(character1ID, {
           from: accounts[1],
         });
-        // expect the last player to be the first
+        // expect the last player to be the first and the former first player to not be in the ranks
         expect(playerTier[0].toString()).to.equal(character4ID.toString());
-        expect(playerTier[3].toString()).to.equal(character1ID.toString());
+        expect(playerTier[2].toString()).to.equal(character3ID.toString());
         // expect to add and subtract ranking points respectively
         expect(winnerPostRankPoints.toString()).to.equal(
           winnerPreviousRankPoints.add(winningPoints).toString()
@@ -1991,7 +1991,7 @@ contract("PvpArena", (accounts) => {
         await pvpArena.performDuel(character6ID, {
           from: accounts[2],
         });
-        const playerTier = await pvpArena.getTopTierPlayers(character1ID);
+        const playerTier = await pvpArena.getTierTopRankers(character1ID);
         // expect the last character to be the first one, climibing through the entire ladder
         expect(playerTier[0].toString()).to.equal(character6ID).toString();
       });
@@ -2047,7 +2047,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[2],
         });
 
-        const playerTier = await pvpArena.getTopTierPlayers(character1ID);
+        const playerTier = await pvpArena.getTierTopRankers(character1ID);
 
         expect(playerTier[0].toString()).to.equal(character2ID).toString();
         expect(playerTier[1].toString()).to.equal(character1ID).toString();
@@ -2121,7 +2121,7 @@ contract("PvpArena", (accounts) => {
         });
 
         // get the post  duel ranking points
-        const playerTier = await pvpArena.getTopTierPlayers(character1ID, {
+        const playerTier = await pvpArena.getTierTopRankers(character1ID, {
           from: accounts[1],
         });
 
@@ -2130,7 +2130,7 @@ contract("PvpArena", (accounts) => {
         });
         //expect loser player to remain in the same spot
         expect(isCharacterInTier).to.equal(false);
-        expect(playerTier[3].toString()).to.equal(character1ID.toString());
+        expect(playerTier[2].toString()).to.equal(character1ID.toString());
       });
     });
   });
