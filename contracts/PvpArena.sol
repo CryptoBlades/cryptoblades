@@ -65,9 +65,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
     uint256 public decisionSeconds;
-    /// @dev amount of points earned by winning a fight
+    /// @dev amount of points earned by winning a duel
     uint8 public winningPoints;
-    /// @dev amount of points subtracted by losing fight
+    /// @dev amount of points subtracted by losing duel
     uint8 public losingPoints;
     /// @dev amount of players that are considered for the top ranking
     uint8 private _maxCharactersPerRanking;
@@ -304,7 +304,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterRankingPoints[winnerID] = characterRankingPoints[winnerID].add(
             winningPoints
         );
-        // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract loserPoints
+        // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract the ranking points
         if (characterRankingPoints[loserID] <= 3) {
             characterRankingPoints[loserID] = 0;
         } else {
@@ -576,7 +576,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
     }
 
-    /// @dev get the top rankers of a tier
+    /// @dev get the top ranked characters of a tier
     function getTierTopRankers(uint256 characterID)
         public
         view
@@ -594,7 +594,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return topRankers;
     }
 
-    /// @dev get the player's ranking points
+    /// @dev get the character's ranking points
     function getCharacterRankingPoints(uint256 characterID)
         public
         view
