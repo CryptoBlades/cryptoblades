@@ -555,7 +555,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 break;
             }
         }
-        // if the character is within the top 4, compare it to the player that precedes it and swap positions if the condition is met
+        // if the character is within the top 4, compare it to the character that precedes it and swap positions if the condition is met
         if (loserFound) {
             for (
                 loserPosition;
@@ -833,7 +833,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev set the ranking points of a player to 0 and update the rank
     function _resetCharacterRankingPoints(uint256 characterID) internal {
         characterRankingPoints[characterID] = 0;
-        //this is not final, but processing the loser will update the ranks leaving this player in the 4th position, which will be quickly replaced by other players
         processLoser(characterID);
     }
 }
