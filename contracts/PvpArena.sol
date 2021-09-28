@@ -515,7 +515,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 break;
             }
         }
-        // if the character is not in the ranking we then compare it to the last player of the rank, swapping positions if the condition is met
+        // if the winner is not in the top characters we then compare it to the last character of the top rank, swapping positions if the condition is met
         if (
             !winnerInRanking &&
             rankingPoints >=
