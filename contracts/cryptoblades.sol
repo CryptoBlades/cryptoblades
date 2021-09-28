@@ -958,7 +958,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
     }
 
-    function trackDailyClaim(uint256 amount) internal {
+    function trackDailyClaim(uint256 _claimingAmount) internal {
 
         if(isDailyTokenClaimAmountExpired()) {
             userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
