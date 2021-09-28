@@ -50,7 +50,7 @@
     "deploy-hecotestnet": "truffle migrate --network hecotestnet",
     "postdeploy-hecotestnet": "run-s \"backup-networks 256\" \"verify-contracts -- --network hecotestnet\"",
     "deploy-okextestnet": "truffle migrate --network okextestnet",
-    "postdeploy-okextestnet": "run-s \"backup-networks 65\" \"verify-contracts -- --network okextestnet\"",
+    "postdeploy-okextestnet": "run-s \"backup-networks 65\" \"verify-okex-contracts -- --network okextestnet\"",
     "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet",
     "postdeploy-mainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 56\" \"verify-contracts -- --network bscmainnet\"",
     "deploy-hecomainnet-warning-be-careful-this-is-prod": "truffle migrate --network hecomainnet",
@@ -60,7 +60,8 @@
     "deploy-mainnet-dry-run": "truffle migrate --network bscmainnet --dry-run",
     "backup-networks": "node scripts/manage-networks.js backup",
     "verify-contracts": "node scripts/verify-contracts.js",
-    "sol-merger": "sol-merger \"./contracts/*.sol\" ./build/merged"
+    "sol-merger": "sol-merger \"./contracts/*.sol\" ./build/merged-contracts",
+    "verify-okex-contracts": "node scripts/verify-okex-contracts.js"
   },
   "keywords": [],
   "author": "",
