@@ -65,3 +65,19 @@ To run tests locally simply run
 `npm run test:local`
 
 > NOTE: Careful, this is not using migrations but rather fixtures which should be kept up to date (`/test/helpers/prepareContracts.js`)
+
+## Alternative development flow with Hardhat
+
+This repository uses Truffle, but if for some reason, you'd prefer using hardhat for development, with an ephemeral local blockchain, you can do so too:
+
+Turn on the Hardhat node:
+`npx hardhat node`
+
+Deploy to the Hardhat node:
+`export ETH_DEV_RPC_PORT=8545 && npm run deploy --reset`
+
+Run the frontend pointing to hardhat:
+`export VUE_APP_NETWORK_ID=31337 && npm run start:frontend`
+
+If you get any issues during deployment, run:
+`truffle compile --all`
