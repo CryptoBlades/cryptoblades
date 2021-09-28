@@ -340,9 +340,8 @@ contract StakingRewardsUpgradeable is
         require(amount >= minimumStakeAmount, "Minimum stake amount required");
         _totalSupply = _totalSupply.add(amount);
         _balances[staker] = _balances[staker].add(amount);
-        if (_stakeTimestamp[staker] == 0) {
-            _stakeTimestamp[staker] = block.timestamp;
-        }
+        _stakeTimestamp[staker] = block.timestamp; // reset timer on adding to stake
+
         emit Staked(staker, amount);
     }
 
