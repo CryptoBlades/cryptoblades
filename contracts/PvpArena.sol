@@ -96,6 +96,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => uint256[]) private _rankingByTier;
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
+    /// @dev total ranking points to use for larger seasons
+    mapping(uint256 => uint256) public characterSeasonalRankingPoints;
 
     event NewDuel(
         uint256 indexed attacker,
@@ -300,10 +302,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _removeCharacterFromArena(loserID);
         }
 
-        // add ranking points to the winner
+        // add ranking and seasonal rankingPoints to the winner
         characterRankingPoints[winnerID] = characterRankingPoints[winnerID].add(
             winningPoints
         );
+        characterSeasonalRankingPoints[
+            winnerID
+        ] = characterSeasonalRankingPoints[winnerID].add(winningPoints);
         // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract the ranking points
         if (characterRankingPoints[loserID] <= 3) {
             characterRankingPoints[loserID] = 0;
@@ -311,7 +316,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             characterRankingPoints[loserID] = characterRankingPoints[loserID]
                 .sub(losingPoints);
         }
-
+        // do the same process with seasonal rankingpoints
+        if (characterSeasonalRankingPoints[loserID] <= 3) {
+            characterSeasonalRankingPoints[loserID] = 0;
+        } else {
+            characterSeasonalRankingPoints[
+                loserID
+            ] = characterSeasonalRankingPoints[loserID].sub(losingPoints);
+        }
         processWinner(winnerID);
         processLoser(loserID);
 
@@ -583,16 +595,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         returns (uint256[] memory)
     {
         uint8 tier = getArenaTier(characterID);
-        uint arrayLength;
+        uint256 arrayLength;
         // we return only the top 3 players, returning the array without the pivot ranker if he exists
-        if(_rankingByTier[tier].length == _maxCharactersPerRanking){
-             arrayLength = _rankingByTier[tier].length - 1;
+        if (_rankingByTier[tier].length == _maxCharactersPerRanking) {
+            arrayLength = _rankingByTier[tier].length - 1;
         } else {
-            arrayLength = _rankingByTier[tier].length; 
+            arrayLength = _rankingByTier[tier].length;
         }
-        uint256[] memory topRankers = new uint256[](
-            arrayLength
-        );
+        uint256[] memory topRankers = new uint256[](arrayLength);
         for (uint256 i = 0; i < arrayLength; i++) {
             topRankers[i] = _rankingByTier[tier][i];
         }
@@ -607,6 +617,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         returns (uint256)
     {
         return characterRankingPoints[characterID];
+    }
+
+    /// @dev get the character's seasonal points
+    function getCharacterSeasonalRankingPoints(uint256 characterID)
+        public
+        view
+        returns (uint256)
+    {
+        return characterSeasonalRankingPoints[characterID];
     }
 
     /// @dev checks if a character is in the arena
@@ -836,8 +855,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return fighters;
     }
 
-    /// @dev set the ranking points of a player to 0 and update the rank
+    /// @dev set the ranking points of a player to 0 and update the rank,
     function _resetCharacterRankingPoints(uint256 characterID) internal {
+        //TODO Determine if this is the right approach as it might less efficient gas wise
         characterRankingPoints[characterID] = 0;
         processLoser(characterID);
     }
