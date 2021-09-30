@@ -9,41 +9,6 @@ const { merge } = require('sol-merger');
 const fs = require('fs');
 const axios = require('axios');
 
-const proxyAdminAbi = [
-  {
-      "inputs": [
-          {
-              "internalType": "contract AdminUpgradeabilityProxy",
-              "name": "proxy",
-              "type": "address"
-          }
-      ],
-      "name": "getProxyImplementation",
-      "outputs": [
-          {
-              "internalType": "address",
-              "name": "",
-              "type": "address"
-          }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-  },
-  {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-          {
-              "internalType": "address",
-              "name": "",
-              "type": "address"
-          }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-  }
-];
-
 async function main() {
   shell.pushd(path.join(__dirname, '..'));
   const mergeDir = 'build/merged-contracts';
@@ -99,6 +64,7 @@ async function main() {
       optimizationRuns: 200,
       licenseType: "No License (None)",
       contractAbi: ""}));
+
     axios.post('https://www.oklink.com/api/explorer/v1/okexchain_test/contract/verify', {
       address: contractAddresses[i],
       contractSource: escape(mergedCode),
