@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
 import "./interfaces/ITransferCooldownable.sol";
+import "./PvpArena.sol";
 
 contract Characters is
     Initializable,
@@ -23,6 +24,7 @@ contract Characters is
         keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
 
     uint256 public constant TRANSFER_COOLDOWN = 1 days;
+    PvpArena public pvp;
 
     function initialize() public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
@@ -524,7 +526,9 @@ contract Characters is
             uint256 requiredToLevel = experienceTable[char.level]; // technically next level
             while (newXp >= requiredToLevel) {
                 newXp = newXp - requiredToLevel;
+                uint256 tier = pvp.getArenaTier(id);
                 char.level += 1;
+                uint256 newTier = pvp.getArenaTier(id);
                 emit LevelUp(ownerOf(id), id, char.level);
                 if (char.level < 255)
                     requiredToLevel = experienceTable[char.level];
