@@ -2086,7 +2086,7 @@ export default Vue.extend({
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
         buyerAddress: '' + this.defaultAccount,
-        network: this.activeChain(), // dummy comment
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
