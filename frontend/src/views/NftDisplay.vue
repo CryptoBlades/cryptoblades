@@ -508,10 +508,6 @@ export default Vue.extend({
   justify-items: center;
 }
 
-.copy-url-button {
-  width: 40%;
-}
-
 .search-button {
   width: 100%;
 }
@@ -542,6 +538,7 @@ export default Vue.extend({
 .result-row-section,
 .search-row-section {
   flex-direction: column;
+  align-content: center;
 }
 
 .result-row-section {
@@ -555,6 +552,9 @@ export default Vue.extend({
 
 .owned-by {
   margin-top: 150px;
+  word-break: break-all;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .search-input-section {
@@ -568,5 +568,21 @@ export default Vue.extend({
 
 .disabled-button {
   opacity: 0.65;
+}
+
+@media (max-width: 576px) {
+  .nft-list,
+  .weapon-grid,
+  .character-list {
+    transform: scale(1);
+  }
+
+  .nft-list,
+  .weapon-grid {
+    padding-left: 0;
+  }
+  .owned-by {
+    margin-top: 50px;
+  }
 }
 </style>
