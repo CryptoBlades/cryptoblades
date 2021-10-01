@@ -945,14 +945,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function claimTokenRewards(uint256 _claimingAmount) public {
 
-        if(isDailyTokenClaimAmountExpired()) {
-            userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
-            userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] = 0;
-        }
-        require(_claimingAmount <= getRemainingTokenClaimAmountPreTax());
-        // safemath throws error on negative
-        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(_claimingAmount);
-        userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] += _claimingAmount;
+        trackDailyClaim(_claimingAmount);
 
         uint256 _tokenRewardsToPayOut = _claimingAmount.sub(
             _getRewardsClaimTax(msg.sender).mulu(_claimingAmount)
@@ -963,6 +956,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // So we don't need to do anything with the tax part of the rewards.
         if(promos.getBit(msg.sender, 4) == false)
             _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
+    }
+
+    function trackDailyClaim(uint256 _claimingAmount) internal {
+
+        if(isDailyTokenClaimAmountExpired()) {
+            userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
+            userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] = 0;
+        }
+        require(_claimingAmount <= getRemainingTokenClaimAmountPreTax() && _claimingAmount > 0);
+        // safemath throws error on negative
+        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(_claimingAmount);
+        userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] += _claimingAmount;
     }
 
     function isDailyTokenClaimAmountExpired() public view returns (bool) {
@@ -998,14 +1003,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
         return vars[VAR_DAILY_MAX_CLAIM];
     }
+    
+    function stakeUnclaimedRewards() public {
+        stakeUnclaimedRewards(getRemainingTokenClaimAmountPreTax());
+    }
 
-    function stakeUnclaimedRewards() external {
-        uint256 _tokenRewards = tokenRewards[msg.sender];
-        tokenRewards[msg.sender] = 0;
+    function stakeUnclaimedRewards(uint256 amount) public {
+
+        trackDailyClaim(amount);
 
         if(promos.getBit(msg.sender, 4) == false) {
-            skillToken.approve(address(stakeFromGameImpl), _tokenRewards);
-            stakeFromGameImpl.stakeFromGame(msg.sender, _tokenRewards);
+            skillToken.approve(address(stakeFromGameImpl), amount);
+            stakeFromGameImpl.stakeFromGame(msg.sender, amount);
         }
     }
 

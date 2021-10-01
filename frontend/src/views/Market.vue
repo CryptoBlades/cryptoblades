@@ -1544,7 +1544,8 @@ export default Vue.extend({
         minPrice: '' + this.characterMinPriceFilter(),
         maxPrice: '' + this.characterMaxPriceFilter(),
         pageSize: '' + (this.characterShowLimit || defaultLimit),
-        pageNum: '' + page
+        pageNum: '' + page,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1626,7 +1627,8 @@ export default Vue.extend({
         minPrice: '' + this.weaponMinPriceFilter(),
         maxPrice: '' + this.weaponMaxPriceFilter(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
-        pageNum: '' + page
+        pageNum: '' + page,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1685,6 +1687,7 @@ export default Vue.extend({
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
         pageNum: '' + page,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1812,6 +1815,7 @@ export default Vue.extend({
         maxPrice: '' + this.characterMaxPriceFilter(),
         sortDir: '' + this.characterPriceOrder(),
         sellerAddress: '' + sellerAddress,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1833,6 +1837,7 @@ export default Vue.extend({
         maxPrice: '' + this.weaponMaxPriceFilter(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         sellerAddress: '' + sellerAddress,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1852,6 +1857,7 @@ export default Vue.extend({
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
         sellerAddress: '' + sellerAddress,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -2036,7 +2042,8 @@ export default Vue.extend({
         minPrice: '' + this.weaponMinPriceFilter(),
         maxPrice: '' + this.weaponMaxPriceFilter(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
-        buyerAddress: '' + this.defaultAccount
+        buyerAddress: '' + this.defaultAccount,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -2058,6 +2065,7 @@ export default Vue.extend({
         maxPrice: '' + this.characterMaxPriceFilter(),
         sortDir: '' + this.characterPriceOrder(),
         buyerAddress: '' + this.defaultAccount,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -2078,6 +2086,7 @@ export default Vue.extend({
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
         buyerAddress: '' + this.defaultAccount,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -2112,7 +2121,9 @@ export default Vue.extend({
     convertSkillToWei(skill: string) {
       return Web3.utils.toWei(skill);
     },
-
+    activeChain(): string {
+      return (localStorage.getItem('currentChain') || 'BSC').toLowerCase();
+    },
     characterMinLevelFilter(): number {
       return sessionStorage.getItem('character-levelfilter') ? +(sessionStorage.getItem('character-levelfilter') as string) - 1 : 0;
     },
