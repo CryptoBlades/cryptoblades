@@ -91,7 +91,7 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://exchaintestrpc.okex.org"],
           "blockExplorerUrls": ["https://www.oklink.com/okexchain-test/"],
-          "exchangeUrl": ""
+          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB"
         }
       }
     },
@@ -185,7 +185,7 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://exchainrpc.okex.org"],
           "blockExplorerUrls": ["https://www.oklink.com/okexchain/"],
-          "exchangeUrl": ""
+          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB"
         }
       }
     }
