@@ -8,7 +8,7 @@ module.exports = async function (deployer, network, accounts) {
     const shields = await Shields.deployed();
     const basicPriceOracle = await BasicPriceOracle.deployed();
 
-    const shields_GAME_ADMIN = shields.GAME_ADMIN();
+    const shields_GAME_ADMIN = await shields.GAME_ADMIN();
     await shields.revokeRole(shields_GAME_ADMIN, blacksmith.address);
 
     // current BSC mainnet value
