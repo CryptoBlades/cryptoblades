@@ -2,7 +2,7 @@
   <div>
     <b-dropdown right no-caret class="options-dropdown">
       <template slot="button-content"><b-icon-three-dots/></template>
-      <b-dropdown-item :disabled="+option.amount === 0" v-for="option in options" :key="option.name" @click="option.handler(nftId)">
+      <b-dropdown-item :disabled="isDisabled(option)" v-for="option in options" :key="option.name" @click="option.handler(nftId)">
         {{option.name}} ({{option.amount}} left)
       </b-dropdown-item>
     </b-dropdown>
@@ -17,6 +17,7 @@ export interface NftOption {
   name: string;
   amount: number;
   handler: (id: number | string) => any;
+  hasDefaultOption?: boolean;
 }
 
 export default Vue.extend({
@@ -30,6 +31,12 @@ export default Vue.extend({
     nftId: {
       type: Number,
       default: null
+    }
+  },
+
+  methods: {
+    isDisabled(option: NftOption): boolean {
+      return !option.hasDefaultOption && +option.amount === 0;
     }
   }
 });
@@ -46,6 +53,10 @@ export default Vue.extend({
 .dropdown-item.disabled {
   opacity: 50%;
   pointer-events: none;
+}
+
+.dropdown-item {
+  padding: 0;
 }
 
 .options-dropdown .btn:not(.disabled):not(:disabled):hover {

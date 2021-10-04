@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 abstract contract Raid is Initializable, MultiAccessUpgradeable {
 
+    // THIS AND raidBasic.sol are old unused files, DO NOT USE!
+
     // Outline raids contract that we can iterate on and deploy multiple of.
     // Needs to be granted access to NFT contracts to interact with them
 

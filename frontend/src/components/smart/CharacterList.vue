@@ -44,7 +44,7 @@
     <ul class="character-list">
       <li
         class="character"
-        :class="{ selected: value === c.id }"
+        :class="[value === c.id ? 'selected' : '', showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : '']"
         v-for="c in filteredCharacters"
         :key="c.id"
         @click="$emit('input', c.id)"
@@ -53,38 +53,54 @@
           <slot name="above" :character="c"></slot>
         </div>
         <slot name="sold" :character="c"></slot>
-        <nft-options-dropdown :nftId="c.id" :options="options" class="nft-options"/>
-        <div class="art">
-          <CharacterArt :character="c" :isMarket="isMarket"/>
+        <nft-options-dropdown v-if="showNftOptions" :nftId="c.id" :options="options" class="nft-options"/>
+        <div class="art" >
+          <div class="animation" />
+          <CharacterArt :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(c.id) : '']" :character="c" :isMarket="isMarket"/>
         </div>
       </li>
     </ul>
+
     <b-modal class="centered-modal" ref="character-rename-modal"
-                  @ok="renameCharacterCall">
-                  <template #modal-title>
-                    Rename Character
-                  </template>
-                  <b-form-input type="string"
-                    class="modal-input" v-model="characterRename" placeholder="New Name" />
-                  <span v-if="characterRename !== '' && (characterRename.length < 2 || characterRename.length > 24)">
-                    Name must be 2 - 24 characters long.
-                  </span>
-                  <span v-if="isRenameProfanish">
-                    This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
-                  </span>
-                </b-modal>
-        <b-modal class="centered-modal" ref="character-change-trait-modal"
-                  @ok="changeCharacterTraitCall">
-                  <template #modal-title>
-                    Change Character's Trait
-                  </template>
-                  <span >
-                    Pick a trait to switch to.
-                  </span>
-                  <select class="form-control" v-model="targetTrait">
-                    <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
-                  </select>
-                </b-modal>
+      @ok="renameCharacterCall">
+      <template #modal-title>
+        Rename Character
+      </template>
+      <b-form-input type="string"
+        class="modal-input" v-model="characterRename" placeholder="New Name" />
+      <span v-if="characterRename !== '' && (characterRename.length < 2 || characterRename.length > 24)">
+        Name must be 2 - 24 characters long.
+      </span>
+      <span v-if="isRenameProfanish">
+        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+      </span>
+    </b-modal>
+
+    <b-modal class="centered-modal" ref="character-change-trait-modal"
+      @ok="changeCharacterTraitCall">
+      <template #modal-title>
+        Change Character's Trait
+      </template>
+      <span >
+        Pick a trait to switch to.
+      </span>
+      <select class="form-control" v-model="targetTrait">
+        <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
+      </select>
+    </b-modal>
+
+    <b-modal class="centered-modal" ref="character-change-skin-modal"
+      @ok="changeCharacterSkinCall">
+      <template #modal-title>
+        Change Character's Skin
+      </template>
+      <span >
+        Pick a skin to switch to.
+      </span>
+      <select class="form-control" v-model="targetSkin">
+        <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+      </select>
+    </b-modal>
   </div>
 </template>
 
@@ -94,6 +110,7 @@ import { getCharacterArt } from '../../character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
+import Events from '@/events';
 
 const sorts = [
   { name: 'Any', dir: '' },
@@ -127,6 +144,10 @@ export default {
     nftDisplay: {
       type: Boolean,
       default: false
+    },
+    showNftOptions: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -146,13 +167,29 @@ export default {
       haveChangeTraitLightning: 0,
       targetTrait: '',
       currentCharacterId: null,
-      options: []
+      options: [],
+      haveCharacterCosmetic1: 0,
+      haveCharacterCosmetic2: 0,
+      haveCharacterCosmetics: [0],
+      targetSkin: '',
+      showCosmetics: true,
+      characterCosmeticsNames: [
+        'Character Grayscale','Character Contrast',
+        'Character Sepia','Character Invert',
+        'Character Blur','Character Fire Glow',
+        'Character Earth Glow','Character Lightning Glow',
+        'Character Water Glow','Character Rainbow Glow',
+        'Character Dark Glow','Ghost Character',
+        'Character Police Lights','Character Neon Border',
+        'Character Diamond Border','Character Gold Border',
+        'Character Silver Border','Character Bronze Border',
+      ]
     };
   },
 
   computed: {
     ...mapState(['maxStamina', 'ownedCharacterIds']),
-    ...mapGetters(['getCharacterName', 'allStaminas', 'charactersWithIds']),
+    ...mapGetters(['getCharacterName', 'allStaminas', 'charactersWithIds', 'getCharacterCosmetic']),
 
     characterIdsToDisplay() {
       if(this.showGivenCharacterIds) {
@@ -190,6 +227,12 @@ export default {
       return +this.haveChangeTraitFire + +this.haveChangeTraitEarth + +this.haveChangeTraitLightning + +this.haveChangeTraitWater;
     },
 
+    totalCosmeticChanges() {
+      let count = 0;
+      this.haveCharacterCosmetics.forEach(x => count += +x);
+      return count;
+    },
+
     isRenameProfanish() {
       return isProfaneIsh(this.characterRename);
     },
@@ -215,6 +258,20 @@ export default {
 
       return availableTraits;
     },
+
+    availableSkins() {
+      const availableSkins = [];
+
+      availableSkins.push('No Skin');
+
+      for(let i = 0; i < 18; i++) {
+        if(+this.haveCharacterCosmetics[i] > 0) {
+          availableSkins.push(this.characterCosmeticsNames[i]);
+        }
+      }
+
+      return availableSkins;
+    }
   },
 
   watch: {
@@ -227,7 +284,8 @@ export default {
     ...mapActions(['fetchCharacters','fetchTotalRenameTags','renameCharacter','changeCharacterTraitLightning',
       'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater',
       'fetchTotalCharacterFireTraitChanges','fetchTotalCharacterEarthTraitChanges',
-      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges']),
+      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
+      'fetchOwnedCharacterCosmetics','changeCharacterCosmetic','removeCharacterCosmetic']),
 
     getCharacterArt,
 
@@ -282,6 +340,12 @@ export default {
           amount: this.totalTraitChanges,
           handler: this.openChangeTrait
         },
+        {
+          name: 'Change Skin',
+          amount: this.totalCosmeticChanges,
+          handler: this.openChangeSkin,
+          hasDefaultOption: true,
+        },
       ];
     },
 
@@ -328,6 +392,37 @@ export default {
       }
       this.updateOptions();
     },
+
+    async loadCosmeticsCount() {
+      this.haveCharacterCosmetics = [];
+      for(let i = 1; i < 21; i++) {
+        this.haveCharacterCosmetics.push(await this.fetchOwnedCharacterCosmetics({cosmetic: i}));
+      }
+      this.updateOptions();
+    },
+
+    openChangeSkin(id) {
+      this.currentCharacterId = id;
+      (this.$refs['character-change-skin-modal']).show();
+    },
+    async changeCharacterSkinCall() {
+      if(!this.currentCharacterId) return;
+      // +1 as cosmetics have 1 (not 0) based ids
+      const selectedSkinId = this.characterCosmeticsNames.findIndex(x => x === this.targetSkin) + 1;
+      if(selectedSkinId === 0) {
+        await this.removeCharacterCosmetic({ id: +this.currentCharacterId });
+        await this.loadCosmeticsCount();
+      } else {
+        await this.changeCharacterCosmetic({ id: +this.currentCharacterId, cosmetic: selectedSkinId });
+        await this.loadCosmeticsCount();
+      }
+
+      this.updateOptions();
+    },
+
+    checkStorage() {
+      this.showCosmetics = localStorage.getItem('showCosmetics') !== 'false';
+    },
   },
 
   components: {
@@ -343,13 +438,17 @@ export default {
       this.minPriceFilter = sessionStorage.getItem('character-price-minfilter') || '';
       this.maxPriceFilter = sessionStorage.getItem('character-price-maxfilter') || '';
     }
+    this.checkStorage();
+    Events.$on('setting:showCosmetics', () => this.checkStorage());
+
     await this.loadConsumablesCount();
-  }
+    await this.loadCosmeticsCount();
+  },
 };
 </script>
 
 <style scoped>
-
+@import '../../styles/character-cosmetics.css';
 .filters {
    justify-content: center;
    width: 100%;
