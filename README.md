@@ -1,5 +1,9 @@
 # CryptoBlades
 
+## Warning
+
+This code is open, but not open source. It is not licensed, which means you cannot use it freely for your own applications. You cannot "base your code on CryptoBlades", nor use our code for anything. At all. This is not permissible under our license terms (which do not exist).
+
 ## Currency Setup
 
 1. Install [Ganache](https://www.trufflesuite.com/ganache).
@@ -55,3 +59,6 @@ There are optional environment variables, most of which have sensible defaults i
 - If you run into any error at all during the build process you may need to reset [Ganache](https://www.trufflesuite.com/ganache) by deleting previous workspaces and going through the Ganache setup process again including importing a new account for Metamask.
 - Artifacts are from different compiler runs `- rm -rf build/`
 
+## Config
+- All network config is in app-config.json
+- If you want to add a new network: add it's configuration in app-config.json and add update currentTokenPrice getter in EarningsCalculator.

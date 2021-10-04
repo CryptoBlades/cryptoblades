@@ -25,7 +25,7 @@ contract CharacterWaterTraitChangeConsumables is Consumables {
     function changeCharacterTrait(uint256 characterId) public {
         require(characters.ownerOf(characterId) == msg.sender, "Not the character owner");
         consumeItem(1);
-        characters.setTrait(characterId, 3);
         emit CharacterTraitChangedToWater(msg.sender, characterId, characters.getTrait(characterId));
+        characters.setTrait(characterId, 3);
     }
 }

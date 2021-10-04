@@ -22,33 +22,52 @@
     integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
     crossorigin="anonymous" />
   <link rel="stylesheet" href="global.css">
-  
+
   <title>
     CryptoBlades
   </title>
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-C5RLX74PEW"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){window.dataLayer.push(arguments);}
-    gtag('js', new Date());
-  
-    gtag('config', 'G-C5RLX74PEW');
-  </script>
-  
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6717992096530538" crossorigin="anonymous"></script>
-  <script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
-  </script>
 </head>
 
 <body>
+  <div id="cookies-eu-banner" data-wait-remove="250" style="display: none">
+    <span>
+      We use third-party cookies (Google Analytics) to offer a better browsing experience, analyze site traffic and serve targeted advertisements.
+      <br/>
+      By clicking accept, you consent to our privacy policy & use of third-party-cookies.
+    </span>
+    <br/>
+    <button id="cookies-eu-reject">Reject</button>
+    <button id="cookies-eu-accept">Accept</button>
+    <p>
+    </p>
+  </div>
   <noscript>
     <strong>We're sorry but CryptoBlades doesn't work properly without JavaScript enabled.
       Please enable it to continue.</strong>
   </noscript>
   <div id="app"></div>
+  <link rel="stylesheet" href="<%= BASE_URL %>../static/cookies-eu-banner/cookies-eu-banner.default.css">
+  <script src="<%= BASE_URL %>../static/cookies-eu-banner/cookies-eu-banner.min.js"></script>
+  <script>
+    new CookiesEuBanner(function () {
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        window.dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+      gtag('config', 'G-C5RLX74PEW');
+      console.log("loaded Analytics");
+
+      let adScript = document.createElement('script')
+      adScript.setAttribute('src', 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6717992096530538')
+      document.head.appendChild(adScript)
+      (adsbygoogle = window.adsbygoogle || []).push({});
+      console.log("loaded Ads");
+    },true);
+  </script>
   <!-- built files will be auto injected -->
 </body>
 

@@ -9,9 +9,9 @@
       <div class="starter-panel">
         <span class="starter-panel-heading">{{ $t('app.warning.title') }}</span>
         <div class="center">
-          <big-button class="button" :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
-          <big-button class="button" :mainText="$t('app.warning.buttons.confMetamask')" @click="configureMetaMask" v-if="showNetworkError" />
-          <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.startMetamask')" />
+          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning" />
+          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetamask" v-if="showNetworkError" />
+          <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
         </div>
       </div>
     </div>
@@ -24,13 +24,8 @@
         <span class="starter-panel-heading">{{ errorMessage || $t('app.warning.start') }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
         <div>
-          <big-button class="button mm-button" :mainText="$t('app.warning.buttons.confMetamask')" @click="configureMetaMask" />
-          <big-button
-            v-bind:class="[isConnecting ? 'disabled' : '']"
-            class="button mm-button"
-            :mainText="$t('app.warning.buttons.startMetamask')"
-            @click="connectMetamask"
-          />
+          <big-button class="button mm-button" :mainText="`Configure MetaMask`" @click="configureMetamask" />
+          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button" :mainText="`Connect to MetaMask`" @click="connectMetamask" />
         </div>
         <div class="seperator"></div>
         <div class="instructions-list">
@@ -76,6 +71,7 @@ import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import { apiUrl } from './utils/common';
 import i18n from './i18n';
+import { getConfigValue } from './contracts';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -143,6 +139,7 @@ export default {
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
+      'configureMetaMask'
     ]),
 
     async updateCharacterStamina(id) {
@@ -174,101 +171,8 @@ export default {
       const onboarding = new MetaMaskOnboarding();
       onboarding.startOnboarding();
     },
-    async configureMetaMask() {
-      const web3 = this.web3.currentProvider;
-      if (this.currentNetworkId === 97) {
-        try {
-          await web3.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x61' }],
-          });
-        } catch (switchError) {
-          try {
-            await web3.request({
-              method: 'wallet_addEthereumChain',
-              params: [
-                {
-                  chainId: '0x61',
-                  chainName: 'Binance Smart Chain Testnet',
-                  nativeCurrency: {
-                    name: 'Binance Coin',
-                    symbol: 'BNB',
-                    decimals: 18,
-                  },
-                  rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
-                  blockExplorerUrls: ['https://testnet.bscscan.com'],
-                },
-              ],
-            });
-          } catch (addError) {
-            console.error(addError);
-          }
-        }
-
-        try {
-          await web3.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: '0xcaf53066e36eef55ed0663419adff6e503bd134f',
-                symbol: 'SKILL',
-                decimals: 18,
-                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
-              },
-            },
-          });
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        {
-          try {
-            await web3.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: '0x38' }],
-            });
-          } catch (switchError) {
-            try {
-              await web3.request({
-                method: 'wallet_addEthereumChain',
-                params: [
-                  {
-                    chainId: '0x38',
-                    chainName: 'Binance Smart Chain Mainnet',
-                    nativeCurrency: {
-                      name: 'Binance Coin',
-                      symbol: 'BNB',
-                      decimals: 18,
-                    },
-                    rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                    blockExplorerUrls: ['https://bscscan.com/'],
-                  },
-                ],
-              });
-            } catch (addError) {
-              console.error(addError);
-            }
-          }
-
-          try {
-            await web3.request({
-              method: 'wallet_watchAsset',
-              params: {
-                type: 'ERC20',
-                options: {
-                  address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
-                  symbol: 'SKILL',
-                  decimals: 18,
-                  image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
-                },
-              },
-            });
-          } catch (error) {
-            console.error(error);
-          }
-        }
-      }
+    async configureMetamask() {
+      await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
 
     async connectMetamask() {
@@ -321,18 +225,18 @@ export default {
       const lastHash = localStorage.getItem('lastnotification');
       let shouldContinue = true;
 
-      notifications.forEach((notif) => {
+      notifications.forEach((notification) => {
         if (!shouldContinue) return;
 
-        if (lastHash === notif.hash) {
+        if (lastHash === notification.hash) {
           shouldContinue = false;
           return;
         }
 
         this.$dialog.notify.warning(
-          `${notif.title}
+          `${notification.title}
           <br>
-          <a href="${notif.link}" target="_blank">` + i18n.t('app.notification.link') + `</a>
+          <a href="${notification.link}" target="_blank">Check it out!</a>
           `,
           {
             timeout: 300000,
@@ -369,8 +273,10 @@ export default {
         });
       }
     });
-
     this.showWarningDialog();
+    if(this.hideWalletWarning) {
+      this.configureMetamask();
+    }
   },
 
   async created() {

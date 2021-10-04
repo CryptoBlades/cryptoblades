@@ -66,7 +66,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -104,7 +104,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                      {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                      <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
 
@@ -146,7 +146,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -256,6 +256,24 @@
                   @click="searchOwnListings('weapon')"  class="gtag-link-others" tagname="search_own_weapons">Search My Weapons</b-button>
               </div>
 
+              <div class="col">
+                <b-button
+                  variant="primary"
+                  @click="searchPrivateWeaponListings()" class="gtag-link-others" tagname="weapons_private">Weapons Private Trades</b-button>
+              </div>
+
+              <div class="col">
+                <b-button
+                  variant="primary"
+                  @click="searchPrivateCharacterListings()" class="gtag-link-others" tagname="characters_private">Characters Private Trades</b-button>
+              </div>
+
+              <div class="col">
+                <b-button
+                  variant="primary"
+                  @click="searchPrivateShieldListings()" class="gtag-link-others" tagname="characters_private">Shields Private Trades</b-button>
+              </div>
+
               <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
@@ -276,6 +294,13 @@
               </div>
 
               <div class="col-4 col-md-3">
+                <b-button
+                  variant="primary"
+                  v-if="ownListedNftSelected"
+                  @click="updateNftListingTargetBuyer()"  class="gtag-link-others" tagname="change_price">Change Target Buyer</b-button>
+              </div>
+
+              <div class="col">
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
@@ -303,7 +328,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -340,7 +365,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -382,7 +407,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: {{ convertWeiToSkill(nftPricesById[id]) | dynamicDecimals(2, 4) }} SKILL
+                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
                     <span class="d-block text-center" v-else>Loading price...</span>
@@ -477,10 +502,11 @@
                   </template>
                   <b-form-input type="number" :max="10000"
                     class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
-
-                  <span v-if="listingSellPrice">Do you want to sell your {{activeType}} for {{Math.min(+listingSellPrice, 10000)}} SKILL?<br>
+                  <b-form-input class="modal-input" v-model="listingTargetBuyer" placeholder="Target Buyer Address (optional)" />
+                  <span v-if="listingSellPrice">
+                    Do you want to sell your {{activeType}} for <CurrencyConverter :skill="Math.min(+listingSellPrice, 10000).toString()"/>?<br>
                   <i>The buyer will pay an extra {{activeListingMarketTax()}}% market fee for a total of
-                  {{calculatedBuyerCost(Math.min(+listingSellPrice, 10000))}} SKILL</i></span>
+                  <CurrencyConverter :skill="calculatedBuyerCost(Math.min(+listingSellPrice, 10000))"/></i></span>
                 </b-modal>
               </div>
 
@@ -655,9 +681,11 @@
 <script lang="ts">
 import assert from 'assert';
 import Vue from 'vue';
+import { BModal } from 'bootstrap-vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import Hint from '../components/Hint.vue';
+import CurrencyConverter from '../components/CurrencyConverter.vue';
 import Web3 from 'web3';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { Accessors } from 'vue/types/options';
@@ -665,7 +693,6 @@ import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons, Shields } from '../../../build/abi-interfaces';
 import { SkillShopListing } from '../interfaces/SkillShopListing';
 import BigNumber from 'bignumber.js';
-import { BModal } from 'bootstrap-vue';
 import { traitNameToNumber } from '@/contract-models';
 import { market_blockchain as useBlockchain } from './../feature-flags';
 import { CharacterTransactionHistoryData, ICharacterHistory,
@@ -681,6 +708,7 @@ type WeaponId = string;
 type CharacterId = string;
 type ShieldId = string;
 type NftId = WeaponId | CharacterId | ShieldId;
+const defaultTargetBuyer = '0x0000000000000000000000000000000000000000';
 
 interface Data {
   activeType: SellType;
@@ -703,6 +731,7 @@ interface Data {
   browseTabActive: boolean;
   skillShopTabActive: boolean;
   listingSellPrice: string;
+  listingTargetBuyer: string;
   priceChangeModal: boolean;
   weaponTransactionHistoryData: WeaponTransactionHistoryData[];
   weaponTransactionHistoryHeader: any;
@@ -755,12 +784,18 @@ interface StoreMappedActions {
   fetchNumberOfShieldListings(payload: { nftContractAddr: string, trait: number, stars: number}): Promise<number>;
   fetchMarketNftIdsBySeller(payload: { nftContractAddr: string, sellerAddr: string }): Promise<string[]>;
   fetchMarketNftPrice(payload: { nftContractAddr: string, tokenId: string | number }): Promise<string>;
+  fetchMarketNftTargetBuyer(payload: { nftContractAddr: string, tokenId: string | number }): Promise<string>;
   fetchMarketTax(payload: { nftContractAddr: string }): Promise<string>;
   checkMarketItemOwnership(payload: { nftContractAddr: string, tokenId: string | number}): Promise<string>;
-  addMarketListing(payload: { nftContractAddr: string, tokenId: string, price: string }): Promise<{ seller: string, nftID: string, price: string }>;
+  addMarketListing(
+    payload: { nftContractAddr: string, tokenId: string, price: string, targetBuyer: string }
+  ): Promise<{ seller: string, nftID: string, price: string, targetBuyer: string }>;
   changeMarketListingPrice(
     payload: { nftContractAddr: string, tokenId: string, newPrice: string }
   ): Promise<{ seller: string, nftID: string, newPrice: string }>;
+  changeMarketListingTargetBuyer(
+    payload: { nftContractAddr: string, tokenId: string, newTargetBuyer: string }
+  ): Promise<{ seller: string, nftID: string, newTargetBuyer: string }>;
   cancelMarketListing(payload: { nftContractAddr: string, tokenId: string }): Promise<{ seller: string, nftID: string }>;
   purchaseMarketListing(payload: { nftContractAddr: string, tokenId: string, maxPrice: string }): Promise<{ seller: string, nftID: string, price: string }>;
   fetchSellerOfNft(payload: { nftContractAddr: string, tokenId: string }): Promise<string>;
@@ -770,7 +805,7 @@ interface StoreMappedActions {
 }
 
 export default Vue.extend({
-  components: { CharacterList, WeaponGrid, Hint, NftList },
+  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList },
 
   data() {
     return {
@@ -794,6 +829,7 @@ export default Vue.extend({
       browseTabActive: true,
       skillShopTabActive: false,
       listingSellPrice: '',
+      listingTargetBuyer: '',
       priceChangeModal: false,
       weaponTransactionHistoryData: [],
       weaponTransactionHistoryHeader: [],
@@ -941,6 +977,302 @@ export default Vue.extend({
           description: 'Changes character\'s trait to Lightning.',
           image: 'potion_05_te.png'
         },
+        {
+          id: 1,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Grayscale',
+          description: '',
+          image: ''
+        },
+        {
+          id: 2,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Contrast',
+          description: 'Increased contrast',
+          image: ''
+        },
+        {
+          id: 3,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Sepia',
+          description: '',
+          image: ''
+        },
+        {
+          id: 4,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Invert',
+          description: 'Inverted colors',
+          image: ''
+        },
+        {
+          id: 5,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Blur',
+          description: 'Blurred weapon',
+          image: ''
+        },
+        {
+          id: 6,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Fire Glow',
+          description: 'Glows with fire power',
+          image: ''
+        },
+        {
+          id: 7,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Earth Glow',
+          description: 'Glows with earth power',
+          image: ''
+        },
+        {
+          id: 8,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Lightning Glow',
+          description: 'Glows with lightning power',
+          image: ''
+        },
+        {
+          id: 9,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Water Glow',
+          description: 'Glows with water power',
+          image: ''
+        },
+        {
+          id: 10,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Rainbow Glow',
+          description: 'Glows with all elements powers',
+          image: ''
+        },
+        {
+          id: 11,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Dark Glow',
+          description: 'Glows with the dark',
+          image: ''
+        },
+        {
+          id: 12,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Ghost Weapon',
+          description: 'Ghost effect',
+          image: ''
+        },
+        {
+          id: 13,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Police Lights',
+          description: 'Police Lights background',
+          image: ''
+        },
+        {
+          id: 14,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Neon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 15,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Rotating Neon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 16,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.4,
+          name: 'Diamond Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 17,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.3,
+          name: 'Gold Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 18,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.2,
+          name: 'Silver Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 19,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Bronze Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 1,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Grayscale',
+          description: '',
+          image: ''
+        },
+        {
+          id: 2,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Contrast',
+          description: 'Increased contrast',
+          image: ''
+        },
+        {
+          id: 3,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Sepia',
+          description: '',
+          image: ''
+        },
+        {
+          id: 4,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Invert',
+          description: 'Inverted colors',
+          image: ''
+        },
+        {
+          id: 5,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Blur',
+          description: 'Blurred character',
+          image: ''
+        },
+        {
+          id: 6,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Fire Glow',
+          description: 'Glows with fire power',
+          image: ''
+        },
+        {
+          id: 7,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Earth Glow',
+          description: 'Glows with earth power',
+          image: ''
+        },
+        {
+          id: 8,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Lightning Glow',
+          description: 'Glows with lightning power',
+          image: ''
+        },
+        {
+          id: 9,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Water Glow',
+          description: 'Glows with water power',
+          image: ''
+        },
+        {
+          id: 10,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Rainbow Glow',
+          description: 'Glows with all elements powers',
+          image: ''
+        },
+        {
+          id: 11,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Dark Glow',
+          description: 'Glows with the dark',
+          image: ''
+        },
+        {
+          id: 12,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Ghost Character',
+          description: 'Ghost effect',
+          image: ''
+        },
+        {
+          id: 13,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Police Lights',
+          description: 'Police lights background',
+          image: ''
+        },
+        {
+          id: 14,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Neon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 15,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.4,
+          name: 'Character Diamond Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 16,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.3,
+          name: 'Character Gold Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 17,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.2,
+          name: 'Character Silver Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 18,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Bronze Border',
+          description: '',
+          image: ''
+        },
       ] as SkillShopListing[];
 
       return nftList;
@@ -958,10 +1290,12 @@ export default Vue.extend({
       'fetchNumberOfShieldListings',
       'fetchMarketNftIdsBySeller',
       'fetchMarketNftPrice',
+      'fetchMarketNftTargetBuyer',
       'fetchMarketTax',
       'checkMarketItemOwnership',
       'addMarketListing',
       'changeMarketListingPrice',
+      'changeMarketListingTargetBuyer',
       'cancelMarketListing',
       'purchaseMarketListing',
       'fetchSellerOfNft',
@@ -983,6 +1317,7 @@ export default Vue.extend({
       this.allListingsAmount = 0;
       this.currentPage = 1;
       this.listingSellPrice = '';
+      this.listingTargetBuyer = '';
     },
 
     async loadMarketTaxes() {
@@ -1021,6 +1356,15 @@ export default Vue.extend({
       });
     },
 
+    async lookupNftTargetBuyer(nftId: NftId) {
+      if(!this.contractAddress) return;
+
+      return await this.fetchMarketNftTargetBuyer({
+        nftContractAddr: this.contractAddress,
+        tokenId: nftId,
+      });
+    },
+
     async fetchNftPrices(nftIds: NftId[]) {
       if(!this.contractAddress) return;
 
@@ -1050,12 +1394,13 @@ export default Vue.extend({
           ? this.selectedNftId
           : this.selectedNftId.split('.')[1],
         price: this.convertSkillToWei(val.toString()),
+        targetBuyer: this.listingTargetBuyer || defaultTargetBuyer
       });
 
       this.selectedNftId = null;
       this.waitingMarketOutcome = false;
-      this.marketOutcome = 'Successfully listed '
-        +this.activeType+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL';
+      this.marketOutcome = `Successfully listed ${this.activeType} ${results.nftID} for ${this.convertWeiToSkill(results.price)} SKILL`
+        +(this.listingTargetBuyer !== defaultTargetBuyer ? ` for ${this.listingTargetBuyer}` : '');
     },
 
     async updateNftListingPrice() {
@@ -1078,8 +1423,28 @@ export default Vue.extend({
 
       this.selectedNftId = null;
       this.waitingMarketOutcome = false;
-      this.marketOutcome = 'Successfully changed price for '
-        +this.activeType+' '+results.nftID+' to '+this.convertWeiToSkill(results.newPrice)+' SKILL';
+      this.marketOutcome = `Successfully changed price for ${this.activeType} ${results.nftID} to ${this.convertWeiToSkill(results.newPrice)} SKILL`;
+    },
+
+    async updateNftListingTargetBuyer() {
+
+      this.marketOutcome = null;
+      if(this.selectedNftId === null) return;
+
+      let targetBuyer = await (this as any).$dialog.prompt({ title: `Sell ${this.activeType}`, text: 'Target Buyer Address (optional)' });
+      if(!targetBuyer) targetBuyer = defaultTargetBuyer;
+
+      this.waitingMarketOutcome = true;
+
+      const results = await this.changeMarketListingTargetBuyer({
+        nftContractAddr: this.contractAddress,
+        tokenId: this.selectedNftId,
+        newTargetBuyer: targetBuyer
+      });
+
+      this.selectedNftId = null;
+      this.waitingMarketOutcome = false;
+      this.marketOutcome = `Successfully changed target buyer for ${this.activeType} ${results.nftID} to ${results.newTargetBuyer}`;
     },
 
     async purchaseNft() {
@@ -1113,7 +1478,7 @@ export default Vue.extend({
         nftContractAddr: this.contractAddress
       });
 
-      this.allSearchResults = results2;
+      this.allSearchResults = await this.filterOutTargetBuyers(results2);
 
       this.allSearchResults = Array.from(this.allSearchResults as string[]).filter((x: any) => x.id !== this.selectedNftId);
 
@@ -1151,9 +1516,11 @@ export default Vue.extend({
       this.currentPage = page + 1;
 
       if(useBlockchain){
+        console.log('chain');
         await this.searchAllCharacterListingsThroughChain(page);
       }
       else{
+        console.log('api');
         await this.searchAllCharacterListingsThroughAPI(page);
       }
 
@@ -1169,7 +1536,7 @@ export default Vue.extend({
     async searchAllCharacterListingsThroughAPI(page: number) {
       const url = new URL(apiUrl('static/market/character'));
       const params = {
-        element: '' + this.characterTraitFilter(),
+        element: '' + this.upperFirstChar(this.characterTraitFilter()),
         minLevel: '' + this.characterMinLevelFilter(),
         maxLevel: '' + this.characterMaxLevelFilter(),
         sortBy: '' + this.characterPriceOrder() ? 'price' : '',
@@ -1178,6 +1545,7 @@ export default Vue.extend({
         maxPrice: '' + this.characterMaxPriceFilter(),
         pageSize: '' + (this.characterShowLimit || defaultLimit),
         pageNum: '' + page,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1197,7 +1565,7 @@ export default Vue.extend({
         maxLevel: this.characterMaxLevelFilter()
       });
 
-      this.allSearchResults = await this.fetchAllMarketCharacterNftIdsPage({
+      const results = await this.fetchAllMarketCharacterNftIdsPage({
         nftContractAddr: this.contractAddress,
         limit: this.characterShowLimit || defaultLimit,
         pageNumber: page,
@@ -1205,6 +1573,8 @@ export default Vue.extend({
         minLevel: this.characterMinLevelFilter(),
         maxLevel: this.characterMaxLevelFilter()
       });
+
+      this.allSearchResults = await this.filterOutTargetBuyers(results);
     },
 
     async searchAllWeaponListings(page: number) {
@@ -1222,6 +1592,7 @@ export default Vue.extend({
       // will need per-result checking of it, OR filtering out own NFTs
       //this.searchResultsOwned = nftSeller === this.defaultAccount;
       this.searchResultsOwned = false; // temp
+      // this.allSearchResults = await this.filterOutTargetBuyers(results) as string[];
 
       this.waitingMarketOutcome = false;
       this.marketOutcome = null;
@@ -1235,26 +1606,29 @@ export default Vue.extend({
         stars: filterStar
       });
 
-      this.allSearchResults = await this.fetchAllMarketWeaponNftIdsPage({
+      const results = await this.fetchAllMarketWeaponNftIdsPage({
         nftContractAddr: this.contractAddress,
         limit: this.weaponShowLimit || defaultLimit,
         pageNumber: page,
         trait: traitNameToNumber(this.weaponTraitFilter()),
         stars: filterStar
       });
+
+      this.allSearchResults = await this.filterOutTargetBuyers(results);
     },
     async searchAllWeaponListingsThroughAPI(page: number) {
       const url = new URL(apiUrl('static/market/weapon'));
       const params = {
-        element: '' + this.weaponTraitFilter(),
-        minStars: '' + this.weaponStarFilter(),
-        maxStars: '' + this.weaponStarFilter(),
+        element: '' + this.upperFirstChar(this.weaponTraitFilter()),
+        minStars: '' + (this.weaponStarFilter() !== 0 ?  this.weaponStarFilter() - 1 : 0),
+        maxStars: '' + (this.weaponStarFilter() !== 0 ?  this.weaponStarFilter() - 1 : 4),
         sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
         sortDir: '' + this.weaponPriceOrder(),
         minPrice: '' + this.weaponMinPriceFilter(),
         maxPrice: '' + this.weaponMaxPriceFilter(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         pageNum: '' + page,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1306,13 +1680,14 @@ export default Vue.extend({
     async searchAllShieldListingsThroughAPI(page: number) {
       const url = new URL(apiUrl('static/market/shield'));
       const params = {
-        element: '' + this.nftTraitFilter(),
-        minStars: '' + this.nftStarFilter(),
-        maxStars: '' + this.nftStarFilter(),
+        element: '' + this.upperFirstChar(this.nftTraitFilter()),
+        minStars: '' + (this.nftStarFilter() !== 0 ?  this.nftStarFilter() - 1 : 0),
+        maxStars: '' + (this.nftStarFilter() !== 0 ?  this.nftStarFilter() - 1 : 4),
         sortBy: '' + this.nftPriceOrder() ? 'price' : '',
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
         pageNum: '' + page,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1343,7 +1718,7 @@ export default Vue.extend({
 
       const price = await this.lookupNftPrice(this.search);
       if(price !== '0' && !banned.banned) {
-        this.searchResults = [this.search];
+        this.searchResults = await this.filterOutTargetBuyers([this.search]);
       } else {
         this.searchResults = [];
       }
@@ -1380,6 +1755,7 @@ export default Vue.extend({
       });
 
       this.searchResultsOwned = this.search === this.defaultAccount;
+      this.searchResults = await this.filterOutTargetBuyers(this.searchResults) as string[];
     },
 
     async searchListingsBySellerThroughAPI(){
@@ -1431,7 +1807,7 @@ export default Vue.extend({
     async searchCharacterListingsBySeller(sellerAddress: string): Promise<string[]>{
       const url = new URL(apiUrl('static/market/character'));
       const params = {
-        element: '' + this.characterTraitFilter(),
+        element: '' + this.upperFirstChar(this.characterTraitFilter()),
         minLevel: '' + this.characterMinLevelFilter(),
         maxLevel: '' + this.characterMaxLevelFilter(),
         sortBy: '' + this.characterPriceOrder() ? 'price' : '',
@@ -1439,6 +1815,7 @@ export default Vue.extend({
         maxPrice: '' + this.characterMaxPriceFilter(),
         sortDir: '' + this.characterPriceOrder(),
         sellerAddress: '' + sellerAddress,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1451,15 +1828,16 @@ export default Vue.extend({
     async searchWeaponListingsBySeller(sellerAddress: string): Promise<string[]>{
       const url = new URL(apiUrl('static/market/weapon'));
       const params = {
-        element: '' + this.weaponTraitFilter(),
-        minStars: '' + this.weaponStarFilter(),
-        maxStars: '' + this.weaponStarFilter(),
+        element: '' + this.upperFirstChar(this.weaponTraitFilter()),
+        minStars: '' + (this.weaponStarFilter() !== 0 ?  this.weaponStarFilter() - 1 : 0),
+        maxStars: '' + (this.weaponStarFilter() !== 0 ?  this.weaponStarFilter() - 1 : 4),
         sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
         sortDir: '' + this.weaponPriceOrder(),
         minPrice: '' + this.weaponMinPriceFilter(),
         maxPrice: '' + this.weaponMaxPriceFilter(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         sellerAddress: '' + sellerAddress,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1472,13 +1850,14 @@ export default Vue.extend({
     async searchShieldListingsBySeller(sellerAddress: string): Promise<NftIdType[]>{
       const url = new URL(apiUrl('static/market/shield'));
       const params = {
-        element: '' + this.nftTraitFilter(),
-        minStars: '' + this.nftStarFilter(),
-        maxStars: '' + this.nftStarFilter(),
+        element: '' + this.upperFirstChar(this.nftTraitFilter()),
+        minStars: '' + (this.nftStarFilter() !== 0 ?  this.nftStarFilter() - 1 : 0),
+        maxStars: '' + (this.nftStarFilter() !== 0 ?  this.nftStarFilter() - 1 : 4),
         sortBy: '' + this.nftPriceOrder() ? 'price' : '',
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
         sellerAddress: '' + sellerAddress,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1651,8 +2030,89 @@ export default Vue.extend({
       (this.$refs['listing-setup-modal'] as BModal).show();
     },
 
+    async searchPrivateWeaponListings(): Promise<string[]>{
+      this.activeType = 'weapon';
+      const url = new URL('https://api.cryptoblades.io/static/market/weapon');
+      const params = {
+        element: '' + this.upperFirstChar(this.weaponTraitFilter()),
+        minStars: '' +  (this.weaponStarFilter() !== 0 ?  this.weaponStarFilter() - 1 : 0),
+        maxStars: '' +  (this.weaponStarFilter() !== 0 ?  this.weaponStarFilter() - 1 : 0),
+        sortBy: '' + this.weaponPriceOrder() ? 'price' : '',
+        sortDir: '' + this.weaponPriceOrder(),
+        minPrice: '' + this.weaponMinPriceFilter(),
+        maxPrice: '' + this.weaponMaxPriceFilter(),
+        pageSize: '' + (this.weaponShowLimit || defaultLimit),
+        buyerAddress: '' + this.defaultAccount,
+        network: this.activeChain(),
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const weaponsData = await fetch(url.toString());
+      const weapons = await weaponsData.json();
+      return weapons.idResults;
+    },
+
+    async searchPrivateCharacterListings(): Promise<string[]> {
+      this.activeType = 'character';
+      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const params = {
+        element: '' + this.upperFirstChar(this.characterTraitFilter()),
+        minLevel: '' + this.characterMinLevelFilter(),
+        maxLevel: '' + this.characterMaxLevelFilter(),
+        sortBy: '' + this.characterPriceOrder() ? 'price' : '',
+        minPrice: '' + this.characterMinPriceFilter(),
+        maxPrice: '' + this.characterMaxPriceFilter(),
+        sortDir: '' + this.characterPriceOrder(),
+        buyerAddress: '' + this.defaultAccount,
+        network: this.activeChain(),
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const charactersData = await fetch(url.toString());
+      const characters = await charactersData.json();
+      return characters.idResults;
+    },
+
+    async searchPrivateShieldListings(): Promise<string[]> {
+      this.activeType = 'character';
+      const url = new URL('https://api.cryptoblades.io/static/market/character');
+      const params = {
+        element: '' + this.upperFirstChar(this.nftTraitFilter()),
+        minStars: '' + (this.nftStarFilter() !== 0 ?  this.nftStarFilter() - 1 : 0),
+        maxStars: '' + (this.nftStarFilter() !== 0 ?  this.nftStarFilter() - 1 : 4),
+        sortBy: '' + this.nftPriceOrder() ? 'price' : '',
+        sortDir: '' + this.nftPriceOrder(),
+        pageSize: '' + (this.shieldShowLimit || defaultLimit),
+        buyerAddress: '' + this.defaultAccount,
+        network: this.activeChain(),
+      };
+
+      url.search = new URLSearchParams(params).toString();
+
+      const charactersData = await fetch(url.toString());
+      const characters = await charactersData.json();
+      return characters.idResults;
+    },
+
+    async filterOutTargetBuyers(nftIds: NftId[]) {
+      if(!this.contractAddress) return [];
+      const results: string[] = [];
+
+      await Promise.all(nftIds.map(async nftId => {
+        const targetBuyer = (await this.lookupNftTargetBuyer(nftId))!;
+        if(targetBuyer === defaultTargetBuyer || targetBuyer === this.defaultAccount) {
+          results.push(nftId);
+        }
+      }));
+
+      return results;
+    },
+
     clearInputs() {
       this.listingSellPrice = '';
+      this.listingTargetBuyer = '';
     },
 
     convertWeiToSkill(wei: string) {
@@ -1661,7 +2121,9 @@ export default Vue.extend({
     convertSkillToWei(skill: string) {
       return Web3.utils.toWei(skill);
     },
-
+    activeChain(): string {
+      return (localStorage.getItem('currentChain') || 'BSC').toLowerCase();
+    },
     characterMinLevelFilter(): number {
       return sessionStorage.getItem('character-levelfilter') ? +(sessionStorage.getItem('character-levelfilter') as string) - 1 : 0;
     },
@@ -1744,6 +2206,14 @@ export default Vue.extend({
 
     maxPrecisionSkill(listedPrice: string): string {
       return this.convertStringToDecimal(this.convertWeiToSkill(listedPrice), 8);
+    },
+
+    upperFirstChar(input: string): string {
+      if(input === ''){
+        return '';
+      }
+
+      return input[0].toUpperCase() + input.slice(1);
     }
   },
 

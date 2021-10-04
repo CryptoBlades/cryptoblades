@@ -25,7 +25,7 @@ contract CharacterEarthTraitChangeConsumables is Consumables {
     function changeCharacterTrait(uint256 characterId) public {
         require(characters.ownerOf(characterId) == msg.sender, "Not the character owner");
         consumeItem(1);
-        characters.setTrait(characterId, 1);
         emit CharacterTraitChangedToEarth(msg.sender, characterId, characters.getTrait(characterId));
+        characters.setTrait(characterId, 1);
     }
 }

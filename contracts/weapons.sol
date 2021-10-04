@@ -15,6 +15,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades weapon", "CBW");
@@ -24,7 +25,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function migrateTo_e55d8c5() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         burnPointMultiplier = 2;
         lowStarBurnPowerPerPoint = 15;
@@ -33,7 +34,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function migrateTo_aa9da90() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         oneFrac = ABDKMath64x64.fromUInt(1);
         powerMultPerPointBasic =  ABDKMath64x64.divu(1, 400);// 0.25%
@@ -42,7 +43,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function migrateTo_951a020() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         // Apparently ERC165 interfaces cannot be removed in this version of the OpenZeppelin library.
         // But if we remove the registration, then while local deployments would not register the interface ID,
@@ -51,9 +52,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         // Hence, we keep registering the interface despite not actually implementing the interface.
         _registerInterface(0xe62e6974); // TransferCooldownableInterfaceId.interfaceId()
     }
-    
+
     function migrateTo_surprise(Promos _promos) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         promos = _promos;
     }
@@ -119,6 +120,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     Promos public promos;
 
+    uint256 public constant BIT_FEATURE_TRANSFER_BLOCKED = 1;
+    
+    uint256 public constant NUMBERPARAMETER_FEATURE_BITS = uint256(keccak256("FEATURE_BITS"));
+
+    mapping(uint256 => uint256) public numberParameters;
+
     event Burned(address indexed owner, uint256 indexed burned);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
@@ -130,7 +137,20 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        needRole(hasRole(GAME_ADMIN, msg.sender));
+    }
+
+    modifier minterOnly() {
+        _minterOnly();
+        _;
+    }
+
+    function _minterOnly() internal view {
+        needRole(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender));
+    }
+
+    function needRole(bool statement) internal view {
+        require(statement, "NR");
     }
 
     modifier noFreshLookup(uint256 id) {
@@ -139,7 +159,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _noFreshLookup(uint256 id) internal view {
-        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
+        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "NFL");
     }
 
     function getStats(uint256 id) internal view
@@ -188,7 +208,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _bonusPower = getBonusPower(id);
     }
 
-    function mint(address minter, uint256 seed) public restricted returns(uint256) {
+    function mint(address minter, uint256 seed, uint8 chosenElement) public minterOnly returns(uint256) {
         uint256 stars;
         uint256 roll = seed % 100;
         // will need revision, possibly manual configuration if we support more than 5 stars
@@ -208,15 +228,21 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             stars = 0; // 1* at 44%
         }
 
-        return mintWeaponWithStars(minter, stars, seed);
+        return mintWeaponWithStars(minter, stars, seed, chosenElement);
     }
 
-    function mintWeaponWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
-        require(stars < 8, "Stars parameter too high! (max 7)");
+    function mintGiveawayWeapon(address to, uint256 stars, uint8 chosenElement) external minterOnly returns(uint256) {
+        // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
+        return mintWeaponWithStars(to, stars, uint256(keccak256(abi.encodePacked(now, tokens.length))), chosenElement);
+    }
+
+    function mintWeaponWithStars(address minter, uint256 stars, uint256 seed, uint8 chosenElement) public minterOnly returns(uint256) {
+        require(stars < 8);
+        require(chosenElement == 100 || (chosenElement>= 0 && chosenElement<= 3));
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
         return performMintWeapon(minter,
-            getRandomProperties(stars, seed),
+            getRandomProperties(stars, seed, chosenElement),
             stat1,
             stat2,
             stat3,
@@ -228,7 +254,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 properties,
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
-    ) public restricted returns(uint256) {
+    ) public minterOnly returns(uint256) {
 
         uint256 tokenID = tokens.length;
 
@@ -245,9 +271,15 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokenID;
     }
 
-    function getRandomProperties(uint256 stars, uint256 seed) public pure returns (uint16) {
+    function getRandomProperties(uint256 stars, uint256 seed, uint8 chosenElement) public pure returns (uint16) {
+        uint256 trait;
+        if (chosenElement == 100) {
+            trait = ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3);
+        } else {
+            trait = ((chosenElement & 0x3) << 3);
+        }
         return uint16((stars & 0x7) // stars aren't randomized here!
-            | ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3) // trait
+            | trait // trait
             | ((RandomUtil.randomSeededMinMax(0,124,RandomUtil.combineSeeds(seed,2)) & 0x7F) << 5)); // statPattern
     }
 
@@ -622,7 +654,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     returns (int128, int128, uint24, uint8) {
 
         drainDurability(id, drainAmount, allowNegativeDurability);
-        
+
         Weapon storage wep = tokens[id];
         return (
             oneFrac.add(powerMultPerPointBasic.mul(
@@ -695,13 +727,31 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint64(maxDurability * secondsPerDurability);
     }
 
+    function setFeatureEnabled(uint256 bit, bool enabled) public restricted {
+        if (enabled) {
+            numberParameters[NUMBERPARAMETER_FEATURE_BITS] |= bit;
+        } else {
+            numberParameters[NUMBERPARAMETER_FEATURE_BITS] &= ~bit;
+        }
+    }
+
+    function _isFeatureEnabled(uint256 bit) private view returns (bool) {
+        return (numberParameters[NUMBERPARAMETER_FEATURE_BITS] & bit) == bit;
+    }
+
     function canRaid(address user, uint256 id) public view returns (bool) {
         return ownerOf(id) == user && getDurabilityPoints(id) > 0;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
-        if(promos.getBit(from, 4) && from != address(0) && to != address(0)) {
-            require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to), "Transfer cooldown");
+        // Always allow minting and burning.
+        if(from != address(0) && to != address(0)) {
+            // But other transfers require the feature to be enabled.
+            require(_isFeatureEnabled(BIT_FEATURE_TRANSFER_BLOCKED) == false);
+
+            if(promos.getBit(from, 4)) { // bad actors, they can transfer to market but nowhere else
+                require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to), "Transfer cooldown");
+            }
         }
     }
 }
