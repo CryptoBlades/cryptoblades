@@ -1,6 +1,95 @@
 {
   "build/contracts/BasicPriceOracle.json": {
-    "events": {},
+    "events": {
+      "0xcfebfed7291191489847e6abdd482d8816f6f32efecf69fc66c91631a2f217f9": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "currentPrice",
+            "type": "uint256"
+          }
+        ],
+        "name": "CurrentPriceUpdated",
+        "type": "event"
+      },
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
     "links": {},
     "address": "0x4fa018401fFF54804caB82b19F3dABA64C30C238",
     "transactionHash": "0x43634e9d29af82ce2f7aaa0368af14a87bbf963a25a9c5165ea5ff72d0d2df2f"
@@ -1428,7 +1517,7 @@
     },
     "links": {},
     "address": "0x29869EDb088466a49f75654d8F04edd16Bf60e75",
-    "transactionHash": "0x523e4d629cd82fffa97477daed0150ae2951b73b937aace6b5ba3505d8805126"
+    "transactionHash": "0x14469b1d9d363c5dbacd3e3bd5c597b5a3b0577dca6d8ccfda20f781882007be"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
@@ -1802,7 +1891,8 @@
   "build/contracts/LPStakingRewardsUpgradeable.json": {
     "events": {},
     "links": {},
-    "address": "0xc7c72245506c31F05c8a79F6Ea938e139b48a15D"
+    "address": "0xc7c72245506c31F05c8a79F6Ea938e139b48a15D",
+    "transactionHash": "0x0a3654978408a6f0c7e034be0e784291b9ff3178632b1cc22ddc1efe4ec94c5a"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -2509,7 +2599,7 @@
     "events": {},
     "links": {},
     "address": "0x6109A500e5b9CE40FFe075Ea3A6beA6e93c23BcF",
-    "transactionHash": "0x7b565d25e1ac8178d419863134b7409e681109ef75dec5309a40b05516912c36"
+    "transactionHash": "0x5d0a29a46100c7dfbda253de8e429530ee375ef085bcb6ae049968db851eba2b"
   },
   "build/contracts/SkillToken.json": {
     "events": {},
