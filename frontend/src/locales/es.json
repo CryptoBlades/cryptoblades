@@ -1,5 +1,5 @@
 {
-  "language": "Spanish",
+  "name": "Spanish",
   "view-link": {
       "plaza": "Plaza",
       "blacksmith": "Herrería",
@@ -57,4 +57,5 @@
   "on": "Prendido",
   "off": "Apagado",
   "trade": "Intercambio"
+}
 }
