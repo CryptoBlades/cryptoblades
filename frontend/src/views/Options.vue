@@ -46,7 +46,7 @@
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Stamina Cost per Fight</h4>
-              <b-form-select size="lg" v-model="fightMultiplier" @change="setFightMultiplier()">
+              <b-form-select class="select-box" size="lg" v-model="fightMultiplier" @change="setFightMultiplier()">
                 <b-form-select-option :value="null" disabled>{{$t("options.selectStaminaFight")}}</b-form-select-option>
                 <b-form-select-option value="1">40</b-form-select-option>
                 <b-form-select-option value="2">80</b-form-select-option>
@@ -57,11 +57,15 @@
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>{{$t("options.language")}}</h4>
-              <b-form-select class="combobox-languages" size="md" v-model="$i18n.locale">
+              <b-form-select class="select-box" size="lg" v-model="$i18n.locale">
                 <b-form-select-option v-for="(value, key) in languages" :key="key" :value="key">
                   {{ value }}
+                </b-form-select-option>
+              </b-form-select>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Current chain</h4>
-              <b-form-select size="lg" v-model="currentChain" @change="setCurrentChain()">
+              <b-form-select class="select-box" size="lg" v-model="currentChain" @change="setCurrentChain()">
                 <b-form-select-option v-for="chain in supportedChains" :key="chain" :value="chain">
                   {{chain}}
                 </b-form-select-option>
@@ -388,11 +392,9 @@ export default Vue.extend({
     }
   }
 }
-
-.combobox-languages {
-  width: 150px !important;
+.select-box{
+  max-width:300px;
 }
-
 .fullscreen-warning {
   z-index: 999999;
 }
