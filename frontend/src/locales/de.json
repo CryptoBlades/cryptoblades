@@ -126,9 +126,12 @@
     "graphic": "3D Grafiken",
     "rewardBar": "Belohnungsleiste verstecken",
     "walletWarning": "Wallet-Warnung verstecken",
+    "showSkillValues": "SKILL Werte in USD anzeigen",
+    "showCosmetics":"Kosmetika anzeigen",
     "selectStaminaFight": "Bitte Ausdauerkosten pro Kampf wählen",
     "staminaFight": "Ausdauerkosten pro Kampf",
-    "language": "Sprache"
+    "language": "Sprache",
+    "currenChain":"Chain"
   },
   "app": {
     "warning": {

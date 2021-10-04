@@ -126,9 +126,12 @@
     "graphic": "3D Graphics",
     "rewardBar": "Hide Rewards Bar",
     "walletWarning": "Hide Wallet Warning",
+    "showSkillValues": "Show SKILL values in USD",
+    "showCosmetics":"Show Cosmetics",
     "selectStaminaFight": "Please select Stamina Cost per Fight",
     "staminaFight": "Stamina Cost per Fight",
-    "language": "Language"
+    "language": "Language",
+    "currenChain":"Current Chain"
   },
   "app": {
     "warning": {
