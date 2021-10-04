@@ -71,8 +71,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint8 public losingPoints;
     /// @dev amount of players that are considered for the top ranking
     uint8 private _maxCharactersPerRanking;
+
     /// @dev percentages of ranked prize distribution by fighter rank (represented as index)
-    uint256[] private _prizePercentages;
+    uint256[] public prizePercentages;
 
     /// @dev Fighter by characterID
     mapping(uint256 => Fighter) public fighterByCharacter;
@@ -194,9 +195,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         winningPoints = 5;
         losingPoints = 3;
         _maxCharactersPerRanking = 4;
-        _prizePercentages.push(60);
-        _prizePercentages.push(30);
-        _prizePercentages.push(10);
+        prizePercentages.push(60);
+        prizePercentages.push(30);
+        prizePercentages.push(10);
     }
 
     /// @notice enter the arena with a character, a weapon and optionally a shield
@@ -852,22 +853,27 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             if (_fightersByTier[i].length() == 0) {
                 continue;
             }
-            uint256 difference = _prizePercentages.length -
-                _rankingByTier[i].length;
+            uint256 difference;
+
+            if (_rankingByTier[i].length <= prizePercentages.length) {
+                difference = prizePercentages.length - _rankingByTier[i].length;
+            } else {
+                difference = 0;
+            }
 
             // Note: If there are less players than top positions, excess is transferred to top 1.
-            if (_rankingByTier[i].length < _prizePercentages.length) {
+            if (_rankingByTier[i].length < prizePercentages.length) {
                 uint256 excessPercentage;
                 address topOnePlayer = characters.ownerOf(_rankingByTier[i][0]);
 
                 // Note: We accumulate excessive percentage.
                 for (
-                    uint256 j = difference;
-                    j < _prizePercentages.length;
+                    uint256 j = prizePercentages.length - difference;
+                    j < prizePercentages.length;
                     j++
                 ) {
                     excessPercentage = excessPercentage.add(
-                        _prizePercentages[_prizePercentages.length - difference]
+                        prizePercentages[prizePercentages.length - difference]
                     );
                 }
 
@@ -880,12 +886,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             }
 
             // Note: We assign rewards normally to all possible players.
-            for (uint8 h = 0; h < _prizePercentages.length - difference; h++) {
-                _assignRewards(
-                    _rankingByTier[i][h],
-                    h + 1,
-                    _rankingsPoolByTier[i]
-                );
+            for (uint8 h = 0; h < (prizePercentages.length) - difference; h++) {
+                _assignRewards(_rankingByTier[i][h], h, _rankingsPoolByTier[i]);
             }
         }
     }
@@ -896,8 +898,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint8 position,
         uint256 pool
     ) private {
-        uint256 percentage = _prizePercentages[position];
+        uint256 percentage = prizePercentages[position];
+
         address playerToTransfer = characters.ownerOf(characterID);
+
         uint256 amountToTransfer;
 
         amountToTransfer = (pool.mul(percentage)).div(100);
@@ -916,5 +920,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             skillToken.safeTransfer(msg.sender, amountToTransfer);
         }
+    }
+
+    function getPrizePercentages() public view returns (uint256[] memory) {
+        return prizePercentages;
     }
 }
