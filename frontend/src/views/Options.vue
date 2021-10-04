@@ -35,13 +35,13 @@
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>{{$t("options.showSkillValues")}}</h4>
               <b-form-checkbox size="lg" :checked="showSkillInUsd" @change="toggleShowSkillInUsd()" switch>
-                <b class="float-left">{{ showSkillInUsd ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ showSkillInUsd ? $t("on") : $t("off") }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>{{$t("options.showCosmetics")}}</h4>
               <b-form-checkbox size="lg" :checked="showCosmetics" @change="toggleShowCosmetics()" switch>
-                <b class="float-left">{{ showCosmetics ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ showCosmetics ? $t("on") : $t("off") }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
@@ -64,7 +64,7 @@
               </b-form-select>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>Current chain</h4>
+              <h4>{{$t("options.currenChain")}}</h4>
               <b-form-select class="select-box" size="lg" v-model="currentChain" @change="setCurrentChain()">
                 <b-form-select-option v-for="chain in supportedChains" :key="chain" :value="chain">
                   {{chain}}
