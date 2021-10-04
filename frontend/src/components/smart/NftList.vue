@@ -68,7 +68,7 @@
           </span>
         </b-button>
       </div>
-      <div v-if="isReward && nonIgnoredNfts.length === 0">
+      <div class="centered-text-div" v-if="isReward && nftIdTypes.length === 0">
         Nothing dropped for you this time.
       </div>
       <ul class="nft-grid">
@@ -128,11 +128,16 @@ interface StoreMappedGetters {
   trinketWithIds(ids: string[]): Nft[];
   junkWithIds(ids: string[]): Nft[];
   keyLootboxesWithIds(ids: string[]): Nft[];
+  weaponsWithIds(ids: (string | number)[]): Nft[];
 }
 
 interface StoreMappedActions {
   purchaseShield(): Promise<void>;
   fetchShields(shieldIds: (string | number)[]): Promise<void>;
+  fetchJunks(junkIds: (string | number)[]): Promise<void>;
+  fetchTrinkets(trinketIds: (string | number)[]): Promise<void>;
+  fetchWeapons(weaponIds: (string | number)[]): Promise<void>;
+  fetchKeyLootboxes(keyLootboxIds: (string | number)[]): Promise<void>;
   updateTrinketIds(): Promise<void>;
   updateJunkIds(): Promise<void>;
   updateKeyLootboxIds(): Promise<void>;
@@ -144,6 +149,8 @@ interface StoreMappedActions {
   purchaseCharacterEarthTraitChange(): Promise<void>;
   purchaseCharacterWaterTraitChange(): Promise<void>;
   purchaseCharacterLightningTraitChange(): Promise<void>;
+  purchaseWeaponCosmetic(obj: {cosmetic: number, price: number}): Promise<void>;
+  purchaseCharacterCosmetic(obj: {cosmetic: number, price: number}): Promise<void>;
 }
 
 export default Vue.extend({
@@ -230,7 +237,8 @@ export default Vue.extend({
 
   computed: {
     ...(mapState(['ownedShieldIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedKeyLootboxIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['shieldsWithIds', 'trinketWithIds', 'junkWithIds', 'keyLootboxesWithIds','nftsWithIdType']) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['shieldsWithIds', 'trinketWithIds', 'junkWithIds', 'keyLootboxesWithIds',
+      'weaponsWithIds','nftsWithIdType']) as Accessors<StoreMappedGetters>),
 
     nftsToDisplay(): NftIdType[] {
       if (this.showGivenNftIdTypes) {
@@ -248,6 +256,8 @@ export default Vue.extend({
     },
 
     displayNfts(): Nft[] {
+      if(!this.nftsToDisplay) return [];
+
       if(this.isMarket && this.showGivenNftIdTypes) {
         const type = this.nftIdTypes && this.nftIdTypes[0]?.type;
         switch(type) {
@@ -260,7 +270,14 @@ export default Vue.extend({
 
       if(this.isReward && this.showGivenNftIdTypes) {
         const rewardedDust = this.nftsToDisplay.filter(x => x.type?.startsWith('dust')).map(x => { return { type: x.type, id: 0, amount: x.amount }; });
-        return this.nftsWithIdType(this.nftsToDisplay).concat(rewardedDust).filter(Boolean);
+        const rewardedWeapons = this.weaponsWithIds(this.nftsToDisplay.filter(x => x.type === 'weapon').map(x => x.id));
+        rewardedWeapons.forEach(x => {
+          if(x) {
+            x.type = 'weapon';
+          }
+        });
+
+        return this.nftsWithIdType(this.nftsToDisplay).concat(rewardedDust).concat(rewardedWeapons).filter(Boolean);
       }
 
       return this.nftsWithIdType(this.nftsToDisplay).filter(Boolean);
@@ -315,6 +332,7 @@ export default Vue.extend({
       const trinketIds: string[] = [];
       const junkIds: string[] = [];
       const keyLootboxIds: string[] = [];
+      const weaponIds: string[] = [];
       newNftsToDisplay.forEach(nft => {
         switch(nft.type) {
         case('shield'):
@@ -329,17 +347,27 @@ export default Vue.extend({
         case('keybox'):
           keyLootboxIds.push(nft.id.toString());
           break;
+        case('weapon'):
+          weaponIds.push(nft.id.toString());
+          break;
         }
       });
+
+      await this.fetchShields(shieldIds);
+      await this.fetchJunks(junkIds);
+      await this.fetchKeyLootboxes(keyLootboxIds);
+      await this.fetchTrinkets(trinketIds);
+      await this.fetchWeapons(weaponIds);
     },
   },
 
   methods: {
-    ...(mapActions(['purchaseShield', 'fetchShields', 'updateTrinketIds',
+    ...(mapActions(['purchaseShield', 'fetchShields', 'fetchJunks', 'fetchTrinkets', 'fetchWeapons', 'fetchKeyLootboxes', 'updateTrinketIds',
       'updateJunkIds', 'updateKeyLootboxIds', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
       'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
       'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
-      'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange'
+      'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange',
+      'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic'
     ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
@@ -419,7 +447,6 @@ export default Vue.extend({
 
     async buyItem(item: nftItem) {
       if(item.type === 'shield'){
-        console.log('buying shield');
         await this.purchaseShield();
       }
 
@@ -448,6 +475,12 @@ export default Vue.extend({
       }
       if(item.type === 'CharacterLightningTraitChange'){
         await this.purchaseCharacterLightningTraitChange();
+      }
+      if(item.type === 'WeaponCosmetic'){
+        await this.purchaseWeaponCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});
+      }
+      if(item.type === 'CharacterCosmetic'){
+        await this.purchaseCharacterCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});
       }
     },
     itemDescriptionHtml(item: SkillShopListing): string {

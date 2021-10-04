@@ -85,6 +85,63 @@ module.exports = {
       gas: 5600000,
       skipDryRun: true
     },
+    hecotestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.HECO_TESTNET_WALLET_PRIVATE_KEY,
+        process.env.HECO_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'wss://ws-testnet.hecochain.com'
+        }
+      )),
+      network_id: 0x100,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      gas: 5600000,
+      skipDryRun: true
+    },
+    hecomainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.HECO_MAINNET_WALLET_PRIVATE_KEY,
+        process.env.HECO_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://http-mainnet-node.huobichain.com'
+        }
+      )),
+      network_id: 0x80,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      gas: 5600000,
+      skipDryRun: true
+    },
+    okextestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.OKEX_TESTNET_WALLET_PRIVATE_KEY,
+        process.env.OKEX_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://exchaintestrpc.okex.org',
+          pollingInterval: 10000000,
+        }
+      )),
+      gasPrice: 1000000000,
+      network_id: 0x41,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    okexmainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.OKEX_MAINNET_WALLET_PRIVATE_KEY,
+        process.env.OKEX_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://exchainrpc.okex.org'
+        }
+      )),
+      gasPrice: 1000000000,
+      network_id: 0x42,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      gas: 5600000,
+      skipDryRun: true
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
@@ -136,7 +193,9 @@ module.exports = {
     "truffle-contract-size"
   ],
   api_keys: {
-    bscscan: process.env.BSCSCAN_API_KEY
+    bscscan: process.env.BSCSCAN_API_KEY,
+    hecoinfo: process.env.HECOINFO_API_KEY,
+    OKLink: process.env.OKLINK_API_KEY
   },
   // subscribers: {
   //   abisToTs: require('./truffle-subscriber-abis-to-ts.js')

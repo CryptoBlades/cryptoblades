@@ -65,6 +65,7 @@
         "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
+        <nft-options-dropdown v-if="showNftOptions" :nftId="weapon.id" :options="options" class="nft-options"/>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
         </div>
@@ -74,6 +75,31 @@
         <slot name="sold" :weapon="weapon"></slot>
       </li>
     </ul>
+
+    <b-modal class="centered-modal" ref="weapon-rename-modal"
+                  @ok="renameWeaponCall()">
+                  <template #modal-title>
+                    Rename Weapon
+                  </template>
+                  <b-form-input type="string"
+                    class="modal-input" v-model="weaponRename" placeholder="New Name" />
+      <span v-if="isRenameProfanish">
+        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+      </span>
+    </b-modal>
+
+    <b-modal class="centered-modal" ref="weapon-change-skin-modal"
+      @ok="changeWeaponSkinCall">
+      <template #modal-title>
+        Change Weapon's Skill
+      </template>
+      <span >
+        Pick a skin to switch to.
+      </span>
+      <select class="form-control" v-model="targetSkin">
+        <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+      </select>
+    </b-modal>
   </div>
 </template>
 
@@ -84,6 +110,10 @@ import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
 import WeaponIcon from '../WeaponIcon.vue';
+import { NftOption } from '../NftOptionsDropdown.vue';
+import { BModal } from 'bootstrap-vue';
+import { getCleanName, isProfaneIsh } from '../../rename-censor';
+import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 
@@ -93,6 +123,11 @@ interface StoreMappedGetters {
 
 interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
+  renameWeapon(arg: {id: number, name: string}): Promise<void>;
+  fetchTotalWeaponRenameTags(): Promise<number>;
+  fetchOwnedWeaponCosmetics(arg: { cosmetic: number }): Promise<number>;
+  changeWeaponCosmetic(arg: { id: number, cosmetic: number }): Promise<void>;
+  removeWeaponCosmetic(arg: { id: number }): Promise<void>;
 }
 
 interface Data {
@@ -104,6 +139,13 @@ interface Data {
   priceSort: string;
   showReforgedWeapons: boolean;
   showFavoriteWeapons: boolean;
+  options: NftOption[];
+  haveRename: number;
+  weaponRename: string;
+  haveWeaponCosmetics: number[];
+  targetSkin: string;
+  currentWeaponId: number | string | null;
+  weaponCosmeticsNames: string[];
 }
 
 const sorts = [
@@ -184,6 +226,10 @@ export default Vue.extend({
       type: Boolean,
       default: false,
     },
+    showNftOptions: {
+      type: Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -197,11 +243,29 @@ export default Vue.extend({
       sorts,
       showReforgedWeapons: this.showReforgedWeaponsDefVal,
       showFavoriteWeapons: this.showFavoriteWeaponsDefVal,
+      options: [],
+      haveRename: 0,
+      weaponRename: '',
+      haveWeaponCosmetics: [],
+      targetSkin: '',
+      currentWeaponId: null,
+      weaponCosmeticsNames: [
+        'Weapon Grayscale','Weapon Contrast',
+        'Weapon Sepia','Weapon Invert',
+        'Weapon Blur','Weapon Fire Glow',
+        'Weapon Earth Glow','Weapon Lightning Glow',
+        'Weapon Water Glow','Weapon Rainbow Glow',
+        'Weapon Dark Glow','Ghost Weapon',
+        'Weapon Police Lights','Weapon Neon Border',
+        'Weapon Rotating Neon Border', 'Weapon Diamond Border',
+        'Weapon Gold Border','Weapon Silver Border','Weapon Bronze Border',
+      ]
     } as Data;
   },
 
   components: {
-    WeaponIcon
+    WeaponIcon,
+    NftOptionsDropdown
   },
 
   computed: {
@@ -267,6 +331,34 @@ export default Vue.extend({
 
       return favoriteWeapons.concat(items);
     },
+
+    isRenameProfanish(): boolean {
+      return isProfaneIsh(this.weaponRename);
+    },
+
+    cleanRename(): string {
+      return getCleanName(this.weaponRename);
+    },
+
+    availableSkins(): string[] {
+      const availableSkins = [];
+
+      availableSkins.push('No Skin');
+
+      for(let i = 0; i < 19; i++) {
+        if(+this.haveWeaponCosmetics[i] > 0) {
+          availableSkins.push(this.weaponCosmeticsNames[i]);
+        }
+      }
+
+      return availableSkins;
+    },
+
+    totalCosmeticChanges(): number {
+      let count = 0;
+      this.haveWeaponCosmetics.forEach(x => count += +x);
+      return count;
+    },
   },
 
   watch: {
@@ -276,7 +368,8 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['fetchWeapons']) as StoreMappedActions),
+    ...(mapActions(['fetchWeapons','renameWeapon','fetchTotalWeaponRenameTags',
+      'fetchOwnedWeaponCosmetics','changeWeaponCosmetic','removeWeaponCosmetic']) as StoreMappedActions),
     ...(mapMutations(['setCurrentWeapon'])),
 
     saveFilters() {
@@ -355,10 +448,66 @@ export default Vue.extend({
       if (favoritesFromStorage) {
         this.favorites = JSON.parse(favoritesFromStorage);
       }
+    },
+
+    openRenameWeapon(id: number | string) {
+      this.currentWeaponId = id;
+      (this.$refs['weapon-rename-modal'] as BModal).show();
+    },
+    async renameWeaponCall() {
+      if(!this.currentWeaponId) return;
+      await this.renameWeapon({id: +this.currentWeaponId, name: this.weaponRename});
+      this.haveRename = await this.fetchTotalWeaponRenameTags();
+      this.updateOptions();
+      this.weaponRename = '';
+    },
+
+    async loadCosmeticsCount() {
+      this.haveWeaponCosmetics = [];
+      for(let i = 1; i < 22; i++) {
+        this.haveWeaponCosmetics.push(await this.fetchOwnedWeaponCosmetics({cosmetic: i}));
+      }
+      this.updateOptions();
+    },
+
+    openChangeSkin(id: number | string) {
+      this.currentWeaponId = id;
+      (this.$refs['weapon-change-skin-modal'] as BModal).show();
+    },
+    async changeWeaponSkinCall() {
+      if(!this.currentWeaponId) return;
+      // +1 because cosmetics are 1 (not 0) based
+      const selectedSkinId = this.weaponCosmeticsNames.findIndex(x => x === this.targetSkin) + 1;
+      if(selectedSkinId === 0) {
+        await this.removeWeaponCosmetic({ id: +this.currentWeaponId });
+        await this.loadCosmeticsCount();
+      } else {
+        await this.changeWeaponCosmetic({ id: +this.currentWeaponId, cosmetic: selectedSkinId });
+        this.haveWeaponCosmetics[selectedSkinId - 1] = await this.fetchOwnedWeaponCosmetics({cosmetic: selectedSkinId});
+        await this.loadCosmeticsCount();
+      }
+
+      this.updateOptions();
+    },
+
+    updateOptions() {
+      this.options = [
+        {
+          name: 'Rename',
+          amount: this.haveRename,
+          handler: this.openRenameWeapon
+        },
+        {
+          name: 'Change Cosmetic',
+          amount: this.totalCosmeticChanges,
+          handler: this.openChangeSkin,
+          hasDefaultOption: true,
+        },
+      ];
     }
   },
 
-  mounted() {
+  async mounted() {
 
     this.checkStorageFavorite();
 
@@ -374,6 +523,9 @@ export default Vue.extend({
       this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
     }
+
+    this.haveRename = await this.fetchTotalWeaponRenameTags();
+    await this.loadCosmeticsCount();
   },
 });
 </script>
@@ -406,7 +558,7 @@ export default Vue.extend({
   border-radius: 5px;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .weapon.selected {
@@ -513,5 +665,11 @@ export default Vue.extend({
 
 .fix-h24 {
   height: 24px;
+}
+
+.nft-options {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 </style>

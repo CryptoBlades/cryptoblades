@@ -11,12 +11,13 @@
 
         <b-dropdown-item
           :disabled="!canClaimTokens"
-          @click="onClaimTokens()" class="gtag-link-others" tagname="claim_skill">
+          @click="onClaimTokens()" class="rewards-info gtag-link-others" tagname="claim_skill"
+           v-tooltip.bottom="'Tax is being reduced by 1% per day. ' + (!canClaimTokens ? withdrawalInfoText : '')">
             SKILL
             <div class="pl-3">{{ formattedSkillReward }}</div>
             <div class="pl-3">
               Early withdraw tax: {{ formattedRewardsClaimTax }}
-              <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="'Tax is being reduced by 1% per day'"/>
+              <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="withdrawalInfoText"/>
             </div>
             <div class="pl-3">Time since last withdraw: n/a</div>
         </b-dropdown-item>
@@ -87,6 +88,7 @@ interface StoreMappedGetters {
 interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
   claimXpRewards(): Promise<void>;
+  fetchRemainingTokenClaimAmountPreTax(): Promise<string>;
 }
 
 enum ClaimStage {
@@ -98,7 +100,8 @@ enum ClaimStage {
 export default Vue.extend({
   data() {
     return {
-      ClaimStage
+      ClaimStage,
+      remainingTokenClaimAmountPreTax: '0'
     };
   },
 
@@ -126,7 +129,7 @@ export default Vue.extend({
     },
 
     canClaimTokens(): boolean {
-      if(toBN(this.skillRewards).lte(0)) {
+      if(toBN(this.skillRewards).lte(0) || toBN(this.remainingTokenClaimAmountPreTax).lte(0)) {
         return false;
       }
 
@@ -152,6 +155,25 @@ export default Vue.extend({
       return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
     },
 
+    formattedRemainingClaimableSkill(): string {
+      const skillClaimable = fromWeiEther(this.remainingTokenClaimAmountPreTax);
+      return `${toBN(skillClaimable).toFixed(4)}`;
+    },
+
+
+    skillRewardNumber(): number {
+      return toBN(fromWeiEther(this.skillRewards)).toNumber();
+    },
+
+    withdrawalInfoText(): string {
+      if(this.skillRewardNumber >= 1) {
+        return `You can withdraw max 10% of amount over 1 SKILL or 2 days worth of fights per day (whatever is greater).
+          Remaining claimable amount today: ${this.formattedRemainingClaimableSkill}`;
+      }
+      return `You can withdraw 1 day worth of fights per day.
+        Remaining claimable amount today: ${this.formattedRemainingClaimableSkill}`;
+    },
+
     canClaimXp(): boolean {
       const allXpsAreZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => toBN(xp).lte(0));
       if(allXpsAreZeroOrLess) {
@@ -163,7 +185,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimXpRewards']) as StoreMappedActions),
+    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax']) as StoreMappedActions),
 
     async onClaimTokens() {
       if(this.canClaimTokens) {
@@ -190,9 +212,17 @@ export default Vue.extend({
       }
     },
 
+    async getRemainingTokenClaimAmountPreTax() {
+      this.remainingTokenClaimAmountPreTax = await this.fetchRemainingTokenClaimAmountPreTax();
+    },
+
     getCleanCharacterName(id: number): string {
       return getCleanName(this.getCharacterName(id));
     }
+  },
+
+  async mounted() {
+    setInterval(async () => await this.getRemainingTokenClaimAmountPreTax(), 3000);
   }
 });
 </script>
@@ -202,6 +232,10 @@ export default Vue.extend({
 .rewards-claimable-icon {
   margin-right: 5px;
   align-self: center;
+}
+
+.rewards-info >>> .dropdown-item.disabled {
+  opacity: 50% !important;
 }
 
 </style>

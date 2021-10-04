@@ -1,0 +1,164 @@
+@keyframes dropglow-fire {
+  0% {
+    filter: drop-shadow(0 0 10px crimson);
+  }
+  100% {
+    filter: drop-shadow(0 0 25px crimson);
+  }
+}
+
+@keyframes dropglow-earth {
+  0% {
+    filter: drop-shadow(0 0 10px green);
+  }
+  100% {
+    filter: drop-shadow(0 0 25px green);
+  }
+}
+
+@keyframes dropglow-lightning {
+  0% {
+    filter: drop-shadow(0 0 10px yellow);
+  }
+  100% {
+    filter: drop-shadow(0 0 25px yellow);
+  }
+}
+
+@keyframes dropglow-water {
+  0% {
+    filter: drop-shadow(0 0 10px aqua);
+  }
+  100% {
+    filter: drop-shadow(0 0 25px aqua);
+  }
+}
+
+@keyframes dropglow-rainbow {
+  0% {
+    filter: drop-shadow(0 0 10px aqua);
+  }
+  33% {
+    filter: drop-shadow(0 0 10px yellow);
+  }
+  66% {
+    filter: drop-shadow(0 0 10px green);
+  }
+  100% {
+    filter: drop-shadow(0 0 25px crimson);
+  }
+}
+
+@keyframes droprotateglow {
+  0% {
+    filter: drop-shadow(0 0 0.5rem navy);
+  }
+  100% {
+    filter: drop-shadow(0 0 1rem navy);
+  }
+}
+
+@keyframes backglow {
+  0% {
+    filter: drop-shadow(0 0 0.5rem navy);
+  }
+  100% {
+    filter: drop-shadow(0 0 1rem navy);
+  }
+}
+
+@keyframes backglow {
+  0% {
+    box-shadow: 0 0 10px 10px rgba(255, 0, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 7.5px 15px rgba(200, 0, 200, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 5px 20px rgba(0, 0, 255, 0.45);
+  }
+}
+
+@keyframes ghost-item {
+  0% {
+    filter: opacity(85%) drop-shadow(0 0 0.5rem navy);
+  }
+  100% {
+    filter: opacity(50%) drop-shadow(0 0 1rem navy);
+  }
+}
+
+@keyframes nebula3 {
+  0% {
+    box-shadow:
+      inset 0 0 12px #fff,      /* inner white */
+      inset 3px 0 15px #f0f,   /* inner left magenta short */
+      inset -3px 0 15px #0ff,  /* inner right cyan short */
+      inset 3px 0 25px #f0f,  /* inner left magenta broad */
+      inset -3px 0 25px #0ff, /* inner right cyan broad */
+      0 0 12px #fff,            /* outer white */
+      -2px 0 20px #f0f,        /* outer left magenta */
+      2px 0 20px #0ff;         /* outer right cyan */
+  }
+  50% {
+    box-shadow:
+      inset 0 0 6px #fff,      /* inner white */
+      inset 2px 0 10px #f0f,   /* inner left magenta short */
+      inset -2px 0 10px #0ff,  /* inner right cyan short */
+      inset 2px 0 25px #f0f,   /* inner left magenta broad */
+      inset -2px 0 25px #0ff,  /* inner right cyan broad */
+      0 0 6px #fff,            /* outer white */
+      -2px 0 10px #f0f,        /* outer left magenta */
+      2px 0 10px #0ff;         /* outer right cyan */
+  }
+  100% {
+    box-shadow:
+      inset 0 0 12px #fff,      /* inner white */
+      inset 3px 0 15px #f0f,   /* inner left magenta short */
+      inset -3px 0 15px #0ff,  /* inner right cyan short */
+      inset 3px 0 25px #f0f,  /* inner left magenta broad */
+      inset -3px 0 25px #0ff, /* inner right cyan broad */
+      0 0 12px #fff,            /* outer white */
+      -2px 0 20px #f0f,        /* outer left magenta */
+      2px 0 20px #0ff;         /* outer right cyan */
+  }
+}
+
+@keyframes nebula4 {
+  0% {
+    transform: rotate(0deg);
+    box-shadow:
+      inset 0 0 12px #fff,      /* inner white */
+      inset 5px 0 20px #f0f,   /* inner left magenta short */
+      inset -5px 0 20px #0ff,  /* inner right cyan short */
+      inset 5px 0 30px #f0f,  /* inner left magenta broad */
+      inset -5px 0 30px #0ff, /* inner right cyan broad */
+      0 0 12px #fff,            /* outer white */
+      -2px 0 20px #f0f,        /* outer left magenta */
+      2px 0 20px #0ff;         /* outer right cyan */
+  }
+  50% {
+    transform: rotate(180deg);
+    box-shadow:
+      inset 0 0 6px #fff,      /* inner white */
+      inset 2px 0 10px #f0f,   /* inner left magenta short */
+      inset -2px 0 10px #0ff,  /* inner right cyan short */
+      inset 2px 0 25px #f0f,   /* inner left magenta broad */
+      inset -2px 0 25px #0ff,  /* inner right cyan broad */
+      0 0 6px #fff,            /* outer white */
+      -2px 0 10px #f0f,        /* outer left magenta */
+      2px 0 10px #0ff;         /* outer right cyan */
+  }
+  100% {
+    transform: rotate(360deg);
+    box-shadow:
+      inset 0 0 12px #fff,      /* inner white */
+      inset 5px 0 20px #f0f,   /* inner left magenta short */
+      inset -5px 0 20px #0ff,  /* inner right cyan short */
+      inset 5px 0 30px #f0f,  /* inner left magenta broad */
+      inset -5px 0 30px #0ff, /* inner right cyan broad */
+      0 0 12px #fff,            /* outer white */
+      -2px 0 20px #f0f,        /* outer left magenta */
+      2px 0 20px #0ff;         /* outer right cyan */
+  }
+}

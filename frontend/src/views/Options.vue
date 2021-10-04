@@ -33,7 +33,19 @@
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>{{$t("options.staminaFight")}}</h4>
+              <h4>Show SKILL values in USD</h4>
+              <b-form-checkbox size="lg" :checked="showSkillInUsd" @change="toggleShowSkillInUsd()" switch>
+                <b class="float-left">{{ showSkillInUsd ? 'On' : 'Off' }}</b>
+              </b-form-checkbox>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
+              <h4>Show Cosmetics</h4>
+              <b-form-checkbox size="lg" :checked="showCosmetics" @change="toggleShowCosmetics()" switch>
+                <b class="float-left">{{ showCosmetics ? 'On' : 'Off' }}</b>
+              </b-form-checkbox>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
+              <h4>Stamina Cost per Fight</h4>
               <b-form-select size="lg" v-model="fightMultiplier" @change="setFightMultiplier()">
                 <b-form-select-option :value="null" disabled>{{$t("options.selectStaminaFight")}}</b-form-select-option>
                 <b-form-select-option value="1">40</b-form-select-option>
@@ -44,10 +56,10 @@
               </b-form-select>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>{{$t("options.language")}}</h4>
-              <b-form-select class="combobox-languages" size="md" v-model="$i18n.locale">
-                <b-form-select-option v-for="(value, key) in languages" :key="key" :value="key">
-                  {{ value }}
+              <h4>Current chain</h4>
+              <b-form-select size="lg" v-model="currentChain" @change="setCurrentChain()">
+                <b-form-select-option v-for="chain in supportedChains" :key="chain" :value="chain">
+                  {{chain}}
                 </b-form-select-option>
               </b-form-select>
             </b-list-group-item>
@@ -63,12 +75,13 @@
 
 <script lang="ts">
 import Events from '../events';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { Accessors } from 'vue/types/options';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../utils/common';
-import i18n from '../i18n';
+import { getConfigValue } from '@/contracts';
+import config from '../../app-config.json';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -77,14 +90,20 @@ interface StoreMappedState {
 
 interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
+  setUpContracts(): Promise<void>;
+  initialize(): Promise<void>;
+  configureMetaMask(networkId: number): Promise<void>;
 }
 interface Data {
   showGraphics: boolean;
   hideRewards: boolean;
   hideAdvanced: boolean;
   hideWalletWarning: boolean;
+  showSkillInUsd: boolean;
+  showCosmetics: boolean;
   fightMultiplier: number;
-  //languages: any;
+  currentChain: string;
+  supportedChains: string[];
 }
 
 interface StoreMappedGetters {
@@ -104,8 +123,14 @@ export default Vue.extend({
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+    this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
+    if(!localStorage.getItem('showCosmetics')) {
+      localStorage.setItem('showCosmetics', 'true');
+    }
+    this.showCosmetics = localStorage.getItem('showCosmetics') !== 'false';
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
-    console.log(i18n.messages);
+    this.currentChain = localStorage.getItem('currentChain') || 'BSC';
+    this.supportedChains = config.supportedChains;
   },
 
   data() {
@@ -114,10 +139,13 @@ export default Vue.extend({
       hideRewards: false,
       hideAdvanced: false,
       hideWalletWarning: false,
+      showSkillInUsd: false,
+      showCosmetics: true,
       fightMultiplier: 1,
+      currentChain: 'BSC',
       checked: false,
       ClaimStage,
-      //languages: {en: 'English', fr: 'Francais'},
+      supportedChains: []
     } as Data;
   },
 
@@ -158,7 +186,8 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['claimTokenRewards']) as StoreMappedActions),
+    ...(mapActions(['claimTokenRewards','setUpContracts','initialize','configureMetaMask']) as StoreMappedActions),
+    ...mapMutations(['setNetworkId']),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
@@ -207,17 +236,33 @@ export default Vue.extend({
       Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
     },
 
+    toggleShowSkillInUsd() {
+      this.showSkillInUsd = !this.showSkillInUsd;
+      if (this.showSkillInUsd) localStorage.setItem('showSkillInUsd', 'true');
+      else localStorage.setItem('showSkillInUsd', 'false');
+
+      Events.$emit('setting:showSkillInUsd', { value: this.showSkillInUsd });
+    },
+
+    toggleShowCosmetics() {
+      this.showCosmetics = !this.showCosmetics;
+      if (this.showCosmetics) localStorage.setItem('showCosmetics', 'true');
+      else localStorage.setItem('showCosmetics', 'false');
+
+      Events.$emit('setting:showCosmetics', { value: this.showCosmetics });
+    },
+
     setFightMultiplier() {
       localStorage.setItem('fightMultiplier', this.fightMultiplier.toString());
 
       Events.$emit('setting:fightMultiplier', { value: this.fightMultiplier });
-    }
-  },
+    },
 
-  watch: {
-    '$i18n.locale'(newVal, ) {
-      localStorage.setItem('language', newVal);
-    }
+    async setCurrentChain() {
+      localStorage.setItem('currentChain', this.currentChain);
+      Events.$emit('setting:currentChain', { value: this.currentChain });
+      await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
+    },
   },
 
 });
