@@ -846,8 +846,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         processLoser(characterID);
     }
 
-    /// @dev distributes the ranking rewards pool to top players
-    function distributeSeasonRewards() external restricted {
+    /// @dev assigns the ranking rewards pool to top players
+    function assignRankedRewards() external restricted {
         // Note: Loops over 15 tiers. Should not be reachable anytime in the foreseeable future.
         for (uint8 i = 0; i <= 15; i++) {
             if (_fightersByTier[i].length() == 0) {
@@ -867,7 +867,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 uint256 excessPercentage;
                 address topOnePlayer = characters.ownerOf(_rankingByTier[i][0]);
 
-                // Note: We accumulate excessive percentage.
+                // Note: We accumulate excess percentage.
                 for (
                     uint256 j = prizePercentages.length - difference;
                     j < prizePercentages.length;
@@ -887,9 +887,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             }
 
             // Note: We assign rewards normally to all possible players.
-            for (uint8 h = 0; h < (prizePercentages.length) - difference; h++) {
+            for (uint8 h = 0; h < prizePercentages.length - difference; h++) {
                 _assignRewards(_rankingByTier[i][h], h, _rankingsPoolByTier[i]);
             }
+
+            // Note: We reset ranking prize pools.
+            _rankingsPoolByTier[i] = 0;
         }
     }
 

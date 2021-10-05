@@ -2147,7 +2147,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe("#distributeSeasonRewards", () => {
+  describe("#assignRankedRewards", () => {
     // These tests assume prizes will be distributed amongst at least 2 players and at most 4 players.
     beforeEach(async () => {
       character1ID = await createCharacterInPvpTier(accounts[1], 1);
@@ -2190,7 +2190,7 @@ contract("PvpArena", (accounts) => {
       const balanceThree = await skillToken.balanceOf(accounts[3]);
       const balanceFour = await skillToken.balanceOf(accounts[4]);
 
-      await pvpArena.distributeSeasonRewards({ from: accounts[0] });
+      await pvpArena.assignRankedRewards({ from: accounts[0] });
 
       await pvpArena.withdrawRankedRewards({ from: accounts[1] });
       await pvpArena.withdrawRankedRewards({ from: accounts[2] });
@@ -2253,7 +2253,7 @@ contract("PvpArena", (accounts) => {
       const balanceOne = await skillToken.balanceOf(accounts[1]);
       const balanceTwo = await skillToken.balanceOf(accounts[2]);
 
-      await pvpArena.distributeSeasonRewards({ from: accounts[0] });
+      await pvpArena.assignRankedRewards({ from: accounts[0] });
 
       await pvpArena.withdrawRankedRewards({ from: accounts[1] });
       await pvpArena.withdrawRankedRewards({ from: accounts[2] });
@@ -2292,6 +2292,35 @@ contract("PvpArena", (accounts) => {
 
       expect(isNewBalanceOneValid).to.equal(true);
       expect(isNewBalanceTwoValid).to.equal(true);
+    });
+
+    it("resets ranking prize pools", async () => {
+      const balanceOne = await skillToken.balanceOf(accounts[1]);
+      const balanceTwo = await skillToken.balanceOf(accounts[2]);
+
+      await pvpArena.assignRankedRewards({ from: accounts[0] });
+
+      await pvpArena.withdrawRankedRewards({ from: accounts[1] });
+      await pvpArena.withdrawRankedRewards({ from: accounts[2] });
+
+      const newerBalanceOne = await skillToken.balanceOf(accounts[1]);
+      const newerBalanceTwo = await skillToken.balanceOf(accounts[2]);
+
+      await pvpArena.assignRankedRewards({ from: accounts[0] });
+
+      const newestBalanceOne = await skillToken.balanceOf(accounts[1]);
+      const newestBalanceTwo = await skillToken.balanceOf(accounts[2]);
+
+      const didBalanceOneGrow = balanceOne < newerBalanceOne;
+      const didBalanceTwoGrow = balanceTwo < newerBalanceTwo;
+
+      const didBalanceOneGrowAgain = newerBalanceOne < newestBalanceOne;
+      const didBalanceTwoGrowAgain = newerBalanceTwo < newestBalanceTwo;
+
+      expect(didBalanceOneGrow).to.equal(true);
+      expect(didBalanceTwoGrow).to.equal(true);
+      expect(didBalanceOneGrowAgain).to.equal(false);
+      expect(didBalanceTwoGrowAgain).to.equal(false);
     });
   });
 });
