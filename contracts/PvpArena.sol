@@ -65,9 +65,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
     uint256 public decisionSeconds;
-    /// @dev amount of points earned by winning a fight
+    /// @dev amount of points earned by winning a duel
     uint8 public winningPoints;
-    /// @dev amount of points lost by losing fight
+    /// @dev amount of points subtracted by losing duel
     uint8 public losingPoints;
     /// @dev amount of players that are considered for the top ranking
     uint8 private _maxCharactersPerRanking;
@@ -215,7 +215,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             wager,
             useShield
         );
-        // add the character into the tier's ranking if it is not full
+        // add the character into the tier's ranking if it is not full yet
         uint256 fightersAmount = _fightersByTier[tier].length();
         if (fightersAmount <= _maxCharactersPerRanking) {
             _rankingByTier[tier].push(characterID);
@@ -304,7 +304,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterRankingPoints[winnerID] = characterRankingPoints[winnerID].add(
             winningPoints
         );
-        // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract loserPoints
+        // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract the ranking points
         if (characterRankingPoints[loserID] <= 3) {
             characterRankingPoints[loserID] = 0;
         } else {
@@ -501,7 +501,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev updates the rank of the winner of a duel
     function processWinner(uint256 winnerID) private {
-        uint256 winnerPoints = characterRankingPoints[winnerID];
+        uint256 rankingPoints = characterRankingPoints[winnerID];
         uint8 tier = getArenaTier(winnerID);
         uint256[] storage ranking = _rankingByTier[tier];
         uint256 winnerPosition;
@@ -515,10 +515,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 break;
             }
         }
-        // if the player is not in the ranking we check if we can replace him for the last one of the ranking
+        // if the winner is not in the top characters we then compare it to the last character of the top rank, swapping positions if the condition is met
         if (
             !winnerInRanking &&
-            winnerPoints >=
+            rankingPoints >=
             getCharacterRankingPoints(ranking[ranking.length - 1])
         ) {
             ranking[ranking.length - 1] = winnerID;
@@ -541,7 +541,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev updates the rank of the loser of a duel
     function processLoser(uint256 loserID) private {
-        uint256 loserPoints = characterRankingPoints[loserID];
+        uint256 rankingPoints = characterRankingPoints[loserID];
         uint8 tier = getArenaTier(loserID);
         uint256[] storage ranking = _rankingByTier[tier];
         uint256 loserPosition;
@@ -555,7 +555,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 break;
             }
         }
-        // if he is found, compare him to the lower positions and replace the rank accordingly
+        // if the character is within the top 4, compare it to the player that precedes it and swap positions if the condition is met
         if (loserFound) {
             for (
                 loserPosition;
@@ -563,7 +563,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 loserPosition++
             ) {
                 if (
-                    loserPoints <=
+                    rankingPoints <=
                     getCharacterRankingPoints(ranking[loserPosition + 1])
                 ) {
                     uint256 oldCharacter = ranking[loserPosition + 1];
@@ -576,8 +576,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
     }
 
-    /// @dev get the top players of a tier
-    function getTopTierPlayers(uint256 characterID)
+    /// @dev get the top ranked characters of a tier
+    function getTierTopRankers(uint256 characterID)
         public
         view
         returns (uint256[] memory)
@@ -594,7 +594,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return topRankers;
     }
 
-    /// @dev get the player's ranking points
+    /// @dev get the character's ranking points
     function getCharacterRankingPoints(uint256 characterID)
         public
         view
@@ -670,7 +670,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _lastActivityByCharacter[characterID] = block.timestamp;
     }
 
-    /// @dev function where admins can seta character's ranking points
+    /// @dev function where admins can set a character's ranking points
     function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
         public
         restricted
@@ -830,7 +830,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return fighters;
     }
 
-    /// @dev returns the senders fighters in the arena
+    /// @dev set the ranking points of a player to 0 and update the rank
     function _resetCharacterRankingPoints(uint256 characterID) internal {
         characterRankingPoints[characterID] = 0;
         //this is not final, but processing the loser will update the ranks leaving this player in the 4th position, which will be quickly replaced by other players
