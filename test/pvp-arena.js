@@ -76,11 +76,6 @@ contract("PvpArena", (accounts) => {
       accounts[4],
       web3.utils.toWei("1", "kether")
     );
-    await skillToken.transferFrom(
-      skillToken.address,
-      accounts[5],
-      web3.utils.toWei("1", "kether")
-    );
 
     await pvpArena.grantRole(await pvpArena.GAME_ADMIN(), accounts[0]);
     await characters.grantRole(await characters.GAME_ADMIN(), accounts[0]);

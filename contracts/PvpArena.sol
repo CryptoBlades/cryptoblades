@@ -908,7 +908,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         ].add(amountToTransfer);
     }
 
-    /// @dev allows a player to withdraw their withdrawable funds
+    /// @dev allows a player to withdraw their ranking earnings
     function withdrawRankedRewards() external {
         uint256 amountToTransfer = _rankingEarningsByPlayer[msg.sender];
 
@@ -919,6 +919,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
     }
 
+    /// @dev returns ranked prize percentages distribution
     function getPrizePercentages() public view returns (uint256[] memory) {
         return prizePercentages;
     }
