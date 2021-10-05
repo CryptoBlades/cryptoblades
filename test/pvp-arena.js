@@ -2276,7 +2276,7 @@ contract("PvpArena", (accounts) => {
       let excessPrizePercentage = 0;
 
       for (let i = 2; i < prizePercentages.length; i++) {
-        excessPrizePercentage = excessPrizePercentage + prizePercentages[i];
+        excessPrizePercentage = +excessPrizePercentage + +prizePercentages[i];
       }
 
       const isNewBalanceOneValid =

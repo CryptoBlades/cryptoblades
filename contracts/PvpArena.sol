@@ -853,6 +853,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             if (_fightersByTier[i].length() == 0) {
                 continue;
             }
+
             uint256 difference;
 
             if (_rankingByTier[i].length <= prizePercentages.length) {
@@ -873,7 +874,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                     j++
                 ) {
                     excessPercentage = excessPercentage.add(
-                        prizePercentages[prizePercentages.length - difference]
+                        prizePercentages[j]
                     );
                 }
 
@@ -899,12 +900,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 pool
     ) private {
         uint256 percentage = prizePercentages[position];
-
+        uint256 amountToTransfer = (pool.mul(percentage)).div(100);
         address playerToTransfer = characters.ownerOf(characterID);
-
-        uint256 amountToTransfer;
-
-        amountToTransfer = (pool.mul(percentage)).div(100);
 
         _rankingEarningsByPlayer[playerToTransfer] = _rankingEarningsByPlayer[
             playerToTransfer
