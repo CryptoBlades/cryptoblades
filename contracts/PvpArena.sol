@@ -65,11 +65,24 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
     uint256 public decisionSeconds;
+    /// @dev amount of points earned by winning a duel
+    uint8 public winningPoints;
+    /// @dev amount of points subtracted by losing duel
+    uint8 public losingPoints;
+    /// @dev amount of players that are considered for the top ranking
+    uint8 private _maxCharactersPerRanking;
+
+    /// @dev percentages of ranked prize distribution by fighter rank (represented as index)
+    uint256[] public prizePercentages;
 
     /// @dev Fighter by characterID
     mapping(uint256 => Fighter) public fighterByCharacter;
     /// @dev Active duel by characterID currently attacking
     mapping(uint256 => Duel) public duelByAttacker;
+    /// @dev ranking points by character
+    mapping(uint256 => uint256) public characterRankingPoints;
+    /// @dev funds available for withdrawal by address
+    mapping(address => uint256) private _rankingEarningsByPlayer;
     /// @dev last time a character was involved in activity that makes it untattackable
     mapping(uint256 => uint256) private _lastActivityByCharacter;
     /// @dev IDs of characters available by tier (1-10, 11-20, etc...)
@@ -82,10 +95,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => bool) private _weaponsInArena;
     /// @dev shields currently in the arena
     mapping(uint256 => bool) private _shieldsInArena;
-    /// @dev duel earnings per character
-    mapping(uint256 => uint256) private _duelEarningsByCharacter;
     /// @dev accumulated rewards per tier
     mapping(uint8 => uint256) private _rankingsPoolByTier;
+    /// @dev duel earnings per character
+    mapping(uint256 => uint256) private _duelEarningsByCharacter;
+    /// @dev ranking by tier
+    mapping(uint8 => uint256[]) private _rankingByTier;
 
     event NewDuel(
         uint256 indexed attacker,
@@ -108,6 +123,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         );
         _;
     }
+
     modifier isOwnedCharacter(uint256 characterID) {
         require(
             characters.ownerOf(characterID) == msg.sender,
@@ -176,6 +192,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _rankingsPoolTaxPercent = 15;
         unattackableSeconds = 2 minutes;
         decisionSeconds = 3 minutes;
+        winningPoints = 5;
+        losingPoints = 3;
+        _maxCharactersPerRanking = 4;
+        prizePercentages.push(60);
+        prizePercentages.push(30);
+        prizePercentages.push(10);
     }
 
     /// @notice enter the arena with a character, a weapon and optionally a shield
@@ -202,14 +224,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             wager,
             useShield
         );
-
+        // add the character into the tier's ranking if it is not full yet
+        uint256 fightersAmount = _fightersByTier[tier].length();
+        if (fightersAmount <= _maxCharactersPerRanking) {
+            _rankingByTier[tier].push(characterID);
+        }
         // character starts unattackable
         _updateLastActivityTimestamp(characterID);
 
         skillToken.transferFrom(msg.sender, address(this), wager);
     }
 
-    /// @dev attempts to find an opponent for a character. If a battle is still pending, it charges a penalty and re-rolls the opponent
+    /// @dev attempts to find an opponent for a character
     function requestOpponent(uint256 characterID)
         external
         characterInArena(characterID)
@@ -282,6 +308,21 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         if (fighterByCharacter[loserID].wager == 0) {
             _removeCharacterFromArena(loserID);
         }
+
+        // add ranking points to the winner
+        characterRankingPoints[winnerID] = characterRankingPoints[winnerID].add(
+            winningPoints
+        );
+        // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract the ranking points
+        if (characterRankingPoints[loserID] <= 3) {
+            characterRankingPoints[loserID] = 0;
+        } else {
+            characterRankingPoints[loserID] = characterRankingPoints[loserID]
+                .sub(losingPoints);
+        }
+
+        processWinner(winnerID);
+        processLoser(loserID);
 
         // add to the rankings pool
         _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
@@ -467,6 +508,110 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return shieldIDs;
     }
 
+    /// @dev updates the rank of the winner of a duel
+    function processWinner(uint256 winnerID) private {
+        uint256 rankingPoints = characterRankingPoints[winnerID];
+        uint8 tier = getArenaTier(winnerID);
+        uint256[] storage ranking = _rankingByTier[tier];
+        uint256 winnerPosition;
+        bool winnerInRanking;
+
+        // check if winner is withing the top 4
+        for (uint8 i = 0; i < ranking.length; i++) {
+            if (winnerID == ranking[i]) {
+                winnerPosition = i;
+                winnerInRanking = true;
+                break;
+            }
+        }
+        // if the winner is not in the top characters we then compare it to the last character of the top rank, swapping positions if the condition is met
+        if (
+            !winnerInRanking &&
+            rankingPoints >=
+            getCharacterRankingPoints(ranking[ranking.length - 1])
+        ) {
+            ranking[ranking.length - 1] = winnerID;
+            winnerPosition = ranking.length - 1;
+        }
+
+        for (winnerPosition; winnerPosition > 0; winnerPosition--) {
+            if (
+                getCharacterRankingPoints(ranking[winnerPosition]) >=
+                getCharacterRankingPoints(ranking[winnerPosition - 1])
+            ) {
+                uint256 oldCharacter = ranking[winnerPosition - 1];
+                ranking[winnerPosition - 1] = winnerID;
+                ranking[winnerPosition] = oldCharacter;
+            } else {
+                break;
+            }
+        }
+    }
+
+    /// @dev updates the rank of the loser of a duel
+    function processLoser(uint256 loserID) private {
+        uint256 rankingPoints = characterRankingPoints[loserID];
+        uint8 tier = getArenaTier(loserID);
+        uint256[] storage ranking = _rankingByTier[tier];
+        uint256 loserPosition;
+        bool loserFound;
+
+        // check if the loser is in the top 4
+        for (uint8 i = 0; i < ranking.length; i++) {
+            if (loserID == ranking[i]) {
+                loserPosition = i;
+                loserFound = true;
+                break;
+            }
+        }
+        // if the character is within the top 4, compare it to the player that precedes it and swap positions if the condition is met
+        if (loserFound) {
+            for (
+                loserPosition;
+                loserPosition < ranking.length - 1;
+                loserPosition++
+            ) {
+                if (
+                    rankingPoints <=
+                    getCharacterRankingPoints(ranking[loserPosition + 1])
+                ) {
+                    uint256 oldCharacter = ranking[loserPosition + 1];
+                    ranking[loserPosition + 1] = loserID;
+                    ranking[loserPosition] = oldCharacter;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
+    /// @dev get the top ranked characters of a tier
+    function getTierTopRankers(uint256 characterID)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        uint8 tier = getArenaTier(characterID);
+        uint256[] memory topRankers = new uint256[](
+            _rankingByTier[tier].length
+        );
+        // we return only the top 3 players
+        for (uint256 i = 0; i < _rankingByTier[tier].length; i++) {
+            topRankers[i] = _rankingByTier[tier][i];
+        }
+
+        return topRankers;
+    }
+
+    /// @dev get the character's ranking points
+    function getCharacterRankingPoints(uint256 characterID)
+        public
+        view
+        returns (uint256)
+    {
+        return characterRankingPoints[characterID];
+    }
+
     /// @dev checks if a character is in the arena
     function isCharacterInArena(uint256 characterID)
         public
@@ -532,6 +677,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev updates the last activity timestamp of a character
     function _updateLastActivityTimestamp(uint256 characterID) private {
         _lastActivityByCharacter[characterID] = block.timestamp;
+    }
+
+    /// @dev function where admins can set a character's ranking points
+    function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
+        public
+        restricted
+    {
+        characterRankingPoints[characterID] = newRankingPoints;
     }
 
     function _getCharacterPowerRoll(uint256 characterID, uint8 opponentTrait)
@@ -684,5 +837,93 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         return fighters;
+    }
+
+    /// @dev set the ranking points of a player to 0 and update the rank
+    function _resetCharacterRankingPoints(uint256 characterID) internal {
+        characterRankingPoints[characterID] = 0;
+        //this is not final, but processing the loser will update the ranks leaving this player in the 4th position, which will be quickly replaced by other players
+        processLoser(characterID);
+    }
+
+    /// @dev assigns the ranking rewards pool to top players
+    function assignRankedRewards() external restricted {
+        // Note: Loops over 15 tiers. Should not be reachable anytime in the foreseeable future.
+        for (uint8 i = 0; i <= 15; i++) {
+            if (_fightersByTier[i].length() == 0) {
+                continue;
+            }
+
+            uint256 difference;
+
+            if (_rankingByTier[i].length <= prizePercentages.length) {
+                difference = prizePercentages.length - _rankingByTier[i].length;
+            } else {
+                difference = 0;
+            }
+
+            // Note: If there are less players than top positions, excess is transferred to top 1.
+            if (_rankingByTier[i].length < prizePercentages.length) {
+                uint256 excessPercentage;
+                address topOnePlayer = characters.ownerOf(_rankingByTier[i][0]);
+
+                // Note: We accumulate excess percentage.
+                for (
+                    uint256 j = prizePercentages.length - difference;
+                    j < prizePercentages.length;
+                    j++
+                ) {
+                    excessPercentage = excessPercentage.add(
+                        prizePercentages[j]
+                    );
+                }
+
+                // Note: We assign excessive rewards to top 1 player.
+                _rankingEarningsByPlayer[
+                    topOnePlayer
+                ] = _rankingEarningsByPlayer[topOnePlayer].add(
+                    (_rankingsPoolByTier[i].mul(excessPercentage)).div(100)
+                );
+            }
+
+            // Note: We assign rewards normally to all possible players.
+            for (uint8 h = 0; h < prizePercentages.length - difference; h++) {
+                _assignRewards(_rankingByTier[i][h], h, _rankingsPoolByTier[i]);
+            }
+
+            // Note: We reset ranking prize pools.
+            _rankingsPoolByTier[i] = 0;
+        }
+    }
+
+    /// @dev increases a players withdrawable funds depending on their position in the ranked leaderboard
+    function _assignRewards(
+        uint256 characterID,
+        uint8 position,
+        uint256 pool
+    ) private {
+        uint256 percentage = prizePercentages[position];
+        uint256 amountToTransfer = (pool.mul(percentage)).div(100);
+        address playerToTransfer = characters.ownerOf(characterID);
+
+        _rankingEarningsByPlayer[playerToTransfer] = _rankingEarningsByPlayer[
+            playerToTransfer
+        ].add(amountToTransfer);
+    }
+
+    /// @dev allows a player to withdraw their ranking earnings
+    function withdrawRankedRewards() external {
+        uint256 amountToTransfer = _rankingEarningsByPlayer[msg.sender];
+
+        if (amountToTransfer > 0) {
+            _rankingEarningsByPlayer[msg.sender] = 0;
+
+            skillToken.safeTransfer(msg.sender, amountToTransfer);
+        }
+    }
+
+    /// @dev returns ranked prize percentages distribution
+    function getPrizePercentages() public view returns (uint256[] memory) {
+        return prizePercentages;
     }
 }

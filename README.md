@@ -55,18 +55,37 @@ There are optional environment variables, most of which have sensible defaults i
 - `npm run lint` - run lint checking for all modules
 - `npm run contract:prepare` - extract the ABI and re-compile Truffle contracts
 - `npm run contract:deploy` - deploy the Truffle contracts for testing
-- `npm run test-local` - run test and ignore unnecessary migrations (only for the local contracts).
+- `npm run test:local` - run tests via hardhat, careful, this is not using migrations but rather fixtures which should be kept up to date (`/test/helpers/prepareContracts.js`)
 
 ## Errors
 
 - If you run into any error at all during the build process you may need to reset [Ganache](https://www.trufflesuite.com/ganache) by deleting previous workspaces and going through the Ganache setup process again including importing a new account for Metamask.
 - Artifacts are from different compiler runs `- rm -rf build/`
 
-## Testing locally
+## Running tests locally
 
 To run tests locally simply run
 
 `npm run test:local`
+
+> NOTE: Careful, this is not using migrations but rather fixtures which should be kept up to date (`/test/helpers/prepareContracts.js`)
+
 ## Config
 - All network config is in app-config.json
 - If you want to add a new network: add it's configuration in app-config.json and add update currentTokenPrice getter in EarningsCalculator.
+
+## Alternative development flow with Hardhat
+
+This repository uses Truffle, but if for some reason, you'd prefer using hardhat for development, with an ephemeral local blockchain, you can do so too:
+
+Turn on the Hardhat node:
+`npx hardhat node`
+
+Deploy to the Hardhat node:
+`export ETH_DEV_RPC_PORT=8545 && npm run deploy --reset`
+
+Run the frontend pointing to hardhat:
+`export VUE_APP_NETWORK_ID=31337 && npm run start:frontend`
+
+If you get any issues during deployment, run:
+`truffle compile --all`
