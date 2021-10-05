@@ -26,6 +26,7 @@ import { abi as junkAbi } from '../../build/contracts/Junk.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
+import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
 import config from '../app-config.json';
@@ -40,10 +41,15 @@ import {
   raid as featureFlagRaid,
   stakeOnly as featureFlagStakeOnly,
   market as featureFlagMarket,
+  pvp as featureFlagPvP,
 } from './feature-flags';
 
 interface RaidContracts {
   Raid1?: Contracts['Raid1'];
+}
+
+interface PvPContracts {
+  PvpArena?: Contracts['PvpArena'];
 }
 
 interface MarketContracts {
@@ -220,6 +226,14 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as Abi, marketContractAddr);
   }
 
+  const pvpContracts: PvPContracts = {};
+  if(featureFlagPvP){
+    const pvpContractAddr = process.env.VUE_APP_PVP_CONTRACT_ADDRESS || (pvpNetworks as Networks)[networkId]!.address;
+
+    pvpContracts.PvpArena = new web3.eth.Contract(pvpAbi as Abi, pvpContractAddr);
+
+  }
+
   const waxBridgeContractAddr = getConfigValue('VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS') || (waxBridgeNetworks as Networks)[networkId]!.address;
   const WaxBridge = new web3.eth.Contract(waxBridgeAbi as Abi, waxBridgeContractAddr);
 
@@ -230,9 +244,11 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
     ...raidContracts,
+    ...pvpContracts,
     ...marketContracts,
     WaxBridge,
   };
 }
 
 export const INTERFACE_ID_TRANSFER_COOLDOWNABLE = '0xe62e6974';
+

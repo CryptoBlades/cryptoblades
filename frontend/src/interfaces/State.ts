@@ -57,6 +57,74 @@ export interface IRaidState {
   //isOwnedCharacterRaidingById: Record<number, boolean>; // ?
 }
 
+export interface IPvPFighterState {
+  characterID: string;
+  characterTrait: string;
+  weaponID: string;
+  weapon: IWeapon | null;
+  shieldID: string;
+  shield: IShield | null;
+  wageredSkill: string;
+  useShield: boolean;
+}
+
+export interface IPvPState {
+  type: string | number;
+  page: string | number;
+  entryWager: string | number;
+  wageredSkill: string | number;
+  arenaTier: string | number;
+  participatingCharacters: string[];
+  participatingWeapons: string[];
+  participatingShields: string[];
+  currentPvPCharacterId: number | null;
+  traitBonus: string;
+  attackerFighter: IPvPFighterState;
+  defenderFighter: IPvPFighterState;
+  duelCost: string | number;
+  isAttackerWithinDecisionTime: boolean;
+  isCharacterAttackable: boolean;
+  isCharacterInArena: boolean;
+  isWeaponInArena: boolean;
+  isShieldInArena: boolean;
+  duelByAttacker: IDuelByAttacker | null;
+  decisionTime: string;
+  rewards: IPvPReward;
+}
+
+export interface IDuelByAttacker {
+  attackerId: string;
+  defenderId: string;
+  createdAt: string;
+  isPending: boolean;
+}
+
+export interface IDuelResult {
+  attackerId: string;
+  attackerRoll: string;
+  attackerWon: boolean;
+  defenderId: string;
+  defenderRoll: string;
+  timestamp: string;
+}
+
+export interface IInventory{
+  id: number,
+  name: string;
+}
+
+export interface IFilter{
+  element: string;
+  stars: number;
+}
+
+export interface IPvPReward{
+  tier: string,
+  rankingRewardsPool: string,
+  allUnclaimedDuelEarnings: string;
+  unclaimedDuelEarningsById: string;
+}
+
 export interface IState {
   contracts: () => Contracts;
   eventSubscriptions: () => IWeb3EventSubscription[];
@@ -101,12 +169,21 @@ export interface IState {
   currentNftType: string | null;
   currentNftId: number | null;
 
+  currentTab: number;
+
   characterTransferCooldowns: Record<number, ITransferCooldown | undefined>;
 
   staking: Record<StakeType, IStakeState>;
   stakeOverviews: Record<StakeType, IStakeOverviewState>;
 
   raid: IRaidState;
+
+  pvp: IPvPState;
+
+  inventory: IInventory[];
+
+  weaponFilter: IFilter;
+  shieldFilter: IFilter;
 
   waxBridgeWithdrawableBnb: string;
   waxBridgeRemainingWithdrawableBnbDuringPeriod: string;
