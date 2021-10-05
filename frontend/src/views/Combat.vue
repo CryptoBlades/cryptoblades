@@ -17,14 +17,14 @@
           <div class="row">
             <div class="col-12 col-md-2 offset-md-5 text-center">
               <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
-                You need {{ staminaPerFight }} stamina to do battle.
-                <h4>Stamina Cost Per Fight</h4>
+                {{$t('combat.needStamina', {staminaPerFight })}}
+                <h4>{{$t('combat.costStamina')}}</h4>
                 <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()" class="ml-3"></b-form-select>
               </div>
             </div>
           </div>
 
-          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">This weapon does not have enough durability.</div>
+          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">{{$t('combat.errors.notEnoughDurability')}}</div>
 
           <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
         </div>
@@ -48,17 +48,15 @@
 
                 <div class="row mb-3 mt-3">
                   <div :class="['col-12', selectedWeaponId ? 'col-md-6 offset-md-3' : 'col-md-2 offset-md-5']">
-                    <h4>Stamina Cost per Fight</h4>
+                    <h4>{{$t('combat.costStamina')}}</h4>
                     <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
                   </div>
                 </div>
 
                 <div class="header-row weapon-header">
-                  <b>Choose a weapon</b>
+                  <b>{{$t('combat.chooseWeapon')}}</b>
                   <Hint
-                    text="Your weapon multiplies your power<br>
-                    <br>+Stats determine the multiplier
-                    <br>Stat element match with character gives greater bonus"
+                    :text="$t('combat.chooseWeaponHint')"
                   />
                 </div>
 
@@ -79,9 +77,7 @@
                   <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
                   <span class="fire-icon" />
                   <Hint
-                    text="The elements affect power:<br>
-                    <br>Character vs Enemy: bonus or penalty as shown above
-                    <br>Character and Weapon match gives bonus"
+                    :text="$t('combat.elementHint')"
                   />
                 </div>
               </div>
@@ -94,15 +90,15 @@
                     </div>
 
                     <div class="">
-                      <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" alt="Enemy" />
+                      <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" :alt="$t('combat.enemy')" />
                     </div>
 
                     <div class="encounter-power">
-                      {{ e.power }} Power
+                      {{ e.power }} {{$t('combat.power')}}
                     </div>
 
                     <div class="xp-gain">
-                      +{{getPotentialXp(e)}} XP
+                      +{{getPotentialXp(e)}} {{$t('combat.xp')}}
                     </div>
 
                     <div class="skill-gain">
@@ -111,15 +107,15 @@
                 </div>
 
                 <div class="victory-chance">
-                  {{ getWinChance(e.power, e.trait) }} Victory
+                  {{ getWinChance(e.power, e.trait) }} {{$t('combat.victory')}}
                 </div>
                 <big-button
                       class="encounter-button btn-styled"
-                      :mainText="`Fight!`"
+                      :mainText="$t('combat.fight')"
                       :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId) || !charHasStamina()"
                       @click="onClickEncounter(e)"
                     />
-                <p v-if="isLoadingTargets">Loading...</p>
+                <p v-if="isLoadingTargets">{{$t('combat.loading')}}</p>
                 </div>
               </div>
             </div>
@@ -349,11 +345,11 @@ export default {
 
     setStaminaSelectorValues() {
       if(this.currentCharacterStamina < 40) {
-        return [{ value: this.fightMultiplier, text: 'You need more stamina to fight!', disabled: true}];
+        return [{ value: this.fightMultiplier, text: this.$t('combat.moreStamina'), disabled: true}];
       }
 
       const choices = [
-        {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
+        {value: null, text: this.$t('combat.pleaseSelect'), disabled: true},
       ];
 
       const addChoices = [];
