@@ -2147,7 +2147,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe.only("#distributeSeasonRewards", () => {
+  describe("#distributeSeasonRewards", () => {
     // These tests assume prizes will be distributed amongst at least 2 players and at most 4 players.
     beforeEach(async () => {
       character1ID = await createCharacterInPvpTier(accounts[1], 1);
