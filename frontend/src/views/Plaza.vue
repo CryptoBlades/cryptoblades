@@ -13,7 +13,7 @@
       </div>
       <big-button
         class="button"
-        :mainText="`Recruit character for ${recruitCost} SKILL`"
+        :mainText="$t('plaza.recruitCharacter') + ` ${recruitCost} SKILL`"
         :disabled="!canRecruit()"
         @click="onMintCharacter"
         tagname="recruit_character"
@@ -29,15 +29,15 @@
       <div class="col">
         <div v-if="ownCharacters.length > 0">
           <div class="d-flex justify-content-space-between">
-            <h1>Characters ({{ ownCharacters.length }} / 4)</h1>
+            <h1>{{$t('characters')}} ({{ ownCharacters.length }} / 4)</h1>
             <b-button
               v-if="ownCharacters.length < 4"
               :disabled="!canRecruit()"
               variant="primary"
               class="ml-auto gtag-link-others"
               @click="onMintCharacter"
-              v-tooltip="'Recruit new character'" tagname="recruit_character">
-              Recruit ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
+              v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+              {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
             </b-button>
           </div>
 
@@ -117,7 +117,7 @@ export default Vue.extend({
       try {
         await this.mintCharacter();
       } catch (e) {
-        (this as any).$dialog.notify.error('Could not mint character: insufficient funds or transaction denied.');
+        (this as any).$dialog.notify.error((this as any).$t('plaza.couldNotMint'));
       }
     },
     formatSkill() {
