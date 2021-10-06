@@ -225,7 +225,7 @@
     "showShields":"Show Shields",
     "listWeapon":"List Weapon",
     "listChar":"List Character",
-    "listShield":"List Character",
+    "listShield":"List Shield",
     "listingTaxHint":"% tax (paid by the buyer) will be added to the final price.",
 
     "sellType" : "Sell {activeType}",
@@ -233,33 +233,165 @@
 
     "sellPrice" : "Sell Price (SKILL)",
     "targetBuyerAddress":"Target Buyer Address (optional)",
-    "listingConfirmation": "Do you want to sell your {activeType} for",
-    "buyerFee" : "The buyer will pay an extra {{activeListingMarketTax()}}% market fee for a total of",
+    "listingConfirmation": "Do you want to sell your {activeType} for ",
+    "buyerFee" : "The buyer will pay an extra {activeListingMarketTax}% market fee for a total of",
     
     "weaponsSold" : "Weapons Sold",
+    "viewWeapons" : "View weapons you have sold.",
     "weaponTxHistory" : "Weapon Transaction History",
     "nothingThere" : "It's seems like there's nothing here.",
-    "tips" : "For tips on how to list NFTs, you may click this",
+    "tips" : "For tips on how to list NFTs, you may click this ",
+    "link" : "link",
 
     "charactersSold" : "Characters Sold",
     "charactersSoldTooltip" : "View characters you have sold.",
     "characterTxHistory":"Character Transaction History",
 
     "shieldsSold" : "Shields Sold",
-    "shieldsSoldTooltip" : "View characters you have sold.",
-    "shieldsTxHistory":"Character Transaction History",
+    "shieldsSoldTooltip" : "View shields you have sold.",
+    "shieldsTxHistory":"Shield Transaction History",
 
     "skillShop" : "Skill Shop",
+    "skillShophint" : "You can buy various goods in here",
     "specials" : "Specials",
     "shop" : "Shop",
 
     "nftList":{
-      "renameTag" : "Rename Tag",
-      "renameTagDesc" : "Renames one character."
+      "characterRenameTag" : "Rename Tag",
+      "characterRenameTagDesc" : "Renames one character.",
+
+      "characterRenameTagDeal" : "Rename Tag Deal",
+      "characterRenameTagDealDesc" : "Renames 4 characters for the price of 3.",
+
+      "weaponRenameTag" : "Weapon Tag",
+      "weaponRenameTagDesc" : "Renames a weapon.",
+
+      "weaponRenameTagDeal" : "Weapon Tag Deal",
+      "weaponRenameTagDealDesc" : "Renames 4 weapons for the price of 3.",
+
+      "characterEarthTraitChange" : "Earth Character Trait",
+      "characterEarthTraitChangeDesc" : "Changes character's trait to Earth.",
+
+      "characterFireTraitChange" : "Fire Character Trait",
+      "characterFireTraitChangeDesc" : "Changes character's trait to Fire.",
+
+      "characterWaterTraitChange" : "Water Character Trait",
+      "characterWaterTraitChangeDesc" : "Changes character's trait to Water.",
+
+      "characterLightningTraitChange" : "Lightning Character Trait",
+      "characterLightningTraitChangeDesc" : "Changes character's trait to Lightning.",
+
+      "weaponGrayscale" : "Weapon Grayscale",
+      "weaponGrayscaleDesc" : "",
+
+      "weaponContrast" : "Weapon Contrast",
+      "weaponContrastDesc" : "Increased contrast",
+
+      "weaponSepia" : "Weapon Sepia",
+      "weaponSepiaDesc" : "",
+
+      "weaponInvert" : "Weapon Invert",
+      "weaponInvertDesc" : "Inverted colors",
+
+      "weaponBlur" : "Weapon Blur",
+      "weaponBlurDesc" : "Blurred weapon",
+
+      "weaponFireglow" : "Weapon Fire Glow",
+      "weaponFireglowDesc" : "Glows with fire power",
+
+      "weaponEarthglow" : "Weapon Earth Glow",
+      "weaponEarthglowDesc" : "Glows with earth power",
+
+      "weaponLightningglow" : "Weapon Lightning Glow",
+      "weaponLightningglowDesc" : "Glows with lightning power",
+
+      "weaponWaterglow" : "Weapon Water Glow",
+      "weaponWaterglowDesc" : "Glows with water power",
+
+      "weaponRainbowglow" : "Weapon Rainbow Glow",
+      "weaponRainbowglowDesc" : "Glows with all elements powers",
+
+      "weaponDarkglow" : "Weapon Dark Glow",
+      "weaponDarkglowDesc" : "Glows with the dark",
+
+      "weaponGhost" : "Ghost Weapon",
+      "weaponGhostDesc" : "Ghost effect",
+
+      "weaponPolicelights" : "Weapon Police Lights",
+      "weaponPolicelightsDesc" : "Police Lights background",
+
+      "weaponNeonborder" : "Weapon Neon Border",
+      "weaponNeonborderDesc" : "",
+
+      "weaponRotatingNeonborder" : "Weapon Rotating Neon Border",
+      "weaponRotatingNeonborderDesc" : "",
+
+      "weaponDiamondborder" : "Diamond Weapon Border",
+      "weaponDiamondborderDesc" : "",
+
+      "weaponGoldborder" : "Gold Weapon Border",
+      "weaponGoldborderDesc" : "",
+
+      "weaponSilverborder" : "Silver Weapon Border",
+      "weaponSilverborderDesc" : "",
+
+      "weaponBronzeborder" : "Bronze Weapon Border",
+      "weaponBronzeborderDesc" : "",
+
+      "characterGrayscale" : "Character Grayscale",
+      "characterGrayscaleDesc" : "",
+
+      "characterContrast" : "Character Contrast",
+      "characterContrastDesc" : "Increased contrast",
+
+      "characterSepia" : "Character Sepia",
+      "characterSepiaDesc" : "",
+
+      "characterInvert" : "Character Invert",
+      "characterInvertDesc" : "Inverted colors",
+
+      "characterBlur" : "Character Blur",
+      "characterBlurDesc" : "Blurred character",
+
+      "characterFireglow" : "Character Fire Glow",
+      "characterFireglowDesc" : "Glows with fire power",
+
+      "characterEarthglow" : "Character Earth Glow",
+      "characterEarthglowDesc" : "Glows with earth power",
+
+      "characterLightningglow" : "Character Lightning Glow",
+      "characterLightningglowDesc" : "Glows with lightning power",
+
+      "characterWaterglow" : "Character Water Glow",
+      "characterWaterglowDesc" : "Glows with water power",
+
+      "characterRainbowglow" : "Character Rainbow Glow",
+      "characterRainbowglowDesc" : "Glows with all elements powers",
+
+      "characterDarkglow" : "Character Dark Glow",
+      "characterDarkglowDesc" : "Glows with the dark",
+
+      "characterGhost" : "Ghost Character",
+      "characterGhostDesc" : "Ghost effect",
+
+      "characterPolice" : "Character Police Lights",
+      "characterPoliceDesc" : "Police lights background",
+
+      "characterNeonborder" : "Character Neon Border",
+      "characterNeonborderDesc" : "",
+
+      "characterDiamondborder" : "Character Diamond Border",
+      "characterDiamondborderDesc" : "",
+
+      "characterGoldborder" : "Character Gold Border",
+      "characterGoldborderDesc" : "",
+
+      "characterSilverborder" : "Character Silver Border",
+      "characterSilverborderDesc" : "",
+
+      "characterBronzeborder" : "Character Bronze Border",
+      "characterBronzeborderDesc" : ""
     }
-
-
-
   },
   "options": {
     "title": "Options",
@@ -307,6 +439,7 @@
   },
   "on": "On",
   "off": "Off",
+  "ok" : "Ok",
   "trade": "Trade",
   "character": "Character",
   "characters": "Characters",
