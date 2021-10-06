@@ -314,7 +314,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
                 bridgeTransfers[bridgeTransfer].status);
     }
 
-    function updateBridgeTransferStatus(uint256 bridgeTransfer, uint8 status, bool forceed) public gameAdminRestricted {
+    function updateBridgeTransferStatus(uint256 bridgeTransfer, uint8 status, bool forced) public gameAdminRestricted {
         require(forced || bridgeTransfers[bridgeTransfer].status == BRIDGE_STATUS_PENDING, 'Not pending transfer');
         bridgeTransfers[bridgeTransfer].status = status;
         bridgeTransfers[bridgeTransfer].lastUpdateBlock = block.number;
