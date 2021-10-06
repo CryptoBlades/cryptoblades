@@ -41,6 +41,7 @@
 
           <character-list
             :value="currentCharacterId"
+            :showNftOptions="true"
             @input="setCurrentCharacter"
           />
         </div>
@@ -56,7 +57,6 @@ import CharacterList from '../components/smart/CharacterList.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import Vue from 'vue';
-
 
 interface Data {
   recruitCost: string;
@@ -109,7 +109,7 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
-    ...mapActions(['mintCharacter',]),
+    ...mapActions(['mintCharacter']),
 
     async onMintCharacter() {
       try {

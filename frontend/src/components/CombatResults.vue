@@ -24,7 +24,7 @@
           </b-col>
         </b-row>
       </b-container>
-      <h6 class="text-left gas-spent">You spent {{fightResults.bnbGasUsed}} BNB on gas fees </h6>
+      <h6 class="text-left gas-spent">You spent {{fightResults.bnbGasUsed}} {{gasToken}} on gas fees </h6>
       <img src="../assets/divider4.png" class="expander-divider">
       <b-container>
         <b-row>
@@ -62,6 +62,7 @@ import { toBN, fromWeiEther } from '../utils/common';
 import Hint from '../components/Hint.vue';
 import {PropType} from 'vue/types/options';
 import axios from 'axios';
+import { getConfigValue } from '@/contracts';
 
 interface CombatResult {
   isVictory: boolean;
@@ -85,6 +86,7 @@ export default Vue.extend({
   data() {
     return {
       skillPrice: 0,
+      gasToken: '',
     };
   },
 
@@ -117,6 +119,7 @@ export default Vue.extend({
   },
 
   async mounted() {
+    this.gasToken = getConfigValue('currencySymbol') || 'BNB';
     await this.fetchPrices();
   },
 

@@ -65,7 +65,13 @@
         "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
-        <nft-options-dropdown :nftId="weapon.id" :options="options" class="nft-options"/>
+        <div v-if="`${setWeaponPvPStatusVisibility(weapon.id)}`">
+          <span
+            :class="`${setWeaponPvPStatus(weapon.id)}`">
+            <span>IN PVP</span>
+          </span>
+        </div>
+        <nft-options-dropdown v-if="showNftOptions" :nftId="weapon.id" :options="options" class="nft-options"/>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
         </div>
@@ -87,6 +93,19 @@
         This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
       </span>
     </b-modal>
+
+    <b-modal class="centered-modal" ref="weapon-change-skin-modal"
+      @ok="changeWeaponSkinCall">
+      <template #modal-title>
+        Change Weapon's Skill
+      </template>
+      <span >
+        Pick a skin to switch to.
+      </span>
+      <select class="form-control" v-model="targetSkin">
+        <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+      </select>
+    </b-modal>
   </div>
 </template>
 
@@ -102,7 +121,7 @@ import { BModal } from 'bootstrap-vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 
-type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
+type StoreMappedState = Pick<IState, 'ownedWeaponIds' | 'pvp'>;
 
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
@@ -112,6 +131,10 @@ interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
   renameWeapon(arg: {id: number, name: string}): Promise<void>;
   fetchTotalWeaponRenameTags(): Promise<number>;
+  fetchParticipatingWeapons(): Promise<void>;
+  fetchOwnedWeaponCosmetics(arg: { cosmetic: number }): Promise<number>;
+  changeWeaponCosmetic(arg: { id: number, cosmetic: number }): Promise<void>;
+  removeWeaponCosmetic(arg: { id: number }): Promise<void>;
 }
 
 interface Data {
@@ -126,7 +149,10 @@ interface Data {
   options: NftOption[];
   haveRename: number;
   weaponRename: string;
+  haveWeaponCosmetics: number[];
+  targetSkin: string;
   currentWeaponId: number | string | null;
+  weaponCosmeticsNames: string[];
 }
 
 const sorts = [
@@ -207,6 +233,10 @@ export default Vue.extend({
       type: Boolean,
       default: false,
     },
+    showNftOptions: {
+      type: Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -223,7 +253,20 @@ export default Vue.extend({
       options: [],
       haveRename: 0,
       weaponRename: '',
+      haveWeaponCosmetics: [],
+      targetSkin: '',
       currentWeaponId: null,
+      weaponCosmeticsNames: [
+        'Weapon Grayscale','Weapon Contrast',
+        'Weapon Sepia','Weapon Invert',
+        'Weapon Blur','Weapon Fire Glow',
+        'Weapon Earth Glow','Weapon Lightning Glow',
+        'Weapon Water Glow','Weapon Rainbow Glow',
+        'Weapon Dark Glow','Ghost Weapon',
+        'Weapon Police Lights','Weapon Neon Border',
+        'Weapon Rotating Neon Border', 'Weapon Diamond Border',
+        'Weapon Gold Border','Weapon Silver Border','Weapon Bronze Border',
+      ]
     } as Data;
   },
 
@@ -233,7 +276,7 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
+    ...(mapState(['ownedWeaponIds','pvp']) as Accessors<StoreMappedState>),
     ...(mapGetters(['weaponsWithIds','getWeaponDurability',]) as Accessors<StoreMappedGetters>),
 
     weaponIdsToDisplay(): string[] {
@@ -302,7 +345,27 @@ export default Vue.extend({
 
     cleanRename(): string {
       return getCleanName(this.weaponRename);
-    }
+    },
+
+    availableSkins(): string[] {
+      const availableSkins = [];
+
+      availableSkins.push('No Skin');
+
+      for(let i = 0; i < 19; i++) {
+        if(+this.haveWeaponCosmetics[i] > 0) {
+          availableSkins.push(this.weaponCosmeticsNames[i]);
+        }
+      }
+
+      return availableSkins;
+    },
+
+    totalCosmeticChanges(): number {
+      let count = 0;
+      this.haveWeaponCosmetics.forEach(x => count += +x);
+      return count;
+    },
   },
 
   watch: {
@@ -312,8 +375,29 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['fetchWeapons','renameWeapon','fetchTotalWeaponRenameTags']) as StoreMappedActions),
+    ...(mapActions(['fetchWeapons','renameWeapon','fetchTotalWeaponRenameTags','fetchParticipatingWeapons',
+      'fetchOwnedWeaponCosmetics','changeWeaponCosmetic','removeWeaponCosmetic']) as StoreMappedActions),
     ...(mapMutations(['setCurrentWeapon'])),
+
+    setWeaponPvPStatus(weaponID: number){
+      this.fetchParticipatingWeapons();
+
+      if(this.pvp.participatingWeapons.includes(weaponID.toString())){
+        return 'main-weapon-in-pvp';
+      }
+      else return 'main-weapon-not-in-pvp';
+    },
+
+    setWeaponPvPStatusVisibility(weaponID: number){
+      this.fetchParticipatingWeapons();
+
+      console.log(this.pvp);
+
+      if(this.pvp.participatingWeapons.includes(weaponID.toString())){
+        return true;
+      }
+      else return false;
+    },
 
     saveFilters() {
       if(this.isMarket) {
@@ -405,12 +489,46 @@ export default Vue.extend({
       this.weaponRename = '';
     },
 
+    async loadCosmeticsCount() {
+      this.haveWeaponCosmetics = [];
+      for(let i = 1; i < 22; i++) {
+        this.haveWeaponCosmetics.push(await this.fetchOwnedWeaponCosmetics({cosmetic: i}));
+      }
+      this.updateOptions();
+    },
+
+    openChangeSkin(id: number | string) {
+      this.currentWeaponId = id;
+      (this.$refs['weapon-change-skin-modal'] as BModal).show();
+    },
+    async changeWeaponSkinCall() {
+      if(!this.currentWeaponId) return;
+      // +1 because cosmetics are 1 (not 0) based
+      const selectedSkinId = this.weaponCosmeticsNames.findIndex(x => x === this.targetSkin) + 1;
+      if(selectedSkinId === 0) {
+        await this.removeWeaponCosmetic({ id: +this.currentWeaponId });
+        await this.loadCosmeticsCount();
+      } else {
+        await this.changeWeaponCosmetic({ id: +this.currentWeaponId, cosmetic: selectedSkinId });
+        this.haveWeaponCosmetics[selectedSkinId - 1] = await this.fetchOwnedWeaponCosmetics({cosmetic: selectedSkinId});
+        await this.loadCosmeticsCount();
+      }
+
+      this.updateOptions();
+    },
+
     updateOptions() {
       this.options = [
         {
           name: 'Rename',
           amount: this.haveRename,
           handler: this.openRenameWeapon
+        },
+        {
+          name: 'Change Cosmetic',
+          amount: this.totalCosmeticChanges,
+          handler: this.openChangeSkin,
+          hasDefaultOption: true,
         },
       ];
     }
@@ -434,7 +552,7 @@ export default Vue.extend({
     }
 
     this.haveRename = await this.fetchTotalWeaponRenameTags();
-    this.updateOptions();
+    await this.loadCosmeticsCount();
   },
 });
 </script>
@@ -467,7 +585,7 @@ export default Vue.extend({
   border-radius: 5px;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .weapon.selected {
@@ -547,6 +665,33 @@ export default Vue.extend({
     display: inline-block;
     margin: auto;
   }
+}
+
+.main-weapon-in-pvp {
+  height: 40px;
+  width: 230px;
+  background-color: rgb(187, 33, 0);
+  transform: rotate(15deg);
+  left: -20px;
+  position: absolute;
+  top: 110px;
+  z-index: 100;
+}
+
+.main-weapon-in-pvp span {
+  text-align: center;
+  width: auto;
+  color: white;
+  display: block;
+  font-size: 30px;
+  font-weight: bold;
+  line-height: 40px;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+  text-transform: uppercase;
+}
+
+.main-weapon-not-in-pvp span {
+  display: none;
 }
 
 .sold {

@@ -34,9 +34,10 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "babel.config.js"
+    "babel.config.js",
+    "app-config.json"
   ],
   "exclude": [
     "node_modules"
-  ]
+  ],
 }

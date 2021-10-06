@@ -72,10 +72,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev amount of players that are considered for the top ranking
     uint8 private _maxCharactersPerRanking;
 
+    /// @dev percentages of ranked prize distribution by fighter rank (represented as index)
+    uint256[] public prizePercentages;
+
     /// @dev Fighter by characterID
     mapping(uint256 => Fighter) public fighterByCharacter;
     /// @dev Active duel by characterID currently attacking
     mapping(uint256 => Duel) public duelByAttacker;
+    /// @dev ranking points by character
+    mapping(uint256 => uint256) public characterRankingPoints;
+    /// @dev funds available for withdrawal by address
+    mapping(address => uint256) private _rankingEarningsByPlayer;
     /// @dev last time a character was involved in activity that makes it untattackable
     mapping(uint256 => uint256) private _lastActivityByCharacter;
     /// @dev IDs of characters available by tier (1-10, 11-20, etc...)
@@ -94,10 +101,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) private _duelEarningsByCharacter;
     /// @dev ranking by tier
     mapping(uint8 => uint256[]) private _rankingByTier;
-    /// @dev ranking points by character
-    mapping(uint256 => uint256) public characterRankingPoints;
+
     /// @dev total ranking points to use for larger seasons
     mapping(uint256 => uint256) public characterSeasonalRankingPoints;
+
 
     event NewDuel(
         uint256 indexed attacker,
@@ -120,6 +127,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         );
         _;
     }
+
     modifier isOwnedCharacter(uint256 characterID) {
         require(
             characters.ownerOf(characterID) == msg.sender,
@@ -191,6 +199,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         winningPoints = 5;
         losingPoints = 3;
         _maxCharactersPerRanking = 4;
+        prizePercentages.push(60);
+        prizePercentages.push(30);
+        prizePercentages.push(10);
     }
 
     /// @notice enter the arena with a character, a weapon and optionally a shield
@@ -228,7 +239,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         skillToken.transferFrom(msg.sender, address(this), wager);
     }
 
-    /// @dev attempts to find an opponent for a character. If a battle is still pending, it charges a penalty and re-rolls the opponent
+    /// @dev attempts to find an opponent for a character
     function requestOpponent(uint256 characterID)
         external
         characterInArena(characterID)
@@ -860,5 +871,86 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         //TODO Determine if this is the right approach as it might less efficient gas wise
         characterRankingPoints[characterID] = 0;
         processLoser(characterID);
+    }
+
+    /// @dev assigns the ranking rewards pool to top players
+    function assignRankedRewards() external restricted {
+        // Note: Loops over 15 tiers. Should not be reachable anytime in the foreseeable future.
+        for (uint8 i = 0; i <= 15; i++) {
+            if (_fightersByTier[i].length() == 0) {
+                continue;
+            }
+
+            uint256 difference;
+
+            if (_rankingByTier[i].length <= prizePercentages.length) {
+                difference = prizePercentages.length - _rankingByTier[i].length;
+            } else {
+                difference = 0;
+            }
+
+            // Note: If there are less players than top positions, excess is transferred to top 1.
+            if (_rankingByTier[i].length < prizePercentages.length) {
+                uint256 excessPercentage;
+                address topOnePlayer = characters.ownerOf(_rankingByTier[i][0]);
+
+                // Note: We accumulate excess percentage.
+                for (
+                    uint256 j = prizePercentages.length - difference;
+                    j < prizePercentages.length;
+                    j++
+                ) {
+                    excessPercentage = excessPercentage.add(
+                        prizePercentages[j]
+                    );
+                }
+
+                // Note: We assign excessive rewards to top 1 player.
+                _rankingEarningsByPlayer[
+                    topOnePlayer
+                ] = _rankingEarningsByPlayer[topOnePlayer].add(
+                    (_rankingsPoolByTier[i].mul(excessPercentage)).div(100)
+                );
+            }
+
+            // Note: We assign rewards normally to all possible players.
+            for (uint8 h = 0; h < prizePercentages.length - difference; h++) {
+                _assignRewards(_rankingByTier[i][h], h, _rankingsPoolByTier[i]);
+            }
+
+            // Note: We reset ranking prize pools.
+            _rankingsPoolByTier[i] = 0;
+        }
+    }
+
+    /// @dev increases a players withdrawable funds depending on their position in the ranked leaderboard
+    function _assignRewards(
+        uint256 characterID,
+        uint8 position,
+        uint256 pool
+    ) private {
+        uint256 percentage = prizePercentages[position];
+        uint256 amountToTransfer = (pool.mul(percentage)).div(100);
+        address playerToTransfer = characters.ownerOf(characterID);
+
+        _rankingEarningsByPlayer[playerToTransfer] = _rankingEarningsByPlayer[
+            playerToTransfer
+        ].add(amountToTransfer);
+    }
+
+    /// @dev allows a player to withdraw their ranking earnings
+    function withdrawRankedRewards() external {
+        uint256 amountToTransfer = _rankingEarningsByPlayer[msg.sender];
+
+        if (amountToTransfer > 0) {
+            _rankingEarningsByPlayer[msg.sender] = 0;
+
+            skillToken.safeTransfer(msg.sender, amountToTransfer);
+        }
+    }
+
+    /// @dev returns ranked prize percentages distribution
+    function getPrizePercentages() public view returns (uint256[] memory) {
+        return prizePercentages;
     }
 }

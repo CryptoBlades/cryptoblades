@@ -1,5 +1,9 @@
 # CryptoBlades
 
+## Warning
+
+This code is open, but not open source. It is not licensed, which means you cannot use it freely for your own applications. You cannot "base your code on CryptoBlades", nor use our code for anything. At all. This is not permissible under our license terms (which do not exist).
+
 ## Currency Setup
 
 1. Install [Ganache](https://www.trufflesuite.com/ganache).
@@ -65,6 +69,10 @@ To run tests locally simply run
 `npm run test:local`
 
 > NOTE: Careful, this is not using migrations but rather fixtures which should be kept up to date (`/test/helpers/prepareContracts.js`)
+
+## Config
+- All network config is in app-config.json
+- If you want to add a new network: add it's configuration in app-config.json and add update currentTokenPrice getter in EarningsCalculator.
 
 ## Alternative development flow with Hardhat
 

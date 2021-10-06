@@ -1,5 +1,5 @@
 
-import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState } from './interfaces';
+import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState, IPvPFighterState, IDuelByAttacker, IDuelResult } from './interfaces';
 import { Nft } from './interfaces/Nft';
 import { IShield } from './interfaces/Shield';
 
@@ -184,5 +184,42 @@ export function raidFromContract(data: string[]): IRaidState {
   return {
     index, expectedFinishTime, raiderCount, playerPower, bossPower, bossTrait, status,
     joinSkill, staminaCost, durabilityCost, xpReward, accountPower
+  };
+}
+
+export function pvpFighterFromContract(data: [string,string,string,string,boolean]): IPvPFighterState {
+  const characterID = data[0];
+  const characterTrait = '0';
+  const weaponID = data[1];
+  const weapon = null;
+  const shieldID = data[2];
+  const shield = null;
+  const wageredSkill = data[3];
+  const useShield = data[4];
+  return {
+    characterID, characterTrait, weaponID, weapon, shieldID, shield, wageredSkill, useShield
+  };
+}
+
+export function duelByAttackerFromContract(data: [string,string,string,boolean]): IDuelByAttacker {
+  const attackerId = data[0];
+  const defenderId = data[1];
+  const createdAt = data[2];
+  const isPending = data[3];
+  return {
+    attackerId,defenderId,createdAt,isPending
+  };
+}
+
+export function duelResultFromContract(data: [string,string,string,string,string,boolean]): IDuelResult {
+  const attackerId = data[0];
+  const defenderId = data[1];
+  const timestamp = data[2];
+  const attackerRoll = data[3];
+  const defenderRoll = data[4];
+  const attackerWon = data[5];
+
+  return {
+    attackerId,attackerRoll,attackerWon,defenderId,defenderRoll,timestamp
   };
 }
