@@ -16,15 +16,6 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    function initialize()
-        public
-        initializer
-    {
-        __AccessControl_init();
-
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    }
-
     // sender + token address => ids
     mapping(address => mapping(address => EnumerableSet.UintSet)) private storedItems;
     // token address + id => owner who stored
@@ -32,10 +23,63 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     // All stored items
     mapping(address => EnumerableSet.UintSet) private allStoredItems;
 
+    // Keeping thing in check
+    // A player can only have one pending request at a time
+
+    uint8 public constant BRIDGE_STATUS_NONE = 0;
+    uint8 public constant BRIDGE_STATUS_PENDING = 1;
+    uint8 public constant BRIDGE_STATUS_DONE = 2;
+
+    struct BridgeTransfer {
+        address owner;
+        address nftAddress;
+
+        uint256 requestBlock; // For tracking. Requested on block x
+        uint256 lastUpdateBlock; // For tracking. Last Update on block y
+        uint256 nftId;
+
+        uint8 chainId; // uint 8 should be enough
+        uint8 status; // enumeration. 0 => nothing, 1 => transfer requested, 2 => moved   
+    }
+
+    // Bot stuff
+    uint256 private _bridgeTransfersAt;
+    uint256 private _bridgeTransfers;
+    mapping(uint8 => bool) private _bridgeEnabled; // Which chain can we go to from here?
+    bool private _botEnabled;
+    mapping(uint256 => BridgeTransfer) private bridgeTransfers;
+
+    // Player stuff
+    // Player => bridgeTransferId
+    mapping(address => uint256) private bridgeTransfersOfPlayers;
+
+    // NFT stuff, an NFT should at most have one BridgeTransfer
+    // NFT => id => bridgeTransferId
+    mapping(address => mapping(uint256 => uint256)) private bridgeTransfersOfNFTs;
+
     // address is IERC721
     EnumerableSet.AddressSet private supportedTokenTypes; 
 
+
+    function initialize()
+        public
+        initializer
+    {
+        __AccessControl_init();
+
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        // make our lives easier and just void the first one...
+        bridgeTransfers[0] = BridgeTransfer(address(0), address(0), 0, 0, 0, 0, 0);
+    }
+
+
     modifier restricted() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Admin only");
+        _;
+    }
+
+    modifier gameAdminRestricted() {
         require(hasRole(GAME_ADMIN, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not game admin");
         _;
     }
@@ -74,6 +118,22 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         _;
     }
 
+    modifier notBridged(IERC721 _tokenAddress, uint256 id) {
+         require(
+            bridgeTransfers[bridgeTransfersOfNFTs[address(_tokenAddress)][id]].status == BRIDGE_STATUS_NONE,
+            "Pending bridge"
+        );
+        _;
+    }
+
+     modifier bridgeEnabled(uint8 targetChain) {
+         require(
+            _bridgeEnabled[targetChain],
+            "bridging disabled"
+        );
+        _;
+    }
+
     modifier isValidERC721(IERC721 _tokenAddress) {
         require(
             ERC165Checker.supportsInterface(
@@ -83,6 +143,16 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         );
         _;
     }
+
+    modifier noPendingBridge(){
+         require(
+            bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]].status == BRIDGE_STATUS_NONE
+            || bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]].status == BRIDGE_STATUS_DONE,
+            "Cannot request a bridge"
+        );
+        _;
+    }
+    
 
     function isTokenSupported(IERC721 _tokenAddress) public view returns (bool) {
         return supportedTokenTypes.contains(address(_tokenAddress));
@@ -140,6 +210,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         public
         isStored(_tokenAddress, _id)
         isOwner(_tokenAddress, _id)
+        notBridged(_tokenAddress, _id)
     {
         storedItems[msg.sender][address(_tokenAddress)].remove(_id);
         allStoredItems[address(_tokenAddress)].remove(_id);
@@ -172,5 +243,80 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         );
 
         return IERC721ReceiverUpgradeable.onERC721Received.selector;
+    }
+
+    // bridge stuff
+    function chainBridgeEnabled(uint8 chainId) public view returns (bool) {
+        return _bridgeEnabled[chainId];
+    }
+
+    function toggleChainBridgeEnabled(uint8 chainId, bool enable) public restricted {
+        _bridgeEnabled[chainId] = enable;
+    }
+
+    function bridgeItem(
+        IERC721 _tokenAddress,
+        uint256 _id,
+        uint8 targetChain
+    )
+        public
+        tokenNotBanned(_tokenAddress)
+        isValidERC721(_tokenAddress)
+        isStored(_tokenAddress, _id)
+        isOwner(_tokenAddress, _id) // isStored built in but why not
+        bridgeEnabled(targetChain)
+        noPendingBridge()
+    {
+        bridgeTransfers[++_bridgeTransfers] = BridgeTransfer(msg.sender, address(_tokenAddress), block.number, 0, _id, targetChain, 1);
+        bridgeTransfersOfPlayers[msg.sender] = _bridgeTransfers;
+        bridgeTransfersOfNFTs[address(_tokenAddress)][_id] = _bridgeTransfers;
+    }
+
+    function cancelBridge() public
+    {
+        require(bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]].status == BRIDGE_STATUS_PENDING, 'no pending bridge');
+        bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]].status = BRIDGE_STATUS_NONE;
+        bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]].lastUpdateBlock = block.number;
+    }
+
+    // Bot stuff
+    function botEnabled() public view returns (bool){
+        return _botEnabled;
+    }
+
+    function toggleBotEnabled(bool enable) public restricted {
+        _botEnabled = enable;
+    }
+
+    function getBridgeTransferAt() public view returns (uint256){
+        return _bridgeTransfersAt;
+    }
+
+    function setBridgeTransferAt(uint256 bridgeTransfersAt) public gameAdminRestricted {
+        _bridgeTransfersAt = bridgeTransfersAt;
+    }
+
+    function getBridgeTransfers() public view returns (uint256){
+        return _bridgeTransfers;
+    }
+
+    function getBridgeTransfer() public view returns (uint256){
+        return bridgeTransfersOfPlayers[msg.sender];
+    }
+
+    function getBridgeTransfer(uint256 bridgeTransfer) public returns (address, address, uint256, uint256, uint256, uint8, uint8) {
+        return (bridgeTransfers[bridgeTransfer].owner,
+                bridgeTransfers[bridgeTransfer].nftAddress,
+                bridgeTransfers[bridgeTransfer].nftId,
+                bridgeTransfers[bridgeTransfer].requestBlock,
+                bridgeTransfers[bridgeTransfer].lastUpdateBlock,
+                bridgeTransfers[bridgeTransfer].chainId,
+                bridgeTransfers[bridgeTransfer].status);
+    }
+
+    function updateBridgeTransferStatus(uint256 bridgeTransfer, uint8 status, bool forceed) public gameAdminRestricted {
+        require(forced || bridgeTransfers[bridgeTransfer].status == BRIDGE_STATUS_PENDING, 'Not pending transfer');
+        bridgeTransfers[bridgeTransfer].status = status;
+        bridgeTransfers[bridgeTransfer].lastUpdateBlock = block.number;
     }
 }
