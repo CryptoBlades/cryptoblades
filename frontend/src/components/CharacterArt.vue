@@ -130,10 +130,6 @@ export default {
   methods: {
     RequiredXp,
 
-    tooltipHtml(character) {
-      return '';
-    },
-
     getCleanCharacterName(id) {
       return getCleanName(this.getCharacterName(id));
     },
