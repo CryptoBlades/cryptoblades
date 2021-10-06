@@ -6,7 +6,6 @@ import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { getConfigValue, setUpContracts } from './contracts';
 
-import { setUpContracts } from './contracts';
 import {
   characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract,
   trinketFromContract, junkFromContract
