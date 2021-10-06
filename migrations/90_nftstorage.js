@@ -12,7 +12,7 @@ module.exports = async function (deployer, network, accounts) {
   
   const blacksmith = await upgradeProxy(Blacksmith.address, Blacksmith, { deployer });
 
-  await blacksmith.migrateTo_NFTStorage( nftStorage.address );
+  await blacksmith.migrateTo_a69635( nftStorage.address );
   
   const shields = await Shields.deployed();
   const weapons = await Weapons.deployed();

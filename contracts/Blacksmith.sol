@@ -101,7 +101,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
     }
 
-    function migrateTo_NFTStorage(
+    function migrateTo_a69635(
         NFTStorage _nftStorage) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
             nftStorage = _nftStorage;
