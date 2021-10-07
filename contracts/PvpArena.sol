@@ -81,6 +81,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Duel) public duelByAttacker;
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
+    /// @dev excess wager by character for when they re-enter the arena
+    mapping(uint256 => uint256) public excessWagerByCharacter;
     /// @dev funds available for withdrawal by address
     mapping(address => uint256) private _rankingEarningsByPlayer;
     /// @dev last time a character was involved in activity that makes it untattackable
@@ -219,9 +221,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             characterID,
             weaponID,
             shieldID,
-            wager.add(fighterByCharacter[characterID].wager),
+            wager.add(getCharacterWager(characterID)),
             useShield
         );
+
+        excessWagerByCharacter[characterID] = 0;
+
         // add the character into the tier's ranking if it is not full yet
         uint256 fightersAmount = _fightersByTier[tier].length();
         if (fightersAmount <= _maxCharactersPerRanking) {
@@ -353,6 +358,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         _removeCharacterFromArena(characterID);
 
+        excessWagerByCharacter[characterID] = 0;
         fighter.wager = 0;
 
         skillToken.safeTransfer(msg.sender, wager);
@@ -591,6 +597,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint256)
     {
+        if (excessWagerByCharacter[characterID] != 0) {
+            return excessWagerByCharacter[characterID];
+        }
+
         return fighterByCharacter[characterID].wager;
     }
 
@@ -707,6 +717,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         uint256 weaponID = fighter.weaponID;
         uint256 shieldID = fighter.shieldID;
+
+        excessWagerByCharacter[characterID] = fighter.wager;
 
         delete fighterByCharacter[characterID];
         delete duelByAttacker[characterID];

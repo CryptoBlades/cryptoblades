@@ -234,6 +234,130 @@ contract("PvpArena", (accounts) => {
           toBN(characterID).toString()
         );
       });
+
+      it("should add pre-existing wager for characters re-entering arena", async () => {
+        const weapon1ID = await helpers.createWeapon(
+          accounts[1],
+          "111",
+          helpers.elements.water,
+          {
+            weapons,
+          }
+        );
+        const weapon2ID = await helpers.createWeapon(
+          accounts[2],
+          "111",
+          helpers.elements.fire,
+          {
+            weapons,
+          }
+        );
+        const weapon3ID = await helpers.createWeapon(
+          accounts[3],
+          "111",
+          helpers.elements.earth,
+          {
+            weapons,
+          }
+        );
+
+        character1ID = await createCharacterInPvpTier(
+          accounts[1],
+          2,
+          "222",
+          weapon1ID
+        );
+        character2ID = await createCharacterInPvpTier(
+          accounts[2],
+          2,
+          "222",
+          weapon2ID
+        );
+
+        const previousWager = await pvpArena.getCharacterWager(character2ID);
+
+        await characters.setTrait(character1ID, helpers.elements.water, {
+          from: accounts[0],
+        });
+        await characters.setTrait(character2ID, helpers.elements.fire, {
+          from: accounts[0],
+        });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character1ID, {
+          from: accounts[1],
+        });
+        await pvpArena.performDuel(character1ID, {
+          from: accounts[1],
+        });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character1ID, {
+          from: accounts[1],
+        });
+        await pvpArena.performDuel(character1ID, {
+          from: accounts[1],
+        });
+
+        await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+
+        character3ID = await createCharacterInPvpTier(
+          accounts[3],
+          2,
+          "222",
+          weapon3ID
+        );
+
+        await characters.setTrait(character3ID, helpers.elements.earth, {
+          from: accounts[0],
+        });
+
+        // Now we make character 2 win one so he gets a non-fractional excedent
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character2ID, {
+          from: accounts[2],
+        });
+        await pvpArena.performDuel(character2ID, {
+          from: accounts[2],
+        });
+
+        await pvpArena.withdrawFromArena(character3ID, { from: accounts[3] });
+
+        // Now we defeat him again to kick him
+        await pvpArena.enterArena(character1ID, weapon1ID, 0, false, {
+          from: accounts[1],
+        });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character1ID, {
+          from: accounts[1],
+        });
+        await pvpArena.performDuel(character1ID, {
+          from: accounts[1],
+        });
+
+        const wager = await pvpArena.getCharacterWager(character2ID);
+
+        const isWagerPositive = wager > toBN(0);
+
+        const isCharacterInArena = await pvpArena.isCharacterInArena(
+          character2ID
+        );
+
+        expect(isCharacterInArena).to.equal(false);
+        expect(isWagerPositive).to.equal(true);
+
+        await pvpArena.enterArena(character2ID, weapon2ID, 0, false, {
+          from: accounts[2],
+        });
+
+        const newWager = await pvpArena.getCharacterWager(character2ID);
+
+        const isNewWagerValid =
+          newWager.toString() === previousWager.add(wager).toString();
+
+        expect(isNewWagerValid).to.equal(true);
+      });
     });
 
     describe("character already in arena", () => {
