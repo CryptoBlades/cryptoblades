@@ -328,7 +328,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         // when not minting or burning...
         if(from != address(0) && to != address(0)) {
             // only allow transferring a particular token every TRANSFER_COOLDOWN seconds
-            require(lastTransferTimestamp[tokenId] < block.timestamp.sub(0), "Transfer cooldown");
+            require(lastTransferTimestamp[tokenId] < block.timestamp.sub(TRANSFER_COOLDOWN), "Transfer cooldown");
 
             if(!hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to)) {
                 lastTransferTimestamp[tokenId] = block.timestamp;
