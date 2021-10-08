@@ -202,7 +202,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     
     // fail safes
     modifier canWithdrawBridgedNFT(uint256 bridgedNFT) {
-         require( bridgedTransfers[bridgedNFT].status == BRIDGED_STATUS_AVAILABLE, "not bridged NFT owner" );
+         require( bridgedTransfers[bridgedNFT].status == BRIDGED_STATUS_AVAILABLE, "not available" );
          require( nftTypeToAddress[bridgedTransfers[bridgedNFT].nftType] != address(0), "NFT not defined" );
         _;
     }
@@ -395,9 +395,9 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         emit NFTBridgedOut(bridgedTransfer.owner, bridgedNFT, bridgedTransfer.nftType, mintedItem);
     }
 
-    function _withdrawWeaponFromBridge(uint256 bridgedNFT, uint256 seed) internal returns (uint256 mintedId) {
+    function _withdrawWeaponFromBridge(uint256 metaData, uint256 seed) internal returns (uint256 mintedId) {
         (uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) 
-            = unpackWeaponsData(bridgedTransfersMeta[bridgedNFT]);
+            = unpackWeaponsData(metaData);
 
         mintedId = 
             weapons.performMintWeapon(address(this), properties, 
@@ -407,8 +407,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
             weapons.setBurnPoints(mintedId, lowStarBurnPoints, fourStarBurnPoints, fiveStarBurnPoints);
     }
 
-    function _withdrawCharacterFromBridge(uint256 bridgedNFT, uint256 seed) internal returns (uint256 mintedId) {
-        (uint16 xp, uint8 level, uint8 trait)  = unpackCharactersData(bridgedTransfersMeta[bridgedNFT]); 
+    function _withdrawCharacterFromBridge(uint256 metaData, uint256 seed) internal returns (uint256 mintedId) {
+        (uint16 xp, uint8 level, uint8 trait)  = unpackCharactersData(metaData); 
         mintedId = 
             characters.customMint(address(this), xp, 
             level, trait, seed);
@@ -476,7 +476,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     function packWeaponsData(uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) public pure returns (uint256){
-        return  uint256(fiveStarBurnPoints | (fourStarBurnPoints << 8) | (lowStarBurnPoints << 16) | (stat3 << 24) | (stat2 << 40) | (stat1 << 56) | (properties << 72));
+        return  uint256(fiveStarBurnPoints | (uint256(fourStarBurnPoints) << 8) | (uint256(lowStarBurnPoints) << 16) | (uint256(stat3) << 24) | (uint256(stat2) << 40) | (uint256(stat1) << 56) | (uint256(properties) << 72));
     }
 
     function unpackWeaponsData(uint256 metaData) public pure returns (uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) {
@@ -490,7 +490,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     function packCharactersData(uint16 xp, uint8 level, uint8 trait) public pure returns (uint256){
-        return  uint256(trait | (level << 8) | (xp << 16));
+        return  uint256(uint256(trait) | (uint256(level) << 8) | (uint256(xp) << 16));
     }
 
     function unpackCharactersData(uint256 metaData) public pure returns (uint16 xp, uint8 level, uint8 trait) {
