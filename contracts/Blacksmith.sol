@@ -10,7 +10,6 @@ import "./Consumables.sol";
 import "./Cosmetics.sol";
 import "./weapons.sol";
 import "./cryptoblades.sol";
-import "./NFTStorage.sol";
 
 contract Blacksmith is Initializable, AccessControlUpgradeable {
     using SafeERC20 for IERC20;
@@ -49,8 +48,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public numberParameters;
 
     mapping(uint256 => mapping(uint256 => uint256)) public itemSeriesFlatPrices;
-
-    NFTStorage public nftStorage;
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
     function initialize(Weapons _weapons, IRandoms _randoms)
@@ -100,13 +97,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER] = 0.2 ether;
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
     }
-
-    function migrateTo_a69635(
-        NFTStorage _nftStorage) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-            nftStorage = _nftStorage;
-        }
-
     /* ========== VIEWS ========== */
 
     /* ========== MUTATIVE FUNCTIONS ========== */
