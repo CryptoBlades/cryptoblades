@@ -604,6 +604,16 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             wbp.fiveStarBurnPoints = 10;
     }
 
+    function setBurnPoints(uint256 weaponId, uint8 amountLB, uint8 amount4B, uint8 amount5B) public minterOnly {
+        WeaponBurnPoints storage wbp = burnPoints[weaponId];
+
+        require(amountLB <= 100 && amount4B <= 25 && amount5B <= 10, "Error amounts");
+     
+        wbp.lowStarBurnPoints = amountLB;
+        wbp.fourStarBurnPoints = amount4B;
+        wbp.fiveStarBurnPoints = amount5B;
+    }
+
     // UNUSED FOR NOW!
     function levelUp(uint256 id, uint256 seed) private {
         Weapon storage wep = tokens[id];

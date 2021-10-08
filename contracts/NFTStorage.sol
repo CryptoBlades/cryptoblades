@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradea
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "./interfaces/IRandoms.sol";
 import "./weapons.sol";
 import "./characters.sol";
 
@@ -15,11 +16,11 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     using EnumerableSet for EnumerableSet.AddressSet;
 
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
-
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     Weapons weapons;
     Characters characters;
+    IRandoms public randoms;
 
     // sender + token address => ids
     mapping(address => mapping(address => EnumerableSet.UintSet)) private storedItems;
@@ -76,42 +77,39 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     mapping(uint8 => address) private nftTypeToAddress;
 
+    // Struct to hold data that will always be needed + rename because it can't be packed.
+    // bridgedTransfersMeta will hold actual NFT data packed
     struct BridgedTransfer {
         address owner;
 
         uint8 nftType;
         uint8 sourceChain;
-        uint8 sourceId;
+        uint256 sourceId;
         
         string rename;
 
         uint256 arrivedAt; // For tracking. Arrived on block x
         uint256 lastUpdateBlock; // For tracking. Last Update on block y
 
-        // Shield
-        uint16 properties;
-        uint16 stat1;
-        uint16 stat2;
-        uint16 stat3;
-
-        // Weapon or character
-        uint8 level; // separate from stat1 because stat1 will have a pre-roll
-
-        // Character
-        uint16 xp; // xp to next level
-        uint8 trait; // 2b trait, TBD
-
         uint8 status; // enumeration. 0 => waiting, 1 => claimed 
     }
-
     
     // Player address => items to be extracted
     mapping(address => EnumerableSet.UintSet) private receivedNFTs;
 
     uint256 private _bridgedTransfersAt;
     mapping(uint256 => BridgedTransfer) private bridgedTransfers;
+    mapping(uint256 => uint256) private bridgedTransfersMeta;
 
-    function initialize(address _weaponsAddress, address _charactersAddress)
+    event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
+    event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
+    event NFTBridgeRequest(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
+    event NFTBridgeCancel(address indexed owner);
+    event NFTBridgeUpdate(uint256 indexed requestId, uint8 status, bool forced);
+    event TransferIn(address indexed receiver, uint8 nftType, uint8 sourceChain, uint256 indexed sourceId);
+    event NFTBridgedOut(address indexed receiver, uint256 indexed bridgedId, uint8 nftType, uint256 indexed mintedId);
+
+    function initialize(address _weaponsAddress, address _charactersAddress/*, IRandoms _randoms*/)
         public
         initializer
     {
@@ -124,19 +122,17 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         characters = Characters(_charactersAddress);
         nftTypeToAddress[NFT_TYPE_CHARACTER] =_charactersAddress;
-
-        // make our lives easier and just void the first one...
-        bridgeTransfers[0] = BridgeTransfer(address(0), address(0), 0, 0, 0, 0, 0);
+        //randoms = _randoms;
     }
 
 
     modifier restricted() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Admin only");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "AO");
         _;
     }
 
     modifier gameAdminRestricted() {
-        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not game admin");
+        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NGA");
         _;
     }
 
@@ -144,7 +140,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(
             supportedTokenTypes.contains(address(_tokenAddress)) &&
                 storedItems[msg.sender][address(_tokenAddress)].contains(id),
-            "Token ID not listed"
+            "Not listed"
         );
         _;
     }
@@ -153,7 +149,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(
             !supportedTokenTypes.contains(address(_tokenAddress)) ||
                 !storedItems[msg.sender][address(_tokenAddress)].contains(id),
-            "Token ID must not be listed"
+            "Already listed"
         );
         _;
     }
@@ -169,7 +165,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     modifier tokenNotBanned(IERC721 _tokenAddress) {
         require(
             isTokenSupported(_tokenAddress),
-            "This type of NFT may not be stored"
+            "Error"
         );
         _;
     }
@@ -186,16 +182,6 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
          require(
             _bridgeEnabled[targetChain],
             "bridging disabled"
-        );
-        _;
-    }
-
-    modifier isValidERC721(IERC721 _tokenAddress) {
-        require(
-            ERC165Checker.supportsInterface(
-                address(_tokenAddress),
-                _INTERFACE_ID_ERC721
-            )
         );
         _;
     }
@@ -267,7 +253,6 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     )
         public
         tokenNotBanned(_tokenAddress)
-        isValidERC721(_tokenAddress)
         isNotStored(_tokenAddress, _id)
     {
         storedItems[msg.sender][address(_tokenAddress)].add(_id);
@@ -275,6 +260,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         storedItemsOwners[address(_tokenAddress)][_id] = msg.sender;
 
         _tokenAddress.safeTransferFrom(msg.sender, address(this), _id);
+
+        emit NFTStored(msg.sender, _tokenAddress, _id);
     }
 
     // Player withdraws NFT from storage.
@@ -289,9 +276,11 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         delete storedItemsOwners[address(_tokenAddress)][_id];
 
         _tokenAddress.safeTransferFrom(address(this), msg.sender, _id);
+
+        emit NFTWithdrawn(msg.sender, _tokenAddress, _id);
     }
 
-    function allowToken(IERC721 _tokenAddress) public restricted isValidERC721(_tokenAddress) {
+    function allowToken(IERC721 _tokenAddress) public restricted {
         supportedTokenTypes.add(address(_tokenAddress));
     }
 
@@ -336,7 +325,6 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     )
         public
         tokenNotBanned(_tokenAddress)
-        isValidERC721(_tokenAddress)
         isStored(_tokenAddress, _id)
         isOwner(_tokenAddress, _id) // isStored built in but why not
         bridgeEnabled(targetChain)
@@ -345,14 +333,20 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         bridgeTransfers[++_bridgeTransfers] = BridgeTransfer(msg.sender, address(_tokenAddress), block.number, 0, _id, targetChain, 1);
         bridgeTransfersOfPlayers[msg.sender] = _bridgeTransfers;
         bridgeTransfersOfNFTs[address(_tokenAddress)][_id] = _bridgeTransfers;
+
+        emit NFTBridgeRequest(msg.sender, _tokenAddress, _id);
     }
 
     // Player cancels bridge request. Can only happen if it's pending.
     function cancelBridge() public
     {
-        require(bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]].status == BRIDGE_STATUS_PENDING, 'no pending bridge');
-        bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]].status = BRIDGE_STATUS_NONE;
-        bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]].lastUpdateBlock = block.number;
+        BridgeTransfer storage bridgeTransfer = bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]];
+
+        require(bridgeTransfer.status == BRIDGE_STATUS_PENDING, 'no pending bridge');
+        bridgeTransfer.status = BRIDGE_STATUS_NONE;
+        bridgeTransfer.lastUpdateBlock = block.number;
+
+        emit NFTBridgeCancel(msg.sender);
     }
 
     // Player received NFTs waiting to be converted to NFTs
@@ -369,50 +363,55 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         }
     }
 
-    // Excluded rename and block info to avoid stack too deep compile error
-    function getReceivedNFT(uint256 receivedNFT) public view  returns (address, uint8, uint8, uint8, uint16, uint16, uint16, uint16, uint8, uint16, uint8, uint8) {
+    function getReceivedNFT(uint256 receivedNFT) public view  returns (address, uint8, uint8, uint256, uint8, uint256) {
         BridgedTransfer storage bridgedTransfer = bridgedTransfers[receivedNFT];
-        return (bridgedTransfer.owner, bridgedTransfer.nftType, bridgedTransfer.sourceChain, bridgedTransfer.sourceId, bridgedTransfer.properties, bridgedTransfer.stat1, bridgedTransfer.stat2, bridgedTransfer.stat3, bridgedTransfer.level, bridgedTransfer.xp, bridgedTransfer.trait, bridgedTransfer.status);
+        return (bridgedTransfer.owner, bridgedTransfer.nftType, bridgedTransfer.sourceChain, bridgedTransfer.sourceId, bridgedTransfer.status, bridgedTransfersMeta[receivedNFT]);
     }
 
     // Convert data stored by bot into an actual NFT and move it to storage
     // Bot can't mint on its own because some NFTs will have constraints (example max 4 chars)
     // Storage concept makes it a lot easier
     function withdrawFromBridge(uint256 bridgedNFT) ownsBridgedNFT(bridgedNFT) canWithdrawBridgedNFT(bridgedNFT) public {
-        
-        if(bridgedTransfers[bridgedNFT].nftType == NFT_TYPE_WEAPON){
-            _withdrawWeaponFromBridge(bridgedTransfers[bridgedNFT]);
+        uint256 mintedItem;
+        BridgedTransfer storage bridgedTransfer = bridgedTransfers[bridgedNFT];
+        uint256 seed = 0;//randoms.getRandomSeed(bridgedTransfer.owner);
+
+        if(bridgedTransfer.nftType == NFT_TYPE_WEAPON){
+            mintedItem = _withdrawWeaponFromBridge(bridgedTransfersMeta[bridgedNFT], seed);
         }
-        else if(bridgedTransfers[bridgedNFT].nftType == NFT_TYPE_CHARACTER) {
-            _withdrawCharacterFromBridge(bridgedTransfers[bridgedNFT]);
+        else if(bridgedTransfer.nftType == NFT_TYPE_CHARACTER) {
+            mintedItem = _withdrawCharacterFromBridge(bridgedTransfersMeta[bridgedNFT], seed);
         }
+
+        address nftAddress = nftTypeToAddress[bridgedTransfer.nftType];
+        allStoredItems[nftAddress].add(mintedItem);
+        storedItemsOwners[nftAddress][mintedItem] = bridgedTransfer.owner;
+        storedItems[bridgedTransfer.owner][nftAddress].add(mintedItem);
 
         receivedNFTs[msg.sender].remove(bridgedNFT);
         bridgedTransfers[bridgedNFT].status = BRIDGED_STATUS_WITHDRAWN;
         bridgedTransfers[bridgedNFT].lastUpdateBlock = block.number;
+
+        emit NFTBridgedOut(bridgedTransfer.owner, bridgedNFT, bridgedTransfer.nftType, mintedItem);
     }
 
-    function _withdrawWeaponFromBridge(BridgedTransfer memory bridgedTransfer) internal {
-        uint256 mintedWeapon = 
-            weapons.performMintWeapon(address(this), bridgedTransfer.properties, 
-            bridgedTransfer.stat1, bridgedTransfer.stat2, 
-            bridgedTransfer.stat3, 0);
+    function _withdrawWeaponFromBridge(uint256 bridgedNFT, uint256 seed) internal returns (uint256 mintedId) {
+        (uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) 
+            = unpackWeaponsData(bridgedTransfersMeta[bridgedNFT]);
 
-            address nftAddress = nftTypeToAddress[bridgedTransfer.nftType];
-            allStoredItems[nftAddress].add(mintedWeapon);
-            storedItemsOwners[nftAddress][mintedWeapon] = bridgedTransfer.owner;
-            storedItems[bridgedTransfer.owner][nftAddress].add(mintedWeapon);
+        mintedId = 
+            weapons.performMintWeapon(address(this), properties, 
+            stat1, stat2, 
+            stat3, seed);
+
+            weapons.setBurnPoints(mintedId, lowStarBurnPoints, fourStarBurnPoints, fiveStarBurnPoints);
     }
 
-    function _withdrawCharacterFromBridge(BridgedTransfer memory bridgedTransfer) internal {
-        uint256 mintedCharacter = 
-            characters.customMint(address(this), bridgedTransfer.xp, 
-            bridgedTransfer.level, bridgedTransfer.trait, 0);
-
-            address nftAddress = nftTypeToAddress[bridgedTransfer.nftType];
-            allStoredItems[nftAddress].add(mintedCharacter);
-            storedItemsOwners[nftAddress][mintedCharacter] = bridgedTransfer.owner;
-            storedItems[bridgedTransfer.owner][nftAddress].add(mintedCharacter);
+    function _withdrawCharacterFromBridge(uint256 bridgedNFT, uint256 seed) internal returns (uint256 mintedId) {
+        (uint16 xp, uint8 level, uint8 trait)  = unpackCharactersData(bridgedTransfersMeta[bridgedNFT]); 
+        mintedId = 
+            characters.customMint(address(this), xp, 
+            level, trait, seed);
     }
 
     // Bot stuff
@@ -441,32 +440,62 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         return bridgeTransfersOfPlayers[msg.sender];
     }
 
-    function getBridgeTransfer(uint256 bridgeTransfer) public returns (address, address, uint256, uint256, uint256, uint8, uint8) {
-        return (bridgeTransfers[bridgeTransfer].owner,
-                bridgeTransfers[bridgeTransfer].nftAddress,
-                bridgeTransfers[bridgeTransfer].nftId,
-                bridgeTransfers[bridgeTransfer].requestBlock,
-                bridgeTransfers[bridgeTransfer].lastUpdateBlock,
-                bridgeTransfers[bridgeTransfer].chainId,
-                bridgeTransfers[bridgeTransfer].status);
+    function getBridgeTransfer(uint256 bridgeTransferId) public returns (address, address, uint256, uint256, uint256, uint8, uint8) {
+        BridgeTransfer storage bridgeTransfer = bridgeTransfers[bridgeTransferId];
+        return (bridgeTransfer.owner,
+                bridgeTransfer.nftAddress,
+                bridgeTransfer.nftId,
+                bridgeTransfer.requestBlock,
+                bridgeTransfer.lastUpdateBlock,
+                bridgeTransfer.chainId,
+                bridgeTransfer.status);
     }
 
     // Bot to update status of a transfer request (this chain => outside chain)
-    function updateBridgeTransferStatus(uint256 bridgeTransfer, uint8 status, bool forced) public gameAdminRestricted {
+    function updateBridgeTransferStatus(uint256 bridgeTransferId, uint8 status, bool forced) public gameAdminRestricted {
+        BridgeTransfer storage bridgeTransfer = bridgeTransfers[bridgeTransferId];
         require(forced || 
-        (bridgeTransfers[bridgeTransfer].status == BRIDGE_STATUS_PENDING && status == BRIDGE_STATUS_PROCESSING)
-        || (bridgeTransfers[bridgeTransfer].status == BRIDGE_STATUS_PROCESSING && status == BRIDGE_STATUS_DONE)
+        (bridgeTransfer.status == BRIDGE_STATUS_PENDING && status == BRIDGE_STATUS_PROCESSING)
+        || (bridgeTransfer.status == BRIDGE_STATUS_PROCESSING && status == BRIDGE_STATUS_DONE)
         || status == BRIDGE_STATUS_ERROR, 'Invalid status change');
-        bridgeTransfers[bridgeTransfer].status = status;
-        bridgeTransfers[bridgeTransfer].lastUpdateBlock = block.number;
+        bridgeTransfer.status = status;
+        bridgeTransfer.lastUpdateBlock = block.number;
+
+        emit NFTBridgeUpdate(bridgeTransferId, status, forced);
     }
 
     // Bot to transfer in an NFT (outside chain => this chain)
-    function transferIn(address receiver, uint8 nftType, uint8 sourceChain, uint8 sourceId, 
-    string memory rename, uint16 properties,  uint16 stat1,  uint16 stat2,  uint16 stat3, uint8 level,
-    uint16 xp,  uint8 trait) public gameAdminRestricted {
+    function transferIn(address receiver, uint8 nftType, uint8 sourceChain, uint256 sourceId, 
+    string memory rename, uint256 metaData) public gameAdminRestricted {
         bridgedTransfers[++_bridgedTransfersAt] = BridgedTransfer(receiver, nftType, sourceChain, sourceId,
-        rename, block.number, 0, properties, stat1, stat2, stat3, level, xp, trait, BRIDGED_STATUS_AVAILABLE);
+        rename, block.number, 0, BRIDGED_STATUS_AVAILABLE);
         receivedNFTs[receiver].add(_bridgedTransfersAt);
+        bridgedTransfersMeta[_bridgedTransfersAt] = metaData;
+
+        emit TransferIn(receiver, nftType, sourceChain, sourceId);
+    }
+
+    function packWeaponsData(uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) public pure returns (uint256){
+        return  uint256(fiveStarBurnPoints | (fourStarBurnPoints << 8) | (lowStarBurnPoints << 16) | (stat3 << 24) | (stat2 << 40) | (stat1 << 56) | (properties << 72));
+    }
+
+    function unpackWeaponsData(uint256 metaData) public pure returns (uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) {
+        fiveStarBurnPoints = uint8(metaData & 0xFF);
+        fourStarBurnPoints = uint8((metaData >> 8) & 0xFF);
+        lowStarBurnPoints = uint8((metaData >> 16) & 0xFF);
+        stat3 = uint16((metaData >> 24) & 0xFFFF);
+        stat2 = uint16((metaData >> 40) & 0xFFFF);
+        stat1 = uint16((metaData >> 56) & 0xFFFF);
+        properties = uint16((metaData >> 72) & 0xFFFF);
+    }
+
+    function packCharactersData(uint16 xp, uint8 level, uint8 trait) public pure returns (uint256){
+        return  uint256(trait | (level << 8) | (xp << 16));
+    }
+
+    function unpackCharactersData(uint256 metaData) public pure returns (uint16 xp, uint8 level, uint8 trait) {
+        trait = uint8((metaData) & 0xFF);
+        level = uint8((metaData >> 8) & 0xFF);
+        xp = uint16(metaData  >> 16 & 0xFFFF);
     }
 }

@@ -1,23 +1,25 @@
 const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
-const Blacksmith = artifacts.require("Blacksmith");
+
 const NFTStorage = artifacts.require("NFTStorage");
 const Shields = artifacts.require("Shields");
 const Weapons = artifacts.require("Weapons");
 const Characters = artifacts.require("Characters");
+// const ChainlinkRandoms = artifacts.require("ChainlinkRandoms");
+// const DummyRandoms = artifacts.require("DummyRandoms");
 
 module.exports = async function (deployer, network, accounts) {
-
+	
+  // if (network === 'development' || network === 'development-fork') {
+		// await upgradeProxy(DummyRandoms.address, DummyRandoms, { deployer });
+  // }
+    
+  // const randoms = await ChainlinkRandoms.deployed();
   //const shields = await Shields.deployed();
-  const weapons = await Weapons.deployed();
+  const weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
   const characters = await upgradeProxy(Characters.address, Characters, { deployer });
   
   const nftStorage = await deployProxy(NFTStorage, [weapons.address, characters.address], { deployer });
-  
-  const blacksmith = await upgradeProxy(Blacksmith.address, Blacksmith, { deployer });
-
-  await blacksmith.migrateTo_a69635( nftStorage.address );
-  
 
   
   //await nftStorage.allowToken(shields.address);
