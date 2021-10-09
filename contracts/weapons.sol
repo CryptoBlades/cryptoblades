@@ -607,7 +607,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function setBurnPoints(uint256 weaponId, uint8 amountLB, uint8 amount4B, uint8 amount5B) public minterOnly {
         WeaponBurnPoints storage wbp = burnPoints[weaponId];
 
-        require(amountLB <= 100 && amount4B <= 25 && amount5B <= 10, "Error amounts");
+        require(amountLB <= 100 && amount4B <= 25 && amount5B <= 10, "EA");
      
         wbp.lowStarBurnPoints = amountLB;
         wbp.fourStarBurnPoints = amount4B;

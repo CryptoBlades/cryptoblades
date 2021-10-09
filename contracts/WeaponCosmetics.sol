@@ -49,4 +49,8 @@ contract WeaponCosmetics is Cosmetics {
     function getWeaponCosmetic(uint256 weaponId) public view returns (uint32) {
         return appliedCosmetics[weaponId];
     }
+
+    function setWeaponCosmetic(uint256 weaponId, uint32 cosmetic) public restricted {
+        appliedCosmetics[weaponId] = cosmetic;
+    }
 }
