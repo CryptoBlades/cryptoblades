@@ -190,7 +190,8 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const cosmeticsCharacterAddr = await Blacksmith.methods.getAddressOfItem(cosmeticsCharacterIndex).call();
   const CharacterCosmetics = new web3.eth.Contract(characterCosmeticsAbi as Abi, cosmeticsCharacterAddr);
 
-  const NFTStorageAddr = await await Blacksmith.methods.nftStorage().call();
+  //Hardcoded NFTStorage address for now
+  const NFTStorageAddr = process.env.VUE_APP_STORAGE_CONTRACT_ADDRESS;
   const NFTStorage = new web3.eth.Contract(storageAbi as Abi, NFTStorageAddr);
 
   const raidContracts: RaidContracts = {};
