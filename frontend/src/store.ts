@@ -3074,16 +3074,14 @@ export function createStore(web3: Web3) {
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
         console.log('storeItem', nftContractAddr,' ',tokenId);
-        console.log(NFTStorage);
         const NFTContract: Contract<IERC721> =
           nftContractAddr === Weapons.options.address
             ? Weapons : nftContractAddr === Characters.options.address
               ? Characters : Shields;
 
-        const ress = await NFTContract.methods
+        await NFTContract.methods
           .approve(NFTStorage.options.address, tokenId)
           .send(defaultCallOptions(state));
-        console.log(ress);
         const res = await NFTStorage.methods
           .storeItem(nftContractAddr, tokenId)
           .send({
@@ -3134,10 +3132,8 @@ export function createStore(web3: Web3) {
       async bridgeItem({ state }, { nftContractAddr, tokenId, targetChain}: { nftContractAddr: string, tokenId: string, targetChain: string}) {
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
-        console.log('storeItem', nftContractAddr,' ',tokenId);
-        console.log(NFTStorage);
+        console.log('bridgeItem', nftContractAddr,' ',tokenId, ' ',targetChain);
 
-        console.log(targetChain);
         await NFTStorage.methods
           .bridgeItem(nftContractAddr, tokenId, targetChain)
           .send({
