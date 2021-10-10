@@ -3,101 +3,130 @@
     <div class="row mt-3 justify-content-center">
         <h3> Bridge for your NFTs - Transfer NFTs to another chain </h3>
     </div>
-    <div class="row mt-3">
-      <div class="col">
-        <div class="d-flex flex-row justify-content-center">
-
-          <div class="p-2">
-            <b-button
-              variant="primary"
-              @click="nftType = 'weapon'; displayStorage = false; selectedNftId = null"  class="gtag-link-others" tagname="show_weapons_bridge">
-              Show Weapons
-              </b-button>
-          </div>
-
-          <div class="p-2">
-            <b-button
-              variant="primary"
-              @click="nftType = 'character'; displayStorage = false; selectedNftId = null"  class="gtag-link-others" tagname="show_characters_bridge">
-              Show Characters
-              </b-button>
-          </div>
-
-          <div class="p-2">
-            <b-button
-              variant="primary"
-              @click="nftType = 'shield'; displayStorage = false; selectedNftId = null"  class="gtag-link-others" tagname="show_shields_bridget">
-              Show Shields
-              </b-button>
-          </div>
-
-          <div class="p-2">
-            <b-button
-              :disabled="selectedNftId == null"
-              variant="primary"
-              @click="transferToStorage()"  class="gtag-link-others" tagname="click_transfer_bridge">Transfer NFT to storage</b-button>
-          </div>
-
-          <div class="p-2">
-            <b-button
-              variant="primary"
-              @click="displayStorage = true; showStorage()"  class="gtag-link-others" tagname="click_transfer_bridge">Show Storage</b-button>
-          </div>
-
-          <div class="p-2">
-            <b-button
-              :disabled="!displayStorage"
-              variant="primary"
-              @click="withdrawItem()"  class="gtag-link-others" tagname="click_transfer_bridge">Withdraw from Storage</b-button>
-          </div>
-
-          <div class="p-2">
-            <b-button
-              :disabled="!displayStorage"
-              variant="primary"
-              @click="displayStorage; requestBridge()"  class="gtag-link-others" tagname="click_transfer_bridge">Request Transfer</b-button>
-          </div>
-
+    <b-tabs justified>
+      <b-tab title="Inventory" @click="nftType = 'weapon'">
+        <div class="row mt-3">
+          <div class="col">
+            <div class="d-flex flex-row justify-content-center">
+              <div class="p-2">
+                <b-button
+                  variant="primary"
+                  @click="nftType = 'weapon'; selectedNftId = null"  class="gtag-link-others" tagname="show_weapons_bridge">
+                  Show Weapons
+                </b-button>
+              </div>
+              <div class="p-2">
+                <b-button
+                  variant="primary"
+                  @click="nftType = 'character'; selectedNftId = null"  class="gtag-link-others" tagname="show_characters_bridge">
+                  Show Characters
+                </b-button>
+              </div>
+              <div class="p-2">
+                <b-button
+                  :disabled="selectedNftId == null"
+                  variant="primary"
+                  @click="transferToStorage()"  class="gtag-link-others" tagname="click_transfer_bridge">Transfer NFT to storage</b-button>
+              </div>
+            </div>
         </div>
       </div>
-    </div>
 
-    <div class="sell-grid" v-if="!displayStorage">
-      <div class="sell-grid" v-if="nftType === 'weapon'">
-      <weapon-grid
-          v-model="selectedNftId"
+      <div class="sell-grid">
+        <div class="sell-grid" v-if="nftType === 'weapon'">
+        <weapon-grid
+            v-model="selectedNftId"
+            :showReforgedWeaponsDefVal="false"
+            :showFavoriteWeaponsDefVal="false"
+            :canFavorite="false"
+          />
+        </div>
+
+        <div class="sell-grid" v-if="nftType === 'character'">
+          <character-list
+            :showFilters="true"
+            v-model="selectedNftId"
+          />
+        </div>
+      </div>
+    </b-tab>
+
+  <b-tab title="Storage" @click="showStorage()">
+      <h3 class="text-center p-2">NFT Storage</h3>
+      <div class="d-flex flex-row justify-content-center">
+              <div class="p-2">
+                <b-button
+                  variant="primary"
+                  @click="nftType = 'weapon'; selectedNftId = null; getStoredIds()"  class="gtag-link-others" tagname="show_weapons_bridge">
+                  Show Weapons
+                </b-button>
+              </div>
+              <div class="p-2">
+                <b-button
+                  variant="primary"
+                  @click="nftType = 'character'; selectedNftId = null; getStoredIds()"  class="gtag-link-others" tagname="show_characters_bridge">
+                  Show Characters
+                </b-button>
+              </div>
+            <div class="p-2">
+              <b-button
+                variant="primary"
+                @click="withdrawItem()"  class="gtag-link-others" tagname="click_transfer_bridge">Withdraw from Storage</b-button>
+            </div>
+
+            <div class="p-2">
+              <b-button
+                :disabled="transferStatus == 'Pending' || selectedNftId == null"
+                variant="primary"
+                @click="requestBridge()"  class="gtag-link-others" tagname="click_transfer_bridge">Request Transfer</b-button>
+            </div>
+            <div class="p-2">
+              <b-button
+                :disabled="transferStatus != 'Pending'"
+                variant="primary"
+                @click="cancelAll()"  class="gtag-link-others" tagname="click_transfer_bridge">Cancel Transfer Request</b-button>
+            </div>
+      </div>
+      <div class="d-flex flex-row bd-highlight mb-3 justify-content-center">
+        <div class="p-4 w-25" v-if="transferStatus != 'Pending'">
+        <h4 class="text-center">Select target chain</h4>
+        <select class="form-control" v-model="targetChain">
+          <option v-for="chain in supportedChains" :value="chain" :key="chain">{{ chain }}</option>
+        </select>
+        </div>
+      </div>
+    <div v-if="transferStatus != 'No transfer'" class="transferBox d-flex flex-column bd-highlight mb-3 justify-content-center">
+      <div class="text-center">
+        <h4>Current Transfer</h4>
+      </div>
+
+      <div v-if="currentTransferNFTType == 'weapon'">
+        <weapon-grid
+          :weaponIds="[currentTransferNFTId]"
+          :showGivenWeaponIds="true"
+          :showReforgedToggle="false"
           :showReforgedWeaponsDefVal="false"
+          :showFavoriteToggle="false"
           :showFavoriteWeaponsDefVal="false"
           :canFavorite="false"
-          :weaponIds="allSearchResults"
+          :newWeapon="true"
         />
       </div>
-
-      <div class="sell-grid" v-if="nftType === 'character'">
+      <div v-else class="d-flex flex-row justify-content-center">
         <character-list
-          :showFilters="true"
-          v-model="selectedNftId"
+          :characterIds="[currentTransferNFTId]"
+          :showGivenCharacterIds="true"
+          :nftDisplay="true"
         />
       </div>
 
-      <div class="sell-grid" v-if="nftType === 'shield'">
-        <nft-list
-          :isShop="false"
-          v-model="selectedNftId"
-          :canFavorite="false"
-        />
+      <div class="text-center">
+        Status: {{transferStatus}} <br>
+        To Chain: {{currentTransferChain}}
       </div>
     </div>
-
-
-    <div class="sell-grid" v-if="displayStorage">
-      <h3>Your stored NFTs</h3>
-      {{selectedStorageType}}
-      <select class="form-control" v-model="selectedStorageType" @change="getStoredIds">
-        <option v-for="x in ['Weapons', 'Characters', 'Shields']" :value="x" :key="x">{{ x || 'Any' }}</option>
-      </select>
-
-    <div v-if="selectedStorageType == 'Weapons'">
+    <br>
+    <div v-if="nftType == 'weapon'">
     <weapon-grid
         v-model="selectedNftId"
         :showReforgedWeaponsDefVal="false"
@@ -109,7 +138,7 @@
         :showGivenWeaponIds="true"
       />
     </div>
-    <div v-if="selectedStorageType == 'Characters'">
+    <div v-if="nftType == 'character'">
       <character-list
         :showFilters="false"
         v-model="selectedNftId"
@@ -117,15 +146,8 @@
         :characterIds="storedNftsIds"
       />
     </div>
-    <div v-if="selectedStorageType == 'Shields'">
-      <nft-list
-        :isShop="false"
-        v-model="selectedNftId"
-        :canFavorite="false"
-        :nftIdTypes="storedNftsIds"
-      />
-    </div>
-    </div>
+  </b-tab>
+</b-tabs>
   </div>
 </template>
 <script lang="ts">
@@ -134,15 +156,13 @@ import { mapActions, mapGetters } from 'vuex';
 import { isNftType, Nft, allNftTypes } from '../interfaces/Nft';
 import { Accessors } from 'vue/types/options';
 import { Contract, Contracts } from '@/interfaces';
-//import BigButton from '../components/BigButton.vue';
 import { NftIdType } from '@/components/smart/NftList.vue';
 import { Characters, Shields, Weapons } from '../../../build/abi-interfaces';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
-import NftList from '../components/smart/NftList.vue';
-import { fromWeiEther } from '@/utils/common';
-import BigNumber from 'bignumber.js';
-//import CurrencyConverter from '../components/CurrencyConverter.vue';
+import config from '../../app-config.json';
+import { getConfigValue } from '@/contracts';
+
 
 interface StoreMappedGetters {
   contracts: Contracts;
@@ -180,6 +200,22 @@ interface StoreMappedActions {
   withdrawFromStorage(payload: {
     nftContractAddr: string;
     tokenId: string}): Promise<void>;
+  getNFTChainId(payload: {
+    nftContractAddr: string;
+    tokenId: string}): Promise<void>;
+  bridgeItem(payload: {
+    nftContractAddr: string;
+    tokenId: string;
+    targetChain: string;
+  }): Promise<void>;
+  getBridgeTransferId(): Promise<string>;
+  getBridgeTransfer(payload: {
+    transferId: string;
+  }): Promise<string[]>;
+  withdrawFromBridge(payload: {
+    tokenId: string;
+  }): Promise<void>;
+  cancelBridge(): Promise<void>;
 }
 
 export default Vue.extend({
@@ -202,14 +238,20 @@ export default Vue.extend({
       shield: null as Nft | null,
       allNftTypes,
       ownerAddress: '',
-      nftType: '',
+      nftType: 'weapon',
       nftId: '',
       nftPrice: '',
-      activeType : 'weapon',
       selectedNftId: '',
       storedNftsIds: [],
-      selectedStorageType: 'Weapons',
-      displayStorage: false,
+      currentChain: '',
+      targetChain: '',
+      targetChainId: '',
+      supportedChains: [] as string[],
+      supportedChainIds: [] as string[],
+      transferStatus: '',
+      currentTransferNFTId: '',
+      currentTransferNFTType: '',
+      currentTransferChain: '',
     };
   },
 
@@ -256,6 +298,24 @@ export default Vue.extend({
       return this.ownCharacters.length < 4;
     },
   },
+  created(){
+    console.log(getConfigValue('supportedChains'));
+    this.supportedChains  = config.supportedChains;
+
+    //remove currentChain from chains to choose from
+    this.currentChain = localStorage.getItem('currentChain') || 'BSC';
+    this.supportedChains = this.supportedChains.filter(item => item !== this.currentChain);
+    this.targetChain = this.supportedChains[0];
+
+    const currentNet = 'test';  //test or production; where to get this from?
+
+    const conf = config as any;
+    for(let i = 0; i < this.supportedChains.length; i++){
+      this.supportedChainIds.push(conf.environments[currentNet].chains[this.supportedChains[i]].VUE_APP_NETWORK_ID);
+    }
+    console.log(this.supportedChainIds);
+    this.getStatus();
+  },
 
   methods: {
     ...(mapActions([
@@ -269,10 +329,65 @@ export default Vue.extend({
       'storeItem',
       'getStorageItemIds',
       'getNumberOfStoragedItems',
-      'withdrawFromStorage'
+      'withdrawFromStorage',
+      'getNFTChainId',
+      'bridgeItem',
+      'getBridgeTransfer',
+      'getBridgeTransferId',
+      'withdrawFromBridge',
+      'cancelBridge',
     ]) as StoreMappedActions),
-    async requestBridge(){
+    async cancelAll(){
+      const res = await this.cancelBridge();
+      console.log('store res: ', res);
+      this.getStatus();
+    },
+    async withdrawBridge(){
+      const res = await this.withdrawFromBridge({
+        tokenId: this.selectedNftId});
+      console.log('store res: ', res);
+    },
+    async getStatus(){
+      const id = await this.getBridgeTransferId();
+      const transfer= await this.getBridgeTransfer({
+        transferId: id,
+      });
+      console.log(transfer[6]);
+      if(transfer[6] === '0'){
+        this.transferStatus = 'No transfer';
+      }
+      if(transfer[6] === '1'){
+        this.transferStatus = 'Pending';
+      }
+      else if(transfer[6] === '2'){
+        this.transferStatus = 'Processing';
+      }
+      else if(transfer[6] === '3'){
+        this.transferStatus = 'DONE';
+      }
+      else if(transfer[6] === '4'){
+        this.transferStatus = 'Error';
+      }
+      console.log(transfer);
+      const currentTransferTokenAddress = transfer[1];
+      this.currentTransferNFTId = transfer[2];
+      const currentTransferChainId = transfer[5];
 
+      this.currentTransferChain = this.supportedChains[this.supportedChainIds.indexOf(currentTransferChainId)];
+      console.log(this.currentTransferChain);
+      console.log(this.supportedChainIds.indexOf(currentTransferChainId));
+
+      if(currentTransferTokenAddress === this.Weapons.options.address) this.currentTransferNFTType = 'weapon';
+      else this.currentTransferNFTType = 'character';
+
+    },
+    async requestBridge(){
+      this.targetChainId = this.supportedChainIds[this.supportedChains.indexOf(this.targetChain)];
+      await this.bridgeItem({
+        nftContractAddr: this.contractAddress,
+        tokenId: this.selectedNftId,
+        targetChain: this.targetChainId});
+      this.getStatus();
     },
     async withdrawItem(){
       const res = await this.withdrawFromStorage({
@@ -280,11 +395,9 @@ export default Vue.extend({
         tokenId: this.selectedNftId,
       });
       console.log(res);
+      this.getStoredIds();
     },
     async getStoredIds(){
-      if(this.selectedStorageType === 'Weapons')this.nftType = 'weapon';
-      if(this.selectedStorageType === 'Characters')this.nftType = 'character';
-      if(this.selectedStorageType === 'Characters')this.nftType = 'character';
       const results: any = await this.getStorageItemIds({
         nftContractAddr: this.contractAddress,
       });
@@ -292,178 +405,39 @@ export default Vue.extend({
       console.log('results: ', results);
     },
     async showStorage(){
-      this.activeType = 'storage';
-      const getNumberOfStoragedItems = await this.getNumberOfStoragedItems({nftContractAddr: this.contractAddress,});
-      console.log(getNumberOfStoragedItems);
+      //const getNumberOfStoragedItems = await this.getNumberOfStoragedItems({nftContractAddr: this.contractAddress,});
       const storedItemIds: any = await this.getStorageItemIds({
         nftContractAddr: this.contractAddress,
       });
-      console.log('results: ', storedItemIds);
+      console.log('storedItemIds: ', storedItemIds);
       this.storedNftsIds = storedItemIds;
     },
     async transferToStorage(){
-      const res = await this.storeItem({
-        nftContractAddr: this.contractAddress,
-        tokenId: this.selectedNftId});
-
-      console.log('results: ', res);
-
-    },
-    displayCharacter(): void {
-      this.character = this.charactersWithIds([this.nftId]).filter(Boolean)[0];
-    },
-    displayWeapon(): void {
-      this.weapon = this.weaponsWithIds([this.nftId]).filter(Boolean)[0];
-    },
-    displayShield(): void {
-      this.shield = this.shieldsWithIds([this.nftId]).filter(Boolean)[0];
-    },
-    capitalizeText(text: string) {
-      return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-    },
-    async fetchOwnerAddress() {
-      if (this.nftId) {
-        this.ownerAddress = await this.checkMarketItemOwnership({
+      try{
+        const res = await this.storeItem({
           nftContractAddr: this.contractAddress,
-          tokenId: this.nftId,
-        });
+          tokenId: this.selectedNftId});
+        console.log('results: ', res);
       }
-    },
-    async searchForNft() {
-      if (this.nftId) {
-        this.clearNfts();
-        if (this.nftType === 'character') {
-          await this.fetchCharacters([this.nftId]);
-          this.displayCharacter();
-        } else if (this.nftType === 'weapon') {
-          await this.fetchWeapons([this.nftId]);
-          this.displayWeapon();
-        } else if (this.nftType === 'shield') {
-          await this.fetchShields([this.nftId]);
-          this.displayShield();
-        }
-        await this.fetchOwnerAddress();
-        await this.fetchNftPrices();
-        this.switchPath();
-      } else {
-        this.clearNfts();
-      }
-    },
-    switchPath() {
-      const oldPath = (this as any).$router.currentRoute.path;
-      const newPath = `/nft-display/${this.nftType}/${this.nftId}`;
-      if (oldPath !== newPath) {
-        (this as any).$router.push(newPath);
-      }
-    },
-    clearNfts() {
-      this.character = null;
-      this.weapon = null;
-      this.shield = null;
-      this.ownerAddress = '';
-    },
-    copyNftUrl() {
-      const dummy = document.createElement('input'),
-        text = window.location.href;
-      document.body.appendChild(dummy);
-      dummy.value = text;
-      dummy.select();
-      document.execCommand('copy');
-      document.body.removeChild(dummy);
-    },
-    convertWeiToSkill(wei: string): string {
-      return fromWeiEther(wei);
-    },
-    maxPrecisionSkill(listedPrice: string): string {
-      return this.convertStringToDecimal(
-        this.convertWeiToSkill(listedPrice),
-        8
-      );
-    },
-    convertStringToDecimal(val: string, maxDecimals: number) {
-      return new BigNumber(val).toFixed(maxDecimals);
-    },
-    async purchaseNft() {
-      if (this.nftId === null) return;
-
-      const price = await this.lookupNftPrice(this.nftId);
-      if (!price) return;
-
-      const skillChainPrice = this.convertStringToDecimal(
-        this.convertWeiToSkill(price),
-        2
-      );
-      const skillUIPrice = this.convertStringToDecimal(
-        this.nftPriceInSkill(),
-        2
-      );
-
-      if (skillChainPrice !== skillUIPrice) {
-        (this as any).$dialog.notify.error(
-          'The price of the listing has changed. Please refresh listing and try again'
-        );
-        return;
+      catch(e){
+        console.log('error: ', e);
       }
 
-      await this.purchaseMarketListing({
-        nftContractAddr: this.contractAddress,
-        tokenId: this.nftId,
-        maxPrice: price,
-      });
-
-      await this.fetchAllMarketNftIds({
-        nftContractAddr: this.contractAddress,
-      });
-      await this.fetchOwnerAddress();
-    },
-    async lookupNftPrice(id: string) {
-      if (!this.contractAddress) return;
-
-      return await this.fetchMarketNftPrice({
-        nftContractAddr: this.contractAddress,
-        tokenId: id,
-      });
-    },
-    async fetchNftPrices() {
-      if (!this.contractAddress) return;
-
-      this.nftPrice = '';
-      const price = await this.lookupNftPrice(this.nftId);
-      if (price) {
-        this.nftPrice = price;
-      }
-    },
-    nftPriceInSkill() {
-      return this.convertWeiToSkill(this.nftPrice);
     },
   },
 
   mounted() {
-    if (this.nftTypeProp && this.nftIdProp) {
-      this.nftType = this.nftTypeProp;
-      this.nftId = this.nftIdProp;
-      this.searchForNft();
-    } else {
-      this.nftType = 'weapon';
-    }
+
   },
 
   components: {
     WeaponGrid,
     CharacterList,
-    NftList,
   },
 });
 </script>
 
 <style scoped>
-.encounter-button {
-  display: block;
-  margin: 2px auto;
-  height: 5em;
-  width: 20em;
-  position: relative;
-}
 
 .character-list {
   transform: scale(1.5);
@@ -546,13 +520,6 @@ export default Vue.extend({
   .character-list {
     transform: scale(1);
   }
-
-  .nft-list,
-  .weapon-grid {
-    padding-left: 0;
-  }
-  .owned-by {
-    margin-top: 50px;
-  }
 }
+
 </style>
