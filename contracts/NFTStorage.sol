@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./weapons.sol";
 import "./characters.sol";
+import "./NFTMarket.sol";
 import "./WeaponRenameTagConsumables.sol";
 import "./CharacterRenameTagConsumables.sol";
 import "./WeaponCosmetics.sol";
@@ -23,6 +24,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     Weapons weapons;
     Characters characters;
+    NFTMarket nftMarket;
     WeaponRenameTagConsumables weaponRenameTagConsumables;
     CharacterRenameTagConsumables characterRenameTagConsumables;
     WeaponCosmetics weaponCosmetics;
@@ -54,15 +56,15 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         uint256 lastUpdateBlock; // For tracking. Last Update on block y
         uint256 nftId;
 
-        uint8 chainId; // uint 8 should be enough
+        uint64 chainId;
         uint8 status; // enumeration. 0 => nothing, 1 => transfer requested, 2 => moved   
     }
 
     // Bot stuff
     uint256 private _bridgeTransfersAt;
     uint256 private _bridgeTransfers;
-    mapping(uint8 => bool) private _bridgeEnabled; // Which chain can we go to from here?
-    mapping(uint8 => string) private _chainPrefix; // Prefix to prepend to chainId
+    mapping(uint64 => bool) private _bridgeEnabled; // Which chain can we go to from here?
+    mapping(uint64 => string) private _chainPrefix; // Prefix to prepend to chainId
     bool private _botEnabled;
     mapping(uint256 => BridgeTransfer) private bridgeTransfers;
 
@@ -120,7 +122,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     event NFTBridgedOut(address indexed receiver, uint256 indexed bridgedId, uint8 nftType, uint256 indexed mintedId);
 
     function initialize(address _weaponsAddress, address _charactersAddress, WeaponRenameTagConsumables _weaponRenameTagConsumables, CharacterRenameTagConsumables _characterRenameTagConsumables,
-     WeaponCosmetics _weaponCosmetics, CharacterCosmetics _characterCosmetics)
+     WeaponCosmetics _weaponCosmetics, CharacterCosmetics _characterCosmetics, NFTMarket _nftMarket)
         public
         initializer
     {
@@ -139,6 +141,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         weaponCosmetics = _weaponCosmetics;
         characterCosmetics = _characterCosmetics;
+
+        nftMarket = _nftMarket;
 
         _chainPrefix[56] = "BSC";
         _chainPrefix[128] = "HECO";
@@ -206,7 +210,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         _;
     }
 
-    modifier noPendingBridge(){
+    modifier noPendingBridge() {
          require(
             bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]].status == BRIDGE_STATUS_NONE
             || bridgeTransfers[bridgeTransfersOfPlayers[msg.sender]].status == BRIDGE_STATUS_DONE,
@@ -226,6 +230,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
          require( nftTypeToAddress[bridgedTransfers[bridgedNFT].nftType] != address(0), "NFT not defined" );
         _;
     }
+
+    modifier notBannedFromMarket() {
+        require(nftMarket.checkUserBanned(msg.sender) == false, "banned");
+        _;
+    }
+    
 
 
     function isTokenSupported(IERC721 _tokenAddress) public view returns (bool) {
@@ -274,6 +284,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         public
         tokenNotBanned(_tokenAddress)
         isNotStored(_tokenAddress, _id)
+        notBannedFromMarket
     {
         storedItems[msg.sender][address(_tokenAddress)].add(_id);
         allStoredItems[address(_tokenAddress)].add(_id);
@@ -328,12 +339,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     // bridge stuff
-    function chainBridgeEnabled(uint8 chainId) public view returns (bool) {
+    function chainBridgeEnabled(uint64 chainId) public view returns (bool) {
         return _bridgeEnabled[chainId];
     }
 
     
-    function toggleChainBridgeEnabled(uint8 chainId, string memory prefix, bool enable) public restricted {
+    function toggleChainBridgeEnabled(uint64 chainId, string memory prefix, bool enable) public restricted {
         _bridgeEnabled[chainId] = enable;
         _chainPrefix[chainId] = prefix;
     }
@@ -397,7 +408,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         BridgedTransfer storage bridgedTransfer = bridgedTransfers[bridgedNFT];
         uint256 seed = bridgedTransfersSeeds[bridgedNFT]; 
 
-        if(bridgedTransfer.nftType == NFT_TYPE_WEAPON){
+        if(bridgedTransfer.nftType == NFT_TYPE_WEAPON) {
             mintedItem = _withdrawWeaponFromBridge(bridgedNFT, bridgedTransfer.sourceChain, bridgedTransfer.sourceId);
 
             if(bytes(bridgedTransfer.rename).length > 0) {
@@ -427,7 +438,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     // Takes bridgedNFT not meta to avoid stack too deep
-    function _withdrawWeaponFromBridge(uint256 bridgedNFT, uint8 chainId, uint256 sourceId) internal returns (uint256 mintedId) {
+    function _withdrawWeaponFromBridge(uint256 bridgedNFT, uint64 chainId, uint256 sourceId) internal returns (uint256 mintedId) {
         (uint8 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) 
             = unpackWeaponsData(bridgedTransfersMeta[bridgedNFT]);
 
@@ -443,7 +454,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     function _withdrawCharacterFromBridge(uint256 metaData, uint256 seed) internal returns (uint256 mintedId) {
-        (uint8 appliedCosmetic, uint16 xp, uint8 level, uint8 trait)  = unpackCharactersData(metaData); 
+        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait)  = unpackCharactersData(metaData); 
         mintedId = 
             characters.customMint(address(this), xp, 
             level, trait, seed);
@@ -453,12 +464,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
             }
     }
 
-    function getNFTChainId(address nftAddress, uint256 nftId) public view returns (string memory chainId){
+    function getNFTChainId(address nftAddress, uint256 nftId) public view returns (string memory chainId) {
         chainId = nftChainIds[nftAddress][nftId];
     }
 
     // Bot stuff
-    function botEnabled() public view returns (bool){
+    function botEnabled() public view returns (bool) {
         return _botEnabled;
     }
 
@@ -466,7 +477,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         _botEnabled = enable;
     }
 
-    function getBridgeTransferAt() public view returns (uint256){
+    function getBridgeTransferAt() public view returns (uint256) {
         return _bridgeTransfersAt;
     }
 
@@ -474,16 +485,16 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         _bridgeTransfersAt = bridgeTransfersAt;
     }
 
-    function getBridgeTransfers() public view returns (uint256){
+    function getBridgeTransfers() public view returns (uint256) {
         return _bridgeTransfers;
     }
 
     // Transfer request of a player if any (only active one). Not bot... will move up
-    function getBridgeTransfer() public view returns (uint256){
+    function getBridgeTransfer() public view returns (uint256) {
         return bridgeTransfersOfPlayers[msg.sender];
     }
 
-    function getBridgeTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint256, uint8, uint8) {
+    function getBridgeTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint256, uint64, uint8) {
         BridgeTransfer storage bridgeTransfer = bridgeTransfers[bridgeTransferId];
         return (bridgeTransfer.owner,
                 bridgeTransfer.nftAddress,
@@ -516,11 +527,21 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         bridgedTransfersMeta[_bridgedTransfersAt] = metaData;
         bridgedTransfersSeeds[_bridgedTransfersAt] = seed;
 
-
         emit TransferIn(receiver, nftType, sourceChain, sourceId);
     }
 
-    function packWeaponsData(uint8 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) public pure returns (uint256){
+    // TODO: 3d cosmetic seed
+    function packedWeaponsData(uint256 weaponId) public view returns (uint256 packedData, string memory rename) {
+        (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,,,,, uint24 _burnPoints,) = weapons.get(weaponId);
+        uint32 appliedCosmetic = weaponCosmetics.getWeaponCosmetic(weaponId);
+        rename = weaponRenameTagConsumables.getWeaponRename(weaponId);
+        packedData = packWeaponsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, uint8(_burnPoints & 0xFF), uint8((_burnPoints >> 8) & 0xFF), uint8((_burnPoints >> 16) & 0xFF));
+    }
+
+    // TODO: 3d cosmetic seed
+    // TODO: Weapon level
+    // Applied cosmetic 32 bits is too much but will just put it as MSB for now. Can change later when something else is added.
+    function packWeaponsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) public pure returns (uint256) {
         return  uint256(fiveStarBurnPoints | (uint256(fourStarBurnPoints) << 8) | (uint256(lowStarBurnPoints) << 16) | (uint256(stat3) << 24) | (uint256(stat2) << 40) | (uint256(stat1) << 56) | (uint256(properties) << 72) | (uint256(appliedCosmetic) << 88));
     }
 
@@ -535,32 +556,41 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         appliedCosmetic = uint8((metaData >> 88) & 0xFF);
     }
 
-    function packCharactersData(uint8 appliedCosmetic, uint16 xp, uint8 level, uint8 trait) public pure returns (uint256){
+    // TODO: 3d cosmetic seed
+    function packedCharacterData(uint256 characterId) public view returns (uint256 packedData, string memory rename) {
+        (uint16 xp, uint8 level, uint8 trait,,,,,,, ) = characters.get(characterId);
+        uint32 appliedCosmetic = characterCosmetics.getCharacterCosmetic(characterId);
+        rename = characterRenameTagConsumables.getCharacterRename(characterId);
+        packedData = packCharactersData(appliedCosmetic, xp, level, trait);
+    }
+
+    // Applied cosmetic 32 bits is too much but will just put it as MSB for now. Can change later when something else is added.
+    function packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait) public pure returns (uint256) {
         return  uint256(uint256(trait) | (uint256(level) << 8) | (uint256(xp) << 16) | (uint256(appliedCosmetic) << 32));
     }
 
-    function unpackCharactersData(uint256 metaData) public pure returns (uint8 appliedCosmetic, uint16 xp, uint8 level, uint8 trait) {
+    function unpackCharactersData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait) {
         trait = uint8((metaData) & 0xFF);
         level = uint8((metaData >> 8) & 0xFF);
         xp = uint16(metaData  >> 16 & 0xFFFF);
-        appliedCosmetic = uint8((metaData >> 32) & 0xFF);
+        appliedCosmetic = uint32((metaData >> 32) & 0xFFFFFFFF);
     }
 
-    function buildChainId(uint8 chainId, uint256 sourceId) internal view returns (string memory) {
+    function buildChainId(uint64 chainId, uint256 sourceId) internal view returns (string memory) {
         return string(abi.encodePacked(_chainPrefix[chainId], uint2str(sourceId)));
     }
 
-    function uint2str(uint i) internal pure returns (string memory){
+    function uint2str(uint i) internal pure returns (string memory) {
         if (i == 0) return "0";
         uint j = i;
         uint length;
-        while (j != 0){
+        while (j != 0) {
             length++;
             j /= 10;
         }
         bytes memory bstr = new bytes(length);
         uint k = length - 1;
-        while (i != 0){
+        while (i != 0) {
             bstr[k--] = byte(uint8(48 + i % 10));
             i /= 10;
         }
