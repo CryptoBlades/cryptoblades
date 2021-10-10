@@ -29,10 +29,9 @@
                   @click="transferToStorage()"  class="gtag-link-others" tagname="click_transfer_bridge">Transfer NFT to storage</b-button>
               </div>
             </div>
+          </div>
         </div>
-      </div>
 
-      <div class="sell-grid">
         <div class="sell-grid" v-if="nftType === 'weapon'">
         <weapon-grid
             v-model="selectedNftId"
@@ -48,106 +47,103 @@
             v-model="selectedNftId"
           />
         </div>
-      </div>
     </b-tab>
 
-  <b-tab title="Storage" @click="showStorage()">
-      <h3 class="text-center p-2">NFT Storage</h3>
-      <div class="d-flex flex-row justify-content-center">
-              <div class="p-2">
-                <b-button
-                  variant="primary"
-                  @click="nftType = 'weapon'; selectedNftId = null; getStoredIds()"  class="gtag-link-others" tagname="show_weapons_bridge">
-                  Show Weapons
-                </b-button>
-              </div>
-              <div class="p-2">
-                <b-button
-                  variant="primary"
-                  @click="nftType = 'character'; selectedNftId = null; getStoredIds()"  class="gtag-link-others" tagname="show_characters_bridge">
-                  Show Characters
-                </b-button>
-              </div>
-            <div class="p-2">
-              <b-button
-                variant="primary"
-                @click="withdrawItem()"  class="gtag-link-others" tagname="click_transfer_bridge">Withdraw from Storage</b-button>
-            </div>
-
-            <div class="p-2">
-              <b-button
-                :disabled="transferStatus == 'Pending' || selectedNftId == null"
-                variant="primary"
-                @click="requestBridge()"  class="gtag-link-others" tagname="click_transfer_bridge">Request Transfer</b-button>
-            </div>
-            <div class="p-2">
-              <b-button
-                :disabled="transferStatus != 'Pending'"
-                variant="primary"
-                @click="cancelAll()"  class="gtag-link-others" tagname="click_transfer_bridge">Cancel Transfer Request</b-button>
-            </div>
-      </div>
-      <div class="d-flex flex-row bd-highlight mb-3 justify-content-center">
-        <div class="p-4 w-25" v-if="transferStatus != 'Pending'">
-        <h4 class="text-center">Select target chain</h4>
-        <select class="form-control" v-model="targetChain">
-          <option v-for="chain in supportedChains" :value="chain" :key="chain">{{ chain }}</option>
-        </select>
+      <b-tab title="Storage" @click="showStorage()">
+        <h3 class="text-center p-2">NFT Storage</h3>
+        <div class="d-flex flex-row justify-content-center">
+          <div class="p-2">
+            <b-button
+              variant="primary"
+              @click="nftType = 'weapon'; selectedNftId = null; getStoredIds()"  class="gtag-link-others" tagname="show_weapons_bridge">
+              Show Weapons
+            </b-button>
+          </div>
+          <div class="p-2">
+            <b-button
+              variant="primary"
+              @click="nftType = 'character'; selectedNftId = null; getStoredIds()"  class="gtag-link-others" tagname="show_characters_bridge">
+              Show Characters
+            </b-button>
+          </div>
+          <div class="p-2">
+            <b-button
+              variant="primary"
+              @click="withdrawItem()"  class="gtag-link-others" tagname="click_transfer_bridge">Withdraw from Storage</b-button>
+          </div>
+          <div class="p-2">
+            <b-button
+              :disabled="transferStatus == 'Pending' || selectedNftId == null"
+              variant="primary"
+              @click="requestBridge()"  class="gtag-link-others" tagname="click_transfer_bridge">Request Transfer</b-button>
+          </div>
+          <div class="p-2">
+            <b-button
+              :disabled="transferStatus != 'Pending'"
+              variant="primary"
+              @click="cancelAll()"  class="gtag-link-others" tagname="click_transfer_bridge">Cancel Transfer Request</b-button>
+          </div>
         </div>
-      </div>
-    <div v-if="transferStatus != 'No transfer'" class="transferBox d-flex flex-column bd-highlight mb-3 justify-content-center">
-      <div class="text-center">
-        <h4>Current Transfer</h4>
-      </div>
+        <div class="d-flex flex-row bd-highlight mb-3 justify-content-center">
+          <div class="p-4 w-25" v-if="transferStatus != 'Pending'">
+            <h4 class="text-center">Select target chain</h4>
+              <select class="form-control" v-model="targetChain">
+                <option v-for="chain in supportedChains" :value="chain" :key="chain">{{ chain }}</option>
+              </select>
+          </div>
+        </div>
+        <div v-if="transferStatus != 'No transfer'" class="transferBox d-flex flex-column bd-highlight mb-3 justify-content-center">
+          <div class="text-center">
+            <h4>Current Transfer</h4>
+          </div>
 
-      <div v-if="currentTransferNFTType == 'weapon'">
-        <weapon-grid
-          :weaponIds="[currentTransferNFTId]"
-          :showGivenWeaponIds="true"
-          :showReforgedToggle="false"
-          :showReforgedWeaponsDefVal="false"
-          :showFavoriteToggle="false"
-          :showFavoriteWeaponsDefVal="false"
-          :canFavorite="false"
-          :newWeapon="true"
-        />
-      </div>
-      <div v-else class="d-flex flex-row justify-content-center">
-        <character-list
-          :characterIds="[currentTransferNFTId]"
-          :showGivenCharacterIds="true"
-          :nftDisplay="true"
-        />
-      </div>
-
-      <div class="text-center">
-        Status: {{transferStatus}} <br>
-        To Chain: {{currentTransferChain}}
-      </div>
-    </div>
-    <br>
-    <div v-if="nftType == 'weapon'">
-    <weapon-grid
-        v-model="selectedNftId"
-        :showReforgedWeaponsDefVal="false"
-        :showFavoriteWeaponsDefVal="false"
-        :showReforgedToggle="false"
-        :showFavoriteToggle="false"
-        :canFavorite="false"
-        :weaponIds="storedNftsIds"
-        :showGivenWeaponIds="true"
-      />
-    </div>
-    <div v-if="nftType == 'character'">
-      <character-list
-        :showFilters="false"
-        v-model="selectedNftId"
-        :showGivenCharacterIds="true"
-        :characterIds="storedNftsIds"
-      />
-    </div>
-  </b-tab>
-</b-tabs>
+          <div v-if="currentTransferNFTType == 'weapon'">
+            <weapon-grid
+              :weaponIds="[currentTransferNFTId]"
+              :showGivenWeaponIds="true"
+              :showReforgedToggle="false"
+              :showReforgedWeaponsDefVal="false"
+              :showFavoriteToggle="false"
+              :showFavoriteWeaponsDefVal="false"
+              :canFavorite="false"
+              :newWeapon="true"
+            />
+          </div>
+          <div v-else class="d-flex flex-row justify-content-center">
+            <character-list
+              :characterIds="[currentTransferNFTId]"
+              :showGivenCharacterIds="true"
+              :nftDisplay="true"
+            />
+          </div>
+          <div class="text-center">
+            Status: {{transferStatus}} <br>
+            To Chain: {{currentTransferChain}}
+          </div>
+        </div>
+        <br>
+        <div v-if="nftType == 'weapon'">
+          <weapon-grid
+              v-model="selectedNftId"
+              :showReforgedWeaponsDefVal="false"
+              :showFavoriteWeaponsDefVal="false"
+              :showReforgedToggle="false"
+              :showFavoriteToggle="false"
+              :canFavorite="false"
+              :weaponIds="storedNftsIds"
+              :showGivenWeaponIds="true"
+            />
+        </div>
+        <div v-if="nftType == 'character'">
+          <character-list
+            :showFilters="false"
+            v-model="selectedNftId"
+            :showGivenCharacterIds="true"
+            :characterIds="storedNftsIds"
+          />
+        </div>
+      </b-tab>
+    </b-tabs>
   </div>
 </template>
 <script lang="ts">
@@ -307,8 +303,8 @@ export default Vue.extend({
     this.supportedChains = this.supportedChains.filter(item => item !== this.currentChain);
     this.targetChain = this.supportedChains[0];
 
-    const currentNet = 'test';  //test or production; where to get this from?
-
+    const currentNet = process.env.VUE_APP_NETWORK as string;  //test or production; where to get this from?
+    console.log('currentNet:', currentNet);
     const conf = config as any;
     for(let i = 0; i < this.supportedChains.length; i++){
       this.supportedChainIds.push(conf.environments[currentNet].chains[this.supportedChains[i]].VUE_APP_NETWORK_ID);
@@ -338,21 +334,19 @@ export default Vue.extend({
       'cancelBridge',
     ]) as StoreMappedActions),
     async cancelAll(){
-      const res = await this.cancelBridge();
-      console.log('store res: ', res);
+      await this.cancelBridge();
       this.getStatus();
     },
     async withdrawBridge(){
-      const res = await this.withdrawFromBridge({
+      await this.withdrawFromBridge({
         tokenId: this.selectedNftId});
-      console.log('store res: ', res);
     },
     async getStatus(){
       const id = await this.getBridgeTransferId();
       const transfer= await this.getBridgeTransfer({
         transferId: id,
       });
-      console.log(transfer[6]);
+      console.log('status: ', transfer);
       if(transfer[6] === '0'){
         this.transferStatus = 'No transfer';
       }
@@ -368,14 +362,12 @@ export default Vue.extend({
       else if(transfer[6] === '4'){
         this.transferStatus = 'Error';
       }
-      console.log(transfer);
+
       const currentTransferTokenAddress = transfer[1];
       this.currentTransferNFTId = transfer[2];
       const currentTransferChainId = transfer[5];
 
       this.currentTransferChain = this.supportedChains[this.supportedChainIds.indexOf(currentTransferChainId)];
-      console.log(this.currentTransferChain);
-      console.log(this.supportedChainIds.indexOf(currentTransferChainId));
 
       if(currentTransferTokenAddress === this.Weapons.options.address) this.currentTransferNFTType = 'weapon';
       else this.currentTransferNFTType = 'character';
