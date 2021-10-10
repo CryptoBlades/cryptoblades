@@ -171,6 +171,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint16(RandomUtil.randomSeededMinMax(0, limit, RandomUtil.combineSeeds(seed, seed2)));
     }
 
+    function getCosmeticsSeed(uint256 id) public view noFreshLookup(id) returns (uint256) {
+        CharacterCosmetics memory cc = cosmetics[id];
+        return cc.seed;
+    }
+
     function mint(address minter, uint256 seed) public restricted {
         uint256 tokenID = tokens.length;
 

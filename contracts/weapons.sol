@@ -179,6 +179,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _pommel = getRandomCosmetic(wc.seed, 4, 24);
     }
 
+    // function getCosmeticsSeed(uint256 id) public view noFreshLookup(id)
+    //     returns (uint256) {
+
+    //     WeaponCosmetics memory wc = cosmetics[id];
+    //     return wc.seed;
+    // }
+
     function get(uint256 id) public view noFreshLookup(id)
         returns (
             uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,
@@ -268,6 +275,25 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         durabilityTimestamp[tokenID] = uint64(now.sub(getDurabilityMaxWait()));
 
         emit NewWeapon(tokenID, minter);
+        return tokenID;
+    }
+
+    function performMintWeaponDetailed(address minter,
+        uint16 properties,
+        uint16 stat1, uint16 stat2, uint16 stat3, uint8 level, uint8 amountLB, uint8 amount4B, uint8 amount5B,
+        uint256 cosmeticSeed
+    ) public minterOnly returns(uint256) {
+        require(amountLB <= 100 && amount4B <= 25 && amount5B <= 10, "EA");
+
+        uint256 tokenID = performMintWeapon(minter, properties, stat1, stat2, stat3, cosmeticSeed);
+        tokens[tokenID].level = level;
+        durabilityTimestamp[tokenID] = uint64(now); // avoid chain jumping abuse
+        WeaponBurnPoints storage wbp = burnPoints[tokenID];
+
+        wbp.lowStarBurnPoints = amountLB;
+        wbp.fourStarBurnPoints = amount4B;
+        wbp.fiveStarBurnPoints = amount5B;
+
         return tokenID;
     }
 
@@ -602,16 +628,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             wbp.fourStarBurnPoints = 25;
         if(wbp.fiveStarBurnPoints > 10)
             wbp.fiveStarBurnPoints = 10;
-    }
-
-    function setBurnPoints(uint256 weaponId, uint8 amountLB, uint8 amount4B, uint8 amount5B) public minterOnly {
-        WeaponBurnPoints storage wbp = burnPoints[weaponId];
-
-        require(amountLB <= 100 && amount4B <= 25 && amount5B <= 10, "EA");
-     
-        wbp.lowStarBurnPoints = amountLB;
-        wbp.fourStarBurnPoints = amount4B;
-        wbp.fiveStarBurnPoints = amount5B;
     }
 
     // UNUSED FOR NOW!
