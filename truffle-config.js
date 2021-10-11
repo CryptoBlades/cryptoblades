@@ -142,6 +142,32 @@ module.exports = {
       gas: 5600000,
       skipDryRun: true
     },
+    polygontestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.POLYGON_TESTNET_WALLET_MNEMONIC,
+        process.env.POLYGON_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'wss://ws-matic-mumbai.chainstacklabs.com'
+        }
+      )),
+      network_id: 80001,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    polygonmainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.POLYGON_MAINNET_WALLET_MNEMONIC,
+        process.env.POLYGON_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://polygon-rpc.com/'
+        }
+      )),
+      network_id: 137,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    }
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
