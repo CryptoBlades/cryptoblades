@@ -439,14 +439,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     // Takes bridgedNFT not meta to avoid stack too deep
     function _withdrawWeaponFromBridge(uint256 bridgedNFT, uint64 chainId, uint256 sourceId) internal returns (uint256 mintedId) {
-        (uint8 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) 
+        (uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 level, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) 
             = unpackWeaponsData(bridgedTransfersMeta[bridgedNFT]);
 
         uint256 seed = bridgedTransfersSeeds[bridgedNFT];
         mintedId = 
-            weapons.performMintWeapon(address(this), properties, stat1, stat2, stat3, seed);
-
-            weapons.setBurnPoints(mintedId, lowStarBurnPoints, fourStarBurnPoints, fiveStarBurnPoints);
+            weapons.performMintWeaponDetailed(address(this), properties, stat1, stat2, stat3, level, lowStarBurnPoints, fourStarBurnPoints, fiveStarBurnPoints, seed);
 
             if(appliedCosmetic > 0) {
                 weaponCosmetics.setWeaponCosmetic(mintedId, appliedCosmetic);
@@ -530,37 +528,36 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         emit TransferIn(receiver, nftType, sourceChain, sourceId);
     }
 
-    // TODO: 3d cosmetic seed
-    function packedWeaponsData(uint256 weaponId) public view returns (uint256 packedData, string memory rename) {
+    function packedWeaponsData(uint256 weaponId) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
         (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,,,,, uint24 _burnPoints,) = weapons.get(weaponId);
         uint32 appliedCosmetic = weaponCosmetics.getWeaponCosmetic(weaponId);
         rename = weaponRenameTagConsumables.getWeaponRename(weaponId);
-        packedData = packWeaponsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, uint8(_burnPoints & 0xFF), uint8((_burnPoints >> 8) & 0xFF), uint8((_burnPoints >> 16) & 0xFF));
+        seed3dCosmetics = 0;//weapons.getCosmeticsSeed(weaponId); removed for now because weapon contract out of space
+        packedData = packWeaponsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, _level, uint8(_burnPoints & 0xFF), uint8((_burnPoints >> 8) & 0xFF), uint8((_burnPoints >> 16) & 0xFF));
     }
 
-    // TODO: 3d cosmetic seed
-    // TODO: Weapon level
     // Applied cosmetic 32 bits is too much but will just put it as MSB for now. Can change later when something else is added.
-    function packWeaponsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) public pure returns (uint256) {
-        return  uint256(fiveStarBurnPoints | (uint256(fourStarBurnPoints) << 8) | (uint256(lowStarBurnPoints) << 16) | (uint256(stat3) << 24) | (uint256(stat2) << 40) | (uint256(stat1) << 56) | (uint256(properties) << 72) | (uint256(appliedCosmetic) << 88));
+    function packWeaponsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 weaponLevel, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) public pure returns (uint256) {
+        return  uint256(fiveStarBurnPoints | (uint256(fourStarBurnPoints) << 8) | (uint256(lowStarBurnPoints) << 16) | (uint256(weaponLevel) << 24) | (uint256(stat3) << 32) | (uint256(stat2) << 48) | (uint256(stat1) << 64) | (uint256(properties) << 80) | (uint256(appliedCosmetic) << 96));
     }
 
-    function unpackWeaponsData(uint256 metaData) public pure returns (uint8 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) {
+    function unpackWeaponsData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 weaponLevel, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) {
         fiveStarBurnPoints = uint8(metaData & 0xFF);
         fourStarBurnPoints = uint8((metaData >> 8) & 0xFF);
         lowStarBurnPoints = uint8((metaData >> 16) & 0xFF);
-        stat3 = uint16((metaData >> 24) & 0xFFFF);
-        stat2 = uint16((metaData >> 40) & 0xFFFF);
-        stat1 = uint16((metaData >> 56) & 0xFFFF);
-        properties = uint16((metaData >> 72) & 0xFFFF);
-        appliedCosmetic = uint8((metaData >> 88) & 0xFF);
+        weaponLevel = uint8((metaData >> 24) & 0xFF);
+        stat3 = uint16((metaData >> 32) & 0xFFFF);
+        stat2 = uint16((metaData >> 48) & 0xFFFF);
+        stat1 = uint16((metaData >> 64) & 0xFFFF);
+        properties = uint16((metaData >> 80) & 0xFFFF);
+        appliedCosmetic = uint32((metaData >> 96) & 0xFFFFFFFF);
     }
 
-    // TODO: 3d cosmetic seed
-    function packedCharacterData(uint256 characterId) public view returns (uint256 packedData, string memory rename) {
+    function packedCharacterData(uint256 characterId) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
         (uint16 xp, uint8 level, uint8 trait,,,,,,, ) = characters.get(characterId);
         uint32 appliedCosmetic = characterCosmetics.getCharacterCosmetic(characterId);
         rename = characterRenameTagConsumables.getCharacterRename(characterId);
+        seed3dCosmetics = characters.getCosmeticsSeed(characterId);
         packedData = packCharactersData(appliedCosmetic, xp, level, trait);
     }
 
