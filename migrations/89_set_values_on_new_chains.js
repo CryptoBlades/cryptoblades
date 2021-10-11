@@ -3,7 +3,7 @@ const BasicPriceOracle = artifacts.require("BasicPriceOracle");
 const Shields = artifacts.require("Shields");
 
 module.exports = async function (deployer, network, accounts) {
-  if(network === 'hecomainnet' || network === 'okexmainnet') {
+  if(network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet') {
     const blacksmith = await Blacksmith.deployed();
     const shields = await Shields.deployed();
     const basicPriceOracle = await BasicPriceOracle.deployed();
