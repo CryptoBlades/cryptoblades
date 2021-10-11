@@ -144,7 +144,7 @@ module.exports = {
     },
     polygontestnet: {
       provider: () => new HDWalletProvider(hdWalletProviderOptions(
-        process.env.POLYGON_TESTNET_WALLET_MNEMONIC,
+        process.env.POLYGON_TESTNET_WALLET_PRIVATE_KEY,
         process.env.POLYGON_TESTNET_WALLET_MNEMONIC,
         {
           providerOrUrl: 'wss://ws-matic-mumbai.chainstacklabs.com'
@@ -157,12 +157,13 @@ module.exports = {
     },
     polygonmainnet: {
       provider: () => new HDWalletProvider(hdWalletProviderOptions(
-        process.env.POLYGON_MAINNET_WALLET_MNEMONIC,
+        process.env.POLYGON_MAINNET_WALLET_PRIVATE_KEY,
         process.env.POLYGON_MAINNET_WALLET_MNEMONIC,
         {
           providerOrUrl: 'https://polygon-rpc.com/'
         }
       )),
+      gasPrice: 30000000000,
       network_id: 137,
       confirmations: 10,
       timeoutBlocks: 200,
@@ -221,7 +222,8 @@ module.exports = {
   api_keys: {
     bscscan: process.env.BSCSCAN_API_KEY,
     hecoinfo: process.env.HECOINFO_API_KEY,
-    OKLink: process.env.OKLINK_API_KEY
+    OKLink: process.env.OKLINK_API_KEY,
+    polygonscan: process.env.POLYGONSCAN_API_KEY
   },
   // subscribers: {
   //   abisToTs: require('./truffle-subscriber-abis-to-ts.js')
