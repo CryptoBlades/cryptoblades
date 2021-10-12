@@ -284,6 +284,10 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         return (purchaseAddressMapping[msg.sender].purchasedTier, purchaseAddressMapping[msg.sender].stamp);
     }
 
+    function getPurchaseOf(address owner)  public view returns (uint8, uint32) {
+        return (purchaseAddressMapping[owner].purchasedTier, purchaseAddressMapping[owner].stamp);
+    }
+
     function getSalesCount() public view returns (uint256){
         return totalSales;
     }

@@ -29,6 +29,7 @@ contract Promos is Initializable, AccessControlUpgradeable {
     uint256 public constant BIT_FOUNDER_SHIELD = 2;
     uint256 public constant BIT_BAD_ACTOR = 4;
     uint256 public constant BIT_LEGENDARY_DEFENDER = 8;
+    uint256 public constant BIT_LAND_OWNED = 16;
 
     int128 public firstCharacterPromoInGameOnlyFundsGivenInUsd;
 
