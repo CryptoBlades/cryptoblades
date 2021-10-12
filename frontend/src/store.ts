@@ -3182,6 +3182,22 @@ export function createStore(web3: Web3) {
             from: state.defaultAccount,
           });
       },
+      async getReceivedNFTs({ state }) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage || !state.defaultAccount) return;
+        const res = await NFTStorage.methods
+          .getReceivedNFTs()
+          .call(defaultCallOptions(state));
+        return res;
+      },
+      async getReceivedNFT({ state }, {tokenId}: {tokenId: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage || !state.defaultAccount) return;
+        const res = await NFTStorage.methods
+          .getReceivedNFT(tokenId)
+          .call(defaultCallOptions(state));
+        return res;
+      },
     },
   });
 }
