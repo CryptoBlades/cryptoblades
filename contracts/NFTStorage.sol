@@ -532,7 +532,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,,,,, uint24 _burnPoints,) = weapons.get(weaponId);
         uint32 appliedCosmetic = weaponCosmetics.getWeaponCosmetic(weaponId);
         rename = weaponRenameTagConsumables.getWeaponRename(weaponId);
-        seed3dCosmetics = 0;//weapons.getCosmeticsSeed(weaponId); removed for now because weapon contract out of space
+        seed3dCosmetics = weapons.getCosmeticsSeed(weaponId);
         packedData = packWeaponsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, _level, uint8(_burnPoints & 0xFF), uint8((_burnPoints >> 8) & 0xFF), uint8((_burnPoints >> 16) & 0xFF));
     }
 
