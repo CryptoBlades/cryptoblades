@@ -908,6 +908,18 @@ export default Vue.extend({
         },
       ] as SkillShopListing[];
 
+      //TODO: salesAllowed()
+      // if(true) {
+      nftList.push({
+        id: 'land',
+        type: 'land',
+        nftPrice: 2,
+        name: 'Land',
+        description: 'A land',
+        image: '',
+      } as SkillShopListing);
+      // }
+
       return nftList;
     },
 

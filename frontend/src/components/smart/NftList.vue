@@ -23,12 +23,32 @@
       </ul>
     </div>
 
+    <b-modal class="map-modal" title="Choose zone" ref="map-modal" size="xl" ok-only hide-footer>
+      <div class="w-100" style="padding-bottom: 100%;">
+        <div id="map-grid" class="map-grid">
+          <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)"></div>
+        </div>
+      </div>
+    </b-modal>
+
+    <b-modal ref="zone-modal" title="Choose chunk" @ok="purchaseLand()" size="lg">
+      <div class="w-100" style="padding-bottom: 100%;">
+        <div id="zone-grid" class="zone-grid" :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
+          <div class="chunk" v-for="chunkId in chunksIds" :key="chunkId"
+           @click="selectChunk(chunkId)" :style="[ selectedChunk === chunkId ? {opacity: 1} : null ]"></div>
+        </div>
+      </div>
+      <template #modal-footer>
+        <b-button class="mt-3" block @click="purchaseLand(selectedChunk)" :disabled="!selectedChunk">Buy land</b-button>
+      </template>
+    </b-modal>
+
     <div v-if="!isShop">
       <div class="filters row mt-2" v-if="!isReward">
         <div v-if="!isMarket" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>Nft Type</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox']" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land']" :value="x" :key="x">{{ x || 'Any' }}</option>
           </select>
         </div>
 
@@ -98,6 +118,7 @@ import { Nft } from '@/interfaces/Nft';
 import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
 import { IState } from '@/interfaces';
+import { BModal } from 'bootstrap-vue';
 
 const sorts = [
   { name: 'Any', dir: '' },
@@ -112,6 +133,10 @@ interface Data {
   favorites: Record<string, Record<number, boolean>>;
   priceSort: string;
   showFavoriteNfts: boolean;
+  selectedZone: string;
+  selectedChunk: string;
+  zonesIds: number[];
+  chunksIds: number[];
 }
 
 export interface NftIdType {
@@ -226,6 +251,10 @@ export default Vue.extend({
       priceSort: '',
       sorts,
       showFavoriteNfts: true,
+      selectedZone: '0',
+      selectedChunk: '',
+      zonesIds: Array.from({length: 100}, (x, i) => i),
+      chunksIds: Array.from({length: 100}, (x, i) => i),
     } as Data;
   },
 
@@ -442,6 +471,45 @@ export default Vue.extend({
       return this.favorites && this.favorites[type] && this.favorites[type][id];
     },
 
+    showMapModal() {
+      (this.$refs['map-modal'] as BModal).show();
+    },
+
+    showZoneModal(zoneId: string) {
+      console.log(zoneId);
+      this.selectedZone = zoneId;
+      this.calculateChunksIds(zoneId);
+      (this.$refs['zone-modal'] as BModal).show();
+    },
+
+    selectChunk(chunkId: string) {
+      this.selectedChunk = chunkId;
+    },
+
+    calculateChunksIds(zoneId: string) {
+      const chunksIds = [] as number[];
+      console.log(zoneId);
+      for (let i = 0; i < 10; i++) {
+        for (let j = 0; j < 10; j++) {
+          let chunkId = 0;
+          if(+zoneId < 10) {
+            chunkId = i * 100 + j + +zoneId * 10;
+          }
+          else if (+zoneId >= 10 && +zoneId < 100) {
+            const zoneIdNumbers = this.splitNum(+zoneId);
+            chunkId = i * 100 + j + zoneIdNumbers[0] * 1000 + zoneIdNumbers[1] * 10;
+          }
+          chunksIds.push(chunkId);
+        }
+      }
+      console.log(chunksIds);
+      this.chunksIds = chunksIds;
+    },
+
+    splitNum(num: number) {
+      return String(num).split('').map(Number);
+    },
+
     async buyItem(item: nftItem) {
       if(item.type === 'shield'){
         await this.purchaseShield();
@@ -472,6 +540,15 @@ export default Vue.extend({
       }
       if(item.type === 'CharacterLightningTraitChange'){
         await this.purchaseCharacterLightningTraitChange();
+      }
+      // if(item.type === 'WeaponCosmetic'){
+      //   await this.purchaseWeaponCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});
+      // }
+      // if(item.type === 'CharacterCosmetic'){
+      //   await this.purchaseCharacterCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});
+      // }
+      if(item.type === 'land'){
+        this.showMapModal();
       }
     },
     itemDescriptionHtml(item: SkillShopListing): string {
@@ -577,6 +654,52 @@ export default Vue.extend({
   outline: solid currentcolor 2px;
 }
 
+.map-modal {
+  max-width: 100%;
+  margin: 0.5rem;
+}
+
+.zone-grid {
+  background-size: cover;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  float: left;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+}
+
+.map-grid {
+  background-image: url(../../assets/map.png);
+  background-size: cover;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  float: left;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+}
+
+.zone,
+.chunk {
+  background-color: greenyellow;
+  opacity: 0;
+  transition: 0.3s;
+}
+
+.zone:hover,
+.chunk:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
 
 @media (max-width: 576px) {
   .weapon-grid {
