@@ -46,9 +46,9 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     // tier, chunkid, x, y
-    function get(address owner) public view returns (uint256, uint256, uint256, uint256) {
+    function getOwned(address owner) public view returns (uint256, uint256, uint256, uint256) {
         uint256 id = tokenOfOwnerByIndex(owner, 0);
-        return (landData[id][LT], landData[id][LC], landData[id][LX], landData[id][LY]);
+        return get(id);
     }
 
     // DO NOT call directly outside the logic of CBKLandSale to avoid breaking tier and chunk logic
