@@ -81,6 +81,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Duel) public duelByAttacker;
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
+    /// @dev excess wager by character for when they re-enter the arena
+    mapping(uint256 => uint256) public excessWagerByCharacter;
     /// @dev funds available for withdrawal by address
     mapping(address => uint256) private _rankingEarningsByPlayer;
     /// @dev last time a character was involved in activity that makes it untattackable
@@ -97,8 +99,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => bool) private _shieldsInArena;
     /// @dev accumulated rewards per tier
     mapping(uint8 => uint256) private _rankingsPoolByTier;
-    /// @dev duel earnings per character
-    mapping(uint256 => uint256) private _duelEarningsByCharacter;
     /// @dev ranking by tier
     mapping(uint8 => uint256[]) private _rankingByTier;
 
@@ -221,9 +221,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             characterID,
             weaponID,
             shieldID,
-            wager,
+            wager.add(getCharacterWager(characterID)),
             useShield
         );
+
+        excessWagerByCharacter[characterID] = 0;
+
         // add the character into the tier's ranking if it is not full yet
         uint256 fightersAmount = _fightersByTier[tier].length();
         if (fightersAmount <= _maxCharactersPerRanking) {
@@ -269,7 +272,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         require(hasPendingDuel(attackerID), "Character not in a duel");
         require(
-            isAttackerWithinDecisionTime(attackerID),
+            isCharacterWithinDecisionTime(attackerID),
             "Decision time expired"
         );
 
@@ -299,13 +302,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         BountyDistribution
             memory bountyDistribution = _getDuelBountyDistribution(attackerID);
 
-        _duelEarningsByCharacter[winnerID] = _duelEarningsByCharacter[winnerID]
+        fighterByCharacter[winnerID].wager = fighterByCharacter[winnerID]
+            .wager
             .add(bountyDistribution.winnerReward);
         fighterByCharacter[loserID].wager = fighterByCharacter[loserID]
             .wager
             .sub(bountyDistribution.loserPayment);
 
-        if (fighterByCharacter[loserID].wager == 0) {
+        if (
+            fighterByCharacter[loserID].wager < getDuelCost(loserID) ||
+            fighterByCharacter[loserID].wager < getEntryWager(loserID).div(4)
+        ) {
             _removeCharacterFromArena(loserID);
         }
 
@@ -343,48 +350,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         Fighter storage fighter = fighterByCharacter[characterID];
         uint256 wager = fighter.wager;
-        uint256 amountToTransfer = getUnclaimedDuelEarnings(characterID);
+        uint256 entryWager = getEntryWager(characterID);
 
         if (hasPendingDuel(characterID)) {
-            amountToTransfer = amountToTransfer.add(wager.sub(wager.div(4)));
-        } else {
-            amountToTransfer = amountToTransfer.add(wager);
+            wager = wager.sub(entryWager.div(4));
         }
 
-        // This also sets the character's earnings to 0
         _removeCharacterFromArena(characterID);
 
-        skillToken.safeTransfer(msg.sender, amountToTransfer);
-    }
+        excessWagerByCharacter[characterID] = 0;
+        fighter.wager = 0;
 
-    /// @dev withdraws a character's unclaimed duel earnings
-    function withdrawDuelEarnings(uint256 characterID)
-        external
-        isOwnedCharacter(characterID)
-    {
-        uint256 amountToTransfer = getUnclaimedDuelEarnings(characterID);
-        require(amountToTransfer > 0, "No unclaimed earnings");
-
-        _duelEarningsByCharacter[characterID] = 0;
-
-        skillToken.safeTransfer(msg.sender, amountToTransfer);
-    }
-
-    /// @dev withdraw all duel earnings
-    function withdrawAllDuelEarnings() external {
-        EnumerableSet.UintSet storage fighters = _fightersByPlayer[msg.sender];
-        uint256 amountToTransfer;
-
-        for (uint256 i = 0; i < fighters.length(); i++) {
-            amountToTransfer = amountToTransfer.add(
-                getUnclaimedDuelEarnings(fighters.at(i))
-            );
-            _duelEarningsByCharacter[fighters.at(i)] = 0;
-        }
-
-        require(amountToTransfer > 0, "No unclaimed earnings");
-
-        skillToken.safeTransfer(msg.sender, amountToTransfer);
+        skillToken.safeTransfer(msg.sender, wager);
     }
 
     /// @dev returns the SKILL amounts distributed to the winner and the ranking pool
@@ -400,29 +377,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 reward = bounty.sub(poolTax).sub(duelCost);
 
         return BountyDistribution(reward, duelCost, poolTax);
-    }
-
-    /// @dev gets the character's unclaimed earnings
-    function getUnclaimedDuelEarnings(uint256 characterID)
-        public
-        view
-        returns (uint256)
-    {
-        return _duelEarningsByCharacter[characterID];
-    }
-
-    /// @dev gets the sum of all the sender's characters' unclaimed earnings
-    function getAllUnclaimedDuelEarnings() external view returns (uint256) {
-        EnumerableSet.UintSet storage playerFighters = _fightersByPlayer[
-            msg.sender
-        ];
-        uint256 sum;
-
-        for (uint256 i = 0; i < playerFighters.length(); i++) {
-            sum = sum.add(_duelEarningsByCharacter[playerFighters.at(i)]);
-        }
-
-        return sum;
     }
 
     function getRankingRewardsPool(uint8 tier) public view returns (uint256) {
@@ -643,11 +597,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint256)
     {
+        if (excessWagerByCharacter[characterID] != 0) {
+            return excessWagerByCharacter[characterID];
+        }
+
         return fighterByCharacter[characterID].wager;
     }
 
     /// @dev wether or not the character is still in time to start a duel
-    function isAttackerWithinDecisionTime(uint256 characterID)
+    function isCharacterWithinDecisionTime(uint256 characterID)
         public
         view
         returns (bool)
@@ -760,6 +718,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 weaponID = fighter.weaponID;
         uint256 shieldID = fighter.shieldID;
 
+        excessWagerByCharacter[characterID] = fighter.wager;
+
         delete fighterByCharacter[characterID];
         delete duelByAttacker[characterID];
 
@@ -772,7 +732,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
-        _duelEarningsByCharacter[characterID] = 0;
     }
 
     /// @dev attempts to find an opponent for a character.
@@ -923,7 +882,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev returns ranked prize percentages distribution
-    function getPrizePercentages() public view returns (uint256[] memory) {
+    function getPrizePercentages() external view returns (uint256[] memory) {
         return prizePercentages;
     }
 }
