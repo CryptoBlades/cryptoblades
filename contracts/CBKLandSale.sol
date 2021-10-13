@@ -2,12 +2,13 @@ pragma solidity ^0.6.5;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-
+import "./CBKLand.sol";
 
 contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
+    CBKLand cbkLand;
      /* ========== EVENTS ========== */
     event T1Given(address indexed owner, uint32 stamp);
     event T2Given(address indexed owner, uint16 chunkId);
@@ -63,7 +64,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     
     bool internal _enabled;
 
-    function initialize()
+    function initialize(CBKLand _cbkLand)
         public
         initializer
     {
@@ -78,6 +79,8 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         availableLand[TIER_ONE] = 1000; // Placeholder value
         availableLand[TIER_TWO] = 100; // Placeholder value
         availableLand[TIER_THREE] = 10; // Placeholder value
+
+        cbkLand = _cbkLand;
     }
 
     modifier isAdmin() {
@@ -139,6 +142,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         emit T1Given(buyer, t1LandsSold);
         t1LandsSold++;
         availableLand[TIER_ONE]--;
+        cbkLand.mint(buyer, TIER_ONE, 0);
     }
 
     function giveT2Land(address buyer, uint16 chunkId) public saleAllowed tierAvailable(TIER_TWO) canPurchase(buyer) chunkAvailable(chunkId) restricted {
@@ -156,6 +160,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         availableLand[TIER_TWO]--;
 
         emit T2Given(buyer, chunkId);
+        cbkLand.mint(buyer, TIER_TWO, chunkId);
     }
 
     function giveT3Land(address buyer, uint16 chunkId) public saleAllowed tierAvailable(TIER_THREE) canPurchase(buyer) chunkAvailable(chunkId) t3Available(chunkId) restricted {
@@ -168,6 +173,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
 
         emit T3Given(buyer, chunkId);
+        cbkLand.mint(buyer, TIER_THREE, chunkId);
     }
 
     function chunkIdToZoneId(uint32 chunkId) internal pure returns (uint8){
