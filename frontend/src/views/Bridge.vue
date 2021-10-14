@@ -367,7 +367,7 @@ export default Vue.extend({
       await this.cancelBridge();
       this.getStatus();
     },
-    async withdrawBridge(tokenId){
+    async withdrawBridge(tokenId: string){
       await this.withdrawFromBridge({
         tokenId });
       this.getIncoming();
