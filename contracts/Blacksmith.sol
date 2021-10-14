@@ -47,8 +47,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public numberParameters;
 
     CBKLandSale public cbkLandSale;
-    mapping(uint8 => uint256) public landPrices;
-
+    // ERC20 => tier => price
+    mapping(uint8 => mapping(uint8 => uint256)) public landPrices;
+    mapping(uint8 => address) currencies;
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
     function initialize(Weapons _weapons, IRandoms _randoms)
@@ -99,13 +100,20 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
     }
 
-    function migrateTo_bcdf4c(CBKLandSale _cbkLandSale) external {
+    function migrateTo_bcdf4c(CBKLandSale _cbkLandSale, address _king) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         cbkLandSale = _cbkLandSale;
-        landPrices[_cbkLandSale.TIER_ONE()] = 100 ether; // Placeholder value
-        landPrices[_cbkLandSale.TIER_TWO()] = 101 ether; // Placeholder value
-        landPrices[_cbkLandSale.TIER_THREE()] = 102 ether; // Placeholder value
+        // Price in Skill
+        landPrices[0][_cbkLandSale.TIER_ONE()] = 1 ether; // Placeholder value
+        landPrices[0][_cbkLandSale.TIER_TWO()] = 2 ether; // Placeholder value
+        landPrices[0][_cbkLandSale.TIER_THREE()] = 3 ether; // Placeholder value
+        // Price in King
+        landPrices[1][_cbkLandSale.TIER_ONE()] = 5 ether; // Placeholder value
+        landPrices[1][_cbkLandSale.TIER_TWO()] = 6 ether; // Placeholder value
+        landPrices[1][_cbkLandSale.TIER_THREE()] = 7 ether; // Placeholder value
+
+        currencies[1] = _king;
     }
 
     /* ========== VIEWS ========== */
@@ -255,37 +263,47 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     /* ========== CBK Land sale ========== */
 
-    event CBKLandPurchased(address indexed owner, uint8 tier, uint256 price);
+    event CBKLandPurchased(address indexed owner, uint8 tier, uint256 price, uint8 currency);
 
-    function purchaseT1CBKLand(uint256 paying) public {
-        require(landPrices[cbkLandSale.TIER_ONE()] == paying, 'Invalid price');
-        game.payContractTokenOnly(msg.sender, landPrices[cbkLandSale.TIER_ONE()]);
+    function purchaseT1CBKLand(uint256 paying, uint8 currency) public {
+        require(paying > 0 && landPrices[currency][cbkLandSale.TIER_ONE()] == paying, 'Invalid price');
+        payCurrency(msg.sender, landPrices[currency][cbkLandSale.TIER_ONE()], currency);
         cbkLandSale.giveT1Land(msg.sender);
-        emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_ONE(), landPrices[cbkLandSale.TIER_ONE()]);
+        emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_ONE(), landPrices[currency][cbkLandSale.TIER_ONE()], currency);
     }
 
-    function purchaseT2CBKLand(uint256 paying, uint16 chunkId) public {
-        require(landPrices[cbkLandSale.TIER_TWO()] == paying,  'Invalid price');
-        game.payContractTokenOnly(msg.sender, landPrices[cbkLandSale.TIER_TWO()]);
+    function purchaseT2CBKLand(uint256 paying, uint16 chunkId, uint8 currency) public {
+        require(paying > 0 && landPrices[currency][cbkLandSale.TIER_TWO()] == paying,  'Invalid price');
+        payCurrency(msg.sender, landPrices[currency][cbkLandSale.TIER_TWO()], currency);
         cbkLandSale.giveT2Land(msg.sender, chunkId);
-        emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_TWO(), landPrices[cbkLandSale.TIER_TWO()]);
+        emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_TWO(), landPrices[currency][cbkLandSale.TIER_TWO()], currency);
     }
 
-    function purchaseT3CBKLand(uint256 paying, uint16 chunkId) public {
-        require(landPrices[cbkLandSale.TIER_THREE()] == paying, 'Invalid price');
-        game.payContractTokenOnly(msg.sender, landPrices[cbkLandSale.TIER_THREE()]);
+    function purchaseT3CBKLand(uint256 paying, uint16 chunkId, uint8 currency) public {
+        require(paying > 0 && landPrices[currency][cbkLandSale.TIER_THREE()] == paying, 'Invalid price');
+        payCurrency(msg.sender, landPrices[currency][cbkLandSale.TIER_THREE()], currency);
         cbkLandSale.giveT3Land(msg.sender, chunkId);
-        emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_THREE(), landPrices[cbkLandSale.TIER_THREE()]);
+        emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_THREE(), landPrices[currency][cbkLandSale.TIER_THREE()], currency);
     }
 
-    function getCBKLandPrice(uint8 tier) public view returns (uint256){
+    function getCBKLandPrice(uint8 tier, uint8 currency) public view returns (uint256){
         require(tier >= cbkLandSale.TIER_ONE() && tier <= cbkLandSale.TIER_THREE(), "Invalid tier");
-        return landPrices[tier];
+        return landPrices[currency][tier];
     }
 
-    function setCBKLandPrice(uint8 tier, uint256 newPrice) external isAdmin {
+    function setCBKLandPrice(uint8 tier, uint256 newPrice, uint8 currency) external isAdmin {
         require(newPrice > 0, 'invalid price');
         require(tier >= cbkLandSale.TIER_ONE() && tier <= cbkLandSale.TIER_THREE(), "Invalid tier");
-        landPrices[tier] = newPrice;
+        landPrices[currency][tier] = newPrice;
+    }
+
+    function payCurrency(address payer, uint256 paying, uint8 currency) internal {
+        if(currency == 0){
+             game.payContractTokenOnly(payer, paying);
+        }
+        else if(currency == 1){
+            require(currencies[currency] != address(0), "invalid");
+            IERC20(currencies[currency]).transferFrom(payer, address(this), paying);
+        }
     }
 }
