@@ -48,7 +48,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public numberParameters;
 
     mapping(uint256 => mapping(uint256 => uint256)) public itemSeriesFlatPrices;
-
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
     function initialize(Weapons _weapons, IRandoms _randoms)
@@ -98,7 +97,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER] = 0.2 ether;
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
     }
-
     /* ========== VIEWS ========== */
 
     /* ========== MUTATIVE FUNCTIONS ========== */

@@ -28,6 +28,7 @@ import { abi as marketAbi, networks as marketNetworks } from '../../build/contra
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
+import { abi as storageAbi } from '../../build/contracts/NFTStorage.json';
 import config from '../app-config.json';
 
 
@@ -189,6 +190,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const cosmeticsCharacterAddr = await Blacksmith.methods.getAddressOfItem(cosmeticsCharacterIndex).call();
   const CharacterCosmetics = new web3.eth.Contract(characterCosmeticsAbi as Abi, cosmeticsCharacterAddr);
 
+  //Hardcoded NFTStorage address for now
+  const NFTStorageAddr = process.env.VUE_APP_STORAGE_CONTRACT_ADDRESS;
+  const NFTStorage = new web3.eth.Contract(storageAbi as Abi, NFTStorageAddr);
 
   const raidContracts: RaidContracts = {};
   let raidTrinketAddress = '';
@@ -229,6 +233,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
+    NFTStorage,
     ...raidContracts,
     ...marketContracts,
     WaxBridge,

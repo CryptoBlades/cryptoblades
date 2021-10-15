@@ -16,6 +16,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     bytes32 public constant NO_OWNED_LIMIT = keccak256("NO_OWNED_LIMIT");
     bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
 
+    uint256 public constant TRANSFER_COOLDOWN = 1 days;
+
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
     function initialize () public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
         __AccessControl_init_unchained();
@@ -129,6 +133,15 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         _;
     }
 
+    modifier minterOnly() {
+        _minterOnly();
+        _;
+    }
+
+    function _minterOnly() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), 'no access');
+    }
+
     function _noFreshLookup(uint256 id) internal view {
         require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
     }
@@ -150,6 +163,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint16(RandomUtil.randomSeededMinMax(0, limit, RandomUtil.combineSeeds(seed, seed2)));
     }
 
+    function getCosmeticsSeed(uint256 id) public view noFreshLookup(id) returns (uint256) {
+        CharacterCosmetics memory cc = cosmetics[id];
+        return cc.seed;
+    }
+
     function mint(address minter, uint256 seed) public restricted {
         uint256 tokenID = tokens.length;
 
@@ -166,6 +184,22 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
         _mint(minter, tokenID);
         emit NewCharacter(tokenID, minter);
+    }
+
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed) minterOnly public returns (uint256) {
+        uint256 tokenID = tokens.length;
+
+        if(block.number != lastMintedBlock)
+            firstMintedOfLastBlock = tokenID;
+        lastMintedBlock = block.number;
+
+        uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
+
+        tokens.push(Character(xp, level, trait, staminaTimestamp));
+        cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
+        _mint(minter, tokenID);
+        emit NewCharacter(tokenID, minter);
+        return tokenID;
     }
 
     function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
