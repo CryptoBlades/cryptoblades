@@ -38,7 +38,7 @@
                 v-visible="allSearchResults && allSearchResults.length > 0"
                 align="center" v-model="currentPage"
                 :total-rows="allListingsAmount"
-                :per-page="activeType === 'weapon' ? weaponShowLimit : characterShowLimit"
+                :per-page="nftListingPageSize()"
                 first-number
                 last-number
                 v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
@@ -170,8 +170,7 @@
                 v-if="allSearchResults && allSearchResults.length > 0"
                 align="center" v-model="currentPage"
                 :total-rows="allListingsAmount"
-                :per-page="activeType === 'weapon' ? weaponShowLimit :
-                  (activeType === 'character' ? characterShowLimit : shieldShowLimit)"
+                :per-page="nftListingPageSize()"
                 first-number
                 last-number
                 v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
@@ -2208,6 +2207,22 @@ export default Vue.extend({
       return this.convertStringToDecimal(this.convertWeiToSkill(listedPrice), 8);
     },
 
+    nftListingPageSize(): number {
+      if(this.activeType === 'weapon'){
+        return this.weaponShowLimit;
+      }
+
+      if(this.activeType === 'character'){
+        return this.characterShowLimit;
+      }
+
+      if(this.activeType === 'shield'){
+        return this.shieldShowLimit;
+      }
+
+      return defaultLimit;
+    },
+
     upperFirstChar(input: string): string {
       if(input === ''){
         return '';
@@ -2215,6 +2230,7 @@ export default Vue.extend({
 
       return input[0].toUpperCase() + input.slice(1);
     }
+
   },
 
   watch: {
