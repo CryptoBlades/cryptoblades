@@ -1813,7 +1813,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe("rankingBehaviour", () => {
+  describe.only("rankingBehaviour", () => {
     describe("entering the arena ", () => {
       let character1ID;
       let character2ID;

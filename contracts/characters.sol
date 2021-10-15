@@ -8,6 +8,7 @@ import "./Promos.sol";
 import "./util.sol";
 import "./interfaces/ITransferCooldownable.sol";
 import "./PvpArena.sol";
+import "hardhat/console.sol";
 
 contract Characters is
     Initializable,
@@ -24,7 +25,6 @@ contract Characters is
         keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
 
     uint256 public constant TRANSFER_COOLDOWN = 1 days;
-    PvpArena public pvp;
 
     function initialize() public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
@@ -313,6 +313,11 @@ contract Characters is
         characterLimit = 4;
     }
 
+    function migrateTo_PvpArena(PvpArena _pvp) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        pvp = _pvp;
+    }
+
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-256
@@ -356,7 +361,7 @@ contract Characters is
         uint256 indexed character,
         uint16 level
     );
-
+    PvpArena public pvp;
     modifier restricted() {
         _restricted();
         _;
@@ -519,16 +524,27 @@ contract Characters is
         return tokens[id].xp;
     }
 
+    function returnFighter(uint256 id) public returns (uint256) {}
+
     function gainXp(uint256 id, uint16 xp) public restricted {
         Character storage char = tokens[id];
+
         if (char.level < 255) {
             uint256 newXp = char.xp.add(xp);
             uint256 requiredToLevel = experienceTable[char.level]; // technically next level
             while (newXp >= requiredToLevel) {
                 newXp = newXp - requiredToLevel;
-                uint256 tier = pvp.getArenaTier(id);
+                uint256 prevTier = pvp.getArenaTier(id);
                 char.level += 1;
                 uint256 newTier = pvp.getArenaTier(id);
+                console.log("rankingPoints", pvp.getCharacterRankingPoints(id));
+                if (prevTier < newTier) {
+                    pvp._resetCharacterRankingPoints(id);
+                    console.log(
+                        "rankingPoints AFTER",
+                        pvp.getCharacterRankingPoints(id)
+                    );
+                }
                 emit LevelUp(ownerOf(id), id, char.level);
                 if (char.level < 255)
                     requiredToLevel = experienceTable[char.level];

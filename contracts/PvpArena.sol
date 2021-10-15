@@ -105,7 +105,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev total ranking points to use for larger seasons
     mapping(uint256 => uint256) public characterSeasonalRankingPoints;
 
-
     event NewDuel(
         uint256 indexed attacker,
         uint256 indexed defender,
