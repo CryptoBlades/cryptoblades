@@ -2,7 +2,6 @@ const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
 
 const NFTStorage = artifacts.require("NFTStorage");
-const Shields = artifacts.require("Shields");
 const Weapons = artifacts.require("Weapons");
 const NFTMarket = artifacts.require("NFTMarket");
 const WeaponCosmetics = artifacts.require("WeaponCosmetics");
@@ -13,7 +12,7 @@ const CharacterRenameTagConsumables = artifacts.require("CharacterRenameTagConsu
 
 module.exports = async function (deployer, network, accounts) {
 	
-  const market = await NFTMarket.deployed();	
+  const market = await upgradeProxy(NFTMarket.address, NFTMarket, { deployer });
   const weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
   const weaponCosmetics = await upgradeProxy(WeaponCosmetics.address, WeaponCosmetics, { deployer });
   const weaponRenameTagConsumables = await upgradeProxy(WeaponRenameTagConsumables.address, WeaponRenameTagConsumables, { deployer });
