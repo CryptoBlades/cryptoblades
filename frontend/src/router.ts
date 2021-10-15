@@ -11,6 +11,7 @@ import Leaderboard from './views/Leaderboard.vue';
 import Portal from './views/Portal.vue';
 import Options from './views/Options.vue';
 import NftDisplay from './views/NftDisplay.vue';
+import Treasury from './views/Treasury.vue';
 
 import {
   raid as featureFlagRaid,
@@ -48,7 +49,8 @@ function createRouter() {
       { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
       { path: '/options', name: 'options', component: Options },
       { path: '/nft-display', name: 'nft-display', component: NftDisplay },
-      { path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true }
+      { path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true },
+      { path: '/treasury', name: 'treasury', component: Treasury },
     ]
   });
 
