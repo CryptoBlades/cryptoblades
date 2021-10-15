@@ -1814,16 +1814,15 @@ contract("PvpArena", (accounts) => {
   });
 
   describe.only("rankingBehaviour", () => {
+    let character1ID;
+    let character2ID;
+    let character3ID;
+    let character4ID;
+    let character5ID;
+    let character6ID;
+    let weapon1ID;
+    let weapon2ID;
     describe("entering the arena ", () => {
-      let character1ID;
-      let character2ID;
-      let character3ID;
-      let character4ID;
-      let character5ID;
-      let character6ID;
-      let weapon1ID;
-      let weapon2ID;
-
       it("should fill the rank with the first 4 players", async () => {
         character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
         character2ID = await createCharacterInPvpTier(accounts[1], 2, "222");
@@ -1838,6 +1837,29 @@ contract("PvpArena", (accounts) => {
 
         expect(characterTier[0].toString()).to.equal(character1ID.toString());
         expect(characterTier[2].toString()).to.equal(character4ID.toString());
+      });
+    });
+
+    describe("Ranking reset", () => {
+      it("should reset the ranking of a character  after advancing tier", async () => {
+        character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
+        character2ID = await createCharacterInPvpTier(accounts[1], 2, "222");
+        await pvpArena.setRankingPoints(character1ID, 35, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character2ID, 34, {
+          from: accounts[0],
+        });
+
+        const previousRankingPoints = await pvpArena.getCharacterRankingPoints(
+          character2ID
+        );
+        await helpers.levelUpTo(character2ID, 30, { characters });
+        const postRankingPoints = await pvpArena.getCharacterRankingPoints(
+          character2ID
+        );
+        expect(previousRankingPoints.toString()).to.equal("34");
+        expect(postRankingPoints.toString()).to.equal("0");
       });
     });
 

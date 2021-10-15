@@ -537,13 +537,8 @@ contract Characters is
                 uint256 prevTier = pvp.getArenaTier(id);
                 char.level += 1;
                 uint256 newTier = pvp.getArenaTier(id);
-                console.log("rankingPoints", pvp.getCharacterRankingPoints(id));
                 if (prevTier < newTier) {
                     pvp._resetCharacterRankingPoints(id);
-                    console.log(
-                        "rankingPoints AFTER",
-                        pvp.getCharacterRankingPoints(id)
-                    );
                 }
                 emit LevelUp(ownerOf(id), id, char.level);
                 if (char.level < 255)
