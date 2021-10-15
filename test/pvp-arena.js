@@ -1813,7 +1813,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe.only("rankingBehaviour", () => {
+  describe("rankingBehaviour", () => {
     let character1ID;
     let character2ID;
     let character3ID;
@@ -1860,6 +1860,25 @@ contract("PvpArena", (accounts) => {
         );
         expect(previousRankingPoints.toString()).to.equal("34");
         expect(postRankingPoints.toString()).to.equal("0");
+      });
+      it("should not reset the rakning if the player levels up but doesn't skip a tier", async () => {
+        character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
+        character2ID = await createCharacterInPvpTier(accounts[1], 2, "222");
+        await pvpArena.setRankingPoints(character1ID, 35, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character2ID, 34, {
+          from: accounts[0],
+        });
+        const previousRankingPoints = await pvpArena.getCharacterRankingPoints(
+          character2ID
+        );
+        await helpers.levelUpTo(character2ID, 8, { characters });
+        const postRankingPoints = await pvpArena.getCharacterRankingPoints(
+          character2ID
+        );
+        expect(previousRankingPoints.toString()).to.equal("34");
+        expect(postRankingPoints.toString()).to.equal("34");
       });
     });
 
