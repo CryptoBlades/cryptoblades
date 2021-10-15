@@ -92,6 +92,36 @@
           "rpcUrls": ["https://exchaintestrpc.okex.org"],
           "blockExplorerUrls": ["https://www.oklink.com/okexchain-test/"],
           "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB"
+        },
+        "POLYGON": {
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
+          "VUE_APP_NETWORK_ID":"80001",
+          "VUE_APP_EXPECTED_NETWORK_ID":"80001",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Matic(Polygon) Testnet Mumbai",
+          
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
+          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e",
+          "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0xBE9f89336324a2D851B658e1d1Ab3b86697B0de4",
+          "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"0xe07fe8077345FfbC3a048eEB9C0BB155F192c508",
+          "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"0x261C7a08F6203908f7b05156E51071AbD1E6aFAd",
+          
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x381988F31C56356D80cd50bE77C26ed7798599a9",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0xa75203D757Bb4cAF4cc008d8B16b36B2EE74c77e",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x2d49c204dA121E63340B9E10651Cb0667D5e709a",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xCb850EEd27fF37B591c88967b5E7bC63De121FBd",
+
+          "chainId": "0x13881",
+          "currencyName": "MATIC",
+          "currencySymbol": "TMATIC",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://matic-mumbai.chainstacklabs.com"],
+          "blockExplorerUrls": ["https://mumbai.polygonscan.com/"],
+          "exchangeUrl": ""
         }
       }
     },
@@ -186,6 +216,36 @@
           "rpcUrls": ["https://exchainrpc.okex.org"],
           "blockExplorerUrls": ["https://www.oklink.com/okexchain/"],
           "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB"
+        },
+        "POLYGON": {
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
+          "VUE_APP_NETWORK_ID":"137",
+          "VUE_APP_EXPECTED_NETWORK_ID":"137",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Matic(Polygon) Mainnet",
+          
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
+          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86",
+          "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0xE34e7cA8e64884E3b5Cd48991ba229d8302E85da",
+          "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"0x96a5448BB59aD9Cccc3a4112c2c57a420768b499",
+          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"0x34d32231e778D53A97AD23Ff932ebDfD8e52162f",
+          "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x070b1A95898B927A900A1F9F42b114154648E51A",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0x6F104F58fFFC13b66A1BD45AA228167c4ADf746F",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xeE6e8467268eA752b027676B3EBcD4eB05749874",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xCb850EEd27fF37B591c88967b5E7bC63De121FBd",
+
+          "chainId": "0x89",
+          "currencyName": "MATIC",
+          "currencySymbol": "MATIC",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://matic-mainnet.chainstacklabs.com"],
+          "blockExplorerUrls": ["https://polygonscan.com/"],
+          "exchangeUrl": ""
         }
       }
     }
