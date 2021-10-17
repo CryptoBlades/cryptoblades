@@ -539,7 +539,7 @@
     },
     "links": {},
     "address": "0xeA44545f2446e853E2EA328151A566537b3edB08",
-    "transactionHash": "0xd51a852ec376ea0aa66ca76a0c9922e1fb06c6e60e25e4cb4eac2f8668570fcf"
+    "transactionHash": "0x10bbe41f376b717866dab4aa41fd66526ae8614e187f58ab9a10e62a4c19ae85"
   },
   "build/contracts/CharacterEarthTraitChangeConsumables.json": {
     "events": {
@@ -1037,7 +1037,7 @@
     },
     "links": {},
     "address": "0xBe9D885FD2dBa353167FCC71f5102F419226e876",
-    "transactionHash": "0x65f8aa1f8c0b78ef078da71d0c1f562adb4ecdebd01495236072210b669a86c1"
+    "transactionHash": "0x4bd4783e234cf51b6021162186cedd88cf61afac60de50d585a7188c4f4fc86f"
   },
   "build/contracts/Characters.json": {
     "events": {
@@ -1238,7 +1238,7 @@
     },
     "links": {},
     "address": "0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
-    "transactionHash": "0xeaec199f520cb0bad9f3c010ea1a5312e6cce46687930a2f4fe30b1fe5ad8182"
+    "transactionHash": "0x66c6643bad0d99b5cc86cd42ce47f57bc551b8f2ea0451ba4083c0e10bd269ec"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2296,7 +2296,13 @@
     },
     "links": {},
     "address": "0x9E47585eC2f55E2e48D3645090136426BF67745B",
-    "transactionHash": "0x2046e7127a48b1ffe8c072c518ba0beff2948b12b4036275a5a0a9cbfb6fddf9"
+    "transactionHash": "0x5d0f82c0750253c2e4f327d87e0d9b8c081d628edbf82c40df58cf80f3778d33"
+  },
+  "build/contracts/NFTStorage.json": {
+    "events": {},
+    "links": {},
+    "address": "0x97E7fe3F19122f68396A787F5d9a1EFCDe7028d7",
+    "transactionHash": "0x1539b8362a93a70234d2058d908458225e778be05fad09566220def72535de56"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -3144,7 +3150,7 @@
     },
     "links": {},
     "address": "0xA9a084e46cCf86173cb291A9E8AD2dEcB04E28C7",
-    "transactionHash": "0x440cf5491edfc449d4b7dfd52a42c905b832b59ff1b43c75e764dda02a8f8e2e"
+    "transactionHash": "0xf3f9fce6ae33a54cd794e8c39a6fb18393f2eb9099dd277f4bc5e78ca03c80a9"
   },
   "build/contracts/WeaponRenameTagConsumables.json": {
     "events": {
@@ -3264,7 +3270,7 @@
     },
     "links": {},
     "address": "0x2F0A79781A6314Ba5cb6d36E37a72c2F3c5058C5",
-    "transactionHash": "0x4b50b4df197faeda305dc8f3b2d503dcbd3353774d939ae871686bdad4a36662"
+    "transactionHash": "0x44cf9fdf4e23530453c0385cafbb88f5cc8d8ecacb5df785fa6f3c0561c6fa38"
   },
   "build/contracts/Weapons.json": {
     "events": {
@@ -3606,6 +3612,6 @@
     },
     "links": {},
     "address": "0x672E4CddA311b3BfAd1e09313241C62B4eFF5782",
-    "transactionHash": "0x14d6b8f5e4a25562ad9bf0923e4612bc6bde7628f7d50ab15a509abeb1c2c8dc"
+    "transactionHash": "0x18e1cfecebcbb8523b34cb3c895c9dc13dbeecbac1f7b65abd76442538c502d4"
   }
 }
