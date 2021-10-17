@@ -26,7 +26,11 @@ import { abi as junkAbi } from '../../build/contracts/Junk.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
+import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
+import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
+import { abi as storageAbi } from '../../build/contracts/NFTStorage.json';
 import config from '../app-config.json';
+
 
 import Web3 from 'web3';
 import { Contracts, isStakeType, StakeType, StakingContracts } from './interfaces';
@@ -57,7 +61,7 @@ interface Chain {
 
 export function getConfigValue(key: string): any {
   if(process.env.NODE_ENV === 'development') return '';
-  const env = window.location.href.startsWith('test') ? 'test' : 'production';
+  const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
   const chain = localStorage.getItem('currentChain') || 'BSC';
   return (config as Config).environments[env].chains[chain][key];
 }
@@ -178,7 +182,17 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const CharacterLightningTraitChangeConsumables = new web3.eth.Contract(characterLightningTraitChangeConsumablesAbi as Abi,
     characterLightningTraitChangeConsumablesAddr);
 
+  const cosmeticsWeaponIndex = await Blacksmith.methods.ITEM_COSMETIC_WEAPON().call();
+  const cosmeticsWeaponAddr = await Blacksmith.methods.getAddressOfItem(cosmeticsWeaponIndex).call();
+  const WeaponCosmetics = new web3.eth.Contract(weaponCosmeticsAbi as Abi, cosmeticsWeaponAddr);
 
+  const cosmeticsCharacterIndex = await Blacksmith.methods.ITEM_COSMETIC_CHARACTER().call();
+  const cosmeticsCharacterAddr = await Blacksmith.methods.getAddressOfItem(cosmeticsCharacterIndex).call();
+  const CharacterCosmetics = new web3.eth.Contract(characterCosmeticsAbi as Abi, cosmeticsCharacterAddr);
+
+  //Hardcoded NFTStorage address for now
+  const NFTStorageAddr = process.env.VUE_APP_STORAGE_CONTRACT_ADDRESS;
+  const NFTStorage = new web3.eth.Contract(storageAbi as Abi, NFTStorageAddr);
 
   const raidContracts: RaidContracts = {};
   let raidTrinketAddress = '';
@@ -218,6 +232,8 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
+    WeaponCosmetics, CharacterCosmetics,
+    NFTStorage,
     ...raidContracts,
     ...marketContracts,
     WaxBridge,

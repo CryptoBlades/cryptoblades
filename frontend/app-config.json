@@ -1,5 +1,5 @@
 {
-  "supportedChains":["BSC","HECO"],
+  "supportedChains":["BSC","HECO","OKEX","POLYGON"],
   "environments": {
     "test": {
       "chains": {
@@ -30,13 +30,14 @@
           "currencySymbol": "BNB",
           "currencyDecimals": "18",
           "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-          "blockExplorerUrls": ["https://testnet.bscscan.com"]
+          "blockExplorerUrls": ["https://testnet.bscscan.com"],
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab"
         },
         "HECO": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
           "VUE_APP_NETWORK_ID":"256",
           "VUE_APP_EXPECTED_NETWORK_ID":"256",
-          "VUE_APP_EXPECTED_NETWORK_NAME":"Heco-Testnet",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Huobi ECO Chain Testnet",
           
           "VUE_APP_STAKE_TYPES_AVAILABLE":"",
           "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
@@ -59,7 +60,8 @@
           "currencySymbol": "HT",
           "currencyDecimals": "18",
           "rpcUrls": ["https://http-testnet.hecochain.com"],
-          "blockExplorerUrls": ["https://testnet.hecoinfo.com"]
+          "blockExplorerUrls": ["https://testnet.hecoinfo.com"],
+          "exchangeUrl": "https://swap.butterswap.me/#/swap?inputCurrency=HT&outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405"
         },
         "OKEX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -67,28 +69,59 @@
           "VUE_APP_EXPECTED_NETWORK_ID":"65",
           "VUE_APP_EXPECTED_NETWORK_NAME":"OKExChain Testnet",
           
-          "VUE_APP_STAKE_TYPES_AVAILABLE":"",
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
           "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
-          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0xdE8a4bE542b38252A099EB030CD257583df24eeF",
           "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"",
           "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
           "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
-          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0x8C1fb0a78f5f3DE44Dd4cB6D5bBdF4FB6d4484cA",
           "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
-          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"",
-          "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"0x05243992Ef98f114506E03b2da27ac444712BC8E",
+          "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"0xD7Fc556DA52Fc6540A0aD80a2491BD6CA2Ea7abD",
           
-          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"",
-          "VUE_APP_RAID_CONTRACT_ADDRESS":"",
-          "VUE_APP_MARKET_CONTRACT_ADDRESS":"",
-          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"",
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x5747636279f12E9402f7da7887355703E7F5B6ac",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0x97b28838Bc13160c4Dc9ee4d5F4FEe07AAB189cb",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xdC05aee085EcEC7f406d0Ef4402a95D3c85E13A0",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xAB29D0B97144e912bef067d95EF9dBE017Aa165f",
 
           "chainId": "0x41",
           "currencyName": "OKExChain",
           "currencySymbol": "OKT",
           "currencyDecimals": "18",
           "rpcUrls": ["https://exchaintestrpc.okex.org"],
-          "blockExplorerUrls": ["https://www.oklink.com/okexchain-test/"]
+          "blockExplorerUrls": ["https://www.oklink.com/okexchain-test/"],
+          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB"
+        },
+        "POLYGON": {
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
+          "VUE_APP_NETWORK_ID":"80001",
+          "VUE_APP_EXPECTED_NETWORK_ID":"80001",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Matic(Polygon) Testnet Mumbai",
+          
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
+          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e",
+          "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0xBE9f89336324a2D851B658e1d1Ab3b86697B0de4",
+          "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"0xe07fe8077345FfbC3a048eEB9C0BB155F192c508",
+          "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"0x261C7a08F6203908f7b05156E51071AbD1E6aFAd",
+          
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x381988F31C56356D80cd50bE77C26ed7798599a9",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0xa75203D757Bb4cAF4cc008d8B16b36B2EE74c77e",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x2d49c204dA121E63340B9E10651Cb0667D5e709a",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xCb850EEd27fF37B591c88967b5E7bC63De121FBd",
+
+          "chainId": "0x13881",
+          "currencyName": "MATIC",
+          "currencySymbol": "TMATIC",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://matic-mumbai.chainstacklabs.com"],
+          "blockExplorerUrls": ["https://mumbai.polygonscan.com/"],
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e"
         }
       }
     },
@@ -121,28 +154,29 @@
           "currencySymbol": "BNB",
           "currencyDecimals": "18",
           "rpcUrls": ["https://bsc-dataseed.binance.org/"],
-          "blockExplorerUrls": ["https://bscscan.com/"]
+          "blockExplorerUrls": ["https://bscscan.com/"],
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab"
         },
         "HECO": {
           "VUE_APP_NETWORK_ID":"128",
           "VUE_APP_EXPECTED_NETWORK_ID":"128",
-          "VUE_APP_EXPECTED_NETWORK_NAME":"Heco-Mainnet",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Huobi ECO Chain Mainnet",
 
-          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill,skill2",
-          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill2",
-          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0xE088ab579668fC49428b18AaB1A488f4f3A94032",
-          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0xE088ab579668fC49428b18AaB1A488f4f3A94032",
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
+          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405",
           "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
           "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
-          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0xd54E98e6B8661Eff807619507aaa67d469DCC7d3",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0x6109A500e5b9CE40FFe075Ea3A6beA6e93c23BcF",
           "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
           "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"",
           "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
 
-          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x381988F31C56356D80cd50bE77C26ed7798599a9",
-          "VUE_APP_RAID_CONTRACT_ADDRESS":"0xa75203D757Bb4cAF4cc008d8B16b36B2EE74c77e",
-          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xEb0EdFAfa6984f602E0932d50A18D047866DE7a6",
-          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x2e6016Fe42460Df6a0e731Fb88aa6FEA47fD3BE3",
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x29869EDb088466a49f75654d8F04edd16Bf60e75",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0x0aBb23EA06960608a4fa1529678C9abc208b4E8d",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x0f6dAA5F4b4277BE496c80aeCD0D101b8dEE6440",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xc64AB1928e8B7a1631F2B1D5d6EE907E6D7F053F",
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
 
           "chainId": "0x80",
@@ -150,28 +184,29 @@
           "currencySymbol": "HT",
           "currencyDecimals": "18",
           "rpcUrls": ["https://http-mainnet.hecochain.com"],
-          "blockExplorerUrls": ["https://hecoinfo.com"]
+          "blockExplorerUrls": ["https://hecoinfo.com"],
+          "exchangeUrl": "https://swap.butterswap.me/#/swap?outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405"
         },
         "OKEX": {
           "VUE_APP_NETWORK_ID":"66",
           "VUE_APP_EXPECTED_NETWORK_ID":"66",
           "VUE_APP_EXPECTED_NETWORK_NAME":"OKExChain Mainnet",
           
-          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill,skill2",
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
           "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
-          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0xA3728bA14A0aCa306C6F51bd34aaC45880913aA1",
-          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB",
           "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
           "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
-          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"",
-          "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
-          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0xC5707a6a16CCe1963Ec3E6cdEE0A91e4876Be395",
+          "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"0x105A0Aa801080A89465bA1f8b6696971FD5F3a6D",
+          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"0xcdbce3aC3E5b51A8eBF011B067dAC903A37F0D3E",
           "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
           
-          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x56aBf2ecdbb08ABc2654A212969569b5d2F907FF",
-          "VUE_APP_RAID_CONTRACT_ADDRESS":"0xE03d0D78f78721591725882100f2852cd078B8F8",
-          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xc5CddCb2E5aB6D03Ecb9Ca836dbd3569626D0201",
-          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x3C8D825Ee903f9aEcEf495aC7F07d700f8a29dA7",
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x98145a2fEBac238280bbdEDc2757dC162318b16e",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0x29F8917c2E6e6bAcc9FD813354bCBEd8A8dD89E3",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x5ea2373e281E92FE3c53dc36cE855D89BF25F6F8",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x23B5b3d1ED0e1B9Ce91344AD6a7CDc25B1f7983C",
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
 
           "chainId": "0x42",
@@ -179,7 +214,38 @@
           "currencySymbol": "OKT",
           "currencyDecimals": "18",
           "rpcUrls": ["https://exchainrpc.okex.org"],
-          "blockExplorerUrls": ["https://www.oklink.com/okexchain/"]
+          "blockExplorerUrls": ["https://www.oklink.com/okexchain/"],
+          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB"
+        },
+        "POLYGON": {
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
+          "VUE_APP_NETWORK_ID":"137",
+          "VUE_APP_EXPECTED_NETWORK_ID":"137",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Matic(Polygon) Mainnet",
+          
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
+          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86",
+          "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0xE34e7cA8e64884E3b5Cd48991ba229d8302E85da",
+          "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"0x96a5448BB59aD9Cccc3a4112c2c57a420768b499",
+          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"0x34d32231e778D53A97AD23Ff932ebDfD8e52162f",
+          "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x070b1A95898B927A900A1F9F42b114154648E51A",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0x6F104F58fFFC13b66A1BD45AA228167c4ADf746F",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xeE6e8467268eA752b027676B3EBcD4eB05749874",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xCb850EEd27fF37B591c88967b5E7bC63De121FBd",
+
+          "chainId": "0x89",
+          "currencyName": "MATIC",
+          "currencySymbol": "MATIC",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://matic-mainnet.chainstacklabs.com"],
+          "blockExplorerUrls": ["https://polygonscan.com/"],
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86"
         }
       }
     }

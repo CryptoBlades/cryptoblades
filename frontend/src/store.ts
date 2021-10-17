@@ -4,14 +4,15 @@ import Web3 from 'web3';
 import _, { isUndefined } from 'lodash';
 import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
-import { getConfigValue, INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
+import { getConfigValue, setUpContracts } from './contracts';
+
 import {
   characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract,
   trinketFromContract, junkFromContract
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
-  IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState
+  IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
@@ -105,18 +106,18 @@ export function createStore(web3: Web3) {
       characters: {},
       characterStaminas: {},
       characterRenames: {},
+      characterCosmetics: {},
       weapons: {},
       currentWeaponId: null,
       currentNftType: null,
       currentNftId: null,
       weaponDurabilities: {},
       weaponRenames: {},
+      weaponCosmetics: {},
       maxDurability: 0,      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
-
-      characterTransferCooldowns: {},
 
       shields: {},
       trinkets: {},
@@ -215,6 +216,12 @@ export function createStore(web3: Web3) {
         };
       },
 
+      getCharacterCosmetic(state: IState) {
+        return (characterId: number) => {
+          return state.characterCosmetics[characterId];
+        };
+      },
+
       getCharacterUnclaimedXp(state: IState) {
         return (characterId: number) => {
           return state.xpRewards[characterId];
@@ -240,8 +247,17 @@ export function createStore(web3: Web3) {
           return getWeaponNameFromSeed(weaponId, stars);
         };
       },
+      getWeaponCosmetic(state: IState) {
+        return (weaponId: number) => {
+          if(state.weaponCosmetics[weaponId] !== undefined) {
+            return state.weaponCosmetics[weaponId];
+          }
+
+          return 0;
+        };
+      },
       getExchangeUrl() {
-        return 'https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
+        return getConfigValue('exchangeUrl');
       },
 
       ownCharacters(state, getters) {
@@ -335,20 +351,6 @@ export function createStore(web3: Web3) {
         if (state.currentWeaponId === null) return null;
 
         return state.weapons[state.currentWeaponId];
-      },
-
-      transferCooldownOfCharacterId(state) {
-        return (characterId: string | number, now: number | null = null) => {
-          const transferCooldown = state.characterTransferCooldowns[+characterId];
-          if(!transferCooldown) return 0;
-
-          const deltaFromLastUpdated =
-            now === null
-              ? 0
-              : (now - transferCooldown.lastUpdatedTimestamp);
-
-          return Math.max(Math.floor(transferCooldown.secondsLeft - deltaFromLastUpdated), 0);
-        };
       },
 
       currentCharacter(state) {
@@ -577,13 +579,6 @@ export function createStore(web3: Web3) {
         Vue.set(state.characters, characterId, character);
       },
 
-      updateCharacterTransferCooldown(
-        state: IState,
-        { characterId, characterTransferCooldown }: { characterId: number, characterTransferCooldown: ITransferCooldown }
-      ) {
-        Vue.set(state.characterTransferCooldowns, characterId, characterTransferCooldown);
-      },
-
       updateShield(state: IState, { shieldId, shield }) {
         Vue.set(state.shields, shieldId, shield);
         if(!state.nfts.shield) {
@@ -632,6 +627,9 @@ export function createStore(web3: Web3) {
           Vue.set(state.weaponRenames, weaponId, renameString);
         }
       },
+      updateWeaponCosmetic(state: IState, { weaponId, weaponCosmetic }) {
+        Vue.set(state.weaponCosmetics, weaponId, weaponCosmetic);
+      },
       updateCharacterStamina(state: IState, { characterId, stamina }) {
         Vue.set(state.characterStaminas, characterId, stamina);
       },
@@ -639,6 +637,9 @@ export function createStore(web3: Web3) {
         if(renameString !== undefined){
           Vue.set(state.characterRenames, characterId, renameString);
         }
+      },
+      updateCharacterCosmetic(state: IState, { characterId, characterCosmetic }) {
+        Vue.set(state.characterCosmetics, characterId, characterCosmetic);
       },
       updateTargets(state: IState, { characterId, weaponId, targets }) {
         if (!state.targetsByCharacterIdAndWeaponId[characterId]) {
@@ -694,8 +695,11 @@ export function createStore(web3: Web3) {
 
         await dispatch('setupCharacterStaminas');
         await dispatch('setupCharacterRenames');
+        await dispatch('setupCharacterCosmetics');
+
         await dispatch('setupWeaponDurabilities');
         await dispatch('setupWeaponRenames');
+        await dispatch('setupWeaponCosmetics');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -1083,7 +1087,7 @@ export function createStore(web3: Web3) {
         await Promise.all(characterIds.map(id => dispatch('fetchCharacter', id)));
       },
 
-      async fetchCharacter({ state, commit, dispatch }, characterId: string | number) {
+      async fetchCharacter({ state, commit }, characterId: string | number) {
         const { Characters } = state.contracts();
         if(!Characters) return;
 
@@ -1096,42 +1100,7 @@ export function createStore(web3: Web3) {
 
             commit('updateCharacter', { characterId, character });
           })(),
-          dispatch('fetchCharacterTransferCooldown', characterId)
         ]);
-      },
-
-      async fetchCharacterTransferCooldownForOwnCharacters({ state, dispatch }) {
-        await Promise.all(
-          state.ownedCharacterIds.map(weaponId =>
-            dispatch('fetchCharacterTransferCooldown', weaponId)
-          )
-        );
-      },
-
-      async fetchCharacterTransferCooldown({ state, commit }, characterId: string | number) {
-        const { Characters } = state.contracts();
-        if(!Characters) return;
-
-        const supportsTransferCooldownable = await Characters.methods
-          .supportsInterface(INTERFACE_ID_TRANSFER_COOLDOWNABLE)
-          .call(defaultCallOptions(state));
-        if(!supportsTransferCooldownable) return;
-
-        const lastUpdatedTimestamp = Date.now();
-        const secondsLeft = await Characters.methods
-          .transferCooldownLeft(characterId)
-          .call(defaultCallOptions(state));
-
-        const payload: {
-          characterId: number,
-          characterTransferCooldown: ITransferCooldown
-        } = {
-          characterId: +characterId,
-          characterTransferCooldown: { lastUpdatedTimestamp, secondsLeft: +secondsLeft }
-        };
-        if(!_.isEqual(state.characterTransferCooldowns[+characterId], payload)) {
-          commit('updateCharacterTransferCooldown', payload);
-        }
       },
 
       async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {
@@ -1266,6 +1235,29 @@ export function createStore(web3: Web3) {
         }
       },
 
+      async setupWeaponCosmetics({ dispatch }) {
+        const ownedWeaponIds = await dispatch('getAccountWeapons');
+
+        for (const weapId of ownedWeaponIds) {
+          dispatch('fetchWeaponCosmetic', weapId);
+        }
+      },
+
+      async setupWeaponsWithIdsCosmetics({ dispatch }, weaponIds: string[]) {
+        for (const weapId of weaponIds) {
+          dispatch('fetchWeaponCosmetic', weapId);
+        }
+      },
+
+      async fetchWeaponCosmetic({ state, commit }, weaponId: number) {
+        const weaponCosmetic = await state.contracts().WeaponCosmetics!.methods
+          .getWeaponCosmetic(weaponId)
+          .call(defaultCallOptions(state));
+        if(state.weaponCosmetics[weaponId] !== weaponCosmetic){
+          commit('updateWeaponCosmetic', { weaponId, weaponCosmetic });
+        }
+      },
+
       async setupCharacterStaminas({ dispatch }) {
         const ownedCharacterIds = await dispatch('getAccountCharacters');
 
@@ -1322,6 +1314,26 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
         if(renameString !== '' && state.characterRenames[characterId] !== renameString){
           commit('updateCharacterRename', { characterId, renameString });
+        }
+      },
+      async setupCharacterCosmetics({ dispatch }) {
+        const ownedCharacterIds = await dispatch('getAccountCharacters');
+
+        for (const charId of ownedCharacterIds) {
+          dispatch('fetchCharacterCosmetic', charId);
+        }
+      },
+      async setupCharactersWithIdsCosmetics({ dispatch }, characterIds: string[]) {
+        for (const charId of characterIds) {
+          dispatch('fetchCharacterCosmetic', charId);
+        }
+      },
+      async fetchCharacterCosmetic({ state, commit }, characterId: number) {
+        const characterCosmetic = await state.contracts().CharacterCosmetics!.methods
+          .getCharacterCosmetic(characterId)
+          .call(defaultCallOptions(state));
+        if(state.characterCosmetics[characterId] !== characterCosmetic){
+          commit('updateCharacterCosmetic', { characterId, characterCosmetic });
         }
       },
       async mintCharacter({ state, dispatch }) {
@@ -1625,7 +1637,7 @@ export function createStore(web3: Web3) {
             targetString,
             fightMultiplier
           )
-          .send({ from: state.defaultAccount, gas: '200000' });
+          .send({ from: state.defaultAccount, gas: '300000' });
 
         await dispatch('fetchTargets', { characterId, weaponId });
 
@@ -1655,6 +1667,19 @@ export function createStore(web3: Web3) {
           skillGain,
           bnbGasUsed
         };
+      },
+
+      async fetchExpectedPayoutForMonsterPower({ state }, power) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(state));
+      },
+
+      async fetchRemainingTokenClaimAmountPreTax({ state }) {
+        if(!_.isFunction(state.contracts)) return;
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
       },
 
       async fetchStakeOverviewData({ getters, dispatch }) {
@@ -2153,7 +2178,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           nftMarketFuctions => nftMarketFuctions.addFee(),
-          {},
+          { allowInGameOnlyFunds: false },
         );
 
         const res = await NFTMarket.methods
@@ -2191,7 +2216,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           nftMarketFuctions => nftMarketFuctions.changeFee(),
-          {},
+          { allowInGameOnlyFunds: false },
         );
 
         const res = await NFTMarket.methods
@@ -2790,6 +2815,124 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacter', id),
         ]);
       },
+      async fetchOwnedWeaponCosmetics({ state }, {cosmetic}) {
+        const { WeaponCosmetics } = state.contracts();
+        if(!WeaponCosmetics || !state.defaultAccount) return;
+        return await WeaponCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
+      },
+      async purchaseWeaponCosmetic({ state, dispatch }, {cosmetic, price}) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !WeaponCosmetics || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseWeaponCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill')
+        ]);
+      },
+      async changeWeaponCosmetic({ state, dispatch}, { id, cosmetic }) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !WeaponCosmetics || !state.defaultAccount) return;
+
+        await WeaponCosmetics.methods
+          .applyCosmetic(id, cosmetic)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchWeaponCosmetic', id)
+        ]);
+      },
+      async removeWeaponCosmetic({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !WeaponCosmetics || !state.defaultAccount) return;
+
+        await WeaponCosmetics.methods
+          .removeCosmetic(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchWeaponCosmetic', id)
+        ]);
+      },
+      async fetchOwnedCharacterCosmetics({ state }, {cosmetic}) {
+        const { CharacterCosmetics } = state.contracts();
+        if(!CharacterCosmetics || !state.defaultAccount) return;
+        return await CharacterCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
+      },
+      async purchaseCharacterCosmetic({ state, dispatch }, {cosmetic, price}) {
+        const { CryptoBlades, SkillToken, CharacterCosmetics, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterCosmetics || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseCharacterCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill')
+        ]);
+      },
+      async changeCharacterCosmetic({ state, dispatch}, { id, cosmetic }) {
+        const { CryptoBlades, SkillToken, CharacterCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterCosmetics || !state.defaultAccount) return;
+
+        await CharacterCosmetics.methods
+          .applyCosmetic(id, cosmetic)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacterCosmetic', id)
+        ]);
+      },
+      async removeCharacterCosmetic({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterCosmetics || !state.defaultAccount) return;
+
+        await CharacterCosmetics.methods
+          .removeCosmetic(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacterCosmetic', id)
+        ]);
+      },
 
       async configureMetaMask({ dispatch }) {
         const currentNetwork = await web3.eth.net.getId();
@@ -2869,7 +3012,135 @@ export function createStore(web3: Web3) {
         }
 
         window.location.reload();
-      }
-    }
+      },
+      async storeItem({ state }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        console.log('storeItem', nftContractAddr,' ',tokenId);
+        const NFTContract: Contract<IERC721> =
+          nftContractAddr === Weapons.options.address
+            ? Weapons : nftContractAddr === Characters.options.address
+              ? Characters : Shields;
+
+        await NFTContract.methods
+          .approve(NFTStorage.options.address, tokenId)
+          .send(defaultCallOptions(state));
+        const res = await NFTStorage.methods
+          .storeItem(nftContractAddr, tokenId)
+          .send({
+            from: state.defaultAccount,
+          });
+        return res;
+      },
+      async getStorageItemIds({ state }, { nftContractAddr }: { nftContractAddr: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage) return;
+
+        const res = await NFTStorage.methods
+          .getStorageItemIds(nftContractAddr)
+          .call(defaultCallOptions(state));
+
+        return res;
+      },
+      async getNumberOfStoragedItems({ state }, { nftContractAddr }: { nftContractAddr: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage) return;
+
+        const res = await NFTStorage.methods
+          .getNumberOfStoragedItems(nftContractAddr)
+          .call(defaultCallOptions(state));
+
+        return res;
+      },
+      async withdrawFromStorage({ state }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        /*
+        const NFTContract: Contract<IERC721> =
+          nftContractAddr === Weapons.options.address
+            ? Weapons : nftContractAddr === Characters.options.address
+              ? Characters : Shields;
+
+
+        await NFTContract.methods
+          .approve(NFTStorage.options.address, tokenId)
+          .send(defaultCallOptions(state));
+        */
+        await NFTStorage.methods
+          .withdrawFromStorage(nftContractAddr, tokenId)
+          .send({
+            from: state.defaultAccount,
+          });
+      },
+      async bridgeItem({ state }, { nftContractAddr, tokenId, targetChain}: { nftContractAddr: string, tokenId: string, targetChain: string}) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        console.log('bridgeItem', nftContractAddr,' ',tokenId, ' ',targetChain);
+
+        await NFTStorage.methods
+          .bridgeItem(nftContractAddr, tokenId, targetChain)
+          .send({
+            from: state.defaultAccount,
+          });
+      },
+      async getNFTChainId({state}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage) return;
+        const chainId = await NFTStorage.methods
+          .getNFTChainId(nftContractAddr, tokenId)
+          .call(defaultCallOptions(state));
+        return chainId;
+      },
+      async getBridgeTransferId({state}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage) return;
+        const id = await NFTStorage.methods
+          .getBridgeTransfer()
+          .call(defaultCallOptions(state));
+        return id;
+      },
+      async getBridgeTransfer({state}, {transferId}: { transferId: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage) return;
+        const response = await NFTStorage.methods
+          .getBridgeTransfer(transferId)
+          .call(defaultCallOptions(state));
+        return response;
+      },
+      async withdrawFromBridge({ state }, {tokenId}: {tokenId: string}) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        await NFTStorage.methods
+          .withdrawFromBridge(tokenId)
+          .send({
+            from: state.defaultAccount,
+          });
+      },
+      async cancelBridge({ state }) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        await NFTStorage.methods
+          .cancelBridge()
+          .send({
+            from: state.defaultAccount,
+          });
+      },
+      async getReceivedNFTs({ state }) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage || !state.defaultAccount) return;
+        const res = await NFTStorage.methods
+          .getReceivedNFTs()
+          .call(defaultCallOptions(state));
+        return res;
+      },
+      async getReceivedNFT({ state }, {tokenId}: {tokenId: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage || !state.defaultAccount) return;
+        const res = await NFTStorage.methods
+          .getReceivedNFT(tokenId)
+          .call(defaultCallOptions(state));
+        return res;
+      },
+    },
   });
 }

@@ -1,0 +1,84 @@
+
+@import './cosmetic-animations.css';
+.animation {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
+.character-cosmetic-applied-1 .placeholder{
+  filter: grayscale(100%);
+}
+
+.character-cosmetic-applied-2 .placeholder{
+  filter: contrast(200%);
+}
+
+.character-cosmetic-applied-3 .placeholder{
+  filter: sepia(100%);
+}
+
+.character-cosmetic-applied-4 .placeholder{
+  filter: invert(100%);
+}
+
+.character-cosmetic-applied-5 .placeholder{
+  filter: blur(1px);
+}
+
+.character-cosmetic-applied-6 .placeholder{
+  animation: dropglow-fire 1000ms ease-out infinite alternate;
+}
+
+.character-cosmetic-applied-7 .placeholder{
+  animation: dropglow-earth 1000ms ease-out infinite alternate;
+}
+
+.character-cosmetic-applied-8 .placeholder{
+  animation: dropglow-lightning 1000ms ease-out infinite alternate;
+}
+
+.character-cosmetic-applied-9 .placeholder{
+  animation: dropglow-water 1000ms ease-out infinite alternate;
+}
+
+.character-cosmetic-applied-10 .placeholder{
+  animation: dropglow-rainbow 2000ms ease-out infinite alternate;
+}
+
+.character-cosmetic-applied-11 .placeholder{
+  animation: droprotateglow 1000ms ease-in-out infinite alternate;
+}
+
+.character-cosmetic-applied-12 .placeholder {
+  animation: ghost-item 1000ms ease-in-out infinite alternate;
+}
+
+.character-animation-applied-13 .animation {
+  width: 0;
+  height: 0;
+  left: 50%;
+  top: 50%;
+  animation: backglow 500ms ease-out infinite alternate;
+  transform: scaleY(9) scaleX(6);
+}
+
+.character-animation-applied-14 {
+  animation: nebula3 1000ms ease-in infinite;
+}
+
+.character-animation-applied-15 {
+  border: 2.5px solid #b9f2ff !important;
+}
+
+.character-animation-applied-16 {
+  border: 2.5px solid gold !important;
+}
+
+.character-animation-applied-17 {
+  border: 2.5px solid silver !important;
+}
+
+.character-animation-applied-18 {
+  border: 2.5px solid #CD7F32 !important;
+}

@@ -15,6 +15,9 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     event T1Given(address indexed owner, uint32 stamp);
     event T2Given(address indexed owner, uint16 chunkId);
     event T3Given(address indexed owner, uint16 chunkId);
+    event T1GivenFree(address indexed owner, uint32 stamp);
+    event T2GivenFree(address indexed owner, uint16 chunkId);
+    event T3GivenFree(address indexed owner, uint16 chunkId);
 
 
     /* ========== LAND SALE INFO ========== */
@@ -28,6 +31,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         address buyer;
         uint8 purchasedTier;
         uint32 stamp; // chunkId or roundrobin stamp
+        bool free;
     }
 
     uint256 private totalSales;
@@ -139,7 +143,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     }
 
     function giveT1Land(address buyer) public saleAllowed tierAvailable(TIER_ONE) canPurchase(buyer) restricted {
-        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_ONE, t1LandsSold);
+        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_ONE, t1LandsSold, false);
         sales[totalSales++] = purchaseAddressMapping[buyer];
         emit T1Given(buyer, t1LandsSold);
         t1LandsSold++;
@@ -157,7 +161,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         chunkT2LandSales[chunkId]++;
         chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
 
-        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_TWO, uint32(chunkId));
+        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_TWO, uint32(chunkId), false);
         sales[totalSales++] = purchaseAddressMapping[buyer];
         availableLand[TIER_TWO]--;
 
@@ -168,13 +172,53 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     function giveT3Land(address buyer, uint16 chunkId) public saleAllowed tierAvailable(TIER_THREE) canPurchase(buyer) chunkAvailable(chunkId) t3Available(chunkId) restricted {
         t3LandsSold++;
         
-        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_THREE, chunkId);
+        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_THREE, chunkId, false);
         sales[totalSales++] = purchaseAddressMapping[buyer];
         availableLand[TIER_THREE]--;
         chunkT3LandSoldTo[chunkId] = buyer;
         chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
 
         emit T3Given(buyer, chunkId);
+        cbkLand.mint(buyer, TIER_THREE, chunkId);
+    }
+
+    function giveT1LandFree(address buyer) public tierAvailable(TIER_ONE) restricted {
+        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_ONE, t1LandsSold, true);
+        sales[totalSales++] = purchaseAddressMapping[buyer];
+        emit T1GivenFree(buyer, t1LandsSold);
+        t1LandsSold++;
+        availableLand[TIER_ONE]--;
+        cbkLand.mint(buyer, TIER_ONE, 0);
+    }
+
+    function giveT2LandFree(address buyer, uint16 chunkId) public tierAvailable(TIER_TWO) chunkAvailable(chunkId) restricted {
+        // First t2 sale
+        if(chunkT2LandSales[chunkId] == 0){
+            chunksWithT2Land++;
+        }
+
+        t2LandsSold++;
+        chunkT2LandSales[chunkId]++;
+        chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
+
+        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_TWO, uint32(chunkId), true);
+        sales[totalSales++] = purchaseAddressMapping[buyer];
+        availableLand[TIER_TWO]--;
+
+        emit T2GivenFree(buyer, chunkId);
+        cbkLand.mint(buyer, TIER_TWO, chunkId);
+    }
+
+    function giveT3LandFree(address buyer, uint16 chunkId) public tierAvailable(TIER_THREE) chunkAvailable(chunkId) t3Available(chunkId) restricted {
+        t3LandsSold++;
+        
+        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_THREE, chunkId, true);
+        sales[totalSales++] = purchaseAddressMapping[buyer];
+        availableLand[TIER_THREE]--;
+        chunkT3LandSoldTo[chunkId] = buyer;
+        chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
+
+        emit T3GivenFree(buyer, chunkId);
         cbkLand.mint(buyer, TIER_THREE, chunkId);
     }
 
