@@ -2,10 +2,12 @@ pragma solidity ^0.6.5;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "./CBKLand.sol";
 
 contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
+    using EnumerableSet for EnumerableSet.UintSet;
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     CBKLand cbkLand;
@@ -60,8 +62,8 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
 
     /* ========== RESERVED CHUNKS SALE INFO ========== */
-    mapping(uint16 => bool) public chunkReserved;
-    
+    EnumerableSet.UintSet private reservedChunkIds;
+
     bool internal _enabled;
 
     function initialize(CBKLand _cbkLand)
@@ -72,7 +74,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
-        _enabled = true;
+        _enabled = false;
 
         _allowedLandOffset = 2;
         _allowedLandSalePerChunk = 99; // At least 1 reserved for T3
@@ -95,7 +97,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
     modifier chunkAvailable(uint16 chunkId) {
         require(chunkId <= MAX_CHUNK_ID, "Chunk not valid");
-        require(!chunkReserved[chunkId], "Chunk reserved");
+        require(!reservedChunkIds.contains(chunkId), "Chunk reserved");
         require(chunkT2LandSales[chunkId] < _allowedLandSalePerChunk, "Chunk not available");
         require(_chunkAvailableForT2(chunkId), "Chunk overpopulated");
         _;
@@ -189,7 +191,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     }
 
     function checkIfChunkAvailable(uint8 tier, uint16 chunkId) public view returns (bool){
-        if(chunkReserved[chunkId]){
+        if(reservedChunkIds.contains(chunkId)){
             return false;
         }
 
@@ -217,7 +219,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     }
 
     function checkChunkReserved(uint16 chunkId) public view returns (bool){
-        return chunkReserved[chunkId];
+        return reservedChunkIds.contains(chunkId);
     }
 
     function getAllZonesPopulation() public view returns (uint16[] memory) {
@@ -308,7 +310,25 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
     function reserveChunks(uint16[] calldata chunkIds, bool reserve) external isAdmin {
         for (uint256 i = 0; i < chunkIds.length; i++) {
-            chunkReserved[chunkIds[i]] = reserve;
+            if(reserve && !reservedChunkIds.contains(chunkIds[i])) {
+                reservedChunkIds.add(chunkIds[i]);
+            }
+
+            if(!reserve) {
+                reservedChunkIds.remove(chunkIds[i]);
+            }
+        }
+    }
+
+    function getReservedChunksIds() public view  returns (uint256[] memory chunkIds) {
+
+        uint256 amount = reservedChunkIds.length();
+        chunkIds = new uint256[](amount);
+
+        uint256 index = 0;
+        for (uint256 i = 0; i < reservedChunkIds.length(); i++) {
+            uint256 id = reservedChunkIds.at(i);
+                chunkIds[index++] = id;
         }
     }
 
