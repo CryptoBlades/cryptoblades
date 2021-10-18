@@ -739,6 +739,10 @@ interface Data {
   shieldTransactionHistoryData: ShieldTransactionHistoryData[];
   shieldTransactionHistoryHeader: any;
   historyCounter: number;
+  landSaleAllowed: boolean;
+  t1LandPrice: string;
+  t2LandPrice: string;
+  t3LandPrice: string;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields' | 'ownedCharacterIds' | 'ownedWeaponIds' | 'ownedShieldIds'>;
@@ -801,6 +805,8 @@ interface StoreMappedActions {
   fetchTotalShieldSupply(): Promise<number>;
   setupWeaponsWithIdsRenames(weaponIds: string[]): Promise<void>;
   setupCharactersWithIdsRenames(weaponIds: string[]): Promise<void>;
+  fetchIsLandSaleAllowed(): Promise<boolean>;
+  getCBKLandPrice(payload: {tier: number}): Promise<string>;
 }
 
 export default Vue.extend({
@@ -836,7 +842,11 @@ export default Vue.extend({
       characterTransactionHistoryHeader: [],
       shieldTransactionHistoryData: [],
       shieldTransactionHistoryHeader: [],
-      historyCounter: 0
+      historyCounter: 0,
+      landSaleAllowed: false,
+      t1LandPrice: '',
+      t2LandPrice: '',
+      t3LandPrice: ''
     } as Data;
   },
 
@@ -899,17 +909,32 @@ export default Vue.extend({
         },
       ] as SkillShopListing[];
 
-      //TODO: salesAllowed()
-      // if(true) {
-      nftList.push({
-        id: 'land',
-        type: 'land',
-        nftPrice: 2,
-        name: 'Land',
-        description: 'A land',
-        image: '',
-      } as SkillShopListing);
-      // }
+      if(this.landSaleAllowed) {
+        nftList.push({
+          id: 't1land',
+          type: 't1land',
+          nftPrice: +this.t1LandPrice,
+          name: 'Tier 1 Land',
+          description: 'A tier 1 land',
+          image: '',
+        } as SkillShopListing);
+        nftList.push({
+          id: 't2land',
+          type: 't2land',
+          nftPrice: +this.t2LandPrice,
+          name: 'Tier 2 Land',
+          description: 'A tier 2 land',
+          image: '',
+        } as SkillShopListing);
+        nftList.push({
+          id: 't3land',
+          type: 't3land',
+          nftPrice: +this.t3LandPrice,
+          name: 'Tier 3 Land',
+          description: 'A tier 3 land',
+          image: '',
+        } as SkillShopListing);
+      }
 
       return nftList;
     },
@@ -1305,6 +1330,8 @@ export default Vue.extend({
       'fetchTotalShieldSupply',
       'setupWeaponsWithIdsRenames',
       'setupCharactersWithIdsRenames',
+      'fetchIsLandSaleAllowed',
+      'getCBKLandPrice',
     ]) as StoreMappedActions),
 
     clearData() {
@@ -2283,8 +2310,12 @@ export default Vue.extend({
     }
   },
 
-  mounted() {
+  async mounted() {
     assert.ok(this.contracts.Weapons && this.contracts.Characters && this.contracts.Shields, 'Expected required contracts to be available');
+    this.landSaleAllowed = await this.fetchIsLandSaleAllowed();
+    this.t1LandPrice = this.convertWeiToSkill(await this.getCBKLandPrice({tier: 1}));
+    this.t2LandPrice = this.convertWeiToSkill(await this.getCBKLandPrice({tier: 2}));
+    this.t3LandPrice = this.convertWeiToSkill(await this.getCBKLandPrice({tier: 3}));
   },
 });
 </script>

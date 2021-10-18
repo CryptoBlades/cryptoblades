@@ -55,6 +55,16 @@
         </div>
       </div>
 
+      <div v-if="nft.type === 't1land' || nft.type === 't2land' || nft.type === 't3land'" class="nft-details glow-container"
+        ref="el" :class="['glow-' + (nft.stars || 0)]">
+        <img class="placeholder-land" src="../assets/t1-frame.png" v-if="nft.type === 't1land'" />
+        <img class="placeholder-land" src="../assets/t2-frame.png" v-if="nft.type === 't2land'" />
+        <img class="placeholder-land" src="../assets/t3-frame.png" v-if="nft.type === 't3land'" />
+
+        <span v-if="nft.type === 't1land'" class="nft-supply">Supply left: {{totalT1LandSupply}}</span>
+        <span v-if="nft.type === 't2land'" class="nft-supply">Supply left: {{totalT2LandSupply}}</span>
+        <span v-if="nft.type === 't3land'" class="nft-supply">Supply left: {{totalT3LandSupply}}</span>
+      </div>
       <div v-if="nft.type === 'weapon' || nft.type === 'WeaponCosmetic'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
           <img v-if="!isShop" class="placeholder-weapon" :src="getWeaponArt(nft)" />
           <div v-if="isShop" class="animation" v-bind:class="'weapon-animation-applied-' + nft.id" />
@@ -127,7 +137,8 @@
       </div>
 
       <div v-if="nft.type !== 'shield' && nft.type !== 'trinket' && nft.type !== 'junk' && nft.type !== 'keybox' && nft.type !== 'weapon'
-        && nft.type !== 'dustLb' && nft.type !== 'dust4b' && nft.type !== 'dust5b' && nft.type !== 'WeaponCosmetic' && nft.type !== 'CharacterCosmetic'"
+        && nft.type !== 'dustLb' && nft.type !== 'dust4b' && nft.type !== 'dust5b' && nft.type !== 'WeaponCosmetic'
+        && nft.type !== 'CharacterCosmetic' && nft.type !== 't1land' && nft.type !== 't2land' && nft.type !== 't3land'"
         class="nft-details">
         <img class="placeholder-consumable" :src="nft.image.startsWith('http') ? nft.image : imgPath(nft.image)"/>
         <span v-if="isShop" class="nft-supply">Owned: {{this.quantityOwned}}</span>
@@ -217,6 +228,9 @@ export default {
   data() {
     return {
       totalShieldSupply: 0,
+      totalT1LandSupply: 0,
+      totalT2LandSupply: 0,
+      totalT3LandSupply: 0,
       fetchSupplyInterval: 0,
       quantityOwned: 0,
       images: require.context('../assets/elements/', false, /\.png$/)
@@ -230,7 +244,7 @@ export default {
     ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags',
       'fetchTotalCharacterFireTraitChanges', 'fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
-      'fetchOwnedWeaponCosmetics', 'fetchOwnedCharacterCosmetics']),
+      'fetchOwnedWeaponCosmetics', 'fetchOwnedCharacterCosmetics', 'getAvailableLand']),
 
     imgPath(img) {
       return this.images('./' + img);
@@ -286,6 +300,17 @@ export default {
       this.quantityOwned = await this.fetchOwnedCharacterCosmetics({cosmetic: +this.nft.id});
       this.fetchSupplyInterval = setInterval(async () => {
         this.quantityOwned = await this.fetchOwnedCharacterCosmetics({cosmetic: +this.nft.id});
+      }, 3000);
+    } else if(this.nft.type === 't1land' || this.nft.type === 't2land' || this.nft.type === 't3land') {
+      const {t1Land, t2Land, t3Land} = await this.getAvailableLand();
+      this.totalT1LandSupply = t1Land;
+      this.totalT2LandSupply = t2Land;
+      this.totalT3LandSupply = t3Land;
+      this.fetchSupplyInterval = setInterval(async () => {
+        const {t1Land, t2Land, t3Land} = await this.getAvailableLand();
+        this.totalT1LandSupply = t1Land;
+        this.totalT2LandSupply = t2Land;
+        this.totalT3LandSupply = t3Land;
       }, 3000);
     }
   },
@@ -375,9 +400,13 @@ export default {
 }
 
 .placeholder-shield {
-  max-width: 160px;
-  max-height: 200px;
+  max-width: 80%;
   margin-top: -10px;
+}
+
+.placeholder-land {
+  max-width: 80%;
+  margin-top: 0.5rem;
 }
 
 .placeholder-trinket {

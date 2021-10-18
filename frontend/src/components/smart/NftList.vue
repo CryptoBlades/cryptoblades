@@ -12,6 +12,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()" />
           <b-button
+            :disabled="(nft.type == 't1land' || nft.type == 't2land' || nft.type == 't3land' ) && !canPurchaseLand"
             variant="primary"
             class="shop-button"
             @click="buyItem(nft)">
@@ -26,20 +27,28 @@
     <b-modal class="map-modal" title="Choose zone" ref="map-modal" size="xl" ok-only hide-footer>
       <div class="w-100" style="padding-bottom: 100%;">
         <div id="map-grid" class="map-grid">
-          <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)"></div>
+          <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)">
+            <span>{{zonesPopulations[zoneId]}}/100</span>
+          </div>
         </div>
       </div>
     </b-modal>
 
-    <b-modal ref="zone-modal" title="Choose chunk" @ok="purchaseLand()" size="lg">
+    <b-modal ref="zone-modal" title="Choose chunk" size="lg">
       <div class="w-100" style="padding-bottom: 100%;">
-        <div id="zone-grid" class="zone-grid" :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
-          <div class="chunk" v-for="chunkId in chunksIds" :key="chunkId"
-           @click="selectChunk(chunkId)" :style="[ selectedChunk === chunkId ? {opacity: 1} : null ]"></div>
+        <div v-if="selectedZone != undefined" id="zone-grid" class="zone-grid"
+        :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
+          <div class="chunk" :class="[reservedChunks.includes(chunkId.toString()) ? 'reserved' : null ]"
+          v-for="(chunkId, index) in chunksIds" :key="chunkId"
+           @click="selectChunk(chunkId, index)" :style="[ selectedChunk === chunkId ? {backgroundColor: 'greenyellow'} : null ]">
+            <span>{{chunksPopulations[index]}}/100</span>
+            <span v-if="reservedChunks.includes(chunkId.toString())">RESERVED</span>
+           </div>
         </div>
       </div>
       <template #modal-footer>
-        <b-button class="mt-3" block @click="purchaseLand(selectedChunk)" :disabled="!selectedChunk">Buy land</b-button>
+        <b-button class="mt-3" block @click="purchaseLand(selectedChunk)"
+        :disabled="selectedChunk === undefined || !selectedChunkAvailable">Buy land</b-button>
       </template>
     </b-modal>
 
@@ -133,10 +142,17 @@ interface Data {
   favorites: Record<string, Record<number, boolean>>;
   priceSort: string;
   showFavoriteNfts: boolean;
-  selectedZone: string;
-  selectedChunk: string;
+  canPurchaseLand: boolean;
+  selectedTier: number;
+  selectedZone: number | undefined;
+  selectedChunk: number | undefined;
+  selectedChunkPopulation: number | undefined;
+  selectedChunkAvailable: boolean;
   zonesIds: number[];
+  zonesPopulations: number[];
   chunksIds: number[];
+  chunksPopulations: number[];
+  reservedChunks: string[];
 }
 
 export interface NftIdType {
@@ -176,6 +192,16 @@ interface StoreMappedActions {
   purchaseCharacterLightningTraitChange(): Promise<void>;
   purchaseWeaponCosmetic(obj: {cosmetic: number, price: number}): Promise<void>;
   purchaseCharacterCosmetic(obj: {cosmetic: number, price: number}): Promise<void>;
+  getAllZonesPopulation(): Promise<number[]>;
+  checkIfChunkAvailable(payload: { tier: number, chunkId: number }): Promise<boolean>;
+  getZoneChunkPopulation(payload: {zoneId: string}): Promise<number[]>;
+  getChunkPopulation(payload: {chunkIds: number[]}): Promise<number[]>;
+  getPurchase(): Promise<{tier: string, chunkId: string}>;
+  purchaseT1CBKLand(payload: {price: string}): Promise<void>;
+  purchaseT2CBKLand(payload: {price: string, chunkId: number}): Promise<void>;
+  purchaseT3CBKLand(payload: {price: string, chunkId: number}): Promise<void>;
+  getCBKLandPrice(payload: {tier: number}): Promise<string>;
+  getReservedChunksIds(): Promise<string[]>;
 }
 
 export default Vue.extend({
@@ -253,10 +279,17 @@ export default Vue.extend({
       priceSort: '',
       sorts,
       showFavoriteNfts: true,
-      selectedZone: '0',
-      selectedChunk: '',
+      canPurchaseLand: false,
+      selectedTier: 0,
+      selectedZone: undefined,
+      selectedChunk: undefined,
+      selectedChunkPopulation: 0,
+      selectedChunkAvailable: false,
       zonesIds: Array.from({length: 100}, (x, i) => i),
+      zonesPopulations: [],
       chunksIds: Array.from({length: 100}, (x, i) => i),
+      chunksPopulations: [],
+      reservedChunks: [],
     } as Data;
   },
 
@@ -396,7 +429,9 @@ export default Vue.extend({
       'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
       'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
       'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange',
-      'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic'
+      'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic', 'getAllZonesPopulation', 'checkIfChunkAvailable',
+      'getZoneChunkPopulation', 'getChunkPopulation', 'purchaseT1CBKLand', 'purchaseT2CBKLand', 'purchaseT3CBKLand', 'getCBKLandPrice',
+      'getPurchase', 'getReservedChunksIds'
     ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
@@ -470,28 +505,38 @@ export default Vue.extend({
       }
     },
 
+    async checkIfCanPurchaseLand() {
+      const purchase = await this.getPurchase();
+      this.canPurchaseLand = purchase.tier === '0';
+    },
+
     isFavorite(type: string, id: number): boolean {
       return this.favorites && this.favorites[type] && this.favorites[type][id];
     },
 
-    showMapModal() {
+    async showMapModal() {
+      this.zonesPopulations = await this.getAllZonesPopulation();
       (this.$refs['map-modal'] as BModal).show();
     },
 
-    showZoneModal(zoneId: string) {
-      console.log(zoneId);
+    async showZoneModal(zoneId: number) {
       this.selectedZone = zoneId;
-      this.calculateChunksIds(zoneId);
+      await this.updateChunksPopulation(zoneId);
       (this.$refs['zone-modal'] as BModal).show();
     },
 
-    selectChunk(chunkId: string) {
+    async selectChunk(chunkId: number, index: number) {
+      if(this.reservedChunks.includes(chunkId.toString())) {
+        this.selectedChunk = undefined;
+        return;
+      }
       this.selectedChunk = chunkId;
+      this.selectedChunkPopulation = this.chunksPopulations[index];
+      this.selectedChunkAvailable = await this.checkIfChunkAvailable({tier: this.selectedTier, chunkId});
     },
 
-    calculateChunksIds(zoneId: string) {
+    calculateChunksIds(zoneId: number) {
       const chunksIds = [] as number[];
-      console.log(zoneId);
       for (let i = 0; i < 10; i++) {
         for (let j = 0; j < 10; j++) {
           let chunkId = 0;
@@ -505,12 +550,41 @@ export default Vue.extend({
           chunksIds.push(chunkId);
         }
       }
-      console.log(chunksIds);
       this.chunksIds = chunksIds;
     },
 
     splitNum(num: number) {
       return String(num).split('').map(Number);
+    },
+
+    async updateChunksPopulation(zoneId: number) {
+      this.calculateChunksIds(zoneId);
+      this.chunksPopulations = await this.getChunkPopulation({chunkIds: this.chunksIds});
+    },
+
+    async purchaseLand(chunkId: number) {
+      const chunkAvailable = await this.checkIfChunkAvailable({tier: this.selectedTier, chunkId});
+      if (!chunkAvailable) {
+        console.log('Chunk not available');
+        return;
+      }
+      if(this.selectedTier === 2) {
+        const price = await this.getCBKLandPrice({tier: this.selectedTier});
+        await this.purchaseT2CBKLand({price, chunkId}).then(() => {
+          if(this.selectedZone !== undefined) {
+            this.updateChunksPopulation(this.selectedZone);
+          }
+        });
+      }
+      if(this.selectedTier === 3) {
+        const price = await this.getCBKLandPrice({tier: this.selectedTier});
+        await this.purchaseT3CBKLand({price, chunkId}).then(() => {
+          if(this.selectedZone !== undefined) {
+            this.updateChunksPopulation(this.selectedZone);
+          }
+        });
+      }
+      await this.checkIfCanPurchaseLand();
     },
 
     async buyItem(item: nftItem) {
@@ -550,7 +624,17 @@ export default Vue.extend({
       if(item.type === 'CharacterCosmetic'){
         await this.purchaseCharacterCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});
       }
-      if(item.type === 'land'){
+      if(item.type === 't1land'){
+        const price = await this.getCBKLandPrice({tier: 1});
+        await this.purchaseT1CBKLand({price});
+        await this.checkIfCanPurchaseLand();
+      }
+      if(item.type === 't2land'){
+        this.selectedTier = 2;
+        this.showMapModal();
+      }
+      if(item.type === 't3land'){
+        this.selectedTier = 3;
         this.showMapModal();
       }
     },
@@ -561,6 +645,8 @@ export default Vue.extend({
 
   async mounted() {
     this.checkStorageFavorite();
+    await this.checkIfCanPurchaseLand();
+    this.reservedChunks = await this.getReservedChunksIds();
 
     if(!this.showGivenNftIdTypes) {
       await this.fetchShields(this.ownedShieldIds);
@@ -693,15 +779,27 @@ export default Vue.extend({
 
 .zone,
 .chunk {
-  background-color: greenyellow;
-  opacity: 0;
+  opacity: 1;
   transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* align horizontal */
+  align-items: center; /* align vertical */
 }
 
 .zone:hover,
 .chunk:hover {
-  opacity: 1;
+  background-color: greenyellow;
   transform: scale(1.1);
+}
+
+.reserved {
+  background-color: black;
+  opacity: 0.5;
+}
+
+.reserved:hover {
+  background-color: black;
 }
 
 @media (max-width: 576px) {
