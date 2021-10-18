@@ -12,7 +12,7 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()" />
           <b-button
-            :disabled="(nft.type == 't1land' || nft.type == 't2land' || nft.type == 't3land' ) && !canPurchaseLand"
+            :disabled="buyButtonDisabled(nft.type)"
             variant="primary"
             class="shop-button"
             @click="buyItem(nft)">
@@ -24,11 +24,11 @@
       </ul>
     </div>
 
-    <b-modal class="map-modal" title="Choose zone" ref="map-modal" size="xl" ok-only hide-footer>
+    <b-modal class="map-modal" title="Choose zone" ref="map-modal" size="xl" hide-footer>
       <div class="w-100" style="padding-bottom: 100%;">
         <div id="map-grid" class="map-grid">
           <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)">
-            <span>{{zonesPopulations[zoneId]}}/100</span>
+            <span>{{zonesPopulation[zoneId]}}/100</span>
           </div>
         </div>
       </div>
@@ -41,7 +41,8 @@
           <div class="chunk" :class="[reservedChunks.includes(chunkId.toString()) ? 'reserved' : null ]"
           v-for="(chunkId, index) in chunksIds" :key="chunkId"
            @click="selectChunk(chunkId, index)" :style="[ selectedChunk === chunkId ? {backgroundColor: 'greenyellow'} : null ]">
-            <span>{{chunksPopulations[index]}}/100</span>
+           <span>ID: {{chunkId}}</span>
+            <span>{{chunksPopulation[index]}}/100</span>
             <span v-if="reservedChunks.includes(chunkId.toString())">RESERVED</span>
            </div>
         </div>
@@ -149,10 +150,13 @@ interface Data {
   selectedChunkPopulation: number | undefined;
   selectedChunkAvailable: boolean;
   zonesIds: number[];
-  zonesPopulations: number[];
+  zonesPopulation: number[];
   chunksIds: number[];
-  chunksPopulations: number[];
+  chunksPopulation: number[];
   reservedChunks: string[];
+  t1LandAvailable: boolean;
+  t2LandAvailable: boolean;
+  t3LandAvailable: boolean;
 }
 
 export interface NftIdType {
@@ -202,6 +206,7 @@ interface StoreMappedActions {
   purchaseT3CBKLand(payload: {price: string, chunkId: number}): Promise<void>;
   getCBKLandPrice(payload: {tier: number}): Promise<string>;
   getReservedChunksIds(): Promise<string[]>;
+  getAvailableLand(): Promise<{t1Land: string, t2Land: string, t3Land: string}>
 }
 
 export default Vue.extend({
@@ -286,10 +291,13 @@ export default Vue.extend({
       selectedChunkPopulation: 0,
       selectedChunkAvailable: false,
       zonesIds: Array.from({length: 100}, (x, i) => i),
-      zonesPopulations: [],
+      zonesPopulation: [],
       chunksIds: Array.from({length: 100}, (x, i) => i),
-      chunksPopulations: [],
+      chunksPopulation: [],
       reservedChunks: [],
+      t1LandAvailable: false,
+      t2LandAvailable: false,
+      t3LandAvailable: false,
     } as Data;
   },
 
@@ -431,7 +439,7 @@ export default Vue.extend({
       'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange',
       'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic', 'getAllZonesPopulation', 'checkIfChunkAvailable',
       'getZoneChunkPopulation', 'getChunkPopulation', 'purchaseT1CBKLand', 'purchaseT2CBKLand', 'purchaseT3CBKLand', 'getCBKLandPrice',
-      'getPurchase', 'getReservedChunksIds'
+      'getPurchase', 'getReservedChunksIds', 'getAvailableLand'
     ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
@@ -515,7 +523,7 @@ export default Vue.extend({
     },
 
     async showMapModal() {
-      this.zonesPopulations = await this.getAllZonesPopulation();
+      this.zonesPopulation = await this.getAllZonesPopulation();
       (this.$refs['map-modal'] as BModal).show();
     },
 
@@ -531,7 +539,7 @@ export default Vue.extend({
         return;
       }
       this.selectedChunk = chunkId;
-      this.selectedChunkPopulation = this.chunksPopulations[index];
+      this.selectedChunkPopulation = this.chunksPopulation[index];
       this.selectedChunkAvailable = await this.checkIfChunkAvailable({tier: this.selectedTier, chunkId});
     },
 
@@ -559,17 +567,17 @@ export default Vue.extend({
 
     async updateChunksPopulation(zoneId: number) {
       this.calculateChunksIds(zoneId);
-      this.chunksPopulations = await this.getChunkPopulation({chunkIds: this.chunksIds});
+      this.chunksPopulation = await this.getChunkPopulation({chunkIds: this.chunksIds});
     },
 
     async purchaseLand(chunkId: number) {
       const chunkAvailable = await this.checkIfChunkAvailable({tier: this.selectedTier, chunkId});
       if (!chunkAvailable) {
-        console.log('Chunk not available');
+        console.error('Chunk not available');
         return;
       }
+      const price = await this.getCBKLandPrice({tier: this.selectedTier});
       if(this.selectedTier === 2) {
-        const price = await this.getCBKLandPrice({tier: this.selectedTier});
         await this.purchaseT2CBKLand({price, chunkId}).then(() => {
           if(this.selectedZone !== undefined) {
             this.updateChunksPopulation(this.selectedZone);
@@ -577,7 +585,6 @@ export default Vue.extend({
         });
       }
       if(this.selectedTier === 3) {
-        const price = await this.getCBKLandPrice({tier: this.selectedTier});
         await this.purchaseT3CBKLand({price, chunkId}).then(() => {
           if(this.selectedZone !== undefined) {
             this.updateChunksPopulation(this.selectedZone);
@@ -585,6 +592,22 @@ export default Vue.extend({
         });
       }
       await this.checkIfCanPurchaseLand();
+    },
+
+    buyButtonDisabled(type: string) {
+      if((type === 't1land' || type === 't2land' || type === 't3land' ) && !this.canPurchaseLand){
+        return true;
+      }
+      if(type === 't1land' && !this.t1LandAvailable) {
+        return true;
+      }
+      if(type === 't2land' && !this.t2LandAvailable) {
+        return true;
+      }
+      if(type === 't3land' && !this.t3LandAvailable) {
+        return true;
+      }
+      return false;
     },
 
     async buyItem(item: nftItem) {
@@ -647,6 +670,10 @@ export default Vue.extend({
     this.checkStorageFavorite();
     await this.checkIfCanPurchaseLand();
     this.reservedChunks = await this.getReservedChunksIds();
+    const {t1Land, t2Land, t3Land} = await this.getAvailableLand();
+    this.t1LandAvailable = t1Land !== '0';
+    this.t2LandAvailable = t2Land !== '0';
+    this.t3LandAvailable = t3Land !== '0';
 
     if(!this.showGivenNftIdTypes) {
       await this.fetchShields(this.ownedShieldIds);
@@ -748,6 +775,7 @@ export default Vue.extend({
   margin: 0.5rem;
 }
 
+.map-grid,
 .zone-grid {
   background-size: cover;
   display: grid;
@@ -764,17 +792,6 @@ export default Vue.extend({
 
 .map-grid {
   background-image: url(../../assets/map.png);
-  background-size: cover;
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: repeat(10, 1fr);
-  float: left;
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  z-index: 1000;
-  width: 100%;
-  height: 100%;
 }
 
 .zone,
@@ -783,8 +800,10 @@ export default Vue.extend({
   transition: 0.3s;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* align horizontal */
-  align-items: center; /* align vertical */
+  justify-content: center;
+  align-items: center;
+  text-shadow: 0px 2px 1px rgb(0 0 0), 0px 4px 7px rgb(0 0 0 / 40%), 0px 9px 12px rgb(0 0 0 / 10%);
+  font-weight: bolder;
 }
 
 .zone:hover,
