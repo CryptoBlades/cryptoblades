@@ -56,15 +56,15 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         uint256 lastUpdateBlock; // For tracking. Last Update on block y
         uint256 nftId;
 
-        uint64 chainId;
+        uint256 chainId;
         uint8 status; // enumeration. 0 => nothing, 1 => transfer requested, 2 => moved   
     }
 
     // Bot stuff
     uint256 private _transfersOutAt;
     uint256 private _transfersOutCount;
-    mapping(uint64 => bool) private _bridgeEnabled; // Which chain can we go to from here?
-    mapping(uint64 => string) private _chainPrefix; // Prefix to prepend to chainId
+    mapping(uint256 => bool) private _bridgeEnabled; // Which chain can we go to from here?
+    mapping(uint256 => string) private _chainPrefix; // Prefix to prepend to chainId
     bool private _botEnabled;
     mapping(uint256 => TransferOut) private transferOuts;
 
@@ -94,7 +94,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         address owner;
 
         uint8 nftType;
-        uint8 sourceChain;
+        uint256 sourceChain;
         uint256 sourceId;
         
         string rename;
@@ -118,7 +118,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     event NFTTransferOutRequest(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTTransferOutCanceled(address indexed owner);
     event NFTTransferUpdate(uint256 indexed requestId, uint8 status, bool forced);
-    event TransferedIn(address indexed receiver, uint8 nftType, uint8 sourceChain, uint256 indexed sourceId);
+    event TransferedIn(address indexed receiver, uint8 nftType, uint256 sourceChain, uint256 indexed sourceId);
     event NFTWithdrawnFromBridge(address indexed receiver, uint256 indexed bridgedId, uint8 nftType, uint256 indexed mintedId);
 
     function initialize(address _weaponsAddress, address _charactersAddress, WeaponRenameTagConsumables _weaponRenameTagConsumables, CharacterRenameTagConsumables _characterRenameTagConsumables,
@@ -202,7 +202,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         _;
     }
 
-     modifier bridgeEnabled(uint8 targetChain) {
+     modifier bridgeEnabled(uint256 targetChain) {
          require(
             _bridgeEnabled[targetChain],
             "bridging disabled"
@@ -339,12 +339,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     // bridge stuff
-    function chainBridgeEnabled(uint64 chainId) public view returns (bool) {
+    function chainBridgeEnabled(uint256 chainId) public view returns (bool) {
         return _bridgeEnabled[chainId];
     }
 
     
-    function toggleChainBridgeEnabled(uint64 chainId, string memory prefix, bool enable) public restricted {
+    function toggleChainBridgeEnabled(uint256 chainId, string memory prefix, bool enable) public restricted {
         _bridgeEnabled[chainId] = enable;
         _chainPrefix[chainId] = prefix;
     }
@@ -353,7 +353,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     function bridgeItem(
         IERC721 _tokenAddress,
         uint256 _id,
-        uint8 targetChain
+        uint256 targetChain
     )
         public
         tokenNotBanned(_tokenAddress)
@@ -395,7 +395,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         }
     }
 
-    function getReceivedNFT(uint256 receivedNFT) public view  returns (address, uint8, uint8, uint256, uint8, uint256) {
+    function getReceivedNFT(uint256 receivedNFT) public view  returns (address, uint8, uint256, uint256, uint8, uint256) {
         TransferIn storage transferIn = transferIns[receivedNFT];
         return (transferIn.owner, transferIn.nftType, transferIn.sourceChain, transferIn.sourceId, transferIn.status, transferInsMeta[receivedNFT]);
     }
@@ -438,7 +438,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     // Takes bridgedNFT not meta to avoid stack too deep
-    function _withdrawWeaponFromBridge(uint256 bridgedNFT, uint64 chainId, uint256 sourceId) internal returns (uint256 mintedId) {
+    function _withdrawWeaponFromBridge(uint256 bridgedNFT, uint256 chainId, uint256 sourceId) internal returns (uint256 mintedId) {
         (uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 level, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) 
             = unpackWeaponsData(transferInsMeta[bridgedNFT]);
 
@@ -492,7 +492,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         return transferOutOfPlayers[msg.sender];
     }
 
-    function getBridgeTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint256, uint64, uint8) {
+    function getBridgeTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint256, uint256, uint8) {
         TransferOut storage transferOut = transferOuts[bridgeTransferId];
         return (transferOut.owner,
                 transferOut.nftAddress,
@@ -517,7 +517,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     // Bot to transfer in an NFT (outside chain => this chain)
-    function transferIn(address receiver, uint8 nftType, uint8 sourceChain, uint256 sourceId, 
+    function transferIn(address receiver, uint8 nftType, uint256 sourceChain, uint256 sourceId, 
     string memory rename, uint256 metaData, uint256 seed) public gameAdminRestricted {
         transferIns[++_transferInsAt] = TransferIn(receiver, nftType, sourceChain, sourceId,
         rename, block.number, 0, TRANSFER_IN_STATUS_AVAILABLE);
@@ -573,7 +573,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         appliedCosmetic = uint32((metaData >> 32) & 0xFFFFFFFF);
     }
 
-    function buildChainId(uint64 chainId, uint256 sourceId) internal view returns (string memory) {
+    function buildChainId(uint256 chainId, uint256 sourceId) internal view returns (string memory) {
         return string(abi.encodePacked(_chainPrefix[chainId], uint2str(sourceId)));
     }
 
