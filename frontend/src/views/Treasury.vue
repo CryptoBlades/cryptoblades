@@ -5,10 +5,10 @@
       <img src="../assets/divider4.png" class="expander-divider">
     </div>
     <div class="d-flex flex-row w-100 align-items-baseline mt-3 pl-5">
-      <h5>Pick a token to farm: </h5>
-      <b-form-select class="w-25 ml-1" size="sm" v-model="fightMultiplier" @change="setFarmingToken()">
-        <b-form-select-option :value="null">SKILL</b-form-select-option>
-        <b-form-select-option v-for="(p, i) in supportedProjects" :key="i" :value="i">{{p.name}} ({{p.tokenSymbol}})</b-form-select-option>
+      <h5>Payout Currency:</h5>
+      <b-form-select class="w-25 ml-1" size="sm" v-model="payoutCurrency" @change="setPayoutCurrency()">
+        <b-form-select-option :value="'SKILL'">SKILL</b-form-select-option>
+        <b-form-select-option v-for="p in supportedProjects" :key="p.name" :value="p.tokenSymbol">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
       </b-form-select>
     </div>
     <div class="d-flex flex-row w-100 pt-2 pr-5 pl-5 pb-2 flex-wrap">
@@ -31,6 +31,12 @@ interface SupportedProject {
 export default Vue.extend({
   components: { PartneredProject },
 
+  data() {
+    return {
+      payoutCurrency: localStorage.getItem('payoutCurrency') || 'SKILL'
+    };
+  },
+
   computed: {
     // TODO: PULL FROM CHAIN
     supportedProjects(): SupportedProject[] {
@@ -48,6 +54,10 @@ export default Vue.extend({
   methods: {
     getLogoFile(projectName: string): string {
       return `${projectName.toLowerCase()}.png`;
+    },
+
+    setPayoutCurrency() {
+      localStorage.setItem('payoutCurrency', this.payoutCurrency);
     }
   }
 
