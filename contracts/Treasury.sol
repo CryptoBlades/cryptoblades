@@ -2,20 +2,26 @@ pragma solidity ^0.6.5;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract Treasury is Initializable, AccessControlUpgradeable {
+    using SafeMath for uint256;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     mapping(address => bool) public partnersWhitelist;
     PartnerProject[] private partneredProjects;
+    uint256 skillPrice;
 
     struct PartnerProject {
         string name;
         string tokenSymbol;
         address tokenAddress;
         uint256 tokenAmount;
+        uint256 tokenClaimed;
         uint256 tokenPrice;
+        uint256 multiplier;
         bool isActive;
     }
 
@@ -51,6 +57,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
             tokenSymbol,
             tokenAddress,
             tokenAmount,
+            0,
+            1,
             tokenPrice,
             isActive
         ));
@@ -81,7 +89,22 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         return activeProjectsIds;
     }
 
+    function get(uint256 id) public view returns(string memory, string memory, address, uint256, uint256, bool) {
+        PartnerProject memory p = partneredProjects[id];
+        return(p.name, p.tokenSymbol, p.tokenAddress, p.tokenAmount, p.tokenPrice, p.isActive);
+    }
+
     function setIsActive(uint256 id, bool isActive) public restricted {
         partneredProjects[id].isActive = isActive;
+    }
+
+    function claim(uint256 id, uint256 skillClaimingAmount) public {
+        uint256 partnerTokenAmount = skillClaimingAmount.mul(skillPrice.div(partneredProjects[id].tokenPrice));
+        IERC20(partneredProjects[id].tokenAddress).transfer(msg.sender, partnerTokenAmount);
+    }
+
+    function setSkillPrice(uint256 newPrice) public restricted {
+        require(newPrice > 0);
+        skillPrice = newPrice;
     }
 }
