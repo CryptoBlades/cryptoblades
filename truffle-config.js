@@ -93,6 +93,7 @@ module.exports = {
           providerOrUrl: 'wss://ws-testnet.hecochain.com'
         }
       )),
+      gasPrice: 1000000000,
       network_id: 0x100,
       confirmations: 10,
       timeoutBlocks: 200,

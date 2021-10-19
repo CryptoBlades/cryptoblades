@@ -474,14 +474,14 @@
                   variant="primary"
                   v-if="activeType === 'weapon'"
                    class="gtag-link-others" tagname="add_listing_weapon"
-                  :disabled="selectedNftId === null || selectedNftOnCooldown"
+                  :disabled="selectedNftId === null"
                   @click="showListingSetupModal()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
                   v-tooltip.bottom="weaponMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
 
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
-                  :disabled="selectedNftId === null || selectedNftOnCooldown"
+                  :disabled="selectedNftId === null"
                    class="gtag-link-others" tagname="add_listing_character"
                   @click="showListingSetupModal()">List Character <b-icon-question-circle :hidden=!characterMarketTax
                   v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
@@ -847,7 +847,6 @@ export default Vue.extend({
     ...(mapGetters([
       'contracts', 'ownCharacters', 'totalShieldSupply','getCharacterName','getWeaponName'
     ]) as Accessors<StoreMappedGetters>),
-    ...mapGetters(['transferCooldownOfCharacterId']),
 
     Weapons(): Contract<Weapons> {
       // we use x! here because we assert that they're set already in created()
@@ -882,13 +881,6 @@ export default Vue.extend({
     ownListedNftSelected(): boolean {
       return this.selectedNftId !== null
         && this.searchResultsOwned;
-    },
-
-    selectedNftOnCooldown(): boolean {
-      return this.selectedNftId !== null
-      && (this.activeType === 'weapon' || this.activeType === 'shield'
-        ? false
-        : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
     },
 
     canPurchase(): boolean {
