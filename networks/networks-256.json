@@ -2251,8 +2251,8 @@
   "build/contracts/NFTStorage.json": {
     "events": {},
     "links": {},
-    "address": "0x65CB2cd8B083AB9BA212E0E1C708C14303bCCf87",
-    "transactionHash": "0x604e515d6adfcaae0ce12ce8f3d4c37cbc2f0bfa2a5a63e37cfe17021681d11b"
+    "address": "0xc64AB1928e8B7a1631F2B1D5d6EE907E6D7F053F",
+    "transactionHash": "0x8594f833406eab9a802302fd781e622db894df425a4efe19e66c5bafde1313aa"
   },
   "build/contracts/Promos.json": {
     "events": {
