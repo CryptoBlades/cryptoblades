@@ -38,7 +38,7 @@
                 v-visible="allSearchResults && allSearchResults.length > 0"
                 align="center" v-model="currentPage"
                 :total-rows="allListingsAmount"
-                :per-page="activeType === 'weapon' ? weaponShowLimit : characterShowLimit"
+                :per-page="nftListingPageSize()"
                 first-number
                 last-number
                 v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
@@ -170,8 +170,7 @@
                 v-if="allSearchResults && allSearchResults.length > 0"
                 align="center" v-model="currentPage"
                 :total-rows="allListingsAmount"
-                :per-page="activeType === 'weapon' ? weaponShowLimit :
-                  (activeType === 'character' ? characterShowLimit : shieldShowLimit)"
+                :per-page="nftListingPageSize()"
                 first-number
                 last-number
                 v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
@@ -475,14 +474,14 @@
                   variant="primary"
                   v-if="activeType === 'weapon'"
                    class="gtag-link-others" tagname="add_listing_weapon"
-                  :disabled="selectedNftId === null || selectedNftOnCooldown"
+                  :disabled="selectedNftId === null"
                   @click="showListingSetupModal()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
                   v-tooltip.bottom="weaponMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
 
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
-                  :disabled="selectedNftId === null || selectedNftOnCooldown"
+                  :disabled="selectedNftId === null"
                    class="gtag-link-others" tagname="add_listing_character"
                   @click="showListingSetupModal()">List Character <b-icon-question-circle :hidden=!characterMarketTax
                   v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
@@ -848,7 +847,6 @@ export default Vue.extend({
     ...(mapGetters([
       'contracts', 'ownCharacters', 'totalShieldSupply','getCharacterName','getWeaponName'
     ]) as Accessors<StoreMappedGetters>),
-    ...mapGetters(['transferCooldownOfCharacterId']),
 
     Weapons(): Contract<Weapons> {
       // we use x! here because we assert that they're set already in created()
@@ -883,13 +881,6 @@ export default Vue.extend({
     ownListedNftSelected(): boolean {
       return this.selectedNftId !== null
         && this.searchResultsOwned;
-    },
-
-    selectedNftOnCooldown(): boolean {
-      return this.selectedNftId !== null
-      && (this.activeType === 'weapon' || this.activeType === 'shield'
-        ? false
-        : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
     },
 
     canPurchase(): boolean {
@@ -976,6 +967,302 @@ export default Vue.extend({
           name: 'Lightning Character Trait',
           description: 'Changes character\'s trait to Lightning.',
           image: 'potion_05_te.png'
+        },
+        {
+          id: 1,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Grayscale',
+          description: '',
+          image: ''
+        },
+        {
+          id: 2,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Contrast',
+          description: 'Increased contrast',
+          image: ''
+        },
+        {
+          id: 3,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Sepia',
+          description: '',
+          image: ''
+        },
+        {
+          id: 4,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Invert',
+          description: 'Inverted colors',
+          image: ''
+        },
+        {
+          id: 5,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Weapon Blur',
+          description: 'Blurred weapon',
+          image: ''
+        },
+        {
+          id: 6,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Fire Glow',
+          description: 'Glows with fire power',
+          image: ''
+        },
+        {
+          id: 7,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Earth Glow',
+          description: 'Glows with earth power',
+          image: ''
+        },
+        {
+          id: 8,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Lightning Glow',
+          description: 'Glows with lightning power',
+          image: ''
+        },
+        {
+          id: 9,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Water Glow',
+          description: 'Glows with water power',
+          image: ''
+        },
+        {
+          id: 10,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Rainbow Glow',
+          description: 'Glows with all elements powers',
+          image: ''
+        },
+        {
+          id: 11,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Dark Glow',
+          description: 'Glows with the dark',
+          image: ''
+        },
+        {
+          id: 12,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Ghost Weapon',
+          description: 'Ghost effect',
+          image: ''
+        },
+        {
+          id: 13,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Police Lights',
+          description: 'Police Lights background',
+          image: ''
+        },
+        {
+          id: 14,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Neon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 15,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.5,
+          name: 'Weapon Rotating Neon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 16,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.4,
+          name: 'Diamond Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 17,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.3,
+          name: 'Gold Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 18,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.2,
+          name: 'Silver Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 19,
+          type: 'WeaponCosmetic',
+          nftPrice: 0.1,
+          name: 'Bronze Weapon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 1,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Grayscale',
+          description: '',
+          image: ''
+        },
+        {
+          id: 2,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Contrast',
+          description: 'Increased contrast',
+          image: ''
+        },
+        {
+          id: 3,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Sepia',
+          description: '',
+          image: ''
+        },
+        {
+          id: 4,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Invert',
+          description: 'Inverted colors',
+          image: ''
+        },
+        {
+          id: 5,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Blur',
+          description: 'Blurred character',
+          image: ''
+        },
+        {
+          id: 6,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Fire Glow',
+          description: 'Glows with fire power',
+          image: ''
+        },
+        {
+          id: 7,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Earth Glow',
+          description: 'Glows with earth power',
+          image: ''
+        },
+        {
+          id: 8,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Lightning Glow',
+          description: 'Glows with lightning power',
+          image: ''
+        },
+        {
+          id: 9,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Water Glow',
+          description: 'Glows with water power',
+          image: ''
+        },
+        {
+          id: 10,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Rainbow Glow',
+          description: 'Glows with all elements powers',
+          image: ''
+        },
+        {
+          id: 11,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Dark Glow',
+          description: 'Glows with the dark',
+          image: ''
+        },
+        {
+          id: 12,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Ghost Character',
+          description: 'Ghost effect',
+          image: ''
+        },
+        {
+          id: 13,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Police Lights',
+          description: 'Police lights background',
+          image: ''
+        },
+        {
+          id: 14,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.5,
+          name: 'Character Neon Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 15,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.4,
+          name: 'Character Diamond Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 16,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.3,
+          name: 'Character Gold Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 17,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.2,
+          name: 'Character Silver Border',
+          description: '',
+          image: ''
+        },
+        {
+          id: 18,
+          type: 'CharacterCosmetic',
+          nftPrice: 0.1,
+          name: 'Character Bronze Border',
+          description: '',
+          image: ''
         },
       ] as SkillShopListing[];
 
@@ -1248,7 +1535,8 @@ export default Vue.extend({
         minPrice: '' + this.characterMinPriceFilter(),
         maxPrice: '' + this.characterMaxPriceFilter(),
         pageSize: '' + (this.characterShowLimit || defaultLimit),
-        pageNum: '' + page
+        pageNum: '' + page,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1330,7 +1618,8 @@ export default Vue.extend({
         minPrice: '' + this.weaponMinPriceFilter(),
         maxPrice: '' + this.weaponMaxPriceFilter(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
-        pageNum: '' + page
+        pageNum: '' + page,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1389,6 +1678,7 @@ export default Vue.extend({
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
         pageNum: '' + page,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1516,6 +1806,7 @@ export default Vue.extend({
         maxPrice: '' + this.characterMaxPriceFilter(),
         sortDir: '' + this.characterPriceOrder(),
         sellerAddress: '' + sellerAddress,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1537,6 +1828,7 @@ export default Vue.extend({
         maxPrice: '' + this.weaponMaxPriceFilter(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
         sellerAddress: '' + sellerAddress,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1556,6 +1848,7 @@ export default Vue.extend({
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
         sellerAddress: '' + sellerAddress,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1740,7 +2033,8 @@ export default Vue.extend({
         minPrice: '' + this.weaponMinPriceFilter(),
         maxPrice: '' + this.weaponMaxPriceFilter(),
         pageSize: '' + (this.weaponShowLimit || defaultLimit),
-        buyerAddress: '' + this.defaultAccount
+        buyerAddress: '' + this.defaultAccount,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1762,6 +2056,7 @@ export default Vue.extend({
         maxPrice: '' + this.characterMaxPriceFilter(),
         sortDir: '' + this.characterPriceOrder(),
         buyerAddress: '' + this.defaultAccount,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1782,6 +2077,7 @@ export default Vue.extend({
         sortDir: '' + this.nftPriceOrder(),
         pageSize: '' + (this.shieldShowLimit || defaultLimit),
         buyerAddress: '' + this.defaultAccount,
+        network: this.activeChain(),
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -1816,7 +2112,9 @@ export default Vue.extend({
     convertSkillToWei(skill: string) {
       return Web3.utils.toWei(skill);
     },
-
+    activeChain(): string {
+      return (localStorage.getItem('currentChain') || 'BSC').toLowerCase();
+    },
     characterMinLevelFilter(): number {
       return sessionStorage.getItem('character-levelfilter') ? +(sessionStorage.getItem('character-levelfilter') as string) - 1 : 0;
     },
@@ -1901,6 +2199,22 @@ export default Vue.extend({
       return this.convertStringToDecimal(this.convertWeiToSkill(listedPrice), 8);
     },
 
+    nftListingPageSize(): number {
+      if(this.activeType === 'weapon'){
+        return this.weaponShowLimit;
+      }
+
+      if(this.activeType === 'character'){
+        return this.characterShowLimit;
+      }
+
+      if(this.activeType === 'shield'){
+        return this.shieldShowLimit;
+      }
+
+      return defaultLimit;
+    },
+
     upperFirstChar(input: string): string {
       if(input === ''){
         return '';
@@ -1908,6 +2222,7 @@ export default Vue.extend({
 
       return input[0].toUpperCase() + input.slice(1);
     }
+
   },
 
   watch: {
