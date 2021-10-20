@@ -118,7 +118,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
 
-    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
+    uint256 public constant NFTVAR_SIMPLEQUEST_ID = 100;
+    uint256 public constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
+    uint256 public constant NFTVAR_REPUTATION = 102;
+
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars; // nftID, fieldID, value
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
 
     Garrison public garrison;
@@ -381,6 +385,25 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         for(uint i = 0; i < owned.length; i++)
             if(nftVars[owned[i]][NFTVAR_BUSY] == 0)
                 chars[--ready] = owned[i];
+    }
+
+    function setNFTVar(uint256 id, uint256 field, uint256 value) public restricted {
+        nftVar[id][field] = value;
+    }
+
+    function setNFTVars(uint256 id, uint256[] calldata fields, uint256[] calldata values) public restricted {
+        for(uint i = 0; i < fields.length; i++)
+            nftVar[id][fields[i]] = values[i];
+    }
+
+    function getNFTVar(uint256 id, uint256 field) public view returns (uint256) {
+        return nftVar[id][field];
+    }
+
+    function getNFTVars(uint256 id, uint256[] calldata fields) public view returns(uint256[] memory values) {
+        values = new uint256[fields.length];
+        for(uint i = 0; fields.length; i++)
+            values[i] = nftVar[id][fields[i]];
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
