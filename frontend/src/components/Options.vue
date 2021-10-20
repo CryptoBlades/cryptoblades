@@ -25,7 +25,7 @@
            NFT Display
         </b-dropdown-item>
 
-        <b-dropdown-item :to="{ name: 'bridge' }">
+        <b-dropdown-item :to="{ name: 'bridge' }" v-if="false">
            <i class="fa fa-exchange-alt mr-2"></i>Bridge NFTs
         </b-dropdown-item>
 
