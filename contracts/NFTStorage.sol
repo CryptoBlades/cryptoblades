@@ -417,7 +417,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     // Convert data stored by bot into an actual NFT and move it to storage
     // Bot can't mint on its own because some NFTs will have constraints (example max 4 chars)
     // Storage concept makes it a lot easier
-    function withdrawFromBridge(uint256 bridgedNFT) ownsBridgedNFT(bridgedNFT) canWithdrawBridgedNFT(bridgedNFT) public {
+    function withdrawFromBridge(uint256 bridgedNFT) ownsBridgedNFT(bridgedNFT) canWithdrawBridgedNFT(bridgedNFT) canStore() public {
         uint256 mintedItem;
         TransferIn storage transferIn = transferIns[bridgedNFT];
         uint256 seed = transferInSeeds[bridgedNFT]; 
