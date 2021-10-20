@@ -52,7 +52,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => mapping(uint256 => uint256)) public itemSeriesFlatPrices;
     CBKLandSale public cbkLandSale;
     // ERC20 => tier => price
-    mapping(uint256 => mapping(uint256 => uint128)) public landPrices;
+    mapping(uint256 => mapping(uint256 => uint256)) public landPrices;
     mapping(uint256 => address) currencies;
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -353,7 +353,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         return landPrices[currency][tier];
     }
 
-    function setCBKLandPrice(uint256 tier, uint128 newPrice, uint256 currency) external isAdmin {
+    function setCBKLandPrice(uint256 tier, uint256 newPrice, uint256 currency) external isAdmin {
         require(newPrice > 0, 'invalid price');
         require(tier >= cbkLandSale.TIER_ONE() && tier <= cbkLandSale.TIER_THREE(), "Invalid tier");
         landPrices[currency][tier] = newPrice;
