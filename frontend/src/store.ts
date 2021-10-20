@@ -1976,6 +1976,138 @@ export function createStore(web3: Web3) {
         return rewards;
       },
 
+      async fetchIsLandSaleAllowed({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .salesAllowed()
+          .call(defaultCallOptions(state));
+      },
+
+      async getAllZonesPopulation({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getAllZonesPopulation()
+          .call(defaultCallOptions(state));
+      },
+
+      async checkIfChunkAvailable({state}, {tier, chunkId}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .checkIfChunkAvailable(tier, chunkId)
+          .call(defaultCallOptions(state));
+      },
+
+      async getZoneChunkPopulation({state}, {zoneId}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getZoneChunkPopulation(zoneId)
+          .call(defaultCallOptions(state));
+      },
+
+      async purchaseT1CBKLand({state}, {price}) {
+        const { CryptoBlades,  Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !Blacksmith || !state.defaultAccount) return;
+
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, price)
+          .send({
+            from: state.defaultAccount
+          });
+
+        return await Blacksmith.methods
+          .purchaseT1CBKLand(price, 0).send({
+            from: state.defaultAccount,
+          });
+      },
+
+      async purchaseT2CBKLand({state}, {price, chunkId}) {
+        const { CryptoBlades,  Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !Blacksmith || !state.defaultAccount) return;
+
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, price)
+          .send({
+            from: state.defaultAccount
+          });
+
+        return await Blacksmith.methods
+          .purchaseT2CBKLand(price, chunkId, 0).send({
+            from: state.defaultAccount,
+          });
+      },
+
+      async purchaseT3CBKLand({state}, {price, chunkId}) {
+        const { CryptoBlades,  Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !Blacksmith || !state.defaultAccount) return;
+
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, price)
+          .send({
+            from: state.defaultAccount
+          });
+
+        return await Blacksmith.methods
+          .purchaseT3CBKLand(price, chunkId, 0).send({
+            from: state.defaultAccount,
+          });
+      },
+
+      async getCBKLandPrice({state}, {tier}) {
+        const Blacksmith = state.contracts().Blacksmith!;
+
+        return await Blacksmith.methods
+          .getCBKLandPrice(tier, 0)
+          .call(defaultCallOptions(state));
+      },
+
+      async getChunkPopulation({state}, {chunkIds}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getChunkPopulation(chunkIds)
+          .call(defaultCallOptions(state));
+      },
+
+      async getPurchase({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        const res = await CBKLandSale.methods
+          .getPurchase()
+          .call(defaultCallOptions(state));
+
+        const tier = res[0];
+        const chunkId = res[1];
+
+        return { tier, chunkId };
+      },
+
+      async getAvailableLand({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        const res = await CBKLandSale.methods
+          .getAvailableLand()
+          .call(defaultCallOptions(state));
+
+        const t1Land = res[0];
+        const t2Land = res[1];
+        const t3Land = res[2];
+
+        return { t1Land, t2Land, t3Land };
+      },
+
+      async getReservedChunksIds({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getReservedChunksIds()
+          .call(defaultCallOptions(state));
+      },
+
+
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
