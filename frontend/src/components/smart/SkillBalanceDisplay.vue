@@ -1,7 +1,7 @@
 <template>
   <div class="skill-balance-display">
     <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="'Buy SKILL'" @click="showModal">
-      <b-modal size="xl" class="centered-modal " ref="mass-dust-confirmation-modal" title="BUY SKILL" ok-only>
+      <b-modal size="xl" class="centered-modal " ref="transak-buy" title="BUY SKILL" ok-only>
       <div class="buy-skill-modal">
         <div class="buy-skill-modal-child">
          <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
@@ -159,7 +159,7 @@ export default Vue.extend({
       await this.withdrawBnbFromWaxBridge();
     },
     showModal() {
-      (this.$refs['mass-dust-confirmation-modal'] as BModal).show();
+      (this.$refs['transak-buy'] as BModal).show();
     }
   },
 
@@ -204,16 +204,10 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
 }
-.img-apeswap{
+.img-apeswap, .img-transak {
   width:100%;
   max-width: 250px;
   height: auto;
-  margin-bottom: 30px;
-}
-.img-transak{
-  width:100%;
-  max-width: 250px;
-    height: auto;
   margin-bottom: 30px;
 }
 </style>
