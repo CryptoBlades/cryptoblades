@@ -287,16 +287,26 @@ contract("PvpArena", (accounts) => {
         await pvpArena.requestOpponent(character1ID, {
           from: accounts[1],
         });
-        await pvpArena.performDuel(character1ID, {
-          from: accounts[1],
+
+        await pvpArena.preparePerformDuel(character1ID, { from: accounts[1] });
+
+        let duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
         });
 
         await time.increase(await pvpArena.unattackableSeconds());
         await pvpArena.requestOpponent(character1ID, {
           from: accounts[1],
         });
-        await pvpArena.performDuel(character1ID, {
-          from: accounts[1],
+
+        await pvpArena.preparePerformDuel(character1ID, { from: accounts[1] });
+
+        duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
         });
 
         await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
@@ -317,8 +327,13 @@ contract("PvpArena", (accounts) => {
         await pvpArena.requestOpponent(character2ID, {
           from: accounts[2],
         });
-        await pvpArena.performDuel(character2ID, {
-          from: accounts[2],
+
+        await pvpArena.preparePerformDuel(character2ID, { from: accounts[2] });
+
+        duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
         });
 
         await pvpArena.withdrawFromArena(character3ID, { from: accounts[3] });
@@ -332,8 +347,13 @@ contract("PvpArena", (accounts) => {
         await pvpArena.requestOpponent(character1ID, {
           from: accounts[1],
         });
-        await pvpArena.performDuel(character1ID, {
-          from: accounts[1],
+
+        await pvpArena.preparePerformDuel(character1ID, { from: accounts[1] });
+
+        duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
         });
 
         const wager = await pvpArena.getCharacterWager(character2ID);
@@ -906,9 +926,16 @@ contract("PvpArena", (accounts) => {
           await pvpArena.requestOpponent(character1ID, {
             from: accounts[1],
           });
-          await pvpArena.performDuel(character1ID, {
+          await pvpArena.preparePerformDuel(character1ID, {
             from: accounts[1],
           });
+
+          let duelQueue = await pvpArena.getDuelQueue();
+
+          await pvpArena.performDuels(duelQueue, {
+            from: accounts[0],
+          });
+
           wager = await pvpArena.getCharacterWager(character1ID);
         });
 
@@ -975,9 +1002,16 @@ contract("PvpArena", (accounts) => {
           await pvpArena.requestOpponent(character1ID, {
             from: accounts[1],
           });
-          await pvpArena.performDuel(character1ID, {
+          await pvpArena.preparePerformDuel(character1ID, {
             from: accounts[1],
           });
+
+          let duelQueue = await pvpArena.getDuelQueue();
+
+          await pvpArena.performDuels(duelQueue, {
+            from: accounts[0],
+          });
+
           wager = await pvpArena.getCharacterWager(character1ID);
 
           await time.increase(await pvpArena.unattackableSeconds());
@@ -1061,9 +1095,14 @@ contract("PvpArena", (accounts) => {
         await pvpArena.requestOpponent(character1ID, {
           from: accounts[1],
         });
-        await pvpArena.performDuel(character1ID, {
-          from: accounts[1],
+        await pvpArena.preparePerformDuel(character1ID, { from: accounts[1] });
+
+        let duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
         });
+
         wager = await pvpArena.getCharacterWager(character1ID);
 
         await time.increase(await pvpArena.unattackableSeconds());
@@ -1094,7 +1133,109 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe("#performDuel", async () => {
+  describe("#preparePerformDuel", () => {
+    let weapon1ID;
+    let weapon2ID;
+    let character1ID;
+    let character2ID;
+
+    beforeEach(async () => {
+      weapon1ID = await helpers.createWeapon(
+        accounts[1],
+        "111",
+        helpers.elements.water,
+        {
+          weapons,
+        }
+      );
+      weapon2ID = await helpers.createWeapon(
+        accounts[2],
+        "111",
+        helpers.elements.fire,
+        {
+          weapons,
+        }
+      );
+
+      character1ID = await createCharacterInPvpTier(
+        accounts[1],
+        2,
+        "222",
+        weapon1ID
+      );
+      character2ID = await createCharacterInPvpTier(
+        accounts[2],
+        2,
+        "222",
+        weapon2ID
+      );
+
+      await characters.setTrait(character1ID, helpers.elements.water, {
+        from: accounts[0],
+      });
+      await characters.setTrait(character2ID, helpers.elements.fire, {
+        from: accounts[0],
+      });
+    });
+
+    describe("happy path", () => {
+      it("updates the duel queue", async () => {
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character1ID, {
+          from: accounts[1],
+        });
+
+        const previousDuelQueue = await pvpArena.getDuelQueue();
+
+        expect(previousDuelQueue.length).to.equal(0);
+
+        await pvpArena.preparePerformDuel(character1ID, { from: accounts[1] });
+
+        const newDuelQueue = await pvpArena.getDuelQueue();
+
+        expect(newDuelQueue.length).to.equal(1);
+      });
+    });
+
+    describe("unhappy path", () => {
+      it("reverts if character is not in a duel", async () => {
+        await expectRevert(
+          pvpArena.preparePerformDuel(character1ID, { from: accounts[1] }),
+          "Character not in a duel"
+        );
+      });
+
+      it("reverts if decision time expired", async () => {
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character1ID, {
+          from: accounts[1],
+        });
+
+        await time.increase(await pvpArena.decisionSeconds());
+
+        await expectRevert(
+          pvpArena.preparePerformDuel(character1ID, { from: accounts[1] }),
+          "Decision time expired"
+        );
+      });
+
+      it("reverts if character is already in duel queue", async () => {
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character1ID, {
+          from: accounts[1],
+        });
+
+        await pvpArena.preparePerformDuel(character1ID, { from: accounts[1] });
+
+        await expectRevert(
+          pvpArena.preparePerformDuel(character1ID, { from: accounts[1] }),
+          "Character is already in duel queue"
+        );
+      });
+    });
+  });
+
+  describe("#performDuels", async () => {
     describe("happy path", () => {
       describe("attacker wins", () => {
         let character1ID;
@@ -1159,9 +1300,16 @@ contract("PvpArena", (accounts) => {
             from: accounts[2],
           });
 
-          const { tx } = await pvpArena.performDuel(character1ID, {
+          await pvpArena.preparePerformDuel(character1ID, {
             from: accounts[1],
           });
+
+          let duelQueue = await pvpArena.getDuelQueue();
+
+          const { tx } = await pvpArena.performDuels(duelQueue, {
+            from: accounts[0],
+          });
+
           previousBalance = await skillToken.balanceOf(accounts[1]);
           duelEvent = await expectEvent.inTransaction(
             tx,
@@ -1207,16 +1355,30 @@ contract("PvpArena", (accounts) => {
           await pvpArena.requestOpponent(character1ID, {
             from: accounts[1],
           });
-          await pvpArena.performDuel(character1ID, {
+
+          await pvpArena.preparePerformDuel(character1ID, {
             from: accounts[1],
+          });
+
+          let duelQueue = await pvpArena.getDuelQueue();
+
+          await pvpArena.performDuels(duelQueue, {
+            from: accounts[0],
           });
 
           await time.increase(await pvpArena.unattackableSeconds());
           await pvpArena.requestOpponent(character1ID, {
             from: accounts[1],
           });
-          await pvpArena.performDuel(character1ID, {
+
+          await pvpArena.preparePerformDuel(character1ID, {
             from: accounts[1],
+          });
+
+          duelQueue = await pvpArena.getDuelQueue();
+
+          await pvpArena.performDuels(duelQueue, {
+            from: accounts[0],
           });
 
           await time.increase(await pvpArena.unattackableSeconds());
@@ -1303,9 +1465,16 @@ contract("PvpArena", (accounts) => {
             from: accounts[1],
           });
 
-          const { tx } = await pvpArena.performDuel(character1ID, {
+          await pvpArena.preparePerformDuel(character1ID, {
             from: accounts[1],
           });
+
+          let duelQueue = await pvpArena.getDuelQueue();
+
+          const { tx } = await pvpArena.performDuels(duelQueue, {
+            from: accounts[0],
+          });
+
           duelTx = tx;
         });
 
@@ -1386,8 +1555,14 @@ contract("PvpArena", (accounts) => {
             from: accounts[1],
           });
 
-          const { tx } = await pvpArena.performDuel(character1ID, {
+          await pvpArena.preparePerformDuel(character1ID, {
             from: accounts[1],
+          });
+
+          let duelQueue = await pvpArena.getDuelQueue();
+
+          const { tx } = await pvpArena.performDuels(duelQueue, {
+            from: accounts[0],
           });
 
           duelTx = tx;
@@ -1416,63 +1591,6 @@ contract("PvpArena", (accounts) => {
             character1Wager.sub(toBN(duelCost)).toString()
           );
         });
-      });
-    });
-    describe("decision time expired", () => {
-      let characterID;
-
-      beforeEach(async () => {
-        characterID = await createCharacterInPvpTier(accounts[1], 2, "222");
-        await createCharacterInPvpTier(accounts[2], 2, "222");
-
-        await time.increase(await pvpArena.unattackableSeconds());
-        await pvpArena.requestOpponent(characterID, {
-          from: accounts[1],
-        });
-
-        const decisionSeconds = await pvpArena.decisionSeconds();
-        await time.increase(decisionSeconds);
-      });
-
-      it("should revert", async () => {
-        await expectRevert(
-          pvpArena.performDuel(characterID, {
-            from: accounts[1],
-          }),
-          "Decision time expired"
-        );
-      });
-    });
-
-    describe("character not in a duel", () => {
-      let characterID;
-      beforeEach(async () => {
-        characterID = await createCharacterInPvpTier(accounts[1], 2, "222");
-      });
-
-      it("should revert", async () => {
-        await expectRevert(
-          pvpArena.performDuel(characterID, {
-            from: accounts[1],
-          }),
-          "Character not in a duel"
-        );
-      });
-    });
-
-    describe("character is not the sender's", () => {
-      let characterID;
-      beforeEach(async () => {
-        characterID = await createCharacterInPvpTier(accounts[1], 2, "222");
-      });
-
-      it("should revert", async () => {
-        await expectRevert(
-          pvpArena.performDuel(characterID, {
-            from: accounts[2],
-          }),
-          "Character is not owned by sender"
-        );
       });
     });
 
@@ -1727,8 +1845,12 @@ contract("PvpArena", (accounts) => {
         });
 
         // perform a duel making sure character4 is always going to win
-        await pvpArena.performDuel(character4ID, {
-          from: accounts[2],
+        await pvpArena.preparePerformDuel(character4ID, { from: accounts[2] });
+
+        let duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
         });
 
         const winnerPostRankPoints = await pvpArena.getCharacterRankingPoints(
@@ -1819,9 +1941,14 @@ contract("PvpArena", (accounts) => {
         });
 
         // perform a duel making sure character6 is always going to win
-        await pvpArena.performDuel(character6ID, {
-          from: accounts[2],
+        await pvpArena.preparePerformDuel(character6ID, { from: accounts[2] });
+
+        let duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
         });
+
         const playerTier = await pvpArena.getTierTopRankers(character1ID);
         // expect the last character to be the first one, climibing through the entire ladder
         expect(playerTier[0].toString()).to.equal(character6ID).toString();
@@ -1875,8 +2002,12 @@ contract("PvpArena", (accounts) => {
         });
 
         // perform a duel making sure character1 is always going to lose, meaning character 2 will be the top 1
-        await pvpArena.performDuel(character2ID, {
-          from: accounts[2],
+        await pvpArena.preparePerformDuel(character2ID, { from: accounts[2] });
+
+        let duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
         });
 
         const playerTier = await pvpArena.getTierTopRankers(character1ID);
@@ -1948,8 +2079,12 @@ contract("PvpArena", (accounts) => {
           from: accounts[2],
         });
         // perform a duel making sure character1 is always going to lose
-        await pvpArena.performDuel(character5ID, {
-          from: accounts[2],
+        await pvpArena.preparePerformDuel(character5ID, { from: accounts[2] });
+
+        let duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
         });
 
         // get the post  duel ranking points
@@ -1987,8 +2122,12 @@ contract("PvpArena", (accounts) => {
         from: accounts[1],
       });
 
-      await pvpArena.performDuel(character1ID, {
-        from: accounts[1],
+      await pvpArena.preparePerformDuel(character1ID, { from: accounts[1] });
+
+      let duelQueue = await pvpArena.getDuelQueue();
+
+      await pvpArena.performDuels(duelQueue, {
+        from: accounts[0],
       });
     });
 
