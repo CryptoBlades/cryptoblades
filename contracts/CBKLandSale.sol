@@ -217,6 +217,18 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         cbkLand.mint(buyer, TIER_THREE, chunkId);
     }
 
+    function giveT1LandReserved(address buyer) public  {
+        
+    }
+
+    function giveT2LandReserved(address buyer, uint256 chunkId) public  {
+        
+    }
+
+    function giveT3LandReserved(address buyer, uint256 chunkId) public  {
+      
+    }
+
     function chunkIdToZoneId(uint256 chunkId) internal pure returns (uint256){
         return 10 * (chunkId / 1000) + (chunkId % 100) / 10;
     }
