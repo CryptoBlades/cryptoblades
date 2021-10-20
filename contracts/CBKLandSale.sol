@@ -250,7 +250,6 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
         if(tier == TIER_THREE){
             return availableLand[TIER_THREE] > 0
-                    && chunkT2LandSales[TIER_TWO] < _allowedLandSalePerChunk
                     && _chunkAvailableForT3(chunkId);
         }
 

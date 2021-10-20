@@ -52,7 +52,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => mapping(uint256 => uint256)) public itemSeriesFlatPrices;
     CBKLandSale public cbkLandSale;
     // ERC20 => tier => price
-    mapping(uint256 => mapping(uint256 => uint256)) public landPrices;
+    mapping(uint256 => mapping(uint256 => uint128)) public landPrices;
     mapping(uint256 => address) currencies;
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -103,20 +103,11 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER] = 0.2 ether;
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
     }
-    function migrateTo_bcdf4c(CBKLandSale _cbkLandSale, address _king) external {
+
+    function migrateTo_bcdf4c(CBKLandSale _cbkLandSale) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         cbkLandSale = _cbkLandSale;
-        // Price in Skill
-        landPrices[0][_cbkLandSale.TIER_ONE()] = 1 ether; // Placeholder value
-        landPrices[0][_cbkLandSale.TIER_TWO()] = 2 ether; // Placeholder value
-        landPrices[0][_cbkLandSale.TIER_THREE()] = 3 ether; // Placeholder value
-        // Price in King
-        landPrices[1][_cbkLandSale.TIER_ONE()] = 5 ether; // Placeholder value
-        landPrices[1][_cbkLandSale.TIER_TWO()] = 6 ether; // Placeholder value
-        landPrices[1][_cbkLandSale.TIER_THREE()] = 7 ether; // Placeholder value
-
-        currencies[1] = _king;
     }
 
     /* ========== VIEWS ========== */
@@ -188,6 +179,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         return itemSeriesFlatPrices[itemIndex][seriesIndex];
     }
 
+    function getCurrency(uint256 currency) public view returns (address) {
+        return currencies[currency];
+    }
     /* ========== Generic Setters ========== */
 
     function setAddressOfItem(uint256 itemIndex, address to) external isAdmin {
@@ -205,6 +199,11 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         for(uint i = 0; i < seriesIndices.length; i++) {
             itemSeriesFlatPrices[itemIndex][seriesIndices[i]] = seriesPrices[i];
         }
+    }
+
+    function setCurrency(uint256 currency, address currencyAddress, bool forced) external isAdmin {
+        require(currency > 0 && (forced || currencies[currency] == address(0)), 'used');
+        currencies[currency] = currencyAddress;
     }
 
     /* ========== Character Rename ========== */
@@ -354,7 +353,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         return landPrices[currency][tier];
     }
 
-    function setCBKLandPrice(uint256 tier, uint256 newPrice, uint256 currency) external isAdmin {
+    function setCBKLandPrice(uint256 tier, uint128 newPrice, uint256 currency) external isAdmin {
         require(newPrice > 0, 'invalid price');
         require(tier >= cbkLandSale.TIER_ONE() && tier <= cbkLandSale.TIER_THREE(), "Invalid tier");
         landPrices[currency][tier] = newPrice;
@@ -364,13 +363,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         if(currency == 0){
              game.payContractTokenOnly(payer, paying);
         }
-        else if(currency == 1){
-            require(currencies[currency] != address(0), "invalid");
+        else {
             IERC20(currencies[currency]).transferFrom(payer, address(this), paying);
         }
-    }
-
-    function recoverCurrency(uint256 currency, uint256 amount) public isAdmin {
-        IERC20(currencies[currency]).safeTransfer(msg.sender, amount); 
     }
 }
