@@ -30,6 +30,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     WeaponCosmetics weaponCosmetics;
     CharacterCosmetics characterCosmetics;
 
+    bool storageEnabled;
     // sender + token address => ids
     mapping(address => mapping(address => EnumerableSet.UintSet)) private storedItems;
     // token address + id => owner who stored
@@ -147,6 +148,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         _chainPrefix[56] = "BSC";
         _chainPrefix[128] = "HECO";
         _chainPrefix[66] = "OKEX";
+
+        storageEnabled = false;
     }
 
 
@@ -202,6 +205,14 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         _;
     }
 
+     modifier canStore() {
+         require(
+            storageEnabled && nftMarket.checkUserBanned(msg.sender) == false,
+            "storage disabled"
+        );
+        _;
+    }
+
      modifier bridgeEnabled(uint256 targetChain) {
          require(
             _bridgeEnabled[targetChain],
@@ -230,13 +241,6 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
          require( nftTypeToAddress[transferIns[bridgedNFT].nftType] != address(0), "NFT not defined" );
         _;
     }
-
-    modifier notBannedFromMarket() {
-        require(nftMarket.checkUserBanned(msg.sender) == false, "banned");
-        _;
-    }
-    
-
 
     function isTokenSupported(IERC721 _tokenAddress) public view returns (bool) {
         return supportedTokenTypes.contains(address(_tokenAddress));
@@ -284,7 +288,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         public
         tokenNotBanned(_tokenAddress)
         isNotStored(_tokenAddress, _id)
-        notBannedFromMarket
+        canStore()
     {
         storedItems[msg.sender][address(_tokenAddress)].add(_id);
         allStoredItems[address(_tokenAddress)].add(_id);
@@ -338,6 +342,15 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         return IERC721ReceiverUpgradeable.onERC721Received.selector;
     }
 
+
+    function storageIsEnabled() public view returns (bool) {
+        return storageEnabled;
+    }
+
+    function setStorageEnabled(bool enabled) public restricted {
+        storageEnabled = enabled;
+    }
+
     // bridge stuff
     function chainBridgeEnabled(uint256 chainId) public view returns (bool) {
         return _bridgeEnabled[chainId];
@@ -361,6 +374,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         isOwner(_tokenAddress, _id) // isStored built in but why not
         bridgeEnabled(targetChain)
         noPendingBridge()
+        canStore()
     {
         transferOuts[++_transfersOutCount] = TransferOut(msg.sender, address(_tokenAddress), block.number, 0, _id, targetChain, 1);
         transferOutOfPlayers[msg.sender] = _transfersOutCount;
@@ -403,7 +417,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     // Convert data stored by bot into an actual NFT and move it to storage
     // Bot can't mint on its own because some NFTs will have constraints (example max 4 chars)
     // Storage concept makes it a lot easier
-    function withdrawFromBridge(uint256 bridgedNFT) ownsBridgedNFT(bridgedNFT) canWithdrawBridgedNFT(bridgedNFT) public {
+    function withdrawFromBridge(uint256 bridgedNFT) ownsBridgedNFT(bridgedNFT) canWithdrawBridgedNFT(bridgedNFT) canStore() public {
         uint256 mintedItem;
         TransferIn storage transferIn = transferIns[bridgedNFT];
         uint256 seed = transferInSeeds[bridgedNFT]; 
