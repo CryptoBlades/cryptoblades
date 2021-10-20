@@ -52,8 +52,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => mapping(uint256 => uint256)) public itemSeriesFlatPrices;
     CBKLandSale public cbkLandSale;
     // ERC20 => tier => price
-    mapping(uint8 => mapping(uint8 => uint256)) public landPrices;
-    mapping(uint8 => address) currencies;
+    mapping(uint256 => mapping(uint256 => uint256)) public landPrices;
+    mapping(uint256 => address) currencies;
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
     function initialize(Weapons _weapons, IRandoms _randoms)
@@ -326,41 +326,41 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     /* ========== CBK Land sale ========== */
 
-    event CBKLandPurchased(address indexed owner, uint8 tier, uint256 price, uint8 currency);
+    event CBKLandPurchased(address indexed owner, uint256 tier, uint256 price, uint256 currency);
 
-    function purchaseT1CBKLand(uint256 paying, uint8 currency) public {
+    function purchaseT1CBKLand(uint256 paying, uint256 currency) public {
         require(paying > 0 && landPrices[currency][cbkLandSale.TIER_ONE()] == paying, 'Invalid price');
         payCurrency(msg.sender, landPrices[currency][cbkLandSale.TIER_ONE()], currency);
         cbkLandSale.giveT1Land(msg.sender);
         emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_ONE(), landPrices[currency][cbkLandSale.TIER_ONE()], currency);
     }
 
-    function purchaseT2CBKLand(uint256 paying, uint16 chunkId, uint8 currency) public {
+    function purchaseT2CBKLand(uint256 paying, uint256 chunkId, uint256 currency) public {
         require(paying > 0 && landPrices[currency][cbkLandSale.TIER_TWO()] == paying,  'Invalid price');
         payCurrency(msg.sender, landPrices[currency][cbkLandSale.TIER_TWO()], currency);
         cbkLandSale.giveT2Land(msg.sender, chunkId);
         emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_TWO(), landPrices[currency][cbkLandSale.TIER_TWO()], currency);
     }
 
-    function purchaseT3CBKLand(uint256 paying, uint16 chunkId, uint8 currency) public {
+    function purchaseT3CBKLand(uint256 paying, uint256 chunkId, uint256 currency) public {
         require(paying > 0 && landPrices[currency][cbkLandSale.TIER_THREE()] == paying, 'Invalid price');
         payCurrency(msg.sender, landPrices[currency][cbkLandSale.TIER_THREE()], currency);
         cbkLandSale.giveT3Land(msg.sender, chunkId);
         emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_THREE(), landPrices[currency][cbkLandSale.TIER_THREE()], currency);
     }
 
-    function getCBKLandPrice(uint8 tier, uint8 currency) public view returns (uint256){
+    function getCBKLandPrice(uint256 tier, uint256 currency) public view returns (uint256){
         require(tier >= cbkLandSale.TIER_ONE() && tier <= cbkLandSale.TIER_THREE(), "Invalid tier");
         return landPrices[currency][tier];
     }
 
-    function setCBKLandPrice(uint8 tier, uint256 newPrice, uint8 currency) external isAdmin {
+    function setCBKLandPrice(uint256 tier, uint256 newPrice, uint256 currency) external isAdmin {
         require(newPrice > 0, 'invalid price');
         require(tier >= cbkLandSale.TIER_ONE() && tier <= cbkLandSale.TIER_THREE(), "Invalid tier");
         landPrices[currency][tier] = newPrice;
     }
 
-    function payCurrency(address payer, uint256 paying, uint8 currency) internal {
+    function payCurrency(address payer, uint256 paying, uint256 currency) internal {
         if(currency == 0){
              game.payContractTokenOnly(payer, paying);
         }
@@ -368,5 +368,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
             require(currencies[currency] != address(0), "invalid");
             IERC20(currencies[currency]).transferFrom(payer, address(this), paying);
         }
+    }
+
+    function recoverCurrency(uint256 currency, uint256 amount) public isAdmin {
+        IERC20(currencies[currency]).safeTransfer(msg.sender, amount); 
     }
 }

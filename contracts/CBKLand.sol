@@ -17,7 +17,7 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint256 public constant LX = 2; // Land Coordinate X
     uint256 public constant LY = 3; // Land Coordinate Y
 
-    event LandMinted(address indexed minter, uint256 id, uint8 tier, uint16 chunkId);
+    event LandMinted(address indexed minter, uint256 id, uint256 tier, uint256 chunkId);
     event LandTransfered(address indexed from, address indexed to, uint256 id);
 
     // TotalLand
@@ -52,7 +52,7 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     // DO NOT call directly outside the logic of CBKLandSale to avoid breaking tier and chunk logic
-    function mint(address minter, uint8 tier, uint16 chunkId) public restricted {
+    function mint(address minter, uint256 tier, uint256 chunkId) public restricted {
         uint256 tokenID = landMinted++;
         
         landData[tokenID][LT] = tier;
