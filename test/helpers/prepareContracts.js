@@ -173,6 +173,7 @@ async function prepareContracts(accounts) {
   await weapons.migrateTo_aa9da90();
   await weapons.migrateTo_951a020();
   await weapons.migrateTo_surprise(promos.address);
+  await weapons.migrateTo_NftVars();
 
   await characters.migrateTo_1ee400a();
   await characters.migrateTo_951a020();

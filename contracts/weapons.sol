@@ -761,4 +761,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             }
         }
     }
+    function getNftVar(uint256 weaponID, uint256 nftVar) public view returns(uint256) {
+        return nftVars[weaponID][nftVar];
+    }
+    function setNftVar(uint256 weaponID, uint256 nftVar, uint8 value) public {
+        nftVars[weaponID][nftVar] = value;
+    }
 }
