@@ -178,6 +178,7 @@ async function prepareContracts(accounts) {
   await characters.migrateTo_ef994e2(promos.address);
   await characters.migrateTo_b627f23();
   await characters.migrateTo_PvpArena(pvpArena.address);
+  await characters.migrateTo_NftVars();
 
   await shields.migrateTo_surprise(promos.address);
 

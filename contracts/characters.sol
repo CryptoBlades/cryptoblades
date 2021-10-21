@@ -318,6 +318,11 @@ contract Characters is
         pvp = _pvp;
     }
 
+    function migrateTo_NftVars() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        NFTVAR_BUSY = 1;
+    }
+
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-256
@@ -362,6 +367,9 @@ contract Characters is
         uint16 level
     );
     PvpArena public pvp;
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;
+    uint256 public NFTVAR_BUSY;
+
     modifier restricted() {
         _restricted();
         _;
@@ -528,7 +536,6 @@ contract Characters is
 
     function gainXp(uint256 id, uint16 xp) public restricted {
         Character storage char = tokens[id];
-
         if (char.level < 255) {
             uint256 newXp = char.xp.add(xp);
             uint256 requiredToLevel = experienceTable[char.level]; // technically next level
@@ -614,6 +621,7 @@ contract Characters is
             allowNegativeStamina || staminaPoints >= amount,
             "Not enough stamina!"
         );
+        require(getNftVar(id, 1) == 0, "character is busy");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;
@@ -642,6 +650,8 @@ contract Characters is
         raidsDone[id] = raidsDone[id] + 1;
         raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
         gainXp(id, xp);
+        // set the character's NFTVAR_BUSY ID to 0
+        setNftVar(id, NFTVAR_BUSY, 0);
     }
 
     function canRaid(address user, uint256 id) public view returns (bool) {
@@ -684,5 +694,12 @@ contract Characters is
 
     function setCharacterLimit(uint256 max) public restricted {
         characterLimit = max;
+    }
+
+    function getNftVar(uint256 characterID, uint8 nftVar) public view returns(uint256) {
+        return nftVars[characterID][nftVar];
+    }
+    function setNftVar(uint256 characterID, uint256 nftVar, uint8 value) public {
+        nftVars[characterID][nftVar] = value;
     }
 }

@@ -10,6 +10,7 @@ import "./util.sol";
 import "./items/RaidTrinket.sol";
 import "./items/KeyLootbox.sol";
 import "./items/Junk.sol";
+import "hardhat/console.sol";
 
 contract Raid1 is Initializable, AccessControlUpgradeable {
 
@@ -171,6 +172,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     function joinRaid(uint256 characterID, uint256 weaponID) public {
         require(characters.canRaid(msg.sender, characterID));
         require(weapons.canRaid(msg.sender, weaponID));
+        require(characters.getNftVar(characterID, 1) == 0, "Character is busy");
         /*require(characters.ownerOf(characterID) == msg.sender);
         require(weapons.ownerOf(weaponID) == msg.sender);
         require(characters.getStaminaPoints(characterID) > 0, "You cannot join with 0 character stamina");

@@ -159,7 +159,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         require(weapons.ownerOf(weaponID) == msg.sender, "Not weapon owner");
         require(!raids.isCharacterRaiding(characterID), "Character is in raid");
         require(!raids.isWeaponRaiding(weaponID), "Weapon is in raid");
-
+        require(characters.getNftVar(characterID, 1) == 0, "Character is busy");
         if (useShield) {
             require(
                 shields.ownerOf(shieldID) == msg.sender,
@@ -236,6 +236,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _updateLastActivityTimestamp(characterID);
 
         skillToken.transferFrom(msg.sender, address(this), wager);
+        // set the character as BUSY setting NFTVAR_BUSY to 1
+        characters.setNftVar(characterID, 1, 1);
     }
 
     /// @dev attempts to find an opponent for a character
@@ -799,6 +801,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
         _duelEarningsByCharacter[characterID] = 0;
+        // setting characters NFTVAR_BUSY to 0
+        characters.setNftVar(characterID, 1, 0);
     }
 
     /// @dev attempts to find an opponent for a character.
