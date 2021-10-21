@@ -71,6 +71,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         cosmetics: 0-255 but only 24 is used, may want to cap so future expansions dont change existing weps
     */
 
+    function migrateTo_NftVars() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        NFTVAR_BUSY = 1;
+    }
     struct Weapon {
         uint16 properties; // right to left: 3b stars, 2b trait, 7b stat pattern, 4b EMPTY
         // stats (each point refers to .25% improvement)
@@ -130,6 +134,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
     event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
+    
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;
+    uint256 public NFTVAR_BUSY;
 
     modifier restricted() {
         _restricted();
