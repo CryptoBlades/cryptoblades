@@ -25,6 +25,9 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     // Avoiding structs for stats
     mapping(uint256 => mapping(uint256 => uint256)) landData;
 
+    uint256 public constant LSU = 0; // URI
+    mapping(uint256 => mapping(uint256 => string)) landStrData;
+
     function initialize () public initializer {
         __ERC721_init("CryptoBladesKingdoms Land", "CBKL");
         __AccessControl_init_unchained();
@@ -38,7 +41,7 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
     }
 
     function get(uint256 id) public view returns (uint256, uint256, uint256, uint256) {
@@ -53,6 +56,11 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     // DO NOT call directly outside the logic of CBKLandSale to avoid breaking tier and chunk logic
     function mint(address minter, uint256 tier, uint256 chunkId) public restricted {
+        mintWithURI(minter, tier, chunkId, '');
+    }
+
+    // DO NOT call directly outside the logic of CBKLandSale to avoid breaking tier and chunk logic
+    function mintWithURI(address minter, uint256 tier, uint256 chunkId, string memory uri) public restricted {
         uint256 tokenID = landMinted++;
         
         landData[tokenID][LT] = tier;
@@ -61,7 +69,20 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         //landData[tokenID][LY] = y; // not yet
         
         _mint(minter, tokenID);
+        _setURI(tokenID, uri);
         emit LandMinted(minter, tokenID, tier, chunkId);
+    }
+
+    function _setURI(uint256 id, string memory uri) internal {
+        landStrData[id][LSU] = uri;
+    }
+
+    function setURI(uint256 id, string memory uri) public restricted {
+        _setURI(id, uri);
+    }
+
+    function getURI(uint256 id) public view returns (string memory uri) {
+        uri = landStrData[id][LSU];
     }
 
     // TODO: block land transfer
