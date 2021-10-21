@@ -276,8 +276,6 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         chunkT2LandSales[chunkId]++;
         chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
 
-        purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_TWO, chunkId, false);
-
         emit T2GivenReserved(msg.sender, buyer, chunkId);
         cbkLand.mint(buyer, TIER_TWO, chunkId, uri);
     }
@@ -434,22 +432,22 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         _reservedEnabled = allowed;
     }
 
-    function reserveChunks(uint256[] calldata chunkIds, address reserveFor, bool reserve, bool forced) external isAdmin {
+    function setChunksReservationInfo(uint256[] calldata chunkIds, address reserveFor, bool reserved, bool forced) external isAdmin {
         for (uint256 i = 0; i < chunkIds.length; i++) {
             require (chunkIds[i] != 0, "0 NA"); // chunk id 0 shouldn't be reserved
-            require(!reserve || (forced || chunksReservedFor[chunkIds[i]] == address(0)), "AS"); // already reserved, request has to be forced to avoid issues
+            require(!reserved || (forced || chunksReservedFor[chunkIds[i]] == address(0)), "AS"); // already reserved, request has to be forced to avoid issues
             
-            if(reserve && !reservedChunkIds.contains(chunkIds[i])) {
+            if(reserved && !reservedChunkIds.contains(chunkIds[i])) {
                 reservedChunkIds.add(chunkIds[i]);
             }
 
-            if(!reserve) {
+            if(!reserved) {
                 reservedChunkIds.remove(chunkIds[i]);
                 chunksReservedFor[chunkIds[i]] = address(0);
                  reservedChunks[reserveFor].remove(chunkIds[i]);
             }
 
-            if(reserve && !reservedChunks[reserveFor].contains(chunkIds[i])) {
+            if(reserved && !reservedChunks[reserveFor].contains(chunkIds[i])) {
                 reservedChunks[reserveFor].add(chunkIds[i]);
                 chunksReservedFor[chunkIds[i]] = reserveFor;
             }
