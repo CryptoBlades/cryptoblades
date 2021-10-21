@@ -614,6 +614,8 @@ contract Characters is
         bool allowNegativeStamina
     ) public restricted returns (uint96) {
         Character storage char = tokens[id];
+        // Check if character is not busy
+        require(getNftVar(id, NFTVAR_BUSY) == 0, "Character is busy");
         uint8 staminaPoints = getStaminaPointsFromTimestamp(
             char.staminaTimestamp
         );
@@ -621,7 +623,6 @@ contract Characters is
             allowNegativeStamina || staminaPoints >= amount,
             "Not enough stamina!"
         );
-        require(getNftVar(id, 1) == 0, "character is busy");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;
@@ -696,10 +697,19 @@ contract Characters is
         characterLimit = max;
     }
 
-    function getNftVar(uint256 characterID, uint8 nftVar) public view returns(uint256) {
+    function getNftVar(uint256 characterID, uint256 nftVar)
+        public
+        view
+        returns (uint256)
+    {
         return nftVars[characterID][nftVar];
     }
-    function setNftVar(uint256 characterID, uint256 nftVar, uint8 value) public {
+
+    function setNftVar(
+        uint256 characterID,
+        uint256 nftVar,
+        uint8 value
+    ) public {
         nftVars[characterID][nftVar] = value;
     }
 }

@@ -150,7 +150,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID,
         bool useShield
     ) {
-        require(!isCharacterInArena(characterID), "Character already in arena");
         require(!_weaponsInArena[weaponID], "Weapon already in arena");
         require(
             characters.ownerOf(characterID) == msg.sender,
