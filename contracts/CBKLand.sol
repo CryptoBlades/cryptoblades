@@ -56,11 +56,11 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     // DO NOT call directly outside the logic of CBKLandSale to avoid breaking tier and chunk logic
     function mint(address minter, uint256 tier, uint256 chunkId) public restricted {
-        mintWithURI(minter, tier, chunkId, '');
+        mint(minter, tier, chunkId, '');
     }
 
     // DO NOT call directly outside the logic of CBKLandSale to avoid breaking tier and chunk logic
-    function mintWithURI(address minter, uint256 tier, uint256 chunkId, string memory uri) public restricted {
+    function mint(address minter, uint256 tier, uint256 chunkId, string memory uri) public restricted {
         uint256 tokenID = landMinted++;
         
         landData[tokenID][LT] = tier;
