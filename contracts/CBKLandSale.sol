@@ -69,12 +69,13 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
     /* ========== RESERVED CHUNKS SALE INFO ========== */
     EnumerableSet.UintSet private reservedChunkIds;
-    mapping(address => EnumerableSet.UintSet) private reservedChunks;
-    mapping(address => uint256) private reservedChunksCounter;
-    mapping(uint256 => address) private chunksReservedFor;
 
     bool internal _enabled;
     bool internal _reservedEnabled;
+    
+    mapping(address => EnumerableSet.UintSet) private reservedChunks;
+    mapping(address => uint256) private reservedChunksCounter;
+    mapping(uint256 => address) private chunksReservedFor;
 
     function initialize(CBKLand _cbkLand)
         public
