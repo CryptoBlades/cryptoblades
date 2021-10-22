@@ -659,9 +659,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
         restricted noFreshLookup(id)
     returns (int128, int128, uint24, uint8) {
-
+        // check if the weapon is busy
+        require(getNftVar(id, NFTVAR_BUSY) == 0);
         drainDurability(id, drainAmount, allowNegativeDurability);
-
         Weapon storage wep = tokens[id];
         return (
             oneFrac.add(powerMultPerPointBasic.mul(
