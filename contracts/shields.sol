@@ -43,6 +43,11 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         cosmetics: 0-255, to be used for future display purposes
     */
 
+    function migrateTo_NftVars() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        NFTVAR_BUSY = 1;
+    }
+
     struct Shield {
         uint16 properties; // right to left: 3b stars, 2b trait, 7b stat pattern, 4b EMPTY
         // stats (each point refers to .25% improvement)
@@ -75,6 +80,9 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     Promos public promos;
 
     event NewShield(uint256 indexed shield, address indexed minter);
+
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;
+    uint256 public NFTVAR_BUSY;
 
     modifier restricted() {
         _restricted();
@@ -369,7 +377,8 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount) public
         restricted noFreshLookup(id)
     returns (int128, int128, uint24, uint8) {
-
+                // check if the Shield is busy
+        require(getNftVar(id, NFTVAR_BUSY) == 0, "Shield is busy");
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require(durabilityPoints >= drainAmount, "Not enough durability!");
 
@@ -441,5 +450,12 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
+    }
+
+    function getNftVar(uint256 shieldID, uint256 nftVar) public view returns(uint256) {
+        return nftVars[shieldID][nftVar];
+    }
+    function setNftVar(uint256 shieldID, uint256 nftVar, uint8 value) public {
+        nftVars[shieldID][nftVar] = value;
     }
 }

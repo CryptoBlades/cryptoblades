@@ -183,6 +183,7 @@ async function prepareContracts(accounts) {
   await characters.migrateTo_NftVars();
 
   await shields.migrateTo_surprise(promos.address);
+  await shields.migrateTo_NftVars();
 
   await game.migrateTo_ef994e2(promos.address);
   await game.migrateTo_23b3a8b(skillStakingRewards.address);
