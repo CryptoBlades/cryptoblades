@@ -74,6 +74,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev percentages of ranked prize distribution by fighter rank (represented as index)
     uint256[] public prizePercentages;
+    /// @dev characters by id that are on queue to perform a duel
+    EnumerableSet.UintSet private _duelQueue;
 
     /// @dev Fighter by characterID
     mapping(uint256 => Fighter) public fighterByCharacter;
@@ -265,8 +267,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         );
     }
 
-    /// @dev performs a given character's duel against its opponent
-    function performDuel(uint256 attackerID)
+    /// @dev adds a character to the duel queue
+    function preparePerformDuel(uint256 attackerID)
         external
         isOwnedCharacter(attackerID)
     {
@@ -276,70 +278,94 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             "Decision time expired"
         );
 
-        uint256 defenderID = getOpponent(attackerID);
-        uint8 defenderTrait = characters.getTrait(defenderID);
-        uint8 attackerTrait = characters.getTrait(attackerID);
-
-        uint24 attackerRoll = _getCharacterPowerRoll(attackerID, defenderTrait);
-        uint24 defenderRoll = _getCharacterPowerRoll(defenderID, attackerTrait);
-
-        uint256 winnerID = attackerRoll >= defenderRoll
-            ? attackerID
-            : defenderID;
-        uint256 loserID = attackerRoll >= defenderRoll
-            ? defenderID
-            : attackerID;
-
-        emit DuelFinished(
-            attackerID,
-            defenderID,
-            block.timestamp,
-            attackerRoll,
-            defenderRoll,
-            attackerRoll >= defenderRoll
+        require(
+            !_duelQueue.contains(attackerID),
+            "Character is already in duel queue"
         );
 
-        BountyDistribution
-            memory bountyDistribution = _getDuelBountyDistribution(attackerID);
+        _duelQueue.add(attackerID);
+    }
 
-        fighterByCharacter[winnerID].wager = fighterByCharacter[winnerID]
-            .wager
-            .add(bountyDistribution.winnerReward);
-        fighterByCharacter[loserID].wager = fighterByCharacter[loserID]
-            .wager
-            .sub(bountyDistribution.loserPayment);
+    /// @dev performs all queued duels
+    function performDuels(uint256[] calldata attackerIDs) external restricted {
+        for (uint256 i = 0; i < attackerIDs.length; i++) {
+            uint256 attackerID = _duelQueue.at(i);
+            uint256 defenderID = getOpponent(attackerID);
+            uint8 defenderTrait = characters.getTrait(defenderID);
+            uint8 attackerTrait = characters.getTrait(attackerID);
 
-        if (
-            fighterByCharacter[loserID].wager < getDuelCost(loserID) ||
-            fighterByCharacter[loserID].wager < getEntryWager(loserID).div(4)
-        ) {
-            _removeCharacterFromArena(loserID);
+            uint24 attackerRoll = _getCharacterPowerRoll(
+                attackerID,
+                defenderTrait
+            );
+            uint24 defenderRoll = _getCharacterPowerRoll(
+                defenderID,
+                attackerTrait
+            );
+
+            uint256 winnerID = attackerRoll >= defenderRoll
+                ? attackerID
+                : defenderID;
+            uint256 loserID = attackerRoll >= defenderRoll
+                ? defenderID
+                : attackerID;
+
+            emit DuelFinished(
+                attackerID,
+                defenderID,
+                block.timestamp,
+                attackerRoll,
+                defenderRoll,
+                attackerRoll >= defenderRoll
+            );
+
+            BountyDistribution
+                memory bountyDistribution = _getDuelBountyDistribution(
+                    attackerID
+                );
+
+            fighterByCharacter[winnerID].wager = fighterByCharacter[winnerID]
+                .wager
+                .add(bountyDistribution.winnerReward);
+            fighterByCharacter[loserID].wager = fighterByCharacter[loserID]
+                .wager
+                .sub(bountyDistribution.loserPayment);
+
+            if (
+                fighterByCharacter[loserID].wager < getDuelCost(loserID) ||
+                fighterByCharacter[loserID].wager <
+                getEntryWager(loserID).div(4)
+            ) {
+                _removeCharacterFromArena(loserID);
+            }
+
+            // add ranking points to the winner
+            characterRankingPoints[winnerID] = characterRankingPoints[winnerID]
+                .add(winningPoints);
+            // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract the ranking points
+            if (characterRankingPoints[loserID] <= 3) {
+                characterRankingPoints[loserID] = 0;
+            } else {
+                characterRankingPoints[loserID] = characterRankingPoints[
+                    loserID
+                ].sub(losingPoints);
+            }
+
+            processWinner(winnerID);
+            processLoser(loserID);
+
+            // add to the rankings pool
+            _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
+                getArenaTier(attackerID)
+            ].add(bountyDistribution.rankingPoolTax);
+
+            _updateLastActivityTimestamp(attackerID);
+            _updateLastActivityTimestamp(defenderID);
+
+            duelByAttacker[attackerID].isPending = false;
+
+            _duelQueue.remove(attackerID);
         }
-
-        // add ranking points to the winner
-        characterRankingPoints[winnerID] = characterRankingPoints[winnerID].add(
-            winningPoints
-        );
-        // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract the ranking points
-        if (characterRankingPoints[loserID] <= 3) {
-            characterRankingPoints[loserID] = 0;
-        } else {
-            characterRankingPoints[loserID] = characterRankingPoints[loserID]
-                .sub(losingPoints);
-        }
-
-        processWinner(winnerID);
-        processLoser(loserID);
-
-        // add to the rankings pool
-        _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
-            getArenaTier(attackerID)
-        ].add(bountyDistribution.rankingPoolTax);
-
-        _updateLastActivityTimestamp(attackerID);
-        _updateLastActivityTimestamp(defenderID);
-
-        duelByAttacker[attackerID].isPending = false;
     }
 
     /// @dev withdraws a character and its items from the arena.
@@ -655,7 +681,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint8 trait = characters.getTrait(characterID);
         uint24 basePower = characters.getPower(characterID);
         uint256 weaponID = fighterByCharacter[characterID].weaponID;
-        uint256 seed = randoms.getRandomSeed(msg.sender);
+        uint256 seed = randoms.getRandomSeedUsingHash(
+            msg.sender,
+            blockhash(block.number)
+        );
 
         (
             ,
@@ -884,5 +913,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev returns ranked prize percentages distribution
     function getPrizePercentages() external view returns (uint256[] memory) {
         return prizePercentages;
+    }
+
+    /// @dev returns the current duel queue
+    function getDuelQueue() public view returns (uint256[] memory) {
+        uint256 length = _duelQueue.length();
+        uint256[] memory values = new uint256[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            values[i] = _duelQueue.at(i);
+        }
+
+        return values;
     }
 }
