@@ -16,17 +16,27 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint256 public constant LC = 1; // Land Chunk Id
     uint256 public constant LX = 2; // Land Coordinate X
     uint256 public constant LY = 3; // Land Coordinate Y
+    
 
     event LandMinted(address indexed minter, uint256 id, uint256 tier, uint256 chunkId);
     event LandTransfered(address indexed from, address indexed to, uint256 id);
+    event LandTokenMinted(address indexed reseller, address indexed minter, uint256 id, uint256 tier);
 
     // TotalLand
     uint256 landMinted;
     // Avoiding structs for stats
     mapping(uint256 => mapping(uint256 => uint256)) landData;
 
-    uint256 public constant LSU = 0; // URI
     mapping(uint256 => mapping(uint256 => string)) landStrData;
+
+    uint256 public constant LBT = 0; // Land is a Token, it will have its chunkId updated later
+    mapping(uint256 => mapping(uint256 => bool)) landBoolData;
+
+    uint256 public constant LAR = 0; // Land Reseller, the one who minted the token
+    mapping(uint256 => mapping(uint256 => address)) landAddressData;
+
+    uint256 public constant TSU = 0; // URI of a tier. Will put this in land NFT because it kinda belongs here
+    mapping(uint256 => mapping(uint256 => string)) tierStrData;
 
     function initialize () public initializer {
         __ERC721_init("CryptoBladesKingdoms Land", "CBKL");
@@ -44,23 +54,18 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
     }
 
-    function get(uint256 id) public view returns (uint256, uint256, uint256, uint256) {
-        return (landData[id][LT], landData[id][LC], landData[id][LX], landData[id][LY]);
+    function get(uint256 id) public view returns (uint256, uint256, uint256, uint256, uint256, bool) {
+        return (landData[id][LT], landData[id][LC], landData[id][LX], landData[id][LY], id, landBoolData[id][LBT]);
     }
 
-    // tier, chunkid, x, y
-    function getOwned(address owner) public view returns (uint256, uint256, uint256, uint256) {
+    // tier, chunkid, x, y, id, isToken (id was added later, that's why not first)
+    function getOwned(address owner) public view returns (uint256, uint256, uint256, uint256, uint256, bool) {
         uint256 id = tokenOfOwnerByIndex(owner, 0);
         return get(id);
     }
 
     // DO NOT call directly outside the logic of CBKLandSale to avoid breaking tier and chunk logic
     function mint(address minter, uint256 tier, uint256 chunkId) public restricted {
-        mint(minter, tier, chunkId, '');
-    }
-
-    // DO NOT call directly outside the logic of CBKLandSale to avoid breaking tier and chunk logic
-    function mint(address minter, uint256 tier, uint256 chunkId, string memory uri) public restricted {
         uint256 tokenID = landMinted++;
         
         landData[tokenID][LT] = tier;
@@ -69,20 +74,31 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         //landData[tokenID][LY] = y; // not yet
         
         _mint(minter, tokenID);
-        _setURI(tokenID, uri);
         emit LandMinted(minter, tokenID, tier, chunkId);
     }
 
-    function _setURI(uint256 id, string memory uri) internal {
-        landStrData[id][LSU] = uri;
+    function mintLandToken(address reseller, address minter, uint256 tier) public restricted {
+        uint256 tokenID = landMinted++;
+        
+        landData[tokenID][LT] = tier;
+        landBoolData[tokenID][LBT] = true;
+        landAddressData[tokenID][LAR] = reseller;
+
+        _mint(minter, tokenID);
+        emit LandTokenMinted(reseller, minter, tokenID, tier);
     }
 
-    function setURI(uint256 id, string memory uri) public restricted {
-        _setURI(id, uri);
+    function getLandTierURI(uint256 id) public view returns (string memory uri) {
+       (uint256 tier,,,,,) = get(id);
+        return getTierURI(tier);
     }
 
-    function getURI(uint256 id) public view returns (string memory uri) {
-        uri = landStrData[id][LSU];
+    function getTierURI(uint256 tier) public view returns (string memory uri) {
+        return tierStrData[tier][TSU];
+    }
+
+    function setTierStr(uint256 tier, uint256 index, string memory val) public restricted {
+        tierStrData[tier][index] = val;
     }
 
     // TODO: block land transfer
