@@ -167,6 +167,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 "Not shield owner"
             );
             require(!_shieldsInArena[shieldID], "Shield already in arena");
+            require(shields.getNftVar(shieldID, 1) == 0, "Shield is busy");
         }
 
         _;
@@ -218,6 +219,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _weaponsInArena[weaponID] = true;
 
         if (useShield) _shieldsInArena[shieldID] = true;
+        if (useShield) shields.setNftVar(shieldID, 1, 1);
 
         _fightersByTier[tier].add(characterID);
         _fightersByPlayer[msg.sender].add(characterID);
@@ -242,6 +244,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         skillToken.transferFrom(msg.sender, address(this), wager);
         // set the character as BUSY setting NFTVAR_BUSY to 1
         characters.setNftVar(characterID, 1, 1);
+        weapons.setNftVar(weaponID, 1, 1);
     }
 
     /// @dev attempts to find an opponent for a character
@@ -788,8 +791,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
-        // setting characters NFTVAR_BUSY to 0
+        // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, 1, 0);
+        weapons.setNftVar(weaponID, 1, 0);
+        shield.setNftVar(shieldID, 1, 0);
     }
 
     /// @dev attempts to find an opponent for a character.
