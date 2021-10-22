@@ -171,7 +171,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     function joinRaid(uint256 characterID, uint256 weaponID) public {
         require(characters.canRaid(msg.sender, characterID));
         require(weapons.canRaid(msg.sender, weaponID));
-        require(characters.getNftVar(characterID, 1) == 0,"Character is busy.");
+        //check if weapon is busy
+        require(weapons.getNftVar(weaponID, 1) == 0, "weapon is busy");
         /*require(characters.ownerOf(characterID) == msg.sender);
         require(weapons.ownerOf(weaponID) == msg.sender);
         require(characters.getStaminaPoints(characterID) > 0, "You cannot join with 0 character stamina");
@@ -221,6 +222,9 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             joinCostPaid = game.usdToSkill(joinCost);
             game.payContractTokenOnly(msg.sender, joinCostPaid);
         }
+        //set character as NFTVAR_BUSY = 1
+        characters.setNftVar(characterID,1, 1);
+        weapons.setNftVar(weaponID,1, 1);
         emit RaidJoined(raidIndex,
             msg.sender,
             characterID,
@@ -341,6 +345,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
                 );
             }
             characters.processRaidParticipation(raider.charID, victory, uint16(earlyMultiplier.mulu(xpReward)));
+            // set weapon as not busy, this is the only place we can place it due to weapons contract size.
+            weapons.setNftVar(raider.wepID, 1, 0);
         }
 
         raidRewardClaimed[claimRaidIndex][msg.sender] = true;

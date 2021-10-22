@@ -2322,7 +2322,7 @@ contract("PvpArena", (accounts) => {
       expect(didBalanceTwoGrowAgain).to.equal(false);
     });
   });
-  describe("#InteractionsWithOtherContracts", () => {
+  describe.only("#InteractionsWithOtherContracts", () => {
     let character1ID;
     let character2ID;
     let weapon1ID;

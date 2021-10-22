@@ -654,7 +654,9 @@ contract Characters is
     }
 
     function canRaid(address user, uint256 id) public view returns (bool) {
+        require(getNftVar(id, NFTVAR_BUSY) == 0, "Character is busy");
         return ownerOf(id) == user && getStaminaPoints(id) > 0;
+        
     }
 
     function _beforeTokenTransfer(
