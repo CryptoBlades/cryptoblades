@@ -33,7 +33,7 @@
       <div class="w-100" style="padding-bottom: 100%;">
         <div id="map-grid" class="map-grid">
           <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)">
-            <span>{{zonesPopulation[zoneId]}}/10 000</span>
+            <span>{{zonesPopulation[zoneId]}}/{{maxZonePopulation.toLocaleString()}}</span>
           </div>
         </div>
       </div>
@@ -47,7 +47,7 @@
           v-for="(chunkId, index) in chunksIds" :key="chunkId"
            @click="selectChunk(chunkId, index)" :style="[ selectedChunk === chunkId ? {backgroundColor: 'greenyellow'} : null ]">
             <span>ID: {{chunkId}}</span>
-            <span>{{chunksPopulation[index]}}/100</span>
+            <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
             <span v-if="reservedChunks.includes(chunkId.toString())">RESERVED</span>
            </div>
         </div>
@@ -159,8 +159,10 @@ interface Data {
   selectedCurrency: number;
   selectedZone: number | undefined;
   selectedChunk: number | undefined;
-  selectedChunkPopulation: number | undefined;
   selectedChunkAvailable: boolean;
+  selectedChunkPopulation: number | undefined;
+  maxZonePopulation: number;
+  maxChunkPopulation: number;
   zonesIds: number[];
   zonesPopulation: number[];
   chunksIds: number[];
@@ -307,8 +309,10 @@ export default Vue.extend({
       selectedCurrency: 0,
       selectedZone: undefined,
       selectedChunk: undefined,
-      selectedChunkPopulation: 0,
       selectedChunkAvailable: false,
+      selectedChunkPopulation: 0,
+      maxZonePopulation: 10000,
+      maxChunkPopulation: 100,
       zonesIds: Array.from({length: 100}, (x, i) => i),
       zonesPopulation: [],
       chunksIds: Array.from({length: 100}, (x, i) => i),
@@ -859,7 +863,7 @@ export default Vue.extend({
 
   .zone,
   .chunk {
-    font-size: 0.75rem;
+    font-size: 0.5rem;
   }
 
   .show-favorite {
