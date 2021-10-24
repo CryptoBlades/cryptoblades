@@ -136,12 +136,12 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         _;
     }
 
-    modifier reservedChunkAvailable(uint256 chunkId) {
-        require(chunkId <= MAX_CHUNK_ID, "Chunk not valid");
-        require(reservedChunks[msg.sender].contains(chunkId), "Chunk not reserved");
-        require(chunkT2LandSales[chunkId] < _allowedLandSalePerChunk, "Chunk not available");
-        _;
-    }
+    // modifier reservedChunkAvailable(uint256 chunkId) {
+    //     require(chunkId <= MAX_CHUNK_ID, "Chunk not valid");
+    //     require(reservedChunks[msg.sender].contains(chunkId), "Chunk not reserved");
+    //     require(chunkT2LandSales[chunkId] < _allowedLandSalePerChunk, "Chunk not available");
+    //     _;
+    // }
 
     // Will not overcomplicate the math on this one. Keeping it simple on purpose for gas cost.
     // Limited to t2 because T3 not many and T1 round robins
@@ -272,6 +272,13 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     //     resellerLandBudget[reseller][TIER_THREE] = t3;
     // }
 
+    // Solidity hates polymorphism for this particular function
+    function giveT1LandReservedBulk(address[] memory players, address reseller) public restricted {
+        for (uint256 i = 0; i < players.length; i++) {
+            giveT1LandReserved(players[i], reseller);
+        }
+    }
+
     function giveT1LandReserved(address player, address reseller) public restricted {
         uint256 rcLength = reservedChunks[reseller].length();
         require(rcLength > 0, "no reserved chunks");
@@ -292,6 +299,29 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
             }
         }
 
+        // Could not find a land
+        revert();
+    }
+
+    function giveT1LandReservedBulk(address[] memory players, address reseller, uint256 chunkId) public restricted {
+        require(reservedChunks[reseller].contains(chunkId), "not reserved");
+        for (uint256 i = 0; i < players.length; i++) {
+            giveT1LandReserved(players[i], reseller, chunkId);
+        }
+    }
+
+    function giveT1LandReserved(address player, address reseller, uint256 chunkId) public restricted {
+        require(reservedChunks[reseller].contains(chunkId), "not reserved");
+        if(chunkT2LandSales[chunkId] < _allowedLandSalePerChunk) {
+            if(chunkT2LandSales[chunkId] == 0){
+                chunksWithT2Land++;
+            }
+            chunkT2LandSales[chunkId]++;
+            chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
+            cbkLand.mint(player, TIER_ONE, chunkId, reseller);
+            emit T1GivenReserved(reseller, player, chunkId);
+             return;
+        }
         // Could not find a land
         revert();
     }
