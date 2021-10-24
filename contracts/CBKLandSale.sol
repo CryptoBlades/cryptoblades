@@ -89,6 +89,8 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     mapping(uint256 => address) private playerReservedLandReseller;
     mapping(uint256 => address) private playerReservedLandForPlayer;
     
+    EnumerableSet.UintSet private takenT3Chunks;
+
     function initialize(CBKLand _cbkLand)
         public
         initializer
@@ -123,8 +125,8 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         _;
     }
 
-    modifier canPurchase() {
-        require(purchaseAddressMapping[msg.sender].purchasedTier == 0, "Already purchased");
+    modifier canPurchase(address buyer) {
+        require(purchaseAddressMapping[buyer].purchasedTier == 0, "Already purchased");
         _;
     }
 
@@ -173,7 +175,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
     }
 
-    function giveT1Land(address buyer) public saleAllowed canPurchase tierAvailable(TIER_ONE) restricted {
+    function giveT1Land(address buyer) public saleAllowed canPurchase(buyer) tierAvailable(TIER_ONE) restricted {
         purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_ONE, t1LandsSold, false);
         sales[totalSales++] = purchaseAddressMapping[buyer];
         emit T1Given(buyer, t1LandsSold);
@@ -182,7 +184,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         cbkLand.mint(buyer, TIER_ONE, 0);
     }
 
-    function giveT2Land(address buyer, uint256 chunkId) public saleAllowed canPurchase tierAvailable(TIER_TWO) chunkAvailable(chunkId) restricted {
+    function giveT2Land(address buyer, uint256 chunkId) public saleAllowed canPurchase(buyer) tierAvailable(TIER_TWO) chunkAvailable(chunkId) restricted {
         // First t2 sale
         if(chunkT2LandSales[chunkId] == 0){
             chunksWithT2Land++;
@@ -200,7 +202,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         cbkLand.mint(buyer, TIER_TWO, chunkId);
     }
 
-    function giveT3Land(address buyer, uint256 chunkId) public saleAllowed canPurchase tierAvailable(TIER_THREE) chunkAvailable(chunkId) t3Available(chunkId) restricted {
+    function giveT3Land(address buyer, uint256 chunkId) public saleAllowed canPurchase(buyer) tierAvailable(TIER_THREE) chunkAvailable(chunkId) t3Available(chunkId) restricted {
         t3LandsSold++;
         
         purchaseAddressMapping[buyer] = purchaseInfo(buyer, TIER_THREE, chunkId, false);
@@ -209,6 +211,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         chunkT3LandSoldTo[chunkId] = buyer;
         chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
 
+        takenT3Chunks.add(chunkId);
         emit T3Given(buyer, chunkId);
         cbkLand.mint(buyer, TIER_THREE, chunkId);
     }
@@ -248,7 +251,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         availableLand[TIER_THREE]--;
         chunkT3LandSoldTo[chunkId] = buyer;
         chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
-
+        takenT3Chunks.add(chunkId);
         emit T3GivenFree(buyer, chunkId);
         cbkLand.mint(buyer, TIER_THREE, chunkId);
     }
@@ -599,6 +602,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         if(tier == 3) {
             require(_chunkAvailableForT3(chunkId), "T3 NA"); 
             chunkT3LandSoldTo[chunkId] = msg.sender;
+            takenT3Chunks.add(chunkId);
         }
 
         if(tier == 2) {
@@ -626,6 +630,17 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         uint256 index = 0;
         for (uint256 i = 0; i < amount; i++) {
             uint256 id = reservedChunkIds.at(i);
+                chunkIds[index++] = id;
+        }
+    }
+
+    function getTakenT3Chunks() public view  returns (uint256[] memory chunkIds) {
+        uint256 amount = takenT3Chunks.length();
+        chunkIds = new uint256[](amount);
+
+        uint256 index = 0;
+        for (uint256 i = 0; i < amount; i++) {
+            uint256 id = takenT3Chunks.at(i);
                 chunkIds[index++] = id;
         }
     }
