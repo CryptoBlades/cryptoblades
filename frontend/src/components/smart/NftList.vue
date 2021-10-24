@@ -5,7 +5,7 @@
         <span>Nothing to buy at this time</span>
       </div>
       <div class="centered-text-div" v-if="(isSpecials && !canPurchaseLand && purchase)">
-        <span>You can purchase only one lad, your purchased</span><br/>
+        <span>You can purchase only one land, your purchase:</span><br/>
         <span>Tier: {{purchase.tier}}</span><br/>
         <span>Chunk ID: {{purchase.chunkId}}</span>
       </div>
@@ -240,9 +240,9 @@ interface StoreMappedActions {
   getZoneChunkPopulation(payload: {zoneId: string}): Promise<number[]>;
   getChunkPopulation(payload: {chunkIds: number[]}): Promise<number[]>;
   getPurchase(): Promise<{tier: string, chunkId: string}>;
-  purchaseT1CBKLand(payload: {price: string}): Promise<void>;
+  purchaseT1CBKLand(payload: {price: string, currency: number}): Promise<void>;
   purchaseT2CBKLand(payload: {price: string, chunkId: number, currency: number}): Promise<void>;
-  purchaseT3CBKLand(payload: {price: string, chunkId: number}): Promise<void>;
+  purchaseT3CBKLand(payload: {price: string, chunkId: number, currency: number}): Promise<void>;
   getCBKLandPrice(payload: {tier: number, currency: number}): Promise<string>;
   getReservedChunksIds(): Promise<string[]>;
   getAvailableLand(): Promise<{t1Land: string, t2Land: string, t3Land: string}>
@@ -659,7 +659,7 @@ export default Vue.extend({
         });
       }
       if(this.selectedTier === 3) {
-        await this.purchaseT3CBKLand({price, chunkId}).then(() => {
+        await this.purchaseT3CBKLand({price, chunkId, currency: this.selectedCurrency}).then(() => {
           if(this.selectedZone !== undefined) {
             this.updateChunksPopulation(this.selectedZone);
           }
@@ -722,7 +722,7 @@ export default Vue.extend({
       }
       if(item.type === 't1land'){
         const price = await this.getCBKLandPrice({tier: 1, currency: this.selectedCurrency});
-        await this.purchaseT1CBKLand({price});
+        await this.purchaseT1CBKLand({price, currency: this.selectedCurrency});
         await this.checkIfCanPurchaseLand();
       }
       if(item.type === 't2land'){

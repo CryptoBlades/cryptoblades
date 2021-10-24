@@ -26,6 +26,7 @@ import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
 import { Nft } from './interfaces/Nft';
 import { getWeaponNameFromSeed } from '@/weapon-name';
 import axios from 'axios';
+import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -2014,51 +2015,87 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
-      async purchaseT1CBKLand({state}, {price}) {
-        const { CryptoBlades,  Blacksmith, SkillToken } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !Blacksmith || !state.defaultAccount) return;
+      async purchaseT1CBKLand({state}, {price, currency}) {
+        const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, price)
-          .send({
-            from: state.defaultAccount
-          });
+        if(currency === 0) {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        } else {
+          const tokenAddress = await Blacksmith.methods
+            .getCurrency(currency)
+            .call(defaultCallOptions(state));
+
+          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+            .approve(Blacksmith.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        }
 
         return await Blacksmith.methods
-          .purchaseT1CBKLand(price, 0).send({
-            from: state.defaultAccount,
+          .purchaseT1CBKLand(price, currency).send({
+            from: state.defaultAccount
           });
       },
 
-      async purchaseT2CBKLand({state}, {price, chunkId}) {
-        const { CryptoBlades,  Blacksmith, SkillToken } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !Blacksmith || !state.defaultAccount) return;
+      async purchaseT2CBKLand({state}, {price, chunkId, currency}) {
+        const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, price)
-          .send({
-            from: state.defaultAccount
-          });
+        if(currency === 0) {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        } else {
+          const tokenAddress = await Blacksmith.methods
+            .getCurrency(currency)
+            .call(defaultCallOptions(state));
+
+          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+            .approve(Blacksmith.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        }
 
         return await Blacksmith.methods
-          .purchaseT2CBKLand(price, chunkId, 0).send({
-            from: state.defaultAccount,
+          .purchaseT2CBKLand(price, chunkId, currency).send({
+            from: state.defaultAccount
           });
       },
 
-      async purchaseT3CBKLand({state}, {price, chunkId}) {
-        const { CryptoBlades,  Blacksmith, SkillToken } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !Blacksmith || !state.defaultAccount) return;
+      async purchaseT3CBKLand({state}, {price, chunkId, currency}) {
+        const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, price)
-          .send({
-            from: state.defaultAccount
-          });
+        if(currency === 0) {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        } else {
+          const tokenAddress = await Blacksmith.methods
+            .getCurrency(currency)
+            .call(defaultCallOptions(state));
+
+          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+            .approve(Blacksmith.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        }
 
         return await Blacksmith.methods
-          .purchaseT3CBKLand(price, chunkId, 0).send({
-            from: state.defaultAccount,
+          .purchaseT3CBKLand(price, chunkId, currency).send({
+            from: state.defaultAccount
           });
       },
 
