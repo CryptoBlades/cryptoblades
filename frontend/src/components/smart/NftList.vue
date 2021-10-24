@@ -4,8 +4,8 @@
       <div class="centered-text-div" v-if="(!nftIdTypes || nftIdTypes.length === 0)">
         <span>Nothing to buy at this time</span>
       </div>
-      <div class="centered-text-div" v-if="(isSpecials && !canPurchaseLand)">
-        <span>Your owned land</span><br/>
+      <div class="centered-text-div" v-if="(isSpecials && !canPurchaseLand && purchase)">
+        <span>You can purchase only one lad, your purchased</span><br/>
         <span>Tier: {{purchase.tier}}</span><br/>
         <span>Chunk ID: {{purchase.chunkId}}</span>
       </div>
@@ -33,7 +33,7 @@
       <div class="w-100" style="padding-bottom: 100%;">
         <div id="map-grid" class="map-grid">
           <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)">
-            <span>{{zonesPopulation[zoneId]}}/10000</span>
+            <span>{{zonesPopulation[zoneId]}}/10 000</span>
           </div>
         </div>
       </div>
@@ -46,7 +46,7 @@
           <div class="chunk" :class="[reservedChunks.includes(chunkId.toString()) ? 'reserved' : null ]"
           v-for="(chunkId, index) in chunksIds" :key="chunkId"
            @click="selectChunk(chunkId, index)" :style="[ selectedChunk === chunkId ? {backgroundColor: 'greenyellow'} : null ]">
-           <span>ID: {{chunkId}}</span>
+            <span>ID: {{chunkId}}</span>
             <span>{{chunksPopulation[index]}}/100</span>
             <span v-if="reservedChunks.includes(chunkId.toString())">RESERVED</span>
            </div>
@@ -156,6 +156,7 @@ interface Data {
   canPurchaseLand: boolean;
   purchase: Land | undefined;
   selectedTier: number;
+  selectedCurrency: number;
   selectedZone: number | undefined;
   selectedChunk: number | undefined;
   selectedChunkPopulation: number | undefined;
@@ -216,7 +217,7 @@ interface StoreMappedActions {
   purchaseT1CBKLand(payload: {price: string}): Promise<void>;
   purchaseT2CBKLand(payload: {price: string, chunkId: number}): Promise<void>;
   purchaseT3CBKLand(payload: {price: string, chunkId: number}): Promise<void>;
-  getCBKLandPrice(payload: {tier: number}): Promise<string>;
+  getCBKLandPrice(payload: {tier: number, currency: number}): Promise<string>;
   getReservedChunksIds(): Promise<string[]>;
   getAvailableLand(): Promise<{t1Land: string, t2Land: string, t3Land: string}>
 }
@@ -303,6 +304,7 @@ export default Vue.extend({
       canPurchaseLand: false,
       purchase: undefined,
       selectedTier: 0,
+      selectedCurrency: 0,
       selectedZone: undefined,
       selectedChunk: undefined,
       selectedChunkPopulation: 0,
@@ -595,7 +597,7 @@ export default Vue.extend({
         console.error('Chunk not available');
         return;
       }
-      const price = await this.getCBKLandPrice({tier: this.selectedTier});
+      const price = await this.getCBKLandPrice({tier: this.selectedTier, currency: this.selectedCurrency});
       if(this.selectedTier === 2) {
         await this.purchaseT2CBKLand({price, chunkId}).then(() => {
           if(this.selectedZone !== undefined) {
@@ -666,7 +668,7 @@ export default Vue.extend({
         await this.purchaseCharacterCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});
       }
       if(item.type === 't1land'){
-        const price = await this.getCBKLandPrice({tier: 1});
+        const price = await this.getCBKLandPrice({tier: 1, currency: this.selectedCurrency});
         await this.purchaseT1CBKLand({price});
         await this.checkIfCanPurchaseLand();
       }
@@ -853,6 +855,11 @@ export default Vue.extend({
   .weapon-grid {
     justify-content: center;
     margin-top: 10px;
+  }
+
+  .zone,
+  .chunk {
+    font-size: 0.75rem;
   }
 
   .show-favorite {

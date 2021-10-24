@@ -2062,11 +2062,11 @@ export function createStore(web3: Web3) {
           });
       },
 
-      async getCBKLandPrice({state}, {tier}) {
+      async getCBKLandPrice({state}, {tier, currency}) {
         const Blacksmith = state.contracts().Blacksmith!;
 
         return await Blacksmith.methods
-          .getCBKLandPrice(tier, 0)
+          .getCBKLandPrice(tier, currency)
           .call(defaultCallOptions(state));
       },
 
