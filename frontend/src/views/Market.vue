@@ -661,7 +661,7 @@
            <div class="row">
             <div class="col-sm-4 special-offer-items">
               <div class="special-offer-bg">
-                 <nft-list :isShop="true" :nftIdTypes="specialOffersNftList"/>
+                 <nft-list :isShop="true" :nftIdTypes="specialOffersNftList" :isSpecials="true"/>
               </div>
             </div>
             <div class="col-sm-8 shop-items">

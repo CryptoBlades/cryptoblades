@@ -4,6 +4,11 @@
       <div class="centered-text-div" v-if="(!nftIdTypes || nftIdTypes.length === 0)">
         <span>Nothing to buy at this time</span>
       </div>
+      <div class="centered-text-div" v-if="(isSpecials && !canPurchaseLand)">
+        <span>Your owned land</span><br/>
+        <span>Tier: {{purchase.tier}}</span><br/>
+        <span>Chunk ID: {{purchase.chunkId}}</span>
+      </div>
       <ul class="nft-grid">
         <li class="nft"
         v-for="nft in nftIdTypes" :key="`${nft.type}.${nft.id}`">
@@ -28,7 +33,7 @@
       <div class="w-100" style="padding-bottom: 100%;">
         <div id="map-grid" class="map-grid">
           <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)">
-            <span>{{zonesPopulation[zoneId]}}/100</span>
+            <span>{{zonesPopulation[zoneId]}}/10000</span>
           </div>
         </div>
       </div>
@@ -36,8 +41,8 @@
 
     <b-modal ref="zone-modal" title="Choose chunk" size="lg">
       <div class="w-100" style="padding-bottom: 100%;">
-        <div v-if="selectedZone != undefined" id="zone-grid" class="zone-grid"
-        :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
+        <div v-if="selectedZone !== undefined" id="zone-grid" class="zone-grid"
+             :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
           <div class="chunk" :class="[reservedChunks.includes(chunkId.toString()) ? 'reserved' : null ]"
           v-for="(chunkId, index) in chunksIds" :key="chunkId"
            @click="selectChunk(chunkId, index)" :style="[ selectedChunk === chunkId ? {backgroundColor: 'greenyellow'} : null ]">
@@ -130,6 +135,11 @@ import { Accessors, PropType } from 'vue/types/options';
 import { IState } from '@/interfaces';
 import { BModal } from 'bootstrap-vue';
 
+interface Land {
+  tier: string,
+  chunkId: string,
+}
+
 const sorts = [
   { name: 'Any', dir: '' },
   { name: 'Price: Low -> High', dir: 1 },
@@ -144,6 +154,7 @@ interface Data {
   priceSort: string;
   showFavoriteNfts: boolean;
   canPurchaseLand: boolean;
+  purchase: Land | undefined;
   selectedTier: number;
   selectedZone: number | undefined;
   selectedChunk: number | undefined;
@@ -157,6 +168,7 @@ interface Data {
   t1LandAvailable: boolean;
   t2LandAvailable: boolean;
   t3LandAvailable: boolean;
+  checkIfCanPurchaseLandInterval: ReturnType<typeof setInterval> | null;
 }
 
 export interface NftIdType {
@@ -273,6 +285,10 @@ export default Vue.extend({
       type: Boolean,
       default: true,
     },
+    isSpecials: {
+      type: Boolean,
+      default: false,
+    }
   },
 
   data() {
@@ -285,6 +301,7 @@ export default Vue.extend({
       sorts,
       showFavoriteNfts: true,
       canPurchaseLand: false,
+      purchase: undefined,
       selectedTier: 0,
       selectedZone: undefined,
       selectedChunk: undefined,
@@ -298,6 +315,7 @@ export default Vue.extend({
       t1LandAvailable: false,
       t2LandAvailable: false,
       t3LandAvailable: false,
+      checkIfCanPurchaseLandInterval: null,
     } as Data;
   },
 
@@ -515,6 +533,7 @@ export default Vue.extend({
 
     async checkIfCanPurchaseLand() {
       const purchase = await this.getPurchase();
+      this.purchase = purchase;
       this.canPurchaseLand = purchase.tier === '0';
     },
 
@@ -591,6 +610,8 @@ export default Vue.extend({
           }
         });
       }
+      (this.$refs['zone-modal'] as BModal).hide();
+      (this.$refs['map-modal'] as BModal).hide();
       await this.checkIfCanPurchaseLand();
     },
 
@@ -604,10 +625,7 @@ export default Vue.extend({
       if(type === 't2land' && !this.t2LandAvailable) {
         return true;
       }
-      if(type === 't3land' && !this.t3LandAvailable) {
-        return true;
-      }
-      return false;
+      return type === 't3land' && !this.t3LandAvailable;
     },
 
     async buyItem(item: nftItem) {
@@ -668,12 +686,6 @@ export default Vue.extend({
 
   async mounted() {
     this.checkStorageFavorite();
-    await this.checkIfCanPurchaseLand();
-    this.reservedChunks = await this.getReservedChunksIds();
-    const {t1Land, t2Land, t3Land} = await this.getAvailableLand();
-    this.t1LandAvailable = t1Land !== '0';
-    this.t2LandAvailable = t2Land !== '0';
-    this.t3LandAvailable = t3Land !== '0';
 
     if(!this.showGivenNftIdTypes) {
       await this.fetchShields(this.ownedShieldIds);
@@ -693,6 +705,22 @@ export default Vue.extend({
       this.typeFilter = sessionStorage.getItem('nft-typefilter') || '';
       this.starFilter = sessionStorage.getItem('nft-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('nft-elementfilter') || '';
+    }
+
+    this.checkIfCanPurchaseLandInterval = setInterval(async () => {
+      await this.checkIfCanPurchaseLand();
+    }, 3000);
+
+    this.reservedChunks = await this.getReservedChunksIds();
+    const {t1Land, t2Land, t3Land} = await this.getAvailableLand();
+    this.t1LandAvailable = t1Land !== '0';
+    this.t2LandAvailable = t2Land !== '0';
+    this.t3LandAvailable = t3Land !== '0';
+  },
+
+  beforeDestroy() {
+    if(this.checkIfCanPurchaseLandInterval){
+      clearInterval(this.checkIfCanPurchaseLandInterval);
     }
   }
 });
