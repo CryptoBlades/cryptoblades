@@ -285,7 +285,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
                 }
                 chunkT2LandSales[cId]++;
                 chunkZoneLandSales[chunkIdToZoneId(cId)]++;
-                cbkLand.mint(player, TIER_ONE, cId);
+                cbkLand.mint(player, TIER_ONE, cId, reseller);
                 emit T1GivenReserved(reseller, player, cId);
                 reservedChunksCounter[reseller] = uint256(i + 1);
                 return;
