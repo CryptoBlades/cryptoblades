@@ -9,7 +9,7 @@
         <span>Tier: {{purchase.tier}}</span><br/>
         <span>Chunk ID: {{purchase.chunkId}}</span>
       </div>
-      <div class="centered-text-div" v-if="(isSpecials && canPurchaseLand)">
+      <div class="centered-text-div" v-if="(isSpecials && landSaleAllowed && canPurchaseLand)">
         <h4>Currency to buy land with</h4>
         <b-form-select v-model="selectedCurrency" @change="onCurrencyChange()">
           <b-form-select-option :value="null" disabled>Please select Currency to buy land with</b-form-select-option>
@@ -46,7 +46,8 @@
       </ul>
     </div>
 
-    <b-modal class="map-modal" title="Choose zone" ref="map-modal" size="xl" hide-footer>
+    <b-modal class="map-modal" title="Choose zone" ref="map-modal" size="xl" hide-footer
+             @hide="selectedZone = undefined">
       <div class="w-100" style="padding-bottom: 100%;">
         <div id="map-grid" class="map-grid">
           <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)">
@@ -56,7 +57,8 @@
       </div>
     </b-modal>
 
-    <b-modal ref="zone-modal" title="Choose chunk" size="lg">
+    <b-modal ref="zone-modal" title="Choose chunk" size="lg"
+             @hide="selectedChunk = undefined">
       <div class="w-100" style="padding-bottom: 100%;">
         <div v-if="selectedZone !== undefined" id="zone-grid" class="zone-grid"
              :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
@@ -171,6 +173,7 @@ interface Data {
   favorites: Record<string, Record<number, boolean>>;
   priceSort: string;
   showFavoriteNfts: boolean;
+  landSaleAllowed: boolean;
   canPurchaseLand: boolean;
   purchase: Land | undefined;
   selectedTier: number;
@@ -245,7 +248,8 @@ interface StoreMappedActions {
   purchaseT3CBKLand(payload: {price: string, chunkId: number, currency: number}): Promise<void>;
   getCBKLandPrice(payload: {tier: number, currency: number}): Promise<string>;
   getReservedChunksIds(): Promise<string[]>;
-  getAvailableLand(): Promise<{t1Land: string, t2Land: string, t3Land: string}>
+  getAvailableLand(): Promise<{t1Land: string, t2Land: string, t3Land: string}>;
+  fetchIsLandSaleAllowed(): Promise<boolean>;
 }
 
 export default Vue.extend({
@@ -327,6 +331,7 @@ export default Vue.extend({
       priceSort: '',
       sorts,
       showFavoriteNfts: true,
+      landSaleAllowed: false,
       canPurchaseLand: false,
       purchase: undefined,
       selectedTier: 0,
@@ -493,7 +498,7 @@ export default Vue.extend({
       'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange',
       'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic', 'getAllZonesPopulation', 'checkIfChunkAvailable',
       'getZoneChunkPopulation', 'getChunkPopulation', 'purchaseT1CBKLand', 'purchaseT2CBKLand', 'purchaseT3CBKLand', 'getCBKLandPrice',
-      'getPurchase', 'getReservedChunksIds', 'getAvailableLand'
+      'getPurchase', 'getReservedChunksIds', 'getAvailableLand', 'fetchIsLandSaleAllowed'
     ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
@@ -761,6 +766,8 @@ export default Vue.extend({
       this.starFilter = sessionStorage.getItem('nft-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('nft-elementfilter') || '';
     }
+
+    this.landSaleAllowed = await this.fetchIsLandSaleAllowed();
 
     this.checkIfCanPurchaseLandInterval = setInterval(async () => {
       await this.checkIfCanPurchaseLand();
