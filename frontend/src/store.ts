@@ -3356,22 +3356,6 @@ export function createStore(web3: Web3) {
           console.log('Fetch Duel Cost Error Log: ' + err);
         }
       },
-      async fetchIsAttackerWithinDecisionTime ({state, commit}, {characterID}){
-        const { PvpArena } = state.contracts();
-        if(!PvpArena) return;
-
-        try{
-          const isAttackerWithinDecisionTime = await PvpArena!.methods
-            .isAttackerWithinDecisionTime(characterID)
-            .call(defaultCallOptions(state));
-
-          commit('updateIsAttackerWithinDecisionTime', { isAttackerWithinDecisionTime });
-
-          return isAttackerWithinDecisionTime;
-        }catch(err){
-          console.log('Fetch Is Attacker Within Decision Time Error Log: ' + err);
-        }
-      },
       async fetchIsCharacterAttackable ({state, commit}, {characterID}){
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
@@ -3695,80 +3679,6 @@ export function createStore(web3: Web3) {
           return rankingRewardsPool;
         } catch(err){
           console.log('Ranking Rewards Pool Error Log: ' + err);
-        }
-      },
-      async fetchUnclaimedDuelEarningsById({state, commit},{characterID}){
-        const { PvpArena } = state.contracts();
-        if (!PvpArena) return;
-
-        try{
-          const unclaimedDuelEarningsById = await PvpArena.methods
-            .getUnclaimedDuelEarnings(characterID)
-            .call(defaultCallOptions(state));
-
-          commit('updateUnclaimedDuelEarningsById', unclaimedDuelEarningsById);
-
-          return unclaimedDuelEarningsById;
-
-        }catch(err){
-          console.log('Unclaimed Duel Earnings By Id Error Log: ' + err);
-        }
-      },
-      async fetchAllUnclaimedDuelEarnings({state, commit}){
-        const { PvpArena } = state.contracts();
-        if (!PvpArena) return;
-
-        try{
-          const allUnclaimedDuelEarnings = await PvpArena.methods
-            .getAllUnclaimedDuelEarnings()
-            .call(defaultCallOptions(state));
-
-          commit('updateAllUnclaimedDuelEarnings', allUnclaimedDuelEarnings);
-
-          return allUnclaimedDuelEarnings;
-
-        }catch(err){
-          console.log('All Unclaimed Duel Earnings Error Log: ' + err);
-        }
-      },
-      async withdrawUnclaimedDuelEarningsById({state, dispatch},{characterID}){
-        const { PvpArena } = state.contracts();
-        if(!PvpArena) return;
-
-        try{
-          await PvpArena.methods
-            .withdrawDuelEarnings(characterID)
-            .send({
-              from: state.defaultAccount
-            });
-
-          await Promise.all([
-            dispatch('updatePvPDetails', { characterID }),
-            dispatch('fetchUnclaimedDuelEarningsById',{ characterID }),
-            dispatch('fetchAllUnclaimedDuelEarnings')
-          ]);
-        }catch(err){
-          console.log('Withdraw Unclaimed Duel Earnings By Id Error Log: ' + err);
-        }
-      },
-      async withdrawAllUnclaimedDuelEarnings({state, dispatch}){
-        const { PvpArena } = state.contracts();
-        if(!PvpArena) return;
-
-        try{
-          await PvpArena.methods
-            .withdrawAllDuelEarnings()
-            .send({
-              from: state.defaultAccount
-            });
-
-          await Promise.all([
-            dispatch('fetchSkillBalance'),
-            dispatch('fetchAllUnclaimedDuelEarnings'
-            )]);
-
-        }catch(err){
-          console.log('Withdraw All Unclaimed Rewards Error Log: ' + err);
         }
       },
       async updatePvPDetails({state, dispatch},{characterID}){

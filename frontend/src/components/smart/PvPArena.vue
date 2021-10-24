@@ -359,10 +359,10 @@ export default {
       this.$store.dispatch('withdrawFromArena',{inDuel,characterID});
     },
     async withdrawUnclaimedDuelEarningsByCharacterId(characterID){
-      await this.$store.dispatch('withdrawUnclaimedDuelEarningsById',{ characterID });
+      // await this.$store.dispatch('withdrawUnclaimedDuelEarningsById',{ characterID });
     },
     async withdrawAllUnclaimedDuelEarnings(){
-      await this.$store.dispatch('withdrawAllUnclaimedDuelEarnings');
+      // await this.$store.dispatch('withdrawAllUnclaimedDuelEarnings');
     },
     async getFighter(characterID){
       console.log(await this.$store.dispatch('fetchFighterByCharacterId', { characterID }));
