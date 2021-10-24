@@ -661,7 +661,7 @@
            <div class="row">
             <div class="col-sm-4 special-offer-items">
               <div class="special-offer-bg">
-                 <nft-list :isShop="true" :nftIdTypes="specialOffersNftList"/>
+                 <nft-list :isShop="true" :nftIdTypes="specialOffersNftList" :isSpecials="true"/>
               </div>
             </div>
             <div class="col-sm-8 shop-items">
@@ -740,9 +740,6 @@ interface Data {
   shieldTransactionHistoryHeader: any;
   historyCounter: number;
   landSaleAllowed: boolean;
-  t1LandPrice: string;
-  t2LandPrice: string;
-  t3LandPrice: string;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields' | 'ownedCharacterIds' | 'ownedWeaponIds' | 'ownedShieldIds'>;
@@ -806,7 +803,6 @@ interface StoreMappedActions {
   setupWeaponsWithIdsRenames(weaponIds: string[]): Promise<void>;
   setupCharactersWithIdsRenames(weaponIds: string[]): Promise<void>;
   fetchIsLandSaleAllowed(): Promise<boolean>;
-  getCBKLandPrice(payload: {tier: number}): Promise<string>;
 }
 
 export default Vue.extend({
@@ -844,9 +840,6 @@ export default Vue.extend({
       shieldTransactionHistoryHeader: [],
       historyCounter: 0,
       landSaleAllowed: false,
-      t1LandPrice: '',
-      t2LandPrice: '',
-      t3LandPrice: ''
     } as Data;
   },
 
@@ -913,7 +906,6 @@ export default Vue.extend({
         nftList.push({
           id: 't1land',
           type: 't1land',
-          nftPrice: +this.t1LandPrice,
           name: 'Tier 1 Land',
           description: 'A tier 1 land',
           image: '',
@@ -921,7 +913,6 @@ export default Vue.extend({
         nftList.push({
           id: 't2land',
           type: 't2land',
-          nftPrice: +this.t2LandPrice,
           name: 'Tier 2 Land',
           description: 'A tier 2 land',
           image: '',
@@ -929,7 +920,6 @@ export default Vue.extend({
         nftList.push({
           id: 't3land',
           type: 't3land',
-          nftPrice: +this.t3LandPrice,
           name: 'Tier 3 Land',
           description: 'A tier 3 land',
           image: '',
@@ -1331,7 +1321,6 @@ export default Vue.extend({
       'setupWeaponsWithIdsRenames',
       'setupCharactersWithIdsRenames',
       'fetchIsLandSaleAllowed',
-      'getCBKLandPrice',
     ]) as StoreMappedActions),
 
     clearData() {
@@ -2313,9 +2302,6 @@ export default Vue.extend({
   async mounted() {
     assert.ok(this.contracts.Weapons && this.contracts.Characters && this.contracts.Shields, 'Expected required contracts to be available');
     this.landSaleAllowed = await this.fetchIsLandSaleAllowed();
-    this.t1LandPrice = this.convertWeiToSkill(await this.getCBKLandPrice({tier: 1}));
-    this.t2LandPrice = this.convertWeiToSkill(await this.getCBKLandPrice({tier: 2}));
-    this.t3LandPrice = this.convertWeiToSkill(await this.getCBKLandPrice({tier: 3}));
   },
 });
 </script>
