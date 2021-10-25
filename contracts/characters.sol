@@ -73,6 +73,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         characterLimit = 4;
     }
 
+    function migrateTo_PvpArena(PvpArena _pvp) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        pvp = _pvp;
+    }
+    
     function migrateTo_NftVars() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
         NFTVAR_BUSY = 1;
