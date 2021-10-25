@@ -794,7 +794,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, 1, 0);
         weapons.setNftVar(weaponID, 1, 0);
-        shield.setNftVar(shieldID, 1, 0);
+        shields.setNftVar(shieldID, 1, 0);
     }
 
     /// @dev attempts to find an opponent for a character.
