@@ -23,7 +23,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     event T3GivenReserved(address indexed reseller, address indexed owner, uint256 chunkId);
     event LandTokenGiven(address indexed reseller, address indexed owner, uint256 tier);
 
-    event ReservedLandClaimed(address indexed reseller, address indexed owner, uint256 tier, uint256 chunkId);
+    event ReservedLandClaimed(uint256 indexed reservation, address indexed reseller, address indexed owner, uint256 tier, uint256 chunkId);
 
     /* ========== LAND SALE INFO ========== */
     uint256 private constant NO_LAND = 0;
@@ -88,6 +88,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) private playerReservedLandTier;
     mapping(uint256 => address) private playerReservedLandReseller;
     mapping(uint256 => address) private playerReservedLandForPlayer;
+    mapping(uint256 => bool) private playerReservedLandClaimed;
     
     EnumerableSet.UintSet private takenT3Chunks;
 
@@ -582,6 +583,10 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         return getChunksOfReseller(reseller);
     }
 
+    function getInfoOfReservation(uint256 reservationId) public view returns (address player, address reseller, uint256 tier, bool claimed) {
+        return (playerReservedLandForPlayer[reservationId], playerReservedLandReseller[reservationId], playerReservedLandTier[reservationId], playerReservedLandClaimed[reservationId]);
+    }
+
     function getChunksOfReseller(address reservedFor) public view  returns (uint256[] memory chunkIds) {
         uint256 amount = reservedChunks[reservedFor].length();
         chunkIds = new uint256[](amount);
@@ -615,8 +620,9 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         
         chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
         playerReservedLands[msg.sender].remove(reservation);
+        playerReservedLandClaimed[reservation] = true;
         cbkLand.mint(msg.sender, tier, chunkId, reseller);
-        emit ReservedLandClaimed(reseller, msg.sender, tier, chunkId);
+        emit ReservedLandClaimed(reservation, reseller, msg.sender, tier, chunkId);
     }
 
     function getResellerOfChunk(uint256 chunkId) public view  returns (address reservedFor) {
