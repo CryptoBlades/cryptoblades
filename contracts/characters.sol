@@ -77,7 +77,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
         pvp = _pvp;
     }
-    
+
     function migrateTo_NftVars() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
         NFTVAR_BUSY = 1;
@@ -308,7 +308,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         raidsDone[id] = raidsDone[id] + 1;
         raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
         gainXp(id, xp);
-        setNftVar(id,1, 1);
+        setNftVar(id,1, 0);
     }
 
     function canRaid(address user, uint256 id) public view returns (bool) {
