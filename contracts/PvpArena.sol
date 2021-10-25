@@ -152,22 +152,19 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID,
         bool useShield
     ) {
-        require(!_weaponsInArena[weaponID], "Weapon already in arena");
         require(
             characters.ownerOf(characterID) == msg.sender,
             "Not character owner"
         );
         require(weapons.ownerOf(weaponID) == msg.sender, "Not weapon owner");
-        require(!raids.isCharacterRaiding(characterID), "Character is in raid");
-        require(!raids.isWeaponRaiding(weaponID), "Weapon is in raid");
         require(characters.getNftVar(characterID, 1) == 0, "Character is busy");
+        require(weapons.getNftVar(weaponID, 1) == 0, "Weapon is busy");
         if (useShield) {
             require(
                 shields.ownerOf(shieldID) == msg.sender,
                 "Not shield owner"
             );
             require(shields.getNftVar(shieldID, 1) == 0, "Shield is busy");
-            require(!_shieldsInArena[shieldID], "Shield already in arena");
         }
 
         _;
@@ -218,7 +215,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _charactersInArena[characterID] = true;
         _weaponsInArena[weaponID] = true;
 
-        if (useShield) _shieldsInArena[shieldID] = true;
         if (useShield) shields.setNftVar(shieldID, 1, 1);
 
         _fightersByTier[tier].add(characterID);

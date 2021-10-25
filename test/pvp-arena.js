@@ -450,7 +450,7 @@ contract("PvpArena", (accounts) => {
           pvpArena.enterArena(character2ID, weaponId, 0, false, {
             from: accounts[1],
           }),
-          "Weapon already in arena"
+          "Weapon is busy"
         );
       });
     });
@@ -489,7 +489,7 @@ contract("PvpArena", (accounts) => {
           pvpArena.enterArena(character2ID, weapon2Id, shieldId, true, {
             from: accounts[1],
           }),
-          "Shield already in arena"
+          "Shield is busy"
         );
       });
     });
