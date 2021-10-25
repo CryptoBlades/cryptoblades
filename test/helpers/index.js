@@ -1,5 +1,5 @@
 const { expectEvent, time } = require('@openzeppelin/test-helpers');
-const { artifacts } = require('hardhat');
+
 const prepareContracts = require('./prepareContracts');
 
 const Characters = artifacts.require('Characters');

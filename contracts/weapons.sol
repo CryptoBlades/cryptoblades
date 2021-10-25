@@ -659,7 +659,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
         restricted noFreshLookup(id)
     returns (int128, int128, uint24, uint8) {
-        // check if the weapon is busy
+        // check if the weapon is busy, there is no space in the contract so we can't add an exaplanation
         require(getNftVar(id, NFTVAR_BUSY) == 0);
         drainDurability(id, drainAmount, allowNegativeDurability);
         Weapon storage wep = tokens[id];
