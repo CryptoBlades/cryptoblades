@@ -2376,7 +2376,7 @@ contract("PvpArena", (accounts) => {
 
       await expectRevert(
         raid1.joinRaid(character2ID, weapon1ID),
-        "weapon is busy"
+        "Weapon is busy"
       );
     });
 

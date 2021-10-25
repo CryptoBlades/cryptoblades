@@ -860,7 +860,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev set the ranking points of a player to 0 and update the rank,
-    function _resetCharacterRankingPoints(uint256 characterID) public {
+    function _resetCharacterRankingPoints(uint256 characterID) external {
         //TODO Determine if this is the right approach as it might less efficient gas wise
         characterRankingPoints[characterID] = 0;
         processLoser(characterID);
