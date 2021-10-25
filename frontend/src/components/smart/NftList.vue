@@ -4,14 +4,14 @@
       <div class="centered-text-div" v-if="(!nftIdTypes || nftIdTypes.length === 0)">
         <span>Nothing to buy at this time</span>
       </div>
-      <div class="centered-text-div" v-if="(isSpecials && !canPurchaseLand && purchase)">
+      <div class="centered-text-div" v-if="isSpecials && !canPurchaseLand && purchase">
         <span>You can purchase only one land, your purchase:</span><br/>
         <span>Tier: {{purchase.tier}}</span><br/>
         <span>Chunk ID: {{purchase.chunkId}}</span>
       </div>
-      <div class="centered-text-div" v-if="(isSpecials && landSaleAllowed && canPurchaseLand)">
+      <div class="centered-text-div mt-2" v-if="isSpecials && landSaleAllowed && canPurchaseLand">
         <h4>Currency to buy land with</h4>
-        <b-form-select v-model="selectedCurrency" @change="onCurrencyChange()">
+        <b-form-select v-model="selectedCurrency" @change="onCurrencyChange()" class="mb-2">
           <b-form-select-option :value="null" disabled>Please select Currency to buy land with</b-form-select-option>
           <b-form-select-option :value="0">SKILL</b-form-select-option>
           <b-form-select-option :value="1">KING</b-form-select-option>
@@ -53,6 +53,19 @@
           </b-button>
         </li>
       </ul>
+      <div class="centered-text-div mt-3" v-if="isSpecials && ownedLands.length !== 0">
+        <h4>Your owned {{ownedLands.length > 1 ? "lands" : 'land'}}:</h4>
+        <ul class="list-group raid-details mb-4" v-for="(land, index) in ownedLands" :key="index">
+          <li class="list-group-item d-flex justify-content-between align-items-center details-text">
+            ChunkId
+            <span class="badge badge-primary badge-pill">{{ land.chunkId }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center details-text">
+            Tier
+            <span class="badge badge-primary badge-pill">{{ land.tier }}</span>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <b-modal class="map-modal" title="Choose zone" ref="map-modal" size="xl" hide-footer
@@ -85,7 +98,8 @@
       <div class="w-100" style="padding-bottom: 100%;">
         <div class="map-grid">
           <div class="zone" :class="[playerReservedT3Zones.includes(zoneId) ? 'available' : null ]"
-               v-for="zoneId in zonesIds" :key="zoneId" @click="showT3ZoneModal(zoneId)">
+               v-for="zoneId in zonesIds" :key="zoneId"
+               @click="playerReservedT3Zones.includes(zoneId) && showT3ZoneModal(zoneId)">
             <span v-if="playerReservedT3Zones.includes(zoneId)">AVAILABLE</span>
           </div>
         </div>
@@ -271,6 +285,7 @@ interface Data {
   t2LandAvailable: boolean;
   t3LandAvailable: boolean;
   checkIfCanPurchaseLandInterval: ReturnType<typeof setInterval> | null;
+  checkOwnedLandsInterval: ReturnType<typeof setInterval> | null;
   checkPlayerReservedLandInterval: ReturnType<typeof setInterval> | null;
   t1LandPrice: string;
   t2LandPrice: string;
@@ -283,6 +298,7 @@ interface Data {
   playerReservedT2Zones: number[];
   playerReservedT3Zones: number[];
   reservationIdToChunks: Map<number, number[]>;
+  ownedLands: Land[];
 }
 
 export interface NftIdType {
@@ -337,6 +353,7 @@ interface StoreMappedActions {
   getPlayerReservedLand(): Promise<{t2Reservations: number[], t3Reservations: number[]}>;
   getChunksOfReservation(payload: {reservationId: number}): Promise<number[]>;
   claimPlayerReservedLand(payload: {reservationId: number, chunkId: number, tier: number}): Promise<void>;
+  getOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string }[]>;
 }
 
 export default Vue.extend({
@@ -439,6 +456,7 @@ export default Vue.extend({
       t2LandAvailable: false,
       t3LandAvailable: false,
       checkIfCanPurchaseLandInterval: null,
+      checkOwnedLandsInterval: null,
       checkPlayerReservedLandInterval: null,
       t1LandPrice: '',
       t2LandPrice: '',
@@ -451,6 +469,7 @@ export default Vue.extend({
       playerReservedT2Zones: [],
       playerReservedT3Zones: [],
       reservationIdToChunks: new Map(),
+      ownedLands: [],
     } as Data;
   },
 
@@ -593,7 +612,7 @@ export default Vue.extend({
       'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic', 'getAllZonesPopulation', 'checkIfChunkAvailable',
       'getZoneChunkPopulation', 'getChunkPopulation', 'purchaseT1CBKLand', 'purchaseT2CBKLand', 'purchaseT3CBKLand', 'getCBKLandPrice',
       'getPurchase', 'getReservedChunksIds', 'getAvailableLand', 'fetchIsLandSaleAllowed', 'getPlayerReservedLand',
-      'getChunksOfReservation', 'claimPlayerReservedLand'
+      'getChunksOfReservation', 'claimPlayerReservedLand', 'getOwnedLands'
     ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
@@ -822,14 +841,16 @@ export default Vue.extend({
         reservationId: this.selectedReservationId,
         chunkId,
         tier: this.selectedTier
-      }).then(() => {
+      }).then(async () => {
         if (this.selectedZone !== undefined) {
-          this.updateChunksPopulation(this.selectedZone);
+          await this.updateChunksPopulation(this.selectedZone);
         }
         (this.$refs['t2-claim-zone-modal'] as BModal).hide();
         (this.$refs['t2-claim-map-modal'] as BModal).hide();
         (this.$refs['t3-claim-zone-modal'] as BModal).hide();
         (this.$refs['t3-claim-map-modal'] as BModal).hide();
+        const results = await this.getOwnedLands();
+        this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
       });
       await this.checkIfCanPurchaseLand();
     },
@@ -936,8 +957,17 @@ export default Vue.extend({
 
     this.landSaleAllowed = await this.fetchIsLandSaleAllowed();
 
+    await this.checkIfCanPurchaseLand();
     this.checkIfCanPurchaseLandInterval = setInterval(async () => {
       await this.checkIfCanPurchaseLand();
+    }, 3000);
+
+    const results = await this.getOwnedLands();
+    this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+
+    this.checkOwnedLandsInterval = setInterval(async () => {
+      const results = await this.getOwnedLands();
+      this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
     }, 3000);
 
     this.reservedChunks = await this.getReservedChunksIds();
@@ -1017,6 +1047,9 @@ export default Vue.extend({
     }
     if(this.checkPlayerReservedLandInterval){
       clearInterval(this.checkPlayerReservedLandInterval);
+    }
+    if(this.checkOwnedLandsInterval){
+      clearInterval(this.checkOwnedLandsInterval);
     }
   }
 });
@@ -1148,6 +1181,15 @@ export default Vue.extend({
 
 .reserved:hover {
   background-color: black;
+}
+
+.details-text {
+  font-size: 1.2em;
+  color: #ccae4f;
+}
+
+.details-text > span {
+  background-color: #ccae4f;
 }
 
 @media (max-width: 576px) {

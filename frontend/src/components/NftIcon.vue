@@ -325,24 +325,35 @@ export default {
       const playerReservedLand = await this.getPlayerReservedLand();
       if(playerReservedLand) {
         const {t2Reservations, t3Reservations} = playerReservedLand;
+        let tier2ReservationsNumber = 0;
         for (const reservationId of t2Reservations) {
           const chunksIds = await this.getChunksOfReservation({reservationId});
-          this.totalT2ChunksToChooseFrom = chunksIds.length;
+          tier2ReservationsNumber += chunksIds.length;
         }
+        this.totalT2ChunksToChooseFrom = tier2ReservationsNumber;
+        let tier3ReservationsNumber = 0;
         for (const reservationId of t3Reservations) {
           const chunksIds = await this.getChunksOfReservation({reservationId});
-          this.totalT3ChunksToChooseFrom = chunksIds.length;
+          tier3ReservationsNumber += chunksIds.length;
         }
+        this.totalT3ChunksToChooseFrom = tier3ReservationsNumber;
       }
       this.fetchSupplyInterval = setInterval(async () => {
-        const {t2Reservations, t3Reservations} = await this.getPlayerReservedLand();
-        for (const reservationId of t2Reservations) {
-          const chunksIds = await this.getChunksOfReservation({reservationId});
-          this.totalT2ChunksToChooseFrom = chunksIds.length;
-        }
-        for (const reservationId of t3Reservations) {
-          const chunksIds = await this.getChunksOfReservation({reservationId});
-          this.totalT3ChunksToChooseFrom = chunksIds.length;
+        const playerReservedLand = await this.getPlayerReservedLand();
+        if(playerReservedLand) {
+          const {t2Reservations, t3Reservations} = playerReservedLand;
+          let tier2ReservationsNumber = 0;
+          for (const reservationId of t2Reservations) {
+            const chunksIds = await this.getChunksOfReservation({reservationId});
+            tier2ReservationsNumber += chunksIds.length;
+          }
+          this.totalT2ChunksToChooseFrom = tier2ReservationsNumber;
+          let tier3ReservationsNumber = 0;
+          for (const reservationId of t3Reservations) {
+            const chunksIds = await this.getChunksOfReservation({reservationId});
+            tier3ReservationsNumber += chunksIds.length;
+          }
+          this.totalT3ChunksToChooseFrom = tier3ReservationsNumber;
         }
       }, 3000);
     }

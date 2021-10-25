@@ -2172,7 +2172,9 @@ export function createStore(web3: Web3) {
 
         return await CBKLandSale.methods
           .claimPlayerReservedLand(reservationId, chunkId, tier)
-          .call(defaultCallOptions(state));
+          .send({
+            from: state.defaultAccount
+          });
       },
 
       async reservedSalesAllowed({state}) {
@@ -2181,6 +2183,18 @@ export function createStore(web3: Web3) {
         return await CBKLandSale.methods
           .reservedSalesAllowed()
           .call(defaultCallOptions(state));
+      },
+
+      async getOwnedLands({state}) {
+        const CBKLand = state.contracts().CBKLand!;
+
+        if (!state.defaultAccount || !CBKLand) return;
+
+        const landsIds = await CBKLand.methods
+          .getOwned(state.defaultAccount)
+          .call(defaultCallOptions(state));
+
+        return await Promise.all(landsIds.map(landId => CBKLand.methods.get(landId).call(defaultCallOptions(state))));
       },
 
 
