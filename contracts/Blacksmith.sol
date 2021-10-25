@@ -329,21 +329,21 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function purchaseT1CBKLand(uint256 paying, uint256 currency) public {
         require(paying > 0 && landPrices[currency][cbkLandSale.TIER_ONE()] == paying, 'Invalid price');
-        payCurrency(msg.sender, landPrices[currency][cbkLandSale.TIER_ONE()], currency);
+        payCurrencyDirect(msg.sender, landPrices[currency][cbkLandSale.TIER_ONE()], currency);
         cbkLandSale.giveT1Land(msg.sender);
         emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_ONE(), landPrices[currency][cbkLandSale.TIER_ONE()], currency);
     }
 
     function purchaseT2CBKLand(uint256 paying, uint256 chunkId, uint256 currency) public {
         require(paying > 0 && landPrices[currency][cbkLandSale.TIER_TWO()] == paying,  'Invalid price');
-        payCurrency(msg.sender, landPrices[currency][cbkLandSale.TIER_TWO()], currency);
+        payCurrencyDirect(msg.sender, landPrices[currency][cbkLandSale.TIER_TWO()], currency);
         cbkLandSale.giveT2Land(msg.sender, chunkId);
         emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_TWO(), landPrices[currency][cbkLandSale.TIER_TWO()], currency);
     }
 
     function purchaseT3CBKLand(uint256 paying, uint256 chunkId, uint256 currency) public {
         require(paying > 0 && landPrices[currency][cbkLandSale.TIER_THREE()] == paying, 'Invalid price');
-        payCurrency(msg.sender, landPrices[currency][cbkLandSale.TIER_THREE()], currency);
+        payCurrencyDirect(msg.sender, landPrices[currency][cbkLandSale.TIER_THREE()], currency);
         cbkLandSale.giveT3Land(msg.sender, chunkId);
         emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_THREE(), landPrices[currency][cbkLandSale.TIER_THREE()], currency);
     }
@@ -359,12 +359,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         landPrices[currency][tier] = newPrice;
     }
 
-    function payCurrency(address payer, uint256 paying, uint256 currency) internal {
-        if(currency == 0){
-             game.payContractTokenOnly(payer, paying);
-        }
-        else {
-            IERC20(currencies[currency]).transferFrom(payer, address(this), paying);
-        }
+    function payCurrencyDirect(address payer, uint256 paying, uint256 currency) internal {
+        IERC20(currencies[currency]).transferFrom(payer, address(this), paying);
     }
 }
