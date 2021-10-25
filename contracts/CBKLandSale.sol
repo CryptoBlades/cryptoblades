@@ -21,6 +21,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     event T1GivenReserved(address indexed reseller, address indexed owner, uint256 chunkId);
     event T2GivenReserved(address indexed reseller, address indexed owner, uint256 chunkId);
     event T3GivenReserved(address indexed reseller, address indexed owner, uint256 chunkId);
+    event LandTokenGiven(address indexed reseller, address indexed owner, uint256 tier);
 
     /* ========== LAND SALE INFO ========== */
     uint256 private constant NO_LAND = 0;
@@ -54,7 +55,6 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     uint256 private t2LandsSold;
     uint256 private chunksWithT2Land;
 
-    uint256 private constant MAX_LAND = 100;
     uint256 private _allowedLandSalePerChunk;
     uint256 private _allowedLandOffset; // Max allowed deviation allowed from theoretical average
 
@@ -76,6 +76,9 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     mapping(address => EnumerableSet.UintSet) private reservedChunks;
     mapping(address => uint256) private reservedChunksCounter;
     mapping(uint256 => address) private chunksReservedFor;
+
+    // reseller address => land tier => budget
+    mapping(address => mapping(uint256 => uint256)) private resellerLandBudget;
 
     function initialize(CBKLand _cbkLand)
         public
@@ -236,20 +239,26 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         cbkLand.mint(buyer, TIER_THREE, chunkId);
     }
 
-    function giveT1LandReserved(address buyer) public {
-        giveT1LandReserved(buyer, '');
+    function giveLandToken(address buyer, uint256 tier) public reservedSaleAllowed() {
+        require(resellerLandBudget[msg.sender][tier] > 0); // will protect against invalid tiers
+        resellerLandBudget[msg.sender][tier]--;
+        cbkLand.mintLandToken(msg.sender, buyer, tier);
+        emit LandTokenGiven(msg.sender, buyer, tier);
     }
 
-    function giveT2LandReserved(address buyer, uint256 chunkId) public {
-        giveT2LandReserved(buyer, chunkId, '');
+    function getResellerBudget(address reseller) public view returns (uint256 t1, uint256 t2, uint256 t3) {
+        t1 = resellerLandBudget[reseller][TIER_ONE];
+        t2 = resellerLandBudget[reseller][TIER_TWO];
+        t3 = resellerLandBudget[reseller][TIER_THREE];
     }
 
-    function giveT3LandReserved(address buyer, uint256 chunkId) public {
-        giveT3LandReserved(buyer, chunkId, '');
+    function setResellerBudget(address reseller, uint256 t1, uint256 t2, uint256 t3) public restricted {
+        resellerLandBudget[reseller][TIER_ONE] = t1;
+        resellerLandBudget[reseller][TIER_TWO] = t2;
+        resellerLandBudget[reseller][TIER_THREE] = t3;
     }
 
-
-    function giveT1LandReserved(address buyer, string memory uri) public reservedSaleAllowed() {
+    function giveT1LandReserved(address buyer) public reservedSaleAllowed() {
         uint256 rcLength = reservedChunks[msg.sender].length();
         require(rcLength > 0, "no reserved chunks");
         uint256 counter = reservedChunksCounter[msg.sender];
@@ -258,7 +267,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
             if(chunkT2LandSales[cId] < _allowedLandSalePerChunk) {
                 chunkT2LandSales[cId]++; // it's actually a T1, but we will play on the T2 because population is shared
                 chunkZoneLandSales[chunkIdToZoneId(cId)]++;
-                cbkLand.mint(buyer, TIER_ONE, cId, uri);
+                cbkLand.mint(buyer, TIER_ONE, cId);
                 emit T1GivenReserved(msg.sender, buyer, cId);
                 reservedChunksCounter[msg.sender] = uint256(i + 1);
                 return;
@@ -269,8 +278,8 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         revert();
     }
 
-    function giveT2LandReserved(address buyer, uint256 chunkId, string memory uri) public reservedChunkAvailable(chunkId) reservedSaleAllowed() {
-        if(chunkT2LandSales[chunkId] == 0){
+    function giveT2LandReserved(address buyer, uint256 chunkId) public reservedChunkAvailable(chunkId) reservedSaleAllowed() {
+         if(chunkT2LandSales[chunkId] == 0){
             chunksWithT2Land++;
         }
 
@@ -278,23 +287,23 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
 
         emit T2GivenReserved(msg.sender, buyer, chunkId);
-        cbkLand.mint(buyer, TIER_TWO, chunkId, uri);
+        cbkLand.mint(buyer, TIER_TWO, chunkId);
     }
 
-    function giveT3LandReserved(address buyer, uint256 chunkId, string memory uri) public reservedChunkAvailable(chunkId) t3Available(chunkId) reservedSaleAllowed() {
+    function giveT3LandReserved(address buyer, uint256 chunkId) public reservedChunkAvailable(chunkId) t3Available(chunkId) reservedSaleAllowed() {
         chunkT3LandSoldTo[chunkId] = buyer;
         chunkZoneLandSales[chunkIdToZoneId(chunkId)]++;
 
         emit T3GivenReserved(msg.sender, buyer, chunkId);
-        cbkLand.mint(buyer, TIER_THREE, chunkId, uri);
+        cbkLand.mint(buyer, TIER_THREE, chunkId);
     }
 
-    // This may cause issues if chunkid 0 is reserved, for now we will assume it wont be
-    function setLandURI(uint256 landId, string memory uri) public {
-        (, uint256 chunkId,,) = cbkLand.get(landId);
-        require(reservedChunks[msg.sender].contains(chunkId), "no access");
-        cbkLand.setURI(landId, uri);
-    }
+    // Will leave this commented
+    // function setLandURI(uint256 landId, string memory uri) public {
+    //     (, uint256 chunkId,,) = cbkLand.get(landId);
+    //     require(reservedChunks[msg.sender].contains(chunkId), "no access");
+    //     cbkLand.setURI(landId, uri);
+    // }
 
     function chunkIdToZoneId(uint256 chunkId) internal pure returns (uint256){
         return 10 * (chunkId / 1000) + (chunkId % 100) / 10;
