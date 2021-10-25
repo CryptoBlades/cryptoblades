@@ -205,7 +205,7 @@
     },
     "links": {},
     "address": "0x16680baFe395022Ae73755946fe5D484118Fe035",
-    "transactionHash": "0xed2d435dfde8bd321b2af70ceb303678b5e91c19bf0cc540205685b5cb35ce85"
+    "transactionHash": "0x5a15315428cbfa427d39085503840e3da05094b2f5e52449652678d1f831673e"
   },
   "build/contracts/CBKLand.json": {
     "events": {
@@ -414,11 +414,42 @@
         ],
         "name": "Transfer",
         "type": "event"
+      },
+      "0x209babc4172e6efcdaca2b23967e40b8d8fa38dc869b532c415a7a96e71d7a41": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "minter",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier",
+            "type": "uint256"
+          }
+        ],
+        "name": "LandTokenMinted",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xE986e14afe3744a986F1A4Bcaa174C84ae1C4B91",
-    "transactionHash": "0x2754846310c2abde9da157ff381d21075c74a9f4437987124ba7632f6a9072a4"
+    "transactionHash": "0xf15074ecfabea21a863908b076e01f9f84cd580a365e5db0ad9ce3cf1b4afc43"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -610,11 +641,111 @@
         ],
         "name": "T3GivenFree",
         "type": "event"
+      },
+      "0x95efea0b44884c51b363ebbcf18c9b700645f0683bff755e933f51e243129d56": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier",
+            "type": "uint256"
+          }
+        ],
+        "name": "LandTokenGiven",
+        "type": "event"
+      },
+      "0x930832e27e0b34f4d930f8239b2227e4edbe0515b6ecc7793692859788d2dc59": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "T1GivenReserved",
+        "type": "event"
+      },
+      "0x8bf2ead42f181e19cbafd7918f72da6b051996d0f009c298ffa4e5460afc0ace": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "T2GivenReserved",
+        "type": "event"
+      },
+      "0x42559f7fd01d443892f6d0f2e47ac54efd2f103a29cab16ae779dbfb9bde8f38": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "T3GivenReserved",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xb86F20B64F25C2fA3C7798f985471fa161BBB5CD",
-    "transactionHash": "0x36ae965413d940229482581ede9740a6ab3f7ba52b5765bd63b4bcbc198ef60a"
+    "transactionHash": "0xd29a193cbcc5f93d71a93340d4c1f5af8d995dfacc84213616ef71291d98ef45"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -2047,7 +2178,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0xdf3f2faa0e43f21e69ac60bd30c0f5a7da685378eb3aa445140361ebc00f4237"
+    "transactionHash": "0xa32a6608e150053baf9fd4816da44bcfc96b1f5abe8a57f2e2526b8e7ef9c2f6"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
