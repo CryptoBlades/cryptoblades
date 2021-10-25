@@ -2327,6 +2327,7 @@ contract("PvpArena", (accounts) => {
     let character2ID;
     let weapon1ID;
     let weapon2ID;
+    let shieldID;
     it("should not allow a player to join the arena if he is busy", async () => {
       // Due to the issues with  starting a raid from here, for now we are testing this against the same arena
       // commenting the necessary code for future uses
@@ -2346,6 +2347,44 @@ contract("PvpArena", (accounts) => {
         "Character is busy"
       );
     });
+
+    it("should not allow a a shield to join PVP if it's already busy", async () => {
+      shieldID = await helpers.createShield(accounts[1], "123", {
+        shields,
+      });
+      weapon1ID = await helpers.createWeapon(accounts[1], "123", 0, {
+        weapons,
+      });
+      weapon2ID = await helpers.createWeapon(accounts[1], "123", 0, {
+        weapons,
+      });
+      character1ID = await helpers.createCharacter(accounts[1], "123", {
+        characters,
+      });
+      character2ID = await helpers.createCharacter(accounts[1], "123", {
+        characters,
+      });
+
+      const cost = await pvpArena.getEntryWager(character2ID, {
+        from: accounts[1],
+      });
+
+      await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        from: accounts[1],
+      });
+
+      await pvpArena.enterArena(character1ID, weapon1ID, shieldID, true, {
+        from: accounts[1],
+      });
+
+      await expectRevert(
+        pvpArena.enterArena(character2ID, weapon2ID, shieldID, true, {
+          from: accounts[1],
+        }),
+        "Shield is busy"
+      );
+    });
+
     it("should not allow a player to join a raid if he is already busy", async () => {
       weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
         weapons,
@@ -2357,6 +2396,26 @@ contract("PvpArena", (accounts) => {
         "Character is busy"
       );
     });
+    it("should not allow a weapon to join a raid if it is already busy", async () => {
+      weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
+        weapons,
+      });
+      character1ID = await createCharacterInPvpTier(
+        accounts[0],
+        1,
+        "222",
+        weapon1ID
+      );
+      character2ID = await helpers.createCharacter(accounts[0], "123", {
+        characters,
+      });
+
+      await expectRevert(
+        raid1.joinRaid(character2ID, weapon1ID),
+        "weapon is busy"
+      );
+    });
+
     it("should not allow a player to perform a regular fight if he is busy", async () => {
       weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
         weapons,

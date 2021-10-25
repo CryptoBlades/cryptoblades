@@ -166,8 +166,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 shields.ownerOf(shieldID) == msg.sender,
                 "Not shield owner"
             );
-            require(!_shieldsInArena[shieldID], "Shield already in arena");
             require(shields.getNftVar(shieldID, 1) == 0, "Shield is busy");
+            require(!_shieldsInArena[shieldID], "Shield already in arena");
         }
 
         _;
