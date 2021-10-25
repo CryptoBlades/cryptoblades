@@ -5,7 +5,7 @@ import type {
   NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables,
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
   CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox,
-  WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale
+  WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale, CBKLand
 } from '../../../build/abi-interfaces';
 import { StakeType } from './State';
 
@@ -47,4 +47,5 @@ export interface Contracts {
   CharacterCosmetics?: Contract<CharacterCosmetics>;
   NFTStorage?: Contract<NFTStorage>;
   CBKLandSale?: Contract<CBKLandSale>;
+  CBKLand?: Contract<CBKLand>;
 }

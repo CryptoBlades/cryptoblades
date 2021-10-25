@@ -26,6 +26,7 @@ import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
 import { Nft } from './interfaces/Nft';
 import { getWeaponNameFromSeed } from '@/weapon-name';
 import axios from 'axios';
+import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -2014,59 +2015,95 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
-      async purchaseT1CBKLand({state}, {price}) {
-        const { CryptoBlades,  Blacksmith, SkillToken } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !Blacksmith || !state.defaultAccount) return;
+      async purchaseT1CBKLand({state}, {price, currency}) {
+        const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, price)
-          .send({
-            from: state.defaultAccount
-          });
+        if(currency === 0) {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        } else {
+          const tokenAddress = await Blacksmith.methods
+            .getCurrency(currency)
+            .call(defaultCallOptions(state));
+
+          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+            .approve(Blacksmith.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        }
 
         return await Blacksmith.methods
-          .purchaseT1CBKLand(price, 0).send({
-            from: state.defaultAccount,
+          .purchaseT1CBKLand(price, currency).send({
+            from: state.defaultAccount
           });
       },
 
-      async purchaseT2CBKLand({state}, {price, chunkId}) {
-        const { CryptoBlades,  Blacksmith, SkillToken } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !Blacksmith || !state.defaultAccount) return;
+      async purchaseT2CBKLand({state}, {price, chunkId, currency}) {
+        const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, price)
-          .send({
-            from: state.defaultAccount
-          });
+        if(currency === 0) {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        } else {
+          const tokenAddress = await Blacksmith.methods
+            .getCurrency(currency)
+            .call(defaultCallOptions(state));
+
+          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+            .approve(Blacksmith.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        }
 
         return await Blacksmith.methods
-          .purchaseT2CBKLand(price, chunkId, 0).send({
-            from: state.defaultAccount,
+          .purchaseT2CBKLand(price, chunkId, currency).send({
+            from: state.defaultAccount
           });
       },
 
-      async purchaseT3CBKLand({state}, {price, chunkId}) {
-        const { CryptoBlades,  Blacksmith, SkillToken } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !Blacksmith || !state.defaultAccount) return;
+      async purchaseT3CBKLand({state}, {price, chunkId, currency}) {
+        const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, price)
-          .send({
-            from: state.defaultAccount
-          });
+        if(currency === 0) {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        } else {
+          const tokenAddress = await Blacksmith.methods
+            .getCurrency(currency)
+            .call(defaultCallOptions(state));
+
+          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+            .approve(Blacksmith.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        }
 
         return await Blacksmith.methods
-          .purchaseT3CBKLand(price, chunkId, 0).send({
-            from: state.defaultAccount,
+          .purchaseT3CBKLand(price, chunkId, currency).send({
+            from: state.defaultAccount
           });
       },
 
-      async getCBKLandPrice({state}, {tier}) {
+      async getCBKLandPrice({state}, {tier, currency}) {
         const Blacksmith = state.contracts().Blacksmith!;
 
         return await Blacksmith.methods
-          .getCBKLandPrice(tier, 0)
+          .getCBKLandPrice(tier, currency)
           .call(defaultCallOptions(state));
       },
 
@@ -2111,6 +2148,53 @@ export function createStore(web3: Web3) {
         return await CBKLandSale.methods
           .getReservedChunksIds()
           .call(defaultCallOptions(state));
+      },
+
+      async getPlayerReservedLand({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+        if (!state.defaultAccount || !CBKLandSale) return;
+
+        return await CBKLandSale.methods
+          .getPlayerReservedLand(state.defaultAccount)
+          .call(defaultCallOptions(state));
+      },
+
+      async getChunksOfReservation({state}, {reservationId}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getChunksOfReservations(reservationId)
+          .call(defaultCallOptions(state));
+      },
+
+      async claimPlayerReservedLand({state}, {reservationId, chunkId, tier}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .claimPlayerReservedLand(reservationId, chunkId, tier)
+          .send({
+            from: state.defaultAccount
+          });
+      },
+
+      async reservedSalesAllowed({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .reservedSalesAllowed()
+          .call(defaultCallOptions(state));
+      },
+
+      async getOwnedLands({state}) {
+        const CBKLand = state.contracts().CBKLand!;
+
+        if (!state.defaultAccount || !CBKLand) return;
+
+        const landsIds = await CBKLand.methods
+          .getOwned(state.defaultAccount)
+          .call(defaultCallOptions(state));
+
+        return await Promise.all(landsIds.map(landId => CBKLand.methods.get(landId).call(defaultCallOptions(state))));
       },
 
 

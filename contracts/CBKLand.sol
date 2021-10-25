@@ -21,6 +21,7 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     event LandMinted(address indexed minter, uint256 id, uint256 tier, uint256 chunkId);
     event LandTransfered(address indexed from, address indexed to, uint256 id);
     event LandTokenMinted(address indexed reseller, address indexed minter, uint256 id, uint256 tier);
+    event LandMintedWithReseller(address indexed minter, uint256 id, uint256 tier, uint256 chunkId, address reseller);
 
     // TotalLand
     uint256 landMinted;
@@ -54,14 +55,21 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
     }
 
-    function get(uint256 id) public view returns (uint256, uint256, uint256, uint256, uint256, bool) {
-        return (landData[id][LT], landData[id][LC], landData[id][LX], landData[id][LY], id, landBoolData[id][LBT]);
+     // tier, chunkid, x, y
+    function get(uint256 id) public view returns (uint256, uint256, uint256, uint256) {
+        return (landData[id][LT], landData[id][LC], landData[id][LX], landData[id][LY]);
     }
 
-    // tier, chunkid, x, y, id, isToken (id was added later, that's why not first)
-    function getOwned(address owner) public view returns (uint256, uint256, uint256, uint256, uint256, bool) {
-        uint256 id = tokenOfOwnerByIndex(owner, 0);
-        return get(id);
+    function getOwned(address owner) public view returns (uint256[] memory ownedIds) {
+        uint256 ownedLandCount = balanceOf(owner);
+        ownedIds = new uint256[](ownedLandCount);
+         for(uint256 i = 0; i < ownedLandCount; i++) {
+             ownedIds[i] = tokenOfOwnerByIndex(owner, i);
+        }
+    }
+
+    function getLandReseller(uint256 land) public view returns (address) {
+        return landAddressData[land][LAR];
     }
 
     // DO NOT call directly outside the logic of CBKLandSale to avoid breaking tier and chunk logic
@@ -77,19 +85,23 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         emit LandMinted(minter, tokenID, tier, chunkId);
     }
 
-    function mintLandToken(address reseller, address minter, uint256 tier) public restricted {
+    function mint(address minter, uint256 tier, uint256 chunkId, address reseller) public restricted {
         uint256 tokenID = landMinted++;
         
         landData[tokenID][LT] = tier;
-        landBoolData[tokenID][LBT] = true;
+        landData[tokenID][LC] = chunkId;
+        //landData[tokenID][LX] = x; // not yet
+        //landData[tokenID][LY] = y; // not yet
+        
         landAddressData[tokenID][LAR] = reseller;
 
         _mint(minter, tokenID);
-        emit LandTokenMinted(reseller, minter, tokenID, tier);
+        emit LandMintedWithReseller(minter, tokenID, tier, chunkId, reseller);
     }
 
+
     function getLandTierURI(uint256 id) public view returns (string memory uri) {
-       (uint256 tier,,,,,) = get(id);
+       (uint256 tier,,,) = get(id);
         return getTierURI(tier);
     }
 
@@ -99,14 +111,5 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function setTierStr(uint256 tier, uint256 index, string memory val) public restricted {
         tierStrData[tier][index] = val;
-    }
-
-    // TODO: block land transfer
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
-        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to)) {
-            require(balanceOf(to) == 0, "Recv has purchased a land");
-        }
-
-        emit LandTransfered(from, to, tokenId);
     }
 }
