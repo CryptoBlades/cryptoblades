@@ -10,7 +10,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    CBKLand cbkLand;
+    CBKLand public cbkLand;
      /* ========== EVENTS ========== */
     event T1Given(address indexed owner, uint256 stamp);
     event T2Given(address indexed owner, uint256 chunkId);
