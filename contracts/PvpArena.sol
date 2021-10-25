@@ -157,6 +157,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             "Not character owner"
         );
         require(weapons.ownerOf(weaponID) == msg.sender, "Not weapon owner");
+        // Check if character and weapon are busy
         require(characters.getNftVar(characterID, 1) == 0, "Character is busy");
         require(weapons.getNftVar(weaponID, 1) == 0, "Weapon is busy");
         if (useShield) {
@@ -215,6 +216,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _charactersInArena[characterID] = true;
         _weaponsInArena[weaponID] = true;
 
+        if (useShield) _shieldsInArena[shieldID] = true;
         if (useShield) shields.setNftVar(shieldID, 1, 1);
 
         _fightersByTier[tier].add(characterID);
