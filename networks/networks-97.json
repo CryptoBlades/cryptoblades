@@ -445,11 +445,48 @@
         ],
         "name": "LandTokenMinted",
         "type": "event"
+      },
+      "0xeb0eeaa397ba5d2edc0e0e59bfd16fe5faccce0491744a5f5e7d53549e198d66": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "minter",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          }
+        ],
+        "name": "LandMintedWithReseller",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xE986e14afe3744a986F1A4Bcaa174C84ae1C4B91",
-    "transactionHash": "0xf15074ecfabea21a863908b076e01f9f84cd580a365e5db0ad9ce3cf1b4afc43"
+    "transactionHash": "0x33595d8d5275011059e05dd72a6da500848885fcf9e99492d6523f2c4994ea6d"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -741,11 +778,48 @@
         ],
         "name": "T3GivenReserved",
         "type": "event"
+      },
+      "0x48f661178e4a5500c28b50686e128704990e013a20fcc66c3625a5c20d8a181c": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "reservation",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "ReservedLandClaimed",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xb86F20B64F25C2fA3C7798f985471fa161BBB5CD",
-    "transactionHash": "0xd29a193cbcc5f93d71a93340d4c1f5af8d995dfacc84213616ef71291d98ef45"
+    "transactionHash": "0xb68292dcda5d777005747bf417586f9e63109f8db0cf6a43f6a8700d35ecd2f1"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
