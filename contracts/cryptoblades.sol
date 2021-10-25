@@ -819,6 +819,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
+    function deductAfterPartnerClaim(uint256 amount, address player) external restricted {
+        tokenRewards[player] = tokenRewards[player].sub(amount);
+    }
+
     function trackIncome(uint256 income) public restricted {
         _trackIncome(income);
     }

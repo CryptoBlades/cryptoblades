@@ -6,14 +6,14 @@
     </div>
     <div class="d-flex flex-row w-100 align-items-baseline mt-3 pl-5">
       <h5>Payout Currency:</h5>
-      <b-form-select class="w-25 ml-1" size="sm" v-model="payoutCurrency" @change="setPayoutCurrency()">
-        <b-form-select-option :value="'SKILL'">SKILL</b-form-select-option>
-        <b-form-select-option v-for="p in supportedProjects" :key="p.name" :value="p.tokenSymbol">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
+      <b-form-select class="w-25 ml-1" size="sm" v-model="payoutCurrencyId" @change="setPayoutCurrency()">
+        <b-form-select-option :value="-1">SKILL</b-form-select-option>
+        <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
       </b-form-select>
     </div>
     <div class="d-flex flex-row w-100 pt-2 pr-5 pl-5 pb-2 flex-wrap">
-      <partnered-project v-for="p in supportedProjects" :key="p.name" :name="p.name" :tokenSymbol="p.tokenSymbol"
-        :tokenSupply="p.tokenSupply" :tokensClaimed="p.tokensClaimed" :logoFileName="getLogoFile(p.name)"/>
+      <partnered-project v-for="p in supportedProjects" :key="p.name" :id="p.id" :name="p.name" :tokenSymbol="p.tokenSymbol"
+        :tokenSupply="p.tokenSupply" :tokenPrice="p.tokenPrice" :logoFileName="getLogoFile(p.name)"/>
     </div>
   </div>
 </template>
@@ -21,44 +21,72 @@
 <script lang='ts'>
 import PartneredProject from '@/components/PartneredProject.vue';
 import Vue from 'vue';
+import { Accessors } from 'vue/types/options';
+import { mapGetters, mapActions } from 'vuex';
 
-interface SupportedProject {
+export interface SupportedProject {
+  id: string;
   name: string;
   tokenSymbol: string;
+  tokenAddress: string;
   tokenSupply: string;
   tokensClaimed: string;
+  tokenPrice: string;
+  isActive: boolean;
 }
+
+interface StoreMappedGetters {
+  getPartnerProjects: SupportedProject[];
+}
+
+interface StoreMappedActions {
+  fetchPartnerProjects(): Promise<void>;
+}
+
 export default Vue.extend({
   components: { PartneredProject },
 
   data() {
     return {
-      payoutCurrency: localStorage.getItem('payoutCurrency') || 'SKILL'
+      payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1'
     };
   },
 
   computed: {
-    // TODO: PULL FROM CHAIN
+    ...(mapGetters(['getPartnerProjects']) as Accessors<StoreMappedGetters>),
+
     supportedProjects(): SupportedProject[] {
-      return [
-        {name: 'Bounty', tokenSymbol: 'BT', tokenSupply: '33333', tokensClaimed: '13000'},
-        {name: 'Trinket1', tokenSymbol: 'TR', tokenSupply: '10000', tokensClaimed: '7412'},
-        {name: 'Sword0', tokenSymbol: 'SW0', tokenSupply: '1000', tokensClaimed: '312'},
-        {name: 'Sword1', tokenSymbol: 'SW1', tokenSupply: '45000', tokensClaimed: '7211'},
-        {name: 'Sword2', tokenSymbol: 'SW2', tokenSupply: '1230000', tokensClaimed: '743445'},
-        {name: 'Sword3', tokenSymbol: 'SW3', tokenSupply: '9999', tokensClaimed: '1322'},
-      ];
+      const supportedProjects = this.getPartnerProjects.map(p => {
+        return {
+          id: p.id,
+          name: p.name,
+          tokenSymbol: p.tokenSymbol,
+          tokenAddress: p.tokenAddress,
+          tokenSupply: p.tokenSupply,
+          tokensClaimed: p.tokensClaimed,
+          tokenPrice: p.tokenPrice,
+          isActive: p.isActive
+        };
+      });
+
+      return supportedProjects;
     }
   },
 
   methods: {
+    ...(mapActions(['fetchPartnerProjects']) as StoreMappedActions),
+
     getLogoFile(projectName: string): string {
       return `${projectName.toLowerCase()}.png`;
     },
 
     setPayoutCurrency() {
-      localStorage.setItem('payoutCurrency', this.payoutCurrency);
+      localStorage.setItem('payoutCurrencyId', this.payoutCurrencyId);
     }
+  },
+
+  async mounted() {
+    await this.fetchPartnerProjects();
   }
 
 });

@@ -5,6 +5,8 @@
       <div class="d-flex flex-column justify-content-center">
         <h4>{{name}}</h4>
         <h6>Token: {{tokenSymbol}}</h6>
+        <span class="multiplier-text">{{skillToPartnerRatio}} SKILL/{{tokenSymbol}}</span>
+        <span class="multiplier-text">Multiplier: x{{multiplier}}</span>
       </div>
     </div>
     <div class="progress w-90 justify-items-center">
@@ -17,9 +19,23 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import { mapActions } from 'vuex';
+import { toBN } from '@/utils/common';
+
+interface Data {
+  images: any;
+  multiplier: string;
+  tokensClaimed: string;
+  skillToPartnerRatio: string;
+  updateInterval: any;
+}
 
 export default Vue.extend({
   props: {
+    id: {
+      type: String,
+      default: '',
+    },
     name: {
       type: String,
       default: '',
@@ -36,7 +52,7 @@ export default Vue.extend({
       type: String,
       default: '0',
     },
-    tokensClaimed: {
+    tokenPrice: {
       type: String,
       default: '0',
     },
@@ -44,8 +60,12 @@ export default Vue.extend({
 
   data() {
     return {
-      images: require.context('../assets/partners/', false, /\.png$/)
-    };
+      images: require.context('../assets/partners/', false, /\.png$/),
+      multiplier: '1',
+      tokensClaimed: '0',
+      skillToPartnerRatio: '0',
+      updateInterval: null
+    } as Data;
   },
 
   computed: {
@@ -56,9 +76,30 @@ export default Vue.extend({
   },
 
   methods: {
+    ...mapActions(['getPartnerProjectMultiplier', 'getPartnerProjectClaimedAmount', 'getSkillToPartnerRatio']),
     imgPath(img: string): string {
       return this.images('./' + img);
+    },
+
+    async update(): Promise<void> {
+      const currentMultiplier = await this.getPartnerProjectMultiplier(this.id);
+      this.multiplier = toBN(currentMultiplier).div(toBN(10).pow(18)).toFixed(3);
+
+      const currentClaimedTokens = await this.getPartnerProjectClaimedAmount(this.id);
+      this.tokensClaimed = toBN(currentClaimedTokens).div(toBN(10).pow(18)).toFixed(2);
+
+      const currentSkillToPartnerRatio = await this.getSkillToPartnerRatio(this.id);
+      this.skillToPartnerRatio = toBN(1).dividedBy(toBN(currentSkillToPartnerRatio).dividedBy(toBN(2).exponentiatedBy(64))).toFixed(2);
     }
+  },
+
+  async created() {
+    await this.update();
+    this.updateInterval = setInterval(async () => { this.update(); }, 10000);
+  },
+
+  beforeDestroy() {
+    clearInterval(this.updateInterval);
   }
 });
 
@@ -66,8 +107,8 @@ export default Vue.extend({
 
 <style scoped>
 .partner-div {
-  width: 210px;
-  height: 140px;
+  width: 240px;
+  height: 160px;
   border: 2px solid #9e8a57;
   border-radius: 10px;
   padding: 5px;
@@ -76,5 +117,8 @@ export default Vue.extend({
 .partner-logo {
   width: 90px;
   height: 90px;
+}
+.multiplier-text {
+  font-size: 0.8rem;
 }
 </style>

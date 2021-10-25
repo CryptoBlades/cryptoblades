@@ -1,5 +1,5 @@
 
-import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState } from './interfaces';
+import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement, IRaidState, IPartnerProject } from './interfaces';
 import { Nft } from './interfaces/Nft';
 import { IShield } from './interfaces/Shield';
 
@@ -184,5 +184,20 @@ export function raidFromContract(data: string[]): IRaidState {
   return {
     index, expectedFinishTime, raiderCount, playerPower, bossPower, bossTrait, status,
     joinSkill, staminaCost, durabilityCost, xpReward, accountPower
+  };
+}
+
+export function partnerProjectFromContract(data: [string, string, string, string, string, string, string, boolean]): IPartnerProject {
+  const id = data[0];
+  const name = data[1];
+  const tokenSymbol = data[2];
+  const tokenAddress = data[3];
+  const tokenSupply = data[4];
+  const tokensClaimed = data[5];
+  const tokenPrice = data[6];
+  const isActive = data[7];
+
+  return {
+    id, name, tokenSymbol, tokenAddress, tokenSupply, tokensClaimed, tokenPrice, isActive
   };
 }

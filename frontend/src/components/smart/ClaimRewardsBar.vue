@@ -104,6 +104,7 @@ enum ClaimStage {
 
 interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
+  claimPartnerToken(id: number): Promise<void>;
   claimXpRewards(): Promise<void>;
   fetchRemainingTokenClaimAmountPreTax(): Promise<string>;
 }
@@ -218,10 +219,15 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax']) as StoreMappedActions),
+    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimPartnerToken', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax']) as StoreMappedActions),
 
     async onClaimTokens() {
-      if(this.canClaimTokens) {
+      const payoutCurrencyId = localStorage.getItem('payoutCurrencyId');
+      if(payoutCurrencyId && payoutCurrencyId !== '-1') {
+        console.log(payoutCurrencyId);
+        await this.claimPartnerToken(+payoutCurrencyId);
+      }
+      else if(this.canClaimTokens) {
         await this.claimTokenRewards();
       }
     },

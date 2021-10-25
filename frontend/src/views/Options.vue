@@ -57,9 +57,9 @@
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Payout Currency</h4>
-              <b-form-select size="lg" v-model="payoutCurrency" @change="setPayoutCurrency()">
-                <b-form-select-option :value="'SKILL'">SKILL</b-form-select-option>
-                <b-form-select-option v-for="p in supportedProjects" :key="p.name" :value="p.tokenSymbol">
+              <b-form-select size="lg" v-model="payoutCurrencyId" @change="setPayoutCurrency()">
+                <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
+                <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">
                   {{p.tokenSymbol}} ({{p.name}})
                 </b-form-select-option>
               </b-form-select>
@@ -91,6 +91,7 @@ import Vue from 'vue';
 import { toBN, fromWeiEther } from '../utils/common';
 import { getConfigValue } from '@/contracts';
 import config from '../../app-config.json';
+import { SupportedProject } from './Treasury.vue';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -113,25 +114,19 @@ interface Data {
   fightMultiplier: number;
   currentChain: string;
   supportedChains: string[];
-  payoutCurrency: string;
+  payoutCurrencyId: string;
 }
 
 interface StoreMappedGetters {
   rewardsClaimTaxAsFactorBN: BigNumber;
   maxRewardsClaimTaxAsFactorBN: BigNumber;
+  getPartnerProjects: SupportedProject[];
 }
 
 enum ClaimStage {
   WaxBridge = 0,
   Stake = 1,
   Claim = 2,
-}
-
-interface SupportedProject {
-  name: string;
-  tokenSymbol: string;
-  tokenSupply: string;
-  tokensClaimed: string;
 }
 
 export default Vue.extend({
@@ -148,7 +143,7 @@ export default Vue.extend({
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
     this.currentChain = localStorage.getItem('currentChain') || 'BSC';
     this.supportedChains = config.supportedChains;
-    this.payoutCurrency = localStorage.getItem('payoutCurrency') || 'SKILL';
+    this.payoutCurrencyId = localStorage.getItem('payoutCurrencyId') || '-1';
   },
 
   data() {
@@ -161,7 +156,7 @@ export default Vue.extend({
       showCosmetics: true,
       fightMultiplier: 1,
       currentChain: 'BSC',
-      payoutCurrency: 'SKILL',
+      payoutCurrencyId: '-1',
       checked: false,
       ClaimStage,
       supportedChains: []
@@ -170,7 +165,7 @@ export default Vue.extend({
 
   computed: {
     ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN']) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
@@ -196,14 +191,20 @@ export default Vue.extend({
       return true;
     },
     supportedProjects(): SupportedProject[] {
-      return [
-        {name: 'Bounty', tokenSymbol: 'BT', tokenSupply: '33333', tokensClaimed: '13000'},
-        {name: 'Trinket1', tokenSymbol: 'TR', tokenSupply: '10000', tokensClaimed: '7412'},
-        {name: 'Sword0', tokenSymbol: 'SW0', tokenSupply: '1000', tokensClaimed: '312'},
-        {name: 'Sword1', tokenSymbol: 'SW1', tokenSupply: '45000', tokensClaimed: '7211'},
-        {name: 'Sword2', tokenSymbol: 'SW2', tokenSupply: '1230000', tokensClaimed: '743445'},
-        {name: 'Sword3', tokenSymbol: 'SW3', tokenSupply: '9999', tokensClaimed: '1322'},
-      ];
+      const supportedProjects = this.getPartnerProjects.map(p => {
+        return {
+          id: p.id,
+          name: p.name,
+          tokenSymbol: p.tokenSymbol,
+          tokenAddress: p.tokenAddress,
+          tokenSupply: p.tokenSupply,
+          tokensClaimed: p.tokensClaimed,
+          tokenPrice: p.tokenPrice,
+          isActive: p.isActive
+        };
+      });
+
+      return supportedProjects;
     }
   },
 
@@ -288,7 +289,7 @@ export default Vue.extend({
     },
 
     setPayoutCurrency() {
-      localStorage.setItem('payoutCurrency', this.payoutCurrency);
+      localStorage.setItem('payoutCurrencyId', this.payoutCurrencyId);
     }
   },
 });
