@@ -2150,6 +2150,39 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async getPlayerReservedLand({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+        if (!state.defaultAccount || !CBKLandSale) return;
+
+        return await CBKLandSale.methods
+          .getPlayerReservedLand(state.defaultAccount)
+          .call(defaultCallOptions(state));
+      },
+
+      async getChunksOfReservation({state}, {reservationId}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getChunksOfReservations(reservationId)
+          .call(defaultCallOptions(state));
+      },
+
+      async claimPlayerReservedLand({state}, {reservationId, chunkId, tier}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .claimPlayerReservedLand(reservationId, chunkId, tier)
+          .call(defaultCallOptions(state));
+      },
+
+      async reservedSalesAllowed({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .reservedSalesAllowed()
+          .call(defaultCallOptions(state));
+      },
+
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();

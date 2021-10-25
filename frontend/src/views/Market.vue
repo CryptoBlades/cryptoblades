@@ -740,6 +740,7 @@ interface Data {
   shieldTransactionHistoryHeader: any;
   historyCounter: number;
   landSaleAllowed: boolean;
+  reservedSaleAllowed: boolean;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields' | 'ownedCharacterIds' | 'ownedWeaponIds' | 'ownedShieldIds'>;
@@ -803,6 +804,7 @@ interface StoreMappedActions {
   setupWeaponsWithIdsRenames(weaponIds: string[]): Promise<void>;
   setupCharactersWithIdsRenames(weaponIds: string[]): Promise<void>;
   fetchIsLandSaleAllowed(): Promise<boolean>;
+  reservedSalesAllowed(): Promise<boolean>;
 }
 
 export default Vue.extend({
@@ -840,6 +842,7 @@ export default Vue.extend({
       shieldTransactionHistoryHeader: [],
       historyCounter: 0,
       landSaleAllowed: false,
+      reservedSaleAllowed: false,
     } as Data;
   },
 
@@ -922,6 +925,23 @@ export default Vue.extend({
           type: 't3land',
           name: 'Tier 3 Land',
           description: 'A tier 3 land',
+          image: '',
+        } as SkillShopListing);
+      }
+
+      if(this.reservedSaleAllowed) {
+        nftList.push({
+          id: 'claimT2Land',
+          type: 'claimT2Land',
+          name: 'Tier 2 Claimable Land',
+          description: 'A tier 2 claimable land',
+          image: '',
+        } as SkillShopListing);
+        nftList.push({
+          id: 'claimT3Land',
+          type: 'claimT3Land',
+          name: 'Tier 3 Claimable Land',
+          description: 'A tier 3 claimable land',
           image: '',
         } as SkillShopListing);
       }
@@ -1321,6 +1341,7 @@ export default Vue.extend({
       'setupWeaponsWithIdsRenames',
       'setupCharactersWithIdsRenames',
       'fetchIsLandSaleAllowed',
+      'reservedSalesAllowed',
     ]) as StoreMappedActions),
 
     clearData() {
@@ -2302,6 +2323,7 @@ export default Vue.extend({
   async mounted() {
     assert.ok(this.contracts.Weapons && this.contracts.Characters && this.contracts.Shields, 'Expected required contracts to be available');
     this.landSaleAllowed = await this.fetchIsLandSaleAllowed();
+    this.reservedSaleAllowed = await this.reservedSalesAllowed();
   },
 });
 </script>
