@@ -15,6 +15,7 @@ import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
 import { abi as blacksmithAbi } from '../../build/contracts/Blacksmith.json';
 import { abi as shieldsAbi } from '../../build/contracts/Shields.json';
 import { abi as cbkLandSaleAbi } from '../../build/contracts/CBKLandSale.json';
+import { abi as cbkLandAbi } from '../../build/contracts/CBKLand.json';
 import { abi as weaponRenameTagConsumablesAbi } from '../../build/contracts/WeaponRenameTagConsumables.json';
 import { abi as characterRenameTagConsumablesAbi } from '../../build/contracts/CharacterRenameTagConsumables.json';
 import { abi as characterFireTraitChangeConsumablesAbi } from '../../build/contracts/CharacterFireTraitChangeConsumables.json';
@@ -198,6 +199,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const cbkLandSaleAddr = await Blacksmith.methods.cbkLandSale().call();
   const CBKLandSale = new web3.eth.Contract(cbkLandSaleAbi as Abi, cbkLandSaleAddr);
 
+  const cbkLandAddr = await CBKLandSale.methods.cbkLand().call();
+  const CBKLand = new web3.eth.Contract(cbkLandAbi as Abi, cbkLandAddr);
+
   const raidContracts: RaidContracts = {};
   let raidTrinketAddress = '';
   let keyboxAddress = '';
@@ -237,7 +241,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
-    NFTStorage, CBKLandSale,
+    NFTStorage, CBKLandSale, CBKLand,
     ...raidContracts,
     ...marketContracts,
     WaxBridge,
