@@ -8,5 +8,6 @@ module.exports = async function (deployer) {
   const charas = await Characters.deployed();
   const pvpArena = await PvpArena.deployed();
   const _charas = await upgradeProxy(charas.address, Characters, { deployer });
-  _charas.migrateTo_PvpArena(pvpArena.address);
+  await _charas.migrateTo_PvpArena(pvpArena.address);
+  await pvpArena.grantRole(pvpArena_GAME_ADMIN, _charas.address);
 };

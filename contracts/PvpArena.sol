@@ -740,7 +740,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         ) {
             traitBonus = traitBonus.sub(fightTraitBonus.mul(charTraitFactor));
         }
-
+        // to trai bonus add / depending on the shield, if you have a shield // opponents we should calculate it in HERE
         return traitBonus;
     }
 
@@ -837,7 +837,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev set the ranking points of a player to 0 and update the rank,
-    function resetCharacterRankingPoints(uint256 characterID) external {
+    function resetCharacterRankingPoints(uint256 characterID) external restricted {
         //TODO Determine if this is the right approach as it might less efficient gas wise
         characterRankingPoints[characterID] = 0;
         processLoser(characterID);

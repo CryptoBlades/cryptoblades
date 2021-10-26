@@ -93,13 +93,14 @@ async function prepareContracts(accounts) {
   const promos_GAME_ADMIN = await promos.GAME_ADMIN();
 
   await pvpArena.grantRole(pvpArena_GAME_ADMIN, game.address);
+  await pvpArena.grantRole(pvpArena_GAME_ADMIN, characters.address);
   await characters.grantRole(charas_GAME_ADMIN, game.address);
+
   await weapons.grantRole(weps_GAME_ADMIN, game.address);
   await promos.grantRole(promos_GAME_ADMIN, game.address);
   await promos.grantRole(promos_GAME_ADMIN, characters.address);
   await game.grantRole(GAME_ADMIN, raid.address);
   await game.grantRole(GAME_ADMIN, blacksmith.address);
-  await raid1.grantRole(GAME_ADMIN, raid1.address);
 
   await weapons.migrateTo_e55d8c5();
   await weapons.migrateTo_aa9da90();
