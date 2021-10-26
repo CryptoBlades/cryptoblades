@@ -1006,7 +1006,7 @@ export function createStore(web3: Web3) {
       },
 
       async updateTrinketIds({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         const ownedTrinketIds = await state.contracts().RaidTrinket!.methods.getOwned().call(defaultCallOptions(state));
         commit('updateUserDetails', {
@@ -1016,7 +1016,7 @@ export function createStore(web3: Web3) {
       },
 
       async updateJunkIds({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         const ownedJunkIds = await state.contracts().Junk!.methods.getOwned().call(defaultCallOptions(state));
         commit('updateUserDetails', {
@@ -1026,7 +1026,7 @@ export function createStore(web3: Web3) {
       },
 
       async updateKeyLootboxIds({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         const ownedKeyLootboxIds = await state.contracts().KeyLootbox!.methods.getOwned().call(defaultCallOptions(state));
         commit('updateUserDetails', {
@@ -2117,6 +2117,8 @@ export function createStore(web3: Web3) {
 
       async getPurchase({state}) {
         const CBKLandSale = state.contracts().CBKLandSale!;
+
+        if(!state.defaultAccount) return;
 
         const res = await CBKLandSale.methods
           .getPurchase()
