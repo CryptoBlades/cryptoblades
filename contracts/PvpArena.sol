@@ -61,10 +61,16 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     int128 private _baseWagerUSD;
     /// @dev how much extra USD is wagered per level tier
     int128 private _tierWagerUSD;
+    /// @dev timestamp of when the current season started
+    uint256 public seasonStartedAt;
+    /// @dev interval of ranked season restarts
+    uint256 public seasonRestartInterval;
     /// @dev amount of time a character is unattackable
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
     uint256 public decisionSeconds;
+    /// @dev current ranked season
+    uint256 public currentRankedSeason;
     /// @dev amount of points earned by winning a duel
     uint8 public winningPoints;
     /// @dev amount of points subtracted by losing duel
@@ -83,6 +89,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Duel) public duelByAttacker;
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
+    /// @dev last ranked season the character was active in
+    mapping(uint256 => uint256) public seasonByCharacter;
     /// @dev excess wager by character for when they re-enter the arena
     mapping(uint256 => uint256) public excessWagerByCharacter;
     /// @dev funds available for withdrawal by address
@@ -197,6 +205,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         winningPoints = 5;
         losingPoints = 3;
         _maxCharactersPerRanking = 4;
+        currentRankedSeason = 1;
+        seasonStartedAt = block.timestamp;
+        seasonRestartInterval = 1 days;
         prizePercentages.push(60);
         prizePercentages.push(30);
         prizePercentages.push(10);
@@ -209,6 +220,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID,
         bool useShield
     ) external enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
+        if (seasonByCharacter[characterID] == 0) {
+            seasonByCharacter[characterID] = currentRankedSeason;
+        }
+
+        if (seasonByCharacter[characterID] != currentRankedSeason) {
+            characterRankingPoints[characterID] = 0;
+            seasonByCharacter[characterID] = currentRankedSeason;
+        }
+
         uint256 wager = getEntryWager(characterID);
         uint8 tier = getArenaTier(characterID);
 
@@ -838,7 +858,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function assignRankedRewards() external restricted {
         // Note: Loops over 15 tiers. Should not be reachable anytime in the foreseeable future.
         for (uint8 i = 0; i <= 15; i++) {
-            if (_fightersByTier[i].length() == 0) {
+            if (
+                _fightersByTier[i].length() == 0 ||
+                _rankingByTier[i].length == 0
+            ) {
                 continue;
             }
 
@@ -881,7 +904,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             // Note: We reset ranking prize pools.
             _rankingsPoolByTier[i] = 0;
+
+            // Note: We reset top players by tier.
+            delete _rankingByTier[i];
         }
+
+        currentRankedSeason = currentRankedSeason.add(1);
     }
 
     /// @dev increases a players withdrawable funds depending on their position in the ranked leaderboard

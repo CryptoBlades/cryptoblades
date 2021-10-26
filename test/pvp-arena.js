@@ -211,6 +211,109 @@ contract("PvpArena", (accounts) => {
         );
       });
 
+      it("should place character in current season if it had never entered PVP before", async () => {
+        const currentSeason = (await pvpArena.currentRankedSeason()).toString();
+
+        character1ID = await createCharacterInPvpTier(accounts[1], 2);
+
+        expect(
+          (await pvpArena.seasonByCharacter(character1ID)).toString()
+        ).to.equal(currentSeason);
+      });
+
+      it("should reset character's rank and place it in current season if it's off-season. Resets rankings by tier as well (leaderboard)", async () => {
+        const weapon1ID = await helpers.createWeapon(
+          accounts[1],
+          "111",
+          helpers.elements.water,
+          {
+            weapons,
+          }
+        );
+        const weapon2ID = await helpers.createWeapon(
+          accounts[2],
+          "111",
+          helpers.elements.fire,
+          {
+            weapons,
+          }
+        );
+
+        character1ID = await createCharacterInPvpTier(
+          accounts[1],
+          2,
+          "222",
+          weapon1ID
+        );
+        character2ID = await createCharacterInPvpTier(
+          accounts[2],
+          2,
+          "222",
+          weapon2ID
+        );
+
+        await characters.setTrait(character1ID, helpers.elements.water, {
+          from: accounts[0],
+        });
+        await characters.setTrait(character2ID, helpers.elements.fire, {
+          from: accounts[0],
+        });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character1ID, {
+          from: accounts[1],
+        });
+
+        await pvpArena.preparePerformDuel(character1ID, { from: accounts[1] });
+
+        let duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
+        });
+
+        const previousLeaderBoard = await pvpArena.getTierTopRankers(
+          character1ID
+        );
+
+        expect(previousLeaderBoard.length).to.equal(2);
+
+        const isCharacter1RankingGreaterThanZero =
+          (
+            await pvpArena.getCharacterRankingPoints(character1ID, {
+              from: accounts[1],
+            })
+          ).toString() > 0;
+
+        expect(isCharacter1RankingGreaterThanZero).to.equal(true);
+
+        await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+
+        await pvpArena.assignRankedRewards();
+
+        const newLeaderBoard = await pvpArena.getTierTopRankers(character1ID);
+
+        expect(newLeaderBoard.length).to.equal(0);
+
+        await pvpArena.enterArena(character1ID, weapon1ID, 0, false, {
+          from: accounts[1],
+        });
+
+        expect(
+          (
+            await pvpArena.getCharacterRankingPoints(character1ID, {
+              from: accounts[1],
+            })
+          ).toString()
+        ).to.equal("0");
+
+        const currentSeason = (await pvpArena.currentRankedSeason()).toString();
+
+        expect(
+          (await pvpArena.seasonByCharacter(character1ID)).toString()
+        ).to.equal(currentSeason);
+      });
+
       it("should leave the character temporarily unattackable", async () => {
         let isAttackable = await pvpArena.isCharacterAttackable(characterID);
         const unattackableSeconds = await pvpArena.unattackableSeconds();
@@ -2253,11 +2356,15 @@ contract("PvpArena", (accounts) => {
       expect(isNewBalanceTwoValid).to.equal(true);
     });
 
-    it("resets ranking prize pools", async () => {
+    it("resets ranking prize pools and updates ranked season", async () => {
       const balanceOne = await skillToken.balanceOf(accounts[1]);
       const balanceTwo = await skillToken.balanceOf(accounts[2]);
 
+      expect((await pvpArena.currentRankedSeason()).toString()).to.equal("1");
+
       await pvpArena.assignRankedRewards({ from: accounts[0] });
+
+      expect((await pvpArena.currentRankedSeason()).toString()).to.equal("2");
 
       await pvpArena.withdrawRankedRewards({ from: accounts[1] });
       await pvpArena.withdrawRankedRewards({ from: accounts[2] });
@@ -2266,6 +2373,8 @@ contract("PvpArena", (accounts) => {
       const newerBalanceTwo = await skillToken.balanceOf(accounts[2]);
 
       await pvpArena.assignRankedRewards({ from: accounts[0] });
+
+      expect((await pvpArena.currentRankedSeason()).toString()).to.equal("3");
 
       const newestBalanceOne = await skillToken.balanceOf(accounts[1]);
       const newestBalanceTwo = await skillToken.balanceOf(accounts[2]);
