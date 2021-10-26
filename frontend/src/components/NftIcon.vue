@@ -67,8 +67,8 @@
         <span v-if="nft.type === 't1land'" class="nft-supply">Supply left: {{totalT1LandSupply}}</span>
         <span v-if="nft.type === 't2land'" class="nft-supply">Supply left: {{totalT2LandSupply}}</span>
         <span v-if="nft.type === 't3land'" class="nft-supply">Supply left: {{totalT3LandSupply}}</span>
-        <span v-if="nft.type === 'claimT2Land'" class="nft-supply">Chunks to choose from: {{ totalT2ChunksToChooseFrom }} </span>
-        <span v-if="nft.type === 'claimT3Land'" class="nft-supply">Chunks to choose from: {{ totalT3ChunksToChooseFrom }}</span>
+        <span v-if="nft.type === 'claimT2Land'" class="nft-supply">Lands to claim: {{ totalT2LandsToClaim }} </span>
+        <span v-if="nft.type === 'claimT3Land'" class="nft-supply">Lands to claim: {{ totalT3LandsToClaim }}</span>
       </div>
       <div v-if="nft.type === 'weapon' || nft.type === 'WeaponCosmetic'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
           <img v-if="!isShop" class="placeholder-weapon" :src="getWeaponArt(nft)" />
@@ -160,7 +160,6 @@ import { getTrinketArt } from '../trinket-arts-placeholder';
 import { getCleanName } from '../rename-censor';
 import { getWeaponArt } from '../weapon-arts-placeholder';
 import { Stat1PercentForChar, Stat2PercentForChar, Stat3PercentForChar } from '../interfaces';
-import _ from 'lodash';
 
 export default {
   props: ['nft', 'isDefault', 'isShop', 'favorite'],
@@ -238,8 +237,8 @@ export default {
       totalT1LandSupply: 0,
       totalT2LandSupply: 0,
       totalT3LandSupply: 0,
-      totalT2ChunksToChooseFrom: 0,
-      totalT3ChunksToChooseFrom: 0,
+      totalT2LandsToClaim: 0,
+      totalT3LandsToClaim: 0,
       fetchSupplyInterval: 0,
       quantityOwned: 0,
       images: require.context('../assets/elements/', false, /\.png$/)
@@ -254,7 +253,7 @@ export default {
       'fetchTotalCharacterFireTraitChanges', 'fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
       'fetchOwnedWeaponCosmetics', 'fetchOwnedCharacterCosmetics', 'getAvailableLand',
-      'getPlayerReservedLand', 'getChunksOfReservation', 'getTakenT3Chunks']),
+      'getPlayerReservedLand']),
 
     imgPath(img) {
       return this.images('./' + img);
@@ -325,40 +324,16 @@ export default {
     } else if(this.nft.type === 'claimT2Land' || this.nft.type === 'claimT3Land') {
       const playerReservedLand = await this.getPlayerReservedLand();
       if(playerReservedLand) {
-        const takenT3Chunks = await this.getTakenT3Chunks();
         const {t2Reservations, t3Reservations} = playerReservedLand;
-        let tier2ReservationsNumber = 0;
-        for (const reservationId of t2Reservations) {
-          const chunksIds = await this.getChunksOfReservation({reservationId});
-          tier2ReservationsNumber += chunksIds.length;
-        }
-        this.totalT2ChunksToChooseFrom = tier2ReservationsNumber;
-        let tier3ReservationsNumber = 0;
-        for (const reservationId of t3Reservations) {
-          let chunksIds = await this.getChunksOfReservation({reservationId});
-          chunksIds = _.without(chunksIds.flat(), ...takenT3Chunks);
-          tier3ReservationsNumber += chunksIds.length;
-        }
-        this.totalT3ChunksToChooseFrom = tier3ReservationsNumber;
+        this.totalT2LandsToClaim = t2Reservations.length;
+        this.totalT3LandsToClaim = t3Reservations.length;
       }
       this.fetchSupplyInterval = setInterval(async () => {
         const playerReservedLand = await this.getPlayerReservedLand();
         if(playerReservedLand) {
-          const takenT3Chunks = await this.getTakenT3Chunks();
           const {t2Reservations, t3Reservations} = playerReservedLand;
-          let tier2ReservationsNumber = 0;
-          for (const reservationId of t2Reservations) {
-            const chunksIds = await this.getChunksOfReservation({reservationId});
-            tier2ReservationsNumber += chunksIds.length;
-          }
-          this.totalT2ChunksToChooseFrom = tier2ReservationsNumber;
-          let tier3ReservationsNumber = 0;
-          for (const reservationId of t3Reservations) {
-            let chunksIds = await this.getChunksOfReservation({reservationId});
-            chunksIds = _.without(chunksIds.flat(), ...takenT3Chunks);
-            tier3ReservationsNumber += chunksIds.length;
-          }
-          this.totalT3ChunksToChooseFrom = tier3ReservationsNumber;
+          this.totalT2LandsToClaim = t2Reservations.length;
+          this.totalT3LandsToClaim = t3Reservations.length;
         }
       }, 3000);
     }
