@@ -1,10 +1,7 @@
 <template>
-  <span v-if="showValueInSkillOnly || !showValueInUsd">
-    {{ formattedSkill }}
-  </span>
-  <span v-else-if="showValueInUsd">
-    {{ formattedUsd }}
-  </span>
+  <span v-if="showValueInSkillOnly || (!showValueInUsd && !showValueInKingOnly)">{{ formattedSkill }}</span>
+  <span v-else-if="showValueInKingOnly">{{ formattedKing }}</span>
+  <span v-else-if="showValueInUsd">{{ formattedUsd }}</span>
 </template>
 
 <script lang="ts">
@@ -20,11 +17,15 @@ export default Vue.extend({
       type: String,
       default: '0',
     },
-    skillMinDecimals: {
+    king: {
+      type: String,
+      default: '0',
+    },
+    minDecimals: {
       type: Number,
       default: 2,
     },
-    skillMaxDecimals: {
+    maxDecimals: {
       type: Number,
       default: 4,
     },
@@ -33,6 +34,10 @@ export default Vue.extend({
       default: 2,
     },
     showValueInSkillOnly: {
+      type: Boolean,
+      default: false,
+    },
+    showValueInKingOnly: {
       type: Boolean,
       default: false,
     },
@@ -50,6 +55,9 @@ export default Vue.extend({
     formattedSkill(): string {
       return `${this.calculateSkillWithDecimals()} SKILL`;
     },
+    formattedKing(): string {
+      return `${this.calculateKingWithDecimals()} KING`;
+    },
   },
   methods: {
     calculateSkillPriceInUsd(): number {
@@ -60,18 +68,36 @@ export default Vue.extend({
       const parsedSkill = toBN(this.skill);
       const decimalPlaces = this.countDecimalPlaces(parsedSkill);
 
-      if (this.skillMaxDecimals < decimalPlaces) {
-        return `~${parsedSkill.toFixed(this.skillMaxDecimals)}`;
+      if (this.maxDecimals < decimalPlaces) {
+        return `~${parseFloat(parsedSkill.toFixed(this.maxDecimals))}`;
       }
 
       if (
-        decimalPlaces > this.skillMinDecimals &&
-        decimalPlaces <= this.skillMaxDecimals
+        decimalPlaces > this.minDecimals &&
+        decimalPlaces <= this.maxDecimals
       ) {
         return parsedSkill.toString();
       }
 
-      return parsedSkill.toFixed(this.skillMinDecimals);
+      return parsedSkill.toFixed(this.minDecimals);
+    },
+
+    calculateKingWithDecimals(): string {
+      const parsedKing = toBN(this.king);
+      const decimalPlaces = this.countDecimalPlaces(parsedKing);
+
+      if (this.maxDecimals < decimalPlaces) {
+        return `~${parseFloat(parsedKing.toFixed(this.maxDecimals))}`;
+      }
+
+      if (
+        decimalPlaces > this.minDecimals &&
+        decimalPlaces <= this.maxDecimals
+      ) {
+        return parsedKing.toString();
+      }
+
+      return parsedKing.toFixed(this.minDecimals);
     },
 
     countDecimalPlaces(value: BigNumber) {
