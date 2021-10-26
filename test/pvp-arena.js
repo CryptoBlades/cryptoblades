@@ -192,7 +192,7 @@ contract("PvpArena", (accounts) => {
       });
     });
 
-    describe.only("happy path", async () => {
+    describe("happy path", async () => {
       let enterArenaReceipt;
 
       beforeEach(async () => {
