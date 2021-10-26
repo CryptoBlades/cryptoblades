@@ -65,6 +65,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
     uint256 public decisionSeconds;
+    /// @dev current ranked season
+    uint256 public currentRankedSeason;
     /// @dev amount of points earned by winning a duel
     uint8 public winningPoints;
     /// @dev amount of points subtracted by losing duel
@@ -83,6 +85,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Duel) public duelByAttacker;
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
+    /// @dev last ranked season the character was active in
+    mapping(uint256 => uint256) public seasonByCharacter;
     /// @dev excess wager by character for when they re-enter the arena
     mapping(uint256 => uint256) public excessWagerByCharacter;
     /// @dev funds available for withdrawal by address
@@ -197,6 +201,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         winningPoints = 5;
         losingPoints = 3;
         _maxCharactersPerRanking = 4;
+        currentRankedSeason = 1;
         prizePercentages.push(60);
         prizePercentages.push(30);
         prizePercentages.push(10);
@@ -209,6 +214,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID,
         bool useShield
     ) external enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
+        if (seasonByCharacter[characterID] == 0) {
+            seasonByCharacter[characterID] = currentRankedSeason;
+        }
+
+        require(
+            currentRankedSeason == seasonByCharacter[characterID],
+            "Character must reset rank"
+        );
+
         uint256 wager = getEntryWager(characterID);
         uint8 tier = getArenaTier(characterID);
 
@@ -882,6 +896,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             // Note: We reset ranking prize pools.
             _rankingsPoolByTier[i] = 0;
         }
+
+        currentRankedSeason.add(1);
     }
 
     /// @dev increases a players withdrawable funds depending on their position in the ranked leaderboard
@@ -908,6 +924,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             skillToken.safeTransfer(msg.sender, amountToTransfer);
         }
+    }
+
+    /// @dev resets a character's rank and places it in the current season
+    function resetRank(uint256 characterID) external {
+        require(
+            seasonByCharacter[characterID] != currentRankedSeason,
+            "Rank already reset"
+        );
+
+        characterRankingPoints[characterID] = 0;
+        seasonByCharacter[characterID] = currentRankedSeason;
     }
 
     /// @dev returns ranked prize percentages distribution
