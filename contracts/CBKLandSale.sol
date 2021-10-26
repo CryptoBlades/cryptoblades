@@ -599,6 +599,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     }
 
     function claimPlayerReservedLand(uint256 reservation, uint256 chunkId, uint256 tier) public reservedSaleAllowed {
+        require(tier != 1, "NT1");
         require(playerReservedLandClaimed[reservation] == false, "AC"); // already claimed
         require(playerReservedLands[msg.sender].contains(reservation), "IR"); // invalid reservation
         require(playerReservedLandTier[reservation] == tier, "IT"); // invalid tier
