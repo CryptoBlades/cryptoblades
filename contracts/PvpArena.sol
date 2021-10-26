@@ -53,8 +53,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     Raid1 public raids;
     IRandoms public randoms;
 
-    // ver si blocktimeActual >= startTime + periodo y wea
-
     /// @dev how much of a duel's bounty is sent to the rankings pool
     uint8 private _rankingsPoolTaxPercent;
     /// @dev how many times the cost of battling must be wagered to enter the arena
@@ -860,7 +858,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function assignRankedRewards() external restricted {
         // Note: Loops over 15 tiers. Should not be reachable anytime in the foreseeable future.
         for (uint8 i = 0; i <= 15; i++) {
-            if (_fightersByTier[i].length() == 0) {
+            if (
+                _fightersByTier[i].length() == 0 ||
+                _rankingByTier[i].length == 0
+            ) {
                 continue;
             }
 
