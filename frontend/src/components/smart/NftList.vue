@@ -287,6 +287,7 @@ interface Data {
   checkIfCanPurchaseLandInterval: ReturnType<typeof setInterval> | null;
   checkOwnedLandsInterval: ReturnType<typeof setInterval> | null;
   checkPlayerReservedLandInterval: ReturnType<typeof setInterval> | null;
+  fetchNftsInterval: ReturnType<typeof setInterval> | null;
   t1LandPrice: string;
   t2LandPrice: string;
   t3LandPrice: string;
@@ -458,6 +459,7 @@ export default Vue.extend({
       checkIfCanPurchaseLandInterval: null,
       checkOwnedLandsInterval: null,
       checkPlayerReservedLandInterval: null,
+      fetchNftsInterval: null,
       t1LandPrice: '',
       t2LandPrice: '',
       t3LandPrice: '',
@@ -688,8 +690,10 @@ export default Vue.extend({
 
     async checkIfCanPurchaseLand() {
       const purchase = await this.getPurchase();
-      this.purchase = purchase;
-      this.canPurchaseLand = purchase.tier === '0';
+      if(purchase) {
+        this.purchase = purchase;
+        this.canPurchaseLand = purchase.tier === '0';
+      }
     },
 
     isFavorite(type: string, id: number): boolean {
@@ -791,6 +795,18 @@ export default Vue.extend({
         this.t2LandPriceFormatted = this.t2LandPrice + ' KING';
         this.t3LandPriceFormatted = this.t3LandPrice + ' KING';
       }
+    },
+
+    async fetchNfts() {
+      await this.updateTrinketIds();
+      await this.updateJunkIds();
+      await this.updateKeyLootboxIds();
+
+      this.fetchNftsInterval = setInterval(async () => {
+        await this.updateTrinketIds();
+        await this.updateJunkIds();
+        await this.updateKeyLootboxIds();
+      }, 3000);
     },
 
     async refreshLandPrices() {
@@ -935,13 +951,6 @@ export default Vue.extend({
   async mounted() {
     this.checkStorageFavorite();
 
-    if(!this.showGivenNftIdTypes) {
-      await this.fetchShields(this.ownedShieldIds);
-      await this.updateTrinketIds();
-      await this.updateJunkIds();
-      await this.updateKeyLootboxIds();
-    }
-
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());
 
     if(this.isMarket) {
@@ -955,6 +964,11 @@ export default Vue.extend({
       this.elementFilter = sessionStorage.getItem('nft-elementfilter') || '';
     }
 
+    if(!this.showGivenNftIdTypes) {
+      await this.fetchShields(this.ownedShieldIds);
+      await this.fetchNfts();
+    }
+
     this.landSaleAllowed = await this.fetchIsLandSaleAllowed();
 
     await this.checkIfCanPurchaseLand();
@@ -963,11 +977,15 @@ export default Vue.extend({
     }, 3000);
 
     const results = await this.getOwnedLands();
-    this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+    if(results){
+      this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+    }
 
     this.checkOwnedLandsInterval = setInterval(async () => {
       const results = await this.getOwnedLands();
-      this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+      if(results) {
+        this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+      }
     }, 3000);
 
     this.reservedChunks = await this.getReservedChunksIds();
@@ -1050,6 +1068,9 @@ export default Vue.extend({
     }
     if(this.checkOwnedLandsInterval){
       clearInterval(this.checkOwnedLandsInterval);
+    }
+    if(this.fetchNftsInterval) {
+      clearInterval(this.fetchNftsInterval);
     }
   }
 });
