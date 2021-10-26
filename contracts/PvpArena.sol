@@ -760,7 +760,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         ) {
             traitBonus = traitBonus.sub(fightTraitBonus.mul(charTraitFactor));
         }
-        // to trai bonus add / depending on the shield, if you have a shield // opponents we should calculate it in HERE
         return traitBonus;
     }
 

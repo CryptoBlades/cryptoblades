@@ -222,7 +222,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             joinCostPaid = game.usdToSkill(joinCost);
             game.payContractTokenOnly(msg.sender, joinCostPaid);
         }
-        //set character as NFTVAR_BUSY = 1
         characters.setNftVar(characterID,characters.NFTVAR_BUSY(), 1);
         weapons.setNftVar(weaponID,weapons.NFTVAR_BUSY(), 1);
         emit RaidJoined(raidIndex,
