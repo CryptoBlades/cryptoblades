@@ -2169,6 +2169,14 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async getTakenT3Chunks({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getTakenT3Chunks()
+          .call(defaultCallOptions(state));
+      },
+
       async claimPlayerReservedLand({state}, {reservationId, chunkId, tier}) {
         const CBKLandSale = state.contracts().CBKLandSale!;
 

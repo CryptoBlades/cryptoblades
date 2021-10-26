@@ -160,6 +160,7 @@ import { getTrinketArt } from '../trinket-arts-placeholder';
 import { getCleanName } from '../rename-censor';
 import { getWeaponArt } from '../weapon-arts-placeholder';
 import { Stat1PercentForChar, Stat2PercentForChar, Stat3PercentForChar } from '../interfaces';
+import _ from 'lodash';
 
 export default {
   props: ['nft', 'isDefault', 'isShop', 'favorite'],
@@ -253,7 +254,7 @@ export default {
       'fetchTotalCharacterFireTraitChanges', 'fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
       'fetchOwnedWeaponCosmetics', 'fetchOwnedCharacterCosmetics', 'getAvailableLand',
-      'getPlayerReservedLand', 'getChunksOfReservation']),
+      'getPlayerReservedLand', 'getChunksOfReservation', 'getTakenT3Chunks']),
 
     imgPath(img) {
       return this.images('./' + img);
@@ -324,6 +325,7 @@ export default {
     } else if(this.nft.type === 'claimT2Land' || this.nft.type === 'claimT3Land') {
       const playerReservedLand = await this.getPlayerReservedLand();
       if(playerReservedLand) {
+        const takenT3Chunks = await this.getTakenT3Chunks();
         const {t2Reservations, t3Reservations} = playerReservedLand;
         let tier2ReservationsNumber = 0;
         for (const reservationId of t2Reservations) {
@@ -333,7 +335,8 @@ export default {
         this.totalT2ChunksToChooseFrom = tier2ReservationsNumber;
         let tier3ReservationsNumber = 0;
         for (const reservationId of t3Reservations) {
-          const chunksIds = await this.getChunksOfReservation({reservationId});
+          let chunksIds = await this.getChunksOfReservation({reservationId});
+          chunksIds = _.without(chunksIds.flat(), ...takenT3Chunks);
           tier3ReservationsNumber += chunksIds.length;
         }
         this.totalT3ChunksToChooseFrom = tier3ReservationsNumber;
@@ -341,6 +344,7 @@ export default {
       this.fetchSupplyInterval = setInterval(async () => {
         const playerReservedLand = await this.getPlayerReservedLand();
         if(playerReservedLand) {
+          const takenT3Chunks = await this.getTakenT3Chunks();
           const {t2Reservations, t3Reservations} = playerReservedLand;
           let tier2ReservationsNumber = 0;
           for (const reservationId of t2Reservations) {
@@ -350,7 +354,8 @@ export default {
           this.totalT2ChunksToChooseFrom = tier2ReservationsNumber;
           let tier3ReservationsNumber = 0;
           for (const reservationId of t3Reservations) {
-            const chunksIds = await this.getChunksOfReservation({reservationId});
+            let chunksIds = await this.getChunksOfReservation({reservationId});
+            chunksIds = _.without(chunksIds.flat(), ...takenT3Chunks);
             tier3ReservationsNumber += chunksIds.length;
           }
           this.totalT3ChunksToChooseFrom = tier3ReservationsNumber;

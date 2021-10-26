@@ -111,12 +111,13 @@
       <div class="w-100" style="padding-bottom: 100%;">
         <div v-if="selectedZone !== undefined" class="zone-grid"
              :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
-          <div class="chunk" :class="[reservedChunks.includes(chunkId.toString()) ? 'reserved' : null ]"
+          <div class="chunk" :class="[reservedChunks.includes(chunkId.toString()) || takenT3Chunks.includes(chunkId.toString()) ? 'reserved' : null ]"
           v-for="(chunkId, index) in chunksIds" :key="chunkId"
            @click="selectChunk(chunkId, index)" :style="[ selectedChunk === chunkId ? {backgroundColor: 'greenyellow'} : null ]">
             <span>ID: {{chunkId}}</span>
             <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
-            <span v-if="reservedChunks.includes(chunkId.toString())">RESERVED</span>
+            <span v-if="selectedTier === 3 && takenT3Chunks.includes(chunkId.toString())">TAKEN</span>
+            <span v-else-if="reservedChunks.includes(chunkId.toString())">RESERVED</span>
            </div>
         </div>
       </div>
@@ -245,6 +246,7 @@ import { Accessors, PropType } from 'vue/types/options';
 import { IState } from '@/interfaces';
 import { BModal } from 'bootstrap-vue';
 import {fromWeiEther} from '@/utils/common';
+import _ from 'lodash';
 
 interface Land {
   tier: string,
@@ -273,12 +275,14 @@ interface Data {
   selectedChunk: number | undefined;
   selectedChunkAvailable: boolean;
   selectedChunkPopulation: number | undefined;
-  selectedReservationId: number | undefined;
+  selectedT2ReservationId: number | undefined;
+  selectedT3ReservationId: number | undefined;
   maxZonePopulation: number;
   maxChunkPopulation: number;
   zonesIds: number[];
   zonesPopulation: number[];
   chunksIds: number[];
+  takenT3Chunks: number[],
   chunksPopulation: number[];
   reservedChunks: string[];
   t1LandAvailable: boolean;
@@ -298,7 +302,8 @@ interface Data {
   playerReservedT3Chunks: number[];
   playerReservedT2Zones: number[];
   playerReservedT3Zones: number[];
-  reservationIdToChunks: Map<number, number[]>;
+  reservationIdT2ToChunks: Map<number, number[]>;
+  reservationIdT3ToChunks: Map<number, number[]>;
   ownedLands: Land[];
 }
 
@@ -355,6 +360,7 @@ interface StoreMappedActions {
   getChunksOfReservation(payload: {reservationId: number}): Promise<number[]>;
   claimPlayerReservedLand(payload: {reservationId: number, chunkId: number, tier: number}): Promise<void>;
   getOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string }[]>;
+  getTakenT3Chunks(): Promise<number[]>;
 }
 
 export default Vue.extend({
@@ -445,12 +451,14 @@ export default Vue.extend({
       selectedChunk: undefined,
       selectedChunkAvailable: false,
       selectedChunkPopulation: 0,
-      selectedReservationId: undefined,
+      selectedT2ReservationId: undefined,
+      selectedT3ReservationId: undefined,
       maxZonePopulation: 10000,
       maxChunkPopulation: 100,
       zonesIds: Array.from({length: 100}, (x, i) => i),
       zonesPopulation: [],
       chunksIds: Array.from({length: 100}, (x, i) => i),
+      takenT3Chunks: [],
       chunksPopulation: [],
       reservedChunks: [],
       t1LandAvailable: false,
@@ -470,7 +478,8 @@ export default Vue.extend({
       playerReservedT3Chunks: [],
       playerReservedT2Zones: [],
       playerReservedT3Zones: [],
-      reservationIdToChunks: new Map(),
+      reservationIdT2ToChunks: new Map(),
+      reservationIdT3ToChunks: new Map(),
       ownedLands: [],
     } as Data;
   },
@@ -614,7 +623,7 @@ export default Vue.extend({
       'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic', 'getAllZonesPopulation', 'checkIfChunkAvailable',
       'getZoneChunkPopulation', 'getChunkPopulation', 'purchaseT1CBKLand', 'purchaseT2CBKLand', 'purchaseT3CBKLand', 'getCBKLandPrice',
       'getPurchase', 'getReservedChunksIds', 'getAvailableLand', 'fetchIsLandSaleAllowed', 'getPlayerReservedLand',
-      'getChunksOfReservation', 'claimPlayerReservedLand', 'getOwnedLands'
+      'getChunksOfReservation', 'claimPlayerReservedLand', 'getOwnedLands', 'getTakenT3Chunks'
     ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
@@ -746,7 +755,9 @@ export default Vue.extend({
     selectAvailableChunk(chunkId: number, index: number) {
       this.selectedChunk = chunkId;
       this.selectedChunkPopulation = this.chunksPopulation[index];
-      this.selectedReservationId = [...this.reservationIdToChunks.entries()]
+      this.selectedT2ReservationId = [...this.reservationIdT2ToChunks.entries()]
+        .filter(({ 1: reservationChunks }) => reservationChunks.includes(chunkId)).map(([k]) => k)[0];
+      this.selectedT3ReservationId = [...this.reservationIdT3ToChunks.entries()]
         .filter(({ 1: reservationChunks }) => reservationChunks.includes(chunkId)).map(([k]) => k)[0];
       this.selectedChunkAvailable = true;
     },
@@ -849,25 +860,44 @@ export default Vue.extend({
     },
 
     async claimLand(chunkId: number) {
-      if (!this.selectedReservationId) {
+      if (!(this.selectedT2ReservationId || this.selectedT3ReservationId)) {
         return;
       }
 
-      await this.claimPlayerReservedLand({
-        reservationId: this.selectedReservationId,
-        chunkId,
-        tier: this.selectedTier
-      }).then(async () => {
-        if (this.selectedZone !== undefined) {
-          await this.updateChunksPopulation(this.selectedZone);
-        }
-        (this.$refs['t2-claim-zone-modal'] as BModal).hide();
-        (this.$refs['t2-claim-map-modal'] as BModal).hide();
-        (this.$refs['t3-claim-zone-modal'] as BModal).hide();
-        (this.$refs['t3-claim-map-modal'] as BModal).hide();
-        const results = await this.getOwnedLands();
-        this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
-      });
+      if(this.selectedTier === 2 && this.selectedT2ReservationId) {
+        await this.claimPlayerReservedLand({
+          reservationId: this.selectedT2ReservationId,
+          chunkId,
+          tier: this.selectedTier
+        }).then(async () => {
+          if (this.selectedZone !== undefined) {
+            await this.updateChunksPopulation(this.selectedZone);
+          }
+          (this.$refs['t2-claim-zone-modal'] as BModal).hide();
+          (this.$refs['t2-claim-map-modal'] as BModal).hide();
+          (this.$refs['t3-claim-zone-modal'] as BModal).hide();
+          (this.$refs['t3-claim-map-modal'] as BModal).hide();
+          const results = await this.getOwnedLands();
+          this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+        });
+      }
+      if(this.selectedTier === 3 && this.selectedT3ReservationId) {
+        await this.claimPlayerReservedLand({
+          reservationId: this.selectedT3ReservationId,
+          chunkId,
+          tier: this.selectedTier
+        }).then(async () => {
+          if (this.selectedZone !== undefined) {
+            await this.updateChunksPopulation(this.selectedZone);
+          }
+          (this.$refs['t2-claim-zone-modal'] as BModal).hide();
+          (this.$refs['t2-claim-map-modal'] as BModal).hide();
+          (this.$refs['t3-claim-zone-modal'] as BModal).hide();
+          (this.$refs['t3-claim-map-modal'] as BModal).hide();
+          const results = await this.getOwnedLands();
+          this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+        });
+      }
       await this.checkIfCanPurchaseLand();
     },
 
@@ -1000,7 +1030,7 @@ export default Vue.extend({
       Promise.all(playerReservedLand.t2Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
         .then(playerReservedT2Chunks => {
           playerReservedLand.t2Reservations.map((reservationId, index) =>
-            this.reservationIdToChunks.set(+reservationId, playerReservedT2Chunks[index].map(chunkId => +chunkId)));
+            this.reservationIdT2ToChunks.set(+reservationId, playerReservedT2Chunks[index].map(chunkId => +chunkId)));
           this.playerReservedT2Chunks = playerReservedT2Chunks.flat();
           const zonesIds: number[] = [];
           this.playerReservedT2Chunks.forEach(chunkId => {
@@ -1012,14 +1042,16 @@ export default Vue.extend({
           this.playerReservedT2Zones = zonesIds;
         });
       Promise.all(playerReservedLand.t3Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
-        .then(playerReservedT3Chunks => {
+        .then(async playerReservedT3Chunks => {
+          this.takenT3Chunks = await this.getTakenT3Chunks();
+          this.playerReservedT3Chunks = _.without(playerReservedT3Chunks.flat(), ...this.takenT3Chunks);
           playerReservedLand.t3Reservations.map((reservationId, index) =>
-            this.reservationIdToChunks.set(+reservationId, playerReservedT3Chunks[index].map(chunkId => +chunkId)));
-          this.playerReservedT3Chunks = playerReservedT3Chunks.flat();
+            this.reservationIdT3ToChunks.set(+reservationId, playerReservedT3Chunks[index]
+              .filter(chunkId => !this.takenT3Chunks.includes(chunkId)).map(chunkId => +chunkId)));
           const zonesIds: number[] = [];
           this.playerReservedT3Chunks.forEach(chunkId => {
             const zoneId = this.calculateZoneId(chunkId);
-            if(zonesIds.indexOf(zoneId) === -1) {
+            if (zonesIds.indexOf(zoneId) === -1) {
               zonesIds.push(zoneId);
             }
           });
@@ -1031,7 +1063,7 @@ export default Vue.extend({
       Promise.all(playerReservedLand.t2Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
         .then(playerReservedT2Chunks => {
           playerReservedLand.t2Reservations.map((reservationId, index) =>
-            this.reservationIdToChunks.set(+reservationId, playerReservedT2Chunks[index].map(chunkId => +chunkId)));
+            this.reservationIdT2ToChunks.set(+reservationId, playerReservedT2Chunks[index].map(chunkId => +chunkId)));
           this.playerReservedT2Chunks = playerReservedT2Chunks.flat();
           const zonesIds: number[] = [];
           this.playerReservedT2Chunks.forEach(chunkId => {
@@ -1043,14 +1075,16 @@ export default Vue.extend({
           this.playerReservedT2Zones = zonesIds;
         });
       Promise.all(playerReservedLand.t3Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
-        .then(playerReservedT3Chunks => {
+        .then(async playerReservedT3Chunks => {
+          this.takenT3Chunks = await this.getTakenT3Chunks();
+          this.playerReservedT3Chunks = _.without(playerReservedT3Chunks.flat(), ...this.takenT3Chunks);
           playerReservedLand.t3Reservations.map((reservationId, index) =>
-            this.reservationIdToChunks.set(+reservationId, playerReservedT3Chunks[index].map(chunkId => +chunkId)));
-          this.playerReservedT3Chunks = playerReservedT3Chunks.flat();
+            this.reservationIdT3ToChunks.set(+reservationId, playerReservedT3Chunks[index]
+              .filter(chunkId => !this.takenT3Chunks.includes(chunkId)).map(chunkId => +chunkId)));
           const zonesIds: number[] = [];
           this.playerReservedT3Chunks.forEach(chunkId => {
             const zoneId = this.calculateZoneId(chunkId);
-            if(zonesIds.indexOf(zoneId) === -1) {
+            if (zonesIds.indexOf(zoneId) === -1) {
               zonesIds.push(zoneId);
             }
           });
