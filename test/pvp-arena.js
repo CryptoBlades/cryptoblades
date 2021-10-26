@@ -192,7 +192,7 @@ contract("PvpArena", (accounts) => {
       });
     });
 
-    describe("happy path", async () => {
+    describe.only("happy path", async () => {
       let enterArenaReceipt;
 
       beforeEach(async () => {
@@ -221,7 +221,7 @@ contract("PvpArena", (accounts) => {
         ).to.equal(currentSeason);
       });
 
-      it("should reset character's rank and place it in current season if it's off-season", async () => {
+      it("should reset character's rank and place it in current season if it's off-season. Resets rankings by tier as well (leaderboard)", async () => {
         const weapon1ID = await helpers.createWeapon(
           accounts[1],
           "111",
@@ -272,6 +272,12 @@ contract("PvpArena", (accounts) => {
           from: accounts[0],
         });
 
+        const previousLeaderBoard = await pvpArena.getTierTopRankers(
+          character1ID
+        );
+
+        expect(previousLeaderBoard.length).to.equal(2);
+
         const isCharacter1RankingGreaterThanZero =
           (
             await pvpArena.getCharacterRankingPoints(character1ID, {
@@ -284,6 +290,10 @@ contract("PvpArena", (accounts) => {
         await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
 
         await pvpArena.assignRankedRewards();
+
+        const newLeaderBoard = await pvpArena.getTierTopRankers(character1ID);
+
+        expect(newLeaderBoard.length).to.equal(0);
 
         await pvpArena.enterArena(character1ID, weapon1ID, 0, false, {
           from: accounts[1],
