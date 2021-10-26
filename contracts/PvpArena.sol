@@ -157,22 +157,20 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID,
         bool useShield
     ) {
-        require(!isCharacterInArena(characterID), "Character already in arena");
-        require(!_weaponsInArena[weaponID], "Weapon already in arena");
         require(
             characters.ownerOf(characterID) == msg.sender,
             "Not character owner"
         );
         require(weapons.ownerOf(weaponID) == msg.sender, "Not weapon owner");
-        require(!raids.isCharacterRaiding(characterID), "Character is in raid");
-        require(!raids.isWeaponRaiding(weaponID), "Weapon is in raid");
-
+        // Check if character and weapon are busy
+        require(characters.getNftVar(characterID, 1) == 0, "Character is busy");
+        require(weapons.getNftVar(weaponID, 1) == 0, "Weapon is busy");
         if (useShield) {
             require(
                 shields.ownerOf(shieldID) == msg.sender,
                 "Not shield owner"
             );
-            require(!_shieldsInArena[shieldID], "Shield already in arena");
+            require(shields.getNftVar(shieldID, 1) == 0, "Shield is busy");
         }
 
         _;
@@ -236,6 +234,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _weaponsInArena[weaponID] = true;
 
         if (useShield) _shieldsInArena[shieldID] = true;
+        if (useShield) shields.setNftVar(shieldID, 1, 1);
 
         _fightersByTier[tier].add(characterID);
         _fightersByPlayer[msg.sender].add(characterID);
@@ -258,6 +257,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _updateLastActivityTimestamp(characterID);
 
         skillToken.transferFrom(msg.sender, address(this), wager);
+        // set the character as BUSY setting NFTVAR_BUSY to 1
+        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 1);
+        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 1);
     }
 
     /// @dev attempts to find an opponent for a character
@@ -564,7 +566,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 break;
             }
         }
-        // if the character is within the top 4, compare it to the player that precedes it and swap positions if the condition is met
+        // if the character is within the top 4, compare it to the character that precedes it and swap positions if the condition is met
         if (loserFound) {
             for (
                 loserPosition;
@@ -572,7 +574,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 loserPosition++
             ) {
                 if (
-                    rankingPoints <=
+                    rankingPoints <
                     getCharacterRankingPoints(ranking[loserPosition + 1])
                 ) {
                     uint256 oldCharacter = ranking[loserPosition + 1];
@@ -592,11 +594,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         returns (uint256[] memory)
     {
         uint8 tier = getArenaTier(characterID);
-        uint256[] memory topRankers = new uint256[](
-            _rankingByTier[tier].length
-        );
-        // we return only the top 3 players
-        for (uint256 i = 0; i < _rankingByTier[tier].length; i++) {
+        uint256 arrayLength;
+        // we return only the top 3 players, returning the array without the pivot ranker if he exists
+        if (_rankingByTier[tier].length == _maxCharactersPerRanking) {
+            arrayLength = _rankingByTier[tier].length - 1;
+        } else {
+            arrayLength = _rankingByTier[tier].length;
+        }
+        uint256[] memory topRankers = new uint256[](arrayLength);
+        for (uint256 i = 0; i < arrayLength; i++) {
             topRankers[i] = _rankingByTier[tier][i];
         }
 
@@ -611,7 +617,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         return characterRankingPoints[characterID];
     }
-
     /// @dev checks if a character is in the arena
     function isCharacterInArena(uint256 characterID)
         public
@@ -755,7 +760,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         ) {
             traitBonus = traitBonus.sub(fightTraitBonus.mul(charTraitFactor));
         }
-
         return traitBonus;
     }
 
@@ -781,6 +785,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
+        // setting characters, weapons and shield NFTVAR_BUSY to 0
+        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 0);
+        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 0);
+        shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
     }
 
     /// @dev attempts to find an opponent for a character.
@@ -847,10 +855,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return fighters;
     }
 
-    /// @dev set the ranking points of a player to 0 and update the rank
-    function _resetCharacterRankingPoints(uint256 characterID) internal {
+    /// @dev set the ranking points of a player to 0 and update the rank,
+    function resetCharacterRankingPoints(uint256 characterID) external restricted {
+        //TODO Determine if this is the right approach as it might less efficient gas wise
         characterRankingPoints[characterID] = 0;
-        //this is not final, but processing the loser will update the ranks leaving this player in the 4th position, which will be quickly replaced by other players
         processLoser(characterID);
     }
 

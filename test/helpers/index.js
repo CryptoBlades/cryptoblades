@@ -1,10 +1,10 @@
 const { expectEvent, time } = require('@openzeppelin/test-helpers');
+
 const prepareContracts = require('./prepareContracts');
 
 const Characters = artifacts.require('Characters');
 const Weapons = artifacts.require('Weapons');
 const Shields = artifacts.require('Shields');
-
 const elements = {
   fire: 0,
   earth: 1,

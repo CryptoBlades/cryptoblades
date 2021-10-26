@@ -71,6 +71,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         cosmetics: 0-255 but only 24 is used, may want to cap so future expansions dont change existing weps
     */
 
+    function migrateTo_NftVars() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        NFTVAR_BUSY = 1;
+    }
     struct Weapon {
         uint16 properties; // right to left: 3b stars, 2b trait, 7b stat pattern, 4b EMPTY
         // stats (each point refers to .25% improvement)
@@ -130,6 +134,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
     event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
+    
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;
+    uint256 public NFTVAR_BUSY;
 
     modifier restricted() {
         _restricted();
@@ -652,9 +659,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
         restricted noFreshLookup(id)
     returns (int128, int128, uint24, uint8) {
-
+        // check if the weapon is busy, there is no space in the contract so we can't add an exaplanation
+        require(getNftVar(id, NFTVAR_BUSY) == 0);
         drainDurability(id, drainAmount, allowNegativeDurability);
-
         Weapon storage wep = tokens[id];
         return (
             oneFrac.add(powerMultPerPointBasic.mul(
@@ -753,5 +760,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
                 require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to), "Transfer cooldown");
             }
         }
+    }
+    function getNftVar(uint256 weaponID, uint256 nftVar) public view returns(uint256) {
+        return nftVars[weaponID][nftVar];
+    }
+    function setNftVar(uint256 weaponID, uint256 nftVar, uint8 value) public {
+        nftVars[weaponID][nftVar] = value;
     }
 }

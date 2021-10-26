@@ -9,7 +9,7 @@ const helpers = require("./helpers");
 const { BN, toBN, fromWei } = web3.utils;
 
 contract("PvpArena", (accounts) => {
-  let pvpArena, characters, weapons, shields, priceOracle, randoms;
+  let pvpArena, characters, weapons, shields, priceOracle, randoms, raid1;
 
   async function createCharacterInPvpTier(
     account,
@@ -53,6 +53,7 @@ contract("PvpArena", (accounts) => {
     randoms = contracts.randoms;
     priceOracle = contracts.priceOracle;
     pvpArena = contracts.pvpArena;
+    raid1 = contracts.raid1;
 
     await priceOracle.setCurrentPrice(web3.utils.toWei("1", "ether")); // 1/5 SKILL per USD, AKA 5 USD per SKILL
 
@@ -83,6 +84,7 @@ contract("PvpArena", (accounts) => {
     await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[2]);
     await weapons.grantRole(await weapons.GAME_ADMIN(), accounts[0]);
     await shields.grantRole(await shields.GAME_ADMIN(), accounts[0]);
+    await raid1.grantRole(await raid1.GAME_ADMIN(), accounts[0]);
   });
 
   describe("#getDuelCost", () => {
@@ -518,7 +520,7 @@ contract("PvpArena", (accounts) => {
           pvpArena.enterArena(characterID, weapon2Id, 0, false, {
             from: accounts[1],
           }),
-          "Character already in arena"
+          "Character is busy"
         );
       });
     });
@@ -551,7 +553,7 @@ contract("PvpArena", (accounts) => {
           pvpArena.enterArena(character2ID, weaponId, 0, false, {
             from: accounts[1],
           }),
-          "Weapon already in arena"
+          "Weapon is busy"
         );
       });
     });
@@ -590,7 +592,7 @@ contract("PvpArena", (accounts) => {
           pvpArena.enterArena(character2ID, weapon2Id, shieldId, true, {
             from: accounts[1],
           }),
-          "Shield already in arena"
+          "Shield is busy"
         );
       });
     });
@@ -1855,30 +1857,70 @@ contract("PvpArena", (accounts) => {
   });
 
   describe("rankingBehaviour", () => {
+    let character1ID;
+    let character2ID;
+    let character3ID;
+    let character4ID;
+    let character5ID;
+    let character6ID;
+    let weapon1ID;
+    let weapon2ID;
     describe("entering the arena ", () => {
-      let character1ID;
-      let character2ID;
-      let character3ID;
-      let character4ID;
-      let character5ID;
-      let character6ID;
-      let weapon1ID;
-      let weapon2ID;
-
       it("should fill the rank with the first 4 players", async () => {
         character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
         character2ID = await createCharacterInPvpTier(accounts[1], 2, "222");
-        character3ID = await createCharacterInPvpTier(accounts[2], 2, "222");
         //this char will be in a different tier
-        character4ID = await createCharacterInPvpTier(accounts[2], 3, "222");
+        character3ID = await createCharacterInPvpTier(accounts[2], 3, "222");
+        character4ID = await createCharacterInPvpTier(accounts[2], 2, "222");
         character5ID = await createCharacterInPvpTier(accounts[2], 2, "222");
         character6ID = await createCharacterInPvpTier(accounts[1], 2, "222");
         const characterTier = await pvpArena.getTierTopRankers(character1ID, {
           from: accounts[1],
         });
-
         expect(characterTier[0].toString()).to.equal(character1ID.toString());
-        expect(characterTier[3].toString()).to.equal(character5ID.toString());
+        expect(characterTier[2].toString()).to.equal(character4ID.toString());
+      });
+    });
+
+    describe("Ranking reset", () => {
+      it("should reset the ranking of a character after advancing tier", async () => {
+        character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
+        character2ID = await createCharacterInPvpTier(accounts[1], 2, "222");
+        await pvpArena.setRankingPoints(character1ID, 35, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character2ID, 34, {
+          from: accounts[0],
+        });
+
+        const previousRankingPoints = await pvpArena.getCharacterRankingPoints(
+          character2ID
+        );
+        await helpers.levelUpTo(character2ID, 30, { characters });
+        const postRankingPoints = await pvpArena.getCharacterRankingPoints(
+          character2ID
+        );
+        expect(previousRankingPoints.toString()).to.equal("34");
+        expect(postRankingPoints.toString()).to.equal("0");
+      });
+      it("should not reset the rakning if the player levels up but doesn't skip a tier", async () => {
+        character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
+        character2ID = await createCharacterInPvpTier(accounts[1], 2, "222");
+        await pvpArena.setRankingPoints(character1ID, 35, {
+          from: accounts[0],
+        });
+        await pvpArena.setRankingPoints(character2ID, 34, {
+          from: accounts[0],
+        });
+        const previousRankingPoints = await pvpArena.getCharacterRankingPoints(
+          character2ID
+        );
+        await helpers.levelUpTo(character2ID, 8, { characters });
+        const postRankingPoints = await pvpArena.getCharacterRankingPoints(
+          character2ID
+        );
+        expect(previousRankingPoints.toString()).to.equal("34");
+        expect(postRankingPoints.toString()).to.equal("34");
       });
     });
 
@@ -1916,7 +1958,6 @@ contract("PvpArena", (accounts) => {
           "222",
           weapon1ID
         );
-
         await characters.setTrait(character4ID, helpers.elements.water, {
           from: accounts[0],
         });
@@ -1967,9 +2008,9 @@ contract("PvpArena", (accounts) => {
         const playerTier = await pvpArena.getTierTopRankers(character1ID, {
           from: accounts[1],
         });
-        // expect the last player to be the first
+        // expect the last player to be the first and the former first player to not be in the ranks
         expect(playerTier[0].toString()).to.equal(character4ID.toString());
-        expect(playerTier[3].toString()).to.equal(character1ID.toString());
+        expect(playerTier[2].toString()).to.equal(character3ID.toString());
         // expect to add and subtract ranking points respectively
         expect(winnerPostRankPoints.toString()).to.equal(
           winnerPreviousRankPoints.add(winningPoints).toString()
@@ -2051,7 +2092,6 @@ contract("PvpArena", (accounts) => {
         await pvpArena.performDuels(duelQueue, {
           from: accounts[0],
         });
-
         const playerTier = await pvpArena.getTierTopRankers(character1ID);
         // expect the last character to be the first one, climibing through the entire ladder
         expect(playerTier[0].toString()).to.equal(character6ID).toString();
@@ -2200,7 +2240,7 @@ contract("PvpArena", (accounts) => {
         });
         //expect loser player to remain in the same spot
         expect(isCharacterInTier).to.equal(false);
-        expect(playerTier[3].toString()).to.equal(character1ID.toString());
+        expect(playerTier[2].toString()).to.equal(character1ID.toString());
       });
     });
   });
@@ -2389,6 +2429,76 @@ contract("PvpArena", (accounts) => {
       expect(didBalanceTwoGrow).to.equal(true);
       expect(didBalanceOneGrowAgain).to.equal(false);
       expect(didBalanceTwoGrowAgain).to.equal(false);
+    });
+  });
+  describe("#InteractionsWithOtherContracts", () => {
+    let character1ID;
+    let character2ID;
+    let weapon1ID;
+    let weapon2ID;
+    let shieldID;
+    it("should not allow a player to join the arena if he is busy", async () => {
+      // Due to the issues with  starting a raid from here, for now we are testing this against the same arena
+      // commenting the necessary code for future uses
+      // await raid1.doRaid(1000, 100, 1, { from: accounts[0] });
+      // const character1ID = await helpers.createCharacter(accounts[0], "123", {
+      //   characters,
+      // });
+      // await raid1.joinRaid(character1ID, weapon1ID, { from: accounts[0] });
+      weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
+        weapons,
+      });
+      character1ID = await createCharacterInPvpTier(accounts[0], 1);
+      await expectRevert(
+        pvpArena.enterArena(character1ID, weapon1ID, 0, false, {
+          from: accounts[0],
+        }),
+        "Character is busy"
+      );
+    });
+
+
+    it("should not allow a player to join a raid if he is already busy", async () => {
+      weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
+        weapons,
+      });
+      character1ID = await createCharacterInPvpTier(accounts[0], 1);
+
+      await expectRevert(
+        raid1.joinRaid(character1ID, weapon1ID),
+        "Character is busy"
+      );
+    });
+    it("should not allow a weapon to join a raid if it is already busy", async () => {
+      weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
+        weapons,
+      });
+      character1ID = await createCharacterInPvpTier(
+        accounts[0],
+        1,
+        "222",
+        weapon1ID
+      );
+      character2ID = await helpers.createCharacter(accounts[0], "123", {
+        characters,
+      });
+
+      await expectRevert(
+        raid1.joinRaid(character2ID, weapon1ID),
+        "Weapon is busy"
+      );
+    });
+
+    it("should not allow a player to perform a regular fight if he is busy", async () => {
+      weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
+        weapons,
+      });
+      character1ID = await createCharacterInPvpTier(accounts[0], 1);
+
+      await expectRevert(
+        characters.getFightDataAndDrainStamina(character1ID, 0, 0),
+        "Character is busy"
+      );
     });
   });
 });
