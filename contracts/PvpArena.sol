@@ -104,9 +104,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev ranking by tier
     mapping(uint8 => uint256[]) private _rankingByTier;
 
-    /// @dev total ranking points to use for larger seasons
-    mapping(uint256 => uint256) public characterSeasonalRankingPoints;
-
     event NewDuel(
         uint256 indexed attacker,
         uint256 indexed defender,
@@ -241,8 +238,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         skillToken.transferFrom(msg.sender, address(this), wager);
         // set the character as BUSY setting NFTVAR_BUSY to 1
-        characters.setNftVar(characterID, 1, 1);
-        weapons.setNftVar(weaponID, 1, 1);
+        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 1);
+        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 1);
     }
 
     /// @dev attempts to find an opponent for a character
@@ -344,12 +341,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 _removeCharacterFromArena(loserID);
             }
 
-            // add ranking points and seasonal ranking points to the winner
+            // add ranking points to the winner
             characterRankingPoints[winnerID] = characterRankingPoints[winnerID]
                 .add(winningPoints);
-            characterSeasonalRankingPoints[
-                winnerID
-            ] = characterSeasonalRankingPoints[winnerID].add(winningPoints);
             // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract the ranking points
             if (characterRankingPoints[loserID] <= 3) {
                 characterRankingPoints[loserID] = 0;
@@ -358,14 +352,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                     loserID
                 ].sub(losingPoints);
             }
-            // do the same process with seasonal rankingpoints
-            if (characterSeasonalRankingPoints[loserID] <= 3) {
-                characterSeasonalRankingPoints[loserID] = 0;
-            } else {
-                characterSeasonalRankingPoints[
-                    loserID
-                ] = characterSeasonalRankingPoints[loserID].sub(losingPoints);
-            }
+
             processWinner(winnerID);
             processLoser(loserID);
 
@@ -610,16 +597,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         return characterRankingPoints[characterID];
     }
-
-    /// @dev get the character's seasonal points
-    function getCharacterSeasonalRankingPoints(uint256 characterID)
-        public
-        view
-        returns (uint256)
-    {
-        return characterSeasonalRankingPoints[characterID];
-    }
-
     /// @dev checks if a character is in the arena
     function isCharacterInArena(uint256 characterID)
         public
@@ -790,9 +767,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
         // setting characters, weapons and shield NFTVAR_BUSY to 0
-        characters.setNftVar(characterID, 1, 0);
-        weapons.setNftVar(weaponID, 1, 0);
-        shields.setNftVar(shieldID, 1, 0);
+        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 0);
+        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 0);
+        shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
     }
 
     /// @dev attempts to find an opponent for a character.
@@ -860,7 +837,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev set the ranking points of a player to 0 and update the rank,
-    function _resetCharacterRankingPoints(uint256 characterID) external {
+    function resetCharacterRankingPoints(uint256 characterID) external {
         //TODO Determine if this is the right approach as it might less efficient gas wise
         characterRankingPoints[characterID] = 0;
         processLoser(characterID);

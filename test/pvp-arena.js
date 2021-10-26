@@ -1753,7 +1753,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe("rankingBehaviour", () => {
+  describe.only("rankingBehaviour", () => {
     let character1ID;
     let character2ID;
     let character3ID;
@@ -1780,7 +1780,7 @@ contract("PvpArena", (accounts) => {
     });
 
     describe("Ranking reset", () => {
-      it("should reset the ranking of a character  after advancing tier", async () => {
+      it("should reset the ranking of a character after advancing tier", async () => {
         character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
         character2ID = await createCharacterInPvpTier(accounts[1], 2, "222");
         await pvpArena.setRankingPoints(character1ID, 35, {

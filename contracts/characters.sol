@@ -73,7 +73,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         characterLimit = 4;
     }
 
-    function migrateTo_PvpArena(PvpArena _pvp) public {
+    function migrateTo_PvpArena(PvpArena _pvp) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
         pvp = _pvp;
     }
@@ -120,12 +120,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
 
-    event NewCharacter(uint256 indexed character, address indexed minter);
-    event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
-
     PvpArena public pvp;
     mapping(uint256 => mapping(uint256 => uint256)) public nftVars;
     uint256 public NFTVAR_BUSY;
+
+    event NewCharacter(uint256 indexed character, address indexed minter);
+    event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
 
     modifier restricted() {
         _restricted();
@@ -238,18 +238,18 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             uint256 newXp = char.xp.add(xp);
             uint256 requiredToLevel = experienceTable[char.level]; // technically next level
             // we get the current character tier and reset points if he changes tier by leveling up
+            uint256 prevTier = pvp.getArenaTier(id);
             while (newXp >= requiredToLevel) {
                 newXp = newXp - requiredToLevel;
-                uint256 prevTier = pvp.getArenaTier(id);
                 char.level += 1;
-                uint256 newTier = pvp.getArenaTier(id);
-                if (prevTier < newTier) {
-                    pvp._resetCharacterRankingPoints(id);
-                }
                 emit LevelUp(ownerOf(id), id, char.level);
                 if (char.level < 255)
                     requiredToLevel = experienceTable[char.level];
                 else newXp = 0;
+            }
+            uint256 newTier = pvp.getArenaTier(id);
+            if (prevTier < newTier) {
+                pvp.resetCharacterRankingPoints(id);
             }
             char.xp = uint16(newXp);
         }
@@ -308,7 +308,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         raidsDone[id] = raidsDone[id] + 1;
         raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
         gainXp(id, xp);
-        setNftVar(id,1, 0);
+        setNftVar(id,NFTVAR_BUSY, 0);
     }
 
     function canRaid(address user, uint256 id) public view returns (bool) {
