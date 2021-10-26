@@ -35,19 +35,28 @@
               && nft.type !== 'claimT2Land' && nft.type !== 'claimT3Land'">
               Buy ({{ nft.nftPrice }} SKILL)
             </span>
-            <span class="gtag-link-others" v-else-if="nft.type === 't1land'">
+            <span class="gtag-link-others" v-else-if="nft.type === 't1land'"
+                  v-tooltip.top="{ content: maxPrecisionSkill(t1LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
+                  @mouseover="hover = !isMobile() || true"
+                  @mouseleave="hover = !isMobile()">
               Buy (<CurrencyConverter :king="t1LandPrice" :skill="t1LandPrice"
                                       :show-value-in-skill-only="selectedCurrency === 0"
                                       :show-value-in-king-only="selectedCurrency === 1"
                                       :max-decimals="2"/>)
             </span>
-            <span class="gtag-link-others" v-else-if="nft.type === 't2land'">
+            <span class="gtag-link-others" v-else-if="nft.type === 't2land'"
+                  v-tooltip.top="{ content: maxPrecisionSkill(t2LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
+                  @mouseover="hover = !isMobile() || true"
+                  @mouseleave="hover = !isMobile()">
               Buy (<CurrencyConverter :king="t2LandPrice" :skill="t2LandPrice"
                                       :show-value-in-skill-only="selectedCurrency === 0"
                                       :show-value-in-king-only="selectedCurrency === 1"
                                       :max-decimals="2"/>)
             </span>
-            <span class="gtag-link-others" v-else-if="nft.type === 't3land'">
+            <span class="gtag-link-others" v-else-if="nft.type === 't3land'"
+                  v-tooltip.top="{ content: maxPrecisionSkill(t3LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
+                  @mouseover="hover = !isMobile() || true"
+                  @mouseleave="hover = !isMobile()">
               Buy (<CurrencyConverter :king="t3LandPrice" :skill="t3LandPrice"
                                       :show-value-in-skill-only="selectedCurrency === 0"
                                       :show-value-in-king-only="selectedCurrency === 1"
@@ -257,6 +266,7 @@ import { BModal } from 'bootstrap-vue';
 import {fromWeiEther} from '@/utils/common';
 import _ from 'lodash';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
+import BigNumber from 'bignumber.js';
 
 interface Land {
   tier: string,
@@ -305,6 +315,9 @@ interface Data {
   t1LandPrice: string;
   t2LandPrice: string;
   t3LandPrice: string;
+  t1LandPriceInWei: string;
+  t2LandPriceInWei: string;
+  t3LandPriceInWei: string;
   playerReservedT2Chunks: number[];
   playerReservedT3Chunks: number[];
   playerReservedT2Zones: number[];
@@ -478,6 +491,9 @@ export default Vue.extend({
       t1LandPrice: '',
       t2LandPrice: '',
       t3LandPrice: '',
+      t1LandPriceInWei: '',
+      t2LandPriceInWei: '',
+      t3LandPriceInWei: '',
       playerReservedT2Chunks: [],
       playerReservedT3Chunks: [],
       playerReservedT2Zones: [],
@@ -789,6 +805,14 @@ export default Vue.extend({
       return String(num).split('').map(Number);
     },
 
+    maxPrecisionSkill(listedPrice: string): string {
+      return this.convertStringToDecimal(fromWeiEther(listedPrice), 8);
+    },
+
+    convertStringToDecimal(val: string, maxDecimals: number) {
+      return new BigNumber(val).toFixed(maxDecimals);
+    },
+
     calculateZoneId(chunkId: number) {
       const chunkIdNumbers = this.splitNum(chunkId);
       if(chunkId < 100) {
@@ -817,9 +841,12 @@ export default Vue.extend({
     },
 
     async refreshLandPrices() {
-      this.t1LandPrice = fromWeiEther(await this.getCBKLandPrice({tier: 1, currency: this.selectedCurrency}));
-      this.t2LandPrice = fromWeiEther(await this.getCBKLandPrice({tier: 2, currency: this.selectedCurrency}));
-      this.t3LandPrice = fromWeiEther(await this.getCBKLandPrice({tier: 3, currency: this.selectedCurrency}));
+      this.t1LandPriceInWei = await this.getCBKLandPrice({tier: 1, currency: this.selectedCurrency});
+      this.t1LandPrice = fromWeiEther(this.t1LandPriceInWei);
+      this.t2LandPriceInWei = await this.getCBKLandPrice({tier: 2, currency: this.selectedCurrency});
+      this.t2LandPrice = fromWeiEther(this.t2LandPriceInWei);
+      this.t3LandPriceInWei = await this.getCBKLandPrice({tier: 3, currency: this.selectedCurrency});
+      this.t3LandPrice = fromWeiEther(this.t3LandPriceInWei);
     },
 
     async updateChunksPopulation(zoneId: number) {
