@@ -53,6 +53,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     Raid1 public raids;
     IRandoms public randoms;
 
+    // ver si blocktimeActual >= startTime + periodo y wea
+
     /// @dev how much of a duel's bounty is sent to the rankings pool
     uint8 private _rankingsPoolTaxPercent;
     /// @dev how many times the cost of battling must be wagered to enter the arena
@@ -61,6 +63,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     int128 private _baseWagerUSD;
     /// @dev how much extra USD is wagered per level tier
     int128 private _tierWagerUSD;
+    /// @dev timestamp of when the current season started
+    uint256 public seasonStartedAt;
+    /// @dev interval of ranked season restarts
+    uint256 public seasonRestartInterval;
     /// @dev amount of time a character is unattackable
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
@@ -202,6 +208,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         losingPoints = 3;
         _maxCharactersPerRanking = 4;
         currentRankedSeason = 1;
+        seasonStartedAt = block.timestamp;
+        seasonRestartInterval = 1 days;
         prizePercentages.push(60);
         prizePercentages.push(30);
         prizePercentages.push(10);
