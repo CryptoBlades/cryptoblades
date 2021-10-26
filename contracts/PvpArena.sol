@@ -895,6 +895,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             // Note: We reset ranking prize pools.
             _rankingsPoolByTier[i] = 0;
+
+            // Note: We reset top players by tier.
+            delete _rankingByTier[i];
         }
 
         currentRankedSeason.add(1);
