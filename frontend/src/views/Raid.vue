@@ -123,7 +123,8 @@
             stamina </span>,
             <span class="badge badge-secondary">{{ durabilityCost }}
             durability </span> and
-            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" :skillMinDecimals="0" :skillMaxDecimals="5"/></span>
+            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" minDecimals="0"
+                                                                   maxDecimals="5"/></span>
           </div>
         </div>
       </div>
