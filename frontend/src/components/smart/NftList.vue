@@ -9,6 +9,16 @@
         <span>Tier: {{purchase.tier}}</span><br/>
         <span v-if="purchase.tier !== '1'">Chunk ID: {{purchase.chunkId}}</span>
       </div>
+      <div class="centered-text-div" v-if="isSpecials">
+        <b-button
+          variant="primary"
+          class="shop-button"
+          @click="showMapModal()">
+            <span class="gtag-link-others">
+              Show map
+            </span>
+        </b-button>
+      </div>
       <div class="centered-text-div mt-2" v-if="isSpecials && landSaleAllowed && canPurchaseLand">
         <h4>Currency to buy land with</h4>
         <b-form-select v-model="selectedCurrency" @change="onCurrencyChange()" class="mb-2">
@@ -87,7 +97,7 @@
     </div>
 
     <b-modal class="map-modal" title="Choose zone" ref="map-modal" size="xl" hide-footer
-             @hide="selectedZone = undefined">
+             @hide="selectedZone = undefined; selectedTier = undefined">
       <div class="w-100" style="padding-bottom: 100%;">
         <div class="map-grid">
           <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)">
@@ -98,7 +108,7 @@
     </b-modal>
 
     <b-modal class="map-modal" title="Choose zone" ref="t2-claim-map-modal" size="xl" hide-footer
-             @hide="selectedZone = undefined">
+             @hide="selectedZone = undefined; selectedTier = undefined">
       <div class="w-100" style="padding-bottom: 100%;">
         <div class="map-grid">
           <div class="zone" :class="[playerReservedT2Zones.includes(zoneId) ? 'available' : null ]"
@@ -112,7 +122,7 @@
     </b-modal>
 
     <b-modal class="map-modal" title="Choose zone" ref="t3-claim-map-modal" size="xl" hide-footer
-             @hide="selectedZone = undefined">
+             @hide="selectedZone = undefined; selectedTier = undefined">
       <div class="w-100" style="padding-bottom: 100%;">
         <div class="map-grid">
           <div class="zone" :class="[playerReservedT3Zones.includes(zoneId) ? 'available' : null ]"
@@ -125,7 +135,7 @@
     </b-modal>
 
     <b-modal ref="zone-modal" title="Choose chunk" size="lg"
-             @hide="selectedChunk = undefined">
+             @hide="selectedChunk = undefined" :hide-footer="!selectedTier">
       <div class="w-100" style="padding-bottom: 100%;">
         <div v-if="selectedZone !== undefined" class="zone-grid"
              :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
@@ -770,7 +780,9 @@ export default Vue.extend({
       }
       this.selectedChunk = chunkId;
       this.selectedChunkPopulation = this.chunksPopulation[index];
-      this.selectedChunkAvailable = await this.checkIfChunkAvailable({tier: this.selectedTier, chunkId});
+      if(this.selectedTier){
+        this.selectedChunkAvailable = await this.checkIfChunkAvailable({tier: this.selectedTier, chunkId});
+      }
     },
 
     selectAvailableChunk(chunkId: number, index: number) {
