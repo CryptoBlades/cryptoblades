@@ -7,7 +7,7 @@
       <div class="centered-text-div" v-if="isSpecials && !canPurchaseLand && purchase">
         <span>You can purchase only one land, your purchase:</span><br/>
         <span>Tier: {{purchase.tier}}</span><br/>
-        <span>Chunk ID: {{purchase.chunkId}}</span>
+        <span v-if="purchase.tier !== '1'">Chunk ID: {{purchase.chunkId}}</span>
       </div>
       <div class="centered-text-div mt-2" v-if="isSpecials && landSaleAllowed && canPurchaseLand">
         <h4>Currency to buy land with</h4>
@@ -74,7 +74,7 @@
       <div class="centered-text-div mt-3" v-if="isSpecials && ownedLands.length !== 0">
         <h4>Your owned {{ownedLands.length > 1 ? "lands" : 'land'}}:</h4>
         <ul class="list-group raid-details mb-4" v-for="(land, index) in ownedLands" :key="index">
-          <li class="list-group-item d-flex justify-content-between align-items-center details-text">
+          <li v-if="land.tier !== '1'" class="list-group-item d-flex justify-content-between align-items-center details-text">
             ChunkId
             <span class="badge badge-primary badge-pill">{{ land.chunkId }}</span>
           </li>
