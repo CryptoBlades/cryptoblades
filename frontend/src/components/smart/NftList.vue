@@ -84,13 +84,13 @@
       <div class="centered-text-div mt-3" v-if="isSpecials && ownedLands.length !== 0">
         <h4>Your owned {{ownedLands.length > 1 ? "lands" : 'land'}}:</h4>
         <ul class="list-group raid-details mb-4" v-for="(land, index) in ownedLands" :key="index">
-          <li v-if="land.tier !== '1'" class="list-group-item d-flex justify-content-between align-items-center details-text">
-            ChunkId
-            <span class="badge badge-primary badge-pill">{{ land.chunkId }}</span>
-          </li>
           <li class="list-group-item d-flex justify-content-between align-items-center details-text">
             Tier
             <span class="badge badge-primary badge-pill">{{ land.tier }}</span>
+          </li>
+          <li v-if="land.chunkId !== '0'" class="list-group-item d-flex justify-content-between align-items-center details-text">
+            ChunkId
+            <span class="badge badge-primary badge-pill">{{ land.chunkId }}</span>
           </li>
         </ul>
       </div>
