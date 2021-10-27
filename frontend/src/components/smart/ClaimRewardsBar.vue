@@ -9,7 +9,7 @@
       <b-nav-item
         class="ml-3"
         :disabled="!canClaimTokens"
-        @click="onClaimTokens()"
+        @click="claimSkill(ClaimStage.Summary)"
         v-tooltip.bottom="!canClaimTokens ? withdrawalInfoText : ''"><!-- moved gtag-link below b-nav-item -->
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="'Tax is being reduced by 1% per day.' + getTaxTimerNextTick">
           <strong>SKILL</strong> {{ formattedSkillReward }}
@@ -67,25 +67,47 @@
         </div>
       </div>
     </b-modal>
+    <b-modal class="centered-modal" ref="claim-summary-modal" title="Claim Rewards" ok-title="Claim" @ok="onClaimTokens()">
+      <div class="d-flex flex-column align-items-center">
+        <div class="d-flex flex-row w-100 align-items-baseline">
+          <h5>Payout Currency:</h5>
+          <b-form-select class="w-50 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
+            <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
+            <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
+          </b-form-select>
+        </div>
+        <partnered-project v-if="selectedPartneredProject"
+          :id="selectedPartneredProject.id" :name="selectedPartneredProject.name"
+          :tokenSymbol="selectedPartneredProject.tokenSymbol" :tokenSupply="selectedPartneredProject.tokenSupply"
+          :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"/>
+        <div class="mt-3" v-if="!selectedPartneredProject">
+          <h5>{{withdrawalInfoText}}</h5>
+          <h6>Early withdraw tax: {{ formattedRewardsClaimTax }} Tax is being reduced by 1% per day. {{getTaxTimerNextTick}}</h6>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import { Accessors } from 'vue/types/options';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { RequiredXp } from '../../interfaces';
 import { ICharacter } from '@/interfaces';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { secondsToDDHHMMSS } from '../../utils/date-time';
 import { getCleanName } from '../../rename-censor';
+import { SupportedProject } from '@/views/Treasury.vue';
+import PartneredProject from '../PartneredProject.vue';
 
 interface StoreMappedState {
   skillRewards: string;
   xpRewards: Record<string, string>;
   ownedCharacterIds: string[];
   directStakeBonusPercent: number;
+  payoutCurrencyId: string;
 }
 
 interface StoreMappedGetters {
@@ -94,12 +116,14 @@ interface StoreMappedGetters {
   maxRewardsClaimTaxAsFactorBN: BigNumber;
   rewardsClaimTaxAsFactorBN: BigNumber;
   getCharacterName(id: number): string;
+  getPartnerProjects: SupportedProject[];
 }
 
 enum ClaimStage {
   WaxBridge = 0,
   Stake = 1,
-  Claim = 2
+  Claim = 2,
+  Summary = 3
 }
 
 interface StoreMappedActions {
@@ -107,20 +131,23 @@ interface StoreMappedActions {
   claimPartnerToken(id: number): Promise<void>;
   claimXpRewards(): Promise<void>;
   fetchRemainingTokenClaimAmountPreTax(): Promise<string>;
+  fetchPartnerProjects(): Promise<void>;
 }
 
 export default Vue.extend({
+  components: { PartneredProject },
+
   data() {
     return {
       ClaimStage,
-      remainingTokenClaimAmountPreTax: '0'
+      remainingTokenClaimAmountPreTax: '0',
     };
   },
 
   computed: {
-    ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
+    ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent', 'payoutCurrencyId']) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName'
+      'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName', 'getPartnerProjects'
     ]) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
@@ -215,17 +242,38 @@ export default Vue.extend({
       }
 
       return true;
+    },
+
+    supportedProjects(): SupportedProject[] {
+      const supportedProjects = this.getPartnerProjects.map(p => {
+        return {
+          id: p.id,
+          name: p.name,
+          tokenSymbol: p.tokenSymbol,
+          tokenAddress: p.tokenAddress,
+          tokenSupply: p.tokenSupply,
+          tokensClaimed: p.tokensClaimed,
+          tokenPrice: p.tokenPrice,
+          isActive: p.isActive
+        };
+      });
+
+      return supportedProjects;
+    },
+
+    selectedPartneredProject(): SupportedProject | undefined {
+      return this.supportedProjects.find(x => x.id === this.payoutCurrencyId);
     }
   },
 
   methods: {
-    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimPartnerToken', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax']) as StoreMappedActions),
+    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimPartnerToken', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax',
+      'fetchPartnerProjects']) as StoreMappedActions),
+    ...mapMutations(['updatePayoutCurrencyId']),
 
     async onClaimTokens() {
-      const payoutCurrencyId = localStorage.getItem('payoutCurrencyId');
-      if(payoutCurrencyId && payoutCurrencyId !== '-1') {
-        console.log(payoutCurrencyId);
-        await this.claimPartnerToken(+payoutCurrencyId);
+      if(this.payoutCurrencyId !== '-1') {
+        await this.claimPartnerToken(+this.payoutCurrencyId);
       }
       else if(this.canClaimTokens) {
         await this.claimTokenRewards();
@@ -249,6 +297,10 @@ export default Vue.extend({
         (this.$refs['stake-suggestion-modal'] as any).hide();
         (this.$refs['claim-confirmation-modal'] as any).show();
       }
+      if(stage === ClaimStage.Summary) {
+        await this.fetchPartnerProjects();
+        (this.$refs['claim-summary-modal'] as any).show();
+      }
       await this.getRemainingTokenClaimAmountPreTax();
     },
 
@@ -258,7 +310,11 @@ export default Vue.extend({
 
     getCleanCharacterName(id: number): string {
       return getCleanName(this.getCharacterName(id));
-    }
+    },
+
+    getLogoFile(projectName: string): string {
+      return `${projectName.toLowerCase()}.png`;
+    },
   },
 
   async mounted() {

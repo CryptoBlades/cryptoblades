@@ -75,6 +75,14 @@ export default Vue.extend({
     },
   },
 
+  watch: {
+    id: {
+      async handler() {
+        await this.update();
+      }
+    }
+  },
+
   methods: {
     ...mapActions(['getPartnerProjectMultiplier', 'getPartnerProjectClaimedAmount', 'getSkillToPartnerRatio']),
     imgPath(img: string): string {

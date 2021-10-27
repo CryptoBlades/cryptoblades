@@ -57,7 +57,7 @@
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Payout Currency</h4>
-              <b-form-select size="lg" v-model="payoutCurrencyId" @change="setPayoutCurrency()">
+              <b-form-select size="lg" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
                 <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
                 <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">
                   {{p.tokenSymbol}} ({{p.name}})
@@ -96,6 +96,7 @@ import { SupportedProject } from './Treasury.vue';
 interface StoreMappedState {
   skillRewards: string;
   directStakeBonusPercent: number;
+  payoutCurrencyId: string;
 }
 
 interface StoreMappedActions {
@@ -103,6 +104,7 @@ interface StoreMappedActions {
   setUpContracts(): Promise<void>;
   initialize(): Promise<void>;
   configureMetaMask(networkId: number): Promise<void>;
+  fetchPartnerProjects(): Promise<void>;
 }
 interface Data {
   showGraphics: boolean;
@@ -130,7 +132,7 @@ enum ClaimStage {
 }
 
 export default Vue.extend({
-  created() {
+  async created() {
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
@@ -143,6 +145,7 @@ export default Vue.extend({
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
     this.currentChain = localStorage.getItem('currentChain') || 'BSC';
     this.supportedChains = config.supportedChains;
+    await this.fetchPartnerProjects();
     this.payoutCurrencyId = localStorage.getItem('payoutCurrencyId') || '-1';
   },
 
@@ -164,7 +167,7 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
+    ...(mapState(['skillRewards', 'directStakeBonusPercent', 'payoutCurrencyId']) as Accessors<StoreMappedState>),
     ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
@@ -209,8 +212,8 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['claimTokenRewards','setUpContracts','initialize','configureMetaMask']) as StoreMappedActions),
-    ...mapMutations(['setNetworkId']),
+    ...(mapActions(['claimTokenRewards','setUpContracts','initialize','configureMetaMask','fetchPartnerProjects']) as StoreMappedActions),
+    ...mapMutations(['setNetworkId','updatePayoutCurrencyId']),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
@@ -287,10 +290,6 @@ export default Vue.extend({
       Events.$emit('setting:currentChain', { value: this.currentChain });
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
-
-    setPayoutCurrency() {
-      localStorage.setItem('payoutCurrencyId', this.payoutCurrencyId);
-    }
   },
 });
 </script>

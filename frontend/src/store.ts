@@ -159,7 +159,8 @@ export function createStore(web3: Web3) {
       waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
       waxBridgeTimeUntilLimitExpires: 0,
 
-      partnerProjects: {}
+      partnerProjects: {},
+      payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
     },
 
     getters: {
@@ -714,6 +715,11 @@ export function createStore(web3: Web3) {
 
       updatePartnerProjectsState(state: IState, { partnerProjectId, partnerProject }) {
         Vue.set(state.partnerProjects, partnerProjectId, partnerProject);
+      },
+
+      updatePayoutCurrencyId(state: IState, newPayoutCurrencyId) {
+        localStorage.setItem('payoutCurrencyId', newPayoutCurrencyId);
+        state.payoutCurrencyId = newPayoutCurrencyId;
       }
     },
 
@@ -3054,12 +3060,10 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        console.log('Claiming...');
         await Treasury.methods.claim(id).send({
           from: state.defaultAccount,
         });
 
-        console.log('Updating balances');
         await Promise.all([
           dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill')
