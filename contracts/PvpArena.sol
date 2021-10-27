@@ -718,6 +718,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             uint8 weaponTrait
         ) = weapons.getFightData(weaponID, trait);
 
+
+        (
+            ,
+            int128 shieldMultFight,
+            uint24 shieldBonusPower,
+            uint8 shieldTrait
+        ) = shields.getFightData(shieldID, trait);
+
         int128 playerTraitBonus = getPVPTraitBonusAgainst(
             trait,
             weaponTrait,
