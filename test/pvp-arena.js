@@ -2372,10 +2372,7 @@ contract("PvpArena", (accounts) => {
         await pvpArena.seasonStartedAt()
       ).toString();
 
-      let isNewSeasonStartTimeGreater =
-        secondSeasonStartedAt > firstSeasonStartedAt;
-
-      expect(isNewSeasonStartTimeGreater).to.equal(true);
+      expect(secondSeasonStartedAt > firstSeasonStartedAt).to.equal(true);
       expect((await pvpArena.currentRankedSeason()).toString()).to.equal("2");
 
       await pvpArena.withdrawRankedRewards({ from: accounts[1] });
@@ -2390,10 +2387,7 @@ contract("PvpArena", (accounts) => {
         await pvpArena.seasonStartedAt()
       ).toString();
 
-      isNewSeasonStartTimeGreater =
-        thirdSeasonStartedAt > secondSeasonStartedAt;
-
-      expect(isNewSeasonStartTimeGreater).to.equal(true);
+      expect(thirdSeasonStartedAt > secondSeasonStartedAt).to.equal(true);
       expect((await pvpArena.currentRankedSeason()).toString()).to.equal("3");
 
       const newestBalanceOne = await skillToken.balanceOf(accounts[1]);
