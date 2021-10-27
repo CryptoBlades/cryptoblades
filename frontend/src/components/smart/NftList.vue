@@ -797,7 +797,7 @@ export default Vue.extend({
 
     clearMapSelections() {
       this.selectedZone = undefined;
-      this.selectedTier = undefined;
+      this.selectedTier = 0;
     },
 
     calculateChunksIds(zoneId: number) {
