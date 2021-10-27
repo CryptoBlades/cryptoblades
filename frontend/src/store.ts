@@ -4,14 +4,15 @@ import Web3 from 'web3';
 import _, { isUndefined } from 'lodash';
 import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
-import { getConfigValue, INTERFACE_ID_TRANSFER_COOLDOWNABLE, setUpContracts } from './contracts';
+import { getConfigValue, setUpContracts } from './contracts';
+
 import {
   characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract,
   trinketFromContract, junkFromContract
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
-  IStakeState, IState, ITransferCooldown, IWeb3EventSubscription, StakeType, IRaidState
+  IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
@@ -25,6 +26,10 @@ import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
 import { Nft } from './interfaces/Nft';
 import { getWeaponNameFromSeed } from '@/weapon-name';
 import axios from 'axios';
+import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
+
+const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
+const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
 
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
@@ -117,8 +122,6 @@ export function createStore(web3: Web3) {
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
-
-      characterTransferCooldowns: {},
 
       shields: {},
       trinkets: {},
@@ -260,7 +263,10 @@ export function createStore(web3: Web3) {
       getExchangeUrl() {
         return getConfigValue('exchangeUrl');
       },
-
+      getExchangeTransakUrl() {
+        const currency = getConfigValue('currencySymbol') || 'BNB';
+        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&defaultCryptoCurrency=' + currency;
+      },
       ownCharacters(state, getters) {
         return getters.charactersWithIds(state.ownedCharacterIds);
       },
@@ -352,20 +358,6 @@ export function createStore(web3: Web3) {
         if (state.currentWeaponId === null) return null;
 
         return state.weapons[state.currentWeaponId];
-      },
-
-      transferCooldownOfCharacterId(state) {
-        return (characterId: string | number, now: number | null = null) => {
-          const transferCooldown = state.characterTransferCooldowns[+characterId];
-          if(!transferCooldown) return 0;
-
-          const deltaFromLastUpdated =
-            now === null
-              ? 0
-              : (now - transferCooldown.lastUpdatedTimestamp);
-
-          return Math.max(Math.floor(transferCooldown.secondsLeft - deltaFromLastUpdated), 0);
-        };
       },
 
       currentCharacter(state) {
@@ -592,13 +584,6 @@ export function createStore(web3: Web3) {
 
       updateCharacter(state: IState, { characterId, character }) {
         Vue.set(state.characters, characterId, character);
-      },
-
-      updateCharacterTransferCooldown(
-        state: IState,
-        { characterId, characterTransferCooldown }: { characterId: number, characterTransferCooldown: ITransferCooldown }
-      ) {
-        Vue.set(state.characterTransferCooldowns, characterId, characterTransferCooldown);
       },
 
       updateShield(state: IState, { shieldId, shield }) {
@@ -1021,7 +1006,7 @@ export function createStore(web3: Web3) {
       },
 
       async updateTrinketIds({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         const ownedTrinketIds = await state.contracts().RaidTrinket!.methods.getOwned().call(defaultCallOptions(state));
         commit('updateUserDetails', {
@@ -1031,7 +1016,7 @@ export function createStore(web3: Web3) {
       },
 
       async updateJunkIds({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         const ownedJunkIds = await state.contracts().Junk!.methods.getOwned().call(defaultCallOptions(state));
         commit('updateUserDetails', {
@@ -1041,7 +1026,7 @@ export function createStore(web3: Web3) {
       },
 
       async updateKeyLootboxIds({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly) return;
+        if(featureFlagStakeOnly || !state.defaultAccount) return;
 
         const ownedKeyLootboxIds = await state.contracts().KeyLootbox!.methods.getOwned().call(defaultCallOptions(state));
         commit('updateUserDetails', {
@@ -1109,7 +1094,7 @@ export function createStore(web3: Web3) {
         await Promise.all(characterIds.map(id => dispatch('fetchCharacter', id)));
       },
 
-      async fetchCharacter({ state, commit, dispatch }, characterId: string | number) {
+      async fetchCharacter({ state, commit }, characterId: string | number) {
         const { Characters } = state.contracts();
         if(!Characters) return;
 
@@ -1122,42 +1107,7 @@ export function createStore(web3: Web3) {
 
             commit('updateCharacter', { characterId, character });
           })(),
-          dispatch('fetchCharacterTransferCooldown', characterId)
         ]);
-      },
-
-      async fetchCharacterTransferCooldownForOwnCharacters({ state, dispatch }) {
-        await Promise.all(
-          state.ownedCharacterIds.map(weaponId =>
-            dispatch('fetchCharacterTransferCooldown', weaponId)
-          )
-        );
-      },
-
-      async fetchCharacterTransferCooldown({ state, commit }, characterId: string | number) {
-        const { Characters } = state.contracts();
-        if(!Characters) return;
-
-        const supportsTransferCooldownable = await Characters.methods
-          .supportsInterface(INTERFACE_ID_TRANSFER_COOLDOWNABLE)
-          .call(defaultCallOptions(state));
-        if(!supportsTransferCooldownable) return;
-
-        const lastUpdatedTimestamp = Date.now();
-        const secondsLeft = await Characters.methods
-          .transferCooldownLeft(characterId)
-          .call(defaultCallOptions(state));
-
-        const payload: {
-          characterId: number,
-          characterTransferCooldown: ITransferCooldown
-        } = {
-          characterId: +characterId,
-          characterTransferCooldown: { lastUpdatedTimestamp, secondsLeft: +secondsLeft }
-        };
-        if(!_.isEqual(state.characterTransferCooldowns[+characterId], payload)) {
-          commit('updateCharacterTransferCooldown', payload);
-        }
       },
 
       async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {
@@ -2033,6 +1983,231 @@ export function createStore(web3: Web3) {
         return rewards;
       },
 
+      async fetchIsLandSaleAllowed({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .salesAllowed()
+          .call(defaultCallOptions(state));
+      },
+
+      async getAllZonesPopulation({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getAllZonesPopulation()
+          .call(defaultCallOptions(state));
+      },
+
+      async checkIfChunkAvailable({state}, {tier, chunkId}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .checkIfChunkAvailable(tier, chunkId)
+          .call(defaultCallOptions(state));
+      },
+
+      async getZoneChunkPopulation({state}, {zoneId}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getZoneChunkPopulation(zoneId)
+          .call(defaultCallOptions(state));
+      },
+
+      async purchaseT1CBKLand({state}, {price, currency}) {
+        const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
+
+        if(currency === 0) {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        } else {
+          const tokenAddress = await Blacksmith.methods
+            .getCurrency(currency)
+            .call(defaultCallOptions(state));
+
+          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+            .approve(Blacksmith.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        }
+
+        return await Blacksmith.methods
+          .purchaseT1CBKLand(price, currency).send({
+            from: state.defaultAccount
+          });
+      },
+
+      async purchaseT2CBKLand({state}, {price, chunkId, currency}) {
+        const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
+
+        if(currency === 0) {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        } else {
+          const tokenAddress = await Blacksmith.methods
+            .getCurrency(currency)
+            .call(defaultCallOptions(state));
+
+          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+            .approve(Blacksmith.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        }
+
+        return await Blacksmith.methods
+          .purchaseT2CBKLand(price, chunkId, currency).send({
+            from: state.defaultAccount
+          });
+      },
+
+      async purchaseT3CBKLand({state}, {price, chunkId, currency}) {
+        const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
+        if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
+
+        if(currency === 0) {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        } else {
+          const tokenAddress = await Blacksmith.methods
+            .getCurrency(currency)
+            .call(defaultCallOptions(state));
+
+          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+            .approve(Blacksmith.options.address, price)
+            .send({
+              from: state.defaultAccount
+            });
+        }
+
+        return await Blacksmith.methods
+          .purchaseT3CBKLand(price, chunkId, currency).send({
+            from: state.defaultAccount
+          });
+      },
+
+      async getCBKLandPrice({state}, {tier, currency}) {
+        const Blacksmith = state.contracts().Blacksmith!;
+
+        return await Blacksmith.methods
+          .getCBKLandPrice(tier, currency)
+          .call(defaultCallOptions(state));
+      },
+
+      async getChunkPopulation({state}, {chunkIds}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getChunkPopulation(chunkIds)
+          .call(defaultCallOptions(state));
+      },
+
+      async getPurchase({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        if(!state.defaultAccount) return;
+
+        const res = await CBKLandSale.methods
+          .getPurchase()
+          .call(defaultCallOptions(state));
+
+        const tier = res[0];
+        const chunkId = res[1];
+
+        return { tier, chunkId };
+      },
+
+      async getAvailableLand({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        const res = await CBKLandSale.methods
+          .getAvailableLand()
+          .call(defaultCallOptions(state));
+
+        const t1Land = res[0];
+        const t2Land = res[1];
+        const t3Land = res[2];
+
+        return { t1Land, t2Land, t3Land };
+      },
+
+      async getReservedChunksIds({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getReservedChunksIds()
+          .call(defaultCallOptions(state));
+      },
+
+      async getPlayerReservedLand({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+        if (!state.defaultAccount || !CBKLandSale) return;
+
+        return await CBKLandSale.methods
+          .getPlayerReservedLand(state.defaultAccount)
+          .call(defaultCallOptions(state));
+      },
+
+      async getChunksOfReservation({state}, {reservationId}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getChunksOfReservations(reservationId)
+          .call(defaultCallOptions(state));
+      },
+
+      async getTakenT3Chunks({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .getTakenT3Chunks()
+          .call(defaultCallOptions(state));
+      },
+
+      async claimPlayerReservedLand({state}, {reservationId, chunkId, tier}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .claimPlayerReservedLand(reservationId, chunkId, tier)
+          .send({
+            from: state.defaultAccount
+          });
+      },
+
+      async reservedSalesAllowed({state}) {
+        const CBKLandSale = state.contracts().CBKLandSale!;
+
+        return await CBKLandSale.methods
+          .reservedSalesAllowed()
+          .call(defaultCallOptions(state));
+      },
+
+      async getOwnedLands({state}) {
+        const CBKLand = state.contracts().CBKLand!;
+
+        if (!state.defaultAccount || !CBKLand) return;
+
+        const landsIds = await CBKLand.methods
+          .getOwned(state.defaultAccount)
+          .call(defaultCallOptions(state));
+
+        return await Promise.all(landsIds.map(landId => CBKLand.methods.get(landId).call(defaultCallOptions(state))));
+      },
+
+
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
@@ -2235,7 +2410,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           nftMarketFuctions => nftMarketFuctions.addFee(),
-          {},
+          { allowInGameOnlyFunds: false },
         );
 
         const res = await NFTMarket.methods
@@ -2273,7 +2448,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           nftMarketFuctions => nftMarketFuctions.changeFee(),
-          {},
+          { allowInGameOnlyFunds: false },
         );
 
         const res = await NFTMarket.methods
@@ -3069,7 +3244,135 @@ export function createStore(web3: Web3) {
         }
 
         window.location.reload();
-      }
-    }
+      },
+      async storeItem({ state }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        console.log('storeItem', nftContractAddr,' ',tokenId);
+        const NFTContract: Contract<IERC721> =
+          nftContractAddr === Weapons.options.address
+            ? Weapons : nftContractAddr === Characters.options.address
+              ? Characters : Shields;
+
+        await NFTContract.methods
+          .approve(NFTStorage.options.address, tokenId)
+          .send(defaultCallOptions(state));
+        const res = await NFTStorage.methods
+          .storeItem(nftContractAddr, tokenId)
+          .send({
+            from: state.defaultAccount,
+          });
+        return res;
+      },
+      async getStorageItemIds({ state }, { nftContractAddr }: { nftContractAddr: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage) return;
+
+        const res = await NFTStorage.methods
+          .getStorageItemIds(nftContractAddr)
+          .call(defaultCallOptions(state));
+
+        return res;
+      },
+      async getNumberOfStoragedItems({ state }, { nftContractAddr }: { nftContractAddr: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage) return;
+
+        const res = await NFTStorage.methods
+          .getNumberOfStoragedItems(nftContractAddr)
+          .call(defaultCallOptions(state));
+
+        return res;
+      },
+      async withdrawFromStorage({ state }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        /*
+        const NFTContract: Contract<IERC721> =
+          nftContractAddr === Weapons.options.address
+            ? Weapons : nftContractAddr === Characters.options.address
+              ? Characters : Shields;
+
+
+        await NFTContract.methods
+          .approve(NFTStorage.options.address, tokenId)
+          .send(defaultCallOptions(state));
+        */
+        await NFTStorage.methods
+          .withdrawFromStorage(nftContractAddr, tokenId)
+          .send({
+            from: state.defaultAccount,
+          });
+      },
+      async bridgeItem({ state }, { nftContractAddr, tokenId, targetChain}: { nftContractAddr: string, tokenId: string, targetChain: string}) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        console.log('bridgeItem', nftContractAddr,' ',tokenId, ' ',targetChain);
+
+        await NFTStorage.methods
+          .bridgeItem(nftContractAddr, tokenId, targetChain)
+          .send({
+            from: state.defaultAccount,
+          });
+      },
+      async getNFTChainId({state}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage) return;
+        const chainId = await NFTStorage.methods
+          .getNFTChainId(nftContractAddr, tokenId)
+          .call(defaultCallOptions(state));
+        return chainId;
+      },
+      async getBridgeTransferId({state}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage) return;
+        const id = await NFTStorage.methods
+          .getBridgeTransfer()
+          .call(defaultCallOptions(state));
+        return id;
+      },
+      async getBridgeTransfer({state}, {transferId}: { transferId: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage) return;
+        const response = await NFTStorage.methods
+          .getBridgeTransfer(transferId)
+          .call(defaultCallOptions(state));
+        return response;
+      },
+      async withdrawFromBridge({ state }, {tokenId}: {tokenId: string}) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        await NFTStorage.methods
+          .withdrawFromBridge(tokenId)
+          .send({
+            from: state.defaultAccount,
+          });
+      },
+      async cancelBridge({ state }) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        await NFTStorage.methods
+          .cancelBridge()
+          .send({
+            from: state.defaultAccount,
+          });
+      },
+      async getReceivedNFTs({ state }) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage || !state.defaultAccount) return;
+        const res = await NFTStorage.methods
+          .getReceivedNFTs()
+          .call(defaultCallOptions(state));
+        return res;
+      },
+      async getReceivedNFT({ state }, {tokenId}: {tokenId: string}) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage || !state.defaultAccount) return;
+        const res = await NFTStorage.methods
+          .getReceivedNFT(tokenId)
+          .call(defaultCallOptions(state));
+        return res;
+      },
+    },
   });
 }

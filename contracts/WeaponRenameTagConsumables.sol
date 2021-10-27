@@ -58,4 +58,8 @@ contract WeaponRenameTagConsumables is Consumables {
     function getMaxSize() public view returns (uint8){
         return _maxSize;
     }
+
+    function setName(uint256 weaponId, string memory newName) public restricted {
+        renames[weaponId] = newName;
+    }
 }
