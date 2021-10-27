@@ -910,6 +910,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         currentRankedSeason = currentRankedSeason.add(1);
+        seasonStartedAt = block.timestamp;
     }
 
     /// @dev increases a players withdrawable funds depending on their position in the ranked leaderboard
