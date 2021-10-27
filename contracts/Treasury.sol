@@ -145,7 +145,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
         if(partnerTokenAmount > remainingPartnerTokenSupply) {
             partnerTokenAmount = remainingPartnerTokenSupply;
-            skillToDeduct = skillToDeduct.mul(remainingPartnerTokenSupply.div(partnerTokenAmount));
+            skillToDeduct = skillToDeduct.mul(remainingPartnerTokenSupply).div(partnerTokenAmount);
         }
         
         game.deductAfterPartnerClaim(skillToDeduct, msg.sender);

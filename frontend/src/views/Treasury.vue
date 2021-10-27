@@ -12,7 +12,7 @@
       </b-form-select>
     </div>
     <div class="d-flex flex-row w-100 pt-2 pr-5 pl-5 pb-2 flex-wrap">
-      <partnered-project v-for="p in supportedProjects" :key="p.name" :id="p.id" :name="p.name" :tokenSymbol="p.tokenSymbol"
+      <partnered-project v-for="p in supportedProjects" :key="p.id" :id="p.id" :name="p.name" :tokenSymbol="p.tokenSymbol"
         :tokenSupply="p.tokenSupply" :tokenPrice="p.tokenPrice" :logoFileName="getLogoFile(p.name)"/>
     </div>
   </div>

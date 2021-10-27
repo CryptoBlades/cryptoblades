@@ -74,7 +74,7 @@
           :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"/>
         <div class="mt-3" v-if="!selectedPartneredProject">
           <h5>{{withdrawalInfoText}}</h5>
-          <h6>Early withdraw tax: {{ formattedRewardsClaimTax }} Tax is being reduced by 1% per day. {{getTaxTimerNextTick}}</h6>
+          <h6>Early withdraw tax: {{ formattedRewardsClaimTax }} Tax is being reduced by 1% per day.</h6>
         </div>
       </div>
     </b-modal>

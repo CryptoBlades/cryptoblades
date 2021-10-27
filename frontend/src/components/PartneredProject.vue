@@ -1,19 +1,31 @@
 <template>
   <div class="partner-div ml-4 mr-4 mb-4 mt-4">
     <div class="d-flex flex-row">
-      <img :src="imgPath(logoFileName)" class="partner-logo"/>
-      <div class="d-flex flex-column justify-content-center">
-        <h4>{{name}}</h4>
+      <img :src="partnerLogoPath" class="partner-logo"/>
+      <div class="d-flex flex-column justify-content-center ml-2">
+        <h4 class="d-flex align-items-center partner-name">{{name}}</h4>
         <h6>Token: {{tokenSymbol}}</h6>
         <span class="multiplier-text">{{skillToPartnerRatio}} SKILL/{{tokenSymbol}}</span>
         <span class="multiplier-text">Multiplier: x{{multiplier}}</span>
       </div>
     </div>
-    <div class="progress w-90 justify-items-center">
+    <div class="mt-1 progress w-90 justify-items-center">
       <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
         :style="[{'width': progressBarWidth, 'background-color': '#9e8a57'}]"/>
     </div>
-    <h6 class="text-center">Claimed {{tokensClaimed}} / {{tokenSupply}}</h6>
+    <h6 class="mt-1 text-center">Claimed {{tokensClaimed}} / {{tokenSupply}}</h6>
+    <div class="d-flex flex-column align-items-center w-100">
+      <b-card no-body class="collapse-style" v-bind:class="detailsOpened ? 'on-top' : ''">
+        <b-card-header class="d-flex flex-column align-items-center w-100 mt-1 p-0" v-b-toggle="'collapse-' + id" @click="toggleDetails()">
+          <h6 class="when-open">Less...</h6><h6 class="when-closed">More...</h6>
+        </b-card-header>
+        <b-collapse :id="'collapse-' + id">
+          <b-card-body>
+            <b-card-text>{{partnerDetails}}</b-card-text>
+          </b-card-body>
+        </b-collapse>
+      </b-card>
+    </div>
  </div>
 </template>
 
@@ -21,6 +33,11 @@
 import Vue from 'vue';
 import { mapActions } from 'vuex';
 import { toBN } from '@/utils/common';
+import partnersInfo from '../../partners.json';
+
+export interface PartnersInfo {
+  partners: Record<string, Record<string, any>>;
+}
 
 interface Data {
   images: any;
@@ -28,6 +45,7 @@ interface Data {
   tokensClaimed: string;
   skillToPartnerRatio: string;
   updateInterval: any;
+  detailsOpened: boolean;
 }
 
 export default Vue.extend({
@@ -64,7 +82,8 @@ export default Vue.extend({
       multiplier: '1',
       tokensClaimed: '0',
       skillToPartnerRatio: '0',
-      updateInterval: null
+      updateInterval: null,
+      detailsOpened: false
     } as Data;
   },
 
@@ -73,6 +92,16 @@ export default Vue.extend({
       if(!this.tokenSupply) return '0%';
       return `${Math.round((+this.tokensClaimed / +this.tokenSupply) * 100)}%`;
     },
+
+    partnerDetails(): string {
+      return (partnersInfo as PartnersInfo).partners[this.name].details;
+    },
+
+    partnerLogoPath(): string {
+      const fileName = (partnersInfo as PartnersInfo).partners[this.name].logo;
+      console.log(fileName);
+      return this.imgPath(fileName);
+    }
   },
 
   watch: {
@@ -97,7 +126,11 @@ export default Vue.extend({
       this.tokensClaimed = toBN(currentClaimedTokens).div(toBN(10).pow(18)).toFixed(2);
 
       const currentSkillToPartnerRatio = await this.getSkillToPartnerRatio(this.id);
-      this.skillToPartnerRatio = toBN(1).dividedBy(toBN(currentSkillToPartnerRatio).dividedBy(toBN(2).exponentiatedBy(64))).toFixed(2);
+      this.skillToPartnerRatio = toBN(1).dividedBy(toBN(currentSkillToPartnerRatio).dividedBy(toBN(2).exponentiatedBy(64))).toFixed(4);
+    },
+
+    toggleDetails() {
+      this.detailsOpened = !this.detailsOpened;
     }
   },
 
@@ -115,18 +148,35 @@ export default Vue.extend({
 
 <style scoped>
 .partner-div {
-  width: 240px;
-  height: 160px;
+  width: 280px;
+  height: 215px;
   border: 2px solid #9e8a57;
   border-radius: 10px;
   padding: 5px;
   background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
 }
 .partner-logo {
-  width: 90px;
-  height: 90px;
+  width: 100x;
+  height: 100px;
 }
 .multiplier-text {
   font-size: 0.8rem;
+}
+.collapse-style {
+  width: 280px;
+  border: 2px solid #9e8a57;
+  border-radius: 10px;
+  background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
+  overflow: hidden;
+}
+.partner-name {
+  height: 48px;
+}
+.collapsed > .when-open,
+.not-collapsed > .when-closed {
+  display: none;
+}
+.on-top {
+  z-index: 10;
 }
 </style>
