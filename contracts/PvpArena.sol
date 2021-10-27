@@ -64,7 +64,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev timestamp of when the current season started
     uint256 public seasonStartedAt;
     /// @dev interval of ranked season restarts
-    uint256 public seasonRestartInterval;
+    uint256 public seasonDuration;
     /// @dev amount of time a character is unattackable
     uint256 public unattackableSeconds;
     /// @dev amount of time an attacker has to make a decision
@@ -205,7 +205,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _maxCharactersPerRanking = 4;
         currentRankedSeason = 1;
         seasonStartedAt = block.timestamp;
-        seasonRestartInterval = 1 days;
+        seasonDuration = 1 days;
         prizePercentages.push(60);
         prizePercentages.push(30);
         prizePercentages.push(10);
@@ -862,8 +862,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         processLoser(characterID);
     }
 
-    /// @dev assigns the ranking rewards pool to top players
-    function assignRankedRewards() external restricted {
+    /// @dev ends a ranked season and starts a new one
+    function restartRankedSeason() external restricted {
         // Note: Loops over 15 tiers. Should not be reachable anytime in the foreseeable future.
         for (uint8 i = 0; i <= 15; i++) {
             if (
@@ -918,6 +918,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         currentRankedSeason = currentRankedSeason.add(1);
+        seasonStartedAt = block.timestamp;
     }
 
     /// @dev increases a players withdrawable funds depending on their position in the ranked leaderboard
