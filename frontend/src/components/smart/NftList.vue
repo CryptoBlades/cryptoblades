@@ -97,8 +97,8 @@
     </div>
 
     <b-modal class="map-modal" title="Choose zone" ref="map-modal" size="xl" hide-footer
-             @hide="selectedZone = undefined; selectedTier = undefined">
-      <div class="w-100" style="padding-bottom: 100%;">
+             @hide="clearMapSelections()">
+      <div class="w-100 padding-bottom-100">
         <div class="map-grid">
           <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)">
             <span>{{zonesPopulation[zoneId]}}/{{maxZonePopulation.toLocaleString()}}</span>
@@ -108,8 +108,8 @@
     </b-modal>
 
     <b-modal class="map-modal" title="Choose zone" ref="t2-claim-map-modal" size="xl" hide-footer
-             @hide="selectedZone = undefined; selectedTier = undefined">
-      <div class="w-100" style="padding-bottom: 100%;">
+             @hide="clearMapSelections()">
+      <div class="w-100 padding-bottom-100">
         <div class="map-grid">
           <div class="zone" :class="[playerReservedT2Zones.includes(zoneId) ? 'available' : null ]"
                v-for="zoneId in zonesIds" :key="zoneId"
@@ -122,8 +122,8 @@
     </b-modal>
 
     <b-modal class="map-modal" title="Choose zone" ref="t3-claim-map-modal" size="xl" hide-footer
-             @hide="selectedZone = undefined; selectedTier = undefined">
-      <div class="w-100" style="padding-bottom: 100%;">
+             @hide="clearMapSelections()">
+      <div class="w-100 padding-bottom-100">
         <div class="map-grid">
           <div class="zone" :class="[playerReservedT3Zones.includes(zoneId) ? 'available' : null ]"
                v-for="zoneId in zonesIds" :key="zoneId"
@@ -136,7 +136,7 @@
 
     <b-modal ref="zone-modal" title="Choose chunk" size="lg"
              @hide="selectedChunk = undefined" :hide-footer="!selectedTier">
-      <div class="w-100" style="padding-bottom: 100%;">
+      <div class="w-100 padding-bottom-100">
         <div v-if="selectedZone !== undefined" class="zone-grid"
              :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
           <div class="chunk" :class="[reservedChunks.includes(chunkId.toString()) || takenT3Chunks.includes(chunkId.toString()) ? 'reserved' : null ]"
@@ -157,7 +157,7 @@
 
     <b-modal ref="t2-claim-zone-modal" title="Choose chunk" size="lg"
              @hide="selectedChunk = undefined">
-      <div class="w-100" style="padding-bottom: 100%;">
+      <div class="w-100 padding-bottom-100">
         <div v-if="selectedZone !== undefined" class="zone-grid"
              :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
           <div class="chunk" :class="[playerReservedT2Chunks.includes(chunkId.toString()) ? 'available' : null ]"
@@ -178,7 +178,7 @@
 
     <b-modal ref="t3-claim-zone-modal" title="Choose chunk" size="lg"
              @hide="selectedChunk = undefined">
-      <div class="w-100" style="padding-bottom: 100%;">
+      <div class="w-100 padding-bottom-100">
         <div v-if="selectedZone !== undefined" class="zone-grid"
              :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
           <div class="chunk" :class="[playerReservedT3Chunks.includes(chunkId.toString()) ? 'available' : null ]"
@@ -795,6 +795,11 @@ export default Vue.extend({
       this.selectedChunkAvailable = true;
     },
 
+    clearMapSelections() {
+      this.selectedZone = undefined;
+      this.selectedTier = undefined;
+    },
+
     calculateChunksIds(zoneId: number) {
       const chunksIds = [] as number[];
       for (let i = 0; i < 10; i++) {
@@ -1220,6 +1225,10 @@ export default Vue.extend({
 .map-modal {
   max-width: 100%;
   margin: 0.5rem;
+}
+
+.padding-bottom-100 {
+  padding-bottom: 100%;
 }
 
 .map-grid,
