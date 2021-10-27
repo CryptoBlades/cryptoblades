@@ -291,7 +291,7 @@ contract("PvpArena", (accounts) => {
 
         await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
 
-        await pvpArena.assignRankedRewards();
+        await pvpArena.restartRankedSeason();
 
         const newLeaderBoard = await pvpArena.getTierTopRankers(character1ID);
 
@@ -2245,7 +2245,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe("#assignRankedRewards", () => {
+  describe("#restartRankedSeason", () => {
     // These tests assume prizes will be distributed amongst at least 2 players and at most 4 players.
     beforeEach(async () => {
       character1ID = await createCharacterInPvpTier(accounts[1], 1);
@@ -2292,7 +2292,7 @@ contract("PvpArena", (accounts) => {
       const balanceThree = await skillToken.balanceOf(accounts[3]);
       const balanceFour = await skillToken.balanceOf(accounts[4]);
 
-      await pvpArena.assignRankedRewards({ from: accounts[0] });
+      await pvpArena.restartRankedSeason({ from: accounts[0] });
 
       await pvpArena.withdrawRankedRewards({ from: accounts[1] });
       await pvpArena.withdrawRankedRewards({ from: accounts[2] });
@@ -2355,7 +2355,7 @@ contract("PvpArena", (accounts) => {
       const balanceOne = await skillToken.balanceOf(accounts[1]);
       const balanceTwo = await skillToken.balanceOf(accounts[2]);
 
-      await pvpArena.assignRankedRewards({ from: accounts[0] });
+      await pvpArena.restartRankedSeason({ from: accounts[0] });
 
       await pvpArena.withdrawRankedRewards({ from: accounts[1] });
       await pvpArena.withdrawRankedRewards({ from: accounts[2] });
@@ -2400,10 +2400,19 @@ contract("PvpArena", (accounts) => {
       const balanceOne = await skillToken.balanceOf(accounts[1]);
       const balanceTwo = await skillToken.balanceOf(accounts[2]);
 
+      const firstSeasonStartedAt = +(
+        await pvpArena.seasonStartedAt()
+      ).toString();
+
       expect((await pvpArena.currentRankedSeason()).toString()).to.equal("1");
 
-      await pvpArena.assignRankedRewards({ from: accounts[0] });
+      await pvpArena.restartRankedSeason({ from: accounts[0] });
 
+      const secondSeasonStartedAt = +(
+        await pvpArena.seasonStartedAt()
+      ).toString();
+
+      expect(secondSeasonStartedAt > firstSeasonStartedAt).to.equal(true);
       expect((await pvpArena.currentRankedSeason()).toString()).to.equal("2");
 
       await pvpArena.withdrawRankedRewards({ from: accounts[1] });
@@ -2412,8 +2421,13 @@ contract("PvpArena", (accounts) => {
       const newerBalanceOne = await skillToken.balanceOf(accounts[1]);
       const newerBalanceTwo = await skillToken.balanceOf(accounts[2]);
 
-      await pvpArena.assignRankedRewards({ from: accounts[0] });
+      await pvpArena.restartRankedSeason({ from: accounts[0] });
 
+      const thirdSeasonStartedAt = +(
+        await pvpArena.seasonStartedAt()
+      ).toString();
+
+      expect(thirdSeasonStartedAt > secondSeasonStartedAt).to.equal(true);
       expect((await pvpArena.currentRankedSeason()).toString()).to.equal("3");
 
       const newestBalanceOne = await skillToken.balanceOf(accounts[1]);
