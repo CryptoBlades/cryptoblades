@@ -139,19 +139,22 @@
       <div class="w-100 padding-bottom-100">
         <div v-if="selectedZone !== undefined" class="zone-grid"
              :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
-          <div class="chunk" :class="[reservedChunks.includes(chunkId.toString()) || takenT3Chunks.includes(chunkId.toString()) ? 'reserved' : null ]"
-          v-for="(chunkId, index) in chunksIds" :key="chunkId"
-           @click="selectChunk(chunkId, index)" :style="[ selectedChunk === chunkId ? {backgroundColor: 'greenyellow'} : null ]">
+          <div class="chunk"
+               :class="[reservedChunks.includes(chunkId.toString())
+                    || (selectedTier === 3 && takenT3Chunks.includes(chunkId.toString())) ? 'reserved' : null ]"
+               v-for="(chunkId, index) in chunksIds" :key="chunkId"
+               @click="selectChunk(chunkId, index)"
+               :style="[ selectedChunk === chunkId ? {backgroundColor: 'greenyellow'} : null ]">
             <span>ID: {{chunkId}}</span>
             <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
             <span v-if="selectedTier === 3 && takenT3Chunks.includes(chunkId.toString())">TAKEN</span>
             <span v-else-if="reservedChunks.includes(chunkId.toString())">RESERVED</span>
-           </div>
+          </div>
         </div>
       </div>
       <template #modal-footer>
         <b-button class="mt-3" block @click="purchaseLand(selectedChunk)"
-        :disabled="selectedChunk === undefined || !selectedChunkAvailable">Buy land</b-button>
+                  :disabled="selectedChunk === undefined || !selectedChunkAvailable">Buy land</b-button>
       </template>
     </b-modal>
 
