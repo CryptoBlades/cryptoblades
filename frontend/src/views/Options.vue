@@ -33,11 +33,7 @@
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-<<<<<<< HEAD
-              <h4>Show SKILL values in USD</h4>
-=======
               <h4>{{$t("options.showSkillValues")}}</h4>
->>>>>>> b26149095e59b46077f631f64453e1e8ede24167
               <b-form-checkbox size="lg" :checked="showSkillInUsd" @change="toggleShowSkillInUsd()" switch>
                 <b class="float-left">{{ showSkillInUsd ? $t("on") : $t("off") }}</b>
               </b-form-checkbox>
