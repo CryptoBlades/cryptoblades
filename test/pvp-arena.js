@@ -1883,10 +1883,10 @@ contract("PvpArena", (accounts) => {
         weapons,
       });
 
-      shieldID = await helpers.createShield(accounts[1], "123", helpers.elements.water, {
+      shieldID = await helpers.createShield(accounts[1], "123",  {
         shields,
       });
-      shield2ID = await helpers.createShield(accounts[2], "123", helpers.elements.fire, {
+      shield2ID = await helpers.createShield(accounts[2], "123", {
         shields,
       });
       cost = await pvpArena.getEntryWager(character2ID, {

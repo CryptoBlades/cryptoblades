@@ -137,10 +137,10 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function mintForPurchase(address buyer) external restricted {
         require(totalSupply() < 25000, "Out of stock"); // temporary restriction
-        mint(buyer, uint256(keccak256(abi.encodePacked(buyer, blockhash(block.number - 1)))), 1);
+        mint(buyer, uint256(keccak256(abi.encodePacked(buyer, blockhash(block.number - 1)))));
     }
 
-    function mint(address minter, uint256 seed, uint8 chosenElement) public restricted returns(uint256) {
+    function mint(address minter, uint256 seed) public restricted returns(uint256) {
         uint256 stars;
         uint256 roll = seed % 100;
         // will need revision, possibly manual configuration if we support more than 5 stars
@@ -160,15 +160,15 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             stars = 0; // 1* at 44%
         }
 
-        return mintShieldWithStars(minter, stars, seed, chosenElement);
+        return mintShieldWithStars(minter, stars, seed);
     }
 
-    function mintShieldWithStars(address minter, uint256 stars, uint256 seed, uint8 chosenElement) public restricted returns(uint256) {
+    function mintShieldWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
         require(stars < 8, "Stars parameter too high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
-        require(chosenElement == 100 || (chosenElement>= 0 && chosenElement<= 3));
+
         return performMintShield(minter,
-            getRandomProperties(stars, seed, chosenElement),
+            getRandomProperties(stars, seed),
             stat1,
             stat2,
             stat3,
@@ -197,16 +197,9 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokenID;
     }
 
-    function getRandomProperties(uint256 stars, uint256 seed, uint8 chosenElement) public pure returns (uint16) {
-        uint256 trait;
-        if (chosenElement == 100) {
-            trait = ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3);
-        } else {
-            trait = ((chosenElement & 0x3) << 3);
-        }
+    function getRandomProperties(uint256 stars, uint256 seed) public pure returns (uint16) {
         return uint16((stars & 0x7) // stars aren't randomized here!
-    
-            | trait // trait
+            | ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3) // trait
             | ((RandomUtil.randomSeededMinMax(0,124,RandomUtil.combineSeeds(seed,2)) & 0x7F) << 5)); // statPattern
     }
 
