@@ -3066,7 +3066,8 @@ export function createStore(web3: Web3) {
 
         await Promise.all([
           dispatch('fetchSkillBalance'),
-          dispatch('fetchFightRewardSkill')
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchPartnerProject', id)
         ]);
       },
 

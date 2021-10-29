@@ -99,7 +99,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     }
 
     function getRemainingPartnerTokenSupply(uint256 partnerId) public view returns(uint256) {
-        return  IERC20(partneredProjects[partnerId].tokenAddress).balanceOf(address(this));
+        return IERC20(partneredProjects[partnerId].tokenAddress).balanceOf(address(this));
     }
 
     function getAmountInPartnerToken(uint256 partnerId, uint256 skillAmount) public view returns(uint256) {
@@ -144,8 +144,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         uint256 skillToDeduct = skillClaimingAmount;
 
         if(partnerTokenAmount > remainingPartnerTokenSupply) {
-            partnerTokenAmount = remainingPartnerTokenSupply;
             skillToDeduct = skillToDeduct.mul(remainingPartnerTokenSupply).div(partnerTokenAmount);
+            partnerTokenAmount = remainingPartnerTokenSupply;
         }
         
         game.deductAfterPartnerClaim(skillToDeduct, msg.sender);

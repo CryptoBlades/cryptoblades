@@ -1,30 +1,53 @@
 <template>
   <div class="body main-font">
-    <b-navbar>
+    <b-navbar v-if="isBar">
       <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
       variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'"/>
 
-      <b-nav-item disabled><strong>Rewards</strong></b-nav-item>
+      <b-nav-item class="bar" disabled><strong>Rewards</strong></b-nav-item>
 
       <b-nav-item
-        class="ml-3"
+        class="ml-3 bar"
         :disabled="!canClaimTokens"
         @click="claimSkill(ClaimStage.Summary)"
         v-tooltip.bottom="!canClaimTokens ? withdrawalInfoText : ''"><!-- moved gtag-link below b-nav-item -->
-        <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="'Tax is being reduced by 1% per day.' + getTaxTimerNextTick">
+        <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="'Click to claim and see the details'">
           <strong>SKILL</strong> {{ formattedSkillReward }}
-          <strong>Early Withdraw Tax</strong> {{ formattedRewardsClaimTax }}
         </span>
-        <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="withdrawalInfoText"/>
       </b-nav-item>
 
       <b-nav-item
-        class="ml-3"
+        class="ml-3 bar"
         :disabled="!canClaimXp"
         @click="onClaimXp">
-          <div class="gtag-link-others" v-html="`<strong>XP</strong> ${formattedXpRewards}`"></div>
+          <div class="gtag-link-others" v-html="`<strong>XP</strong> ${formattedXpRewardsBar}`"></div>
       </b-nav-item>
     </b-navbar>
+
+    <b-navbar-nav v-if="!isBar">
+      <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
+      variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'" />
+
+      <b-nav-item-dropdown right>
+        <template #button-content>
+          Rewards
+        </template>
+
+        <b-dropdown-item
+          :disabled="!canClaimTokens"
+          @click="claimSkill(ClaimStage.Summary)" class="rewards-info gtag-link-others" tagname="claim_skill"
+           v-tooltip.bottom="'Click to claim and see the details'">
+            SKILL
+            <div class="pl-3">{{ formattedSkillReward }}</div>
+        </b-dropdown-item>
+
+        <b-dropdown-item
+          :disabled="!canClaimXp"
+          @click="onClaimXp" class="gtag-link-others" tagname="claim_xp">
+            XP <div class="pl-3" v-for="(reward, index) in formattedXpRewards" :key="index">{{ reward }}</div>
+        </b-dropdown-item>
+      </b-nav-item-dropdown>
+    </b-navbar-nav>
 
     <b-modal class="centered-modal" ref="need-gas-modal" title="Need Withdraw?"
       @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Portal" >
@@ -137,6 +160,13 @@ interface StoreMappedActions {
 export default Vue.extend({
   components: { PartneredProject },
 
+  props: {
+    isBar: {
+      type: Boolean,
+      default: true
+    }
+  },
+
   data() {
     return {
       ClaimStage,
@@ -215,7 +245,7 @@ export default Vue.extend({
       return this.ownedCharacterIds.map(charaId => this.xpRewards[charaId] || '0');
     },
 
-    formattedXpRewards(): string {
+    formattedXpRewardsBar(): string {
       return this.xpRewardsForOwnedCharacters.map((xp, i) => {
         const currentCharacter = this.currentCharacter || { id: null };
         if(!this.ownCharacters[i]) return `${xp}`;
@@ -225,6 +255,14 @@ export default Vue.extend({
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '</u>' : ''}` +
                 `${this.ownCharacters[i].id === currentCharacter.id ? '</b>' : ''}`;
       }).join(', ');
+    },
+
+    formattedXpRewards(): string[] {
+      return this.xpRewardsForOwnedCharacters.map((xp, i) => {
+        if(!this.ownCharacters[i]) return xp;
+
+        return `${this.getCleanCharacterName(this.ownCharacters[i].id)} ${xp}`;
+      });
     },
 
     canClaimTokens(): boolean {
@@ -330,7 +368,7 @@ export default Vue.extend({
   background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
 }
 
-.nav-item {
+.nav-item.bar {
   margin-top: -24px;
 }
 
