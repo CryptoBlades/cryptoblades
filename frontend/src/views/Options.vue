@@ -33,20 +33,24 @@
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
+<<<<<<< HEAD
               <h4>Show SKILL values in USD</h4>
+=======
+              <h4>{{$t("options.showSkillValues")}}</h4>
+>>>>>>> b26149095e59b46077f631f64453e1e8ede24167
               <b-form-checkbox size="lg" :checked="showSkillInUsd" @change="toggleShowSkillInUsd()" switch>
-                <b class="float-left">{{ showSkillInUsd ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ showSkillInUsd ? $t("on") : $t("off") }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>Show Cosmetics</h4>
+              <h4>{{$t("options.showCosmetics")}}</h4>
               <b-form-checkbox size="lg" :checked="showCosmetics" @change="toggleShowCosmetics()" switch>
-                <b class="float-left">{{ showCosmetics ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ showCosmetics ? $t("on") : $t("off") }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>Stamina Cost per Fight</h4>
-              <b-form-select size="lg" v-model="fightMultiplier" @change="setFightMultiplier()">
+              <h4>{{$t("options.staminaFight")}}</h4>
+              <b-form-select class="select-box" size="lg" v-model="fightMultiplier" @change="setFightMultiplier()">
                 <b-form-select-option :value="null" disabled>{{$t("options.selectStaminaFight")}}</b-form-select-option>
                 <b-form-select-option value="1">40</b-form-select-option>
                 <b-form-select-option value="2">80</b-form-select-option>
@@ -56,8 +60,16 @@
               </b-form-select>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>Current chain</h4>
-              <b-form-select size="lg" v-model="currentChain" @change="setCurrentChain()">
+              <h4>{{$t("options.language")}}</h4>
+              <b-form-select class="select-box" size="lg" v-model="$i18n.locale">
+                <b-form-select-option v-for="(value, key) in languages" :key="key" :value="key">
+                  {{ value }}
+                </b-form-select-option>
+              </b-form-select>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
+              <h4>{{$t("options.currenChain")}}</h4>
+              <b-form-select class="select-box" size="lg" v-model="currentChain" @change="setCurrentChain()">
                 <b-form-select-option v-for="chain in supportedChains" :key="chain" :value="chain">
                   {{chain}}
                 </b-form-select-option>
@@ -80,6 +92,7 @@ import BigNumber from 'bignumber.js';
 import { Accessors } from 'vue/types/options';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../utils/common';
+import i18n from '../i18n';
 import { getConfigValue } from '@/contracts';
 import config from '../../app-config.json';
 
@@ -264,7 +277,11 @@ export default Vue.extend({
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
   },
-
+  watch: {
+    '$i18n.locale'(newVal, ) {
+      localStorage.setItem('language', newVal);
+    }
+  }
 });
 </script>
 
@@ -379,11 +396,9 @@ export default Vue.extend({
     }
   }
 }
-
-.combobox-languages {
-  width: 150px !important;
+.select-box{
+  max-width:300px;
 }
-
 .fullscreen-warning {
   z-index: 999999;
 }
