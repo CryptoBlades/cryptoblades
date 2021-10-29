@@ -744,7 +744,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterRankingPoints[characterID] = newRankingPoints;
     }
 
-    function _getCharacterShieldRoll(uint256 characterID)
+    function _getShieldStats(uint256 characterID)
         private
         view
         returns (int128)
@@ -760,8 +760,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint24)
     {
-        // TODO:
-        // get more accurate shield stats although this can make the formula very OP
         uint8 trait = characters.getTrait(characterID);
         uint24 basePower = characters.getPower(characterID);
         uint256 weaponID = fighterByCharacter[characterID].weaponID;
@@ -772,7 +770,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         bool useShield = fighterByCharacter[characterID].useShield;
         int128 bonusShieldStats;
         if (useShield) {
-            bonusShieldStats = _getCharacterShieldRoll(characterID);
+            bonusShieldStats = _getShieldStats(characterID);
         }
 
         (
