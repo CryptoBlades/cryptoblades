@@ -14,6 +14,17 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
 
     uint256 public constant ITEM_WEAPON_RENAME = 1;
 
+    // every status assumes payment has been made
+    uint256 public constant STATUS_SUBMITTED = 0; // fresh order waiting
+    uint256 public constant STATUS_SERVICE_ERROR = 1; // bot couldn't place order, can be refunded
+    uint256 public constant STATUS_REJECTED = 2; // we've taken personal issue with the order, is refundable
+    uint256 public constant STATUS_OFFERED_REFUND = 3; // manually 
+    uint256 public constant STATUS_CANCELLED = 1; // was never processed
+    uint256 public constant STATUS_PROCESSED = 2; // it's in the system, has shop ID, waiting for completion
+    uint256 public constant STATUS_SHIPPED = 3; // shipped (can we even get this info?)
+
+    uint256 public constant VAR_ACCEPTING_ORDERS = 1; // can orders be placed?
+
     /* ========== STATE VARIABLES ========== */
 
     CryptoBlades public game;
@@ -52,9 +63,13 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
 
     /* ========== MODIFIERS ========== */
 
-    modifier onlyGame() {
-        require(hasRole(GAME, msg.sender), "Only game");
+    modifier restricted() {
+        _restricted();
         _;
+    }
+
+    function _restricted() {
+        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
     }
 
     modifier isAdmin() {
