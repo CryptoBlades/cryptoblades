@@ -67,13 +67,14 @@ async function createWeapon(receiver, seed, element = 0, context = {}) {
 /**
  * @param {string} receiver address of who receives the shield
  * @param {string} seed seed for generating the shield
+ * @param {number} element weapon element
  * @param {Shields} [context.shields] instance of the Shields contract
  *
  * @return {Promise<string>} ID of the newly created shield
  */
-async function createShield(receiver, seed, context = {}) {
+async function createShield(receiver, seed, element = 0, context = {}) {
   const shields = context.shields || (await Shields.deployed());
-  const { tx: mintShieldTx } = await shields.mint(receiver, seed);
+  const { tx: mintShieldTx } = await shields.mint(receiver, seed, element);
 
   const newShieldEvt = await expectEvent.inTransaction(mintShieldTx, Shields, 'NewShield', { minter: receiver });
   await time.advanceBlock();

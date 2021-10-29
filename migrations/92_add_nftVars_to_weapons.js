@@ -1,5 +1,5 @@
 const { upgradeProxy } = require('@openzeppelin/truffle-upgrades');
-const { artifacts } = require("hardhat");
+
 
 const Weapons = artifacts.require("Weapons");
 

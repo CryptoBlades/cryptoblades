@@ -1856,7 +1856,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe("rankingBehaviour", () => {
+  describe.only("rankingBehaviour", () => {
     let character1ID;
     let character2ID;
     let character3ID;
@@ -1865,6 +1865,63 @@ contract("PvpArena", (accounts) => {
     let character6ID;
     let weapon1ID;
     let weapon2ID;
+    let shieldID;
+    let shield2ID;
+
+    it.only("should see the shield", async () => {
+      character1ID = await helpers.createCharacter(accounts[1], "152", {
+        characters,
+      });
+
+      character2ID = await helpers.createCharacter(accounts[2], "152", {
+        characters,
+      });
+      weapon1ID = await helpers.createWeapon(accounts[1], "123", 0, {
+        weapons,
+      });
+      weapon2ID = await helpers.createWeapon(accounts[2], "123", 0, {
+        weapons,
+      });
+
+      shieldID = await helpers.createShield(accounts[1], "123", helpers.elements.water, {
+        shields,
+      });
+      shield2ID = await helpers.createShield(accounts[2], "123", helpers.elements.fire, {
+        shields,
+      });
+      cost = await pvpArena.getEntryWager(character2ID, {
+        from: accounts[1],
+      });
+      await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        from: accounts[1],
+      });
+      await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        from: accounts[2],
+      });
+      await pvpArena.enterArena(character1ID, weapon1ID, shieldID, true, {
+        from: accounts[1],
+      });
+      await pvpArena.enterArena(character2ID, weapon2ID, shield2ID, true, {
+        from: accounts[2],
+      });
+
+      await time.increase(await pvpArena.unattackableSeconds());
+      await pvpArena.requestOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      // perform a duel making sure character4 is always going to win
+      await pvpArena.preparePerformDuel(character1ID, {
+        from: accounts[1],
+      });
+
+      let duelQueue = await pvpArena.getDuelQueue();
+
+      await pvpArena.performDuels(duelQueue, {
+        from: accounts[0],
+      });
+    });
+
     describe("entering the arena ", () => {
       it("should fill the rank with the first 4 players", async () => {
         character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
@@ -2470,7 +2527,6 @@ contract("PvpArena", (accounts) => {
         "Character is busy"
       );
     });
-
 
     it("should not allow a player to join a raid if he is already busy", async () => {
       weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {

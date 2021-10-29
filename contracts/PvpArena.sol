@@ -706,6 +706,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint8 trait = characters.getTrait(characterID);
         uint24 basePower = characters.getPower(characterID);
         uint256 weaponID = fighterByCharacter[characterID].weaponID;
+        bool useShield = fighterByCharacter[characterID].useShield;
+
+
+        console.log("shield ID", fighterByCharacter[characterID].shieldID);
+
+        uint256 shieldID = fighterByCharacter[characterID].shieldID;
         uint256 seed = randoms.getRandomSeedUsingHash(
             msg.sender,
             blockhash(block.number)
@@ -718,13 +724,16 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             uint8 weaponTrait
         ) = weapons.getFightData(weaponID, trait);
 
-
+        if(useShield){
         (
             ,
             int128 shieldMultFight,
             uint24 shieldBonusPower,
             uint8 shieldTrait
         ) = shields.getFightData(shieldID, trait);
+            console.log("shield Trait", shieldTrait);
+        }
+
 
         int128 playerTraitBonus = getPVPTraitBonusAgainst(
             trait,
