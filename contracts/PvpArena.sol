@@ -790,7 +790,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         uint256 playerFightPower = game.getPlayerPower(
             basePower,
-            weaponMultFight,
+            weaponMultFight.add(bonusShieldStats),
             weaponBonusPower
         );
 
