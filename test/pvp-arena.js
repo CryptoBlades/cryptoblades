@@ -1868,7 +1868,7 @@ contract("PvpArena", (accounts) => {
     let shieldID;
     let shield2ID;
 
-    it.only("should see the shield", async () => {
+    it("should see the shield", async () => {
       character1ID = await helpers.createCharacter(accounts[1], "152", {
         characters,
       });
