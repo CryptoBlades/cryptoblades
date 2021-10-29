@@ -724,10 +724,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function payContractTokenOnly(address playerAddress, uint256 convertedAmount) public restricted {
-        _payContractTokenOnly(playerAddress, convertedAmount);
+        _payContractTokenOnly(playerAddress, convertedAmount, true);
+    }
+
+    function payContractTokenOnly(address playerAddress, uint256 convertedAmount, bool track) public restricted {
+        _payContractTokenOnly(playerAddress, convertedAmount, track);
     }
 
     function _payContractTokenOnly(address playerAddress, uint256 convertedAmount) internal {
+        _payContractTokenOnly(playerAddress, convertedAmount, true);
+    }
+
+    function _payContractTokenOnly(address playerAddress, uint256 convertedAmount, bool track) internal {
         (, uint256 fromTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
@@ -735,7 +743,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 convertedAmount
             );
 
-        _deductPlayerSkillStandard(playerAddress, 0, fromTokenRewards, fromUserWallet);
+        _deductPlayerSkillStandard(playerAddress, 0, fromTokenRewards, fromUserWallet, track);
     }
 
     function _payContract(address playerAddress, int128 usdAmount) internal
@@ -804,6 +812,22 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 fromTokenRewards,
         uint256 fromUserWallet
     ) internal {
+        _deductPlayerSkillStandard(
+            playerAddress,
+            fromInGameOnlyFunds,
+            fromTokenRewards,
+            fromUserWallet,
+            true
+        );
+    }
+
+    function _deductPlayerSkillStandard(
+        address playerAddress,
+        uint256 fromInGameOnlyFunds,
+        uint256 fromTokenRewards,
+        uint256 fromUserWallet,
+        bool trackInflow
+    ) internal {
         if(fromInGameOnlyFunds > 0) {
             totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
             inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
@@ -815,7 +839,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         if(fromUserWallet > 0) {
             skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
-            _trackIncome(fromUserWallet);
+            if(trackInflow)
+                _trackIncome(fromUserWallet);
         }
     }
 
