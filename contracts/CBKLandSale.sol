@@ -368,7 +368,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         require(chunkId == 0 && reseller != address(0), "NA2"); // Is a reseller land with chunk id 0
         require(assignedChunkid == 0 || reservedChunks[reseller].contains(assignedChunkid), "NA3"); // FE didn't send chunkId or reseller owns the assigned chunkId
         require(tier != TIER_THREE || _chunkAvailableForT3(assignedChunkid), "NA4"); // Not tier 3 or tier 3 available
-        require(tier == TIER_ONE || assignedChunkid > 0, "NA5"); // tier 1 or chunkid requested
+        require((tier == TIER_ONE && assignedChunkid == 0) || assignedChunkid > 0, "NA5"); // tier 1 or chunkid requested
         require(tier != TIER_TWO || chunkT2LandSales[assignedChunkid] < _allowedLandSalePerChunk, "NA6"); // Not T2 or population allows it
 
         // T1 => get random reseller chunkId
