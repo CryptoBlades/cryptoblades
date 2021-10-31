@@ -1017,6 +1017,14 @@ export default Vue.extend({
         },
         {
           id: 1,
+          type: 'SmokeBomb50',
+          nftPrice: 0.1,
+          name: '50 Smoke Bombs',
+          description: 'Get new enemies in combat.',
+          image: 'https://seiyria.com/gameicons-font/svg/smoke-bomb.svg'
+        },
+        {
+          id: 1,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
           name: 'Weapon Grayscale',

@@ -253,7 +253,7 @@ export default {
       'fetchTotalCharacterFireTraitChanges', 'fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
       'fetchOwnedWeaponCosmetics', 'fetchOwnedCharacterCosmetics', 'getAvailableLand',
-      'getPlayerReservedLand']),
+      'getPlayerReservedLand', 'fetchTotalSmokeBombsOwned']),
 
     imgPath(img) {
       return this.images('./' + img);
@@ -335,6 +335,11 @@ export default {
           this.totalT2LandsToClaim = t2Reservations.length;
           this.totalT3LandsToClaim = t3Reservations.length;
         }
+      }, 3000);
+    } else if(this.nft.type === 'SmokeBomb50') {
+      this.quantityOwned = await this.fetchTotalSmokeBombsOwned();
+      this.fetchSupplyInterval = setInterval(async () => {
+        this.quantityOwned = await this.fetchTotalSmokeBombsOwned();
       }, 3000);
     }
   },

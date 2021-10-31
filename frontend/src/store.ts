@@ -3166,7 +3166,51 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacterCosmetic', id)
         ]);
       },
+      async fetchTotalSmokeBombsOwned({ state }) {
+        const { SmokeBombConsumables } = state.contracts();
+        if(!SmokeBombConsumables || !state.defaultAccount) return;
+        return await SmokeBombConsumables.methods.getItemCount().call(defaultCallOptions(state));
+      },
+      async purchaseSmokeBomb50({ state, dispatch }) {
+        const { CryptoBlades, SkillToken, SmokeBombConsumables, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !SmokeBombConsumables || !Blacksmith || !state.defaultAccount) return;
 
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address,  web3.utils.toWei('0.1', 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchase50SmokeBombs( web3.utils.toWei('0.1', 'ether')).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchTotalSmokeBombsOwned')
+        ]);
+      },
+      async useSmokeBomb({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, SmokeBombConsumables } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !SmokeBombConsumables || !state.defaultAccount) return;
+
+        await SmokeBombConsumables.methods
+          .useSmokeBomb(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '500000'
+          });
+
+        await Promise.all([
+          dispatch('fetchTotalSmokeBombsOwned', id),
+        ]);
+      },
       async configureMetaMask({ dispatch }) {
         const currentNetwork = await web3.eth.net.getId();
         if(currentNetwork === +getConfigValue('VUE_APP_NETWORK_ID')) return;

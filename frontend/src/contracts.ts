@@ -22,6 +22,7 @@ import { abi as characterFireTraitChangeConsumablesAbi } from '../../build/contr
 import { abi as characterEarthTraitChangeConsumablesAbi } from '../../build/contracts/CharacterEarthTraitChangeConsumables.json';
 import { abi as characterWaterTraitChangeConsumablesAbi } from '../../build/contracts/CharacterWaterTraitChangeConsumables.json';
 import { abi as characterLightningTraitChangeConsumablesAbi } from '../../build/contracts/CharacterLightningTraitChangeConsumables.json';
+import { abi as SmokeBombConsumablesAbi } from '../../build/contracts/SmokeBombConsumables.json';
 import { abi as raidTrinketAbi } from '../../build/contracts/RaidTrinket.json';
 import { abi as keyboxAbi } from '../../build/contracts/KeyLootbox.json';
 import { abi as junkAbi } from '../../build/contracts/Junk.json';
@@ -202,6 +203,10 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const cbkLandAddr = await CBKLandSale.methods.cbkLand().call();
   const CBKLand = new web3.eth.Contract(cbkLandAbi as Abi, cbkLandAddr);
 
+  const smokeBombConsumablesIndex = await Blacksmith.methods.ITEM_SMOKE_BOMB().call();
+  const smokeBombAddr = await Blacksmith.methods.getAddressOfItem(smokeBombConsumablesIndex).call();
+  const SmokeBombConsumables = new web3.eth.Contract(SmokeBombConsumablesAbi as Abi, smokeBombAddr);
+
   const raidContracts: RaidContracts = {};
   let raidTrinketAddress = '';
   let keyboxAddress = '';
@@ -241,7 +246,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
-    NFTStorage, CBKLandSale, CBKLand,
+    NFTStorage, CBKLandSale, CBKLand, SmokeBombConsumables,
     ...raidContracts,
     ...marketContracts,
     WaxBridge,

@@ -391,6 +391,7 @@ interface StoreMappedActions {
   claimPlayerReservedLand(payload: {reservationId: number, chunkId: number, tier: number}): Promise<void>;
   getOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string }[]>;
   getTakenT3Chunks(): Promise<number[]>;
+  purchaseSmokeBomb50(): Promise<void>;
 }
 
 export default Vue.extend({
@@ -654,7 +655,7 @@ export default Vue.extend({
       'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic', 'getAllZonesPopulation', 'checkIfChunkAvailable',
       'getZoneChunkPopulation', 'getChunkPopulation', 'purchaseT1CBKLand', 'purchaseT2CBKLand', 'purchaseT3CBKLand', 'getCBKLandPrice',
       'getPurchase', 'getReservedChunksIds', 'getAvailableLand', 'fetchIsLandSaleAllowed', 'getPlayerReservedLand',
-      'getChunksOfReservation', 'claimPlayerReservedLand', 'getOwnedLands', 'getTakenT3Chunks'
+      'getChunksOfReservation', 'claimPlayerReservedLand', 'getOwnedLands', 'getTakenT3Chunks', 'purchaseSmokeBomb50'
     ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
@@ -1011,6 +1012,9 @@ export default Vue.extend({
       if(item.type === 'claimT3Land'){
         this.selectedTier = 3;
         this.showT3MapModal();
+      }
+      if(item.type === 'SmokeBomb50'){
+        await this.purchaseSmokeBomb50();
       }
     },
     itemDescriptionHtml(item: SkillShopListing): string {

@@ -29,6 +29,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_LIGHTNING = 6;
     uint256 public constant ITEM_COSMETIC_WEAPON = 7; // series
     uint256 public constant ITEM_COSMETIC_CHARACTER = 8; // series
+    uint256 public constant ITEM_SMOKE_BOMB = 9;
 
     uint256 public constant NUMBERPARAMETER_GIVEN_TICKETS = uint256(keccak256("GIVEN_TICKETS"));
     uint256 public constant NUMBERPARAMETER_SPENT_TICKETS = uint256(keccak256("SPENT_TICKETS"));
@@ -115,6 +116,13 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         cbkLandSale = _cbkLandSale;
+    }
+
+    function migrateTo_cdd5968(address _smokeBomb) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        itemAddresses[ITEM_SMOKE_BOMB] = _smokeBomb;
+        itemFlatPrices[ITEM_SMOKE_BOMB] = 0.002 ether;
     }
 
     /* ========== VIEWS ========== */
@@ -337,6 +345,22 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         require(paying > 0 && paying == itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic], 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic]);
         Cosmetics(itemAddresses[ITEM_COSMETIC_CHARACTER]).giveCosmetic(msg.sender, cosmetic, 1);
+    }
+
+    /* ========== Smoke Bomb ========== */
+      function setSmokeBombPrice(uint256 newPrice) external isAdmin {
+        require(newPrice > 0, 'invalid price');
+        itemFlatPrices[ITEM_SMOKE_BOMB] = newPrice;
+    }
+
+    function getSmokeBombPrice() public view returns (uint256){
+        return itemFlatPrices[ITEM_SMOKE_BOMB];
+    }
+
+     function purchase50SmokeBombs(uint256 paying) public { 
+        require(paying == itemFlatPrices[ITEM_SMOKE_BOMB] * 50, 'Invalid price');
+        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_SMOKE_BOMB] * 50);
+        Consumables(itemAddresses[ITEM_SMOKE_BOMB]).giveItem(msg.sender, 50);
     }
 
     /* ========== CBK Land sale ========== */

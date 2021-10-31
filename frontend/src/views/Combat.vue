@@ -69,6 +69,13 @@
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-link-others" tagname="choose_weapon">
                   Choose New Weapon
                 </b-button>
+
+                <b-button v-if="selectedWeaponId" variant="primary" class="ml-3 smoke-bomb-button"
+                @click="useSmokeBombUI()" id="gtag-link-others" tagname="use_smokebomb"
+                :disabled="smokeBombs == 0">
+                  Use Smoke Bomb ({{this.smokeBombs}}) <b-icon-question-circle class="centered-icon"
+                  scale="1.2" v-tooltip.top="'Find new enemies!'"/>
+                </b-button>
               </div>
 
               <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" :checkForDurability="true" />
@@ -167,6 +174,8 @@ export default {
       fightMultiplier: Number(localStorage.getItem('fightMultiplier')),
       staminaPerFight: 40,
       targetExpectedPayouts: new Array(4),
+      smokeBombs: 0,
+      intervalSmokeBombs: null
     };
   },
 
@@ -174,6 +183,7 @@ export default {
     this.intervalSeconds = setInterval(() => (this.timeSeconds = new Date().getSeconds()), 5000);
     this.intervalMinutes = setInterval(() => (this.timeMinutes = new Date().getMinutes()), 20000);
     this.staminaPerFight = 40 * Number(localStorage.getItem('fightMultiplier'));
+    this.intervalSmokeBombs = setInterval(async () => (this.smokeBombs = await this.fetchTotalSmokeBombsOwned()), 5000);
   },
 
   computed: {
@@ -225,9 +235,12 @@ export default {
       if (this.resultsAvailable && error === null) this.$bvModal.show('fightResultsModal');
     },
   },
-
+  beforeDestroy() {
+    clearInterval(this.intervalSmokeBombs);
+  },
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
+      'fetchTotalSmokeBombsOwned', 'useSmokeBomb']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -382,7 +395,10 @@ export default {
 
       return choices;
     },
-
+    async useSmokeBombUI(){
+      await this.useSmokeBomb({ id: this.currentCharacter.id });
+      await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
+    },
     async getExpectedPayouts() {
       if(!this.targets) return;
       const expectedPayouts = new Array(4);
@@ -615,6 +631,10 @@ h1 {
 .enemy-img {
   position: relative;
   top: -50px;
+}
+
+.smoke-bomb-button svg {
+  margin-left: 5px;
 }
 
 @media (max-width: 1334px) {
