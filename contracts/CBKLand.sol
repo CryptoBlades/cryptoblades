@@ -22,6 +22,7 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     event LandTransfered(address indexed from, address indexed to, uint256 id);
     event LandTokenMinted(address indexed reseller, address indexed minter, uint256 id, uint256 tier);
     event LandMintedWithReseller(address indexed minter, uint256 id, uint256 tier, uint256 chunkId, address reseller);
+    event LandChunkIdUpdated(uint256 indexed id, uint256 chunkId);
 
     // TotalLand
     uint256 landMinted;
@@ -55,9 +56,9 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
     }
 
-     // tier, chunkid, x, y
-    function get(uint256 id) public view returns (uint256, uint256, uint256, uint256) {
-        return (landData[id][LT], landData[id][LC], landData[id][LX], landData[id][LY]);
+     // tier, chunkid, x, y, reseller address
+    function get(uint256 id) public view returns (uint256, uint256, uint256, uint256, address) {
+        return (landData[id][LT], landData[id][LC], landData[id][LX], landData[id][LY], landAddressData[id][LAR]);
     }
 
     function getOwned(address owner) public view returns (uint256[] memory ownedIds) {
@@ -99,9 +100,20 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         emit LandMintedWithReseller(minter, tokenID, tier, chunkId, reseller);
     }
 
+    function massMint(address minter, uint256 tier, uint256 chunkId, address reseller, uint256 quantity) public restricted {
+        for(uint256 i = 0; i < quantity; i++) {
+            mint(minter, tier, chunkId, reseller);
+        }
+    }
+
+    function updateChunkId(uint256 id, uint256 chunkId) public restricted {
+        landData[id][LC] = chunkId;
+        emit LandChunkIdUpdated(id, chunkId);
+    }
+
 
     function getLandTierURI(uint256 id) public view returns (string memory uri) {
-       (uint256 tier,,,) = get(id);
+       (uint256 tier,,,,) = get(id);
         return getTierURI(tier);
     }
 

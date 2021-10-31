@@ -24,7 +24,9 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     event LandTokenGiven(address indexed reseller, address indexed owner, uint256 tier);
 
     event ReservedLandClaimed(uint256 indexed reservation, address indexed reseller, address indexed owner, uint256 tier, uint256 chunkId);
-
+    event MassMintReservedLand(address indexed player, address indexed reseller, uint256 chunkId, uint256 tier1, uint256 tier2, bool giveTier3);
+    event MassMintReservedChunklessLand(address indexed player, address indexed reseller, uint256 tier1, uint256 tier2,  uint256 tier3);
+    
     /* ========== LAND SALE INFO ========== */
     uint256 private constant NO_LAND = 0;
     uint256 public constant TIER_ONE = 1;
@@ -305,6 +307,104 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
 
         // Could not find a land
         revert();
+    }
+
+    // For mass mint
+    function massMintReservedLand(address player, address reseller, uint256 chunkId, uint256 tier1, uint256 tier2, bool giveTier3) public restricted {
+        require(reservedChunks[reseller].contains(chunkId), "not reserved");
+        require(chunkT2LandSales[chunkId] + tier1 + tier2 <= _allowedLandSalePerChunk, "NA");
+        require(!giveTier3 || _chunkAvailableForT3(chunkId), "NA2");
+    
+        if((tier1 + tier2) > 0 && chunkT2LandSales[chunkId] == 0) {
+             chunksWithT2Land++;
+        }
+                
+        if(tier1 > 0) {
+            cbkLand.massMint(player, TIER_ONE, chunkId, reseller, tier1);
+            chunkT2LandSales[chunkId] += tier1;
+        }
+
+        if(tier2 > 0) {
+            cbkLand.massMint(player, TIER_TWO, chunkId, reseller, tier2);
+            chunkT2LandSales[chunkId] += tier2;
+        }
+
+        if(giveTier3) {
+            chunkT3LandSoldTo[chunkId] = player;
+            takenT3Chunks.add(chunkId);
+            cbkLand.mint(player, TIER_THREE, chunkId, reseller);
+        }
+
+        chunkZoneLandSales[chunkIdToZoneId(chunkId)] += tier1 + tier2 + (giveTier3 ? 1 : 0);
+        emit MassMintReservedLand(player, reseller, chunkId, tier1, tier2, giveTier3);
+    }
+
+    // For mass mint 
+    // Can change chunk id once
+    // Call with caution
+    function massMintReservedLand(address player, address reseller, uint256 tier1, uint256 tier2, uint256 tier3) public restricted {
+        require(reservedChunks[reseller].length() > 0, "no reservation");
+                
+        if(tier1 > 0) {
+            cbkLand.massMint(player, TIER_ONE, 0, reseller, tier1);
+        }
+
+        if(tier2 > 0) {
+            cbkLand.massMint(player, TIER_TWO, 0, reseller, tier2);
+        }
+
+        if(tier3 > 0) {
+            cbkLand.massMint(player, TIER_THREE, 0, reseller, tier3);
+        }
+
+        emit MassMintReservedChunklessLand(player, reseller, tier1, tier2, tier3);
+    }
+
+    // Can be called only from land with reseller address and chunkid 0
+    // For T1; assignedChunkId is a dummy param
+    function changeLandChunkId(uint256 landId, uint256 assignedChunkid) public {
+        require(cbkLand.ownerOf(landId) == msg.sender, "NA1"); // Owns the land
+        (uint256 tier, uint256 chunkId, , , address reseller) = cbkLand.get(landId);
+        require(chunkId == 0 && reseller != address(0), "NA2"); // Is a reseller land with chunk id 0
+        require(assignedChunkid == 0 || reservedChunks[reseller].contains(assignedChunkid), "NA3"); // FE didn't send chunkId or reseller owns the assigned chunkId
+        require(tier != TIER_THREE || _chunkAvailableForT3(assignedChunkid), "NA4"); // Not tier 3 or tier 3 available
+        require(tier == TIER_ONE || assignedChunkid > 0, "NA5"); // tier 1 or chunkid requested
+        require(tier != TIER_TWO || chunkT2LandSales[assignedChunkid] < _allowedLandSalePerChunk, "NA6"); // Not T2 or population allows it
+
+        // T1 => get random reseller chunkId
+        if(tier == TIER_ONE) {
+            uint256 rcLength = reservedChunks[reseller].length();
+            require(rcLength > 0, "no reserved chunks");
+            uint256 counter = reservedChunksCounter[reseller];
+            for(uint256 i = counter; i < counter + rcLength; i++) {
+                uint256 cId = reservedChunks[reseller].at(uint256(i % rcLength));
+                if(chunkT2LandSales[cId] < _allowedLandSalePerChunk) {
+                    assignedChunkid = cId;
+                    reservedChunksCounter[reseller] = uint256(i + 1);
+                    break;
+                }
+            }
+        }
+
+        require(assignedChunkid != 0, "NA7"); // Would only happen if T1 && round robin failed; shouldn't
+
+        // T1 and T2 share population
+        if(tier != TIER_THREE) {
+            if(chunkT2LandSales[assignedChunkid] == 0){
+                chunksWithT2Land++;
+            }
+
+            chunkT2LandSales[assignedChunkid]++;
+        }
+
+        // T3 => tag the land
+        if(tier == TIER_THREE) {
+            chunkT3LandSoldTo[assignedChunkid] = msg.sender;
+            takenT3Chunks.add(assignedChunkid);
+        }
+
+        chunkZoneLandSales[chunkIdToZoneId(assignedChunkid)]++;
+        cbkLand.updateChunkId(landId, assignedChunkid);
     }
 
     function giveT1LandReservedBulk(address[] memory players, address reseller, uint256 chunkId) public restricted {
