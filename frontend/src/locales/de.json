@@ -187,6 +187,214 @@
         "whoops": "Ups..."
       }
     },
+    "market":{
+      "browseNfts":"NFTs durchsuchen",
+      "nftHint":"NFT steht für Non Fungible Token.<br>Waffen und Charaktere sind NFTs des ERC721-Standards",
+      "browseChars":"Charaktere durchsuchen",
+      "browseWeapons":"Waffen durchsuchen",
+      "browseShields":"Schilde durchsuchen",
+  
+      "price":"Preis",
+      "loadingPrice":"Lade Preis ...",
+      "sold":"verkauft",
+  
+      "maxChars":"Du hast schon das Maximum an Charakteren (4).",
+      "loading":"Lade...",
+  
+      "searchNfts":"Suche NFTs",
+      "searchPlaceholder":"Verkäuferadresse, NFT ID",
+      "searchCharID":"Suche Charakter ID",
+      "searchWeaponID":"Suche Waffen ID",
+      "weaponsBySeller":"Waffen nach Verkäufer",
+      "charsBySeller":"Charaktere nach Verkäufer",
+      "searchShieldID":"Suche Schild ID",
+      "shieldsBySeller":"Schilde nach Verkäufer",
+      "searchMyWeapons":"Suche meine Waffen",
+      "weaponsPrivateTrades":"Waffen private Angebote",
+      "charsPrivateTrades":"Charaktere private Angebote",
+      "shieldsPrivateTrades":"Schilde private Angebote",
+      "searchMyChars":"Suche meine Charaktere",
+      "searchMyShields":"Suche meine Schilde",
+      "changePrice":"Preis verändern",
+      "changeTargetBuyer":"Käufer ändern",
+      "cancelTooltip":"Abgebrochene Verkäufe können erst nach 24 neu gelistet werden!",
+      "cancelListing":"Verkauf abbrechen",
+  
+      "listNfts":"NFT verkaufen",
+      "listingHint" : "Wenn du ein NFT zum Verkauf anbietest, dann wird es an den Markt gesendet, <br> bis es verkauft wird oder du den Verkauf abbrichst.",
+      "showWeapons":"Waffen anzeigen",
+      "showChars":"Charaktere anzeigen",
+      "showShields":"Schilde anzeigen",
+      "listWeapon":"Waffe verkaufen",
+      "listChar":"Charakter verkaufen",
+      "listShield":"Schild verkaufen",
+      "listingTaxHint":"% Steuer (bezahlt Käufer) wird zum finalen Preis hinzugefügt.",
+  
+      "sellType" : "Verkaufe {activeType}",
+      "changeTypePrice" : "Verändere {activeType} Preis",
+  
+      "sellPrice" : "Verkaufspreis (SKILL)",
+      "targetBuyerAddress":"Ziel-Käuferadresse (optional)",
+      "listingConfirmation": "{activeType} verkaufen für ",
+      "buyerFee" : "Der Käufer muss {activeListingMarketTax}% Markt-Steuer bezahlen. Gesamt:",
+      
+      "weaponsSold" : "Verkaufte Waffen",
+      "viewWeapons" : "Deine verkauften Waffen anzeigen",
+      "weaponTxHistory" : "Transaktionsverlauf deiner Waffen",
+      "nothingThere" : "Hier scheint nichts zu sein!",
+      "tips" : "Für Tipps wie man NFTs verkauft, schaue hier ",
+      "link" : "link",
+  
+      "charactersSold" : "Charaktere verkauft",
+      "charactersSoldTooltip" : "Sieh dir deine verkauften Charaktere an",
+      "characterTxHistory":"Transaktionsverlauf deiner Charaktere",
+  
+      "shieldsSold" : "Schilde verkauft",
+      "shieldsSoldTooltip" : "Sieh dir deine verkauften Schilde an",
+      "shieldsTxHistory":"Transaktionsverlauf deiner Schilde",
+  
+      "skillShop" : "Skill Shop",
+      "skillShophint" : "Du kannst hier verschiedene Gegenstände kaufen",
+      "specials" : "Specials",
+      "shop" : "Shop",
+  
+      "nftList":{
+        "characterRenameTag" : "Namensschild für deinen Charakter",
+        "characterRenameTagDesc" : "Benennt einen Charakter um",
+  
+        "characterRenameTagDeal" : "Deal: Namensschilde für deine Charaktere",
+        "characterRenameTagDealDesc" : "Benennt 4 Charaktere zum Preis von 3 um",
+  
+        "weaponRenameTag" : "Waffen Namensschild",
+        "weaponRenameTagDesc" : "Benennt eine Waffe um",
+  
+        "weaponRenameTagDeal" : "Deal: Waffen Namensschilde",
+        "weaponRenameTagDealDesc" : "Benennt 4 Waffen zum Preis von 3 um",
+  
+        "characterEarthTraitChange" : "Erd-Trank",
+        "characterEarthTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Erd-Charakter.",
+  
+        "characterFireTraitChange" : "Feuer-Trank",
+        "characterFireTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Feuer-Charakter.",
+  
+        "characterWaterTraitChange" : "Wasser-Trank",
+        "characterWaterTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Wasser-Charakter.",
+  
+        "characterLightningTraitChange" : "Blitz-Trank",
+        "characterLightningTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Blitz-Charakter",
+  
+        "weaponGrayscale" : "Waffen Graustufe",
+        "weaponGrayscaleDesc" : "",
+  
+        "weaponContrast" : "Waffen Kontrast",
+        "weaponContrastDesc" : "Erhöhter contrast",
+  
+        "weaponSepia" : "Waffen Sepia",
+        "weaponSepiaDesc" : "",
+  
+        "weaponInvert" : "Waffe invertieren",
+        "weaponInvertDesc" : "Invertierte Farben",
+  
+        "weaponBlur" : "Waffe unscharf",
+        "weaponBlurDesc" : "Waffe unscharf",
+  
+        "weaponFireglow" : "Waffe Feuerglühen",
+        "weaponFireglowDesc" : "Lässt deine Waffe mit der Kraft des Feuers glühen",
+  
+        "weaponEarthglow" : "Waffe Erdglühen",
+        "weaponEarthglowDesc" : "Lässt deine Waffe mit der Kraft der Erde glühen",
+  
+        "weaponLightningglow" : "Waffe Blitzglühen",
+        "weaponLightningglowDesc" : "Lässt deine Waffe mit der Kraft des Blitzes glühen",
+  
+        "weaponWaterglow" : "Waffe Wasserglühen",
+        "weaponWaterglowDesc" : "Lässt deine Waffe mit der Kraft des Wassers glühen",
+  
+        "weaponRainbowglow" : "Waffe Regenbogenglühen",
+        "weaponRainbowglowDesc" : "Lässt deine Waffe mit der Kraft aller Elemente glühen",
+  
+        "weaponDarkglow" : "Waffe Dunkelglühen",
+        "weaponDarkglowDesc" : "Lässt deine Waffe mit der Kraft der Dunkelheit glühen",
+  
+        "weaponGhost" : "Geisterwaffe",
+        "weaponGhostDesc" : "Geisteffekt für deine Waffe",
+  
+        "weaponPolicelights" : "Waffen Polizeilichter",
+        "weaponPolicelightsDesc" : "Polizeilicht Hintergrund für deine Waffe",
+  
+        "weaponNeonborder" : "Waffe Neon Umrandung",
+        "weaponNeonborderDesc" : "",
+  
+        "weaponRotatingNeonborder" : "Drehende-Neon Waffen Umrandung",
+        "weaponRotatingNeonborderDesc" : "",
+  
+        "weaponDiamondborder" : "Diamant Waffen Umrandung",
+        "weaponDiamondborderDesc" : "",
+  
+        "weaponGoldborder" : "Gold Waffen Umrandung",
+        "weaponGoldborderDesc" : "",
+  
+        "weaponSilverborder" : "Silberne Waffen Umrandung",
+        "weaponSilverborderDesc" : "",
+  
+        "weaponBronzeborder" : "Bronzene Waffen Umrandung",
+        "weaponBronzeborderDesc" : "",
+  
+        "characterGrayscale" : "Charakter Graustufe",
+        "characterGrayscaleDesc" : "",
+  
+        "characterContrast" : "Charakter Kontrast",
+        "characterContrastDesc" : "Erhöhter Kontrast für deinen Charakter",
+  
+        "characterSepia" : "Charakter Sepia",
+        "characterSepiaDesc" : "",
+  
+        "characterInvert" : "Charakter Invertiert",
+        "characterInvertDesc" : "Invertierte Farben für deinen Charakter",
+  
+        "characterBlur" : "Charakter Unschärfe",
+        "characterBlurDesc" : "Unschärfe für deinen Charakter",
+  
+        "characterFireglow" : "Charakter Feuerglühen",
+        "characterFireglowDesc" : "Lässt deinen Charakter mit der Kraft des Feuers glühen",
+  
+        "characterEarthglow" : "Charakter Erdglühen",
+        "characterEarthglowDesc" : "Lässt deinen Charakter mit der Kraft der Erde glühen",
+  
+        "characterLightningglow" : "Charakter Blitzglühen",
+        "characterLightningglowDesc" : "Lässt deinen Charakter mit der Kraft des Blitzes glühen",
+  
+        "characterWaterglow" : "Charakter Wasserglühen",
+        "characterWaterglowDesc" : "Lässt deinen Charakter mit der Kraft des Wassers glühen",
+  
+        "characterRainbowglow" : "Charakter Regenbogenglühen",
+        "characterRainbowglowDesc" : "Leuchter mit der Kraft aller Elemente",
+  
+        "characterDarkglow" : "Charakter Dunkelglühen",
+        "characterDarkglowDesc" : "Leuchtet mit der Dunkelheit",
+  
+        "characterGhost" : "Geister Charakter",
+        "characterGhostDesc" : "Ghost effect",
+  
+        "characterPolice" : "Charakter Polizeilichter",
+        "characterPoliceDesc" : "Polizeilichter Hintergrund",
+  
+        "characterNeonborder" : "Charakter Neon Umrandung",
+        "characterNeonborderDesc" : "",
+  
+        "characterDiamondborder" : "Charakter Diamond Umrandung",
+        "characterDiamondborderDesc" : "",
+  
+        "characterGoldborder" : "Charakter Gold Umrandung",
+        "characterGoldborderDesc" : "",
+  
+        "characterSilverborder" : "Charakter Silver Umrandung",
+        "characterSilverborderDesc" : "",
+  
+        "characterBronzeborder" : "Charakter Bronze Umrandung",
+        "characterBronzeborderDesc" : ""
+      }
+    },
   "options": {
     "title": "Optionen",
     "graphic": "3D Grafiken",
