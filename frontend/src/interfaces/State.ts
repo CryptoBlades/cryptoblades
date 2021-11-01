@@ -16,11 +16,6 @@ export interface IWeb3EventSubscription {
   unsubscribe(): void;
 }
 
-export interface ITransferCooldown {
-  secondsLeft: number;
-  lastUpdatedTimestamp: number;
-}
-
 export interface IStakeState {
   ownBalance: string;
   stakedBalance: string;
@@ -100,8 +95,6 @@ export interface IState {
 
   currentNftType: string | null;
   currentNftId: number | null;
-
-  characterTransferCooldowns: Record<number, ITransferCooldown | undefined>;
 
   staking: Record<StakeType, IStakeState>;
   stakeOverviews: Record<StakeType, IStakeOverviewState>;

@@ -149,7 +149,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         needRole(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender));
     }
 
-    function needRole(bool statement) internal view {
+    function needRole(bool statement) internal pure {
         require(statement, "NR");
     }
 

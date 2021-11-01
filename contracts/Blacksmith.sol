@@ -4,12 +4,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "./interfaces/IPriceOracle.sol";
 import "./interfaces/IRandoms.sol";
 import "./shields.sol";
 import "./Consumables.sol";
 import "./Cosmetics.sol";
 import "./weapons.sol";
 import "./cryptoblades.sol";
+import "./CBKLandSale.sol";
 
 contract Blacksmith is Initializable, AccessControlUpgradeable {
     using SafeERC20 for IERC20;
@@ -31,6 +33,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant NUMBERPARAMETER_GIVEN_TICKETS = uint256(keccak256("GIVEN_TICKETS"));
     uint256 public constant NUMBERPARAMETER_SPENT_TICKETS = uint256(keccak256("SPENT_TICKETS"));
 
+    uint256 public constant LINK_SKILL_ORACLE_2 = 1; // technically second skill oracle (it's separate)
+    uint256 public constant LINK_KING_ORACLE = 2;
+
     /* ========== STATE VARIABLES ========== */
 
     Weapons public weapons;
@@ -41,6 +46,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     Shields public shields;
     CryptoBlades public game;
 
+
     // keys: ITEM_ constant
     mapping(uint256 => address) public itemAddresses;
     mapping(uint256 => uint256) public itemFlatPrices;
@@ -48,6 +54,13 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public numberParameters;
 
     mapping(uint256 => mapping(uint256 => uint256)) public itemSeriesFlatPrices;
+    CBKLandSale public cbkLandSale;
+    // ERC20 => tier => price
+    mapping(uint256 => mapping(uint256 => uint256)) public landPrices;
+    mapping(uint256 => address) currencies;
+
+    mapping(uint256 => address) public links;
+
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
     function initialize(Weapons _weapons, IRandoms _randoms)
@@ -97,6 +110,13 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER] = 0.2 ether;
         itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING] = 0.2 ether;
     }
+
+    function migrateTo_bcdf4c(CBKLandSale _cbkLandSale) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        cbkLandSale = _cbkLandSale;
+    }
+
     /* ========== VIEWS ========== */
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -166,6 +186,14 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         return itemSeriesFlatPrices[itemIndex][seriesIndex];
     }
 
+    function getCurrency(uint256 currency) public view returns (address) {
+        return currencies[currency];
+    }
+
+    function getLink(uint256 linkId) public view returns (address) {
+        return links[linkId];
+    }
+
     /* ========== Generic Setters ========== */
 
     function setAddressOfItem(uint256 itemIndex, address to) external isAdmin {
@@ -183,6 +211,15 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         for(uint i = 0; i < seriesIndices.length; i++) {
             itemSeriesFlatPrices[itemIndex][seriesIndices[i]] = seriesPrices[i];
         }
+    }
+
+    function setCurrency(uint256 currency, address currencyAddress, bool forced) external isAdmin {
+        require(currency > 0 && (forced || currencies[currency] == address(0)), 'used');
+        currencies[currency] = currencyAddress;
+    }
+
+    function setLink(uint256 linkId, address linkAddress) external isAdmin {
+        links[linkId] = linkAddress;
     }
 
     /* ========== Character Rename ========== */
@@ -300,5 +337,61 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         require(paying > 0 && paying == itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic], 'Invalid price');
         game.payContractTokenOnly(msg.sender, itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic]);
         Cosmetics(itemAddresses[ITEM_COSMETIC_CHARACTER]).giveCosmetic(msg.sender, cosmetic, 1);
+    }
+
+    /* ========== CBK Land sale ========== */
+
+    event CBKLandPurchased(address indexed owner, uint256 tier, uint256 price, uint256 currency);
+
+    function purchaseT1CBKLand(uint256 paying, uint256 currency) public {
+        uint256 price = getCBKLandPrice(cbkLandSale.TIER_ONE(), currency);
+        require(paying > 0 && price == paying, 'Invalid price');
+        payCurrency(msg.sender, price, currency);
+        cbkLandSale.giveT1Land(msg.sender);
+        emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_ONE(), price, currency);
+    }
+
+    function purchaseT2CBKLand(uint256 paying, uint256 chunkId, uint256 currency) public {
+        uint256 price = getCBKLandPrice(cbkLandSale.TIER_TWO(), currency);
+        require(paying > 0 && price == paying,  'Invalid price');
+        payCurrency(msg.sender, price, currency);
+        cbkLandSale.giveT2Land(msg.sender, chunkId);
+        emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_TWO(), price, currency);
+    }
+
+    function purchaseT3CBKLand(uint256 paying, uint256 chunkId, uint256 currency) public {
+        uint256 price = getCBKLandPrice(cbkLandSale.TIER_THREE(), currency);
+        require(paying > 0 && price == paying, 'Invalid price');
+        payCurrency(msg.sender, price, currency);
+        cbkLandSale.giveT3Land(msg.sender, chunkId);
+        emit CBKLandPurchased(msg.sender, cbkLandSale.TIER_THREE(), price, currency);
+    }
+
+    function getCBKLandPrice(uint256 tier, uint256 currency) public view returns (uint256){
+        return landPrices[currency][tier] * getOracledTokenPerUSD(currency);
+    }
+
+    function getOracledTokenPerUSD(uint256 currency) public view returns (uint256) {
+        if(currency == 0) {
+            return IPriceOracle(links[LINK_SKILL_ORACLE_2]).currentPrice();
+        }
+        else {
+            return IPriceOracle(links[LINK_KING_ORACLE]).currentPrice();
+        }
+    }
+
+    function setCBKLandPrice(uint256 tier, uint256 newPrice, uint256 currency) external isAdmin {
+        require(newPrice > 0, 'invalid price');
+        require(tier >= cbkLandSale.TIER_ONE() && tier <= cbkLandSale.TIER_THREE(), "Invalid tier");
+        landPrices[currency][tier] = newPrice;
+    }
+
+    function payCurrency(address payer, uint256 paying, uint256 currency) internal {
+        if(currency == 0){
+             game.payContractTokenOnly(payer, paying, false);
+        }
+        else {
+            IERC20(currencies[currency]).transferFrom(payer, address(this), paying);
+        }
     }
 }
