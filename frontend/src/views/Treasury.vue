@@ -4,14 +4,14 @@
       <h3 class="mt-2"> Partnered Projects </h3>
       <img src="../assets/divider4.png" class="expander-divider">
     </div>
-    <div class="d-flex flex-row w-100 align-items-baseline mt-3 pl-5">
+    <div class="d-flex w-100 align-items-baseline mt-3 pl-5">
       <h5>Payout Currency:</h5>
       <b-form-select class="w-25 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
         <b-form-select-option :value="-1">SKILL</b-form-select-option>
         <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
       </b-form-select>
     </div>
-    <div class="d-flex flex-row w-100 pt-2 pr-5 pl-5 pb-2 flex-wrap">
+    <div class="d-flex w-100 pt-2 pr-5 pl-5 pb-2 flex-wrap">
       <partnered-project v-for="p in supportedProjects" :key="p.id" :id="p.id" :name="p.name" :tokenSymbol="p.tokenSymbol"
         :tokenSupply="p.tokenSupply" :tokenPrice="p.tokenPrice" :logoFileName="getLogoFile(p.name)"/>
     </div>

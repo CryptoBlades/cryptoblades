@@ -1,6 +1,6 @@
 <template>
-  <div class="partner-div ml-4 mr-4 mb-4 mt-4">
-    <div class="d-flex flex-row">
+  <div class="partner-div m-4">
+    <div class="d-flex">
       <img :src="partnerLogoPath" class="partner-logo"/>
       <div class="d-flex flex-column justify-content-center ml-2">
         <h4 class="d-flex align-items-center partner-name">{{name}}</h4>
@@ -44,7 +44,7 @@ interface Data {
   multiplier: string;
   tokensClaimed: string;
   skillToPartnerRatio: string;
-  updateInterval: any;
+  updateInterval: ReturnType<typeof setInterval> | null;
   detailsOpened: boolean;
 }
 
@@ -99,7 +99,6 @@ export default Vue.extend({
 
     partnerLogoPath(): string {
       const fileName = (partnersInfo as PartnersInfo).partners[this.name].logo;
-      console.log(fileName);
       return this.imgPath(fileName);
     }
   },
@@ -140,7 +139,9 @@ export default Vue.extend({
   },
 
   beforeDestroy() {
-    clearInterval(this.updateInterval);
+    if(this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
   }
 });
 
@@ -156,7 +157,7 @@ export default Vue.extend({
   background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
 }
 .partner-logo {
-  width: 100x;
+  width: 100px;
   height: 100px;
 }
 .multiplier-text {
