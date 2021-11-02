@@ -174,7 +174,621 @@
     },
     "links": {},
     "address": "0xcAFAAF5064bCA5cB596A73428006A71C57Ed480a",
-    "transactionHash": "0x9d9979b0034e5900eea3ac07304136eb3689a7c3cd6c1ee114cb86b8bacfd7d4"
+    "transactionHash": "0xc074e5cdafa046552463630f4c115ac8756649c81a195c94cca25840c75f7794"
+  },
+  "build/contracts/CBKLand.json": {
+    "events": {
+      "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "approved",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "Approval",
+        "type": "event"
+      },
+      "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "operator",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "approved",
+            "type": "bool"
+          }
+        ],
+        "name": "ApprovalForAll",
+        "type": "event"
+      },
+      "0xec81cf35afa3e6238d13ae3b6841f31c87c9d0308c0dbc3fc7f3c53b037eb3c5": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "minter",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "LandMinted",
+        "type": "event"
+      },
+      "0xeb0eeaa397ba5d2edc0e0e59bfd16fe5faccce0491744a5f5e7d53549e198d66": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "minter",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          }
+        ],
+        "name": "LandMintedWithReseller",
+        "type": "event"
+      },
+      "0x209babc4172e6efcdaca2b23967e40b8d8fa38dc869b532c415a7a96e71d7a41": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "minter",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier",
+            "type": "uint256"
+          }
+        ],
+        "name": "LandTokenMinted",
+        "type": "event"
+      },
+      "0x7f2badcef3de751c147a8779a5e116ae48fce3092948c82a18c6cbd0bbf05ded": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          }
+        ],
+        "name": "LandTransfered",
+        "type": "event"
+      },
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      },
+      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "Transfer",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0xb23F1C1841567b95F1C6E8fd6189539790BBB9F4",
+    "transactionHash": "0x4598a10e87690c5bea112b812d51b440a669dde7c3bd08a1a5ba50162f6b085d"
+  },
+  "build/contracts/CBKLandSale.json": {
+    "events": {
+      "0x95efea0b44884c51b363ebbcf18c9b700645f0683bff755e933f51e243129d56": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier",
+            "type": "uint256"
+          }
+        ],
+        "name": "LandTokenGiven",
+        "type": "event"
+      },
+      "0x48f661178e4a5500c28b50686e128704990e013a20fcc66c3625a5c20d8a181c": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "reservation",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "ReservedLandClaimed",
+        "type": "event"
+      },
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      },
+      "0x0d9884c4ae330560842289114d101b73de68ab19f49f83df908a3603e4e50346": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "stamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "T1Given",
+        "type": "event"
+      },
+      "0x133b391e04a4561d62574d6bd8dbe127d35559a6c5b9fe3e1e08f3ee5087d3a5": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "stamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "T1GivenFree",
+        "type": "event"
+      },
+      "0x930832e27e0b34f4d930f8239b2227e4edbe0515b6ecc7793692859788d2dc59": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "T1GivenReserved",
+        "type": "event"
+      },
+      "0x8d25417d8e172b5944afc548b1115d2f8eb974e815b89ddacf12811924a774e6": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "T2Given",
+        "type": "event"
+      },
+      "0x7f56778894406c1da1455af08a81d7ed37de1d81e694b5fc64525f93584aac09": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "T2GivenFree",
+        "type": "event"
+      },
+      "0x8bf2ead42f181e19cbafd7918f72da6b051996d0f009c298ffa4e5460afc0ace": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "T2GivenReserved",
+        "type": "event"
+      },
+      "0xbbe7fb3c12a38e4ebe481551e04ded26418efd14b3c058f11c19e861be0fbecb": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "T3Given",
+        "type": "event"
+      },
+      "0xcb9eb02496e12aca03070fe49b9d3b5ba274d508841a6103a5496c35f1bdb509": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "T3GivenFree",
+        "type": "event"
+      },
+      "0x42559f7fd01d443892f6d0f2e47ac54efd2f103a29cab16ae779dbfb9bde8f38": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "T3GivenReserved",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x236777456dD5159Da6c38A0E24f46e30C6f9e326",
+    "transactionHash": "0x05f3a74ee4bd89ccf9ddddeafeac6c10f8d7917b24ffd5e12879d08687fc0902"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -539,7 +1153,7 @@
     },
     "links": {},
     "address": "0x17f526f9db4F3b43D9120155871AC43296c39cD8",
-    "transactionHash": "0x71b3decd28b29b95498aa3d52790b412612a04305e690d3fabc54016953e4582"
+    "transactionHash": "0xdf562dc4243191589125ba191fa9b71936eca1c0ee3f9a8c08fa44053dade744"
   },
   "build/contracts/CharacterEarthTraitChangeConsumables.json": {
     "events": {
@@ -1037,7 +1651,7 @@
     },
     "links": {},
     "address": "0x04B8dAD3aDa3f95052038dfDA79c57afe6C21047",
-    "transactionHash": "0xd673ec5c8cbce4a37693c2c9edb32d03cf8f2fc63f251feab02558d3b4b13286"
+    "transactionHash": "0x883ae5aaab7d1fd75a5e1f5839f155859ddc0089e468083e5130a2bc474d706e"
   },
   "build/contracts/Characters.json": {
     "events": {
@@ -1238,7 +1852,7 @@
     },
     "links": {},
     "address": "0x6A1d1803d4EDF5CF27EDb64ae95A22F81707eA38",
-    "transactionHash": "0xca325ab401e67fa353cc850abfa128103c7668008a7e4d65bf1724f9c35ce71a"
+    "transactionHash": "0x7987bdec0826bfc91b3f154d027c9405cd590e6f121e1e66ac766083813fdf9f"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -1520,7 +2134,7 @@
     },
     "links": {},
     "address": "0x98145a2fEBac238280bbdEDc2757dC162318b16e",
-    "transactionHash": "0x45f53c5686b42a7831f8ab1ad669a371fa7d5d4a07074f3ec421f45115728ce6"
+    "transactionHash": "0x59e759b638390ed00dcdcf617895346d064a3f158d47dded299dc49456508f80"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
@@ -2145,7 +2759,13 @@
     },
     "links": {},
     "address": "0x5ea2373e281E92FE3c53dc36cE855D89BF25F6F8",
-    "transactionHash": "0xbd4844b9bc5a89a65d63189adab9773bba190cc5f3dffd25fc665a1d0c5e57fb"
+    "transactionHash": "0x2ce2f6f87f880fb09f6453be32b8d2383272fffc8ca96a5ef49b240afa17cf82"
+  },
+  "build/contracts/NFTStorage.json": {
+    "events": {},
+    "links": {},
+    "address": "0x7f25686b5a211280C2555c08B7e6d2930e7e87e6",
+    "transactionHash": "0xe779f71a8a5b05153b00b1c4242c42f89d2850447c2947556070aa1c193b9854"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -2948,7 +3568,7 @@
     },
     "links": {},
     "address": "0x43d0a72dCd36A0De38aeDe93FD0CB6B24658b18b",
-    "transactionHash": "0x08154f08b8d211f00905246948be59c4462c0a0cccb097d39cda9bf628a2917c"
+    "transactionHash": "0x0b8d5a0713eac639bf8add93d1fdcfac04c88e27b2e0b32e161f6091f5c4a0bb"
   },
   "build/contracts/WeaponRenameTagConsumables.json": {
     "events": {
@@ -3068,7 +3688,7 @@
     },
     "links": {},
     "address": "0xeC8A94061C493Beeb1D5F314E8dcF299a05257Eb",
-    "transactionHash": "0xa5859305ce12777e0f18606d0cc64824d0448071b85402e426c44ca1f9e4981c"
+    "transactionHash": "0xd2aa7f3a536f43e43b9a499d20976d25c7e1568823d20ec1b10f84dea42819bd"
   },
   "build/contracts/Weapons.json": {
     "events": {
@@ -3361,6 +3981,6 @@
     },
     "links": {},
     "address": "0x364759180A6484e57ECD73C042264A6Da75770e8",
-    "transactionHash": "0xd1613bf8dd32ad5975d42f76b2421f0ed5ad59d153386a573d5f636c998123df"
+    "transactionHash": "0x3e5d43dea3cdf00c686c22993fc16954e00d637627071e566f1ef9b2223cace3"
   }
 }

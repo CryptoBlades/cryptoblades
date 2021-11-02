@@ -765,4 +765,14 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         require(tier >= TIER_ONE && tier <= TIER_THREE, "Invalid tier");
         availableLand[tier] = available;
     }
+
+    function getReservationAt() public view returns (uint256) {
+        return playerReservedLandAt;
+    }
+
+    function updateResellerOfReservation(uint256[] calldata ids, address reseller) external isAdmin {
+        for (uint256 i = 0; i < ids.length; i++) {
+            playerReservedLandReseller[ids[i]] = reseller;
+        }
+    }
 }
