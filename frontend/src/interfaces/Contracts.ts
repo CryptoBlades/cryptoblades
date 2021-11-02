@@ -4,7 +4,8 @@ import type {
   CryptoBlades, Characters, Weapons, RaidBasic, IRandoms,
   NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables,
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
-  CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox
+  CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox,
+  WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale, CBKLand
 } from '../../../build/abi-interfaces';
 import { StakeType } from './State';
 
@@ -42,4 +43,9 @@ export interface Contracts {
   RaidTrinket?: Contract<RaidTrinket>;
   Junk?: Contract<Junk>;
   KeyLootbox?: Contract<KeyLootbox>;
+  WeaponCosmetics?: Contract<WeaponCosmetics>;
+  CharacterCosmetics?: Contract<CharacterCosmetics>;
+  NFTStorage?: Contract<NFTStorage>;
+  CBKLandSale?: Contract<CBKLandSale>;
+  CBKLand?: Contract<CBKLand>;
 }

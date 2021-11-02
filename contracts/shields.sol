@@ -380,7 +380,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         else {
             durabilityTimestamp[id] = uint64(durabilityTimestamp[id] + drainTime);
         }
-        
+
         Shield storage shd = tokens[id];
         return (
             shieldBaseMultiplier.add(defenseMultPerPointBasic.mul(
@@ -438,7 +438,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function getDurabilityMaxWait() public pure returns (uint64) {
         return uint64(maxDurability * secondsPerDurability);
     }
-    
+
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
