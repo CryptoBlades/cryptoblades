@@ -297,7 +297,7 @@
     },
     "links": {},
     "address": "0xd3b5df75a4d0d87Add79A5bdAB2f865928F7Fc8e",
-    "transactionHash": "0x9d4e68a0a3d614f2b425aed48a9e8f10b9aefa0d180a33343d5bb83d88e27d8d"
+    "transactionHash": "0xf73206c7cd32cfe035042aeaf2797389723d972e4c4da0251209138e142fdc1b"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -493,7 +493,7 @@
     },
     "links": {},
     "address": "0x95047Fd99EF9dF86Dc11c051102884fA6e0eddbe",
-    "transactionHash": "0x1c0819daa3cbd65c35ee815ef507287df1f38e5222329fbf1653e5986bf36a59"
+    "transactionHash": "0x5c9ce5e2315b62d70c1c3ae2239d70f56963c65891990468700d45fc072c7a89"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
