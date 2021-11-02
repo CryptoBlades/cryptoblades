@@ -3536,7 +3536,7 @@ export function createStore(web3: Web3) {
 
         try{
           const duelResult: IDuelResult = duelResultFromContract((await PvpArena.methods
-            .performDuel(characterID)
+            .performDuels(characterID)
             .send({
               from: state.defaultAccount
             })).events.DuelFinished.returnValues);

@@ -93,7 +93,9 @@ async function prepareContracts(accounts) {
   const promos_GAME_ADMIN = await promos.GAME_ADMIN();
 
   await pvpArena.grantRole(pvpArena_GAME_ADMIN, game.address);
+  await pvpArena.grantRole(pvpArena_GAME_ADMIN, characters.address);
   await characters.grantRole(charas_GAME_ADMIN, game.address);
+
   await weapons.grantRole(weps_GAME_ADMIN, game.address);
   await promos.grantRole(promos_GAME_ADMIN, game.address);
   await promos.grantRole(promos_GAME_ADMIN, characters.address);
@@ -104,13 +106,17 @@ async function prepareContracts(accounts) {
   await weapons.migrateTo_aa9da90();
   await weapons.migrateTo_951a020();
   await weapons.migrateTo_surprise(promos.address);
+  await weapons.migrateTo_NftVars();
 
   await characters.migrateTo_1ee400a();
   await characters.migrateTo_951a020();
   await characters.migrateTo_ef994e2(promos.address);
   await characters.migrateTo_b627f23();
+  await characters.migrateTo_PvpArena(pvpArena.address);
+  await characters.migrateTo_NftVars();
 
   await shields.migrateTo_surprise(promos.address);
+  await shields.migrateTo_NftVars();
 
   await game.migrateTo_ef994e2(promos.address);
   await game.migrateTo_23b3a8b(skillStakingRewards.address);

@@ -358,7 +358,7 @@ export default {
 
       this.$store.dispatch('withdrawFromArena',{inDuel,characterID});
     },
-    async withdrawUnclaimedDuelEarningsByCharacterId(characterID){
+    async withdrawUnclaimedDuelEarningsByCharacterId(){
       // await this.$store.dispatch('withdrawUnclaimedDuelEarningsById',{ characterID });
     },
     async withdrawAllUnclaimedDuelEarnings(){

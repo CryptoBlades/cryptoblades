@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
 import "./interfaces/ITransferCooldownable.sol";
+import "./PvpArena.sol";
 
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable, ITransferCooldownable {
 
@@ -72,6 +73,16 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         characterLimit = 4;
     }
 
+    function migrateTo_PvpArena(PvpArena _pvp) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        pvp = _pvp;
+    }
+
+    function migrateTo_NftVars() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        NFTVAR_BUSY = 1;
+    }
+
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-256
@@ -108,6 +119,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
+
+    PvpArena public pvp;
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;
+    uint256 public NFTVAR_BUSY;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -219,17 +234,22 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function gainXp(uint256 id, uint16 xp) public restricted {
         Character storage char = tokens[id];
-        if(char.level < 255) {
-            uint newXp = char.xp.add(xp);
-            uint requiredToLevel = experienceTable[char.level]; // technically next level
-            while(newXp >= requiredToLevel) {
+        if (char.level < 255) {
+            uint256 newXp = char.xp.add(xp);
+            uint256 requiredToLevel = experienceTable[char.level]; // technically next level
+            // we get the current character tier and reset points if he changes tier by leveling up
+            uint256 prevTier = pvp.getArenaTier(id);
+            while (newXp >= requiredToLevel) {
                 newXp = newXp - requiredToLevel;
                 char.level += 1;
                 emit LevelUp(ownerOf(id), id, char.level);
-                if(char.level < 255)
+                if (char.level < 255)
                     requiredToLevel = experienceTable[char.level];
-                else
-                    newXp = 0;
+                else newXp = 0;
+            }
+            uint256 newTier = pvp.getArenaTier(id);
+            if (prevTier < newTier) {
+                pvp.resetCharacterRankingPoints(id);
             }
             char.xp = uint16(newXp);
         }
@@ -268,6 +288,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function getFightDataAndDrainStamina(uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
         Character storage char = tokens[id];
+        require(getNftVar(id, NFTVAR_BUSY) == 0, "Character is busy");
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
         require(allowNegativeStamina || staminaPoints >= amount, "Not enough stamina!");
 
@@ -287,9 +308,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         raidsDone[id] = raidsDone[id] + 1;
         raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
         gainXp(id, xp);
+        setNftVar(id,NFTVAR_BUSY, 0);
     }
 
     function canRaid(address user, uint256 id) public view returns (bool) {
+        require(getNftVar(id, NFTVAR_BUSY) == 0, "Character is busy");
         return ownerOf(id) == user && getStaminaPoints(id) > 0;
     }
 
@@ -314,5 +337,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function setCharacterLimit(uint256 max) public restricted {
         characterLimit = max;
+    }
+
+    // functions to get and set the NFT vars
+    function getNftVar(uint256 characterID, uint256 nftVar) public view returns(uint256) {
+        return nftVars[characterID][nftVar];
+    }
+    function setNftVar(uint256 characterID, uint256 nftVar, uint8 value) public {
+        nftVars[characterID][nftVar] = value;
     }
 }
