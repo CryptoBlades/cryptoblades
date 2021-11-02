@@ -5,6 +5,9 @@
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
+    <div class="content dark-bg-text" v-if="!canShowApp">
+      You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.
+    </div>
     <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
         <span class="starter-panel-heading">Metamask Not Detected Or Incorrect Network</span>
@@ -34,7 +37,9 @@
             BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
           </p>
           <ul class="unstyled-list">
-            <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
+            <li>
+              1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a> or <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">Buy with Transak</a>
+            </li>
             <li>
               2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br />
               <a v-bind:href="`${getExchangeUrl}`" target="_blank">Trade SKILL/BNB</a>
@@ -141,6 +146,9 @@ export default {
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
       'configureMetaMask'
+    ]),
+    ...mapGetters([
+      'getExchangeTransakUrl'
     ]),
 
     async updateCharacterStamina(id) {
