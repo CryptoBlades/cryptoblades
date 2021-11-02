@@ -775,4 +775,33 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
             playerReservedLandReseller[ids[i]] = reseller;
         }
     }
+
+    // Do not use forced unless really needed. If used, preferable don't update population
+    // Do NOT update population when calling T3 land
+    function updateLandChunkIdBulk(uint256[] calldata landIds, uint256 fromChunkId, uint256 toChunkId, bool updateToPopulation, bool forced) external isAdmin {
+        require(forced || cbkLand.landsBelongToChunk(landIds, fromChunkId), "NA");
+
+        if(updateToPopulation) {
+            uint256 populationFrom = chunkT2LandSales[fromChunkId];
+            uint256 populationTo = chunkT2LandSales[toChunkId];
+            uint256 populationChange = landIds.length;
+
+            if(populationFrom - populationChange < 0) {
+                require(forced, "NA2"); // forced or don't allow. Something is wrong.
+                populationChange = populationFrom; // can't have negative population
+            }
+
+            if(populationTo + populationChange > _allowedLandSalePerChunk) {
+                require(forced, "NA3"); // forced or don't allow. Something is wrong. No reset on populationChange
+            }
+
+            chunkT2LandSales[fromChunkId] -= populationChange;
+            chunkZoneLandSales[chunkIdToZoneId(fromChunkId)] -= populationChange;
+
+            chunkT2LandSales[toChunkId] += populationChange;
+            chunkZoneLandSales[chunkIdToZoneId(toChunkId)] += populationChange;
+        }
+
+        cbkLand.updateChunkId(landIds, toChunkId);
+    }
 }

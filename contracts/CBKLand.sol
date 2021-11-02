@@ -111,6 +111,26 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         emit LandChunkIdUpdated(id, chunkId);
     }
 
+    function updateChunkId(uint256[] memory ids, uint256 chunkId) public restricted {
+        for(uint256 i = 0; i < ids.length; i++) {
+            updateChunkId(ids[i], chunkId);
+        }
+    }
+
+    // Helper function for bulk moving land without having to jump chains
+    function landsBelongToChunk(uint256[] memory ids, uint256 chunkId) public view returns (bool) {
+        for(uint256 i = 0; i < ids.length; i++) {
+            if(landData[ids[i]][LC] != chunkId) {
+                return false;
+            }
+
+            if(ids[i] > landMinted) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     function getLandTierURI(uint256 id) public view returns (string memory uri) {
        (uint256 tier,,,,) = get(id);
