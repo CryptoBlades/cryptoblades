@@ -777,7 +777,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     }
 
     // Do not use forced unless really needed. If used, preferable don't update population
-    // Do NOT update population when calling T3 land
+    // Do NOT use with T3
     function updateLandChunkIdBulk(uint256[] calldata landIds, uint256 fromChunkId, uint256 toChunkId, bool updateToPopulation, bool forced) external isAdmin {
         require(forced || cbkLand.landsBelongToChunk(landIds, fromChunkId), "NA");
 
