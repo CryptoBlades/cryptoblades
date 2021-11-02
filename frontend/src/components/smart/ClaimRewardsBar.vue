@@ -155,7 +155,8 @@ export default Vue.extend({
       let frac: BigNumber;
 
       // if has no skill rewards do not display timer next tick.
-      if (this.skillRewards === '0') {
+      // or if tax is zero also do not display timer next tick.
+      if (this.skillRewards === '0' || this.rewardsClaimTaxAsFactorBN.toString() === '0') {
         return '';
       } else {
         frac = this.rewardsClaimTaxAsFactorBN;

@@ -9,7 +9,7 @@ import "./util.sol";
 import "./interfaces/ITransferCooldownable.sol";
 import "./PvpArena.sol";
 
-contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable, ITransferCooldownable {
+contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
     using SafeMath for uint8;
@@ -18,7 +18,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     bytes32 public constant NO_OWNED_LIMIT = keccak256("NO_OWNED_LIMIT");
     bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
 
-    uint256 public constant TRANSFER_COOLDOWN = 1 days;
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
@@ -58,7 +58,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function migrateTo_951a020() public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
-        _registerInterface(TransferCooldownableInterfaceId.interfaceId());
+        // Apparently ERC165 interfaces cannot be removed in this version of the OpenZeppelin library.
+        // But if we remove the registration, then while local deployments would not register the interface ID,
+        // existing deployments on both testnet and mainnet would still be registered to handle it.
+        // That sort of inconsistency is a good way to attract bugs that only happens on some environments.
+        // Hence, we keep registering the interface despite not actually implementing the interface.
+        _registerInterface(0xe62e6974); // TransferCooldownableInterfaceId.interfaceId()
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
@@ -108,7 +113,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     uint256[256] private experienceTable; // fastest lookup in the west
 
-    mapping(uint256 => uint256) public override lastTransferTimestamp;
+    // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
+    mapping(uint256 => uint256) public lastTransferTimestamp;
 
     Promos public promos;
 
@@ -141,21 +147,17 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         _;
     }
 
+    modifier minterOnly() {
+        _minterOnly();
+        _;
+    }
+
+    function _minterOnly() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), 'no access');
+    }
+
     function _noFreshLookup(uint256 id) internal view {
         require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
-    }
-
-    function transferCooldownEnd(uint256 tokenId) public override view returns (uint256) {
-        return lastTransferTimestamp[tokenId].add(TRANSFER_COOLDOWN);
-    }
-
-    function transferCooldownLeft(uint256 tokenId) public override view returns (uint256) {
-        (bool success, uint256 secondsLeft) =
-            lastTransferTimestamp[tokenId].trySub(
-                block.timestamp.sub(TRANSFER_COOLDOWN)
-            );
-
-        return success ? secondsLeft : 0;
     }
 
     function get(uint256 id) public view noFreshLookup(id) returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
@@ -175,6 +177,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint16(RandomUtil.randomSeededMinMax(0, limit, RandomUtil.combineSeeds(seed, seed2)));
     }
 
+    function getCosmeticsSeed(uint256 id) public view noFreshLookup(id) returns (uint256) {
+        CharacterCosmetics memory cc = cosmetics[id];
+        return cc.seed;
+    }
+
     function mint(address minter, uint256 seed) public restricted {
         uint256 tokenID = tokens.length;
 
@@ -191,6 +198,22 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
         _mint(minter, tokenID);
         emit NewCharacter(tokenID, minter);
+    }
+
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed) minterOnly public returns (uint256) {
+        uint256 tokenID = tokens.length;
+
+        if(block.number != lastMintedBlock)
+            firstMintedOfLastBlock = tokenID;
+        lastMintedBlock = block.number;
+
+        uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
+
+        tokens.push(Character(xp, level, trait, staminaTimestamp));
+        cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
+        _mint(minter, tokenID);
+        emit NewCharacter(tokenID, minter);
+        return tokenID;
     }
 
     function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
@@ -319,16 +342,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to)) {
             require(balanceOf(to) < characterLimit, "Recv has too many characters");
-        }
-
-        // when not minting or burning...
-        if(from != address(0) && to != address(0)) {
-            // only allow transferring a particular token every TRANSFER_COOLDOWN seconds
-            require(lastTransferTimestamp[tokenId] < block.timestamp.sub(TRANSFER_COOLDOWN), "Transfer cooldown");
-
-            if(!hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to)) {
-                lastTransferTimestamp[tokenId] = block.timestamp;
-            }
         }
 
         promos.setBit(from, promos.BIT_FIRST_CHARACTER());
