@@ -137,6 +137,10 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getTierURI(tier);
     }
 
+    function tokenURI(uint256 id) public view override returns (string memory) {
+        return getLandTierURI(id);
+    }
+
     function getTierURI(uint256 tier) public view returns (string memory uri) {
         return tierStrData[tier][TSU];
     }
