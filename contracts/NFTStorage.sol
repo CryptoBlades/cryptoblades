@@ -114,6 +114,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     mapping(uint256 => uint256) private transferInsMeta;
     mapping(uint256 => uint256) private transferInSeeds;
 
+    EnumerableSet.UintSet private _supportedChains;
+
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTTransferOutRequest(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -356,10 +358,27 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         return _bridgeEnabled[chainId];
     }
 
+    function getEnabledChainsForBridging() public view  returns (uint256[] memory chainIds) {
+        uint256 amount = _supportedChains.length();
+        chainIds = new uint256[](amount);
+
+        uint256 index = 0;
+        for (uint256 i = 0; i < amount; i++) {
+            uint256 id = _supportedChains.at(i);
+                chainIds[index++] = id;
+        }
+    }
+
     
     function toggleChainBridgeEnabled(uint256 chainId, string memory prefix, bool enable) public restricted {
         _bridgeEnabled[chainId] = enable;
         _chainPrefix[chainId] = prefix;
+
+        if(enable) {
+            _supportedChains.add(chainId);
+        } else {
+            _supportedChains.remove(chainId);
+        }
     }
 
     // Player requests to bridge an item
@@ -526,6 +545,13 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         || status == TRANSFER_OUT_STATUS_ERROR, 'Invalid status change');
         transferOut.status = status;
         transferOut.lastUpdateBlock = block.number;
+
+        if(status == TRANSFER_OUT_STATUS_DONE) {
+            TransferOut memory transferOut = transferOuts[bridgeTransferId];
+            storedItems[transferOut.owner][transferOut.nftAddress].remove(transferOut.nftId);
+            allStoredItems[transferOut.nftAddress].remove(transferOut.nftId);
+            delete storedItemsOwners[transferOut.nftAddress][transferOut.nftId];
+        }
 
         emit NFTTransferUpdate(bridgeTransferId, status, forced);
     }
