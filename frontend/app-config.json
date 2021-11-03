@@ -28,6 +28,7 @@
 
           "chainId": "0x61",
           "currencyName": "Binance Coin",
+          "currencyNetwork": "BSC",
           "currencySymbol": "BNB",
           "currencyTransak": "BNB,BUSD",
           "currencyDecimals": "18",
@@ -60,6 +61,7 @@
 
           "chainId": "0x100",
           "currencyName": "Huobi Token",
+          "currencyNetwork": "Huobi",
           "currencySymbol": "HT",
           "currencyTransak": "HT",
           "currencyDecimals": "18",
@@ -92,6 +94,7 @@
 
           "chainId": "0x41",
           "currencyName": "OKExChain",
+          "currencyNetwork": "OKEx",
           "currencySymbol": "OKT",
           "currencyTransak": "OKT",
           "currencyDecimals": "18",
@@ -123,6 +126,7 @@
 
           "chainId": "0x13881",
           "currencyName": "MATIC",
+          "currencyNetwork": "Polygon",
           "currencySymbol": "TMATIC",
           "currencyTransak": "TMATIC",
           "currencyDecimals": "18",
@@ -159,6 +163,7 @@
 
           "chainId": "0x38",
           "currencyName": "Binance Coin",
+          "currencyNetwork": "BSC",
           "currencySymbol": "BNB",
           "currencyTransak": "BNB,BUSD",
           "currencyDecimals": "18",
@@ -191,6 +196,7 @@
 
           "chainId": "0x80",
           "currencyName": "Huobi Token",
+          "currencyNetwork": "Huobi",
           "currencySymbol": "HT",
           "currencyTransak": "HT",
           "currencyDecimals": "18",
@@ -223,6 +229,7 @@
 
           "chainId": "0x42",
           "currencyName": "OKExChain",
+          "currencyNetwork": "OKEx",
           "currencySymbol": "OKT",
           "currencyTransak": "OKT",
           "currencyDecimals": "18",
@@ -254,6 +261,7 @@
 
           "chainId": "0x89",
           "currencyName": "MATIC",
+          "currencyNetwork": "Polygon",
           "currencySymbol": "MATIC",
           "currencyTransak": "MATIC",
           "currencyDecimals": "18",

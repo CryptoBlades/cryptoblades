@@ -264,9 +264,15 @@ export function createStore(web3: Web3) {
         return getConfigValue('exchangeUrl');
       },
       getExchangeTransakUrl() {
-        const currencyNetwork = getConfigValue('currency') || 'BNB';
-        const currency = getConfigValue('currencyTransak') || 'BNB,BUSD';
-        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&defaultCryptoCurrencyNetwork=' + currencyNetwork + '&defaultCryptoCurrency=' + currency;
+        const currencyNetwork = getConfigValue('currencyNetwork') || 'BSC';
+        const currencyDefault = getConfigValue('currency') || 'BNB';
+        const currencyList = getConfigValue('currencyTransak') || 'BNB,BUSD';
+        
+        const urlCC = 'defaultCryptoCurrency=' + currencyDefault;
+        const urlNetwork = 'network=' + currencyNetwork;
+        const urlCCL = 'cryptoCurrencyList=' + currencyList;
+        
+        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlNetwork + '&' + urlCCL;
       },
       ownCharacters(state, getters) {
         return getters.charactersWithIds(state.ownedCharacterIds);

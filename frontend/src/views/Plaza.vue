@@ -1,6 +1,5 @@
 <template>
   <div class="body main-font">
-
     <div v-if="ownCharacters.length === 0" class="blank-slate">
       <div class="current-promotion">
         <div class="tob-bg-img promotion-decoration">
@@ -20,7 +19,8 @@
       />
       <div v-if="formatSkill() < recruitCost" >
         <br>
-        You can buy more SKILL from <a v-bind:href="`${getExchangeUrl}`" target="_blank">here</a>.
+        You can buy more SKILL from <a :href="getExchangeUrl" target="_blank">here</a> or
+        <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">buy BNB with Transak</a>.
       </div>
     </div>
     <div class="row mt-3" v-if="ownCharacters.length > 0">
@@ -96,6 +96,7 @@ export default Vue.extend({
   },
 
   async created() {
+    console.log(this.getExchangeUrl, this.getExchangeTransakUrl());
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
@@ -110,6 +111,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter']),
+    ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
       try {
