@@ -4,193 +4,115 @@
       <span>Nothing to buy at this time</span>
     </div>
     <ul class="product-grid">
-      <li class="product" v-for="product in products" :key="product.id">
-        <img class="product-img" :src="product.thumbnail_url" alt=""/>
+      <li class="product"
+      v-for="product in products" :key="product.id">
+        <img class="product-img" :src="product.thumbnail_url" />
         <div class="product-name">{{ product.name }}</div>
         <b-button
-          :disabled="!product.price || isLoading"
           variant="primary"
           class="shop-button"
           @click="openAddress(product)">
-          <span>Buy (<CurrencyConverter v-if="product.price" :skill="fromWeiEther(+product.price)"
-                                        :showValueInSkillOnly="true" :minDecimals="1"/>)</span>
+          <span>
+            Buy ({{ product.price }} SKILL)
+          </span>
         </b-button>
       </li>
     </ul>
 
-    <b-modal class="centered-modal" ref="merchandise-address-modal" @ok="buyItem" :ok-title="'Submit order'"
-             :ok-disabled="disableMerchOkButton" button-size="lg">
+    <b-modal class="centered-modal" ref="merchandise-address-modal" @ok="buyItem">
       <template #modal-title>
         Delivery Address
       </template>
 
       <b-form-input type="text"
-                    class="modal-input" v-model="recipient.name" placeholder="Name"/>
+        class="modal-input" v-model="recipient.name" placeholder="Name" />
       <b-form-input type="number"
-                    class="modal-input" v-model="recipient.phone" placeholder="Phone"/>
+        class="modal-input" v-model="recipient.phone" placeholder="Phone" />
       <b-form-input type="email"
-                    class="modal-input" v-model="recipient.email" placeholder="Email"/>
+        class="modal-input" v-model="recipient.email" placeholder="Email" />
       <b-form-input type="text"
-                    class="modal-input" v-model="recipient.address1" placeholder="Address"/>
+        class="modal-input" v-model="recipient.address1" placeholder="Address" />
       <b-form-input type="text"
-                    class="modal-input" v-model="recipient.city" placeholder="City"/>
+        class="modal-input" v-model="recipient.city" placeholder="City" />
       <b-form-input type="text"
-                    class="modal-input" v-model="recipient.zip" placeholder="Zip Code"/>
+        class="modal-input" v-model="recipient.zip" placeholder="Zip Code" />
       <b-form-select
-        class="modal-input" v-model="recipient.countryCode" @change="fetchStates" :options="countries"
+        class="modal-input" v-model="recipient.country_code" :options="countries"
         text-field="name" value-field="code"></b-form-select>
-      {{ selectedCountry }}
+        {{ selected_country }}
       <b-form-select
-        class="modal-input" v-if="states.length !== 0" v-model="recipient.stateCode" :options="states"
-        value-field="code" text-field="name"></b-form-select>
+        class="modal-input" v-model="recipient.state_code" :options="states" value-field="code" text-field="name"></b-form-select>
     </b-modal>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import {mapActions} from 'vuex';
-import {fromWeiEther} from '@/utils/common';
-import CurrencyConverter from '../../components/CurrencyConverter.vue';
-import api from '@/api';
-
-export interface Product {
-  id: number,
-  name: string,
-  thumbnail_url: string,
-  price?: number
-}
-
-export interface Recipient {
-  name: string;
-  address1: string;
-  city: string;
-  stateCode?: string;
-  countryCode: string;
-  zip: string;
-  phone: string;
-  email: string;
-}
-
-export interface Country {
-  name: string;
-  code: string;
-  states?: string[];
-}
-
-export interface MerchandiseOrderData {
-  recipient: Recipient;
-  items: MerchandiseItemData[];
-}
-
-export interface MerchandiseItemData {
-  sync_variant_id: number;
-  quantity: number;
-}
-
-interface Data {
-  products: Product[];
-  selectedProduct: Product | undefined;
-  selectedCountry: Country | undefined;
-  countries: Country[];
-  states: string[];
-  recipient: Recipient;
-  isLoading: boolean;
-}
-
-interface StoreMappedActions {
-  purchaseMerchandise(payload: { id: number, price: number, amount: number }): Promise<number>;
-
-  getItemPrice(payload: { id: number }): Promise<number>;
-}
+import axios from 'axios';
 
 export default Vue.extend({
-  components: {
-    CurrencyConverter
-  },
-
   data() {
     return {
-      products: [],
-      selectedProduct: undefined,
-      selectedCountry: undefined,
+      products: '',
+      selected_product: null,
+      selected_country: null,
+      selected_state: null,
       countries: [],
-      states: [],
-      recipient: {} as Recipient,
-      isLoading: false,
-    } as Data;
+      recipient: {
+        name: 'Bob',
+        address1: 'Baker Street 2B',
+        city: 'London',
+        state_code: 'AL',
+        country_code: 'US',
+        zip: '12345',
+        phone: '5512345678',
+        email: 'example@email.com'
+      }
+    };
   },
 
   computed: {
-    disableMerchOkButton() {
-      return !this.$data.recipient.name || !this.$data.recipient.phone || !this.$data.recipient.email
-        || !this.$data.recipient.address1 || !this.$data.recipient.city || !this.$data.recipient.zip
-        || !this.$data.recipient.countryCode;
+    states() {
+      return this.countries.find(country => country.code === this.recipient.country_code)?.states;
     }
   },
 
   methods: {
-    ...mapActions(['getItemPrice', 'purchaseMerchandise']) as StoreMappedActions,
-    fromWeiEther,
-
     async fetchProducts() {
-      const response = await api.getMerchandiseProducts();
-      if (response.code !== 200) {
-        return;
-      }
-      this.products = response.result;
-      for (const product of this.products) {
-        product.price = await this.getItemPrice({id: product.id});
-      }
+      const response = await axios.get('http://localhost:2400/products');
+      this.products = response.data?.result;
     },
 
     async fetchCountries() {
-      const response = await api.getMerchandiseCountries();
-      if (response.code !== 200) {
-        return;
-      }
-      this.countries = response.result;
-      this.fetchStates();
+      const response = await axios.get('http://localhost:2400/countries');
+      this.countries = response.data?.result;
     },
 
-    fetchStates() {
-      this.recipient.stateCode = undefined;
-      this.states = this.countries.find((country: Country) => country.code === this.recipient.countryCode)?.states || [];
-    },
-
-    openAddress(product: Product) {
-      (this.$refs['merchandise-address-modal'] as any).show();
-      this.selectedProduct = product;
+    async openAddress(product) {
+      this.$refs['merchandise-address-modal'].show();
+      this.selected_product = product;
     },
 
     async buyItem() {
-      if (!this.selectedProduct) return;
-      const orderData: MerchandiseOrderData = {
+      const printful_payload = {
         recipient: this.recipient,
         items: [
           {
-            sync_variant_id: this.selectedProduct.id,
+            sync_variant_id: this.selected_product.id,
             quantity: 1
           }
         ]
       };
-      if (!this.selectedProduct.price) return;
-      this.isLoading = true;
-      await this.purchaseMerchandise({id: this.selectedProduct.id, price: this.selectedProduct.price, amount: 1})
-        .then(async () => {
-          this.isLoading = false;
-          this.recipient = {} as Recipient;
-          await api.createMerchandiseOrder(orderData);
-        });
+      // TODO call the blockchain to make the purchase, return the transaction from the blockchain to validate the successful payment in the BE.
+      const response = await axios.post('http://localhost:2400/create_order', printful_payload);
+      console.log(response);
     },
   },
 
   async mounted() {
-    await this.fetchProducts();
-    await this.fetchCountries();
-  },
-
-
+    this.fetchProducts();
+    this.fetchCountries();
+  }
 });
 </script>
 
@@ -216,7 +138,6 @@ export default Vue.extend({
   grid-template-columns: repeat(auto-fit, 12em);
   gap: 0.5em;
 }
-
 .product {
   width: 12em;
   background: rgba(255, 255, 255, 0.1);
@@ -225,10 +146,6 @@ export default Vue.extend({
   position: relative;
   overflow: hidden;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .centered-text-div {
@@ -238,6 +155,106 @@ export default Vue.extend({
 .shop-button {
   position: relative;
   width: 12rem;
+}
+
+.row.filters {
+   justify-content: center;
+   width: 100%;
+   max-width: 900px;
+   margin: 0 auto;
+   align-content: center;
+   border-bottom: 0.2px solid rgba(102, 80, 80, 0.1);
+   margin-bottom: 20px;
+}
+.dropdown-elem {
+  margin-bottom: 20px;
+  max-width: 300px;
+  width: 100%;
+}
+
+.show-favorite {
+  margin-left: 15px;
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+}
+.show-favorite-checkbox {
+  margin-left: 5px;
+}
+
+.clear-filters-button {
+  align-self: flex-end;
+  height: fit-content;
+}
+
+.clear-filters-button {
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+}
+
+.above-wrapper {
+  padding: 0.1rem;
+}
+
+.product.selected {
+  outline: solid currentcolor 2px;
+}
+
+
+@media (max-width: 576px) {
+  .weapon-grid {
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .show-favorite {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+
+  .clear-filters-button {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-self: center;
+    text-align: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .ml-3 {
+    margin-left: 0 !important;
+  }
+}
+
+/* Needed to adjust weapon list */
+@media all and (max-width: 767.98px) {
+  .weapon-grid {
+    padding-left: 2em;
+    justify-content: center;
+  }
+  .stars-elem {
+  margin-bottom: 20px;
+  max-width: 500px;
+  width: 100%;
+}
+  li.weapon {
+    display: inline-block;
+    margin: auto;
+  }
+}
+
+.sold {
+    height: 40px;
+    width: 230px;
+    background-color: rgb(187, 33, 0);
+    transform: rotate(15deg);
+    left: -20px;
+    position: absolute;
+    top: 110px;
+    z-index: 100;
 }
 
 .sold span {
@@ -250,6 +267,10 @@ export default Vue.extend({
   line-height: 40px;
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
   text-transform: uppercase;
+}
+
+.fix-h24 {
+  height: 24px;
 }
 
 .modal-input {

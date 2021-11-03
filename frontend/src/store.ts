@@ -2969,30 +2969,10 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async purchaseMerchandise({ state }, {id, price, amount}) {
-        const { CryptoBlades, SkillToken, Merchandise } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !Merchandise || !state.defaultAccount) return;
-
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, price)
-          .send({
-            from: state.defaultAccount
-          });
-
-        return await Merchandise.methods
-          .placeOrder([id], [amount])
-          .send({
-            from: state.defaultAccount
-          });
-      },
-
-      async getItemPrice({ state }, {id}) {
-        const { Merchandise } = state.contracts();
-        if (!Merchandise) return;
-
-        return await Merchandise.methods
-          .getPriceOfItem(id)
-          .call(defaultCallOptions(state));
+      async purchaseMerchandise({ commit }, product) {
+        console.log(product, commit);
+        // TODO call blockchain to purchase
+        // Return a success response from the blockchain to call BE with that success value so we can confirm it in our BE.
       },
 
       async claimTokenRewards({ state, dispatch }) {
