@@ -2968,6 +2968,12 @@ export function createStore(web3: Web3) {
         ]);
       },
 
+      async purchaseMerchandise({ commit }, product) {
+        console.log(product, commit);
+        // TODO call blockchain to purchase
+        // Return a success response from the blockchain to call BE with that success value so we can confirm it in our BE.
+      },
+
       async claimTokenRewards({ state, dispatch }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
