@@ -2731,6 +2731,12 @@
     "address": "0x4168062aB151Da9fDF2c5ae0Bc503BCA7Abd8952",
     "transactionHash": "0x0e36164a9e0d4209aa365bbd0722ec6cadd0b2d7cc9406d428615e9e75b8aca6"
   },
+  "build/contracts/Merchandise.json": {
+    "events": {},
+    "links": {},
+    "address": "0xC2C3F4548fc5D81cD8867D52fE414BF365cba8D1",
+    "transactionHash": "0x07bd535805ab6f443e379cadcb680cb53d1ee8a2ed63bab690798c0034bcb23e"
+  },
   "build/contracts/Migrations.json": {
     "events": {},
     "links": {},

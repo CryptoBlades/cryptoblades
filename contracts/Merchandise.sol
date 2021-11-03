@@ -16,14 +16,15 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    uint256 public constant STATUS_SUBMITTED = 0; // fresh order waiting
-    uint256 public constant STATUS_CANCELLED = 1; // cancelled before processing (refunded)
-    uint256 public constant STATUS_PROCESSED = 2; // bot has submitted the order to the shop
-    uint256 public constant STATUS_ERROR = 3;
+    uint8 public constant STATUS_SUBMITTED = 0; // fresh order waiting
+    uint8 public constant STATUS_CANCELLED = 1; // cancelled before processing (refunded)
+    uint8 public constant STATUS_PROCESSED = 2; // bot has submitted the order to the shop
+    uint8 public constant STATUS_PAUSED = 3; // something happened, can not be refunded
+    uint8 public constant STATUS_ERROR_REFUNDABLE = 4; // something happened, can be refunded
 
-    uint256 public constant LINK_SKILL_TOKEN = 1;
+    //uint256 public constant LINK_ = 1;
 
-    uint256 public constant VAR_ACCEPTING_ORDERS = 1; // can orders be placed?
+    uint256 public constant VAR_ORDERS_ENABLED = 1; // can orders be placed?
     uint256 public constant VAR_TRACK_INCOME = 2; // will income go to payouts?
 
     /* ========== STATE VARIABLES ========== */
@@ -35,6 +36,16 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public vars;
 
     mapping(uint256 => uint256) public itemPrices; // stored in USD cents
+
+    uint256 public nextOrderID;
+    uint256 public lowestUnprocessedOrderID;
+    mapping(uint256 => address) public orderBuyer;
+    mapping(uint256 => uint256) public orderPaidAmount;
+    mapping(uint256 => uint32[]) public orderBaskets; // 8 bits amount, 24 bits itemID
+    mapping(uint256 => uint256) public orderData; // 8 bits status, rest is timestamp (for now)
+
+    event OrderPlaced(address indexed buyer, uint256 indexed orderId);
+    event OrderStatusChanged(uint256 indexed orderId, uint8 indexed newStatus);
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -56,13 +67,61 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
         return itemPrices[item] * skillOracle.currentPrice() / 100;
     }
 
-    function getPriceOfBasket(uint256[] memory items, uint8[] memory amounts) returns (uint256) {
+    function getPriceOfBasket(uint256[] memory items, uint8[] memory amounts) public view returns (uint256) {
+        require(items.length == amounts.length, "Basket mismatch");
         uint256 sumCents = 0;
-        for(uint i = 0; i < items.length; i++)
-            sumCents = sumCents.add(itemPrices[items[i]]);
+        for(uint i = 0; i < items.length; i++) {
+            require(itemPrices[items[i]] > 0 && amounts[i] > 0, "Invalid item");
+            sumCents = sumCents.add(itemPrices[items[i]].mul(amounts[i]));
+        }
         return sumCents.mul(skillOracle.currentPrice()) / 100;
     }
+
+    function getOrder(uint256 orderId) public view
+        returns(
+            address buyer,
+            uint32[] memory basketItems,
+            uint32[] memory basketAmounts,
+            uint256 paidAmount,
+            uint256 timestamp,
+            uint8 status
+        )
+    {
+        buyer = orderBuyer[orderId];
+
+        uint256 basketSize = getBasketSize(orderId);
+        basketItems = new uint32[](basketSize);
+        basketAmounts = new uint32[](basketSize);
+        for(uint i = 0; i < basketSize; i++) {
+            basketItems[i] = getBasketItem(orderId, i);
+            basketAmounts[i] = getBasketItemAmount(orderId, i);
+        }
+        
+        paidAmount = orderPaidAmount[orderId];
+        timestamp = getOrderTimestamp(orderId);
+        status = getOrderStatus(orderId);
+    }
     
+    function getBasketSize(uint256 orderId) public view returns(uint256) {
+        return orderBaskets[orderId].length;
+    }
+
+    function getBasketItem(uint256 orderId, uint256 basketItemIndex) public view returns(uint32) {
+        return (orderBaskets[orderId][basketItemIndex] & 0xffffff00) >> 8;
+    }
+    
+    function getBasketItemAmount(uint256 orderId, uint256 basketItemIndex) public view returns(uint32) {
+        return orderBaskets[orderId][basketItemIndex] & 0xff;
+    }
+
+    function getOrderTimestamp(uint256 orderId) public view returns (uint256) {
+        return orderData[orderId] >> 8;
+    }
+
+    function getOrderStatus(uint256 orderId) public view returns (uint8) {
+        return uint8(orderData[orderId] & 0xff);
+    }
+
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     function recoverToken(address tokenAddress, uint256 amount) external isAdmin {
@@ -81,24 +140,60 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
         itemPrices[item] = usdCents;
     }
 
-    function setItemPrices(uint256[] calldata items, uint256[] prices) external restricted {
+    function setItemPrices(uint256[] calldata items, uint256[] calldata usdCents) external restricted {
         for(uint i = 0; i < items.length; i++)
-            itemPrices[items[i]] = prices[i];
+            itemPrices[items[i]] = usdCents[i];
     }
 
-    function setItemsToPrice(uint256[] calldata items, uint256 price) external restricted {
+    function setItemsToPrice(uint256[] calldata items, uint256 usdCents) external restricted {
         for(uint i = 0; i < items.length; i++)
-            itemPrices[items[i]] = prices[i];
+            itemPrices[items[i]] = usdCents;
     }
 
-    function placeOrder(uint256[] calldata items, uint8[] memory amounts) external returns (uint256) {
-        IERC20(links[LINK_SKILL_TOKEN])
-            .safeTransferFrom(msg.sender, address(this), getPriceOfBasket(items,amounts));
-        return 0; // order ID
+    function placeOrder(uint256[] calldata items, uint8[] calldata amounts) external returns (uint256) {
+        require(vars[VAR_ORDERS_ENABLED] != 0
+            || hasRole(GAME_ADMIN,msg.sender),
+            "Cannot place orders right now");
+
+        uint256 payingAmount = getPriceOfBasket(items,amounts);
+
+        game.payContractTokenOnly(msg.sender, payingAmount, vars[VAR_TRACK_INCOME] != 0);
+            
+        orderBuyer[nextOrderID] = msg.sender;
+        orderData[nextOrderID] = now << 8; // lowest 8 bits is status (default 0)
+
+        for(uint i = 0; i < items.length; i++) {
+            orderBaskets[nextOrderID].push(amounts[i] | (uint32(items[i]) << 8));
+        }
+        orderPaidAmount[nextOrderID] = payingAmount;
+
+        emit OrderPlaced(msg.sender, nextOrderID);
+        return nextOrderID++;
     }
 
-    function cancelOrder(uint256 orderId) external {
+    function setOrderStatus(uint256 orderId, uint8 status) external restricted {
+        _setOrderStatus(orderId, status);
+    }
 
+    function _setOrderStatus(uint256 orderId, uint8 status) internal {
+        orderData[orderId] = ((orderData[orderId] >> 8) << 8) | status;
+        emit OrderStatusChanged(orderId, status);
+    }
+
+    function setOrderStatuses(uint256[] calldata orderIds, uint8[] calldata statuses) external restricted {
+        for(uint i = 0; i < orderIds.length; i++)
+            _setOrderStatus(orderIds[i], statuses[i]);
+    }
+
+    function setOrdersToStatus(uint256[] calldata orderIds, uint8 status) external restricted {
+        for(uint i = 0; i < orderIds.length; i++)
+            _setOrderStatus(orderIds[i], status);
+    }
+
+    function processOrders(uint256[] calldata orderIds, uint256 _lowestUnprocessedOrderID) external restricted {
+        for(uint i = 0; i < orderIds.length; i++)
+            _setOrderStatus(orderIds[i], STATUS_PROCESSED);
+        lowestUnprocessedOrderID = _lowestUnprocessedOrderID;
     }
 
     /* ========== MODIFIERS ========== */
