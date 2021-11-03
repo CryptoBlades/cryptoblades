@@ -671,6 +671,17 @@
             </div>
             <img class="shop-horizontal-divider" src="../assets/divider4.png" />
           </div>
+          <div class="row">
+            <div class="col-sm-12 centered-text">
+              <h3>Merchandise</h3>
+            </div>
+            <img class="shop-horizontal-divider-top" src="../assets/divider4.png" />
+          </div>
+          <div class="col-sm-12 merchandise-shop-items">
+            <div class="shop-items">
+              <merchandise-list />
+            </div>
+          </div>
         </div>
       </b-tab>
     </b-tabs>
@@ -700,6 +711,7 @@ import { CharacterTransactionHistoryData, ICharacterHistory,
 import { getShieldNameFromSeed } from '@/shield-name';
 import { fromWeiEther, apiUrl } from '../utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
+import MerchandiseList from '@/components/smart/MerchandiseList.vue';
 import { getCleanName } from '../rename-censor';
 
 type SellType = 'weapon' | 'character' | 'shield';
@@ -808,7 +820,7 @@ interface StoreMappedActions {
 }
 
 export default Vue.extend({
-  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList },
+  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList, MerchandiseList },
 
   data() {
     return {
@@ -1556,11 +1568,9 @@ export default Vue.extend({
       this.currentPage = page + 1;
 
       if(useBlockchain){
-        console.log('chain');
         await this.searchAllCharacterListingsThroughChain(page);
       }
       else{
-        console.log('api');
         await this.searchAllCharacterListingsThroughAPI(page);
       }
 
@@ -2408,6 +2418,14 @@ export default Vue.extend({
 }
 
 .special-offer-items {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.merchandise-shop-items {
   height: 100%;
   width: 100%;
   display: flex;

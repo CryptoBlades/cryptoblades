@@ -267,11 +267,11 @@ export function createStore(web3: Web3) {
         const currencyNetwork = getConfigValue('currencyNetwork') || 'BSC';
         const currencyDefault = getConfigValue('currency') || 'BNB';
         const currencyList = getConfigValue('currencyTransak') || 'BNB,BUSD';
-        
+
         const urlCC = 'defaultCryptoCurrency=' + currencyDefault;
         const urlNetwork = 'network=' + currencyNetwork;
         const urlCCL = 'cryptoCurrencyList=' + currencyList;
-        
+
         return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlNetwork + '&' + urlCCL;
       },
       ownCharacters(state, getters) {
@@ -2661,6 +2661,12 @@ export function createStore(web3: Web3) {
           dispatch('fetchTotalShieldSupply'),
           dispatch('updateShieldIds'),
         ]);
+      },
+
+      async purchaseMerchandise({ commit }, product) {
+        console.log(product, commit);
+        // TODO call blockchain to purchase
+        // Return a success response from the blockchain to call BE with that success value so we can confirm it in our BE.
       },
 
       async claimTokenRewards({ state, dispatch }) {
