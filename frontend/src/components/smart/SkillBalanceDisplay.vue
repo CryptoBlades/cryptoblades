@@ -88,14 +88,16 @@ export default Vue.extend({
 
     bnbClaimTooltip(): string {
       if(!this.canWithdrawBnb) {
-        return `
-          You have reached your limit for withdrawing BNB from the portal for this period,
-          please wait about ${this.durationUntilLimitPeriodOver}
-          (${this.formattedTotalAvailableBnb} left)
-        `;
+        return this.$t('skillBalanceDisplay.reachedPortalLimit', {
+          durationUntilLimitPeriodOver : this.durationUntilLimitPeriodOver,
+          formattedTotalAvailableBnb : this.formattedTotalAvailableBnb,
+        });
       }
 
-      return `${this.formattedBnbThatCanBeWithdrawn} of ${this.formattedTotalAvailableBnb} withdrawable from the portal`;
+      return this.$t('skillBalanceDisplay.withdrawablePortal', {
+        formattedBnbThatCanBeWithdrawn : this.formattedBnbThatCanBeWithdrawn,
+        formattedTotalAvailableBnb : this.formattedTotalAvailableBnb,
+      });
     },
     formattedInGameOnlyFunds(): string {
       const skillBalance = fromWeiEther(this.inGameOnlyFunds);
@@ -109,11 +111,11 @@ export default Vue.extend({
       let html =  toBN(skillBalance).toFixed(4) + ' SKILL';
 
       if(parseFloat(skillRewards) !== 0){
-        html += '<br>+ WITHDRAWABLE ' + toBN(skillRewards).toFixed(4) + ' SKILL';
+        html += this.$t('skillBalanceDisplay.withdrawable') + toBN(skillRewards).toFixed(4) + ' SKILL';
       }
 
       if(parseFloat(inGameOnlyFundsBalance) !== 0){
-        html += '<br>+ IN GAME ONLY ' + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
+        html += this.$t('skillBalanceDisplay.igo') + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
       }
 
       return html;
