@@ -40,7 +40,7 @@
                 v-visible="allSearchResults && allSearchResults.length > 0"
                 align="center" v-model="currentPage"
                 :total-rows="allListingsAmount"
-                :per-page="activeType === 'weapon' ? weaponShowLimit : characterShowLimit"
+                :per-page="nftListingPageSize()"
                 first-number
                 last-number
                 v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
@@ -172,8 +172,7 @@
                 v-if="allSearchResults && allSearchResults.length > 0"
                 align="center" v-model="currentPage"
                 :total-rows="allListingsAmount"
-                :per-page="activeType === 'weapon' ? weaponShowLimit :
-                  (activeType === 'character' ? characterShowLimit : shieldShowLimit)"
+                :per-page="nftListingPageSize()"
                 first-number
                 last-number
                 v-on:click.native="(activeType == 'weapon' && searchAllWeaponListings(currentPage - 1)) ||
@@ -477,14 +476,14 @@
                   variant="primary"
                   v-if="activeType === 'weapon'"
                    class="gtag-link-others" tagname="add_listing_weapon"
-                  :disabled="selectedNftId === null || selectedNftOnCooldown"
+                  :disabled="selectedNftId === null"
                   @click="showListingSetupModal()">{{$t('market.listWeapon')}} <b-icon-question-circle :hidden=!weaponMarketTax
                   v-tooltip.bottom="weaponMarketTax + $t('market.listingTaxHint')"/></b-button>
 
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
-                  :disabled="selectedNftId === null || selectedNftOnCooldown"
+                  :disabled="selectedNftId === null"
                    class="gtag-link-others" tagname="add_listing_character"
                   @click="showListingSetupModal()">{{$t('market.listChar')}} <b-icon-question-circle :hidden=!characterMarketTax
                   v-tooltip.bottom="characterMarketTax + $t('market.listingTaxHint')"/></b-button>
@@ -664,7 +663,7 @@
            <div class="row">
             <div class="col-sm-4 special-offer-items">
               <div class="special-offer-bg">
-                 <nft-list :isShop="true" :nftIdTypes="specialOffersNftList"/>
+                 <nft-list :isShop="true" :nftIdTypes="specialOffersNftList" :isSpecials="true"/>
               </div>
             </div>
             <div class="col-sm-8 shop-items">
@@ -742,6 +741,8 @@ interface Data {
   shieldTransactionHistoryData: ShieldTransactionHistoryData[];
   shieldTransactionHistoryHeader: any;
   historyCounter: number;
+  landSaleAllowed: boolean;
+  reservedSaleAllowed: boolean;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields' | 'ownedCharacterIds' | 'ownedWeaponIds' | 'ownedShieldIds'>;
@@ -804,6 +805,8 @@ interface StoreMappedActions {
   fetchTotalShieldSupply(): Promise<number>;
   setupWeaponsWithIdsRenames(weaponIds: string[]): Promise<void>;
   setupCharactersWithIdsRenames(weaponIds: string[]): Promise<void>;
+  fetchIsLandSaleAllowed(): Promise<boolean>;
+  reservedSalesAllowed(): Promise<boolean>;
 }
 
 export default Vue.extend({
@@ -839,7 +842,9 @@ export default Vue.extend({
       characterTransactionHistoryHeader: [],
       shieldTransactionHistoryData: [],
       shieldTransactionHistoryHeader: [],
-      historyCounter: 0
+      historyCounter: 0,
+      landSaleAllowed: false,
+      reservedSaleAllowed: false,
     } as Data;
   },
 
@@ -850,7 +855,6 @@ export default Vue.extend({
     ...(mapGetters([
       'contracts', 'ownCharacters', 'totalShieldSupply','getCharacterName','getWeaponName'
     ]) as Accessors<StoreMappedGetters>),
-    ...mapGetters(['transferCooldownOfCharacterId']),
 
     Weapons(): Contract<Weapons> {
       // we use x! here because we assert that they're set already in created()
@@ -887,13 +891,6 @@ export default Vue.extend({
         && this.searchResultsOwned;
     },
 
-    selectedNftOnCooldown(): boolean {
-      return this.selectedNftId !== null
-      && (this.activeType === 'weapon' || this.activeType === 'shield'
-        ? false
-        : (this.transferCooldownOfCharacterId(+this.selectedNftId) > 0));
-    },
-
     canPurchase(): boolean {
       return this.activeType === 'weapon' || this.activeType === 'shield' || this.ownCharacters.length < 4 ;
     },
@@ -909,6 +906,47 @@ export default Vue.extend({
           image: '',
         },
       ] as SkillShopListing[];
+
+      if(this.landSaleAllowed) {
+        nftList.push({
+          id: 't1land',
+          type: 't1land',
+          name: 'Tier 1 Land',
+          description: 'A tier 1 land',
+          image: '',
+        } as SkillShopListing);
+        nftList.push({
+          id: 't2land',
+          type: 't2land',
+          name: 'Tier 2 Land',
+          description: 'A tier 2 land',
+          image: '',
+        } as SkillShopListing);
+        nftList.push({
+          id: 't3land',
+          type: 't3land',
+          name: 'Tier 3 Land',
+          description: 'A tier 3 land',
+          image: '',
+        } as SkillShopListing);
+      }
+
+      if(this.reservedSaleAllowed) {
+        nftList.push({
+          id: 'claimT2Land',
+          type: 'claimT2Land',
+          name: 'Tier 2 Claimable Land',
+          description: 'A tier 2 claimable land',
+          image: '',
+        } as SkillShopListing);
+        nftList.push({
+          id: 'claimT3Land',
+          type: 'claimT3Land',
+          name: 'Tier 3 Claimable Land',
+          description: 'A tier 3 claimable land',
+          image: '',
+        } as SkillShopListing);
+      }
 
       return nftList;
     },
@@ -1304,6 +1342,8 @@ export default Vue.extend({
       'fetchTotalShieldSupply',
       'setupWeaponsWithIdsRenames',
       'setupCharactersWithIdsRenames',
+      'fetchIsLandSaleAllowed',
+      'reservedSalesAllowed',
     ]) as StoreMappedActions),
 
     clearData() {
@@ -2210,6 +2250,22 @@ export default Vue.extend({
       return this.convertStringToDecimal(this.convertWeiToSkill(listedPrice), 8);
     },
 
+    nftListingPageSize(): number {
+      if(this.activeType === 'weapon'){
+        return this.weaponShowLimit;
+      }
+
+      if(this.activeType === 'character'){
+        return this.characterShowLimit;
+      }
+
+      if(this.activeType === 'shield'){
+        return this.shieldShowLimit;
+      }
+
+      return defaultLimit;
+    },
+
     upperFirstChar(input: string): string {
       if(input === ''){
         return '';
@@ -2217,6 +2273,7 @@ export default Vue.extend({
 
       return input[0].toUpperCase() + input.slice(1);
     }
+
   },
 
   watch: {
@@ -2265,8 +2322,10 @@ export default Vue.extend({
     }
   },
 
-  mounted() {
+  async mounted() {
     assert.ok(this.contracts.Weapons && this.contracts.Characters && this.contracts.Shields, 'Expected required contracts to be available');
+    this.landSaleAllowed = await this.fetchIsLandSaleAllowed();
+    this.reservedSaleAllowed = await this.reservedSalesAllowed();
   },
 });
 </script>

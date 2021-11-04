@@ -49,4 +49,8 @@ contract CharacterCosmetics is Cosmetics {
     function getCharacterCosmetic(uint256 characterId) public view returns (uint32) {
         return appliedCosmetics[characterId];
     }
+
+    function setCharacterCosmetic(uint256 characterId, uint32 cosmetic) public restricted {
+        appliedCosmetics[characterId] = cosmetic;
+    }
 }

@@ -1,7 +1,7 @@
 const ChainlinkRandoms = artifacts.require("ChainlinkRandoms");
 
 module.exports = async function (deployer, network) {
-  if (network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecomainnet' || network === 'okexmainnet') {
+  if (network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet') {
     let linkToken, vrfCoordinator, keyHash, fee;
     if (network === 'bscmainnet' || network === 'bscmainnet-fork') {
       linkToken = '0x404460C6A5EdE2D891e8297795264fDe62ADBB75';
@@ -9,7 +9,7 @@ module.exports = async function (deployer, network) {
       keyHash = '0xc251acd21ec4fb7f31bb8868288bfdbaeb4fbfec2df3735ddbd4f7dc8d60103c';
       fee = web3.utils.toWei('0.2', 'ether');
     }
-    else if(network === 'hecomainnet' || network === 'okexmainnet') {
+    else if(network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet') {
       linkToken = '0x0000000000000000000000000000000000000000';
       vrfCoordinator = '0x0000000000000000000000000000000000000000';
       keyHash = '0x0000000000000000000000000000000000000000';

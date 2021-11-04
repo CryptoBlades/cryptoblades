@@ -1,5 +1,5 @@
 <template>
-  <div class="character-art" v-tooltip="tooltipHtml(character)" ref="el">
+  <div class="character-art" ref="el">
     <div class="trait" v-if="!portrait">
       <span :class="characterTrait.toLowerCase() + '-icon circle-element'"></span>
     </div>
@@ -115,7 +115,6 @@ export default {
     ...mapState(['maxStamina']),
     ...mapGetters([
       'getCharacterName',
-      'transferCooldownOfCharacterId',
       'getCharacterUnclaimedXp',
       'timeUntilCharacterHasMaxStamina',
       'charactersWithIds',
@@ -129,20 +128,6 @@ export default {
 
   methods: {
     RequiredXp,
-
-    tooltipHtml(character) {
-      if (!character) return '';
-
-      const cooldown = this.transferCooldownOfCharacterId(this.character.id);
-      if (cooldown) {
-        if (cooldown === 86400)
-          // edge case for when it's exactly 1 day and the iso string cant display
-          return this.$t('CharacterArt.cooldown1d');
-        else return this.$t('CharacterArt.cooldown', {cooldownTime: new Date(cooldown * 1000).toISOString().substr(11, 8)});
-      }
-
-      return '';
-    },
 
     getCleanCharacterName(id) {
       return getCleanName(this.getCharacterName(id));

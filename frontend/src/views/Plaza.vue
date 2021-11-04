@@ -1,6 +1,5 @@
 <template>
   <div class="body main-font">
-
     <div v-if="ownCharacters.length === 0" class="blank-slate">
       <div class="current-promotion">
         <div class="tob-bg-img promotion-decoration">
@@ -21,7 +20,8 @@
       <div v-if="formatSkill() < recruitCost" >
         <br>
         <i18n path="plaza.notEnoughSkill" tag="label" for="plaza.notEnoughSkillLink">
-          <a v-bind:href="`${getExchangeUrl}`" target="_blank">{{$t("plaza.notEnoughSkillLink")}}</a>
+          <a v-bind:href="`${getExchangeUrl}`" target="_blank" rel="noopener noreferrer">{{$t("plaza.notEnoughSkillLink")}}</a>
+          <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">{{$t("plaza.buyBNBTransak")}}</a>.
         </i18n>
       </div>
     </div>
@@ -98,6 +98,7 @@ export default Vue.extend({
   },
 
   async created() {
+    console.log(this.getExchangeUrl, this.getExchangeTransakUrl());
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
@@ -112,6 +113,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter']),
+    ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
       try {

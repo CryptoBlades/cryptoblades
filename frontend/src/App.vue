@@ -5,13 +5,16 @@
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
+    <div class="content dark-bg-text" v-if="!canShowApp">
+      {{$t('app.cantView')}}
+    </div>
     <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
         <span class="starter-panel-heading">{{ $t('app.warning.title') }}</span>
         <div class="center">
-          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning" />
-          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetamask" v-if="showNetworkError" />
-          <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
+          <big-button class="button" :mainText="$t('app.buttons.addMM')" @click="startOnboarding" v-if="showMetamaskWarning" />
+          <big-button class="button" :mainText="$t('app.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
+          <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.buttons.hide')" />
         </div>
       </div>
     </div>
@@ -24,15 +27,15 @@
         <span class="starter-panel-heading">{{ errorMessage || $t('app.warning.start') }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
         <div>
-          <big-button class="button mm-button" :mainText="`Configure MetaMask`" @click="configureMetamask" />
-          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button" :mainText="`Connect to MetaMask`" @click="connectMetamask" />
+          <big-button class="button mm-button" :mainText="$t('app.buttons.confMetamask')" @click="configureMetamask" />
+          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button" :mainText="$t('app.buttons.startMetamask')" @click="connectMetamask" />
         </div>
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>{{ $t('app.warning.message.instructions', {recruitCost: this.recruitCost}) }}</p>
           <ul class="unstyled-list">
             <li>
-              1. {{ $t('app.warning.message.inst1') }} <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">{{ $t('app.warning.message.watchVideo', {name:''}) }}</a>
+              1. {{ $t('app.warning.message.inst1') }} <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.watchVideo')}}</a> {{$t('app.warning.message.or')}} <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.buyWithTransak')}}</a>
             </li>
             <li>
               2. {{ $t('app.warning.message.inst2') }}<br />
@@ -134,12 +137,14 @@ export default {
     ...mapActions([
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
-      'fetchCharacterTransferCooldownForOwnCharacters',
       'setupWeaponDurabilities',
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
       'configureMetaMask'
+    ]),
+    ...mapGetters([
+      'getExchangeTransakUrl'
     ]),
 
     async updateCharacterStamina(id) {
@@ -304,7 +309,6 @@ export default {
 
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
-        this.fetchCharacterTransferCooldownForOwnCharacters(),
         this.setupWeaponDurabilities(),
         this.fetchWaxBridgeDetails(),
         this.fetchRewardsClaimTax(),
