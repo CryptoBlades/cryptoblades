@@ -12,25 +12,31 @@
       <b-container v-if="fightResults.isVictory">
         <b-row>
           <b-col class="text-left no-padding">
-            <h4>You earned:</h4>
+            <h4>{{$t('combatResults.earned')}}</h4>
           </b-col>
           <b-col class="text-center no-padding">
             <h4>
               {{formattedUsd}}
-              <Hint text="SKILL earned is based on gas costs of the network plus a factor of your power" />
+              <Hint :text="$t('combatResults.hint')" />
             </h4>
             <h6 class="formatted-skill">{{formattedSkill}}</h6>
             <h5>{{formattedXpGain}}</h5>
           </b-col>
         </b-row>
       </b-container>
-      <h6 class="text-left gas-spent">You spent {{fightResults.bnbGasUsed}} {{gasToken}} on gas fees </h6>
+      <h6 class="text-left gas-spent">
+        {{$t('combatResults.gasFee', {
+          bnbGasUsed : fightResults.bnbGasUsed,
+          gasToken : gasToken
+          })
+        }}
+      </h6>
       <img src="../assets/divider4.png" class="expander-divider">
       <b-container>
         <b-row>
           <b-col class="text-left no-padding">
-            <h5 class="no-margin">You rolled:</h5>
-            <h5 class="no-margin">Enemy rolled:</h5>
+            <h5 class="no-margin">{{$t('combatResults.youRolled')}}</h5>
+            <h5 class="no-margin">{{$t('combatResults.enemyRolled')}}</h5>
           </b-col>
           <b-col class="text-center no-padding">
             <h5 class="no-margin">{{fightResults.playerRoll}}</h5>
@@ -92,7 +98,8 @@ export default Vue.extend({
 
   computed: {
     formattedOutcome(): string {
-      return `You ${this.fightResults.isVictory ? 'won' : 'lost'} the fight!`;
+      if(this.fightResults.isVictory) return this.$t('combatResults.won');
+      else return this.$t('combatResults.lost');
     },
     formattedUsd(): string {
       return `$${(this.calculateSkillPriceInUsd()).toFixed(2)}`;
