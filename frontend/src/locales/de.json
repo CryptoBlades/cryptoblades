@@ -9,19 +9,42 @@
       "market": "Markt",
       "stake": "Stake"
   },
-  "ClaimRewardsBar":{
+  "ClaimRewardsBar": {
     "rewards": "Rewards",
     "earlyWithdrawTax": "Early Withdraw Tax",
     "taxReduce":"Tax is being reduced by 1% per day",
     "readyToClaim":"Rewards ready to claim!"
   },
-  "CharacterDisplay":{
+  "CharacterDisplay": {
     "loading":"Loading...",
     "powerIncrease":"Power increases by 10 every level up, and multiplied every 10 level ups",
     "power": "Power",
     "level": "Level"
     },
-  "EarningsCalculator":{
+  "CharacterArt": {
+    "cooldown1d" : "Kann nicht gehandelt werden. Dauer: 1 Tag",
+    "cooldown" : "Kann nicht gehandelt werden. Dauer: {cooldownTime}",
+    "staminaTooltip" : "Regeneriert 1 Punkt je 5 Minuten. Ausdauerleiste wird voll sein am: ",
+    "claimableXP" : "Beanspruchbare EP",
+    "score" : "Punktzahl",
+    "scoreTooltip" : "Die Punkzahl ist ein Maß für den Gesamtfortschritt deines Charakters. Sie verändert sich, wenn du gewinnst oder verlierst. Die Punktzahl ist zur Zeit deaktiviert.",
+    "staminaShort" : "AUSD",
+    "xp" : "EP",
+    "id" : "ID"
+  },
+  "combatResults": {
+    "won" : "Du hast den Kampf gewonnen!",
+    "lost" : "Du hast den Kampf verloren!",
+    "earned" : "Verdient:",
+    "hint" : "Die höhe des verdienten SKILL is abhängig von den Gas-Kosten des Netzwerks und deiner Stärke.",
+    "gasFee" : "Du hast {bnbGasUsed} {gasToken} in Gas-Gebühren bezahlt.",
+    "youRolled" : "Dein Wurf:",
+    "enemyRolled" : "Wurf des Gegners:"
+  },
+  "nftIcon": {
+
+  },
+  "EarningsCalculator": {
     "nextMilestone": "Nächster Meilenstein",
     "earningsCalculator": "Einkommensberechnung",
     "milestoneBonus":"Verdiene {0} mehr pro Kampf ab ",
@@ -30,7 +53,6 @@
     "winsPerDay": "Gewonnene Kämpfe am Tag",
     "dailyProfit": "Täglicher Profit",
     "monthlyProfit": "Monatlicher Profit"
-    
   },
   "plaza": {
     "welcome": "Start earning today!",
@@ -40,6 +62,30 @@
     "recruitNew": "Charakter rekrutieren",
     "recruit": "Rekrutieren",
     "couldNotMint":"Konnte keinen Charakter erstellen: Nicht genug Guthaben oder die Transaktion wurde abgelehnt."
+  },
+  "characterList" : {
+    "level" : "Level",
+    "element" : "Element",
+    "minPrice" : "Min Preis",
+    "maxPrice" : "Max Preis",
+    "sort" : "Sortieren",
+    "sorts":{
+      "any" : "Egal",
+      "lowToHigh" : "Preis: Niedrig -> Hoch",
+      "highToLow" : "Preis: Hoch -> Niedrig"
+    },
+    "clearFilters" : "Filter löschen",
+    "rename" : "Umbenennen",
+    "changeTrait" : "Element ändern",
+    "changeSkin" : "Aussehen ändern",
+    "renameCharacter" : "Charakter umbenennen",
+    "newName" : "Neuer Name",
+    "renameCharacterLengthWarning" : "Name muss 2 - 24 Zeichen lang sein.",
+    "renameCharacterProfanityWarning" : "Der neue Name enthält nicht erlaubte Wörter und wird so angezeigt:",
+    "changeCharacterTrait" : "Element eines Charakters ändern",
+    "pickTrait" : "Wähle ein Element aus",
+    "changeCharacterSkin" : "Änder das Aussehen eines Charakters",
+    "pickSkin" : "Wähle einen Skin zum Wechseln aus."
   },
   "blacksmith":{
     "noWeapons": "Du hast keine Waffen <br> Du kannst Waffen schmieden, indem du unten auf den Knopf klickst",
@@ -439,6 +485,13 @@
     "staminaFight": "Ausdauerkosten pro Kampf",
     "language": "Sprache",
     "currenChain":"Chain"
+  },
+  "skillBalanceDisplay" : {
+    "totalBalance" : "Total Balance",
+    "reachedPortalLimit" : "You have reached your limit for withdrawing BNB from the portal for this period, please wait about {durationUntilLimitPeriodOver}({formattedTotalAvailableBnb} left)",
+    "withdrawablePortal" : "{formattedBnbThatCanBeWithdrawn} of {formattedTotalAvailableBnb} withdrawable from the portal",
+    "withdrawable" : "<br>+ AUSZAHLBAR ",
+    "igo": "<br>+ Nur Im Spiel verwendbar "
   },
   "app": {
     "warning": {

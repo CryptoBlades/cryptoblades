@@ -21,6 +21,39 @@
     "power": "Power",
     "level": "Level"
     },
+  "CharacterArt": {
+    "cooldown1d" : "May not be traded for: 1 day",
+    "cooldown" : "May not be traded for: {cooldownTime}",
+    "staminaTooltip" : "Regenerates 1 point every 5 minutes, stamina bar will be full at: ",
+    "claimableXP" : "Claimable XP",
+    "score" : "Score",
+    "scoreTooltip" : "Hero score is a measure of your hero's combat prowess so far. It goes up when you win and down when you lose. It is also temporarily disabled!",
+    "staminaShort" : "STA",
+    "xp" : "XP",
+    "id" : "ID"
+    },
+  "combatResults":{
+    "won" : "You won the fight!",
+    "lost" : "You lost the fight!",
+    "earned" : "You earned:",
+    "hint" : "SKILL earned is based on gas costs of the network plus a factor of your power",
+    "gasFee" : "You spent {bnbGasUsed} {gasToken} on gas fees ",
+    "youRolled" : "You rolled:",
+    "enemyRolled" : "Enemy rolled:"
+  },
+  "nftIcon": {
+    "weaponTooltip" : "Weapons (2-5*)",
+    "junkTooltip" : "Junk (1-5*)",
+    "trinketTooltip" : "Trinket (1-5*)",
+    "secretTooltip" : "Secret (??)",
+    "lesserDustTooltip" : "Lesser Dust",
+    "greaterDustTooltip" : "Greater Dust",
+    "powerfulDust" : "Powerful Dust",
+    "supplyLeft" : "Supply left:",
+    "id" : "ID",
+    "owned" : "Owned:",
+    "amount" : "Amount"
+  },
   "EarningsCalculator":{
     "nextMilestone": "Next Milestone",
     "earningsCalculator": "Earnings Calculator",
@@ -30,7 +63,6 @@
     "winsPerDay": "Wins # per day",
     "dailyProfit": "Daily profit",
     "monthlyProfit": "Monthly profit"
-    
   },
   "plaza": {
     "welcome": "Start earning today!",
@@ -40,6 +72,30 @@
     "recruitNew": "Recruit new character",
     "recruit": "Recruit",
     "couldNotMint":"Could not mint character: insufficient funds or transaction denied."
+  },
+  "characterList" : {
+    "level" : "Level",
+    "element" : "Element",
+    "minPrice" : "Min Price",
+    "maxPrice" : "Max Price",
+    "sort" : "Sort",
+    "sorts":{
+      "any" : "Any",
+      "lowToHigh" : "Price: Low -> High",
+      "highToLow" : "Price: High -> Low"
+    },
+    "clearFilters" : "Clear Filters",
+    "rename" : "Rename",
+    "changeTrait" : "Change Trait",
+    "changeSkin" : "Change Skin",
+    "renameCharacter" : "Rename Character",
+    "newName" : "New Name",
+    "renameCharacterLengthWarning" : "Name must be 2 - 24 characters long.",
+    "renameCharacterProfanityWarning" : "This name contains profanish words and thus will be displayed as follows:",
+    "changeCharacterTrait" : "Change Character's Trait",
+    "pickTrait" : "Pick a trait to switch to.",
+    "changeCharacterSkin" : "Change Character's Skin",
+    "pickSkin" : "Pick a skin to switch to."
   },
   "blacksmith":{
     "noWeapons": "You do not currently have any weapons <br> You can forge one by clicking the button below.",
@@ -439,6 +495,13 @@
     "staminaFight": "Stamina Cost per Fight",
     "language": "Language",
     "currenChain":"Current Chain"
+  },
+  "skillBalanceDisplay" : {
+    "totalBalance" : "Gesamtguthaben",
+    "reachedPortalLimit" : "You have reached your limit for withdrawing BNB from the portal for this period, please wait about {durationUntilLimitPeriodOver}({formattedTotalAvailableBnb} left)",
+    "withdrawablePortal" : "{formattedBnbThatCanBeWithdrawn} of {formattedTotalAvailableBnb} withdrawable from the portal",
+    "withdrawable" : "<br>+ WITHDRAWABLE ",
+    "igo": "<br>+ IN GAME ONLY "
   },
   "app": {
     "warning": {
