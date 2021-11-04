@@ -22,8 +22,6 @@
     "level": "Level"
     },
   "CharacterArt": {
-    "cooldown1d" : "Kann nicht gehandelt werden. Dauer: 1 Tag",
-    "cooldown" : "Kann nicht gehandelt werden. Dauer: {cooldownTime}",
     "staminaTooltip" : "Regeneriert 1 Punkt je 5 Minuten. Ausdauerleiste wird voll sein am: ",
     "claimableXP" : "Beanspruchbare EP",
     "score" : "Punktzahl",
@@ -58,7 +56,8 @@
     "welcome": "Start earning today!",
     "recruitCharacter": "Rekrutieren einen Charakter für",
     "notEnoughSkillLink" : "hier",
-    "notEnoughSkill": "Du kannst {0} mehr SKILL kaufen.",
+    "notEnoughSkill" : "Du kannst {0} mehr SKILL kaufen oder ",
+    "buyBNBTransak" : "BNB mit Transak kaufen",
     "recruitNew": "Charakter rekrutieren",
     "recruit": "Rekrutieren",
     "couldNotMint":"Konnte keinen Charakter erstellen: Nicht genug Guthaben oder die Transaktion wurde abgelehnt."

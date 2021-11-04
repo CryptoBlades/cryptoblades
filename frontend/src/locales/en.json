@@ -66,7 +66,8 @@
     "welcome": "Start earning today!",
     "recruitCharacter": "Recruit character for",
     "notEnoughSkillLink" : "here",
-    "notEnoughSkill": "You can buy more SKILL from {0}.",
+    "notEnoughSkill" : "You can buy more SKILL from {0} or ",
+    "buyBNBTransak" : "buy BNB with Transak",
     "recruitNew": "Recruit new character",
     "recruit": "Recruit",
     "couldNotMint":"Could not mint character: insufficient funds or transaction denied."
