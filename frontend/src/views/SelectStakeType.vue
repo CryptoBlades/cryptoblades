@@ -13,7 +13,7 @@
       </li>
     </ul>
     <div class="loading-indicator" v-else>
-      <h1>Loading...</h1>
+      <h1>{{$t('stake.loading')}}</h1>
     </div>
   </div>
 </template>

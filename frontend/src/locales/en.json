@@ -393,6 +393,41 @@
       "characterBronzeborderDesc" : ""
     }
   },
+  "stake":{
+    "unknownStakeType" : "Unknown stake type, please try again.",
+    "rewardsAvailable" : "Rewards are available!",
+    "have": "You have:",
+    "toBeClaimed": "to be claimed.",
+    "stake" : "Stake",
+    "unstake" : "Unstake",
+    "tokenAmount": "Token Amount",
+    "wallet": "wallet:",
+    "stakeNote" :"<span class='bold'>NOTE</span>: You will not be able to unstake or claim rewards until {minimumStakeTimeFormatted} has passed since your initial stake.",
+    "loading" : "Loading...",
+    "lockedNote" : "Unstaking will lock remaining funds for another {minimumStakeTimeFormatted}",
+    "sorryStake" : "Sorry, stake is still locked; please wait about {estimatedUnlockTimeLeftFormatted}",
+    "sorryReward" : "Sorry, reward is still locked; please wait about {estimatedUnlockTimeLeftFormatted}",
+    "claimReward" : "Claim Reward",
+    "connectToWalletButtonLabel" : "Connect to wallet ↗",
+    "amountIsTooBigButtonLabel" : "Amount is too big",
+    "contractIsFullButtonLabel" : "Contract is Full",
+    "enterAnAmountButtonLabel": "Enter an amount",
+    "insufficientBalanceButtonLabel" : "Insufficient balance",
+    "notEnoughFundsInExitPoolButtonLabel" : "Not enough funds in Exit Pool",
+    "waitingButtonLabel" : "Waiting...",
+    "stakeButtonLabel" : "Stake",
+    "unstakeButtonLabel" : "Unstake",
+    "stakeAllUnclaimedRewards" : "Stake all of unclaimed rewards ({formattedSkillRewards} SKILL)",
+    "noUnclaimedRewards" : "No unclaimed rewards to stake",
+    "StakeSelectorItem" : {
+      "earn" : "Earn",
+      "apy" : "APY",
+      "stakeLocked" : "Stake locked",
+      "warning" : "Warning",
+      "select" : "Select",
+      "deprecatedTooltip" : "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
+    }
+  },
   "options": {
     "title": "Options",
     "graphic": "3D Graphics",
