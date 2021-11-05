@@ -267,11 +267,11 @@ export function createStore(web3: Web3) {
         const currencyNetwork = getConfigValue('currencyNetwork') || 'BSC';
         const currencyDefault = getConfigValue('currency') || 'BNB';
         const currencyList = getConfigValue('currencyTransak') || 'BNB,BUSD';
-        
+
         const urlCC = 'defaultCryptoCurrency=' + currencyDefault;
         const urlNetwork = 'network=' + currencyNetwork;
         const urlCCL = 'cryptoCurrencyList=' + currencyList;
-        
+
         return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlNetwork + '&' + urlCCL;
       },
       ownCharacters(state, getters) {
