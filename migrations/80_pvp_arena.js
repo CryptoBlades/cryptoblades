@@ -26,7 +26,6 @@ module.exports = async function (deployer, network) {
     { deployer }
   );
 
-  const GAME_ADMIN = await pvpArena.GAME_ADMIN();
-
-  await game.grantRole(GAME_ADMIN, pvpArena.address);
+  await game.grantRole(await game.GAME_ADMIN(), pvpArena.address);
+  await pvpArena.grantRole(await pvpArena.GAME_ADMIN(), deployer.networks[network].from);
 };
