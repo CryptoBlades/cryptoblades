@@ -198,22 +198,25 @@
     </b-modal>
 
     <div v-if="!isShop">
+      <div>
+        <h1 v-if="isLandTab">Lands ({{totalNonIgnoredLandsCount}})</h1>
+      </div>
       <div class="filters row mt-2" v-if="!isReward">
-        <div v-if="!isMarket" class="col-sm-6 col-md-4 dropdown-elem">
+        <div v-if="!isMarket && !isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>Nft Type</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
             <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land']" :value="x" :key="x">{{ x || 'Any' }}</option>
           </select>
         </div>
 
-        <div class="col-sm-6 col-md-4 dropdown-elem">
+        <div v-if="!isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>Stars</strong>
           <select class="form-control" v-model="starFilter" @change="saveFilters()">
             <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
           </select>
         </div>
 
-        <div class="col-sm-6 col-md-4 dropdown-elem">
+        <div v-if="!isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>Element</strong>
           <select class="form-control" v-model="elementFilter" @change="saveFilters()">
             <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
@@ -227,9 +230,23 @@
           </select>
         </div>
 
-        <div v-if="showFavoriteToggle" class="show-favorite">
+        <div v-if="showFavoriteToggle && !isLandTab" class="show-favorite">
           <b-check class="show-favorite-checkbox" v-model="showFavoriteNfts" />
           <strong>Show Favorite</strong>
+        </div>
+
+        <div v-if="isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
+          <strong>Tier</strong>
+          <select class="form-control" v-model="tierFilter">
+            <option v-for="x in ['', 1, 2, 3]" :value="x" :key="x">{{ x || 'Any' }}</option>
+          </select>
+        </div>
+
+        <div v-if="isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
+          <strong>Chunk Id</strong>
+          <select class="form-control" v-model="chunkIdFilter">
+            <option v-for="x in ownedChunkIds" :value="x" :key="x">{{ x || 'Any' }}</option>
+          </select>
         </div>
 
         <b-button
@@ -245,6 +262,16 @@
       <div class="centered-text-div" v-if="isReward && nftIdTypes.length === 0">
         Nothing dropped for you this time.
       </div>
+
+      <b-pagination v-if="isLandTab" class="customPagination"
+        v-visible="nonIgnoredNfts && totalNonIgnoredLandsCount > showLimit"
+        align="center" v-model="currentPage"
+        :total-rows="totalNonIgnoredLandsCount"
+        :per-page="showLimit"
+        first-number
+        last-number
+      ></b-pagination>
+
       <ul class="nft-grid">
         <li class="nft" v-for="nft in nonIgnoredNfts" :key="`${nft.type}.${nft.id}`"
           :class="{ selected: highlight !== null && `${nft.type}.${nft.id}` === highlight }"
@@ -258,6 +285,15 @@
           <slot name="sold" :nft="nft"></slot>
         </li>
       </ul>
+
+      <b-pagination v-if="isLandTab" class="customPagination"
+        v-visible="nonIgnoredNfts && totalNonIgnoredLandsCount > showLimit"
+        align="center" v-model="currentPage"
+        :total-rows="totalNonIgnoredLandsCount"
+        :per-page="showLimit"
+        first-number
+        last-number
+      ></b-pagination>
     </div>
   </div>
 </template>
@@ -335,6 +371,10 @@ interface Data {
   reservationIdT2ToChunks: Map<number, number[]>;
   reservationIdT3ToChunks: Map<number, number[]>;
   ownedLands: Land[];
+  tierFilter: string;
+  chunkIdFilter: string;
+  currentPage: number;
+  totalItemsCount: number;
 }
 
 export interface NftIdType {
@@ -460,6 +500,10 @@ export default Vue.extend({
     isSpecials: {
       type: Boolean,
       default: false,
+    },
+    isLandTab: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -511,6 +555,10 @@ export default Vue.extend({
       reservationIdT2ToChunks: new Map(),
       reservationIdT3ToChunks: new Map(),
       ownedLands: [],
+      tierFilter: '',
+      chunkIdFilter: '',
+      currentPage: 1,
+      totalItemsCount: 0
     } as Data;
   },
 
@@ -564,7 +612,26 @@ export default Vue.extend({
         return this.nftsWithIdType(this.nftsToDisplay).concat(rewardedDust).concat(rewardedWeapons).filter(Boolean);
       }
 
+      if(this.isLandTab) {
+        return this.ownedLands.map((x, i) => { return { type: `t${x.tier}land`, id: i, tier: +x.tier, chunkId: +x.chunkId }; });
+      }
+
       return this.nftsWithIdType(this.nftsToDisplay).filter(Boolean);
+    },
+
+    totalNonIgnoredLandsCount(): number {
+      let items: Nft[] = [];
+      this.displayNfts.forEach((x) => items.push(x));
+
+      if(this.tierFilter && this.isLandTab) {
+        items = items.filter((x) => x.tier === +this.tierFilter);
+      }
+
+      if(this.chunkIdFilter && this.isLandTab) {
+        items = items.filter((x) => x.chunkId === +this.chunkIdFilter);
+      }
+
+      return items.length;
     },
 
     nonIgnoredNfts(): Nft[] {
@@ -593,8 +660,17 @@ export default Vue.extend({
         items = items.filter((x) => x.element?.includes(this.elementFilter));
       }
 
+      if(this.tierFilter && this.isLandTab) {
+        items = items.filter((x) => x.tier === +this.tierFilter);
+      }
+
+      if(this.chunkIdFilter && this.isLandTab) {
+        items = items.filter((x) => x.chunkId === +this.chunkIdFilter);
+      }
+
       if (this.showLimit > 0 && items.length > this.showLimit) {
-        items = items.slice(0, this.showLimit);
+        const offset = (this.currentPage-1) * this.showLimit;
+        items = items.slice(offset, offset + this.showLimit);
       }
 
       const favoriteNfts: Nft[] = [];
@@ -607,6 +683,11 @@ export default Vue.extend({
       }
 
       return favoriteNfts.concat(items);
+    },
+
+    ownedChunkIds(): string[] {
+      const uniqChunkIds = _.uniq(this.ownedLands.map(x => +x.chunkId)).sort((a, b) => a - b).map(x => x.toString());
+      return [''].concat(uniqChunkIds);
     }
   },
 
@@ -692,6 +773,8 @@ export default Vue.extend({
       this.starFilter = '';
       this.elementFilter = '';
       this.priceSort = '';
+      this.tierFilter = '';
+      this.chunkIdFilter = '';
 
       this.$emit('nft-filters-changed');
     },
