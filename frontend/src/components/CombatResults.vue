@@ -98,8 +98,8 @@ export default Vue.extend({
 
   computed: {
     formattedOutcome(): string {
-      if(this.fightResults.isVictory) return this.$t('combatResults.won');
-      else return this.$t('combatResults.lost');
+      if(this.fightResults.isVictory) return (this as any).$t('combatResults.won');
+      else return (this as any).$t('combatResults.lost');
     },
     formattedUsd(): string {
       return `$${(this.calculateSkillPriceInUsd()).toFixed(2)}`;
