@@ -103,13 +103,13 @@ export default Vue.extend({
 
     bnbClaimTooltip(): string {
       if(!this.canWithdrawBnb) {
-        return this.$t('skillBalanceDisplay.reachedPortalLimit', {
+        return (this as any).$t('skillBalanceDisplay.reachedPortalLimit', {
           durationUntilLimitPeriodOver : this.durationUntilLimitPeriodOver,
           formattedTotalAvailableBnb : this.formattedTotalAvailableBnb,
         });
       }
 
-      return this.$t('skillBalanceDisplay.withdrawablePortal', {
+      return (this as any).$t('skillBalanceDisplay.withdrawablePortal', {
         formattedBnbThatCanBeWithdrawn : this.formattedBnbThatCanBeWithdrawn,
         formattedTotalAvailableBnb : this.formattedTotalAvailableBnb,
       });
@@ -126,11 +126,11 @@ export default Vue.extend({
       let html =  toBN(skillBalance).toFixed(4) + ' SKILL';
 
       if(parseFloat(skillRewards) !== 0){
-        html += this.$t('skillBalanceDisplay.withdrawable') + toBN(skillRewards).toFixed(4) + ' SKILL';
+        html += (this as any).$t('skillBalanceDisplay.withdrawable') + toBN(skillRewards).toFixed(4) + ' SKILL';
       }
 
       if(parseFloat(inGameOnlyFundsBalance) !== 0){
-        html += this.$t('skillBalanceDisplay.igo') + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
+        html += (this as any).$t('skillBalanceDisplay.igo') + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
       }
 
       return html;
