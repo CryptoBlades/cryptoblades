@@ -12,8 +12,11 @@
   "ClaimRewardsBar":{
     "rewards": "Rewards",
     "earlyWithdrawTax": "Early Withdraw Tax",
-    "taxReduce":"Tax is being reduced by 1% per day",
-    "readyToClaim":"Rewards ready to claim!"
+    "taxReduce":"Tax is being reduced by 1% per day.",
+    "readyToClaim":"Rewards ready to claim!",
+    "timeSince" : "Time since last withdraw: n/a",
+    "withdrawalInfoText1" : "You can withdraw max 10% of amount over 1 SKILL or 2 days worth of fights per day (whatever is greater). Remaining claimable amount today: ",
+    "withdrawalInfoText2" : "You can withdraw 1 day worth of fights per day. Remaining claimable amount today: "
   },
   "CharacterDisplay":{
     "loading":"Loading...",
@@ -52,7 +55,10 @@
     "owned" : "Owned:",
     "amount" : "Amount"
   },
-  "EarningsCalculator":{
+  "nftOptionsDropdown" : {
+    "left" : "left"
+  },  
+  "EarningsCalculator" : {
     "nextMilestone": "Next Milestone",
     "earningsCalculator": "Earnings Calculator",
     "milestoneBonus":"Earn {0} more per battle at",
@@ -95,6 +101,12 @@
     "pickTrait" : "Pick a trait to switch to.",
     "changeCharacterSkin" : "Change Character's Skin",
     "pickSkin" : "Pick a skin to switch to."
+  },
+  "weaponIcon":{
+    "durability" : "Durability:",
+    "durabilityTooltip" : "Repairs 1 point every 50 minutes, durability will be full at:",
+    "id" : "ID",
+    "bonusPower" : "Bonus power:"
   },
   "blacksmith":{
     "noWeapons": "You do not currently have any weapons <br> You can forge one by clicking the button below.",
@@ -162,6 +174,15 @@
     "couldNotForge": "Could not forge sword: Insuffucient funds or transaction was denied.",
     "couldNotReforge":"Could not reforge sword: Insufficient funds, Dust, or transaction was denied.",
     "couldNotBurn": "Could not burn sword: Insufficient funds or transaction was denied."
+  },
+  "dustBalanceDisplay" : {
+    "availableDust" : "Available Dust",
+    "lesserPower" : "15 power per point",
+    "lesser" : "Lesser",
+    "greaterPower" : "30 power per point",
+    "greater" : "Greater",
+    "powerfulPower" : "75 power per point",
+    "powerful" : "Powerful"
   },
   "combat":{
     "error": "Error:",
@@ -476,6 +497,7 @@
     "noUnclaimedRewards" : "No unclaimed rewards to stake",
     "StakeSelectorItem" : {
       "earn" : "Earn",
+      "yieldTooltip" : "Estimated yield per year and token.",
       "apy" : "APY",
       "stakeLocked" : "Stake locked",
       "warning" : "Warning",
@@ -495,8 +517,49 @@
     "language": "Language",
     "currenChain":"Current Chain"
   },
+  "optionsMenu" : {
+    "links" : "Links",
+    "claimSkill" : "Claim Skill",
+    "leaderboard" : "Leaderboard",
+    "portal" : "Portal",
+    "wiki" : "Wiki",
+    "nftDisplay" : "NFT Display",
+    "bridgeNfts" : "Bridge NFTs",
+    "options" : "Options"
+  },
+  "needGasModal" : {
+    "title" : "Need Withdraw?",
+    "okTitle" : "Next",
+    "cancelTitle" : "Go to WAX Portal",
+    "needWithdraw" : "Need Withdraw? Try our WAX Portal, which will pay you .5% under market rate to sell your WAX for BNB!",
+    "holdReminder" : "Hold Reminder:",
+    "holdReminderText" : "A percentage of your earning goes back to the community, <br> <u> if you withdraw early </u>",
+    "yourTax" : "Your early withdraw tax",
+    "reduces1" : "Reduces 1% per day",
+    "reduces2" : "Reset to 15% after withdraw"
+  },
+  "stakeModal" : {
+    "title" : "Stake Skill",
+    "okTitle" : "Go to Stake",
+    "cancelTitle" : "Cancel",
+    "stakeText" : "You can avoid paying the 15% tax by staking unclaimed skill rewards for 7 days. If you stake your SKILL now, we'll give you a 50% bonus in-game only SKILL that you can use right away!",
+    "bonusWarning1" : "No thanks, I'd rather pay {formattedTaxAmount} in taxes and forfeit my bonus",
+    "bonusWarning2" : "No thanks, I'd rather forfeit my bonus",
+    "confirmModal" : {
+      "title" : "Claim Skill",
+      "okTitle" : "I am sure",
+      "cancelTitle" : "Cancel",
+      "claimWarning1" : "You are about to miss out on {formattedBonusLost} bonus SKILL. Are you sure you wish to continue?",
+      "claimWarning2" : "You are about to pay {formattedRewardsClaimTax} tax for early withdrawal, costing you {formattedTaxAmount} SKILL. You will also miss out on {formattedBonusLost} bonus SKILL. Are you sure you wish to continue?",
+      "cantBeUndone" : "This action cannot be undone."
+    }
+  },
   "skillBalanceDisplay" : {
-    "totalBalance" : "Gesamtguthaben",
+    "buySkillTooltip" : "Buy SKILL",
+    "buySkillTitle" : "BUY SKILL",
+    "buyWithCrypto" : "Buy with Crypto",
+    "buyWithFiat" : "Buy with Fiat",
+    "totalBalance" : "Total Balance",
     "reachedPortalLimit" : "You have reached your limit for withdrawing BNB from the portal for this period, please wait about {durationUntilLimitPeriodOver}({formattedTotalAvailableBnb} left)",
     "withdrawablePortal" : "{formattedBnbThatCanBeWithdrawn} of {formattedTotalAvailableBnb} withdrawable from the portal",
     "withdrawable" : "<br>+ WITHDRAWABLE ",
@@ -530,7 +593,7 @@
         "watchVideo": "Watch Video",
         "or": "or",
         "buyWithTransak" : "Buy with Transak",
-        "questionDiscord": "If you have any questions, please join our Discord:",
+        "questionDiscord": "If you have any questions, please join our Discord:"
       }
     },
     "notification": {

@@ -15,6 +15,9 @@
     "taxReduce":"Tax is being reduced by 1% per day",
     "readyToClaim":"Rewards ready to claim!"
   },
+  "ClaimRewards" : {
+    "rewards": "Rewards"
+  },
   "CharacterDisplay": {
     "loading":"Loading...",
     "powerIncrease":"Power increases by 10 every level up, and multiplied every 10 level ups",
@@ -42,6 +45,9 @@
   "nftIcon": {
 
   },
+  "nftOptionsDropdown" : {
+
+  },
   "EarningsCalculator": {
     "nextMilestone": "Nächster Meilenstein",
     "earningsCalculator": "Einkommensberechnung",
@@ -52,6 +58,7 @@
     "dailyProfit": "Täglicher Profit",
     "monthlyProfit": "Monatlicher Profit"
   },
+
   "plaza": {
     "welcome": "Start earning today!",
     "recruitCharacter": "Rekrutieren einen Charakter für",
@@ -86,6 +93,12 @@
     "changeCharacterSkin" : "Änder das Aussehen eines Charakters",
     "pickSkin" : "Wähle einen Skin zum Wechseln aus."
   },
+  "weaponIcon":{
+    "durability" : "Haltbarkeit",
+    "durabilityTooltip" : "Wird um 1 Punkt je 50 Minuten repariert. Haltbarkeit wird zum folgenden Zeitpunkt voll sein:",
+    "id" : "ID",
+    "bonusPower" : "Bonusstärke:"
+  },
   "blacksmith":{
     "noWeapons": "Du hast keine Waffen <br> Du kannst Waffen schmieden, indem du unten auf den Knopf klickst",
     "forgeSwordFor": "Schwert schmieden ",
@@ -109,7 +122,7 @@
       "2star": "2* @ 56% Wahrscheinlichkeit. Geschätzte Kosten",
       "1star": "1* @ 100% Wahrscheinlichkeit."
     },
-    "forgeResults": "Schmiede Ergebnisse",
+    "forgeResults": "Ergebnisse des Schmiedens",
     "forgingSwords":"Schmiede Schwert...",
     "massBurn": "Massenverbrennung",
     "cancel": "Abbrechen",
@@ -465,12 +478,13 @@
     "stakeAllUnclaimedRewards" : "Stake all of unclaimed rewards ({formattedSkillRewards} SKILL)",
     "noUnclaimedRewards" : "No unclaimed rewards to stake",
     "StakeSelectorItem" : {
-      "earn" : "Earn",
+      "earn" : "Verdiene",
+      "yieldTooltip" : "Geschätzte Rendite je Jahr und Token",
       "apy" : "APY",
-      "stakeLocked" : "Stake locked",
-      "warning" : "Warning",
-      "select" : "Select",
-      "deprecatedTooltip" : "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
+      "stakeLocked" : "Stake gesperrt",
+      "warning" : "Warnung",
+      "select" : "Wählen",
+      "deprecatedTooltip" : "Dieser Stake-Pool ist veraltet und in diesen sollte nicht mehr eingezahlt werden. Du kannst immernoch aus diesen auszahlen oder einzahlen, aber auf eigenes Risiko. Dies wird jedoch nicht empfohlen und kann nicht rückgängig gemacht werden."
     }
   },
   "options": {
@@ -485,8 +499,49 @@
     "language": "Sprache",
     "currenChain":"Chain"
   },
+  "optionsMenu" : {
+    "links" : "Links",
+    "claimSkill" : "Skill claimen",
+    "leaderboard" : "Rangliste",
+    "portal" : "Portal",
+    "wiki" : "Wiki",
+    "nftDisplay" : "NFT Anzeige",
+    "bridgeNfts" : "NFTs überbrücken",
+    "options" : "Optionen",
+    "needGasModal" : {
+      "title" : "Möchtest du abheben?",
+      "okTitle" : "Weiter",
+      "cancelTitle" : "Zum WAX Portal",
+      "needWithdraw" : "Möchtest du abheben? Probier doch unser WAX Portal aus! Es zahlt dir unter 0.05% unter Marktpreis, wenn du WAX für BNB verkaufst!",
+      "holdReminder" : "Halten Erinnerung:",
+      "holdReminderText" : "Ein Teil deiner Einnahmen geht zurück an die Community, <br> <u> wenn du vorzeitig abhebst. </u>",
+      "yourTax" : "Deine Steuer für vorzeitiges Abheben",
+      "reduces1" : "Verringert sich um 1% am Tag",
+      "reduces2" : "Ist wieder 15%, nachdem du Abgehoben hast"
+    },
+    "stakeModal" : {
+      "title" : "Stake Skill",
+      "okTitle" : "Zum Staken",
+      "cancelTitle" : "Abbrechen",
+      "stakeText" : "Du musst keine 15% Steuer bezahlen, wenn du dein unclaimed Skill für 7 Tage stakest. Wenn du dein Skill jetzt stakest, geben wir dir einen 50% Bonus in in-game only SKILL (nur im Spiel verwendbar), den du sofort verwenden kannst!",
+      "bonusWarning1" : "Nein danke, ich bezahle lieber {formattedTaxAmount} in Steuern und verliere meinen Bonus",
+      "bonusWarning2" : "Nein danke, ich verliere lieber meinen Bonus",
+      "confirmModal" : {
+        "title" : "Skill abheben",
+        "okTitle" : "Ich bin mir sicher",
+        "cancelTitle" : "Abbrechen",
+        "claimWarning1" : "Du wirst {formattedBonusLost} bonus SKILL verlieren. Bist du dir sicher, dass du fortfahren möchtest?",
+        "claimWarning2" : "Du wirst {formattedRewardsClaimTax} Steuer bezahlen, weil du vorzeitig abhebst. Das kostet dich {formattedTaxAmount} SKILL. Außerder verwirfst du {formattedBonusLost} Bonus SKILL. Bist du dir sicher, dass du fortfahren möchtest?",
+        "cantBeUndone" : "Das kann nicht rückgängig gemacht werden!"
+      }
+    }
+  },
   "skillBalanceDisplay" : {
-    "totalBalance" : "Total Balance",
+    "buySkillTooltip" : "SKILL kaufen",
+    "buySkillTitle" : "SKILL kaufen",
+    "buyWithCrypto" : "Mit Crypto kaufen",
+    "buyWithFiat" : "Mit Fiat kaufen",
+    "totalBalance" : "Gesamtguthaben",
     "reachedPortalLimit" : "You have reached your limit for withdrawing BNB from the portal for this period, please wait about {durationUntilLimitPeriodOver}({formattedTotalAvailableBnb} left)",
     "withdrawablePortal" : "{formattedBnbThatCanBeWithdrawn} of {formattedTotalAvailableBnb} withdrawable from the portal",
     "withdrawable" : "<br>+ AUSZAHLBAR ",
