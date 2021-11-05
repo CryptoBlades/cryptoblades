@@ -9,14 +9,14 @@
       "market": "Markt",
       "stake": "Stake"
   },
-  "ClaimRewardsBar": {
+  "ClaimRewardsBar":{
     "rewards": "Rewards",
     "earlyWithdrawTax": "Early Withdraw Tax",
-    "taxReduce":"Tax is being reduced by 1% per day",
-    "readyToClaim":"Rewards ready to claim!"
-  },
-  "ClaimRewards" : {
-    "rewards": "Rewards"
+    "taxReduce":"Tax is being reduced by 1% per day.",
+    "readyToClaim":"Rewards ready to claim!",
+    "timeSince" : "Time since last withdraw: n/a",
+    "withdrawalInfoText1" : "You can withdraw max 10% of amount over 1 SKILL or 2 days worth of fights per day (whatever is greater). Remaining claimable amount today: ",
+    "withdrawalInfoText2" : "You can withdraw 1 day worth of fights per day. Remaining claimable amount today: "
   },
   "CharacterDisplay": {
     "loading":"Loading...",
@@ -43,11 +43,21 @@
     "enemyRolled" : "Wurf des Gegners:"
   },
   "nftIcon": {
-
+    "weaponTooltip" : "Weapons (2-5*)",
+    "junkTooltip" : "Junk (1-5*)",
+    "trinketTooltip" : "Trinket (1-5*)",
+    "secretTooltip" : "Secret (??)",
+    "lesserDustTooltip" : "Lesser Dust",
+    "greaterDustTooltip" : "Greater Dust",
+    "powerfulDust" : "Powerful Dust",
+    "supplyLeft" : "Supply left:",
+    "id" : "ID",
+    "owned" : "Owned:",
+    "amount" : "Amount"
   },
   "nftOptionsDropdown" : {
-
-  },
+    "left" : "left"
+  },  
   "EarningsCalculator": {
     "nextMilestone": "Nächster Meilenstein",
     "earningsCalculator": "Einkommensberechnung",
@@ -58,7 +68,6 @@
     "dailyProfit": "Täglicher Profit",
     "monthlyProfit": "Monatlicher Profit"
   },
-
   "plaza": {
     "welcome": "Start earning today!",
     "recruitCharacter": "Rekrutieren einen Charakter für",
@@ -166,291 +175,300 @@
     "couldNotReforge":"Umschmieden nicht möglich: Zu wenig Guthaben, Staub oder Transaktion wurde abgelehnt.",
     "couldNotBurn": "Verbrennen nicht möglich: Zu wenig Guthaben oder Transaktion wurde abgelehnt."
   },
-    "combat":{
-      "error": "Fehler:",
-      "close": "Schließen",
-      "errors":{
-        "needToSelectChar": "Du musst einen Charakter zum Kämpfen auswählen.",
-        "notEnoughDurability":"Diese Waffe hat nicht genug Haltbarkeit.",
-        "lastSeconds":"Du kannst nicht während der letzten 30 Sekunden einer Stunde kämpfen. Halte dich bereit!"
-      },
-      "needStamina":"Du brauchst {staminaPerFight} Ausdauer zum kämpfen.",
-      "costStamina": "Ausdauerkosten pro Kampf",
-      "waiting":"Warte auf Kampfergebnisse...",
-      "chooseWeapon":"Wähle eine Waffe aus",
-      "chooseWeaponHint":"Deine Waffe multipliziert deine Stärke<br><br>+Attribute bestimmen den Faktor<br>Attribute, die zu dem Element deines Charakters passen, geben einen noch größeren Bonus",
-      "chooseNewWeapon": "Wähle eine neue Waffe aus",
-      "elementHint":"Elemente beeinflussen Stärke:<br><br>Charakter vs Gegner: Bonus oder Strafe wie oben gezeigt<br>Charakter- und Waffenübereinstimmung geben Bonus",
-      "enemy":"Gegner",
-      "power": "Stärke",
-      "xp":"XP",
-      "victory": "Sieg",
-      "fight": "Kämpfen!",
-      "loading": "Lade...",
-      "noWeapons": "Du hast keine Waffen. Du kannst Waffen beim Schmied herstellen.",
-      "noCharacters":"Du hast keine Charaktere. Du kannst welche auf dem Plaza rekrutieren.",
-      "winChances":{
-        "unlikely": "Unwahrscheinlicher",
-        "possible": "Möglicher",
-        "likely": "Wahrscheinlicher",
-        "veryLikely": "Sehr wahrscheinlicher"
-      },
-      "moreStamina": "Du brauchst zum kämpfen mehr Ausdauer!",
-      "pleaseSelect": "Wähle bitte aus, wie viel Ausdauer du einsetzen möchtest"
+  "dustBalanceDisplay" : {
+    "availableDust" : "Available Dust",
+    "lesserPower" : "15 power per point",
+    "lesser" : "Lesser",
+    "greaterPower" : "30 power per point",
+    "greater" : "Greater",
+    "powerfulPower" : "75 power per point",
+    "powerful" : "Powerful"
+  },
+  "combat":{
+    "error": "Fehler:",
+    "close": "Schließen",
+    "errors":{
+      "needToSelectChar": "Du musst einen Charakter zum Kämpfen auswählen.",
+      "notEnoughDurability":"Diese Waffe hat nicht genug Haltbarkeit.",
+      "lastSeconds":"Du kannst nicht während der letzten 30 Sekunden einer Stunde kämpfen. Halte dich bereit!"
     },
-    "raid":{
-      "title":"Hellborn Raid",
-      "numberOfRaiders":"Anzahl der Raider",
-      "totalPower" : "Gesamtstärke",
-      "bossPower" : "Bossstärke",
-      "victoryChance" : "Siegchance",
-      "drops" : "Drops",
-      "rewardsHint" : "Belohnungen werden durch deine beigetragene Stärke im Vergleich zu den anderen Raidern bestimmt.<br>Ein früher Beitritt gibt dir bis zu 10% Bonus.",
-      "xpReward" : "XP Belohnung ",
-      "xpRewardHint" : "Charaktere, die teilnehmen, bekommen automatisch XP.<br> Wenn dein Charakter besonders gut kämpft, kann er bis zu +2400% Bonus-XP bekommen!",
-      "weapon" : "Waffe",
-      "weaponHint" : "Deine Waffe multipliziert deine Stärke<br><br>+Attribute bestimmen den Faktor<br>Attribute, die zu dem Element deines Charakters passen, geben einen noch größeren Bonus",
-      "multiplier" : "Faktor: x",
-      "chooseNewWeapon" : "Wähle eine neue Waffe",
-      "inRaid" : "Im Raid",
-      "character" : "Charakter",
-      "power" : "Stärke",
-      "joiningCost" : "Beitreten kostet",
-      "stamina": "Ausdauer",
-      "durability": "Haltbarkeit",
-      "and": "und",
-      "finishesOn" : "Fertig am",
-      "raidStatus" : "Raid Status",
-      "claimRewards" : "Belohnung abholen",
-      "raidRewardsSelector" : "Raid Belohnungsauswahl",
-      "selectRaid" : "Wähle einen Raid aus, von dem du die Belohnung abholen möchtest:",
-      "raidRewards" : "Raid Belohnungen",
-      "rewards" : "Belohnungen",
-      "claimingRewards" : "Hole Belohnungen...",
-      "loading" : "Lade...",
-      "gotXP" : "Alle teilnehmenden Charaktere bekamen {xpReward} XP",
-      "gotBonusXP" : "Folgende Charakter(e) kmäpften besonders gut und haben Bonus-XP bekommen:",
-      "loot" : "Loot",
-      "signUp" : "Teilnehmen!",
-      "joiningCostStamina" : "Beitreten kostet {formatStaminaHours}h Ausdauer",
-      "yourPower" : "Deine Stärke:",
-      "errors":{
-        "selection" :"Prüfe Charakter- und Waffenauswahl und versuch es nochmal...",
-        "raidNotStarted": "Raid hat noch nicht begonnen...",
-        "lockedChar": "Der ausgewählte Charakter befindet sich schon in einem Raid...",
-        "lockedWeapon" : "Die ausgewählte Waffe wird schon in einem Raid genutzt...",
-        "notEnough" :"Nicht genug Ausdauer oder Haltbarkeit...",
-        "whoops": "Ups..."
-      }
+    "needStamina":"Du brauchst {staminaPerFight} Ausdauer zum kämpfen.",
+    "costStamina": "Ausdauerkosten pro Kampf",
+    "waiting":"Warte auf Kampfergebnisse...",
+    "chooseWeapon":"Wähle eine Waffe aus",
+    "chooseWeaponHint":"Deine Waffe multipliziert deine Stärke<br><br>+Attribute bestimmen den Faktor<br>Attribute, die zu dem Element deines Charakters passen, geben einen noch größeren Bonus",
+    "chooseNewWeapon": "Wähle eine neue Waffe aus",
+    "elementHint":"Elemente beeinflussen Stärke:<br><br>Charakter vs Gegner: Bonus oder Strafe wie oben gezeigt<br>Charakter- und Waffenübereinstimmung geben Bonus",
+    "enemy":"Gegner",
+    "power": "Stärke",
+    "xp":"XP",
+    "victory": "Sieg",
+    "fight": "Kämpfen!",
+    "loading": "Lade...",
+    "noWeapons": "Du hast keine Waffen. Du kannst Waffen beim Schmied herstellen.",
+    "noCharacters":"Du hast keine Charaktere. Du kannst welche auf dem Plaza rekrutieren.",
+    "winChances":{
+      "unlikely": "Unwahrscheinlicher",
+      "possible": "Möglicher",
+      "likely": "Wahrscheinlicher",
+      "veryLikely": "Sehr wahrscheinlicher"
     },
-    "market":{
-      "browseNfts":"NFTs durchsuchen",
-      "nftHint":"NFT steht für Non Fungible Token.<br>Waffen und Charaktere sind NFTs des ERC721-Standards",
-      "browseChars":"Charaktere durchsuchen",
-      "browseWeapons":"Waffen durchsuchen",
-      "browseShields":"Schilde durchsuchen",
-  
-      "price":"Preis",
-      "loadingPrice":"Lade Preis ...",
-      "sold":"verkauft",
-  
-      "maxChars":"Du hast schon das Maximum an Charakteren (4).",
-      "loading":"Lade...",
-  
-      "searchNfts":"Suche NFTs",
-      "searchPlaceholder":"Verkäuferadresse, NFT ID",
-      "searchCharID":"Suche Charakter ID",
-      "searchWeaponID":"Suche Waffen ID",
-      "weaponsBySeller":"Waffen nach Verkäufer",
-      "charsBySeller":"Charaktere nach Verkäufer",
-      "searchShieldID":"Suche Schild ID",
-      "shieldsBySeller":"Schilde nach Verkäufer",
-      "searchMyWeapons":"Suche meine Waffen",
-      "weaponsPrivateTrades":"Waffen private Angebote",
-      "charsPrivateTrades":"Charaktere private Angebote",
-      "shieldsPrivateTrades":"Schilde private Angebote",
-      "searchMyChars":"Suche meine Charaktere",
-      "searchMyShields":"Suche meine Schilde",
-      "changePrice":"Preis verändern",
-      "changeTargetBuyer":"Käufer ändern",
-      "cancelTooltip":"Abgebrochene Verkäufe können erst nach 24 neu gelistet werden!",
-      "cancelListing":"Verkauf abbrechen",
-  
-      "listNfts":"NFT verkaufen",
-      "listingHint" : "Wenn du ein NFT zum Verkauf anbietest, dann wird es an den Markt gesendet, <br> bis es verkauft wird oder du den Verkauf abbrichst.",
-      "showWeapons":"Waffen anzeigen",
-      "showChars":"Charaktere anzeigen",
-      "showShields":"Schilde anzeigen",
-      "listWeapon":"Waffe verkaufen",
-      "listChar":"Charakter verkaufen",
-      "listShield":"Schild verkaufen",
-      "listingTaxHint":"% Steuer (bezahlt Käufer) wird zum finalen Preis hinzugefügt.",
-  
-      "sellType" : "Verkaufe {activeType}",
-      "changeTypePrice" : "Verändere {activeType} Preis",
-  
-      "sellPrice" : "Verkaufspreis (SKILL)",
-      "targetBuyerAddress":"Ziel-Käuferadresse (optional)",
-      "listingConfirmation": "{activeType} verkaufen für ",
-      "buyerFee" : "Der Käufer muss {activeListingMarketTax}% Markt-Steuer bezahlen. Gesamt:",
-      
-      "weaponsSold" : "Verkaufte Waffen",
-      "viewWeapons" : "Deine verkauften Waffen anzeigen",
-      "weaponTxHistory" : "Transaktionsverlauf deiner Waffen",
-      "nothingThere" : "Hier scheint nichts zu sein!",
-      "tips" : "Für Tipps wie man NFTs verkauft, schaue hier ",
-      "link" : "link",
-  
-      "charactersSold" : "Charaktere verkauft",
-      "charactersSoldTooltip" : "Sieh dir deine verkauften Charaktere an",
-      "characterTxHistory":"Transaktionsverlauf deiner Charaktere",
-  
-      "shieldsSold" : "Schilde verkauft",
-      "shieldsSoldTooltip" : "Sieh dir deine verkauften Schilde an",
-      "shieldsTxHistory":"Transaktionsverlauf deiner Schilde",
-  
-      "skillShop" : "Skill Shop",
-      "skillShophint" : "Du kannst hier verschiedene Gegenstände kaufen",
-      "specials" : "Specials",
-      "shop" : "Shop",
-  
-      "nftList":{
-        "characterRenameTag" : "Namensschild für deinen Charakter",
-        "characterRenameTagDesc" : "Benennt einen Charakter um",
-  
-        "characterRenameTagDeal" : "Deal: Namensschilde für deine Charaktere",
-        "characterRenameTagDealDesc" : "Benennt 4 Charaktere zum Preis von 3 um",
-  
-        "weaponRenameTag" : "Waffen Namensschild",
-        "weaponRenameTagDesc" : "Benennt eine Waffe um",
-  
-        "weaponRenameTagDeal" : "Deal: Waffen Namensschilde",
-        "weaponRenameTagDealDesc" : "Benennt 4 Waffen zum Preis von 3 um",
-  
-        "characterEarthTraitChange" : "Erd-Trank",
-        "characterEarthTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Erd-Charakter.",
-  
-        "characterFireTraitChange" : "Feuer-Trank",
-        "characterFireTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Feuer-Charakter.",
-  
-        "characterWaterTraitChange" : "Wasser-Trank",
-        "characterWaterTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Wasser-Charakter.",
-  
-        "characterLightningTraitChange" : "Blitz-Trank",
-        "characterLightningTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Blitz-Charakter",
-  
-        "weaponGrayscale" : "Waffen Graustufe",
-        "weaponGrayscaleDesc" : "",
-  
-        "weaponContrast" : "Waffen Kontrast",
-        "weaponContrastDesc" : "Erhöhter contrast",
-  
-        "weaponSepia" : "Waffen Sepia",
-        "weaponSepiaDesc" : "",
-  
-        "weaponInvert" : "Waffe invertieren",
-        "weaponInvertDesc" : "Invertierte Farben",
-  
-        "weaponBlur" : "Waffe unscharf",
-        "weaponBlurDesc" : "Waffe unscharf",
-  
-        "weaponFireglow" : "Waffe Feuerglühen",
-        "weaponFireglowDesc" : "Lässt deine Waffe mit der Kraft des Feuers glühen",
-  
-        "weaponEarthglow" : "Waffe Erdglühen",
-        "weaponEarthglowDesc" : "Lässt deine Waffe mit der Kraft der Erde glühen",
-  
-        "weaponLightningglow" : "Waffe Blitzglühen",
-        "weaponLightningglowDesc" : "Lässt deine Waffe mit der Kraft des Blitzes glühen",
-  
-        "weaponWaterglow" : "Waffe Wasserglühen",
-        "weaponWaterglowDesc" : "Lässt deine Waffe mit der Kraft des Wassers glühen",
-  
-        "weaponRainbowglow" : "Waffe Regenbogenglühen",
-        "weaponRainbowglowDesc" : "Lässt deine Waffe mit der Kraft aller Elemente glühen",
-  
-        "weaponDarkglow" : "Waffe Dunkelglühen",
-        "weaponDarkglowDesc" : "Lässt deine Waffe mit der Kraft der Dunkelheit glühen",
-  
-        "weaponGhost" : "Geisterwaffe",
-        "weaponGhostDesc" : "Geisteffekt für deine Waffe",
-  
-        "weaponPolicelights" : "Waffen Polizeilichter",
-        "weaponPolicelightsDesc" : "Polizeilicht Hintergrund für deine Waffe",
-  
-        "weaponNeonborder" : "Waffe Neon Umrandung",
-        "weaponNeonborderDesc" : "",
-  
-        "weaponRotatingNeonborder" : "Drehende-Neon Waffen Umrandung",
-        "weaponRotatingNeonborderDesc" : "",
-  
-        "weaponDiamondborder" : "Diamant Waffen Umrandung",
-        "weaponDiamondborderDesc" : "",
-  
-        "weaponGoldborder" : "Gold Waffen Umrandung",
-        "weaponGoldborderDesc" : "",
-  
-        "weaponSilverborder" : "Silberne Waffen Umrandung",
-        "weaponSilverborderDesc" : "",
-  
-        "weaponBronzeborder" : "Bronzene Waffen Umrandung",
-        "weaponBronzeborderDesc" : "",
-  
-        "characterGrayscale" : "Charakter Graustufe",
-        "characterGrayscaleDesc" : "",
-  
-        "characterContrast" : "Charakter Kontrast",
-        "characterContrastDesc" : "Erhöhter Kontrast für deinen Charakter",
-  
-        "characterSepia" : "Charakter Sepia",
-        "characterSepiaDesc" : "",
-  
-        "characterInvert" : "Charakter Invertiert",
-        "characterInvertDesc" : "Invertierte Farben für deinen Charakter",
-  
-        "characterBlur" : "Charakter Unschärfe",
-        "characterBlurDesc" : "Unschärfe für deinen Charakter",
-  
-        "characterFireglow" : "Charakter Feuerglühen",
-        "characterFireglowDesc" : "Lässt deinen Charakter mit der Kraft des Feuers glühen",
-  
-        "characterEarthglow" : "Charakter Erdglühen",
-        "characterEarthglowDesc" : "Lässt deinen Charakter mit der Kraft der Erde glühen",
-  
-        "characterLightningglow" : "Charakter Blitzglühen",
-        "characterLightningglowDesc" : "Lässt deinen Charakter mit der Kraft des Blitzes glühen",
-  
-        "characterWaterglow" : "Charakter Wasserglühen",
-        "characterWaterglowDesc" : "Lässt deinen Charakter mit der Kraft des Wassers glühen",
-  
-        "characterRainbowglow" : "Charakter Regenbogenglühen",
-        "characterRainbowglowDesc" : "Leuchter mit der Kraft aller Elemente",
-  
-        "characterDarkglow" : "Charakter Dunkelglühen",
-        "characterDarkglowDesc" : "Leuchtet mit der Dunkelheit",
-  
-        "characterGhost" : "Geister Charakter",
-        "characterGhostDesc" : "Ghost effect",
-  
-        "characterPolice" : "Charakter Polizeilichter",
-        "characterPoliceDesc" : "Polizeilichter Hintergrund",
-  
-        "characterNeonborder" : "Charakter Neon Umrandung",
-        "characterNeonborderDesc" : "",
-  
-        "characterDiamondborder" : "Charakter Diamond Umrandung",
-        "characterDiamondborderDesc" : "",
-  
-        "characterGoldborder" : "Charakter Gold Umrandung",
-        "characterGoldborderDesc" : "",
-  
-        "characterSilverborder" : "Charakter Silver Umrandung",
-        "characterSilverborderDesc" : "",
-  
-        "characterBronzeborder" : "Charakter Bronze Umrandung",
-        "characterBronzeborderDesc" : ""
-      }
-    },
+    "moreStamina": "Du brauchst zum kämpfen mehr Ausdauer!",
+    "pleaseSelect": "Wähle bitte aus, wie viel Ausdauer du einsetzen möchtest"
+  },
+  "raid":{
+    "title":"Hellborn Raid",
+    "numberOfRaiders":"Anzahl der Raider",
+    "totalPower" : "Gesamtstärke",
+    "bossPower" : "Bossstärke",
+    "victoryChance" : "Siegchance",
+    "drops" : "Drops",
+    "rewardsHint" : "Belohnungen werden durch deine beigetragene Stärke im Vergleich zu den anderen Raidern bestimmt.<br>Ein früher Beitritt gibt dir bis zu 10% Bonus.",
+    "xpReward" : "XP Belohnung ",
+    "xpRewardHint" : "Charaktere, die teilnehmen, bekommen automatisch XP.<br> Wenn dein Charakter besonders gut kämpft, kann er bis zu +2400% Bonus-XP bekommen!",
+    "weapon" : "Waffe",
+    "weaponHint" : "Deine Waffe multipliziert deine Stärke<br><br>+Attribute bestimmen den Faktor<br>Attribute, die zu dem Element deines Charakters passen, geben einen noch größeren Bonus",
+    "multiplier" : "Faktor: x",
+    "chooseNewWeapon" : "Wähle eine neue Waffe",
+    "inRaid" : "Im Raid",
+    "character" : "Charakter",
+    "power" : "Stärke",
+    "joiningCost" : "Beitreten kostet",
+    "stamina": "Ausdauer",
+    "durability": "Haltbarkeit",
+    "and": "und",
+    "finishesOn" : "Fertig am",
+    "raidStatus" : "Raid Status",
+    "claimRewards" : "Belohnung abholen",
+    "raidRewardsSelector" : "Raid Belohnungsauswahl",
+    "selectRaid" : "Wähle einen Raid aus, von dem du die Belohnung abholen möchtest:",
+    "raidRewards" : "Raid Belohnungen",
+    "rewards" : "Belohnungen",
+    "claimingRewards" : "Hole Belohnungen...",
+    "loading" : "Lade...",
+    "gotXP" : "Alle teilnehmenden Charaktere bekamen {xpReward} XP",
+    "gotBonusXP" : "Folgende Charakter(e) kmäpften besonders gut und haben Bonus-XP bekommen:",
+    "loot" : "Loot",
+    "signUp" : "Teilnehmen!",
+    "joiningCostStamina" : "Beitreten kostet {formatStaminaHours}h Ausdauer",
+    "yourPower" : "Deine Stärke:",
+    "errors":{
+      "selection" :"Prüfe Charakter- und Waffenauswahl und versuch es nochmal...",
+      "raidNotStarted": "Raid hat noch nicht begonnen...",
+      "lockedChar": "Der ausgewählte Charakter befindet sich schon in einem Raid...",
+      "lockedWeapon" : "Die ausgewählte Waffe wird schon in einem Raid genutzt...",
+      "notEnough" :"Nicht genug Ausdauer oder Haltbarkeit...",
+      "whoops": "Ups..."
+    }
+  },
+  "market":{
+    "browseNfts":"NFTs durchsuchen",
+    "nftHint":"NFT steht für Non Fungible Token.<br>Waffen und Charaktere sind NFTs des ERC721-Standards",
+    "browseChars":"Charaktere durchsuchen",
+    "browseWeapons":"Waffen durchsuchen",
+    "browseShields":"Schilde durchsuchen",
+
+    "price":"Preis",
+    "loadingPrice":"Lade Preis ...",
+    "sold":"verkauft",
+
+    "maxChars":"Du hast schon das Maximum an Charakteren (4).",
+    "loading":"Lade...",
+
+    "searchNfts":"Suche NFTs",
+    "searchPlaceholder":"Verkäuferadresse, NFT ID",
+    "searchCharID":"Suche Charakter ID",
+    "searchWeaponID":"Suche Waffen ID",
+    "weaponsBySeller":"Waffen nach Verkäufer",
+    "charsBySeller":"Charaktere nach Verkäufer",
+    "searchShieldID":"Suche Schild ID",
+    "shieldsBySeller":"Schilde nach Verkäufer",
+    "searchMyWeapons":"Suche meine Waffen",
+    "weaponsPrivateTrades":"Waffen private Angebote",
+    "charsPrivateTrades":"Charaktere private Angebote",
+    "shieldsPrivateTrades":"Schilde private Angebote",
+    "searchMyChars":"Suche meine Charaktere",
+    "searchMyShields":"Suche meine Schilde",
+    "changePrice":"Preis verändern",
+    "changeTargetBuyer":"Käufer ändern",
+    "cancelTooltip":"Abgebrochene Verkäufe können erst nach 24 neu gelistet werden!",
+    "cancelListing":"Verkauf abbrechen",
+
+    "listNfts":"NFT verkaufen",
+    "listingHint" : "Wenn du ein NFT zum Verkauf anbietest, dann wird es an den Markt gesendet, <br> bis es verkauft wird oder du den Verkauf abbrichst.",
+    "showWeapons":"Waffen anzeigen",
+    "showChars":"Charaktere anzeigen",
+    "showShields":"Schilde anzeigen",
+    "listWeapon":"Waffe verkaufen",
+    "listChar":"Charakter verkaufen",
+    "listShield":"Schild verkaufen",
+    "listingTaxHint":"% Steuer (bezahlt Käufer) wird zum finalen Preis hinzugefügt.",
+
+    "sellType" : "Verkaufe {activeType}",
+    "changeTypePrice" : "Verändere {activeType} Preis",
+
+    "sellPrice" : "Verkaufspreis (SKILL)",
+    "targetBuyerAddress":"Ziel-Käuferadresse (optional)",
+    "listingConfirmation": "{activeType} verkaufen für ",
+    "buyerFee" : "Der Käufer muss {activeListingMarketTax}% Markt-Steuer bezahlen. Gesamt:",
+    
+    "weaponsSold" : "Verkaufte Waffen",
+    "viewWeapons" : "Deine verkauften Waffen anzeigen",
+    "weaponTxHistory" : "Transaktionsverlauf deiner Waffen",
+    "nothingThere" : "Hier scheint nichts zu sein!",
+    "tips" : "Für Tipps wie man NFTs verkauft, schaue hier ",
+    "link" : "link",
+
+    "charactersSold" : "Charaktere verkauft",
+    "charactersSoldTooltip" : "Sieh dir deine verkauften Charaktere an",
+    "characterTxHistory":"Transaktionsverlauf deiner Charaktere",
+
+    "shieldsSold" : "Schilde verkauft",
+    "shieldsSoldTooltip" : "Sieh dir deine verkauften Schilde an",
+    "shieldsTxHistory":"Transaktionsverlauf deiner Schilde",
+
+    "skillShop" : "Skill Shop",
+    "skillShophint" : "Du kannst hier verschiedene Gegenstände kaufen",
+    "specials" : "Specials",
+    "shop" : "Shop",
+
+    "nftList":{
+      "characterRenameTag" : "Namensschild für deinen Charakter",
+      "characterRenameTagDesc" : "Benennt einen Charakter um",
+
+      "characterRenameTagDeal" : "Deal: Namensschilde für deine Charaktere",
+      "characterRenameTagDealDesc" : "Benennt 4 Charaktere zum Preis von 3 um",
+
+      "weaponRenameTag" : "Waffen Namensschild",
+      "weaponRenameTagDesc" : "Benennt eine Waffe um",
+
+      "weaponRenameTagDeal" : "Deal: Waffen Namensschilde",
+      "weaponRenameTagDealDesc" : "Benennt 4 Waffen zum Preis von 3 um",
+
+      "characterEarthTraitChange" : "Erd-Trank",
+      "characterEarthTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Erd-Charakter.",
+
+      "characterFireTraitChange" : "Feuer-Trank",
+      "characterFireTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Feuer-Charakter.",
+
+      "characterWaterTraitChange" : "Wasser-Trank",
+      "characterWaterTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Wasser-Charakter.",
+
+      "characterLightningTraitChange" : "Blitz-Trank",
+      "characterLightningTraitChangeDesc" : "Verwandelt deinen Charakter zum einem Blitz-Charakter",
+
+      "weaponGrayscale" : "Waffen Graustufe",
+      "weaponGrayscaleDesc" : "",
+
+      "weaponContrast" : "Waffen Kontrast",
+      "weaponContrastDesc" : "Erhöhter contrast",
+
+      "weaponSepia" : "Waffen Sepia",
+      "weaponSepiaDesc" : "",
+
+      "weaponInvert" : "Waffe invertieren",
+      "weaponInvertDesc" : "Invertierte Farben",
+
+      "weaponBlur" : "Waffe unscharf",
+      "weaponBlurDesc" : "Waffe unscharf",
+
+      "weaponFireglow" : "Waffe Feuerglühen",
+      "weaponFireglowDesc" : "Lässt deine Waffe mit der Kraft des Feuers glühen",
+
+      "weaponEarthglow" : "Waffe Erdglühen",
+      "weaponEarthglowDesc" : "Lässt deine Waffe mit der Kraft der Erde glühen",
+
+      "weaponLightningglow" : "Waffe Blitzglühen",
+      "weaponLightningglowDesc" : "Lässt deine Waffe mit der Kraft des Blitzes glühen",
+
+      "weaponWaterglow" : "Waffe Wasserglühen",
+      "weaponWaterglowDesc" : "Lässt deine Waffe mit der Kraft des Wassers glühen",
+
+      "weaponRainbowglow" : "Waffe Regenbogenglühen",
+      "weaponRainbowglowDesc" : "Lässt deine Waffe mit der Kraft aller Elemente glühen",
+
+      "weaponDarkglow" : "Waffe Dunkelglühen",
+      "weaponDarkglowDesc" : "Lässt deine Waffe mit der Kraft der Dunkelheit glühen",
+
+      "weaponGhost" : "Geisterwaffe",
+      "weaponGhostDesc" : "Geisteffekt für deine Waffe",
+
+      "weaponPolicelights" : "Waffen Polizeilichter",
+      "weaponPolicelightsDesc" : "Polizeilicht Hintergrund für deine Waffe",
+
+      "weaponNeonborder" : "Waffe Neon Umrandung",
+      "weaponNeonborderDesc" : "",
+
+      "weaponRotatingNeonborder" : "Drehende-Neon Waffen Umrandung",
+      "weaponRotatingNeonborderDesc" : "",
+
+      "weaponDiamondborder" : "Diamant Waffen Umrandung",
+      "weaponDiamondborderDesc" : "",
+
+      "weaponGoldborder" : "Gold Waffen Umrandung",
+      "weaponGoldborderDesc" : "",
+
+      "weaponSilverborder" : "Silberne Waffen Umrandung",
+      "weaponSilverborderDesc" : "",
+
+      "weaponBronzeborder" : "Bronzene Waffen Umrandung",
+      "weaponBronzeborderDesc" : "",
+
+      "characterGrayscale" : "Charakter Graustufe",
+      "characterGrayscaleDesc" : "",
+
+      "characterContrast" : "Charakter Kontrast",
+      "characterContrastDesc" : "Erhöhter Kontrast für deinen Charakter",
+
+      "characterSepia" : "Charakter Sepia",
+      "characterSepiaDesc" : "",
+
+      "characterInvert" : "Charakter Invertiert",
+      "characterInvertDesc" : "Invertierte Farben für deinen Charakter",
+
+      "characterBlur" : "Charakter Unschärfe",
+      "characterBlurDesc" : "Unschärfe für deinen Charakter",
+
+      "characterFireglow" : "Charakter Feuerglühen",
+      "characterFireglowDesc" : "Lässt deinen Charakter mit der Kraft des Feuers glühen",
+
+      "characterEarthglow" : "Charakter Erdglühen",
+      "characterEarthglowDesc" : "Lässt deinen Charakter mit der Kraft der Erde glühen",
+
+      "characterLightningglow" : "Charakter Blitzglühen",
+      "characterLightningglowDesc" : "Lässt deinen Charakter mit der Kraft des Blitzes glühen",
+
+      "characterWaterglow" : "Charakter Wasserglühen",
+      "characterWaterglowDesc" : "Lässt deinen Charakter mit der Kraft des Wassers glühen",
+
+      "characterRainbowglow" : "Charakter Regenbogenglühen",
+      "characterRainbowglowDesc" : "Leuchter mit der Kraft aller Elemente",
+
+      "characterDarkglow" : "Charakter Dunkelglühen",
+      "characterDarkglowDesc" : "Leuchtet mit der Dunkelheit",
+
+      "characterGhost" : "Geister Charakter",
+      "characterGhostDesc" : "Ghost effect",
+
+      "characterPolice" : "Charakter Polizeilichter",
+      "characterPoliceDesc" : "Polizeilichter Hintergrund",
+
+      "characterNeonborder" : "Charakter Neon Umrandung",
+      "characterNeonborderDesc" : "",
+
+      "characterDiamondborder" : "Charakter Diamond Umrandung",
+      "characterDiamondborderDesc" : "",
+
+      "characterGoldborder" : "Charakter Gold Umrandung",
+      "characterGoldborderDesc" : "",
+
+      "characterSilverborder" : "Charakter Silver Umrandung",
+      "characterSilverborderDesc" : "",
+
+      "characterBronzeborder" : "Charakter Bronze Umrandung",
+      "characterBronzeborderDesc" : ""
+    }
+  },
   "stake":{
     "unknownStakeType" : "Unknown stake type, please try again.",
     "rewardsAvailable" : "Rewards are available!",
@@ -508,32 +526,32 @@
     "nftDisplay" : "NFT Anzeige",
     "bridgeNfts" : "NFTs überbrücken",
     "options" : "Optionen",
-    "needGasModal" : {
-      "title" : "Möchtest du abheben?",
-      "okTitle" : "Weiter",
-      "cancelTitle" : "Zum WAX Portal",
-      "needWithdraw" : "Möchtest du abheben? Probier doch unser WAX Portal aus! Es zahlt dir unter 0.05% unter Marktpreis, wenn du WAX für BNB verkaufst!",
-      "holdReminder" : "Halten Erinnerung:",
-      "holdReminderText" : "Ein Teil deiner Einnahmen geht zurück an die Community, <br> <u> wenn du vorzeitig abhebst. </u>",
-      "yourTax" : "Deine Steuer für vorzeitiges Abheben",
-      "reduces1" : "Verringert sich um 1% am Tag",
-      "reduces2" : "Ist wieder 15%, nachdem du Abgehoben hast"
-    },
-    "stakeModal" : {
-      "title" : "Stake Skill",
-      "okTitle" : "Zum Staken",
+  },
+  "needGasModal" : {
+    "title" : "Möchtest du abheben?",
+    "okTitle" : "Weiter",
+    "cancelTitle" : "Zum WAX Portal",
+    "needWithdraw" : "Möchtest du abheben? Probier doch unser WAX Portal aus! Es zahlt dir unter 0.05% unter Marktpreis, wenn du WAX für BNB verkaufst!",
+    "holdReminder" : "Halten Erinnerung:",
+    "holdReminderText" : "Ein Teil deiner Einnahmen geht zurück an die Community, <br> <u> wenn du vorzeitig abhebst. </u>",
+    "yourTax" : "Deine Steuer für vorzeitiges Abheben",
+    "reduces1" : "Verringert sich um 1% am Tag",
+    "reduces2" : "Ist wieder 15%, nachdem du Abgehoben hast"
+  },
+  "stakeModal" : {
+    "title" : "Stake Skill",
+    "okTitle" : "Zum Staken",
+    "cancelTitle" : "Abbrechen",
+    "stakeText" : "Du musst keine 15% Steuer bezahlen, wenn du dein unclaimed Skill für 7 Tage stakest. Wenn du dein Skill jetzt stakest, geben wir dir einen 50% Bonus in in-game only SKILL (nur im Spiel verwendbar), den du sofort verwenden kannst!",
+    "bonusWarning1" : "Nein danke, ich bezahle lieber {formattedTaxAmount} in Steuern und verliere meinen Bonus",
+    "bonusWarning2" : "Nein danke, ich verliere lieber meinen Bonus",
+    "confirmModal" : {
+      "title" : "Skill abheben",
+      "okTitle" : "Ich bin mir sicher",
       "cancelTitle" : "Abbrechen",
-      "stakeText" : "Du musst keine 15% Steuer bezahlen, wenn du dein unclaimed Skill für 7 Tage stakest. Wenn du dein Skill jetzt stakest, geben wir dir einen 50% Bonus in in-game only SKILL (nur im Spiel verwendbar), den du sofort verwenden kannst!",
-      "bonusWarning1" : "Nein danke, ich bezahle lieber {formattedTaxAmount} in Steuern und verliere meinen Bonus",
-      "bonusWarning2" : "Nein danke, ich verliere lieber meinen Bonus",
-      "confirmModal" : {
-        "title" : "Skill abheben",
-        "okTitle" : "Ich bin mir sicher",
-        "cancelTitle" : "Abbrechen",
-        "claimWarning1" : "Du wirst {formattedBonusLost} bonus SKILL verlieren. Bist du dir sicher, dass du fortfahren möchtest?",
-        "claimWarning2" : "Du wirst {formattedRewardsClaimTax} Steuer bezahlen, weil du vorzeitig abhebst. Das kostet dich {formattedTaxAmount} SKILL. Außerder verwirfst du {formattedBonusLost} Bonus SKILL. Bist du dir sicher, dass du fortfahren möchtest?",
-        "cantBeUndone" : "Das kann nicht rückgängig gemacht werden!"
-      }
+      "claimWarning1" : "Du wirst {formattedBonusLost} bonus SKILL verlieren. Bist du dir sicher, dass du fortfahren möchtest?",
+      "claimWarning2" : "Du wirst {formattedRewardsClaimTax} Steuer bezahlen, weil du vorzeitig abhebst. Das kostet dich {formattedTaxAmount} SKILL. Außerder verwirfst du {formattedBonusLost} Bonus SKILL. Bist du dir sicher, dass du fortfahren möchtest?",
+      "cantBeUndone" : "Das kann nicht rückgängig gemacht werden!"
     }
   },
   "skillBalanceDisplay" : {
@@ -548,6 +566,7 @@
     "igo": "<br>+ Nur Im Spiel verwendbar "
   },
   "app": {
+    "cantView" : "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
     "warning": {
       "title": "Metamask Not Detected Or Incorrect Network",
       "start": "Get Started With CryptoBlades",
@@ -571,7 +590,9 @@
         "inst2": "Once you have BNB, go to ApeSwap to obtain SKILL tokens:",
         "inst3": "Follow this tutorial to swap BNB for SKILL:",
         "inst4": "That's it! Now you can create your first character:",
-        "watchVideo": "Watch {name}Video",
+        "watchVideo": "Watch Video",
+        "or": "or",
+        "buyWithTransak" : "Buy with Transak",
         "questionDiscord": "If you have any questions, please join our Discord:"
       }
     },
