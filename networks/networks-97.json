@@ -2252,7 +2252,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0xa32a6608e150053baf9fd4816da44bcfc96b1f5abe8a57f2e2526b8e7ef9c2f6"
+    "transactionHash": "0x6a6534c11f5ca5864bba565b20ef1ddee21ef49ff404722e42117ed64b516a73"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
