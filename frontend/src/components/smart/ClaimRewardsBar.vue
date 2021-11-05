@@ -11,9 +11,9 @@
         :disabled="!canClaimTokens"
         @click="onClaimTokens()"
         v-tooltip.bottom="!canClaimTokens ? withdrawalInfoText : ''"><!-- moved gtag-link below b-nav-item -->
-        <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="'Tax is being reduced by 1% per day.' + getTaxTimerNextTick">
+        <span class="gtag-link-others" tagname="claim_skill" :v-tooltip="$t('ClaimRewardsBar.taxReduce') + getTaxTimerNextTick">
           <strong>SKILL</strong> {{ formattedSkillReward }}
-          <strong>Early Withdraw Tax</strong> {{ formattedRewardsClaimTax }}
+          <strong>{{$t('ClaimRewardsBar.earlyWithdrawTax')}}</strong> {{ formattedRewardsClaimTax }}
         </span>
         <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="withdrawalInfoText"/>
       </b-nav-item>
@@ -26,46 +26,50 @@
       </b-nav-item>
     </b-navbar>
 
-    <b-modal class="centered-modal" ref="need-gas-modal" title="Need Withdraw?"
-      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Portal" >
-        Need Withdraw? Try our WAX Portal, which will pay you .5% under market rate to sell your WAX for BNB!
+    <!-- Unused -->
+    <b-modal class="centered-modal" ref="need-gas-modal" :title="$t('needGasModal.title')"
+      @ok="claimSkill(ClaimStage.Stake)" :ok-title="$t('needGasModal.okTitle')"
+      @cancel="$router.push({ name: 'portal' })" :cancel-title="$t('needGasModal.cancelTitle')" >
+        {{$t('needGasModal.needWithdraw')}}
         <div class="text-center">
           <hr class="hr-divider">
-          Hold Reminder:<br>
-          A percentage of your earning goes back to the community,<br>
-          <u>if you withdraw early</u>
+          {{$t('needGasModal.holdReminder')}}<br>
+          <span v-html="$t('needGasModal.holdReminderText')"></span>
           <div class="row">
-            <div class="col-5">Your early withdraw tax</div>
+            <div class="col-5">{{$t('needGasModal.yourTax')}}</div>
             <div class="col-2"><span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></div>
-            <div class="col-5 text-left">Reduces 1% per day<br>
-              Reset to 15% after withdraw</div>
+            <div class="col-5 text-left">{{$t('needGasModal.reduces1')}}<br>
+              {{$t('needGasModal.reduces2')}}</div>
           </div>
         </div>
     </b-modal>
-    <b-modal class="centered-modal" ref="stake-suggestion-modal" title="Stake Skill"
-      @ok="$router.push({ name: 'select-stake-type' })" ok-only ok-title="Go to Stake" >
-        You can avoid paying the 15% tax by staking unclaimed skill rewards for 7 days. If you stake your SKILL now, we'll give you a
-        50% bonus in-game only SKILL that you can use right away!
-      <a href="#" @click="claimSkill(ClaimStage.Claim)"> <br>No thanks, I'd rather {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " +
-        this.formattedTaxAmount + " in taxes and " : ""  }}forfeit my bonus </a>
+    <b-modal class="centered-modal" ref="stake-suggestion-modal" :title="$t('stakeModal.title')"
+      @ok="$router.push({ name: 'select-stake-type' })"
+      :ok-title="$t('stakeModal.okTitle')"
+      :cancel-title="$t('stakeModal.cancelTitle')"
+      >
+        {{$t('stakeModal.stakeText')}}
+      <a href="#" @click="claimSkill(ClaimStage.Claim)">
+      <br>
+      <span v-if="(this.rewardsClaimTaxAsFactorBN > 0)">{{$t('stakeModal.bonusWarning1')}}</span>
+      <span v-else>{{$t('stakeModal.bonusWarning2', {formattedTaxAmount : this.formattedTaxAmount})}}</span>      </a>
     </b-modal>
-    <b-modal class="centered-modal" ref="claim-confirmation-modal" title="Claim Skill" ok-title="I am sure"
-      @ok="onClaimTokens()"> You are about to {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " + formattedRewardsClaimTax +
-      " tax for early withdrawal, costing you " + this.formattedTaxAmount + " SKILL. You will also " : "" }}
-      miss out on {{formattedBonusLost}} bonus SKILL. Are you sure
-      you wish to continue? <b>This action cannot be undone.</b>
-      <div class="text-center">
-        <hr class="hr-divider">
-        Hold Reminder:<br>
-        A percentage of your earning goes back to the community,<br>
-        <u>if you withdraw early</u>
-        <div class="row">
-          <div class="col-5">Your early withdraw tax</div>
-          <div class="col-2"><span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></div>
-          <div class="col-5 text-left">Reduces 1% per day<br>
-            Reset to 15% after withdraw</div>
-        </div>
-      </div>
+    <b-modal class="centered-modal" ref="claim-confirmation-modal"
+    :title="$t('stakeModal.confirmModal.title')"
+    :ok-title="$t('stakeModal.confirmModal.okTitle')"
+    :cancel-title="$t('stakeModal.confirmModal.cancelTitle')"
+    @ok="onClaimTokens()">
+      <span v-if="(this.rewardsClaimTaxAsFactorBN > 0)">
+        {{$t('stakeModal.confirmModal.claimWarning2', {
+          formattedRewardsClaimTax,
+          formattedTaxAmount : this.formattedTaxAmount,
+          formattedBonusLost
+          } )}}
+      </span>
+      <span v-else>
+        {{$t('stakeModal.confirmModal.claimWarning1', {formattedBonusLost})}}
+      </span>
+      <b>{{$t('stakeModal.confirmModal.cantBeUndone')}}</b>
     </b-modal>
   </div>
 </template>
@@ -176,11 +180,9 @@ export default Vue.extend({
 
     withdrawalInfoText(): string {
       if(this.skillRewardNumber >= 1) {
-        return `You can withdraw max 10% of amount over 1 SKILL or 2 days worth of fights per day (whatever is greater).
-          Remaining claimable amount today: ${this.formattedRemainingClaimableSkill}`;
+        return `${(this as any).$t('ClaimRewardsBar.withdrawalInfoText1')} ${this.formattedRemainingClaimableSkill}`;
       }
-      return `You can withdraw 1 day worth of fights per day.
-        Remaining claimable amount today: ${this.formattedRemainingClaimableSkill}`;
+      return `${(this as any).$t('ClaimRewardsBar.withdrawalInfoText2')} ${this.formattedRemainingClaimableSkill}`;
     },
 
     xpRewardsForOwnedCharacters(): string[] {

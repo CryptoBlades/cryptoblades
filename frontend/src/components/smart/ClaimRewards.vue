@@ -2,24 +2,24 @@
   <div class="body main-font">
     <b-navbar-nav>
       <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
-      variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'" />
+      variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="$t('ClaimRewardsBar.readyToClaim')" />
 
       <b-nav-item-dropdown right>
         <template #button-content>
-          Rewards
+          {{$t('ClaimRewardsBar.rewards')}}
         </template>
 
         <b-dropdown-item
           :disabled="!canClaimTokens"
           @click="onClaimTokens()" class="rewards-info gtag-link-others" tagname="claim_skill"
-           v-tooltip.bottom="'Tax is being reduced by 1% per day. ' + (!canClaimTokens ? withdrawalInfoText : '')">
+           v-tooltip.bottom="$t('ClaimRewardsBar.taxReduce') + (!canClaimTokens ? withdrawalInfoText : '')">
             SKILL
             <div class="pl-3">{{ formattedSkillReward }}</div>
             <div class="pl-3">
-              Early withdraw tax: {{ formattedRewardsClaimTax }}
+              {{$t('ClaimRewardsBar.earlyWithdrawTax')}} {{ formattedRewardsClaimTax }}
               <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="withdrawalInfoText"/>
             </div>
-            <div class="pl-3">Time since last withdraw: n/a</div>
+            <div class="pl-3">{{$t('ClaimRewardsBar.timeSince')}}</div>
         </b-dropdown-item>
 
         <b-dropdown-item
@@ -30,6 +30,7 @@
       </b-nav-item-dropdown>
     </b-navbar-nav>
 
+    <!-- Unused -->
     <b-modal class="centered-modal" ref="need-gas-modal" title="Need Withdraw?"
       @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Portal" >
         Need Withdraw? Try our WAX Portal, which will pay you .5% under market rate to sell your WAX for BNB!
@@ -167,11 +168,9 @@ export default Vue.extend({
 
     withdrawalInfoText(): string {
       if(this.skillRewardNumber >= 1) {
-        return `You can withdraw max 10% of amount over 1 SKILL or 2 days worth of fights per day (whatever is greater).
-          Remaining claimable amount today: ${this.formattedRemainingClaimableSkill}`;
+        return `${(this as any).$t('ClaimRewardsBar.withdrawalInfoText1')} ${this.formattedRemainingClaimableSkill}`;
       }
-      return `You can withdraw 1 day worth of fights per day.
-        Remaining claimable amount today: ${this.formattedRemainingClaimableSkill}`;
+      return `${(this as any).$t('ClaimRewardsBar.withdrawalInfoText2')} ${this.formattedRemainingClaimableSkill}`;
     },
 
     canClaimXp(): boolean {
