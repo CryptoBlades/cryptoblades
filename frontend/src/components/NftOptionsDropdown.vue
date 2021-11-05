@@ -3,7 +3,7 @@
     <b-dropdown right no-caret class="options-dropdown">
       <template slot="button-content"><b-icon-three-dots/></template>
       <b-dropdown-item :disabled="isDisabled(option)" v-for="option in options" :key="option.name" @click="option.handler(nftId)">
-        {{option.name}} ({{option.amount}} left)
+        {{option.name}} ({{option.amount}} {{$t('nftOptionsDropdown.left')}})
       </b-dropdown-item>
     </b-dropdown>
   </div>
