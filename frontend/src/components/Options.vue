@@ -41,49 +41,49 @@
       </b-nav-item-dropdown>
     </b-navbar-nav>
 
-    <b-modal class="centered-modal" ref="need-gas-modal" :title="$t('optionsMenu.needGasModal.title')"
-      @ok="claimSkill(ClaimStage.Stake)" :ok-title="$t('optionsMenu.needGasModal.okTitle')"
-      @cancel="$router.push({ name: 'portal' })" :cancel-title="$t('optionsMenu.needGasModal.cancelTitle')" >
-        {{$t('optionsMenu.needGasModal.needWithdraw')}}
+    <b-modal class="centered-modal" ref="need-gas-modal" :title="$t('needGasModal.title')"
+      @ok="claimSkill(ClaimStage.Stake)" :ok-title="$t('needGasModal.okTitle')"
+      @cancel="$router.push({ name: 'portal' })" :cancel-title="$t('needGasModal.cancelTitle')" >
+        {{$t('needGasModal.needWithdraw')}}
         <div class="text-center">
           <hr class="hr-divider">
-          {{$t('optionsMenu.needGasModal.holdReminder')}}<br>
-          <span v-html="$t('optionsMenu.needGasModal.holdReminderText')"></span>
+          {{$t('needGasModal.holdReminder')}}<br>
+          <span v-html="$t('needGasModal.holdReminderText')"></span>
           <div class="row">
-            <div class="col-5">{{$t('optionsMenu.needGasModal.yourTax')}}</div>
+            <div class="col-5">{{$t('needGasModal.yourTax')}}</div>
             <div class="col-2"><span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></div>
-            <div class="col-5 text-left">{{$t('optionsMenu.needGasModal.reduces1')}}<br>
-              {{$t('optionsMenu.needGasModal.reduces2')}}</div>
+            <div class="col-5 text-left">{{$t('needGasModal.reduces1')}}<br>
+              {{$t('needGasModal.reduces2')}}</div>
           </div>
         </div>
     </b-modal>
-    <b-modal class="centered-modal" ref="stake-suggestion-modal" :title="$t('optionsMenu.stakeModal.title')"
+    <b-modal class="centered-modal" ref="stake-suggestion-modal" :title="$t('stakeModal.title')"
       @ok="$router.push({ name: 'select-stake-type' })"
-      :ok-title="$t('optionsMenu.stakeModal.okTitle')"
-      :cancel-title="$t('optionsMenu.stakeModal.cancelTitle')"
+      :ok-title="$t('stakeModal.okTitle')"
+      :cancel-title="$t('stakeModal.cancelTitle')"
       >
-        {{$t('optionsMenu.stakeModal.stakeText')}}
+        {{$t('stakeModal.stakeText')}}
       <a href="#" @click="claimSkill(ClaimStage.Claim)">
       <br>
-      <span v-if="(this.rewardsClaimTaxAsFactorBN > 0)">{{$t('optionsMenu.stakeModal.bonusWarning1')}}</span>
-      <span v-else>{{$t('optionsMenu.stakeModal.bonusWarning2', {formattedTaxAmount : this.formattedTaxAmount})}}</span>      </a>
+      <span v-if="(this.rewardsClaimTaxAsFactorBN > 0)">{{$t('stakeModal.bonusWarning1')}}</span>
+      <span v-else>{{$t('stakeModal.bonusWarning2', {formattedTaxAmount : this.formattedTaxAmount})}}</span>      </a>
     </b-modal>
     <b-modal class="centered-modal" ref="claim-confirmation-modal"
-    :title="$t('optionsMenu.stakeModal.confirmModal.title')"
-    :ok-title="$t('optionsMenu.stakeModal.confirmModal.okTitle')"
-    :cancel-title="$t('optionsMenu.stakeModal.confirmModal.cancelTitle')"
+    :title="$t('stakeModal.confirmModal.title')"
+    :ok-title="$t('stakeModal.confirmModal.okTitle')"
+    :cancel-title="$t('stakeModal.confirmModal.cancelTitle')"
     @ok="onClaimTokens()">
       <span v-if="(this.rewardsClaimTaxAsFactorBN > 0)">
-        {{$t('optionsMenu.stakeModal.confirmModal.claimWarning2', {
+        {{$t('stakeModal.confirmModal.claimWarning2', {
           formattedRewardsClaimTax,
           formattedTaxAmount : this.formattedTaxAmount,
           formattedBonusLost
           } )}}
       </span>
       <span v-else>
-        {{$t('optionsMenu.stakeModal.confirmModal.claimWarning1', {formattedBonusLost})}}
+        {{$t('stakeModal.confirmModal.claimWarning1', {formattedBonusLost})}}
       </span>
-      <b>{{$t('optionsMenu.stakeModal.confirmModal.cantBeUndone')}}</b>
+      <b>{{$t('stakeModal.confirmModal.cantBeUndone')}}</b>
     </b-modal>
   </div>
 </template>
