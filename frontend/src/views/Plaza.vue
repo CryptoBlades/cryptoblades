@@ -21,8 +21,8 @@
         <br>
         <i18n path="plaza.notEnoughSkill" tag="label" for="plaza.notEnoughSkillLink">
           <a v-bind:href="`${getExchangeUrl}`" target="_blank" rel="noopener noreferrer">{{$t("plaza.notEnoughSkillLink")}}</a>
-          <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">{{$t("plaza.buyBNBTransak")}}</a>.
         </i18n>
+          <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">{{$t("plaza.buyBNBTransak")}}</a>.
       </div>
     </div>
     <div class="row mt-3" v-if="ownCharacters.length > 0">
