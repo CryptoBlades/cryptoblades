@@ -1,15 +1,15 @@
 <template>
   <div class="skill-balance-display">
-    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="'Buy SKILL'" @click="showModal">
-      <b-modal size="xl" class="centered-modal " ref="transak-buy" title="BUY SKILL" ok-only>
+    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
+      <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
       <div class="buy-skill-modal">
         <div class="buy-skill-modal-child">
          <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">Buy with Crypto</b-button>
+              <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">{{$t('skillBalanceDisplay.buyWithCrypto')}}</b-button>
         </div>
         <div class="buy-skill-modal-child">
               <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">Buy with Fiat</b-button>
+              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">{{$t('skillBalanceDisplay.buyWithFiat')}}</b-button>
         </div>
       </div>
     </b-modal>
@@ -18,7 +18,7 @@
     </div>
 
     <div class="balance-container">
-      <strong class="mr-2 balance-text">Total Balance</strong>
+      <strong class="mr-2 balance-text">{{$t('skillBalanceDisplay.totalBalance')}}</strong>
       <span class="balance"
         v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
         @mouseover="hover = !isMobile() || true"
