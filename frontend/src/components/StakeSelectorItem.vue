@@ -22,7 +22,7 @@
             {{ rewardTokenName }}
           </td>
         </tr>
-        <tr v-if="estimatedYield" title="Estimated yield per year and token.">
+        <tr v-if="estimatedYield" :title="$t('stake.StakeSelectorItem.yieldTooltip')">
           <th class="bold">
             {{$t('stake.StakeSelectorItem.apy')}}
           </th>
