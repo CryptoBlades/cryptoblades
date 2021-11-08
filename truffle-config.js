@@ -169,7 +169,21 @@ module.exports = {
       confirmations: 10,
       timeoutBlocks: 200,
       skipDryRun: true
-    }
+    },
+    avaxtestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.AVAX_TESTNET_WALLET_PRIVATE_KEY,
+        process.env.AVAX_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://api.avax-test.network/ext/bc/C/rpc'
+        }
+      )),
+      network_id: 43113, // 1 or * for deployment, 43113 for verification
+      gas: 6000000,
+      gasPrice: 25000000000,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port

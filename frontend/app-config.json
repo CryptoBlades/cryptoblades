@@ -130,6 +130,38 @@
           "rpcUrls": ["https://matic-mumbai.chainstacklabs.com"],
           "blockExplorerUrls": ["https://mumbai.polygonscan.com/"],
           "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e"
+        },
+        "AVAX": {
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS": "snoui.wam",
+          "VUE_APP_NETWORK_ID":"1",
+          "VUE_APP_EXPECTED_NETWORK_ID":"1",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Avalance Fuji Testnet",
+
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
+          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS": "skill",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS": "0xFA36e02daF3f8EDc4295c8d2E3Be2fA5c383b948",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0xFA36e02daF3f8EDc4295c8d2E3Be2fA5c383b948",
+          "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0xCBcb7B972Ecd05D72d8B475f3266E95e581e47DD",
+          "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"0xCf7478d95B1D394c309845F4743A8455E73730A9",
+          "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"0xEECba44dE199fe54c8f914c3a2371Cf9bbCf6711",
+
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0xB4008A0b07Cdfd59DCd0cCd7B66bf6EefD2cA4A1",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0x1717677A230A1296987150631Aa1DDf7f435A64A",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x8A2D5E2160b04C3FBEb0e28D8239708f2a8a9CaC",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x719f18d5b6670Dda6Aa92C3fd0eECc48AdbAFaba",
+
+          "chainId": "0xA869",
+          "currencyName": "Avalanche",
+          "currencyNetwork": "AVAX",
+          "currencySymbol": "AVAX",
+          "currencyTransak": "BNB,BUSD",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://api.avax-test.network/ext/bc/C/rpc"],
+          "blockExplorerUrls": ["https://testnet.bscscan.com"],
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab"
         }
       }
     },
