@@ -104,6 +104,8 @@ export interface IDuelResult {
   defenderId: string;
   defenderRoll: string;
   timestamp: string;
+  previousDuelReward: string | number;
+  newDuelReward: string | number;
 }
 
 export interface IInventory{

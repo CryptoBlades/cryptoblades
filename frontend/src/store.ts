@@ -13,7 +13,7 @@ import {
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
   IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState, IPvPState, IInventory, IPvPFighterState,
-  IDuelByAttacker, IDuelResult, IWeapon
+  IDuelByAttacker, IWeapon
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
@@ -3660,7 +3660,9 @@ export function createStore(web3: Web3) {
 
           await dispatch('updatePvPDetails',{ characterID });
         } catch(err){
-          console.log('Get Opponent Error Log: ' + err);
+          console.log('Get Opponent Error Log: ');
+          console.log(err);
+          return err;
         }
 
 
@@ -3730,48 +3732,74 @@ export function createStore(web3: Web3) {
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
 
+        const currentBlockNumber = await web3.eth.getBlockNumber();
+        console.log(currentBlockNumber);
+
         try{
           await PvpArena.methods
             .preparePerformDuel(characterID)
             .send({
               from: state.defaultAccount
             });
+
+          return currentBlockNumber;
         }catch(err){
           console.log('Prepare Perform Duel Error Log: ' + err);
         }
 
       },
-      async getDuelQueue({state}){
-        const { PvpArena } = state.contracts();
-        if (!PvpArena) return;
-
-        try{
-          const duelQueue = await PvpArena.methods
-            .getDuelQueue()
-            .call(defaultCallOptions(state));
-
-          return duelQueue;
-        }catch(err){
-          console.log('Get Duel Queue Error Log' + err);
-        }
-      },
-      async performDuel({state, dispatch}, {characterID, duelQueue}){
+      async waitForDuelResult({state, dispatch, commit}, {characterID, previousBlock}){
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
 
+        const previousDuelReward = state.pvp.wageredSkill;
+
+        let isDuelFinished = false;
+        const nextBlock = previousBlock + 1;
+        console.log(previousBlock);
+        console.log(nextBlock);
+        let duelResult;
+        let latestDuelIndex = 0;
+
         try{
-          const duelResult: IDuelResult = duelResultFromContract((await PvpArena.methods
-            .performDuels(duelQueue)
-            .send({
-              from: state.defaultAccount
-            })).events.DuelFinished.returnValues);
+          while(!isDuelFinished){
+            const currentBlock = await web3.eth.getBlockNumber();
+            if(currentBlock >= nextBlock){
+              duelResult = await PvpArena.getPastEvents('DuelFinished', {
+                filter: {attacker: characterID},
+                toBlock: 'latest',
+                fromBlock: 0
+              });
+
+              if(duelResult.length > 0){
+                latestDuelIndex = duelResult?.length-1;
+                duelResult = duelResultFromContract(duelResult[latestDuelIndex].returnValues as [string, string, string, string, string, boolean]);
+
+                duelResult.previousDuelReward = previousDuelReward;
+                duelResult.newDuelReward = state.pvp.wageredSkill;
+
+                console.log(duelResult);
+
+                isDuelFinished = true;
+              }
+              else{
+                duelResult = undefined;
+                isDuelFinished = false;
+              }
+            }
+            else{
+              isDuelFinished = false;
+            }
+          }
 
           //This is outside to make sure that performDuel executes before showing the rewards
           await dispatch('updatePvPDetails', { characterID });
+          commit('updateHasPendingDuel', false);
 
           return duelResult;
         }catch(err){
-          console.log('Perform Duel Error Log: ' + err);
+          console.log('Perform Duel Error Log: ');
+          console.log(err);
         }
       },
       async withdrawFromArena({state, commit, dispatch}, {inDuel,characterID}){
@@ -4146,6 +4174,38 @@ export function createStore(web3: Web3) {
           console.log('Withdraw Ranked Rewards Error Log: ' + err);
         }
       },
+      async fetchWinningPoints({state}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        try{
+          const winningPoints = await PvpArena.methods
+            .winningPoints()
+            .call(defaultCallOptions(state));
+
+          return winningPoints;
+
+        }catch(err){
+          console.log('Fetch Winning Points Error Log:');
+          console.log(err);
+        }
+      },
+      async fetchLosingPoints({state}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        try{
+          const losingPoints = await PvpArena.methods
+            .losingPoints()
+            .call(defaultCallOptions(state));
+
+          return losingPoints;
+        }catch(err){
+          console.log('Fetch Losing Points Error Log:');
+          console.log(err);
+        }
+      },
+
 
       async configureMetaMask({ dispatch }) {
         const currentNetwork = await web3.eth.net.getId();

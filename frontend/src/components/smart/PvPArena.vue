@@ -31,10 +31,6 @@
       </b-col>
     </b-row>
 
-      <div>
-        <pvp-stats v-if="this.pvp.showStats && !isLoading" :characterID="this.currentPvPCharacterId"></pvp-stats>
-      </div>
-
     <b-row v-if="!isLoading">
       <div
         class="go-back-container">
@@ -67,13 +63,13 @@
       <b-col>
         <b-row>
           <div
-            v-if="!hasPendingDuel && this.pvp.decisionTime == '00:00'"
+            v-if="!this.pvp.hasPendingDuel && this.pvp.decisionTime == '00:00'"
             class="find-opponent-container"
             @click="findOpponent(currentPvPCharacterId)">
               <img id="find-opponent-img" src="../../assets/winged-shield.svg"/>
           </div>
           <div
-            v-if="this.pvp.decisionTime !== '00:00'"
+            v-if="this.pvp.hasPendingDuel && this.pvp.decisionTime !== '00:00'"
             class="duel-container">
               <img
                   id="duel-img"
@@ -91,7 +87,7 @@
                   src="../../assets/run.svg"/>WITHDRAW</span>
           </div>
           <div
-            v-if="hasPendingDuel"
+            v-if="this.pvp.hasPendingDuel"
             class="reroll-container">
               <span
                 @click="reRollOpponent(currentPvPCharacterId)">
@@ -131,7 +127,7 @@
         <b-row>
           <pvp-fighter
             :characterId="this.pvp.duelByAttacker.defenderId"
-            :show="hasPendingDuel"
+            :show="this.pvp.hasPendingDuel && this.pvp.decisionTime !== '00:00'"
             :isAttacker="false"></pvp-fighter>
         </b-row>
       </b-col>
@@ -171,7 +167,7 @@
               class="duel-result-rewards-label">RANK POINTS
             </span>
             <span
-              class="duel-result-rewards-won-value">+ {{getRankingPointAdjustment}}</span><br>
+              class="duel-result-rewards-won-value">+ {{winningPoints}}</span><br>
         </div>
         <div class="duel-result-rewards"
           v-if="!duelResult.attackerWon">
@@ -184,7 +180,7 @@
               class="duel-result-rewards-label">RANK POINTS
             </span>
             <span
-              class="duel-result-rewards-lost-value">- {{getRankingPointAdjustment}}</span><br>
+              class="duel-result-rewards-lost-value">- {{losingPoints}}</span><br>
         </div>
 
         <div class="duel-result-ok-button">
@@ -219,6 +215,10 @@
       </div>
     </b-modal>
 
+      <div>
+        <pvp-stats v-if="this.pvp.showStats" :characterID="this.currentPvPCharacterId"></pvp-stats>
+      </div>
+
   </div>
 </template>
 
@@ -246,6 +246,8 @@ export default {
       previousRankPoints: '',
       newRankPoints: '',
       showStats: false,
+      winningPoints: 0,
+      losingPoints: 0
     };
   },
 
@@ -265,12 +267,6 @@ export default {
     getRankingPointAdjustment(){
       const rankPointAdjustment = Math.abs(this.previousRankPoints - this.newRankPoints);
       return rankPointAdjustment;
-    },
-
-    hasPendingDuel(){
-      this.$store.dispatch('hasPendingDuel', {characterID: this.currentPvPCharacterId});
-      const hasPendingDuel = this.pvp.hasPendingDuel;
-      return hasPendingDuel;
     },
 
     getWageredSkill(){
@@ -294,7 +290,8 @@ export default {
       'setCurrentCharacter',
       'setCurrentPvPCharacter',
       'updateShowStats',
-      'updateIsLoading'
+      'updateIsLoading',
+      'updateHasPendingDuel'
     ]),
 
     openStats(){
@@ -353,36 +350,38 @@ export default {
 
     async performDuel(characterID){
       this.updateIsLoading(true);
-      await this.$store.dispatch('preparePerformDuel', {characterID});
-      this.previousRankPoints = '';
       this.previousDuelReward = '';
-      this.previousRankPoints = this.pvp.characterRankingPoints;
       this.previousDuelReward = new BN(this.pvp.wageredSkill).div(new BN(10).pow(18)).toFixed(4);
-      const duelQueue = await this.$store.dispatch('getDuelQueue');
-      this.duelResult = await this.$store.dispatch('performDuel',{characterID, duelQueue});
-      this.isPerformDuel = true;
-      this.isDuelResult = true;
-      setTimeout(() => {
-        this.isPerformDuel = false;
-        this.clearAllTicker();
-        this.ticker();
-      },6000);
-      this.newDuelReward = '';
-      this.newRankPoints = '';
-      this.newDuelReward = new BN(this.pvp.wageredSkill).div(new BN(10).pow(18)).toFixed(4);
-      this.newRankPoints = this.pvp.characterRankingPoints;
+      const currentBlock = await this.$store.dispatch('preparePerformDuel', {characterID});
+
+      this.waitForDuel(characterID, currentBlock);
+
+      this.updateIsLoading(false);
+    },
+
+    async waitForDuel(characterID, currentBlock){
+      this.duelResult = await this.$store.dispatch('waitForDuelResult', {characterID, previousBlock: currentBlock});
 
       if(this.duelResult === undefined){
         this.isPerformDuel = false;
         this.isDuelResult = false;
       }
-      this.updateIsLoading(false);
-
+      else{
+        this.isPerformDuel = true;
+        this.isDuelResult = true;
+        setTimeout(() => {
+          this.isPerformDuel = false;
+          this.clearAllTicker();
+          this.ticker();
+        },6000);
+        this.newDuelReward = '';
+        this.newDuelReward = new BN(this.duelResult.newDuelReward).div(new BN(10).pow(18)).toFixed(4);
+      }
     },
 
     async withdrawFromArena(characterID){
       try{
-        const inDuel = this.pvp.duelByAttacker.isPending;
+        const inDuel = this.pvp.hasPendingDuel;
 
         await this.$store.dispatch('withdrawFromArena',{inDuel,characterID});
       }catch(err){
@@ -423,7 +422,7 @@ export default {
 
       this.$store.dispatch('fetchDecisionTime',{decisionTime:`${formattedMinutes}:${formattedSeconds}`});
 
-      if(distance < 0 || !this.pvp.duelByAttacker.isPending){
+      if(distance < 0 || !this.pvp.hasPendingDuel){
         this.$store.dispatch('fetchDecisionTime',{decisionTime:'00:00'});
         this.clearAllTicker();
       }
@@ -443,8 +442,12 @@ export default {
   },
 
   async created(){
+    this.updateIsLoading(true);
+    this.winningPoints = await this.$store.dispatch('fetchWinningPoints');
+    this.losingPoints = await this.$store.dispatch('fetchLosingPoints');
     this.clearAllTicker();
     this.ticker();
+    this.updateIsLoading(false);
   },
 
   components:{

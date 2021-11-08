@@ -218,8 +218,10 @@ export function duelResultFromContract(data: [string,string,string,string,string
   const attackerRoll = data[3];
   const defenderRoll = data[4];
   const attackerWon = data[5];
+  const previousDuelReward = 0;
+  const newDuelReward = 0;
 
   return {
-    attackerId,attackerRoll,attackerWon,defenderId,defenderRoll,timestamp
+    attackerId,attackerRoll,attackerWon,defenderId,defenderRoll,timestamp, previousDuelReward, newDuelReward
   };
 }
