@@ -33,7 +33,7 @@
               </span>
         </div>
         <div
-            v-if="shield.stars === 3"
+            v-if="shield.stars >= 3"
             id="inventory-shield-trait-2">
               <span>
                 <img
@@ -83,7 +83,7 @@
             </span>
         </div>
         <div
-          v-if="shield.stars === 3"
+          v-if="shield.stars >= 3"
           id="inventory-equipped-shield-trait-2">
             <span>
               <img
@@ -413,7 +413,6 @@ export default {
     border-radius: 10%;
     transform: rotate(30deg);
     position: absolute;
-    left: 28%;
     top: 30%;
 }
 

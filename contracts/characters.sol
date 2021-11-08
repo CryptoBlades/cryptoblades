@@ -6,6 +6,8 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
+import "./interfaces/ITransferCooldownable.sol";
+import "./PvpArena.sol";
 
 import "./interfaces/ITransferCooldownable.sol";
 import "./PvpArena.sol";

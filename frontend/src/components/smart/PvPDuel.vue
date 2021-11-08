@@ -31,7 +31,7 @@ import { getWeaponArtById } from '../../weapon-arts-placeholder';
 
 export default {
 
-  props: ['attackerId','defenderId','isWon'],
+  props: ['attackerId','defenderId'],
 
   methods:{
     getCharacterArtById,
@@ -359,6 +359,7 @@ export default {
   }
   100%{
     opacity: 0;
+    z-index: -1;
   }
 }
 
@@ -424,6 +425,7 @@ export default {
   100%{
     opacity: 0;
     background-color: rgb(104, 104, 104);
+    z-index: -1;
   }
 }
 
