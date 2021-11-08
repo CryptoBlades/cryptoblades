@@ -16,11 +16,6 @@ export interface IWeb3EventSubscription {
   unsubscribe(): void;
 }
 
-export interface ITransferCooldown {
-  secondsLeft: number;
-  lastUpdatedTimestamp: number;
-}
-
 export interface IStakeState {
   ownBalance: string;
   stakedBalance: string;
@@ -171,7 +166,7 @@ export interface IState {
 
   currentTab: number;
 
-  characterTransferCooldowns: Record<number, ITransferCooldown | undefined>;
+  characterTransferCooldowns: Record<number,  | undefined>;
 
   staking: Record<StakeType, IStakeState>;
   stakeOverviews: Record<StakeType, IStakeOverviewState>;

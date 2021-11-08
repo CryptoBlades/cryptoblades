@@ -25,6 +25,10 @@
            NFT Display
         </b-dropdown-item>
 
+        <b-dropdown-item :to="{ name: 'bridge' }" v-if="isBridgeEnabled">
+           <i class="fa fa-exchange-alt mr-2"></i>Bridge NFTs
+        </b-dropdown-item>
+
         </b-dropdown-group>
         <hr class="border-light">
 
@@ -76,6 +80,7 @@ import BigNumber from 'bignumber.js';
 import { Accessors } from 'vue/types/options';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../utils/common';
+import { nft_bridge as bridgeEnabled } from './../feature-flags';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -86,6 +91,7 @@ interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
 }
 interface Data {
+  isBridgeEnabled: boolean;
   showGraphics: boolean;
   hideRewards: boolean;
   hideWalletWarning: boolean;
@@ -109,10 +115,12 @@ export default Vue.extend({
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
+    this.isBridgeEnabled = bridgeEnabled;
   },
 
   data() {
     return {
+      isBridgeEnabled: false,
       showGraphics: false,
       hideRewards: false,
       hideWalletWarning: false,
