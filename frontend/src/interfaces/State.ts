@@ -85,6 +85,9 @@ export interface IPvPState {
   duelByAttacker: IDuelByAttacker | null;
   decisionTime: string;
   rewards: IPvPReward;
+  hasPendingDuel: boolean;
+  characterRankingPoints: string;
+  showStats: boolean;
 }
 
 export interface IDuelByAttacker {
@@ -172,6 +175,8 @@ export interface IState {
   raid: IRaidState;
 
   pvp: IPvPState;
+
+  isLoading: boolean;
 
   inventory: IInventory[];
 

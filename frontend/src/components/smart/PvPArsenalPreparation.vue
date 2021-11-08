@@ -2,10 +2,23 @@
   <b-row class="pvp-content">
         <b-col id="arsenal-preparation-content">
 
-            <pvp-divider>
+            <pvp-divider v-if="!isLoading">
             </pvp-divider>
 
-            <b-row id="slider-buttons">
+        <b-row>
+          <b-col>
+            <div class="preloader-container"
+              v-if="isLoading">
+                <pvp-preloader></pvp-preloader>
+                  <div class="preloader-text" >
+                    <span v-if="isLoading">Please wait ...</span>
+                  </div>
+            </div>
+          </b-col>
+        </b-row>
+
+          <b-row id="slider-buttons"
+            v-if="!isLoading">
               <b-col
                   v-for="character in ownCharacters"
                   :key="character.id">
@@ -14,8 +27,9 @@
                   :currentCharacterId="currentCharacterId"
                   :inPvP="true"></pvp-character>
               </b-col>
-            </b-row>
-          <b-row id="slider-content">
+          </b-row>
+          <b-row id="slider-content"
+            v-if="!isLoading">
               <b-col>
                 <b-row class="equipped-weapon-container">
                   <b-col>
@@ -29,7 +43,7 @@
                   <b-col>
                     <div
                         id="equipped-weapon"
-                        @click="setCurrentTab(0); hideShieldInventory();">
+                        @click="setCurrentTab(0); tickWeaponInventory(); ">
                       <div
                         v-if="!this.pvp.isCharacterInArena"
                         class="equipped-weapon-content">
@@ -63,7 +77,7 @@
                   <b-col>
                     <div
                         id="equipped-shield"
-                        @click="setCurrentTab(1); hideWeaponInventory();">
+                        @click="setCurrentTab(1); tickShieldInventory();">
                       <div
                         v-if="!this.pvp.isCharacterInArena && this.ownShields.length !== 0"
                         class="equipped-shield-content">
@@ -125,17 +139,21 @@
           :show.sync="showWeaponInventory"
           :custom-class="`${getPopoverClass(0)}`"
           target="equipped-weapon"
-          triggers="click"
+          triggers="hover focus"
           placement="right">
             <pvp-inventory></pvp-inventory>
         </b-popover>
         <b-popover
           :show.sync="showShieldInventory"
           :custom-class="`${getPopoverClass(1)}`"
-          target="equipped-shield" triggers="click"
+          target="equipped-shield"
+          triggers="hover focus"
           placement="right">
             <pvp-inventory></pvp-inventory>
         </b-popover>
+
+        <pvp-stats v-if="this.pvp.showStats" :characterID="this.currentCharacterId"></pvp-stats>
+
   </b-row>
 </template>
 
@@ -153,19 +171,20 @@ import PvPCharacter from './PvPCharacter.vue';
 import PvPDivider from './PvPDivider.vue';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
-
+import PvPStats from './PvPStats.vue';
+import PvPPreloader from './Preloader.vue';
 
 export default {
   data(){
     return {
       sliding: 0,
       showWeaponInventory: false,
-      showShieldInventory: false,
+      showShieldInventory: false
     };
   },
 
   computed: {
-    ...mapState(['currentCharacterId','currentWeaponId','pvp']),
+    ...mapState(['currentCharacterId','currentWeaponId','pvp','isLoading']),
     ...mapGetters([
       'currentWeapon',
       'currentCharacter',
@@ -187,19 +206,22 @@ export default {
       'setCurrentShield',
       'setCurrentWeapon',
       'updateIsWeaponInArena',
-      'updateIsShieldInArena'
+      'updateIsShieldInArena',
+      'updateIsLoading'
     ]),
 
     getCharacterArt,
 
     getWeaponArt,
 
-    hideWeaponInventory(){
-      this.showWeaponInventory = false;
+    tickWeaponInventory(){
+      this.showWeaponInventory = !this.showWeaponInventory;
+      this.showShieldInventory = false;
     },
 
-    hideShieldInventory(){
-      this.showShieldInventory = false;
+    tickShieldInventory(){
+      this.showShieldInventory = !this.showShieldInventory;
+      this.showWeaponInventory = false;
     },
 
     getShieldArt(shieldId) {
@@ -232,12 +254,16 @@ export default {
 
   },
   async created(){
+    this.updateIsLoading(true);
     this.setCurrentWeapon(null);
     this.updateIsWeaponInArena({isWeaponInArena: true});
     this.setCurrentShield(null);
     this.updateIsShieldInArena({isShieldInArena: false});
 
     await this.$store.dispatch('fetchIsCharacterInArena', { characterID: this.currentCharacterId });
+    setTimeout(() => {
+      this.updateIsLoading(false);
+    }, 3000);
   },
 
   components: {
@@ -248,7 +274,9 @@ export default {
     'pvp-character': PvPCharacter,
     'pvp-divider': PvPDivider,
     'pvp-weapon': PvPWeapon,
-    'pvp-shield': PvPShield
+    'pvp-shield': PvPShield,
+    'pvp-stats': PvPStats,
+    'pvp-preloader': PvPPreloader
   },
 };
 </script>
@@ -373,4 +401,19 @@ export default {
 
 
 /* PvP Content Styles */
+
+.preloader-container{
+  height: 500px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.preloader-text{
+  position: relative;
+  top: 350px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
 </style>

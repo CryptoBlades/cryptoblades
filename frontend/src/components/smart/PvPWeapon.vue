@@ -34,7 +34,7 @@
               </span>
           </div>
           <div
-            v-if="weapon.stars === 3"
+            v-if="weapon.stars >= 3"
             id="inventory-weapon-trait-2">
               <span>
                 <img
@@ -83,7 +83,7 @@
             </span>
         </div>
         <div
-          v-if="weapon.stars === 3"
+          v-if="weapon.stars >= 3"
           id="inventory-equipped-weapon-trait-2">
             <span>
               <img
@@ -390,7 +390,6 @@ export default {
     border-radius: 10%;
     transform: rotate(30deg);
     position: absolute;
-    left: 28%;
     top: 30%;
 }
 

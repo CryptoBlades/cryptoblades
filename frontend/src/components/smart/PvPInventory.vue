@@ -45,6 +45,8 @@
                       <img class="weapon-filter" src="../../assets/elements/water.png"/>
                     </span>
                   </b-col>
+                  <b-col>
+                  </b-col>
                 </b-row>
                 <span class="inventory-filter-header"> STAR </span>
                 <b-row>

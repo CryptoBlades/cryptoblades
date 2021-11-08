@@ -107,11 +107,11 @@
                   <b-row class="fighter-duel-cost-container"
                     v-if="isAttacker">
                     <b-col>
-                      <span class="fighter-combat-details-label">Duel Cost</span>
+                      <span class="fighter-combat-details-label">Ranking Points</span>
                     </b-col>
                     <b-col>
                       <div>
-                        <span class=fighter-combat-details-value>{{getDuelCost}}</span>
+                        <span class=fighter-combat-details-value>{{getCharacterRankingPoints}}</span>
                       </div>
                     </b-col>
                   </b-row>
@@ -183,6 +183,11 @@ export default {
       return duelCost;
     },
 
+    getCharacterRankingPoints(){
+      const characterRankingPoints = this.pvp.characterRankingPoints;
+      return characterRankingPoints;
+    },
+
     getCharacterTrait(){
       if(this.isAttacker){
         return this.pvp.attackerFighter.characterTrait;
@@ -194,6 +199,7 @@ export default {
   },
 
   methods:{
+
     getCharacterArtById,
 
     CharacterPower,
