@@ -361,10 +361,9 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         uint256 amount = _supportedChains.length();
         chainIds = new uint256[](amount);
 
-        uint256 index = 0;
         for (uint256 i = 0; i < amount; i++) {
             uint256 id = _supportedChains.at(i);
-                chainIds[index++] = id;
+                chainIds[i] = id;
         }
     }
 
@@ -420,10 +419,9 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         EnumerableSet.UintSet storage storedTokens = receivedNFTs[msg.sender];
 
-        uint256 index = 0;
         for (uint256 i = 0; i < storedTokens.length(); i++) {
             uint256 id = storedTokens.at(i);
-                tokens[index++] = id;
+                tokens[i] = id;
         }
     }
 
