@@ -275,10 +275,9 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         EnumerableSet.UintSet storage storedTokens = storedItems[msg.sender][address(_tokenAddress)];
 
-        uint256 index = 0;
         for (uint256 i = 0; i < storedTokens.length(); i++) {
             uint256 id = storedTokens.at(i);
-                tokens[index++] = id;
+                tokens[i] = id;
         }
     }
 
