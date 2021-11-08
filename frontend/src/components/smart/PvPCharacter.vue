@@ -67,8 +67,6 @@ export default {
       await Promise.all([
         this.$store.dispatch('fetchIsCharacterInArena', { characterID }),
         this.$store.dispatch('fetchEntryWager',{ characterID }),
-        this.$store.dispatch('fetchUnclaimedDuelEarningsById', { characterID }),
-        this.$store.dispatch('fetchAllUnclaimedDuelEarnings'),
         this.$store.dispatch('fetchPvPTraitBonusAgainst',{
           characterTrait: this.pvp.attackerFighter.characterTrait,
           weaponTrait: this.getWeaponElementNum(this.pvp.attackerFighter.weapon.element),
@@ -95,7 +93,7 @@ export default {
     },
 
     getDecisionTime(){
-      const decisionTimeInterval = (this.pvp.duelByAttacker.createdAt * 1000) + (180000);
+      const decisionTimeInterval = (this.pvp.duelByAttacker.createdAt * 1000) - 60000;
 
       const decisionTime = new Date(decisionTimeInterval);
 
@@ -167,8 +165,6 @@ export default {
     await Promise.all([
       this.$store.dispatch('fetchIsCharacterInArena', { characterID: this.currentCharacterId }),
       this.$store.dispatch('fetchEntryWager',{ characterID: this.currentCharacterId }),
-      this.$store.dispatch('fetchUnclaimedDuelEarningsById', { characterID: this.currentCharacterId }),
-      this.$store.dispatch('fetchAllUnclaimedDuelEarnings'),
       this.$store.dispatch('fetchPvPTraitBonusAgainst',{
         characterTrait: this.pvp.attackerFighter.characterTrait,
         weaponTrait: this.getWeaponElementNum(this.pvp.attackerFighter.weapon.element),
@@ -198,7 +194,6 @@ export default {
     border-radius: 10%;
     transform: rotate(30deg);
     position: absolute;
-    left: 38%;
     top: 20%;
 }
 
