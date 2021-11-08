@@ -1827,7 +1827,7 @@ export function createStore(web3: Web3) {
         await dispatch('fetchStakeDetails', { stakeType });
       },
 
-      async joinRaid({ state }, { characterId, weaponId }) {
+      async joinRaid({ state, dispatch }, { characterId, weaponId }) {
         const { CryptoBlades, SkillToken, Raid1 } = state.contracts();
         if(!Raid1 || !CryptoBlades || !SkillToken || !state.defaultAccount) {
           return;
@@ -1849,6 +1849,8 @@ export function createStore(web3: Web3) {
         await Raid1!.methods
           .joinRaid(characterId, weaponId)
           .send(defaultCallOptions(state));
+
+        await dispatch('fetchSkillBalance');
       },
 
       async fetchRaidState({ state, commit }) {
