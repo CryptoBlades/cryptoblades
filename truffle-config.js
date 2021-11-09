@@ -178,9 +178,24 @@ module.exports = {
           providerOrUrl: 'https://api.avax-test.network/ext/bc/C/rpc'
         }
       )),
-      network_id: 43113, // 1 or * for deployment, 43113 for verification
+      network_id: 1, // 1 or * for deployment, 43113 for verification (for truffle-plugin-verify to pick up snowtracer api key)
       gas: 6000000,
       gasPrice: 25000000000,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    avaxmainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.AVAX_MAINNET_PRIVATE_KEY,
+        process.env.AVAX_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://api.avax.network/ext/bc/C/rpc'
+        }
+      )),
+      network_id: 1, // 1 or * for deployment, 43114 for verification (for truffle-plugin-verify to pick up snowtracer api key)
+      gas: 7000000,
+      gasPrice: 27000000000,
+      confirmations: 7,
       timeoutBlocks: 200,
       skipDryRun: true
     },
@@ -238,7 +253,8 @@ module.exports = {
     bscscan: process.env.BSCSCAN_API_KEY,
     hecoinfo: process.env.HECOINFO_API_KEY,
     OKLink: process.env.OKLINK_API_KEY,
-    polygonscan: process.env.POLYGONSCAN_API_KEY
+    polygonscan: process.env.POLYGONSCAN_API_KEY,
+    snowtrace: process.env.SNOWTRACE_API_KEY
   },
   // subscribers: {
   //   abisToTs: require('./truffle-subscriber-abis-to-ts.js')

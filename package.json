@@ -62,9 +62,12 @@
     "postdeploy-okexmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 66\" \"verify-contracts -- --network okexmainnet\"",
     "deploy-polygonmainnet-warning-be-careful-this-is-prod": "truffle migrate --network polygonmainnet",
     "postdeploy-polygonmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 137\" \"verify-contracts -- --network polygonmainnet\"",
+    "deploy-avaxmainnet-warning-be-careful-this-is-prod": "truffle migrate --network avaxmainnet",
+    "postdeploy-avaxmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks-to-file 1 43114\" \"verify-contracts -- --network avaxmainnet\"",
     "deploy-mainnet-dry-run": "truffle migrate --network bscmainnet --dry-run",
     "backup-networks": "node scripts/manage-networks.js backup",
     "backup-networks-to-file": "node scripts/manage-networks.js backupToFile",
+    "restore-networks-from-file": "node scripts/manage-networks.js restoreFromFile",
     "verify-contracts": "node scripts/verify-contracts.js"
   },
   "keywords": [],

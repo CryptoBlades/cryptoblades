@@ -294,6 +294,38 @@
           "rpcUrls": ["https://matic-mainnet.chainstacklabs.com"],
           "blockExplorerUrls": ["https://polygonscan.com/"],
           "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86"
+        },
+        "AVAX": {
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
+          "VUE_APP_NETWORK_ID":"1",
+          "VUE_APP_EXPECTED_NETWORK_ID":"1",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Avalanche Mainnet",
+          
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
+          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"skill",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0x483416eB3aFA601B9C6385f63CeC0C82B6aBf1fb",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0x483416eB3aFA601B9C6385f63CeC0C82B6aBf1fb",
+          "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"0x96438Debb1419bF0B53119Edae6e664c931504CA",
+          "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"0xE8f14F0a5a5f059ae060664e0f165B7e5A52e4e5",
+          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"0x1d2e34AA4E5A7a0907066D4a93456d639eF22aC2",
+          "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"0x79dc8A125f2C929165414342FC959Ea7bBCbb6E8",
+          
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x46419526a59ec1d73b72620ae16da091bE8486bd",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0xbAC6B71a5bC3517Bee588299980B3C357a518e5C",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x9469ED8d4b86e4442b4AA848bB94B9f9130f123E",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xf055e7F7cbed74821A857D80Dd0E5b45576a41BD",
+
+          "chainId": "0xA86A",
+          "currencyName": "Avalanche",
+          "currencyNetwork": "Avalanche",
+          "currencySymbol": "AVAX",
+          "currencyTransak": "AVAX",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://api.avax.network/ext/bc/C/rpc"],
+          "blockExplorerUrls": ["https://snowtrace.io/"],
+          "exchangeUrl": ""
         }
       }
     }

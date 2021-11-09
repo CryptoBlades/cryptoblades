@@ -36,7 +36,7 @@ module.exports = async function (deployer, network) {
 
     skillToken = await IERC20.at('0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab');
   }
-  else if(network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet') {
+  else if(network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet') {
     randoms = await ChainlinkRandoms.deployed();
     skillToken = await SkillToken.deployed();
   }

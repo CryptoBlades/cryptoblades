@@ -590,7 +590,7 @@ export default Vue.extend({
     async onForgeWeapon() {
       if(this.disableForge) return;
 
-      (this.$refs['forge-element-selector-modal']as BModal).hide();
+      (this.$refs['forge-element-selector-modal']as BModal)?.hide();
 
       const forgeMultiplier = 1;
 
@@ -601,7 +601,7 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await this.mintWeapon({ useStakedSkillOnly: this.useStakedForForge, chosenElement: this.selectedElement });
+        await this.mintWeapon({ useStakedSkillOnly: this.useStakedForForge, chosenElement: this.selectedElement || 100 });
 
       } catch (e) {
         console.error(e);
