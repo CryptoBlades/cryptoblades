@@ -3756,16 +3756,14 @@ export function createStore(web3: Web3) {
         }
 
       },
-      async waitForDuelResult({state, dispatch, commit}, {characterID, previousBlock}){
+      async waitForDuelResult({state, dispatch}, {characterID, previousBlock}){
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
 
         const previousDuelReward = state.pvp.wageredSkill;
 
         let isDuelFinished = false;
-        const nextBlock = previousBlock + 1;
-        console.log(previousBlock);
-        console.log(nextBlock);
+        let nextBlock = previousBlock + 1;
         let duelResult;
         let latestDuelIndex = 0;
 
@@ -3779,20 +3777,19 @@ export function createStore(web3: Web3) {
                 fromBlock: 0
               });
 
-              if(duelResult.length > 0){
+              if(duelResult !== undefined){
                 latestDuelIndex = duelResult?.length-1;
                 duelResult = duelResultFromContract(duelResult[latestDuelIndex].returnValues as [string, string, string, string, string, boolean]);
 
                 duelResult.previousDuelReward = previousDuelReward;
                 duelResult.newDuelReward = state.pvp.wageredSkill;
 
-                console.log(duelResult);
-
                 isDuelFinished = true;
               }
               else{
                 duelResult = undefined;
                 isDuelFinished = false;
+                nextBlock++;
               }
             }
             else{
@@ -3802,7 +3799,7 @@ export function createStore(web3: Web3) {
 
           //This is outside to make sure that performDuel executes before showing the rewards
           await dispatch('updatePvPDetails', { characterID });
-          commit('updateHasPendingDuel', false);
+
 
           return duelResult;
         }catch(err){

@@ -63,7 +63,7 @@
       <b-col>
         <b-row>
           <div
-            v-if="!getIsShown"
+            v-if="!this.pvp.duelByAttacker.isPending && this.pvp.decisionTime === '00:00'"
             class="find-opponent-container"
             @click="findOpponent(currentPvPCharacterId)">
               <img id="find-opponent-img" src="../../assets/winged-shield.svg"/>
@@ -87,7 +87,7 @@
                   src="../../assets/run.svg"/>WITHDRAW</span>
           </div>
           <div
-            v-if="getIsShown"
+            v-if="this.pvp.duelByAttacker.isPending"
             class="reroll-container">
               <span
                 @click="reRollOpponent(currentPvPCharacterId)">
@@ -162,7 +162,7 @@
               class="duel-result-rewards-label">SKILL
             </span>
             <span
-              class="duel-result-rewards-won-value">+ {{getDuelReward}}</span><br>
+              class="duel-result-rewards-won-value">+ {{getWinDuelReward}}</span><br>
             <span
               class="duel-result-rewards-label">RANK POINTS
             </span>
@@ -175,7 +175,7 @@
               class="duel-result-rewards-label">SKILL
             </span>
             <span
-              class="duel-result-rewards-lost-value">- {{getDuelReward}}</span><br>
+              class="duel-result-rewards-lost-value">- {{getLoseDuelReward}}</span><br>
             <span
               class="duel-result-rewards-label">RANK POINTS
             </span>
@@ -241,8 +241,6 @@ export default {
       duelResult: null,
       totalWithdrawableSkill: '',
       isShown: false,
-      previousDuelReward: '',
-      newDuelReward: '',
       previousRankPoints: '',
       newRankPoints: '',
       showStats: false,
@@ -263,8 +261,12 @@ export default {
       return this.pvp.duelByAttacker.isPending && this.pvp.decisionTime !== '00:00';
     },
 
-    getDuelReward(){
-      const duelReward = Math.abs(parseFloat(this.newDuelReward) - parseFloat(this.previousDuelReward)).toFixed(4);
+    getWinDuelReward(){
+      const duelReward = new BN(this.pvp.duelCost).div(new BN(10).pow(18)).toFixed(4) - (new BN(this.pvp.duelCost).div(new BN(10).pow(18)).toFixed(4) * 0.30);
+      return duelReward;
+    },
+    getLoseDuelReward(){
+      const duelReward = new BN(this.pvp.duelCost).div(new BN(10).pow(18)).toFixed(4);
       return duelReward;
     },
 
@@ -354,8 +356,6 @@ export default {
 
     async performDuel(characterID){
       this.updateIsLoading(true);
-      this.previousDuelReward = '';
-      this.previousDuelReward = new BN(this.pvp.wageredSkill).div(new BN(10).pow(18)).toFixed(4);
       const currentBlock = await this.$store.dispatch('preparePerformDuel', {characterID});
 
       this.waitForDuel(characterID, currentBlock);
@@ -365,7 +365,6 @@ export default {
 
     async waitForDuel(characterID, currentBlock){
       this.duelResult = await this.$store.dispatch('waitForDuelResult', {characterID, previousBlock: currentBlock});
-
       if(this.duelResult === undefined){
         this.isPerformDuel = false;
         this.isDuelResult = false;
@@ -378,8 +377,6 @@ export default {
           this.clearAllTicker();
           this.ticker();
         },6000);
-        this.newDuelReward = '';
-        this.newDuelReward = new BN(this.duelResult.newDuelReward).div(new BN(10).pow(18)).toFixed(4);
       }
     },
 

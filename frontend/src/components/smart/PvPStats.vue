@@ -450,10 +450,7 @@ export default {
     Promise.all([
       await this.processDuelHistory(),
       await this.processLeaderboards()]);
-
-    setTimeout(() => {
-      this.updateIsLoading(false);
-    }, 3000);
+    this.updateIsLoading(false);
   },
 
   components:{
