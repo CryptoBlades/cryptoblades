@@ -63,13 +63,13 @@
       <b-col>
         <b-row>
           <div
-            v-if="!this.pvp.hasPendingDuel && this.pvp.decisionTime == '00:00'"
+            v-if="!getIsShown"
             class="find-opponent-container"
             @click="findOpponent(currentPvPCharacterId)">
               <img id="find-opponent-img" src="../../assets/winged-shield.svg"/>
           </div>
           <div
-            v-if="this.pvp.hasPendingDuel && this.pvp.decisionTime !== '00:00'"
+            v-if="getIsShown"
             class="duel-container">
               <img
                   id="duel-img"
@@ -87,7 +87,7 @@
                   src="../../assets/run.svg"/>WITHDRAW</span>
           </div>
           <div
-            v-if="this.pvp.hasPendingDuel"
+            v-if="getIsShown"
             class="reroll-container">
               <span
                 @click="reRollOpponent(currentPvPCharacterId)">
@@ -127,7 +127,7 @@
         <b-row>
           <pvp-fighter
             :characterId="this.pvp.duelByAttacker.defenderId"
-            :show="this.pvp.hasPendingDuel && this.pvp.decisionTime !== '00:00'"
+            :show="getIsShown"
             :isAttacker="false"></pvp-fighter>
         </b-row>
       </b-col>
@@ -258,6 +258,10 @@ export default {
       'currentPvPCharacterId',
       'getCharacterName'
     ]),
+
+    getIsShown(){
+      return this.pvp.duelByAttacker.isPending && this.pvp.decisionTime !== '00:00';
+    },
 
     getDuelReward(){
       const duelReward = Math.abs(parseFloat(this.newDuelReward) - parseFloat(this.previousDuelReward)).toFixed(4);
