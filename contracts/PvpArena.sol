@@ -19,6 +19,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
     using SafeMath for uint8;
+    using SafeMath for uint24;
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -324,6 +325,52 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 defenderID,
                 attackerTrait
             );
+
+            if (fighterByCharacter[attackerID].useShield) {
+                uint24 attackerShieldDefense = 3;
+
+                (, , , uint8 attackerShieldTrait) = shields.getFightData(
+                    fighterByCharacter[attackerID].shieldID,
+                    attackerTrait
+                );
+
+                if (
+                    game.isTraitEffectiveAgainst(
+                        attackerShieldTrait,
+                        defenderTrait
+                    )
+                ) {
+                    attackerShieldDefense = 10;
+                }
+
+                defenderRoll = uint24(
+                    (defenderRoll.mul(uint24(200).sub(attackerShieldDefense)))
+                        .div(100)
+                );
+            }
+
+            if (fighterByCharacter[defenderID].useShield) {
+                uint24 defenderShieldDefense = 3;
+
+                (, , , uint8 defenderShieldTrait) = shields.getFightData(
+                    fighterByCharacter[defenderID].shieldID,
+                    attackerTrait
+                );
+
+                if (
+                    game.isTraitEffectiveAgainst(
+                        defenderShieldTrait,
+                        defenderTrait
+                    )
+                ) {
+                    defenderShieldDefense = 10;
+                }
+
+                attackerRoll = uint24(
+                    (attackerRoll.mul(uint24(200).sub(defenderShieldDefense)))
+                        .div(100)
+                );
+            }
 
             uint256 winnerID = attackerRoll >= defenderRoll
                 ? attackerID
@@ -696,13 +743,22 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterRankingPoints[characterID] = newRankingPoints;
     }
 
+    function _getShieldStats(uint256 characterID)
+        private
+        view
+        returns (int128)
+    {
+        uint8 trait = characters.getTrait(characterID);
+        uint256 shieldID = fighterByCharacter[characterID].shieldID;
+        (, int128 shieldMultFight, , ) = shields.getFightData(shieldID, trait);
+        return (shieldMultFight);
+    }
+
     function _getCharacterPowerRoll(uint256 characterID, uint8 opponentTrait)
         private
         view
         returns (uint24)
     {
-        // TODO:
-        // - [ ] consider shield
         uint8 trait = characters.getTrait(characterID);
         uint24 basePower = characters.getPower(characterID);
         uint256 weaponID = fighterByCharacter[characterID].weaponID;
@@ -710,6 +766,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             msg.sender,
             blockhash(block.number)
         );
+
+        bool useShield = fighterByCharacter[characterID].useShield;
+        int128 bonusShieldStats;
+        if (useShield) {
+            bonusShieldStats = _getShieldStats(characterID);
+        }
+
 
         (
             ,
@@ -726,7 +789,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         uint256 playerFightPower = game.getPlayerPower(
             basePower,
-            weaponMultFight,
+            weaponMultFight.add(bonusShieldStats),
             weaponBonusPower
         );
 
@@ -747,7 +810,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         int128 traitBonus = ABDKMath64x64.fromUInt(1);
         int128 fightTraitBonus = game.fightTraitBonus();
         int128 charTraitFactor = ABDKMath64x64.divu(50, 100);
-
         if (characterTrait == weaponTrait) {
             traitBonus = traitBonus.add(fightTraitBonus);
         }

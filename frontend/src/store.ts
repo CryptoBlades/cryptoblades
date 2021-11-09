@@ -336,9 +336,15 @@ export function createStore(web3: Web3) {
         return getConfigValue('exchangeUrl');
       },
       getExchangeTransakUrl() {
-        const currencyNetwork = getConfigValue('currency') || 'BNB';
-        const currency = getConfigValue('currencyTransak') || 'BNB,BUSD';
-        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&defaultCryptoCurrencyNetwork=' + currencyNetwork + '&defaultCryptoCurrency=' + currency;
+        const currencyNetwork = getConfigValue('currencyNetwork') || 'BSC';
+        const currencyDefault = getConfigValue('currency') || 'BNB';
+        const currencyList = getConfigValue('currencyTransak') || 'BNB,BUSD';
+
+        const urlCC = 'defaultCryptoCurrency=' + currencyDefault;
+        const urlNetwork = 'network=' + currencyNetwork;
+        const urlCCL = 'cryptoCurrencyList=' + currencyList;
+
+        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlNetwork + '&' + urlCCL;
       },
       ownCharacters(state, getters) {
         return getters.charactersWithIds(state.ownedCharacterIds);
@@ -2203,7 +2209,7 @@ export function createStore(web3: Web3) {
         await dispatch('fetchStakeDetails', { stakeType });
       },
 
-      async joinRaid({ state }, { characterId, weaponId }) {
+      async joinRaid({ state, dispatch }, { characterId, weaponId }) {
         const { CryptoBlades, SkillToken, Raid1 } = state.contracts();
         if(!Raid1 || !CryptoBlades || !SkillToken || !state.defaultAccount) {
           return;
@@ -2225,6 +2231,8 @@ export function createStore(web3: Web3) {
         await Raid1!.methods
           .joinRaid(characterId, weaponId)
           .send(defaultCallOptions(state));
+
+        await dispatch('fetchSkillBalance');
       },
 
       async fetchRaidState({ state, commit }) {
