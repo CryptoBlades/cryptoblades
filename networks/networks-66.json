@@ -455,7 +455,7 @@
     },
     "links": {},
     "address": "0xb23F1C1841567b95F1C6E8fd6189539790BBB9F4",
-    "transactionHash": "0x4598a10e87690c5bea112b812d51b440a669dde7c3bd08a1a5ba50162f6b085d"
+    "transactionHash": "0x6fb1740fbb0770883557abf06a3a39ded52eb551f45d26beb8f600ee2ffcafb4"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -788,7 +788,7 @@
     },
     "links": {},
     "address": "0x236777456dD5159Da6c38A0E24f46e30C6f9e326",
-    "transactionHash": "0x05f3a74ee4bd89ccf9ddddeafeac6c10f8d7917b24ffd5e12879d08687fc0902"
+    "transactionHash": "0xaf6b2b4d587ad42c6567c54d8218094712f920df52bcdf7609e1c14dc0c70d43"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -2134,7 +2134,7 @@
     },
     "links": {},
     "address": "0x98145a2fEBac238280bbdEDc2757dC162318b16e",
-    "transactionHash": "0x59e759b638390ed00dcdcf617895346d064a3f158d47dded299dc49456508f80"
+    "transactionHash": "0xcbc717fa9a8d782daf1489c17e2e3e069ddeef8423759830b406fda36d55fa86"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
@@ -2512,6 +2512,12 @@
     "address": "0xcdbce3aC3E5b51A8eBF011B067dAC903A37F0D3E",
     "transactionHash": "0xdededfdfe98c63d1cf5b71984fac44963a09e43e0a75a1c85e096c23f98c8c93"
   },
+  "build/contracts/Merchandise.json": {
+    "events": {},
+    "links": {},
+    "address": "0x3b20013A190aE6781c013B2506F8a164e7A8816b",
+    "transactionHash": "0x94a9744b35ac88011c4b84ecb66736b44d2ac8ec5feba4f3778c87401e1c272f"
+  },
   "build/contracts/Migrations.json": {
     "events": {},
     "links": {},
@@ -2765,7 +2771,7 @@
     "events": {},
     "links": {},
     "address": "0x7f25686b5a211280C2555c08B7e6d2930e7e87e6",
-    "transactionHash": "0xe779f71a8a5b05153b00b1c4242c42f89d2850447c2947556070aa1c193b9854"
+    "transactionHash": "0x2335228e68edd30e58c12d45833dd6b892ca56f42e4014b05964fb3dc9e8a3dc"
   },
   "build/contracts/Promos.json": {
     "events": {
