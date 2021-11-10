@@ -155,13 +155,13 @@
 
           "chainId": "0xA869",
           "currencyName": "Avalanche",
-          "currencyNetwork": "AVAX",
+          "currencyNetwork": "Avalanche",
           "currencySymbol": "AVAX",
-          "currencyTransak": "BNB,BUSD",
+          "currencyTransak": "AVAX",
           "currencyDecimals": "18",
           "rpcUrls": ["https://api.avax-test.network/ext/bc/C/rpc"],
-          "blockExplorerUrls": ["https://testnet.bscscan.com"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab"
+          "blockExplorerUrls": ["https://testnet.snowtrace.io/"],
+          "exchangeUrl": ""
         }
       }
     },

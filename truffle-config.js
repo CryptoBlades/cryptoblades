@@ -195,7 +195,7 @@ module.exports = {
       network_id: 1, // 1 or * for deployment, 43114 for verification (for truffle-plugin-verify to pick up snowtracer api key)
       gas: 7000000,
       gasPrice: 27000000000,
-      confirmations: 7,
+      confirmations: 10,
       timeoutBlocks: 200,
       skipDryRun: true
     },
