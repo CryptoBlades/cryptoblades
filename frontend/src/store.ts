@@ -13,7 +13,7 @@ import {
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
   IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState, IPvPState, IInventory, IPvPFighterState,
-  IDuelByAttacker, IWeapon
+  IDuelByAttacker, IWeapon, IDuelResult
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
@@ -199,6 +199,9 @@ export function createStore(web3: Web3) {
         isCharacterInArena: false,
         isWeaponInArena: false,
         isShieldInArena: false,
+        isPerformDuel: false,
+        isDuelResult: false,
+        duelResult: null,
         duelByAttacker: {
           attackerId: '0',
           defenderId: '0',
@@ -1076,6 +1079,18 @@ export function createStore(web3: Web3) {
 
       updateIsLoading(state: IState, isLoading: boolean){
         state.isLoading = isLoading;
+      },
+
+      updateIsDuelResult(state: IState, isDuelResult: boolean){
+        state.pvp.isDuelResult = isDuelResult;
+      },
+
+      updateIsPerformDuel(state: IState, isPerformDuel: boolean){
+        state.pvp.isPerformDuel = isPerformDuel;
+      },
+
+      updateDuelResult(state: IState, duelResult: IDuelResult){
+        state.pvp.duelResult = duelResult;
       }
 
     },
@@ -3637,7 +3652,9 @@ export function createStore(web3: Web3) {
               from: state.defaultAccount
             });
         } catch(err){
-          console.error('Enter Arena Skill Token Approval Error Log: ' + err);
+          console.log('Enter Arena Skill Token Approval Error Log: ');
+          console.log(err);
+          return err;
         }
 
         try{
@@ -3650,7 +3667,9 @@ export function createStore(web3: Web3) {
           await dispatch('updatePvPDetails', { characterID });
 
         } catch(err){
-          console.error('Enter Arena Error Log: ' + err);
+          console.log('Enter Arena Error Log: ');
+          console.log(err);
+          return err;
         }
 
 
@@ -3688,7 +3707,9 @@ export function createStore(web3: Web3) {
               from: state.defaultAccount
             });
         }catch(err){
-          console.log('Reroll Opponent Skill Approval Error Log: ' + err);
+          console.log('Reroll Opponent Skill Approval Error Log: ');
+          console.log(err);
+          return err;
         }
 
         try{
@@ -3700,7 +3721,9 @@ export function createStore(web3: Web3) {
 
           await dispatch('updatePvPDetails', { characterID });
         } catch(err){
-          console.log('Reroll Opponent Error Log: ' + err);
+          console.log('Reroll Opponent Error Log: ');
+          console.log(err);
+          return err;
         }
       },
       async getDuelByAttacker({state, commit, dispatch}, {characterID}){
@@ -3736,12 +3759,9 @@ export function createStore(web3: Web3) {
 
         return duelByAttacker;
       },
-      async preparePerformDuel({state}, {characterID}){
+      async preparePerformDuel({state, commit}, {characterID}){
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
-
-        const currentBlockNumber = await web3.eth.getBlockNumber();
-        console.log(currentBlockNumber);
 
         try{
           await PvpArena.methods
@@ -3749,63 +3769,58 @@ export function createStore(web3: Web3) {
             .send({
               from: state.defaultAccount
             });
-
-          return currentBlockNumber;
         }catch(err){
-          console.log('Prepare Perform Duel Error Log: ' + err);
+          commit('updateIsLoading', false);
+          console.log('Prepare Perform Duel Error Log: ');
+          console.log(err);
+          return err;
         }
 
       },
-      async waitForDuelResult({state, dispatch}, {characterID, previousBlock}){
+      async waitForDuelResult({state, commit, dispatch},{characterID}){
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
 
-        const previousDuelReward = state.pvp.wageredSkill;
+        const currentBlock = await web3.eth.getBlockNumber();
 
-        let isDuelFinished = false;
-        let nextBlock = previousBlock + 1;
-        let duelResult;
-        let latestDuelIndex = 0;
+        const subscription = web3.eth.subscribe('newBlockHeaders',
+          async function(error: any){
+            if(!error){
 
-        try{
-          while(!isDuelFinished){
-            const currentBlock = await web3.eth.getBlockNumber();
-            if(currentBlock >= nextBlock){
-              duelResult = await PvpArena.getPastEvents('DuelFinished', {
+              const duelResult = await PvpArena.getPastEvents('DuelFinished', {
                 filter: {attacker: characterID},
                 toBlock: 'latest',
-                fromBlock: 0
+                fromBlock: currentBlock
               });
+              if(duelResult.length > 0){
 
-              if(duelResult !== undefined){
-                latestDuelIndex = duelResult?.length-1;
-                duelResult = duelResultFromContract(duelResult[latestDuelIndex].returnValues as [string, string, string, string, string, boolean]);
+                const processedDuelResult: IDuelResult =
+                duelResultFromContract(duelResult[0].returnValues as [string, string, string, string, string, boolean]);
 
-                duelResult.previousDuelReward = previousDuelReward;
-                duelResult.newDuelReward = state.pvp.wageredSkill;
+                console.log(processedDuelResult);
 
-                isDuelFinished = true;
+                commit('updateDuelResult', processedDuelResult );
+
+                subscription.unsubscribe((error: any, result: any) =>{
+                  if(!error){
+                    console.log(result);
+                  }
+                });
+
+                commit('updateIsLoading', false);
+                commit('updateIsPerformDuel', true);
+                commit('updateIsDuelResult', true);
+
+                setTimeout(() => {
+                  commit('updateIsPerformDuel', false);
+                }, 6000);
+
               }
-              else{
-                duelResult = undefined;
-                isDuelFinished = false;
-                nextBlock++;
-              }
-            }
-            else{
-              isDuelFinished = false;
-            }
-          }
 
-          //This is outside to make sure that performDuel executes before showing the rewards
-          await dispatch('updatePvPDetails', { characterID });
+            }});
 
+        await dispatch('updatePvPDetails',{ characterID });
 
-          return duelResult;
-        }catch(err){
-          console.log('Perform Duel Error Log: ');
-          console.log(err);
-        }
       },
       async withdrawFromArena({state, commit, dispatch}, {inDuel,characterID}){
         const { PvpArena, SkillToken } = state.contracts();
@@ -3821,7 +3836,9 @@ export function createStore(web3: Web3) {
                 from: state.defaultAccount
               });
           }catch(err){
-            console.log('Withdraw From Arena Skill Approval Error Log: ' + err);
+            console.log('Withdraw From Arena Skill Approval Error Log: ');
+            console.log(err);
+            return err;
           }
         }
 
@@ -3832,7 +3849,9 @@ export function createStore(web3: Web3) {
               from: state.defaultAccount
             });
         }catch(err){
-          console.log('Withdraw From Arena Error Log: ' + err);
+          console.log('Withdraw From Arena Error Log: ');
+          console.log(err);
+          return err;
         }
 
         await dispatch('fetchParticipatingCharacters');
@@ -4111,11 +4130,6 @@ export function createStore(web3: Web3) {
             attack: processedAttackingDuelHistory,
             defend: processedDefendingDuelHistory
           };
-
-          console.log('Attacking Duel History\n');
-          console.log(processedAttackingDuelHistory);
-          console.log('Defending Duel History\n');
-          console.log(processedDefendingDuelHistory);
 
           return duelHistory;
 

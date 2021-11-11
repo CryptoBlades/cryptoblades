@@ -82,6 +82,9 @@ export interface IPvPState {
   isCharacterInArena: boolean;
   isWeaponInArena: boolean;
   isShieldInArena: boolean;
+  isPerformDuel: boolean;
+  isDuelResult: boolean;
+  duelResult: IDuelResult | null;
   duelByAttacker: IDuelByAttacker | null;
   decisionTime: string;
   rewards: IPvPReward;
