@@ -661,7 +661,8 @@
         "inst3": "Hier ein Tutorial wie man BNB zu SKILL tauscht:",
         "inst4": "Das war's! Du kannst jetzt deinen ersten Charakter rekrutieren:",
         "watchVideo": "Video anschauen",
-        "or": "oder ",
+        "watchGettingStartedVideo" : "Watch 'Getting Started' Video",
+        "or": "oder",
         "buyWithTransak" : "Mit Transak kaufen",
         "questionDiscord": "Wenn du Fragen hast, tritt gerne unserem Discord bei:"
       }
