@@ -9,12 +9,13 @@
       <b-nav-item
         class="ml-3"
         :disabled="!canClaimTokens"
-        @click="onClaimTokens()"><!-- moved gtag-link below b-nav-item -->
-        <span class="gtag-link-others" tagname="claim_skill">
+        @click="onClaimTokens()"
+        v-tooltip.bottom="!canClaimTokens ? withdrawalInfoText : ''"><!-- moved gtag-link below b-nav-item -->
+        <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="'Tax is being reduced by 1% per day.' + getTaxTimerNextTick">
           <strong>SKILL</strong> {{ formattedSkillReward }}
           <strong>Early Withdraw Tax</strong> {{ formattedRewardsClaimTax }}
-          <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="'Tax is being reduced by 1% per day'"/>
         </span>
+        <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="withdrawalInfoText"/>
       </b-nav-item>
 
       <b-nav-item
@@ -74,10 +75,11 @@ import Vue from 'vue';
 import { Accessors } from 'vue/types/options';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { getCharacterNameFromSeed } from '../../character-name';
 import { RequiredXp } from '../../interfaces';
 import { ICharacter } from '@/interfaces';
 import { toBN, fromWeiEther } from '../../utils/common';
+import { secondsToDDHHMMSS } from '../../utils/date-time';
+import { getCleanName } from '../../rename-censor';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -91,6 +93,7 @@ interface StoreMappedGetters {
   currentCharacter: ICharacter | null;
   maxRewardsClaimTaxAsFactorBN: BigNumber;
   rewardsClaimTaxAsFactorBN: BigNumber;
+  getCharacterName(id: number): string;
 }
 
 enum ClaimStage {
@@ -102,19 +105,21 @@ enum ClaimStage {
 interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
   claimXpRewards(): Promise<void>;
+  fetchRemainingTokenClaimAmountPreTax(): Promise<string>;
 }
 
 export default Vue.extend({
   data() {
     return {
-      ClaimStage
+      ClaimStage,
+      remainingTokenClaimAmountPreTax: '0'
     };
   },
 
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN'
+      'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName'
     ]) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
@@ -132,6 +137,11 @@ export default Vue.extend({
       return `${toBN(skillLost).toFixed(4)}`;
     },
 
+    formattedRemainingClaimableSkill(): string {
+      const skillClaimable = fromWeiEther(this.remainingTokenClaimAmountPreTax);
+      return `${toBN(skillClaimable).toFixed(4)}`;
+    },
+
     formattedRewardsClaimTax(): string {
       const frac =
         this.skillRewards === '0'
@@ -139,6 +149,38 @@ export default Vue.extend({
           : this.rewardsClaimTaxAsFactorBN;
 
       return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
+    },
+
+    getTaxTimerNextTick(): string {
+      let frac: BigNumber;
+
+      // if has no skill rewards do not display timer next tick.
+      // or if tax is zero also do not display timer next tick.
+      if (this.skillRewards === '0' || this.rewardsClaimTaxAsFactorBN.toString() === '0') {
+        return '';
+      } else {
+        frac = this.rewardsClaimTaxAsFactorBN;
+      }
+
+      // get 2 decimal values
+      const decVal = toBN(frac.multipliedBy(100).decimalPlaces(2).toString().split('.')[1]);
+      // convert to seconds
+      const toSec = decVal.dividedBy(100).multipliedBy(24).multipliedBy(60).multipliedBy(60);
+      // return message
+      return ` Next -1% reduction happens in ${secondsToDDHHMMSS(toSec.toNumber())}.`;
+    },
+
+    skillRewardNumber(): number {
+      return toBN(fromWeiEther(this.skillRewards)).toNumber();
+    },
+
+    withdrawalInfoText(): string {
+      if(this.skillRewardNumber >= 1) {
+        return `You can withdraw max 10% of amount over 1 SKILL or 2 days worth of fights per day (whatever is greater).
+          Remaining claimable amount today: ${this.formattedRemainingClaimableSkill}`;
+      }
+      return `You can withdraw 1 day worth of fights per day.
+        Remaining claimable amount today: ${this.formattedRemainingClaimableSkill}`;
     },
 
     xpRewardsForOwnedCharacters(): string[] {
@@ -151,14 +193,14 @@ export default Vue.extend({
         if(!this.ownCharacters[i]) return `${xp}`;
         return  `${this.ownCharacters[i].id === currentCharacter.id ? '<b>' : ''}` +
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '<u>' : ''}` +
-                `${getCharacterNameFromSeed(this.ownCharacters[i].id)} ${xp}` +
+                `${(this.getCleanCharacterName(this.ownCharacters[i].id))} ${xp}` +
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '</u>' : ''}` +
                 `${this.ownCharacters[i].id === currentCharacter.id ? '</b>' : ''}`;
       }).join(', ');
     },
 
     canClaimTokens(): boolean {
-      if(toBN(this.skillRewards).lte(0)) {
+      if(toBN(this.skillRewards).lte(0) || toBN(this.remainingTokenClaimAmountPreTax).lte(0)) {
         return false;
       }
 
@@ -176,7 +218,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimXpRewards']) as StoreMappedActions),
+    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax']) as StoreMappedActions),
 
     async onClaimTokens() {
       if(this.canClaimTokens) {
@@ -201,7 +243,20 @@ export default Vue.extend({
         (this.$refs['stake-suggestion-modal'] as any).hide();
         (this.$refs['claim-confirmation-modal'] as any).show();
       }
+      await this.getRemainingTokenClaimAmountPreTax();
+    },
+
+    async getRemainingTokenClaimAmountPreTax() {
+      this.remainingTokenClaimAmountPreTax = await this.fetchRemainingTokenClaimAmountPreTax();
+    },
+
+    getCleanCharacterName(id: number): string {
+      return getCleanName(this.getCharacterName(id));
     }
+  },
+
+  async mounted() {
+    setInterval(async () => await this.getRemainingTokenClaimAmountPreTax(), 3000);
   }
 });
 </script>

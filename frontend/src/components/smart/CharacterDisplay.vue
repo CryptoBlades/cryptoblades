@@ -23,7 +23,7 @@
 
         <div class="character-data-column dark-bg-text">
           <span v-if="!isLoadingCharacter" class="name bold character-name">{{
-            getCharacterName(currentCharacterId)
+            getCleanCharacterName(currentCharacterId)
           }} <span :class="traits[currentCharacter.trait].toLowerCase() + '-icon trait-icon'"></span></span>
           <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
           <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
@@ -39,7 +39,8 @@
           </span>
         </div>
 
-        <earnings-calculator/>
+        <!-- Hiding earnings calculator as it's not working correctly with new formula -->
+        <earnings-calculator style="display: none"/>
       </div>
     </transition>
 
@@ -54,7 +55,7 @@
           @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
         >
           <div class="name-list">
-            {{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+            {{ getCleanCharacterName(c.id) }} Lv.{{ c.level + 1}}
           </div>
           <div class="small-stamina-char"
             :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
@@ -74,7 +75,7 @@
           @click="!getIsInCombat && setCurrentCharacter(c.id)"
         >
         <div class="name-list"
-        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+        >{{ getCleanCharacterName(c.id) }} Lv.{{ c.level + 1}}
           <small-bar
             :showMinimalVersion="true"
             v-if="!isLoadingCharacter"
@@ -99,6 +100,7 @@ import { RequiredXp } from '../../interfaces';
 import Hint from '../Hint.vue';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../../utils/common';
+import { getCleanName } from '../../rename-censor';
 
 export default Vue.extend({
   components: {
@@ -131,7 +133,7 @@ export default Vue.extend({
     filteredCharactersForList(): any {
       const items: any  = this.ownCharacters;
       return items;
-    }
+    },
   },
 
   data() {
@@ -162,6 +164,10 @@ export default Vue.extend({
       const skillBalance = fromWeiEther(skill.toString());
       return toBN(skillBalance).toNumber();
     },
+
+    getCleanCharacterName(id: string): string {
+      return getCleanName(this.getCharacterName(id));
+    }
   },
 });
 </script>

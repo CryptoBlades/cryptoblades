@@ -5,12 +5,15 @@
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
+    <div class="content dark-bg-text" v-if="!canShowApp">
+      You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.
+    </div>
     <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
         <span class="starter-panel-heading">Metamask Not Detected Or Incorrect Network</span>
         <div class="center">
           <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning" />
-          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError" />
+          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetamask" v-if="showNetworkError" />
           <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
         </div>
       </div>
@@ -24,7 +27,7 @@
         <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
         <div>
-          <big-button class="button mm-button" :mainText="`Configure MetaMask`" @click="configureMetaMask" />
+          <big-button class="button mm-button" :mainText="`Configure MetaMask`" @click="configureMetamask" />
           <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button" :mainText="`Connect to MetaMask`" @click="connectMetamask" />
         </div>
         <div class="seperator"></div>
@@ -34,7 +37,9 @@
             BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
           </p>
           <ul class="unstyled-list">
-            <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
+            <li>
+              1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a> or <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">Buy with Transak</a>
+            </li>
             <li>
               2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br />
               <a v-bind:href="`${getExchangeUrl}`" target="_blank">Trade SKILL/BNB</a>
@@ -72,6 +77,8 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+import { apiUrl } from './utils/common';
+import { getConfigValue } from './contracts';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -91,6 +98,7 @@ export default {
     hideWalletWarning: false,
     isConnecting: false,
     recruitCost: '',
+    isOptions: false,
   }),
 
   computed: {
@@ -98,7 +106,7 @@ export default {
     ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
-      return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
+      return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
     },
 
     showMetamaskWarning() {
@@ -120,6 +128,10 @@ export default {
     },
     $route(to) {
       // react to route changes
+      if(to.path === '/options') {
+        return this.isOptions = true;
+      } else this.isOptions = false;
+
       window.gtag('event', 'page_view', {
         page_title: to.name,
         page_location: to.fullPath,
@@ -134,11 +146,14 @@ export default {
     ...mapActions([
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
-      'fetchCharacterTransferCooldownForOwnCharacters',
       'setupWeaponDurabilities',
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
+      'configureMetaMask'
+    ]),
+    ...mapGetters([
+      'getExchangeTransakUrl'
     ]),
 
     async updateCharacterStamina(id) {
@@ -170,101 +185,8 @@ export default {
       const onboarding = new MetaMaskOnboarding();
       onboarding.startOnboarding();
     },
-    async configureMetaMask() {
-      const web3 = this.web3.currentProvider;
-      if (this.currentNetworkId === 97) {
-        try {
-          await web3.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x61' }],
-          });
-        } catch (switchError) {
-          try {
-            await web3.request({
-              method: 'wallet_addEthereumChain',
-              params: [
-                {
-                  chainId: '0x61',
-                  chainName: 'Binance Smart Chain Testnet',
-                  nativeCurrency: {
-                    name: 'Binance Coin',
-                    symbol: 'BNB',
-                    decimals: 18,
-                  },
-                  rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
-                  blockExplorerUrls: ['https://testnet.bscscan.com'],
-                },
-              ],
-            });
-          } catch (addError) {
-            console.error(addError);
-          }
-        }
-
-        try {
-          await web3.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: '0xcaf53066e36eef55ed0663419adff6e503bd134f',
-                symbol: 'SKILL',
-                decimals: 18,
-                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
-              },
-            },
-          });
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        {
-          try {
-            await web3.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: '0x38' }],
-            });
-          } catch (switchError) {
-            try {
-              await web3.request({
-                method: 'wallet_addEthereumChain',
-                params: [
-                  {
-                    chainId: '0x38',
-                    chainName: 'Binance Smart Chain Mainnet',
-                    nativeCurrency: {
-                      name: 'Binance Coin',
-                      symbol: 'BNB',
-                      decimals: 18,
-                    },
-                    rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                    blockExplorerUrls: ['https://bscscan.com/'],
-                  },
-                ],
-              });
-            } catch (addError) {
-              console.error(addError);
-            }
-          }
-
-          try {
-            await web3.request({
-              method: 'wallet_watchAsset',
-              params: {
-                type: 'ERC20',
-                options: {
-                  address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
-                  symbol: 'SKILL',
-                  decimals: 18,
-                  image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
-                },
-              },
-            });
-          } catch (error) {
-            console.error(error);
-          }
-        }
-      }
+    async configureMetamask() {
+      await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
 
     async connectMetamask() {
@@ -276,6 +198,9 @@ export default {
         .then(() => {
           this.errorMessage = 'Success: MetaMask connected.';
           this.isConnecting = false;
+
+          this.initializeStore();
+          this.toggleHideWalletWarning();
         })
         .catch(() => {
           this.errorMessage = 'Error: MetaMask could not get permissions.';
@@ -310,24 +235,24 @@ export default {
     },
 
     async checkNotifications() {
-      const response = await fetch('https://api.cryptoblades.io/static/notifications');
+      const response = await fetch(apiUrl('static/notifications'));
       const notifications = await response.json();
 
       const lastHash = localStorage.getItem('lastnotification');
       let shouldContinue = true;
 
-      notifications.forEach((notif) => {
+      notifications.forEach((notification) => {
         if (!shouldContinue) return;
 
-        if (lastHash === notif.hash) {
+        if (lastHash === notification.hash) {
           shouldContinue = false;
           return;
         }
 
         this.$dialog.notify.warning(
-          `${notif.title}
+          `${notification.title}
           <br>
-          <a href="${notif.link}" target="_blank">Check it out!</a>
+          <a href="${notification.link}" target="_blank">Check it out!</a>
           `,
           {
             timeout: 300000,
@@ -364,8 +289,10 @@ export default {
         });
       }
     });
-
     this.showWarningDialog();
+    if(this.hideWalletWarning) {
+      this.configureMetamask();
+    }
   },
 
   async created() {
@@ -393,7 +320,6 @@ export default {
 
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
-        this.fetchCharacterTransferCooldownForOwnCharacters(),
         this.setupWeaponDurabilities(),
         this.fetchWaxBridgeDetails(),
         this.fetchRewardsClaimTax(),
@@ -682,7 +608,7 @@ div.bg-success {
 
 .content {
   padding: 0 1em;
-  height: calc(100vh - 56px);
+  height: auto;
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }

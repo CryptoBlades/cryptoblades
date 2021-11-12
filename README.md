@@ -1,5 +1,9 @@
 # CryptoBlades
 
+## Warning
+
+This code is open, but not open source. It is not licensed, which means you cannot use it freely for your own applications. You cannot "base your code on CryptoBlades", nor use our code for anything. At all. This is not permissible under our license terms (which do not exist).
+
 ## Currency Setup
 
 1. Install [Ganache](https://www.trufflesuite.com/ganache).
@@ -31,15 +35,11 @@ For Windows developers experiencing errors follow these steps:
 
 If you're using VSCode, we recommend these extensions: Auto Rename Tag, EditorConfig for VSCode, Eslint, Github Pull Requests, Gitlens, Javascript and Typescript, Live Share, Solidity, Typescript Hero, Vetur
 
-## Truffle Environment Variables
+## Environment Variables
 
-Truffle also supports some environment variables, if you create a `.env` file in the root you can specify:
+There are optional environment variables, most of which have sensible defaults if copied from `.env.local`:
 
-- `ETH_DEV_RPC_HOST`
-- `ETH_DEV_RPC_PORT`
-- `ETH_DEV_RPC_NETWORK_ID`
-- `ETH_DEV_RPC_GAS`
-- `BINANCE_WALLET_MNEMONIC`
+- `VUE_APP_API_URL` - the API URL to use - defaults to prod (which will throw CORS errors on local)
 
 ## Structure
 
@@ -59,3 +59,6 @@ Truffle also supports some environment variables, if you create a `.env` file in
 - If you run into any error at all during the build process you may need to reset [Ganache](https://www.trufflesuite.com/ganache) by deleting previous workspaces and going through the Ganache setup process again including importing a new account for Metamask.
 - Artifacts are from different compiler runs `- rm -rf build/`
 
+## Config
+- All network config is in app-config.json
+- If you want to add a new network: add it's configuration in app-config.json and add update currentTokenPrice getter in EarningsCalculator.

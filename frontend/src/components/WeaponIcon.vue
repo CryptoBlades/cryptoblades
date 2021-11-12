@@ -1,7 +1,7 @@
 <template>
   <div
     class="weapon-icon"
-    v-bind:class="[getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '']"
+    v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '')]"
     v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"
@@ -12,8 +12,10 @@
     </div>
 
     <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
-
-      <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)" />
+      <!-- below use of weapon.id is for test purpose, should be replaced with getWeaponCosmetic(weapon.id) -->
+      <div class="animation" v-bind:class="showCosmetics ? 'weapon-animation-applied-' + getWeaponCosmetic(weapon.id) : ''"/>
+      <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
+        class="placeholder" :src="getWeaponArt(weapon)" />
 
       <div class="trait">
         <span :class="weapon.element.toLowerCase() + '-icon'"></span>
@@ -21,7 +23,7 @@
       </div>
 
       <div class="name">
-        {{ getWeaponNameFromSeed(weapon.id, weapon.stars) }}
+        {{ getCleanWeaponName(weapon.id, weapon.stars) }}
       </div>
 
       <div class="bonus-power">
@@ -61,7 +63,6 @@
 
 <script>
 import { getWeaponArt } from '../weapon-arts-placeholder';
-import { getWeaponNameFromSeed } from '../weapon-name';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import swordspecs from '../assets/swordspecs.json';
@@ -71,8 +72,10 @@ import { Stat1PercentForChar,
   Stat2PercentForChar,
   Stat3PercentForChar
 } from '../interfaces';
+import Events from '@/events';
 
 import { mapGetters, mapState } from 'vuex';
+import { getCleanName } from '../rename-censor';
 
 const bladeCount = 24;
 const crossGuardCount = 24;
@@ -102,7 +105,9 @@ export default {
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',
-      'timeUntilWeaponHasMaxDurability'
+      'timeUntilWeaponHasMaxDurability',
+      'getWeaponName',
+      'getWeaponCosmetic'
     ]),
     tooltipHtml() {
       if(!this.weapon) return '';
@@ -205,13 +210,12 @@ export default {
       pommelNormalTexture: null,
       pommelAOTexture: null,
       showPlaceholder: false,
+      showCosmetics: true,
     };
   },
 
   methods: {
-    getWeaponNameFromSeed,
     getWeaponArt,
-
     init() {
       const container = this.$refs.el;
 
@@ -421,9 +425,19 @@ export default {
           this.renderer.render(this.scene, this.camera);
         }
       }
-    }
+    },
+
+    getCleanWeaponName(id, stars) {
+      return getCleanName(this.getWeaponName(id, stars));
+    },
+
+    checkStorage() {
+      this.showCosmetics = localStorage.getItem('showCosmetics') !== 'false';
+    },
   },
   mounted() {
+    this.checkStorage();
+    Events.$on('setting:showCosmetics', () => this.checkStorage());
     if(localStorage.getItem('useGraphics') === 'false') {
       this.allLoaded = true;
       this.showPlaceholder = true;
@@ -438,6 +452,7 @@ export default {
 </script>
 
 <style scoped>
+@import '../styles/weapon-cosmetics.css';
 .small-durability-bar {
   position: relative;
   top: -5px;
@@ -453,6 +468,7 @@ export default {
   height: 100%;
   width: 100%;
   position: relative;
+  overflow: hidden;
 }
 
 .glow-container {
@@ -486,12 +502,12 @@ export default {
 
 .favorite-star {
   position: absolute;
-  margin-left: 5px;
+  margin-left: 110px;
 }
 
 .id {
   top: 8px;
-  right: 10px;
+  left: 30px;
   font-style: italic;
 }
 
@@ -543,6 +559,39 @@ export default {
   animation: glow-4 2000ms ease-out infinite alternate;
 }
 
+@keyframes glow-1 {
+  0% {
+    box-shadow: inset 0 0 10px rgba(0, 162, 255, 0.5);
+  }
+  100% {
+    box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
+  }
+}
+@keyframes glow-2 {
+  0% {
+    box-shadow: inset 0 0 10px rgba(125, 0, 125, 0.5);
+  }
+  100% {
+    box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
+  }
+}
+@keyframes glow-3 {
+  0% {
+    box-shadow: inset 0 0 10px rgba(255, 102, 0, 0.3);
+  }
+  100% {
+    box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
+  }
+}
+@keyframes glow-4 {
+  0% {
+    box-shadow: inset 0 0 10px rgba(125, 0, 0, 0.5);
+  }
+  100% {
+    box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
+  }
+}
+
 .no-durability {
   opacity: 0.6;
 }
@@ -553,41 +602,5 @@ export default {
   right: 10%;
   font-size: 0.6em;
   text-align: right;
-}
-
-@keyframes glow-1 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(0, 162, 255, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
-  }
-}
-
-@keyframes glow-2 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(125, 0, 125, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
-  }
-}
-
-@keyframes glow-3 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(255, 102, 0, 0.3);
-  }
-  100% {
-    box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
-  }
-}
-
-@keyframes glow-4 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(125, 0, 0, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
-  }
 }
 </style>

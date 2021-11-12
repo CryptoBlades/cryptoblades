@@ -13,6 +13,7 @@ import "./characters.sol";
 import "./Promos.sol";
 import "./weapons.sol";
 import "./util.sol";
+import "./Blacksmith.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -22,8 +23,34 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    int128 public constant REWARDS_CLAIM_TAX_MAX = 2767011611056432742; // = ~0.15 = ~15%
-    uint256 public constant REWARDS_CLAIM_TAX_DURATION = 15 days;
+    int128 public constant PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT =
+        14757395258967641292; // 0.8 in fixed-point 64x64 format
+
+    // Mapped variables (vars[]) keys, one value per key
+    // Using small numbers for now to save on contract size (3% for 13 vars vs using uint256(keccak256("name"))!)
+    // Can be migrated later via setVars if needed
+    uint256 public constant VAR_HOURLY_INCOME = 1;
+    uint256 public constant VAR_HOURLY_FIGHTS = 2;
+    uint256 public constant VAR_HOURLY_POWER_SUM = 3;
+    uint256 public constant VAR_HOURLY_POWER_AVERAGE = 4;
+    uint256 public constant VAR_HOURLY_PAY_PER_FIGHT = 5;
+    uint256 public constant VAR_HOURLY_TIMESTAMP = 6;
+    uint256 public constant VAR_DAILY_MAX_CLAIM = 7;
+    uint256 public constant VAR_CLAIM_DEPOSIT_AMOUNT = 8;
+    uint256 public constant VAR_PARAM_PAYOUT_INCOME_PERCENT = 9;
+    uint256 public constant VAR_PARAM_DAILY_CLAIM_FIGHTS_LIMIT = 10;
+    uint256 public constant VAR_PARAM_DAILY_CLAIM_DEPOSIT_PERCENT = 11;
+    uint256 public constant VAR_PARAM_MAX_FIGHT_PAYOUT = 12;
+    uint256 public constant VAR_HOURLY_DISTRIBUTION = 13;
+    uint256 public constant VAR_UNCLAIMED_SKILL = 14;
+    uint256 public constant VAR_HOURLY_MAX_POWER_AVERAGE = 15;
+    uint256 public constant VAR_PARAM_HOURLY_MAX_POWER_PERCENT = 16;
+    uint256 public constant VAR_PARAM_SIGNIFICANT_HOUR_FIGHTS = 17;
+    uint256 public constant VAR_PARAM_HOURLY_PAY_ALLOWANCE = 18;
+
+    // Mapped user variable(userVars[]) keys, one value per wallet
+    uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
+    uint256 public constant USERVAR_CLAIM_TIMESTAMP = 10002;
 
     Characters public characters;
     Weapons public weapons;
@@ -65,24 +92,37 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         promos = _promos;
     }
 
     function migrateTo_23b3a8b(IStakeFromGame _stakeFromGame) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         stakeFromGameImpl = _stakeFromGame;
     }
 
     function migrateTo_801f279() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         burnWeaponFee = ABDKMath64x64.divu(2, 10);//0.2 usd;
         reforgeWeaponWithDustFee = ABDKMath64x64.divu(3, 10);//0.3 usd;
 
         reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;//0.5 usd;
+    }
+
+    function migrateTo_60872c8(Blacksmith _blacksmith) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+
+        blacksmith = _blacksmith;
+    }
+
+    function migrateTo_6a97bd1() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+
+        rewardsClaimTaxMax = 2767011611056432742; // = ~0.15 = ~15%
+        rewardsClaimTaxDuration = 15 days;
     }
 
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
@@ -129,13 +169,67 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     int128 public burnWeaponFee;
     int128 public reforgeWeaponWithDustFee;
 
+    Blacksmith public blacksmith;
+
+    struct MintPayment {
+        bytes32 blockHash;
+        uint256 blockNumber;
+        address nftAddress;
+        uint count;
+    }
+
+    mapping(address => MintPayment) mintPayments;
+
+    struct MintPaymentSkillDeposited {
+        uint256 skillDepositedFromWallet;
+        uint256 skillDepositedFromRewards;
+        uint256 skillDepositedFromIgo;
+
+        uint256 skillRefundableFromWallet;
+        uint256 skillRefundableFromRewards;
+        uint256 skillRefundableFromIgo;
+
+        uint256 refundClaimableTimestamp;
+    }
+
+    uint256 public totalMintPaymentSkillRefundable;
+    mapping(address => MintPaymentSkillDeposited) mintPaymentSkillDepositeds;
+
+    int128 private rewardsClaimTaxMax;
+    uint256 private rewardsClaimTaxDuration;
+
+    mapping(uint256 => uint256) public vars;
+    mapping(address => mapping(uint256 => uint256)) public userVars;
+
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
 
     function recoverSkill(uint256 amount) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         skillToken.safeTransfer(msg.sender, amount);
+    }
+
+    function REWARDS_CLAIM_TAX_MAX() public view returns (int128) {
+        return rewardsClaimTaxMax;
+    }
+
+    function REWARDS_CLAIM_TAX_DURATION() public view returns (uint256) {
+        return rewardsClaimTaxDuration;
+    }
+
+    function getSkillToSubtractSingle(uint256 _needed, uint256 _available)
+        public
+        pure
+        returns (uint256 _used, uint256 _remainder) {
+
+        if(_needed <= _available) {
+            return (_needed, 0);
+        }
+
+        _needed -= _available;
+
+        return (_available, _needed);
     }
 
     function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _skillNeeded)
@@ -158,32 +252,20 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (_inGameOnlyFunds, _tokenRewards, _skillNeeded);
     }
 
-    function getSkillNeededFromUserWallet(address playerAddress, uint256 skillNeeded)
+    function getSkillNeededFromUserWallet(address playerAddress, uint256 skillNeeded, bool allowInGameOnlyFunds)
         public
         view
         returns (uint256 skillNeededFromUserWallet) {
 
+        uint256 inGameOnlyFundsToUse = 0;
+        if (allowInGameOnlyFunds) {
+            inGameOnlyFundsToUse = inGameOnlyFunds[playerAddress];
+        }
         (,, skillNeededFromUserWallet) = getSkillToSubtract(
-            inGameOnlyFunds[playerAddress],
+            inGameOnlyFundsToUse,
             tokenRewards[playerAddress],
             skillNeeded
         );
-    }
-
-    function getMyCharacters() public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](characters.balanceOf(msg.sender));
-        for(uint256 i = 0; i < tokens.length; i++) {
-            tokens[i] = characters.tokenOfOwnerByIndex(msg.sender, i);
-        }
-        return tokens;
-    }
-
-    function getMyWeapons() public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](weapons.balanceOf(msg.sender));
-        for(uint256 i = 0; i < tokens.length; i++) {
-            tokens[i] = weapons.tokenOfOwnerByIndex(msg.sender, i);
-        }
-        return tokens;
     }
 
     function unpackFightData(uint96 playerData)
@@ -195,22 +277,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
-            // These have been combined due to error: CompilerError: Stack too deep, try removing local variables. TODO
-            // onlyNonContract
-            // isCharacterOwner(char)
-            // isWeaponOwner(wep) {
-        fightModifierChecks(char, wep) {
-        require(fightMultiplier > 0);
+        onlyNonContract() {
+        require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight * fightMultiplier));
+            unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
+                char, staminaCostFight * fightMultiplier, false));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightData(wep, charTrait);
-
-        weapons.drainDurability(wep, durabilityCostFight * fightMultiplier);
+            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(msg.sender, wep, charTrait,
+                durabilityCostFight * fightMultiplier, false);
 
         // dirty variable reuse to avoid stack limits
         target = grabTarget(
@@ -237,12 +315,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 targetPower,
         uint8 fightMultiplier
     ) private {
-        uint256 seed = randoms.getRandomSeed(msg.sender);
+        uint256 seed = uint256(keccak256(abi.encodePacked(now, msg.sender)));
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
+        updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
+
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
-        uint256 tokens = usdToSkill(getTokenGainForFight(targetPower, fightMultiplier));
+        uint256 tokens = getTokenGainForFight(targetPower) * fightMultiplier;
 
         if(playerRoll < monsterRoll) {
             tokens = 0;
@@ -250,12 +330,17 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
 
         if(tokenRewards[msg.sender] == 0 && tokens > 0) {
-            _startRewardsClaimTaxTimer(msg.sender);
+            _rewardsClaimTaxTimerStart[msg.sender] = block.timestamp;
         }
 
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
         tokenRewards[msg.sender] += tokens;
+        vars[VAR_UNCLAIMED_SKILL] += tokens;
+        vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
         xpRewards[char] += xp;
+
+        vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
+        vars[VAR_HOURLY_POWER_SUM] += playerFightPower * fightMultiplier;
 
         emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
@@ -264,15 +349,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint24(target & 0xFFFFFF);
     }
 
-    function getTokenGainForFight(uint24 monsterPower, uint8 fightMultiplier) internal view returns (int128) {
-        return fightRewardGasOffset.add(
-            fightRewardBaseline.mul(
-                ABDKMath64x64.sqrt(
-                    // Performance optimization: 1000 = getPowerAtLevel(0)
-                    ABDKMath64x64.divu(monsterPower, 1000)
-                )
-            ).mul(ABDKMath64x64.fromUInt(fightMultiplier))
-        );
+    function getTokenGainForFight(uint24 monsterPower) public view returns (uint256) {
+        // monsterPower / avgPower * payPerFight * powerMultiplier
+        uint256 amount = ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
+            .mulu(vars[VAR_HOURLY_PAY_PER_FIGHT]);
+        
+        if(amount > vars[VAR_PARAM_MAX_FIGHT_PAYOUT])
+            amount = vars[VAR_PARAM_MAX_FIGHT_PAYOUT];
+        if(vars[VAR_HOURLY_DISTRIBUTION] < amount * 5) // the * 5 is a temp measure until we can sync frontend on main
+            amount = 0;
+        return amount;
     }
 
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
@@ -325,7 +411,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return getTargetsInternal(
             getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
             characters.getStaminaTimestamp(char),
-            getCurrentHour()
+            now.div(1 hours)
         );
     }
 
@@ -385,14 +471,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 tokenRewards[msg.sender],
                 skillAmount
             );
-        require(skillToken.balanceOf(msg.sender) >= fromUserWallet,
-            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(fromUserWallet))));
+        require(skillToken.balanceOf(msg.sender) >= fromUserWallet && promos.getBit(msg.sender, 4) == false);
 
-        _payContractTokenOnly(msg.sender, mintCharacterFee);
-
-        if(!promos.getBit(msg.sender, promos.BIT_FIRST_CHARACTER()) && characters.balanceOf(msg.sender) == 0) {
-            _giveInGameOnlyFundsFromContractBalance(msg.sender, usdToSkill(promos.firstCharacterPromoInGameOnlyFundsGivenInUsd()));
-        }
+        uint256 convertedAmount = usdToSkill(mintCharacterFee);
+        _payContractTokenOnly(msg.sender, convertedAmount);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         characters.mint(msg.sender, seed);
@@ -400,7 +482,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
             weapons.performMintWeapon(msg.sender,
-                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100)),
+                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100), 100),
                 weapons.getRandomStat(4, 200, seed, 101),
                 0, // stat2
                 0, // stat3
@@ -409,49 +491,155 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeapon() public onlyNonContract oncePerBlock(msg.sender) requestPayFromPlayer(mintWeaponFee) {
-        _payContract(msg.sender, mintWeaponFee);
-
-        uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.mint(msg.sender, seed);
+    function mintWeaponN(uint32 num, uint8 chosenElement)
+        external
+        onlyNonContract
+        oncePerBlock(msg.sender)
+    {
+        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * num * chosenElementFee));
+        _mintWeaponNLogic(num, chosenElement);
     }
 
-    function burnWeapon(uint256 burnID) public
-            isWeaponOwner(burnID) requestPayFromPlayer(burnWeaponFee) {
-        _payContract(msg.sender, burnWeaponFee);
+    function mintWeapon(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
+        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * chosenElementFee));
+        _mintWeaponLogic(chosenElement);
+    }
+
+    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement)
+        external
+        onlyNonContract
+        oncePerBlock(msg.sender)
+    {
+        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
+        int128 discountedMintWeaponFee =
+            mintWeaponFee
+                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
+                .mul(ABDKMath64x64.fromUInt(num))
+                .mul(ABDKMath64x64.fromUInt(chosenElementFee));
+        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
+
+        _mintWeaponNLogic(num, chosenElement);
+    }
+
+    function mintWeaponUsingStakedSkill(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
+        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
+        int128 discountedMintWeaponFee =
+            mintWeaponFee
+                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
+                .mul(ABDKMath64x64.fromUInt(chosenElementFee));
+        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
+
+        _mintWeaponLogic(chosenElement);
+    }
+
+    function _mintWeaponNLogic(uint32 num, uint8 chosenElement) internal {
+        require(num > 0 && num <= 10);
+        for (uint i = 0; i < num; i++) {
+            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))), chosenElement);
+        }
+    }
+
+    function mintWeaponNforAddress(address _minter, uint32 num)
+        public
+        onlyNonContract
+        oncePerBlock(_minter)
+    {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(GAME_ADMIN, msg.sender));
+        require(num > 0 && num <= 50);
+
+        for (uint i = 0; i < num; i++) {
+            weapons.mint(_minter, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), _minter, i))), 100);
+        }
+    }
+
+    function _mintWeaponLogic(uint8 chosenElement) internal {
+        //uint256 seed = randoms.getRandomSeed(msg.sender);
+        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
+    }
+
+    function burnWeapon(uint256 burnID) external isWeaponOwner(burnID) {
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee));
+
+        _burnWeaponLogic(burnID);
+    }
+
+    function burnWeapons(uint256[] calldata burnIDs) external isWeaponsOwner(burnIDs) {
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length))));
+
+        _burnWeaponsLogic(burnIDs);
+    }
+
+    function reforgeWeapon(uint256 reforgeID, uint256 burnID) external isWeaponOwner(reforgeID) isWeaponOwner(burnID) {
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(reforgeWeaponFee));
+
+        _reforgeWeaponLogic(reforgeID, burnID);
+    }
+
+    function reforgeWeaponWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) external isWeaponOwner(reforgeID) {
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(reforgeWeaponWithDustFee));
+
+        _reforgeWeaponWithDustLogic(reforgeID, amountLB, amount4B, amount5B);
+    }
+
+    function burnWeaponUsingStakedSkill(uint256 burnID) external isWeaponOwner(burnID) {
+        int128 discountedBurnWeaponFee =
+            burnWeaponFee.mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
+        _payContractStakedOnly(msg.sender, usdToSkill(discountedBurnWeaponFee));
+
+        _burnWeaponLogic(burnID);
+    }
+
+    function burnWeaponsUsingStakedSkill(uint256[] calldata burnIDs) external isWeaponsOwner(burnIDs) {
+        int128 discountedBurnWeaponFee =
+            burnWeaponFee
+                .mul(ABDKMath64x64.fromUInt(burnIDs.length))
+                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
+        _payContractStakedOnly(msg.sender, usdToSkill(discountedBurnWeaponFee));
+
+        _burnWeaponsLogic(burnIDs);
+    }
+
+    function reforgeWeaponUsingStakedSkill(uint256 reforgeID, uint256 burnID) external isWeaponOwner(reforgeID) isWeaponOwner(burnID) {
+        int128 discountedReforgeWeaponFee =
+            reforgeWeaponFee
+                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
+        _payContractStakedOnly(msg.sender, usdToSkill(discountedReforgeWeaponFee));
+
+        _reforgeWeaponLogic(reforgeID, burnID);
+    }
+
+    function reforgeWeaponWithDustUsingStakedSkill(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) external isWeaponOwner(reforgeID) {
+        int128 discountedReforgeWeaponWithDustFee =
+            reforgeWeaponWithDustFee
+                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
+        _payContractStakedOnly(msg.sender, usdToSkill(discountedReforgeWeaponWithDustFee));
+
+        _reforgeWeaponWithDustLogic(reforgeID, amountLB, amount4B, amount5B);
+    }
+
+    function _burnWeaponLogic(uint256 burnID) internal {
         weapons.burn(burnID);
     }
 
-    function burnWeapons(uint256[] memory burnIDs) public
-            isWeaponsOwner(burnIDs) requestPayFromPlayer(burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length))) {
-        _payContract(msg.sender, burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length)));
+    function _burnWeaponsLogic(uint256[] memory burnIDs) internal {
         for(uint i = 0; i < burnIDs.length; i++) {
             weapons.burn(burnIDs[i]);
         }
     }
 
-    function reforgeWeapon(uint256 reforgeID, uint256 burnID) public
-            isWeaponOwner(reforgeID) isWeaponOwner(burnID) requestPayFromPlayer(reforgeWeaponFee) {
-        _payContract(msg.sender, reforgeWeaponFee);
+    function _reforgeWeaponLogic(uint256 reforgeID, uint256 burnID) internal {
         weapons.reforge(reforgeID, burnID);
     }
 
-    function reforgeWeaponWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) public
-            isWeaponOwner(reforgeID) requestPayFromPlayer(reforgeWeaponWithDustFee) {
-        _payContract(msg.sender, reforgeWeaponWithDustFee);
+    function _reforgeWeaponWithDustLogic(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) internal {
         weapons.reforgeWithDust(reforgeID, amountLB, amount4B, amount5B);
     }
 
     function migrateRandoms(IRandoms _newRandoms) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
         randoms = _newRandoms;
-    }
-
-    modifier fightModifierChecks(uint256 char, uint256 wep) {
-        require(tx.origin == msg.sender, "Only EOA allowed (temporary)");
-        require(characters.ownerOf(char) == msg.sender, "Not the character owner");
-        require(weapons.ownerOf(wep) == msg.sender, "Not the weapon owner");
-        _;
     }
 
     modifier onlyNonContract() {
@@ -460,7 +648,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _onlyNonContract() internal view {
-        require(tx.origin == msg.sender, "Only EOA allowed (temporary)");
+        require(tx.origin == msg.sender, "ONC");
     }
 
     modifier restricted() {
@@ -469,7 +657,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Missing GAME_ADMIN role");
+        require(hasRole(GAME_ADMIN, msg.sender), "NGA");
     }
 
     modifier oncePerBlock(address user) {
@@ -478,7 +666,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _oncePerBlock(address user) internal {
-        require(lastBlockNumberCalled[user] < block.number, "Only callable once per block");
+        require(lastBlockNumberCalled[user] < block.number, "OCB");
         lastBlockNumberCalled[user] = block.number;
     }
 
@@ -488,7 +676,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _isWeaponOwner(uint256 weapon) internal view {
-        require(weapons.ownerOf(weapon) == msg.sender, "Not the weapon owner");
+        require(weapons.ownerOf(weapon) == msg.sender);
     }
 
     modifier isWeaponsOwner(uint256[] memory weaponArray) {
@@ -498,7 +686,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _isWeaponsOwner(uint256[] memory weaponArray) internal view {
         for(uint i = 0; i < weaponArray.length; i++) {
-            require(weapons.ownerOf(weaponArray[i]) == msg.sender, "Not the weapon owner");
+            require(weapons.ownerOf(weaponArray[i]) == msg.sender);
         }
     }
 
@@ -508,67 +696,26 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _isCharacterOwner(uint256 character) internal view {
-        require(characters.ownerOf(character) == msg.sender, "Not the character owner");
-    }
-
-    modifier isTargetValid(uint256 character, uint256 weapon, uint32 target) {
-        bool foundMatch = false;
-        uint32[4] memory targets = getTargets(character, weapon);
-        for(uint i = 0; i < targets.length; i++) {
-            if(targets[i] == target) {
-                foundMatch = true;
-            }
-        }
-        require(foundMatch, "Target invalid");
-        _;
-    }
-
-    modifier requestPayFromPlayer(int128 usdAmount) {
-        _requestPayFromPlayer(usdAmount);
-        _;
-    }
-
-    function _requestPayFromPlayer(int128 usdAmount) internal view {
-        uint256 skillAmount = usdToSkill(usdAmount);
-
-        (,, uint256 fromUserWallet) =
-            getSkillToSubtract(
-                inGameOnlyFunds[msg.sender],
-                tokenRewards[msg.sender],
-                skillAmount
-            );
-
-        require(skillToken.balanceOf(msg.sender) >= fromUserWallet,
-            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(skillAmount))));
-    }
-
-    function payContract(address playerAddress, int128 usdAmount) public restricted {
-        _payContract(playerAddress, usdAmount);
-    }
-
-    function payContractConverted(address playerAddress, uint256 convertedAmount) public restricted {
-        _payContractConverted(playerAddress, convertedAmount);
-    }
-
-    function payPlayer(address playerAddress, int128 baseAmount) public restricted {
-        _payPlayer(playerAddress, baseAmount);
+        require(characters.ownerOf(character) == msg.sender);
     }
 
     function payPlayerConverted(address playerAddress, uint256 convertedAmount) public restricted {
         _payPlayerConverted(playerAddress, convertedAmount);
     }
 
-    function approveContractCharacterFor(uint256 characterID, address playerAddress) public restricted {
-        _approveContractCharacterFor(characterID, playerAddress);
+    function payContractTokenOnly(address playerAddress, uint256 convertedAmount) public restricted {
+        _payContractTokenOnly(playerAddress, convertedAmount, true);
     }
 
-    function approveContractWeaponFor(uint256 weaponID, address playerAddress) public restricted {
-        _approveContractWeaponFor(weaponID, playerAddress);
+    function payContractTokenOnly(address playerAddress, uint256 convertedAmount, bool track) public restricted {
+        _payContractTokenOnly(playerAddress, convertedAmount, track);
     }
 
-    function _payContractTokenOnly(address playerAddress, int128 usdAmount) internal {
-        uint256 convertedAmount = usdToSkill(usdAmount);
+    function _payContractTokenOnly(address playerAddress, uint256 convertedAmount) internal {
+        _payContractTokenOnly(playerAddress, convertedAmount, true);
+    }
 
+    function _payContractTokenOnly(address playerAddress, uint256 convertedAmount, bool track) internal {
         (, uint256 fromTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
@@ -576,15 +723,17 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 convertedAmount
             );
 
-        tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
-        skillToken.safeTransferFrom(playerAddress, address(this), fromUserWallet);
+        _deductPlayerSkillStandard(playerAddress, 0, fromTokenRewards, fromUserWallet, track);
     }
 
-    function _payContract(address playerAddress, int128 usdAmount) internal {
-        _payContractConverted(playerAddress, usdToSkill(usdAmount));
+    function _payContract(address playerAddress, int128 usdAmount) internal
+        returns (uint256 _fromInGameOnlyFunds, uint256 _fromTokenRewards, uint256 _fromUserWallet) {
+
+        return _payContractConverted(playerAddress, usdToSkill(usdAmount));
     }
 
-    function _payContractConverted(address playerAddress, uint256 convertedAmount) internal {
+    function _payContractConverted(address playerAddress, uint256 convertedAmount) internal
+        returns (uint256 _fromInGameOnlyFunds, uint256 _fromTokenRewards, uint256 _fromUserWallet) {
 
         (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
@@ -593,12 +742,123 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 convertedAmount
             );
 
-        // must use requestPayFromPlayer modifier to approve on the initial function!
-        totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
-        inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
+        require(skillToken.balanceOf(playerAddress) >= fromUserWallet,
+            string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(convertedAmount))));
 
-        tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
-        skillToken.safeTransferFrom(playerAddress, address(this), fromUserWallet);
+        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
+
+        return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
+    }
+
+    function _payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) internal
+        returns (
+            uint256 _fromInGameOnlyFunds,
+            uint256 _fromTokenRewards,
+            uint256 _fromUserWallet,
+            uint256 _fromStaked
+        ) {
+
+        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 _remainder) =
+            getSkillToSubtract(
+                inGameOnlyFunds[playerAddress],
+                tokenRewards[playerAddress],
+                convertedAmount
+            );
+
+        (uint256 fromUserWallet, uint256 fromStaked) =
+            getSkillToSubtractSingle(
+                _remainder,
+                skillToken.balanceOf(playerAddress)
+            );
+
+        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
+
+        if(fromStaked > 0) {
+            stakeFromGameImpl.unstakeToGame(playerAddress, fromStaked);
+            _trackIncome(fromStaked);
+        }
+
+        return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet, fromStaked);
+    }
+
+    function _payContractStakedOnly(address playerAddress, uint256 convertedAmount) internal {
+        stakeFromGameImpl.unstakeToGame(playerAddress, convertedAmount);
+        _trackIncome(convertedAmount);
+    }
+
+    function _deductPlayerSkillStandard(
+        address playerAddress,
+        uint256 fromInGameOnlyFunds,
+        uint256 fromTokenRewards,
+        uint256 fromUserWallet
+    ) internal {
+        _deductPlayerSkillStandard(
+            playerAddress,
+            fromInGameOnlyFunds,
+            fromTokenRewards,
+            fromUserWallet,
+            true
+        );
+    }
+
+    function _deductPlayerSkillStandard(
+        address playerAddress,
+        uint256 fromInGameOnlyFunds,
+        uint256 fromTokenRewards,
+        uint256 fromUserWallet,
+        bool trackInflow
+    ) internal {
+        if(fromInGameOnlyFunds > 0) {
+            totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
+            inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
+        }
+
+        if(fromTokenRewards > 0) {
+            tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
+        }
+
+        if(fromUserWallet > 0) {
+            skillToken.transferFrom(playerAddress, address(this), fromUserWallet);
+            if(trackInflow)
+                _trackIncome(fromUserWallet);
+        }
+    }
+
+    function trackIncome(uint256 income) public restricted {
+        _trackIncome(income);
+    }
+
+    function _trackIncome(uint256 income) internal {
+        vars[VAR_HOURLY_INCOME] += ABDKMath64x64.divu(vars[VAR_PARAM_PAYOUT_INCOME_PERCENT],100)
+                .mulu(income);
+        updateHourlyPayouts();
+    }
+
+    function updateHourlyPayouts() internal {
+        // Could be done by a bot instead?
+        if(now - vars[VAR_HOURLY_TIMESTAMP] >= 1 hours) {
+            vars[VAR_HOURLY_TIMESTAMP] = now;
+
+            uint256 undistributed = vars[VAR_HOURLY_INCOME] + vars[VAR_HOURLY_DISTRIBUTION];
+
+            vars[VAR_HOURLY_DISTRIBUTION] = undistributed > vars[VAR_PARAM_HOURLY_PAY_ALLOWANCE]
+                ? vars[VAR_PARAM_HOURLY_PAY_ALLOWANCE] : undistributed;
+            vars[VAR_HOURLY_INCOME] = undistributed.sub(vars[VAR_HOURLY_DISTRIBUTION]);
+
+            uint256 fights = vars[VAR_HOURLY_FIGHTS];
+            if(fights >= vars[VAR_PARAM_SIGNIFICANT_HOUR_FIGHTS]) {
+                uint256 averagePower = vars[VAR_HOURLY_POWER_SUM] / fights;
+
+                if(averagePower > vars[VAR_HOURLY_MAX_POWER_AVERAGE])
+                    vars[VAR_HOURLY_MAX_POWER_AVERAGE] = averagePower;
+            }
+            vars[VAR_HOURLY_POWER_AVERAGE] = ABDKMath64x64.divu(vars[VAR_PARAM_HOURLY_MAX_POWER_PERCENT],100)
+                .mulu(vars[VAR_HOURLY_MAX_POWER_AVERAGE]);
+
+            vars[VAR_DAILY_MAX_CLAIM] = vars[VAR_HOURLY_PAY_PER_FIGHT] * vars[VAR_PARAM_DAILY_CLAIM_FIGHTS_LIMIT];
+            vars[VAR_HOURLY_FIGHTS] = 0;
+            vars[VAR_HOURLY_POWER_SUM] = 0;
+        }
     }
 
     function _payPlayer(address playerAddress, int128 baseAmount) internal {
@@ -606,27 +866,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _payPlayerConverted(address playerAddress, uint256 convertedAmount) internal {
-        skillToken.safeTransfer(playerAddress, convertedAmount);
-    }
-
-    function _approveContractCharacterFor(uint256 characterID, address playerAddress) internal {
-        characters.approve(playerAddress, characterID);
-    }
-
-    function _approveContractWeaponFor(uint256 weaponID, address playerAddress) internal {
-        weapons.approve(playerAddress, weaponID);
+        skillToken.transfer(playerAddress, convertedAmount);
     }
 
     function setCharacterMintValue(uint256 cents) public restricted {
         mintCharacterFee = ABDKMath64x64.divu(cents, 100);
-    }
-
-    function setFightRewardBaselineValue(uint256 tenthcents) public restricted {
-        fightRewardBaseline = ABDKMath64x64.divu(tenthcents, 1000); // !!! THIS TAKES TENTH OF CENTS !!!
-    }
-
-    function setFightRewardGasOffsetValue(uint256 cents) public restricted {
-        fightRewardGasOffset = ABDKMath64x64.divu(cents, 100);
     }
 
     function setWeaponMintValue(uint256 cents) public restricted {
@@ -638,10 +882,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setReforgeWeaponValue(uint256 cents) public restricted {
-        require(cents >= 25, "ReforgeWeaponValue too low");
-        require(cents <= 100, "ReforgeWeaponValue too high");
         int128 newReforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
-        require(newReforgeWeaponFee > burnWeaponFee, "Reforge fee must include burn fee");
+        require(newReforgeWeaponFee > burnWeaponFee);
         reforgeWeaponWithDustFee = newReforgeWeaponFee - burnWeaponFee;
         reforgeWeaponFee = newReforgeWeaponFee;
     }
@@ -652,8 +894,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setStaminaCostFight(uint8 points) public restricted {
-        require(points >= 20, "StaminaCostFight too low");
-        require(points <= 50, "StaminaCostFight too high");
         staminaCostFight = points;
     }
 
@@ -662,13 +902,25 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function setFightXpGain(uint256 average) public restricted {
-        require(average >= 16, "FightXpGain too low");
-        require(average <= 64, "FightXpGain too high");
         fightXpGain = average;
     }
 
-    function setCharacterLimit(uint256 max) public restricted {
-        characters.setCharacterLimit(max);
+    function setRewardsClaimTaxMaxAsPercent(uint256 _percent) public restricted {
+        rewardsClaimTaxMax = ABDKMath64x64.divu(_percent, 100);
+    }
+
+    function setRewardsClaimTaxDuration(uint256 _rewardsClaimTaxDuration) public restricted {
+        rewardsClaimTaxDuration = _rewardsClaimTaxDuration;
+    }
+
+    function setVar(uint256 varField, uint256 value) external restricted {
+        vars[varField] = value;
+    }
+
+    function setVars(uint256[] calldata varFields, uint256[] calldata values) external restricted {
+        for(uint i = 0; i < varFields.length; i++) {
+            vars[varFields[i]] = values[i];
+        }
     }
 
     function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {
@@ -695,34 +947,86 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
     }
 
-    function getCurrentHour() public view returns (uint256) {
-        // "now" returns unix time since 1970 Jan 1, in seconds
-        return now.div(1 hours);
+    function claimTokenRewards() public {
+        claimTokenRewards(getRemainingTokenClaimAmountPreTax());
     }
 
-    function claimTokenRewards() public {
-        // our characters go to the tavern
-        // and the barkeep pays them for the bounties
-        uint256 _tokenRewards = tokenRewards[msg.sender];
-        tokenRewards[msg.sender] = 0;
+    function claimTokenRewards(uint256 _claimingAmount) public {
 
-        uint256 _tokenRewardsToPayOut = _tokenRewards.sub(
-            _getRewardsClaimTax(msg.sender).mulu(_tokenRewards)
+        trackDailyClaim(_claimingAmount);
+
+        uint256 _tokenRewardsToPayOut = _claimingAmount.sub(
+            _getRewardsClaimTax(msg.sender).mulu(_claimingAmount)
         );
 
         // Tax goes to game contract itself, which would mean
         // transferring from the game contract to ...itself.
         // So we don't need to do anything with the tax part of the rewards.
-
-        _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
+        if(promos.getBit(msg.sender, 4) == false) {
+            _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
+            if(_tokenRewardsToPayOut <= vars[VAR_UNCLAIMED_SKILL])
+                vars[VAR_UNCLAIMED_SKILL] -= _tokenRewardsToPayOut;
+        }
     }
 
-    function stakeUnclaimedRewards() external {
-        uint256 _tokenRewards = tokenRewards[msg.sender];
-        tokenRewards[msg.sender] = 0;
+    function trackDailyClaim(uint256 _claimingAmount) internal {
 
-        skillToken.approve(address(stakeFromGameImpl), _tokenRewards);
-        stakeFromGameImpl.stakeFromGame(msg.sender, _tokenRewards);
+        if(isDailyTokenClaimAmountExpired()) {
+            userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
+            userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] = 0;
+        }
+        require(_claimingAmount <= getRemainingTokenClaimAmountPreTax() && _claimingAmount > 0);
+        // safemath throws error on negative
+        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(_claimingAmount);
+        userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] += _claimingAmount;
+    }
+
+    function isDailyTokenClaimAmountExpired() public view returns (bool) {
+        return userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] <= now - 1 days;
+    }
+
+    function getClaimedTokensToday() public view returns (uint256) {
+        // if claim timestamp is older than a day, it's reset to 0
+        return isDailyTokenClaimAmountExpired() ? 0 : userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT];
+    }
+
+    function getRemainingTokenClaimAmountPreTax() public view returns (uint256) {
+        // used to get how much can be withdrawn until the daily withdraw timer expires
+        uint256 max = getMaxTokenClaimAmountPreTax();
+        uint256 claimed = getClaimedTokensToday();
+        if(claimed >= max)
+            return 0; // all tapped out for today
+        uint256 remainingOfMax = max-claimed;
+        return tokenRewards[msg.sender] >= remainingOfMax ? remainingOfMax : tokenRewards[msg.sender];
+    }
+
+    function getMaxTokenClaimAmountPreTax() public view returns(uint256) {
+        // if tokenRewards is above VAR_CLAIM_DEPOSIT_AMOUNT, we let them withdraw more
+        // this function does not account for amount already withdrawn today
+        if(tokenRewards[msg.sender] >= vars[VAR_CLAIM_DEPOSIT_AMOUNT]) { // deposit bonus active
+            // max is either 10% of amount above deposit, or 2x the regular limit, whichever is higher
+            uint256 aboveDepositAdjusted = ABDKMath64x64.divu(vars[VAR_PARAM_DAILY_CLAIM_DEPOSIT_PERCENT],100)
+                .mulu(tokenRewards[msg.sender]-vars[VAR_CLAIM_DEPOSIT_AMOUNT]); // 10% above deposit
+            if(aboveDepositAdjusted > vars[VAR_DAILY_MAX_CLAIM] * 2) {
+                return aboveDepositAdjusted;
+            }
+            return vars[VAR_DAILY_MAX_CLAIM] * 2;
+        }
+        return vars[VAR_DAILY_MAX_CLAIM];
+    }
+    
+    function stakeUnclaimedRewards() public {
+        stakeUnclaimedRewards(getRemainingTokenClaimAmountPreTax());
+    }
+
+    function stakeUnclaimedRewards(uint256 amount) public {
+
+        trackDailyClaim(amount);
+
+        if(promos.getBit(msg.sender, 4) == false) {
+            skillToken.approve(address(stakeFromGameImpl), amount);
+            stakeFromGameImpl.stakeFromGame(msg.sender, amount);
+        }
     }
 
     function claimXpRewards() public {
@@ -758,23 +1062,19 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function _getRewardsClaimTax(address playerAddress) internal view returns (int128) {
         assert(_rewardsClaimTaxTimerStart[playerAddress] <= block.timestamp);
 
-        uint256 rewardsClaimTaxTimerEnd = _rewardsClaimTaxTimerStart[playerAddress].add(REWARDS_CLAIM_TAX_DURATION);
+        uint256 rewardsClaimTaxTimerEnd = _rewardsClaimTaxTimerStart[playerAddress].add(rewardsClaimTaxDuration);
 
         (, uint256 durationUntilNoTax) = rewardsClaimTaxTimerEnd.trySub(block.timestamp);
 
-        assert(0 <= durationUntilNoTax && durationUntilNoTax <= REWARDS_CLAIM_TAX_DURATION);
+        assert(0 <= durationUntilNoTax && durationUntilNoTax <= rewardsClaimTaxDuration);
 
-        int128 frac = ABDKMath64x64.divu(durationUntilNoTax, REWARDS_CLAIM_TAX_DURATION);
+        int128 frac = ABDKMath64x64.divu(durationUntilNoTax, rewardsClaimTaxDuration);
 
-        return REWARDS_CLAIM_TAX_MAX.mul(frac);
+        return rewardsClaimTaxMax.mul(frac);
     }
 
     function getOwnRewardsClaimTax() public view returns (int128) {
         return _getRewardsClaimTax(msg.sender);
-    }
-
-    function _startRewardsClaimTaxTimer(address playerAddress) internal {
-        _rewardsClaimTaxTimerStart[playerAddress] = block.timestamp;
     }
 
 }

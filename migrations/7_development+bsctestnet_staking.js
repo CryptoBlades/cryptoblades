@@ -8,7 +8,7 @@ const LPStakingRewardsUpgradeable = artifacts.require("LPStakingRewardsUpgradeab
 const LP2StakingRewardsUpgradeable = artifacts.require("LP2StakingRewardsUpgradeable");
 
 module.exports = async function (deployer, network, accounts) {
-  if (network === 'development' || network === 'development-fork' || network === 'bsctestnet' || network === 'bsctestnet-fork') {
+  if (network === 'development' || network === 'development-fork' || network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'hecotestnet' || network === 'okextestnet' || network === 'polygontestnet') {
     const token = await SkillToken.deployed();
     const expToken = await ExperimentToken.deployed();
     const expToken2 = await ExperimentToken2.deployed();

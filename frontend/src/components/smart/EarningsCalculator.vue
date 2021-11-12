@@ -30,6 +30,10 @@
                   <input class="stat-slider" type="range" min="1" max="255" v-model="levelSliderValue" />
                   <b-form-input class="stat-input" type="number" v-model="levelSliderValue" :min="1" :max="255" />
                 </div>
+                <span>Stamina</span>
+                <select class="form-control wep-trait-form" v-model="staminaSelectValue">
+                  <option v-for="x in [40,80,120,160,200]" :value="x" :key="x">{{ x }}</option>
+                </select>
               </div>
 
               <div class="calculator-earnings">
@@ -37,10 +41,10 @@
                   <span class="calculator-subheader">Current prices (USD)</span>
                   <div class="prices-div">
                     <div class="token-price-div">
-                      BNB: <b-form-input class="price-input" type="number" v-model="bnbPrice" />
+                      {{gasToken}}: <span class="text-white"> ${{currentTokenPrice}}</span>
                     </div>
                     <div class="token-price-div">
-                      SKILL: <b-form-input class="price-input" type="number" v-model="skillPrice" />
+                     SKILL: <b-form-label class="price-input" type="number" v-model="skillPrice" /> <span class="text-white"> ${{skillPrice }}</span>
                     </div>
                   </div>
                 </div>
@@ -137,6 +141,7 @@
 </template>
 
 <script lang="ts">
+import { getConfigValue } from '@/contracts';
 import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, WeaponTrait } from '@/interfaces';
 import axios from 'axios';
 import Vue from 'vue';
@@ -146,6 +151,8 @@ import { toBN, fromWeiEther } from '../../utils/common';
 interface PriceJson {
   binancecoin: CoinPrice;
   cryptoblades: CoinPrice;
+  'huobi-token': CoinPrice;
+  okexchain: CoinPrice;
 }
 
 interface CoinPrice {
@@ -164,12 +171,26 @@ export default Vue.extend({
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
+
+    currentTokenPrice(): number {
+      switch(this.gasToken) {
+      case 'BNB':
+        return this.bnbPrice;
+      case 'HT':
+        return this.htPrice;
+      case 'OKT':
+        return this.oktPrice;
+      default:
+        return this.bnbPrice;
+      }
+    },
   },
 
   data() {
     return {
       characterElementValue: '',
       levelSliderValue: 1,
+      staminaSelectValue: 40,
       starsValue: 1,
       wepElementValue: '',
       wepFirstStatElementValue: '',
@@ -180,8 +201,11 @@ export default Vue.extend({
       wepThirdStatSliderValue: 4,
       wepBonusPowerSliderValue: 0,
       bnbPrice: 0,
+      htPrice: 0,
+      oktPrice: 0,
       skillPrice: 0,
       calculationResults: [] as number[][],
+      gasToken: '',
     };
   },
 
@@ -211,6 +235,7 @@ export default Vue.extend({
     onReset() {
       this.characterElementValue = '';
       this.levelSliderValue =  1;
+      this.staminaSelectValue = 40;
       this.starsValue =  1;
       this.wepElementValue =  '';
       this.wepFirstStatElementValue =  '';
@@ -242,10 +267,12 @@ export default Vue.extend({
     },
 
     async fetchPrices() {
-      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
+      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin,huobi-token,okexchain&vs_currencies=usd');
       const data = response.data as PriceJson;
       this.bnbPrice = data?.binancecoin.usd;
       this.skillPrice = data?.cryptoblades.usd;
+      this.htPrice = data?.['huobi-token'].usd;
+      this.oktPrice = data?.okexchain.usd;
     },
 
     canCalculate(): boolean {
@@ -263,16 +290,23 @@ export default Vue.extend({
       const weapon = this.getWeapon();
       const characterTrait = CharacterTrait[this.characterElementValue as keyof typeof CharacterTrait];
       const weaponMultiplier = GetTotalMultiplierForTrait(weapon, characterTrait);
+      const fights = this.getNumberOfFights(this.staminaSelectValue);
 
       const totalPower = this.getTotalPower(CharacterPower(this.levelSliderValue - 1), weaponMultiplier, this.wepBonusPowerSliderValue);
-      const averageReward = this.getAverageRewardForPower(totalPower);
-      const averageFightProfit = averageReward * this.skillPrice - fightBnbFee;
+      const averageDailyReward = this.getAverageRewardForPower(totalPower) *7.2 +
+        this.formattedSkill(this.fightGasOffset) * fights;
+      const averageFightProfit = averageDailyReward * this.skillPrice / 7.2;
       for(let i = 1; i < 8; i++) {
-        const averageDailyProfitForCharacter = averageFightProfit * i - (7 - i) * fightBnbFee;
+        const averageDailyProfitForCharacter = averageFightProfit * i -
+          ((this.getNumberOfFights(this.staminaSelectValue) * fightBnbFee));
         const averageDailyProfitForAllCharacter = 4 * averageDailyProfitForCharacter;
         const averageMonthlyProfitForAllCharacter = 30 * averageDailyProfitForAllCharacter;
         this.calculationResults.push([averageDailyProfitForCharacter, averageDailyProfitForAllCharacter, averageMonthlyProfitForAllCharacter]);
       }
+    },
+
+    getNumberOfFights(stamina: number) {
+      return 288 / stamina;
     },
 
     getWeapon(): IWeapon {
@@ -292,7 +326,7 @@ export default Vue.extend({
     },
 
     getAverageRewardForPower(power: number): number {
-      return this.formattedSkill(this.fightGasOffset) + (this.formattedSkill(this.fightBaseline) * Math.sqrt(power / 1000));
+      return (this.formattedSkill(this.fightBaseline) * Math.sqrt(power / 1000));
     },
 
     getNextMilestoneBonus(level: number): string {
@@ -335,6 +369,10 @@ export default Vue.extend({
       this.wepThirdStatSliderValue = this.getMinRoll(value);
     }
   },
+
+  mounted() {
+    this.gasToken = getConfigValue('currencySymbol') || 'BNB';
+  }
 });
 </script>
 <style scoped>
