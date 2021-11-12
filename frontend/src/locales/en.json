@@ -655,13 +655,14 @@
       },
       "message": {
         "hideWalletWarning": "You have hidden the wallet warning and it would now be displayed. If you are trying to play, please disable the option and follow the instructions, otherwise close and ignore.",
-        "instructions": "Get started in less than 10 minutes! To recruit your first character you need {recruitCost} SKILL and 0.001 BNB for gas. You will also need 0.0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!",
+        "instructions": "Get started in less than 10 minutes! To recruit your first character you need {recruitCost} SKILL and .001 BNB for gas. You will also need .0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!",
         "inst1": "Buying BNB with fiat:",
         "inst2": "Once you have BNB, go to ApeSwap to obtain SKILL tokens:",
         "inst3": "Follow this tutorial to swap BNB for SKILL:",
         "inst4": "That's it! Now you can create your first character:",
         "watchVideo": "Watch Video",
-        "or": "or ",
+        "watchGettingStartedVideo" : "Watch 'Getting Started' Video",
+        "or": "or",
         "buyWithTransak" : "Buy with Transak",
         "questionDiscord": "If you have any questions, please join our Discord:"
       }
