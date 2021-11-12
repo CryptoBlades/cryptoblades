@@ -295,7 +295,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             getPlayerPower(basePowerLevel, weaponMultTarget, weaponBonusPower),
             timestamp,
             target,
-            getCurrentHour()
+            now / 1 hours
         );
         performFight(
             char,
@@ -404,6 +404,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getTargets(uint256 char, uint256 wep) public view returns (uint32[4] memory) {
+        // this is a frontend function
         (int128 weaponMultTarget,,
             uint24 weaponBonusPower,
             ) = weapons.getFightData(wep, characters.getTrait(char));
@@ -411,7 +412,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return getTargetsInternal(
             getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
             characters.getStaminaTimestamp(char),
-            now.div(1 hours)
+            now / 1 hours
         );
     }
 
