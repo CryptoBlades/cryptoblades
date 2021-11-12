@@ -94,6 +94,7 @@ export default {
     hideWalletWarning: false,
     isConnecting: false,
     recruitCost: '',
+    isOptions: false,
   }),
 
   computed: {
@@ -101,7 +102,7 @@ export default {
     ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
-      return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
+      return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
     },
 
     showMetamaskWarning() {
@@ -123,6 +124,10 @@ export default {
     },
     $route(to) {
       // react to route changes
+      if(to.path === '/options') {
+        return this.isOptions = true;
+      } else this.isOptions = false;
+
       window.gtag('event', 'page_view', {
         page_title: to.name,
         page_location: to.fullPath,

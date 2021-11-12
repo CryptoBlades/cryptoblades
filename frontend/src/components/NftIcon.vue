@@ -12,9 +12,9 @@
       <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
         v-tooltip="$t('nftIcon.secretTooltip')" />
       <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../assets/dusts/LesserDust.png"
-        v-tooltip="$t('nftIcon.lesserDustTooltip')" />
+        v-tooltip="$t('nftIcon.lesserDust')" />
       <img class="default-dust-placeholder" v-if="nft.type === '4bdust'" src="../assets/dusts/greaterDust.png"
-        v-tooltip="$t('nftIcon.greaterDustTooltip')" />
+        v-tooltip="$t('nftIcon.greaterDust')" />
       <img class="default-dust-placeholder" v-if="nft.type === '5bdust'" src="../assets/dusts/powerfulDust.png"
         v-tooltip="$t('nftIcon.powerfulDust')" />
     </div>
@@ -64,9 +64,10 @@
         <img class="placeholder-land" src="../assets/t2-frame.png" v-if="nft.type === 'claimT2Land'" />
         <img class="placeholder-land" src="../assets/t3-frame.png" v-if="nft.type === 'claimT3Land'" />
 
-        <span v-if="nft.type === 't1land'" class="nft-supply">Supply left: {{totalT1LandSupply}}</span>
-        <span v-if="nft.type === 't2land'" class="nft-supply">Supply left: {{totalT2LandSupply}}</span>
-        <span v-if="nft.type === 't3land'" class="nft-supply">Supply left: {{totalT3LandSupply}}</span>
+        <span v-if="nft.type === 't1land' && isShop" class="nft-supply">Supply left: {{totalT1LandSupply}}</span>
+        <span v-if="nft.type === 't2land' && isShop" class="nft-supply">Supply left: {{totalT2LandSupply}}</span>
+        <span v-if="nft.type === 't3land' && isShop" class="nft-supply">Supply left: {{totalT3LandSupply}}</span>
+        <span v-if="!isShop" class="nft-supply">Chunk Id: {{nft.chunkId}}</span>
         <span v-if="nft.type === 'claimT2Land'" class="nft-supply">Lands to claim: {{ totalT2LandsToClaim }} </span>
         <span v-if="nft.type === 'claimT3Land'" class="nft-supply">Lands to claim: {{ totalT3LandsToClaim }}</span>
       </div>
@@ -170,9 +171,11 @@ export default {
     ...mapGetters(['getWeaponName', 'currentCharacter',]),
     tooltipHtml() {
       if(!this.nft) return '';
-      if(this.nft.type === 'dustLb') return this.$t('nftIcon.lesserDustTooltip');
-      if(this.nft.type === 'dust4b') return this.$t('nftIcon.greaterDustTooltip');
+      if(this.nft.type === 'dustLb') return this.$t('nftIcon.lesserDust');
+      if(this.nft.type === 'dust4b') return this.$t('nftIcon.greaterDust');
       if(this.nft.type === 'dust5b') return this.$t('nftIcon.powerfulDust');
+      if(this.nft.type === 't1') return this.$t('nftIcon.lesserDust');
+      if(this.nft.type.includes('land')) return this.$t('nftIcon.land', {tier : this.nft.tier}) `Tier ${this.nft.tier} Land`;
 
       const wrapInSpan = (spanClass, text) => {
         return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;
