@@ -617,7 +617,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getBonusPowerForFight(id, wep.level);
     }
 
-    function getBonusPowerForFight(uint256 id, uint8 level) public view noFreshLookup(id) returns (uint24) {
+    function getBonusPowerForFight(uint256 id, uint8 level) public view returns (uint24) {
         WeaponBurnPoints storage wbp = burnPoints[id];
         return uint24(lowStarBurnPowerPerPoint.mul(wbp.lowStarBurnPoints)
             .add(fourStarBurnPowerPerPoint.mul(wbp.fourStarBurnPoints))
@@ -640,10 +640,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
-        restricted noFreshLookup(id)
+    function getFightDataAndDrainDurability(address fighter,
+        uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
+        restricted
     returns (int128, int128, uint24, uint8) {
-
+        require(fighter == ownerOf(id));
         drainDurability(id, drainAmount, allowNegativeDurability);
 
         Weapon storage wep = tokens[id];
@@ -659,11 +660,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) public restricted {
+    function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) internal {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
-        require((durabilityPoints >= amount || allowNegativeDurability)
-            /*&& promos.getBit(ownerOf(id), 4) == false*/,
-            "Low durability!");
+        require((durabilityPoints >= amount
+        || (allowNegativeDurability && durabilityPoints > 0)) // we allow going into negative, but not starting negative
+            ,"Low durability!");
 
         uint64 drainTime = uint64(amount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
@@ -728,10 +729,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function _isFeatureEnabled(uint256 bit) private view returns (bool) {
         return (numberParameters[NUMBERPARAMETER_FEATURE_BITS] & bit) == bit;
-    }
-
-    function canRaid(address user, uint256 id) public view returns (bool) {
-        return ownerOf(id) == user && getDurabilityPoints(id) > 0;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
