@@ -188,6 +188,7 @@ export default Vue.extend({
     languages(): { [key: string]: string } {
       const rObj: { [key: string]: string } = {};
       for (const [key, value] of Object.entries(i18n.messages)) {
+        if(value.name.toString === null) continue;
         rObj[key] = value.name.toString();
       }
       return rObj;
