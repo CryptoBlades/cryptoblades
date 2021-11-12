@@ -28,14 +28,18 @@
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
         <div>
           <big-button class="button mm-button" :mainText="$t('app.buttons.confMetamask')" @click="configureMetamask" />
-          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button" :mainText="$t('app.buttons.startMetamask')" @click="connectMetamask" />
+          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button"
+          :mainText="$t('app.buttons.startMetamask')" @click="connectMetamask" />
         </div>
         <div class="seperator"></div>
         <div class="instructions-list">
           <p>{{ $t('app.warning.message.instructions', {recruitCost: this.recruitCost}) }}</p>
           <ul class="unstyled-list">
             <li>
-              1. {{ $t('app.warning.message.inst1') }} <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.watchVideo')}}</a> {{$t('app.warning.message.or')}} <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.buyWithTransak')}}</a>
+              1. {{ $t('app.warning.message.inst1') }}
+              <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.watchVideo')}}</a>
+              {{$t('app.warning.message.or')}}
+              <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.buyWithTransak')}}</a>
             </li>
             <li>
               2. {{ $t('app.warning.message.inst2') }}<br />
