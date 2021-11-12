@@ -29,7 +29,6 @@ function loadLocaleMessages() {
       messages[locale] = removeEmpty(locales(key));
     }
   });
-  console.log(messages);
   return messages;
 }
 
