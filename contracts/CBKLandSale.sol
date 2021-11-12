@@ -26,6 +26,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     event ReservedLandClaimed(uint256 indexed reservation, address indexed reseller, address indexed owner, uint256 tier, uint256 chunkId);
     event MassMintReservedLand(address indexed player, address indexed reseller, uint256 chunkId, uint256 tier1, uint256 tier2, bool giveTier3);
     event MassMintReservedChunklessLand(address indexed player, address indexed reseller, uint256 tier1, uint256 tier2,  uint256 tier3);
+    event ReservedLandClaimedForPlayer(uint256 indexed reservation, address indexed reseller, address indexed owner, uint256 tier, uint256 chunkId);
     
     /* ========== LAND SALE INFO ========== */
     uint256 private constant NO_LAND = 0;
@@ -725,6 +726,45 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         playerReservedLandClaimed[reservation] = true;
         cbkLand.mint(msg.sender, tier, chunkId, reseller);
         emit ReservedLandClaimed(reservation, reseller, msg.sender, tier, chunkId);
+    }
+
+
+    
+    function massClaimReservationsForPlayer(address player, uint256[] calldata reservations) external isAdmin {
+        for (uint256 i = 0; i < reservations.length; i++) {
+            uint256 reservation = reservations[i];
+            require(playerReservedLandClaimed[reservation] == false, "AC"); // already claimed
+            require(playerReservedLands[player].contains(reservation), "IR"); // invalid reservation
+            require(playerReservedLandTier[reservation] == TIER_TWO, "IT"); // invalid tier; only T2 is handled like this
+            address reseller = playerReservedLandReseller[reservation];
+            uint256 rcLength = reservedChunks[reseller].length();
+            require(rcLength > 0, "no reserved chunks");
+            
+            uint256 assignedChunkid = 0;
+            
+            uint256 counter = reservedChunksCounter[reseller];
+            for(uint256 i = counter; i < counter + rcLength; i++) {
+                uint256 cId = reservedChunks[reseller].at(uint256(i % rcLength));
+                if(chunkT2LandSales[cId] < _allowedLandSalePerChunk) {
+                    assignedChunkid = cId;
+                    reservedChunksCounter[reseller] = uint256(i + 1);
+                    break;
+                }
+            }
+
+            require(assignedChunkid != 0, "NA");
+
+            if(chunkT2LandSales[assignedChunkid] == 0){
+                chunksWithT2Land++;
+            }
+
+            chunkT2LandSales[assignedChunkid]++;
+            playerReservedLands[player].remove(reservation);
+            playerReservedLandClaimed[reservation] = true;
+            cbkLand.mint(player, TIER_TWO, assignedChunkid, reseller);
+            chunkZoneLandSales[chunkIdToZoneId(assignedChunkid)]++;
+            emit ReservedLandClaimedForPlayer(reservation, reseller, player, TIER_TWO, assignedChunkid);
+        }
     }
 
     function getResellerOfChunk(uint256 chunkId) public view  returns (address reservedFor) {
