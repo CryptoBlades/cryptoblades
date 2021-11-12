@@ -324,9 +324,9 @@ interface Land {
 }
 
 const sorts = [
-  { name: i18n.t('characterList.sorts.any'), dir: '' },
-  { name: i18n.t('characterList.sorts.lowToHigh'), dir: 1 },
-  { name: i18n.t('characterList.sorts.highToLow'), dir: -1 },
+  { name: i18n.t('nftList.sorts.any'), dir: '' },
+  { name: i18n.t('nftList.sorts.lowToHigh'), dir: 1 },
+  { name: i18n.t('nftList.sorts.highToLow'), dir: -1 },
 ];
 
 interface Data {
