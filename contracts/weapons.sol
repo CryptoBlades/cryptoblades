@@ -662,7 +662,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) public restricted {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require((durabilityPoints >= amount || allowNegativeDurability)
-            && promos.getBit(ownerOf(id), 4) == false,
+            /*&& promos.getBit(ownerOf(id), 4) == false*/,
             "Low durability!");
 
         uint64 drainTime = uint64(amount * secondsPerDurability);
