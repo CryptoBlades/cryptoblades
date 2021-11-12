@@ -277,16 +277,17 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
-        fightModifierChecks(char, wep) {
+        onlyNonContract() {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight * fightMultiplier, false));
+            unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
+                char, staminaCostFight * fightMultiplier, false));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(wep, charTrait,
+            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(msg.sender, wep, charTrait,
                 durabilityCostFight * fightMultiplier, false);
 
         _verifyFight(
@@ -355,7 +356,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 targetPower,
         uint8 fightMultiplier
     ) private {
-        uint256 seed = randoms.getRandomSeed(msg.sender);
+        uint256 seed = uint256(keccak256(abi.encodePacked(now, msg.sender)));
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
@@ -664,13 +665,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function migrateRandoms(IRandoms _newRandoms) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
         randoms = _newRandoms;
-    }
-
-    modifier fightModifierChecks(uint256 character, uint256 weapon) {
-        _onlyNonContract();
-        _isCharacterOwner(character);
-        _isWeaponOwner(weapon);
-        _;
     }
 
     modifier onlyNonContract() {
