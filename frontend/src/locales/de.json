@@ -102,6 +102,26 @@
     "changeCharacterSkin" : "Änder das Aussehen eines Charakters",
     "pickSkin" : "Wähle einen Skin zum Wechseln aus."
   },
+  "weaponGrid":{
+    "stars" : "Sterne",
+    "element" : "Element",
+    "minPrice" : "Min Preis",
+    "maxPrice" : "Max Preis",
+    "sort" : "Sortieren",
+    "showReforged" : "Umgeschmiedete anzeigen",
+    "showFavorite" : "Favoriten anzeigen",
+    "clearFilters" : "Filter löschen",
+    "sorts":{
+      "any" : "Egal",
+      "lowToHigh" : "Preis: Niedrig -> Hoch",
+      "highToLow" : "Preis: Hoch -> Niedrig"
+    },
+    "renameWeapon": "Waffe umbenennen",
+    "renamePlaceholder": "Neuer Name",
+    "isProfanish" : "Dieser Name enthält nicht erlaubte Wörter und wird deshalb wie folgt dargestellt:",
+    "changeWeaponSkill" : "Element der Waffe ändern",
+    "pickSkin" : "Wähle einen Skin zum Wechseln aus."
+  },
   "weaponIcon":{
     "durability" : "Haltbarkeit",
     "durabilityTooltip" : "Wird um 1 Punkt je 50 Minuten repariert. Haltbarkeit wird zum folgenden Zeitpunkt voll sein:",
