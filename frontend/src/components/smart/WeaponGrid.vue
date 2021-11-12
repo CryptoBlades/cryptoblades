@@ -28,7 +28,7 @@
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
           <strong>{{$t('weaponGrid.sort')}}</strong>
           <select class="form-control" v-model="priceSort" >
-            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
+            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('weaponGrid.sorts.any') }}</option>
           </select>
         </div>
       </template>

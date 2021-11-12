@@ -208,28 +208,28 @@
         <div v-if="!isMarket && !isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>{{$t('nftList.nftType')}}</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land']" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land']" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div v-if="!isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>{{$t('nftList.stars')}}</strong>
           <select class="form-control" v-model="starFilter" @change="saveFilters()">
-            <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div v-if="!isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>{{$t('nftList.element')}}</strong>
           <select class="form-control" v-model="elementFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div class="col-sm-6 col-md-4 dropdown-elem" v-if="isMarket">
           <strong>{{$t('nftList.sort')}}</strong>
           <select class="form-control" v-model="priceSort" @change="saveFilters()">
-            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
+            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
@@ -241,14 +241,14 @@
         <div v-if="isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>{{$t('nftList.tier')}}</strong>
           <select class="form-control" v-model="tierFilter">
-            <option v-for="x in ['', 1, 2, 3]" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 1, 2, 3]" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div v-if="isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>{{$t('nftList.chunkID')}}</strong>
           <select class="form-control" v-model="chunkIdFilter">
-            <option v-for="x in ownedChunkIds" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ownedChunkIds" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
