@@ -10,18 +10,18 @@
       "stake": "Stake"
   },
   "ClaimRewardsBar":{
-    "rewards": "Rewards",
-    "earlyWithdrawTax": "Early Withdraw Tax",
-    "taxReduce":"Tax is being reduced by 1% per day.",
-    "readyToClaim":"Rewards ready to claim!",
-    "timeSince" : "Time since last withdraw: n/a",
-    "withdrawalInfoText1" : "You can withdraw max 10% of amount over 1 SKILL or 2 days worth of fights per day (whatever is greater). Remaining claimable amount today: ",
-    "withdrawalInfoText2" : "You can withdraw 1 day worth of fights per day. Remaining claimable amount today: "
+    "rewards": "Belohnungen",
+    "earlyWithdrawTax": "Abhebe-Steuer",
+    "taxReduce":"Die Steuer verringert sich um 1% am Tag",
+    "readyToClaim":"Belohnungen können abgeholt werden!",
+    "timeSince" : "Letzte Abhebung: n/a",
+    "withdrawalInfoText1" : "Du kannst maximal 10% abheben, wenn du über 1 SKILL hast oder die Menge SKILL, die du nach 2 Tagen kämpfen bekommen würdest. Je nachdem was größer ist. Mögliche Abhebung heute: ",
+    "withdrawalInfoText2" : "Du kannst so viel SKILL abheben, wie du in einem Tag durch Kämpfe bekommst. Mögliche Abhebung heute:"
   },
   "CharacterDisplay": {
-    "loading":"Loading...",
-    "powerIncrease":"Power increases by 10 every level up, and multiplied every 10 level ups",
-    "power": "Power",
+    "loading":"Lade...",
+    "powerIncrease":"Kraft erhöht sich um 10 je Level deines Charakters und wird je 10 Level mit 10 multipliziert.",
+    "power": "Kraft",
     "level": "Level"
     },
   "CharacterArt": {
@@ -50,6 +50,7 @@
     "lesserDustTooltip" : "Lesser Dust",
     "greaterDustTooltip" : "Greater Dust",
     "powerfulDust" : "Powerful Dust",
+    "land" : "Tier {tier} Land",
     "supplyLeft" : "Supply left:",
     "id" : "ID",
     "owned" : "Owned:",
@@ -169,7 +170,7 @@
     "use": "Benutze",
     "cancelReforge":"Umschmieden abbrechen",
     "selectBurnWeapon": "Wähle die Waffe aus, die du verbrennen mächtest",
-    "clearAll": "Clear all",
+    "clearAll": "Alle entfernen",
     "buyShield":"Du kannst Schilde im Skill Shop auf dem Marktplatz kaufen und andere NFTs von Raids looten!",
     "dustStorage": "Staublager",
     "dustGained": "Du bekommst Staub, indem du Waffen verbrennst!",
@@ -196,13 +197,13 @@
     "couldNotBurn": "Verbrennen nicht möglich: Zu wenig Guthaben oder Transaktion wurde abgelehnt."
   },
   "dustBalanceDisplay" : {
-    "availableDust" : "Available Dust",
-    "lesserPower" : "15 power per point",
-    "lesser" : "Lesser",
-    "greaterPower" : "30 power per point",
-    "greater" : "Greater",
-    "powerfulPower" : "75 power per point",
-    "powerful" : "Powerful"
+    "availableDust" : "Dein Staub",
+    "lesserPower" : "15 Stärke je Punkt",
+    "lesser" : "Schlechter",
+    "greaterPower" : "30 Stärke je Punkt",
+    "greater" : "Besserer",
+    "powerfulPower" : "75 Stärke je Punkt",
+    "powerful" : "Bester"
   },
   "combat":{
     "error": "Fehler:",
@@ -624,7 +625,7 @@
     "nftType" : "Nft-Typ",
     "stars" : "Sterne",
     "element" : "Element",
-    "sort" : "sortieren",
+    "sort" : "Sortieren",
     "showFavorite" : "Favoriten anzeigen",
     "clearFilters" : "Filter löschen",
     "noDrop" : "Leider hast du dieses Mal nichts bekommen.",
@@ -635,7 +636,7 @@
     }
   },
   "app": {
-    "cantView" : "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
+    "cantView" : "Du kannst das Spiel gerade nicht ansehen. Versuche den LocalStorage zu löschen, um deine Einstellunge zurückzusetzen.",
     "warning": {
       "title": "Metamask Not Detected Or Incorrect Network",
       "start": "Get Started With CryptoBlades",
@@ -653,20 +654,20 @@
         "welcome": "Welcome to CryptoBlades. Here is how you can get started."
       },
       "message": {
-        "hideWalletWarning": "You have hidden the wallet warning and it would now be displayed. If you are trying to play, please disable the option and follow the instructions, otherwise close and ignore.",
-        "instructions": "Get started in less than 10 minutes! To recruit your first character you need {recruitCost} SKILL and 0.001 BNB for gas. You will also need 0.0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!",
-        "inst1": "Buying BNB with fiat:",
-        "inst2": "Once you have BNB, go to ApeSwap to obtain SKILL tokens:",
-        "inst3": "Follow this tutorial to swap BNB for SKILL:",
-        "inst4": "That's it! Now you can create your first character:",
-        "watchVideo": "Watch Video",
+        "hideWalletWarning": "Du hast die Wallet-Warnung ausgeblendet und diese würde jetzt angezeigt werden. Falls du nicht spielen kannst, gehe in die Einstellungen und aktiviere die Wallet-Warnung. Folge dann den angezeigten Schritten.",
+        "instructions": "Fange in weniger als 10 Minuten an! Um deinen ersten Charakter zu rekrutieren, brauchst du {recruitCost} SKILL und mindestens 0.001 BNB für gas (Transaktionsgebühr). Außerdem brauchst du etwas BNB für deine ersten Kämpfe (0.0015 BNB), aber keine Sorge du wirst die Gebühr durch SKILL wieder verdienen!",
+        "inst1": "BNB mit FIAT kaufen:",
+        "inst2": "Sobald du BNB hast, gehe zu ApeSwap und hole dir SKILL tokens:",
+        "inst3": "Hier ein Tutorial wie man BNB zu SKILL tauscht:",
+        "inst4": "Das war's! Du kannst jetzt deinen ersten Charakter rekrutieren:",
+        "watchVideo": "Video anschauen",
         "or": "oder ",
-        "buyWithTransak" : "Buy with Transak",
-        "questionDiscord": "If you have any questions, please join our Discord:"
+        "buyWithTransak" : "Mit Transak kaufen",
+        "questionDiscord": "Wenn du Fragen hast, tritt gerne unserem Discord bei:"
       }
     },
     "notification": {
-      "link": "Check it out!"
+      "link": "Schau's dir an!"
     }
   },
   "on": "An",
