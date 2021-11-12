@@ -580,6 +580,40 @@
     "amount" : "Wie viel WAX möchtest du tauschen? Du hast: ",
     "invalidAmount" : "Ungültige WAX-Anzahl. Bitte nutze folgendes Format: X.xxxxxxxx (8 Dezimalstellen)."
   },
+  "nftList" : {
+    "nothing" : "Es steht gerade nichts zum Verkauf",
+    "onlyOne" : "Du kannst nur ein Stück Land kaufen. Dein Kauf:",
+    "tier" : "Stufe",
+    "chunkID" : "Chunk ID",
+    "showMap" : "Karte anzeigen",
+    "currencyToBuy" : "Währung für den Landkauf",
+    "select" : "Währung für Landkauf auswählen",
+    "buy" : "Kaufen",
+    "claim2" : "Stufe 2 beanspruchen",
+    "claim3" : "Stufe 3 beanspruchen",
+    "owned" : "Du besitzt",
+    "chooseZone" : "Gebiet wählen",
+    "chooseChunk" : "Chunk wählen" ,
+    "available" : "VERFÜGBAR",
+    "available2" : "Verfügbar",
+    "taken" : "BESETZT",
+    "reserved" : "RESERVIERT",
+    "buyLand" : "Land kaufen",
+    "claimLand" : "Land beanspruchen",
+    "lands" : "Länder",
+    "nftType" : "Nft-Typ",
+    "stars" : "Sterne",
+    "element" : "Element",
+    "sort" : "sortieren",
+    "showFavorite" : "Favoriten anzeigen",
+    "clearFilters" : "Filter löschen",
+    "noDrop" : "Leider hast du dieses Mal nichts bekommen.",
+    "sorts":{
+      "any" : "Egal",
+      "lowToHigh" : "Preis: Niedrig -> Hoch",
+      "highToLow" : "Preis: Hoch -> Niedrig"
+    }
+  },
   "app": {
     "cantView" : "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
     "warning": {

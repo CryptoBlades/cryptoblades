@@ -581,6 +581,41 @@
     "amount" : "How much WAX do you want to transfer? You have:",
     "invalidAmount" : "Invalid WAX amount. Please use the format: X.xxxxxxxx (8 decimals)."
   },
+  "nftList" : {
+    "nothing" : "Nothing to buy at this time",
+    "onlyOne" : "You can purchase only one land, your purchase:",
+    "tier" : "Tier",
+    "chunkID" : "Chunk ID",
+    "showMap" : "Show map",
+    "currencyToBuy" : "Currency to buy land with",
+    "select" : "Please select Currency to buy land with",
+    "buy" : "Buy",
+    "claim2" : "Claim Tier 2",
+    "claim3" : "Claim Tier 3",
+    "owned" : "Your owned",
+    "chooseZone" : "Choose zone",
+    
+    "chooseChunk" : "Choose chunk" ,
+    "available" : "AVAILABLE",
+    "available2" : "Available",
+    "taken" : "TAKEN",
+    "reserved" : "RESERVED",
+    "buyLand" : "Buy land",
+    "claimLand" : "Claim Land",
+    "lands" : "Lands",
+    "nftType" : "Nft Type",
+    "stars" : "Stars",
+    "element" : "Element",
+    "sort" : "Sort",
+    "showFavorite" : "Show Favorite",
+    "clearFilters" : "Clear Filters",
+    "noDrop" : "Nothing dropped for you this time.",
+    "sorts":{
+      "any" : "Any",
+      "lowToHigh" : "Price: Low -> High",
+      "highToLow" : "Price: High -> Low"
+    }
+  },
   "app": {
     "cantView" : "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
     "warning": {
