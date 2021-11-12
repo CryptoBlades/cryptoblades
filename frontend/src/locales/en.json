@@ -47,9 +47,10 @@
     "junkTooltip" : "Junk (1-5*)",
     "trinketTooltip" : "Trinket (1-5*)",
     "secretTooltip" : "Secret (??)",
-    "lesserDustTooltip" : "Lesser Dust",
-    "greaterDustTooltip" : "Greater Dust",
+    "lesserDust" : "Lesser Dust",
+    "greaterDust" : "Greater Dust",
     "powerfulDust" : "Powerful Dust",
+    "land" : "Tier {tier} Land",
     "supplyLeft" : "Supply left:",
     "id" : "ID",
     "owned" : "Owned:",
@@ -72,7 +73,7 @@
     "welcome": "Start earning today!",
     "recruitCharacter": "Recruit character for",
     "notEnoughSkillLink" : "here",
-    "notEnoughSkill" : "You can buy more SKILL from {0} or ",
+    "notEnoughSkill" : "You can buy more SKILL from {0} or",
     "buyBNBTransak" : "buy BNB with Transak",
     "recruitNew": "Recruit new character",
     "recruit": "Recruit",
@@ -565,6 +566,21 @@
     "withdrawable" : "<br>+ WITHDRAWABLE ",
     "igo": "<br>+ IN GAME ONLY "
   },
+  "leaderboard" : {
+    "loading" : "Loading..."
+  },
+  "portal" : {
+    "title" : "Portal",
+    "text1" : "The portal allows you to convert your other currencies to BNB. Currently, the portal supports",
+    "text2" : "We'll get your BNB to you ASAP!",
+    "waiting" : "Waiting for transaction results...",
+    "minimumSkill" : "In order to use the Portal, you will need at least <br> <b>5 SKILL!</b> <br> Please add some here:",
+    "swap" : "Swap SKILL/BNB",
+    "connectWallet" : "Connect WAX wallet",
+    "waxLogin" : "WAX Login",
+    "amount" : "How much WAX do you want to transfer? You have:",
+    "invalidAmount" : "Invalid WAX amount. Please use the format: X.xxxxxxxx (8 decimals)."
+  },
   "app": {
     "cantView" : "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
     "warning": {
@@ -591,7 +607,7 @@
         "inst3": "Follow this tutorial to swap BNB for SKILL:",
         "inst4": "That's it! Now you can create your first character:",
         "watchVideo": "Watch Video",
-        "or": "or",
+        "or": "or ",
         "buyWithTransak" : "Buy with Transak",
         "questionDiscord": "If you have any questions, please join our Discord:"
       }

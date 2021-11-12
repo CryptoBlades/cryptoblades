@@ -72,7 +72,7 @@
     "welcome": "Start earning today!",
     "recruitCharacter": "Rekrutieren einen Charakter für",
     "notEnoughSkillLink" : "hier",
-    "notEnoughSkill" : "Du kannst {0} mehr SKILL kaufen oder ",
+    "notEnoughSkill" : "Du kannst {0} mehr SKILL kaufen oder",
     "buyBNBTransak" : "BNB mit Transak kaufen",
     "recruitNew": "Charakter rekrutieren",
     "recruit": "Rekrutieren",
@@ -294,7 +294,7 @@
     "cancelTooltip":"Abgebrochene Verkäufe können erst nach 24 neu gelistet werden!",
     "cancelListing":"Verkauf abbrechen",
 
-    "listNfts":"NFT verkaufen",
+    "listNfts":"NFTs verkaufen",
     "listingHint" : "Wenn du ein NFT zum Verkauf anbietest, dann wird es an den Markt gesendet, <br> bis es verkauft wird oder du den Verkauf abbrichst.",
     "showWeapons":"Waffen anzeigen",
     "showChars":"Charaktere anzeigen",
@@ -565,6 +565,21 @@
     "withdrawable" : "<br>+ AUSZAHLBAR ",
     "igo": "<br>+ Nur Im Spiel verwendbar "
   },
+  "leaderboard" : {
+    "loading" : "Lädt..."
+  },
+  "portal" : {
+    "title" : "Portal",
+    "text1" : "Mit dem Portal kannst du andere Kryptowährungen in BNB umwandeln. Momentan unterstützt das Portal ",
+    "text2" : "Du bekommmst dein BNB sofort ... ",
+    "waiting" : "Warte auf Transaktion ...",
+    "minimumSkill" : "Um das Portal zu nutzen, brauchst du mindestens <br> <b> 5 SKILL! </b> <br> Du kannst hier Skill tauschen:",
+    "swap" : "Tausche SKILL/BNB",
+    "connectWallet" : "WAX wallet verbinden",
+    "waxLogin" : "WAX Login",
+    "amount" : "Wie viel WAX möchtest du tauschen? Du hast: ",
+    "invalidAmount" : "Ungültige WAX-Anzahl. Bitte nutze folgendes Format: X.xxxxxxxx (8 Dezimalstellen)."
+  },
   "app": {
     "cantView" : "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
     "warning": {
@@ -591,7 +606,7 @@
         "inst3": "Follow this tutorial to swap BNB for SKILL:",
         "inst4": "That's it! Now you can create your first character:",
         "watchVideo": "Watch Video",
-        "or": "or",
+        "or": "oder ",
         "buyWithTransak" : "Buy with Transak",
         "questionDiscord": "If you have any questions, please join our Discord:"
       }
