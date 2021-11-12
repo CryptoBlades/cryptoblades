@@ -12,8 +12,8 @@
       <div class="starter-panel">
         <span class="starter-panel-heading">{{ $t('app.warning.title') }}</span>
         <div class="center">
-          <big-button class="button" :mainText="$t('app.buttons.addMM')" @click="startOnboarding" v-if="showMetamaskWarning" />
-          <big-button class="button" :mainText="$t('app.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
+          <big-button class="button" :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
+          <big-button class="button" :mainText="$t('app.warning.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
           <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.buttons.hide')" />
         </div>
       </div>
@@ -27,9 +27,9 @@
         <span class="starter-panel-heading">{{ errorMessage || $t('app.warning.start') }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
         <div>
-          <big-button class="button mm-button" :mainText="$t('app.buttons.confMetamask')" @click="configureMetamask" />
+          <big-button class="button mm-button" :mainText="$t('app.warning.buttons.confMetamask')" @click="configureMetamask" />
           <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button"
-          :mainText="$t('app.buttons.startMetamask')" @click="connectMetamask" />
+          :mainText="$t('app.warning.buttons.startMetamask')" @click="connectMetamask" />
         </div>
         <div class="seperator"></div>
         <div class="instructions-list">
@@ -49,7 +49,7 @@
               3. {{ $t('app.warning.message.inst3') }} <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">{{ $t('app.warning.message.watchVideo', {name:''}) }}</a>
             </li>
             <li>
-              4. {{ $t('app.warning.message.inst4') }} (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">{{ $t('app.warning.message.watchVideo', {name:"'Getting Started' "}) }}</a>)
+              4. {{ $t('app.warning.message.inst4') }} (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">{{ $t('app.warning.message.watchGettingStartedVideo', {name:"'Getting Started' "}) }}</a>)
             </li>
           </ul>
           <p>
