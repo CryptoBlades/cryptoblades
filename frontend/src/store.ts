@@ -218,6 +218,9 @@ export function createStore(web3: Web3) {
         hasPendingDuel: false,
         characterRankingPoints: '0',
         showStats: false,
+        currentRankedSeason: '0',
+        seasonDuration: '',
+        seasonStartedAt: ''
       },
 
       isLoading: false,
@@ -1091,6 +1094,18 @@ export function createStore(web3: Web3) {
 
       updateDuelResult(state: IState, duelResult: IDuelResult){
         state.pvp.duelResult = duelResult;
+      },
+
+      updateCurrentRankedSeason(state: IState, currentRankedSeason: string){
+        state.pvp.currentRankedSeason = currentRankedSeason;
+      },
+
+      updateSeasonDuration(state: IState, seasonDuration: string){
+        state.pvp.seasonDuration = seasonDuration;
+      },
+
+      updateSeasonStartedAt(state: IState, seasonStartedAt: string){
+        state.pvp.seasonStartedAt = seasonStartedAt;
       }
 
     },
@@ -4224,7 +4239,56 @@ export function createStore(web3: Web3) {
           console.log(err);
         }
       },
+      async fetchCurrentRankedSeason({state, commit}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
 
+        try{
+          const currentRankedSeason = await PvpArena.methods
+            .currentRankedSeason()
+            .call(defaultCallOptions(state));
+
+          commit('updateCurrentRankedSeason', currentRankedSeason);
+        }catch(err){
+          console.log('Fetch Current Ranked Season Error Log: ');
+          console.log(err);
+          return err;
+        }
+      },
+      async fetchSeasonDuration({state, commit}){
+        const { PvpArena } = state.contracts();
+        if(!PvpArena) return;
+
+        try{
+          const seasonDuration = await PvpArena.methods
+            .seasonDuration()
+            .call(defaultCallOptions(state));
+
+          commit('updateSeasonDuration', seasonDuration);
+
+        }catch(err){
+          console.log('Fetch Season Duration Error Log: ');
+          console.log(err);
+          return err;
+        }
+      },
+
+      async fetchSeasonStartedAt({state, commit}){
+        const { PvpArena } = state.contracts();
+        if (!PvpArena) return;
+
+        try{
+          const seasonStartedAt = await PvpArena.methods
+            .seasonStartedAt()
+            .call(defaultCallOptions(state));
+
+          commit('updateSeasonStartedAt', seasonStartedAt);
+        }catch(err){
+          console.log('Fetch Season Started At Error Log: ');
+          console.log(err);
+          return err;
+        }
+      },
 
       async configureMetaMask({ dispatch }) {
         const currentNetwork = await web3.eth.net.getId();

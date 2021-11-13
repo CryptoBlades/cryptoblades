@@ -87,7 +87,7 @@
                   src="../../assets/run.svg"/>WITHDRAW</span>
           </div>
           <div
-            v-if="!this.pvp.duelByAttacker.isPending"
+            v-if="this.pvp.duelByAttacker.isPending"
             class="reroll-container">
               <span
                 @click="reRollOpponent(currentPvPCharacterId)">
@@ -398,7 +398,7 @@ export default {
 
     getDecisionTime(){
 
-      const decisionTimeInterval = (this.pvp.duelByAttacker.createdAt * 1000) - 180000;
+      const decisionTimeInterval = (this.pvp.duelByAttacker.createdAt * 1000);
 
       const decisionTime = new Date(decisionTimeInterval);
 

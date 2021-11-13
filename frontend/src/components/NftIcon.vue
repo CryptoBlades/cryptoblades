@@ -64,9 +64,10 @@
         <img class="placeholder-land" src="../assets/t2-frame.png" v-if="nft.type === 'claimT2Land'" />
         <img class="placeholder-land" src="../assets/t3-frame.png" v-if="nft.type === 'claimT3Land'" />
 
-        <span v-if="nft.type === 't1land'" class="nft-supply">Supply left: {{totalT1LandSupply}}</span>
-        <span v-if="nft.type === 't2land'" class="nft-supply">Supply left: {{totalT2LandSupply}}</span>
-        <span v-if="nft.type === 't3land'" class="nft-supply">Supply left: {{totalT3LandSupply}}</span>
+        <span v-if="nft.type === 't1land' && isShop" class="nft-supply">Supply left: {{totalT1LandSupply}}</span>
+        <span v-if="nft.type === 't2land' && isShop" class="nft-supply">Supply left: {{totalT2LandSupply}}</span>
+        <span v-if="nft.type === 't3land' && isShop" class="nft-supply">Supply left: {{totalT3LandSupply}}</span>
+        <span v-if="!isShop" class="nft-supply">Chunk Id: {{nft.chunkId}}</span>
         <span v-if="nft.type === 'claimT2Land'" class="nft-supply">Lands to claim: {{ totalT2LandsToClaim }} </span>
         <span v-if="nft.type === 'claimT3Land'" class="nft-supply">Lands to claim: {{ totalT3LandsToClaim }}</span>
       </div>
@@ -173,6 +174,8 @@ export default {
       if(this.nft.type === 'dustLb') return 'Lesser Dust';
       if(this.nft.type === 'dust4b') return 'Greater Dust';
       if(this.nft.type === 'dust5b') return 'Powerful Dust';
+      if(this.nft.type === 't1') return 'Lesser Dust';
+      if(this.nft.type.includes('land')) return `Tier ${this.nft.tier} Land`;
 
       const wrapInSpan = (spanClass, text) => {
         return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;

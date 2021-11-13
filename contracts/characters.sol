@@ -309,11 +309,14 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint64(maxStamina * secondsPerStamina);
     }
 
-    function getFightDataAndDrainStamina(uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
+    function getFightDataAndDrainStamina(address fighter,
+        uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
+        require(fighter == ownerOf(id));
         Character storage char = tokens[id];
         require(getNftVar(id, NFTVAR_BUSY) == 0, "Character is busy");
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
-        require(allowNegativeStamina || staminaPoints >= amount, "Not enough stamina!");
+        require((staminaPoints > 0 && allowNegativeStamina) // we allow going into negative, but not starting negative
+            || staminaPoints >= amount, "Not enough stamina!");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;

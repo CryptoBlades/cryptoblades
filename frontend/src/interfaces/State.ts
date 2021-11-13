@@ -91,6 +91,9 @@ export interface IPvPState {
   hasPendingDuel: boolean;
   characterRankingPoints: string;
   showStats: boolean;
+  currentRankedSeason: string;
+  seasonDuration: string;
+  seasonStartedAt: string;
 }
 
 export interface IDuelByAttacker {

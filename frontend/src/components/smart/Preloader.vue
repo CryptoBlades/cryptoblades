@@ -32,7 +32,7 @@
 }
 
 .preloader::after{
-  content: url('https://www.gitbook.com/cdn-cgi/image/width=40,height=40,fit=contain,dpr=1.25,format=auto/https%3A%2F%2Fcryptoblades.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-28427.appspot.com%2Fo%2Fspaces%252F-MdGmpX4w7mgvE8wm1DQ%252Favatar-1625579572849.png%3Fgeneration%3D1625579573048975%26alt%3Dmedia');
+  content: url('../../assets/cb_logo_preloader.png');
   height: 95%;
   width: 95%;
   position: absolute;

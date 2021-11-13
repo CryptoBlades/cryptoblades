@@ -819,7 +819,7 @@
     },
     "links": {},
     "address": "0xb86F20B64F25C2fA3C7798f985471fa161BBB5CD",
-    "transactionHash": "0xba8b6c0a84430e88d2c57e54063cf20ff3a5b3a06d559c36b2849cfa68f74f5d"
+    "transactionHash": "0xcb0895ce8f2828255bfa64e924d307c048e17cef22e1bb614a1d2d6b95c45cd3"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -1883,7 +1883,7 @@
     },
     "links": {},
     "address": "0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
-    "transactionHash": "0x66c6643bad0d99b5cc86cd42ce47f57bc551b8f2ea0451ba4083c0e10bd269ec"
+    "transactionHash": "0xb4eedb1d471a2231062b167cec8b30938df2e60e8af0a376709a51e68fdc5481"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2252,7 +2252,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0x6a6534c11f5ca5864bba565b20ef1ddee21ef49ff404722e42117ed64b516a73"
+    "transactionHash": "0x2c4f626635fdc655adae9ab22d79ddf5487fa6b157789a74ff2c211d196ca82a"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -3272,7 +3272,7 @@
     },
     "links": {},
     "address": "0xE8cEE8309c5705c8b5004BBB031686a1029ab977",
-    "transactionHash": "0xeebdf229a7d59c1cfacdae2418363af0466a6b3e7ac5010fb31803672fe6b1ab"
+    "transactionHash": "0x1a59a1fd8cc19134d39b6693ee2a1d0c20c82c45b3b1c4b61ee08a44b99d354c"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -3360,7 +3360,7 @@
     "events": {},
     "links": {},
     "address": "0x86Ab07F69046475D14d69127d76Cef9bA91fbC39",
-    "transactionHash": "0xdd09970ca921cbd44ec52b5b13e46d5ca945f6c40076f8b2065a7e7c218cae55"
+    "transactionHash": "0x7e95a63ef3ea98e67e007a8592908ee536f1b4f1584fae6320eb0ab0f5d967cb"
   },
   "build/contracts/RaidBasic.json": {
     "events": {},
@@ -4582,6 +4582,6 @@
     },
     "links": {},
     "address": "0x672E4CddA311b3BfAd1e09313241C62B4eFF5782",
-    "transactionHash": "0x74b8e47cbfbe9cb694f33d55e87f873621cd1f1c6ee7947bea735b333ecfd35b"
+    "transactionHash": "0x60dec8e36f29a88078850b94744a63db5fa275bbd50a6fdec1824029fdd10529"
   }
 }
