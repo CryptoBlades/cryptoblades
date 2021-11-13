@@ -687,5 +687,11 @@
   "stars":"Sterne",
   "stats":"Attribute",
   "bonusPower" : "Bonusstärke",
-  "loading": "Lade..."
+  "loading": "Lade...",
+  "traits" : {
+    "earth" : "Erde",
+    "fire" : "Feuer",
+    "lightning" : "Blitz",
+    "water" : "Wasser"
+  }
 }

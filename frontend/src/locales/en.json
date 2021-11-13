@@ -687,5 +687,11 @@
   "weapons": "Weapons",
   "stars":"Stars",
   "stats":"Stats",
-  "bonusPower" : "Bonus Power"
+  "bonusPower" : "Bonus Power",
+  "traits" : {
+    "earth" : "Earth",
+    "fire" : "Fire",
+    "lightning" : "Lightning",
+    "water" : "Water"
+  }
 }
