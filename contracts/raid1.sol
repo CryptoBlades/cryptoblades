@@ -27,7 +27,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
-
+    
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     uint8 public constant STATUS_UNSTARTED = 0;
@@ -93,7 +93,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         uint8 outcome,
         uint256 bossRoll,
         uint256 playerRoll);
-
+    
     // reward specific events for analytics
     event RewardClaimed(uint256 indexed raidIndex, address indexed user, uint256 characterCount);
     event RewardedXpBonus(uint256 indexed raidIndex, address indexed user, uint256 indexed charID, uint16 amount);
@@ -106,7 +106,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     event RewardedKeyBox(uint256 indexed raidIndex, address indexed user, uint256 indexed tokenID);
 
     function initialize(address gameContract) public initializer {
-
+        
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
@@ -177,7 +177,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         require(weapons.ownerOf(weaponID) == msg.sender);
         require(characters.getStaminaPoints(characterID) > 0, "You cannot join with 0 character stamina");
         require(weapons.getDurabilityPoints(weaponID) > 0, "You cannot join with 0 weapon durability");*/
-        // owner and stamina/durability checks in the fightdata functions
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
@@ -190,7 +189,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
 
         (uint8 charTrait, uint24 basePowerLevel, /*uint64 timestamp*/) =
-            unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
+            unpackFightData(characters.getFightDataAndDrainStamina(
                                     characterID,
                                     uint8(staminaCost),
                                     true)
@@ -199,9 +198,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         (/*int128 weaponMultTarget*/,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(msg.sender,
-                weaponID, charTrait, uint8(durabilityCost), true);
-
+            /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(weaponID, charTrait, uint8(durabilityCost), true);
+        
         uint24 power = getPlayerFinalPower(
             getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             charTrait,
@@ -565,7 +563,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
         return chars;
     }
-
+    
     function getParticipatingWeapons() public view returns(uint256[] memory) {
         uint256[] memory indices = raidParticipantIndices[raidIndex][msg.sender];
         uint256[] memory weps = new uint256[](indices.length);
@@ -587,7 +585,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
         return totalAccountPower;
     }
-
+    
     function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
         return isRaidStarted()
             && haveEnoughEnergy(characterID, weaponID)

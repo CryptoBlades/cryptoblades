@@ -766,13 +766,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             msg.sender,
             blockhash(block.number)
         );
-
         bool useShield = fighterByCharacter[characterID].useShield;
         int128 bonusShieldStats;
         if (useShield) {
             bonusShieldStats = _getShieldStats(characterID);
         }
-
 
         (
             ,

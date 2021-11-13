@@ -125,7 +125,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     Promos public promos;
 
     uint256 public constant BIT_FEATURE_TRANSFER_BLOCKED = 1;
-
+    
     uint256 public constant NUMBERPARAMETER_FEATURE_BITS = uint256(keccak256("FEATURE_BITS"));
 
     mapping(uint256 => uint256) public numberParameters;
@@ -134,7 +134,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
     event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
-
+    
     mapping(uint256 => mapping(uint256 => uint256)) public nftVars;
     uint256 public NFTVAR_BUSY;
 
@@ -624,7 +624,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getBonusPowerForFight(id, wep.level);
     }
 
-    function getBonusPowerForFight(uint256 id, uint8 level) public view returns (uint24) {
+    function getBonusPowerForFight(uint256 id, uint8 level) public view noFreshLookup(id) returns (uint24) {
         WeaponBurnPoints storage wbp = burnPoints[id];
         return uint24(lowStarBurnPowerPerPoint.mul(wbp.lowStarBurnPoints)
             .add(fourStarBurnPowerPerPoint.mul(wbp.fourStarBurnPoints))
@@ -647,9 +647,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function getFightDataAndDrainDurability(address fighter,
-        uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
-        restricted
+    function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
+        restricted noFreshLookup(id)
     returns (int128, int128, uint24, uint8) {
         // check if the weapon is busy, there is no space in the contract so we can't add an exaplanation
         require(getNftVar(id, NFTVAR_BUSY) == 0);
@@ -667,11 +666,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) internal {
+    function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) public restricted {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
-        require((durabilityPoints >= amount
-        || (allowNegativeDurability && durabilityPoints > 0)) // we allow going into negative, but not starting negative
-            ,"Low durability!");
+        require((durabilityPoints >= amount || allowNegativeDurability)
+            && promos.getBit(ownerOf(id), 4) == false,
+            "Low durability!");
 
         uint64 drainTime = uint64(amount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that

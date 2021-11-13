@@ -277,25 +277,24 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
-        onlyNonContract() {
+        fightModifierChecks(char, wep) {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
-                char, staminaCostFight * fightMultiplier, false));
+            unpackFightData(characters.getFightDataAndDrainStamina(char, staminaCostFight * fightMultiplier, false));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(msg.sender, wep, charTrait,
+            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(wep, charTrait,
                 durabilityCostFight * fightMultiplier, false);
 
-        // dirty variable reuse to avoid stack limits
-        target = grabTarget(
-            getPlayerPower(basePowerLevel, weaponMultTarget, weaponBonusPower),
+        _verifyFight(
+            basePowerLevel,
+            weaponMultTarget,
+            weaponBonusPower,
             timestamp,
-            target,
-            now / 1 hours
+            target
         );
         performFight(
             char,
@@ -307,6 +306,47 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         );
     }
 
+    function _verifyFight(
+        uint24 basePowerLevel,
+        int128 weaponMultTarget,
+        uint24 weaponBonusPower,
+        uint64 timestamp,
+        uint32 target
+    ) internal view {
+        verifyFight(
+            basePowerLevel,
+            weaponMultTarget,
+            weaponBonusPower,
+            timestamp,
+            now.div(1 hours),
+            target
+        );
+    }
+
+    function verifyFight(
+        uint24 playerBasePower,
+        int128 wepMultiplier,
+        uint24 wepBonusPower,
+        uint64 staminaTimestamp,
+        uint256 hour,
+        uint32 target
+    ) public pure {
+
+        uint32[4] memory targets = getTargetsInternal(
+            getPlayerPower(playerBasePower, wepMultiplier, wepBonusPower),
+            staminaTimestamp,
+            hour
+        );
+        bool foundMatch = false;
+        for(uint i = 0; i < targets.length; i++) {
+            if(targets[i] == target) {
+                foundMatch = true;
+                i = targets.length;
+            }
+        }
+        require(foundMatch);
+    }
+
     function performFight(
         uint256 char,
         uint256 wep,
@@ -315,7 +355,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 targetPower,
         uint8 fightMultiplier
     ) private {
-        uint256 seed = uint256(keccak256(abi.encodePacked(now, msg.sender)));
+        uint256 seed = randoms.getRandomSeed(msg.sender);
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
@@ -404,7 +444,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getTargets(uint256 char, uint256 wep) public view returns (uint32[4] memory) {
-        // this is a frontend function
         (int128 weaponMultTarget,,
             uint24 weaponBonusPower,
             ) = weapons.getFightData(wep, characters.getTrait(char));
@@ -412,7 +451,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return getTargetsInternal(
             getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
             characters.getStaminaTimestamp(char),
-            now / 1 hours
+            now.div(1 hours)
         );
     }
 
@@ -424,15 +463,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // trait bonuses not accounted for
         // targets expire on the hour
 
+        uint256 baseSeed = RandomUtil.combineSeeds(
+            RandomUtil.combineSeeds(staminaTimestamp,
+            currentHour),
+            playerPower
+        );
+
         uint32[4] memory targets;
-        for(uint32 i = 0; i < targets.length; i++) {
+        for(uint i = 0; i < targets.length; i++) {
             // we alter seed per-index or they would be all the same
-            // this is a read only function so it's fine to pack all 4 params each iteration
-            // for the sake of target picking it needs to be the same as in grabTarget(i)
-            // even the exact type of "i" is important here
-            uint256 indexSeed = uint256(keccak256(abi.encodePacked(
-                staminaTimestamp, currentHour, playerPower, i
-            )));
+            uint256 indexSeed = RandomUtil.combineSeeds(baseSeed, i);
             targets[i] = uint32(
                 RandomUtil.plusMinus10PercentSeeded(playerPower, indexSeed) // power
                 | (uint32(indexSeed % 4) << 24) // trait
@@ -440,23 +480,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
 
         return targets;
-    }
-
-    function grabTarget(
-        uint24 playerPower,
-        uint64 staminaTimestamp,
-        uint32 enemyIndex,
-        uint256 currentHour
-    ) private pure returns (uint32) {
-        require(enemyIndex < 4, "High target index");
-
-        uint256 enemySeed = uint256(keccak256(abi.encodePacked(
-            staminaTimestamp, currentHour, playerPower, enemyIndex
-        )));
-        return uint32(
-            RandomUtil.plusMinus10PercentSeeded(playerPower, enemySeed) // power
-            | (uint32(enemySeed % 4) << 24) // trait
-        );
     }
 
     function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
@@ -641,6 +664,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function migrateRandoms(IRandoms _newRandoms) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
         randoms = _newRandoms;
+    }
+
+    modifier fightModifierChecks(uint256 character, uint256 weapon) {
+        _onlyNonContract();
+        _isCharacterOwner(character);
+        _isWeaponOwner(weapon);
+        _;
     }
 
     modifier onlyNonContract() {

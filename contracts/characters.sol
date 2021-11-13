@@ -9,6 +9,10 @@ import "./util.sol";
 import "./interfaces/ITransferCooldownable.sol";
 import "./PvpArena.sol";
 
+import "./interfaces/ITransferCooldownable.sol";
+import "./PvpArena.sol";
+
+
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
@@ -309,14 +313,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint64(maxStamina * secondsPerStamina);
     }
 
-    function getFightDataAndDrainStamina(address fighter,
-        uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
-        require(fighter == ownerOf(id));
+    function getFightDataAndDrainStamina(uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
         Character storage char = tokens[id];
         require(getNftVar(id, NFTVAR_BUSY) == 0, "Character is busy");
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
-        require((staminaPoints > 0 && allowNegativeStamina) // we allow going into negative, but not starting negative
-            || staminaPoints >= amount, "Not enough stamina!");
+        require(allowNegativeStamina || staminaPoints >= amount, "Not enough stamina!");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;
