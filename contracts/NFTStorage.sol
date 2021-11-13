@@ -116,6 +116,11 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     EnumerableSet.UintSet private _supportedChains;
 
+    // Source chain => NFT Type => NFTId of source chain => transfer id
+    mapping(uint256 => mapping(uint256 => mapping(uint256 => uint256))) private _transferInsLog;
+    // Transfer id => minted item Id; no need for NFT type; we can get that from trasnfer in info
+    mapping(uint256 => uint256) private _withdrawFromBridgeLog;
+
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTTransferOutRequest(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -464,6 +469,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         nftChainIds[nftTypeToAddress[transferIn.nftType]][mintedItem] = buildChainId(transferIn.sourceChain, transferIn.sourceId);
     
+        _withdrawFromBridgeLog[bridgedNFT] = mintedItem;
+
         emit NFTWithdrawnFromBridge(transferIn.owner, bridgedNFT, transferIn.nftType, mintedItem);
     }
 
@@ -519,7 +526,11 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     // Transfer request of a player if any (only active one). Not bot... will move up
     function getBridgeTransfer() public view returns (uint256) {
-        return transferOutOfPlayers[msg.sender];
+        return getBridgeTransferOfPlayer(msg.sender);
+    }
+
+     function getBridgeTransferOfPlayer(address player) public view returns (uint256) {
+        return transferOutOfPlayers[player];
     }
 
     function getBridgeTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint256, uint256, uint8) {
@@ -562,7 +573,13 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         transferInsMeta[_transferInsAt] = metaData;
         transferInSeeds[_transferInsAt] = seed;
 
+        _transferInsLog[sourceChain][nftType][sourceId] = _transferInsAt;
         emit TransferedIn(receiver, nftType, sourceChain, sourceId);
+    }
+
+    // To know if it actually made it
+    function getTransferInFromLog(uint256 sourceChain, uint8 nftType, uint256 sourceId) public view returns (uint256) {
+        return  _transferInsLog[sourceChain][nftType][sourceId];
     }
 
     function packedWeaponsData(uint256 weaponId) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
