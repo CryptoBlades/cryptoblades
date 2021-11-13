@@ -79,7 +79,7 @@
                 :text="$t('raid.weaponHint')"/>
                   </span>
                   <span class="float-right sub-text">
-                    {{$t('raid.xpReward')}}{{ currentMultiplier }}
+                    {{$t('raid.multiplier')}}{{ currentMultiplier }}
                   </span>
               </span>
               <hr class="divider">

@@ -29,7 +29,7 @@
           <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
             <b>{{$t('CharacterDisplay.level')}} </b>
             <span>{{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP) </span>
-            <b>{{$t('CharacterDisplay.power')}}:</b>
+            <b>{{$t('CharacterDisplay.power')}}: </b>
             <span>{{CharacterPower(currentCharacter.level).toLocaleString()}}</span>
             <Hint class="power-hint" :text="$t('CharacterDisplay.powerIncrease')+
               `<br>${$t('CharacterDisplay.level')} 1: 1000
