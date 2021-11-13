@@ -70,6 +70,7 @@ import {PropType} from 'vue/types/options';
 import axios from 'axios';
 import { getConfigValue } from '@/contracts';
 import i18n from '@/i18n';
+import {TranslateResult} from 'vue-i18n';
 
 interface CombatResult {
   isVictory: boolean;
@@ -98,7 +99,7 @@ export default Vue.extend({
   },
 
   computed: {
-    formattedOutcome(): string {
+    formattedOutcome(): TranslateResult {
       if(this.fightResults.isVictory) return i18n.t('combatResults.won');
       else return i18n.t('combatResults.lost');
     },

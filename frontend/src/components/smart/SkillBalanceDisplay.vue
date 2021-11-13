@@ -47,6 +47,7 @@ import { IState } from '@/interfaces';
 import { formatDurationFromSeconds } from '@/utils/date-time';
 import { BModal } from 'bootstrap-vue';
 import i18n from '@/i18n';
+import {TranslateResult} from 'vue-i18n';
 
 type StoreMappedState = Pick<IState, 'skillRewards' | 'skillBalance' | 'inGameOnlyFunds' | 'waxBridgeWithdrawableBnb' | 'waxBridgeTimeUntilLimitExpires'>;
 
@@ -102,7 +103,7 @@ export default Vue.extend({
       return formatDurationFromSeconds(this.waxBridgeTimeUntilLimitExpires);
     },
 
-    bnbClaimTooltip(): string {
+    bnbClaimTooltip(): TranslateResult {
       if(!this.canWithdrawBnb) {
         return i18n.t('skillBalanceDisplay.reachedPortalLimit', {
           durationUntilLimitPeriodOver : this.durationUntilLimitPeriodOver,
