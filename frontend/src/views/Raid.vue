@@ -76,9 +76,7 @@
             <span class="raid-title-section bold">
               <span>{{$t('raid.weapon')}}
                 <Hint
-                text="Your weapon multiplies your power<br>
-                  <br>+Stats determine the multiplier
-                  <br>Stat element match with character gives greater bonus"/>
+                :text="$t('raid.weaponHint')"/>
                   </span>
                   <span class="float-right sub-text">
                     {{$t('raid.xpReward')}}{{ currentMultiplier }}
