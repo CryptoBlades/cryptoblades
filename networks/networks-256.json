@@ -887,7 +887,7 @@
     },
     "links": {},
     "address": "0x26362Fa1a24f2b8eA3498863A3700605C16A9D9D",
-    "transactionHash": "0xe36dffc3249e30038df37c245c6889d586232469dc00fff46a27400ba2a7a33a"
+    "transactionHash": "0x967769c11c204d7007698d4b94827359185ad467c9279e2b5613a8f51c56c808"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -1951,7 +1951,7 @@
     },
     "links": {},
     "address": "0x58E7a90eEf2bEe6494c8d99d74a244b21B3c1239",
-    "transactionHash": "0x0c7291c8653fb9bb2e09a7ee39ef6fefb21f60628955dde4ef4434561178baa7"
+    "transactionHash": "0x10f448d70c202cfdb0b1bc26412f9b4f8ec1c871d7fd1b4f9d78d2a1e2aa5146"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2233,7 +2233,7 @@
     },
     "links": {},
     "address": "0xD9AC0Cc8BBDBA6616De0F07119D61d40Fb5258DE",
-    "transactionHash": "0xd499091212e844809b08254ee043649c6e02de5f55b06c29bc7eadc57276251f"
+    "transactionHash": "0x0f8dc40e67cb9af9c1c867497cd73e39133383321f9a9a5cf6d2f2749c44964a"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -3222,7 +3222,7 @@
     },
     "links": {},
     "address": "0x7EB3237Ba499A05e8915870AeA5c897048F709b1",
-    "transactionHash": "0x39c8003228352b38c8fd216b7250b5c37f20b0564c4f5a1b7c1c8802ddabc306"
+    "transactionHash": "0x35d92d76cdc81a0fafe6a920f2d9c6780da623b12598e19fbbbc29b836a37937"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -3310,7 +3310,7 @@
     "events": {},
     "links": {},
     "address": "0xBc4cB5E95c12FD4D7065632dbfFdf3004dE11aF1",
-    "transactionHash": "0x399b99d3f1eef7dc25f67a1086e34a878e19b8ad639a7e247f2a6bede975b530"
+    "transactionHash": "0x7202032d4f873de1504ef49ebf3521aa4dcfc86b3ea723168dcf9be4688ce49f"
   },
   "build/contracts/RaidBasic.json": {
     "events": {},
@@ -4483,6 +4483,6 @@
     },
     "links": {},
     "address": "0xA4DEB2aC411f8BaA1F9A353Db0c80ABF4f3AfB8a",
-    "transactionHash": "0x30769ec259c483b5dc7273512bb1fafc10efeef4da130a8aadce2736f2e91edf"
+    "transactionHash": "0x7011c715b1b99b43b7ffe0891f463fd43d6457ce5f1172c440fb0717b37a90e2"
   }
 }
