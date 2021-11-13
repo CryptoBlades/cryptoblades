@@ -69,6 +69,7 @@ import Hint from '../components/Hint.vue';
 import {PropType} from 'vue/types/options';
 import axios from 'axios';
 import { getConfigValue } from '@/contracts';
+import i18n from '@/i18n';
 
 interface CombatResult {
   isVictory: boolean;
@@ -98,8 +99,8 @@ export default Vue.extend({
 
   computed: {
     formattedOutcome(): string {
-      if(this.fightResults.isVictory) return (this as any).$t('combatResults.won');
-      else return (this as any).$t('combatResults.lost');
+      if(this.fightResults.isVictory) return i18n.t('combatResults.won');
+      else return i18n.t('combatResults.lost');
     },
     formattedUsd(): string {
       return `$${(this.calculateSkillPriceInUsd()).toFixed(2)}`;

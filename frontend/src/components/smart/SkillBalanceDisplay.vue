@@ -46,6 +46,7 @@ import { toBN, fromWeiEther } from '../../utils/common';
 import { IState } from '@/interfaces';
 import { formatDurationFromSeconds } from '@/utils/date-time';
 import { BModal } from 'bootstrap-vue';
+import i18n from '@/i18n';
 
 type StoreMappedState = Pick<IState, 'skillRewards' | 'skillBalance' | 'inGameOnlyFunds' | 'waxBridgeWithdrawableBnb' | 'waxBridgeTimeUntilLimitExpires'>;
 
@@ -103,13 +104,13 @@ export default Vue.extend({
 
     bnbClaimTooltip(): string {
       if(!this.canWithdrawBnb) {
-        return (this as any).$t('skillBalanceDisplay.reachedPortalLimit', {
+        return i18n.t('skillBalanceDisplay.reachedPortalLimit', {
           durationUntilLimitPeriodOver : this.durationUntilLimitPeriodOver,
           formattedTotalAvailableBnb : this.formattedTotalAvailableBnb,
         });
       }
 
-      return (this as any).$t('skillBalanceDisplay.withdrawablePortal', {
+      return i18n.t('skillBalanceDisplay.withdrawablePortal', {
         formattedBnbThatCanBeWithdrawn : this.formattedBnbThatCanBeWithdrawn,
         formattedTotalAvailableBnb : this.formattedTotalAvailableBnb,
       });
@@ -126,11 +127,11 @@ export default Vue.extend({
       let html =  toBN(skillBalance).toFixed(4) + ' SKILL';
 
       if(parseFloat(skillRewards) !== 0){
-        html += (this as any).$t('skillBalanceDisplay.withdrawable') + toBN(skillRewards).toFixed(4) + ' SKILL';
+        html += i18n.t('skillBalanceDisplay.withdrawable') + toBN(skillRewards).toFixed(4) + ' SKILL';
       }
 
       if(parseFloat(inGameOnlyFundsBalance) !== 0){
-        html += (this as any).$t('skillBalanceDisplay.igo') + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
+        html += i18n.t('skillBalanceDisplay.igo') + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
       }
 
       return html;

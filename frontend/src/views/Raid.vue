@@ -223,7 +223,7 @@ import { traitNumberToName } from '@/contract-models';
 import { fromWeiEther } from '@/utils/common';
 import { staminaToHours } from '@/utils/date-time';
 import { RaidRewards, Weapon, Junk, Keybox, DustLb, Dust4b, Dust5b, BonusXp } from '@/interfaces/RaidRewards';
-
+import i18n from '@/i18n';
 
 interface RaidMappedActions {
   fetchRaidState(): Promise<void>;
@@ -396,28 +396,28 @@ export default Vue.extend({
 
     async joinRaidMethod(): Promise<void> {
       if (!this.selectedWeaponId || !this.currentCharacterId) {
-        (this as any).$dialog.notify.error((this as any).$t('raid.errors.selection'));
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.selection'));
         return;
       }
 
       const isRaidStarted = await this.isRaidStarted();
       if(!isRaidStarted) {
-        (this as any).$dialog.notify.error((this as any).$t('raid.errors.raidNotStarted'));
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.raidNotStarted'));
         return;
       }
       const isCharacterRaiding = await this.isCharacterAlreadyRaiding(this.currentCharacterId);
       if(isCharacterRaiding) {
-        (this as any).$dialog.notify.error((this as any).$t('raid.errors.lockedChar'));
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.lockedChar'));
         return;
       }
       const isWeaponRaiding = await this.isWeaponAlreadyRaiding(this.selectedWeaponId);
       if(isWeaponRaiding) {
-        (this as any).$dialog.notify.error((this as any).$t('raid.errors.lockedWeapon'));
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.lockedWeapon'));
         return;
       }
       const haveEnoughEnergy = await this.haveEnoughEnergy(this.currentCharacterId, this.selectedWeaponId);
       if(!haveEnoughEnergy) {
-        (this as any).$dialog.notify.error((this as any).$t('raid.errors.notEnough'));
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.notEnough'));
         return;
       }
 
@@ -426,7 +426,7 @@ export default Vue.extend({
         this.selectedWeaponId = '';
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error((this as any).$t('raid.errors.whoops'));
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.whoops'));
       }
 
       await this.getParticipatingCharacters();

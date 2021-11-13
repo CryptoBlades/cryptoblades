@@ -59,6 +59,7 @@ import CharacterList from '../components/smart/CharacterList.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import Vue from 'vue';
+import i18n from '@/i18n';
 
 interface Data {
   recruitCost: string;
@@ -119,7 +120,7 @@ export default Vue.extend({
       try {
         await this.mintCharacter();
       } catch (e) {
-        (this as any).$dialog.notify.error((this as any).$t('plaza.couldNotMint'));
+        (this as any).$dialog.notify.error(i18n.t('plaza.couldNotMint'));
       }
     },
     formatSkill() {

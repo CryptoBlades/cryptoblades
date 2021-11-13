@@ -71,6 +71,7 @@ import BigNumber from 'bignumber.js';
 import { ICharacter } from '@/interfaces';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { getCleanName } from '../../rename-censor';
+import i18n from '@/i18n';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -168,9 +169,9 @@ export default Vue.extend({
 
     withdrawalInfoText(): string {
       if(this.skillRewardNumber >= 1) {
-        return `${(this as any).$t('ClaimRewardsBar.withdrawalInfoText1')} ${this.formattedRemainingClaimableSkill}`;
+        return `${i18n.t('ClaimRewardsBar.withdrawalInfoText1')} ${this.formattedRemainingClaimableSkill}`;
       }
-      return `${(this as any).$t('ClaimRewardsBar.withdrawalInfoText2')} ${this.formattedRemainingClaimableSkill}`;
+      return `${i18n.t('ClaimRewardsBar.withdrawalInfoText2')} ${this.formattedRemainingClaimableSkill}`;
     },
 
     canClaimXp(): boolean {

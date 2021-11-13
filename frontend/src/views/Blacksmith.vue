@@ -444,6 +444,7 @@ import { Contracts, IState } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
+import i18n from '@/i18n';
 
 type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards'>;
 
@@ -619,7 +620,7 @@ export default Vue.extend({
 
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error((this as any).$t('blacksmith.couldNotForge'));
+        (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
@@ -646,7 +647,7 @@ export default Vue.extend({
 
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error((this as any).$t('blacksmith.couldNotForge'));
+        (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
       } finally {
         clearTimeout(failbackTimeout);
         this.disableForge = false;
@@ -786,7 +787,7 @@ export default Vue.extend({
 
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error((this as any).$t('blacksmith.couldNotReforge'));
+        (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotReforge'));
       }
     },
 
@@ -799,7 +800,7 @@ export default Vue.extend({
         this.burnWeaponId = null;
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error((this as any).$t('blacksmith.couldNotBurn'));
+        (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotBurn'));
       }
     },
   },

@@ -703,6 +703,7 @@ import { getShieldNameFromSeed } from '@/shield-name';
 import { fromWeiEther, apiUrl } from '../utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
 import { getCleanName } from '../rename-censor';
+import i18n from '@/i18n';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
@@ -957,360 +958,360 @@ export default Vue.extend({
           id: 0,
           type: 'CharacterRenameTag',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.characterRenameTag'),
-          description: (this as any).$t('market.nftList.characterRenameTagDesc'),
+          name: i18n.t('market.nftList.characterRenameTag'),
+          description: i18n.t('market.nftList.characterRenameTagDesc'),
           image: 'scroll_06_te.png'
         },
         {
           id: 0,
           type: 'CharacterRenameTagDeal',
           nftPrice: 0.3,
-          name: (this as any).$t('market.nftList.characterRenameTagDeal'),
-          description: (this as any).$t('market.nftList.characterRenameTagDealDesc'),
+          name: i18n.t('market.nftList.characterRenameTagDeal'),
+          description: i18n.t('market.nftList.characterRenameTagDealDesc'),
           image: 'scroll_06_te4.png'
         },
         {
           id: 1,
           type: 'WeaponRenameTag',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.weaponRenameTag'),
-          description: (this as any).$t('market.nftList.weaponRenameTagDesc'),
+          name: i18n.t('market.nftList.weaponRenameTag'),
+          description: i18n.t('market.nftList.weaponRenameTagDesc'),
           image: 'rune_05_te.png'
         },
         {
           id: 1,
           type: 'WeaponRenameTagDeal',
           nftPrice: 0.3,
-          name: (this as any).$t('market.nftList.weaponRenameTagDeal'),
-          description: (this as any).$t('market.nftList.weaponRenameTagDealDesc'),
+          name: i18n.t('market.nftList.weaponRenameTagDeal'),
+          description: i18n.t('market.nftList.weaponRenameTagDealDesc'),
           image: 'rune_05_te4.png'
         },
         {
           id: 1,
           type: 'CharacterEarthTraitChange',
           nftPrice: 0.2,
-          name: (this as any).$t('market.nftList.characterEarthTraitChange'),
-          description: (this as any).$t('market.nftList.characterEarthTraitChangeDesc'),
+          name: i18n.t('market.nftList.characterEarthTraitChange'),
+          description: i18n.t('market.nftList.characterEarthTraitChangeDesc'),
           image: 'potion_06_te.png'
         },
         {
           id: 1,
           type: 'CharacterFireTraitChange',
           nftPrice: 0.2,
-          name: (this as any).$t('market.nftList.characterFireTraitChange'),
-          description: (this as any).$t('market.nftList.characterFireTraitChangeDesc'),
+          name: i18n.t('market.nftList.characterFireTraitChange'),
+          description: i18n.t('market.nftList.characterFireTraitChangeDesc'),
           image: 'potion_09_te.png'
         },
         {
           id: 1,
           type: 'CharacterWaterTraitChange',
           nftPrice: 0.2,
-          name: (this as any).$t('market.nftList.characterWaterTraitChange'),
-          description: (this as any).$t('market.nftList.characterWaterTraitChangeDesc'),
+          name: i18n.t('market.nftList.characterWaterTraitChange'),
+          description: i18n.t('market.nftList.characterWaterTraitChangeDesc'),
           image: 'potion_07_te.png'
         },
         {
           id: 1,
           type: 'CharacterLightningTraitChange',
           nftPrice: 0.2,
-          name: (this as any).$t('market.nftList.characterLightningTraitChange'),
-          description: (this as any).$t('market.nftList.characterLightningTraitChangeDesc'),
+          name: i18n.t('market.nftList.characterLightningTraitChange'),
+          description: i18n.t('market.nftList.characterLightningTraitChangeDesc'),
           image: 'potion_05_te.png'
         },
         {
           id: 1,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.weaponGrayscale'),
-          description: (this as any).$t('market.nftList.weaponGrayscaleDesc'),
+          name: i18n.t('market.nftList.weaponGrayscale'),
+          description: i18n.t('market.nftList.weaponGrayscaleDesc'),
           image: ''
         },
         {
           id: 2,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.weaponContrast'),
-          description: (this as any).$t('market.nftList.weaponContrastDesc'),
+          name: i18n.t('market.nftList.weaponContrast'),
+          description: i18n.t('market.nftList.weaponContrastDesc'),
           image: ''
         },
         {
           id: 3,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.weaponSepia'),
-          description: (this as any).$t('market.nftList.weaponSepiaDesc'),
+          name: i18n.t('market.nftList.weaponSepia'),
+          description: i18n.t('market.nftList.weaponSepiaDesc'),
           image: ''
         },
         {
           id: 4,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.weaponInvert'),
-          description: (this as any).$t('market.nftList.weaponInvertDesc'),
+          name: i18n.t('market.nftList.weaponInvert'),
+          description: i18n.t('market.nftList.weaponInvertDesc'),
           image: ''
         },
         {
           id: 5,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.weaponBlur'),
-          description: (this as any).$t('market.nftList.weaponBlurDesc'),
+          name: i18n.t('market.nftList.weaponBlur'),
+          description: i18n.t('market.nftList.weaponBlurDesc'),
           image: ''
         },
         {
           id: 6,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.weaponFireglow'),
-          description: (this as any).$t('market.nftList.weaponFireglowDesc'),
+          name: i18n.t('market.nftList.weaponFireglow'),
+          description: i18n.t('market.nftList.weaponFireglowDesc'),
           image: ''
         },
         {
           id: 7,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.weaponEarthglow'),
-          description: (this as any).$t('market.nftList.weaponEarthglowDesc'),
+          name: i18n.t('market.nftList.weaponEarthglow'),
+          description: i18n.t('market.nftList.weaponEarthglowDesc'),
           image: ''
         },
         {
           id: 8,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.weaponLightningglow'),
-          description: (this as any).$t('market.nftList.weaponLightningglowDesc'),
+          name: i18n.t('market.nftList.weaponLightningglow'),
+          description: i18n.t('market.nftList.weaponLightningglowDesc'),
           image: ''
         },
         {
           id: 9,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.weaponWaterglow'),
-          description: (this as any).$t('market.nftList.weaponWaterglowDesc'),
+          name: i18n.t('market.nftList.weaponWaterglow'),
+          description: i18n.t('market.nftList.weaponWaterglowDesc'),
           image: ''
         },
         {
           id: 10,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.weaponRainbowglow'),
-          description: (this as any).$t('market.nftList.weaponRainbowglowDesc'),
+          name: i18n.t('market.nftList.weaponRainbowglow'),
+          description: i18n.t('market.nftList.weaponRainbowglowDesc'),
           image: ''
         },
         {
           id: 11,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.weaponDarkglow'),
-          description: (this as any).$t('market.nftList.weaponDarkglowDesc'),
+          name: i18n.t('market.nftList.weaponDarkglow'),
+          description: i18n.t('market.nftList.weaponDarkglowDesc'),
           image: ''
         },
         {
           id: 12,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.weaponGhost'),
-          description: (this as any).$t('market.nftList.weaponGhostDesc'),
+          name: i18n.t('market.nftList.weaponGhost'),
+          description: i18n.t('market.nftList.weaponGhostDesc'),
           image: ''
         },
         {
           id: 13,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.weaponPolicelights'),
-          description: (this as any).$t('market.nftList.weaponPolicelightsDesc'),
+          name: i18n.t('market.nftList.weaponPolicelights'),
+          description: i18n.t('market.nftList.weaponPolicelightsDesc'),
           image: ''
         },
         {
           id: 14,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.weaponNeonborder'),
-          description: (this as any).$t('market.nftList.weaponNeonborderDesc'),
+          name: i18n.t('market.nftList.weaponNeonborder'),
+          description: i18n.t('market.nftList.weaponNeonborderDesc'),
           image: ''
         },
         {
           id: 15,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.weaponRotatingNeonborder'),
-          description: (this as any).$t('market.nftList.weaponRotatingNeonborderDesc'),
+          name: i18n.t('market.nftList.weaponRotatingNeonborder'),
+          description: i18n.t('market.nftList.weaponRotatingNeonborderDesc'),
           image: ''
         },
         {
           id: 16,
           type: 'WeaponCosmetic',
           nftPrice: 0.4,
-          name: (this as any).$t('market.nftList.weaponDiamondborder'),
-          description: (this as any).$t('market.nftList.weaponDiamondborderDesc'),
+          name: i18n.t('market.nftList.weaponDiamondborder'),
+          description: i18n.t('market.nftList.weaponDiamondborderDesc'),
           image: ''
         },
         {
           id: 17,
           type: 'WeaponCosmetic',
           nftPrice: 0.3,
-          name: (this as any).$t('market.nftList.weaponGoldborder'),
-          description: (this as any).$t('market.nftList.weaponGoldborderDesc'),
+          name: i18n.t('market.nftList.weaponGoldborder'),
+          description: i18n.t('market.nftList.weaponGoldborderDesc'),
           image: ''
         },
         {
           id: 18,
           type: 'WeaponCosmetic',
           nftPrice: 0.2,
-          name: (this as any).$t('market.nftList.weaponSilverborder'),
-          description: (this as any).$t('market.nftList.weaponSilverborderDesc'),
+          name: i18n.t('market.nftList.weaponSilverborder'),
+          description: i18n.t('market.nftList.weaponSilverborderDesc'),
           image: ''
         },
         {
           id: 19,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.weaponBronzeborder'),
-          description: (this as any).$t('market.nftList.weaponBronzeborderDesc'),
+          name: i18n.t('market.nftList.weaponBronzeborder'),
+          description: i18n.t('market.nftList.weaponBronzeborderDesc'),
           image: ''
         },
         {
           id: 1,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.characterGrayscale'),
-          description: (this as any).$t('market.nftList.characterGrayscaleDesc'),
+          name: i18n.t('market.nftList.characterGrayscale'),
+          description: i18n.t('market.nftList.characterGrayscaleDesc'),
           image: ''
         },
         {
           id: 2,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.characterContrast'),
-          description: (this as any).$t('market.nftList.characterContrastDesc'),
+          name: i18n.t('market.nftList.characterContrast'),
+          description: i18n.t('market.nftList.characterContrastDesc'),
           image: ''
         },
         {
           id: 3,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.characterSepia'),
-          description: (this as any).$t('market.nftList.characterSepiaDesc'),
+          name: i18n.t('market.nftList.characterSepia'),
+          description: i18n.t('market.nftList.characterSepiaDesc'),
           image: ''
         },
         {
           id: 4,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.characterInvert'),
-          description: (this as any).$t('market.nftList.characterInvertDesc'),
+          name: i18n.t('market.nftList.characterInvert'),
+          description: i18n.t('market.nftList.characterInvertDesc'),
           image: ''
         },
         {
           id: 5,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.characterBlur'),
-          description: (this as any).$t('market.nftList.characterBlurDesc'),
+          name: i18n.t('market.nftList.characterBlur'),
+          description: i18n.t('market.nftList.characterBlurDesc'),
           image: ''
         },
         {
           id: 6,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.characterFireglow'),
-          description: (this as any).$t('market.nftList.characterFireglowDesc'),
+          name: i18n.t('market.nftList.characterFireglow'),
+          description: i18n.t('market.nftList.characterFireglowDesc'),
           image: ''
         },
         {
           id: 7,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.characterEarthglow'),
-          description: (this as any).$t('market.nftList.characterEarthglowDesc'),
+          name: i18n.t('market.nftList.characterEarthglow'),
+          description: i18n.t('market.nftList.characterEarthglowDesc'),
           image: ''
         },
         {
           id: 8,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.characterLightningglow'),
-          description: (this as any).$t('market.nftList.characterLightningglowDesc'),
+          name: i18n.t('market.nftList.characterLightningglow'),
+          description: i18n.t('market.nftList.characterLightningglowDesc'),
           image: ''
         },
         {
           id: 9,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.characterWaterglow'),
-          description: (this as any).$t('market.nftList.characterWaterglowDesc'),
+          name: i18n.t('market.nftList.characterWaterglow'),
+          description: i18n.t('market.nftList.characterWaterglowDesc'),
           image: ''
         },
         {
           id: 10,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.characterRainbowglow'),
-          description: (this as any).$t('market.nftList.characterRainbowglowDesc'),
+          name: i18n.t('market.nftList.characterRainbowglow'),
+          description: i18n.t('market.nftList.characterRainbowglowDesc'),
           image: ''
         },
         {
           id: 11,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.characterDarkglow'),
-          description: (this as any).$t('market.nftList.characterDarkglowDesc'),
+          name: i18n.t('market.nftList.characterDarkglow'),
+          description: i18n.t('market.nftList.characterDarkglowDesc'),
           image: ''
         },
         {
           id: 12,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.characterGhost'),
-          description: (this as any).$t('market.nftList.characterGhostDesc'),
+          name: i18n.t('market.nftList.characterGhost'),
+          description: i18n.t('market.nftList.characterGhostDesc'),
           image: ''
         },
         {
           id: 13,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.characterPolice'),
-          description: (this as any).$t('market.nftList.characterPoliceDesc'),
+          name: i18n.t('market.nftList.characterPolice'),
+          description: i18n.t('market.nftList.characterPoliceDesc'),
           image: ''
         },
         {
           id: 14,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: (this as any).$t('market.nftList.characterNeonborder'),
-          description: (this as any).$t('market.nftList.characterNeonborderDesc'),
+          name: i18n.t('market.nftList.characterNeonborder'),
+          description: i18n.t('market.nftList.characterNeonborderDesc'),
           image: ''
         },
         {
           id: 15,
           type: 'CharacterCosmetic',
           nftPrice: 0.4,
-          name: (this as any).$t('market.nftList.characterDiamondborder'),
-          description: (this as any).$t('market.nftList.characterDiamondborderDesc'),
+          name: i18n.t('market.nftList.characterDiamondborder'),
+          description: i18n.t('market.nftList.characterDiamondborderDesc'),
           image: ''
         },
         {
           id: 16,
           type: 'CharacterCosmetic',
           nftPrice: 0.3,
-          name: (this as any).$t('market.nftList.characterGoldborder'),
-          description: (this as any).$t('market.nftList.characterGoldborderDesc'),
+          name: i18n.t('market.nftList.characterGoldborder'),
+          description: i18n.t('market.nftList.characterGoldborderDesc'),
           image: ''
         },
         {
           id: 17,
           type: 'CharacterCosmetic',
           nftPrice: 0.2,
-          name: (this as any).$t('market.nftList.characterSilverborder'),
-          description: (this as any).$t('market.nftList.characterSilverborderDesc'),
+          name: i18n.t('market.nftList.characterSilverborder'),
+          description: i18n.t('market.nftList.characterSilverborderDesc'),
           image: ''
         },
         {
           id: 18,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: (this as any).$t('market.nftList.characterBronzeborder'),
-          description: (this as any).$t('market.nftList.characterBronzeborderDesc'),
+          name: i18n.t('market.nftList.characterBronzeborder'),
+          description: i18n.t('market.nftList.characterBronzeborderDesc'),
           image: ''
         },
       ] as SkillShopListing[];
