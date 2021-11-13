@@ -26,6 +26,7 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
     event ReservedLandClaimed(uint256 indexed reservation, address indexed reseller, address indexed owner, uint256 tier, uint256 chunkId);
     event MassMintReservedLand(address indexed player, address indexed reseller, uint256 chunkId, uint256 tier1, uint256 tier2, bool giveTier3);
     event MassMintReservedChunklessLand(address indexed player, address indexed reseller, uint256 tier1, uint256 tier2,  uint256 tier3);
+    event ReservedLandClaimedForPlayer(uint256 indexed reservation, address indexed reseller, address indexed owner, uint256 tier, uint256 chunkId);
     
     /* ========== LAND SALE INFO ========== */
     uint256 private constant NO_LAND = 0;
@@ -727,6 +728,61 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         emit ReservedLandClaimed(reservation, reseller, msg.sender, tier, chunkId);
     }
 
+
+    
+    function massClaimReservationsForPlayer(address player, uint256[] calldata reservations) external isAdmin {
+        for (uint256 i = 0; i < reservations.length; i++) {
+            uint256 reservation = reservations[i];
+            require(playerReservedLandClaimed[reservation] == false, "AC"); // already claimed
+            require(playerReservedLands[player].contains(reservation), "IR"); // invalid reservation
+            address reseller = playerReservedLandReseller[reservation];
+            uint256 rcLength = reservedChunks[reseller].length();
+            require(rcLength > 0, "no reserved chunks");
+            
+            uint256 assignedChunkid = 0;
+            uint256 reservedTier = playerReservedLandTier[reservation];
+            
+            require(reservedTier == TIER_TWO || reservedTier == TIER_THREE, "NA");
+
+            uint256 counter = reservedChunksCounter[reseller];
+            for(uint256 i = counter; i < counter + rcLength; i++) {
+                uint256 cId = reservedChunks[reseller].at(uint256(i % rcLength));
+                if(reservedTier == TIER_TWO) { // T2, find a spot with enough population
+                    if(chunkT2LandSales[cId] < _allowedLandSalePerChunk) {
+                        assignedChunkid = cId;
+                        reservedChunksCounter[reseller] = uint256(i + 1);
+                        break;
+                    }
+                }
+                else if(!takenT3Chunks.contains(cId)) { // This is a T3, find a chunk that isn't claimed as T3
+                    assignedChunkid = cId;
+                     reservedChunksCounter[reseller] = uint256(i + 1);
+                    break;
+                }
+                
+            }
+
+            require(assignedChunkid != 0, "NA");
+
+            if(reservedTier == TIER_TWO) {
+                if(chunkT2LandSales[assignedChunkid] == 0){
+                    chunksWithT2Land++;
+                }
+                chunkT2LandSales[assignedChunkid]++;
+            }
+            else {
+                chunkT3LandSoldTo[assignedChunkid] = player;
+                takenT3Chunks.add(assignedChunkid);
+            }
+
+            playerReservedLands[player].remove(reservation);
+            playerReservedLandClaimed[reservation] = true;
+            cbkLand.mint(player, reservedTier, assignedChunkid, reseller);
+            chunkZoneLandSales[chunkIdToZoneId(assignedChunkid)]++;
+            emit ReservedLandClaimedForPlayer(reservation, reseller, player, reservedTier, assignedChunkid);
+        }
+    }
+
     function getResellerOfChunk(uint256 chunkId) public view  returns (address reservedFor) {
         reservedFor = chunksReservedFor[chunkId];
     }
@@ -770,38 +826,38 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
         return playerReservedLandAt;
     }
 
-    function updateResellerOfReservation(uint256[] calldata ids, address reseller) external isAdmin {
-        for (uint256 i = 0; i < ids.length; i++) {
-            playerReservedLandReseller[ids[i]] = reseller;
-        }
-    }
+    // function updateResellerOfReservation(uint256[] calldata ids, address reseller) external isAdmin {
+    //     for (uint256 i = 0; i < ids.length; i++) {
+    //         playerReservedLandReseller[ids[i]] = reseller;
+    //     }
+    // }
 
     // Do not use forced unless really needed. If used, preferable don't update population
     // Do NOT use with T3
-    function updateLandChunkIdBulk(uint256[] calldata landIds, uint256 fromChunkId, uint256 toChunkId, bool updateToPopulation, bool forced) external isAdmin {
-        require(forced || cbkLand.landsBelongToChunk(landIds, fromChunkId), "NA");
+    // function updateLandChunkIdBulk(uint256[] calldata landIds, uint256 fromChunkId, uint256 toChunkId, bool updateToPopulation, bool forced) external isAdmin {
+    //     require(forced || cbkLand.landsBelongToChunk(landIds, fromChunkId), "NA");
 
-        if(updateToPopulation) {
-            uint256 populationFrom = chunkT2LandSales[fromChunkId];
-            uint256 populationTo = chunkT2LandSales[toChunkId];
-            uint256 populationChange = landIds.length;
+    //     if(updateToPopulation) {
+    //         uint256 populationFrom = chunkT2LandSales[fromChunkId];
+    //         uint256 populationTo = chunkT2LandSales[toChunkId];
+    //         uint256 populationChange = landIds.length;
 
-            if(populationFrom - populationChange < 0) {
-                require(forced, "NA2"); // forced or don't allow. Something is wrong.
-                populationChange = populationFrom; // can't have negative population
-            }
+    //         if(populationFrom - populationChange < 0) {
+    //             require(forced, "NA2"); // forced or don't allow. Something is wrong.
+    //             populationChange = populationFrom; // can't have negative population
+    //         }
 
-            if(populationTo + populationChange > _allowedLandSalePerChunk) {
-                require(forced, "NA3"); // forced or don't allow. Something is wrong. No reset on populationChange
-            }
+    //         if(populationTo + populationChange > _allowedLandSalePerChunk) {
+    //             require(forced, "NA3"); // forced or don't allow. Something is wrong. No reset on populationChange
+    //         }
 
-            chunkT2LandSales[fromChunkId] -= populationChange;
-            chunkZoneLandSales[chunkIdToZoneId(fromChunkId)] -= populationChange;
+    //         chunkT2LandSales[fromChunkId] -= populationChange;
+    //         chunkZoneLandSales[chunkIdToZoneId(fromChunkId)] -= populationChange;
 
-            chunkT2LandSales[toChunkId] += populationChange;
-            chunkZoneLandSales[chunkIdToZoneId(toChunkId)] += populationChange;
-        }
+    //         chunkT2LandSales[toChunkId] += populationChange;
+    //         chunkZoneLandSales[chunkIdToZoneId(toChunkId)] += populationChange;
+    //     }
 
-        cbkLand.updateChunkId(landIds, toChunkId);
-    }
+    //     cbkLand.updateChunkId(landIds, toChunkId);
+    // }
 }

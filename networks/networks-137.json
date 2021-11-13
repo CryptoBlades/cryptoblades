@@ -482,11 +482,30 @@
         ],
         "name": "Transfer",
         "type": "event"
+      },
+      "0x2e85b301306999ae012fd2ac66de0bea91e6ea98d76c25b269004b2d74b3631a": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          }
+        ],
+        "name": "LandChunkIdUpdated",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0x140d3a7fE604FA6d1dFa8b377eAA507D85cD37cF",
-    "transactionHash": "0xc7c1a1bae2dda4aeeb2d5304d71c76ddb6d71304e0d163b4d4a372ef4777bfaa"
+    "transactionHash": "0x75b48e9f116b3e3f10348b423530fd3780386faef8ae9aa752ab24c68b9b71ca"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -815,11 +834,91 @@
         ],
         "name": "T3GivenReserved",
         "type": "event"
+      },
+      "0x3ad3beed09e6f8863b08d47fe79fcffc47494acc9f5e42e9395ca1b1d0c4ba81": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier1",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier2",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier3",
+            "type": "uint256"
+          }
+        ],
+        "name": "MassMintReservedChunklessLand",
+        "type": "event"
+      },
+      "0x16d7b35bba02a0c301ed1165c9c2600c7a1482b1c230ca4a7353f1ab7d377e41": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "reseller",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "chunkId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier1",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "tier2",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "giveTier3",
+            "type": "bool"
+          }
+        ],
+        "name": "MassMintReservedLand",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xcF5Ba33FBa63699Ad4cD2A553c5D2a1fa0056e54",
-    "transactionHash": "0x8c811621362dde150e5a5a691688cbf4808588b930c54505e96ce01cb775e20f"
+    "transactionHash": "0x4ac55008813d12f57f8d56ba96f68b621224a32fae096730cc0c18b19f901a0b"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -2165,7 +2264,7 @@
     },
     "links": {},
     "address": "0x070b1A95898B927A900A1F9F42b114154648E51A",
-    "transactionHash": "0x248984aed925de1f17fe5b4443db8fe05e58b0f971da28755804c61fa1f089de"
+    "transactionHash": "0x93afaab19c800cc3ab36f8d69bcbe3be7e26ec67507b9930a8dde0f007919e2d"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
@@ -2902,6 +3001,12 @@
     "links": {},
     "address": "0x34d32231e778D53A97AD23Ff932ebDfD8e52162f"
   },
+  "build/contracts/Merchandise.json": {
+    "events": {},
+    "links": {},
+    "address": "0xe96cEC34B5DB980A024a79561F6320e877E2143D",
+    "transactionHash": "0x60c943847f2b4240914c1b2c14aa17c823bafb8de9903b1145e9a76c636208f5"
+  },
   "build/contracts/Migrations.json": {
     "events": {},
     "links": {},
@@ -3406,7 +3511,7 @@
     },
     "links": {},
     "address": "0x5846b663523649Ed02CA9cC57bBAE7FAe2a3cDcA",
-    "transactionHash": "0x575bcc06a02d05b9670c317f5dbde91ab44ac5bc6c0c8fe6e6d9176339fc04ca"
+    "transactionHash": "0x3c5b26030d5da0df0cb30e727f93dd2ef5c6fe42df8ac551113e207d7be5c5f3"
   },
   "build/contracts/Promos.json": {
     "events": {
