@@ -32,11 +32,11 @@
             <b>{{$t('CharacterDisplay.power')}}:</b>
             <span>{{CharacterPower(currentCharacter.level).toLocaleString()}}</span>
             <Hint class="power-hint" :text="$t('CharacterDisplay.powerIncrease')+
-              `<br>Level 1: 1000
-              <br>Level 10: 1090
-              <br>Level 11: 2200
-              <br>Level 20: 2380
-              <br>Level 21: 3600`" />
+              `<br>${$t('CharacterDisplay.level')} 1: 1000
+              <br>${$t('CharacterDisplay.level')} 10: 1090
+              <br>${$t('CharacterDisplay.level')} 11: 2200
+              <br>${$t('CharacterDisplay.level')} 20: 2380
+              <br>${$t('CharacterDisplay.level')} 21: 3600`" />
           </span>
         </div>
 
