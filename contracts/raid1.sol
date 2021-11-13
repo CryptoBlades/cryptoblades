@@ -169,12 +169,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function joinRaid(uint256 characterID, uint256 weaponID) public {
-        require(characters.canRaid(msg.sender, characterID));
-        require(weapons.canRaid(msg.sender, weaponID));
-        /*require(characters.ownerOf(characterID) == msg.sender);
-        require(weapons.ownerOf(weaponID) == msg.sender);
-        require(characters.getStaminaPoints(characterID) > 0, "You cannot join with 0 character stamina");
-        require(weapons.getDurabilityPoints(weaponID) > 0, "You cannot join with 0 weapon durability");*/
+        // owner and stamina/durability checks in the fightdata functions
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
@@ -187,7 +182,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
 
         (uint8 charTrait, uint24 basePowerLevel, /*uint64 timestamp*/) =
-            unpackFightData(characters.getFightDataAndDrainStamina(
+            unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
                                     characterID,
                                     uint8(staminaCost),
                                     true)
@@ -196,7 +191,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         (/*int128 weaponMultTarget*/,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(weaponID, charTrait, uint8(durabilityCost), true);
+            /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(msg.sender,
+                weaponID, charTrait, uint8(durabilityCost), true);
         
         uint24 power = getPlayerFinalPower(
             getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
