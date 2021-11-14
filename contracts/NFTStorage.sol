@@ -121,6 +121,9 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     // Transfer id => minted item Id; no need for NFT type; we can get that from trasnfer in info
     mapping(uint256 => uint256) private _withdrawFromBridgeLog;
 
+    CryptoBlades public game;
+    uint256 private _bridgeFee;
+    
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTTransferOutRequest(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -157,6 +160,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         _chainPrefix[66] = "OKEX";
 
         storageEnabled = false;
+    }
+
+    function migrateTo_something(CryptoBlades _game) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        game = _game;
     }
 
 
@@ -398,6 +407,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         noPendingBridge()
         canStore()
     {
+        game.payContractTokenOnly(msg.sender, _bridgeFee);
         transferOuts[++_transfersOutCount] = TransferOut(msg.sender, address(_tokenAddress), block.number, 0, _id, targetChain, 1);
         transferOutOfPlayers[msg.sender] = _transfersOutCount;
         transferOutOfNFTs[address(_tokenAddress)][_id] = _transfersOutCount;
@@ -501,6 +511,14 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     function getNFTChainId(address nftAddress, uint256 nftId) public view returns (string memory chainId) {
         chainId = nftChainIds[nftAddress][nftId];
+    }
+
+    function setBridgeFee(uint256 newFee) external isAdmin {
+        _bridgeFee = newFee;
+    }
+
+     function getBridgeFee() public view returns (uint256){
+        return _bridgeFee;
     }
 
     // Bot stuff
