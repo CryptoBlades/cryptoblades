@@ -154,40 +154,44 @@
         </div>
         <div v-else>
           <div class="d-flex flex-row bd-highlight mb-3 justify-content-center">
-            <div class="p-4 w-20">
+            <div v-if="incomingWeapons.length !== 0" class="p-4 w-20">
               <h4 class="text-center">Select Weapon to Withdraw</h4>
               <select class="form-control" v-model="weaponIdToWithdraw">
                 <option value="" disabled selected>Select your Weapon</option>
-                <option v-for="(weapon, i) in incomingWeapons"
-                :value="incomingNftIds[i]"
+                <option v-for="weapon in incomingWeapons"
+                :value="weapon['7']"
                 :key="weapon['3']">
                   Weapon ID: {{ weapon['3'] }}
                   from Chain: {{supportedChains[supportedChainIds.indexOf(weapon['2'])]}}
                 </option>
               </select>
               <div class="p-2 text-center">
-                <b-button :disabled="weaponIdToWithdraw == null" variant="primary"
+                <b-button :disabled="weaponIdToWithdraw == ''" variant="primary"
                   @click="withdrawBridge(weaponIdToWithdraw)" class="gtag-link-others" tagname="click_transfer_bridge">
                   Withdraw Weapon</b-button>
               </div>
             </div>
-            <div class="p-4 w-20">
+            <div v-if="incomingChars.length !== 0" class="p-4 w-20">
               <h4 class="text-center">Select Character to Withdraw</h4>
               <select class="form-control" v-model="characterIdToWithdraw">
                 <option value="" disabled selected>Select your Character</option>
-                <option v-for="(character, i) in incomingChars"
-                :value="incomingNftIds[i]"
+                <option v-for="character in incomingChars"
+                :value="character['7']"
                 :key="character['3']">
                   Character ID: {{ character['3'] }} from Chain:
                   {{supportedChains[supportedChainIds.indexOf(character['2'])]}}
                 </option>
               </select>
               <div class="p-2 text-center">
-                <b-button :disabled="characterIdToWithdraw == null" variant="primary"
+                <b-button :disabled="characterIdToWithdraw == ''" variant="primary"
                   @click="withdrawBridge(characterIdToWithdraw)" class="gtag-link-others"
                   tagname="click_transfer_bridge">Withdraw Character</b-button>
               </div>
             </div>
+          </div>
+          <div class="outcome" v-if="withdrawingFromBridge">
+            <i class="fas fa-spinner fa-spin"></i>
+            Loading...
           </div>
         </div>
       </b-tab>
@@ -292,6 +296,7 @@ export default Vue.extend({
       transferingToStorage: false,
       transferingFromStorage: false,
       cancellingRequest: false,
+      withdrawingFromBridge: false,
       enabledChains: [] as string[],
     };
   },
@@ -350,7 +355,6 @@ export default Vue.extend({
 
     //check current net by checking url
     const env = window.location.href.startsWith('https://test') ? 'test' : 'production'; //const env = 'test';
-    console.log('currentNet: ', env);
     const conf = config as any;
     for(let i = 0; i < this.supportedChains.length; i++){
       this.supportedChainIds.push(conf.environments[env].chains[this.supportedChains[i]].VUE_APP_NETWORK_ID);
@@ -411,9 +415,18 @@ export default Vue.extend({
       this.getStatus();
     },
     async withdrawBridge(tokenId: string){
-      await this.withdrawFromBridge({
-        tokenId });
-      this.getIncoming();
+      this.withdrawingFromBridge = true;
+      try{
+        await this.withdrawFromBridge({
+          tokenId });
+        this.getIncoming();
+        this.withdrawingFromBridge = false;
+        this.weaponIdToWithdraw = '';
+        this.characterIdToWithdraw = '';
+      }
+      catch(e){
+        this.withdrawingFromBridge = false;
+      }
     },
     async getIncoming(){
       this.incomingWeapons = [];
