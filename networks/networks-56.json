@@ -493,7 +493,7 @@
     },
     "links": {},
     "address": "0x95047Fd99EF9dF86Dc11c051102884fA6e0eddbe",
-    "transactionHash": "0x5c9ce5e2315b62d70c1c3ae2239d70f56963c65891990468700d45fc072c7a89"
+    "transactionHash": "0x6655b5451b510b8af8ccc0b0f31a56d73f2fbf26062e4ef9998151c70e88d8cb"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -1396,7 +1396,7 @@
     },
     "links": {},
     "address": "0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
-    "transactionHash": "0xaa7352940ba232c512c7121ad8fb3a3476fa15b1df760ac82c60b6f915d4d19b"
+    "transactionHash": "0xae11ea496f15591b1069c6e91239edaa7fd362b1307a8089f31753028764fdfd"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -1767,6 +1767,12 @@
     "address": "0x39e0D6D95E035e2F8a2392788e0c53b7BA7d9B83",
     "transactionHash": "0xb994553f5e8c77940c9af746bd56493f521045790dfbc8f87b2a26080e4b176d"
   },
+  "build/contracts/Merchandise.json": {
+    "events": {},
+    "links": {},
+    "address": "0x168470C8A5a244aEE5a01B8D812F2069dB2038aE",
+    "transactionHash": "0x3c6144a9357a0334735c0b3cc9bf277a1a25a1408ca2353d993a23d787e8e521"
+  },
   "build/contracts/Migrations.json": {
     "events": {},
     "links": {},
@@ -1983,7 +1989,7 @@
     "events": {},
     "links": {},
     "address": "0x32Abf3872b1399E8C17FCA1c574A02096B339e3F",
-    "transactionHash": "0x008b5c691f514e42d337461223cf391328dee4144f9bf9009f61d9ba52852d78"
+    "transactionHash": "0x1cfc9f0ae23e12c8915fff2d6e705ade01ae14a5b33ca6b028e2eb1e5478ae1e"
   },
   "build/contracts/Promos.json": {
     "events": {

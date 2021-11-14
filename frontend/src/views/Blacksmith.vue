@@ -357,6 +357,16 @@
         </template>
         <dust-balance-display/>
       </b-tab>
+      <b-tab>
+        <template #title>
+          Lands <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Lands are available in the skill shop.`"/>
+        </template>
+        <div class="row mt-3">
+          <div class="col">
+            <nft-list :isLandTab="true" :showLimit="30" />
+          </div>
+        </div>
+      </b-tab>
     </b-tabs>
     <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              title="Dust Reforge Confirmation" @ok="onReforgeWeaponWithDust">
