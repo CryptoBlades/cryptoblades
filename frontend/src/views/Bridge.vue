@@ -19,7 +19,8 @@
             </b-button>
           </div>
           <div class="p-2">
-            <b-button :disabled="selectedNftId == ''" variant="primary" @click="transferToStorage()"
+            <b-button :disabled="selectedNftId == ''" variant="primary"
+            @click=" nftType === 'character' ? $refs['character-warning-modal'].show() :  transferToStorage()"
               class="gtag-link-others" tagname="click_transfer_bridge">Transfer NFT to storage</b-button>
           </div>
         </div>
@@ -40,6 +41,14 @@
           <i class="fas fa-spinner fa-spin"></i>
           Loading...
         </div>
+        <b-modal class="centered-modal" ref="character-warning-modal" @ok="transferToStorage()">
+          <template #modal-title>
+           <b-icon icon="exclamation-circle" variant="danger"/> WARNING
+          </template>
+          <span>
+           When transferring your character to another chain, your character will lose <b>all</b> unclaimed XP!<br>
+          </span>
+        </b-modal>
       </b-tab>
       <b-tab title="Storage" @click="showStorage(); selectedNftId = ''">
         <div class="d-flex flex-row justify-content-center">
