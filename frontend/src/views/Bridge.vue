@@ -61,7 +61,10 @@
               tagname="click_transfer_bridge">Withdraw from Storage</b-button>
           </div>
           <div class="p-2">
-            <b-button :disabled="transferStatus == 'Pending' || transferStatus == 'Processing' || selectedNftId == ''" variant="primary"
+            <b-button
+              :disabled="(transferStatus === 'DONE' || transferStatus !== 'No transfer') && (currentTransferNFTId == selectedNftId)||
+              transferStatus === 'Pending' || transferStatus === 'Processing' || selectedNftId == ''"
+              variant="primary"
               @click="requestBridge()" class="gtag-link-others" tagname="click_transfer_bridge">Request Transfer
             </b-button>
           </div>
