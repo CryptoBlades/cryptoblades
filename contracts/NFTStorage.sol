@@ -162,7 +162,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         storageEnabled = false;
     }
 
-    function migrateTo_something(CryptoBlades _game) external {
+    function migrateTo_56837f7(CryptoBlades _game) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         game = _game;
@@ -513,7 +513,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         chainId = nftChainIds[nftAddress][nftId];
     }
 
-    function setBridgeFee(uint256 newFee) external isAdmin {
+    function setBridgeFee(uint256 newFee) external restricted {
         _bridgeFee = newFee;
     }
 
