@@ -9,11 +9,12 @@
         <img class="product-img" :src="product.thumbnail_url" />
         <div class="product-name">{{ product.name }}</div>
         <b-button
+          :disabled="!product.price"
           variant="primary"
           class="shop-button"
           @click="openAddress(product)">
           <span>
-            Buy ({{ product.price }} SKILL)
+            Buy (<CurrencyConverter v-if="product.price" :skill="convertWeiToSkill(+product.price)" :showValueInSkillOnly="true" :minDecimals="1"/>)
           </span>
         </b-button>
       </li>
@@ -49,14 +50,59 @@
 <script lang="ts">
 import Vue from 'vue';
 import axios from 'axios';
+import { mapActions } from 'vuex';
+import { fromWeiEther } from '@/utils/common';
+import CurrencyConverter from '../../components/CurrencyConverter.vue';
+
+interface Product {
+  id: number,
+  name: string,
+  thumbnail_url: string,
+  price?: number
+}
+
+interface Recipient {
+  name: string;
+  address1: string;
+  city: string;
+  state_code: string;
+  country_code: string;
+  zip: string;
+  phone: string;
+  email: string;
+}
+
+interface Country {
+  name: string;
+  code: string;
+  states?: string;
+}
+
+interface Data {
+  products: Product[];
+  selected_product: Product | undefined;
+  selected_country: Country | undefined;
+  selected_state: string;
+  countries: Country[];
+  recipient: Recipient;
+}
+
+interface StoreMappedActions {
+  getItemPrice(payload: {id: number}): Promise<number>;
+  purchaseMerchandise(payload: {id: number, price: number, amount: number}): Promise<number>;
+}
 
 export default Vue.extend({
+  components: {
+    CurrencyConverter
+  },
+
   data() {
     return {
-      products: '',
-      selected_product: null,
-      selected_country: null,
-      selected_state: null,
+      products: [],
+      selected_product: undefined,
+      selected_country: undefined,
+      selected_state: '',
       countries: [],
       recipient: {
         name: 'Bob',
@@ -67,8 +113,8 @@ export default Vue.extend({
         zip: '12345',
         phone: '5512345678',
         email: 'example@email.com'
-      }
-    };
+      } as Recipient,
+    } as Data;
   },
 
   computed: {
@@ -78,9 +124,15 @@ export default Vue.extend({
   },
 
   methods: {
+    ...mapActions(['getItemPrice', 'purchaseMerchandise']) as StoreMappedActions,
+
     async fetchProducts() {
       const response = await axios.get('http://localhost:2400/products');
       this.products = response.data?.result;
+      for (const product of this.products) {
+        product.price = await this.getItemPrice({id: product.id});
+      }
+      console.log(this.products);
     },
 
     async fetchCountries() {
@@ -88,12 +140,13 @@ export default Vue.extend({
       this.countries = response.data?.result;
     },
 
-    async openAddress(product) {
+    async openAddress(product: Product) {
       this.$refs['merchandise-address-modal'].show();
       this.selected_product = product;
     },
 
     async buyItem() {
+      if(!this.selected_product) return;
       const printful_payload = {
         recipient: this.recipient,
         items: [
@@ -103,16 +156,25 @@ export default Vue.extend({
           }
         ]
       };
-      // TODO call the blockchain to make the purchase, return the transaction from the blockchain to validate the successful payment in the BE.
+
+      if(!this.selected_product.price) return;
+      await this.purchaseMerchandise({id: this.selected_product.id, price: this.selected_product.price, amount: 1});
+
       const response = await axios.post('http://localhost:2400/create_order', printful_payload);
       console.log(response);
+    },
+
+    convertWeiToSkill(wei: string) {
+      return fromWeiEther(wei);
     },
   },
 
   async mounted() {
-    this.fetchProducts();
-    this.fetchCountries();
-  }
+    await this.fetchProducts();
+    await this.fetchCountries();
+  },
+
+
 });
 </script>
 
