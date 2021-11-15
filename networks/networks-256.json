@@ -4226,10 +4226,6 @@
     },
     "links": {},
     "address": "0xA4DEB2aC411f8BaA1F9A353Db0c80ABF4f3AfB8a",
-<<<<<<< HEAD
-    "transactionHash": "0xf09c4843b8e080032e3a8d073584c6bc79165c054418b67d37915fc51d3b8124"
-=======
     "transactionHash": "0x7011c715b1b99b43b7ffe0891f463fd43d6457ce5f1172c440fb0717b37a90e2"
->>>>>>> da89442bf512fb7b6e4d9a7b77e3696928f48be2
   }
 }
