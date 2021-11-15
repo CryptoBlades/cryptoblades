@@ -4377,128 +4377,9 @@ export function createStore(web3: Web3) {
 
         window.location.reload();
       },
-      async fetchOwnedWeaponCosmetics({ state }, {cosmetic}) {
-        const { WeaponCosmetics } = state.contracts();
-        if(!WeaponCosmetics || !state.defaultAccount) return;
-        return await WeaponCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
-      },
-      async purchaseWeaponCosmetic({ state, dispatch }, {cosmetic, price}) {
-        const { CryptoBlades, SkillToken, WeaponCosmetics, Blacksmith } = state.contracts();
-        if(!CryptoBlades || !WeaponCosmetics || !Blacksmith || !state.defaultAccount) return;
-
-        try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
-            .send({
-              from: state.defaultAccount
-            });
-        } catch(err) {
-          console.error(err);
-        }
-
-        await Blacksmith.methods.purchaseWeaponCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
-          from: state.defaultAccount,
-          gas: '500000'
-        });
-
-        await Promise.all([
-          dispatch('fetchSkillBalance'),
-          dispatch('fetchFightRewardSkill')
-        ]);
-      },
-      async changeWeaponCosmetic({ state, dispatch}, { id, cosmetic }) {
-        const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !WeaponCosmetics || !state.defaultAccount) return;
-
-        await WeaponCosmetics.methods
-          .applyCosmetic(id, cosmetic)
-          .send({
-            from: state.defaultAccount,
-            gas: '5000000'
-          });
-
-        await Promise.all([
-          dispatch('fetchWeaponCosmetic', id)
-        ]);
-      },
-      async removeWeaponCosmetic({ state, dispatch}, { id }) {
-        const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !WeaponCosmetics || !state.defaultAccount) return;
-
-        await WeaponCosmetics.methods
-          .removeCosmetic(id)
-          .send({
-            from: state.defaultAccount,
-            gas: '5000000'
-          });
-
-        await Promise.all([
-          dispatch('fetchWeaponCosmetic', id)
-        ]);
-      },
-      async fetchOwnedCharacterCosmetics({ state }, {cosmetic}) {
-        const { CharacterCosmetics } = state.contracts();
-        if(!CharacterCosmetics || !state.defaultAccount) return;
-        return await CharacterCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
-      },
-      async purchaseCharacterCosmetic({ state, dispatch }, {cosmetic, price}) {
-        const { CryptoBlades, SkillToken, CharacterCosmetics, Blacksmith } = state.contracts();
-        if(!CryptoBlades || !CharacterCosmetics || !Blacksmith || !state.defaultAccount) return;
-
-        try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
-            .send({
-              from: state.defaultAccount
-            });
-        } catch(err) {
-          console.error(err);
-        }
-
-        await Blacksmith.methods.purchaseCharacterCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
-          from: state.defaultAccount,
-          gas: '500000'
-        });
-
-        await Promise.all([
-          dispatch('fetchSkillBalance'),
-          dispatch('fetchFightRewardSkill')
-        ]);
-      },
-      async changeCharacterCosmetic({ state, dispatch}, { id, cosmetic }) {
-        const { CryptoBlades, SkillToken, CharacterCosmetics } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !CharacterCosmetics || !state.defaultAccount) return;
-
-        await CharacterCosmetics.methods
-          .applyCosmetic(id, cosmetic)
-          .send({
-            from: state.defaultAccount,
-            gas: '5000000'
-          });
-
-        await Promise.all([
-          dispatch('fetchCharacterCosmetic', id)
-        ]);
-      },
-      async removeCharacterCosmetic({ state, dispatch}, { id }) {
-        const { CryptoBlades, SkillToken, CharacterCosmetics } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !CharacterCosmetics || !state.defaultAccount) return;
-
-        await CharacterCosmetics.methods
-          .removeCosmetic(id)
-          .send({
-            from: state.defaultAccount,
-            gas: '5000000'
-          });
-
-        await Promise.all([
-          dispatch('fetchCharacterCosmetic', id)
-        ]);
-      },
-      async storeItem({ state }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+      async storeItem({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
-        console.log('storeItem', nftContractAddr,' ',tokenId);
         const NFTContract: Contract<IERC721> =
           nftContractAddr === Weapons.options.address
             ? Weapons : nftContractAddr === Characters.options.address
@@ -4512,6 +4393,12 @@ export function createStore(web3: Web3) {
           .send({
             from: state.defaultAccount,
           });
+
+        if(nftContractAddr === Weapons.options.address)
+          await dispatch('updateWeaponIds');
+        else if(nftContractAddr === Characters.options.address)
+          await dispatch('updateCharacterIds');
+
         return res;
       },
       async getStorageItemIds({ state }, { nftContractAddr }: { nftContractAddr: string}) {
@@ -4534,30 +4421,25 @@ export function createStore(web3: Web3) {
 
         return res;
       },
-      async withdrawFromStorage({ state }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+      async withdrawFromStorage({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
-        /*
-        const NFTContract: Contract<IERC721> =
-          nftContractAddr === Weapons.options.address
-            ? Weapons : nftContractAddr === Characters.options.address
-              ? Characters : Shields;
 
-
-        await NFTContract.methods
-          .approve(NFTStorage.options.address, tokenId)
-          .send(defaultCallOptions(state));
-        */
         await NFTStorage.methods
           .withdrawFromStorage(nftContractAddr, tokenId)
           .send({
             from: state.defaultAccount,
           });
+
+        if(nftContractAddr === Weapons.options.address)
+          await dispatch('updateWeaponIds');
+        else if(nftContractAddr === Characters.options.address)
+          await dispatch('updateCharacterIds');
+
       },
       async bridgeItem({ state }, { nftContractAddr, tokenId, targetChain}: { nftContractAddr: string, tokenId: string, targetChain: string}) {
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
-        console.log('bridgeItem', nftContractAddr,' ',tokenId, ' ',targetChain);
 
         await NFTStorage.methods
           .bridgeItem(nftContractAddr, tokenId, targetChain)
@@ -4623,6 +4505,14 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
         return res;
       },
+      async chainEnabled({ state }, { chainId }: { chainId: string }) {
+        const { NFTStorage } = state.contracts();
+        if (!NFTStorage || !state.defaultAccount) return;
+        const isEnabled = await NFTStorage.methods
+          .chainBridgeEnabled(chainId)
+          .call(defaultCallOptions(state));
+        return isEnabled;
+      }
     },
   });
 }

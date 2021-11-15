@@ -3155,7 +3155,14 @@
         ],
         "name": "NewDuel",
         "type": "event"
-      },
+      }
+    },
+    "links": {},
+    "address": "0xE8cEE8309c5705c8b5004BBB031686a1029ab977",
+    "transactionHash": "0xcbf16a9152fe6dab31ed1e5b2808dd6c368f400d4a45ea19c1ec063e5e961943"
+  },
+  "build/contracts/Promos.json": {
+    "events": {
       "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
         "anonymous": false,
         "inputs": [
