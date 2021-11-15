@@ -398,7 +398,7 @@ export default {
 
     getDecisionTime(){
 
-      const decisionTimeInterval = (this.pvp.duelByAttacker.createdAt * 1000);
+      const decisionTimeInterval = (this.pvp.duelByAttacker.createdAt * 1000) + 150000;
 
       const decisionTime = new Date(decisionTimeInterval);
 
