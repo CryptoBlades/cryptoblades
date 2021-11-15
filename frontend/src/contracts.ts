@@ -74,7 +74,7 @@ export function getConfigValue(key: string): any {
   return (config as Config).environments[env].chains[chain][key];
 }
 
-let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
+let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '31337';
 
 type Networks = Partial<Record<string, { address: string }>>;
 
@@ -115,7 +115,7 @@ function getStakingContractsInfoWithDefaults(): Partial<Record<StakeType, Partia
 }
 
 async function setUpStakingContracts(web3: Web3) {
-  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
+  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '31337';
   const stakingContractsInfo = getStakingContractsInfoWithDefaults();
 
   const staking: StakingContracts = {};

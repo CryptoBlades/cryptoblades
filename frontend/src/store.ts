@@ -4290,6 +4290,15 @@ export function createStore(web3: Web3) {
         }
       },
 
+      async checkCharacterOwnership({ state }, { characterID }) {
+        const { Characters } = state.contracts();
+        if(!Characters) return;
+
+        return await Characters.methods
+          .ownerOf(characterID)
+          .call(defaultCallOptions(state));
+      },
+
       async configureMetaMask({ dispatch }) {
         const currentNetwork = await web3.eth.net.getId();
         if(currentNetwork === +getConfigValue('VUE_APP_NETWORK_ID')) return;
