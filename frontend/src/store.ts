@@ -3314,15 +3314,21 @@ export function createStore(web3: Web3) {
           await dispatch('updateCharacterIds');
 
       },
-      async bridgeItem({ state }, { nftContractAddr, tokenId, targetChain}: { nftContractAddr: string, tokenId: string, targetChain: string}) {
-        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
-        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+      async bridgeItem({ state, dispatch }, { nftContractAddr, tokenId, targetChain, bridgeFee }:
+      { nftContractAddr: string, tokenId: string, targetChain: string, bridgeFee: string }) {
+        const { NFTStorage, CryptoBlades, Weapons, Characters, Shields, SkillToken } = state.contracts();
+        if (!NFTStorage || !CryptoBlades || !Weapons || !Characters || !Shields || !SkillToken || !state.defaultAccount) return;
+
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, bridgeFee)
+          .send(defaultCallOptions(state));
 
         await NFTStorage.methods
           .bridgeItem(nftContractAddr, tokenId, targetChain)
           .send({
             from: state.defaultAccount,
           });
+        dispatch('fetchSkillBalance');
       },
       async getNFTChainId({state}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
         const { NFTStorage } = state.contracts();
