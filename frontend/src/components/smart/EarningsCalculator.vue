@@ -40,7 +40,7 @@
 
               <div class="calculator-earnings">
                 <div class="coin-price-inputs">
-                  <span class="calculator-subheader">{{$t('EarningsCalculator.nextMilestone')}} (USD)</span>
+                  <span class="calculator-subheader">{{$t('EarningsCalculator.currentPrices')}} (USD)</span>
                   <div class="prices-div">
                     <div class="token-price-div">
                       {{gasToken}}: <span class="text-white"> ${{currentTokenPrice}}</span>
@@ -73,6 +73,7 @@
                     </b-row>
                   </div>
                 </div>
+                <span class="calculator-subheader ml-5 mr-5">The values are based on an hourly allowance that can run out.</span>
                 <div class="button-div">
                   <b-button class="btn btn-primary" @click="onReset">
                       Reset
@@ -82,8 +83,7 @@
                       Calculate
                   </b-button>
                   <b-icon-question-circle class="centered-icon" scale="1.5"
-                    v-tooltip.bottom="`Earnings on victory: ${this.stringFormattedSkill(this.fightGasOffset)} gas offset +
-                    ${this.stringFormattedSkill(this.fightBaseline)} per square root of power/1000`"/>
+                    v-tooltip.bottom="`Earnings are based on skill income from last hour, shown earnings are valid as long as the supply lasts.`"/>
                 </div>
               </div>
 
