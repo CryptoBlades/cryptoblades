@@ -90,6 +90,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Duel) public duelByAttacker;
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
+    /// @dev defender is in a duel that has not finished processing.
+    mapping(uint256 => bool) public characterDefending;
     /// @dev last ranked season the character was active in
     mapping(uint256 => uint256) public seasonByCharacter;
     /// @dev excess wager by character for when they re-enter the arena
@@ -200,7 +202,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _tierWagerUSD = ABDKMath64x64.divu(50, 100); // $0.5
         _rankingsPoolTaxPercent = 15;
         unattackableSeconds = 2 minutes;
-        decisionSeconds = 3 minutes;
+        decisionSeconds = 2 minutes;
         winningPoints = 5;
         losingPoints = 3;
         _maxCharactersPerRanking = 4;
@@ -306,13 +308,26 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             "Character is already in duel queue"
         );
 
+        uint256 defenderID = getOpponent(attackerID);
+
+        characterDefending[defenderID] = true;
+
         _duelQueue.add(attackerID);
+
+    }
+
+    function clearDuelQueue() external restricted {
+        for (uint256 i = 0; i < _duelQueue.length(); i++) {
+            _duelQueue.remove(_duelQueue.at(i));
+        }
     }
 
     /// @dev performs all queued duels
     function performDuels(uint256[] calldata attackerIDs) external restricted {
         for (uint256 i = 0; i < attackerIDs.length; i++) {
-            uint256 attackerID = _duelQueue.at(i);
+            uint256 attackerID = attackerIDs[i];
+            if (!_duelQueue.contains(attackerID)) continue;
+            
             uint256 defenderID = getOpponent(attackerID);
             uint8 defenderTrait = characters.getTrait(defenderID);
             uint8 attackerTrait = characters.getTrait(attackerID);
@@ -400,6 +415,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 .wager
                 .sub(bountyDistribution.loserPayment);
 
+            characterDefending[defenderID] = false;
+
             if (
                 fighterByCharacter[loserID].wager < getDuelCost(loserID) ||
                 fighterByCharacter[loserID].wager <
@@ -433,8 +450,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             duelByAttacker[attackerID].isPending = false;
 
+
             _duelQueue.remove(attackerID);
         }
+    }
+
+    function showWagers(uint256 characterID) external restricted view returns (uint256) {
+        return fighterByCharacter[characterID].wager;
     }
 
     /// @dev withdraws a character and its items from the arena.
@@ -664,7 +686,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         return characterRankingPoints[characterID];
     }
-
     /// @dev checks if a character is in the arena
     function isCharacterInArena(uint256 characterID)
         public
@@ -728,7 +749,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         uint256 lastActivity = _lastActivityByCharacter[characterID];
 
-        return lastActivity.add(unattackableSeconds) <= block.timestamp;
+        require(!characterDefending[characterID], "Defender duel in process");
+
+        return lastActivity.add(unattackableSeconds) <= block.timestamp && !_duelQueue.contains(characterID);
     }
 
     /// @dev updates the last activity timestamp of a character
@@ -767,11 +790,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             msg.sender,
             blockhash(block.number)
         );
+
         bool useShield = fighterByCharacter[characterID].useShield;
         int128 bonusShieldStats;
         if (useShield) {
             bonusShieldStats = _getShieldStats(characterID);
         }
+
 
         (
             ,
@@ -837,7 +862,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         delete fighterByCharacter[characterID];
         delete duelByAttacker[characterID];
 
+        require(!characterDefending[characterID], "Defender duel in process");
+
         _fightersByPlayer[msg.sender].remove(characterID);
+
+        if (_duelQueue.contains(characterID)) {
+            _duelQueue.remove(characterID);
+        }
 
         uint8 tier = getArenaTier(characterID);
 
@@ -859,6 +890,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         EnumerableSet.UintSet storage fightersInTier = _fightersByTier[tier];
 
         require(fightersInTier.length() != 0, "No opponents available in tier");
+        require(!_duelQueue.contains(characterID), "Character is in duel queue");
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
@@ -917,10 +949,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev set the ranking points of a player to 0 and update the rank,
-    function resetCharacterRankingPoints(uint256 characterID)
-        external
-        restricted
-    {
+    function resetCharacterRankingPoints(uint256 characterID) external restricted {
         //TODO Determine if this is the right approach as it might less efficient gas wise
         characterRankingPoints[characterID] = 0;
         processLoser(characterID);

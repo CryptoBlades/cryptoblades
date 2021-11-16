@@ -68,6 +68,10 @@ interface Chain {
 }
 
 export function getConfigValue(key: string): any {
+  if (process.env.VUE_APP_STAGE === 'alpha') {
+    return process.env[key];
+  }
+
   if(process.env.NODE_ENV === 'development') return '';
   const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
   const chain = localStorage.getItem('currentChain') || 'BSC';
