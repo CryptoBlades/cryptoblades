@@ -190,7 +190,7 @@
                 </option>
               </select>
               <div class="p-2 text-center">
-                <b-button :disabled="weaponIdToWithdraw == ''" variant="primary"
+                <b-button :disabled="!weaponIdToWithdraw" variant="primary"
                   @click="withdrawBridge(weaponIdToWithdraw)" class="gtag-link-others" tagname="click_transfer_bridge">
                   Withdraw Weapon</b-button>
               </div>
@@ -207,7 +207,7 @@
                 </option>
               </select>
               <div class="p-2 text-center">
-                <b-button :disabled="characterIdToWithdraw == ''" variant="primary"
+                <b-button :disabled="!characterIdToWithdraw" variant="primary"
                   @click="withdrawBridge(characterIdToWithdraw)" class="gtag-link-others"
                   tagname="click_transfer_bridge">Withdraw Character</b-button>
               </div>
@@ -392,7 +392,7 @@ export default Vue.extend({
     this.targetChain = this.chainsToSendTo[0];
 
     //check current net by checking url
-    const env = window.location.href.startsWith('https://test') ? 'test' : 'production'; //const env = 'test';
+    const env = 'test';// window.location.href.startsWith('https://test') ? 'test' : 'production'; //const env = 'test';
     const conf = config as any;
     for(let i = 0; i < this.supportedChains.length; i++){
       this.supportedChainIds.push(conf.environments[env].chains[this.supportedChains[i]].VUE_APP_NETWORK_ID);
