@@ -298,7 +298,6 @@ export default Vue.extend({
       const totalPower = this.getTotalPower(CharacterPower(this.levelSliderValue - 1), weaponMultiplier, this.wepBonusPowerSliderValue);
       const averageDailyReward = await this.getAverageRewardForPower(totalPower) * 7.2 +
         this.formattedSkill(this.fightGasOffset) * fights;
-      console.log(averageDailyReward);
       const averageFightProfit = averageDailyReward * this.skillPrice / 7.2;
       for(let i = 1; i < 8; i++) {
         const averageDailyProfitForCharacter = averageFightProfit * i -
