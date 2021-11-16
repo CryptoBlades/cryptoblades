@@ -445,6 +445,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
     }
 
+    function showWagers(uint256 characterID) external restricted view returns (uint256) {
+        return fighterByCharacter[characterID].wager;
+    }
+
     /// @dev withdraws a character and its items from the arena.
     /// if the character is in a battle, a penalty is charged
     function withdrawFromArena(uint256 characterID)
