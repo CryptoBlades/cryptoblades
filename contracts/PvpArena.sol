@@ -90,6 +90,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Duel) public duelByAttacker;
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
+    /// @dev defender is in a duel that has not finished processing.
+    mapping(uint256 => bool) public characterDefending;
     /// @dev last ranked season the character was active in
     mapping(uint256 => uint256) public seasonByCharacter;
     /// @dev excess wager by character for when they re-enter the arena
@@ -306,7 +308,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             "Character is already in duel queue"
         );
 
+        uint256 defenderID = getOpponent(attackerID);
+
+        characterDefending[defenderID] = true;
+
         _duelQueue.add(attackerID);
+
     }
 
     function clearDuelQueue() external restricted {
@@ -408,6 +415,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 .wager
                 .sub(bountyDistribution.loserPayment);
 
+            characterDefending[defenderID] = false;
+
             if (
                 fighterByCharacter[loserID].wager < getDuelCost(loserID) ||
                 fighterByCharacter[loserID].wager <
@@ -440,6 +449,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _updateLastActivityTimestamp(defenderID);
 
             duelByAttacker[attackerID].isPending = false;
+
 
             _duelQueue.remove(attackerID);
         }
@@ -739,6 +749,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         uint256 lastActivity = _lastActivityByCharacter[characterID];
 
+        require(!characterDefending[characterID], "Defender duel in process");
+
         return lastActivity.add(unattackableSeconds) <= block.timestamp && !_duelQueue.contains(characterID);
     }
 
@@ -849,6 +861,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         delete fighterByCharacter[characterID];
         delete duelByAttacker[characterID];
+
+        require(!characterDefending[characterID], "Defender duel in process");
 
         _fightersByPlayer[msg.sender].remove(characterID);
 
