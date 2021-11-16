@@ -735,7 +735,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         uint256 lastActivity = _lastActivityByCharacter[characterID];
 
-        return lastActivity.add(unattackableSeconds) <= block.timestamp;
+        return lastActivity.add(unattackableSeconds) <= block.timestamp && !_duelQueue.contains(characterID);
     }
 
     /// @dev updates the last activity timestamp of a character
@@ -902,7 +902,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             break;
         }
 
-        require(!_duelQueue.contains(opponentID), "Opponent is in duel queue");
         require(foundOpponent, "No opponent found");
 
         duelByAttacker[characterID] = Duel(
