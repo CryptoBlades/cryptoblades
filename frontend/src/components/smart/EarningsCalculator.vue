@@ -3,29 +3,31 @@
     <div class="character-earning-potential dark-bg-text" v-if="!isLoadingCharacter">
       <div class="milestone-header">
         <img src="../../assets/earning-potential-sword.png" class="sword-left">
-        <span class="milestone-text">Next Milestone</span>
+        <span class="milestone-text">{{$t('EarningsCalculator.nextMilestone')}}</span>
         <img src="../../assets/earning-potential-sword.png" class="sword-right">
       </div>
       <div class="milestone-details">
-        Earn <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level)}}%</span> more per battle at<br>
+        <i18n path="EarningsCalculator.milestoneBonus" tag="label">
+          <span class="bonus-text">{{getNextMilestoneBonus(currentCharacter.level)}}%</span> <br>
+        </i18n>
         <div class="calculator-icon-div">
           <span class="milestone-lvl-text">LVL {{getNextMilestoneLevel(currentCharacter.level)}}</span><br>
           <b-button class="btn btn-primary btn-small" @click="onShowEarningsCalculator">
             <b-icon-calculator-fill class="milestone-hint" scale="1"
               v-tooltip.bottom="`Earnings Calculator`"/>
-              Earnings Calculator
+              {{$t('EarningsCalculator.earningsCalculator')}}
           </b-button>
 
-          <b-modal hide-footer ref="earnings-calc-modal" size="xl" title="Earnings Calculator">
+          <b-modal hide-footer ref="earnings-calc-modal" size="xl" :title="$t('EarningsCalculator.earningsCalculator')">
             <div class="calculator">
               <div class="calculator-character">
-                <span class="calculator-subheader">Character</span>
+                <span class="calculator-subheader">{{$t('character')}}</span>
                 <img src="../../assets/placeholder/chara-0.png" class="char-placeholder">
-                <span>Element</span>
+                <span>{{$t('element')}}</span>
                 <select class="form-control wep-trait-form" v-model="characterElementValue">
-                  <option v-for="x in ['Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x }}</option>
+                  <option v-for="x in this.$t('elements')" :value="x" :key="x">{{ x }}</option>
                 </select>
-                <span>Level</span>
+                <span>{{$t('level')}}</span>
                 <div class="slider-input-div">
                   <input class="stat-slider" type="range" min="1" max="255" v-model="levelSliderValue" />
                   <b-form-input class="stat-input" type="number" v-model="levelSliderValue" :min="1" :max="255" />
@@ -38,7 +40,7 @@
 
               <div class="calculator-earnings">
                 <div class="coin-price-inputs">
-                  <span class="calculator-subheader">Current prices (USD)</span>
+                  <span class="calculator-subheader">{{$t('EarningsCalculator.nextMilestone')}} (USD)</span>
                   <div class="prices-div">
                     <div class="token-price-div">
                       {{gasToken}}: <span class="text-white"> ${{currentTokenPrice}}</span>
@@ -49,13 +51,13 @@
                   </div>
                 </div>
                 <div class="results">
-                  <strong>Earnings (USD)</strong>
+                  <strong>{{$t('EarningsCalculator.earnings')}} (USD)</strong>
                   <div class="earnings-grid">
                     <b-row>
-                      <b-col><strong>Wins # per day</strong></b-col>
-                      <b-col><strong>Daily profit</strong><br>(1 character)</b-col>
-                      <b-col><strong>Daily profit</strong><br>(4 characters)</b-col>
-                      <b-col><strong>Monthly profit</strong><br>(4 characters)</b-col>
+                      <b-col><strong>{{$t('EarningsCalculator.winsPerDay')}}</strong></b-col>
+                      <b-col><strong>{{$t('EarningsCalculator.dailyProfit')}}</strong><br>(1 {{$t('character')}})</b-col>
+                      <b-col><strong>{{$t('EarningsCalculator.dailyProfit')}}</strong><br>(4 {{$t('characters')}})</b-col>
+                      <b-col><strong>{{$t('EarningsCalculator.monthlyProfit')}}</strong><br>(4 {{$t('characters')}})</b-col>
                     </b-row>
                     <b-row class="earnings-row" v-for="i in 7" :key="i">
                       <b-col>{{8 - i}} ({{i - 1}} lost)</b-col>
@@ -86,15 +88,15 @@
               </div>
 
               <div class="calculator-weapon">
-                <span class="calculator-subheader">Weapon</span>
+                <span class="calculator-subheader">{{$t('weapon')}}</span>
                 <img src="../../assets/placeholder/sword-placeholder-0.png" class="wep-placeholder">
-                <span>Stars</span>
+                <span>{{$t('stars')}}</span>
                 <b-form-rating @change="refreshWeaponStats" class="stars-picker" variant="warning" v-model="starsValue" size="sm"></b-form-rating>
-                <span>Element</span>
+                <span>{{$t('element')}}</span>
                 <select class="form-control wep-trait-form" v-model="wepElementValue">
-                  <option v-for="x in ['Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x }}</option>
+                  <option v-for="x in this.$t(['elements'])" :value="x" :key="x">{{ x }}</option>
                 </select>
-                <span>Stats</span>
+                <span>{{$t('stats')}}</span>
                 <div>
                   <select class="form-control wep-trait-form" v-model="wepFirstStatElementValue">
                     <option v-for="x in ['STR', 'DEX', 'CHA', 'INT', 'PWR']" :value="x" :key="x">{{ x }}</option>
@@ -125,7 +127,7 @@
                       :min="getMinRoll(starsValue)" :max="getMaxRoll(starsValue)" />
                   </div>
                 </div>
-                <span>Bonus power</span>
+                <span>{{$t('bonusPower')}}</span>
                 <div class="slider-input-div">
                   <input class="stat-slider" type="range" :min="0" :max="2500" v-model="wepBonusPowerSliderValue" />
                   <b-form-input class="power-input" type="number" v-model="wepBonusPowerSliderValue"

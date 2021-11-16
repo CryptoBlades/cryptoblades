@@ -4,8 +4,8 @@
     <b-tabs justified>
       <b-tab @click="clearData();browseTabActive = true;skillShopTabActive = false">
         <template #title>
-          Browse NFTs
-          <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard" />
+          {{$t('market.browseNfts')}}
+          <hint class="hint" :text="$t('market.nftHint')" />
         </template>
 
         <div class="row mt-3">
@@ -15,19 +15,21 @@
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchAllCharacterListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_characters">Browse Characters</b-button>
+                  @click="searchAllCharacterListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_characters">
+                  {{$t('market.browseChars')}}
+                </b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchAllWeaponListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_weapons">Browse Weapons</b-button>
+                  @click="searchAllWeaponListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_weapons">{{$t('market.browseWeapons')}}</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchAllShieldListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_shields">Browse Shields</b-button>
+                  @click="searchAllShieldListings(currentPage - 1)"  class="gtag-link-others" tagname="browse_shields">{{$t('market.browseShields')}}</b-button>
               </div>
 
               <div class="col"></div>
@@ -66,10 +68,10 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
+                        <strong>{{$t('market.price')}}</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
-                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <span class="d-block text-center" v-else>{{$t('market.loadingPrice')}}</span>
                     <b-button
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; purchaseNft();"
@@ -81,7 +83,7 @@
                 </template>
 
                 <template #sold="{ weapon: { id } }">
-                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>{{$t('market.sold')}}</span></div>
                 </template>
 
               </weapon-grid>
@@ -108,7 +110,7 @@
                       </span>
                     </span>
 
-                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <span class="d-block text-center" v-else>{{$t('market.loadingPrice')}}</span>
                     <b-button
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; canPurchase && purchaseNft();"
@@ -116,13 +118,13 @@
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
                       class="gtag-link-others" tagname="confirm_purchase">
                       {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }} <b-icon-question-circle v-if="!canPurchase"
-                      v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                      v-tooltip.bottom="$t('market.maxChars')"/>
                     </b-button>
                   </div>
                 </template>
 
                 <template #sold="{ character: { id } }">
-                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>{{$t('market.sold')}}</span></div>
                 </template>
               </character-list>
 
@@ -149,7 +151,7 @@
                         <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
-                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <span class="d-block text-center" v-else>{{$t('market.loadingPrice')}}</span>
                     <b-button
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
                       @click="selectedNftId = id; purchaseNft();"
@@ -161,7 +163,7 @@
                 </template>
 
                 <template #sold="{ nft: { id } }">
-                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>{{$t('market.sold')}}</span></div>
                 </template>
 
               </nft-list>
@@ -186,7 +188,7 @@
           <div class="col">
             <div class="outcome" v-if="waitingMarketOutcome">
               <i class="fas fa-spinner fa-spin"></i>
-              Loading...
+              {{$t('market.loading')}}
             </div>
 
             <div class="outcome" v-if="marketOutcome !== null">{{ marketOutcome }}</div>
@@ -196,14 +198,14 @@
 
       <b-tab @click="clearData();loadMarketTaxes(),browseTabActive = false;skillShopTabActive = false">
         <template #title>
-          Search NFTs
+          {{$t('market.searchNfts')}}
           <hint class="hint" text="NFT stands for Non Fungible Token.<br>Weapons, Shields and Characters are NFTs of the ERC721 standard" />
         </template>
 
         <div class="row mt-3">
           <div class="col">
             <div class="d-flex justify-content-center">
-               <input class="form-control search w-50" type="text" v-model.trim="search" placeholder="Seller Address, NFT ID" />
+               <input class="form-control search w-50" type="text" v-model.trim="search" :placeholder="$t('market.searchPlaceholder')" />
             </div>
 
             <div class="row buttons-row mt-3">
@@ -211,100 +213,100 @@
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsByNftId('character')"  class="gtag-link-others" tagname="search_character_id">Search Character ID</b-button>
+                  @click="searchListingsByNftId('character')"  class="gtag-link-others" tagname="search_character_id">{{$t('market.searchCharID')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsByNftId('weapon')"  class="gtag-link-others" tagname="search_weapon_id">Search Weapon ID</b-button>
+                  @click="searchListingsByNftId('weapon')"  class="gtag-link-others" tagname="search_weapon_id">{{$t('market.searchWeaponID')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsBySeller('weapon')"  class="gtag-link-others" tagname="weapons_seller">Weapons by Seller</b-button>
+                  @click="searchListingsBySeller('weapon')"  class="gtag-link-others" tagname="weapons_seller">{{$t('market.weaponsBySeller')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsBySeller('character')"  class="gtag-link-others" tagname="characters_seller">Characters by Seller</b-button>
+                  @click="searchListingsBySeller('character')"  class="gtag-link-others" tagname="characters_seller">{{$t('market.charsBySeller')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsByNftId('shield')"  class="gtag-link-others" tagname="search_shield_id">Search Shield ID</b-button>
+                  @click="searchListingsByNftId('shield')"  class="gtag-link-others" tagname="search_shield_id">{{$t('market.searchShieldID')}}</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   :disabled="!search"
-                  @click="searchListingsBySeller('shield')"  class="gtag-link-others" tagname="shields_seller">Shields by Seller</b-button>
+                  @click="searchListingsBySeller('shield')"  class="gtag-link-others" tagname="shields_seller">{{$t('market.shieldsBySeller')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
-                  @click="searchOwnListings('weapon')"  class="gtag-link-others" tagname="search_own_weapons">Search My Weapons</b-button>
+                  @click="searchOwnListings('weapon')"  class="gtag-link-others" tagname="search_own_weapons">{{$t('market.searchMyWeapons')}}</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchPrivateWeaponListings()" class="gtag-link-others" tagname="weapons_private">Weapons Private Trades</b-button>
+                  @click="searchPrivateWeaponListings()" class="gtag-link-others" tagname="weapons_private">{{$t('market.weaponsPrivateTrades')}}</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchPrivateCharacterListings()" class="gtag-link-others" tagname="characters_private">Characters Private Trades</b-button>
+                  @click="searchPrivateCharacterListings()" class="gtag-link-others" tagname="characters_private">{{$t('market.charsPrivateTrades')}}</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
-                  @click="searchPrivateShieldListings()" class="gtag-link-others" tagname="characters_private">Shields Private Trades</b-button>
+                  @click="searchPrivateShieldListings()" class="gtag-link-others" tagname="characters_private">{{$t('market.shieldsPrivateTrades')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
-                  @click="searchOwnListings('character')"  class="gtag-link-others" tagname="search_own_characters">Search My Characters</b-button>
+                  @click="searchOwnListings('character')"  class="gtag-link-others" tagname="search_own_characters">{{$t('market.searchMyChars')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
-                  @click="searchOwnListings('shield')"  class="gtag-link-others" tagname="search_own_shields">Search My Shields</b-button>
+                  @click="searchOwnListings('shield')"  class="gtag-link-others" tagname="search_own_shields">{{$t('market.searchMyShields')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2">
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
-                  @click="showListingSetupModal(true)" class="gtag-link-others" tagname="change_price">Change Price</b-button>
+                  @click="showListingSetupModal(true)" class="gtag-link-others" tagname="change_price">{{$t('market.changePrice')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3">
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
-                  @click="updateNftListingTargetBuyer()"  class="gtag-link-others" tagname="change_price">Change Target Buyer</b-button>
+                  @click="updateNftListingTargetBuyer()"  class="gtag-link-others" tagname="change_price">{{$t('market.changeTargetBuyer')}}</b-button>
               </div>
 
               <div class="col">
                 <b-button
                   variant="primary"
                   v-if="ownListedNftSelected"
-                  v-tooltip="'Cancelled sales cannot be re-listed for 24 hours!'"
-                  @click="cancelNftListing()"  class="gtag-link-others" tagname="cancel_listing">Cancel Listing</b-button>
+                  v-tooltip="$t('market.cancelTooltip')"
+                  @click="cancelNftListing()"  class="gtag-link-others" tagname="cancel_listing">{{$t('market.cancelListing')}}</b-button>
               </div>
             </div>
 
@@ -327,10 +329,10 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
+                        <strong>{{$t('market.price')}}</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
-                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <span class="d-block text-center" v-else>{{$t('market.loadingPrice')}}</span>
                     <b-button
                         v-if="id !== null && !searchResultsOwned"
                         :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
@@ -343,7 +345,7 @@
                 </template>
 
                 <template #sold="{ weapon: { id } }">
-                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>{{$t('market.sold')}}</span></div>
                 </template>
 
               </weapon-grid>
@@ -367,7 +369,7 @@
                         <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
-                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <span class="d-block text-center" v-else>{{$t('market.loadingPrice')}}</span>
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
@@ -376,13 +378,13 @@
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
                       class="gtag-link-others" tagname="confirm_purchase">
                       {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }} <b-icon-question-circle v-if="!canPurchase"
-                      v-tooltip.bottom="'You already have max amount of characters (4).'"/>
+                      v-tooltip.bottom="$t('market.maxChars')"/>
                     </b-button>
                   </div>
                 </template>
 
                 <template #sold="{ character: { id } }">
-                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>{{$t('market.sold')}}</span></div>
                 </template>
 
               </character-list>
@@ -406,10 +408,10 @@
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()"
                       >
-                        <strong>Price</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
+                        <strong>{{$t('market.price')}}</strong>: <CurrencyConverter :skill="convertWeiToSkill(nftPricesById[id])"/>
                       </span>
                     </span>
-                    <span class="d-block text-center" v-else>Loading price...</span>
+                    <span class="d-block text-center" v-else>{{$t('market.loadingPrice')}}</span>
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
@@ -422,7 +424,7 @@
                 </template>
 
                 <template #sold="{ nft: { id } }">
-                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>sold</span></div>
+                  <div class="sold" v-if="nftPricesById[id] && convertWeiToSkill(nftPricesById[id]) === '0'"><span>{{$t('market.sold')}}</span></div>
                 </template>
 
               </nft-list>
@@ -434,7 +436,7 @@
           <div class="col">
             <div class="outcome" v-if="waitingMarketOutcome">
               <i class="fas fa-spinner fa-spin"></i>
-              Loading...
+              {{$t('market.loading')}}
             </div>
 
             <div class="outcome" v-if="marketOutcome !== null">{{ marketOutcome }}</div>
@@ -444,8 +446,8 @@
 
       <b-tab @click="clearData();loadMarketTaxes();browseTabActive = false;skillShopTabActive = false">
         <template #title>
-          List NFTs
-          <hint class="hint" text="When you list an NFT for sale, it is transferred to the<br>market until someone buys it or you cancel the sale" />
+          {{$t('market.listNfts')}}
+          <hint class="hint" :text="$t('market.listingHint')" />
         </template>
 
         <div class="row mt-3">
@@ -454,19 +456,19 @@
               <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
-                  @click="activeType = 'weapon'"  class="gtag-link-others" tagname="show_weapons_market">Show Weapons</b-button>
+                  @click="activeType = 'weapon'"  class="gtag-link-others" tagname="show_weapons_market">{{$t('market.showWeapons')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
-                  @click="activeType = 'character'"  class="gtag-link-others" tagname="show_characters_market">Show Characters</b-button>
+                  @click="activeType = 'character'"  class="gtag-link-others" tagname="show_characters_market">{{$t('market.showChars')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2 mb-2">
                 <b-button
                   variant="primary"
-                  @click="activeType = 'shield'"  class="gtag-link-others" tagname="show_shields_market">Show Shields</b-button>
+                  @click="activeType = 'shield'"  class="gtag-link-others" tagname="show_shields_market">{{$t('market.showShields')}}</b-button>
               </div>
 
               <div class="col-4 col-md-3 col-lg-2 mb-2">
@@ -475,36 +477,36 @@
                   v-if="activeType === 'weapon'"
                    class="gtag-link-others" tagname="add_listing_weapon"
                   :disabled="selectedNftId === null"
-                  @click="showListingSetupModal()">List Weapon <b-icon-question-circle :hidden=!weaponMarketTax
-                  v-tooltip.bottom="weaponMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
+                  @click="showListingSetupModal()">{{$t('market.listWeapon')}} <b-icon-question-circle :hidden=!weaponMarketTax
+                  v-tooltip.bottom="weaponMarketTax + $t('market.listingTaxHint')"/></b-button>
 
                 <b-button
                   variant="primary"
                   v-if="activeType === 'character'"
                   :disabled="selectedNftId === null"
                    class="gtag-link-others" tagname="add_listing_character"
-                  @click="showListingSetupModal()">List Character <b-icon-question-circle :hidden=!characterMarketTax
-                  v-tooltip.bottom="characterMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
+                  @click="showListingSetupModal()">{{$t('market.listChar')}} <b-icon-question-circle :hidden=!characterMarketTax
+                  v-tooltip.bottom="characterMarketTax + $t('market.listingTaxHint')"/></b-button>
 
                 <b-button
                   variant="primary"
                   v-if="activeType === 'shield'"
                    class="gtag-link-others" tagname="add_listing_shield"
                   :disabled="selectedNftId === null || selectedNftOnCooldown"
-                  @click="showListingSetupModal()">List Shield <b-icon-question-circle :hidden=!shieldMarketTax
-                  v-tooltip.bottom="shieldMarketTax + '% tax (paid by the buyer) will be added to the final price.'"/></b-button>
+                  @click="showListingSetupModal()">{{$t('market.listShield')}} <b-icon-question-circle :hidden=!shieldMarketTax
+                  v-tooltip.bottom="shieldMarketTax + $t('market.listingTaxHint')"/></b-button>
 
                 <b-modal class="centered-modal" ref="listing-setup-modal"
                   @ok="!priceChangeModal ? addListingForNft() : updateNftListingPrice()">
                   <template #modal-title>
-                    {{!priceChangeModal ? `Sell ${activeType}` : `Change ${activeType} price`}}
+                    {{!priceChangeModal ? $t('market.sellType', {activeType}) : $t('market.sellType', {changeTypePrice})}}
                   </template>
                   <b-form-input type="number" :max="10000"
-                    class="modal-input" v-model="listingSellPrice" placeholder="Sell Price (SKILL)" />
-                  <b-form-input class="modal-input" v-model="listingTargetBuyer" placeholder="Target Buyer Address (optional)" />
+                    class="modal-input" v-model="listingSellPrice" :placeholder="$t('market.sellPrice')" />
+                  <b-form-input class="modal-input" v-model="listingTargetBuyer" :placeholder="$t('market.targetBuyerAddress')" />
                   <span v-if="listingSellPrice">
-                    Do you want to sell your {{activeType}} for <CurrencyConverter :skill="Math.min(+listingSellPrice, 10000).toString()"/>?<br>
-                  <i>The buyer will pay an extra {{activeListingMarketTax()}}% market fee for a total of
+                    {{$t('market.listingConfirmation', {activeType})}}<CurrencyConverter :skill="Math.min(+listingSellPrice, 10000).toString()"/>?<br>
+                  <i>{{$t('market.buyerFee', { activeListingMarketTax: activeListingMarketTax() })}}
                   <CurrencyConverter :skill="calculatedBuyerCost(Math.min(+listingSellPrice, 10000))"/></i></span>
                 </b-modal>
               </div>
@@ -513,26 +515,26 @@
                 <b-button
                   variant="primary"
                    class="gtag-link-others" tagname="show_weapons_sold"
-                  @click="showWeaponsSoldModal()"> Weapons Sold
-                  <b-icon-question-circle v-tooltip.bottom="'View weapons you have sold.'"/>
+                  @click="showWeaponsSoldModal()"> {{$t('market.weaponsSold')}}
+                  <b-icon-question-circle v-tooltip.bottom="$t('market.viewWeapons')"/>
                 </b-button>
 
                 <b-modal class="centered-modal " ref="weapons-sold-modal">
 
                     <template #modal-header>
                          <div class="transaction-history-header-text">
-                           Weapon Transaction History
+                           {{$t('market.weaponTxHistory')}}
                          </div>
                     </template>
                     <div v-if="historyCounter > 0">
                       <b-table class="transaction-history-text" :items="weaponTransactionHistoryData" :fields="weaponTransactionHistoryHeader"></b-table>
                     </div>
                     <div v-if="historyCounter === 0">
-                      <p>It's seems like there's nothing here.</p>
-                      <p>For tips on how to list NFTs, you may click this <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">link</a></strong></p>
+                      <p>{{$t('market.nothingThere')}}</p>
+                      <p>{{$t('market.tips')}} <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">{{$t('market.link')}}</a></strong></p>
                     </div>
                     <template #modal-footer>
-                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('weapons-sold-modal')">Ok</b-button>
+                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('weapons-sold-modal')">{{$t('ok')}}</b-button>
                     </template>
 
 
@@ -544,26 +546,26 @@
                 <b-button
                   variant="primary"
                    class="gtag-link-others" tagname="show_characters_sold"
-                  @click="showCharactersSoldModal()"> Characters Sold
-                  <b-icon-question-circle v-tooltip.bottom="'View characters you have sold.'"/>
+                  @click="showCharactersSoldModal()"> {{$t('market.charactersSold')}}
+                  <b-icon-question-circle v-tooltip.bottom="$t('market.charactersSoldTooltip')"/>
                 </b-button>
 
                 <b-modal class="centered-modal " ref="characters-sold-modal">
 
                     <template #modal-header>
                          <div class="transaction-history-header-text">
-                           Character Transaction History
+                           {{$t('market.characterTxHistory')}}
                          </div>
                     </template>
                     <div v-if="historyCounter > 0">
                       <b-table class="transaction-history-text" :items="characterTransactionHistoryData" :fields="characterTransactionHistoryHeader"></b-table>
                     </div>
                     <div v-if="historyCounter === 0">
-                      <p>It's seems like there's nothing here.</p>
-                      <p>For tips on how to list NFTs, you may click this <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">link</a></strong></p>
+                      <p>{{$t('market.nothingThere')}}</p>
+                      <p>{{$t('market.tips')}}<strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">{{$t('market.link')}}</a></strong></p>
                     </div>
                     <template #modal-footer>
-                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('characters-sold-modal')">Ok</b-button>
+                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('characters-sold-modal')">{{$t('ok')}}</b-button>
                     </template>
 
                 </b-modal>
@@ -573,26 +575,26 @@
                 <b-button
                   variant="primary"
                    class="gtag-link-others" tagname="show_shields_sold"
-                  @click="showShieldsSoldModal()"> Shields Sold
-                  <b-icon-question-circle v-tooltip.bottom="'View shields you have sold.'"/>
+                  @click="showShieldsSoldModal()"> {{$t('market.shieldsSold')}}
+                  <b-icon-question-circle v-tooltip.bottom="$t('market.shieldsSoldTooltip')"/>
                 </b-button>
 
                 <b-modal class="centered-modal " ref="shields-sold-modal">
 
                     <template #modal-header>
                          <div class="transaction-history-header-text">
-                           Shield Transaction History
+                           {{$t('market.shieldsTxHistory')}}
                          </div>
                     </template>
                     <div v-if="historyCounter > 0">
                       <b-table class="transaction-history-text" :items="shieldTransactionHistoryData" :fields="sieldTransactionHistoryHeader"></b-table>
                     </div>
                     <div v-if="historyCounter === 0">
-                      <p>It's seems like there's nothing here.</p>
-                      <p>For tips on how to list NFTs, you may click this <strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">link</a></strong></p>
+                      <p>{{$t('market.nothingThere')}}</p>
+                      <p>{{$t('market.tips')}}<strong><a href="https://cryptoblades.gitbook.io/wiki/market/marketplace#list-nfts" target="_blank">{{$t('market.link')}}</a></strong></p>
                     </div>
                     <template #modal-footer>
-                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('shields-sold-modal')">Ok</b-button>
+                    <b-button class="mt-3" block @click="resetTransactionHistoryValues('shields-sold-modal')">{{$t('ok')}}</b-button>
                     </template>
 
 
@@ -634,7 +636,7 @@
           <div class="col">
             <div class="outcome" v-if="waitingMarketOutcome">
               <i class="fas fa-spinner fa-spin"></i>
-              Loading...
+              {{$t('market.loading')}}
             </div>
 
             <div class="outcome" v-if="marketOutcome !== null">{{ marketOutcome }}</div>
@@ -644,17 +646,17 @@
 
       <b-tab @click="clearData();browseTabActive = false;skillShopTabActive = true">
         <template #title>
-          Skill Shop
-          <hint class="hint" text="You can buy various goods in here" />
+          {{$t('market.skillShop')}}
+          <hint class="hint" :text="$t('market.skillShophint')" />
         </template>
 
         <div>
           <div class="row">
             <div class="col-sm-4 centered-text">
-              <h3>Specials</h3>
+              <h3>{{$t('market.specials')}}</h3>
             </div>
             <div class="col-sm-8 centered-text">
-              <h3>Shop</h3>
+              <h3>{{$t('market.shop')}}</h3>
             </div>
             <img class="shop-horizontal-divider-top" src="../assets/divider4.png" />
           </div>
@@ -701,6 +703,7 @@ import { getShieldNameFromSeed } from '@/shield-name';
 import { fromWeiEther, apiUrl } from '../utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
 import { getCleanName } from '../rename-censor';
+import i18n from '@/i18n';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
@@ -955,360 +958,360 @@ export default Vue.extend({
           id: 0,
           type: 'CharacterRenameTag',
           nftPrice: 0.1,
-          name: 'Rename Tag',
-          description: 'Renames one character.',
+          name: i18n.t('market.nftList.characterRenameTag'),
+          description: i18n.t('market.nftList.characterRenameTagDesc'),
           image: 'scroll_06_te.png'
         },
         {
           id: 0,
           type: 'CharacterRenameTagDeal',
           nftPrice: 0.3,
-          name: 'Rename Tag Deal',
-          description: 'Renames 4 characters for the price of 3.',
+          name: i18n.t('market.nftList.characterRenameTagDeal'),
+          description: i18n.t('market.nftList.characterRenameTagDealDesc'),
           image: 'scroll_06_te4.png'
         },
         {
           id: 1,
           type: 'WeaponRenameTag',
           nftPrice: 0.1,
-          name: 'Weapon Tag',
-          description: 'Renames a weapon.',
+          name: i18n.t('market.nftList.weaponRenameTag'),
+          description: i18n.t('market.nftList.weaponRenameTagDesc'),
           image: 'rune_05_te.png'
         },
         {
           id: 1,
           type: 'WeaponRenameTagDeal',
           nftPrice: 0.3,
-          name: 'Weapon Tag Deal',
-          description: 'Renames 4 weapons for the price of 3.',
+          name: i18n.t('market.nftList.weaponRenameTagDeal'),
+          description: i18n.t('market.nftList.weaponRenameTagDealDesc'),
           image: 'rune_05_te4.png'
         },
         {
           id: 1,
           type: 'CharacterEarthTraitChange',
           nftPrice: 0.2,
-          name: 'Earth Character Trait',
-          description: 'Changes character\'s trait to Earth.',
+          name: i18n.t('market.nftList.characterEarthTraitChange'),
+          description: i18n.t('market.nftList.characterEarthTraitChangeDesc'),
           image: 'potion_06_te.png'
         },
         {
           id: 1,
           type: 'CharacterFireTraitChange',
           nftPrice: 0.2,
-          name: 'Fire Character Trait',
-          description: 'Changes character\'s trait to Fire.',
+          name: i18n.t('market.nftList.characterFireTraitChange'),
+          description: i18n.t('market.nftList.characterFireTraitChangeDesc'),
           image: 'potion_09_te.png'
         },
         {
           id: 1,
           type: 'CharacterWaterTraitChange',
           nftPrice: 0.2,
-          name: 'Water Character Trait',
-          description: 'Changes character\'s trait to Water.',
+          name: i18n.t('market.nftList.characterWaterTraitChange'),
+          description: i18n.t('market.nftList.characterWaterTraitChangeDesc'),
           image: 'potion_07_te.png'
         },
         {
           id: 1,
           type: 'CharacterLightningTraitChange',
           nftPrice: 0.2,
-          name: 'Lightning Character Trait',
-          description: 'Changes character\'s trait to Lightning.',
+          name: i18n.t('market.nftList.characterLightningTraitChange'),
+          description: i18n.t('market.nftList.characterLightningTraitChangeDesc'),
           image: 'potion_05_te.png'
         },
         {
           id: 1,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: 'Weapon Grayscale',
-          description: '',
+          name: i18n.t('market.nftList.weaponGrayscale'),
+          description: i18n.t('market.nftList.weaponGrayscaleDesc'),
           image: ''
         },
         {
           id: 2,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: 'Weapon Contrast',
-          description: 'Increased contrast',
+          name: i18n.t('market.nftList.weaponContrast'),
+          description: i18n.t('market.nftList.weaponContrastDesc'),
           image: ''
         },
         {
           id: 3,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: 'Weapon Sepia',
-          description: '',
+          name: i18n.t('market.nftList.weaponSepia'),
+          description: i18n.t('market.nftList.weaponSepiaDesc'),
           image: ''
         },
         {
           id: 4,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: 'Weapon Invert',
-          description: 'Inverted colors',
+          name: i18n.t('market.nftList.weaponInvert'),
+          description: i18n.t('market.nftList.weaponInvertDesc'),
           image: ''
         },
         {
           id: 5,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: 'Weapon Blur',
-          description: 'Blurred weapon',
+          name: i18n.t('market.nftList.weaponBlur'),
+          description: i18n.t('market.nftList.weaponBlurDesc'),
           image: ''
         },
         {
           id: 6,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: 'Weapon Fire Glow',
-          description: 'Glows with fire power',
+          name: i18n.t('market.nftList.weaponFireglow'),
+          description: i18n.t('market.nftList.weaponFireglowDesc'),
           image: ''
         },
         {
           id: 7,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: 'Weapon Earth Glow',
-          description: 'Glows with earth power',
+          name: i18n.t('market.nftList.weaponEarthglow'),
+          description: i18n.t('market.nftList.weaponEarthglowDesc'),
           image: ''
         },
         {
           id: 8,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: 'Weapon Lightning Glow',
-          description: 'Glows with lightning power',
+          name: i18n.t('market.nftList.weaponLightningglow'),
+          description: i18n.t('market.nftList.weaponLightningglowDesc'),
           image: ''
         },
         {
           id: 9,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: 'Weapon Water Glow',
-          description: 'Glows with water power',
+          name: i18n.t('market.nftList.weaponWaterglow'),
+          description: i18n.t('market.nftList.weaponWaterglowDesc'),
           image: ''
         },
         {
           id: 10,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: 'Weapon Rainbow Glow',
-          description: 'Glows with all elements powers',
+          name: i18n.t('market.nftList.weaponRainbowglow'),
+          description: i18n.t('market.nftList.weaponRainbowglowDesc'),
           image: ''
         },
         {
           id: 11,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: 'Weapon Dark Glow',
-          description: 'Glows with the dark',
+          name: i18n.t('market.nftList.weaponDarkglow'),
+          description: i18n.t('market.nftList.weaponDarkglowDesc'),
           image: ''
         },
         {
           id: 12,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: 'Ghost Weapon',
-          description: 'Ghost effect',
+          name: i18n.t('market.nftList.weaponGhost'),
+          description: i18n.t('market.nftList.weaponGhostDesc'),
           image: ''
         },
         {
           id: 13,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: 'Weapon Police Lights',
-          description: 'Police Lights background',
+          name: i18n.t('market.nftList.weaponPolicelights'),
+          description: i18n.t('market.nftList.weaponPolicelightsDesc'),
           image: ''
         },
         {
           id: 14,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: 'Weapon Neon Border',
-          description: '',
+          name: i18n.t('market.nftList.weaponNeonborder'),
+          description: i18n.t('market.nftList.weaponNeonborderDesc'),
           image: ''
         },
         {
           id: 15,
           type: 'WeaponCosmetic',
           nftPrice: 0.5,
-          name: 'Weapon Rotating Neon Border',
-          description: '',
+          name: i18n.t('market.nftList.weaponRotatingNeonborder'),
+          description: i18n.t('market.nftList.weaponRotatingNeonborderDesc'),
           image: ''
         },
         {
           id: 16,
           type: 'WeaponCosmetic',
           nftPrice: 0.4,
-          name: 'Diamond Weapon Border',
-          description: '',
+          name: i18n.t('market.nftList.weaponDiamondborder'),
+          description: i18n.t('market.nftList.weaponDiamondborderDesc'),
           image: ''
         },
         {
           id: 17,
           type: 'WeaponCosmetic',
           nftPrice: 0.3,
-          name: 'Gold Weapon Border',
-          description: '',
+          name: i18n.t('market.nftList.weaponGoldborder'),
+          description: i18n.t('market.nftList.weaponGoldborderDesc'),
           image: ''
         },
         {
           id: 18,
           type: 'WeaponCosmetic',
           nftPrice: 0.2,
-          name: 'Silver Weapon Border',
-          description: '',
+          name: i18n.t('market.nftList.weaponSilverborder'),
+          description: i18n.t('market.nftList.weaponSilverborderDesc'),
           image: ''
         },
         {
           id: 19,
           type: 'WeaponCosmetic',
           nftPrice: 0.1,
-          name: 'Bronze Weapon Border',
-          description: '',
+          name: i18n.t('market.nftList.weaponBronzeborder'),
+          description: i18n.t('market.nftList.weaponBronzeborderDesc'),
           image: ''
         },
         {
           id: 1,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: 'Character Grayscale',
-          description: '',
+          name: i18n.t('market.nftList.characterGrayscale'),
+          description: i18n.t('market.nftList.characterGrayscaleDesc'),
           image: ''
         },
         {
           id: 2,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: 'Character Contrast',
-          description: 'Increased contrast',
+          name: i18n.t('market.nftList.characterContrast'),
+          description: i18n.t('market.nftList.characterContrastDesc'),
           image: ''
         },
         {
           id: 3,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: 'Character Sepia',
-          description: '',
+          name: i18n.t('market.nftList.characterSepia'),
+          description: i18n.t('market.nftList.characterSepiaDesc'),
           image: ''
         },
         {
           id: 4,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: 'Character Invert',
-          description: 'Inverted colors',
+          name: i18n.t('market.nftList.characterInvert'),
+          description: i18n.t('market.nftList.characterInvertDesc'),
           image: ''
         },
         {
           id: 5,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: 'Character Blur',
-          description: 'Blurred character',
+          name: i18n.t('market.nftList.characterBlur'),
+          description: i18n.t('market.nftList.characterBlurDesc'),
           image: ''
         },
         {
           id: 6,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: 'Character Fire Glow',
-          description: 'Glows with fire power',
+          name: i18n.t('market.nftList.characterFireglow'),
+          description: i18n.t('market.nftList.characterFireglowDesc'),
           image: ''
         },
         {
           id: 7,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: 'Character Earth Glow',
-          description: 'Glows with earth power',
+          name: i18n.t('market.nftList.characterEarthglow'),
+          description: i18n.t('market.nftList.characterEarthglowDesc'),
           image: ''
         },
         {
           id: 8,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: 'Character Lightning Glow',
-          description: 'Glows with lightning power',
+          name: i18n.t('market.nftList.characterLightningglow'),
+          description: i18n.t('market.nftList.characterLightningglowDesc'),
           image: ''
         },
         {
           id: 9,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: 'Character Water Glow',
-          description: 'Glows with water power',
+          name: i18n.t('market.nftList.characterWaterglow'),
+          description: i18n.t('market.nftList.characterWaterglowDesc'),
           image: ''
         },
         {
           id: 10,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: 'Character Rainbow Glow',
-          description: 'Glows with all elements powers',
+          name: i18n.t('market.nftList.characterRainbowglow'),
+          description: i18n.t('market.nftList.characterRainbowglowDesc'),
           image: ''
         },
         {
           id: 11,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: 'Character Dark Glow',
-          description: 'Glows with the dark',
+          name: i18n.t('market.nftList.characterDarkglow'),
+          description: i18n.t('market.nftList.characterDarkglowDesc'),
           image: ''
         },
         {
           id: 12,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: 'Ghost Character',
-          description: 'Ghost effect',
+          name: i18n.t('market.nftList.characterGhost'),
+          description: i18n.t('market.nftList.characterGhostDesc'),
           image: ''
         },
         {
           id: 13,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: 'Character Police Lights',
-          description: 'Police lights background',
+          name: i18n.t('market.nftList.characterPolice'),
+          description: i18n.t('market.nftList.characterPoliceDesc'),
           image: ''
         },
         {
           id: 14,
           type: 'CharacterCosmetic',
           nftPrice: 0.5,
-          name: 'Character Neon Border',
-          description: '',
+          name: i18n.t('market.nftList.characterNeonborder'),
+          description: i18n.t('market.nftList.characterNeonborderDesc'),
           image: ''
         },
         {
           id: 15,
           type: 'CharacterCosmetic',
           nftPrice: 0.4,
-          name: 'Character Diamond Border',
-          description: '',
+          name: i18n.t('market.nftList.characterDiamondborder'),
+          description: i18n.t('market.nftList.characterDiamondborderDesc'),
           image: ''
         },
         {
           id: 16,
           type: 'CharacterCosmetic',
           nftPrice: 0.3,
-          name: 'Character Gold Border',
-          description: '',
+          name: i18n.t('market.nftList.characterGoldborder'),
+          description: i18n.t('market.nftList.characterGoldborderDesc'),
           image: ''
         },
         {
           id: 17,
           type: 'CharacterCosmetic',
           nftPrice: 0.2,
-          name: 'Character Silver Border',
-          description: '',
+          name: i18n.t('market.nftList.characterSilverborder'),
+          description: i18n.t('market.nftList.characterSilverborderDesc'),
           image: ''
         },
         {
           id: 18,
           type: 'CharacterCosmetic',
           nftPrice: 0.1,
-          name: 'Character Bronze Border',
-          description: '',
+          name: i18n.t('market.nftList.characterBronzeborder'),
+          description: i18n.t('market.nftList.characterBronzeborderDesc'),
           image: ''
         },
       ] as SkillShopListing[];
