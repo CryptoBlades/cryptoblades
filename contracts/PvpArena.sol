@@ -309,10 +309,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _duelQueue.add(attackerID);
     }
 
+    function clearDuelQueue() external restricted {
+        for (uint256 i = 0; i < _duelQueue.length(); i++) {
+            _duelQueue.remove(_duelQueue.at(i));
+        }
+    }
+
     /// @dev performs all queued duels
     function performDuels(uint256[] calldata attackerIDs) external restricted {
         for (uint256 i = 0; i < attackerIDs.length; i++) {
-            uint256 attackerID = _duelQueue.at(i);
+            uint256 attackerID = attackerIDs[i];
+            if (!_duelQueue.contains(attackerID)) continue;
+            
             uint256 defenderID = getOpponent(attackerID);
             uint8 defenderTrait = characters.getTrait(defenderID);
             uint8 attackerTrait = characters.getTrait(attackerID);
@@ -840,6 +848,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         _fightersByPlayer[msg.sender].remove(characterID);
 
+        if (_duelQueue.contains(characterID)) {
+            _duelQueue.remove(characterID);
+        }
+
         uint8 tier = getArenaTier(characterID);
 
         _fightersByTier[tier].remove(characterID);
@@ -860,6 +872,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         EnumerableSet.UintSet storage fightersInTier = _fightersByTier[tier];
 
         require(fightersInTier.length() != 0, "No opponents available in tier");
+        require(!_duelQueue.contains(characterID), "Character is in duel queue");
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
@@ -889,6 +902,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             break;
         }
 
+        require(!_duelQueue.contains(opponentID), "Opponent is in duel queue");
         require(foundOpponent, "No opponent found");
 
         duelByAttacker[characterID] = Duel(
