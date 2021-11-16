@@ -25,7 +25,7 @@
                 <img src="../../assets/placeholder/chara-0.png" class="char-placeholder">
                 <span>{{$t('element')}}</span>
                 <select class="form-control wep-trait-form" v-model="characterElementValue">
-                  <option v-for="x in this.$t('elements')" :value="x" :key="x">{{ x }}</option>
+                  <option v-for="x in this.$t('traits')" :value="x" :key="x">{{ x }}</option>
                 </select>
                 <span>{{$t('level')}}</span>
                 <div class="slider-input-div">
@@ -94,7 +94,7 @@
                 <b-form-rating @change="refreshWeaponStats" class="stars-picker" variant="warning" v-model="starsValue" size="sm"></b-form-rating>
                 <span>{{$t('element')}}</span>
                 <select class="form-control wep-trait-form" v-model="wepElementValue">
-                  <option v-for="x in this.$t(['elements'])" :value="x" :key="x">{{ x }}</option>
+                  <option v-for="x in this.$t(['traits'])" :value="x" :key="x">{{ x }}</option>
                 </select>
                 <span>{{$t('stats')}}</span>
                 <div>
@@ -147,14 +147,14 @@ import { getConfigValue } from '@/contracts';
 import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, WeaponTrait } from '@/interfaces';
 import axios from 'axios';
 import Vue from 'vue';
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { toBN, fromWeiEther } from '../../utils/common';
 
 interface PriceJson {
   binancecoin: CoinPrice;
   cryptoblades: CoinPrice;
   'huobi-token': CoinPrice;
-  okexchain: CoinPrice;
+  'oec-token': CoinPrice;
 }
 
 interface CoinPrice {
@@ -212,6 +212,7 @@ export default Vue.extend({
   },
 
   methods: {
+    ...mapActions(['fetchExpectedPayoutForMonsterPower']),
     async onShowEarningsCalculator() {
       if(this.currentCharacter !== null) {
         this.characterElementValue = CharacterTrait[this.currentCharacter.trait];
@@ -269,12 +270,12 @@ export default Vue.extend({
     },
 
     async fetchPrices() {
-      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin,huobi-token,okexchain&vs_currencies=usd');
+      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin,huobi-token,oec-token&vs_currencies=usd');
       const data = response.data as PriceJson;
       this.bnbPrice = data?.binancecoin.usd;
       this.skillPrice = data?.cryptoblades.usd;
       this.htPrice = data?.['huobi-token'].usd;
-      this.oktPrice = data?.okexchain.usd;
+      this.oktPrice = data?.['oec-token'].usd;
     },
 
     canCalculate(): boolean {
@@ -285,7 +286,7 @@ export default Vue.extend({
       return true;
     },
 
-    calculateEarnings() {
+    async calculateEarnings() {
       if(!this.canCalculate()) return;
       this.calculationResults = [];
       const fightBnbFee = 0.0007 * this.bnbPrice;
@@ -295,8 +296,9 @@ export default Vue.extend({
       const fights = this.getNumberOfFights(this.staminaSelectValue);
 
       const totalPower = this.getTotalPower(CharacterPower(this.levelSliderValue - 1), weaponMultiplier, this.wepBonusPowerSliderValue);
-      const averageDailyReward = this.getAverageRewardForPower(totalPower) *7.2 +
+      const averageDailyReward = await this.getAverageRewardForPower(totalPower) * 7.2 +
         this.formattedSkill(this.fightGasOffset) * fights;
+      console.log(averageDailyReward);
       const averageFightProfit = averageDailyReward * this.skillPrice / 7.2;
       for(let i = 1; i < 8; i++) {
         const averageDailyProfitForCharacter = averageFightProfit * i -
@@ -327,8 +329,9 @@ export default Vue.extend({
       return characterPower * weaponMultiplier + Number(bonusPower);
     },
 
-    getAverageRewardForPower(power: number): number {
-      return (this.formattedSkill(this.fightBaseline) * Math.sqrt(power / 1000));
+    async getAverageRewardForPower(power: number) {
+      const expectedPayout = await this.fetchExpectedPayoutForMonsterPower(Math.round(power));
+      return this.formattedSkill(expectedPayout);
     },
 
     getNextMilestoneBonus(level: number): string {

@@ -40,8 +40,7 @@
           </span>
         </div>
 
-        <!-- Hiding earnings calculator as it's not working correctly with new formula -->
-        <earnings-calculator style="display: none"/>
+        <earnings-calculator />
       </div>
     </transition>
 
