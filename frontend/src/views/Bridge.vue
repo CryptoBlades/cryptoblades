@@ -76,20 +76,21 @@
           </div>
           <div class="p-2">
             <b-button
-              :disabled="!canBridge || (transferStatus === 'DONE' || transferStatus !== 'No transfer') && (currentTransferNFTId == selectedNftId)||
-              transferStatus === 'Pending' || transferStatus === 'Processing' || selectedNftId === ''"
+              :disabled="!canBridge || (transferStatus === transferStates.done || transferStatus !== transferStates.noTransfer)
+              &&(currentTransferNFTId == selectedNftId)||
+              transferStatus === transferStates.pending || transferStatus === transferStates.processing || selectedNftId === ''"
               variant="primary"
               @click="requestBridge()" class="gtag-link-others" tagname="click_transfer_bridge">
                 Request Transfer <span :style="canBridge ? '' : 'color:red;'"> (<CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/>) </span>
             </b-button>
           </div>
           <div class="p-2">
-            <b-button :disabled="transferStatus != 'Pending'" variant="primary" @click="$refs['refund-warning-modal'].show()"
+            <b-button :disabled="transferStatus != transferStates.pending" variant="primary" @click="$refs['refund-warning-modal'].show()"
               class="gtag-link-others" tagname="click_transfer_bridge">Cancel Transfer Request</b-button>
           </div>
         </div>
         <div class="d-flex flex-row bd-highlight mb-3 justify-content-center">
-          <div class="p-4 w-25" v-if="transferStatus != 'Pending' && storedNftsIds.length !== 0">
+          <div class="p-4 w-25" v-if="transferStatus != transferStates.pending && storedNftsIds.length !== 0">
             <h4 class="text-center">Select target chain</h4>
             <select class="form-control" v-model="targetChain">
               <option v-for="chain in chainsToSendTo" :value="chain" :key="chain"
@@ -99,7 +100,7 @@
             </select>
           </div>
         </div>
-        <div v-if="transferStatus != 'No transfer'"
+        <div v-if="transferStatus != transferStates.noTransfer"
           class="transferBox d-flex flex-column bd-highlight mb-3 justify-content-center">
           <div class="text-center">
             <h4>Current Transfer</h4>
@@ -282,6 +283,14 @@ interface StoreMappedActions {
   }): Promise<boolean>;
 }
 
+enum transferStates{
+  noTransfer = 'No transfer',
+  pending = 'Pending',
+  processing = 'Processing',
+  done = 'DONE',
+  error = 'Error'
+}
+
 export default Vue.extend({
   props: {
     nftTypeProp: {
@@ -310,6 +319,7 @@ export default Vue.extend({
       supportedChains: [] as string[],
       supportedChainIds: [] as string[],
       transferStatus: '',
+      transferStates,
       currentTransferNFTId: '',
       currentTransferNFTType: '',
       currentTransferChain: '',
@@ -491,21 +501,21 @@ export default Vue.extend({
         transferId: id,
       });
       if(transfer[6] === '0'){
-        this.transferStatus = 'No transfer';
+        this.transferStatus = transferStates.noTransfer;
         this.currentTransferNFTId = '';
         return;
       }
       if(transfer[6] === '1'){
-        this.transferStatus = 'Pending';
+        this.transferStatus = transferStates.pending;
       }
       else if(transfer[6] === '2'){
-        this.transferStatus = 'Processing';
+        this.transferStatus = transferStates.processing;
       }
       else if(transfer[6] === '3'){
-        this.transferStatus = 'DONE';
+        this.transferStatus = transferStates.done;
       }
       else if(transfer[6] === '4'){
-        this.transferStatus = 'Error';
+        this.transferStatus = transferStates.error;
       }
 
       const currentTransferTokenAddress = transfer[1];
