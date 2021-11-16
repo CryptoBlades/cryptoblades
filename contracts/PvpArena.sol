@@ -200,7 +200,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _tierWagerUSD = ABDKMath64x64.divu(50, 100); // $0.5
         _rankingsPoolTaxPercent = 15;
         unattackableSeconds = 2 minutes;
-        decisionSeconds = 3 minutes;
+        decisionSeconds = 2 minutes;
         winningPoints = 5;
         losingPoints = 3;
         _maxCharactersPerRanking = 4;
