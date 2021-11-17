@@ -3181,19 +3181,26 @@ export function createStore(web3: Web3) {
       },
       async purchaseSmokeBomb50({ state, dispatch }) {
         const { CryptoBlades, SkillToken, SmokeBombConsumables, Blacksmith } = state.contracts();
-        if(!CryptoBlades || !SmokeBombConsumables || !Blacksmith || !state.defaultAccount) return;
+        if(!CryptoBlades || !SmokeBombConsumables || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
-        try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address,  web3.utils.toWei('0.1', 'ether'))
-            .send({
-              from: state.defaultAccount
-            });
-        } catch(err) {
-          console.error(err);
-        }
+        await approveFeeFromAnyContract(
+          CryptoBlades,
+          Blacksmith,
+          SkillToken,
+          state.defaultAccount,
+          state.skillRewards,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          blacksmithFunctions => blacksmithFunctions.getSmokeBombPrice(),
+          { allowInGameOnlyFunds: false, feeMultiplier: 50, payToAddress: CryptoBlades.options.address },
+          true
+        );
 
-        await Blacksmith.methods.purchase50SmokeBombs( web3.utils.toWei('0.1', 'ether')).send({
+        const skillBombPrice = await Blacksmith.methods.getSmokeBombPrice().call(defaultCallOptions(state));
+
+        const priceFor50 = parseFloat(Web3.utils.fromWei(skillBombPrice)) * 50;
+
+        await Blacksmith.methods.purchase50SmokeBombs( Web3.utils.toWei(priceFor50.toString(), 'ether')).send({
           from: state.defaultAccount,
           gas: '500000'
         });

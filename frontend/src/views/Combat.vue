@@ -69,7 +69,7 @@
                 </b-button>
 
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3 smoke-bomb-button"
-                @click="useSmokeBombUI()" id="gtag-link-others" tagname="use_smokebomb"
+                @click="useSmokeBombUI" id="gtag-link-others" tagname="use_smokebomb"
                 :disabled="smokeBombs == 0">
                   Use Smoke Bomb ({{this.smokeBombs}}) <b-icon-question-circle class="centered-icon"
                   scale="1.2" v-tooltip.top="'Find new enemies!'"/>

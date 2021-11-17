@@ -261,7 +261,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokens[id].staminaTimestamp;
     }
 
-    function incrementStaminaTimeStamp(uint256 id, uint256 staminaChange) public restricted {
+    function incrementStaminaTimeStamp(uint256 id, uint64 staminaChange) public restricted {
         tokens[id].staminaTimestamp += staminaChange;
     }
 
