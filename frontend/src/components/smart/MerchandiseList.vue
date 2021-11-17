@@ -38,11 +38,11 @@
       <b-form-input type="text"
         class="modal-input" v-model="recipient.zip" placeholder="Zip Code" />
       <b-form-select
-        class="modal-input" v-model="recipient.country_code" :options="countries"
+        class="modal-input" v-model="recipient.countryCode" @change="fetchStates" :options="countries"
         text-field="name" value-field="code"></b-form-select>
-        {{ selected_country }}
+        {{ selectedCountry }}
       <b-form-select
-        class="modal-input" v-model="recipient.state_code" :options="states" value-field="code" text-field="name"></b-form-select>
+        class="modal-input" v-if="states.length !== 0" v-model="recipient.stateCode" :options="states" value-field="code" text-field="name"></b-form-select>
     </b-modal>
   </div>
 </template>
@@ -65,8 +65,8 @@ interface Recipient {
   name: string;
   address1: string;
   city: string;
-  state_code: string;
-  country_code: string;
+  stateCode?: string;
+  countryCode: string;
   zip: string;
   phone: string;
   email: string;
@@ -75,15 +75,15 @@ interface Recipient {
 interface Country {
   name: string;
   code: string;
-  states?: string;
+  states?: string[];
 }
 
 interface Data {
   products: Product[];
-  selected_product: Product | undefined;
-  selected_country: Country | undefined;
-  selected_state: string;
+  selectedProduct: Product | undefined;
+  selectedCountry: Country | undefined;
   countries: Country[];
+  states: string[];
   recipient: Recipient;
 }
 
@@ -100,27 +100,12 @@ export default Vue.extend({
   data() {
     return {
       products: [],
-      selected_product: undefined,
-      selected_country: undefined,
-      selected_state: '',
+      selectedProduct: undefined,
+      selectedCountry: undefined,
       countries: [],
-      recipient: {
-        name: 'Bob',
-        address1: 'Baker Street 2B',
-        city: 'London',
-        state_code: 'AL',
-        country_code: 'US',
-        zip: '12345',
-        phone: '5512345678',
-        email: 'example@email.com'
-      } as Recipient,
+      states: [],
+      recipient: {} as Recipient,
     } as Data;
-  },
-
-  computed: {
-    states() {
-      return this.countries.find(country => country.code === this.recipient.country_code)?.states;
-    }
   },
 
   methods: {
@@ -132,36 +117,41 @@ export default Vue.extend({
       for (const product of this.products) {
         product.price = await this.getItemPrice({id: product.id});
       }
-      console.log(this.products);
     },
 
     async fetchCountries() {
       const response = await axios.get('http://localhost:2400/countries');
       this.countries = response.data?.result;
+      this.fetchStates();
     },
 
-    async openAddress(product: Product) {
-      this.$refs['merchandise-address-modal'].show();
-      this.selected_product = product;
+    fetchStates() {
+      this.recipient.stateCode = undefined;
+      this.states = this.countries.find((country: Country) => country.code === this.recipient.countryCode)?.states || [];
+    },
+
+    openAddress(product: Product) {
+      (this.$refs['merchandise-address-modal'] as any).show();
+      this.selectedProduct = product;
     },
 
     async buyItem() {
-      if(!this.selected_product) return;
+      if(!this.selectedProduct) return;
       const printful_payload = {
         recipient: this.recipient,
         items: [
           {
-            sync_variant_id: this.selected_product.id,
+            sync_variant_id: this.selectedProduct.id,
             quantity: 1
           }
         ]
       };
 
-      if(!this.selected_product.price) return;
-      await this.purchaseMerchandise({id: this.selected_product.id, price: this.selected_product.price, amount: 1});
+      if(!this.selectedProduct.price) return;
+      await this.purchaseMerchandise({id: this.selectedProduct.id, price: this.selectedProduct.price, amount: 1});
+      this.recipient = {} as Recipient;
 
-      const response = await axios.post('http://localhost:2400/create_order', printful_payload);
-      console.log(response);
+      await axios.post('http://localhost:2400/create_order', printful_payload);
     },
 
     convertWeiToSkill(wei: string) {

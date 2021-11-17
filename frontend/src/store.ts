@@ -2665,9 +2665,9 @@ export function createStore(web3: Web3) {
       },
 
       async purchaseMerchandise({ state }, {id, price, amount}) {
-        console.log(price, state);
         const { CryptoBlades, SkillToken, Merchandise } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Merchandise || !state.defaultAccount) return;
+
         await SkillToken.methods
           .approve(CryptoBlades.options.address, price)
           .send({
@@ -2683,10 +2683,7 @@ export function createStore(web3: Web3) {
 
       async getItemPrice({ state }, {id}) {
         const { Merchandise } = state.contracts();
-        if (!Merchandise) {
-          console.log('No contract');
-          return;
-        }
+        if (!Merchandise) return;
 
         return await Merchandise.methods
           .getPriceOfItem(id)
