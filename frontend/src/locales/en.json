@@ -235,7 +235,9 @@
       "veryLikely": "Very Likely"
     },
     "moreStamina": "You need more stamina to fight!",
-    "pleaseSelect": "Please select Stamina Cost per Fight"
+    "pleaseSelect": "Please select Stamina Cost per Fight",
+	"useSmokeBomb": "Use Smoke Bomb",
+    "useSmokeBombDesc": "Find new enemies!"
   },
   "raid":{
     "title":"Hellborn raid",
@@ -487,7 +489,10 @@
       "characterSilverborderDesc" : "",
 
       "characterBronzeborder" : "Character Bronze Border",
-      "characterBronzeborderDesc" : ""
+      "characterBronzeborderDesc" : "",
+	  
+	  "smokeBomb50" : "50 Smoke Bombs",
+      "smokeBomb50Desc" : "Get new enemies in combat."
     }
   },
   "stake":{

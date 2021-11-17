@@ -70,9 +70,9 @@
 
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3 smoke-bomb-button"
                 @click="useSmokeBombUI" id="gtag-link-others" tagname="use_smokebomb"
-                :disabled="smokeBombs === '0'">
-                  Use Smoke Bomb ({{this.smokeBombs}}) <b-icon-question-circle class="centered-icon"
-                  scale="1.2" v-tooltip.top="'Find new enemies!'"/>
+                :disabled="!smokeBombs">
+                  {{$t('combat.useSmokeBomb')}} ({{this.smokeBombs}}) <b-icon-question-circle class="centered-icon"
+                  scale="1.2" v-tooltip.top="` ${$t('combat.useSmokeBombDesc')}`" />
                 </b-button>
               </div>
 
@@ -179,7 +179,7 @@ export default {
     this.intervalSeconds = setInterval(() => (this.timeSeconds = new Date().getSeconds()), 5000);
     this.intervalMinutes = setInterval(() => (this.timeMinutes = new Date().getMinutes()), 20000);
     this.staminaPerFight = 40 * Number(localStorage.getItem('fightMultiplier'));
-    this.intervalSmokeBombs = setInterval(async () => (this.smokeBombs = await this.fetchTotalSmokeBombsOwned()), 5000);
+    this.intervalSmokeBombs = setInterval(async () => (this.smokeBombs = +await this.fetchTotalSmokeBombsOwned()), 5000);
   },
 
   computed: {

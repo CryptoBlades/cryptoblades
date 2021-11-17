@@ -1022,8 +1022,8 @@ export default Vue.extend({
           id: 1,
           type: 'SmokeBomb50',
           nftPrice: 0.1,
-          name: '50 Smoke Bombs',
-          description: 'Get new enemies in combat.',
+          name: i18n.t('market.nftList.smokeBomb50'),
+          description: i18n.t('market.nftList.smokeBomb50Desc'),
           image: 'https://seiyria.com/gameicons-font/svg/smoke-bomb.svg'
         },
         {
