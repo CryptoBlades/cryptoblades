@@ -120,7 +120,7 @@
     "renameWeapon": "Rename Weapon",
     "renamePlaceholder": "New Name",
     "isProfanish" : "This name contains profanish words and thus will be displayed as follows:",
-    "changeWeaponSkill" : "Change Weapon's Skill",
+    "changeWeaponSkill" : "Change Weapon's Skin",
     "pickSkin" : "Pick a skin to switch to."
   },
   "weaponIcon":{
@@ -693,5 +693,6 @@
     "fire" : "Fire",
     "lightning" : "Lightning",
     "water" : "Water"
-  }
+  },
+  "copyLink": "Copy link"
 }

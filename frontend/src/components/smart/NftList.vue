@@ -1118,7 +1118,7 @@ export default Vue.extend({
       if (this.isMarket) {
         this.options = [
           {
-            name: 'Copy link',
+            name: i18n.t('copyLink').toString(),
             amount: 0,
             handler: copyNftUrl,
             hasDefaultOption: true,

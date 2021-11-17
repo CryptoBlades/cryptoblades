@@ -507,12 +507,12 @@ export default Vue.extend({
       if(!this.isMarket) {
         this.options = [
           {
-            name: 'Rename',
+            name: i18n.t('characterList.rename').toString(),
             amount: this.haveRename,
             handler: this.openRenameWeapon
           },
           {
-            name: 'Change Cosmetic',
+            name: i18n.t('characterList.changeSkin').toString(),
             amount: this.totalCosmeticChanges,
             handler: this.openChangeSkin,
             hasDefaultOption: true
@@ -521,7 +521,7 @@ export default Vue.extend({
       } else {
         this.options = [
           {
-            name: 'Copy link',
+            name: i18n.t('copyLink').toString(),
             amount: 0,
             handler: copyNftUrl,
             hasDefaultOption: true,

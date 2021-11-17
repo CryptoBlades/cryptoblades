@@ -355,7 +355,7 @@ export default {
       } else {
         this.options = [
           {
-            name: 'Copy link',
+            name: this.$t('copyLink'),
             amount: 0,
             handler: copyNftUrl,
             hasDefaultOption: true,
