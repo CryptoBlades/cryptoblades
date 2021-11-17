@@ -54,6 +54,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     Raid1 public raids;
     IRandoms public randoms;
 
+
     /// @dev how much of a duel's bounty is sent to the rankings pool
     uint8 private _rankingsPoolTaxPercent;
     /// @dev how many times the cost of battling must be wagered to enter the arena
@@ -91,8 +92,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
     /// @dev defender is in a duel that has not finished processing.
-    mapping(uint256 => bool) public characterDefending;
-    /// @dev last ranked season the character was active in
     mapping(uint256 => uint256) public seasonByCharacter;
     /// @dev excess wager by character for when they re-enter the arena
     mapping(uint256 => uint256) public excessWagerByCharacter;
@@ -114,6 +113,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => uint256) private _rankingsPoolByTier;
     /// @dev ranking by tier
     mapping(uint8 => uint256[]) private _rankingByTier;
+    /// @dev defender is in a duel that has not finished processing
+    mapping(uint256 => bool) public characterDefending;
+
+
 
     event NewDuel(
         uint256 indexed attacker,
