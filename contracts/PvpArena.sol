@@ -325,8 +325,38 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function removeCharacterFromArena(uint256 characterID) external restricted {
-        _removeCharacterFromArena(characterID);
+    // This function is used for debugging, remove later.
+    function forceRemoveCharacterFromArena(uint256 characterID) external restricted {
+        require(isCharacterInArena(characterID), "Character not in arena");
+        Fighter storage fighter = fighterByCharacter[characterID];
+
+        uint256 weaponID = fighter.weaponID;
+        uint256 shieldID = fighter.shieldID;
+
+        excessWagerByCharacter[characterID] = fighter.wager;
+
+        delete fighterByCharacter[characterID];
+        delete duelByAttacker[characterID];
+
+        characterDefending[characterID] = false;
+
+        _fightersByPlayer[msg.sender].remove(characterID);
+
+        if (_duelQueue.contains(characterID)) {
+            _duelQueue.remove(characterID);
+        }
+
+        uint8 tier = getArenaTier(characterID);
+
+        _fightersByTier[tier].remove(characterID);
+
+        _charactersInArena[characterID] = false;
+        _weaponsInArena[weaponID] = false;
+        _shieldsInArena[shieldID] = false;
+        // setting characters, weapons and shield NFTVAR_BUSY to 0
+        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 0);
+        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 0);
+        shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
     }
 
     /// @dev performs all queued duels
