@@ -322,6 +322,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
     }
 
+    function removeCharacterFromArena(uint256 characterID) external restricted {
+        _removeCharacterFromArena(characterID);
+    }
+
     /// @dev performs all queued duels
     function performDuels(uint256[] calldata attackerIDs) external restricted {
         for (uint256 i = 0; i < attackerIDs.length; i++) {
