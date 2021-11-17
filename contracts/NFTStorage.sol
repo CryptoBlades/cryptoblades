@@ -114,6 +114,16 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     mapping(uint256 => uint256) private transferInsMeta;
     mapping(uint256 => uint256) private transferInSeeds;
 
+    EnumerableSet.UintSet private _supportedChains;
+
+    // Source chain => NFT Type => NFTId of source chain => transfer id
+    mapping(uint256 => mapping(uint256 => mapping(uint256 => uint256))) private _transferInsLog;
+    // Transfer id => minted item Id; no need for NFT type; we can get that from trasnfer in info
+    mapping(uint256 => uint256) private _withdrawFromBridgeLog;
+
+    CryptoBlades public game;
+    uint256 private _bridgeFee;
+    
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTTransferOutRequest(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -150,6 +160,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         _chainPrefix[66] = "OKEX";
 
         storageEnabled = false;
+    }
+
+    function migrateTo_56837f7(CryptoBlades _game) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        game = _game;
     }
 
 
@@ -273,10 +289,9 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         EnumerableSet.UintSet storage storedTokens = storedItems[msg.sender][address(_tokenAddress)];
 
-        uint256 index = 0;
         for (uint256 i = 0; i < storedTokens.length(); i++) {
             uint256 id = storedTokens.at(i);
-                tokens[index++] = id;
+                tokens[i] = id;
         }
     }
 
@@ -356,10 +371,26 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         return _bridgeEnabled[chainId];
     }
 
+    function getEnabledChainsForBridging() public view  returns (uint256[] memory chainIds) {
+        uint256 amount = _supportedChains.length();
+        chainIds = new uint256[](amount);
+
+        for (uint256 i = 0; i < amount; i++) {
+            uint256 id = _supportedChains.at(i);
+                chainIds[i] = id;
+        }
+    }
+
     
     function toggleChainBridgeEnabled(uint256 chainId, string memory prefix, bool enable) public restricted {
         _bridgeEnabled[chainId] = enable;
         _chainPrefix[chainId] = prefix;
+
+        if(enable) {
+            _supportedChains.add(chainId);
+        } else {
+            _supportedChains.remove(chainId);
+        }
     }
 
     // Player requests to bridge an item
@@ -376,6 +407,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         noPendingBridge()
         canStore()
     {
+        game.payContractTokenOnly(msg.sender, _bridgeFee);
         transferOuts[++_transfersOutCount] = TransferOut(msg.sender, address(_tokenAddress), block.number, 0, _id, targetChain, 1);
         transferOutOfPlayers[msg.sender] = _transfersOutCount;
         transferOutOfNFTs[address(_tokenAddress)][_id] = _transfersOutCount;
@@ -402,10 +434,9 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         EnumerableSet.UintSet storage storedTokens = receivedNFTs[msg.sender];
 
-        uint256 index = 0;
         for (uint256 i = 0; i < storedTokens.length(); i++) {
             uint256 id = storedTokens.at(i);
-                tokens[index++] = id;
+                tokens[i] = id;
         }
     }
 
@@ -448,6 +479,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         nftChainIds[nftTypeToAddress[transferIn.nftType]][mintedItem] = buildChainId(transferIn.sourceChain, transferIn.sourceId);
     
+        _withdrawFromBridgeLog[bridgedNFT] = mintedItem;
+
         emit NFTWithdrawnFromBridge(transferIn.owner, bridgedNFT, transferIn.nftType, mintedItem);
     }
 
@@ -480,6 +513,14 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         chainId = nftChainIds[nftAddress][nftId];
     }
 
+    function setBridgeFee(uint256 newFee) external restricted {
+        _bridgeFee = newFee;
+    }
+
+     function getBridgeFee() public view returns (uint256){
+        return _bridgeFee;
+    }
+
     // Bot stuff
     function botEnabled() public view returns (bool) {
         return _botEnabled;
@@ -503,7 +544,11 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     // Transfer request of a player if any (only active one). Not bot... will move up
     function getBridgeTransfer() public view returns (uint256) {
-        return transferOutOfPlayers[msg.sender];
+        return getBridgeTransferOfPlayer(msg.sender);
+    }
+
+     function getBridgeTransferOfPlayer(address player) public view returns (uint256) {
+        return transferOutOfPlayers[player];
     }
 
     function getBridgeTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint256, uint256, uint8) {
@@ -527,6 +572,13 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         transferOut.status = status;
         transferOut.lastUpdateBlock = block.number;
 
+        if(status == TRANSFER_OUT_STATUS_DONE) {
+            TransferOut memory transferOut = transferOuts[bridgeTransferId];
+            storedItems[transferOut.owner][transferOut.nftAddress].remove(transferOut.nftId);
+            allStoredItems[transferOut.nftAddress].remove(transferOut.nftId);
+            delete storedItemsOwners[transferOut.nftAddress][transferOut.nftId];
+        }
+
         emit NFTTransferUpdate(bridgeTransferId, status, forced);
     }
 
@@ -539,7 +591,13 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         transferInsMeta[_transferInsAt] = metaData;
         transferInSeeds[_transferInsAt] = seed;
 
+        _transferInsLog[sourceChain][nftType][sourceId] = _transferInsAt;
         emit TransferedIn(receiver, nftType, sourceChain, sourceId);
+    }
+
+    // To know if it actually made it
+    function getTransferInFromLog(uint256 sourceChain, uint8 nftType, uint256 sourceId) public view returns (uint256) {
+        return  _transferInsLog[sourceChain][nftType][sourceId];
     }
 
     function packedWeaponsData(uint256 weaponId) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {

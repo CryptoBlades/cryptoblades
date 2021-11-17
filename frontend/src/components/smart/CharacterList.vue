@@ -2,41 +2,42 @@
   <div>
     <div class="filters row mt-2 pl-2" v-if="showFilters" @change="saveFilters()">
       <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-        <strong>Level</strong>
+        <strong>{{$t('characterList.level')}}</strong>
         <select class="form-control" v-model="levelFilter">
           <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
-            {{ x ? `${x} - ${x + 9}` : 'Any' }}
+            {{ x ? `${x} - ${x + 9}` : $t('characterList.sorts.any') }}
           </option>
         </select>
       </div>
 
       <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-        <strong>Element</strong>
+        <strong>{{$t('characterList.element')}}</strong>
         <select class="form-control" v-model="elementFilter">
-          <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
+          <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+          :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('characterList.sorts.any') }}</option>
         </select>
       </div>
 
       <template v-if="isMarket">
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>Min Price</strong>
+          <strong>{{$t('characterList.minPrice')}}</strong>
           <input class="form-control" type="number" v-model.trim="minPriceFilter" :min="0" placeholder="Min" />
         </div>
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>Max Price</strong>
+          <strong>{{$t('characterList.maxPrice')}}</strong>
           <input class="form-control" type="number" v-model.trim="maxPriceFilter" :min="0" placeholder="Max" />
         </div>
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>Sort</strong>
+          <strong>{{$t('characterList.sort')}}</strong>
           <select class="form-control" v-model="priceSort">
-            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
+            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('characterList.sorts.any') }}</option>
           </select>
         </div>
       </template>
 
       <b-button variant="primary" class="clear-filters-button mb-3" @click="clearFilters" >
           <span>
-            Clear Filters
+            {{$t('characterList.clearFilters')}}
           </span>
         </b-button>
     </div>
@@ -64,25 +65,26 @@
     <b-modal class="centered-modal" ref="character-rename-modal"
       @ok="renameCharacterCall">
       <template #modal-title>
-        Rename Character
+        {{$t('characterList.renameCharacter')}}
       </template>
       <b-form-input type="string"
-        class="modal-input" v-model="characterRename" placeholder="New Name" />
+        class="modal-input" v-model="characterRename" :placeholder="$t('characterList.newName')" />
       <span v-if="characterRename !== '' && (characterRename.length < 2 || characterRename.length > 24)">
-        Name must be 2 - 24 characters long.
+        {{$t('characterList.renameCharacterLengthWarning')}}
       </span>
       <span v-if="isRenameProfanish">
-        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+        {{$t('characterList.renameCharacterProfanityWarning')}}
+         <em>{{cleanRename}}</em>
       </span>
     </b-modal>
 
     <b-modal class="centered-modal" ref="character-change-trait-modal"
       @ok="changeCharacterTraitCall">
       <template #modal-title>
-        Change Character's Trait
+        {{$t('characterList.changeCharacterTrait')}}
       </template>
-      <span >
-        Pick a trait to switch to.
+      <span>
+        {{$t('characterList.pickTrait')}}
       </span>
       <select class="form-control" v-model="targetTrait">
         <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
@@ -92,10 +94,10 @@
     <b-modal class="centered-modal" ref="character-change-skin-modal"
       @ok="changeCharacterSkinCall">
       <template #modal-title>
-        Change Character's Skin
+        {{$t('characterList.changeCharacterSkin')}}
       </template>
       <span >
-        Pick a skin to switch to.
+        {{$t('characterList.pickSkin')}}
       </span>
       <select class="form-control" v-model="targetSkin">
         <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
@@ -111,11 +113,12 @@ import CharacterArt from '../CharacterArt.vue';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import Events from '@/events';
+import i18n from '@/i18n';
 
 const sorts = [
-  { name: 'Any', dir: '' },
-  { name: 'Price: Low -> High', dir: 1 },
-  { name: 'Price: High -> Low', dir: -1 },
+  { name: i18n.t('characterList.sorts.any'), dir: '' },
+  { name: i18n.t('characterList.sorts.lowToHigh'), dir: 1 },
+  { name: i18n.t('characterList.sorts.highToLow'), dir: -1 },
 ];
 
 export default {
@@ -331,17 +334,17 @@ export default {
     updateOptions() {
       this.options = [
         {
-          name: 'Rename',
+          name: this.$t('characterList.rename'),
           amount: this.haveRename,
           handler: this.openRenameCharacter
         },
         {
-          name: 'Change Trait',
+          name: this.$t('characterList.changeTrait'),
           amount: this.totalTraitChanges,
           handler: this.openChangeTrait
         },
         {
-          name: 'Change Skin',
+          name: this.$t('characterList.changeSkin'),
           amount: this.totalCosmeticChanges,
           handler: this.openChangeSkin,
           hasDefaultOption: true,
@@ -431,8 +434,8 @@ export default {
   },
 
   async mounted() {
-    this.levelFilter = localStorage.getItem('character-levelfilter') || '';
-    this.elementFilter = localStorage.getItem('character-elementfilter') || '';
+    this.levelFilter = sessionStorage.getItem('character-levelfilter') || '';
+    this.elementFilter = sessionStorage.getItem('character-elementfilter') || '';
     if(this.isMarket) {
       this.priceSort = sessionStorage.getItem('character-price-order') || '';
       this.minPriceFilter = sessionStorage.getItem('character-price-minfilter') || '';

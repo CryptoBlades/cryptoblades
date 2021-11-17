@@ -301,10 +301,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint64(maxStamina * secondsPerStamina);
     }
 
-    function getFightDataAndDrainStamina(uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
+    function getFightDataAndDrainStamina(address fighter,
+        uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
+        require(fighter == ownerOf(id));
         Character storage char = tokens[id];
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
-        require(allowNegativeStamina || staminaPoints >= amount, "Not enough stamina!");
+        require((staminaPoints > 0 && allowNegativeStamina) // we allow going into negative, but not starting negative
+            || staminaPoints >= amount, "Not enough stamina!");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp + _randomCharacterSeed[id]; // playing on stamina to change targets without having to jump contracts
@@ -323,10 +326,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         raidsDone[id] = raidsDone[id] + 1;
         raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
         gainXp(id, xp);
-    }
-
-    function canRaid(address user, uint256 id) public view returns (bool) {
-        return ownerOf(id) == user && getStaminaPoints(id) > 0;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
