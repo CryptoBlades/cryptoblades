@@ -2,8 +2,9 @@
   <div>
     <b-dropdown right no-caret class="options-dropdown">
       <template slot="button-content"><b-icon-three-dots/></template>
-      <b-dropdown-item :disabled="isDisabled(option)" v-for="option in options" :key="option.name" @click="option.handler(nftId)">
-        {{option.name}} ({{option.amount}} {{$t('nftOptionsDropdown.left')}})
+      <b-dropdown-item :disabled="isDisabled(option)" v-for="option in options" :key="option.name"
+      @click="nftType ? option.handler(nftId, nftType) : option.handler(nftId)">
+        {{option.name}} <span v-if="!option.noAmount">({{option.amount}} {{$t('nftOptionsDropdown.left')}})</span>
       </b-dropdown-item>
     </b-dropdown>
   </div>
@@ -16,8 +17,9 @@ import { PropType } from 'vue/types/options';
 export interface NftOption {
   name: string;
   amount: number;
-  handler: (id: number | string) => any;
+  handler: (id: number | string, type?: string) => any;
   hasDefaultOption?: boolean;
+  noAmount?: boolean;
 }
 
 export default Vue.extend({
@@ -31,6 +33,10 @@ export default Vue.extend({
     nftId: {
       type: Number,
       default: null
+    },
+    nftType: {
+      type: String,
+      default: '',
     }
   },
 

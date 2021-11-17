@@ -54,7 +54,7 @@
           <slot name="above" :character="c"></slot>
         </div>
         <slot name="sold" :character="c"></slot>
-        <nft-options-dropdown v-if="showNftOptions" :nftId="c.id" :options="options" class="nft-options"/>
+        <nft-options-dropdown v-if="showNftOptions" :nftType="'character'" :nftId="c.id" :options="options" class="nft-options"/>
         <div class="art" >
           <div class="animation" />
           <CharacterArt :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(c.id) : '']" :character="c" :isMarket="isMarket"/>
@@ -114,6 +114,7 @@ import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import Events from '@/events';
 import i18n from '@/i18n';
+import { copyNftUrl } from '@/utils/common';
 
 const sorts = [
   { name: i18n.t('characterList.sorts.any'), dir: '' },
@@ -332,24 +333,36 @@ export default {
     },
 
     updateOptions() {
-      this.options = [
-        {
-          name: this.$t('characterList.rename'),
-          amount: this.haveRename,
-          handler: this.openRenameCharacter
-        },
-        {
-          name: this.$t('characterList.changeTrait'),
-          amount: this.totalTraitChanges,
-          handler: this.openChangeTrait
-        },
-        {
-          name: this.$t('characterList.changeSkin'),
-          amount: this.totalCosmeticChanges,
-          handler: this.openChangeSkin,
-          hasDefaultOption: true,
-        },
-      ];
+      if(!this.isMarket) {
+        this.options = [
+          {
+            name: this.$t('characterList.rename'),
+            amount: this.haveRename,
+            handler: this.openRenameCharacter
+          },
+          {
+            name: this.$t('characterList.changeTrait'),
+            amount: this.totalTraitChanges,
+            handler: this.openChangeTrait
+          },
+          {
+            name: this.$t('characterList.changeSkin'),
+            amount: this.totalCosmeticChanges,
+            handler: this.openChangeSkin,
+            hasDefaultOption: true,
+          },
+        ];
+      } else {
+        this.options = [
+          {
+            name: 'Copy link',
+            amount: 0,
+            handler: copyNftUrl,
+            hasDefaultOption: true,
+            noAmount: true
+          },
+        ];
+      }
     },
 
     openRenameCharacter(id) {

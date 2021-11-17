@@ -488,7 +488,7 @@ export default {
 
 .id {
   top: 8px;
-  right: 10px;
+  left: 30px;
   font-style: italic;
 }
 

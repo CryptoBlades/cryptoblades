@@ -66,7 +66,7 @@
         "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
-        <nft-options-dropdown v-if="showNftOptions" :nftId="weapon.id" :options="options" class="nft-options"/>
+        <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" class="nft-options"/>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
         </div>
@@ -116,6 +116,7 @@ import { BModal } from 'bootstrap-vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import i18n from '@/i18n';
+import { copyNftUrl } from '@/utils/common';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 
@@ -503,20 +504,32 @@ export default Vue.extend({
     },
 
     updateOptions() {
-      this.options = [
-        {
-          name: 'Rename',
-          amount: this.haveRename,
-          handler: this.openRenameWeapon
-        },
-        {
-          name: 'Change Cosmetic',
-          amount: this.totalCosmeticChanges,
-          handler: this.openChangeSkin,
-          hasDefaultOption: true,
-        },
-      ];
-    }
+      if(!this.isMarket) {
+        this.options = [
+          {
+            name: 'Rename',
+            amount: this.haveRename,
+            handler: this.openRenameWeapon
+          },
+          {
+            name: 'Change Cosmetic',
+            amount: this.totalCosmeticChanges,
+            handler: this.openChangeSkin,
+            hasDefaultOption: true
+          },
+        ];
+      } else {
+        this.options = [
+          {
+            name: 'Copy link',
+            amount: 0,
+            handler: copyNftUrl,
+            hasDefaultOption: true,
+            noAmount: true
+          },
+        ];
+      }
+    },
   },
 
   async mounted() {
