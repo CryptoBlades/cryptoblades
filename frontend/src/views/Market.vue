@@ -58,6 +58,7 @@
                 :showFavoriteToggle="false"
                 :canFavorite="false"
                 :isMarket="true"
+                :showNftOptions="true"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
@@ -96,6 +97,7 @@
                 :characterIds="allSearchResults"
                 :showLimit="characterShowLimit"
                 :isMarket="true"
+                :showNftOptions="true"
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
@@ -137,6 +139,7 @@
                 :showReforgedToggle="false"
                 :showFavoriteToggle="false"
                 :isMarket="true"
+                :showNftOptions="true"
                 v-model="selectedNftId"
                 :canFavorite="false">
 
@@ -319,6 +322,7 @@
                 :canFavorite="false"
                 :weaponIds="searchResults"
                 :isMarket="true"
+                :showNftOptions="true"
                 v-model="selectedNftId">
 
                 <template #above="{ weapon: { id } }">
@@ -356,6 +360,7 @@
                 :showGivenCharacterIds="true"
                 :characterIds="searchResults"
                 :isMarket="true"
+                :showNftOptions="true"
                 v-model="selectedNftId">
 
                 <template #above="{ character: { id } }">
@@ -398,6 +403,7 @@
                 :showLimit="shieldShowLimit"
                 :isMarket="true"
                 v-model="selectedNftId"
+                :showNftOptions="true"
                 :canFavorite="false">
 
                 <template #above="{ nft: { id } }">

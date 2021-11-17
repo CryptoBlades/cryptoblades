@@ -281,6 +281,7 @@
           @click="onNftClick(nft.type, nft.id)"
           @contextmenu="canFavorite && toggleFavorite($event, nft.type, nft.id)"
         >
+          <nft-options-dropdown v-if="showNftOptions" :nftType="nft.type" :nftId="nft.id" :options="options" class="nft-options"/>
           <nft-icon :favorite="isFavorite(nft.type, nft.id)" :nft="nft" :isShop="isShop"/>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :nft="nft"></slot>
@@ -312,11 +313,13 @@ import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
 import { IState } from '@/interfaces';
 import { BModal } from 'bootstrap-vue';
-import {fromWeiEther} from '@/utils/common';
+import {copyNftUrl, fromWeiEther} from '@/utils/common';
 import _ from 'lodash';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
 import BigNumber from 'bignumber.js';
 import i18n from '@/i18n';
+import { NftOption } from '../NftOptionsDropdown.vue';
+import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 
 interface Land {
   tier: string,
@@ -379,6 +382,7 @@ interface Data {
   chunkIdFilter: string;
   currentPage: number;
   totalItemsCount: number;
+  options: NftOption[];
 }
 
 export interface NftIdType {
@@ -508,6 +512,10 @@ export default Vue.extend({
     isLandTab: {
       type: Boolean,
       default: false
+    },
+    showNftOptions: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -562,13 +570,15 @@ export default Vue.extend({
       tierFilter: '',
       chunkIdFilter: '',
       currentPage: 1,
-      totalItemsCount: 0
+      totalItemsCount: 0,
+      options: []
     } as Data;
   },
 
   components: {
     CurrencyConverter,
-    NftIcon
+    NftIcon,
+    NftOptionsDropdown
   },
 
   computed: {
@@ -1102,11 +1112,26 @@ export default Vue.extend({
     },
     itemDescriptionHtml(item: SkillShopListing): string {
       return item.name + '<br>' + item.description;
-    }
+    },
+
+    updateOptions() {
+      if (this.isMarket) {
+        this.options = [
+          {
+            name: i18n.t('copyLink').toString(),
+            amount: 0,
+            handler: copyNftUrl,
+            hasDefaultOption: true,
+            noAmount: true
+          },
+        ];
+      }
+    },
   },
 
   async mounted() {
     this.checkStorageFavorite();
+    this.updateOptions();
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());
 
@@ -1254,6 +1279,12 @@ export default Vue.extend({
   cursor: pointer;
   position: relative;
   overflow: hidden;
+}
+
+.nft-options {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 .centered-text-div {
