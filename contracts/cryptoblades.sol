@@ -411,7 +411,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         return getTargetsInternal(
             getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
-            characters.getTimestampForTargets(char),
+            characters.getStaminaTimestamp(char),
             now / 1 hours
         );
     }

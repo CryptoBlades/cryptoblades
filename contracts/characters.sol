@@ -113,7 +113,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
-    mapping(uint256 => uint16) private _randomCharacterSeed; 
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -165,14 +164,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function getCosmeticsSeed(uint256 id) public view noFreshLookup(id) returns (uint256) {
         CharacterCosmetics memory cc = cosmetics[id];
         return cc.seed;
-    }
-
-    function getRandomSeed(uint256 id) public view returns (uint64) {
-        return _randomCharacterSeed[id];
-    }
-
-    function setRandomSeed(uint256 id, uint16 newSeed) public restricted {
-        _randomCharacterSeed[id] = newSeed;
     }
 
     function mint(address minter, uint256 seed) public restricted {
@@ -270,8 +261,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokens[id].staminaTimestamp;
     }
 
-    function getTimestampForTargets(uint256 id) public view noFreshLookup(id) returns (uint64) {
-        return tokens[id].staminaTimestamp + _randomCharacterSeed[id];
+    function incrementStaminaTimeStamp(uint256 id, uint256 staminaChange) public restricted {
+        tokens[id].staminaTimestamp += staminaChange;
     }
 
     function setStaminaTimestamp(uint256 id, uint64 timestamp) public restricted {
@@ -310,7 +301,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             || staminaPoints >= amount, "Not enough stamina!");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
-        uint64 preTimestamp = char.staminaTimestamp + _randomCharacterSeed[id]; // playing on stamina to change targets without having to jump contracts
+        uint64 preTimestamp = char.staminaTimestamp;
         
         if(staminaPoints >= maxStamina) { // if stamina full, we reset timestamp and drain from that
             char.staminaTimestamp = uint64(now - getStaminaMaxWait() + drainTime);
