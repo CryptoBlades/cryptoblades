@@ -1,16 +1,16 @@
 <template>
   <div>
     <div class="col-lg-12">
-      <h1 class="text-center">Available Dust</h1>
+      <h1 class="text-center">{{$t('dustBalanceDisplay.availableDust')}}</h1>
       <div class="row">
         <div class="col-lg-3"></div>
         <div class="col-lg-2 dust-container" align="center">
           <div class="dust">
-            LB: <span class="text-warning">15 power per point</span>
+            LB: <span class="text-warning">{{$t('dustBalanceDisplay.lesserPower')}}</span>
             <div class="dust-image1">
             </div>
           </div>
-          <h1 class="text-center">Lesser</h1>
+          <h1 class="text-center">{{$t('dustBalanceDisplay.lesser')}}</h1>
           <div class="boxed">
             <h2>
               <h2>{{getLesserDust()}}</h2>
@@ -19,11 +19,11 @@
         </div>
         <div class="col-lg-2 dust-container" align="center">
           <div class="dust">
-            4B: <span class="text-warning">30 power per point</span>
+            4B: <span class="text-warning">{{$t('dustBalanceDisplay.greaterPower')}}</span>
             <div class="dust-image2">
             </div>
           </div>
-          <h1 class="text-center">Greater</h1>
+          <h1 class="text-center">{{$t('dustBalanceDisplay.greater')}}</h1>
           <div class="boxed">
             <h2>
               <h2>{{getGreaterDust()}}</h2>
@@ -32,11 +32,11 @@
         </div>
         <div class="col-lg-2 dust-container" align="center">
           <div class="dust">
-            5B: <span class="text-warning">75 power per point</span>
+            5B: <span class="text-warning">{{$t('dustBalanceDisplay.powerfulPower')}}</span>
             <div class="dust-image3">
             </div>
           </div>
-          <h1 class="text-center">Powerful</h1>
+          <h1 class="text-center">{{$t('dustBalanceDisplay.powerful')}}</h1>
           <div class="boxed">
             <h2>
               <h2>{{getPowerfulDust()}}</h2>

@@ -3,7 +3,7 @@
     <b-card no-body>
       <div class="outcome" v-if="waitingLeaderboardOutcome">
         <i class="fas fa-spinner fa-spin"></i>
-        Loading...
+        {{$t('leaderboard.loading')}}
       </div>
       <b-tabs pills card vertical>
         <b-tab v-for="leaderboard in leaderboards" :key="leaderboard.key" :title="leaderboard.key">

@@ -8,12 +8,12 @@
         :class="{ 'height-minimized': !showRewardClaimSection }"
       >
         <div class="reward-claim-inner-wrapper">
-          <h1 class="no-margin center-text">Rewards are available!</h1>
-          <p class="center-text">You have:</p>
+          <h1 class="no-margin center-text">{{$t('stake.rewardsAvailable')}}</h1>
+          <p class="center-text">{{$t('stake.have')}}</p>
           <p class="center-text selectable">
             {{ currentRewardEarned.toFixed(18) }} SKILL
           </p>
-          <p class="center-text">to be claimed.</p>
+          <p class="center-text">{{$t('stake.toBeClaimed')}}</p>
           <button
             class="StakeButton claim-button"
             :class="{
@@ -32,14 +32,14 @@
             :class="{ switch_active: isDeposit }"
             @click="isDeposit = true"
           >
-            <span>Stake</span>
+            <span>{{$t('stake.stake')}}</span>
           </button>
           <button
             class="switch"
             :class="{ switch_active: !isDeposit }"
             @click="isDeposit = false"
           >
-            <span>Unstake</span>
+            <span>{{$t('stake.unstake')}}</span>
           </button>
         </div>
       </div>
@@ -50,7 +50,7 @@
               <input
                 class="token-amount-input"
                 inputmode="decimal"
-                title="Token Amount"
+                :title="$t('stake.tokenAmount')"
                 autocomplete="off"
                 autocorrect="off"
                 type="text"
@@ -65,7 +65,7 @@
               <div class="ant-col">{{ stakingTokenName }}</div>
             </div>
             <div class="balance" id="balance" @click="onMAX">
-              wallet: {{ inputSideBalance }}
+              {{$t('stake.wallet')}} {{ inputSideBalance }}
             </div>
           </div>
         </div>
@@ -78,7 +78,7 @@
               <input
                 class="token-amount-input"
                 inputmode="decimal"
-                title="Token Amount"
+                :title="$t('stake.tokenAmount')"
                 autocomplete="off"
                 autocorrect="off"
                 type="text"
@@ -95,7 +95,7 @@
               </div>
             </div>
             <div class="balance" id="balance" @click="onMAX">
-              wallet: {{ outputSideBalance }}
+              {{$t('stake.wallet')}} {{ outputSideBalance }}
             </div>
           </div>
         </div>
@@ -103,10 +103,8 @@
         <p
           class="no-margin spacing-top"
           v-if="isDeposit && stakeData.rewardMinimumStakeTime > 0"
+          v-html="$t('stake.stakeNote', { minimumStakeTimeFormatted})"
         >
-          <span class="bold">NOTE</span>: You will not be able to unstake or
-          claim rewards until {{ minimumStakeTimeFormatted }} has passed since
-          your initial stake.
         </p>
 
         <button
@@ -117,12 +115,12 @@
         >
           <span v-if="loading">
             <!-- <ImageVue :src="'loading.svg'" :size="'45px'" /> -->
-            Loading...
+            {{$t('stake.loading')}}
           </span>
           <span class="gold-text" v-else>
             {{ submitButtonLabel }}
             <b-icon-exclamation-circle class="centered-icon" scale="0.9" v-if="tryingToUnstake"
-              v-tooltip="`Unstaking will lock remaining funds for another ${minimumStakeTimeFormatted}`"/>
+              v-tooltip="$t('stake.lockedNote', {minimumStakeTimeFormatted})"/>
           </span>
         </button>
 
@@ -138,10 +136,10 @@
             Loading...
           </span>
           <span class="gold-text" v-else-if="canStakeUnclaimedRewards">
-            Stake all of unclaimed rewards ({{ formattedSkillRewards }} SKILL)
+            {{$t('stake.stakeAllUnclaimedRewards', {formattedSkillRewards})}}
           </span>
           <span class="gold-text" v-else>
-            No unclaimed rewards to stake
+            {{$t('stake.noUnclaimedRewards')}}
           </span>
         </button>
       </div>
@@ -156,16 +154,6 @@ import { mapActions, mapState } from 'vuex';
 import { formatDurationFromSeconds, secondsToDDHHMMSS } from '../../utils/date-time';
 import { isStakeType } from '../../interfaces/State';
 
-const connectToWalletButtonLabel = 'Connect to wallet ↗';
-const amountIsTooBigButtonLabel = 'Amount is too big';
-const contractIsFullButtonLabel = 'Contract is Full';
-const enterAnAmountButtonLabel = 'Enter an amount';
-const insufficientBalanceButtonLabel = 'Insufficient balance';
-const notEnoughFundsInExitPoolButtonLabel = 'Not enough funds in Exit Pool';
-const waitingButtonLabel = 'Waiting...';
-
-const stakeButtonLabel = 'Stake';
-const unstakeButtonLabel = 'Unstake';
 
 export default {
   props: {
@@ -336,23 +324,23 @@ export default {
     submitButtonLabel() {
       switch (this.currentState) {
       case 'ok':
-        return this.isDeposit ? stakeButtonLabel : unstakeButtonLabel;
+        return this.isDeposit ? this.$t('stake.stakeButtonLabel') : this.$t('stake.unstakeButtonLabel');
       case 'contractFull':
-        return contractIsFullButtonLabel;
+        return this.$t('stake.contractIsFullButtonLabel');
       case 'amountIsTooBig':
-        return amountIsTooBigButtonLabel;
+        return this.$t('stake.amountIsTooBigButtonLabel');
       case 'waiting':
-        return waitingButtonLabel;
+        return this.$t('stake.waitingButtonLabel');
       case 'inputIsZero':
-        return enterAnAmountButtonLabel;
+        return this.$t('stake.enterAnAmountButtonLabel');
       case 'insufficientBalance':
-        return insufficientBalanceButtonLabel;
+        return this.$t('stake.insufficientBalanceButtonLabel');
       case 'notEnoughFundsInExitPool':
-        return notEnoughFundsInExitPoolButtonLabel;
+        return this.$t('stake.notEnoughFundsInExitPoolButtonLabel');
       case 'stakeLocked':
-        return `Sorry, stake is still locked; please wait about ${this.estimatedUnlockTimeLeftFormatted}`;
+        return this.$t('stake.sorryStake', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
-        return connectToWalletButtonLabel;
+        return this.t('stake.connectToWalletButtonLabel');
       }
     },
 
@@ -375,11 +363,11 @@ export default {
     claimRewardButtonLabel() {
       switch (this.rewardClaimState) {
       case 'loading':
-        return 'Loading...';
+        return this.$t('stake.loading');
       case 'rewardLocked':
-        return `Sorry, reward is still locked; please wait about ${this.estimatedUnlockTimeLeftFormatted}`;
+        return this.$t('stake.sorryReward', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
-        return 'Claim reward';
+        return this.$t('stake.claimReward');
       }
     },
 
