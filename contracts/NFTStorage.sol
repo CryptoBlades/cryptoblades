@@ -544,7 +544,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         chainId = nftChainIds[nftAddress][nftId];
     }
 
-    function setNFTChainId(address nftAddress, uint256 nftId, string calldata chainId) external gameAdminRestricted {
+    function setNFTChainId(address nftAddress, uint256 nftId, string calldata chainId, bool forced) external gameAdminRestricted {
+        require(forced || (bytes(nftChainIds[nftAddress][nftId]).length == 0 && nftChainIdsToMintId[nftAddress][chainId] == 0), "NA");
         nftChainIds[nftAddress][nftId] = chainId;
         nftChainIdsToMintId[nftAddress][chainId] = nftId;
     }
