@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./weapons.sol";
 import "./characters.sol";
 import "./NFTMarket.sol";
+import "./Promos.sol";
 import "./WeaponRenameTagConsumables.sol";
 import "./CharacterRenameTagConsumables.sol";
 import "./WeaponCosmetics.sol";
@@ -131,6 +132,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     mapping(uint256 => string) private transferInChainId;
 
+    Promos public promos;
+
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTTransferOutRequest(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -175,6 +178,11 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         game = _game;
     }
 
+    function migrateTo_98bf302(Promos _promos) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        promos = _promos;
+    }
 
     modifier restricted() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "AO");
@@ -231,7 +239,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
      modifier canStore() {
          require(
-            storageEnabled && nftMarket.checkUserBanned(msg.sender) == false,
+            storageEnabled && promos.getBit(msg.sender, promos.BIT_BAD_ACTOR()) == false,
             "storage disabled"
         );
         _;
