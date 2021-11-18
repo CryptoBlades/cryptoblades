@@ -9,11 +9,12 @@
         <img class="product-img" :src="product.thumbnail_url" />
         <div class="product-name">{{ product.name }}</div>
         <b-button
+          :disabled="!product.price"
           variant="primary"
           class="shop-button"
           @click="openAddress(product)">
           <span>
-            Buy ({{ product.price }} SKILL)
+            Buy (<CurrencyConverter v-if="product.price" :skill="convertWeiToSkill(+product.price)" :showValueInSkillOnly="true" :minDecimals="1"/>)
           </span>
         </b-button>
       </li>
@@ -37,11 +38,11 @@
       <b-form-input type="text"
         class="modal-input" v-model="recipient.zip" placeholder="Zip Code" />
       <b-form-select
-        class="modal-input" v-model="recipient.country_code" :options="countries"
+        class="modal-input" v-model="recipient.countryCode" @change="fetchStates" :options="countries"
         text-field="name" value-field="code"></b-form-select>
-        {{ selected_country }}
+        {{ selectedCountry }}
       <b-form-select
-        class="modal-input" v-model="recipient.state_code" :options="states" value-field="code" text-field="name"></b-form-select>
+        class="modal-input" v-if="states.length !== 0" v-model="recipient.stateCode" :options="states" value-field="code" text-field="name"></b-form-select>
     </b-modal>
   </div>
 </template>
@@ -49,70 +50,121 @@
 <script lang="ts">
 import Vue from 'vue';
 import axios from 'axios';
+import { mapActions } from 'vuex';
+import { fromWeiEther } from '@/utils/common';
+import CurrencyConverter from '../../components/CurrencyConverter.vue';
+
+interface Product {
+  id: number,
+  name: string,
+  thumbnail_url: string,
+  price?: number
+}
+
+interface Recipient {
+  name: string;
+  address1: string;
+  city: string;
+  stateCode?: string;
+  countryCode: string;
+  zip: string;
+  phone: string;
+  email: string;
+}
+
+interface Country {
+  name: string;
+  code: string;
+  states?: string[];
+}
+
+interface Data {
+  products: Product[];
+  selectedProduct: Product | undefined;
+  selectedCountry: Country | undefined;
+  countries: Country[];
+  states: string[];
+  recipient: Recipient;
+}
+
+interface StoreMappedActions {
+  getItemPrice(payload: {id: number}): Promise<number>;
+  purchaseMerchandise(payload: {id: number, price: number, amount: number}): Promise<number>;
+}
 
 export default Vue.extend({
-  data() {
-    return {
-      products: '',
-      selected_product: null,
-      selected_country: null,
-      selected_state: null,
-      countries: [],
-      recipient: {
-        name: 'Bob',
-        address1: 'Baker Street 2B',
-        city: 'London',
-        state_code: 'AL',
-        country_code: 'US',
-        zip: '12345',
-        phone: '5512345678',
-        email: 'example@email.com'
-      }
-    };
+  components: {
+    CurrencyConverter
   },
 
-  computed: {
-    states() {
-      return this.countries.find(country => country.code === this.recipient.country_code)?.states;
-    }
+  data() {
+    return {
+      products: [],
+      selectedProduct: undefined,
+      selectedCountry: undefined,
+      countries: [],
+      states: [],
+      recipient: {} as Recipient,
+    } as Data;
   },
 
   methods: {
+    ...mapActions(['getItemPrice', 'purchaseMerchandise']) as StoreMappedActions,
+
     async fetchProducts() {
       const response = await axios.get('http://localhost:2400/products');
       this.products = response.data?.result;
+      for (const product of this.products) {
+        product.price = await this.getItemPrice({id: product.id});
+      }
     },
 
     async fetchCountries() {
       const response = await axios.get('http://localhost:2400/countries');
       this.countries = response.data?.result;
+      this.fetchStates();
     },
 
-    async openAddress(product) {
-      this.$refs['merchandise-address-modal'].show();
-      this.selected_product = product;
+    fetchStates() {
+      this.recipient.stateCode = undefined;
+      this.states = this.countries.find((country: Country) => country.code === this.recipient.countryCode)?.states || [];
+    },
+
+    openAddress(product: Product) {
+      (this.$refs['merchandise-address-modal'] as any).show();
+      this.selectedProduct = product;
     },
 
     async buyItem() {
+      if(!this.selectedProduct) return;
       const printful_payload = {
         recipient: this.recipient,
         items: [
           {
-            sync_variant_id: this.selected_product.id,
+            sync_variant_id: this.selectedProduct.id,
             quantity: 1
           }
         ]
       };
-      // TODO call the blockchain to make the purchase, return the transaction from the blockchain to validate the successful payment in the BE.
-      const response = await axios.post('http://localhost:2400/create_order', printful_payload);
-      console.log(response);
+
+      if(!this.selectedProduct.price) return;
+      await this.purchaseMerchandise({id: this.selectedProduct.id, price: this.selectedProduct.price, amount: 1});
+      this.recipient = {} as Recipient;
+
+      await axios.post('http://localhost:2400/create_order', printful_payload);
+    },
+
+    convertWeiToSkill(wei: string) {
+      return fromWeiEther(wei);
     },
   },
 
   async mounted() {
-    this.fetchProducts();
-    this.fetchCountries();
-  }
+    await this.fetchProducts();
+    await this.fetchCountries();
+  },
+
+
 });
 </script>
 
