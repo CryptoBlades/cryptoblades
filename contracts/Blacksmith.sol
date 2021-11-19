@@ -388,7 +388,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function payCurrency(address payer, uint256 paying, uint256 currency) internal {
         if(currency == 0){
-             game.payContractTokenOnly(payer, paying, false);
+             game.payContractTokenOnly(payer, paying, true);
         }
         else {
             IERC20(currencies[currency]).transferFrom(payer, address(this), paying);

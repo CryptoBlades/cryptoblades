@@ -4,6 +4,7 @@ const Weapons = artifacts.require("Weapons");
 const Characters = artifacts.require("Characters");
 const NFTStorage = artifacts.require("NFTStorage");
 const Promos = artifacts.require("Promos");
+const Blacksmith = artifacts.require("Blacksmith");
 
 module.exports = async function (deployer, network, accounts) {
    const promos = await Promos.deployed();
@@ -12,4 +13,5 @@ module.exports = async function (deployer, network, accounts) {
    
    await upgradeProxy(Characters.address, Characters, { deployer });
    await upgradeProxy(Weapons.address, Weapons, { deployer });
+   await upgradeProxy(Blacksmith.address, Blacksmith, { deployer });
 };
