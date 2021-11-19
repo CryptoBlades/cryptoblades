@@ -70,7 +70,7 @@
             </b-button>
           </div>
           <div class="p-2">
-            <b-button :disabled="selectedNftId === '' || currentTransferNFTId == selectedNftId" variant="primary"
+            <b-button :disabled="selectedNftId === '' || (currentTransferNFTId == selectedNftId && transferStatus != transferStates.restored)" variant="primary"
               @click="withdrawItem()" class="gtag-link-others"
               tagname="click_transfer_bridge">Withdraw from Storage</b-button>
           </div>
@@ -288,7 +288,8 @@ enum transferStates{
   pending = 'Pending',
   processing = 'Processing',
   done = 'DONE',
-  error = 'Error'
+  error = 'Error',
+  restored = 'Restored'
 }
 
 export default Vue.extend({
@@ -516,6 +517,9 @@ export default Vue.extend({
       }
       else if(transfer[6] === '4'){
         this.transferStatus = transferStates.error;
+      }
+      else if(transfer[6] === '5'){
+        this.transferStatus = transferStates.restored;
       }
 
       const currentTransferTokenAddress = transfer[1];
