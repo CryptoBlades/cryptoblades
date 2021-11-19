@@ -16,13 +16,9 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    uint8 public constant STATUS_SUBMITTED = 0; // fresh order waiting
-    uint8 public constant STATUS_CANCELLED = 1; // cancelled before processing (refunded)
-    uint8 public constant STATUS_PROCESSED = 2; // bot has submitted the order to the shop
-    uint8 public constant STATUS_PAUSED = 3; // something happened, can not be refunded
-    uint8 public constant STATUS_ERROR_REFUNDABLE = 4; // something happened, can be refunded
+    uint8 public constant STATUS_PAID = 0;
 
-    //uint256 public constant LINK_ = 1;
+    uint256 public constant LINK_SKILL_TOKEN = 1;
 
     uint256 public constant VAR_ORDERS_ENABLED = 1; // can orders be placed?
     uint256 public constant VAR_TRACK_INCOME = 2; // will income go to payouts?
@@ -122,6 +118,16 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
         return uint8(orderData[orderId] & 0xff);
     }
 
+    function getUserAllowanceRequired(address user, uint256 charge) public view returns (uint256) {
+        uint256 unclaimedSkill = game.getTokenRewardsFor(user);
+        return charge < unclaimedSkill ? 0 : charge-unclaimedSkill;
+    }
+
+    function canUserBeCharged(address user, uint256 charge) public view returns (bool) {
+        uint256 allowanceRequired = getUserAllowanceRequired(user, charge);
+        return IERC20(links[LINK_SKILL_TOKEN]).allowance(user, address(game)) >= allowanceRequired;
+    }
+
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     function recoverToken(address tokenAddress, uint256 amount) external isAdmin {
@@ -150,16 +156,15 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
             itemPrices[items[i]] = usdCents;
     }
 
-    function placeOrder(uint256[] calldata items, uint8[] calldata amounts) external returns (uint256) {
-        require(vars[VAR_ORDERS_ENABLED] != 0
-            || hasRole(GAME_ADMIN,msg.sender),
-            "Cannot place orders right now");
+    function placeOrder(address user, uint256 extraCost, uint256[] calldata items, uint8[] calldata amounts) external restricted
+    returns (uint256) {
+        require(vars[VAR_ORDERS_ENABLED] != 0, "Cannot place orders right now");
 
-        uint256 payingAmount = getPriceOfBasket(items,amounts);
+        uint256 payingAmount = getPriceOfBasket(items,amounts) + extraCost;
 
-        game.payContractTokenOnly(msg.sender, payingAmount, vars[VAR_TRACK_INCOME] != 0);
+        game.payContractTokenOnly(user, payingAmount, vars[VAR_TRACK_INCOME] != 0);
             
-        orderBuyer[nextOrderID] = msg.sender;
+        orderBuyer[nextOrderID] = user;
         orderData[nextOrderID] = now << 8; // lowest 8 bits is status (default 0)
 
         for(uint i = 0; i < items.length; i++) {
@@ -167,7 +172,7 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
         }
         orderPaidAmount[nextOrderID] = payingAmount;
 
-        emit OrderPlaced(msg.sender, nextOrderID);
+        emit OrderPlaced(user, nextOrderID);
         return nextOrderID++;
     }
 
@@ -190,10 +195,14 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
             _setOrderStatus(orderIds[i], status);
     }
 
-    function processOrders(uint256[] calldata orderIds, uint256 _lowestUnprocessedOrderID) external restricted {
-        for(uint i = 0; i < orderIds.length; i++)
-            _setOrderStatus(orderIds[i], STATUS_PROCESSED);
-        lowestUnprocessedOrderID = _lowestUnprocessedOrderID;
+    function setVar(uint256 varField, uint256 value) external restricted {
+        vars[varField] = value;
+    }
+
+    function setVars(uint256[] calldata varFields, uint256[] calldata values) external restricted {
+        for(uint i = 0; i < varFields.length; i++) {
+            vars[varFields[i]] = values[i];
+        }
     }
 
     /* ========== MODIFIERS ========== */
