@@ -13,7 +13,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 .button {
   border: 2px solid #6c5f38;
   border-radius: 0.1em;

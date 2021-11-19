@@ -1,0 +1,206 @@
+/*OSWALD*/
+@font-face {
+  font-family: 'Oswald';
+  font-weight: 200;
+  font-display: swap;
+  src: url('../assets/fonts/OswaldExtraLight.eot');
+  src: url('../assets/fonts/OswaldExtraLight.eot') format('embedded-opentype'),
+  url('../assets/fonts/OswaldExtraLight.woff2') format('woff2'),
+  url('../assets/fonts/OswaldExtraLight.woff') format('woff'),
+  url('../assets/fonts/OswaldExtraLight.ttf') format('truetype'),
+  url('../assets/fonts/OswaldExtraLight.svg#OswaldExtraLight') format('svg');
+}
+@font-face {
+  font-family: 'Oswald';
+  font-weight: 300;
+  font-display: swap;
+  src: url('../assets/fonts/OswaldLight.eot');
+  src: url('../assets/fonts/OswaldLight.eot') format('embedded-opentype'),
+  url('../assets/fonts/OswaldLight.woff2') format('woff2'),
+  url('../assets/fonts/OswaldLight.woff') format('woff'),
+  url('../assets/fonts/OswaldLight.ttf') format('truetype'),
+  url('../assets/fonts/OswaldLight.svg#OswaldLight') format('svg');
+}
+
+@font-face {
+  font-family: 'Oswald';
+  font-weight: normal;
+  font-display: swap;
+  src: url('../assets/fonts/OswaldRegular.eot');
+  src: url('../assets/fonts/OswaldRegular.eot') format('embedded-opentype'),
+  url('../assets/fonts/OswaldRegular.woff2') format('woff2'),
+  url('../assets/fonts/OswaldRegular.woff') format('woff'),
+  url('../assets/fonts/OswaldRegular.ttf') format('truetype'),
+  url('../assets/fonts/OswaldRegular.svg#OswaldRegular') format('svg');
+}
+
+@font-face {
+  font-family: 'Oswald';
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/OswaldMedium.eot');
+  src: url('../assets/fonts/OswaldMedium.eot') format('embedded-opentype'),
+  url('../assets/fonts/OswaldMedium.woff2') format('woff2'),
+  url('../assets/fonts/OswaldMedium.woff') format('woff'),
+  url('../assets/fonts/OswaldMedium.ttf') format('truetype'),
+  url('../assets/fonts/OswaldMedium.svg#OswaldMedium') format('svg');
+}
+
+@font-face {
+  font-family: 'Oswald';
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/OswaldSemiBold.eot');
+  src: url('../assets/fonts/OswaldSemiBold.eot') format('embedded-opentype'),
+  url('../assets/fonts/OswaldSemiBold.woff2') format('woff2'),
+  url('../assets/fonts/OswaldSemiBold.woff') format('woff'),
+  url('../assets/fonts/OswaldSemiBold.ttf') format('truetype'),
+  url('../assets/fonts/OswaldSemiBold.svg#OswaldSemiBold') format('svg');
+}
+
+@font-face {
+  font-family: 'Oswald';
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/OswaldSemiBold.eot');
+  src: url('../assets/fonts/OswaldSemiBold.eot') format('embedded-opentype'),
+  url('../assets/fonts/OswaldSemiBold.woff2') format('woff2'),
+  url('../assets/fonts/OswaldSemiBold.woff') format('woff'),
+  url('../assets/fonts/OswaldSemiBold.ttf') format('truetype'),
+  url('../assets/fonts/OswaldSemiBold.svg#OswaldSemiBold') format('svg');
+}
+
+/*ROBOTO*/
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 200;
+  font-display: swap;
+  src: url('../assets/fonts/RobotoThin.eot');
+  src: url('../assets/fonts/RobotoThin.eot') format('embedded-opentype'),
+  url('../assets/fonts/RobotoThin.woff2') format('woff2'),
+  url('../assets/fonts/RobotoThin.woff') format('woff'),
+  url('../assets/fonts/RobotoThin.ttf') format('truetype'),
+  url('../assets/fonts/RobotoThin.svg#RobotoThin') format('svg');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 300;
+  font-display: swap;
+  src: url('../assets/fonts/RobotoLight.eot');
+  src: url('../assets/fonts/RobotoLight.eot') format('embedded-opentype'),
+  url('../assets/fonts/RobotoLight.woff2') format('woff2'),
+  url('../assets/fonts/RobotoLight.woff') format('woff'),
+  url('../assets/fonts/RobotoLight.ttf') format('truetype'),
+  url('../assets/fonts/RobotoLight.svg#RobotoLight') format('svg');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/RobotoRegular.eot');
+  src: url('../assets/fonts/RobotoRegular.eot') format('embedded-opentype'),
+  url('../assets/fonts/RobotoRegular.woff2') format('woff2'),
+  url('../assets/fonts/RobotoRegular.woff') format('woff'),
+  url('../assets/fonts/RobotoRegular.ttf') format('truetype'),
+  url('../assets/fonts/RobotoRegular.svg#RobotoRegular') format('svg');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/RobotoMedium.eot');
+  src: url('../assets/fonts/RobotoMedium.eot') format('embedded-opentype'),
+  url('../assets/fonts/RobotoMedium.woff2') format('woff2'),
+  url('../assets/fonts/RobotoMedium.woff') format('woff'),
+  url('../assets/fonts/RobotoMedium.ttf') format('truetype'),
+  url('../assets/fonts/RobotoMedium.svg#RobotoMedium') format('svg');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/RobotoBold.eot');
+  src: url('../assets/fonts/RobotoBold.eot') format('embedded-opentype'),
+  url('../assets/fonts/RobotoBold.woff2') format('woff2'),
+  url('../assets/fonts/RobotoBold.woff') format('woff'),
+  url('../assets/fonts/RobotoBold.ttf') format('truetype'),
+  url('../assets/fonts/RobotoBold.svg#RobotoBold') format('svg');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 800;
+  font-display: swap;
+  src: url('../assets/fonts/RobotoBlack.eot');
+  src: url('../assets/fonts/RobotoBlack.eot') format('embedded-opentype'),
+  url('../assets/fonts/RobotoBlack.woff2') format('woff2'),
+  url('../assets/fonts/RobotoBlack.woff') format('woff'),
+  url('../assets/fonts/RobotoBlack.ttf') format('truetype'),
+  url('../assets/fonts/RobotoBlack.svg#RobotoBlack') format('svg');
+}
+
+/*TRAJAN*/
+@font-face {
+  font-family: 'Trajan';
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/TrajanProRegular.eot');
+  src: url('../assets/fonts/TrajanProRegular.eot') format('embedded-opentype'),
+  url('../assets/fonts/TrajanProRegular.woff2') format('woff2'),
+  url('../assets/fonts/TrajanProRegular.woff') format('woff'),
+  url('../assets/fonts/TrajanProRegular.ttf') format('truetype'),
+  url('../assets/fonts/TrajanProRegular.svg#TrajanProRegular') format('svg');
+}
+
+@font-face {
+  font-family: 'Trajan';
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/TrajanProBold.eot');
+  src: url('../assets/fonts/TrajanProBold.eot') format('embedded-opentype'),
+  url('../assets/fonts/TrajanProBold.woff2') format('woff2'),
+  url('../assets/fonts/TrajanProBold.woff') format('woff'),
+  url('../assets/fonts/TrajanProBold.ttf') format('truetype'),
+  url('../assets/fonts/TrajanProBold.svg#TrajanProBold') format('svg');
+}
+
+/*ROBOTO CONDENSE*/
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-weight: 300;
+  font-display: swap;
+  src: url('../assets/fonts/RobotoCondensedLight.eot');
+  src: url('../assets/fonts/RobotoCondensedLight.eot') format('embedded-opentype'),
+  url('../assets/fonts/RobotoCondensedLight.woff2') format('woff2'),
+  url('../assets/fonts/RobotoCondensedLight.woff') format('woff'),
+  url('../assets/fonts/RobotoCondensedLight.ttf') format('truetype'),
+  url('../assets/fonts/RobotoCondensedLight.svg#RobotoCondensedLight') format('svg');
+}
+
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/RobotoCondensedRegular.eot');
+  src: url('../assets/fonts/RobotoCondensedRegular.eot') format('embedded-opentype'),
+  url('../assets/fonts/RobotoCondensedRegular.woff2') format('woff2'),
+  url('../assets/fonts/RobotoCondensedRegular.woff') format('woff'),
+  url('../assets/fonts/RobotoCondensedRegular.ttf') format('truetype'),
+  url('../assets/fonts/RobotoCondensedRegular.svg#RobotoCondensedRegular') format('svg');
+}
+
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/RobotoCondensedBold.eot');
+  src: url('../assets/fonts/RobotoCondensedBold.eot') format('embedded-opentype'),
+  url('../assets/fonts/RobotoCondensedBold.woff2') format('woff2'),
+  url('../assets/fonts/RobotoCondensedBold.woff') format('woff'),
+  url('../assets/fonts/RobotoCondensedBold.ttf') format('truetype'),
+  url('../assets/fonts/RobotoCondensedBold.svg#RobotoCondensedBold') format('svg');
+}

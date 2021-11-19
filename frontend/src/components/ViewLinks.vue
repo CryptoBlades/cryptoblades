@@ -1,52 +1,43 @@
 <template>
   <b-navbar-nav>
-
-    <router-link :to="{ name: 'plaza' }" exact class="nav-link"
-    v-if="!featureFlagStakeOnly">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="plaza_screen">{{ $t("viewLink.plaza") }}</span>
-      </li>
-    </router-link>
-
-    <router-link :to="{ name: 'blacksmith' }" exact class="nav-link"   v-if="!featureFlagStakeOnly">
-      <li class="nav-item nav-top-links" >
-        <span class="gtag-link-others" tagname="blacksmith_screen">{{ $t("viewLink.blacksmith") }}</span>
-      </li>
-    </router-link>
-
-    <router-link :to="{ name: 'combat' }" exact class="nav-link"  v-if="!featureFlagStakeOnly">
-      <li class="nav-item nav-top-links" >
-        <span class="gtag-link-others" tagname="combat_screen">{{ $t("viewLink.combat") }}</span>
-      </li>
-    </router-link>
-
-    <router-link :to="{ name: 'raid' }" exact class="nav-link"  v-if="!featureFlagStakeOnly && featureFlagRaid">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="raid_screen">{{ $t("viewLink.raid") }}</span>
-      </li>
-    </router-link>
-
-    <router-link :to="{ name: 'market' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagMarket">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="market_screen">{{ $t("viewLink.market") }}</span>
-      </li>
-    </router-link>
-
-    <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="stake_screen">{{ $t("viewLink.stake") }}</span>
-      </li>
-    </router-link>
-
+    <li class="play-to-earn">
+      <Button mainText="Play-to-earn" route="play-to-earn"/>
+    </li>
+    <li class="character">
+      <router-link :to="{ name: 'character' }" exact class="nav-link">
+        <img src="../assets/new-ui/icon-character.png" alt="character">
+        <div>Character</div>
+      </router-link>
+    </li>
+    <li class="blacksmith">
+      <router-link :to="{ name: 'blacksmith' }" exact class="nav-link">
+        <img src="../assets/new-ui/icon-blacksmith.png" alt="blacksmith">
+        <div>Blacksmith</div>
+      </router-link>
+    </li>
+    <li class="marketplace">
+      <router-link :to="{ name: 'marketplace' }" exact class="nav-link">
+        <img src="../assets/new-ui/icon-balance.png" alt="marketplace">
+        <div>Marketplace</div>
+      </router-link>
+    </li>
+    <li class="leaderboard">
+      <router-link :to="{ name: 'leaderboard' }" exact class="nav-link leaderboard">
+        <img src="../assets/new-ui/icon-leaderboard.png" alt="leaderboard">
+        <div>Leaderboard</div>
+      </router-link>
+    </li>
   </b-navbar-nav>
 </template>
 
 <script>
 import { market as featureFlagMarket, portal as featureFlagPortal } from '../feature-flags';
-
+import Button from '@/components/Button';
 export default {
+  components : {
+    Button
+  },
   inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
-
   computed: {
     featureFlagMarket() {
       return featureFlagMarket;
@@ -59,13 +50,33 @@ export default {
 </script>
 
 <style scoped>
-a {
-  font-weight: bold;
+.navbar-nav {
+  display: flex;
 }
-
-.nav-top-links > span {
-  color : #BFA765;
-  font-size: 1.1em;
-  padding: 0px 5px 0px 5px;
+li {
+  display: inline-block;
+  padding-right: 38px;
+}
+li:last-child {
+  padding-right: 0;
+}
+li .nav-link {
+  font-family: 'Oswald';
+  font-size: 18px;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-align: center;
+}
+li .nav-link img {
+  margin-bottom: 5px;
+}
+.play-to-earn {
+  display: flex;
+  align-items: center;
+}
+.play-to-earn a {
+  border: 1px solid #EDCD90;
+  display: block;
+  padding: 20px;
 }
 </style>

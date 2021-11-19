@@ -9,3 +9,4 @@ report*.json
 .vscode/launch.json
 .vs
 public/abi
+.idea/

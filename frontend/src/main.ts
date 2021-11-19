@@ -11,10 +11,12 @@ import Web3 from 'web3';
 import { createStore } from './store';
 import createRouter from './router';
 
-import App from './App.vue';
-
+import '@/styles/font-face.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
+import '@/styles/global.css';
+
+import App from './App.vue';
 
 import {
   raid as featureFlagRaid,

@@ -13,6 +13,9 @@ import Options from './views/Options.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 
+//new game UI
+import Home from './views/Home.vue';
+
 import {
   raid as featureFlagRaid,
   stakeOnly as featureFlagStakeOnly,
@@ -40,10 +43,19 @@ function createRouter() {
 
   const router = new VueRouter({
     routes: [
-      { path: '/', name: 'plaza', component: Plaza },
+      //new game ui
+      { path: '/', name: 'home', component: Home },
+      { path: '/play-to-earn', name: 'play-to-earn', component: Home },
+      { path: '/character', name: 'character', component: Home },
+      { path: '/character', name: 'character', component: Home },
       { path: '/blacksmith', name: 'blacksmith', component: Blacksmith },
-      { path: '/combat', name: 'combat', component: Combat },
+      { path: '/marketplace', name: 'marketplace', component: Market },
       { path: '/leaderboard', name: 'leaderboard', component: Leaderboard },
+      //end new
+
+      //old
+      { path: '/plaza', name: 'plaza', component: Plaza },
+      { path: '/combat', name: 'combat', component: Combat },
       ...marketRoutes,
       { path: '/stake', name: 'select-stake-type', component: SelectStakeType },
       { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
@@ -51,6 +63,7 @@ function createRouter() {
       { path: '/nft-display', name: 'nft-display', component: NftDisplay },
       { path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true },
       { path: '/bridge', name:'bridge', component: Bridge }
+      //end old
     ]
   });
 

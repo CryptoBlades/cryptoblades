@@ -93,8 +93,18 @@
   transition: opacity .15s;
 }
 
-* {
-  font-family: 'Arial Narrow';
+body {
+  color: #fff;
+  background: #000E29;
+  height: 100vh;
+}
+
+a {
+  color: #fff;
+}
+
+a:hover {
+  color: #EDCD90;
 }
 
 .add-button {

@@ -24,6 +24,8 @@
     "core-js": "^3.6.5",
     "fantastical": "^2.0.1",
     "imagemin": "^7.0.1",
+    "node-sass": "^6.0.1",
+    "sass-loader": "^12.3.0",
     "seedrandom": "^3.0.5",
     "three": "^0.127.0",
     "three-fbx-loader": "^1.0.3",
