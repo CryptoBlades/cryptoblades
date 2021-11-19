@@ -279,20 +279,42 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function performMintWeaponDetailed(address minter,
-        uint16 properties,
-        uint16 stat1, uint16 stat2, uint16 stat3, uint8 level, uint8 amountLB, uint8 amount4B, uint8 amount5B,
-        uint256 cosmeticSeed
+        uint256 metaData,
+        uint256 cosmeticSeed, uint256 tokenID
     ) public minterOnly returns(uint256) {
-        require(amountLB <= 100 && amount4B <= 25 && amount5B <= 10);
 
-        uint256 tokenID = performMintWeapon(minter, properties, stat1, stat2, stat3, cosmeticSeed);
+        uint8 fiveStarBurnPoints = uint8(metaData & 0xFF);
+        uint8 fourStarBurnPoints = uint8((metaData >> 8) & 0xFF);
+        uint8 lowStarBurnPoints = uint8((metaData >> 16) & 0xFF);
+        uint8 level = uint8((metaData >> 24) & 0xFF);
+        uint16 stat3 = uint16((metaData >> 32) & 0xFFFF);
+        uint16 stat2 = uint16((metaData >> 48) & 0xFFFF);
+        uint16 stat1 = uint16((metaData >> 64) & 0xFFFF);
+        uint16 properties = uint16((metaData >> 80) & 0xFFFF);
+
+        require(lowStarBurnPoints <= 100 && fourStarBurnPoints <= 25 &&  fiveStarBurnPoints <= 10);
+
+        if(tokenID == 0){
+            tokenID = performMintWeapon(minter, properties, stat1, stat2, stat3, 0);
+        }
+        else {
+            Weapon storage wp = tokens[tokenID];
+            wp.properties = properties;
+            wp.stat1 = stat1;
+            wp.stat2 = stat2;
+            wp.stat3 = stat3;
+            wp.level = level;
+        }
+        WeaponCosmetics storage wc = cosmetics[tokenID];
+        wc.seed = cosmeticSeed;
+        
         tokens[tokenID].level = level;
         durabilityTimestamp[tokenID] = uint64(now); // avoid chain jumping abuse
         WeaponBurnPoints storage wbp = burnPoints[tokenID];
 
-        wbp.lowStarBurnPoints = amountLB;
-        wbp.fourStarBurnPoints = amount4B;
-        wbp.fiveStarBurnPoints = amount5B;
+        wbp.lowStarBurnPoints = lowStarBurnPoints;
+        wbp.fourStarBurnPoints = fourStarBurnPoints;
+        wbp.fiveStarBurnPoints = fiveStarBurnPoints;
 
         return tokenID;
     }
