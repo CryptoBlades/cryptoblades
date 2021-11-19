@@ -5,6 +5,8 @@ const SkillToken = artifacts.require("SkillToken");
 
 module.exports = async function (deployer, network, accounts) {
   const merch = await upgradeProxy(Merchandise.address, Merchandise, { deployer });
+  const GAME_ADMIN = await merch.GAME_ADMIN();
+  await merch.grantRole(GAME_ADMIN, accounts[0]);
 
   //LINK_SKILL_TOKEN needs to be set manually on mainnets
   if (network === 'development' || network === 'development-fork'
