@@ -13,7 +13,8 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'bsctestnet' || network === 'bsctestnet-fork'
     || network === 'hecotestnet'
     || network === 'okextestnet'
-    || network === 'polygontestnet') {
+    || network === 'polygontestnet'
+    || network === 'avaxtestnet' || network === 'avaxtestnet-fork') {
 
     const LINK_SKILL_TOKEN = await merch.LINK_SKILL_TOKEN();
     const VAR_ORDERS_ENABLED = await merch.VAR_ORDERS_ENABLED();
