@@ -35,13 +35,13 @@
       <div>
         <div class="small-durability-bar"
         :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
-        v-tooltip.bottom="`Durability: ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
-          Repairs 1 point every 50 minutes, durability will be full at: ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
+        v-tooltip.bottom="`${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
+          ${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
       </div>
 
     </div>
 
-    <div class="id">ID {{ weapon.id }}</div>
+    <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
 
     <div class="stats">
       <div v-if="weapon.stat1Value">
@@ -176,7 +176,7 @@ export default {
       }
 
       if(this.weapon.bonusPower > 0) {
-        ttHtml += `<br>Bonus power: ${this.weapon.bonusPower}`;
+        ttHtml += `<br>${this.$t('weaponIcon.bonusPower')} ${this.weapon.bonusPower}`;
       }
 
       return ttHtml;

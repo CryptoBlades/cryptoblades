@@ -1,15 +1,15 @@
 <template>
   <div class="skill-balance-display">
-    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="'Buy SKILL'" @click="showModal">
-      <b-modal size="xl" class="centered-modal " ref="transak-buy" title="BUY SKILL" ok-only>
+    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
+      <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
       <div class="buy-skill-modal">
         <div class="buy-skill-modal-child">
          <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">Buy with Crypto</b-button>
+              <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">{{$t('skillBalanceDisplay.buyWithCrypto')}}</b-button>
         </div>
         <div class="buy-skill-modal-child">
               <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">Buy with Fiat</b-button>
+              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">{{$t('skillBalanceDisplay.buyWithFiat')}}</b-button>
         </div>
       </div>
     </b-modal>
@@ -18,7 +18,7 @@
     </div>
 
     <div class="balance-container">
-      <strong class="mr-2 balance-text">Total Balance</strong>
+      <strong class="mr-2 balance-text">{{$t('skillBalanceDisplay.totalBalance')}}</strong>
       <span class="balance"
         v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
         @mouseover="hover = !isMobile() || true"
@@ -46,6 +46,8 @@ import { toBN, fromWeiEther } from '../../utils/common';
 import { IState } from '@/interfaces';
 import { formatDurationFromSeconds } from '@/utils/date-time';
 import { BModal } from 'bootstrap-vue';
+import i18n from '@/i18n';
+import {TranslateResult} from 'vue-i18n';
 
 type StoreMappedState = Pick<IState, 'skillRewards' | 'skillBalance' | 'inGameOnlyFunds' | 'waxBridgeWithdrawableBnb' | 'waxBridgeTimeUntilLimitExpires'>;
 
@@ -101,16 +103,18 @@ export default Vue.extend({
       return formatDurationFromSeconds(this.waxBridgeTimeUntilLimitExpires);
     },
 
-    bnbClaimTooltip(): string {
+    bnbClaimTooltip(): TranslateResult {
       if(!this.canWithdrawBnb) {
-        return `
-          You have reached your limit for withdrawing BNB from the portal for this period,
-          please wait about ${this.durationUntilLimitPeriodOver}
-          (${this.formattedTotalAvailableBnb} left)
-        `;
+        return i18n.t('skillBalanceDisplay.reachedPortalLimit', {
+          durationUntilLimitPeriodOver : this.durationUntilLimitPeriodOver,
+          formattedTotalAvailableBnb : this.formattedTotalAvailableBnb,
+        });
       }
 
-      return `${this.formattedBnbThatCanBeWithdrawn} of ${this.formattedTotalAvailableBnb} withdrawable from the portal`;
+      return i18n.t('skillBalanceDisplay.withdrawablePortal', {
+        formattedBnbThatCanBeWithdrawn : this.formattedBnbThatCanBeWithdrawn,
+        formattedTotalAvailableBnb : this.formattedTotalAvailableBnb,
+      });
     },
     formattedInGameOnlyFunds(): string {
       const skillBalance = fromWeiEther(this.inGameOnlyFunds);
@@ -124,11 +128,11 @@ export default Vue.extend({
       let html =  toBN(skillBalance).toFixed(4) + ' SKILL';
 
       if(parseFloat(skillRewards) !== 0){
-        html += '<br>+ WITHDRAWABLE ' + toBN(skillRewards).toFixed(4) + ' SKILL';
+        html += i18n.t('skillBalanceDisplay.withdrawable') + toBN(skillRewards).toFixed(4) + ' SKILL';
       }
 
       if(parseFloat(inGameOnlyFundsBalance) !== 0){
-        html += '<br>+ IN GAME ONLY ' + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
+        html += i18n.t('skillBalanceDisplay.igo') + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
       }
 
       return html;

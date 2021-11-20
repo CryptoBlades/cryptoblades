@@ -2,12 +2,12 @@
   <div>
     <div v-if="isShop">
       <div class="centered-text-div" v-if="(!nftIdTypes || nftIdTypes.length === 0)">
-        <span>Nothing to buy at this time</span>
+        <span>{{$t('nftList.nothing')}}</span>
       </div>
       <div class="centered-text-div" v-if="isSpecials && !canPurchaseLand && purchase">
-        <span>You can purchase only one land, your purchase:</span><br/>
-        <span>Tier: {{purchase.tier}}</span><br/>
-        <span v-if="purchase.tier !== '1'">Chunk ID: {{purchase.chunkId}}</span>
+        <span>{{$t('nftList.onlyOne')}}</span><br/>
+        <span>{{$t('nftList.tier')}}: {{purchase.tier}}</span><br/>
+        <span v-if="purchase.tier !== '1'">{{$t('nftList.chunkID')}}: {{purchase.chunkId}}</span>
       </div>
       <div class="centered-text-div" v-if="isSpecials">
         <b-button
@@ -15,14 +15,14 @@
           class="shop-button"
           @click="showMapModal()">
             <span class="gtag-link-others">
-              Show map
+              {{$t('nftList.showMap')}}
             </span>
         </b-button>
       </div>
       <div class="centered-text-div mt-2" v-if="isSpecials && landSaleAllowed && canPurchaseLand">
-        <h4>Currency to buy land with</h4>
+        <h4>{{$t('nftList.currencyToBuy')}}</h4>
         <b-form-select v-model="selectedCurrency" @change="onCurrencyChange()" class="mb-2">
-          <b-form-select-option :value="null" disabled>Please select Currency to buy land with</b-form-select-option>
+          <b-form-select-option :value="null" disabled>{{$t('nftList.select')}}</b-form-select-option>
           <b-form-select-option :value="0">SKILL</b-form-select-option>
           <b-form-select-option :value="1">KING</b-form-select-option>
         </b-form-select>
@@ -43,13 +43,13 @@
             @click="buyItem(nft)">
             <span class="gtag-link-others" v-if="nft.type !== 't1land' && nft.type !== 't2land' && nft.type !== 't3land'
               && nft.type !== 'claimT2Land' && nft.type !== 'claimT3Land'">
-              Buy ({{ nft.nftPrice }} SKILL)
+              {{$t('nftList.buy')}} ({{ nft.nftPrice }} SKILL)
             </span>
             <span class="gtag-link-others" v-else-if="nft.type === 't1land'"
                   v-tooltip.top="{ content: maxPrecisionSkill(t1LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
                   @mouseover="hover = !isMobile() || true"
                   @mouseleave="hover = !isMobile()">
-              Buy (<CurrencyConverter :king="t1LandPrice" :skill="t1LandPrice"
+              {{$t('nftList.buy')}} (<CurrencyConverter :king="t1LandPrice" :skill="t1LandPrice"
                                       :show-value-in-skill-only="selectedCurrency === 0"
                                       :show-value-in-king-only="selectedCurrency === 1"
                                       :max-decimals="2"/>)
@@ -58,7 +58,7 @@
                   v-tooltip.top="{ content: maxPrecisionSkill(t2LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
                   @mouseover="hover = !isMobile() || true"
                   @mouseleave="hover = !isMobile()">
-              Buy (<CurrencyConverter :king="t2LandPrice" :skill="t2LandPrice"
+              {{$t('nftList.buy')}} (<CurrencyConverter :king="t2LandPrice" :skill="t2LandPrice"
                                       :show-value-in-skill-only="selectedCurrency === 0"
                                       :show-value-in-king-only="selectedCurrency === 1"
                                       :max-decimals="2"/>)
@@ -67,36 +67,36 @@
                   v-tooltip.top="{ content: maxPrecisionSkill(t3LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
                   @mouseover="hover = !isMobile() || true"
                   @mouseleave="hover = !isMobile()">
-              Buy (<CurrencyConverter :king="t3LandPrice" :skill="t3LandPrice"
+              {{$t('nftList.buy')}} (<CurrencyConverter :king="t3LandPrice" :skill="t3LandPrice"
                                       :show-value-in-skill-only="selectedCurrency === 0"
                                       :show-value-in-king-only="selectedCurrency === 1"
                                       :max-decimals="2"/>)
             </span>
             <span class="gtag-link-others" v-else-if="nft.type === 'claimT2Land'">
-              Claim Tier 2
+              {{$t('nftList.claim2')}}
             </span>
             <span class="gtag-link-others" v-else-if="nft.type === 'claimT3Land'">
-              Claim Tier 3
+              {{$t('nftList.claim3')}}
             </span>
           </b-button>
         </li>
       </ul>
       <div class="centered-text-div mt-3" v-if="isSpecials && ownedLands.length !== 0">
-        <h4>Your owned {{ownedLands.length > 1 ? "lands" : 'land'}}:</h4>
+        <h4>{{$t('nftList.owned')}} {{ownedLands.length > 1 ? "lands" : 'land'}}:</h4>
         <ul class="list-group raid-details mb-4" v-for="(land, index) in ownedLands" :key="index">
           <li class="list-group-item d-flex justify-content-between align-items-center details-text">
-            Tier
+            {{$t('nftList.tier')}}
             <span class="badge badge-primary badge-pill">{{ land.tier }}</span>
           </li>
           <li v-if="land.chunkId !== '0'" class="list-group-item d-flex justify-content-between align-items-center details-text">
-            ChunkId
+            {{$t('nftList.chunkID')}}
             <span class="badge badge-primary badge-pill">{{ land.chunkId }}</span>
           </li>
         </ul>
       </div>
     </div>
 
-    <b-modal class="map-modal" title="Choose zone" ref="map-modal" size="xl" hide-footer
+    <b-modal class="map-modal" :title="$t('nftList.chooseZone')" ref="map-modal" size="xl" hide-footer
              @hide="clearMapSelections()">
       <div class="w-100 padding-bottom-100">
         <div class="map-grid">
@@ -107,34 +107,34 @@
       </div>
     </b-modal>
 
-    <b-modal class="map-modal" title="Choose zone" ref="t2-claim-map-modal" size="xl" hide-footer
+    <b-modal class="map-modal" :title="$t('nftList.chooseZone')" ref="t2-claim-map-modal" size="xl" hide-footer
              @hide="clearMapSelections()">
       <div class="w-100 padding-bottom-100">
         <div class="map-grid">
           <div class="zone" :class="[playerReservedT2Zones.includes(zoneId) ? 'available' : null ]"
                v-for="zoneId in zonesIds" :key="zoneId"
                @click="playerReservedT2Zones.includes(zoneId) && showT2ZoneModal(zoneId)">
-            <span v-if="playerReservedT2Zones.includes(zoneId)">AVAILABLE</span>
+            <span v-if="playerReservedT2Zones.includes(zoneId)">{{$t('nftList.available')}}</span>
             <span>{{zonesPopulation[zoneId]}}/{{maxZonePopulation.toLocaleString()}}</span>
           </div>
         </div>
       </div>
     </b-modal>
 
-    <b-modal class="map-modal" title="Choose zone" ref="t3-claim-map-modal" size="xl" hide-footer
+    <b-modal class="map-modal" :title="$t('nftList.chooseZone')" ref="t3-claim-map-modal" size="xl" hide-footer
              @hide="clearMapSelections()">
       <div class="w-100 padding-bottom-100">
         <div class="map-grid">
           <div class="zone" :class="[playerReservedT3Zones.includes(zoneId) ? 'available' : null ]"
                v-for="zoneId in zonesIds" :key="zoneId"
                @click="playerReservedT3Zones.includes(zoneId) && showT3ZoneModal(zoneId)">
-            <span v-if="playerReservedT3Zones.includes(zoneId)">AVAILABLE</span>
+            <span v-if="playerReservedT3Zones.includes(zoneId)">{{$t('nftList.available')}}</span>
           </div>
         </div>
       </div>
     </b-modal>
 
-    <b-modal ref="zone-modal" title="Choose chunk" size="lg"
+    <b-modal ref="zone-modal" :title="$t('nftList.chooseChunk')" size="lg"
              @hide="selectedChunk = undefined" :hide-footer="!selectedTier">
       <div class="w-100 padding-bottom-100">
         <div v-if="selectedZone !== undefined" class="zone-grid"
@@ -147,18 +147,18 @@
                :style="[ selectedChunk === chunkId ? {backgroundColor: 'greenyellow'} : null ]">
             <span>ID: {{chunkId}}</span>
             <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
-            <span v-if="selectedTier === 3 && takenT3Chunks.includes(chunkId.toString())">TAKEN</span>
-            <span v-else-if="reservedChunks.includes(chunkId.toString())">RESERVED</span>
+            <span v-if="selectedTier === 3 && takenT3Chunks.includes(chunkId.toString())">{{$t('nftList.taken')}}</span>
+            <span v-else-if="reservedChunks.includes(chunkId.toString())">{{$t('nftList.reserved')}}</span>
           </div>
         </div>
       </div>
       <template #modal-footer>
         <b-button class="mt-3" block @click="purchaseLand(selectedChunk)"
-                  :disabled="selectedChunk === undefined || !selectedChunkAvailable">Buy land</b-button>
+                  :disabled="selectedChunk === undefined || !selectedChunkAvailable">{{$t('nftList.buyLand')}}</b-button>
       </template>
     </b-modal>
 
-    <b-modal ref="t2-claim-zone-modal" title="Choose chunk" size="lg"
+    <b-modal ref="t2-claim-zone-modal" :title="$t('nftList.chooseChunk')" size="lg"
              @hide="selectedChunk = undefined">
       <div class="w-100 padding-bottom-100">
         <div v-if="selectedZone !== undefined" class="zone-grid"
@@ -169,17 +169,17 @@
                :style="[ selectedChunk === chunkId ? {opacity: '1'} : null ]">
             <span>ID: {{chunkId}}</span>
             <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
-            <span v-if="playerReservedT2Chunks.includes(chunkId.toString())">Available</span>
+            <span v-if="playerReservedT2Chunks.includes(chunkId.toString())">{{$t('nftList.available2')}}</span>
           </div>
         </div>
       </div>
       <template #modal-footer>
         <b-button class="mt-3" block @click="claimLand(selectedChunk)"
-                  :disabled="selectedChunk === undefined || !selectedChunkAvailable">Claim Land</b-button>
+                  :disabled="selectedChunk === undefined || !selectedChunkAvailable">{{$t('nftList.claimLand')}}</b-button>
       </template>
     </b-modal>
 
-    <b-modal ref="t3-claim-zone-modal" title="Choose chunk" size="lg"
+    <b-modal ref="t3-claim-zone-modal" :title="$t('nftList.chooseChunk')" size="lg"
              @hide="selectedChunk = undefined">
       <div class="w-100 padding-bottom-100">
         <div v-if="selectedZone !== undefined" class="zone-grid"
@@ -190,65 +190,65 @@
                :style="[ selectedChunk === chunkId ? {opacity: '1'} : null ]">
             <span>ID: {{chunkId}}</span>
             <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
-            <span v-if="playerReservedT3Chunks.includes(chunkId.toString())">Available</span>
+            <span v-if="playerReservedT3Chunks.includes(chunkId.toString())">{{$t('nftList.available2')}}</span>
           </div>
         </div>
       </div>
       <template #modal-footer>
         <b-button class="mt-3" block @click="claimLand(selectedChunk)"
-                  :disabled="selectedChunk === undefined || !selectedChunkAvailable">Claim Land</b-button>
+                  :disabled="selectedChunk === undefined || !selectedChunkAvailable">{{$t('nftList.claimLand')}}</b-button>
       </template>
     </b-modal>
 
     <div v-if="!isShop">
       <div>
-        <h1 v-if="isLandTab">Lands ({{totalNonIgnoredLandsCount}})</h1>
+        <h1 v-if="isLandTab">{{$t('nftList.lands')}} ({{totalNonIgnoredLandsCount}})</h1>
       </div>
       <div class="filters row mt-2" v-if="!isReward">
         <div v-if="!isMarket && !isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
-          <strong>Nft Type</strong>
+          <strong>{{$t('nftList.nftType')}}</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land']" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land']" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div v-if="!isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
-          <strong>Stars</strong>
+          <strong>{{$t('nftList.stars')}}</strong>
           <select class="form-control" v-model="starFilter" @change="saveFilters()">
-            <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div v-if="!isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
-          <strong>Element</strong>
+          <strong>{{$t('nftList.element')}}</strong>
           <select class="form-control" v-model="elementFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div class="col-sm-6 col-md-4 dropdown-elem" v-if="isMarket">
-          <strong>Sort</strong>
+          <strong>{{$t('nftList.sort')}}</strong>
           <select class="form-control" v-model="priceSort" @change="saveFilters()">
-            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
+            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div v-if="showFavoriteToggle && !isLandTab" class="show-favorite">
           <b-check class="show-favorite-checkbox" v-model="showFavoriteNfts" />
-          <strong>Show Favorite</strong>
+          <strong>{{$t('nftList.showFavorite')}}</strong>
         </div>
 
         <div v-if="isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
-          <strong>Tier</strong>
+          <strong>{{$t('nftList.tier')}}</strong>
           <select class="form-control" v-model="tierFilter">
-            <option v-for="x in ['', 1, 2, 3]" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 1, 2, 3]" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div v-if="isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
-          <strong>Chunk Id</strong>
+          <strong>{{$t('nftList.chunkID')}}</strong>
           <select class="form-control" v-model="chunkIdFilter">
-            <option v-for="x in ownedChunkIds" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ownedChunkIds" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
@@ -258,12 +258,12 @@
           @click="clearFilters"
         >
           <span>
-            Clear Filters
+            {{$t('nftList.clearFilters')}}
           </span>
         </b-button>
       </div>
       <div class="centered-text-div" v-if="isReward && nftIdTypes.length === 0">
-        Nothing dropped for you this time.
+        {{$t('nftList.noDrop')}}
       </div>
 
       <b-pagination v-if="isLandTab" class="customPagination"
@@ -281,6 +281,7 @@
           @click="onNftClick(nft.type, nft.id)"
           @contextmenu="canFavorite && toggleFavorite($event, nft.type, nft.id)"
         >
+          <nft-options-dropdown v-if="showNftOptions" :nftType="nft.type" :nftId="nft.id" :options="options" class="nft-options"/>
           <nft-icon :favorite="isFavorite(nft.type, nft.id)" :nft="nft" :isShop="isShop"/>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :nft="nft"></slot>
@@ -312,10 +313,13 @@ import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
 import { IState } from '@/interfaces';
 import { BModal } from 'bootstrap-vue';
-import {fromWeiEther} from '@/utils/common';
+import {copyNftUrl, fromWeiEther} from '@/utils/common';
 import _ from 'lodash';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
 import BigNumber from 'bignumber.js';
+import i18n from '@/i18n';
+import { NftOption } from '../NftOptionsDropdown.vue';
+import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 
 interface Land {
   tier: string,
@@ -323,9 +327,9 @@ interface Land {
 }
 
 const sorts = [
-  { name: 'Any', dir: '' },
-  { name: 'Price: Low -> High', dir: 1 },
-  { name: 'Price: High -> Low', dir: -1 },
+  { name: i18n.t('nftList.sorts.any'), dir: '' },
+  { name: i18n.t('nftList.sorts.lowToHigh'), dir: 1 },
+  { name: i18n.t('nftList.sorts.highToLow'), dir: -1 },
 ];
 
 interface Data {
@@ -378,6 +382,7 @@ interface Data {
   chunkIdFilter: string;
   currentPage: number;
   totalItemsCount: number;
+  options: NftOption[];
 }
 
 export interface NftIdType {
@@ -507,6 +512,10 @@ export default Vue.extend({
     isLandTab: {
       type: Boolean,
       default: false
+    },
+    showNftOptions: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -561,13 +570,15 @@ export default Vue.extend({
       tierFilter: '',
       chunkIdFilter: '',
       currentPage: 1,
-      totalItemsCount: 0
+      totalItemsCount: 0,
+      options: []
     } as Data;
   },
 
   components: {
     CurrencyConverter,
-    NftIcon
+    NftIcon,
+    NftOptionsDropdown
   },
 
   computed: {
@@ -1101,11 +1112,26 @@ export default Vue.extend({
     },
     itemDescriptionHtml(item: SkillShopListing): string {
       return item.name + '<br>' + item.description;
-    }
+    },
+
+    updateOptions() {
+      if (this.isMarket) {
+        this.options = [
+          {
+            name: i18n.t('copyLink').toString(),
+            amount: 0,
+            handler: copyNftUrl,
+            hasDefaultOption: true,
+            noAmount: true
+          },
+        ];
+      }
+    },
   },
 
   async mounted() {
     this.checkStorageFavorite();
+    this.updateOptions();
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());
 
@@ -1253,6 +1279,12 @@ export default Vue.extend({
   cursor: pointer;
   position: relative;
   overflow: hidden;
+}
+
+.nft-options {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 .centered-text-div {

@@ -30,7 +30,7 @@
     "truffle": "^5.2.3",
     "truffle-contract-size": "^2.0.1",
     "truffle-export-abi": "^1.0.1",
-    "truffle-plugin-verify": "^0.5.15",
+    "truffle-plugin-verify": "^0.5.17",
     "yargs": "^17.0.1"
   },
   "scripts": {
@@ -52,6 +52,8 @@
     "postdeploy-okextestnet": "run-s \"backup-networks 65\" \"verify-contracts -- --network okextestnet\"",
     "deploy-polygontestnet": "truffle migrate --network polygontestnet",
     "postdeploy-polygontestnet": "run-s \"backup-networks 80001\" \"verify-contracts -- --network polygontestnet\"",
+    "deploy-avaxtestnet": "truffle migrate --network avaxtestnet",
+    "postdeploy-avaxtestnet": "run-s \"backup-networks-to-file 1 43113\" \"verify-contracts -- --network avaxtestnet\"",
     "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet",
     "postdeploy-mainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 56\" \"verify-contracts -- --network bscmainnet\"",
     "deploy-hecomainnet-warning-be-careful-this-is-prod": "truffle migrate --network hecomainnet",
@@ -60,8 +62,12 @@
     "postdeploy-okexmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 66\" \"verify-contracts -- --network okexmainnet\"",
     "deploy-polygonmainnet-warning-be-careful-this-is-prod": "truffle migrate --network polygonmainnet",
     "postdeploy-polygonmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 137\" \"verify-contracts -- --network polygonmainnet\"",
+    "deploy-avaxmainnet-warning-be-careful-this-is-prod": "truffle migrate --network avaxmainnet",
+    "postdeploy-avaxmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks-to-file 1 43114\" \"verify-contracts -- --network avaxmainnet\"",
     "deploy-mainnet-dry-run": "truffle migrate --network bscmainnet --dry-run",
     "backup-networks": "node scripts/manage-networks.js backup",
+    "backup-networks-to-file": "node scripts/manage-networks.js backupToFile",
+    "restore-networks-from-file": "node scripts/manage-networks.js restoreFromFile",
     "verify-contracts": "node scripts/verify-contracts.js"
   },
   "keywords": [],
