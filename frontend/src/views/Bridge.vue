@@ -1,16 +1,22 @@
 <template>
   <div>
-    <div class="row mt-3 mb-3 justify-content-center">
-      <h3> Bridge for your NFTs - Transfer NFTs to another chain </h3>
+    <div class="row m-3 justify-content-center">
+      <h2> Bridge for your NFTs</h2>
+    </div>
+    <div class="row m-3 justify-content-center">
+      <h3>Transfer NFTs to another chain</h3>
     </div>
     <div class="row mt-3 mb-3 justify-content-center">
       <p v-if="bridgeFee">
-        Bridge Transfer Fee: <CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/>
+        Bridge Transfer Fee: <CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/> &nbsp;
+        <b-icon-question-circle class="centered-icon" scale="0.8"
+        v-tooltip.bottom="`The fee is deducted when you request a transfer under the 'Storage' tab.`"
+        />
       </p>
     </div>
     <b-tabs justified>
       <b-tab title="Inventory" @click="nftType = 'weapon'">
-        <div class="d-flex flex-row justify-content-center">
+        <div class="btnRow d-flex flex-row justify-content-center">
           <div class="p-2">
             <b-button variant="primary" @click="nftType = 'weapon'; selectedNftId = ''" class="gtag-link-others"
               tagname="show_weapons_bridge" :disabled="nftType === 'weapon'">
@@ -56,7 +62,7 @@
         </b-modal>
       </b-tab>
       <b-tab title="Storage" @click="showStorage(); selectedNftId = ''">
-        <div class="d-flex flex-row justify-content-center" v-if="loadedStorage">
+        <div class="btnRow d-flex flex-row justify-content-center" v-if="loadedStorage">
           <div class="p-2">
             <b-button variant="primary" @click="nftType = 'weapon'; selectedNftId = ''; getStoredIds()"
               class="gtag-link-others" tagname="show_weapons_bridge" :disabled="nftType === 'weapon'">
@@ -72,19 +78,19 @@
           <div class="p-2">
             <b-button :disabled="selectedNftId === '' || currentTransferNFTId == selectedNftId" variant="primary"
               @click="withdrawItem()" class="gtag-link-others"
-              tagname="click_transfer_bridge">Withdraw from Storage</b-button>
+              tagname="click_transfer_bridge">Withdraw from <br> Storage</b-button>
           </div>
           <div class="p-2">
             <b-button
               :disabled="!canBridge"
               variant="primary"
               @click="requestBridge()" class="gtag-link-others" tagname="click_transfer_bridge">
-                Request Transfer <span :style="canAffordBridge ? '' : 'color:red;'"> (<CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/>) </span>
+                Request Transfer <br> <span :style="canAffordBridge ? '' : 'color:red;'"> (<CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/>) </span>
             </b-button>
           </div>
           <div class="p-2">
             <b-button :disabled="transferStatus != transferStates.pending" variant="primary" @click="$refs['refund-warning-modal'].show()"
-              class="gtag-link-others" tagname="click_transfer_bridge">Cancel Transfer Request</b-button>
+              class="gtag-link-others" tagname="click_transfer_bridge">Cancel <br> Transfer Request</b-button>
           </div>
         </div>
         <div class="d-flex flex-row bd-highlight mb-3 justify-content-center">
@@ -105,6 +111,7 @@
           </div>
           <div v-if="currentTransferNFTType == 'weapon'">
             <weapon-grid
+            class="currentTransferNFT"
             v-model="selectedNftId"
             :weaponIds="[currentTransferNFTId]"
             :showGivenWeaponIds="true"
@@ -118,6 +125,7 @@
           </div>
           <div v-if="currentTransferNFTType == 'character'">
             <character-list
+            class="currentTransferNFT"
             v-model="selectedNftId"
             :characterIds="[currentTransferNFTId]"
             :showGivenCharacterIds="true"
@@ -591,92 +599,31 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.btnRow{
+  flex-wrap: wrap;
+}
+.btn{
+  width: 150px;
+  line-height: 1.25em;
+  height: 4em;
+  white-space:nowrap;
+}
 .outcome {
   margin: 20px auto;
   text-align: center;
   font-size: 1em;
 }
-.character-list {
-  transform: scale(1.5);
+/deep/ .character-list{
+  justify-content: center;
+}
+/deep/ .currentTransferNFT .weapon-grid{
+  grid-template-columns: repeat(auto-fit,12em);
+	box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
+	transform: scale(1);
 }
 
-.nft-list,
-.weapon-grid {
-  transform: scale(2);
-}
+@media screen and (min-width: 768px) {
 
-/deep/ .weapon-grid {
-  justify-items: center;
-}
-
-.search-button {
-  width: 100%;
-}
-
-.search-input-id,
-.search-input-type {
-  margin-top: 5px;
-  width: 22em;
-}
-
-.copy-url-button,
-.search-button {
-  margin-top: 30px;
-}
-
-.nft-display {
-  height: auto;
-}
-
-.search-result-section {
-  padding-top: 100px;
-}
-
-.search-section {
-  border-right: 1px solid #9e8a57;
-}
-
-.result-row-section,
-.search-row-section {
-  flex-direction: column;
-  align-content: center;
-}
-
-.result-row-section {
-  align-items: center;
-}
-
-.owned-by,
-.info-text {
-  text-align: center;
-}
-
-.owned-by {
-  margin-top: 150px;
-  word-break: break-all;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-.search-input-section {
-  display: flex;
-  justify-content: space-evenly;
-}
-
-.m-top-negative-5 {
-  margin-top: -5px;
-}
-
-.disabled-button {
-  opacity: 0.65;
-}
-
-@media (max-width: 576px) {
-  .nft-list,
-  .weapon-grid,
-  .character-list {
-    transform: scale(1);
-  }
 }
 
 </style>
