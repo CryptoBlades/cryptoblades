@@ -5,7 +5,7 @@
     </div>
     <div class="row mt-3 mb-3 justify-content-center">
       <p v-if="bridgeFee">
-        Transfer Fee: <CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/>
+        Bridge Transfer Fee: <CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/>
       </p>
     </div>
     <b-tabs justified>
@@ -26,7 +26,7 @@
           <div class="p-2">
             <b-button :disabled="selectedNftId === ''" variant="primary"
             @click=" nftType === 'character' ? $refs['character-warning-modal'].show() :  transferToStorage()"
-              class="gtag-link-others" tagname="click_transfer_bridge">Transfer NFT to storage</b-button>
+              class="gtag-link-others" tagname="click_transfer_bridge">Move NFT to storage</b-button>
           </div>
         </div>
 
@@ -51,7 +51,7 @@
            <b-icon icon="exclamation-circle" variant="danger"/> WARNING
           </template>
           <span>
-           When transferring your character to another chain, your character will lose <b>all</b> unclaimed XP!<br>
+            When transferring your character to another chain, <b>any</b> unclaimed XP remains on this one!
           </span>
         </b-modal>
       </b-tab>
