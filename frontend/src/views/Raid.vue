@@ -2,26 +2,26 @@
   <div class="main-font">
     <div class="row">
       <div class="col-md-12 col-lg-6">
-        <span class="bold raid-title-section">Hellborn raid</span>
+        <span class="bold raid-title-section">{{$t('raid.title')}}</span>
         <hr class="divider">
         <div class="row boss-row">
           <div class="col-md-12 col-lg-6 order-xs-last order-sm-last order-lg-first">
             <ul class="list-group raid-details mb-4">
               <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
-                Number of Raiders
+                {{$t('raid.numberOfRaiders')}}
                 <span class="badge badge-primary badge-pill">{{ raiderCount }}</span>
               </li>
               <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
-                Total Power
+                {{$t('raid.totalPower')}}
                 <span class="badge badge-primary badge-pill">{{ totalPower }}</span>
               </li>
               <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text">
-                 Boss Power
+                 {{$t('raid.bossPower')}}
                 <span class="badge badge-primary badge-pill">{{ bossPower }}</span>
               </li>
               <li class="list-group-item d-flex justify-content-between align-items-center raid-details-text progress-container">
                 <div class="d-flex justify-content-between align-items-center raid-details-text" style="width: 100%;">
-                Victory chance
+                {{$t('raid.victoryChance')}}
                 <span class="badge badge-primary badge-pill">{{ formattedWinChance }}</span>
                 </div>
                 <div class="progress" style="width: 100%">
@@ -33,9 +33,9 @@
               </li>
             </ul>
             <span class="mt-3 bold raid-title-section">
-              Drops
+              {{$t('raid.drops')}}
               <b-icon-question-circle class="rewards-tooltip"
-               v-tooltip="'Rewards are based on your contributed power relative to others.<br>Joining early gives up to 10% bonus.'"/>
+               v-tooltip="$t('raid.rewardsHint')"/>
             </span>
             <hr class="divider">
             <div class="drops">
@@ -50,10 +50,9 @@
               </div>
               <br />
               <span class="bold raid-title-section xp-reward-section">
-                XP reward</span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }}
+                {{$t('raid.xpReward')}} </span> <span class="xp-reward ml-3 raid-details-text"> {{ xpReward }}
                 <b-icon-question-circle
-                  v-tooltip="`XP will be automatically claimed by participating characters.<br>
-                    If your character performs exceptionally well they will be rewarded with up to +2400% bonus XP.`"/>
+                  v-tooltip="$t('raid.xpRewardHint')"/>
               </span>
             </div>
           </div>
@@ -75,14 +74,12 @@
         <div class="row">
           <div class="col-xs-12 col-sm-12 col-lg-6 weap-box">
             <span class="raid-title-section bold">
-              <span>Weapon
+              <span>{{$t('raid.weapon')}}
                 <Hint
-                text="Your weapon multiplies your power<br>
-                  <br>+Stats determine the multiplier
-                  <br>Stat element match with character gives greater bonus"/>
+                :text="$t('raid.weaponHint')"/>
                   </span>
                   <span class="float-right sub-text">
-                    Multiplier: x{{ currentMultiplier }}
+                    {{$t('raid.multiplier')}}{{ currentMultiplier }}
                   </span>
               </span>
               <hr class="divider">
@@ -91,23 +88,29 @@
                 <weapon-icon class="weapon-icon" :weapon="getSelectedWeapon" />
               </div>
               <b-button v-if="selectedWeaponId" variant="primary" class="new-weapon-button" @click="selectedWeaponId = null">
-                Choose New Weapon
+                {{$t('raid.chooseNewWeapon')}}
               </b-button>
             </div>
 
             <weapon-grid v-if="!selectedWeaponId" v-model="selectedWeaponId" class="raid-weapon-grid">
               <template #sold="{ weapon: { id } }">
-                <div class="sold" v-if="participatingWeapons && participatingWeapons.find(x => +x === +id) !== undefined"><span>in raid</span></div>
+                <div class="sold" v-if="participatingWeapons && participatingWeapons.find(x => +x === +id) !== undefined">
+                  <span>{{$t('raid.inRaid')}}</span>
+                </div>
               </template>
             </weapon-grid>
             <hr class="divider">
           </div>
           <div class="col-xs-12 col-sm-12 col-lg-6 char-box">
-            <span class="raid-title-section bold">Character <span class="float-right sub-text">Power {{ currentCharacterPower }}</span></span>
+            <span class="raid-title-section bold">{{$t('raid.character')}}
+              <span class="float-right sub-text">{{$t('raid.power')}} {{ currentCharacterPower }}</span>
+            </span>
             <hr class="divider">
             <character-list :value="currentCharacterId" @input="setCurrentCharacter" class="raid-style">
               <template #sold="{ character: { id } }">
-                <div class="sold" v-if="participatingCharacters && participatingCharacters.find(x => +x === +id) !== undefined"><span>in raid</span></div>
+                <div class="sold" v-if="participatingCharacters && participatingCharacters.find(x => +x === +id) !== undefined">
+                  <span>{{$t('raid.inRaid')}}</span>
+                </div>
               </template>
             </character-list>
             <hr class="divider">
@@ -119,10 +122,10 @@
       <div class="row">
         <div class="col-12">
           <div class="text-center">
-            Joining will cost <span class="badge badge-secondary">{{ staminaCost }}
-            stamina </span>,
+            {{$t('raid.joiningCost')}} <span class="badge badge-secondary">{{ staminaCost }}
+            {{$t('raid.stamina')}} </span>,
             <span class="badge badge-secondary">{{ durabilityCost }}
-            durability </span> and
+            {{$t('raid.durability')}} </span> {{$t('raid.and')}}
             <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" minDecimals="0"
                                                                    maxDecimals="5"/></span>
           </div>
@@ -136,60 +139,60 @@
             <div class='col-sm-4 raid-summary-text'>
               <div class="float-lg-left mb-sm-2">
                 <div class="finish">
-                    <span class="title">Finishes on</span>
+                    <span class="title">{{$t('raid.finishesOn')}}</span>
                     {{ expectedFinishTime }}
                     <br />
-                    <span class="title">Raid status</span> {{ raidStatus }}
+                    <span class="title">{{$t('raid.raidStatus')}}</span> {{ raidStatus }}
                   </div>
               </div>
             </div>
             <div class="col-sm-8 row">
-              <big-button v-if="claimButtonActive" class="encounter-button btn-styled" :mainText="`Claim rewards`" @click="promptRewardClaim()" />
-              <b-modal id="rewardsRaidPicker" title="Raid rewards selector" @ok="claimRewardIndex(rewardsRaidId)">
+              <big-button v-if="claimButtonActive" class="encounter-button btn-styled" :mainText="$t('raid.claimRewards')" @click="promptRewardClaim()" />
+              <b-modal id="rewardsRaidPicker" :title="$t('raid.raidRewardsSelector')" @ok="claimRewardIndex(rewardsRaidId)">
                 <div class="raid-picker">
-                  Select a raid to claim rewards from:
+                  {{$t('raid.selectRaid')}}
                   <select class="form-control raid-id-selector" v-model="rewardsRaidId">
                     <option v-for="id in rewardIndexes" :value="id" :key="id">{{ id }}</option>
                   </select>
                 </div>
               </b-modal>
 
-            <b-modal id="rewardsModal" title="Raid rewards" size="lg">
+            <b-modal id="rewardsModal" :title="$t('raid.raidRewards')" size="lg">
               <template #modal-header>
                 <div v-if="!spin" class="new-weapon-header-text text-center">
-                  <strong>Rewards</strong>
+                  <strong>{{$t('raid.rewards')}}</strong>
                 </div>
                 <div v-if="spin" class="new-weapon-header-text text-center">
-                  <strong>Claiming rewards...</strong>
+                  <strong>{{$t('raid.claimingRewards')}}</strong>
                 </div>
               </template>
               <div class="text-center">
-                <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
-                <b-spinner v-if="spin" type="grow" label="Loading..."></b-spinner>
+                <b-spinner v-if="spin" type="grow" :label="$t('raid.loading')"></b-spinner>
+                <b-spinner v-if="spin" type="grow" :label="$t('raid.loading')"></b-spinner>
+                <b-spinner v-if="spin" type="grow" :label="$t('raid.loading')"></b-spinner>
               </div>
               <div class="text-center" v-if="!spin">
-                <strong>All participating characters got {{xpReward}} XP</strong><br>
+                <strong>{{$t('raid.gotXP', {xpReward})}}</strong><br>
                 <div v-if="bonuxXpCharacterNames && bonuxXpCharacterNames.length > 0">
-                  <strong>Following character(s) performed exceptionally well and were rewarded with bonus XP:</strong>
+                  <strong>{{$t('raid.gotBonusXP')}}</strong>
                   <br>
                   <span v-for="i in bonuxXpCharacterNames.length" :key="i">
                     {{bonuxXpCharacterNames[i - 1]}}: +{{bonuxXpAmounts[i - 1]}} XP<br>
                   </span>
                 </div>
                 <br>
-                <p class="h2 text-center"><u>Loot</u></p>
+                <p class="h2 text-center"><u>{{$t('raid.loot')}}</u></p>
               </div>
               <nft-list v-if="!spin" :showGivenNftIdTypes="true" :nftIdTypes="rewards" :isReward="true"/>
             </b-modal>
 
-              <big-button class="encounter-button btn-styled" :mainText="`Sign up!`"
-                          v-tooltip="`Joining will cost ${formatStaminaHours}h of stamina`" @click="joinRaidMethod()" />
+              <big-button class="encounter-button btn-styled" :mainText="$t('raid.signUp')"
+                          v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="joinRaidMethod()" />
             </div>
             <div class='col-sm-4 raid-summary-text'>
              <div class="float-lg-right text-sm-center mt-sm-2 text-center">
                 <div class="finish">
-                    <span class="title">Your Power:  {{accountPower}}</span>
+                    <span class="title">{{$t('raid.yourPower')}}  {{accountPower}}</span>
                   </div>
               </div>
             </div>
@@ -218,7 +221,7 @@ import { traitNumberToName } from '@/contract-models';
 import { fromWeiEther } from '@/utils/common';
 import { staminaToHours } from '@/utils/date-time';
 import { RaidRewards, Weapon, Junk, Keybox, DustLb, Dust4b, Dust5b, BonusXp } from '@/interfaces/RaidRewards';
-
+import i18n from '@/i18n';
 
 interface RaidMappedActions {
   fetchRaidState(): Promise<void>;
@@ -391,28 +394,28 @@ export default Vue.extend({
 
     async joinRaidMethod(): Promise<void> {
       if (!this.selectedWeaponId || !this.currentCharacterId) {
-        (this as any).$dialog.notify.error('Check Character and Weapon Selection and try again...');
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.selection'));
         return;
       }
 
       const isRaidStarted = await this.isRaidStarted();
       if(!isRaidStarted) {
-        (this as any).$dialog.notify.error('Raid has not started yet...');
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.raidNotStarted'));
         return;
       }
       const isCharacterRaiding = await this.isCharacterAlreadyRaiding(this.currentCharacterId);
       if(isCharacterRaiding) {
-        (this as any).$dialog.notify.error('Selected character is locked in the raid already...');
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.lockedChar'));
         return;
       }
       const isWeaponRaiding = await this.isWeaponAlreadyRaiding(this.selectedWeaponId);
       if(isWeaponRaiding) {
-        (this as any).$dialog.notify.error('Selected weapon is locked in the raid already...');
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.lockedWeapon'));
         return;
       }
       const haveEnoughEnergy = await this.haveEnoughEnergy(this.currentCharacterId, this.selectedWeaponId);
       if(!haveEnoughEnergy) {
-        (this as any).$dialog.notify.error('Not enough stamina or durability...');
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.notEnough'));
         return;
       }
 
@@ -421,7 +424,7 @@ export default Vue.extend({
         this.selectedWeaponId = '';
       } catch (e) {
         console.error(e);
-        (this as any).$dialog.notify.error('Whoops...');
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.whoops'));
       }
 
       await this.getParticipatingCharacters();

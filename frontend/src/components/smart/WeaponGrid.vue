@@ -2,45 +2,46 @@
   <div>
     <div class="filters row mt-2 pl-2" v-if="!newWeapon" @change="saveFilters()">
       <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
-        <strong>Stars</strong>
+        <strong>{{$t('weaponGrid.stars')}}</strong>
         <select class="form-control" v-model="starFilter" >
-          <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
+          <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
         </select>
       </div>
 
       <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
-        <strong>Element</strong>
+        <strong>{{$t('weaponGrid.element')}}</strong>
         <select class="form-control" v-model="elementFilter" >
-          <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
+          <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+          :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
         </select>
       </div>
 
       <template v-if="isMarket">
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>Min Price</strong>
+          <strong>{{$t('weaponGrid.minPrice')}}</strong>
           <input class="form-control" type="number" v-model.trim="minPriceFilter" :min="0" placeholder="Min" />
         </div>
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>Max Price</strong>
+          <strong>{{$t('weaponGrid.maxPrice')}}</strong>
           <input class="form-control" type="number" v-model.trim="maxPriceFilter" :min="0" placeholder="Max" />
         </div>
 
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>Sort</strong>
+          <strong>{{$t('weaponGrid.sort')}}</strong>
           <select class="form-control" v-model="priceSort" >
-            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
+            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('weaponGrid.sorts.any') }}</option>
           </select>
         </div>
       </template>
 
       <div v-if="showReforgedToggle" class="show-reforged">
         <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
-        <strong>Show reforged</strong>
+        <strong>{{$t('weaponGrid.showReforged')}}</strong>
       </div>
 
       <div v-if="showFavoriteToggle" class="show-reforged show-favorite">
         <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
-        <strong>Show Favorite</strong>
+        <strong>{{$t('weaponGrid.showFavorite')}}</strong>
       </div>
 
       <b-button
@@ -50,7 +51,7 @@
         @click="clearFilters"
       >
         <span>
-          Clear Filters
+          {{$t('weaponGrid.clearFilters')}}
         </span>
       </b-button>
     </div>
@@ -65,7 +66,7 @@
         "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
-        <nft-options-dropdown v-if="showNftOptions" :nftId="weapon.id" :options="options" class="nft-options"/>
+        <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" class="nft-options"/>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
         </div>
@@ -79,22 +80,22 @@
     <b-modal class="centered-modal" ref="weapon-rename-modal"
                   @ok="renameWeaponCall()">
                   <template #modal-title>
-                    Rename Weapon
+                    {{$t('weaponGrid.renameWeapon')}}
                   </template>
                   <b-form-input type="string"
-                    class="modal-input" v-model="weaponRename" placeholder="New Name" />
+                    class="modal-input" v-model="weaponRename" :placeholder="$t('weaponGrid.renamePlaceholder')" />
       <span v-if="isRenameProfanish">
-        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+        {{$t('weaponGrid.isProfanish')}} <em>{{cleanRename}}</em>
       </span>
     </b-modal>
 
     <b-modal class="centered-modal" ref="weapon-change-skin-modal"
       @ok="changeWeaponSkinCall">
       <template #modal-title>
-        Change Weapon's Skill
+        {{$t('weaponGrid.changeWeaponSkill')}}
       </template>
       <span >
-        Pick a skin to switch to.
+        {{$t('weaponGrid.pickSkin')}}
       </span>
       <select class="form-control" v-model="targetSkin">
         <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
@@ -114,6 +115,8 @@ import { NftOption } from '../NftOptionsDropdown.vue';
 import { BModal } from 'bootstrap-vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
+import i18n from '@/i18n';
+import { copyNftUrl } from '@/utils/common';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 
@@ -149,9 +152,9 @@ interface Data {
 }
 
 const sorts = [
-  { name: 'Any', dir: '' },
-  { name: 'Price: Low -> High', dir: 1 },
-  { name: 'Price: High -> Low', dir: -1 },
+  { name: i18n.t('weaponGrid.sorts.any'), dir: '' },
+  { name: i18n.t('weaponGrid.sorts.lowToHigh'), dir: 1 },
+  { name: i18n.t('weaponGrid.sorts.highToLow'), dir: -1 },
 ];
 
 export default Vue.extend({
@@ -250,15 +253,25 @@ export default Vue.extend({
       targetSkin: '',
       currentWeaponId: null,
       weaponCosmeticsNames: [
-        'Weapon Grayscale','Weapon Contrast',
-        'Weapon Sepia','Weapon Invert',
-        'Weapon Blur','Weapon Fire Glow',
-        'Weapon Earth Glow','Weapon Lightning Glow',
-        'Weapon Water Glow','Weapon Rainbow Glow',
-        'Weapon Dark Glow','Ghost Weapon',
-        'Weapon Police Lights','Weapon Neon Border',
-        'Weapon Rotating Neon Border', 'Weapon Diamond Border',
-        'Weapon Gold Border','Weapon Silver Border','Weapon Bronze Border',
+        i18n.t('market.nftList.weaponGrayscale'),
+        i18n.t('market.nftList.weaponContrast'),
+        i18n.t('market.nftList.weaponSepia'),
+        i18n.t('market.nftList.weaponInvert'),
+        i18n.t('market.nftList.weaponBlur'),
+        i18n.t('market.nftList.weaponFireglow'),
+        i18n.t('market.nftList.weaponEarthglow'),
+        i18n.t('market.nftList.weaponLightningglow'),
+        i18n.t('market.nftList.weaponWaterglow'),
+        i18n.t('market.nftList.weaponRainbowglow'),
+        i18n.t('market.nftList.weaponDarkglow'),
+        i18n.t('market.nftList.weaponGhost'),
+        i18n.t('market.nftList.weaponPolicelights'),
+        i18n.t('market.nftList.weaponNeonborder'),
+        i18n.t('market.nftList.weaponRotatingNeonborder'),
+        i18n.t('market.nftList.weaponDiamondborder'),
+        i18n.t('market.nftList.weaponGoldborder'),
+        i18n.t('market.nftList.weaponSilverborder'),
+        i18n.t('market.nftList.weaponBronzeborder')
       ]
     } as Data;
   },
@@ -491,20 +504,32 @@ export default Vue.extend({
     },
 
     updateOptions() {
-      this.options = [
-        {
-          name: 'Rename',
-          amount: this.haveRename,
-          handler: this.openRenameWeapon
-        },
-        {
-          name: 'Change Cosmetic',
-          amount: this.totalCosmeticChanges,
-          handler: this.openChangeSkin,
-          hasDefaultOption: true,
-        },
-      ];
-    }
+      if(!this.isMarket) {
+        this.options = [
+          {
+            name: i18n.t('characterList.rename').toString(),
+            amount: this.haveRename,
+            handler: this.openRenameWeapon
+          },
+          {
+            name: i18n.t('characterList.changeSkin').toString(),
+            amount: this.totalCosmeticChanges,
+            handler: this.openChangeSkin,
+            hasDefaultOption: true
+          },
+        ];
+      } else {
+        this.options = [
+          {
+            name: i18n.t('copyLink').toString(),
+            amount: 0,
+            handler: copyNftUrl,
+            hasDefaultOption: true,
+            noAmount: true
+          },
+        ];
+      }
+    },
   },
 
   async mounted() {

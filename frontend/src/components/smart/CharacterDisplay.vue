@@ -25,22 +25,22 @@
           <span v-if="!isLoadingCharacter" class="name bold character-name">{{
             getCleanCharacterName(currentCharacterId)
           }} <span :class="traits[currentCharacter.trait].toLowerCase() + '-icon trait-icon'"></span></span>
-          <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
+          <span v-if="isLoadingCharacter" class="name bold">{{$t('CharacterDisplay.loading')}}</span>
           <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
-            <b>Level</b> <span>{{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP) </span>
-            <b>Power:</b> <span>{{CharacterPower(currentCharacter.level).toLocaleString()}}</span>
-            <Hint class="power-hint" text="Power increases by 10 every level up,
-              <br>and multiplied every 10 level ups
-              <br>Level 1: 1000
-              <br>Level 10: 1090
-              <br>Level 11: 2200
-              <br>Level 20: 2380
-              <br>Level 21: 3600" />
+            <b>{{$t('CharacterDisplay.level')}} </b>
+            <span>{{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP) </span>
+            <b>{{$t('CharacterDisplay.power')}}: </b>
+            <span>{{CharacterPower(currentCharacter.level).toLocaleString()}}</span>
+            <Hint class="power-hint" :text="$t('CharacterDisplay.powerIncrease')+
+              `<br>${$t('CharacterDisplay.level')} 1: 1000
+              <br>${$t('CharacterDisplay.level')} 10: 1090
+              <br>${$t('CharacterDisplay.level')} 11: 2200
+              <br>${$t('CharacterDisplay.level')} 20: 2380
+              <br>${$t('CharacterDisplay.level')} 21: 3600`" />
           </span>
         </div>
 
-        <!-- Hiding earnings calculator as it's not working correctly with new formula -->
-        <earnings-calculator style="display: none"/>
+        <earnings-calculator />
       </div>
     </transition>
 
