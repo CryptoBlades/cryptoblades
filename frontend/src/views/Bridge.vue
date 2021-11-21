@@ -138,13 +138,13 @@
         <div v-if="nftType == 'weapon' && storedNftsIds.length !== 0">
           <weapon-grid
           v-model="selectedNftId"
-          :showReforgedWeaponsDefVal="false"
-          :showFavoriteWeaponsDefVal="false"
-            :showReforgedToggle="true"
-            :showFavoriteToggle="true"
-            :canFavorite="false"
-            :weaponIds="storedNftsIds"
-            :showGivenWeaponIds="true"
+          :showReforgedWeaponsDefVal="true"
+          :showFavoriteWeaponsDefVal="true"
+          :showReforgedToggle="true"
+          :showFavoriteToggle="true"
+          :canFavorite="false"
+          :weaponIds="storedNftsIds"
+          :showGivenWeaponIds="true"
             />
         </div>
         <div v-else-if="nftType == 'weapon'">
