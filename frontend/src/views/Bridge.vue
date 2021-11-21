@@ -70,18 +70,16 @@
             </b-button>
           </div>
           <div class="p-2">
-            <b-button :disabled="selectedNftId === '' || (currentTransferNFTId == selectedNftId && transferStatus != transferStates.restored)" variant="primary"
+            <b-button :disabled="selectedNftId === '' || currentTransferNFTId == selectedNftId" variant="primary"
               @click="withdrawItem()" class="gtag-link-others"
               tagname="click_transfer_bridge">Withdraw from Storage</b-button>
           </div>
           <div class="p-2">
             <b-button
-              :disabled="!canBridge || (transferStatus === transferStates.done || transferStatus !== transferStates.noTransfer)
-              &&(currentTransferNFTId == selectedNftId)||
-              transferStatus === transferStates.pending || transferStatus === transferStates.processing || selectedNftId === ''"
+              :disabled="!canBridge"
               variant="primary"
               @click="requestBridge()" class="gtag-link-others" tagname="click_transfer_bridge">
-                Request Transfer <span :style="canBridge ? '' : 'color:red;'"> (<CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/>) </span>
+                Request Transfer <span :style="canAffordBridge ? '' : 'color:red;'"> (<CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/>) </span>
             </b-button>
           </div>
           <div class="p-2">
@@ -379,6 +377,19 @@ export default Vue.extend({
           : this.Shields.options.address;
     },
     canBridge(){
+      if (!this.canAffordBridge) return false;
+
+      else if(this.transferStatus === transferStates.done && this.currentTransferNFTId === String(this.selectedNftId)) return false;
+
+      else if(this.transferStatus === transferStates.restored && this.currentTransferNFTId !== String(this.selectedNftId)) return false;
+
+      else if(this.transferStatus === transferStates.pending || this.transferStatus === this.transferStates.processing) return false;
+
+      else if(this.selectedNftId === '') return false;
+
+      else return true;
+    },
+    canAffordBridge(){
       const cost = toBN(this.bridgeFee);
       const balance = toBN(this.skillBalance);
       return balance.isGreaterThanOrEqualTo(cost);
@@ -460,6 +471,7 @@ export default Vue.extend({
       this.getStatus();
     },
     async withdrawBridge(tokenId: string){
+      console.log('withdrawBridge', tokenId);
       this.withdrawingFromBridge = true;
       try{
         await this.withdrawFromBridge({
