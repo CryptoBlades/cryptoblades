@@ -125,7 +125,14 @@
 
       <div></div>
     </div>
-
+    <b-modal class="centered-modal" ref="no-skill-warning-modal" @ok="fightTarget(targetToFight,targetToFightIndex)">
+      <template #modal-title>
+        <b-icon icon="exclamation-circle" variant="danger"/> WARNING
+      </template>
+      <span>
+        You will not gain any SKILL from this fight, but you will still earn <b> XP </b>!
+      </span>
+    </b-modal>
     <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
       <div v-if="ownWeapons.length === 0">{{$t('combat.noWeapons')}}</div>
 
@@ -163,6 +170,8 @@ export default {
       fightMultiplier: Number(localStorage.getItem('fightMultiplier')),
       staminaPerFight: 40,
       targetExpectedPayouts: new Array(4),
+      targetToFight: null,
+      targetToFightIndex: null,
     };
   },
 
@@ -284,7 +293,19 @@ export default {
       if ((enemyElement + 1) % 4 === playerElement) return -1;
       return 0;
     },
+
     async onClickEncounter(targetToFight, targetIndex) {
+      if(this.targetExpectedPayouts[targetIndex] === '0'){
+        this.$refs['no-skill-warning-modal'].show();
+        this.targetToFight = targetToFight;
+        this.targetToFightIndex = targetIndex;
+      }
+      else{
+        this.fightTarget(targetToFight, targetIndex);
+      }
+    },
+
+    async fightTarget(targetToFight, targetIndex){
       if (this.selectedWeaponId === null || this.currentCharacterId === null) {
         return;
       }
