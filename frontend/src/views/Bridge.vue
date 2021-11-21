@@ -56,7 +56,7 @@
         </b-modal>
       </b-tab>
       <b-tab title="Storage" @click="showStorage(); selectedNftId = ''">
-        <div class="d-flex flex-row justify-content-center">
+        <div class="d-flex flex-row justify-content-center" v-if="loadedStorage">
           <div class="p-2">
             <b-button variant="primary" @click="nftType = 'weapon'; selectedNftId = ''; getStoredIds()"
               class="gtag-link-others" tagname="show_weapons_bridge" :disabled="nftType === 'weapon'">
@@ -334,6 +334,7 @@ export default Vue.extend({
       withdrawingFromBridge: false,
       enabledChains: [] as string[],
       bridgeFee: '',
+      loadedStorage: false
     };
   },
 
@@ -578,6 +579,7 @@ export default Vue.extend({
       }
       await this.getStoredIds();
       await this.getStatus();
+      this.loadedStorage = true;
     },
   },
   components: {
