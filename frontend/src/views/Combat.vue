@@ -130,7 +130,9 @@
         <b-icon icon="exclamation-circle" variant="danger"/> WARNING
       </template>
       <span>
-        You will not gain any SKILL from this fight, but you will still earn <b> XP </b>!
+        You will not gain any SKILL from this fight, but you will still earn <b> XP </b>! <br>
+        Rewards will be filled in <b> {{minutesToNextAllowance}} </b> min. <br>
+        There were <b> {{lastAllowanceSkill}} </b> distributed during the last allowance.
       </span>
     </b-modal>
     <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
@@ -172,6 +174,8 @@ export default {
       targetExpectedPayouts: new Array(4),
       targetToFight: null,
       targetToFightIndex: null,
+      minutesToNextAllowance: null,
+      lastAllowanceSkill: null,
     };
   },
 
@@ -191,7 +195,7 @@ export default {
       'currentCharacterStamina',
       'getWeaponDurability',
       'fightGasOffset',
-      'fightBaseline',
+      'fightBaseline'
     ]),
 
     targets() {
@@ -232,7 +236,8 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
+      'fetchAllowanceTimestamp', 'fetchHourlyAllowance']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -294,11 +299,23 @@ export default {
       return 0;
     },
 
+    async getNextAllowanceTime(){
+      const allowanceTimestamp = await this.fetchAllowanceTimestamp();
+      const currentTime = Math.round(Date.now() / 1000);
+      const minutesToNextAllowance = Math.round(60 - (currentTime - allowanceTimestamp)/60);
+      this.minutesToNextAllowance = minutesToNextAllowance;
+    },
+    async getHourlyAllowance(){
+      const fetchHourlyAllowance = await this.fetchHourlyAllowance();
+      this.lastAllowanceSkill = this.formattedSkill(fetchHourlyAllowance);
+    },
     async onClickEncounter(targetToFight, targetIndex) {
       if(this.targetExpectedPayouts[targetIndex] === '0'){
-        this.$refs['no-skill-warning-modal'].show();
         this.targetToFight = targetToFight;
         this.targetToFightIndex = targetIndex;
+        await this.getHourlyAllowance();
+        await this.getNextAllowanceTime();
+        this.$refs['no-skill-warning-modal'].show();
       }
       else{
         this.fightTarget(targetToFight, targetIndex);

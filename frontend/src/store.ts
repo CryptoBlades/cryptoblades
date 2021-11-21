@@ -1689,6 +1689,16 @@ export function createStore(web3: Web3) {
         return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(state));
       },
 
+      async fetchAllowanceTimestamp({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.vars(6).call(defaultCallOptions(state));
+      },
+      async fetchHourlyAllowance({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.vars(18).call(defaultCallOptions(state));
+      },
       async fetchRemainingTokenClaimAmountPreTax({ state }) {
         if(!_.isFunction(state.contracts)) return;
         const { CryptoBlades } = state.contracts();
