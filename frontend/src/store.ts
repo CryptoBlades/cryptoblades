@@ -2419,7 +2419,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           nftMarketFuctions => nftMarketFuctions.addFee(),
-          { allowInGameOnlyFunds: false },
+          { allowInGameOnlyFunds: false, allowSkillRewards: false },
         );
 
         const res = await NFTMarket.methods
@@ -2457,7 +2457,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           nftMarketFuctions => nftMarketFuctions.changeFee(),
-          { allowInGameOnlyFunds: false },
+          { allowInGameOnlyFunds: false, allowSkillRewards: false },
         );
 
         const res = await NFTMarket.methods
