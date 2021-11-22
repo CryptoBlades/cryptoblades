@@ -132,7 +132,7 @@
       <span>
         You will not gain any SKILL from this fight, but you will still earn <b> XP </b>! <br>
         Rewards will be filled in <b> {{minutesToNextAllowance}} </b> min. <br>
-        There were <b> {{lastAllowanceSkill}} </b> distributed during the last allowance.
+        There were up to <b> {{lastAllowanceSkill}} </b> distributed during the last allowance.
       </span>
     </b-modal>
     <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
