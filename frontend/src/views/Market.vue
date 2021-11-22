@@ -1633,7 +1633,7 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
       this.currentPage = page + 1;
 
-      if(useBlockchain === true)
+      if(useBlockchain)
         await this.searchAllWeaponListingsThroughChain(page);
       else
         await this.searchAllWeaponListingsThroughAPI(page);
@@ -1696,7 +1696,7 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
       this.currentPage = page + 1;
 
-      if(useBlockchain === true)
+      if(useBlockchain)
         await this.searchAllShieldListingsThroughChain(page);
       else
         await this.searchAllShieldListingsThroughAPI(page);
