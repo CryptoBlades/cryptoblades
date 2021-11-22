@@ -5,8 +5,8 @@
     </div>
     <ul class="product-grid">
       <li class="product"
-      v-for="product in products" :key="product.id">
-        <img class="product-img" :src="product.thumbnail_url" />
+          v-for="product in products" :key="product.id">
+        <img class="product-img" :src="product.thumbnail_url"/>
         <div class="product-name">{{ product.name }}</div>
         <b-button
           :disabled="!product.price"
@@ -14,7 +14,8 @@
           class="shop-button"
           @click="openAddress(product)">
           <span>
-            Buy (<CurrencyConverter v-if="product.price" :skill="convertWeiToSkill(+product.price)" :showValueInSkillOnly="true" :minDecimals="1"/>)
+            Buy (<CurrencyConverter v-if="product.price" :skill="fromWeiEther(+product.price)"
+                                    :showValueInSkillOnly="true" :minDecimals="1"/>)
           </span>
         </b-button>
       </li>
@@ -26,42 +27,43 @@
       </template>
 
       <b-form-input type="text"
-        class="modal-input" v-model="recipient.name" placeholder="Name" />
+                    class="modal-input" v-model="recipient.name" placeholder="Name"/>
       <b-form-input type="number"
-        class="modal-input" v-model="recipient.phone" placeholder="Phone" />
+                    class="modal-input" v-model="recipient.phone" placeholder="Phone"/>
       <b-form-input type="email"
-        class="modal-input" v-model="recipient.email" placeholder="Email" />
+                    class="modal-input" v-model="recipient.email" placeholder="Email"/>
       <b-form-input type="text"
-        class="modal-input" v-model="recipient.address1" placeholder="Address" />
+                    class="modal-input" v-model="recipient.address1" placeholder="Address"/>
       <b-form-input type="text"
-        class="modal-input" v-model="recipient.city" placeholder="City" />
+                    class="modal-input" v-model="recipient.city" placeholder="City"/>
       <b-form-input type="text"
-        class="modal-input" v-model="recipient.zip" placeholder="Zip Code" />
+                    class="modal-input" v-model="recipient.zip" placeholder="Zip Code"/>
       <b-form-select
         class="modal-input" v-model="recipient.countryCode" @change="fetchStates" :options="countries"
         text-field="name" value-field="code"></b-form-select>
-        {{ selectedCountry }}
+      {{ selectedCountry }}
       <b-form-select
-        class="modal-input" v-if="states.length !== 0" v-model="recipient.stateCode" :options="states" value-field="code" text-field="name"></b-form-select>
+        class="modal-input" v-if="states.length !== 0" v-model="recipient.stateCode" :options="states"
+        value-field="code" text-field="name"></b-form-select>
     </b-modal>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import axios from 'axios';
-import { mapActions } from 'vuex';
-import { fromWeiEther } from '@/utils/common';
+import {mapActions} from 'vuex';
+import {fromWeiEther} from '@/utils/common';
 import CurrencyConverter from '../../components/CurrencyConverter.vue';
+import api from '@/api';
 
-interface Product {
+export interface Product {
   id: number,
   name: string,
   thumbnail_url: string,
   price?: number
 }
 
-interface Recipient {
+export interface Recipient {
   name: string;
   address1: string;
   city: string;
@@ -72,10 +74,20 @@ interface Recipient {
   email: string;
 }
 
-interface Country {
+export interface Country {
   name: string;
   code: string;
   states?: string[];
+}
+
+export interface MerchandiseOrderData {
+  recipient: Recipient;
+  items: MerchandiseItemData[];
+}
+
+export interface MerchandiseItemData {
+  sync_variant_id: number;
+  quantity: number;
 }
 
 interface Data {
@@ -88,8 +100,8 @@ interface Data {
 }
 
 interface StoreMappedActions {
-  getItemPrice(payload: {id: number}): Promise<number>;
-  purchaseMerchandise(payload: {id: number, price: number, amount: number}): Promise<number>;
+  getItemPrice(payload: { id: number }): Promise<number>;
+  purchaseMerchandise(payload: { id: number, price: number, amount: number }): Promise<number>;
 }
 
 export default Vue.extend({
@@ -110,18 +122,25 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['getItemPrice', 'purchaseMerchandise']) as StoreMappedActions,
+    fromWeiEther,
 
     async fetchProducts() {
-      const response = await axios.get('http://localhost:2400/products');
-      this.products = response.data?.result;
+      const response = await api.getMerchandiseProducts();
+      if (response.code !== 200) {
+        return;
+      }
+      this.products = response.result;
       for (const product of this.products) {
         product.price = await this.getItemPrice({id: product.id});
       }
     },
 
     async fetchCountries() {
-      const response = await axios.get('http://localhost:2400/countries');
-      this.countries = response.data?.result;
+      const response = await api.getMerchandiseCountries();
+      if (response.code !== 200) {
+        return;
+      }
+      this.countries = response.result;
       this.fetchStates();
     },
 
@@ -136,8 +155,8 @@ export default Vue.extend({
     },
 
     async buyItem() {
-      if(!this.selectedProduct) return;
-      const printful_payload = {
+      if (!this.selectedProduct) return;
+      const orderData: MerchandiseOrderData = {
         recipient: this.recipient,
         items: [
           {
@@ -147,15 +166,11 @@ export default Vue.extend({
         ]
       };
 
-      if(!this.selectedProduct.price) return;
+      if (!this.selectedProduct.price) return;
       await this.purchaseMerchandise({id: this.selectedProduct.id, price: this.selectedProduct.price, amount: 1});
       this.recipient = {} as Recipient;
 
-      await axios.post('http://localhost:2400/create_order', printful_payload);
-    },
-
-    convertWeiToSkill(wei: string) {
-      return fromWeiEther(wei);
+      await api.createMerchandiseOrder(orderData);
     },
   },
 
@@ -190,6 +205,7 @@ export default Vue.extend({
   grid-template-columns: repeat(auto-fit, 12em);
   gap: 0.5em;
 }
+
 .product {
   width: 12em;
   background: rgba(255, 255, 255, 0.1);
@@ -198,6 +214,10 @@ export default Vue.extend({
   position: relative;
   overflow: hidden;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .centered-text-div {
@@ -210,14 +230,15 @@ export default Vue.extend({
 }
 
 .row.filters {
-   justify-content: center;
-   width: 100%;
-   max-width: 900px;
-   margin: 0 auto;
-   align-content: center;
-   border-bottom: 0.2px solid rgba(102, 80, 80, 0.1);
-   margin-bottom: 20px;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  align-content: center;
+  border-bottom: 0.2px solid rgba(102, 80, 80, 0.1);
+  margin-bottom: 20px;
 }
+
 .dropdown-elem {
   margin-bottom: 20px;
   max-width: 300px;
@@ -230,6 +251,7 @@ export default Vue.extend({
   flex-direction: row;
   align-self: center;
 }
+
 .show-favorite-checkbox {
   margin-left: 5px;
 }
@@ -287,11 +309,13 @@ export default Vue.extend({
     padding-left: 2em;
     justify-content: center;
   }
+
   .stars-elem {
-  margin-bottom: 20px;
-  max-width: 500px;
-  width: 100%;
-}
+    margin-bottom: 20px;
+    max-width: 500px;
+    width: 100%;
+  }
+
   li.weapon {
     display: inline-block;
     margin: auto;
@@ -299,14 +323,14 @@ export default Vue.extend({
 }
 
 .sold {
-    height: 40px;
-    width: 230px;
-    background-color: rgb(187, 33, 0);
-    transform: rotate(15deg);
-    left: -20px;
-    position: absolute;
-    top: 110px;
-    z-index: 100;
+  height: 40px;
+  width: 230px;
+  background-color: rgb(187, 33, 0);
+  transform: rotate(15deg);
+  left: -20px;
+  position: absolute;
+  top: 110px;
+  z-index: 100;
 }
 
 .sold span {
