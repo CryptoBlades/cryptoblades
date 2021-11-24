@@ -174,7 +174,7 @@
     },
     "links": {},
     "address": "0xcAFAAF5064bCA5cB596A73428006A71C57Ed480a",
-    "transactionHash": "0xc074e5cdafa046552463630f4c115ac8756649c81a195c94cca25840c75f7794"
+    "transactionHash": "0xd45d55d8ee9ab7067c953dfe46c729006ee5449dfa6ab340a1a16874176cc6e0"
   },
   "build/contracts/CBKLand.json": {
     "events": {
@@ -788,7 +788,7 @@
     },
     "links": {},
     "address": "0x236777456dD5159Da6c38A0E24f46e30C6f9e326",
-    "transactionHash": "0xaf6b2b4d587ad42c6567c54d8218094712f920df52bcdf7609e1c14dc0c70d43"
+    "transactionHash": "0x178fd60b7d23ddc249909117220023691d89fa7e4f5b0380d0ef22548a61ddc4"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -1852,7 +1852,7 @@
     },
     "links": {},
     "address": "0x6A1d1803d4EDF5CF27EDb64ae95A22F81707eA38",
-    "transactionHash": "0x7987bdec0826bfc91b3f154d027c9405cd590e6f121e1e66ac766083813fdf9f"
+    "transactionHash": "0x7db3e2dfa3e8b7a45d6212d2e66a93cb3a5bea5abf8c6ad9c997b93f84144f35"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2134,7 +2134,7 @@
     },
     "links": {},
     "address": "0x98145a2fEBac238280bbdEDc2757dC162318b16e",
-    "transactionHash": "0xcbc717fa9a8d782daf1489c17e2e3e069ddeef8423759830b406fda36d55fa86"
+    "transactionHash": "0xb3b6d6431f4c6726922f32a82c027ff2fd30c64789a70f27cf7e15b694c152e5"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
@@ -2513,10 +2513,124 @@
     "transactionHash": "0xdededfdfe98c63d1cf5b71984fac44963a09e43e0a75a1c85e096c23f98c8c93"
   },
   "build/contracts/Merchandise.json": {
-    "events": {},
+    "events": {
+      "0xf6f21bda482268b6851cb7d134c9ef42acd2e610afc2ce82688cd2799adacca3": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "buyer",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "orderId",
+            "type": "uint256"
+          }
+        ],
+        "name": "OrderPlaced",
+        "type": "event"
+      },
+      "0x15fe7663e318fda785235fa9e39aa6923ffd39fe53631991197fb842f34f6ba9": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "orderId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint8",
+            "name": "newStatus",
+            "type": "uint8"
+          }
+        ],
+        "name": "OrderStatusChanged",
+        "type": "event"
+      },
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
     "links": {},
     "address": "0x3b20013A190aE6781c013B2506F8a164e7A8816b",
-    "transactionHash": "0x94a9744b35ac88011c4b84ecb66736b44d2ac8ec5feba4f3778c87401e1c272f"
+    "transactionHash": "0x39fec275ab38b00312c034e852100a68fe4b0a5cbdc3f85e214adec95cd1da14"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -2771,7 +2885,7 @@
     "events": {},
     "links": {},
     "address": "0x7f25686b5a211280C2555c08B7e6d2930e7e87e6",
-    "transactionHash": "0x2335228e68edd30e58c12d45833dd6b892ca56f42e4014b05964fb3dc9e8a3dc"
+    "transactionHash": "0x0a870561dde6b4cbe4c74e324afee7de57d6a54c0ce322becbf564b9533bdf7e"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -2859,7 +2973,7 @@
     "events": {},
     "links": {},
     "address": "0x29F8917c2E6e6bAcc9FD813354bCBEd8A8dD89E3",
-    "transactionHash": "0x4e74624b19908d9374e1da5d8e7a0677dcca7ef8de16b79ef1fdd31da9c6b45d"
+    "transactionHash": "0x2d04378e771623a4229c9ceb6a3643992f370e72a814c8d1f589cf5ab5b2c1d6"
   },
   "build/contracts/RaidBasic.json": {
     "events": {},
@@ -3987,6 +4101,6 @@
     },
     "links": {},
     "address": "0x364759180A6484e57ECD73C042264A6Da75770e8",
-    "transactionHash": "0x3e5d43dea3cdf00c686c22993fc16954e00d637627071e566f1ef9b2223cace3"
+    "transactionHash": "0x508649022c261bef17ac2bf612e57f75a8c18bc4121cbb95eaef2f31140c3e0e"
   }
 }

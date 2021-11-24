@@ -1689,6 +1689,16 @@ export function createStore(web3: Web3) {
         return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(state));
       },
 
+      async fetchAllowanceTimestamp({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.vars(6).call(defaultCallOptions(state));
+      },
+      async fetchHourlyAllowance({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.vars(18).call(defaultCallOptions(state));
+      },
       async fetchRemainingTokenClaimAmountPreTax({ state }) {
         if(!_.isFunction(state.contracts)) return;
         const { CryptoBlades } = state.contracts();
@@ -2419,7 +2429,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           nftMarketFuctions => nftMarketFuctions.addFee(),
-          { allowInGameOnlyFunds: false },
+          { allowInGameOnlyFunds: false, allowSkillRewards: false },
         );
 
         const res = await NFTMarket.methods
@@ -2457,7 +2467,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           nftMarketFuctions => nftMarketFuctions.changeFee(),
-          { allowInGameOnlyFunds: false },
+          { allowInGameOnlyFunds: false, allowSkillRewards: false },
         );
 
         const res = await NFTMarket.methods
@@ -3254,10 +3264,9 @@ export function createStore(web3: Web3) {
 
         window.location.reload();
       },
-      async storeItem({ state }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+      async storeItem({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
-        console.log('storeItem', nftContractAddr,' ',tokenId);
         const NFTContract: Contract<IERC721> =
           nftContractAddr === Weapons.options.address
             ? Weapons : nftContractAddr === Characters.options.address
@@ -3271,6 +3280,12 @@ export function createStore(web3: Web3) {
           .send({
             from: state.defaultAccount,
           });
+
+        if(nftContractAddr === Weapons.options.address)
+          await dispatch('updateWeaponIds');
+        else if(nftContractAddr === Characters.options.address)
+          await dispatch('updateCharacterIds');
+
         return res;
       },
       async getStorageItemIds({ state }, { nftContractAddr }: { nftContractAddr: string}) {
@@ -3293,36 +3308,37 @@ export function createStore(web3: Web3) {
 
         return res;
       },
-      async withdrawFromStorage({ state }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
-        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
-        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
-        /*
-        const NFTContract: Contract<IERC721> =
-          nftContractAddr === Weapons.options.address
-            ? Weapons : nftContractAddr === Characters.options.address
-              ? Characters : Shields;
+      async withdrawFromStorage({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+        const { NFTStorage, Weapons, Characters } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !state.defaultAccount) return;
 
-
-        await NFTContract.methods
-          .approve(NFTStorage.options.address, tokenId)
-          .send(defaultCallOptions(state));
-        */
         await NFTStorage.methods
           .withdrawFromStorage(nftContractAddr, tokenId)
           .send({
             from: state.defaultAccount,
           });
+
+        if(nftContractAddr === Weapons.options.address)
+          await dispatch('updateWeaponIds');
+        else if(nftContractAddr === Characters.options.address)
+          await dispatch('updateCharacterIds');
+
       },
-      async bridgeItem({ state }, { nftContractAddr, tokenId, targetChain}: { nftContractAddr: string, tokenId: string, targetChain: string}) {
-        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
-        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
-        console.log('bridgeItem', nftContractAddr,' ',tokenId, ' ',targetChain);
+      async bridgeItem({ state, dispatch }, { nftContractAddr, tokenId, targetChain, bridgeFee }:
+      { nftContractAddr: string, tokenId: string, targetChain: string, bridgeFee: string }) {
+        const { NFTStorage, CryptoBlades, SkillToken } = state.contracts();
+        if (!NFTStorage || !CryptoBlades || !SkillToken || !state.defaultAccount) return;
+
+        await SkillToken.methods
+          .approve(CryptoBlades.options.address, bridgeFee)
+          .send(defaultCallOptions(state));
 
         await NFTStorage.methods
           .bridgeItem(nftContractAddr, tokenId, targetChain)
           .send({
             from: state.defaultAccount,
           });
+        dispatch('fetchSkillBalance');
       },
       async getNFTChainId({state}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
         const { NFTStorage } = state.contracts();
@@ -3349,8 +3365,8 @@ export function createStore(web3: Web3) {
         return response;
       },
       async withdrawFromBridge({ state }, {tokenId}: {tokenId: string}) {
-        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
-        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage || !state.defaultAccount) return;
         await NFTStorage.methods
           .withdrawFromBridge(tokenId)
           .send({
@@ -3358,8 +3374,8 @@ export function createStore(web3: Web3) {
           });
       },
       async cancelBridge({ state }) {
-        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
-        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage || !state.defaultAccount) return;
         await NFTStorage.methods
           .cancelBridge()
           .send({
@@ -3382,6 +3398,14 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
         return res;
       },
+      async chainEnabled({ state }, { chainId }: { chainId: string }) {
+        const { NFTStorage } = state.contracts();
+        if (!NFTStorage || !state.defaultAccount) return;
+        const isEnabled = await NFTStorage.methods
+          .chainBridgeEnabled(chainId)
+          .call(defaultCallOptions(state));
+        return isEnabled;
+      }
     },
   });
 }

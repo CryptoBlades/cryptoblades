@@ -84,7 +84,7 @@
     },
     "links": {},
     "address": "0x970Ea2c182199A38ed6d991B730A5a9638B1a399",
-    "transactionHash": "0x35fdf9acd1ae5a266665ecc349e7c0fef6f1d0e7b49cc26e8a2e57860b0ee5bb"
+    "transactionHash": "0x1be9d53d6218d9c1ced84abe34b0d2422daee9f7ecd96717d282ab356462d53e"
   },
   "build/contracts/CBKLand.json": {
     "events": {
@@ -493,7 +493,7 @@
     },
     "links": {},
     "address": "0x95047Fd99EF9dF86Dc11c051102884fA6e0eddbe",
-    "transactionHash": "0x5c9ce5e2315b62d70c1c3ae2239d70f56963c65891990468700d45fc072c7a89"
+    "transactionHash": "0x6655b5451b510b8af8ccc0b0f31a56d73f2fbf26062e4ef9998151c70e88d8cb"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -1768,10 +1768,124 @@
     "transactionHash": "0xb994553f5e8c77940c9af746bd56493f521045790dfbc8f87b2a26080e4b176d"
   },
   "build/contracts/Merchandise.json": {
-    "events": {},
+    "events": {
+      "0xf6f21bda482268b6851cb7d134c9ef42acd2e610afc2ce82688cd2799adacca3": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "buyer",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "orderId",
+            "type": "uint256"
+          }
+        ],
+        "name": "OrderPlaced",
+        "type": "event"
+      },
+      "0x15fe7663e318fda785235fa9e39aa6923ffd39fe53631991197fb842f34f6ba9": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "orderId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint8",
+            "name": "newStatus",
+            "type": "uint8"
+          }
+        ],
+        "name": "OrderStatusChanged",
+        "type": "event"
+      },
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
     "links": {},
     "address": "0x168470C8A5a244aEE5a01B8D812F2069dB2038aE",
-    "transactionHash": "0x3c6144a9357a0334735c0b3cc9bf277a1a25a1408ca2353d993a23d787e8e521"
+    "transactionHash": "0xef56adaa5a014b8967a2ef114a1156bc8215d73dfefec0c6df93ef5def640bc8"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -1989,7 +2103,7 @@
     "events": {},
     "links": {},
     "address": "0x32Abf3872b1399E8C17FCA1c574A02096B339e3F",
-    "transactionHash": "0x1cfc9f0ae23e12c8915fff2d6e705ade01ae14a5b33ca6b028e2eb1e5478ae1e"
+    "transactionHash": "0x0cd85784a5188ac6711f87825fa5c55160b673c4fbc5995c396828ae6aac5d69"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -3247,6 +3361,6 @@
     },
     "links": {},
     "address": "0x7E091b0a220356B157131c831258A9C98aC8031A",
-    "transactionHash": "0x34fb0c73f830daf569a52769aee65b3f2d96d95fc753bce68b8556c36a612ed9"
+    "transactionHash": "0xb85f7c3198eade2dda63ae604d3e962bd557853529bdd20bc0877665b1f20872"
   }
 }
