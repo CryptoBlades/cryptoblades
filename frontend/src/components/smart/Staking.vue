@@ -11,7 +11,7 @@
           <h1 class="no-margin center-text">{{$t('stake.rewardsAvailable')}}</h1>
           <p class="center-text">{{$t('stake.have')}}</p>
           <p class="center-text selectable">
-            {{ currentRewardEarned.toFixed(18) }} SKILL
+            {{ currentRewardEarned.toFixed(18) }} {{stakingRewardsName}}
           </p>
           <p class="center-text">{{$t('stake.toBeClaimed')}}</p>
           <button
@@ -205,7 +205,19 @@ export default {
     unlockTimeLeftInternal() { return this.stakeData.unlockTimeLeft; },
 
     stakingTokenName() {
-      return this.stakeType === 'skill' || this.stakeType === 'skill2' ? 'SKILL' : 'SKILL-WBNB';
+      switch(this.stakeType) {
+      case 'skill':
+        return 'SKILL';
+      case 'king':
+        return 'KING';
+      default:
+        return 'SKILL-WBNB';
+      }
+    },
+
+    stakingRewardsName() {
+      if(this.stakeType === 'king') return 'KING';
+      return 'SKILL';
     },
 
     minimumStakeTimeFormatted() {
