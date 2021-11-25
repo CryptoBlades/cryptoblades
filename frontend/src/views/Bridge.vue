@@ -388,6 +388,8 @@ export default Vue.extend({
     canBridge(){
       if (!this.canAffordBridge) return false;
 
+      else if(!this.enabledChains.length) return false;
+
       else if(this.transferStatus === transferStates.done && this.currentTransferNFTId === String(this.selectedNftId)) return false;
 
       else if(this.transferStatus === transferStates.pending || this.transferStatus === this.transferStates.processing) return false;
