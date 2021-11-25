@@ -390,8 +390,6 @@ export default Vue.extend({
 
       else if(this.transferStatus === transferStates.done && this.currentTransferNFTId === String(this.selectedNftId)) return false;
 
-      else if(this.transferStatus === transferStates.restored && this.currentTransferNFTId !== String(this.selectedNftId)) return false;
-
       else if(this.transferStatus === transferStates.pending || this.transferStatus === this.transferStates.processing) return false;
 
       else if(this.selectedNftId === '') return false;
