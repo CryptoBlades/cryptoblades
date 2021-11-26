@@ -17,6 +17,10 @@
               <span>Character ID</span>
               <span class="fighter-id">{{characterId}}</span>
               </div>
+              <div>
+              <span>Remaining Wager</span>
+              <span class="fighter-id">{{getWageredSkill}}</span>
+              </div>
           </div>
         </div>
         <div class="fighter-back">
