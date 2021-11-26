@@ -54,6 +54,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     Raid1 public raids;
     IRandoms public randoms;
 
+
     /// @dev how much of a duel's bounty is sent to the rankings pool
     uint8 private _rankingsPoolTaxPercent;
     /// @dev how many times the cost of battling must be wagered to enter the arena
@@ -91,8 +92,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
     /// @dev defender is in a duel that has not finished processing.
-    mapping(uint256 => bool) public characterDefending;
-    /// @dev last ranked season the character was active in
     mapping(uint256 => uint256) public seasonByCharacter;
     /// @dev excess wager by character for when they re-enter the arena
     mapping(uint256 => uint256) public excessWagerByCharacter;
@@ -114,6 +113,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => uint256) private _rankingsPoolByTier;
     /// @dev ranking by tier
     mapping(uint8 => uint256[]) private _rankingByTier;
+    /// @dev defender is in a duel that has not finished processing
+    mapping(uint256 => bool) public characterDefending;
+
+
 
     event NewDuel(
         uint256 indexed attacker,
@@ -320,6 +323,40 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         for (uint256 i = 0; i < _duelQueue.length(); i++) {
             _duelQueue.remove(_duelQueue.at(i));
         }
+    }
+
+    // This function is used for debugging, remove later.
+    function forceRemoveCharacterFromArena(uint256 characterID) external restricted {
+        require(isCharacterInArena(characterID), "Character not in arena");
+        Fighter storage fighter = fighterByCharacter[characterID];
+
+        uint256 weaponID = fighter.weaponID;
+        uint256 shieldID = fighter.shieldID;
+
+        excessWagerByCharacter[characterID] = fighter.wager;
+
+        delete fighterByCharacter[characterID];
+        delete duelByAttacker[characterID];
+
+        characterDefending[characterID] = false;
+
+        _fightersByPlayer[msg.sender].remove(characterID);
+
+        if (_duelQueue.contains(characterID)) {
+            _duelQueue.remove(characterID);
+        }
+
+        uint8 tier = getArenaTier(characterID);
+
+        _fightersByTier[tier].remove(characterID);
+
+        _charactersInArena[characterID] = false;
+        _weaponsInArena[weaponID] = false;
+        _shieldsInArena[shieldID] = false;
+        // setting characters, weapons and shield NFTVAR_BUSY to 0
+        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 0);
+        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 0);
+        shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
     }
 
     /// @dev performs all queued duels
