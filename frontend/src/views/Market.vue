@@ -679,17 +679,6 @@
             </div>
             <img class="shop-horizontal-divider" src="../assets/divider4.png" />
           </div>
-          <div class="row">
-            <div class="col-sm-12 centered-text">
-              <h3>Merchandise</h3>
-            </div>
-            <img class="shop-horizontal-divider-top" src="../assets/divider4.png" />
-          </div>
-          <div class="col-sm-12 merchandise-shop-items">
-            <div class="shop-items">
-              <merchandise-list />
-            </div>
-          </div>
         </div>
       </b-tab>
       <b-tab @click="clearData();browseTabActive = false;skillShopTabActive = false">
