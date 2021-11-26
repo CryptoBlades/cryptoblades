@@ -171,8 +171,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     function joinRaid(uint256 characterID, uint256 weaponID) public {
         // owner and stamina/durability checks in the fightdata functions
         //check if weapon is busy
+        require(characters.getNftVar(characterID, characters.NFTVAR_BUSY()) == 0, "Character is busy");
         require(weapons.getNftVar(weaponID, weapons.NFTVAR_BUSY()) == 0, "Weapon is busy");
-        require(characters.getNftVar(characterID, characters.NFTVAR_BUSY()) == 0, "Weapon is busy");
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 

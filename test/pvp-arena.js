@@ -2502,7 +2502,7 @@ contract("PvpArena", (accounts) => {
       expect(didBalanceTwoGrowAgain).to.equal(false);
     });
   });
-  describe("#InteractionsWithOtherContracts", () => {
+  describe.only("#InteractionsWithOtherContracts", () => {
     let character1ID;
     let character2ID;
     let weapon1ID;
@@ -2566,7 +2566,7 @@ contract("PvpArena", (accounts) => {
       character1ID = await createCharacterInPvpTier(accounts[0], 1);
 
       await expectRevert(
-        characters.getFightDataAndDrainStamina(character1ID, 0, 0),
+        characters.getFightDataAndDrainStamina(accounts[0], character1ID, 0, 0),
         "Character is busy"
       );
     });
