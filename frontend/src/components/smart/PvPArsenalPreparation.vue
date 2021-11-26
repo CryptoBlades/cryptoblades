@@ -61,7 +61,12 @@
                     </div>
                     <div class="equipped-weapon-content no-equip"
                       v-if="this.pvp.isCharacterInArena">
-                        Character is in arena
+                      <div>
+                        <pvp-weapon
+                          :weapon="this.pvp.attackerFighter.weapon"
+                          :inPvP="false"
+                          :isEquipContainer="true"></pvp-weapon>
+                      </div>
                     </div>
                   </b-col>
                 </b-row>
@@ -93,7 +98,12 @@
                     </div>
                     <div class="equipped-shield-content no-equip"
                       v-if="this.pvp.isCharacterInArena">
-                        Character is in arena
+                      <div>
+                        <pvp-shield
+                          :shield="this.pvp.attackerFighter.shield"
+                          :inPvP="false"
+                          :isEquipContainer="true"></pvp-shield>
+                      </div>
                     </div>
 
                   </b-col>
