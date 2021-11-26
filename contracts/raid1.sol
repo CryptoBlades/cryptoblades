@@ -169,17 +169,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function joinRaid(uint256 characterID, uint256 weaponID) public {
-        require(characters.canRaid(msg.sender, characterID));
-
+        // owner and stamina/durability checks in the fightdata functions
         //check if weapon is busy
         require(weapons.getNftVar(weaponID, weapons.NFTVAR_BUSY()) == 0, "Weapon is busy");
         require(characters.getNftVar(characterID, characters.NFTVAR_BUSY()) == 0, "Weapon is busy");
-        /*require(characters.ownerOf(characterID) == msg.sender);
-        require(weapons.ownerOf(weaponID) == msg.sender);
-        require(characters.getStaminaPoints(characterID) > 0, "You cannot join with 0 character stamina");
-        require(weapons.getDurabilityPoints(weaponID) > 0, "You cannot join with 0 weapon durability");*/
-        // owner and stamina/durability checks in the fightdata functions
-
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
