@@ -679,15 +679,21 @@
             </div>
             <img class="shop-horizontal-divider" src="../assets/divider4.png" />
           </div>
+        </div>
+      </b-tab>
+      <b-tab @click="clearData();browseTabActive = false;skillShopTabActive = false">
+        <template #title>
+          Merchandise
+          <hint class="hint" text="You can buy real merchandise in here" />
+        </template>
+
+        <div>
           <div class="row">
-            <div class="col-sm-12 centered-text">
-              <h3>Merchandise</h3>
-            </div>
-            <img class="shop-horizontal-divider-top" src="../assets/divider4.png" />
+            <img class="shop-horizontal-divider-top" src="../assets/divider4.png"  alt=""/>
           </div>
           <div class="col-sm-12 merchandise-shop-items">
             <div class="shop-items">
-              <merchandise-list />
+              <MerchandiseList />
             </div>
           </div>
         </div>
@@ -709,7 +715,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { Accessors } from 'vue/types/options';
 import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons, Shields } from '../../../build/abi-interfaces';
-import { SkillShopListing } from '../interfaces/SkillShopListing';
+import { SkillShopListing } from '@/interfaces/SkillShopListing';
 import BigNumber from 'bignumber.js';
 import { traitNameToNumber } from '@/contract-models';
 import { market_blockchain as useBlockchain } from './../feature-flags';
@@ -717,10 +723,10 @@ import { CharacterTransactionHistoryData, ICharacterHistory,
   IWeaponHistory, WeaponTransactionHistoryData,
   IShieldHistory, ShieldTransactionHistoryData } from '@/interfaces/History';
 import { getShieldNameFromSeed } from '@/shield-name';
-import { fromWeiEther, apiUrl } from '../utils/common';
+import { fromWeiEther, apiUrl } from '@/utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
 import MerchandiseList from '@/components/smart/MerchandiseList.vue';
-import { getCleanName } from '../rename-censor';
+import { getCleanName } from '@/rename-censor';
 import i18n from '@/i18n';
 import { toInteger } from 'lodash';
 
