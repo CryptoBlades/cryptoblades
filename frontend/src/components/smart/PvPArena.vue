@@ -168,6 +168,11 @@
             </span>
             <span
               class="duel-result-rewards-won-value">+ {{winningPoints}}</span><br>
+               <span
+              class="duel-result-rewards-label">NEW RANK
+            </span>
+            <span
+              class="duel-result-rewards-won-value">{{getNewRankAfterVictory}}</span><br>
         </div>
         <div class="duel-result-rewards"
           v-if="!duelResult.attackerWon">
@@ -181,6 +186,11 @@
             </span>
             <span
               class="duel-result-rewards-lost-value">- {{losingPoints}}</span><br>
+              <span
+              class="duel-result-rewards-label">NEW RANK
+            </span>
+            <span
+              class="duel-result-rewards-lost-value">{{getNewRankAfterLoss}}</span><br>
         </div>
 
         <div class="duel-result-ok-button">
@@ -272,6 +282,14 @@ export default {
     getWageredSkill(){
       const wageredSkill = new BN(this.pvp.wageredSkill).div(new BN(10).pow(18)).toFixed(4);
       return wageredSkill;
+    },
+
+    getNewRankAfterVictory() {
+      return +(this.pvp.characterRankingPoints) + +(this.winningPoints);
+    },
+
+    getNewRankAfterLoss() {
+      return +(this.pvp.characterRankingPoints) - +(this.losingPoints) < 0 ? 0 : +(this.pvp.characterRankingPoints) - +(this.losingPoints);
     },
 
     getRewardsArenaTier(){
