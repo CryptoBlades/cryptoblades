@@ -9,10 +9,6 @@ import "./util.sol";
 import "./interfaces/ITransferCooldownable.sol";
 import "./PvpArena.sol";
 
-import "./interfaces/ITransferCooldownable.sol";
-import "./PvpArena.sol";
-
-
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
