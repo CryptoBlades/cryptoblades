@@ -27,6 +27,7 @@
             id="inventory-weapon-trait-1">
               <span>
                 <img
+                  v-if="weapon.stat1Type <= 3"
                   class="inventory-weapon-trait-img"
                   :src="getElementIcon(weapon.stat1Type)"/>
                     <span :class="getElementColor(weapon.stat1Type)">{{weapon.stat1}}</span>
@@ -38,6 +39,7 @@
             id="inventory-weapon-trait-2">
               <span>
                 <img
+                  v-if="weapon.stat2Type <= 3"
                   class="inventory-weapon-trait-img"
                   :src="getElementIcon(weapon.stat2Type)"/>
                     <span :class="getElementColor(weapon.stat2Type)">{{weapon.stat2}}</span>
@@ -49,6 +51,7 @@
             id="inventory-weapon-trait-3">
               <span>
                 <img
+                  v-if="weapon.stat3Type <= 3"
                   class="inventory-weapon-trait-img"
                   :src="getElementIcon(weapon.stat3Type)"/>
                     <span :class="getElementColor(weapon.stat3Type)">{{weapon.stat3}}</span>
@@ -76,6 +79,7 @@
           id="inventory-equipped-weapon-trait-1">
             <span>
               <img
+                v-if="weapon.stat1Type <= 3"
                 class="inventory-equipped-weapon-trait-img"
                 :src="getElementIcon(weapon.stat1Type)"/>
                   <span :class="getElementColor(weapon.stat1Type)">{{weapon.stat1}}</span>
@@ -87,6 +91,7 @@
           id="inventory-equipped-weapon-trait-2">
             <span>
               <img
+                v-if="weapon.stat2Type <= 3"
                 class="inventory-equipped-weapon-trait-img"
                 :src="getElementIcon(weapon.stat2Type)"/>
                   <span :class="getElementColor(weapon.stat2Type)">{{weapon.stat2}}</span>
@@ -98,6 +103,7 @@
           id="inventory-equipped-weapon-trait-3">
             <span>
               <img
+                v-if="weapon.stat3Type <= 3"
                 class="inventory-equipped-weapon-trait-img"
                 :src="getElementIcon(weapon.stat3Type)"/>
                   <span :class="getElementColor(weapon.stat3Type)">{{weapon.stat3}}</span>
