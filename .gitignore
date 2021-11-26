@@ -2,7 +2,6 @@ build/
 build-*/
 node_modules/
 .openzeppelin/unknown-1337.json
-.openzeppelin/unknown-31337.json
 .netlify
 .env
 *.log
