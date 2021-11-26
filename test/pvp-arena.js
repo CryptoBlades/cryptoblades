@@ -1699,7 +1699,7 @@ contract("PvpArena", (accounts) => {
       });
     });
 
-    describe("#reRollOpponent", () => {
+    describe.only("#reRollOpponent", () => {
       it("should fail if character is not dueling", async () => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 2);
         await createCharacterInPvpTier(accounts[2], 2);
