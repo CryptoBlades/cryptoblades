@@ -62,7 +62,7 @@ module.exports = {
         process.env.BINANCE_WALLET_PRIVATE_KEY,
         process.env.BINANCE_WALLET_MNEMONIC,
         {
-          providerOrUrl: 'https://data-seed-prebsc-2-s2.binance.org:8545/'
+          providerOrUrl: process.env.BINANCE_TESTNET_RPC_URL || 'https://data-seed-prebsc-2-s2.binance.org:8545/'
         }
       )),
       network_id: 0x61,
@@ -76,7 +76,7 @@ module.exports = {
         process.env.BINANCE_MAINNET_WALLET_PRIVATE_KEY,
         process.env.BINANCE_MAINNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: 'https://bsc-dataseed.binance.org/'
+          providerOrUrl: process.env.BINANCE_MAINNET_RPC_URL || 'https://bsc-dataseed.binance.org/'
         }
       )),
       network_id: 0x38,
@@ -90,7 +90,7 @@ module.exports = {
         process.env.HECO_TESTNET_WALLET_PRIVATE_KEY,
         process.env.HECO_TESTNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: 'wss://ws-testnet.hecochain.com'
+          providerOrUrl: process.env.HECO_TESTNET_RPC_URL || 'wss://ws-testnet.hecochain.com'
         }
       )),
       gasPrice: 1000000000,
@@ -105,7 +105,7 @@ module.exports = {
         process.env.HECO_MAINNET_WALLET_PRIVATE_KEY,
         process.env.HECO_MAINNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: 'https://http-mainnet-node.huobichain.com'
+          providerOrUrl: process.env.HECO_MAINNET_RPC_URL || 'https://http-mainnet-node.huobichain.com'
         }
       )),
       network_id: 0x80,
@@ -119,7 +119,7 @@ module.exports = {
         process.env.OKEX_TESTNET_WALLET_PRIVATE_KEY,
         process.env.OKEX_TESTNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: 'https://exchaintestrpc.okex.org',
+          providerOrUrl: process.env.OKEX_TESTNET_RPC_URL || 'https://exchaintestrpc.okex.org',
           pollingInterval: 10000000,
         }
       )),
@@ -133,7 +133,7 @@ module.exports = {
         process.env.OKEX_MAINNET_WALLET_PRIVATE_KEY,
         process.env.OKEX_MAINNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: 'https://exchainrpc.okex.org'
+          providerOrUrl: process.env.OKEX_MAINNET_RPC_URL || 'https://exchainrpc.okex.org'
         }
       )),
       gasPrice: 1000000000,
@@ -148,7 +148,7 @@ module.exports = {
         process.env.POLYGON_TESTNET_WALLET_PRIVATE_KEY,
         process.env.POLYGON_TESTNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: 'wss://ws-matic-mumbai.chainstacklabs.com'
+          providerOrUrl: process.env.POLYGON_TESTNET_RPC_URL || 'wss://ws-matic-mumbai.chainstacklabs.com'
         }
       )),
       network_id: 80001,
@@ -161,7 +161,7 @@ module.exports = {
         process.env.POLYGON_MAINNET_WALLET_PRIVATE_KEY,
         process.env.POLYGON_MAINNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: 'https://polygon-rpc.com/'
+          providerOrUrl: process.env.POLYGON_MAINNET_RPC_URL || 'https://polygon-rpc.com/'
         }
       )),
       gasPrice: 30000000000,
@@ -175,7 +175,7 @@ module.exports = {
         process.env.AVAX_TESTNET_WALLET_PRIVATE_KEY,
         process.env.AVAX_TESTNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: 'https://api.avax-test.network/ext/bc/C/rpc'
+          providerOrUrl: process.env.AVAX_TESTNET_RPC_URL || 'https://api.avax-test.network/ext/bc/C/rpc'
         }
       )),
       network_id: 1, // 1 or * for deployment, 43113 for verification (for truffle-plugin-verify to pick up snowtracer api key)
@@ -189,7 +189,7 @@ module.exports = {
         process.env.AVAX_MAINNET_PRIVATE_KEY,
         process.env.AVAX_MAINNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: 'https://api.avax.network/ext/bc/C/rpc'
+          providerOrUrl: process.env.AVAX_MAINNET_RPC_URL || 'https://api.avax.network/ext/bc/C/rpc'
         }
       )),
       network_id: 1, // 1 or * for deployment, 43114 for verification (for truffle-plugin-verify to pick up snowtracer api key)
