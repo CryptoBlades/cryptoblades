@@ -340,6 +340,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         characterDefending[characterID] = false;
 
+        // FIXME: msg.sender might not be the intended player (can be opponent or bot)
         _fightersByPlayer[msg.sender].remove(characterID);
 
         if (_duelQueue.contains(characterID)) {
@@ -568,6 +569,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256[] memory values = new uint256[](length);
 
         for (uint256 i = 0; i < length; i++) {
+            // FIXME: The following line is a workaround. The issues is, when _removeCharacterFromArena is called through performDuels (via bot or winning player kicking another one), _fightersByPlayer[msg.sender] fails (as msg.sender is not the character's owner). FIX.
+            // ===
+            if (!isCharacterInArena(_fightersByPlayer[msg.sender].at(i))) continue;
+            // ===
             values[i] = _fightersByPlayer[msg.sender].at(i);
         }
 
@@ -786,9 +791,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         uint256 lastActivity = _lastActivityByCharacter[characterID];
 
-        require(!characterDefending[characterID], "Defender duel in process");
-
-        return lastActivity.add(unattackableSeconds) <= block.timestamp && !_duelQueue.contains(characterID);
+        return lastActivity.add(unattackableSeconds) <= block.timestamp && !_duelQueue.contains(characterID) && !characterDefending[characterID];    
     }
 
     /// @dev updates the last activity timestamp of a character
@@ -901,6 +904,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         require(!characterDefending[characterID], "Defender duel in process");
 
+        // FIXME: msg.sender might not be the intended player (can be opponent or bot)
         _fightersByPlayer[msg.sender].remove(characterID);
 
         if (_duelQueue.contains(characterID)) {
