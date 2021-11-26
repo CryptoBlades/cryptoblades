@@ -207,11 +207,15 @@ export default {
     stakingTokenName() {
       switch(this.stakeType) {
       case 'skill':
+      case 'skill2':
         return 'SKILL';
       case 'king':
         return 'KING';
-      default:
+      case 'lp':
+      case 'lp2':
         return 'SKILL-WBNB';
+      default:
+        return 'unknown';
       }
     },
 
