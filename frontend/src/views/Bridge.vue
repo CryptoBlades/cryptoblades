@@ -76,7 +76,10 @@
             </b-button>
           </div>
           <div class="p-2">
-            <b-button :disabled="selectedNftId === '' || currentTransferNFTId == selectedNftId" variant="primary"
+            <b-button :disabled="selectedNftId === '' ||
+            (currentTransferNFTId == selectedNftId && transferStatus != transferStates.restored) ||
+            !storedNftsIds.includes(String(selectedNftId))"
+            variant="primary"
               @click="withdrawItem()" class="gtag-link-others"
               tagname="click_transfer_bridge">Withdraw from <br> Storage</b-button>
           </div>
@@ -319,7 +322,7 @@ export default Vue.extend({
       ownerAddress: '',
       nftType: 'weapon',
       selectedNftId: '' as string,
-      storedNftsIds: [],
+      storedNftsIds: [] as string[],
       currentChain: '',
       targetChain: '',
       targetChainId: '',
@@ -389,6 +392,8 @@ export default Vue.extend({
       if (!this.canAffordBridge) return false;
 
       else if(!this.enabledChains.length) return false;
+
+      else if(!this.storedNftsIds.includes(String(this.selectedNftId))) return false;
 
       else if(this.transferStatus === transferStates.done && this.currentTransferNFTId === String(this.selectedNftId)) return false;
 
