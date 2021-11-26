@@ -11,7 +11,7 @@
         :disabled="!canClaimTokens"
         @click="claimSkill(ClaimStage.Summary)"
         v-tooltip.bottom="!canClaimTokens ? withdrawalInfoText : ''"><!-- moved gtag-link below b-nav-item -->
-        <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="'Click to claim and see the details'">
+        <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
           <strong>SKILL</strong> {{ formattedSkillReward }}
         </span>
       </b-nav-item>
@@ -30,13 +30,13 @@
 
       <b-nav-item-dropdown right>
         <template #button-content>
-          Rewards
+          {{$t('ClaimRewardsBar.rewards')}}
         </template>
 
         <b-dropdown-item
           :disabled="!canClaimTokens"
           @click="claimSkill(ClaimStage.Summary)" class="rewards-info gtag-link-others" tagname="claim_skill"
-           v-tooltip.bottom="'Click to claim and see the details'">
+           v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
             SKILL
             <div class="pl-3">{{ formattedSkillReward }}</div>
         </b-dropdown-item>
@@ -92,10 +92,10 @@
       </span>
       <b>{{$t('stakeModal.confirmModal.cantBeUndone')}}</b>
     </b-modal>
-    <b-modal class="centered-modal" ref="claim-summary-modal" title="Claim Rewards" ok-title="Claim" @ok="onClaimTokens()">
+    <b-modal class="centered-modal" ref="claim-summary-modal" :title="$t('ClaimRewardsBar.claimRewards')" :ok-title="$t('ClaimRewardsBar.claim')" @ok="onClaimTokens()">
       <div class="d-flex flex-column align-items-center">
         <div class="d-flex flex-row w-100 align-items-baseline">
-          <h5>Payout Currency:</h5>
+          <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
           <b-form-select class="w-50 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
             <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
             <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
@@ -107,7 +107,7 @@
           :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"/>
         <div class="mt-3" v-if="!selectedPartneredProject">
           <h5>{{withdrawalInfoText}}</h5>
-          <h6>Early withdraw tax: {{ formattedRewardsClaimTax }} Tax is being reduced by 1% per day. {{getTaxTimerNextTick}}</h6>
+          <h6>{{$t('ClaimRewardsBar.earlyWithdrawTax')}}: {{ formattedRewardsClaimTax }} {{$t('ClaimRewardsBar.taxReduce')}} {{getTaxTimerNextTick}}</h6>
         </div>
       </div>
     </b-modal>
@@ -126,7 +126,7 @@ import { secondsToDDHHMMSS } from '../../utils/date-time';
 import { getCleanName } from '../../rename-censor';
 import { SupportedProject } from '@/views/Treasury.vue';
 import PartneredProject from '../PartneredProject.vue';
-import i18n from '@/i18n'
+import i18n from '@/i18n';
 
 interface StoreMappedState {
   skillRewards: string;
