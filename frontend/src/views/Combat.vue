@@ -2,7 +2,7 @@
   <div class="body main-font">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <div class="row" v-if="error !== null">
-        <div class="col error">Error: {{ error }}</div>
+        <div class="col error">{{$t('combat.error')}} {{ error }}</div>
       </div>
 
       <b-modal id="fightResultsModal" hide-footer hide-header>
@@ -12,21 +12,21 @@
 
       <div class="row">
         <div class="col">
-          <div class="message-box" v-if="!currentCharacter">You need to select a character to do battle.</div>
+          <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
 
           <div class="row">
             <div class="col-12 col-md-2 offset-md-5 text-center">
               <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
-                You need {{ staminaPerFight }} stamina to do battle.
-                <h4>Stamina Cost Per Fight</h4>
+                {{$t('combat.needStamina', {staminaPerFight })}}
+                <h4>{{$t('combat.costStamina')}}</h4>
                 <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()" class="ml-3"></b-form-select>
               </div>
             </div>
           </div>
 
-          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">This weapon does not have enough durability.</div>
+          <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">{{$t('combat.errors.notEnoughDurability')}}</div>
 
-          <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">You cannot do battle during the last 30 seconds of the hour. Stand fast!</div>
+          <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
         </div>
       </div>
 
@@ -38,7 +38,7 @@
             <div class="col">
               <div class="waiting" v-if="waitingResults" margin="auto">
                 <i class="fas fa-spinner fa-spin"></i>
-                Waiting for fight results...
+                {{$t('combat.waiting')}}
               </div>
             </div>
           </div>
@@ -48,17 +48,15 @@
 
                 <div class="row mb-3 mt-3">
                   <div :class="['col-12', selectedWeaponId ? 'col-md-6 offset-md-3' : 'col-md-2 offset-md-5']">
-                    <h4>Stamina Cost per Fight</h4>
+                    <h4>{{$t('combat.costStamina')}}</h4>
                     <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
                   </div>
                 </div>
 
                 <div class="header-row weapon-header">
-                  <b>Choose a weapon</b>
+                  <b>{{$t('combat.chooseWeapon')}}</b>
                   <Hint
-                    text="Your weapon multiplies your power<br>
-                    <br>+Stats determine the multiplier
-                    <br>Stat element match with character gives greater bonus"
+                    :text="$t('combat.chooseWeaponHint')"
                   />
                 </div>
 
@@ -67,7 +65,7 @@
                 </div>
 
                 <b-button v-if="selectedWeaponId" variant="primary" class="ml-3" @click="selectedWeaponId = null" id="gtag-link-others" tagname="choose_weapon">
-                  Choose New Weapon
+                  {{$t('combat.chooseNewWeapon')}}
                 </b-button>
               </div>
 
@@ -79,9 +77,7 @@
                   <span class="fire-icon" /> » <span class="earth-icon" /> » <span class="lightning-icon" /> » <span class="water-icon" /> »
                   <span class="fire-icon" />
                   <Hint
-                    text="The elements affect power:<br>
-                    <br>Character vs Enemy: bonus or penalty as shown above
-                    <br>Character and Weapon match gives bonus"
+                    :text="$t('combat.elementHint')"
                   />
                 </div>
               </div>
@@ -94,15 +90,15 @@
                     </div>
 
                     <div class="">
-                      <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" alt="Enemy" />
+                      <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" :alt="$t('combat.enemy')" />
                     </div>
 
                     <div class="encounter-power">
-                      {{ e.power }} Power
+                      {{ e.power }} {{$t('combat.power')}}
                     </div>
 
                     <div class="xp-gain">
-                      +{{getPotentialXp(e)}} XP
+                      +{{getPotentialXp(e)}} {{$t('combat.xp')}}
                     </div>
 
                     <div class="skill-gain">
@@ -111,15 +107,15 @@
                 </div>
 
                 <div class="victory-chance">
-                  {{ getWinChance(e.power, e.trait) }} Victory
+                  {{ getWinChance(e.power, e.trait) }} {{$t('combat.victory')}}
                 </div>
                 <big-button
                       class="encounter-button btn-styled"
-                      :mainText="`Fight!`"
+                      :mainText="$t('combat.fight')"
                       :disabled="(timeMinutes === 59 && timeSeconds >= 30) || waitingResults || !weaponHasDurability(selectedWeaponId) || !charHasStamina()"
-                      @click="onClickEncounter(e)"
+                      @click="onClickEncounter(e,i)"
                     />
-                <p v-if="isLoadingTargets">Loading...</p>
+                <p v-if="isLoadingTargets">{{$t('combat.loading')}}</p>
                 </div>
               </div>
             </div>
@@ -129,11 +125,20 @@
 
       <div></div>
     </div>
-
+    <b-modal class="centered-modal" ref="no-skill-warning-modal" @ok="fightTarget(targetToFight,targetToFightIndex)">
+      <template #modal-title>
+        <b-icon icon="exclamation-circle" variant="danger"/> WARNING
+      </template>
+      <span>
+        You will not gain any SKILL from this fight, but you will still earn <b> XP </b>! <br>
+        Rewards will be filled in <b> {{minutesToNextAllowance}} </b> min. <br>
+        There were up to <b> {{lastAllowanceSkill}} </b> distributed during the last allowance.
+      </span>
+    </b-modal>
     <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
-      <div v-if="ownWeapons.length === 0">You do not currently have any weapons. You can forge one at the Blacksmith.</div>
+      <div v-if="ownWeapons.length === 0">{{$t('combat.noWeapons')}}</div>
 
-      <div v-if="ownCharacters.length === 0">You do not currently have any characters. You can recruit one at the Plaza.</div>
+      <div v-if="ownCharacters.length === 0">{{$t('combat.noCharacters')}}</div>
     </div>
   </div>
 </template>
@@ -167,6 +172,10 @@ export default {
       fightMultiplier: Number(localStorage.getItem('fightMultiplier')),
       staminaPerFight: 40,
       targetExpectedPayouts: new Array(4),
+      targetToFight: null,
+      targetToFightIndex: null,
+      minutesToNextAllowance: null,
+      lastAllowanceSkill: null,
     };
   },
 
@@ -186,7 +195,7 @@ export default {
       'currentCharacterStamina',
       'getWeaponDurability',
       'fightGasOffset',
-      'fightBaseline',
+      'fightBaseline'
     ]),
 
     targets() {
@@ -227,7 +236,8 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower']),
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
+      'fetchAllowanceTimestamp', 'fetchHourlyAllowance']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -256,8 +266,8 @@ export default {
       const enemyRange = enemyMax - enemyMin;
       let rollingTotal = 0;
       // shortcut: if it is impossible for one side to win, just say so
-      if (playerMin > enemyMax) return 'Very Likely';
-      if (playerMax < enemyMin) return 'Unlikely';
+      if (playerMin > enemyMax) return this.$t('combat.winChances.veryLikely');
+      if (playerMax < enemyMin) this.$t('combat.winChances.unlikely');
 
       // case 1: player power is higher than enemy power
       if (playerMin >= enemyMin) {
@@ -278,17 +288,41 @@ export default {
         //since this is chance the enemy wins, we negate it
         rollingTotal = 1 - rollingTotal;
       }
-      if (rollingTotal <= 0.3) return 'Unlikely';
-      if (rollingTotal <= 0.5) return 'Possible';
-      if (rollingTotal <= 0.7) return 'Likely';
-      return 'Very Likely';
+      if (rollingTotal <= 0.3) return this.$t('combat.winChances.unlikely');
+      if (rollingTotal <= 0.5) return this.$t('combat.winChances.possible');
+      if (rollingTotal <= 0.7) return this.$t('combat.winChances.likely');
+      return this.$t('combat.winChances.veryLikely');
     },
     getElementAdvantage(playerElement, enemyElement) {
       if ((playerElement + 1) % 4 === enemyElement) return 1;
       if ((enemyElement + 1) % 4 === playerElement) return -1;
       return 0;
     },
-    async onClickEncounter(targetToFight) {
+
+    async getNextAllowanceTime(){
+      const allowanceTimestamp = await this.fetchAllowanceTimestamp();
+      const currentTime = Math.round(Date.now() / 1000);
+      const minutesToNextAllowance = Math.round(60 - (currentTime - allowanceTimestamp)/60);
+      this.minutesToNextAllowance = minutesToNextAllowance;
+    },
+    async getHourlyAllowance(){
+      const fetchHourlyAllowance = await this.fetchHourlyAllowance();
+      this.lastAllowanceSkill = this.formattedSkill(fetchHourlyAllowance);
+    },
+    async onClickEncounter(targetToFight, targetIndex) {
+      if(this.targetExpectedPayouts[targetIndex] === '0'){
+        this.targetToFight = targetToFight;
+        this.targetToFightIndex = targetIndex;
+        await this.getHourlyAllowance();
+        await this.getNextAllowanceTime();
+        this.$refs['no-skill-warning-modal'].show();
+      }
+      else{
+        this.fightTarget(targetToFight, targetIndex);
+      }
+    },
+
+    async fightTarget(targetToFight, targetIndex){
       if (this.selectedWeaponId === null || this.currentCharacterId === null) {
         return;
       }
@@ -298,7 +332,7 @@ export default {
       // Force a quick refresh of targets
       await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
-      if (!this.targets.find((target) => target.original === targetToFight.original)) {
+      if (this.targets[targetIndex].original !== targetToFight.original) {
         this.waitingResults = false;
         return;
       }
@@ -311,7 +345,7 @@ export default {
         const results = await this.doEncounter({
           characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
-          targetString: targetToFight.original,
+          targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
         });
 
@@ -349,11 +383,11 @@ export default {
 
     setStaminaSelectorValues() {
       if(this.currentCharacterStamina < 40) {
-        return [{ value: this.fightMultiplier, text: 'You need more stamina to fight!', disabled: true}];
+        return [{ value: this.fightMultiplier, text: this.$t('combat.moreStamina'), disabled: true}];
       }
 
       const choices = [
-        {value: null, text: 'Please select Stamina Cost per Fight', disabled: true},
+        {value: null, text: this.$t('combat.pleaseSelect'), disabled: true},
       ];
 
       const addChoices = [];

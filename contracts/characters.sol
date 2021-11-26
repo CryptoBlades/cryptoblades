@@ -184,19 +184,32 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         emit NewCharacter(tokenID, minter);
     }
 
-    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed) minterOnly public returns (uint256) {
-        uint256 tokenID = tokens.length;
-
-        if(block.number != lastMintedBlock)
-            firstMintedOfLastBlock = tokenID;
-        lastMintedBlock = block.number;
-
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID) minterOnly public returns (uint256) {
         uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
 
-        tokens.push(Character(xp, level, trait, staminaTimestamp));
-        cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
-        _mint(minter, tokenID);
-        emit NewCharacter(tokenID, minter);
+        if(tokenID == 0){
+            tokenID = tokens.length;
+
+            if(block.number != lastMintedBlock)
+                firstMintedOfLastBlock = tokenID;
+            lastMintedBlock = block.number;
+
+            tokens.push(Character(xp, level, trait, staminaTimestamp));
+            cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
+            _mint(minter, tokenID);
+            emit NewCharacter(tokenID, minter);
+        }
+        else {
+            Character storage ch = tokens[tokenID];
+            ch.xp = xp;
+            ch.level = level;
+            ch.trait = trait;
+            ch.staminaTimestamp = staminaTimestamp;
+
+            CharacterCosmetics storage cc = cosmetics[tokenID];
+            cc.seed = seed;
+        }
+        
         return tokenID;
     }
 
@@ -288,10 +301,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint64(maxStamina * secondsPerStamina);
     }
 
-    function getFightDataAndDrainStamina(uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
+    function getFightDataAndDrainStamina(address fighter,
+        uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
+        require(fighter == ownerOf(id));
         Character storage char = tokens[id];
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
-        require(allowNegativeStamina || staminaPoints >= amount, "Not enough stamina!");
+        require((staminaPoints > 0 && allowNegativeStamina) // we allow going into negative, but not starting negative
+            || staminaPoints >= amount, "Not enough stamina!");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;
@@ -309,10 +325,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         raidsDone[id] = raidsDone[id] + 1;
         raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
         gainXp(id, xp);
-    }
-
-    function canRaid(address user, uint256 id) public view returns (bool) {
-        return ownerOf(id) == user && getStaminaPoints(id) > 0;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {

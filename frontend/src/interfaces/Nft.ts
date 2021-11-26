@@ -15,6 +15,8 @@ export interface Nft {
   nftPrice?: number;
   amount?: number;
   effect?: number;
+  tier?: number;
+  chunkId?: number;
 }
 
 export type NftType = 'weapon' | 'character' | 'shield';

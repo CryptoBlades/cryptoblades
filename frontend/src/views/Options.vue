@@ -7,7 +7,7 @@
             <img class="vertical-decoration bottom" src="../assets/border-element.png" />
           </div>
           <hr class="header-border header-border-top" />
-          <h2 class="linear-wipe">Options</h2>
+          <h2 class="linear-wipe">{{$t("options.title")}}</h2>
           <hr class="header-border header-border-bot" />
         </div>
       </div>
@@ -15,39 +15,39 @@
         <div class="col">
           <b-list-group class="dark-bg">
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>3D Graphics</h4>
+              <h4>{{$t("options.graphic")}}</h4>
               <b-form-checkbox size="lg" :checked="showGraphics" @change="toggleGraphics()" switch>
-                <b class="float-left">{{ showGraphics ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ showGraphics ? $t("on") : $t("off") }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>Hide Rewards Bar</h4>
+              <h4>{{$t("options.rewardBar")}}</h4>
               <b-form-checkbox size="lg" :checked="hideRewards" @change="toggleRewards()" switch>
-                <b class="float-left">{{ hideRewards ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ hideRewards ? $t("on") : $t("off")  }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>Hide Wallet Warning</h4>
+              <h4>{{$t("options.walletWarning")}}</h4>
               <b-form-checkbox size="lg" :checked="hideWalletWarning" @change="toggleHideWalletWarning()" switch>
-                <b class="float-left">{{ hideWalletWarning ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ hideWalletWarning ? $t("on") : $t("off")  }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>Show SKILL values in USD</h4>
+              <h4>{{$t("options.showSkillValues")}}</h4>
               <b-form-checkbox size="lg" :checked="showSkillInUsd" @change="toggleShowSkillInUsd()" switch>
-                <b class="float-left">{{ showSkillInUsd ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ showSkillInUsd ? $t("on") : $t("off") }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>Show Cosmetics</h4>
+              <h4>{{$t("options.showCosmetics")}}</h4>
               <b-form-checkbox size="lg" :checked="showCosmetics" @change="toggleShowCosmetics()" switch>
-                <b class="float-left">{{ showCosmetics ? 'On' : 'Off' }}</b>
+                <b class="float-left">{{ showCosmetics ? $t("on") : $t("off") }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>Stamina Cost per Fight</h4>
-              <b-form-select size="lg" v-model="fightMultiplier" @change="setFightMultiplier()">
-                <b-form-select-option :value="null" disabled>Please select Stamina Cost per Fight</b-form-select-option>
+              <h4>{{$t("options.staminaFight")}}</h4>
+              <b-form-select class="select-box" size="lg" v-model="fightMultiplier" @change="setFightMultiplier()">
+                <b-form-select-option :value="null" disabled>{{$t("options.selectStaminaFight")}}</b-form-select-option>
                 <b-form-select-option value="1">40</b-form-select-option>
                 <b-form-select-option value="2">80</b-form-select-option>
                 <b-form-select-option value="3">120</b-form-select-option>
@@ -61,6 +61,14 @@
                 <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
                 <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">
                   {{p.tokenSymbol}} ({{p.name}})
+                </b-form-select-option>
+              </b-form-select>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
+              <h4>{{$t("options.language")}}</h4>
+              <b-form-select class="select-box" size="lg" v-model="$i18n.locale">
+                <b-form-select-option v-for="(value, key) in languages" :key="key" :value="key">
+                  {{ value }}
                 </b-form-select-option>
               </b-form-select>
             </b-list-group-item>
@@ -89,6 +97,7 @@ import BigNumber from 'bignumber.js';
 import { Accessors } from 'vue/types/options';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../utils/common';
+import i18n from '../i18n';
 import { getConfigValue } from '@/contracts';
 import config from '../../app-config.json';
 import { SupportedProject } from './Treasury.vue';
@@ -208,6 +217,15 @@ export default Vue.extend({
       });
 
       return supportedProjects;
+    },
+
+    languages(): { [key: string]: string } {
+      const rObj: { [key: string]: string } = {};
+      for (const [key, value] of Object.entries(i18n.messages)) {
+        if(value.name.toString === null) continue;
+        rObj[key] = value.name.toString();
+      }
+      return rObj;
     }
   },
 
@@ -221,7 +239,6 @@ export default Vue.extend({
 
       Events.$emit('setting:useGraphics', { value: this.showGraphics });
     },
-
     toggleRewards() {
       this.hideRewards = !this.hideRewards;
       if (this.hideRewards) localStorage.setItem('hideRewards', 'true');
@@ -291,6 +308,11 @@ export default Vue.extend({
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
   },
+  watch: {
+    '$i18n.locale'(newVal, ) {
+      localStorage.setItem('language', newVal);
+    }
+  }
 });
 </script>
 
@@ -405,7 +427,9 @@ export default Vue.extend({
     }
   }
 }
-
+.select-box{
+  max-width:300px;
+}
 .fullscreen-warning {
   z-index: 999999;
 }

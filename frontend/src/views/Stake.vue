@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font">
     <staking class="staking" v-if="isKnownStakeType" :stakeType="stakeType" />
-    <h1 v-else>Unknown stake type, please try again.</h1>
+    <h1 v-else>{{$t('stake.unknownStakeType')}}</h1>
   </div>
 </template>
 

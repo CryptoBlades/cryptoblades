@@ -9,3 +9,5 @@ export const market = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_F
 export const market_blockchain = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG_MARKET_USE_BLOCKCHAIN + '').toLowerCase());
 
 export const portal = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG_PORTAL + '').toLowerCase());
+
+export const nft_bridge = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG_NFT_BRIDGE + '').toLowerCase());
