@@ -92,7 +92,8 @@
       </span>
       <b>{{$t('stakeModal.confirmModal.cantBeUndone')}}</b>
     </b-modal>
-    <b-modal class="centered-modal" ref="claim-summary-modal" :title="$t('ClaimRewardsBar.claimRewards')" :ok-title="$t('ClaimRewardsBar.claim')" @ok="onClaimTokens()">
+    <b-modal class="centered-modal" ref="claim-summary-modal" :title="$t('ClaimRewardsBar.claimRewards')"
+      :ok-title="$t('ClaimRewardsBar.claim')" @ok="onClaimTokens()">
       <div class="d-flex flex-column align-items-center">
         <div class="d-flex flex-row w-100 align-items-baseline">
           <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
