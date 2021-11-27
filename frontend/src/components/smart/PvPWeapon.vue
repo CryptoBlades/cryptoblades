@@ -26,10 +26,13 @@
             v-if="weapon.stars >=0 || weapon.stars <=2"
             id="inventory-weapon-trait-1">
               <span>
+                <span v-if="weapon.stat1Type > 3" class="inventory-weapon-trait-pwr">
+                </span>
+                <span v-if="weapon.stat1Type <= 3">
                 <img
-                  v-if="weapon.stat1Type <= 3"
                   class="inventory-weapon-trait-img"
                   :src="getElementIcon(weapon.stat1Type)"/>
+                </span>
                     <span :class="getElementColor(weapon.stat1Type)">{{weapon.stat1}}</span>
                     <span class="inventory-weapon-trait-value">{{weapon.stat1Value}}</span>
               </span>
@@ -38,10 +41,13 @@
             v-if="weapon.stars >= 3"
             id="inventory-weapon-trait-2">
               <span>
+                <span v-if="weapon.stat2Type > 3" class="inventory-weapon-trait-pwr">
+                </span>
+                <span v-if="weapon.stat2Type <= 3">
                 <img
-                  v-if="weapon.stat2Type <= 3"
                   class="inventory-weapon-trait-img"
                   :src="getElementIcon(weapon.stat2Type)"/>
+                </span>
                     <span :class="getElementColor(weapon.stat2Type)">{{weapon.stat2}}</span>
                     <span class="inventory-weapon-trait-value">{{weapon.stat2Value}}</span>
               </span>
@@ -50,10 +56,13 @@
             v-if="weapon.stars === 4"
             id="inventory-weapon-trait-3">
               <span>
+                <span v-if="weapon.stat3Type > 3" class="inventory-weapon-trait-pwr">
+                </span>
+                <span v-if="weapon.stat3Type <= 3">
                 <img
-                  v-if="weapon.stat3Type <= 3"
                   class="inventory-weapon-trait-img"
                   :src="getElementIcon(weapon.stat3Type)"/>
+                </span>
                     <span :class="getElementColor(weapon.stat3Type)">{{weapon.stat3}}</span>
                     <span class="inventory-weapon-trait-value">{{weapon.stat3Value}}</span>
               </span>
@@ -78,10 +87,13 @@
           v-if="weapon.stars >=0 || weapon.stars <=2"
           id="inventory-equipped-weapon-trait-1">
             <span>
+              <span v-if="weapon.stat1Type > 3" class="inventory-equipped-weapon-trait-pwr">
+              </span>
+              <span v-if="weapon.stat1Type <= 3">
               <img
-                v-if="weapon.stat1Type <= 3"
                 class="inventory-equipped-weapon-trait-img"
                 :src="getElementIcon(weapon.stat1Type)"/>
+              </span>
                   <span :class="getElementColor(weapon.stat1Type)">{{weapon.stat1}}</span>
                   <span class="inventory-equipped-weapon-trait-value">{{weapon.stat1Value}}</span>
             </span>
@@ -90,10 +102,13 @@
           v-if="weapon.stars >= 3"
           id="inventory-equipped-weapon-trait-2">
             <span>
+              <span v-if="weapon.stat2Type > 3" class="inventory-equipped-weapon-trait-pwr">
+              </span>
+              <span v-if="weapon.stat2Type <= 3">
               <img
-                v-if="weapon.stat2Type <= 3"
                 class="inventory-equipped-weapon-trait-img"
                 :src="getElementIcon(weapon.stat2Type)"/>
+              </span>
                   <span :class="getElementColor(weapon.stat2Type)">{{weapon.stat2}}</span>
                   <span class="inventory-equipped-weapon-trait-value">{{weapon.stat2Value}}</span>
             </span>
@@ -102,10 +117,13 @@
           v-if="weapon.stars === 4"
           id="inventory-equipped-weapon-trait-3">
             <span>
+              <span v-if="weapon.stat3Type > 3" class="inventory-equipped-weapon-trait-pwr">
+              </span>
+              <span v-if="weapon.stat3Type <= 3">
               <img
-                v-if="weapon.stat3Type <= 3"
                 class="inventory-equipped-weapon-trait-img"
                 :src="getElementIcon(weapon.stat3Type)"/>
+              </span>
                   <span :class="getElementColor(weapon.stat3Type)">{{weapon.stat3}}</span>
                   <span class="inventory-equipped-weapon-trait-value">{{weapon.stat3Value}}</span>
             </span>
@@ -292,9 +310,17 @@ export default {
   width: 20px;
 }
 
+.inventory-weapon-trait-pwr {
+  margin-left: 20px;
+}
+
 .inventory-equipped-weapon-trait-img {
   height: 15px;
   width: 15px;
+}
+
+.inventory-equipped-weapon-trait-pwr {
+  margin-left: 15px;
 }
 
 .inventory-weapon-trait-label-fire{
