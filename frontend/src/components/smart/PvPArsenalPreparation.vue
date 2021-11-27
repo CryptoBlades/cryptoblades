@@ -45,7 +45,7 @@
                         id="equipped-weapon"
                         @click="setCurrentTab(0); tickWeaponInventory(); ">
                       <div
-                        v-if="!this.pvp.isCharacterInArena"
+                        v-if="!this.pvp.isCharacterInArena && this.ownWeapons.length !== this.pvp.participatingWeapons.length"
                         class="equipped-weapon-content">
                         <pvp-weapon
                           v-if="this.ownWeapons.length !== 0"
@@ -56,8 +56,9 @@
                       </div>
                     </div>
                     <div class="equipped-weapon-content no-equip"
-                        v-if="this.ownWeapons.length <=0 && !this.pvp.isCharacterInArena">
-                        No Weapon Detected
+                        v-if="!this.pvp.isCharacterInArena && (this.ownWeapons.length === this.pvp.participatingWeapons.length
+                        || this.ownWeapons.length === 0)">
+                        No available weapon
                     </div>
                     <div class="equipped-weapon-content no-equip"
                       v-if="this.pvp.isCharacterInArena">
@@ -84,7 +85,7 @@
                         id="equipped-shield"
                         @click="setCurrentTab(1); tickShieldInventory();">
                       <div
-                        v-if="!this.pvp.isCharacterInArena && this.ownShields.length !== 0"
+                        v-if="!this.pvp.isCharacterInArena && this.ownShields.length !== this.pvp.participatingShields.length"
                         class="equipped-shield-content">
                         <pvp-shield
                           :shield="currentShield"
@@ -93,8 +94,9 @@
                       </div>
                     </div>
                     <div class="equipped-shield-content no-equip"
-                        v-if="this.ownShields.length <=0 && !this.pvp.isCharacterInArena">
-                        No Shield Detected
+                        v-if="!this.pvp.isCharacterInArena && (this.ownShields.length === this.pvp.participatingShields.length
+                        || this.ownShields.length === 0)">
+                        No available shield
                     </div>
                     <div class="equipped-shield-content no-equip"
                       v-if="this.pvp.isCharacterInArena">
