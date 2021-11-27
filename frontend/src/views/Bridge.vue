@@ -420,7 +420,9 @@ export default Vue.extend({
     canAffordBridge(){
       const cost = toBN(this.bridgeFee);
       const balance = toBN(this.skillBalance);
-      return balance.isGreaterThanOrEqualTo(cost);
+      const skillRewards = toBN(this.skillRewards);
+      const totalBalance = balance.plus(skillRewards);
+      return totalBalance.isGreaterThanOrEqualTo(cost);
     },
   },
   created(){
