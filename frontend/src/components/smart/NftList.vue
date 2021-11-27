@@ -412,14 +412,14 @@ interface StoreMappedActions {
   updateTrinketIds(): Promise<void>;
   updateJunkIds(): Promise<void>;
   updateKeyLootboxIds(): Promise<void>;
-  purchaseRenameTag(): Promise<void>;
-  purchaseRenameTagDeal(): Promise<void>;
-  purchaseWeaponRenameTag(): Promise<void>;
-  purchaseWeaponRenameTagDeal(): Promise<void>;
-  purchaseCharacterFireTraitChange(): Promise<void>;
-  purchaseCharacterEarthTraitChange(): Promise<void>;
-  purchaseCharacterWaterTraitChange(): Promise<void>;
-  purchaseCharacterLightningTraitChange(): Promise<void>;
+  purchaseRenameTag(obj: {price: number}): Promise<void>;
+  purchaseRenameTagDeal(obj: {price: number}): Promise<void>;
+  purchaseWeaponRenameTag(obj: {price: number}): Promise<void>;
+  purchaseWeaponRenameTagDeal(obj: {price: number}): Promise<void>;
+  purchaseCharacterFireTraitChange(obj: {price: number}): Promise<void>;
+  purchaseCharacterEarthTraitChange(obj: {price: number}): Promise<void>;
+  purchaseCharacterWaterTraitChange(obj: {price: number}): Promise<void>;
+  purchaseCharacterLightningTraitChange(obj: {price: number}): Promise<void>;
   purchaseWeaponCosmetic(obj: {cosmetic: number, price: number}): Promise<void>;
   purchaseCharacterCosmetic(obj: {cosmetic: number, price: number}): Promise<void>;
   getAllZonesPopulation(): Promise<number[]>;
@@ -1057,30 +1057,30 @@ export default Vue.extend({
       }
 
       if(item.type === 'CharacterRenameTag'){
-        await this.purchaseRenameTag();
+        await this.purchaseRenameTag({price: item.nftPrice || 0});
       }
       if(item.type === 'CharacterRenameTagDeal'){
-        await this.purchaseRenameTagDeal();
+        await this.purchaseRenameTagDeal({price: item.nftPrice || 0});
       }
 
       if(item.type === 'WeaponRenameTag'){
-        await this.purchaseWeaponRenameTag();
+        await this.purchaseWeaponRenameTag({price: item.nftPrice || 0});
       }
       if(item.type === 'WeaponRenameTagDeal'){
-        await this.purchaseWeaponRenameTagDeal();
+        await this.purchaseWeaponRenameTagDeal({price: item.nftPrice || 0});
       }
 
       if(item.type === 'CharacterFireTraitChange'){
-        await this.purchaseCharacterFireTraitChange();
+        await this.purchaseCharacterFireTraitChange({price: item.nftPrice || 0});
       }
       if(item.type === 'CharacterEarthTraitChange'){
-        await this.purchaseCharacterEarthTraitChange();
+        await this.purchaseCharacterEarthTraitChange({price: item.nftPrice || 0});
       }
       if(item.type === 'CharacterWaterTraitChange'){
-        await this.purchaseCharacterWaterTraitChange();
+        await this.purchaseCharacterWaterTraitChange({price: item.nftPrice || 0});
       }
       if(item.type === 'CharacterLightningTraitChange'){
-        await this.purchaseCharacterLightningTraitChange();
+        await this.purchaseCharacterLightningTraitChange({price: item.nftPrice || 0});
       }
       if(item.type === 'WeaponCosmetic'){
         await this.purchaseWeaponCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});

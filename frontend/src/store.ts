@@ -2747,13 +2747,13 @@ export function createStore(web3: Web3) {
         if(!CharacterRenameTagConsumables || !state.defaultAccount) return;
         return await CharacterRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseRenameTag({ state, dispatch }) {
+      async purchaseRenameTag({ state, dispatch }, {price}) {
         const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
+            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
             .send({
               from: state.defaultAccount
             });
@@ -2761,7 +2761,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterRenameTag(Web3.utils.toWei('0.1')).send({
+        await Blacksmith.methods.purchaseCharacterRenameTag(Web3.utils.toWei('' + price)).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2772,13 +2772,13 @@ export function createStore(web3: Web3) {
           dispatch('fetchTotalRenameTags')
         ]);
       },
-      async purchaseRenameTagDeal({ state, dispatch }) {
+      async purchaseRenameTagDeal({ state, dispatch }, {price}) {
         const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('0.3', 'ether'))
+            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
             .send({
               from: state.defaultAccount
             });
@@ -2786,7 +2786,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterRenameTagDeal(Web3.utils.toWei('0.3')).send({
+        await Blacksmith.methods.purchaseCharacterRenameTagDeal(Web3.utils.toWei('' + price)).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2817,13 +2817,13 @@ export function createStore(web3: Web3) {
         if(!WeaponRenameTagConsumables || !state.defaultAccount) return;
         return await WeaponRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseWeaponRenameTag({ state, dispatch }) {
+      async purchaseWeaponRenameTag({ state, dispatch }, {price}) {
         const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
+            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
             .send({
               from: state.defaultAccount
             });
@@ -2831,7 +2831,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseWeaponRenameTag(Web3.utils.toWei('0.1')).send({
+        await Blacksmith.methods.purchaseWeaponRenameTag(Web3.utils.toWei('' + price)).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2842,13 +2842,13 @@ export function createStore(web3: Web3) {
           dispatch('fetchTotalWeaponRenameTags')
         ]);
       },
-      async purchaseWeaponRenameTagDeal({ state, dispatch }) {
+      async purchaseWeaponRenameTagDeal({ state, dispatch }, {price}) {
         const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('0.3', 'ether'))
+            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
             .send({
               from: state.defaultAccount
             });
@@ -2856,7 +2856,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseWeaponRenameTagDeal(Web3.utils.toWei('0.3')).send({
+        await Blacksmith.methods.purchaseWeaponRenameTagDeal(Web3.utils.toWei('' + price)).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2888,13 +2888,13 @@ export function createStore(web3: Web3) {
         if(!CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
         return await CharacterFireTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseCharacterFireTraitChange({ state, dispatch }) {
+      async purchaseCharacterFireTraitChange({ state, dispatch }, {price}) {
         const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterFireTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
             .send({
               from: state.defaultAccount
             });
@@ -2902,7 +2902,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterFireTraitChange(Web3.utils.toWei('0.2')).send({
+        await Blacksmith.methods.purchaseCharacterFireTraitChange(Web3.utils.toWei('' + price)).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2934,13 +2934,13 @@ export function createStore(web3: Web3) {
         if(!CharacterEarthTraitChangeConsumables || !state.defaultAccount) return;
         return await CharacterEarthTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseCharacterEarthTraitChange({ state, dispatch }) {
+      async purchaseCharacterEarthTraitChange({ state, dispatch }, {price}) {
         const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterEarthTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
             .send({
               from: state.defaultAccount
             });
@@ -2948,7 +2948,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterEarthTraitChange(Web3.utils.toWei('0.2')).send({
+        await Blacksmith.methods.purchaseCharacterEarthTraitChange(Web3.utils.toWei('' + price)).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -2980,13 +2980,13 @@ export function createStore(web3: Web3) {
         if(!CharacterWaterTraitChangeConsumables || !state.defaultAccount) return;
         return await CharacterWaterTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseCharacterWaterTraitChange({ state, dispatch }) {
+      async purchaseCharacterWaterTraitChange({ state, dispatch }, {price}) {
         const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterWaterTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
             .send({
               from: state.defaultAccount
             });
@@ -2994,7 +2994,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterWaterTraitChange(Web3.utils.toWei('0.2')).send({
+        await Blacksmith.methods.purchaseCharacterWaterTraitChange(Web3.utils.toWei('' + price)).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -3026,13 +3026,13 @@ export function createStore(web3: Web3) {
         if(!CharacterLightningTraitChangeConsumables || !state.defaultAccount) return;
         return await CharacterLightningTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseCharacterLightningTraitChange({ state, dispatch }) {
+      async purchaseCharacterLightningTraitChange({ state, dispatch }, {price}) {
         const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterLightningTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
+            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
             .send({
               from: state.defaultAccount
             });
@@ -3040,7 +3040,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterLightningTraitChange(Web3.utils.toWei('0.2')).send({
+        await Blacksmith.methods.purchaseCharacterLightningTraitChange(Web3.utils.toWei('' + price)).send({
           from: state.defaultAccount,
           gas: '500000'
         });
