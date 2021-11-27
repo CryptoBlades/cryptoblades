@@ -3395,6 +3395,22 @@ export function createStore(web3: Web3) {
           .chainBridgeEnabled(chainId)
           .call(defaultCallOptions(state));
         return isEnabled;
+      },
+      async getBridgeTransferAt({ state }) {
+        const { NFTStorage } = await state.contracts();
+        if (!NFTStorage || !state.defaultAccount) return;
+        const transferAt = await NFTStorage.methods
+          .getBridgeTransferAt()
+          .call(defaultCallOptions(state));
+        return parseInt(transferAt,10);
+      },
+      async getBridgeTransfers({ state }) {
+        const { NFTStorage } = state.contracts();
+        if(!NFTStorage || !state.defaultAccount) return;
+        const bridgeTransfers = await NFTStorage.methods
+          .getBridgeTransfers()
+          .call(defaultCallOptions(state));
+        return parseInt(bridgeTransfers,10);
       }
     },
   });
