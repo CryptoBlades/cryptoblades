@@ -35,7 +35,6 @@
                   <b-col>
                     <div id="equipped-weapon-header">
                          SWORD
-                         <Hint text="Placeholder for weapon hint text"/>
                     </div>
                   </b-col>
                 </b-row>
@@ -75,7 +74,6 @@
                   <b-col>
                     <div id="equipped-shield-header">
                          SHIELD
-                         <Hint text="Placeholder for shield hint text"/>
                     </div>
                   </b-col>
                 </b-row>
@@ -172,7 +170,6 @@
 <script>
 import { getCharacterArt } from '../../character-arts-placeholder';
 import { getWeaponArt } from '../../weapon-arts-placeholder';
-import Hint from '../Hint.vue';
 import Element from '../smart/Element.vue';
 import { mapGetters, mapMutations, mapState } from 'vuex';
 import foundersShield from '../../assets/shield1.png';
@@ -279,7 +276,6 @@ export default {
   },
 
   components: {
-    Hint,
     'char-element': Element,
     'pvp-arena-details': PvPArenaDetails,
     'pvp-inventory': PvPInventory,

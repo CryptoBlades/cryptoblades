@@ -1,12 +1,13 @@
 <template>
   <div class="inventory-container">
-        <b-row class="inventory-header-text">
+        <b-row v-if="!isInventoryLoading"
+          class="inventory-header-text">
             <b-col>
               <span v-if="getCurrentTab === 0" v-text="`${inventoryTabNames[getCurrentTab].name.toUpperCase()}`+ ' ' + inventoryHeaderText"/>
               <span v-if="getCurrentTab === 1" v-text="`${inventoryTabNames[getCurrentTab].name.toUpperCase()}`+ ' ' + inventoryHeaderText"/>
             </b-col>
         </b-row>
-        <b-row v-if="getCurrentTab === 0">
+        <b-row v-if="getCurrentTab === 0 && !isInventoryLoading">
               <b-col v-if="this.ownWeapons.length > 0">
                 <span class="inventory-filter-header"> ELEMENT </span>
                 <b-row>
@@ -117,7 +118,7 @@
                 You do not have any weapons.
               </b-col>
         </b-row>
-        <b-row v-if="getCurrentTab === 1">
+        <b-row v-if="getCurrentTab === 1 && !isInventoryLoading">
               <b-col v-if="this.ownShields.length > 0">
                 <span class="inventory-filter-header"> ELEMENT </span>
                 <b-row>
@@ -226,14 +227,26 @@
                 </div>
               </b-col>
         </b-row>
+        <b-row>
+          <b-col>
+            <div class="inventory-preloader-container"
+              v-if="isInventoryLoading">
+                <pvp-preloader></pvp-preloader>
+                <div class="inventory-preloader-text" >
+                    <span v-if="isInventoryLoading">Please wait ...</span>
+                </div>
+            </div>
+          </b-col>
+        </b-row>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapMutations, mapState } from 'vuex';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import PvPConstants from '../../utils/constants/pvp-constants';
 import PvPWeapon from '../smart/PvPWeapon.vue';
 import PvPShield from '../smart/PvPShield.vue';
+import PvPPreloader from './Preloader.vue';
 
 export default {
 
@@ -241,6 +254,7 @@ export default {
     return {
       inventoryHeaderTextHint: PvPConstants.INVENTORY_HEADER_TEXT_HINT,
       inventoryHeaderText: PvPConstants.INVENTORY_HEADER_TEXT,
+      isInventoryLoading: false
     };
   },
 
@@ -276,6 +290,7 @@ export default {
       'setShieldElementFilter',
       'setShieldStarFilter'
     ]),
+    ...mapActions(['initialize']),
 
     setClassListForShieldAndWeaponElementFilter(elementFilter , currentElement){
       if(elementFilter.toUpperCase() === currentElement.toUpperCase()){
@@ -292,15 +307,40 @@ export default {
     },
   },
 
+  async created(){
+    this.isInventoryLoading = true;
+
+    this.initialize();
+
+    setTimeout(() => {
+      this.isInventoryLoading = false;
+    }, 3000);
+  },
+
   components:{
     'pvp-weapon': PvPWeapon,
-    'pvp-shield' : PvPShield
+    'pvp-shield' : PvPShield,
+    'pvp-preloader': PvPPreloader
   }
 
 };
 </script>
 
 <style>
+
+.inventory-preloader-container{
+  height: 200px;
+  margin: auto;
+}
+
+.inventory-preloader-text{
+  position: relative;
+  top: 230px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-align: center;
+  color: #968332;
+}
 
 .inventory-container {
   height: auto;
