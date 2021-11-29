@@ -9,8 +9,8 @@
         <span v-if="!pvp.isWeaponInArena" class="ready"></span>
         <span v-if="pvp.isWeaponInArena" class="not-ready"></span><br>
         <span>Shield (Optional)</span>
-        <span v-if="!pvp.isShieldInArena && currentShield" class="ready"></span>
-        <span v-if="pvp.isShieldInArena || !currentShield" class="not-ready"></span><br>
+        <span v-if="!pvp.isShieldInArena" class="ready"></span>
+        <span v-if="pvp.isShieldInArena" class="not-ready"></span><br>
         <b-modal id="enterArenaErrorModal" title="STOP RIGHT THERE!" ok-only>
                 <span class="enter-arena-error-label">Weapon Error: </span>
                 <span class="enter-arena-error-value" v-text="this.weaponErrorMessage"></span><br>
@@ -133,28 +133,47 @@ export default {
       }
 
       if(this.currentShield && canEnterArena){
-        await this.$store.dispatch('enterArena',
+        const errorMessage = await this.$store.dispatch('enterArena',
           {characterID: this.currentCharacterId,
             weaponID: this.currentWeaponId,
             shieldID: this.currentShield.id,
             useShield: true});
-        await Promise.all([
-          this.$store.dispatch('fetchIsCharacterInArena',{characterID: this.currentCharacterId}),
-          this.$store.dispatch('fetchIsWeaponInArena',{ weaponID: this.currentWeaponId }),
-          this.$store.dispatch('fetchIsShieldInArena', { shieldID: this.currentShield.id })
-        ]);
+
+        if(errorMessage && errorMessage.code === 4001){
+          this.$dialog.notify.error(errorMessage.message, {position: 'bottom-left'});
+        }else if (errorMessage && errorMessage.code !== 4001){
+          this.$dialog.notify.error('Something went wrong entering the arena. Please try again', {position: 'bottom-left'});
+        }
+
+        if(!errorMessage){
+          await Promise.all([
+            this.$store.dispatch('fetchIsCharacterInArena',{characterID: this.currentCharacterId}),
+            this.$store.dispatch('fetchIsWeaponInArena',{ weaponID: this.currentWeaponId }),
+            this.$store.dispatch('fetchIsShieldInArena', { shieldID: this.currentShield.id })
+          ]);
+        }
       }
       else if (this.currentShield === null && canEnterArena){
-        await this.$store.dispatch('enterArena',
+        const errorMessage = await this.$store.dispatch('enterArena',
           {characterID: this.currentCharacterId,
             weaponID: this.currentWeaponId,
             shieldID: 0,
             useShield: false});
-        await Promise.all([
-          this.$store.dispatch('fetchIsCharacterInArena',{characterID: this.currentCharacterId}),
-          this.$store.dispatch('fetchIsWeaponInArena',{ weaponID: this.currentWeaponId }),
-          this.updateIsShieldInArena({ isShieldInArena: false })
-        ]);
+
+        if(errorMessage && errorMessage.code === 4001){
+          this.$dialog.notify.error(errorMessage.message, {position: 'bottom-left'});
+        }else if (errorMessage && errorMessage.code !== 4001){
+          this.$dialog.notify.error('Something went wrong entering the arena. Please try again', {position: 'bottom-left'});
+        }
+
+        if(!errorMessage){
+          await Promise.all([
+            this.$store.dispatch('fetchIsCharacterInArena',{characterID: this.currentCharacterId}),
+            this.$store.dispatch('fetchIsWeaponInArena',{ weaponID: this.currentWeaponId }),
+            this.updateIsShieldInArena({ isShieldInArena: false })
+          ]);
+        }
+
       }
       else if (!canEnterArena){
         this.$bvModal.show('enterArenaErrorModal');
