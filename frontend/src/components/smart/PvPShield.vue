@@ -25,9 +25,13 @@
             v-if="shield.stars >=0 || shield.stars <=2"
             id="inventory-shield-trait-1">
               <span>
+                <span v-if="shield.stat1Type > 3" class="inventory-shield-trait-pwr">
+                </span>
+                <span v-if="shield.stat1Type <= 3">
                 <img
                   class="inventory-shield-trait-img"
                   :src="getElementIcon(shield.stat1Type)"/>
+                </span>
                     <span :class="getElementColor(shield.stat1Type)">{{shield.stat1}}</span>
                     <span class="inventory-shield-trait-value">{{shield.stat1Value}}</span>
               </span>
@@ -36,9 +40,13 @@
             v-if="shield.stars >= 3"
             id="inventory-shield-trait-2">
               <span>
+                <span v-if="shield.stat2Type > 3" class="inventory-shield-trait-pwr">
+                </span>
+                <span v-if="shield.stat2Type <= 3">
                 <img
                   class="inventory-shield-trait-img"
                   :src="getElementIcon(shield.stat2Type)"/>
+                </span>
                     <span :class="getElementColor(shield.stat2Type)">{{shield.stat2}}</span>
                     <span class="inventory-shield-trait-value">{{shield.stat2Value}}</span>
               </span>
@@ -47,9 +55,13 @@
             v-if="shield.stars === 4"
             id="inventory-shield-trait-3">
               <span>
+                <span v-if="shield.stat3Type > 3" class="inventory-shield-trait-pwr">
+                </span>
+                <span v-if="shield.stat3Type <= 3">
                 <img
                   class="inventory-shield-trait-img"
                   :src="getElementIcon(shield.stat3Type)"/>
+                </span>
                     <span :class="getElementColor(shield.stat3Type)">{{shield.stat3}}</span>
                     <span class="inventory-shield-trait-value">{{shield.stat3Value}}</span>
               </span>
@@ -75,9 +87,13 @@
           v-if="shield.stars >=0 || shield.stars <=2"
           id="inventory-equipped-shield-trait-1">
             <span>
+              <span v-if="shield.stat1Type > 3" class="inventory-equipped-shield-trait-pwr">
+              </span>
+              <span v-if="shield.stat1Type <= 3">
               <img
                 class="inventory-equipped-shield-trait-img"
                 :src="getElementIcon(shield.stat1Type)"/>
+              </span>
                   <span :class="getElementColor(shield.stat1Type)">{{shield.stat1}}</span>
                   <span class="inventory-equipped-shield-trait-value">{{shield.stat1Value}}</span>
             </span>
@@ -86,9 +102,13 @@
           v-if="shield.stars >= 3"
           id="inventory-equipped-shield-trait-2">
             <span>
+              <span v-if="shield.stat2Type > 3" class="inventory-equipped-shield-trait-pwr">
+              </span>
+              <span v-if="shield.stat2Type <= 3">
               <img
                 class="inventory-equipped-shield-trait-img"
                 :src="getElementIcon(shield.stat2Type)"/>
+              </span>
                   <span :class="getElementColor(shield.stat2Type)">{{shield.stat2}}</span>
                   <span class="inventory-equipped-shield-trait-value">{{shield.stat2Value}}</span>
             </span>
@@ -97,9 +117,13 @@
           v-if="shield.stars === 4"
           id="inventory-equipped-shield-trait-3">
             <span>
+              <span v-if="shield.stat3Type > 3" class="inventory-equipped-shield-trait-pwr">
+              </span>
+              <span v-if="shield.stat3Type <= 3">
               <img
                 class="inventory-equipped-shield-trait-img"
                 :src="getElementIcon(shield.stat3Type)"/>
+              </span>
                   <span :class="getElementColor(shield.stat3Type)">{{shield.stat3}}</span>
                   <span class="inventory-equipped-shield-trait-value">{{shield.stat3Value}}</span>
             </span>
@@ -308,9 +332,17 @@ export default {
   width: 20px;
 }
 
+.inventory-shield-trait-pwr {
+  margin-left: 20px;
+}
+
 .inventory-equipped-shield-trait-img {
   height: 15px;
   width: 15px;
+}
+
+.inventory-equipped-shield-trait-pwr {
+  margin-left: 15px;
 }
 
 .inventory-shield-trait-label-fire{

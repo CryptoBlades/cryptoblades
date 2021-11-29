@@ -35,7 +35,6 @@
                   <b-col>
                     <div id="equipped-weapon-header">
                          SWORD
-                         <Hint text="Placeholder for weapon hint text"/>
                     </div>
                   </b-col>
                 </b-row>
@@ -45,7 +44,7 @@
                         id="equipped-weapon"
                         @click="setCurrentTab(0); tickWeaponInventory(); ">
                       <div
-                        v-if="!this.pvp.isCharacterInArena"
+                        v-if="!this.pvp.isCharacterInArena && this.ownWeapons.length !== this.pvp.participatingWeapons.length"
                         class="equipped-weapon-content">
                         <pvp-weapon
                           v-if="this.ownWeapons.length !== 0"
@@ -56,12 +55,18 @@
                       </div>
                     </div>
                     <div class="equipped-weapon-content no-equip"
-                        v-if="this.ownWeapons.length <=0 && !this.pvp.isCharacterInArena">
-                        No Weapon Detected
+                        v-if="!this.pvp.isCharacterInArena && (this.ownWeapons.length === this.pvp.participatingWeapons.length
+                        || this.ownWeapons.length === 0)">
+                        No available weapon
                     </div>
                     <div class="equipped-weapon-content no-equip"
                       v-if="this.pvp.isCharacterInArena">
-                        Character is in arena
+                      <div>
+                        <pvp-weapon
+                          :weapon="this.pvp.attackerFighter.weapon"
+                          :inPvP="false"
+                          :isEquipContainer="true"></pvp-weapon>
+                      </div>
                     </div>
                   </b-col>
                 </b-row>
@@ -69,7 +74,6 @@
                   <b-col>
                     <div id="equipped-shield-header">
                          SHIELD
-                         <Hint text="Placeholder for shield hint text"/>
                     </div>
                   </b-col>
                 </b-row>
@@ -79,7 +83,7 @@
                         id="equipped-shield"
                         @click="setCurrentTab(1); tickShieldInventory();">
                       <div
-                        v-if="!this.pvp.isCharacterInArena && this.ownShields.length !== 0"
+                        v-if="!this.pvp.isCharacterInArena && this.ownShields.length !== this.pvp.participatingShields.length"
                         class="equipped-shield-content">
                         <pvp-shield
                           :shield="currentShield"
@@ -88,12 +92,18 @@
                       </div>
                     </div>
                     <div class="equipped-shield-content no-equip"
-                        v-if="this.ownShields.length <=0 && !this.pvp.isCharacterInArena">
-                        No Shield Detected
+                        v-if="!this.pvp.isCharacterInArena && (this.ownShields.length === this.pvp.participatingShields.length
+                        || this.ownShields.length === 0)">
+                        No available shield
                     </div>
                     <div class="equipped-shield-content no-equip"
                       v-if="this.pvp.isCharacterInArena">
-                        Character is in arena
+                      <div>
+                        <pvp-shield
+                          :shield="this.pvp.attackerFighter.shield"
+                          :inPvP="false"
+                          :isEquipContainer="true"></pvp-shield>
+                      </div>
                     </div>
 
                   </b-col>
@@ -160,7 +170,6 @@
 <script>
 import { getCharacterArt } from '../../character-arts-placeholder';
 import { getWeaponArt } from '../../weapon-arts-placeholder';
-import Hint from '../Hint.vue';
 import Element from '../smart/Element.vue';
 import { mapGetters, mapMutations, mapState } from 'vuex';
 import foundersShield from '../../assets/shield1.png';
@@ -267,7 +276,6 @@ export default {
   },
 
   components: {
-    Hint,
     'char-element': Element,
     'pvp-arena-details': PvPArenaDetails,
     'pvp-inventory': PvPInventory,
