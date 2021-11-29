@@ -52,6 +52,17 @@ export interface IRaidState {
   //isOwnedCharacterRaidingById: Record<number, boolean>; // ?
 }
 
+export interface IPartnerProject {
+  id: string;
+  name: string;
+  tokenSymbol: string;
+  tokenAddress: string;
+  tokenSupply: string;
+  tokensClaimed: string;
+  tokenPrice: string;
+  isActive: boolean;
+}
+
 export interface IState {
   contracts: () => Contracts;
   eventSubscriptions: () => IWeb3EventSubscription[];
@@ -115,4 +126,7 @@ export interface IState {
   keyboxes: Record<number, Nft>;
 
   nfts: Record<string, Record<number | string, Nft>>;
+
+  partnerProjects: Record<number, IPartnerProject>;
+  payoutCurrencyId: string;
 }
