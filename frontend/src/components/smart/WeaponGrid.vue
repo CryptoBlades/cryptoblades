@@ -72,7 +72,7 @@
             <span>IN PVP</span>
           </span>
         </div>
-        <nft-options-dropdown v-if="showNftOptions" :nftId="weapon.id" :options="options" class="nft-options"/>
+        <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" class="nft-options"/>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
         </div>
