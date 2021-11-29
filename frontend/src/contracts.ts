@@ -31,6 +31,7 @@ import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as storageAbi } from '../../build/contracts/NFTStorage.json';
+import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/contracts/Treasury.json';
 import config from '../app-config.json';
 
 
@@ -234,6 +235,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const waxBridgeContractAddr = getConfigValue('VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS') || (waxBridgeNetworks as Networks)[networkId]!.address;
   const WaxBridge = new web3.eth.Contract(waxBridgeAbi as Abi, waxBridgeContractAddr);
 
+  const treasuryContractAddr = getConfigValue('VUE_APP_TREASURY_CONTRACT_ADDRESS') || (treasuryNetworks as Networks)[networkId]!.address;
+  const Treasury = new web3.eth.Contract(treasuryAbi as Abi, treasuryContractAddr);
+
   return {
     ...stakingContracts,
     CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
@@ -244,6 +248,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     ...raidContracts,
     ...marketContracts,
     WaxBridge,
+    Treasury
   };
 }
 

@@ -322,7 +322,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
 
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
-        uint256 tokens = getTokenGainForFight(targetPower) * fightMultiplier;
+        uint256 tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
 
         if(playerRoll < monsterRoll) {
             tokens = 0;
@@ -349,14 +349,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint24(target & 0xFFFFFF);
     }
 
-    function getTokenGainForFight(uint24 monsterPower) public view returns (uint256) {
+    function getTokenGainForFight(uint24 monsterPower, bool applyLimit) public view returns (uint256) {
         // monsterPower / avgPower * payPerFight * powerMultiplier
         uint256 amount = ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
             .mulu(vars[VAR_HOURLY_PAY_PER_FIGHT]);
         
         if(amount > vars[VAR_PARAM_MAX_FIGHT_PAYOUT])
             amount = vars[VAR_PARAM_MAX_FIGHT_PAYOUT];
-        if(vars[VAR_HOURLY_DISTRIBUTION] < amount * 5) // the * 5 is a temp measure until we can sync frontend on main
+        if(vars[VAR_HOURLY_DISTRIBUTION] < amount * 5 && applyLimit) // the * 5 is a temp measure until we can sync frontend on main
             amount = 0;
         return amount;
     }
@@ -823,6 +823,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             if(trackInflow)
                 _trackIncome(fromUserWallet);
         }
+    }
+
+    function deductAfterPartnerClaim(uint256 amount, address player) external restricted {
+        tokenRewards[player] = tokenRewards[player].sub(amount);
     }
 
     function trackIncome(uint256 income) public restricted {

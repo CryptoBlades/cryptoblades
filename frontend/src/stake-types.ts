@@ -42,6 +42,13 @@ if(availableStakingContracts.includes('lp2')) {
   };
 }
 
+if(availableStakingContracts.includes('king')) {
+  stakingContractsInfo.king = {
+    stakingRewardsAddress: getConfigValue('VUE_APP_KING_STAKING_REWARDS_CONTRACT_ADDRESS'),
+    stakingTokenAddress: getConfigValue('VUE_APP_KING_TOKEN_CONTRACT_ADDRESS')
+  };
+}
+
 interface HumanReadableDetailsForStakeType {
   stakeTokenName: string;
   rewardTokenName: string;
@@ -71,6 +78,11 @@ const defaultHumanReadableDetailsForStakeTypes: Record<StakeType, HumanReadableD
     rewardTokenName: 'SKILL',
     stakeTitle: 'SKILL-BNB for SKILL V2'
   },
+  king: {
+    stakeTokenName: 'KING',
+    rewardTokenName: 'KING',
+    stakeTitle: 'KING for KING'
+  }
 };
 
 export const humanReadableDetailsForStakeTypes = defaultHumanReadableDetailsForStakeTypes;

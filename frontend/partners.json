@@ -1,0 +1,15 @@
+{
+  "partners": {
+    "ProjectName": {
+      "logo": ".png",
+      "details": "Details text"
+    },"Bounty": {
+      "logo": "bounty.png",
+      "details": "Details text"
+    },
+    "Sword0": {
+      "logo": "sword0.png",
+      "details": "Details text"
+    }
+  }
+}

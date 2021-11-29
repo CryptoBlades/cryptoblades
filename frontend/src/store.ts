@@ -1,18 +1,18 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
-import _, { isUndefined } from 'lodash';
+import _, { isUndefined, values } from 'lodash';
 import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { getConfigValue, setUpContracts } from './contracts';
 
 import {
   characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract,
-  trinketFromContract, junkFromContract
+  trinketFromContract, junkFromContract, partnerProjectFromContract
 } from './contract-models';
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
-  IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState
+  IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState, IPartnerProject
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
@@ -134,13 +134,15 @@ export function createStore(web3: Web3) {
         skill: { ...defaultStakeState },
         skill2: { ...defaultStakeState },
         lp: { ...defaultStakeState },
-        lp2: { ...defaultStakeState }
+        lp2: { ...defaultStakeState },
+        king: { ...defaultStakeState }
       },
       stakeOverviews: {
         skill: { ...defaultStakeOverviewState },
         skill2: { ...defaultStakeOverviewState },
         lp: { ...defaultStakeOverviewState },
-        lp2: { ...defaultStakeOverviewState }
+        lp2: { ...defaultStakeOverviewState },
+        king: { ...defaultStakeOverviewState }
       },
 
       raid: {
@@ -161,6 +163,9 @@ export function createStore(web3: Web3) {
       waxBridgeWithdrawableBnb: '0',
       waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
       waxBridgeTimeUntilLimitExpires: 0,
+
+      partnerProjects: {},
+      payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
     },
 
     getters: {
@@ -468,6 +473,10 @@ export function createStore(web3: Web3) {
       waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod(state): string {
         return bnMinimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
       },
+
+      getPartnerProjects(state): IPartnerProject[] {
+        return values(state.partnerProjects);
+      }
     },
 
     mutations: {
@@ -697,6 +706,15 @@ export function createStore(web3: Web3) {
         state.currentNftType = payload.type;
         state.currentNftId = payload.id;
       },
+
+      updatePartnerProjectsState(state: IState, { partnerProjectId, partnerProject }) {
+        Vue.set(state.partnerProjects, partnerProjectId, partnerProject);
+      },
+
+      updatePayoutCurrencyId(state: IState, newPayoutCurrencyId) {
+        localStorage.setItem('payoutCurrencyId', newPayoutCurrencyId);
+        state.payoutCurrencyId = newPayoutCurrencyId;
+      }
     },
 
     actions: {
@@ -1683,10 +1701,13 @@ export function createStore(web3: Web3) {
         };
       },
 
-      async fetchExpectedPayoutForMonsterPower({ state }, power) {
+      async fetchExpectedPayoutForMonsterPower({ state }, { power, isCalculator = false }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
-        return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(state));
+        if(isCalculator) {
+          return await CryptoBlades.methods.getTokenGainForFight(power, false).call(defaultCallOptions(state));
+        }
+        return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(state));
       },
 
       async fetchAllowanceTimestamp({ state }) {
@@ -3182,6 +3203,70 @@ export function createStore(web3: Web3) {
 
         await Promise.all([
           dispatch('fetchCharacterCosmetic', id)
+        ]);
+      },
+
+      async fetchPartnerProjects({ state, dispatch }) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        state.partnerProjects = {};
+        const activePartnerProjectIds = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(state));
+        activePartnerProjectIds.forEach(async (id: string) => {
+          await dispatch('fetchPartnerProject', id);
+        });
+      },
+
+      async fetchPartnerProject({ state, commit }, id) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const partnerProject = partnerProjectFromContract(
+          await Treasury.methods.getPartnerProject(id).call(defaultCallOptions(state))
+        );
+
+        commit('updatePartnerProjectsState', { partnerProjectId: id, partnerProject });
+      },
+
+      async getPartnerProjectMultiplier({ state }, id) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const multiplier = await Treasury.methods.getProjectMultiplier(id).call(defaultCallOptions(state));
+
+        return multiplier;
+      },
+
+      async getPartnerProjectClaimedAmount({ state }, id) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const claimedAmount = await Treasury.methods.getProjectClaimedAmount(id).call(defaultCallOptions(state));
+
+        return claimedAmount;
+      },
+
+      async getSkillToPartnerRatio({ state }, id) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const ratio = await Treasury.methods.getSkillToPartnerRatio(id).call(defaultCallOptions(state));
+
+        return ratio;
+      },
+
+      async claimPartnerToken({ state, dispatch }, id) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.claim(id).send({
+          from: state.defaultAccount,
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('fetchPartnerProject', id)
         ]);
       },
 

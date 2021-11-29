@@ -421,7 +421,7 @@ export default {
       if(!this.targets) return;
       const expectedPayouts = new Array(4);
       for(let i = 0; i < this.targets.length; i++) {
-        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower(this.targets[i].power);
+        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: this.targets[i].power });
         expectedPayouts[i] = expectedPayout;
       }
       this.targetExpectedPayouts = expectedPayouts;
