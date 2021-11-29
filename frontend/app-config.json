@@ -34,7 +34,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
           "blockExplorerUrls": ["https://testnet.bscscan.com"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab"
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab",
+          "fightGas": "0.0007"
         },
         "HECO": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -67,7 +68,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://http-testnet.hecochain.com"],
           "blockExplorerUrls": ["https://testnet.hecoinfo.com"],
-          "exchangeUrl": "https://swap.butterswap.me/#/swap?inputCurrency=HT&outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405"
+          "exchangeUrl": "https://swap.butterswap.me/#/swap?inputCurrency=HT&outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405",
+          "fightGas": "0.0006"
         },
         "OKEX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -100,7 +102,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://exchaintestrpc.okex.org"],
           "blockExplorerUrls": ["https://www.oklink.com/okexchain-test/"],
-          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB"
+          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB",
+          "fightGas": "0.00009"
         },
         "POLYGON": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -132,7 +135,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://matic-mumbai.chainstacklabs.com"],
           "blockExplorerUrls": ["https://mumbai.polygonscan.com/"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e"
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e",
+          "fightGas": "0.0095"
         },
         "AVAX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS": "snoui.wam",
@@ -164,7 +168,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://api.avax-test.network/ext/bc/C/rpc"],
           "blockExplorerUrls": ["https://testnet.snowtrace.io/"],
-          "exchangeUrl": ""
+          "exchangeUrl": "",
+          "fightGas": "0.006"
         }
       }
     },
@@ -201,7 +206,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://bsc-dataseed.binance.org/"],
           "blockExplorerUrls": ["https://bscscan.com/"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab"
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab",
+          "fightGas": "0.0007"
         },
         "HECO": {
           "VUE_APP_NETWORK_ID":"128",
@@ -234,7 +240,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://http-mainnet.hecochain.com"],
           "blockExplorerUrls": ["https://hecoinfo.com"],
-          "exchangeUrl": "https://swap.butterswap.me/#/swap?outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405"
+          "exchangeUrl": "https://swap.butterswap.me/#/swap?outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405",
+          "fightGas": "0.0006"
         },
         "OKEX": {
           "VUE_APP_NETWORK_ID":"66",
@@ -267,7 +274,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://exchainrpc.okex.org"],
           "blockExplorerUrls": ["https://www.oklink.com/okexchain/"],
-          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB"
+          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB",
+          "fightGas": "0.00009"
         },
         "POLYGON": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -300,7 +308,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://matic-mainnet.chainstacklabs.com"],
           "blockExplorerUrls": ["https://polygonscan.com/"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86"
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86",
+          "fightGas": "0.0095"
         },
         "AVAX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -332,7 +341,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://api.avax.network/ext/bc/C/rpc"],
           "blockExplorerUrls": ["https://snowtrace.io/"],
-          "exchangeUrl": ""
+          "exchangeUrl": "",
+          "fightGas": "0.006"
         }
       }
     }
