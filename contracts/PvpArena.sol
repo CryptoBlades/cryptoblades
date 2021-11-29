@@ -366,7 +366,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         for (uint256 i = 0; i < attackerIDs.length; i++) {
             uint256 attackerID = attackerIDs[i];
             if (!_duelQueue.contains(attackerID)) continue;
-            
+
             uint256 defenderID = getOpponent(attackerID);
             uint8 defenderTrait = characters.getTrait(defenderID);
             uint8 attackerTrait = characters.getTrait(attackerID);
@@ -569,7 +569,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 length = _fightersByPlayer[msg.sender].length();
         uint256[] memory values = new uint256[](length);
 
-        for (uint256 i = 0; i < length; i++) {            
+        for (uint256 i = 0; i < length; i++) {
             values[i] = _fightersByPlayer[msg.sender].at(i);
         }
 
@@ -788,7 +788,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         uint256 lastActivity = _lastActivityByCharacter[characterID];
 
-        return lastActivity.add(unattackableSeconds) <= block.timestamp && !_duelQueue.contains(characterID) && !characterDefending[characterID];    
+        return lastActivity.add(unattackableSeconds) <= block.timestamp && !_duelQueue.contains(characterID) && !characterDefending[characterID];
     }
 
     /// @dev updates the last activity timestamp of a character
