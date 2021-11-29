@@ -37,3 +37,14 @@ export const gasUsedToBnb = (gasUsed: number, gasPrice: string): string => {
 
   return  bnbGasCost;
 };
+
+export const copyNftUrl = (id: number | string, type?: string): void => {
+  const path = `/#/nft-display/${type}/${id}`;
+  const dummy = document.createElement('input'),
+    text = window.location.origin + path;
+  document.body.appendChild(dummy);
+  dummy.value = text;
+  dummy.select();
+  document.execCommand('copy');
+  document.body.removeChild(dummy);
+};

@@ -25,11 +25,7 @@ module.exports = {
   networks: {
     hardhat: {
       gas: truffleConfig.networks.development.gas,
-      blockGasLimit: 67219750,
-      mining:{
-        auto: true,
-        interval: 5000
-      }
+      blockGasLimit: 672197500,
     },
   },
   paths: {},

@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
-import "hardhat/console.sol";
 import "./util.sol";
 import "./interfaces/IRandoms.sol";
 import "./cryptoblades.sol";
@@ -59,6 +58,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint8 private _rankingsPoolTaxPercent;
     /// @dev how many times the cost of battling must be wagered to enter the arena
     uint8 public wageringFactor;
+    /// @dev percentage of duel cost charged when rerolling opponent
+    uint256 public reRollFeePercent;
     /// @dev the base amount wagered per duel in dollars
     int128 private _baseWagerUSD;
     /// @dev how much extra USD is wagered per level tier
@@ -201,6 +202,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         // TODO: Tweak these values, they are placeholders
         wageringFactor = 3;
+        reRollFeePercent = 25;
         _baseWagerUSD = ABDKMath64x64.divu(500, 100); // $5
         _tierWagerUSD = ABDKMath64x64.divu(50, 100); // $0.5
         _rankingsPoolTaxPercent = 15;
@@ -217,7 +219,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         prizePercentages.push(10);
     }
 
-    /// @notice enter the arena with a character, a weapon and optionally a shield
+    /// @dev enter the arena with a character, a weapon and optionally a shield
     function enterArena(
         uint256 characterID,
         uint256 weaponID,
@@ -291,7 +293,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         skillToken.transferFrom(
             msg.sender,
             address(this),
-            getDuelCost(characterID).div(4)
+            getDuelCost(characterID).div(uint256(100).div(reRollFeePercent))
         );
     }
 
@@ -340,7 +342,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         characterDefending[characterID] = false;
 
-        _fightersByPlayer[msg.sender].remove(characterID);
+        _fightersByPlayer[characters.ownerOf(characterID)].remove(characterID);
 
         if (_duelQueue.contains(characterID)) {
             _duelQueue.remove(characterID);
@@ -546,7 +548,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return game.usdToSkill(_baseWagerUSD.add(tierExtra));
     }
 
-    /// @notice gets the amount of SKILL required to enter the arena
+    /// @dev gets the amount of SKILL required to enter the arena
     /// @param characterID the id of the character entering the arena
     function getEntryWager(uint256 characterID) public view returns (uint256) {
         return getDuelCost(characterID).mul(wageringFactor);
@@ -567,7 +569,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 length = _fightersByPlayer[msg.sender].length();
         uint256[] memory values = new uint256[](length);
 
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; i++) {            
             values[i] = _fightersByPlayer[msg.sender].at(i);
         }
 
@@ -786,9 +788,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         uint256 lastActivity = _lastActivityByCharacter[characterID];
 
-        require(!characterDefending[characterID], "Defender duel in process");
-
-        return lastActivity.add(unattackableSeconds) <= block.timestamp && !_duelQueue.contains(characterID);
+        return lastActivity.add(unattackableSeconds) <= block.timestamp && !_duelQueue.contains(characterID) && !characterDefending[characterID];    
     }
 
     /// @dev updates the last activity timestamp of a character
@@ -901,7 +901,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         require(!characterDefending[characterID], "Defender duel in process");
 
-        _fightersByPlayer[msg.sender].remove(characterID);
+        _fightersByPlayer[characters.ownerOf(characterID)].remove(characterID);
 
         if (_duelQueue.contains(characterID)) {
             _duelQueue.remove(characterID);
@@ -1093,4 +1093,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         return values;
     }
+    /// @dev returns the account's ranking prize pool earnings
+    function getPlayerPrizePoolRewards() view public returns(uint256){
+        return _rankingEarningsByPlayer[msg.sender];
+    }
+
 }

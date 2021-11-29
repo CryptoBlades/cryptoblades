@@ -286,20 +286,42 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function performMintWeaponDetailed(address minter,
-        uint16 properties,
-        uint16 stat1, uint16 stat2, uint16 stat3, uint8 level, uint8 amountLB, uint8 amount4B, uint8 amount5B,
-        uint256 cosmeticSeed
+        uint256 metaData,
+        uint256 cosmeticSeed, uint256 tokenID
     ) public minterOnly returns(uint256) {
-        require(amountLB <= 100 && amount4B <= 25 && amount5B <= 10);
 
-        uint256 tokenID = performMintWeapon(minter, properties, stat1, stat2, stat3, cosmeticSeed);
+        uint8 fiveStarBurnPoints = uint8(metaData & 0xFF);
+        uint8 fourStarBurnPoints = uint8((metaData >> 8) & 0xFF);
+        uint8 lowStarBurnPoints = uint8((metaData >> 16) & 0xFF);
+        uint8 level = uint8((metaData >> 24) & 0xFF);
+        uint16 stat3 = uint16((metaData >> 32) & 0xFFFF);
+        uint16 stat2 = uint16((metaData >> 48) & 0xFFFF);
+        uint16 stat1 = uint16((metaData >> 64) & 0xFFFF);
+        uint16 properties = uint16((metaData >> 80) & 0xFFFF);
+
+        require(lowStarBurnPoints <= 100 && fourStarBurnPoints <= 25 &&  fiveStarBurnPoints <= 10);
+
+        if(tokenID == 0){
+            tokenID = performMintWeapon(minter, properties, stat1, stat2, stat3, 0);
+        }
+        else {
+            Weapon storage wp = tokens[tokenID];
+            wp.properties = properties;
+            wp.stat1 = stat1;
+            wp.stat2 = stat2;
+            wp.stat3 = stat3;
+            wp.level = level;
+        }
+        WeaponCosmetics storage wc = cosmetics[tokenID];
+        wc.seed = cosmeticSeed;
+        
         tokens[tokenID].level = level;
         durabilityTimestamp[tokenID] = uint64(now); // avoid chain jumping abuse
         WeaponBurnPoints storage wbp = burnPoints[tokenID];
 
-        wbp.lowStarBurnPoints = amountLB;
-        wbp.fourStarBurnPoints = amount4B;
-        wbp.fiveStarBurnPoints = amount5B;
+        wbp.lowStarBurnPoints = lowStarBurnPoints;
+        wbp.fourStarBurnPoints = fourStarBurnPoints;
+        wbp.fiveStarBurnPoints = fiveStarBurnPoints;
 
         return tokenID;
     }
@@ -624,7 +646,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getBonusPowerForFight(id, wep.level);
     }
 
-    function getBonusPowerForFight(uint256 id, uint8 level) public view noFreshLookup(id) returns (uint24) {
+    function getBonusPowerForFight(uint256 id, uint8 level) public view returns (uint24) {
         WeaponBurnPoints storage wbp = burnPoints[id];
         return uint24(lowStarBurnPowerPerPoint.mul(wbp.lowStarBurnPoints)
             .add(fourStarBurnPowerPerPoint.mul(wbp.fourStarBurnPoints))
@@ -647,11 +669,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
-        restricted noFreshLookup(id)
+    function getFightDataAndDrainDurability(address fighter,
+        uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
+        restricted
     returns (int128, int128, uint24, uint8) {
         // check if the weapon is busy, there is no space in the contract so we can't add an exaplanation
         require(getNftVar(id, NFTVAR_BUSY) == 0);
+        require(fighter == ownerOf(id));
         drainDurability(id, drainAmount, allowNegativeDurability);
         Weapon storage wep = tokens[id];
         return (
@@ -666,11 +690,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) public restricted {
+    function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) internal {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
-        require((durabilityPoints >= amount || allowNegativeDurability)
-            && promos.getBit(ownerOf(id), 4) == false,
-            "Low durability!");
+        require((durabilityPoints >= amount
+        || (allowNegativeDurability && durabilityPoints > 0)) // we allow going into negative, but not starting negative
+            ,"Low durability!");
 
         uint64 drainTime = uint64(amount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
@@ -735,10 +759,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function _isFeatureEnabled(uint256 bit) private view returns (bool) {
         return (numberParameters[NUMBERPARAMETER_FEATURE_BITS] & bit) == bit;
-    }
-
-    function canRaid(address user, uint256 id) public view returns (bool) {
-        return ownerOf(id) == user && getDurabilityPoints(id) > 0;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {

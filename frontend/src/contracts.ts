@@ -72,15 +72,14 @@ export function getConfigValue(key: string): any {
     return process.env[key];
   }
 
-  // if(process.env.NODE_ENV === 'development') return '';
-  const env = 'test';
+  if(process.env.NODE_ENV === 'development') return '';
+  const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
   const chain = localStorage.getItem('currentChain') || 'BSC';
   return (config as Config).environments[env].chains[chain][key];
 }
 
 let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
-console.log(networkId);
-console.log('appid', getConfigValue('VUE_APP_NETWORK_ID'));
+
 type Networks = Partial<Record<string, { address: string }>>;
 
 type Abi = any[];
@@ -120,7 +119,7 @@ function getStakingContractsInfoWithDefaults(): Partial<Record<StakeType, Partia
 }
 
 async function setUpStakingContracts(web3: Web3) {
-  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '31337';
+  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
   const stakingContractsInfo = getStakingContractsInfoWithDefaults();
 
   const staking: StakingContracts = {};
@@ -136,7 +135,6 @@ async function setUpStakingContracts(web3: Web3) {
   }
 
   const skillTokenAddress = getConfigValue('VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS') || (skillTokenNetworks as Networks)[networkId]!.address;
-  console.log('skillTokenAddress', skillTokenAddress);
   const SkillToken = new web3.eth.Contract(erc20Abi as Abi, skillTokenAddress);
 
   return {
@@ -245,7 +243,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   const pvpContracts: PvPContracts = {};
   if(featureFlagPvP){
-    const pvpContractAddr = getConfigValue('VUE_APP_PVP_CONTRACT_ADDRESS') || (pvpNetworks as Networks)[networkId]!.address;
+    const pvpContractAddr = process.env.VUE_APP_PVP_CONTRACT_ADDRESS || (pvpNetworks as Networks)[networkId]!.address;
 
     pvpContracts.PvpArena = new web3.eth.Contract(pvpAbi as Abi, pvpContractAddr);
 

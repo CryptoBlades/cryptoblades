@@ -8,7 +8,7 @@ const ExperimentToken2 = artifacts.require("ExperimentToken2");
 writeFileAsync = util.promisify(fs.writeFile);
 
 module.exports = async function (deployer, network, accounts) {
-  if (network === 'development' || network === 'development-fork' || network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'hecotestnet' || network === 'okextestnet' || network === 'polygontestnet') {
+  if (network === 'development' || network === 'development-fork' || network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'hecotestnet' || network === 'okextestnet' || network === 'polygontestnet' || network === 'avaxtestnet' || network === 'avaxtestnet-fork') {
     // tokens
     await deployer.deploy(SkillToken);
     const token = await SkillToken.deployed();
@@ -23,9 +23,5 @@ module.exports = async function (deployer, network, accounts) {
     await token.transferFrom(token.address, accounts[0], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
     await expToken.transferFrom(expToken.address, accounts[0], web3.utils.toWei('599', 'ether'));
     await expToken2.transferFrom(expToken2.address, accounts[0], web3.utils.toWei('699', 'ether'));
-
-    await token.transferFrom(token.address, accounts[1], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
-    await expToken.transferFrom(expToken.address, accounts[1], web3.utils.toWei('599', 'ether'));
-    await expToken2.transferFrom(expToken2.address, accounts[1], web3.utils.toWei('699', 'ether'));
   }
 };

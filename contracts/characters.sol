@@ -8,11 +8,6 @@ import "./Promos.sol";
 import "./util.sol";
 import "./interfaces/ITransferCooldownable.sol";
 import "./PvpArena.sol";
-
-import "./interfaces/ITransferCooldownable.sol";
-import "./PvpArena.sol";
-
-
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
@@ -204,19 +199,32 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         emit NewCharacter(tokenID, minter);
     }
 
-    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed) minterOnly public returns (uint256) {
-        uint256 tokenID = tokens.length;
-
-        if(block.number != lastMintedBlock)
-            firstMintedOfLastBlock = tokenID;
-        lastMintedBlock = block.number;
-
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID) minterOnly public returns (uint256) {
         uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
 
-        tokens.push(Character(xp, level, trait, staminaTimestamp));
-        cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
-        _mint(minter, tokenID);
-        emit NewCharacter(tokenID, minter);
+        if(tokenID == 0){
+            tokenID = tokens.length;
+
+            if(block.number != lastMintedBlock)
+                firstMintedOfLastBlock = tokenID;
+            lastMintedBlock = block.number;
+
+            tokens.push(Character(xp, level, trait, staminaTimestamp));
+            cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
+            _mint(minter, tokenID);
+            emit NewCharacter(tokenID, minter);
+        }
+        else {
+            Character storage ch = tokens[tokenID];
+            ch.xp = xp;
+            ch.level = level;
+            ch.trait = trait;
+            ch.staminaTimestamp = staminaTimestamp;
+
+            CharacterCosmetics storage cc = cosmetics[tokenID];
+            cc.seed = seed;
+        }
+        
         return tokenID;
     }
 
@@ -313,11 +321,14 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint64(maxStamina * secondsPerStamina);
     }
 
-    function getFightDataAndDrainStamina(uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
+    function getFightDataAndDrainStamina(address fighter,
+        uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
+        require(fighter == ownerOf(id));
         Character storage char = tokens[id];
         require(getNftVar(id, NFTVAR_BUSY) == 0, "Character is busy");
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
-        require(allowNegativeStamina || staminaPoints >= amount, "Not enough stamina!");
+        require((staminaPoints > 0 && allowNegativeStamina) // we allow going into negative, but not starting negative
+            || staminaPoints >= amount, "Not enough stamina!");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;
