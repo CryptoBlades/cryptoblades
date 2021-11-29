@@ -1683,10 +1683,13 @@ export function createStore(web3: Web3) {
         };
       },
 
-      async fetchExpectedPayoutForMonsterPower({ state }, power) {
+      async fetchExpectedPayoutForMonsterPower({ state }, { power, isCalculator = false }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
-        return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(state));
+        if(isCalculator) {
+          return await CryptoBlades.methods.getTokenGainForFight(power, false).call(defaultCallOptions(state));
+        }
+        return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(state));
       },
 
       async fetchAllowanceTimestamp({ state }) {
