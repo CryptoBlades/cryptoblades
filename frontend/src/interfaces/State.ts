@@ -5,8 +5,8 @@ import { Contracts } from './Contracts';
 import { Nft } from './Nft';
 import { IShield } from './Shield';
 
-export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2';
-export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2'];
+export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king';
+export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king'];
 
 export function isStakeType(stakeType: string): stakeType is StakeType {
   return allStakeTypes.includes(stakeType as StakeType);

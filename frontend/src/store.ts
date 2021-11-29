@@ -134,13 +134,15 @@ export function createStore(web3: Web3) {
         skill: { ...defaultStakeState },
         skill2: { ...defaultStakeState },
         lp: { ...defaultStakeState },
-        lp2: { ...defaultStakeState }
+        lp2: { ...defaultStakeState },
+        king: { ...defaultStakeState }
       },
       stakeOverviews: {
         skill: { ...defaultStakeOverviewState },
         skill2: { ...defaultStakeOverviewState },
         lp: { ...defaultStakeOverviewState },
-        lp2: { ...defaultStakeOverviewState }
+        lp2: { ...defaultStakeOverviewState },
+        king: { ...defaultStakeOverviewState }
       },
 
       raid: {
