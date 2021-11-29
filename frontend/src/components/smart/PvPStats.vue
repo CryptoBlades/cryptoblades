@@ -3,7 +3,7 @@
 
     <b-row>
       <div class="pvp-stats-close-button">
-        <span @click="closeStats()" >X</span>
+        <span @click="closeStats()" >Close</span>
       </div>
     </b-row>
 
@@ -21,22 +21,10 @@
           <span class="pvp-stats-character-rank-points-label"> RANK POINTS </span>
           <span class="pvp-stats-character-text">{{getCharacterRankingPoints}}</span><br>
         </div>
-        <div class="pvp-stats-season">
-          <div class="pvp-stats-current-ranked-season">
-            <span>SEASON {{this.pvp.currentRankedSeason}}</span>
-          </div>
-          <div>
-            <span class="pvp-stats-current-ranked-season-begin-label">SEASON DURATION</span>
-            <span class="pvp-stats-current-ranked-season-begin-text">{{convertDateTime(this.pvp.seasonStartedAt)}} - </span>
-            <span class="pvp-stats-current-ranked-season-end-text">{{getDuration}}</span>
-          </div>
-        </div>
       </b-col>
 
-      <b-col cols="6">
-        <b-row>
-          <b-col>
-        <b-tabs class="pvp-stats" justified>
+      <b-col class="pvp-stats" cols="6">
+        <b-tabs justified>
           <b-tab class="duel-history" title="DUEL HISTORY">
             <div class="duel-history-data-filter-container">
               <b-row>
@@ -169,7 +157,7 @@
                 </b-col>
                 <b-col>
                   <div class="leaderboard-character-body">
-                    <span>{{topRankers.characterID[index]}}</span>
+                    <span>{{getCharacterName(player).toUpperCase()}}</span>
                   </div>
                 </b-col>
                 <b-col>
@@ -184,13 +172,11 @@
                 </b-col>
               </b-row>
             </div>
-            <div class="withdraw-reward" v-if="isTopRanker && getIsEndOfSeason">
+            <div class="withdraw-reward" v-if="isTopRanker">
                 <span @click="withdrawReward()">WITHDRAW REWARD</span>
             </div>
           </b-tab>
         </b-tabs>
-          </b-col>
-        </b-row>
       </b-col>
     </b-row>
   </div>
@@ -237,18 +223,6 @@ export default {
     ...mapGetters([
       'getCharacterName'
     ]),
-
-    getDuration(){
-      const endDate = toInteger(this.pvp.seasonStartedAt) + toInteger(this.pvp.seasonDuration);
-      return this.convertDateTime(endDate);
-    },
-
-    getIsEndOfSeason(){
-      const currentDate = new Date();
-      const endDate = new Date((toInteger(this.pvp.seasonStartedAt) + toInteger(this.pvp.seasonDuration)) * 1000);
-
-      return currentDate >= endDate;
-    },
 
     isTopRanker(){
       const isTop = this.topRankers.characterID.includes(this.characterID.toString());
@@ -299,98 +273,166 @@ export default {
     processDuelHistoryTimestamps(duelHistory){
 
       duelHistory.attack.forEach(attack => {
+        const convertedTimestamp = (attack.timestamp * 1000) - 240000;
+        let duelMonth = new Date(convertedTimestamp).getUTCMonth();
+        const duelDay = new Date(convertedTimestamp).getUTCDate();
+        const duelYear = new Date(convertedTimestamp).getFullYear();
+        const duelHour = new Date(convertedTimestamp).getHours();
+        const duelMinutes = new Date(convertedTimestamp).getMinutes();
+        const duelSeconds = new Date(convertedTimestamp).getSeconds();
 
-        attack.timestamp = this.convertDateTime(attack.timestamp);
+        if(duelMonth.toString() === '0'){
+          duelMonth = 'Jan';
+        }
+        else if (duelMonth.toString() === '1'){
+          duelMonth = 'Feb';
+        }
+        else if (duelMonth.toString() === '2'){
+          duelMonth = 'Mar';
+        }
+        else if (duelMonth.toString() === '3'){
+          duelMonth = 'Apr';
+        }
+        else if (duelMonth.toString() === '4'){
+          duelMonth = 'May';
+        }
+        else if (duelMonth.toString() === '5'){
+          duelMonth = 'June';
+        }
+        else if (duelMonth.toString() === '6'){
+          duelMonth = 'July';
+        }
+        else if (duelMonth.toString() === '7'){
+          duelMonth = 'Aug';
+        }
+        else if (duelMonth.toString() === '8'){
+          duelMonth = 'Sept';
+        }
+        else if (duelMonth.toString() === '9'){
+          duelMonth = 'Oct';
+        }
+        else if (duelMonth.toString() === '10'){
+          duelMonth = 'Nov';
+        }
+        else if (duelMonth.toString() === '11'){
+          duelMonth = 'Dec';
+        }
+
+        let adjustedDuelDay = '';
+        let adjustedDuelHour = '';
+        let adjustedDuelMinutes = '';
+        let adjustedDuelSeconds = '';
+
+        if(toInteger(duelHour) < 10){
+          adjustedDuelHour = '0'+ duelHour;
+        }
+        else{
+          adjustedDuelHour = duelHour;
+        }
+        if(toInteger(duelMinutes) < 10){
+          adjustedDuelMinutes = '0'+ duelMinutes;
+        }
+        else{
+          adjustedDuelMinutes = duelMinutes;
+        }
+        if(toInteger(duelSeconds) < 10){
+          adjustedDuelSeconds = '0'+ duelSeconds;
+        }
+        else{
+          adjustedDuelSeconds = duelSeconds;
+        }
+
+        adjustedDuelDay = toInteger(duelDay) + 1;
+
+        const convertedDate = duelMonth + ' ' + adjustedDuelDay + ' ' + duelYear + ' '
+          + adjustedDuelHour + ':' + adjustedDuelMinutes + ':' + adjustedDuelSeconds;
+
+        attack.timestamp = convertedDate;
 
       });
 
 
       duelHistory.defend.forEach(defend => {
+        const convertedTimestamp = (defend.timestamp * 1000) - 240000;
+        let duelMonth = new Date(convertedTimestamp).getUTCMonth();
+        const duelDay = new Date(convertedTimestamp).getUTCDate();
+        const duelYear = new Date(convertedTimestamp).getFullYear();
+        const duelHour = new Date(convertedTimestamp).getHours();
+        const duelMinutes = new Date(convertedTimestamp).getMinutes();
+        const duelSeconds = new Date(convertedTimestamp).getSeconds();
 
-        defend.timestamp = this.convertDateTime(defend.timestamp);
+        if(duelMonth.toString() === '0'){
+          duelMonth = 'Jan';
+        }
+        else if (duelMonth.toString() === '1'){
+          duelMonth = 'Feb';
+        }
+        else if (duelMonth.toString() === '2'){
+          duelMonth = 'Mar';
+        }
+        else if (duelMonth.toString() === '3'){
+          duelMonth = 'Apr';
+        }
+        else if (duelMonth.toString() === '4'){
+          duelMonth = 'May';
+        }
+        else if (duelMonth.toString() === '5'){
+          duelMonth = 'June';
+        }
+        else if (duelMonth.toString() === '6'){
+          duelMonth = 'July';
+        }
+        else if (duelMonth.toString() === '7'){
+          duelMonth = 'Aug';
+        }
+        else if (duelMonth.toString() === '8'){
+          duelMonth = 'Sept';
+        }
+        else if (duelMonth.toString() === '9'){
+          duelMonth = 'Oct';
+        }
+        else if (duelMonth.toString() === '10'){
+          duelMonth = 'Nov';
+        }
+        else if (duelMonth.toString() === '11'){
+          duelMonth = 'Dec';
+        }
+
+        let adjustedDuelDay = '';
+        let adjustedDuelHour = '';
+        let adjustedDuelMinutes = '';
+        let adjustedDuelSeconds = '';
+
+        if(toInteger(duelHour) < 10){
+          adjustedDuelHour = '0'+ duelHour;
+        }
+        else{
+          adjustedDuelHour = duelHour;
+        }
+        if(toInteger(duelMinutes) < 10){
+          adjustedDuelMinutes = '0'+ duelMinutes;
+        }
+        else{
+          adjustedDuelMinutes = duelMinutes;
+        }
+        if(toInteger(duelSeconds) < 10){
+          adjustedDuelSeconds = '0'+ duelSeconds;
+        }
+        else{
+          adjustedDuelSeconds = duelSeconds;
+        }
+
+        adjustedDuelDay = toInteger(duelDay) + 1;
+
+        const convertedDate = duelMonth + ' ' + adjustedDuelDay + ' ' + duelYear + ' '
+          + adjustedDuelHour + ':' + adjustedDuelMinutes + ':' + adjustedDuelSeconds;
+
+        defend.timestamp = convertedDate;
 
       });
 
 
       return duelHistory;
-    },
-
-    convertDateTime(timestamp){
-      const convertedTimestamp = (timestamp * 1000);
-      let month = new Date(convertedTimestamp).getUTCMonth();
-      const day = new Date(convertedTimestamp).getUTCDate();
-      const year = new Date(convertedTimestamp).getFullYear();
-      const hour = new Date(convertedTimestamp).getHours();
-      const minutes = new Date(convertedTimestamp).getMinutes();
-      const seconds = new Date(convertedTimestamp).getSeconds();
-
-      if(month.toString() === '0'){
-        month = 'Jan';
-      }
-      else if (month.toString() === '1'){
-        month = 'Feb';
-      }
-      else if (month.toString() === '2'){
-        month = 'Mar';
-      }
-      else if (month.toString() === '3'){
-        month = 'Apr';
-      }
-      else if (month.toString() === '4'){
-        month = 'May';
-      }
-      else if (month.toString() === '5'){
-        month = 'June';
-      }
-      else if (month.toString() === '6'){
-        month = 'July';
-      }
-      else if (month.toString() === '7'){
-        month = 'Aug';
-      }
-      else if (month.toString() === '8'){
-        month = 'Sept';
-      }
-      else if (month.toString() === '9'){
-        month = 'Oct';
-      }
-      else if (month.toString() === '10'){
-        month = 'Nov';
-      }
-      else if (month.toString() === '11'){
-        month = 'Dec';
-      }
-
-      let adjustedDay = '';
-      let adjustedHour = '';
-      let adjustedMinutes = '';
-      let adjustedSeconds = '';
-
-      if(toInteger(hour) < 10){
-        adjustedHour = '0'+ hour;
-      }
-      else{
-        adjustedHour = hour;
-      }
-      if(toInteger(minutes) < 10){
-        adjustedMinutes = '0'+ minutes;
-      }
-      else{
-        adjustedMinutes = minutes;
-      }
-      if(toInteger(seconds) < 10){
-        adjustedSeconds = '0'+ seconds;
-      }
-      else{
-        adjustedSeconds = seconds;
-      }
-
-      adjustedDay = toInteger(day);
-
-      const convertedDate = month + ' ' + adjustedDay + ' ' + year + ' '
-          + adjustedHour + ':' + adjustedMinutes + ':' + adjustedSeconds;
-
-      return convertedDate;
     },
 
     updateDuelHistoryFilter(filterFlag){
@@ -406,12 +448,12 @@ export default {
   async created(){
     this.updateIsLoading(true);
     Promise.all([
-      await this.$store.dispatch('fetchCurrentRankedSeason'),
-      await this.$store.dispatch('fetchSeasonDuration'),
-      await this.$store.dispatch('fetchSeasonStartedAt'),
       await this.processDuelHistory(),
       await this.processLeaderboards()]);
-    this.updateIsLoading(false);
+
+    setTimeout(() => {
+      this.updateIsLoading(false);
+    }, 3000);
   },
 
   components:{
@@ -436,21 +478,15 @@ export default {
 }
 
 .pvp-stats-close-button{
-  box-shadow: 0 0 10px #fff;
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  text-align: center;
   margin-left: auto;
-  margin-right: 30px;
+  margin-right: 25px;
   margin-bottom: 20px;
   margin-top: 10px;
   cursor: pointer;
 }
 
 .pvp-stats-close-button:hover{
- background-color: #968332;
- color: #000;
+  text-shadow: 0 0px 10px #fff;
 }
 
 .pvp-stats-container{
@@ -466,12 +502,14 @@ export default {
 }
 
 .pvp-stats-character{
-  margin: auto;
+  margin-left: 20px;
+  height: 100%;
+  width: 50%;
 }
 
 .pvp-stats-character-image{
-  height: 100%;
-  width: 100%;
+  height: 150%;
+  width: 150%;
 }
 
 .pvp-no-duel-found{
@@ -489,40 +527,40 @@ export default {
   font-size: 40px;
   font-weight: bold;
   width: 100px;
-  text-align: center;
+  align-items: center;
 }
 
 .leaderboard-rank-header{
   color: #fff;
   font-weight: bold;
   margin: auto;
-  text-align: center;
+  align-items: center;
 }
 
 .leaderboard-character-header{
   color: #fff;
   font-weight: bold;
   margin: auto;
-  text-align: center;
+  align-items: center;
 }
 
 .leaderboard-points-header{
   color: #fff;
   font-weight: bold;
   margin: auto;
-  text-align: center;
+  align-items: center;
 }
 
 .leaderboard-prize-header{
   color: #fff;
   font-weight: bold;
   margin: auto;
-  text-align: center;
+  align-items: center;
 }
 
 .leaderboard-rank-body{
   margin: auto;
-  text-align: center;
+  align-items: center;
   margin-top: 10px;
   margin-bottom: 10px;
   font-weight: bold;
@@ -532,7 +570,7 @@ export default {
   font-size: 15px;
   font-weight: bold;
   margin: auto;
-  text-align: center;
+  align-items: center;
   margin-top: 10px;
   margin-bottom: 10px;
   font-weight: bold;
@@ -540,7 +578,7 @@ export default {
 
 .leaderboard-points-body{
   margin: auto;
-  text-align: center;
+  align-items: center;
   margin-top: 10px;
   margin-bottom: 10px;
   font-weight: bold;
@@ -548,7 +586,7 @@ export default {
 
 .leaderboard-prize-body{
   margin: auto;
-  text-align: center;
+  align-items: center;
   margin-top: 10px;
   margin-bottom: 10px;
   font-weight: bold;
@@ -581,18 +619,6 @@ export default {
   box-shadow: 0 0 10px #fff;
   text-align: center;
   opacity: 0.8;
-}
-
-.pvp-stats-season{
-  background-color: #000;
-  position: absolute;
-  top: 200px;
-  height: 100px;
-  width: 80%;
-  border-radius: 10px;
-  box-shadow: 0 0 10px #fff;
-  text-align: center;
-  opacity: 0.9;
 }
 
 .pvp-stats-character-id-label{
@@ -629,7 +655,7 @@ export default {
   margin-bottom: 10px;
   width: 90%;
   text-align: center;
-  text-align: center;
+  align-items: center;
   font-weight: bold;
   color: #fff;
   border-top: 1px solid #968332;
@@ -657,7 +683,7 @@ export default {
   border-radius: 5px;
   margin-top: 10px;
   margin-bottom: 10px;
-  text-align: center;
+  align-items: center;
 }
 
 .duel-history-data-row-lose{
@@ -665,7 +691,7 @@ export default {
   border-radius: 5px;
   margin-top: 10px;
   margin-bottom: 10px;
-  text-align: center;
+  align-items: center;
 }
 
 .active-duel-history-filter{
@@ -682,24 +708,6 @@ export default {
   color: #fff;
   text-decoration: underline;
   text-decoration-color: #968332;
-}
-
-.pvp-stats-current-ranked-season{
-  margin: auto;
-  font-size: 40px;
-  font-weight: bold;
-  text-align: center;
-}
-
-.pvp-stats-current-ranked-season-begin-label, .pvp-stats-current-ranked-season-end-label{
-  margin-right: 20px;
-  color: #fff;
-  font-weight: bold;
-}
-
-.pvp-stats-current-ranked-season-begin-text, .pvp-stats-current-ranked-season-end-text{
-  color: #968332;
-  font-weight: bold;
 }
 
 

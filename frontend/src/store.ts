@@ -13,7 +13,7 @@ import {
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
   IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState, IPvPState, IInventory, IPvPFighterState,
-  IDuelByAttacker, IWeapon, IDuelResult
+  IDuelByAttacker, IWeapon
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
@@ -199,9 +199,6 @@ export function createStore(web3: Web3) {
         isCharacterInArena: false,
         isWeaponInArena: false,
         isShieldInArena: false,
-        isPerformDuel: false,
-        isDuelResult: false,
-        duelResult: null,
         duelByAttacker: {
           attackerId: '0',
           defenderId: '0',
@@ -218,9 +215,6 @@ export function createStore(web3: Web3) {
         hasPendingDuel: false,
         characterRankingPoints: '0',
         showStats: false,
-        currentRankedSeason: '0',
-        seasonDuration: '',
-        seasonStartedAt: ''
       },
 
       isLoading: false,
@@ -1082,30 +1076,6 @@ export function createStore(web3: Web3) {
 
       updateIsLoading(state: IState, isLoading: boolean){
         state.isLoading = isLoading;
-      },
-
-      updateIsDuelResult(state: IState, isDuelResult: boolean){
-        state.pvp.isDuelResult = isDuelResult;
-      },
-
-      updateIsPerformDuel(state: IState, isPerformDuel: boolean){
-        state.pvp.isPerformDuel = isPerformDuel;
-      },
-
-      updateDuelResult(state: IState, duelResult: IDuelResult){
-        state.pvp.duelResult = duelResult;
-      },
-
-      updateCurrentRankedSeason(state: IState, currentRankedSeason: string){
-        state.pvp.currentRankedSeason = currentRankedSeason;
-      },
-
-      updateSeasonDuration(state: IState, seasonDuration: string){
-        state.pvp.seasonDuration = seasonDuration;
-      },
-
-      updateSeasonStartedAt(state: IState, seasonStartedAt: string){
-        state.pvp.seasonStartedAt = seasonStartedAt;
       }
 
     },
@@ -3158,13 +3128,13 @@ export function createStore(web3: Web3) {
         if(!CharacterRenameTagConsumables || !state.defaultAccount) return;
         return await CharacterRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseRenameTag({ state, dispatch }, {price}) {
+      async purchaseRenameTag({ state, dispatch }) {
         const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
             .send({
               from: state.defaultAccount
             });
@@ -3172,7 +3142,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterRenameTag(Web3.utils.toWei('' + price)).send({
+        await Blacksmith.methods.purchaseCharacterRenameTag(Web3.utils.toWei('0.1')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -3183,13 +3153,13 @@ export function createStore(web3: Web3) {
           dispatch('fetchTotalRenameTags')
         ]);
       },
-      async purchaseRenameTagDeal({ state, dispatch }, {price}) {
+      async purchaseRenameTagDeal({ state, dispatch }) {
         const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.3', 'ether'))
             .send({
               from: state.defaultAccount
             });
@@ -3197,7 +3167,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterRenameTagDeal(Web3.utils.toWei('' + price)).send({
+        await Blacksmith.methods.purchaseCharacterRenameTagDeal(Web3.utils.toWei('0.3')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -3228,13 +3198,13 @@ export function createStore(web3: Web3) {
         if(!WeaponRenameTagConsumables || !state.defaultAccount) return;
         return await WeaponRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseWeaponRenameTag({ state, dispatch }, {price}) {
+      async purchaseWeaponRenameTag({ state, dispatch }) {
         const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.1', 'ether'))
             .send({
               from: state.defaultAccount
             });
@@ -3242,7 +3212,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseWeaponRenameTag(Web3.utils.toWei('' + price)).send({
+        await Blacksmith.methods.purchaseWeaponRenameTag(Web3.utils.toWei('0.1')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -3253,13 +3223,13 @@ export function createStore(web3: Web3) {
           dispatch('fetchTotalWeaponRenameTags')
         ]);
       },
-      async purchaseWeaponRenameTagDeal({ state, dispatch }, {price}) {
+      async purchaseWeaponRenameTagDeal({ state, dispatch }) {
         const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.3', 'ether'))
             .send({
               from: state.defaultAccount
             });
@@ -3267,7 +3237,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseWeaponRenameTagDeal(Web3.utils.toWei('' + price)).send({
+        await Blacksmith.methods.purchaseWeaponRenameTagDeal(Web3.utils.toWei('0.3')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -3299,13 +3269,13 @@ export function createStore(web3: Web3) {
         if(!CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
         return await CharacterFireTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseCharacterFireTraitChange({ state, dispatch }, {price}) {
+      async purchaseCharacterFireTraitChange({ state, dispatch }) {
         const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterFireTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
             .send({
               from: state.defaultAccount
             });
@@ -3313,7 +3283,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterFireTraitChange(Web3.utils.toWei('' + price)).send({
+        await Blacksmith.methods.purchaseCharacterFireTraitChange(Web3.utils.toWei('0.2')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -3345,13 +3315,13 @@ export function createStore(web3: Web3) {
         if(!CharacterEarthTraitChangeConsumables || !state.defaultAccount) return;
         return await CharacterEarthTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseCharacterEarthTraitChange({ state, dispatch }, {price}) {
+      async purchaseCharacterEarthTraitChange({ state, dispatch }) {
         const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterEarthTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
             .send({
               from: state.defaultAccount
             });
@@ -3359,7 +3329,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterEarthTraitChange(Web3.utils.toWei('' + price)).send({
+        await Blacksmith.methods.purchaseCharacterEarthTraitChange(Web3.utils.toWei('0.2')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -3391,13 +3361,13 @@ export function createStore(web3: Web3) {
         if(!CharacterWaterTraitChangeConsumables || !state.defaultAccount) return;
         return await CharacterWaterTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseCharacterWaterTraitChange({ state, dispatch }, {price}) {
+      async purchaseCharacterWaterTraitChange({ state, dispatch }) {
         const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterWaterTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
             .send({
               from: state.defaultAccount
             });
@@ -3405,7 +3375,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterWaterTraitChange(Web3.utils.toWei('' + price)).send({
+        await Blacksmith.methods.purchaseCharacterWaterTraitChange(Web3.utils.toWei('0.2')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -3437,13 +3407,13 @@ export function createStore(web3: Web3) {
         if(!CharacterLightningTraitChangeConsumables || !state.defaultAccount) return;
         return await CharacterLightningTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
-      async purchaseCharacterLightningTraitChange({ state, dispatch }, {price}) {
+      async purchaseCharacterLightningTraitChange({ state, dispatch }) {
         const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables, Blacksmith } = state.contracts();
         if(!CryptoBlades || !CharacterLightningTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
+            .approve(CryptoBlades.options.address, web3.utils.toWei('0.2', 'ether'))
             .send({
               from: state.defaultAccount
             });
@@ -3451,7 +3421,7 @@ export function createStore(web3: Web3) {
           console.error(err);
         }
 
-        await Blacksmith.methods.purchaseCharacterLightningTraitChange(Web3.utils.toWei('' + price)).send({
+        await Blacksmith.methods.purchaseCharacterLightningTraitChange(Web3.utils.toWei('0.2')).send({
           from: state.defaultAccount,
           gas: '500000'
         });
@@ -3677,9 +3647,7 @@ export function createStore(web3: Web3) {
               from: state.defaultAccount
             });
         } catch(err){
-          console.log('Enter Arena Skill Token Approval Error Log: ');
-          console.log(err);
-          return err;
+          console.error('Enter Arena Skill Token Approval Error Log: ' + err);
         }
 
         try{
@@ -3692,9 +3660,7 @@ export function createStore(web3: Web3) {
           await dispatch('updatePvPDetails', { characterID });
 
         } catch(err){
-          console.log('Enter Arena Error Log: ');
-          console.log(err);
-          return err;
+          console.error('Enter Arena Error Log: ' + err);
         }
 
 
@@ -3732,9 +3698,7 @@ export function createStore(web3: Web3) {
               from: state.defaultAccount
             });
         }catch(err){
-          console.log('Reroll Opponent Skill Approval Error Log: ');
-          console.log(err);
-          return err;
+          console.log('Reroll Opponent Skill Approval Error Log: ' + err);
         }
 
         try{
@@ -3746,9 +3710,7 @@ export function createStore(web3: Web3) {
 
           await dispatch('updatePvPDetails', { characterID });
         } catch(err){
-          console.log('Reroll Opponent Error Log: ');
-          console.log(err);
-          return err;
+          console.log('Reroll Opponent Error Log: ' + err);
         }
       },
       async getDuelByAttacker({state, commit, dispatch}, {characterID}){
@@ -3784,9 +3746,12 @@ export function createStore(web3: Web3) {
 
         return duelByAttacker;
       },
-      async preparePerformDuel({state, commit}, {characterID}){
+      async preparePerformDuel({state}, {characterID}){
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
+
+        const currentBlockNumber = await web3.eth.getBlockNumber();
+        console.log(currentBlockNumber);
 
         try{
           await PvpArena.methods
@@ -3794,58 +3759,66 @@ export function createStore(web3: Web3) {
             .send({
               from: state.defaultAccount
             });
+
+          return currentBlockNumber;
         }catch(err){
-          commit('updateIsLoading', false);
-          console.log('Prepare Perform Duel Error Log: ');
-          console.log(err);
-          return err;
+          console.log('Prepare Perform Duel Error Log: ' + err);
         }
 
       },
-      async waitForDuelResult({state, commit, dispatch},{characterID}){
+      async waitForDuelResult({state, dispatch, commit}, {characterID, previousBlock}){
         const { PvpArena } = state.contracts();
         if(!PvpArena) return;
 
-        const currentBlock = await web3.eth.getBlockNumber();
+        const previousDuelReward = state.pvp.wageredSkill;
 
-        const subscription = web3.eth.subscribe('newBlockHeaders',
-          async function(error: any){
-            if(!error){
+        let isDuelFinished = false;
+        const nextBlock = previousBlock + 1;
+        console.log(previousBlock);
+        console.log(nextBlock);
+        let duelResult;
+        let latestDuelIndex = 0;
 
-              const duelResult = await PvpArena.getPastEvents('DuelFinished', {
+        try{
+          while(!isDuelFinished){
+            const currentBlock = await web3.eth.getBlockNumber();
+            if(currentBlock >= nextBlock){
+              duelResult = await PvpArena.getPastEvents('DuelFinished', {
                 filter: {attacker: characterID},
                 toBlock: 'latest',
-                fromBlock: currentBlock
+                fromBlock: 0
               });
+
               if(duelResult.length > 0){
+                latestDuelIndex = duelResult?.length-1;
+                duelResult = duelResultFromContract(duelResult[latestDuelIndex].returnValues as [string, string, string, string, string, boolean]);
 
-                const processedDuelResult: IDuelResult =
-                duelResultFromContract(duelResult[0].returnValues as [string, string, string, string, string, boolean]);
+                duelResult.previousDuelReward = previousDuelReward;
+                duelResult.newDuelReward = state.pvp.wageredSkill;
 
-                console.log(processedDuelResult);
+                console.log(duelResult);
 
-                commit('updateDuelResult', processedDuelResult );
-
-                subscription.unsubscribe((error: any, result: any) =>{
-                  if(!error){
-                    console.log(result);
-                  }
-                });
-
-                commit('updateIsLoading', false);
-                commit('updateIsPerformDuel', true);
-                commit('updateIsDuelResult', true);
-
-                setTimeout(() => {
-                  commit('updateIsPerformDuel', false);
-                }, 6000);
-
+                isDuelFinished = true;
               }
+              else{
+                duelResult = undefined;
+                isDuelFinished = false;
+              }
+            }
+            else{
+              isDuelFinished = false;
+            }
+          }
 
-            }});
+          //This is outside to make sure that performDuel executes before showing the rewards
+          await dispatch('updatePvPDetails', { characterID });
+          commit('updateHasPendingDuel', false);
 
-        await dispatch('updatePvPDetails',{ characterID });
-
+          return duelResult;
+        }catch(err){
+          console.log('Perform Duel Error Log: ');
+          console.log(err);
+        }
       },
       async withdrawFromArena({state, commit, dispatch}, {inDuel,characterID}){
         const { PvpArena, SkillToken } = state.contracts();
@@ -3861,9 +3834,7 @@ export function createStore(web3: Web3) {
                 from: state.defaultAccount
               });
           }catch(err){
-            console.log('Withdraw From Arena Skill Approval Error Log: ');
-            console.log(err);
-            return err;
+            console.log('Withdraw From Arena Skill Approval Error Log: ' + err);
           }
         }
 
@@ -3874,9 +3845,7 @@ export function createStore(web3: Web3) {
               from: state.defaultAccount
             });
         }catch(err){
-          console.log('Withdraw From Arena Error Log: ');
-          console.log(err);
-          return err;
+          console.log('Withdraw From Arena Error Log: ' + err);
         }
 
         await dispatch('fetchParticipatingCharacters');
@@ -4156,6 +4125,11 @@ export function createStore(web3: Web3) {
             defend: processedDefendingDuelHistory
           };
 
+          console.log('Attacking Duel History\n');
+          console.log(processedAttackingDuelHistory);
+          console.log('Defending Duel History\n');
+          console.log(processedDefendingDuelHistory);
+
           return duelHistory;
 
         }catch(err){
@@ -4249,65 +4223,7 @@ export function createStore(web3: Web3) {
           console.log(err);
         }
       },
-      async fetchCurrentRankedSeason({state, commit}){
-        const { PvpArena } = state.contracts();
-        if(!PvpArena) return;
 
-        try{
-          const currentRankedSeason = await PvpArena.methods
-            .currentRankedSeason()
-            .call(defaultCallOptions(state));
-
-          commit('updateCurrentRankedSeason', currentRankedSeason);
-        }catch(err){
-          console.log('Fetch Current Ranked Season Error Log: ');
-          console.log(err);
-          return err;
-        }
-      },
-      async fetchSeasonDuration({state, commit}){
-        const { PvpArena } = state.contracts();
-        if(!PvpArena) return;
-
-        try{
-          const seasonDuration = await PvpArena.methods
-            .seasonDuration()
-            .call(defaultCallOptions(state));
-
-          commit('updateSeasonDuration', seasonDuration);
-
-        }catch(err){
-          console.log('Fetch Season Duration Error Log: ');
-          console.log(err);
-          return err;
-        }
-      },
-
-      async fetchSeasonStartedAt({state, commit}){
-        const { PvpArena } = state.contracts();
-        if (!PvpArena) return;
-
-        try{
-          const seasonStartedAt = await PvpArena.methods
-            .seasonStartedAt()
-            .call(defaultCallOptions(state));
-
-          commit('updateSeasonStartedAt', seasonStartedAt);
-        }catch(err){
-          console.log('Fetch Season Started At Error Log: ');
-          console.log(err);
-          return err;
-        }
-      },
-
-      async checkCharacterOwnership({ state }, { characterID }) {
-        const { Characters } = state.contracts();
-        if(!Characters) return;
-
-        return await Characters.methods
-          .ownerOf(characterID)
-          .call(defaultCallOptions(state));
-      },
 
       async configureMetaMask({ dispatch }) {
         const currentNetwork = await web3.eth.net.getId();
@@ -4647,22 +4563,6 @@ export function createStore(web3: Web3) {
           .chainBridgeEnabled(chainId)
           .call(defaultCallOptions(state));
         return isEnabled;
-      },
-      async getBridgeTransferAt({ state }) {
-        const { NFTStorage } = await state.contracts();
-        if (!NFTStorage || !state.defaultAccount) return;
-        const transferAt = await NFTStorage.methods
-          .getBridgeTransferAt()
-          .call(defaultCallOptions(state));
-        return parseInt(transferAt,10);
-      },
-      async getBridgeTransfers({ state }) {
-        const { NFTStorage } = state.contracts();
-        if(!NFTStorage || !state.defaultAccount) return;
-        const bridgeTransfers = await NFTStorage.methods
-          .getBridgeTransfers()
-          .call(defaultCallOptions(state));
-        return parseInt(bridgeTransfers,10);
       }
     },
   });

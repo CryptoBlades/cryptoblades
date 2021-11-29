@@ -20,7 +20,7 @@
 
     <b-row
       id="arena-character-buttons"
-      v-if="!pvp.isDuelResult && !isLoading">
+      v-if="!isDuelResult && !isLoading">
       <b-col
         v-for="character in inPvPCharacters"
         :key="character.id">
@@ -43,14 +43,14 @@
     </b-row>
 
     <b-row
-      v-if="!pvp.isDuelResult && !isLoading">
+      v-if="!isDuelResult && !isLoading">
       <div class="timer-container">
         <span id="timer" v-text="this.pvp.decisionTime"/>
       </div>
     </b-row>
 
     <b-row
-      v-if="!pvp.isDuelResult && !isLoading">
+      v-if="!isDuelResult && !isLoading">
       <b-col>
         <b-row>
           <pvp-fighter
@@ -63,13 +63,13 @@
       <b-col>
         <b-row>
           <div
-            v-if="!this.pvp.duelByAttacker.isPending && this.pvp.decisionTime === '00:00'"
+            v-if="!this.pvp.hasPendingDuel && this.pvp.decisionTime == '00:00'"
             class="find-opponent-container"
             @click="findOpponent(currentPvPCharacterId)">
               <img id="find-opponent-img" src="../../assets/winged-shield.svg"/>
           </div>
           <div
-            v-if="getIsShown"
+            v-if="this.pvp.hasPendingDuel && this.pvp.decisionTime !== '00:00'"
             class="duel-container">
               <img
                   id="duel-img"
@@ -87,7 +87,7 @@
                   src="../../assets/run.svg"/>WITHDRAW</span>
           </div>
           <div
-            v-if="this.pvp.duelByAttacker.isPending"
+            v-if="this.pvp.hasPendingDuel"
             class="reroll-container">
               <span
                 @click="reRollOpponent(currentPvPCharacterId)">
@@ -127,42 +127,42 @@
         <b-row>
           <pvp-fighter
             :characterId="this.pvp.duelByAttacker.defenderId"
-            :show="getIsShown"
+            :show="this.pvp.hasPendingDuel && this.pvp.decisionTime !== '00:00'"
             :isAttacker="false"></pvp-fighter>
         </b-row>
       </b-col>
     </b-row>
 
     <b-row
-      v-if="pvp.isDuelResult && !isLoading">
+      v-if="isDuelResult && !isLoading">
       <div class="duel-result-container">
         <div class="duel-result">
          <p
           class="duel-win-result-text"
-          v-if="this.pvp.duelResult.attackerWon">YOU WIN</p>
+          v-if="duelResult.attackerWon">YOU WIN</p>
          <p
           class="duel-lose-result-text"
-          v-if="!this.pvp.duelResult.attackerWon">YOU LOST</p>
+          v-if="!duelResult.attackerWon">YOU LOST</p>
           <span
               class="duel-result-roll-label">You rolled
             </span>
             <span
               class="duel-result-roll-value"
-              v-text="this.pvp.duelResult.attackerRoll"/><br>
+              v-text="duelResult.attackerRoll"/><br>
             <span
               class="duel-result-roll-label">Enemy rolled
             </span>
             <span
               class="duel-result-roll-value"
-              v-text="this.pvp.duelResult.defenderRoll"/><br>
+              v-text="duelResult.defenderRoll"/><br>
         </div>
         <div class="duel-result-rewards"
-          v-if="this.pvp.duelResult.attackerWon">
+          v-if="duelResult.attackerWon">
             <span
               class="duel-result-rewards-label">SKILL
             </span>
             <span
-              class="duel-result-rewards-won-value">+ {{getWinDuelReward}}</span><br>
+              class="duel-result-rewards-won-value">+ {{getDuelReward}}</span><br>
             <span
               class="duel-result-rewards-label">RANK POINTS
             </span>
@@ -175,12 +175,12 @@
               class="duel-result-rewards-won-value">{{getNewRankAfterVictory}}</span><br>
         </div>
         <div class="duel-result-rewards"
-          v-if="!this.pvp.duelResult.attackerWon">
+          v-if="!duelResult.attackerWon">
             <span
               class="duel-result-rewards-label">SKILL
             </span>
             <span
-              class="duel-result-rewards-lost-value">- {{getLoseDuelReward}}</span><br>
+              class="duel-result-rewards-lost-value">- {{getDuelReward}}</span><br>
             <span
               class="duel-result-rewards-label">RANK POINTS
             </span>
@@ -205,9 +205,9 @@
     </div>
 
     <pvp-duel
-      v-if="pvp.isPerformDuel"
-      :attackerId="this.pvp.duelResult.attackerId"
-      :defenderId="this.pvp.duelResult.defenderId"></pvp-duel>
+      v-if="isPerformDuel"
+      :attackerId="this.duelResult.attackerId"
+      :defenderId="this.duelResult.defenderId"></pvp-duel>
 
     <b-modal
       id="withdraw-character"
@@ -246,8 +246,13 @@ export default {
 
   data(){
     return{
+      isPerformDuel: false,
+      isDuelResult: false,
+      duelResult: null,
       totalWithdrawableSkill: '',
       isShown: false,
+      previousDuelReward: '',
+      newDuelReward: '',
       previousRankPoints: '',
       newRankPoints: '',
       showStats: false,
@@ -264,16 +269,8 @@ export default {
       'getCharacterName'
     ]),
 
-    getIsShown(){
-      return this.pvp.duelByAttacker.isPending && this.pvp.decisionTime !== '00:00';
-    },
-
-    getWinDuelReward(){
-      const duelReward = new BN(this.pvp.duelCost).div(new BN(10).pow(18)).toFixed(4) - (new BN(this.pvp.duelCost).div(new BN(10).pow(18)).toFixed(4) * 0.30);
-      return duelReward;
-    },
-    getLoseDuelReward(){
-      const duelReward = new BN(this.pvp.duelCost).div(new BN(10).pow(18)).toFixed(4);
+    getDuelReward(){
+      const duelReward = Math.abs(parseFloat(this.newDuelReward) - parseFloat(this.previousDuelReward)).toFixed(4);
       return duelReward;
     },
 
@@ -312,8 +309,7 @@ export default {
       'setCurrentPvPCharacter',
       'updateShowStats',
       'updateIsLoading',
-      'updateHasPendingDuel',
-      'updateIsDuelResult'
+      'updateHasPendingDuel'
     ]),
 
     openStats(){
@@ -321,7 +317,7 @@ export default {
     },
 
     async afterDuelChecks(){
-      this.updateIsDuelResult(false);
+      this.isDuelResult = !this.isDuelResult;
 
       if(this.pvp.participatingCharacters.length < 1){
         await this.$store.dispatch('fetchArenaPage', {page: '0'});
@@ -344,69 +340,70 @@ export default {
 
     async findOpponent(characterID){
       this.updateIsLoading(true);
-      const errorMessage = await this.$store.dispatch('getOpponent', {characterID});
-
-      if(errorMessage && errorMessage.code === 4001){
-        this.$dialog.notify.error(errorMessage.message, {position: 'bottom-left'});
+      try{
+        await this.$store.dispatch('getOpponent', {characterID});
+      }catch(err){
+        console.log(err);
       }
-      else if(errorMessage && errorMessage.code !== 4001 && errorMessage){
-        this.$dialog.notify.error('No opponents available in tier. Try again.', {position: 'bottom-left'});
+      finally{
+        this.updateIsLoading(false);
+        this.clearAllTicker();
+        this.ticker();
       }
-      else if(errorMessage && errorMessage.code !== 4001 && this.pvp.hasPendingDuel){
-        this.$dialog.notify.error('Opponent already requested', {position: 'bottom-left'});
-      }
-
-
-      this.updateIsLoading(false);
-      this.clearAllTicker();
-      this.ticker();
-
     },
 
     async reRollOpponent(characterID){
       this.updateIsLoading(true);
-
-      const errorMessage = await this.$store.dispatch('reRollOpponent',{characterID});
-
-      if(errorMessage && errorMessage.code === 4001){
-        this.$dialog.notify.error(errorMessage.message, {position: 'bottom-left'});
-      }else if (errorMessage && errorMessage.code !== 4001 && !this.pvp.hasPendingDuel){
-        this.$dialog.notify.error('Character is not dueling', {position: 'bottom-left'});
+      try{
+        await this.$store.dispatch('reRollOpponent',{characterID});
+      }catch(err){
+        console.log(err);
       }
-
-      this.updateIsLoading(false);
-      this.clearAllTicker();
-      this.ticker();
+      finally{
+        this.updateIsLoading(false);
+        this.clearAllTicker();
+        this.ticker();
+      }
     },
 
     async performDuel(characterID){
       this.updateIsLoading(true);
-      const errorMessage = await this.$store.dispatch('preparePerformDuel', {characterID});
+      this.previousDuelReward = '';
+      this.previousDuelReward = new BN(this.pvp.wageredSkill).div(new BN(10).pow(18)).toFixed(4);
+      const currentBlock = await this.$store.dispatch('preparePerformDuel', {characterID});
 
-      if(errorMessage !== undefined && errorMessage.code === 4001){
-        this.$dialog.notify.error(errorMessage.message, {position: 'bottom-left'});
-      }else if (errorMessage !== undefined && errorMessage.code !== 4001){
-        this.$dialog.notify.error('Something went wrong with the duel queue. Please try again', {position: 'bottom-left'});
-      }
+      this.waitForDuel(characterID, currentBlock);
 
-      if(!errorMessage){
-        this.waitForDuel(characterID);
-      }
+      this.updateIsLoading(false);
     },
 
-    async waitForDuel(characterID){
-      await this.$store.dispatch('waitForDuelResult', {characterID});
+    async waitForDuel(characterID, currentBlock){
+      this.duelResult = await this.$store.dispatch('waitForDuelResult', {characterID, previousBlock: currentBlock});
+
+      if(this.duelResult === undefined){
+        this.isPerformDuel = false;
+        this.isDuelResult = false;
+      }
+      else{
+        this.isPerformDuel = true;
+        this.isDuelResult = true;
+        setTimeout(() => {
+          this.isPerformDuel = false;
+          this.clearAllTicker();
+          this.ticker();
+        },6000);
+        this.newDuelReward = '';
+        this.newDuelReward = new BN(this.duelResult.newDuelReward).div(new BN(10).pow(18)).toFixed(4);
+      }
     },
 
     async withdrawFromArena(characterID){
-      const inDuel = this.pvp.hasPendingDuel;
+      try{
+        const inDuel = this.pvp.hasPendingDuel;
 
-      const errorMessage = await this.$store.dispatch('withdrawFromArena',{inDuel,characterID});
-
-      if(errorMessage && errorMessage.code === 4001){
-        this.$dialog.notify.error(errorMessage.message, {position: 'bottom-left'});
-      }else if (errorMessage && errorMessage.code !== 4001){
-        this.$dialog.notify.error('Something went wrong withdrawing your character. Please try again', {position: 'bottom-left'});
+        await this.$store.dispatch('withdrawFromArena',{inDuel,characterID});
+      }catch(err){
+        console.log(err);
       }
     },
 
@@ -416,7 +413,7 @@ export default {
 
     getDecisionTime(){
 
-      const decisionTimeInterval = (this.pvp.duelByAttacker.createdAt * 1000) + 180000;
+      const decisionTimeInterval = (this.pvp.duelByAttacker.createdAt * 1000) - 60000;
 
       const decisionTime = new Date(decisionTimeInterval);
 
