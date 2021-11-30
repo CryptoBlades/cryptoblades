@@ -4,7 +4,10 @@
       <img :src="partnerLogoPath" class="partner-logo"/>
       <div class="d-flex flex-column justify-content-center ml-2">
         <h4 class="d-flex align-items-center partner-name">{{name}}</h4>
-        <h6>Token: {{tokenSymbol}}</h6>
+        <div class="d-flex">
+          <h6>Token: {{tokenSymbol}}</h6>
+          <a @click="addTokenToMetamask" class="ml-1 add-token-button">(Add)</a>
+        </div>
         <span class="multiplier-text">{{skillToPartnerRatio}} SKILL/{{tokenSymbol}}</span>
         <span class="multiplier-text">Multiplier: x{{multiplier}}</span>
       </div>
@@ -32,7 +35,7 @@
 <script lang='ts'>
 import Vue from 'vue';
 import { mapActions } from 'vuex';
-import { toBN } from '@/utils/common';
+import { addTokenToMetamask, toBN } from '@/utils/common';
 import partnersInfo from '../../partners.json';
 
 export interface PartnersInfo {
@@ -65,6 +68,10 @@ export default Vue.extend({
     tokenSymbol: {
       type: String,
       default: '',
+    },
+    tokenAddress: {
+      type: String,
+      default: ''
     },
     tokenSupply: {
       type: String,
@@ -130,6 +137,10 @@ export default Vue.extend({
 
     toggleDetails() {
       this.detailsOpened = !this.detailsOpened;
+    },
+
+    async addTokenToMetamask() {
+      await addTokenToMetamask(this.tokenAddress, this.tokenSymbol);
     }
   },
 
@@ -179,5 +190,8 @@ export default Vue.extend({
 }
 .on-top {
   z-index: 10;
+}
+.add-token-button {
+  line-height: 1.2;
 }
 </style>
