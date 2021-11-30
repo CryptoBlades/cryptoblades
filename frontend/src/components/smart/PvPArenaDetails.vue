@@ -9,8 +9,8 @@
         <span v-if="!pvp.isWeaponInArena" class="ready"></span>
         <span v-if="pvp.isWeaponInArena" class="not-ready"></span><br>
         <span>Shield (Optional)</span>
-        <span v-if="!pvp.isShieldInArena" class="ready"></span>
-        <span v-if="pvp.isShieldInArena" class="not-ready"></span><br>
+        <span v-if="!pvp.isShieldInArena && currentShield" class="ready"></span>
+        <span v-if="pvp.isShieldInArena || !currentShield" class="not-ready"></span><br>
         <b-modal id="enterArenaErrorModal" title="STOP RIGHT THERE!" ok-only>
                 <span class="enter-arena-error-label">Weapon Error: </span>
                 <span class="enter-arena-error-value" v-text="this.weaponErrorMessage"></span><br>

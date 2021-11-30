@@ -469,6 +469,11 @@ export default {
     this.clearAllTicker();
     this.ticker();
     this.updateIsLoading(false);
+
+    if ((await this.$store.dispatch('fetchDuelQueue')).map(characterID => characterID.toString()).includes(this.currentPvPCharacterId.toString())) {
+      this.updateIsLoading(true);
+      await this.waitForDuel(this.currentPvPCharacterId);
+    }
   },
 
   components:{
