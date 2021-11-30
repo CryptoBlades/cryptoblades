@@ -3210,7 +3210,6 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        state.partnerProjects = {};
         const activePartnerProjectIds = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(state));
         activePartnerProjectIds.forEach(async (id: string) => {
           await dispatch('fetchPartnerProject', id);
@@ -3349,6 +3348,7 @@ export function createStore(web3: Web3) {
 
         window.location.reload();
       },
+
       async storeItem({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;

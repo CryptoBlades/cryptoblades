@@ -13,7 +13,8 @@
     </div>
     <div class="d-flex w-100 pt-2 pr-5 pl-5 pb-2 flex-wrap">
       <partnered-project v-for="p in supportedProjects" :key="p.id" :id="p.id" :name="p.name" :tokenSymbol="p.tokenSymbol"
-        :tokenSupply="p.tokenSupply" :tokenPrice="p.tokenPrice" :logoFileName="getLogoFile(p.name)"/>
+        :tokenSupply="p.tokenSupply" :tokenPrice="p.tokenPrice" :logoFileName="getLogoFile(p.name)"
+        :tokenAddress="p.tokenAddress"/>
     </div>
   </div>
 </template>
@@ -47,8 +48,18 @@ interface StoreMappedActions {
   fetchPartnerProjects(): Promise<void>;
 }
 
+interface Data {
+  updateInterval: ReturnType<typeof setInterval> | null;
+}
+
 export default Vue.extend({
   components: { PartneredProject },
+
+  data() {
+    return {
+      updateInterval: null
+    } as Data;
+  },
 
   computed: {
     ...(mapGetters(['getPartnerProjects']) as Accessors<StoreMappedGetters>),
@@ -83,6 +94,15 @@ export default Vue.extend({
 
   async mounted() {
     await this.fetchPartnerProjects();
+    this.updateInterval = setInterval(async () => {
+      await this.fetchPartnerProjects();
+    }, 3000);
+  },
+
+  beforeDestroy() {
+    if(this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
   }
 
 });
