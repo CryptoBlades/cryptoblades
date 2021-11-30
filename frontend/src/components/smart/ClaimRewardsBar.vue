@@ -4,7 +4,7 @@
       <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
       variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="$t('ClaimRewardsBar.readyToClaim')"/>
 
-      <b-nav-item disabled><strong>{{$t('ClaimRewardsBar.rewards')}}</strong></b-nav-item>
+      <b-nav-item class="bar" disabled><strong>{{$t('ClaimRewardsBar.rewards')}}</strong></b-nav-item>
 
       <b-nav-item
         class="ml-3 bar"
@@ -93,7 +93,8 @@
       <b>{{$t('stakeModal.confirmModal.cantBeUndone')}}</b>
     </b-modal>
     <b-modal class="centered-modal" ref="claim-summary-modal" :title="$t('ClaimRewardsBar.claimRewards')"
-      :ok-title="$t('ClaimRewardsBar.claim')" @ok="onClaimTokens()">
+      :ok-title="$t('ClaimRewardsBar.claim')" @ok="onClaimTokens()"
+      :ok-disabled="selectedPartneredProject && !canClaimSelectedProject">
       <div class="d-flex flex-column align-items-center">
         <div class="d-flex flex-row w-100 align-items-baseline">
           <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
@@ -105,7 +106,11 @@
         <partnered-project v-if="selectedPartneredProject"
           :id="selectedPartneredProject.id" :name="selectedPartneredProject.name"
           :tokenSymbol="selectedPartneredProject.tokenSymbol" :tokenSupply="selectedPartneredProject.tokenSupply"
-          :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"/>
+          :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"
+          :tokenAddress="selectedPartneredProject.tokenAddress"/>
+        <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
+          <h5>This partner tokens have been claimed already.</h5>
+        </div>
         <div class="mt-3" v-if="!selectedPartneredProject">
           <h5>{{withdrawalInfoText}}</h5>
           <h6>{{$t('ClaimRewardsBar.earlyWithdrawTax')}}: {{ formattedRewardsClaimTax }} {{$t('ClaimRewardsBar.taxReduce')}} {{getTaxTimerNextTick}}</h6>
@@ -303,6 +308,13 @@ export default Vue.extend({
 
     selectedPartneredProject(): SupportedProject | undefined {
       return this.supportedProjects.find(x => x.id === this.payoutCurrencyId);
+    },
+
+    canClaimSelectedProject(): boolean {
+      if(this.selectedPartneredProject) {
+        return toBN(this.selectedPartneredProject.tokensClaimed).div(toBN(10).pow(18)) < toBN(this.selectedPartneredProject.tokenSupply);
+      }
+      return false;
     }
   },
 

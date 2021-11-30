@@ -3,7 +3,8 @@
     "ProjectName": {
       "logo": ".png",
       "details": "Details text"
-    },"Bounty": {
+    },
+    "Bounty": {
       "logo": "bounty.png",
       "details": "Details text"
     },
