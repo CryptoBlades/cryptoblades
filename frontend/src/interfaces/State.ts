@@ -4,6 +4,7 @@ import { ITarget } from './Target';
 import { Contracts } from './Contracts';
 import { Nft } from './Nft';
 import { IShield } from './Shield';
+import BigNumber from 'bignumber.js';
 
 export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2';
 export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2'];
@@ -94,6 +95,7 @@ export interface IPvPState {
   currentRankedSeason: string;
   seasonDuration: string;
   seasonStartedAt: string;
+  duelQueue: BigNumber[];
 }
 
 export interface IDuelByAttacker {

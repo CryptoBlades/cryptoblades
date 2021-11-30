@@ -29,6 +29,7 @@ import { getWeaponNameFromSeed } from '@/weapon-name';
 import axios from 'axios';
 import { IShield } from './interfaces/Shield';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
+import { BigNumber } from 'bignumber.js';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -220,7 +221,8 @@ export function createStore(web3: Web3) {
         showStats: false,
         currentRankedSeason: '0',
         seasonDuration: '',
-        seasonStartedAt: ''
+        seasonStartedAt: '',
+        duelQueue: []
       },
 
       isLoading: false,
@@ -1054,6 +1056,10 @@ export function createStore(web3: Web3) {
 
       updateRankingRewardsPool(state: IState, rankingRewardsPool: string){
         state.pvp.rewards.rankingRewardsPool = rankingRewardsPool;
+      },
+
+      updateDuelQueue(state: IState, duelQueue: BigNumber[]){
+        state.pvp.duelQueue = duelQueue;
       },
 
       updateAllUnclaimedDuelEarnings(state: IState, allUnclaimedDuelEarnings: string){
@@ -3994,6 +4000,24 @@ export function createStore(web3: Web3) {
           console.log('Ranking Rewards Pool Error Log: ' + err);
         }
       },
+
+      async fetchDuelQueue({state, commit}){
+        const { PvpArena } = state.contracts();
+        if (!PvpArena) return;
+
+        try{
+          const duelQueue = await PvpArena.methods
+            .getDuelQueue()
+            .call(defaultCallOptions(state));
+
+          commit('updateDuelQueue', duelQueue);
+
+          return duelQueue;
+        } catch(err){
+          console.log('Fetch Duel Queue Error Log: ' + err);
+        }
+      },
+
       async updatePvPDetails({state, dispatch},{characterID}){
         await Promise.all([
           dispatch('fetchSkillBalance'),
