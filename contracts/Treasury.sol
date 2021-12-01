@@ -18,7 +18,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     uint256 public multiplierUnit;
 
     PartnerProject[] private partneredProjects;
-    mapping(uint256 => uint256) projectAddedBlockNumber;
+    mapping(uint256 => uint256) multiplierTimestamp;
     mapping(uint256 => uint256) tokensClaimed;
     uint256 skillPrice;
 
@@ -33,6 +33,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     }
 
     CryptoBlades public game;
+
+    mapping(uint256 => uint256) projectDistributionTime;
 
     function initialize(CryptoBlades _game) public initializer {
         __AccessControl_init_unchained();
@@ -87,7 +89,10 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     }
 
     function getProjectMultiplier(uint256 partnerId) public view returns(uint256) {
-        return uint(1e18).div(multiplierUnit).mul(block.number.sub(projectAddedBlockNumber[partnerId])).add(1e18);
+        if(block.timestamp >= multiplierTimestamp[partnerId]) {
+            return uint(1e18).div(multiplierUnit).mul(block.timestamp.sub(multiplierTimestamp[partnerId])).add(1e18); 
+        }
+        return uint(1e18).sub(uint(1e18).div(multiplierUnit).mul(multiplierTimestamp[partnerId].sub(block.timestamp)));
     }
 
     function getProjectClaimedAmount(uint256 partnerId) public view returns(uint256) {
@@ -104,8 +109,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     function getAmountInPartnerToken(uint256 partnerId, uint256 skillAmount) public view returns(uint256) {
         uint256 baseAmount = getSkillToPartnerRatio(partnerId).mulu(skillAmount);
-        uint256 bonusAmount = baseAmount.mul(block.number.sub(projectAddedBlockNumber[partnerId])).div(multiplierUnit);
-        return baseAmount.add(bonusAmount);
+        uint256 amountWithMultiplier = baseAmount.mul(getProjectMultiplier(partnerId)).div(1e18);
+        return amountWithMultiplier;
     }
 
     // Mutative
@@ -116,10 +121,11 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         address tokenAddress,
         uint256 tokenSupply,
         uint256 tokenPrice,
+        uint256 distributionTime,
         bool isActive)
     public restricted {
         uint256 id = partneredProjects.length;
-        projectAddedBlockNumber[id] = block.number;
+        multiplierTimestamp[id] = block.timestamp;
         tokensClaimed[id] = 0;
         partneredProjects.push(PartnerProject(
             id,
@@ -130,6 +136,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
             tokenPrice,
             isActive
         ));
+        projectDistributionTime[id] = distributionTime;
     }
 
     function claim(uint256 partnerId) public {
@@ -151,9 +158,11 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         game.deductAfterPartnerClaim(skillToDeduct, msg.sender);
         tokensClaimed[partnerId] += partnerTokenAmount;
         IERC20(partneredProjects[partnerId].tokenAddress).safeTransfer(msg.sender, partnerTokenAmount);
+
+        multiplierTimestamp[partnerId] = multiplierTimestamp[partnerId].add(partnerTokenAmount.div(partneredProjects[partnerId].tokenSupply.div(projectDistributionTime[partnerId])).div(uint(1e18).div(multiplierUnit)));
     }
 
-    function setMultiplierUnit(uint256 unit) public restricted {
+    function setMultiplierUnit(uint256 unit) external restricted {
         multiplierUnit = unit;
     }
 
@@ -161,13 +170,17 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         partneredProjects[id].isActive = isActive;
     }
 
-    function setSkillPrice(uint256 newPrice) public restricted {
+    function setSkillPrice(uint256 newPrice) external restricted {
         require(newPrice > 0);
         skillPrice = newPrice;
     }
 
-    function setPartnerTokenPrice(uint256 partnerId, uint256 newPrice) public restricted {
+    function setPartnerTokenPrice(uint256 partnerId, uint256 newPrice) external restricted {
         require(newPrice > 0);
         partneredProjects[partnerId].tokenPrice = newPrice;
+    }
+
+    function setDistributionTime(uint256 partnerId, uint256 distributionTime) external restricted {
+        projectDistributionTime[partnerId] = distributionTime;
     }
 }

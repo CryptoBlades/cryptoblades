@@ -8,9 +8,7 @@
 
       <b-nav-item
         class="ml-3 bar"
-        :disabled="!canClaimTokens"
-        @click="claimSkill(ClaimStage.Summary)"
-        v-tooltip.bottom="!canClaimTokens ? withdrawalInfoText : ''"><!-- moved gtag-link below b-nav-item -->
+        @click="claimSkill(ClaimStage.Summary)"><!-- moved gtag-link below b-nav-item -->
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
           <strong>SKILL</strong> {{ formattedSkillReward }}
         </span>
@@ -34,7 +32,6 @@
         </template>
 
         <b-dropdown-item
-          :disabled="!canClaimTokens"
           @click="claimSkill(ClaimStage.Summary)" class="rewards-info gtag-link-others" tagname="claim_skill"
            v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
             SKILL
@@ -94,7 +91,7 @@
     </b-modal>
     <b-modal class="centered-modal" ref="claim-summary-modal" :title="$t('ClaimRewardsBar.claimRewards')"
       :ok-title="$t('ClaimRewardsBar.claim')" @ok="onClaimTokens()"
-      :ok-disabled="selectedPartneredProject && !canClaimSelectedProject">
+      :ok-disabled="(selectedPartneredProject && !canClaimSelectedProject) || (!selectedPartneredProject && !canClaimTokens)">
       <div class="d-flex flex-column align-items-center">
         <div class="d-flex flex-row w-100 align-items-baseline">
           <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
