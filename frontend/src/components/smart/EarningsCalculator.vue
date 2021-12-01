@@ -289,19 +289,17 @@ export default Vue.extend({
     async calculateEarnings() {
       if(!this.canCalculate()) return;
       this.calculationResults = [];
-      const fightBnbFee = 0.0007 * this.bnbPrice;
+      const fightFee = +getConfigValue('fightGas') * this.currentTokenPrice;
       const weapon = this.getWeapon();
       const characterTrait = CharacterTrait[this.characterElementValue as keyof typeof CharacterTrait];
       const weaponMultiplier = GetTotalMultiplierForTrait(weapon, characterTrait);
-      const fights = this.getNumberOfFights(this.staminaSelectValue);
 
       const totalPower = this.getTotalPower(CharacterPower(this.levelSliderValue - 1), weaponMultiplier, this.wepBonusPowerSliderValue);
-      const averageDailyReward = await this.getAverageRewardForPower(totalPower) * 7.2 +
-        this.formattedSkill(this.fightGasOffset) * fights;
+      const averageDailyReward = await this.getAverageRewardForPower(totalPower) * 7.2;
       const averageFightProfit = averageDailyReward * this.skillPrice / 7.2;
       for(let i = 1; i < 8; i++) {
         const averageDailyProfitForCharacter = averageFightProfit * i -
-          ((this.getNumberOfFights(this.staminaSelectValue) * fightBnbFee));
+          ((this.getNumberOfFights(this.staminaSelectValue) * fightFee));
         const averageDailyProfitForAllCharacter = 4 * averageDailyProfitForCharacter;
         const averageMonthlyProfitForAllCharacter = 30 * averageDailyProfitForAllCharacter;
         this.calculationResults.push([averageDailyProfitForCharacter, averageDailyProfitForAllCharacter, averageMonthlyProfitForAllCharacter]);
@@ -329,7 +327,7 @@ export default Vue.extend({
     },
 
     async getAverageRewardForPower(power: number) {
-      const expectedPayout = await this.fetchExpectedPayoutForMonsterPower(Math.round(power));
+      const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: Math.round(power), isCalculator: true });
       return this.formattedSkill(expectedPayout);
     },
 

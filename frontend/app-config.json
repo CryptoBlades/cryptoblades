@@ -25,6 +25,7 @@
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x9E47585eC2f55E2e48D3645090136426BF67745B",
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x18e608D58Ba392b72A9df5bE5bd8afBe9134A20d",
           "VUE_APP_STORAGE_CONTRACT_ADDRESS":"0xE8cEE8309c5705c8b5004BBB031686a1029ab977",
+          "VUE_APP_TREASURY_CONTRACT_ADDRESS": "0xe676452f2C650F80C3D282E723112aA67bE617c7",
 
           "chainId": "0x61",
           "currencyName": "Binance Coin",
@@ -34,7 +35,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
           "blockExplorerUrls": ["https://testnet.bscscan.com"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab"
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab",
+          "fightGas": "0.0007"
         },
         "HECO": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -58,6 +60,7 @@
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x019E3b542D07A1042e5FfE3546d14b773D08A1Da",
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x0C0fB08f71045E30076121659E91Af38525CB9be",
           "VUE_APP_STORAGE_CONTRACT_ADDRESS":"0x7EB3237Ba499A05e8915870AeA5c897048F709b1",
+          "VUE_APP_TREASURY_CONTRACT_ADDRESS": "0xB4a1661a19AA4Ef3DfCD0cE11f474952bd5Ca140",
 
           "chainId": "0x100",
           "currencyName": "Huobi Token",
@@ -67,7 +70,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://http-testnet.hecochain.com"],
           "blockExplorerUrls": ["https://testnet.hecoinfo.com"],
-          "exchangeUrl": "https://swap.butterswap.me/#/swap?inputCurrency=HT&outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405"
+          "exchangeUrl": "https://swap.butterswap.me/#/swap?inputCurrency=HT&outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405",
+          "fightGas": "0.0006"
         },
         "OKEX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -91,6 +95,7 @@
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xdC05aee085EcEC7f406d0Ef4402a95D3c85E13A0",
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xAB29D0B97144e912bef067d95EF9dBE017Aa165f",
           "VUE_APP_STORAGE_CONTRACT_ADDRESS":"",
+          "VUE_APP_TREASURY_CONTRACT_ADDRESS": "",
 
           "chainId": "0x41",
           "currencyName": "OKExChain",
@@ -100,7 +105,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://exchaintestrpc.okex.org"],
           "blockExplorerUrls": ["https://www.oklink.com/okexchain-test/"],
-          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB"
+          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB",
+          "fightGas": "0.00009"
         },
         "POLYGON": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -123,6 +129,7 @@
           "VUE_APP_RAID_CONTRACT_ADDRESS":"0xa75203D757Bb4cAF4cc008d8B16b36B2EE74c77e",
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x2d49c204dA121E63340B9E10651Cb0667D5e709a",
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xCb850EEd27fF37B591c88967b5E7bC63De121FBd",
+          "VUE_APP_TREASURY_CONTRACT_ADDRESS": "0xD828C778ED9954Ff92bFb92CDF3666227dbFAcEF",
 
           "chainId": "0x13881",
           "currencyName": "MATIC",
@@ -132,7 +139,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://matic-mumbai.chainstacklabs.com"],
           "blockExplorerUrls": ["https://mumbai.polygonscan.com/"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e"
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e",
+          "fightGas": "0.0095"
         },
         "AVAX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS": "snoui.wam",
@@ -164,7 +172,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://api.avax-test.network/ext/bc/C/rpc"],
           "blockExplorerUrls": ["https://testnet.snowtrace.io/"],
-          "exchangeUrl": ""
+          "exchangeUrl": "",
+          "fightGas": "0.006"
         }
       }
     },
@@ -185,6 +194,8 @@
           "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"0xd6b2D8f59Bf30cfE7009fB4fC00a7b13Ca836A2c",
           "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"0x39e0D6D95E035e2F8a2392788e0c53b7BA7d9B83",
           "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_KING_TOKEN_CONTRACT_ADDRESS":"0x0ccd575bf9378c06f6dca82f8122f570769f00c2",
+          "VUE_APP_KING_STAKING_REWARDS_CONTRACT_ADDRESS":"",
 
           "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
           "VUE_APP_RAID_CONTRACT_ADDRESS":"0x1067d34D7bEBe2BE81657e8a2E3CFEBb0161F96b",
@@ -192,6 +203,7 @@
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
           "VUE_APP_STORAGE_CONTRACT_ADDRESS":"0x32Abf3872b1399E8C17FCA1c574A02096B339e3F",
+          "VUE_APP_TREASURY_CONTRACT_ADDRESS": "0x812Fa2f7d89e5d837450702bd51120920dccaA99",
 
           "chainId": "0x38",
           "currencyName": "Binance Coin",
@@ -201,7 +213,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://bsc-dataseed.binance.org/"],
           "blockExplorerUrls": ["https://bscscan.com/"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab"
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab",
+          "fightGas": "0.0007"
         },
         "HECO": {
           "VUE_APP_NETWORK_ID":"128",
@@ -225,6 +238,7 @@
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xc64AB1928e8B7a1631F2B1D5d6EE907E6D7F053F",
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
           "VUE_APP_STORAGE_CONTRACT_ADDRESS":"0xD92d2dC19b6032A1F29E3ca87e6f0beE7515a0Bb",
+          "VUE_APP_TREASURY_CONTRACT_ADDRESS": "0x7843Bd2aDdE5E54bD6e61C28fA89009240a48C08",
 
           "chainId": "0x80",
           "currencyName": "Huobi Token",
@@ -234,7 +248,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://http-mainnet.hecochain.com"],
           "blockExplorerUrls": ["https://hecoinfo.com"],
-          "exchangeUrl": "https://swap.butterswap.me/#/swap?outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405"
+          "exchangeUrl": "https://swap.butterswap.me/#/swap?outputCurrency=0x27d4DfDB3fDf58e198bA4dbc23B2F82c0b8e3405",
+          "fightGas": "0.0006"
         },
         "OKEX": {
           "VUE_APP_NETWORK_ID":"66",
@@ -258,6 +273,7 @@
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0x23B5b3d1ED0e1B9Ce91344AD6a7CDc25B1f7983C",
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
           "VUE_APP_STORAGE_CONTRACT_ADDRESS":"0x7f25686b5a211280C2555c08B7e6d2930e7e87e6",
+          "VUE_APP_TREASURY_CONTRACT_ADDRESS": "0xcBEfF02841370997054AdfF624dC490C8cB20406",
 
           "chainId": "0x42",
           "currencyName": "OKExChain",
@@ -267,7 +283,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://exchainrpc.okex.org"],
           "blockExplorerUrls": ["https://www.oklink.com/okexchain/"],
-          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB"
+          "exchangeUrl": "https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB",
+          "fightGas": "0.00009"
         },
         "POLYGON": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -291,6 +308,7 @@
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xeE6e8467268eA752b027676B3EBcD4eB05749874",
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xCb850EEd27fF37B591c88967b5E7bC63De121FBd",
           "VUE_APP_STORAGE_CONTRACT_ADDRESS":"0x5846b663523649Ed02CA9cC57bBAE7FAe2a3cDcA",
+          "VUE_APP_TREASURY_CONTRACT_ADDRESS": "0x216AC39765D920D7f86162Daf9BE1f045f321A8D",
 
           "chainId": "0x89",
           "currencyName": "MATIC",
@@ -300,7 +318,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://matic-mainnet.chainstacklabs.com"],
           "blockExplorerUrls": ["https://polygonscan.com/"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86"
+          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86",
+          "fightGas": "0.0095"
         },
         "AVAX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
@@ -323,6 +342,7 @@
           "VUE_APP_RAID_CONTRACT_ADDRESS":"0xbAC6B71a5bC3517Bee588299980B3C357a518e5C",
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x9469ED8d4b86e4442b4AA848bB94B9f9130f123E",
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xf055e7F7cbed74821A857D80Dd0E5b45576a41BD",
+          "VUE_APP_TREASURY_CONTRACT_ADDRESS": "0x5B1cCb62D2F9c8523abBa89A56432005cef03b99",
 
           "chainId": "0xA86A",
           "currencyName": "Avalanche",
@@ -332,7 +352,8 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://api.avax.network/ext/bc/C/rpc"],
           "blockExplorerUrls": ["https://snowtrace.io/"],
-          "exchangeUrl": ""
+          "exchangeUrl": "",
+          "fightGas": "0.006"
         }
       }
     }

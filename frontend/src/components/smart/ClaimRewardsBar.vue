@@ -1,36 +1,57 @@
 <template>
   <div class="body main-font">
-    <b-navbar>
+    <b-navbar v-if="isBar">
       <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
       variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="$t('ClaimRewardsBar.readyToClaim')"/>
 
-      <b-nav-item disabled><strong>{{$t('ClaimRewardsBar.rewards')}}</strong></b-nav-item>
+      <b-nav-item class="bar" disabled><strong>{{$t('ClaimRewardsBar.rewards')}}</strong></b-nav-item>
 
       <b-nav-item
-        class="ml-3"
+        class="ml-3 bar"
         :disabled="!canClaimTokens"
-        @click="onClaimTokens()"
+        @click="claimSkill(ClaimStage.Summary)"
         v-tooltip.bottom="!canClaimTokens ? withdrawalInfoText : ''"><!-- moved gtag-link below b-nav-item -->
-        <span class="gtag-link-others" tagname="claim_skill" :v-tooltip="$t('ClaimRewardsBar.taxReduce') + getTaxTimerNextTick">
+        <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
           <strong>SKILL</strong> {{ formattedSkillReward }}
-          <strong>{{$t('ClaimRewardsBar.earlyWithdrawTax')}}</strong> {{ formattedRewardsClaimTax }}
         </span>
-        <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="withdrawalInfoText"/>
       </b-nav-item>
 
       <b-nav-item
-        class="ml-3"
+        class="ml-3 bar"
         :disabled="!canClaimXp"
         @click="onClaimXp">
-          <div class="gtag-link-others" v-html="`<strong>XP</strong> ${formattedXpRewards}`"></div>
+          <div class="gtag-link-others" v-html="`<strong>XP</strong> ${formattedXpRewardsBar}`"></div>
       </b-nav-item>
     </b-navbar>
 
-    <!-- Unused -->
-    <b-modal class="centered-modal" ref="need-gas-modal" :title="$t('needGasModal.title')"
-      @ok="claimSkill(ClaimStage.Stake)" :ok-title="$t('needGasModal.okTitle')"
-      @cancel="$router.push({ name: 'portal' })" :cancel-title="$t('needGasModal.cancelTitle')" >
-        {{$t('needGasModal.needWithdraw')}}
+    <b-navbar-nav v-if="!isBar">
+      <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
+      variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'" />
+
+      <b-nav-item-dropdown right>
+        <template #button-content>
+          {{$t('ClaimRewardsBar.rewards')}}
+        </template>
+
+        <b-dropdown-item
+          :disabled="!canClaimTokens"
+          @click="claimSkill(ClaimStage.Summary)" class="rewards-info gtag-link-others" tagname="claim_skill"
+           v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
+            SKILL
+            <div class="pl-3">{{ formattedSkillReward }}</div>
+        </b-dropdown-item>
+
+        <b-dropdown-item
+          :disabled="!canClaimXp"
+          @click="onClaimXp" class="gtag-link-others" tagname="claim_xp">
+            XP <div class="pl-3" v-for="(reward, index) in formattedXpRewards" :key="index">{{ reward }}</div>
+        </b-dropdown-item>
+      </b-nav-item-dropdown>
+    </b-navbar-nav>
+
+    <b-modal class="centered-modal" ref="need-gas-modal" title="Need Withdraw?"
+      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Portal" >
+        Need Withdraw? Try our WAX Portal, which will pay you .5% under market rate to sell your WAX for BNB!
         <div class="text-center">
           <hr class="hr-divider">
           {{$t('needGasModal.holdReminder')}}<br>
@@ -71,19 +92,46 @@
       </span>
       <b>{{$t('stakeModal.confirmModal.cantBeUndone')}}</b>
     </b-modal>
+    <b-modal class="centered-modal" ref="claim-summary-modal" :title="$t('ClaimRewardsBar.claimRewards')"
+      :ok-title="$t('ClaimRewardsBar.claim')" @ok="onClaimTokens()"
+      :ok-disabled="selectedPartneredProject && !canClaimSelectedProject">
+      <div class="d-flex flex-column align-items-center">
+        <div class="d-flex flex-row w-100 align-items-baseline">
+          <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
+          <b-form-select class="w-50 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
+            <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
+            <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
+          </b-form-select>
+        </div>
+        <partnered-project v-if="selectedPartneredProject"
+          :id="selectedPartneredProject.id" :name="selectedPartneredProject.name"
+          :tokenSymbol="selectedPartneredProject.tokenSymbol" :tokenSupply="selectedPartneredProject.tokenSupply"
+          :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"
+          :tokenAddress="selectedPartneredProject.tokenAddress"/>
+        <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
+          <h5>This partner tokens have been claimed already.</h5>
+        </div>
+        <div class="mt-3" v-if="!selectedPartneredProject">
+          <h5>{{withdrawalInfoText}}</h5>
+          <h6>{{$t('ClaimRewardsBar.earlyWithdrawTax')}}: {{ formattedRewardsClaimTax }} {{$t('ClaimRewardsBar.taxReduce')}} {{getTaxTimerNextTick}}</h6>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import { Accessors } from 'vue/types/options';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { RequiredXp } from '../../interfaces';
 import { ICharacter } from '@/interfaces';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { secondsToDDHHMMSS } from '../../utils/date-time';
 import { getCleanName } from '../../rename-censor';
+import { SupportedProject } from '@/views/Treasury.vue';
+import PartneredProject from '../PartneredProject.vue';
 import i18n from '@/i18n';
 
 interface StoreMappedState {
@@ -91,6 +139,7 @@ interface StoreMappedState {
   xpRewards: Record<string, string>;
   ownedCharacterIds: string[];
   directStakeBonusPercent: number;
+  payoutCurrencyId: string;
 }
 
 interface StoreMappedGetters {
@@ -99,32 +148,45 @@ interface StoreMappedGetters {
   maxRewardsClaimTaxAsFactorBN: BigNumber;
   rewardsClaimTaxAsFactorBN: BigNumber;
   getCharacterName(id: number): string;
+  getPartnerProjects: SupportedProject[];
 }
 
 enum ClaimStage {
   WaxBridge = 0,
   Stake = 1,
-  Claim = 2
+  Claim = 2,
+  Summary = 3
 }
 
 interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
+  claimPartnerToken(id: number): Promise<void>;
   claimXpRewards(): Promise<void>;
   fetchRemainingTokenClaimAmountPreTax(): Promise<string>;
+  fetchPartnerProjects(): Promise<void>;
 }
 
 export default Vue.extend({
+  components: { PartneredProject },
+
+  props: {
+    isBar: {
+      type: Boolean,
+      default: true
+    }
+  },
+
   data() {
     return {
       ClaimStage,
-      remainingTokenClaimAmountPreTax: '0'
+      remainingTokenClaimAmountPreTax: '0',
     };
   },
 
   computed: {
-    ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
+    ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent', 'payoutCurrencyId']) as Accessors<StoreMappedState>),
     ...(mapGetters([
-      'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName'
+      'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName', 'getPartnerProjects'
     ]) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
@@ -190,7 +252,7 @@ export default Vue.extend({
       return this.ownedCharacterIds.map(charaId => this.xpRewards[charaId] || '0');
     },
 
-    formattedXpRewards(): string {
+    formattedXpRewardsBar(): string {
       return this.xpRewardsForOwnedCharacters.map((xp, i) => {
         const currentCharacter = this.currentCharacter || { id: null };
         if(!this.ownCharacters[i]) return `${xp}`;
@@ -200,6 +262,14 @@ export default Vue.extend({
                 `${(this.ownCharacters[i].xp + this.xpRewards[this.ownCharacters[i].id]) as any > RequiredXp(this.ownCharacters[i].level) ? '</u>' : ''}` +
                 `${this.ownCharacters[i].id === currentCharacter.id ? '</b>' : ''}`;
       }).join(', ');
+    },
+
+    formattedXpRewards(): string[] {
+      return this.xpRewardsForOwnedCharacters.map((xp, i) => {
+        if(!this.ownCharacters[i]) return xp;
+
+        return `${this.getCleanCharacterName(this.ownCharacters[i].id)} ${xp}`;
+      });
     },
 
     canClaimTokens(): boolean {
@@ -217,14 +287,47 @@ export default Vue.extend({
       }
 
       return true;
+    },
+
+    supportedProjects(): SupportedProject[] {
+      const supportedProjects = this.getPartnerProjects.map(p => {
+        return {
+          id: p.id,
+          name: p.name,
+          tokenSymbol: p.tokenSymbol,
+          tokenAddress: p.tokenAddress,
+          tokenSupply: p.tokenSupply,
+          tokensClaimed: p.tokensClaimed,
+          tokenPrice: p.tokenPrice,
+          isActive: p.isActive
+        };
+      });
+
+      return supportedProjects;
+    },
+
+    selectedPartneredProject(): SupportedProject | undefined {
+      return this.supportedProjects.find(x => x.id === this.payoutCurrencyId);
+    },
+
+    canClaimSelectedProject(): boolean {
+      if(this.selectedPartneredProject) {
+        return toBN(this.selectedPartneredProject.tokensClaimed).div(toBN(10).pow(18)) < toBN(this.selectedPartneredProject.tokenSupply);
+      }
+      return false;
     }
   },
 
   methods: {
-    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax']) as StoreMappedActions),
+    ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimPartnerToken', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax',
+      'fetchPartnerProjects']) as StoreMappedActions),
+    ...mapMutations(['updatePayoutCurrencyId']),
 
     async onClaimTokens() {
-      if(this.canClaimTokens) {
+      if(this.payoutCurrencyId !== '-1') {
+        await this.claimPartnerToken(+this.payoutCurrencyId);
+      }
+      else if(this.canClaimTokens) {
         await this.claimTokenRewards();
       }
     },
@@ -246,6 +349,10 @@ export default Vue.extend({
         (this.$refs['stake-suggestion-modal'] as any).hide();
         (this.$refs['claim-confirmation-modal'] as any).show();
       }
+      if(stage === ClaimStage.Summary) {
+        await this.fetchPartnerProjects();
+        (this.$refs['claim-summary-modal'] as any).show();
+      }
       await this.getRemainingTokenClaimAmountPreTax();
     },
 
@@ -255,7 +362,11 @@ export default Vue.extend({
 
     getCleanCharacterName(id: number): string {
       return getCleanName(this.getCharacterName(id));
-    }
+    },
+
+    getLogoFile(projectName: string): string {
+      return `${projectName.toLowerCase()}.png`;
+    },
   },
 
   async mounted() {
@@ -271,7 +382,7 @@ export default Vue.extend({
   background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
 }
 
-.nav-item {
+.nav-item.bar {
   margin-top: -24px;
 }
 

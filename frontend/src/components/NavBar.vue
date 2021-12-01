@@ -9,7 +9,7 @@
 
       <skill-balance-display class="ml-auto d-none d-sm-flex" />
 
-      <claim-rewards  v-if="!canShowRewardsBar" />
+      <claim-rewards-bar :isBar="false" v-if="!canShowRewardsBar" />
 
       <options class="d-none d-sm-flex"/>
 
@@ -36,7 +36,6 @@ import Vue from 'vue';
 import ViewLinks from './ViewLinks.vue';
 import Options from './Options.vue';
 import SkillBalanceDisplay from './smart/SkillBalanceDisplay.vue';
-import ClaimRewards from './smart/ClaimRewards.vue';
 import ClaimRewardsBar from './smart/ClaimRewardsBar.vue';
 
 import Events from '../events';
@@ -46,7 +45,6 @@ export default Vue.extend({
   components: {
     ViewLinks,
     SkillBalanceDisplay,
-    ClaimRewards,
     ClaimRewardsBar,
     Options
   },
