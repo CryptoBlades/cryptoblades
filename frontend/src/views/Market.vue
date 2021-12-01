@@ -710,6 +710,7 @@ import { fromWeiEther, apiUrl } from '../utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
 import { getCleanName } from '../rename-censor';
 import i18n from '@/i18n';
+import { toInteger } from 'lodash';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
@@ -752,7 +753,8 @@ interface Data {
   reservedSaleAllowed: boolean;
 }
 
-type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields' | 'ownedCharacterIds' | 'ownedWeaponIds' | 'ownedShieldIds'>;
+type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields'
+| 'ownedCharacterIds' | 'ownedWeaponIds' | 'ownedShieldIds' | 'itemPrices'>;
 
 const defaultLimit = 40;
 
@@ -814,6 +816,7 @@ interface StoreMappedActions {
   setupCharactersWithIdsRenames(weaponIds: string[]): Promise<void>;
   fetchIsLandSaleAllowed(): Promise<boolean>;
   reservedSalesAllowed(): Promise<boolean>;
+  fetchItemPrices(): Promise<void>;
 }
 
 export default Vue.extend({
@@ -857,7 +860,7 @@ export default Vue.extend({
 
   computed: {
     ...(mapState([
-      'defaultAccount', 'weapons', 'characters', 'shields', 'ownedCharacterIds', 'ownedWeaponIds', 'ownedShieldIds',
+      'defaultAccount', 'weapons', 'characters', 'shields', 'ownedCharacterIds', 'ownedWeaponIds', 'ownedShieldIds', 'itemPrices'
     ]) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'contracts', 'ownCharacters', 'totalShieldSupply','getCharacterName','getWeaponName'
@@ -963,7 +966,7 @@ export default Vue.extend({
         {
           id: 0,
           type: 'CharacterRenameTag',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterRenamePrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterRenameTag'),
           description: i18n.t('market.nftList.characterRenameTagDesc'),
           image: 'scroll_06_te.png'
@@ -971,7 +974,7 @@ export default Vue.extend({
         {
           id: 0,
           type: 'CharacterRenameTagDeal',
-          nftPrice: 0.225,
+          nftPrice: toInteger(new BigNumber(toInteger(this.itemPrices.itemCharacterRenamePrice) * 3).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterRenameTagDeal'),
           description: i18n.t('market.nftList.characterRenameTagDealDesc'),
           image: 'scroll_06_te4.png'
@@ -979,7 +982,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'WeaponRenameTag',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponRenamePrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponRenameTag'),
           description: i18n.t('market.nftList.weaponRenameTagDesc'),
           image: 'rune_05_te.png'
@@ -987,7 +990,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'WeaponRenameTagDeal',
-          nftPrice: 0.225,
+          nftPrice: toInteger(new BigNumber(toInteger(this.itemPrices.itemWeaponRenamePrice) * 3).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponRenameTagDeal'),
           description: i18n.t('market.nftList.weaponRenameTagDealDesc'),
           image: 'rune_05_te4.png'
@@ -995,7 +998,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'CharacterEarthTraitChange',
-          nftPrice: 0.15,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterTraitChangeEarthPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterEarthTraitChange'),
           description: i18n.t('market.nftList.characterEarthTraitChangeDesc'),
           image: 'potion_06_te.png'
@@ -1003,7 +1006,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'CharacterFireTraitChange',
-          nftPrice: 0.15,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterTraitChangeFirePrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterFireTraitChange'),
           description: i18n.t('market.nftList.characterFireTraitChangeDesc'),
           image: 'potion_09_te.png'
@@ -1011,7 +1014,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'CharacterWaterTraitChange',
-          nftPrice: 0.15,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterTraitChangeWaterPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterWaterTraitChange'),
           description: i18n.t('market.nftList.characterWaterTraitChangeDesc'),
           image: 'potion_07_te.png'
@@ -1019,7 +1022,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'CharacterLightningTraitChange',
-          nftPrice: 0.15,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterTraitChangeLightningPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterLightningTraitChange'),
           description: i18n.t('market.nftList.characterLightningTraitChangeDesc'),
           image: 'potion_05_te.png'
@@ -1027,7 +1030,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'WeaponCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticGrayscalePrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponGrayscale'),
           description: i18n.t('market.nftList.weaponGrayscaleDesc'),
           image: ''
@@ -1035,7 +1038,7 @@ export default Vue.extend({
         {
           id: 2,
           type: 'WeaponCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticContrastPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponContrast'),
           description: i18n.t('market.nftList.weaponContrastDesc'),
           image: ''
@@ -1043,7 +1046,7 @@ export default Vue.extend({
         {
           id: 3,
           type: 'WeaponCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticSepiaPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponSepia'),
           description: i18n.t('market.nftList.weaponSepiaDesc'),
           image: ''
@@ -1051,7 +1054,7 @@ export default Vue.extend({
         {
           id: 4,
           type: 'WeaponCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticInvertPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponInvert'),
           description: i18n.t('market.nftList.weaponInvertDesc'),
           image: ''
@@ -1059,7 +1062,7 @@ export default Vue.extend({
         {
           id: 5,
           type: 'WeaponCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticBlurPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponBlur'),
           description: i18n.t('market.nftList.weaponBlurDesc'),
           image: ''
@@ -1067,7 +1070,7 @@ export default Vue.extend({
         {
           id: 6,
           type: 'WeaponCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticFireGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponFireglow'),
           description: i18n.t('market.nftList.weaponFireglowDesc'),
           image: ''
@@ -1075,7 +1078,7 @@ export default Vue.extend({
         {
           id: 7,
           type: 'WeaponCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticEarthGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponEarthglow'),
           description: i18n.t('market.nftList.weaponEarthglowDesc'),
           image: ''
@@ -1083,7 +1086,7 @@ export default Vue.extend({
         {
           id: 8,
           type: 'WeaponCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticLightningGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponLightningglow'),
           description: i18n.t('market.nftList.weaponLightningglowDesc'),
           image: ''
@@ -1091,7 +1094,7 @@ export default Vue.extend({
         {
           id: 9,
           type: 'WeaponCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticWaterGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponWaterglow'),
           description: i18n.t('market.nftList.weaponWaterglowDesc'),
           image: ''
@@ -1099,7 +1102,7 @@ export default Vue.extend({
         {
           id: 10,
           type: 'WeaponCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticRainbowGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponRainbowglow'),
           description: i18n.t('market.nftList.weaponRainbowglowDesc'),
           image: ''
@@ -1107,7 +1110,7 @@ export default Vue.extend({
         {
           id: 11,
           type: 'WeaponCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticDarkGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponDarkglow'),
           description: i18n.t('market.nftList.weaponDarkglowDesc'),
           image: ''
@@ -1115,7 +1118,7 @@ export default Vue.extend({
         {
           id: 12,
           type: 'WeaponCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticGhostPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponGhost'),
           description: i18n.t('market.nftList.weaponGhostDesc'),
           image: ''
@@ -1123,7 +1126,7 @@ export default Vue.extend({
         {
           id: 13,
           type: 'WeaponCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticPoliceLightsPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponPolicelights'),
           description: i18n.t('market.nftList.weaponPolicelightsDesc'),
           image: ''
@@ -1131,7 +1134,7 @@ export default Vue.extend({
         {
           id: 14,
           type: 'WeaponCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticNeonBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponNeonborder'),
           description: i18n.t('market.nftList.weaponNeonborderDesc'),
           image: ''
@@ -1139,7 +1142,7 @@ export default Vue.extend({
         {
           id: 15,
           type: 'WeaponCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticRotatingNeonBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponRotatingNeonborder'),
           description: i18n.t('market.nftList.weaponRotatingNeonborderDesc'),
           image: ''
@@ -1147,7 +1150,7 @@ export default Vue.extend({
         {
           id: 16,
           type: 'WeaponCosmetic',
-          nftPrice: 0.3,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticDiamondBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponDiamondborder'),
           description: i18n.t('market.nftList.weaponDiamondborderDesc'),
           image: ''
@@ -1155,7 +1158,7 @@ export default Vue.extend({
         {
           id: 17,
           type: 'WeaponCosmetic',
-          nftPrice: 0.225,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticGoldBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponGoldborder'),
           description: i18n.t('market.nftList.weaponGoldborderDesc'),
           image: ''
@@ -1163,7 +1166,7 @@ export default Vue.extend({
         {
           id: 18,
           type: 'WeaponCosmetic',
-          nftPrice: 0.15,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticSilverBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponSilverborder'),
           description: i18n.t('market.nftList.weaponSilverborderDesc'),
           image: ''
@@ -1171,7 +1174,7 @@ export default Vue.extend({
         {
           id: 19,
           type: 'WeaponCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemWeaponCosmeticBronzeBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.weaponBronzeborder'),
           description: i18n.t('market.nftList.weaponBronzeborderDesc'),
           image: ''
@@ -1179,7 +1182,7 @@ export default Vue.extend({
         {
           id: 1,
           type: 'CharacterCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticGrayscalePrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterGrayscale'),
           description: i18n.t('market.nftList.characterGrayscaleDesc'),
           image: ''
@@ -1187,7 +1190,7 @@ export default Vue.extend({
         {
           id: 2,
           type: 'CharacterCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticContrastPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterContrast'),
           description: i18n.t('market.nftList.characterContrastDesc'),
           image: ''
@@ -1195,7 +1198,7 @@ export default Vue.extend({
         {
           id: 3,
           type: 'CharacterCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticSepiaPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterSepia'),
           description: i18n.t('market.nftList.characterSepiaDesc'),
           image: ''
@@ -1203,7 +1206,7 @@ export default Vue.extend({
         {
           id: 4,
           type: 'CharacterCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticInvertPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterInvert'),
           description: i18n.t('market.nftList.characterInvertDesc'),
           image: ''
@@ -1211,7 +1214,7 @@ export default Vue.extend({
         {
           id: 5,
           type: 'CharacterCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticBlurPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterBlur'),
           description: i18n.t('market.nftList.characterBlurDesc'),
           image: ''
@@ -1219,7 +1222,7 @@ export default Vue.extend({
         {
           id: 6,
           type: 'CharacterCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticFireGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterFireglow'),
           description: i18n.t('market.nftList.characterFireglowDesc'),
           image: ''
@@ -1227,7 +1230,7 @@ export default Vue.extend({
         {
           id: 7,
           type: 'CharacterCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticEarthGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterEarthglow'),
           description: i18n.t('market.nftList.characterEarthglowDesc'),
           image: ''
@@ -1235,7 +1238,7 @@ export default Vue.extend({
         {
           id: 8,
           type: 'CharacterCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticLightningGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterLightningglow'),
           description: i18n.t('market.nftList.characterLightningglowDesc'),
           image: ''
@@ -1243,7 +1246,7 @@ export default Vue.extend({
         {
           id: 9,
           type: 'CharacterCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticWaterGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterWaterglow'),
           description: i18n.t('market.nftList.characterWaterglowDesc'),
           image: ''
@@ -1251,7 +1254,7 @@ export default Vue.extend({
         {
           id: 10,
           type: 'CharacterCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticRainbowGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterRainbowglow'),
           description: i18n.t('market.nftList.characterRainbowglowDesc'),
           image: ''
@@ -1259,7 +1262,7 @@ export default Vue.extend({
         {
           id: 11,
           type: 'CharacterCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticDarkGlowPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterDarkglow'),
           description: i18n.t('market.nftList.characterDarkglowDesc'),
           image: ''
@@ -1267,7 +1270,7 @@ export default Vue.extend({
         {
           id: 12,
           type: 'CharacterCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticGhostPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterGhost'),
           description: i18n.t('market.nftList.characterGhostDesc'),
           image: ''
@@ -1275,7 +1278,7 @@ export default Vue.extend({
         {
           id: 13,
           type: 'CharacterCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticPoliceLightsPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterPolice'),
           description: i18n.t('market.nftList.characterPoliceDesc'),
           image: ''
@@ -1283,7 +1286,7 @@ export default Vue.extend({
         {
           id: 14,
           type: 'CharacterCosmetic',
-          nftPrice: 0.375,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticNeonBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterNeonborder'),
           description: i18n.t('market.nftList.characterNeonborderDesc'),
           image: ''
@@ -1291,7 +1294,7 @@ export default Vue.extend({
         {
           id: 15,
           type: 'CharacterCosmetic',
-          nftPrice: 0.3,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticDiamondBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterDiamondborder'),
           description: i18n.t('market.nftList.characterDiamondborderDesc'),
           image: ''
@@ -1299,7 +1302,7 @@ export default Vue.extend({
         {
           id: 16,
           type: 'CharacterCosmetic',
-          nftPrice: 0.225,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticGoldBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterGoldborder'),
           description: i18n.t('market.nftList.characterGoldborderDesc'),
           image: ''
@@ -1307,7 +1310,7 @@ export default Vue.extend({
         {
           id: 17,
           type: 'CharacterCosmetic',
-          nftPrice: 0.15,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticSilverBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterSilverborder'),
           description: i18n.t('market.nftList.characterSilverborderDesc'),
           image: ''
@@ -1315,7 +1318,7 @@ export default Vue.extend({
         {
           id: 18,
           type: 'CharacterCosmetic',
-          nftPrice: 0.075,
+          nftPrice: toInteger(new BigNumber(this.itemPrices.itemCharacterCosmeticBronzeBorderPrice).div(new BigNumber(10).pow(18)).toFixed(4)),
           name: i18n.t('market.nftList.characterBronzeborder'),
           description: i18n.t('market.nftList.characterBronzeborderDesc'),
           image: ''
@@ -1351,6 +1354,7 @@ export default Vue.extend({
       'setupCharactersWithIdsRenames',
       'fetchIsLandSaleAllowed',
       'reservedSalesAllowed',
+      'fetchItemPrices',
     ]) as StoreMappedActions),
 
     clearData() {
@@ -2334,6 +2338,11 @@ export default Vue.extend({
     this.landSaleAllowed = await this.fetchIsLandSaleAllowed();
     this.reservedSaleAllowed = await this.reservedSalesAllowed();
   },
+
+  async created() {
+    await this.fetchItemPrices();
+  }
+
 });
 </script>
 

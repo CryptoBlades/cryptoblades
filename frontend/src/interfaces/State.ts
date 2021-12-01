@@ -63,6 +63,52 @@ export interface IPartnerProject {
   isActive: boolean;
 }
 
+export interface IItemPrices {
+  itemWeaponRenamePrice: string;
+  itemCharacterRenamePrice: string;
+  itemCharacterTraitChangeFirePrice: string;
+  itemCharacterTraitChangeEarthPrice: string;
+  itemCharacterTraitChangeWaterPrice: string;
+  itemCharacterTraitChangeLightningPrice: string;
+  itemWeaponCosmeticGrayscalePrice: string;
+  itemWeaponCosmeticContrastPrice: string;
+  itemWeaponCosmeticSepiaPrice: string;
+  itemWeaponCosmeticInvertPrice: string;
+  itemWeaponCosmeticBlurPrice: string;
+  itemWeaponCosmeticFireGlowPrice: string;
+  itemWeaponCosmeticEarthGlowPrice: string;
+  itemWeaponCosmeticLightningGlowPrice: string;
+  itemWeaponCosmeticWaterGlowPrice: string;
+  itemWeaponCosmeticRainbowGlowPrice: string;
+  itemWeaponCosmeticDarkGlowPrice: string;
+  itemWeaponCosmeticGhostPrice: string;
+  itemWeaponCosmeticPoliceLightsPrice: string;
+  itemWeaponCosmeticNeonBorderPrice: string;
+  itemWeaponCosmeticRotatingNeonBorderPrice: string;
+  itemWeaponCosmeticDiamondBorderPrice: string;
+  itemWeaponCosmeticGoldBorderPrice: string;
+  itemWeaponCosmeticSilverBorderPrice: string;
+  itemWeaponCosmeticBronzeBorderPrice: string;
+  itemCharacterCosmeticGrayscalePrice: string;
+  itemCharacterCosmeticContrastPrice: string;
+  itemCharacterCosmeticSepiaPrice: string;
+  itemCharacterCosmeticInvertPrice: string;
+  itemCharacterCosmeticBlurPrice: string;
+  itemCharacterCosmeticFireGlowPrice: string;
+  itemCharacterCosmeticEarthGlowPrice: string;
+  itemCharacterCosmeticLightningGlowPrice: string;
+  itemCharacterCosmeticWaterGlowPrice: string;
+  itemCharacterCosmeticRainbowGlowPrice: string;
+  itemCharacterCosmeticDarkGlowPrice: string;
+  itemCharacterCosmeticGhostPrice: string;
+  itemCharacterCosmeticPoliceLightsPrice: string;
+  itemCharacterCosmeticNeonBorderPrice: string;
+  itemCharacterCosmeticDiamondBorderPrice: string;
+  itemCharacterCosmeticGoldBorderPrice: string;
+  itemCharacterCosmeticSilverBorderPrice: string;
+  itemCharacterCosmeticBronzeBorderPrice: string;
+}
+
 export interface IState {
   contracts: () => Contracts;
   eventSubscriptions: () => IWeb3EventSubscription[];
@@ -129,4 +175,6 @@ export interface IState {
 
   partnerProjects: Record<number, IPartnerProject>;
   payoutCurrencyId: string;
+
+  itemPrices: IItemPrices;
 }

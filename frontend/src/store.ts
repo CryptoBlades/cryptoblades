@@ -166,6 +166,53 @@ export function createStore(web3: Web3) {
 
       partnerProjects: {},
       payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
+
+      itemPrices: {
+        itemWeaponRenamePrice: '',
+        itemCharacterRenamePrice: '',
+        itemCharacterTraitChangeEarthPrice: '',
+        itemCharacterTraitChangeFirePrice: '',
+        itemCharacterTraitChangeLightningPrice: '',
+        itemCharacterTraitChangeWaterPrice: '',
+        itemWeaponCosmeticGrayscalePrice: '',
+        itemWeaponCosmeticContrastPrice: '',
+        itemWeaponCosmeticSepiaPrice: '',
+        itemWeaponCosmeticInvertPrice: '',
+        itemWeaponCosmeticBlurPrice: '',
+        itemWeaponCosmeticFireGlowPrice: '',
+        itemWeaponCosmeticEarthGlowPrice: '',
+        itemWeaponCosmeticLightningGlowPrice: '',
+        itemWeaponCosmeticWaterGlowPrice: '',
+        itemWeaponCosmeticRainbowGlowPrice: '',
+        itemWeaponCosmeticDarkGlowPrice: '',
+        itemWeaponCosmeticGhostPrice: '',
+        itemWeaponCosmeticPoliceLightsPrice: '',
+        itemWeaponCosmeticNeonBorderPrice: '',
+        itemWeaponCosmeticRotatingNeonBorderPrice: '',
+        itemWeaponCosmeticDiamondBorderPrice: '',
+        itemWeaponCosmeticGoldBorderPrice: '',
+        itemWeaponCosmeticSilverBorderPrice: '',
+        itemWeaponCosmeticBronzeBorderPrice: '',
+        itemCharacterCosmeticGrayscalePrice: '',
+        itemCharacterCosmeticContrastPrice: '',
+        itemCharacterCosmeticSepiaPrice: '',
+        itemCharacterCosmeticInvertPrice: '',
+        itemCharacterCosmeticBlurPrice: '',
+        itemCharacterCosmeticFireGlowPrice: '',
+        itemCharacterCosmeticEarthGlowPrice: '',
+        itemCharacterCosmeticLightningGlowPrice: '',
+        itemCharacterCosmeticWaterGlowPrice: '',
+        itemCharacterCosmeticRainbowGlowPrice: '',
+        itemCharacterCosmeticDarkGlowPrice: '',
+        itemCharacterCosmeticGhostPrice: '',
+        itemCharacterCosmeticPoliceLightsPrice: '',
+        itemCharacterCosmeticNeonBorderPrice: '',
+        itemCharacterCosmeticDiamondBorderPrice: '',
+        itemCharacterCosmeticGoldBorderPrice: '',
+        itemCharacterCosmeticSilverBorderPrice: '',
+        itemCharacterCosmeticBronzeBorderPrice: '',
+      },
+
     },
 
     getters: {
@@ -714,6 +761,193 @@ export function createStore(web3: Web3) {
       updatePayoutCurrencyId(state: IState, newPayoutCurrencyId) {
         localStorage.setItem('payoutCurrencyId', newPayoutCurrencyId);
         state.payoutCurrencyId = newPayoutCurrencyId;
+      },
+
+      updateItemPrices(state: IState, {itemPrice, id}) {
+        switch(id){
+        case '1': {
+          state.itemPrices.itemWeaponRenamePrice = itemPrice;
+          break;
+        }
+        case '2':{
+          state.itemPrices.itemCharacterRenamePrice = itemPrice;
+          break;
+        }
+        case '3':{
+          state.itemPrices.itemCharacterTraitChangeFirePrice = itemPrice;
+          break;
+        }
+        case '4':{
+          state.itemPrices.itemCharacterTraitChangeEarthPrice = itemPrice;
+          break;
+        }
+        case '5':{
+          state.itemPrices.itemCharacterTraitChangeWaterPrice = itemPrice;
+          break;
+        }
+        case '6':{
+          state.itemPrices.itemCharacterTraitChangeLightningPrice = itemPrice;
+          break;
+        }
+
+        }
+      },
+
+      updateWeaponCosmeticPrices(state: IState, {itemPrice, id}){
+        switch(id){
+        case '1':{
+          state.itemPrices.itemWeaponCosmeticGrayscalePrice = itemPrice;
+          break;
+        }
+        case '2':{
+          state.itemPrices.itemWeaponCosmeticContrastPrice = itemPrice;
+          break;
+        }
+        case '3':{
+          state.itemPrices.itemWeaponCosmeticSepiaPrice = itemPrice;
+          break;
+        }
+        case '4':{
+          state.itemPrices.itemWeaponCosmeticInvertPrice = itemPrice;
+          break;
+        }
+        case '5':{
+          state.itemPrices.itemWeaponCosmeticBlurPrice = itemPrice;
+          break;
+        }
+        case '6':{
+          state.itemPrices.itemWeaponCosmeticFireGlowPrice = itemPrice;
+          break;
+        }
+        case '7':{
+          state.itemPrices.itemWeaponCosmeticEarthGlowPrice = itemPrice;
+          break;
+        }
+        case '8':{
+          state.itemPrices.itemWeaponCosmeticLightningGlowPrice = itemPrice;
+          break;
+        }
+        case '9':{
+          state.itemPrices.itemWeaponCosmeticWaterGlowPrice = itemPrice;
+          break;
+        }
+        case '10':{
+          state.itemPrices.itemWeaponCosmeticRainbowGlowPrice = itemPrice;
+          break;
+        }
+        case '11':{
+          state.itemPrices.itemWeaponCosmeticDarkGlowPrice = itemPrice;
+          break;
+        }
+        case '12':{
+          state.itemPrices.itemWeaponCosmeticGhostPrice = itemPrice;
+          break;
+        }
+        case '13':{
+          state.itemPrices.itemWeaponCosmeticPoliceLightsPrice = itemPrice;
+          break;
+        }
+        case '14':{
+          state.itemPrices.itemWeaponCosmeticNeonBorderPrice = itemPrice;
+          break;
+        }
+        case '15':{
+          state.itemPrices.itemWeaponCosmeticRotatingNeonBorderPrice = itemPrice;
+          break;
+        }
+        case '16':{
+          state.itemPrices.itemWeaponCosmeticDiamondBorderPrice = itemPrice;
+          break;
+        }
+        case '17':{
+          state.itemPrices.itemWeaponCosmeticGoldBorderPrice = itemPrice;
+          break;
+        }
+        case '18':{
+          state.itemPrices.itemWeaponCosmeticSilverBorderPrice = itemPrice;
+          break;
+        }
+        case '19':{
+          state.itemPrices.itemWeaponCosmeticBronzeBorderPrice = itemPrice;
+        }
+        }
+      },
+
+      updateCharacterCosmeticPrices(state: IState, {itemPrice, id}){
+        switch(id){
+        case '1':{
+          state.itemPrices.itemCharacterCosmeticGrayscalePrice = itemPrice;
+          break;
+        }
+        case '2':{
+          state.itemPrices.itemCharacterCosmeticContrastPrice = itemPrice;
+          break;
+        }
+        case '3':{
+          state.itemPrices.itemCharacterCosmeticSepiaPrice = itemPrice;
+          break;
+        }
+        case '4':{
+          state.itemPrices.itemCharacterCosmeticInvertPrice = itemPrice;
+          break;
+        }
+        case '5':{
+          state.itemPrices.itemCharacterCosmeticBlurPrice = itemPrice;
+          break;
+        }
+        case '6':{
+          state.itemPrices.itemCharacterCosmeticFireGlowPrice = itemPrice;
+          break;
+        }
+        case '7':{
+          state.itemPrices.itemCharacterCosmeticEarthGlowPrice = itemPrice;
+          break;
+        }
+        case '8':{
+          state.itemPrices.itemCharacterCosmeticLightningGlowPrice = itemPrice;
+          break;
+        }
+        case '9':{
+          state.itemPrices.itemCharacterCosmeticWaterGlowPrice = itemPrice;
+          break;
+        }
+        case '10':{
+          state.itemPrices.itemCharacterCosmeticRainbowGlowPrice = itemPrice;
+          break;
+        }
+        case '11':{
+          state.itemPrices.itemCharacterCosmeticDarkGlowPrice = itemPrice;
+          break;
+        }
+        case '12':{
+          state.itemPrices.itemCharacterCosmeticGhostPrice = itemPrice;
+          break;
+        }
+        case '13':{
+          state.itemPrices.itemCharacterCosmeticPoliceLightsPrice = itemPrice;
+          break;
+        }
+        case '14':{
+          state.itemPrices.itemCharacterCosmeticNeonBorderPrice = itemPrice;
+          break;
+        }
+        case '15':{
+          state.itemPrices.itemCharacterCosmeticDiamondBorderPrice = itemPrice;
+          break;
+        }
+        case '16':{
+          state.itemPrices.itemCharacterCosmeticGoldBorderPrice = itemPrice;
+          break;
+        }
+        case '17':{
+          state.itemPrices.itemCharacterCosmeticSilverBorderPrice = itemPrice;
+          break;
+        }
+        case '18':{
+          state.itemPrices.itemCharacterCosmeticBronzeBorderPrice = itemPrice;
+          break;
+        }
+        }
       }
     },
 
@@ -3506,7 +3740,46 @@ export function createStore(web3: Web3) {
           .getBridgeTransfers()
           .call(defaultCallOptions(state));
         return parseInt(bridgeTransfers,10);
-      }
+      },
+
+      async fetchItemPrices({state, commit}){
+        const { Blacksmith } = state.contracts();
+        if (!Blacksmith) return;
+
+        try{
+          //Fetch the flat prices of Skill Shop Items
+          for(let itemIndex = 1; itemIndex <= 6; itemIndex++ ){
+            const itemFlatPrices = await Blacksmith.methods
+              .getFlatPriceOfItem(itemIndex)
+              .call(defaultCallOptions(state));
+
+            commit('updateItemPrices', {itemPrice: itemFlatPrices, id: itemIndex.toString()});
+          }
+
+          //Fetch the flat prices of Weapon Cosmetics
+          for(let itemIndex = 1; itemIndex <= 19; itemIndex++){
+            const itemSeriesFlatPrices = await Blacksmith.methods
+              .getFlatPriceOfSeriesItem(7, itemIndex)
+              .call(defaultCallOptions(state));
+
+            commit('updateWeaponCosmeticPrices', {itemPrice: itemSeriesFlatPrices, id: itemIndex.toString()});
+          }
+
+          //Fetch the flat prices of Character Cosmetics
+          for(let itemIndex = 1; itemIndex <= 18; itemIndex++){
+            const itemSeriesFlatPrices = await Blacksmith.methods
+              .getFlatPriceOfSeriesItem(8, itemIndex)
+              .call(defaultCallOptions(state));
+
+            commit('updateCharacterCosmeticPrices', {itemPrice: itemSeriesFlatPrices, id: itemIndex.toString()});
+          }
+
+
+        } catch(err){
+          console.log('Blacksmith error');
+          console.log(err);
+        }
+      },
     },
   });
 }
