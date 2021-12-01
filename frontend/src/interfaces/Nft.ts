@@ -12,7 +12,7 @@ export interface Nft {
   stat1Value?: number;
   stat2Value?: number;
   stat3Value?: number;
-  nftPrice?: number | string;
+  nftPrice?: number;
   amount?: number;
   effect?: number;
   tier?: number;
