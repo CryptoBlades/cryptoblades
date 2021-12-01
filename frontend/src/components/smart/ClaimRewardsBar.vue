@@ -312,7 +312,8 @@ export default Vue.extend({
 
     canClaimSelectedProject(): boolean {
       if(this.selectedPartneredProject) {
-        return toBN(this.selectedPartneredProject.tokensClaimed).div(toBN(10).pow(18)) < toBN(this.selectedPartneredProject.tokenSupply);
+        return toBN(+this.selectedPartneredProject.tokensClaimed).div(toBN(10).pow(18)).toNumber()
+          < toBN(+this.selectedPartneredProject.tokenSupply).toNumber();
       }
       return false;
     }
