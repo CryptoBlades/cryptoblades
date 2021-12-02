@@ -5,7 +5,16 @@
         <img src="../assets/logo_Text_Source.png" class="logo d-inline-block align-top" alt="Logo">
       </b-navbar-brand>
 
-      <view-links class="view-links"></view-links>
+      <b-navbar-toggle target="navbar-toggle-collapse">
+        <template #default="{ expanded }">
+          <b-icon v-if="expanded" icon="chevron-bar-up"></b-icon>
+          <b-icon v-else icon="chevron-bar-down"></b-icon>
+        </template>
+      </b-navbar-toggle>
+
+      <b-collapse id="navbar-toggle-collapse" is-nav>
+        <view-links class="view-links"></view-links>
+      </b-collapse>
 
       <skill-balance-display class="ml-auto d-none d-sm-flex" />
 
@@ -139,6 +148,9 @@ a.router-link-active {
     text-align: center;
     margin: 0 auto;
     display: block;
+  }
+  .nav-logo{
+    margin-right:0 !important;
   }
 }
 </style>
