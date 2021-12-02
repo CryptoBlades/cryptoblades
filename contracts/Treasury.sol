@@ -35,6 +35,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     CryptoBlades public game;
 
     mapping(uint256 => uint256) projectDistributionTime;
+    uint256 public defaultSlippage;
 
     function initialize(CryptoBlades _game) public initializer {
         __AccessControl_init_unchained();
@@ -42,7 +43,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         _setupRole(GAME_ADMIN, msg.sender);
 
         game = _game;
-        // each block increases payout by 0.0001x
+        // multiplier increases every second by 1e18/multiplierUnit
         multiplierUnit = 1e4;
     }
     
@@ -140,11 +141,12 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     }
 
     function claim(uint256 partnerId) public {
-        claim(partnerId, game.getTokenRewardsFor(msg.sender));
+        claim(partnerId, game.getTokenRewardsFor(msg.sender), getProjectMultiplier(partnerId), defaultSlippage);
     }
 
-    function claim(uint256 partnerId, uint256 skillClaimingAmount) public {
+    function claim(uint256 partnerId, uint256 skillClaimingAmount, uint256 currentMultiplier, uint256 slippage) public {
         require(game.getTokenRewardsFor(msg.sender) >= skillClaimingAmount, 'Claim amount exceeds available rewards balance');
+        require(currentMultiplier.mul(uint(1e18).add(slippage.mul(1e16))) >= getProjectMultiplier(partnerId));
 
         uint256 partnerTokenAmount = getAmountInPartnerToken(partnerId, skillClaimingAmount);
         uint256 remainingPartnerTokenSupply = getRemainingPartnerTokenSupply(partnerId);
@@ -182,5 +184,9 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     function setDistributionTime(uint256 partnerId, uint256 distributionTime) external restricted {
         projectDistributionTime[partnerId] = distributionTime;
+    }
+
+    function setDefaultSlippage(uint256 newSlippage) external restricted {
+        defaultSlippage = newSlippage;
     }
 }
