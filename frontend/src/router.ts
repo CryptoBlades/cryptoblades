@@ -10,7 +10,7 @@ import Market from './views/Market.vue';
 import Leaderboard from './views/Leaderboard.vue';
 import Portal from './views/Portal.vue';
 import Options from './views/Options.vue';
-import PvP from './views/PvP.vue';
+import PvP from './components/smart/pvp-overhaul/PvP.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 
