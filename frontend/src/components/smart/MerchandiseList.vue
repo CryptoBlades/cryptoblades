@@ -8,7 +8,6 @@
         <img class="product-img" :src="product.thumbnail_url" alt=""/>
         <div class="product-name">{{ product.name }}</div>
         <b-button
-          :disabled="!product.price || isLoading"
           variant="primary"
           class="shop-button"
           @click="openAddress(product)">
@@ -19,30 +18,43 @@
     </ul>
 
     <b-modal class="centered-modal" ref="merchandise-address-modal" @ok="buyItem" :ok-title="'Submit order'"
-             :ok-disabled="disableMerchOkButton" button-size="lg">
+             :ok-disabled="false" button-size="lg">
       <template #modal-title>
         Delivery Address
       </template>
-
       <b-form-input type="text"
-                    class="modal-input" v-model="recipient.name" placeholder="Name"/>
-      <b-form-input type="number"
-                    class="modal-input" v-model="recipient.phone" placeholder="Phone"/>
+                    class="modal-input" v-model="recipient.first_name" placeholder="First name"/>
+      <b-form-input type="text"
+                    class="modal-input" v-model="recipient.last_name" placeholder="Last name"/>
       <b-form-input type="email"
                     class="modal-input" v-model="recipient.email" placeholder="Email"/>
+      <b-form-input type="number"
+                    class="modal-input" v-model="recipient.phone" placeholder="Phone"/>
+      <b-form-select
+        class="modal-input" v-model="selectedCountry" @change="countryChanged">
+        <b-form-select-option :value="undefined">Please select an option</b-form-select-option>
+        <b-form-select-option v-for="country in countries" :key="country.code" :value="country">{{
+            country.name
+          }}
+        </b-form-select-option>
+      </b-form-select>
+      <b-form-select
+        class="modal-input" v-if="selectedCountry && selectedCountry.states && selectedCountry.states.length !== 0"
+        v-model="selectedState">
+        <b-form-select-option :value="undefined">Please select an option</b-form-select-option>
+        <b-form-select-option v-for="state in selectedCountry.states" :key="state.code" :value="state">{{
+            state.name
+          }}
+        </b-form-select-option>
+      </b-form-select>
       <b-form-input type="text"
-                    class="modal-input" v-model="recipient.address1" placeholder="Address"/>
+                    class="modal-input" v-model="recipient.address1" placeholder="Address line 1"/>
+      <b-form-input type="text"
+                    class="modal-input" v-model="recipient.address2" placeholder="Address line 2"/>
       <b-form-input type="text"
                     class="modal-input" v-model="recipient.city" placeholder="City"/>
       <b-form-input type="text"
                     class="modal-input" v-model="recipient.zip" placeholder="Zip Code"/>
-      <b-form-select
-        class="modal-input" v-model="recipient.countryCode" @change="fetchStates" :options="countries"
-        text-field="name" value-field="code"></b-form-select>
-      {{ selectedCountry }}
-      <b-form-select
-        class="modal-input" v-if="states.length !== 0" v-model="recipient.stateCode" :options="states"
-        value-field="code" text-field="name"></b-form-select>
     </b-modal>
   </div>
 </template>
@@ -55,45 +67,56 @@ import CurrencyConverter from '../../components/CurrencyConverter.vue';
 import api from '@/api';
 
 export interface Product {
-  id: number,
-  name: string,
-  thumbnail_url: string,
-  price?: number
+  id: number;
+  external_id: string;
+  name: string;
+  variants: number;
+  synced: number;
+  thumbnail_url: string;
+  is_ignored: boolean;
 }
 
 export interface Recipient {
-  name: string;
-  address1: string;
-  city: string;
-  stateCode?: string;
-  countryCode: string;
-  zip: string;
-  phone: string;
+  first_name: string;
+  last_name: string;
   email: string;
+  phone: string;
+  country: string;
+  state?: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  zip: string;
 }
 
 export interface Country {
   name: string;
   code: string;
-  states?: string[];
+  states?: State[];
+}
+
+export interface State {
+  name: string;
+  code: string;
 }
 
 export interface MerchandiseOrderData {
   recipient: Recipient;
-  items: MerchandiseItemData[];
+  items: Item[];
 }
 
-export interface MerchandiseItemData {
+export interface Item {
   sync_variant_id: number;
+  product_id: string;
   quantity: number;
 }
 
 interface Data {
   products: Product[];
-  selectedProduct: Product | undefined;
-  selectedCountry: Country | undefined;
+  selectedProduct?: Product;
+  selectedCountry?: Country;
+  selectedState?: State;
   countries: Country[];
-  states: string[];
   recipient: Recipient;
   isLoading: boolean;
 }
@@ -114,15 +137,15 @@ export default Vue.extend({
       products: [],
       selectedProduct: undefined,
       selectedCountry: undefined,
+      selectedState: undefined,
       countries: [],
-      states: [],
       recipient: {} as Recipient,
       isLoading: false,
     } as Data;
   },
 
   computed: {
-    disableMerchOkButton() {
+    disablePlaceOrderButton() {
       return !this.$data.recipient.name || !this.$data.recipient.phone || !this.$data.recipient.email
         || !this.$data.recipient.address1 || !this.$data.recipient.city || !this.$data.recipient.zip
         || !this.$data.recipient.countryCode;
@@ -133,15 +156,18 @@ export default Vue.extend({
     ...mapActions(['getItemPrice', 'purchaseMerchandise']) as StoreMappedActions,
     fromWeiEther,
 
+    countryChanged() {
+      this.selectedState = undefined;
+    },
     async fetchProducts() {
       const response = await api.getMerchandiseProducts();
       if (response.code !== 200) {
         return;
       }
       this.products = response.result;
-      for (const product of this.products) {
-        product.price = await this.getItemPrice({id: product.id});
-      }
+      // for (const product of this.products) {
+      // product.price = await this.getItemPrice({id: product.id});
+      // }
     },
 
     async fetchCountries() {
@@ -150,12 +176,6 @@ export default Vue.extend({
         return;
       }
       this.countries = response.result;
-      this.fetchStates();
-    },
-
-    fetchStates() {
-      this.recipient.stateCode = undefined;
-      this.states = this.countries.find((country: Country) => country.code === this.recipient.countryCode)?.states || [];
     },
 
     openAddress(product: Product) {
@@ -164,24 +184,27 @@ export default Vue.extend({
     },
 
     async buyItem() {
-      if (!this.selectedProduct) return;
+      if (!this.selectedCountry) return;
+      this.recipient.country = this.selectedCountry.code;
+      this.recipient.state = this.selectedState?.code;
       const orderData: MerchandiseOrderData = {
         recipient: this.recipient,
         items: [
           {
-            sync_variant_id: this.selectedProduct.id,
+            sync_variant_id: 2799351521,
+            product_id: '612a5910aa37e7',
             quantity: 1
           }
         ]
       };
-      if (!this.selectedProduct.price) return;
       this.isLoading = true;
-      await this.purchaseMerchandise({id: this.selectedProduct.id, price: this.selectedProduct.price, amount: 1})
-        .then(async () => {
-          this.isLoading = false;
-          this.recipient = {} as Recipient;
-          await api.createMerchandiseOrder(orderData);
-        });
+      // await this.purchaseMerchandise({id: this.selectedProduct.id, price: this.selectedProduct.price, amount: 1})
+      //   .then(async () => {
+      //
+      //   });
+      this.isLoading = false;
+      this.recipient = {} as Recipient;
+      await api.createMerchandiseOrder(orderData);
     },
   },
 

@@ -2980,7 +2980,7 @@ export function createStore(web3: Web3) {
           });
 
         return await Merchandise.methods
-          .placeOrder([id], [amount])
+          .placeOrder(state.defaultAccount, 0, [id], [amount])
           .send({
             from: state.defaultAccount
           });
