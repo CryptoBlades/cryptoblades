@@ -344,7 +344,7 @@ export default {
       const diff =  (currentTime - allowanceTimestamp);
       this.minutesToNextAllowance = Math.floor(60 - (diff)/60);
       this.secondsToNextAllowance = Math.round(60 - (diff)%60);
-      if(diff/60 > 60){
+      if(diff/60 >= 60){
         this.timeToNextAllowanceText = 'Allowance update any moment now ...';
       }
       else{
