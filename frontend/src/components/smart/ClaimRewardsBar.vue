@@ -104,13 +104,13 @@
         </div>
         <div v-if="selectedPartneredProject" class="d-flex mt-2">
           <div class="d-flex justify-content-center align-items-center">
-            <h6 class="claim-input-text">Skill Amount:</h6>
+            <h6 class="claim-input-text">{{$t('ClaimRewardsBar.skillAmount')}}:</h6>
             <b-form-input v-bind:class="!isSkillAmountValid ? 'invalid-amount' : ''"
-              type="number" step="0.0001" :max="skillRewardNumber" v-model="skillAmount" class="claim-input" />
+              type="number" min="0" step="0.0001" :max="skillRewardNumber" v-model="skillAmount" class="claim-input" />
             <a class="" @click="setMaxSkillAmount">(Max)</a>
           </div>
           <div class="d-flex justify-content-center align-items-center">
-            <h6 class="claim-input-text">Slippage (%):</h6>
+            <h6 class="claim-input-text">{{$t('ClaimRewardsBar.slippage')}} (%):</h6>
             <b-form-input type="number" step="0.5" v-model="slippage" class="claim-input" />
           </div>
         </div>
@@ -120,7 +120,7 @@
           :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"
           :tokenAddress="selectedPartneredProject.tokenAddress"/>
         <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
-          <h5>This partner tokens have been claimed already.</h5>
+          <h5>{{$t('ClaimRewardsBar.partnerTokenClaimed')}}</h5>
         </div>
         <div class="mt-3" v-if="!selectedPartneredProject">
           <h5>{{withdrawalInfoText}}</h5>

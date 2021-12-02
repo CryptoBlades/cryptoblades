@@ -114,6 +114,10 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         return amountWithMultiplier;
     }
 
+    function getProjectDistributionTime(uint256 projectId) public view returns(uint256) {
+        return projectDistributionTime[projectId];
+    }
+
     // Mutative
 
     function addPartnerProject(

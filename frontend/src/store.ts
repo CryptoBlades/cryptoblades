@@ -3486,6 +3486,15 @@ export function createStore(web3: Web3) {
         return multiplier;
       },
 
+      async getPartnerProjectDistributionTime({ state }, id) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const distributionTime = await Treasury.methods.getProjectDistributionTime(id).call(defaultCallOptions(state));
+
+        return distributionTime;
+      },
+
       async getPartnerProjectClaimedAmount({ state }, id) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;

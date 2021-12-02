@@ -20,7 +20,10 @@
     "clickDetails" : "Click to claim and see the details",
     "claim":"Claim",
     "claimRewards": "Claim Rewards",
-    "payoutCurrency": "Payout Currency"
+    "payoutCurrency": "Payout Currency",
+    "partnerTokenClaimed": "This partner tokens have been claimed already.",
+    "slippage": "Slippage",
+    "skillAmount": "Skill Amount"
   },
   "CharacterDisplay":{
     "loading":"Loading...",
@@ -698,5 +701,19 @@
     "lightning" : "Lightning",
     "water" : "Water"
   },
-  "copyLink": "Copy link"
+  "copyLink": "Copy link",
+  "Treasury": {
+    "formulaDetailsTitle": "Claiming Formula Details",
+    "partneredProjects": "Partnered Projects",
+    "payoutCurrency": "Payout Currency"
+  },
+  "PartneredProject": {
+    "multiplier": "Multiplier",
+    "distribution": "Distribution",
+    "days": "days",
+    "add": "Add",
+    "claimed": "Claimed",
+    "more": "More",
+    "less": "Less"
+  }
 }
