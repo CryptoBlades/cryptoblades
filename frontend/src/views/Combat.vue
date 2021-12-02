@@ -30,6 +30,26 @@
         </div>
       </div>
 
+      <div class="row" v-if="!selectedWeaponId">
+        <div class="col-12 text-center">
+          <h2>Next Hourly Update
+            <Hint id="hourlyUpdateHint" text="
+            We release a certain amount of the reward pool every hour,
+            and if it's drained the earnings will be zero until the next hour.
+            "/>
+          </h2>
+          <h4>{{timeToNextAllowanceText}}</h4>
+        </div>
+        <div class="col-12 text-center">
+          <h2>Expected Earnings</h2>
+          <h5>
+            <CurrencyConverter :skill="expectedSkill"  :showValueInUsdOnly="false"/>
+            (<CurrencyConverter :skill="expectedSkill"  :showValueInUsdOnly="true"/>)
+            <Hint id="expectedSkillHint" text="for a 40 Stamina Fight"/>
+          <br>Average Power: <b>{{powerAvg}}</b></h5>
+        </div>
+      </div>
+
       <img src="../assets/divider7.png" class="info-divider enemy-divider" />
 
       <div class="row" v-if="currentCharacterStamina >= staminaPerFight">
@@ -154,6 +174,7 @@ import CombatResults from '../components/CombatResults.vue';
 import { toBN, fromWeiEther } from '../utils/common';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
+import CurrencyConverter from '../components/CurrencyConverter.vue';
 
 export default {
   data() {
@@ -175,7 +196,12 @@ export default {
       targetToFight: null,
       targetToFightIndex: null,
       minutesToNextAllowance: null,
+      secondsToNextAllowance: null,
       lastAllowanceSkill: null,
+      nextAllowanceCounter: null,
+      timeToNextAllowanceText: '',
+      powerAvg: null,
+      expectedSkill: null,
     };
   },
 
@@ -183,8 +209,17 @@ export default {
     this.intervalSeconds = setInterval(() => (this.timeSeconds = new Date().getSeconds()), 5000);
     this.intervalMinutes = setInterval(() => (this.timeMinutes = new Date().getMinutes()), 20000);
     this.staminaPerFight = 40 * Number(localStorage.getItem('fightMultiplier'));
-  },
+    this.counterInterval = setInterval(async () => {
+      await this.getNextAllowanceTime();
+      await this.getExpectedPayout();
+    }, 1000);
 
+  },
+  beforeDestroy() {
+    clearInterval(this.intervalSeconds);
+    clearInterval(this.intervalMinutes);
+    clearInterval(this.counterInterval);
+  },
   computed: {
     ...mapState(['currentCharacterId']),
     ...mapGetters([
@@ -237,7 +272,7 @@ export default {
 
   methods: {
     ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
-      'fetchAllowanceTimestamp', 'fetchHourlyAllowance']),
+      'fetchAllowanceTimestamp', 'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -299,11 +334,22 @@ export default {
       return 0;
     },
 
+    async getExpectedPayout() {
+      this.powerAvg = await this.fetchHourlyPowerAverage();
+      this.expectedSkill = fromWeiEther(await this.fetchHourlyPayPerFight());
+    },
     async getNextAllowanceTime(){
       const allowanceTimestamp = await this.fetchAllowanceTimestamp();
       const currentTime = Math.round(Date.now() / 1000);
-      const minutesToNextAllowance = Math.round(60 - (currentTime - allowanceTimestamp)/60);
-      this.minutesToNextAllowance = minutesToNextAllowance;
+      const diff =  (currentTime - allowanceTimestamp);
+      this.minutesToNextAllowance = Math.floor(60 - (diff)/60);
+      this.secondsToNextAllowance = Math.round(60 - (diff)%60);
+      if(diff/60 > 60){
+        this.timeToNextAllowanceText = 'Allowance update any moment now ...';
+      }
+      else{
+        this.timeToNextAllowanceText = this.minutesToNextAllowance + ' minutes and ' + this.secondsToNextAllowance + ' seconds';
+      }
     },
     async getHourlyAllowance(){
       const fetchHourlyAllowance = await this.fetchHourlyAllowance();
@@ -434,6 +480,7 @@ export default {
     Hint,
     CombatResults,
     WeaponIcon,
+    CurrencyConverter,
   },
 };
 </script>
@@ -716,7 +763,10 @@ h1 {
   display: block;
   text-align: center;
 }
-
+#hourlyUpdateHint, #expectedSkillHint{
+  margin:0;
+  font-size: 1em;
+}
 @media (max-width: 575.98px) {
   .show-reforged {
     width: 100%;
