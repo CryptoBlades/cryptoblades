@@ -66,7 +66,7 @@ interface Chain {
 }
 
 export function getConfigValue(key: string): any {
-  if(process.env.NODE_ENV === 'development') return '';
+  //if(process.env.NODE_ENV === 'development') return '';
   const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
   const chain = localStorage.getItem('currentChain') || 'BSC';
   return (config as Config).environments[env].chains[chain][key];
@@ -241,9 +241,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const treasuryContractAddr = getConfigValue('VUE_APP_TREASURY_CONTRACT_ADDRESS') || (treasuryNetworks as Networks)[networkId]!.address;
   const Treasury = new web3.eth.Contract(treasuryAbi as Abi, treasuryContractAddr);
 
-  const kingStakingRewardsUpgradeableAddress = getConfigValue('VUE_APP_KING_STAKING_REWARDS_CONTRACT_ADDRESS')
-    || (kingStakingRewardsUpgradeableNetworks as Networks)[networkId]!.address;
-  const KingStakingRewardsUpgradeable = new web3.eth.Contract(kingStakingRewardsUpgradeableAbi as Abi, kingStakingRewardsUpgradeableAddress);
+  let KingStakingRewardsUpgradeable;
+  if(networkId === '56') {
+    const kingStakingRewardsUpgradeableAddress = getConfigValue('VUE_APP_KING_STAKING_REWARDS_CONTRACT_ADDRESS')
+      || (kingStakingRewardsUpgradeableNetworks as Networks)[networkId]!.address;
+    KingStakingRewardsUpgradeable = new web3.eth.Contract(kingStakingRewardsUpgradeableAbi as Abi, kingStakingRewardsUpgradeableAddress);
+  }
 
   return {
     ...stakingContracts,
