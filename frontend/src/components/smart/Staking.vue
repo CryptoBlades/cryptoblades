@@ -356,7 +356,7 @@ export default {
       case 'stakeLocked':
         return this.$t('stake.sorryStake', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
-        return this.t('stake.connectToWalletButtonLabel');
+        return this.$t('stake.connectToWalletButtonLabel');
       }
     },
 

@@ -241,8 +241,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const treasuryContractAddr = getConfigValue('VUE_APP_TREASURY_CONTRACT_ADDRESS') || (treasuryNetworks as Networks)[networkId]!.address;
   const Treasury = new web3.eth.Contract(treasuryAbi as Abi, treasuryContractAddr);
 
-  const stakingContractsInfo = getStakingContractsInfoWithDefaults();
-  const kingStakingRewardsUpgradeableAddress = stakingContractsInfo.king?.stakingRewardsAddress
+  const kingStakingRewardsUpgradeableAddress = getConfigValue('VUE_APP_KING_STAKING_REWARDS_CONTRACT_ADDRESS')
     || (kingStakingRewardsUpgradeableNetworks as Networks)[networkId]!.address;
   const KingStakingRewardsUpgradeable = new web3.eth.Contract(kingStakingRewardsUpgradeableAbi as Abi, kingStakingRewardsUpgradeableAddress);
 
