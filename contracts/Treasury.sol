@@ -18,7 +18,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     uint256 public multiplierUnit;
 
     PartnerProject[] private partneredProjects;
-    mapping(uint256 => uint256) multiplierTimestamp;
+    mapping(uint256 => uint256) projectAddedBlockNumber;
     mapping(uint256 => uint256) tokensClaimed;
     uint256 skillPrice;
 
@@ -35,6 +35,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     CryptoBlades public game;
 
     mapping(uint256 => uint256) projectDistributionTime;
+    mapping(uint256 => uint256) multiplierTimestamp;
     uint256 public defaultSlippage;
 
     function initialize(CryptoBlades _game) public initializer {
