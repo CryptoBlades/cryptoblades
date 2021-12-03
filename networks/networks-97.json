@@ -2252,7 +2252,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0x669c1917bcc55b2046b9ee0b95da500173d7ff2e28b8b7345336e4aef6f63324"
+    "transactionHash": "0x4fd7140009a2ececb6a0952d9092ae591fc0f9cc1aa9543b4383c215da7365a6"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -3901,7 +3901,7 @@
     "events": {},
     "links": {},
     "address": "0xe676452f2C650F80C3D282E723112aA67bE617c7",
-    "transactionHash": "0xce6f38c22cb8ed4188dd60279aef09d3216a4527a61e109766bf329f676fb798"
+    "transactionHash": "0x783781234585f4b6f0751cb84e13cc74d5ac416be1eb993f69a5df332a2f8565"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
