@@ -2075,6 +2075,28 @@ export function createStore(web3: Web3) {
         await dispatch('fetchStakeDetails', { stakeType });
       },
 
+      async unstakeKing({ state, dispatch }, { amount }: { amount: string }) {
+        const { KingStakingRewardsUpgradeable } = state.contracts();
+        if(!KingStakingRewardsUpgradeable) return;
+
+        await KingStakingRewardsUpgradeable.methods.withdrawWithoutFee(amount).send({
+          from: state.defaultAccount,
+        });
+
+        await dispatch('fetchStakeDetails', { stakeType: 'king' });
+      },
+
+      async claimKingReward({ state, dispatch }) {
+        const { KingStakingRewardsUpgradeable } = state.contracts();
+        if(!KingStakingRewardsUpgradeable) return;
+
+        await KingStakingRewardsUpgradeable.methods.getRewardWithoutFee().send({
+          from: state.defaultAccount,
+        });
+
+        await dispatch('fetchStakeDetails', { stakeType: 'king' });
+      },
+
       async stakeUnclaimedRewards({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
         if(stakeType !== stakeTypeThatCanHaveUnclaimedRewardsStakedTo) return;
 
