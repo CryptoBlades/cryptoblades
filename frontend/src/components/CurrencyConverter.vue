@@ -41,6 +41,10 @@ export default Vue.extend({
       type: Boolean,
       default: false,
     },
+    showValueInUsdOnly: {
+      type: Boolean,
+      default: undefined,
+    },
   },
   data() {
     return {
@@ -106,7 +110,12 @@ export default Vue.extend({
     },
 
     checkStorage() {
-      this.showValueInUsd = localStorage.getItem('showSkillInUsd') === 'true';
+      if(this.showValueInUsdOnly !== undefined) {
+        this.showValueInUsd = this.showValueInUsdOnly;
+      }
+      else{
+        this.showValueInUsd = localStorage.getItem('showSkillInUsd') === 'true';
+      }
     },
   },
   mounted() {

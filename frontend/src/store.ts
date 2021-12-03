@@ -1944,6 +1944,16 @@ export function createStore(web3: Web3) {
         return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(state));
       },
 
+      async fetchHourlyPowerAverage({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.vars(4).call(defaultCallOptions(state));
+      },
+      async fetchHourlyPayPerFight({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.vars(5).call(defaultCallOptions(state));
+      },
       async fetchAllowanceTimestamp({ state }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
@@ -1954,6 +1964,7 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades) return;
         return await CryptoBlades.methods.vars(18).call(defaultCallOptions(state));
       },
+
       async fetchRemainingTokenClaimAmountPreTax({ state }) {
         if(!_.isFunction(state.contracts)) return;
         const { CryptoBlades } = state.contracts();
