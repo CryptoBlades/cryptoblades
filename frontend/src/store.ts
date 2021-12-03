@@ -3780,6 +3780,27 @@ export function createStore(web3: Web3) {
           console.log(err);
         }
       },
+      async transferNFT({ state, dispatch },{nftId, receiverAddress, nftType}: {nftId: number, receiverAddress: string, nftType: string}) {
+        const { Characters, Weapons } = state.contracts();
+        if (!Characters || !Weapons || !state.defaultAccount) return;
+
+        if (nftType === 'character') {
+          await Characters.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateCharacterIds');
+        }
+        else if (nftType === 'weapon') {
+          await Weapons.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateWeaponIds');
+        }
+      }
     },
   });
 }
