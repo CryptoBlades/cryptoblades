@@ -8,23 +8,31 @@
         Your Cart
       </template>
       <template #modal-footer>
-        Total: {{totalPrice}} MXN
+        Total: {{ totalPrice }} MXN
       </template>
-      <div class="d-flex justify-content-around" v-for="cartEntry in cartEntries" :key="cartEntry.variant.external_id">
-        <img class="variant-image" :src="cartEntry.variant.files.find(file => isFileTypePreview(file)).preview_url"
-             alt="">
-        <div class="d-flex flex-column">
-          <p>{{ cartEntry.variant.name }}</p>
-          <p>Price: {{ cartEntry.variant.retail_price }} {{ cartEntry.variant.currency }}</p>
-        </div>
-        <div class="quantity-display">
-          <div class="input-group-prepend">
-            <b-button class="btn-primary" type="button" :disabled="isMinusButtonDisabled(cartEntry)"
-                      @click="subtractQuantity(cartEntry)"><i class="fas fa-minus"></i></b-button>
+      <div v-if="cartEntries.length === 0">
+        <h3>Nothing in cart</h3>
+      </div>
+      <div v-else class="cart-entries-container">
+        <div class="cart-entry-container" v-for="cartEntry in cartEntries" :key="cartEntry.variant.external_id">
+          <img class="variant-image flex-grow-1"
+               :src="cartEntry.variant.files.find(file => isFileTypePreview(file)).preview_url"
+               alt="">
+          <div class="d-flex flex-column justify-content-center align-items-center flex-grow-1 w-50">
+            <p>{{ cartEntry.variant.name }}</p>
+            <p>Price: {{ cartEntry.variant.retail_price }} {{ cartEntry.variant.currency }}</p>
           </div>
-          <b-input type="number" readonly class="form-control" :value="cartEntry.quantity" min="1"></b-input>
-          <div class="input-group-append">
-            <b-button class="btn-primary" type="button" @click="addQuantity(cartEntry)"><i class="fas fa-plus"></i>
+          <div class="quantity-display flex-grow-1">
+            <div class="input-group-prepend">
+              <b-button class="btn-primary" type="button" :disabled="isMinusButtonDisabled(cartEntry)"
+                        @click="subtractQuantity(cartEntry)"><i class="fas fa-minus"></i></b-button>
+            </div>
+            <b-input type="number" readonly class="form-control" :value="cartEntry.quantity" min="1"></b-input>
+            <div class="input-group-append">
+              <b-button class="btn-primary" type="button" @click="addQuantity(cartEntry)"><i class="fas fa-plus"></i>
+              </b-button>
+            </div>
+            <b-button class="btn-danger" type="button" @click="removeCartEntry(cartEntry)"><i class="fas fa-trash"></i>
             </b-button>
           </div>
         </div>
@@ -79,6 +87,9 @@ export default Vue.extend({
     isMinusButtonDisabled(cartEntry: CartEntry) {
       return cartEntry.quantity <= 1;
     },
+    removeCartEntry(cartEntry: CartEntry) {
+      this.cartEntries.splice(this.cartEntries.indexOf(cartEntry), 1);
+    }
   },
 
   async mounted() {
@@ -99,6 +110,19 @@ export default Vue.extend({
 
 <style>
 .variant-image {
-  max-width: 100px;
+  max-width: 200px;
+}
+
+.cart-entry-container {
+  display: flex;
+  justify-content: space-around;
+  border-bottom: 1px solid #6c5f38;
+  border-top: 1px solid #6c5f38;
+}
+
+.cart-entries-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 </style>
