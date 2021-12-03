@@ -166,6 +166,7 @@ export function createStore(web3: Web3) {
 
       partnerProjects: {},
       payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
+      defaultSlippage: '0',
 
       itemPrices: {
         itemWeaponRenamePrice: '',
@@ -756,6 +757,10 @@ export function createStore(web3: Web3) {
 
       updatePartnerProjectsState(state: IState, { partnerProjectId, partnerProject }) {
         Vue.set(state.partnerProjects, partnerProjectId, partnerProject);
+      },
+
+      updateDefaultSlippage(state: IState, slippage) {
+        state.defaultSlippage = slippage;
       },
 
       updatePayoutCurrencyId(state: IState, newPayoutCurrencyId) {
@@ -1944,6 +1949,16 @@ export function createStore(web3: Web3) {
         return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(state));
       },
 
+      async fetchHourlyPowerAverage({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.vars(4).call(defaultCallOptions(state));
+      },
+      async fetchHourlyPayPerFight({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+        return await CryptoBlades.methods.vars(5).call(defaultCallOptions(state));
+      },
       async fetchAllowanceTimestamp({ state }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
@@ -1954,6 +1969,7 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades) return;
         return await CryptoBlades.methods.vars(18).call(defaultCallOptions(state));
       },
+
       async fetchRemainingTokenClaimAmountPreTax({ state }) {
         if(!_.isFunction(state.contracts)) return;
         const { CryptoBlades } = state.contracts();
@@ -2062,6 +2078,28 @@ export function createStore(web3: Web3) {
         });
 
         await dispatch('fetchStakeDetails', { stakeType });
+      },
+
+      async unstakeKing({ state, dispatch }, { amount }: { amount: string }) {
+        const { KingStakingRewardsUpgradeable } = state.contracts();
+        if(!KingStakingRewardsUpgradeable) return;
+
+        await KingStakingRewardsUpgradeable.methods.withdrawWithoutFee(amount).send({
+          from: state.defaultAccount,
+        });
+
+        await dispatch('fetchStakeDetails', { stakeType: 'king' });
+      },
+
+      async claimKingReward({ state, dispatch }) {
+        const { KingStakingRewardsUpgradeable } = state.contracts();
+        if(!KingStakingRewardsUpgradeable) return;
+
+        await KingStakingRewardsUpgradeable.methods.getRewardWithoutFee().send({
+          from: state.defaultAccount,
+        });
+
+        await dispatch('fetchStakeDetails', { stakeType: 'king' });
       },
 
       async stakeUnclaimedRewards({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
@@ -3448,6 +3486,8 @@ export function createStore(web3: Web3) {
         activePartnerProjectIds.forEach(async (id: string) => {
           await dispatch('fetchPartnerProject', id);
         });
+
+        await dispatch('fetchDefaultSlippage');
       },
 
       async fetchPartnerProject({ state, commit }, id) {
@@ -3461,6 +3501,15 @@ export function createStore(web3: Web3) {
         commit('updatePartnerProjectsState', { partnerProjectId: id, partnerProject });
       },
 
+      async fetchDefaultSlippage({ state, commit }) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const slippage = await Treasury.methods.defaultSlippage().call(defaultCallOptions(state));
+
+        commit('updateDefaultSlippage', slippage);
+      },
+
       async getPartnerProjectMultiplier({ state }, id) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
@@ -3468,6 +3517,15 @@ export function createStore(web3: Web3) {
         const multiplier = await Treasury.methods.getProjectMultiplier(id).call(defaultCallOptions(state));
 
         return multiplier;
+      },
+
+      async getPartnerProjectDistributionTime({ state }, id) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const distributionTime = await Treasury.methods.getProjectDistributionTime(id).call(defaultCallOptions(state));
+
+        return distributionTime;
       },
 
       async getPartnerProjectClaimedAmount({ state }, id) {
@@ -3488,11 +3546,13 @@ export function createStore(web3: Web3) {
         return ratio;
       },
 
-      async claimPartnerToken({ state, dispatch }, id) {
+      async claimPartnerToken({ state, dispatch },
+                              { id, skillAmount, currentMultiplier, slippage }:
+                              {id: number, skillAmount: string, currentMultiplier: string, slippage: string}) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        await Treasury.methods.claim(id).send({
+        await Treasury.methods.claim(id, skillAmount, currentMultiplier, slippage).send({
           from: state.defaultAccount,
         });
 
@@ -3780,6 +3840,27 @@ export function createStore(web3: Web3) {
           console.log(err);
         }
       },
+      async transferNFT({ state, dispatch },{nftId, receiverAddress, nftType}: {nftId: number, receiverAddress: string, nftType: string}) {
+        const { Characters, Weapons } = state.contracts();
+        if (!Characters || !Weapons || !state.defaultAccount) return;
+
+        if (nftType === 'character') {
+          await Characters.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateCharacterIds');
+        }
+        else if (nftType === 'weapon') {
+          await Weapons.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateWeaponIds');
+        }
+      }
     },
   });
 }
