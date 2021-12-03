@@ -111,7 +111,7 @@
           </div>
           <div class="d-flex justify-content-center align-items-center">
             <h6 class="claim-input-text">{{$t('ClaimRewardsBar.slippage')}} (%):</h6>
-            <b-form-input type="number" step="0.5" v-model="slippage" class="claim-input" />
+            <b-form-input type="number" max="100" step="0.5" v-model="slippage" class="claim-input" />
           </div>
         </div>
         <partnered-project v-if="selectedPartneredProject"
@@ -353,8 +353,8 @@ export default Vue.extend({
           {
             id: +this.payoutCurrencyId,
             skillAmount: toBN(this.skillAmount).multipliedBy(toBN(10).pow(18)).toString(),
-            currentMultiplier: toBN(currentMultiplier).multipliedBy(toBN(10).pow(18)).toString(),
-            slippage: this.slippage.toString()
+            currentMultiplier: toBN(currentMultiplier).toString(),
+            slippage: toBN(this.slippage).multipliedBy(toBN(10).pow(16)).toString()
           }
         );
       }
@@ -383,7 +383,7 @@ export default Vue.extend({
       if(stage === ClaimStage.Summary) {
         await this.fetchPartnerProjects();
         this.skillAmount = this.skillRewardNumber;
-        this.slippage = +this.defaultSlippage;
+        this.slippage = +toBN(this.defaultSlippage).dividedBy(toBN(10).pow(16));
         (this.$refs['claim-summary-modal'] as any).show();
       }
       await this.getRemainingTokenClaimAmountPreTax();

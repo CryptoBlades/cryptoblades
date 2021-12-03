@@ -93,7 +93,11 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         if(block.timestamp >= multiplierTimestamp[partnerId]) {
             return uint(1e18).div(multiplierUnit).mul(block.timestamp.sub(multiplierTimestamp[partnerId])).add(1e18); 
         }
-        return uint(1e18).sub(uint(1e18).div(multiplierUnit).mul(multiplierTimestamp[partnerId].sub(block.timestamp)));
+        uint256 multiplierDecrease = uint(1e18).div(multiplierUnit).mul(multiplierTimestamp[partnerId].sub(block.timestamp));
+        if(multiplierDecrease > 1e18) {
+            return 0;
+        }
+        return uint(1e18).sub(multiplierDecrease);
     }
 
     function getProjectClaimedAmount(uint256 partnerId) public view returns(uint256) {
@@ -150,7 +154,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     function claim(uint256 partnerId, uint256 skillClaimingAmount, uint256 currentMultiplier, uint256 slippage) public {
         require(game.getTokenRewardsFor(msg.sender) >= skillClaimingAmount, 'Claim amount exceeds available rewards balance');
-        require(currentMultiplier.mul(uint(1e18).add(slippage.mul(1e16))) >= getProjectMultiplier(partnerId));
+        require(currentMultiplier.mul(uint(1e18).sub(slippage)).div(1e18) < getProjectMultiplier(partnerId), 'Slippage exceeded');
 
         uint256 partnerTokenAmount = getAmountInPartnerToken(partnerId, skillClaimingAmount);
         uint256 remainingPartnerTokenSupply = getRemainingPartnerTokenSupply(partnerId);
