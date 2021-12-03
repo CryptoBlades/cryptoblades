@@ -693,7 +693,7 @@
           </div>
           <div class="col-sm-12 merchandise-shop-items">
             <div class="shop-items">
-              <MerchandiseList />
+              <Merchandise />
             </div>
           </div>
         </div>
@@ -725,7 +725,8 @@ import { CharacterTransactionHistoryData, ICharacterHistory,
 import { getShieldNameFromSeed } from '@/shield-name';
 import { fromWeiEther, apiUrl } from '@/utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
-import MerchandiseList from '@/components/smart/MerchandiseList.vue';
+import i18n from '@/i18n';
+import Merchandise from '@/components/smart/Merchandise.vue';
 import { getCleanName } from '@/rename-censor';
 import i18n from '@/i18n';
 import { toInteger } from 'lodash';
@@ -838,7 +839,7 @@ interface StoreMappedActions {
 }
 
 export default Vue.extend({
-  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList, MerchandiseList },
+  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList, Merchandise },
 
   data() {
     return {
