@@ -1,6 +1,6 @@
 import { Contract as Web3EthContract } from 'web3-eth-contract';
 import type {
-  IERC20, IStakingRewards,
+  IERC20, IStakingRewards, KingStakingRewardsUpgradeable,
   CryptoBlades, Characters, Weapons, RaidBasic, IRandoms,
   NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables,
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
@@ -50,4 +50,5 @@ export interface Contracts {
   CBKLand?: Contract<CBKLand>;
 
   Treasury?: Contract<Treasury>;
+  KingStakingRewardsUpgradeable?: Contract<KingStakingRewardsUpgradeable>;
 }

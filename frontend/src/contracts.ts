@@ -32,6 +32,9 @@ import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as storageAbi } from '../../build/contracts/NFTStorage.json';
 import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/contracts/Treasury.json';
+import { abi as kingStakingRewardsUpgradeableAbi,
+  networks as kingStakingRewardsUpgradeableNetworks }
+  from '../../build/contracts/KingStakingRewardsUpgradeable.json';
 import config from '../app-config.json';
 
 
@@ -238,6 +241,11 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const treasuryContractAddr = getConfigValue('VUE_APP_TREASURY_CONTRACT_ADDRESS') || (treasuryNetworks as Networks)[networkId]!.address;
   const Treasury = new web3.eth.Contract(treasuryAbi as Abi, treasuryContractAddr);
 
+  const stakingContractsInfo = getStakingContractsInfoWithDefaults();
+  const kingStakingRewardsUpgradeableAddress = stakingContractsInfo.king?.stakingRewardsAddress
+    || (kingStakingRewardsUpgradeableNetworks as Networks)[networkId]!.address;
+  const KingStakingRewardsUpgradeable = new web3.eth.Contract(kingStakingRewardsUpgradeableAbi as Abi, kingStakingRewardsUpgradeableAddress);
+
   return {
     ...stakingContracts,
     CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
@@ -248,7 +256,8 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     ...raidContracts,
     ...marketContracts,
     WaxBridge,
-    Treasury
+    Treasury,
+    KingStakingRewardsUpgradeable
   };
 }
 

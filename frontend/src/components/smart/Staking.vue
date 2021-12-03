@@ -418,6 +418,8 @@ export default {
       'fetchStakeDetails',
       'stake',
       'unstake',
+      'unstakeKing',
+      'claimKingReward',
       'stakeUnclaimedRewards',
       'claimReward',
     ]),
@@ -473,7 +475,12 @@ export default {
           await this.stake({ amount, stakeType: this.stakeType });
         } else {
           //unstake
-          await this.unstake({ amount, stakeType: this.stakeType });
+          if(this.stakeType === 'king') {
+            await this.unstakeKing({ amount });
+          }
+          else {
+            await this.unstake({ amount, stakeType: this.stakeType });
+          }
         }
       } catch (e) {
         console.error(e);
@@ -500,7 +507,12 @@ export default {
       try {
         this.rewardClaimLoading = true;
 
-        await this.claimReward({ stakeType: this.stakeType });
+        if(this.stakeType === 'king') {
+          await this.claimKingReward();
+        }
+        else {
+          await this.claimReward({ stakeType: this.stakeType });
+        }
       } catch (e) {
         console.error(e);
       } finally {
