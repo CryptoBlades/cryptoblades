@@ -6,25 +6,33 @@
         <h4 class="d-flex align-items-center partner-name">{{name}}</h4>
         <div class="d-flex">
           <h6>Token: {{tokenSymbol}}</h6>
-          <a @click="addTokenToMetamask" class="ml-1 add-token-button">(Add)</a>
+          <a @click="addTokenToMetamask" class="ml-1 a-button">({{$t('PartneredProject.add')}})</a>
         </div>
         <span class="multiplier-text">{{skillToPartnerRatio}} SKILL/{{tokenSymbol}}</span>
-        <span class="multiplier-text">Multiplier: x{{multiplier}}</span>
+        <span class="multiplier-text">{{$t('PartneredProject.multiplier')}}: x{{multiplier}}</span>
+        <span class="multiplier-text">{{$t('PartneredProject.distribution')}}: {{distributionTime}} {{$t('PartneredProject.days')}}</span>
       </div>
     </div>
     <div class="mt-1 progress w-90 justify-items-center">
       <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
         :style="[{'width': progressBarWidth, 'background-color': '#9e8a57'}]"/>
     </div>
-    <h6 class="mt-1 text-center">Claimed {{tokensClaimed}} / {{tokenSupply}}</h6>
+    <h6 class="mt-1 text-center">{{$t('PartneredProject.claimed')}} {{tokensClaimed}} / {{tokenSupply}}</h6>
     <div class="d-flex flex-column align-items-center w-100">
       <b-card no-body class="collapse-style" v-bind:class="detailsOpened ? 'on-top' : ''">
         <b-card-header class="d-flex flex-column align-items-center w-100 mt-1 p-0" v-b-toggle="'collapse-' + id" @click="toggleDetails()">
-          <h6 class="when-open">Less...</h6><h6 class="when-closed">More...</h6>
+          <h6 class="when-open">{{$t('PartneredProject.less')}}...</h6><h6 class="when-closed">{{$t('PartneredProject.more')}}...</h6>
         </b-card-header>
         <b-collapse :id="'collapse-' + id">
           <b-card-body>
-            <b-card-text>{{partnerDetails}}</b-card-text>
+            <b-card-text>
+              <div>
+                {{partnerDetails}}
+              </div>
+              <div>
+                <a class="a-button" @click="openPartnerWebsite">{{partnerWebsite}}</a>
+              </div>
+            </b-card-text>
           </b-card-body>
         </b-collapse>
       </b-card>
@@ -45,6 +53,7 @@ export interface PartnersInfo {
 interface Data {
   images: any;
   multiplier: string;
+  distributionTime: string;
   tokensClaimed: string;
   skillToPartnerRatio: string;
   updateInterval: ReturnType<typeof setInterval> | null;
@@ -87,6 +96,7 @@ export default Vue.extend({
     return {
       images: require.context('../assets/partners/', false, /\.png$/),
       multiplier: '1',
+      distributionTime: '0',
       tokensClaimed: '0',
       skillToPartnerRatio: '0',
       updateInterval: null,
@@ -104,6 +114,10 @@ export default Vue.extend({
       return (partnersInfo as PartnersInfo).partners[this.name].details;
     },
 
+    partnerWebsite(): string {
+      return (partnersInfo as PartnersInfo).partners[this.name].website;
+    },
+
     partnerLogoPath(): string {
       const fileName = (partnersInfo as PartnersInfo).partners[this.name].logo;
       return this.imgPath(fileName);
@@ -119,14 +133,17 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['getPartnerProjectMultiplier', 'getPartnerProjectClaimedAmount', 'getSkillToPartnerRatio']),
+    ...mapActions(['getPartnerProjectMultiplier', 'getPartnerProjectClaimedAmount', 'getSkillToPartnerRatio', 'getPartnerProjectDistributionTime']),
     imgPath(img: string): string {
       return this.images('./' + img);
     },
 
     async update(): Promise<void> {
       const currentMultiplier = await this.getPartnerProjectMultiplier(this.id);
-      this.multiplier = toBN(currentMultiplier).div(toBN(10).pow(18)).toFixed(3);
+      this.multiplier = toBN(currentMultiplier).div(toBN(10).pow(18)).toFixed(4);
+
+      const distributionTime = await this.getPartnerProjectDistributionTime(this.id);
+      this.distributionTime = distributionTime;
 
       const currentClaimedTokens = await this.getPartnerProjectClaimedAmount(this.id);
       this.tokensClaimed = toBN(currentClaimedTokens).div(toBN(10).pow(18)).toFixed(2);
@@ -141,6 +158,10 @@ export default Vue.extend({
 
     async addTokenToMetamask() {
       await addTokenToMetamask(this.tokenAddress, this.tokenSymbol);
+    },
+
+    openPartnerWebsite() {
+      window.open(this.partnerWebsite, '_blank');
     }
   },
 
@@ -161,7 +182,7 @@ export default Vue.extend({
 <style scoped>
 .partner-div {
   width: 280px;
-  height: 215px;
+  height: 230px;
   border: 2px solid #9e8a57;
   border-radius: 10px;
   padding: 5px;
@@ -191,7 +212,8 @@ export default Vue.extend({
 .on-top {
   z-index: 10;
 }
-.add-token-button {
+.a-button {
   line-height: 1.2;
+  cursor: pointer;
 }
 </style>

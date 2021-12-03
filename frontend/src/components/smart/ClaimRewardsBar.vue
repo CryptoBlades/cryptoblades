@@ -8,9 +8,7 @@
 
       <b-nav-item
         class="ml-3 bar"
-        :disabled="!canClaimTokens"
-        @click="claimSkill(ClaimStage.Summary)"
-        v-tooltip.bottom="!canClaimTokens ? withdrawalInfoText : ''"><!-- moved gtag-link below b-nav-item -->
+        @click="claimSkill(ClaimStage.Summary)"><!-- moved gtag-link below b-nav-item -->
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
           <strong>SKILL</strong> {{ formattedSkillReward }}
         </span>
@@ -34,7 +32,6 @@
         </template>
 
         <b-dropdown-item
-          :disabled="!canClaimTokens"
           @click="claimSkill(ClaimStage.Summary)" class="rewards-info gtag-link-others" tagname="claim_skill"
            v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
             SKILL
@@ -94,7 +91,9 @@
     </b-modal>
     <b-modal class="centered-modal" ref="claim-summary-modal" :title="$t('ClaimRewardsBar.claimRewards')"
       :ok-title="$t('ClaimRewardsBar.claim')" @ok="onClaimTokens()"
-      :ok-disabled="selectedPartneredProject && !canClaimSelectedProject">
+      :ok-disabled="(selectedPartneredProject && !canClaimSelectedProject)
+        || (!selectedPartneredProject && !canClaimTokens)
+        || !isSkillAmountValid">
       <div class="d-flex flex-column align-items-center">
         <div class="d-flex flex-row w-100 align-items-baseline">
           <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
@@ -103,13 +102,25 @@
             <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
           </b-form-select>
         </div>
+        <div v-if="selectedPartneredProject" class="d-flex mt-2">
+          <div class="d-flex justify-content-center align-items-center">
+            <h6 class="claim-input-text">{{$t('ClaimRewardsBar.skillAmount')}}:</h6>
+            <b-form-input v-bind:class="!isSkillAmountValid ? 'invalid-amount' : ''"
+              type="number" min="0" step="0.0001" :max="skillRewardNumber" v-model="skillAmount" class="claim-input" />
+            <a class="" @click="setMaxSkillAmount">(Max)</a>
+          </div>
+          <div class="d-flex justify-content-center align-items-center">
+            <h6 class="claim-input-text">{{$t('ClaimRewardsBar.slippage')}} (%):</h6>
+            <b-form-input type="number" max="100" step="0.5" v-model="slippage" class="claim-input" />
+          </div>
+        </div>
         <partnered-project v-if="selectedPartneredProject"
           :id="selectedPartneredProject.id" :name="selectedPartneredProject.name"
           :tokenSymbol="selectedPartneredProject.tokenSymbol" :tokenSupply="selectedPartneredProject.tokenSupply"
           :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"
           :tokenAddress="selectedPartneredProject.tokenAddress"/>
         <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
-          <h5>This partner tokens have been claimed already.</h5>
+          <h5>{{$t('ClaimRewardsBar.partnerTokenClaimed')}}</h5>
         </div>
         <div class="mt-3" v-if="!selectedPartneredProject">
           <h5>{{withdrawalInfoText}}</h5>
@@ -140,6 +151,7 @@ interface StoreMappedState {
   ownedCharacterIds: string[];
   directStakeBonusPercent: number;
   payoutCurrencyId: string;
+  defaultSlippage: string;
 }
 
 interface StoreMappedGetters {
@@ -160,10 +172,13 @@ enum ClaimStage {
 
 interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
-  claimPartnerToken(id: number): Promise<void>;
+  claimPartnerToken(
+    {id, skillAmount, currentMultiplier, slippage}:
+    {id: number, skillAmount: string, currentMultiplier: string, slippage: string}): Promise<void>;
   claimXpRewards(): Promise<void>;
   fetchRemainingTokenClaimAmountPreTax(): Promise<string>;
   fetchPartnerProjects(): Promise<void>;
+  getPartnerProjectMultiplier(id: number): Promise<string>;
 }
 
 export default Vue.extend({
@@ -180,11 +195,14 @@ export default Vue.extend({
     return {
       ClaimStage,
       remainingTokenClaimAmountPreTax: '0',
+      skillAmount: 0,
+      slippage: 0
     };
   },
 
   computed: {
-    ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent', 'payoutCurrencyId']) as Accessors<StoreMappedState>),
+    ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent',
+      'payoutCurrencyId', 'defaultSlippage']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName', 'getPartnerProjects'
     ]) as Accessors<StoreMappedGetters>),
@@ -316,17 +334,29 @@ export default Vue.extend({
           < toBN(+this.selectedPartneredProject.tokenSupply).toNumber();
       }
       return false;
+    },
+
+    isSkillAmountValid(): boolean {
+      return this.skillAmount <= this.skillRewardNumber && this.skillAmount > 0;
     }
   },
 
   methods: {
     ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimPartnerToken', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax',
-      'fetchPartnerProjects']) as StoreMappedActions),
+      'fetchPartnerProjects', 'getPartnerProjectMultiplier']) as StoreMappedActions),
     ...mapMutations(['updatePayoutCurrencyId']),
 
     async onClaimTokens() {
       if(this.payoutCurrencyId !== '-1') {
-        await this.claimPartnerToken(+this.payoutCurrencyId);
+        const currentMultiplier = await this.getPartnerProjectMultiplier(+this.payoutCurrencyId);
+        await this.claimPartnerToken(
+          {
+            id: +this.payoutCurrencyId,
+            skillAmount: toBN(this.skillAmount).multipliedBy(toBN(10).pow(18)).toString(),
+            currentMultiplier: toBN(currentMultiplier).toString(),
+            slippage: toBN(this.slippage).multipliedBy(toBN(10).pow(16)).toString()
+          }
+        );
       }
       else if(this.canClaimTokens) {
         await this.claimTokenRewards();
@@ -352,6 +382,8 @@ export default Vue.extend({
       }
       if(stage === ClaimStage.Summary) {
         await this.fetchPartnerProjects();
+        this.skillAmount = this.skillRewardNumber;
+        this.slippage = +toBN(this.defaultSlippage).dividedBy(toBN(10).pow(16));
         (this.$refs['claim-summary-modal'] as any).show();
       }
       await this.getRemainingTokenClaimAmountPreTax();
@@ -368,6 +400,10 @@ export default Vue.extend({
     getLogoFile(projectName: string): string {
       return `${projectName.toLowerCase()}.png`;
     },
+
+    setMaxSkillAmount(): void {
+      this.skillAmount = this.skillRewardNumber;
+    }
   },
 
   async mounted() {
@@ -394,5 +430,19 @@ export default Vue.extend({
 .rewards-claimable-icon {
   margin-right: 5px;
   align-self: center;
+}
+
+.claim-input {
+  max-height: 60%;
+  max-width: 40%;
+  margin-left: 5px;
+}
+
+.claim-input-text {
+  margin-bottom: -1px;
+}
+
+.invalid-amount {
+  border: 2px solid red;
 }
 </style>

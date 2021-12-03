@@ -166,6 +166,7 @@ export function createStore(web3: Web3) {
 
       partnerProjects: {},
       payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
+      defaultSlippage: '0',
 
       itemPrices: {
         itemWeaponRenamePrice: '',
@@ -756,6 +757,10 @@ export function createStore(web3: Web3) {
 
       updatePartnerProjectsState(state: IState, { partnerProjectId, partnerProject }) {
         Vue.set(state.partnerProjects, partnerProjectId, partnerProject);
+      },
+
+      updateDefaultSlippage(state: IState, slippage) {
+        state.defaultSlippage = slippage;
       },
 
       updatePayoutCurrencyId(state: IState, newPayoutCurrencyId) {
@@ -3481,6 +3486,8 @@ export function createStore(web3: Web3) {
         activePartnerProjectIds.forEach(async (id: string) => {
           await dispatch('fetchPartnerProject', id);
         });
+
+        await dispatch('fetchDefaultSlippage');
       },
 
       async fetchPartnerProject({ state, commit }, id) {
@@ -3494,6 +3501,15 @@ export function createStore(web3: Web3) {
         commit('updatePartnerProjectsState', { partnerProjectId: id, partnerProject });
       },
 
+      async fetchDefaultSlippage({ state, commit }) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const slippage = await Treasury.methods.defaultSlippage().call(defaultCallOptions(state));
+
+        commit('updateDefaultSlippage', slippage);
+      },
+
       async getPartnerProjectMultiplier({ state }, id) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
@@ -3501,6 +3517,15 @@ export function createStore(web3: Web3) {
         const multiplier = await Treasury.methods.getProjectMultiplier(id).call(defaultCallOptions(state));
 
         return multiplier;
+      },
+
+      async getPartnerProjectDistributionTime({ state }, id) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const distributionTime = await Treasury.methods.getProjectDistributionTime(id).call(defaultCallOptions(state));
+
+        return distributionTime;
       },
 
       async getPartnerProjectClaimedAmount({ state }, id) {
@@ -3521,11 +3546,13 @@ export function createStore(web3: Web3) {
         return ratio;
       },
 
-      async claimPartnerToken({ state, dispatch }, id) {
+      async claimPartnerToken({ state, dispatch },
+                              { id, skillAmount, currentMultiplier, slippage }:
+                              {id: number, skillAmount: string, currentMultiplier: string, slippage: string}) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        await Treasury.methods.claim(id).send({
+        await Treasury.methods.claim(id, skillAmount, currentMultiplier, slippage).send({
           from: state.defaultAccount,
         });
 
