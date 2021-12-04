@@ -149,7 +149,3 @@ export default Vue.extend({
   font-size: 1.5em;
 }
 </style>
-
-function dispatch(arg0: string) {
-  throw new Error('Function not implemented.');
-}
