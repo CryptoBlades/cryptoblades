@@ -121,12 +121,8 @@ export default Vue.extend({
 }
 
 .dropdown-item.disabled {
-  opacity: 50%;
+  opacity: 0.5;
   pointer-events: none;
-}
-
-.dropdown-item {
-  padding: 0;
 }
 
 .options-dropdown .btn:not(.disabled):not(:disabled):hover {
