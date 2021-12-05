@@ -725,12 +725,10 @@ import { CharacterTransactionHistoryData, ICharacterHistory,
 import { getShieldNameFromSeed } from '@/shield-name';
 import { fromWeiEther, apiUrl } from '@/utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
-import i18n from '@/i18n';
-import Merchandise from '@/components/smart/Merchandise.vue';
 import { getCleanName } from '@/rename-censor';
 import i18n from '@/i18n';
 import { toInteger } from 'lodash';
-
+import Merchandise from '@/components/smart/Merchandise.vue';
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
 type CharacterId = string;
