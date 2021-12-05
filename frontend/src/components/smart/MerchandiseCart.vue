@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <b-button @click="openCartModal">Open modal</b-button>
+  <div class="d-flex justify-content-end m-3">
+    <b-button variant="primary" class="shop-button" @click="openCartModal">Your cart ({{cartEntries.length}})</b-button>
 
     <b-modal class="centered-modal" ref="merchandise-cart-modal" :ok-title="'Add to cart'"
              :ok-disabled="false" button-size="lg" size="xl" scrollable>

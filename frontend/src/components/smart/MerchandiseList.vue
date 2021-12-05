@@ -4,19 +4,25 @@
       <span>Nothing to buy at this time</span>
     </div>
     <ul class="product-grid">
-      <li class="product" v-for="product in products" :key="product.id">
+      <li class="product" v-for="product in productsForPage" :key="product.id">
         <img class="product-img" :src="product.thumbnail_url" alt=""/>
         <div class="text-center">{{ product.name }}</div>
         <b-button
           variant="primary"
           class="shop-button"
           @click="openAddress(product)">
-          <span>Buy (<CurrencyConverter v-if="product.price" :skill="fromWeiEther(+product.price)"
-                                        :showValueInSkillOnly="true" :minDecimals="1"/>)</span>
+          <span>Choose variant</span>
         </b-button>
       </li>
     </ul>
-
+    <b-pagination
+      v-if="products.length !== 0"
+      class="customPagination"
+      v-model="currentPage"
+      :total-rows="products.length"
+      :per-page="perPage"
+      align="center"
+    />
     <ShippingInfoModal/>
     <VariantChoiceModal/>
   </div>
@@ -26,7 +32,6 @@
 import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {fromWeiEther} from '@/utils/common';
-import CurrencyConverter from '../../components/CurrencyConverter.vue';
 import api from '@/api';
 import ShippingInfoModal, {Recipient} from '@/components/smart/ShippingInfoModal.vue';
 import VariantChoiceModal from '@/components/smart/VariantChoiceModal.vue';
@@ -56,6 +61,8 @@ interface Data {
   products: Product[];
   selectedProduct?: Product;
   isLoading: boolean;
+  currentPage: number;
+  perPage: number;
 }
 
 interface StoreMappedActions {
@@ -66,7 +73,7 @@ interface StoreMappedActions {
 
 export default Vue.extend({
   components: {
-    CurrencyConverter, ShippingInfoModal, VariantChoiceModal
+    ShippingInfoModal, VariantChoiceModal
   },
 
   data() {
@@ -74,7 +81,21 @@ export default Vue.extend({
       products: [],
       selectedProduct: undefined,
       isLoading: false,
+      currentPage: 1,
+      perPage: 2,
     } as Data;
+  },
+
+  computed: {
+    rows() {
+      return this.$data.products.length;
+    },
+    productsForPage() {
+      return this.$data.products.slice(
+        (this.$data.currentPage - 1) * this.$data.perPage,
+        this.$data.currentPage * this.$data.perPage,
+      );
+    }
   },
 
   methods: {
