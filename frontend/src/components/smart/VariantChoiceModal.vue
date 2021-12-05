@@ -2,7 +2,7 @@
   <b-modal class="centered-modal" ref="merchandise-variant-modal" @ok="addToCart" :ok-title="'Add to cart'"
            :ok-disabled="false" button-size="lg" size="xl">
     <template #modal-title>
-      Shop Prototype
+      Choose Variant
     </template>
     <div class="d-flex">
       <div class="p-2" v-if="selectedVariant">
@@ -18,17 +18,28 @@
           </div>
         </div>
         <p>Variant: {{ selectedVariant.name }}</p>
-        <p>{{ selectedVariant.retail_price.toLocaleString() }} {{ selectedVariant.currency }}</p>
-        <div class="quantity-display">
+        <span>{{ selectedVariant.retail_price.toLocaleString() }} {{ selectedVariant.currency }}</span>
+        /
+        <span v-if="selectedVariant">
+          <CurrencyConverter :skill="fromWeiEther(retailPriceInSkill)"
+                             :show-value-in-skill-only="true"/>
+        </span>
+        <div class="quantity-display mt-3">
           <div class="input-group-prepend">
-            <b-button class="btn-primary" type="button" :disabled="isMinusButtonDisabled" @click="subtractQuantity"><i class="fas fa-minus"></i></b-button>
+            <b-button class="btn-primary" type="button" :disabled="isMinusButtonDisabled" @click="subtractQuantity"><i
+              class="fas fa-minus"></i></b-button>
           </div>
           <b-input type="number" readonly class="form-control" :value="quantity" min="1"></b-input>
           <div class="input-group-append">
             <b-button class="btn-primary" type="button" @click="addQuantity"><i class="fas fa-plus"></i></b-button>
           </div>
         </div>
-        <p>Total price: {{ totalPrice.toLocaleString() }} {{ selectedVariant.currency }}</p>
+        <span>Total price: {{ totalPrice.toLocaleString() }} {{ selectedVariant.currency }}</span>
+        /
+        <span v-if="selectedVariant">
+          <CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)"
+                             :show-value-in-skill-only="true"/>
+        </span>
       </div>
     </div>
   </b-modal>
@@ -39,6 +50,9 @@ import Vue from 'vue';
 import api from '@/api';
 import {BModal} from 'bootstrap-vue';
 import {Product} from '@/components/smart/MerchandiseList.vue';
+import CurrencyConverter from '@/components/CurrencyConverter.vue';
+import {fromWeiEther} from '@/utils/common';
+import {mapActions} from 'vuex';
 
 export interface CartEntry {
   product: Product;
@@ -92,22 +106,33 @@ export enum FileType {
   PREVIEW = 'preview',
 }
 
+interface StoreMappedActions {
+  currentSkillPrice(): Promise<string>;
+}
+
 interface Data {
   variants: Variant[];
   selectedVariant?: Variant;
   product?: Product;
   quantity: number;
+  retailPriceInSkill: number;
   totalPrice: number;
+  totalPriceInSkill: number;
+  skillPrice: number;
 }
 
 export default Vue.extend({
+  components: {CurrencyConverter},
   data() {
     return {
       variants: [],
       selectedVariant: undefined,
       product: undefined,
       quantity: 1,
+      retailPriceInSkill: 0,
       totalPrice: 0,
+      totalPriceInSkill: 0,
+      skillPrice: 0,
     } as Data;
   },
 
@@ -124,6 +149,8 @@ export default Vue.extend({
   },
 
   methods: {
+    ...mapActions(['currentSkillPrice']) as StoreMappedActions,
+    fromWeiEther,
     async fetchVariants(productId: number) {
       const response = await api.getMerchandiseProductVariants(productId);
       if (response.code !== 200) {
@@ -133,7 +160,7 @@ export default Vue.extend({
       console.log(this.variants);
     },
     addToCart() {
-      if(!this.product || !this.selectedVariant) return;
+      if (!this.product || !this.selectedVariant) return;
 
       const cartEntry = {
         product: this.product,
@@ -150,6 +177,7 @@ export default Vue.extend({
     },
     selectVariant(variant: Variant) {
       this.selectedVariant = variant;
+      this.calculateTotalPrice();
     },
     subtractQuantity() {
       this.quantity--;
@@ -160,9 +188,19 @@ export default Vue.extend({
       this.calculateTotalPrice();
     },
     calculateTotalPrice() {
-      if(!this.selectedVariant) return;
+      if (!this.selectedVariant) return;
       this.totalPrice = +this.selectedVariant.retail_price * this.quantity;
-    }
+      this.calculateTotalSkillPrice();
+    },
+    calculateTotalSkillPrice() {
+      if (!this.selectedVariant) return;
+      this.retailPriceInSkill = +this.selectedVariant.retail_price * this.skillPrice;
+      this.totalPriceInSkill = +this.selectedVariant.retail_price * this.quantity * this.skillPrice;
+    },
+    usdToSkill(cartEntry: CartEntry) {
+      if (!cartEntry?.variant) return;
+      return +cartEntry.variant.retail_price * this.skillPrice;
+    },
   },
 
   async mounted() {
@@ -171,6 +209,7 @@ export default Vue.extend({
       const modal = this.$refs['merchandise-variant-modal'] as BModal;
       if (modal) {
         if (this.product) {
+          this.skillPrice = +await this.currentSkillPrice();
           await this.fetchVariants(this.product.id);
           this.selectedVariant = this.variants[0];
           this.calculateTotalPrice();

@@ -27,6 +27,7 @@ import { Nft } from './interfaces/Nft';
 import { getWeaponNameFromSeed } from '@/weapon-name';
 import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
+import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -2969,18 +2970,29 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async purchaseMerchandise({ state }, {id, price, amount}) {
+      async currentSkillPrice({ state }) {
+        const { Merchandise } = state.contracts();
+        if(!Merchandise || !state.defaultAccount) return;
+
+        const skillOracle = await Merchandise.methods.skillOracle().call(defaultCallOptions(state));
+        return await new web3.eth.Contract(priceOracleAbi as any[], skillOracle).methods
+          .currentPrice().call(defaultCallOptions(state));
+      },
+
+      async purchaseMerchandise({ state }, {ids, amounts, totalPrice}) {
         const { CryptoBlades, SkillToken, Merchandise } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Merchandise || !state.defaultAccount) return;
 
         await SkillToken.methods
-          .approve(CryptoBlades.options.address, price)
+          .approve(CryptoBlades.options.address, totalPrice)
           .send({
             from: state.defaultAccount
           });
 
+        console.log(totalPrice, ids, amounts);
+
         return await Merchandise.methods
-          .placeOrder(state.defaultAccount, 0, [id], [amount])
+          .placeOrder(state.defaultAccount, totalPrice, ids, amounts)
           .send({
             from: state.defaultAccount
           });

@@ -5,12 +5,17 @@
     </div>
     <ul class="product-grid">
       <li class="product" v-for="product in productsForPage" :key="product.id">
-        <img class="product-img" :src="product.thumbnail_url" alt=""/>
-        <div class="text-center">{{ product.name }}</div>
+        <div class="d-flex flex-column w-100 h-100 align-items-center">
+          <img class="product-img" :src="product.thumbnail_url" alt=""/>
+          <div class="text-center font-weight-bold">
+            {{ product.name }}
+          </div>
+<!--          <span v-if="product.lowestPrice" class="starting_at mb-1 mt-2">Starting at {{ product.lowestPrice }}</span>-->
+        </div>
         <b-button
           variant="primary"
           class="shop-button"
-          @click="openAddress(product)">
+          @click="openChooseVariantModal(product)">
           <span>Choose variant</span>
         </b-button>
       </li>
@@ -66,8 +71,6 @@ interface Data {
 }
 
 interface StoreMappedActions {
-  purchaseMerchandise(payload: { id: number, price: number, amount: number }): Promise<number>;
-
   getItemPrice(payload: { id: number }): Promise<number>;
 }
 
@@ -82,7 +85,7 @@ export default Vue.extend({
       selectedProduct: undefined,
       isLoading: false,
       currentPage: 1,
-      perPage: 2,
+      perPage: 30,
     } as Data;
   },
 
@@ -99,7 +102,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['getItemPrice', 'purchaseMerchandise']) as StoreMappedActions,
+    ...mapActions(['getItemPrice']) as StoreMappedActions,
     fromWeiEther,
 
     async fetchProducts() {
@@ -108,16 +111,33 @@ export default Vue.extend({
         return;
       }
       this.products = response.result;
+      // const promises = this.products.map(product => api.getMerchandiseProductVariants(product.id));
+      // console.log(promises);
+      // Promise.all(promises).then(values => {
+      //   values.forEach(value => {
+      //     const product = this.products.find(product => value.result.sync_product.id === product.id);
+      //     if (product) {
+      //       product.lowestPrice = Math.min(...value.result.sync_variants.map(variant => +variant.retail_price));
+      //     }
+      //   });
+      //   console.log(this.products.map(product => product.lowestPrice));
+      // });
+      // for (const product of this.products) {
+      //   const response = await api.getMerchandiseProductVariants(product.id);
+      //   console.log(response);
+      //   const prices = response.result.sync_variants.map(variant => +variant.retail_price);
+      //   console.log(prices);
+      //   product.lowestPrice = Math.min(...prices);
+      //   console.log(Math.min(...prices));
+      // }
       // for (const product of this.products) {
       // product.price = await this.getItemPrice({id: product.id});
       // }
     },
 
-    async openAddress(product: Product) {
+    async openChooseVariantModal(product: Product) {
       this.selectedProduct = product;
-      // this.$root.$emit('merchandise-address-modal', true);
       this.$root.$emit('merchandise-variant-modal', this.selectedProduct);
-      // (this.$refs['merchandise-address-modal'] as BModal).show();
     },
   },
 
@@ -164,5 +184,9 @@ export default Vue.extend({
   position: relative;
   width: 12rem;
 }
+
+/*.starting_at {*/
+/*  font-size: 13px;*/
+/*}*/
 
 </style>

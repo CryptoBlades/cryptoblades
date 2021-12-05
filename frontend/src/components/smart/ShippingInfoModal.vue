@@ -1,6 +1,6 @@
 <template>
   <b-modal class="centered-modal" ref="merchandise-address-modal" @ok="buyItem" :ok-title="'Submit order'"
-           :ok-disabled="false" button-size="lg">
+           :ok-disabled="disablePlaceOrderButton" button-size="lg">
     <template #modal-title>
       Delivery Address
     </template>
@@ -45,6 +45,10 @@ import Vue from 'vue';
 import api from '@/api';
 import {BModal} from 'bootstrap-vue';
 import {MerchandiseOrder} from '@/components/smart/MerchandiseList.vue';
+import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import {mapActions} from 'vuex';
+import {toBN} from '@/utils/common';
+import BigNumber from 'bignumber.js';
 
 export interface Recipient {
   first_name: string;
@@ -70,11 +74,23 @@ export interface State {
   code: string;
 }
 
+interface OrderItem {
+  sync_variant_id: number;
+  product_id: string;
+  quantity: number;
+}
+
+interface StoreMappedActions {
+  purchaseMerchandise(payload: { ids: number[], amounts: number[], totalPrice: BigNumber }): Promise<number>;
+}
+
 interface Data {
   selectedCountry?: Country;
   selectedState?: State;
   countries: Country[];
   recipient: Recipient;
+  cartEntries: CartEntry[];
+  totalPriceInSkill: number;
 }
 
 export default Vue.extend({
@@ -84,25 +100,27 @@ export default Vue.extend({
       selectedState: undefined,
       countries: [],
       recipient: {} as Recipient,
+      cartEntries: [],
+      totalPriceInSkill: 0,
     } as Data;
   },
 
-  // props: {
-  //   recipient: {
-  //     type: Object as PropType<Recipient>,
-  //   },
-  // },
-
   computed: {
-    //TODO: Rework this
-    // disablePlaceOrderButton() {
-    //   return !this.$data.recipient.name || !this.$data.recipient.phone || !this.$data.recipient.email
-    //     || !this.$data.recipient.address1 || !this.$data.recipient.city || !this.$data.recipient.zip
-    //     || !this.$data.recipient.countryCode;
-    // }
+    disablePlaceOrderButton() {
+      return !this.$data.recipient.first_name
+        || !this.$data.recipient.last_name
+        || !this.$data.recipient.email
+        || !this.$data.recipient.phone
+        || !this.$data.selectedCountry
+        || (this.$data.selectedCountry.states && this.$data.selectedCountry.states.length !== 0 && !this.$data.selectedState)
+        || !this.$data.recipient.address1
+        || !this.$data.recipient.city
+        || !this.$data.recipient.zip;
+    }
   },
 
   methods: {
+    ...mapActions(['purchaseMerchandise']) as StoreMappedActions,
     countryChanged() {
       this.selectedState = undefined;
     },
@@ -119,32 +137,35 @@ export default Vue.extend({
       if (!this.selectedCountry) return;
       this.recipient.country = this.selectedCountry.code;
       this.recipient.state = this.selectedState?.code;
+      const orderItems = this.cartEntries.map(cartEntry => {
+        return {
+          sync_variant_id: cartEntry.variant.id,
+          quantity: cartEntry.quantity
+        } as OrderItem;
+      });
       const merchandiseOrder: MerchandiseOrder = {
         recipient: this.recipient,
-        items: [
-          {
-            sync_variant_id: 2799351521,
-            product_id: '612a5910aa37e7',
-            quantity: 1
-          }
-        ]
+        items: orderItems
       };
-      // await this.purchaseMerchandise({id: this.selectedProduct.id, price: this.selectedProduct.price, amount: 1})
-      //   .then(async () => {
-      //
-      //   });
-      // this.recipient = {} as Recipient;
-      await api.createMerchandiseOrder(merchandiseOrder);
-      (this.$refs['merchandise-address-modal'] as BModal).hide();
+
+      await this.purchaseMerchandise({
+        ids: merchandiseOrder.items.map(item => item.sync_variant_id),
+        amounts: merchandiseOrder.items.map(item => item.quantity),
+        totalPrice: toBN(this.totalPriceInSkill),
+      }).then(async () => await api.createMerchandiseOrder(merchandiseOrder));
+
+      console.log('Order created');
     },
   },
 
   async mounted() {
     await this.fetchCountries();
-    this.$root.$on('merchandise-address-modal', (open: boolean) => {
+    this.$root.$on('merchandise-address-modal', (totalPriceInSkill: number, cartEntries: CartEntry[]) => {
       const modal = this.$refs['merchandise-address-modal'] as BModal;
       if (modal) {
-        if (open) {
+        if (totalPriceInSkill) {
+          this.totalPriceInSkill = totalPriceInSkill;
+          this.cartEntries = cartEntries;
           modal.show();
         } else {
           modal.hide();
