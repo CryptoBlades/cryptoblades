@@ -349,6 +349,10 @@ export default Vue.extend({
     async onClaimTokens() {
       if(this.payoutCurrencyId !== '-1') {
         const currentMultiplier = await this.getPartnerProjectMultiplier(+this.payoutCurrencyId);
+        if(currentMultiplier === '0') {
+          (this as any).$dialog.notify.error(i18n.t('Multiplier is at x0, try again later...'));
+          return;
+        }
         await this.claimPartnerToken(
           {
             id: +this.payoutCurrencyId,
