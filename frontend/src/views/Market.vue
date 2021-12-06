@@ -681,7 +681,7 @@
           </div>
         </div>
       </b-tab>
-      <b-tab @click="clearData();browseTabActive = false;skillShopTabActive = false">
+      <b-tab v-if="isMerchandiseEnabled" @click="clearData();browseTabActive = false;skillShopTabActive = false">
         <template #title>
           {{$t('market.merchandise.merchandise')}}
           <hint class="hint" text="You can buy real merchandise in here" />
@@ -729,6 +729,8 @@ import { getCleanName } from '@/rename-censor';
 import i18n from '@/i18n';
 import { toInteger } from 'lodash';
 import Merchandise from '@/components/smart/Merchandise.vue';
+import { merchandise as merchandiseEnabled } from './../feature-flags';
+
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
 type CharacterId = string;
@@ -768,6 +770,7 @@ interface Data {
   historyCounter: number;
   landSaleAllowed: boolean;
   reservedSaleAllowed: boolean;
+  isMerchandiseEnabled: boolean;
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields'
@@ -872,6 +875,7 @@ export default Vue.extend({
       historyCounter: 0,
       landSaleAllowed: false,
       reservedSaleAllowed: false,
+      isMerchandiseEnabled: merchandiseEnabled,
     } as Data;
   },
 
