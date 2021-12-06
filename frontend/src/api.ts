@@ -49,6 +49,6 @@ export default {
     return this.execute(HttpMethod.GET, '/merchant/countries');
   },
   createMerchandiseOrder(merchandiseOrder: MerchandiseOrder): Promise<ApiResponse<any>> {
-    return this.execute(HttpMethod.POST, '/merchant/create_order', merchandiseOrder);
+    return this.execute(HttpMethod.POST, '/merchant/create_order', merchandiseOrder, {confirm: true});
   },
 };
