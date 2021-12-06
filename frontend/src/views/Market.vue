@@ -681,6 +681,23 @@
           </div>
         </div>
       </b-tab>
+      <b-tab @click="clearData();browseTabActive = false;skillShopTabActive = false">
+        <template #title>
+          {{$t('market.merchandise.merchandise')}}
+          <hint class="hint" text="You can buy real merchandise in here" />
+        </template>
+
+        <div>
+          <div class="row">
+            <img class="shop-horizontal-divider-top" src="../assets/divider4.png"  alt=""/>
+          </div>
+          <div class="col-sm-12 merchandise-shop-items">
+            <div class="shop-items">
+              <Merchandise />
+            </div>
+          </div>
+        </div>
+      </b-tab>
     </b-tabs>
   </div>
 </template>
@@ -698,7 +715,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { Accessors } from 'vue/types/options';
 import { Contract, Contracts, IState } from '../interfaces';
 import { Characters, Weapons, Shields } from '../../../build/abi-interfaces';
-import { SkillShopListing } from '../interfaces/SkillShopListing';
+import { SkillShopListing } from '@/interfaces/SkillShopListing';
 import BigNumber from 'bignumber.js';
 import { traitNameToNumber } from '@/contract-models';
 import { market_blockchain as useBlockchain } from './../feature-flags';
@@ -706,12 +723,12 @@ import { CharacterTransactionHistoryData, ICharacterHistory,
   IWeaponHistory, WeaponTransactionHistoryData,
   IShieldHistory, ShieldTransactionHistoryData } from '@/interfaces/History';
 import { getShieldNameFromSeed } from '@/shield-name';
-import { fromWeiEther, apiUrl } from '../utils/common';
+import { fromWeiEther, apiUrl } from '@/utils/common';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
-import { getCleanName } from '../rename-censor';
+import { getCleanName } from '@/rename-censor';
 import i18n from '@/i18n';
 import { toInteger } from 'lodash';
-
+import Merchandise from '@/components/smart/Merchandise.vue';
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
 type CharacterId = string;
@@ -820,7 +837,7 @@ interface StoreMappedActions {
 }
 
 export default Vue.extend({
-  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList },
+  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList, Merchandise },
 
   data() {
     return {
@@ -1569,11 +1586,9 @@ export default Vue.extend({
       this.currentPage = page + 1;
 
       if(useBlockchain){
-        console.log('chain');
         await this.searchAllCharacterListingsThroughChain(page);
       }
       else{
-        console.log('api');
         await this.searchAllCharacterListingsThroughAPI(page);
       }
 
@@ -1636,7 +1651,7 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
       this.currentPage = page + 1;
 
-      if(useBlockchain === true)
+      if(useBlockchain)
         await this.searchAllWeaponListingsThroughChain(page);
       else
         await this.searchAllWeaponListingsThroughAPI(page);
@@ -1699,7 +1714,7 @@ export default Vue.extend({
       this.waitingMarketOutcome = true;
       this.currentPage = page + 1;
 
-      if(useBlockchain === true)
+      if(useBlockchain)
         await this.searchAllShieldListingsThroughChain(page);
       else
         await this.searchAllShieldListingsThroughAPI(page);
@@ -2426,6 +2441,14 @@ export default Vue.extend({
 }
 
 .special-offer-items {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.merchandise-shop-items {
   height: 100%;
   width: 100%;
   display: flex;
