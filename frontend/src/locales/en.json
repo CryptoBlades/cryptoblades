@@ -520,6 +520,7 @@
       "yourCart": "Your cart",
       "nothingInCart": "Nothing in cart",
       "total": "Total",
+      "insufficientFunds": "Insufficient funds",
       "placeOrder": "Place order",
 
       "nothingToBuyAtThisTime": "Nothing to buy at this time",

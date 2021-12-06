@@ -51,9 +51,14 @@
               }} </span>/
             <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/></span>
           </div>
-          <b-button :disabled="isPlaceOrderButtonDisabled()" variant="primary" @click="openAddressModal">
+          <span class="d-inline-block"
+                v-b-tooltip="{title: !canAffordMerch() ? $t('market.merchandise.insufficientFunds') : null}">
+          <b-button :disabled="isPlaceOrderButtonDisabled()"
+                    variant="primary"
+                    @click="openAddressModal">
             {{ $t('market.merchandise.placeOrder') }}
           </b-button>
+          </span>
         </div>
       </template>
     </b-modal>
@@ -65,7 +70,7 @@ import Vue from 'vue';
 import {BModal} from 'bootstrap-vue';
 import {PropType} from 'vue/types/options';
 import {CartEntry, FileType} from '@/components/smart/VariantChoiceModal.vue';
-import {mapActions} from 'vuex';
+import {mapActions, mapState} from 'vuex';
 import {fromWeiEther, toBN} from '@/utils/common';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
 
@@ -98,6 +103,10 @@ export default Vue.extend({
   },
 
   components: {CurrencyConverter},
+
+  computed: {
+    ...mapState(['skillBalance']),
+  },
 
   methods: {
     ...mapActions(['currentSkillPrice']) as StoreMappedActions,
@@ -137,7 +146,12 @@ export default Vue.extend({
       return cartEntry.quantity <= 1;
     },
     isPlaceOrderButtonDisabled() {
-      return this.cartEntries.length === 0;
+      return this.cartEntries.length === 0 || !this.canAffordMerch();
+    },
+    canAffordMerch() {
+      const cost = toBN(this.totalPriceInSkill);
+      const balance = toBN(this.skillBalance);
+      return balance.isGreaterThanOrEqualTo(cost);
     },
   },
 

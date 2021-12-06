@@ -190,7 +190,7 @@ export default Vue.extend({
     calculateTotalSkillPrice() {
       if (!this.selectedVariant) return;
       this.retailPriceInSkill = +this.selectedVariant.retail_price * this.skillPrice;
-      this.totalPriceInSkill = +this.selectedVariant.retail_price * this.quantity * this.skillPrice;
+      this.totalPriceInSkill = this.retailPriceInSkill * this.quantity;
     },
     usdToSkill(cartEntry: CartEntry) {
       if (!cartEntry?.variant) return;
