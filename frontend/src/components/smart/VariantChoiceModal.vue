@@ -1,10 +1,10 @@
 <template>
   <b-modal class="centered-modal" ref="merchandise-variant-modal" @ok="addToCart" :ok-title="'Add to cart'"
-           :ok-disabled="false" button-size="lg" size="xl">
+           :ok-disabled="false" button-size="lg" size="xl" scrollable>
     <template #modal-title>
       Choose Variant
     </template>
-    <div class="d-flex">
+    <div class="variant-container">
       <div class="p-2" v-if="selectedVariant">
         <img class="preview" :src="selectedVariant.files.find(file => isFileTypePreview(file)).preview_url" alt=""/>
       </div>
@@ -247,7 +247,7 @@ export default Vue.extend({
 }
 
 .preview {
-  width: 500px;
+  max-width: 100%;
   object-fit: scale-down;
 }
 
@@ -257,5 +257,15 @@ export default Vue.extend({
   justify-content: space-between;
   width: 50%;
   gap: 0.5em;
+}
+
+.variant-container {
+  display: flex;
+}
+
+@media (max-width: 576px) {
+  .variant-container {
+    flex-direction: column;
+  }
 }
 </style>

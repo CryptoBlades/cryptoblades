@@ -1,26 +1,20 @@
 <template>
-  <div class="d-flex justify-content-end m-3">
-    <b-button variant="primary" class="shop-button" @click="openCartModal">Your cart ({{ cartEntries.length }})
+  <div class="d-flex justify-content-between m-3 cart-container">
+    <b-button variant="primary" class="shop-button hidden"></b-button>
+    <h2 v-if="isOrderLoading">Completing your order...</h2>
+    <b-button variant="primary" class="shop-button" :disabled="isOrderLoading" @click="openCartModal">Your cart ({{ cartEntries.length }})
     </b-button>
 
     <b-modal class="centered-modal" ref="merchandise-cart-modal" button-size="lg" size="xl" scrollable>
       <template #modal-title>
         Your Cart
       </template>
-      <template #modal-footer>
-        <div v-if="cartEntries.length !== 0">
-          <span>Total: {{ totalPrice.toFixed(2) }} {{ cartEntries[0].variant.currency }} </span>/
-          <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/></span>
-        </div>
-        <b-button :disabled="isPlaceOrderButtonDisabled()" variant="primary" @click="openAddressModal">Place order
-        </b-button>
-      </template>
-      <div v-if="cartEntries.length === 0">
+      <div v-if="cartEntries.length === 0" class="d-flex justify-content-center">
         <h3>Nothing in cart</h3>
       </div>
       <div v-else class="cart-entries-container">
         <div class="cart-entry-container" v-for="cartEntry in cartEntries" :key="cartEntry.variant.external_id">
-          <img class="variant-image flex-grow-1"
+          <img class="variant-image flex-grow-1 m-2"
                :src="cartEntry.variant.files.find(file => isFileTypePreview(file)).preview_url"
                alt="">
           <div class="d-flex flex-column justify-content-center align-items-center flex-grow-1 w-50">
@@ -33,7 +27,7 @@
                                        :skill="fromWeiEther(toBN(usdToSkill(cartEntry)))"
                                        :show-value-in-skill-only="true"/></span></div>
           </div>
-          <div class="quantity-display flex-grow-1">
+          <div class="quantity-display flex-grow-1 m-2">
             <div class="input-group-prepend">
               <b-button class="btn-primary" type="button" :disabled="isMinusButtonDisabled(cartEntry)"
                         @click="subtractQuantity(cartEntry)"><i class="fas fa-minus"></i></b-button>
@@ -48,6 +42,16 @@
           </div>
         </div>
       </div>
+      <template #modal-footer>
+        <div class="cart-footer">
+          <div v-if="cartEntries.length !== 0">
+            <span>Total: {{ totalPrice.toFixed(2) }} {{ cartEntries[0].variant.currency }} </span>/
+            <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/></span>
+          </div>
+          <b-button :disabled="isPlaceOrderButtonDisabled()" variant="primary" @click="openAddressModal">Place order
+          </b-button>
+        </div>
+      </template>
     </b-modal>
   </div>
 </template>
@@ -69,6 +73,7 @@ interface Data {
   totalPrice: number;
   totalPriceInSkill: number;
   skillPrice: number;
+  isOrderLoading: boolean;
 }
 
 export default Vue.extend({
@@ -77,6 +82,7 @@ export default Vue.extend({
       totalPrice: 0,
       totalPriceInSkill: 0,
       skillPrice: 0,
+      isOrderLoading: false,
     } as Data;
   },
 
@@ -144,6 +150,9 @@ export default Vue.extend({
         }
       }
     });
+    this.$root.$on('merchandise-order-loading', (isOrderLoading: boolean) => {
+      this.isOrderLoading = isOrderLoading;
+    });
   },
 });
 </script>
@@ -156,6 +165,7 @@ export default Vue.extend({
 .cart-entry-container {
   display: flex;
   justify-content: space-around;
+  align-items: center;
   border-bottom: 1px solid #6c5f38;
   border-top: 1px solid #6c5f38;
 }
@@ -163,6 +173,34 @@ export default Vue.extend({
 .cart-entries-container {
   display: flex;
   flex-direction: column;
+  gap: 0.5em;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.cart-footer {
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
+}
+
+@media (max-width: 576px) {
+  .cart-entry-container {
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .cart-footer {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cart-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5em;
+  }
 }
 </style>

@@ -10,11 +10,12 @@
           <div class="text-center font-weight-bold">
             {{ product.name }}
           </div>
-<!--          <span v-if="product.lowestPrice" class="starting_at mb-1 mt-2">Starting at {{ product.lowestPrice }}</span>-->
+          <!--          <span v-if="product.lowestPrice" class="starting_at mb-1 mt-2">Starting at {{ product.lowestPrice }}</span>-->
         </div>
         <b-button
           variant="primary"
           class="shop-button"
+          :disabled="isOrderLoading"
           @click="openChooseVariantModal(product)">
           <span>Choose variant</span>
         </b-button>
@@ -93,6 +94,12 @@ export default Vue.extend({
     } as Data;
   },
 
+  props: {
+    isOrderLoading: {
+      type: Boolean,
+    }
+  },
+
   computed: {
     rows() {
       return this.$data.products.length;
@@ -148,9 +155,15 @@ export default Vue.extend({
       this.selectedProduct = product;
       this.$root.$emit('merchandise-variant-modal', this.selectedProduct);
     },
+    isMobile() {
+      return screen.width <= 576;
+    },
   },
 
   async mounted() {
+    if (this.isMobile()) {
+      this.perPage = 10;
+    }
     await this.fetchProducts();
     console.log(this.products.length);
   },

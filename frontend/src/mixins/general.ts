@@ -1,14 +1,9 @@
 import Vue from 'vue';
 
-Vue.mixin({
+export default Vue.mixin({
   methods: {
     isMobile() {
-      if( screen.width <= 576 ) {
-        return true;
-      }
-      else {
-        return false;
-      }
+      return screen.width <= 576;
     }
   }
 });

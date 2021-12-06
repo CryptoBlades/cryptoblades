@@ -5,9 +5,7 @@
       Delivery Address
     </template>
     <b-form-input type="text"
-                  class="mt-2 mb-2" v-model="recipient.first_name" placeholder="First name"/>
-    <b-form-input type="text"
-                  class="mt-2 mb-2" v-model="recipient.last_name" placeholder="Last name"/>
+                  class="mt-2 mb-2" v-model="recipient.name" placeholder="Full name"/>
     <b-form-input type="email"
                   class="mt-2 mb-2" v-model="recipient.email" placeholder="Email"/>
     <b-form-input type="tel"
@@ -37,6 +35,8 @@
                   class="mt-2 mb-2" v-model="recipient.city" placeholder="City"/>
     <b-form-input type="text"
                   class="mt-2 mb-2" v-model="recipient.zip" placeholder="Zip Code"/>
+    <b-form-input type="text"
+                  class="mt-2 mb-2" v-model="recipient.company" placeholder="Company (optional)"/>
   </b-modal>
 </template>
 
@@ -47,12 +47,10 @@ import {BModal} from 'bootstrap-vue';
 import {MerchandiseOrder} from '@/components/smart/MerchandiseList.vue';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {mapActions} from 'vuex';
-import {toBN} from '@/utils/common';
 import BigNumber from 'bignumber.js';
 
 export interface Recipient {
-  first_name: string;
-  last_name: string;
+  name: string;
   email: string;
   phone: string;
   country: string;
@@ -61,6 +59,7 @@ export interface Recipient {
   address2?: string;
   city: string;
   zip: string;
+  company: string;
 }
 
 export interface Country {
@@ -107,8 +106,7 @@ export default Vue.extend({
 
   computed: {
     disablePlaceOrderButton() {
-      return !this.$data.recipient.first_name
-        || !this.$data.recipient.last_name
+      return !this.$data.recipient.name
         || !this.$data.recipient.email
         || !this.$data.recipient.phone
         || !this.$data.selectedCountry
@@ -133,9 +131,9 @@ export default Vue.extend({
       this.countries = response.result;
     },
 
-    async buyItem(bvModalEvt: Event) {
-      bvModalEvt.preventDefault();
+    async buyItem() {
       if (!this.selectedCountry) return;
+      this.$root.$emit('merchandise-order-loading', true);
       this.recipient.country = this.selectedCountry.code;
       this.recipient.state = this.selectedState?.code;
       const orderItems = this.cartEntries.map(cartEntry => {
@@ -149,15 +147,23 @@ export default Vue.extend({
         items: orderItems
       };
 
+      this.$root.$emit('merchandise-cart-modal', false);
       console.log('transaction starting');
-      await this.purchaseMerchandise({
-        ids: merchandiseOrder.items.map(item => item.sync_variant_id),
-        amounts: merchandiseOrder.items.map(item => item.quantity),
-        totalPrice: toBN(this.totalPriceInSkill),
-      });
-      console.log('after transaction, now request');
-      await api.createMerchandiseOrder(merchandiseOrder);
-      console.log('Order created');
+      try {
+        // await this.purchaseMerchandise({
+        //   ids: merchandiseOrder.items.map(item => item.sync_variant_id),
+        //   amounts: merchandiseOrder.items.map(item => item.quantity),
+        //   totalPrice: toBN(this.totalPriceInSkill),
+        // });
+        await setTimeout(() => {
+        }, 2000);
+        const apiResponse = await api.createMerchandiseOrder(merchandiseOrder);
+        this.$root.$emit('order-complete-modal', apiResponse.result.id, apiResponse.result.shipping_service_name);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.$root.$emit('merchandise-order-loading', false);
+      }
     },
   },
 
@@ -171,6 +177,7 @@ export default Vue.extend({
           this.cartEntries = cartEntries;
           modal.show();
         } else {
+          console.log('hide address');
           modal.hide();
         }
       }
