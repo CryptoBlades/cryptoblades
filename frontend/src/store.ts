@@ -2996,15 +2996,6 @@ export function createStore(web3: Web3) {
           });
       },
 
-      async getItemPrice({ state }, {id}) {
-        const { Merchandise } = state.contracts();
-        if (!Merchandise) return;
-
-        return await Merchandise.methods
-          .getPriceOfItem(id)
-          .call(defaultCallOptions(state));
-      },
-
       async claimTokenRewards({ state, dispatch }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
