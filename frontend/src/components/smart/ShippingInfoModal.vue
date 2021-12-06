@@ -1,18 +1,18 @@
 <template>
-  <b-modal class="centered-modal" ref="merchandise-address-modal" @ok="buyItem" :ok-title="'Submit order'"
+  <b-modal class="centered-modal" ref="merchandise-address-modal" @ok="buyItem" :ok-title="$t('market.merchandise.submitOrder')"
            :ok-disabled="disablePlaceOrderButton" button-size="lg">
     <template #modal-title>
-      Delivery Address
+      {{$t('market.merchandise.deliveryAddress')}}
     </template>
     <b-form-input type="text"
-                  class="mt-2 mb-2" v-model="recipient.name" placeholder="Full name"/>
-    <b-form-input type="email"
-                  class="mt-2 mb-2" v-model="recipient.email" placeholder="Email"/>
+                  class="mt-2 mb-2" v-model="recipient.name" :placeholder="$t('market.merchandise.fullName')"/>
+    <b-form-input type="email" :state="emailState"
+                  class="mt-2 mb-2" v-model="recipient.email" :placeholder="$t('market.merchandise.email')"/>
     <b-form-input type="tel"
-                  class="mt-2 mb-2" v-model="recipient.phone" placeholder="Phone"/>
+                  class="mt-2 mb-2" v-model="recipient.phone" :placeholder="$t('market.merchandise.phone')"/>
     <b-form-select
       class="mt-2 mb-2" v-model="selectedCountry" @change="countryChanged">
-      <b-form-select-option :value="undefined">Please select an option</b-form-select-option>
+      <b-form-select-option :value="undefined">{{ $t('market.merchandise.pleaseSelectAnOption') }}</b-form-select-option>
       <b-form-select-option v-for="country in countries" :key="country.code" :value="country">{{
           country.name
         }}
@@ -21,22 +21,22 @@
     <b-form-select
       class="mt-2 mb-2" v-if="selectedCountry && selectedCountry.states && selectedCountry.states.length !== 0"
       v-model="selectedState">
-      <b-form-select-option :value="undefined">Please select an option</b-form-select-option>
+      <b-form-select-option :value="undefined">{{ $t('market.merchandise.pleaseSelectAnOption') }}</b-form-select-option>
       <b-form-select-option v-for="state in selectedCountry.states" :key="state.code" :value="state">{{
           state.name
         }}
       </b-form-select-option>
     </b-form-select>
     <b-form-input type="text"
-                  class="mt-2 mb-2" v-model="recipient.address1" placeholder="Address line 1"/>
+                  class="mt-2 mb-2" v-model="recipient.address1" :placeholder="$t('market.merchandise.addressLine1')"/>
     <b-form-input type="text"
-                  class="mt-2 mb-2" v-model="recipient.address2" placeholder="Address line 2"/>
+                  class="mt-2 mb-2" v-model="recipient.address2" :placeholder="$t('market.merchandise.addressLine2')"/>
     <b-form-input type="text"
-                  class="mt-2 mb-2" v-model="recipient.city" placeholder="City"/>
+                  class="mt-2 mb-2" v-model="recipient.city" :placeholder="$t('market.merchandise.city')"/>
     <b-form-input type="text"
-                  class="mt-2 mb-2" v-model="recipient.zip" placeholder="Zip Code"/>
+                  class="mt-2 mb-2" v-model="recipient.zip" :placeholder="$t('market.merchandise.zipCode')"/>
     <b-form-input type="text"
-                  class="mt-2 mb-2" v-model="recipient.company" placeholder="Company (optional)"/>
+                  class="mt-2 mb-2" v-model="recipient.company" :placeholder="$t('market.merchandise.companyOptional')"/>
   </b-modal>
 </template>
 
@@ -106,6 +106,9 @@ export default Vue.extend({
   },
 
   computed: {
+    emailState() {
+      return this.$data.recipient.email && this.$data.recipient.email.includes('@');
+    },
     disablePlaceOrderButton() {
       return !this.$data.recipient.name
         || !this.$data.recipient.email

@@ -1,16 +1,17 @@
 <template>
   <div class="d-flex justify-content-between m-3 cart-container">
     <b-button variant="primary" class="shop-button hidden"></b-button>
-    <h2 v-if="isOrderLoading">Completing your order...</h2>
-    <b-button variant="primary" class="shop-button" :disabled="isOrderLoading" @click="openCartModal">Your cart ({{ cartEntries.length }})
+    <h2 v-if="isOrderLoading">{{ $t('market.merchandise.completingYourOrder') }}</h2>
+    <b-button variant="primary" class="shop-button" :disabled="isOrderLoading" @click="openCartModal">
+      {{ $t('market.merchandise.yourCart') }} ({{ cartEntries.length }})
     </b-button>
 
     <b-modal class="centered-modal" ref="merchandise-cart-modal" button-size="lg" size="xl" scrollable>
       <template #modal-title>
-        Your Cart
+        {{ $t('market.merchandise.yourCart') }}
       </template>
       <div v-if="cartEntries.length === 0" class="d-flex justify-content-center">
-        <h3>Nothing in cart</h3>
+        <h3>{{ $t('market.merchandise.nothingInCart') }}</h3>
       </div>
       <div v-else class="cart-entries-container">
         <div class="cart-entry-container" v-for="cartEntry in cartEntries" :key="cartEntry.variant.external_id">
@@ -45,10 +46,13 @@
       <template #modal-footer>
         <div class="cart-footer">
           <div v-if="cartEntries.length !== 0">
-            <span>Total: {{ totalPrice.toFixed(2) }} {{ cartEntries[0].variant.currency }} </span>/
+            <span>{{ $t('market.merchandise.total') }}: {{ totalPrice.toFixed(2) }} {{
+                cartEntries[0].variant.currency
+              }} </span>/
             <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/></span>
           </div>
-          <b-button :disabled="isPlaceOrderButtonDisabled()" variant="primary" @click="openAddressModal">Place order
+          <b-button :disabled="isPlaceOrderButtonDisabled()" variant="primary" @click="openAddressModal">
+            {{ $t('market.merchandise.placeOrder') }}
           </b-button>
         </div>
       </template>

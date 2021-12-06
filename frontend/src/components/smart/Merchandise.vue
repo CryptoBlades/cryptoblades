@@ -3,11 +3,11 @@
     <MerchandiseCart :cartEntries="cartEntries" :isOrderLoading="isOrderLoading"/>
     <MerchandiseList :isOrderLoading="isOrderLoading"/>
     <b-modal ref="order-complete-modal" ok-only no-close-on-backdrop hide-header-close
-             :title="`Order #${orderNumber} completed`">
-      <p>Thank you for shopping!</p>
-      <span>Your shipping method:</span>
+             :title="$t('market.merchandise.orderCompleted', {orderNumber})">
+      <p>{{$t('market.merchandise.thankYouForShopping')}}</p>
+      <span>{{$t('market.merchandise.yourShippingMethod')}}: </span>
       <p class="font-weight-bold">{{shipping}}</p>
-      <p>Check your email for order details</p>
+      <p>{{$t('market.merchandise.checkYourEmail')}}</p>
     </b-modal>
   </div>
 </template>

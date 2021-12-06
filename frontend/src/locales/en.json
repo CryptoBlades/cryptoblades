@@ -65,7 +65,7 @@
   },
   "nftOptionsDropdown" : {
     "left" : "left"
-  },  
+  },
   "EarningsCalculator" : {
     "nextMilestone": "Next Milestone",
     "earningsCalculator": "Earnings Calculator",
@@ -339,7 +339,7 @@
     "targetBuyerAddress":"Target Buyer Address (optional)",
     "listingConfirmation": "Do you want to sell your {activeType} for ",
     "buyerFee" : "The buyer will pay an extra {activeListingMarketTax}% market fee for a total of",
-    
+
     "weaponsSold" : "Weapons Sold",
     "viewWeapons" : "View weapons you have sold.",
     "weaponTxHistory" : "Weapon Transaction History",
@@ -495,6 +495,36 @@
 
       "characterBronzeborder" : "Character Bronze Border",
       "characterBronzeborderDesc" : ""
+    },
+    "merchandise": {
+      "deliveryAddress": "Delivery Address",
+      "submitOrder": "Submit order",
+      "fullName": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "pleaseSelectAnOption": "Please select an option",
+      "addressLine1": "Address line 1",
+      "addressLine2": "Address line 2",
+      "city": "City",
+      "zipCode": "Zip code",
+      "companyOptional": "Company (optional)",
+
+      "orderCompleted": "Order #{orderNumber} completed",
+      "thankYouForShopping": "Thank you for shopping with us!",
+      "yourShippingMethod": "Your shipping method",
+      "checkYourEmail": "Check your email for order details!",
+
+      "completingYourOrder": "Completing your order...",
+      "yourCart": "Your cart",
+      "nothingInCart": "Nothing in cart",
+      "total": "Total",
+      "placeOrder": "Place order",
+
+      "nothingToBuyAtThisTime": "Nothing to buy at this time",
+      "chooseVariant": "Choose variant",
+      "addToCart": "Add to cart",
+      "variant": "Variant",
+      "totalPrice": "Total price"
     }
   },
   "stake":{

@@ -1,8 +1,9 @@
 <template>
-  <b-modal class="centered-modal" ref="merchandise-variant-modal" @ok="addToCart" :ok-title="'Add to cart'"
+  <b-modal class="centered-modal" ref="merchandise-variant-modal" @ok="addToCart"
+           :ok-title="$t('market.merchandise.addToCart')"
            :ok-disabled="false" button-size="lg" size="xl" scrollable>
     <template #modal-title>
-      Choose Variant
+      {{ $t('market.merchandise.chooseVariant') }}
     </template>
     <div class="variant-container">
       <div class="p-2" v-if="selectedVariant">
@@ -17,7 +18,7 @@
                  @click="selectVariant(variant)"/>
           </div>
         </div>
-        <p>Variant: {{ selectedVariant.name }}</p>
+        <p>{{ $t('market.merchandise.variant') }}: {{ selectedVariant.name }}</p>
         <span>{{ selectedVariant.retail_price.toLocaleString() }} {{ selectedVariant.currency }}</span>
         /
         <span v-if="selectedVariant">
@@ -34,7 +35,9 @@
             <b-button class="btn-primary" type="button" @click="addQuantity"><i class="fas fa-plus"></i></b-button>
           </div>
         </div>
-        <span>Total price: {{ totalPrice.toLocaleString() }} {{ selectedVariant.currency }}</span>
+        <span>{{ $t('market.merchandise.totalPrice') }}: {{ totalPrice.toLocaleString() }} {{
+            selectedVariant.currency
+          }}</span>
         /
         <span v-if="selectedVariant">
           <CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)"
@@ -137,12 +140,6 @@ export default Vue.extend({
   },
 
   computed: {
-    //TODO: Rework this
-    // disablePlaceOrderButton() {
-    //   return !this.$data.recipient.name || !this.$data.recipient.phone || !this.$data.recipient.email
-    //     || !this.$data.recipient.address1 || !this.$data.recipient.city || !this.$data.recipient.zip
-    //     || !this.$data.recipient.countryCode;
-    // }
     isMinusButtonDisabled() {
       return this.$data.quantity <= 1;
     },

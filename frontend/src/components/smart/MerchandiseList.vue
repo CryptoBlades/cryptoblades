@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="text-center" v-if="products.length === 0">
-      <span>Nothing to buy at this time</span>
+      <span>{{ $t('market.merchandise.nothingToBuyAtThisTime') }}</span>
     </div>
     <ul class="product-grid">
       <li class="product" v-for="product in productsForPage" :key="product.id">
@@ -17,7 +17,7 @@
           class="shop-button"
           :disabled="isOrderLoading"
           @click="openChooseVariantModal(product)">
-          <span>Choose variant</span>
+          <span>{{ $t('market.merchandise.chooseVariant') }}</span>
         </b-button>
       </li>
     </ul>
