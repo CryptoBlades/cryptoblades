@@ -3,14 +3,13 @@
     <b-button variant="primary" class="shop-button" @click="openCartModal">Your cart ({{ cartEntries.length }})
     </b-button>
 
-    <b-modal class="centered-modal" ref="merchandise-cart-modal" :ok-title="'Add to cart'"
-             :ok-disabled="false" button-size="lg" size="xl" scrollable>
+    <b-modal class="centered-modal" ref="merchandise-cart-modal" button-size="lg" size="xl" scrollable>
       <template #modal-title>
         Your Cart
       </template>
       <template #modal-footer>
         <div v-if="cartEntries.length !== 0">
-          <span>Total: {{ totalPrice }} {{ cartEntries[0].variant.currency }} </span>/
+          <span>Total: {{ totalPrice.toFixed(2) }} {{ cartEntries[0].variant.currency }} </span>/
           <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/></span>
         </div>
         <b-button :disabled="isPlaceOrderButtonDisabled()" variant="primary" @click="openAddressModal">Place order

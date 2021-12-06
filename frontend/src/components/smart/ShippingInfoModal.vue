@@ -133,7 +133,8 @@ export default Vue.extend({
       this.countries = response.result;
     },
 
-    async buyItem() {
+    async buyItem(bvModalEvt: Event) {
+      bvModalEvt.preventDefault();
       if (!this.selectedCountry) return;
       this.recipient.country = this.selectedCountry.code;
       this.recipient.state = this.selectedState?.code;
@@ -148,12 +149,14 @@ export default Vue.extend({
         items: orderItems
       };
 
+      console.log('transaction starting');
       await this.purchaseMerchandise({
         ids: merchandiseOrder.items.map(item => item.sync_variant_id),
         amounts: merchandiseOrder.items.map(item => item.quantity),
         totalPrice: toBN(this.totalPriceInSkill),
-      }).then(async () => await api.createMerchandiseOrder(merchandiseOrder));
-
+      });
+      console.log('after transaction, now request');
+      await api.createMerchandiseOrder(merchandiseOrder);
       console.log('Order created');
     },
   },

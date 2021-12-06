@@ -8,7 +8,7 @@
       <div class="p-2" v-if="selectedVariant">
         <img class="preview" :src="selectedVariant.files.find(file => isFileTypePreview(file)).preview_url" alt=""/>
       </div>
-      <div class="p-2" v-if="selectedVariant">
+      <div class="p-2 w-100" v-if="selectedVariant">
         <div class="thumbnail-list pb-2">
           <div v-for="variant in variants" :key="variant.id">
             <img class="thumbnail" :class="selectedVariant === variant ? 'thumbnail-selected' : null"

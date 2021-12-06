@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center" v-if="(products.length === 0)">
+    <div class="text-center" v-if="products.length === 0">
       <span>Nothing to buy at this time</span>
     </div>
     <ul class="product-grid">
@@ -68,6 +68,8 @@ interface Data {
   isLoading: boolean;
   currentPage: number;
   perPage: number;
+  offset: number;
+  limit: number;
 }
 
 interface StoreMappedActions {
@@ -86,6 +88,8 @@ export default Vue.extend({
       isLoading: false,
       currentPage: 1,
       perPage: 30,
+      offset: 0,
+      limit: 100,
     } as Data;
   },
 
@@ -106,11 +110,16 @@ export default Vue.extend({
     fromWeiEther,
 
     async fetchProducts() {
-      const response = await api.getMerchandiseProducts();
-      if (response.code !== 200) {
-        return;
-      }
-      this.products = response.result;
+      let result = [];
+      do {
+        const response = await api.getMerchandiseProducts(this.limit, this.offset);
+        if (response.code !== 200) {
+          return;
+        }
+        result = response.result;
+        this.products.push(...result);
+        this.offset += 100;
+      } while (result.length === 100);
       // const promises = this.products.map(product => api.getMerchandiseProductVariants(product.id));
       // console.log(promises);
       // Promise.all(promises).then(values => {
@@ -143,6 +152,7 @@ export default Vue.extend({
 
   async mounted() {
     await this.fetchProducts();
+    console.log(this.products.length);
   },
 });
 </script>

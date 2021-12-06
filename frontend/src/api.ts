@@ -25,12 +25,13 @@ const client = axios.create({
 });
 
 export default {
-  async execute(method: HttpMethod, resource: string, data?: any) {
+  async execute(method: HttpMethod, resource: string, data?: any, params?: any): Promise<ApiResponse<any>> {
     const accessToken = process.env.VUE_APP_API_KEY || 'accessToken';
     return client({
       method,
       url: resource,
       data,
+      params,
       headers: {
         Authorization: `Bearer ${accessToken}`
       }
@@ -38,8 +39,8 @@ export default {
       return req.data;
     });
   },
-  getMerchandiseProducts(): Promise<ApiResponse<Product[]>> {
-    return this.execute(HttpMethod.GET, '/merchant/products');
+  getMerchandiseProducts(limit: number, offset: number): Promise<ApiResponse<Product[]>> {
+    return this.execute(HttpMethod.GET, '/merchant/products', undefined, {limit, offset});
   },
   getMerchandiseProductVariants(productId: number): Promise<ApiResponse<ProductDetails>> {
     return this.execute(HttpMethod.GET, `/merchant/products/${productId}`);
