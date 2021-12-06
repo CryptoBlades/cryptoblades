@@ -350,7 +350,7 @@ export default Vue.extend({
       if(this.payoutCurrencyId !== '-1') {
         const currentMultiplier = await this.getPartnerProjectMultiplier(+this.payoutCurrencyId);
         if(currentMultiplier === '0') {
-          (this as any).$dialog.notify.error(i18n.t('Multiplier is at x0, try again later...'));
+          (this as any).$dialog.notify.error(i18n.t('ClaimRewardsBar.multiplierAtZero'));
           return;
         }
         await this.claimPartnerToken(
