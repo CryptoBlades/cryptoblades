@@ -154,7 +154,6 @@ export default Vue.extend({
         return;
       }
       this.variants = response.result.sync_variants;
-      console.log(this.variants);
     },
     addToCart() {
       if (!this.product || !this.selectedVariant) return;
@@ -164,7 +163,6 @@ export default Vue.extend({
         variant: this.selectedVariant,
         quantity: this.quantity,
       } as CartEntry;
-      console.log(cartEntry);
 
       this.$root.$emit('add-to-cart', cartEntry);
       this.quantity = 1;

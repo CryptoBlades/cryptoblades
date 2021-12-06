@@ -152,7 +152,6 @@ export default Vue.extend({
       };
 
       this.$root.$emit('merchandise-cart-modal', false);
-      console.log('transaction starting');
       try {
         await this.purchaseMerchandise({
           ids: merchandiseOrder.items.map(item => item.sync_variant_id),
@@ -179,7 +178,6 @@ export default Vue.extend({
           this.cartEntries = cartEntries;
           modal.show();
         } else {
-          console.log('hide address');
           modal.hide();
         }
       }

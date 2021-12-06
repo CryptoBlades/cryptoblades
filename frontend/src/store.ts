@@ -2989,8 +2989,6 @@ export function createStore(web3: Web3) {
             from: state.defaultAccount
           });
 
-        console.log(totalPrice, ids, amounts);
-
         return await Merchandise.methods
           .placeOrder(state.defaultAccount, totalPrice, ids, amounts)
           .send({

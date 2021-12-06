@@ -10,7 +10,6 @@
           <div class="text-center font-weight-bold">
             {{ product.name }}
           </div>
-          <!--          <span v-if="product.lowestPrice" class="starting_at mb-1 mt-2">Starting at {{ product.lowestPrice }}</span>-->
         </div>
         <b-button
           variant="primary"
@@ -127,28 +126,6 @@ export default Vue.extend({
         this.products.push(...result);
         this.offset += 100;
       } while (result.length === 100);
-      // const promises = this.products.map(product => api.getMerchandiseProductVariants(product.id));
-      // console.log(promises);
-      // Promise.all(promises).then(values => {
-      //   values.forEach(value => {
-      //     const product = this.products.find(product => value.result.sync_product.id === product.id);
-      //     if (product) {
-      //       product.lowestPrice = Math.min(...value.result.sync_variants.map(variant => +variant.retail_price));
-      //     }
-      //   });
-      //   console.log(this.products.map(product => product.lowestPrice));
-      // });
-      // for (const product of this.products) {
-      //   const response = await api.getMerchandiseProductVariants(product.id);
-      //   console.log(response);
-      //   const prices = response.result.sync_variants.map(variant => +variant.retail_price);
-      //   console.log(prices);
-      //   product.lowestPrice = Math.min(...prices);
-      //   console.log(Math.min(...prices));
-      // }
-      // for (const product of this.products) {
-      // product.price = await this.getItemPrice({id: product.id});
-      // }
     },
 
     async openChooseVariantModal(product: Product) {
@@ -165,7 +142,6 @@ export default Vue.extend({
       this.perPage = 10;
     }
     await this.fetchProducts();
-    console.log(this.products.length);
   },
 });
 </script>
@@ -207,9 +183,5 @@ export default Vue.extend({
   position: relative;
   width: 12rem;
 }
-
-/*.starting_at {*/
-/*  font-size: 13px;*/
-/*}*/
 
 </style>
