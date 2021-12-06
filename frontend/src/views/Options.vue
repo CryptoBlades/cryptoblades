@@ -125,7 +125,6 @@ interface Data {
   fightMultiplier: number;
   currentChain: string;
   supportedChains: string[];
-  payoutCurrencyId: string;
 }
 
 interface StoreMappedGetters {
@@ -155,7 +154,6 @@ export default Vue.extend({
     this.currentChain = localStorage.getItem('currentChain') || 'BSC';
     this.supportedChains = config.supportedChains;
     await this.fetchPartnerProjects();
-    this.payoutCurrencyId = localStorage.getItem('payoutCurrencyId') || '-1';
   },
 
   data() {
@@ -168,7 +166,6 @@ export default Vue.extend({
       showCosmetics: true,
       fightMultiplier: 1,
       currentChain: 'BSC',
-      payoutCurrencyId: '-1',
       checked: false,
       ClaimStage,
       supportedChains: []
