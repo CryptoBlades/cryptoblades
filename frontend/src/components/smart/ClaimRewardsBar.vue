@@ -256,7 +256,7 @@ export default Vue.extend({
     },
 
     skillRewardNumber(): number {
-      return toBN(fromWeiEther(this.skillRewards)).toNumber();
+      return +toBN(fromWeiEther(this.skillRewards)).toFixed(17);
     },
 
     withdrawalInfoText(): string {
@@ -349,6 +349,10 @@ export default Vue.extend({
     async onClaimTokens() {
       if(this.payoutCurrencyId !== '-1') {
         const currentMultiplier = await this.getPartnerProjectMultiplier(+this.payoutCurrencyId);
+        if(currentMultiplier === '0') {
+          (this as any).$dialog.notify.error(i18n.t('ClaimRewardsBar.multiplierAtZero'));
+          return;
+        }
         await this.claimPartnerToken(
           {
             id: +this.payoutCurrencyId,

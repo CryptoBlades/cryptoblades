@@ -23,7 +23,8 @@
     "payoutCurrency": "Payout Currency",
     "partnerTokenClaimed": "This partner tokens have been claimed already.",
     "slippage": "Slippage",
-    "skillAmount": "Skill Amount"
+    "skillAmount": "Skill Amount",
+    "multiplierAtZero": "Multiplier is at x0, try again later..."
   },
   "CharacterDisplay":{
     "loading":"Loading...",
