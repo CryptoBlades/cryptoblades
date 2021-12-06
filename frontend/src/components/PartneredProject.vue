@@ -9,7 +9,8 @@
           <a @click="addTokenToMetamask" class="ml-1 a-button">({{$t('PartneredProject.add')}})</a>
         </div>
         <span class="multiplier-text">{{skillToPartnerRatio}} SKILL/{{tokenSymbol}}</span>
-        <span class="multiplier-text">{{$t('PartneredProject.multiplier')}}: x{{multiplier}}</span>
+        <span v-bind:class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
+          class="multiplier-text">{{$t('PartneredProject.multiplier')}}: x{{multiplier}}</span>
         <span class="multiplier-text">{{$t('PartneredProject.distribution')}}: {{distributionTime}} {{$t('PartneredProject.days')}}</span>
       </div>
     </div>
@@ -215,5 +216,11 @@ export default Vue.extend({
 .a-button {
   line-height: 1.2;
   cursor: pointer;
+}
+.very-low-multiplier {
+  color: rgb(223, 17, 17);
+}
+.low-multiplier {
+  color: rgb(212, 147, 25);
 }
 </style>
