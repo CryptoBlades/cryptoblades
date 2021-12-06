@@ -48,6 +48,7 @@ import {MerchandiseOrder} from '@/components/smart/MerchandiseList.vue';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {mapActions} from 'vuex';
 import BigNumber from 'bignumber.js';
+import {toBN} from '@/utils/common';
 
 export interface Recipient {
   name: string;
@@ -150,13 +151,11 @@ export default Vue.extend({
       this.$root.$emit('merchandise-cart-modal', false);
       console.log('transaction starting');
       try {
-        // await this.purchaseMerchandise({
-        //   ids: merchandiseOrder.items.map(item => item.sync_variant_id),
-        //   amounts: merchandiseOrder.items.map(item => item.quantity),
-        //   totalPrice: toBN(this.totalPriceInSkill),
-        // });
-        await setTimeout(() => {
-        }, 2000);
+        await this.purchaseMerchandise({
+          ids: merchandiseOrder.items.map(item => item.sync_variant_id),
+          amounts: merchandiseOrder.items.map(item => item.quantity),
+          totalPrice: toBN(this.totalPriceInSkill),
+        });
         const apiResponse = await api.createMerchandiseOrder(merchandiseOrder);
         this.$root.$emit('order-complete-modal', apiResponse.result.id, apiResponse.result.shipping_service_name);
       } catch (e) {
