@@ -683,7 +683,7 @@
       </b-tab>
       <b-tab @click="clearData();browseTabActive = false;skillShopTabActive = false">
         <template #title>
-          Merchandise
+          {{$t('market.merchandise.merchandise')}}
           <hint class="hint" text="You can buy real merchandise in here" />
         </template>
 

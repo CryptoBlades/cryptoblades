@@ -497,6 +497,8 @@
       "characterBronzeborderDesc" : ""
     },
     "merchandise": {
+      "merchandise": "Merchandise",
+
       "deliveryAddress": "Delivery Address",
       "submitOrder": "Submit order",
       "fullName": "Full name",
