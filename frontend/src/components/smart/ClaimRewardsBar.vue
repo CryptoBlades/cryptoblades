@@ -256,7 +256,7 @@ export default Vue.extend({
     },
 
     skillRewardNumber(): number {
-      return toBN(fromWeiEther(this.skillRewards)).toNumber();
+      return +toBN(fromWeiEther(this.skillRewards)).toFixed(17);
     },
 
     withdrawalInfoText(): string {

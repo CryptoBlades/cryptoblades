@@ -126,8 +126,8 @@
             {{$t('raid.stamina')}} </span>,
             <span class="badge badge-secondary">{{ durabilityCost }}
             {{$t('raid.durability')}} </span> {{$t('raid.and')}}
-            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" minDecimals="0"
-                                                                   maxDecimals="5"/></span>
+            <span class="badge badge-secondary"><CurrencyConverter :skill="convertWeiToSkill(joinCost)" :minDecimals="0"
+                                                                   :maxDecimals="5"/></span>
           </div>
         </div>
       </div>
