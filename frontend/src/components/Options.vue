@@ -130,12 +130,11 @@ export default Vue.extend({
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
     this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
-    this.isBridgeEnabled = bridgeEnabled;
   },
 
   data() {
     return {
-      isBridgeEnabled: false,
+      isBridgeEnabled: bridgeEnabled,
       showGraphics: false,
       hideRewards: false,
       hideWalletWarning: false,
