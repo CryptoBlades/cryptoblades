@@ -50,7 +50,7 @@
       <img src="../assets/border-element.png">
     </div>
         <div>
-      <Adsense v-if="showAds"
+      <Adsense v-if="showAds && !isMobile()"
           data-ad-client="ca-pub-6717992096530538"
           data-ad-slot="5115599573"
           data-ad-format="auto"
@@ -70,6 +70,7 @@ import axios from 'axios';
 import { getConfigValue } from '@/contracts';
 import i18n from '@/i18n';
 import {TranslateResult} from 'vue-i18n';
+import '@/mixins/general';
 
 interface CombatResult {
   isVictory: boolean;
