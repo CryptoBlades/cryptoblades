@@ -44,7 +44,7 @@
       <img src="../assets/border-element.png">
     </div>
         <div>
-      <Adsense
+      <Adsense v-if="showAds"
           data-ad-client="ca-pub-6717992096530538"
           data-ad-slot="5115599573"
           data-ad-format="auto"
@@ -86,6 +86,7 @@ export default Vue.extend({
     return {
       skillPrice: 0,
       gasToken: '',
+      showAds: false
     };
   },
 
@@ -114,11 +115,15 @@ export default Vue.extend({
     },
     calculateSkillPriceInUsd(): number {
       return fromWeiEther(this.fightResults.skillGain) as unknown as number * this.skillPrice as unknown as number;
-    }
+    },
+    checkStorage() {
+      this.showAds =  localStorage.getItem('show-ads') === 'true';
+    },
   },
 
   async mounted() {
     this.gasToken = getConfigValue('currencyToken') || 'BNB';
+    this.checkStorage();
     await this.fetchPrices();
   },
 
