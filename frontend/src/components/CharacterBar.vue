@@ -30,7 +30,10 @@ export default Vue.extend({
   },
   methods: {
     checkStorage() {
-      this.showAds =  localStorage.getItem('show-ads') === 'true';
+      this.showAds =  localStorage.getItem('show-ads') === 'true' && !this.isMobile();
+    },
+    isMobile() {
+      return screen.width <= 576;
     },
   },
   async mounted() {

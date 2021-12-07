@@ -176,7 +176,7 @@ export default {
 
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
-      this.showAds =  localStorage.getItem('show-ads') === 'true';
+      this.showAds =  localStorage.getItem('show-ads') === 'true' && !this.isMobile();
     },
     async initializeRecruitCost() {
       const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
@@ -269,6 +269,9 @@ export default {
       });
 
       localStorage.setItem('lastnotification', notifications[0].hash);
+    },
+    isMobile() {
+      return screen.width <= 576;
     },
   },
 
