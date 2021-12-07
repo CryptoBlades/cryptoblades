@@ -16,9 +16,10 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue';
 import CharacterDisplay from './smart/CharacterDisplay.vue';
 
-export default {
+export default Vue.extend({
   components: {
     CharacterDisplay,
   },
@@ -35,7 +36,7 @@ export default {
   async mounted() {
     this.checkStorage();
   },
-};
+});
 </script>
 
 <style scoped>
