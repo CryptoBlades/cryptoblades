@@ -2,7 +2,7 @@
   <div class="character-bar">
     <character-display />
         <div class="ad-container">
-        <Adsense v-if="showAds"
+        <Adsense v-if="showAds && !isMobile()"
           data-ad-client="ca-pub-6717992096530538"
           data-ad-slot="5115599573"
           data-ad-format="auto"
@@ -18,6 +18,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import CharacterDisplay from './smart/CharacterDisplay.vue';
+import '@/mixins/general';
 
 export default Vue.extend({
   components: {

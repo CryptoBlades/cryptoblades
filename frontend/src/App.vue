@@ -61,7 +61,7 @@
         <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
       </div>
       <div class="ad-container">
-        <Adsense v-if="showAds"
+        <Adsense v-if="showAds && !isMobile()"
           data-ad-client="ca-pub-6717992096530538"
           data-ad-slot="5115599573"
           data-ad-format="auto"
@@ -88,6 +88,7 @@ import CharacterBar from './components/CharacterBar.vue';
 import { apiUrl } from './utils/common';
 import i18n from './i18n';
 import { getConfigValue } from './contracts';
+import '@/mixins/general';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
