@@ -116,7 +116,6 @@ export default Vue.extend({
       return this.fightResults.xpGain + ' xp';
     }
   },
-
   methods: {
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
@@ -132,10 +131,10 @@ export default Vue.extend({
 
   async mounted() {
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
-    this.checkStorage();
     await this.fetchPrices();
+    await new Promise(f => setTimeout(f, 1000));
+    this.checkStorage();
   },
-
   components: {
     Hint,
   },
