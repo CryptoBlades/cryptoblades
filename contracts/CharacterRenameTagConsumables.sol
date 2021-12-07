@@ -58,4 +58,8 @@ contract CharacterRenameTagConsumables is Consumables {
     function getMaxSize() public view returns (uint8){
         return _maxSize;
     }
+
+    function setName(uint256 characterId, string memory newName) public restricted {
+        renames[characterId] = newName;
+    }
 }

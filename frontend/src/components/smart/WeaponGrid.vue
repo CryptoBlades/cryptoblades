@@ -2,45 +2,46 @@
   <div>
     <div class="filters row mt-2 pl-2" v-if="!newWeapon" @change="saveFilters()">
       <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
-        <strong>Stars</strong>
+        <strong>{{$t('weaponGrid.stars')}}</strong>
         <select class="form-control" v-model="starFilter" >
-          <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
+          <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
         </select>
       </div>
 
       <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
-        <strong>Element</strong>
+        <strong>{{$t('weaponGrid.element')}}</strong>
         <select class="form-control" v-model="elementFilter" >
-          <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
+          <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+          :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
         </select>
       </div>
 
       <template v-if="isMarket">
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>Min Price</strong>
+          <strong>{{$t('weaponGrid.minPrice')}}</strong>
           <input class="form-control" type="number" v-model.trim="minPriceFilter" :min="0" placeholder="Min" />
         </div>
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>Max Price</strong>
+          <strong>{{$t('weaponGrid.maxPrice')}}</strong>
           <input class="form-control" type="number" v-model.trim="maxPriceFilter" :min="0" placeholder="Max" />
         </div>
 
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>Sort</strong>
+          <strong>{{$t('weaponGrid.sort')}}</strong>
           <select class="form-control" v-model="priceSort" >
-            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
+            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('weaponGrid.sorts.any') }}</option>
           </select>
         </div>
       </template>
 
       <div v-if="showReforgedToggle" class="show-reforged">
         <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
-        <strong>Show reforged</strong>
+        <strong>{{$t('weaponGrid.showReforged')}}</strong>
       </div>
 
       <div v-if="showFavoriteToggle" class="show-reforged show-favorite">
         <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
-        <strong>Show Favorite</strong>
+        <strong>{{$t('weaponGrid.showFavorite')}}</strong>
       </div>
 
       <b-button
@@ -50,7 +51,7 @@
         @click="clearFilters"
       >
         <span>
-          Clear Filters
+          {{$t('weaponGrid.clearFilters')}}
         </span>
       </b-button>
     </div>
@@ -65,7 +66,7 @@
         "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
       >
-        <nft-options-dropdown :nftId="weapon.id" :options="options" class="nft-options"/>
+        <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" class="nft-options"/>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
         </div>
@@ -79,13 +80,26 @@
     <b-modal class="centered-modal" ref="weapon-rename-modal"
                   @ok="renameWeaponCall()">
                   <template #modal-title>
-                    Rename Weapon
+                    {{$t('weaponGrid.renameWeapon')}}
                   </template>
                   <b-form-input type="string"
-                    class="modal-input" v-model="weaponRename" placeholder="New Name" />
+                    class="modal-input" v-model="weaponRename" :placeholder="$t('weaponGrid.renamePlaceholder')" />
       <span v-if="isRenameProfanish">
-        This name contains profanish words and thus will be displayed as follows: <em>{{cleanRename}}</em>
+        {{$t('weaponGrid.isProfanish')}} <em>{{cleanRename}}</em>
       </span>
+    </b-modal>
+
+    <b-modal class="centered-modal" ref="weapon-change-skin-modal"
+      @ok="changeWeaponSkinCall">
+      <template #modal-title>
+        {{$t('weaponGrid.changeWeaponSkill')}}
+      </template>
+      <span >
+        {{$t('weaponGrid.pickSkin')}}
+      </span>
+      <select class="form-control" v-model="targetSkin">
+        <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+      </select>
     </b-modal>
   </div>
 </template>
@@ -101,6 +115,8 @@ import { NftOption } from '../NftOptionsDropdown.vue';
 import { BModal } from 'bootstrap-vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
+import i18n from '@/i18n';
+import { copyNftUrl } from '@/utils/common';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 
@@ -112,6 +128,9 @@ interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
   renameWeapon(arg: {id: number, name: string}): Promise<void>;
   fetchTotalWeaponRenameTags(): Promise<number>;
+  fetchOwnedWeaponCosmetics(arg: { cosmetic: number }): Promise<number>;
+  changeWeaponCosmetic(arg: { id: number, cosmetic: number }): Promise<void>;
+  removeWeaponCosmetic(arg: { id: number }): Promise<void>;
 }
 
 interface Data {
@@ -126,13 +145,16 @@ interface Data {
   options: NftOption[];
   haveRename: number;
   weaponRename: string;
+  haveWeaponCosmetics: number[];
+  targetSkin: string;
   currentWeaponId: number | string | null;
+  weaponCosmeticsNames: string[];
 }
 
 const sorts = [
-  { name: 'Any', dir: '' },
-  { name: 'Price: Low -> High', dir: 1 },
-  { name: 'Price: High -> Low', dir: -1 },
+  { name: i18n.t('weaponGrid.sorts.any'), dir: '' },
+  { name: i18n.t('weaponGrid.sorts.lowToHigh'), dir: 1 },
+  { name: i18n.t('weaponGrid.sorts.highToLow'), dir: -1 },
 ];
 
 export default Vue.extend({
@@ -207,6 +229,10 @@ export default Vue.extend({
       type: Boolean,
       default: false,
     },
+    showNftOptions: {
+      type: Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -223,7 +249,30 @@ export default Vue.extend({
       options: [],
       haveRename: 0,
       weaponRename: '',
+      haveWeaponCosmetics: [],
+      targetSkin: '',
       currentWeaponId: null,
+      weaponCosmeticsNames: [
+        i18n.t('market.nftList.weaponGrayscale'),
+        i18n.t('market.nftList.weaponContrast'),
+        i18n.t('market.nftList.weaponSepia'),
+        i18n.t('market.nftList.weaponInvert'),
+        i18n.t('market.nftList.weaponBlur'),
+        i18n.t('market.nftList.weaponFireglow'),
+        i18n.t('market.nftList.weaponEarthglow'),
+        i18n.t('market.nftList.weaponLightningglow'),
+        i18n.t('market.nftList.weaponWaterglow'),
+        i18n.t('market.nftList.weaponRainbowglow'),
+        i18n.t('market.nftList.weaponDarkglow'),
+        i18n.t('market.nftList.weaponGhost'),
+        i18n.t('market.nftList.weaponPolicelights'),
+        i18n.t('market.nftList.weaponNeonborder'),
+        i18n.t('market.nftList.weaponRotatingNeonborder'),
+        i18n.t('market.nftList.weaponDiamondborder'),
+        i18n.t('market.nftList.weaponGoldborder'),
+        i18n.t('market.nftList.weaponSilverborder'),
+        i18n.t('market.nftList.weaponBronzeborder')
+      ]
     } as Data;
   },
 
@@ -302,7 +351,27 @@ export default Vue.extend({
 
     cleanRename(): string {
       return getCleanName(this.weaponRename);
-    }
+    },
+
+    availableSkins(): string[] {
+      const availableSkins = [];
+
+      availableSkins.push('No Skin');
+
+      for(let i = 0; i < 19; i++) {
+        if(+this.haveWeaponCosmetics[i] > 0) {
+          availableSkins.push(this.weaponCosmeticsNames[i]);
+        }
+      }
+
+      return availableSkins;
+    },
+
+    totalCosmeticChanges(): number {
+      let count = 0;
+      this.haveWeaponCosmetics.forEach(x => count += +x);
+      return count;
+    },
   },
 
   watch: {
@@ -312,7 +381,8 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['fetchWeapons','renameWeapon','fetchTotalWeaponRenameTags']) as StoreMappedActions),
+    ...(mapActions(['fetchWeapons','renameWeapon','fetchTotalWeaponRenameTags',
+      'fetchOwnedWeaponCosmetics','changeWeaponCosmetic','removeWeaponCosmetic']) as StoreMappedActions),
     ...(mapMutations(['setCurrentWeapon'])),
 
     saveFilters() {
@@ -405,15 +475,61 @@ export default Vue.extend({
       this.weaponRename = '';
     },
 
+    async loadCosmeticsCount() {
+      this.haveWeaponCosmetics = [];
+      for(let i = 1; i < 22; i++) {
+        this.haveWeaponCosmetics.push(await this.fetchOwnedWeaponCosmetics({cosmetic: i}));
+      }
+      this.updateOptions();
+    },
+
+    openChangeSkin(id: number | string) {
+      this.currentWeaponId = id;
+      (this.$refs['weapon-change-skin-modal'] as BModal).show();
+    },
+    async changeWeaponSkinCall() {
+      if(!this.currentWeaponId) return;
+      // +1 because cosmetics are 1 (not 0) based
+      const selectedSkinId = this.weaponCosmeticsNames.findIndex(x => x === this.targetSkin) + 1;
+      if(selectedSkinId === 0) {
+        await this.removeWeaponCosmetic({ id: +this.currentWeaponId });
+        await this.loadCosmeticsCount();
+      } else {
+        await this.changeWeaponCosmetic({ id: +this.currentWeaponId, cosmetic: selectedSkinId });
+        this.haveWeaponCosmetics[selectedSkinId - 1] = await this.fetchOwnedWeaponCosmetics({cosmetic: selectedSkinId});
+        await this.loadCosmeticsCount();
+      }
+
+      this.updateOptions();
+    },
+
     updateOptions() {
-      this.options = [
-        {
-          name: 'Rename',
-          amount: this.haveRename,
-          handler: this.openRenameWeapon
-        },
-      ];
-    }
+      if(!this.isMarket) {
+        this.options = [
+          {
+            name: i18n.t('characterList.rename').toString(),
+            amount: this.haveRename,
+            handler: this.openRenameWeapon
+          },
+          {
+            name: i18n.t('characterList.changeSkin').toString(),
+            amount: this.totalCosmeticChanges,
+            handler: this.openChangeSkin,
+            hasDefaultOption: true
+          },
+        ];
+      } else {
+        this.options = [
+          {
+            name: i18n.t('copyLink').toString(),
+            amount: 0,
+            handler: copyNftUrl,
+            hasDefaultOption: true,
+            noAmount: true
+          },
+        ];
+      }
+    },
   },
 
   async mounted() {
@@ -434,7 +550,7 @@ export default Vue.extend({
     }
 
     this.haveRename = await this.fetchTotalWeaponRenameTags();
-    this.updateOptions();
+    await this.loadCosmeticsCount();
   },
 });
 </script>
@@ -467,7 +583,7 @@ export default Vue.extend({
   border-radius: 5px;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .weapon.selected {

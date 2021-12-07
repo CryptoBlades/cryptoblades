@@ -2,7 +2,7 @@ const shell = require('shelljs');
 const _ = require('lodash');
 const yargs = require('yargs/yargs');
 
-function backupNetworks(networkId) {
+function backupNetworks(networkId, fileId = null) {
     const savedNetworks = {};
 
     for(const buildArtifact of shell.ls('build/contracts/*.json')) {
@@ -11,13 +11,15 @@ function backupNetworks(networkId) {
         savedNetworks[buildArtifact] = data.networks[networkId];
     }
 
-    shell.ShellString(JSON.stringify(savedNetworks, null, '  ')).to(`networks/networks-${networkId}.json`);
+    const jsonFileId = fileId || networkId;
+    shell.ShellString(JSON.stringify(savedNetworks, null, '  ')).to(`networks/networks-${jsonFileId}.json`);
 
-    console.log(`Addresses for network ID ${networkId} have been backed up to networks/networks-${networkId}.json.`);
+    console.log(`Addresses for network ID ${networkId} have been backed up to networks/networks-${jsonFileId}.json.`);
 }
 
-function restoreNetworks(networkId, doForce = false) {
-    const savedNetworks = JSON.parse(shell.cat(`networks/networks-${networkId}.json`));
+function restoreNetworks(networkId, doForce = false, fileId = null) {
+    const jsonFileId = fileId || networkId;
+    const savedNetworks = JSON.parse(shell.cat(`networks/networks-${jsonFileId}.json`));
 
     const filesToWrite = [];
 
@@ -52,7 +54,7 @@ function restoreNetworks(networkId, doForce = false) {
     for(const { filename, contents } of filesToWrite) {
         shell.ShellString(contents).to(filename);
     }
-    console.log(`Addresses for network ID ${networkId} have been restored from networks/networks-${networkId}.json to the build artifacts.`);
+    console.log(`Addresses for network ID ${networkId} have been restored from networks/networks-${jsonFileId}.json to the build artifacts.`);
 }
 
 yargs(process.argv.slice(2))
@@ -61,6 +63,12 @@ yargs(process.argv.slice(2))
     }, argv => {
         backupNetworks(argv.networkId);
     })
+    .command('backupToFile <networkId> <fileId>', 'Backup networks from build artifacts', yargs => {
+        yargs.check(argv => Number.isInteger(argv.networkId));
+        yargs.check(argv => Number.isInteger(argv.fileId));
+    }, argv => {
+        backupNetworks(argv.networkId, argv.fileId);
+    })
     .command('restore <networkId>', 'Restore networks to build artifacts', yargs => {
         yargs
             .check(argv => Number.isInteger(argv.networkId))
@@ -68,6 +76,15 @@ yargs(process.argv.slice(2))
             .boolean('force');
     }, argv => {
         restoreNetworks(argv.networkId, argv.force);
+    })
+    .command('restoreFromFile <networkId> <fileId>', 'Restore networks to build artifacts', yargs => {
+        yargs
+            .check(argv => Number.isInteger(argv.networkId))
+            .option('force', { description: 'Force overwrite existing network data even if it is different' })
+            .boolean('force');
+        yargs.check(argv => Number.isInteger(argv.fileId));
+    }, argv => {
+        restoreNetworks(argv.networkId, argv.force, argv.fileId);
     })
     .demandCommand()
     .argv;

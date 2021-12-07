@@ -8,7 +8,7 @@
       <table class="stake-data-table">
         <tr>
           <th class="bold">
-            Stake
+            {{$t('stake.stake')}}
           </th>
           <td class="align-right">
             {{ stakeTokenName }}
@@ -16,15 +16,15 @@
         </tr>
         <tr>
           <th class="bold">
-            Earn
+            {{$t('stake.StakeSelectorItem.earn')}}
           </th>
           <td class="align-right">
             {{ rewardTokenName }}
           </td>
         </tr>
-        <tr v-if="estimatedYield" title="Estimated yield per year and token.">
+        <tr v-if="estimatedYield" :title="$t('stake.StakeSelectorItem.yieldTooltip')">
           <th class="bold">
-            APY
+            {{$t('stake.StakeSelectorItem.apy')}}
           </th>
           <td class="align-right">
             {{ estimatedYield.multipliedBy(100).toFixed(2) }}%
@@ -32,7 +32,7 @@
         </tr>
         <tr v-if="minimumStakeTime !== 0">
           <th class="bold">
-            Stake locked
+            {{$t('stake.StakeSelectorItem.stakeLocked')}}
           </th>
           <td class="align-right">
             {{ minimumStakeTimeFormatted }}
@@ -44,11 +44,10 @@
       class="stake-select-button button dark-bg-text"
       :class="{ deprecated: deprecated }"
       :to="{ name: 'stake', params: { stakeType } }">
-        <span v-if="deprecated">Warning</span>
-        <span v-if="!deprecated">Select</span>
+        <span v-if="deprecated">{{$t('stake.StakeSelectorItem.warning')}}</span>
+        <span v-if="!deprecated">{{$t('stake.StakeSelectorItem.select')}}</span>
         <b-icon-question-circle-fill v-if="deprecated"
-          v-tooltip="`This stake pool has been deprecated, and should not be staked in anymore.
-          You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed.`" />
+          v-tooltip="$t('stake.StakeSelectorItem.deprecatedTooltip')" />
     </router-link>
   </div>
 </template>
