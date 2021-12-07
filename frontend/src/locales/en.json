@@ -243,7 +243,12 @@
       "veryLikely": "Very Likely"
     },
     "moreStamina": "You need more stamina to fight!",
-    "pleaseSelect": "Please select Stamina Cost per Fight"
+    "pleaseSelect": "Please select Stamina Cost per Fight",
+    "hourlyUpdateHint": "We release a certain amount of the reward pool every hour, and if it's drained the earnings will be zero until the next hour. Still have questions? Join our discord for more information!",
+    "forStaminaFight": "for a {stamina} Stamina Fight",
+    "averagePower": "Average Power",
+    "expectedEarnings": "Expected Earnings",
+    "nextHourlyUpdate": "Next Hourly Update"
   },
   "raid":{
     "title":"Hellborn raid",

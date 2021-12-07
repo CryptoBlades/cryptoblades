@@ -32,21 +32,23 @@
 
       <div class="row" v-if="!selectedWeaponId">
         <div class="col-12 text-center">
-          <h2>Next Hourly Update
-            <Hint id="hourlyUpdateHint" text="
-            We release a certain amount of the reward pool every hour,
-            and if it's drained the earnings will be zero until the next hour.
-            "/>
+          <h2>{{ $t('combat.nextHourlyUpdate') }}
+            <i id="next-hourly-update-hint" class="far fa-question-circle hint"/>
           </h2>
-          <h4>{{timeToNextAllowanceText}}</h4>
+          <b-tooltip target="next-hourly-update-hint">
+            {{ $t('combat.hourlyUpdateHint') }} <a href="https://discord.gg/cryptoblades" target="_blank">https://discord.gg/cryptoblades</a>
+          </b-tooltip>
+          <h4>{{ timeToNextAllowanceText }}</h4>
         </div>
         <div class="col-12 text-center">
-          <h2>Expected Earnings</h2>
+          <h2>{{ $t('combat.expectedEarnings') }}</h2>
           <h5>
-            <CurrencyConverter :skill="expectedSkill"  :showValueInUsdOnly="false"/>
-            (<CurrencyConverter :skill="expectedSkill"  :showValueInUsdOnly="true"/>)
-            <Hint id="expectedSkillHint" text="for a 40 Stamina Fight"/>
-          <br>Average Power: <b>{{powerAvg}}</b></h5>
+            <CurrencyConverter :skill="expectedSkill" :showValueInUsdOnly="false"/>
+            (
+            <CurrencyConverter :skill="expectedSkill" :showValueInUsdOnly="true"/>
+            )
+            <Hint id="expectedSkillHint" :text="$t('combat.forStaminaFight', {stamina: 40})"/>
+            <br>{{ $t('combat.averagePower') }}: <b>{{ powerAvg }}</b></h5>
         </div>
       </div>
 
@@ -167,13 +169,13 @@
 // import Character from "../components/Character.vue";
 import BigButton from '../components/BigButton.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
-import { getEnemyArt } from '../enemy-art';
-import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, WeaponElement } from '../interfaces';
+import {getEnemyArt} from '../enemy-art';
+import {CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, WeaponElement} from '../interfaces';
 import Hint from '../components/Hint.vue';
 import CombatResults from '../components/CombatResults.vue';
-import { toBN, fromWeiEther } from '../utils/common';
+import {fromWeiEther, toBN} from '../utils/common';
 import WeaponIcon from '../components/WeaponIcon.vue';
-import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
 
 export default {
