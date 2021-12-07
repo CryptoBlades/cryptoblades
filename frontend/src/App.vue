@@ -61,7 +61,7 @@
         <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
       </div>
       <div class="ad-container">
-        <Adsense v-if="showAds"
+        <Adsense v-if="showAds && !isMobile()"
           data-ad-client="ca-pub-6717992096530538"
           data-ad-slot="5115599573"
           data-ad-format="auto"
@@ -88,6 +88,7 @@ import CharacterBar from './components/CharacterBar.vue';
 import { apiUrl } from './utils/common';
 import i18n from './i18n';
 import { getConfigValue } from './contracts';
+import '@/mixins/general';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -176,7 +177,7 @@ export default {
 
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
-      this.showAds =  localStorage.getItem('show-ads') === 'true' && !this.isMobile();
+      this.showAds =  localStorage.getItem('show-ads') === 'true';
     },
     async initializeRecruitCost() {
       const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
@@ -269,9 +270,6 @@ export default {
       });
 
       localStorage.setItem('lastnotification', notifications[0].hash);
-    },
-    isMobile() {
-      return screen.width <= 576;
     },
   },
 
