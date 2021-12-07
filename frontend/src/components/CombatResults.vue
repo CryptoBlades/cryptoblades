@@ -46,18 +46,17 @@
       </b-container>
     </div>
   </div>
-
     <div class="bot-bg-img promotion-decoration">
       <img src="../assets/border-element.png">
     </div>
-
-    <div>
-      <ins class="adsbygoogle"
-          style="display:block"
+        <div>
+      <Adsense v-if="showAds"
           data-ad-client="ca-pub-6717992096530538"
           data-ad-slot="5115599573"
           data-ad-format="auto"
-          data-full-width-responsive="true"></ins>
+          data-full-width-responsive="yes"
+          >
+        </Adsense>
     </div>
   </div>
 </template>
@@ -95,6 +94,7 @@ export default Vue.extend({
     return {
       skillPrice: 0,
       gasToken: '',
+      showAds: false
     };
   },
 
@@ -116,7 +116,6 @@ export default Vue.extend({
       return this.fightResults.xpGain + ' xp';
     }
   },
-
   methods: {
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
@@ -124,14 +123,18 @@ export default Vue.extend({
     },
     calculateSkillPriceInUsd(): number {
       return fromWeiEther(this.fightResults.skillGain) as unknown as number * this.skillPrice as unknown as number;
-    }
+    },
+    checkStorage() {
+      this.showAds =  localStorage.getItem('show-ads') === 'true';
+    },
   },
 
   async mounted() {
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
     await this.fetchPrices();
+    await new Promise(f => setTimeout(f, 1000));
+    this.checkStorage();
   },
-
   components: {
     Hint,
   },
