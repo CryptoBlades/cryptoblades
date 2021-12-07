@@ -33,8 +33,11 @@
       <div class="row" v-if="!selectedWeaponId">
         <div class="col-12 text-center">
           <h2>{{ $t('combat.nextHourlyUpdate') }}
-            <Hint id="hourlyUpdateHint" :text="`${$t('combat.hourlyUpdateHint')} https://discord.gg/cryptoblades`"/>
+            <i id="next-hourly-update-hint" class="far fa-question-circle hint"/>
           </h2>
+          <b-tooltip target="next-hourly-update-hint">
+            {{ $t('combat.hourlyUpdateHint') }} <a href="https://discord.gg/cryptoblades" target="_blank">https://discord.gg/cryptoblades</a>
+          </b-tooltip>
           <h4>{{ timeToNextAllowanceText }}</h4>
         </div>
         <div class="col-12 text-center">
