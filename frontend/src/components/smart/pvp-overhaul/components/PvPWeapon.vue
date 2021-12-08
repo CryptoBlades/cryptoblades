@@ -1,20 +1,25 @@
 <template>
-  <div class="mainWrapper">
-    <div class="starsWrapper">
-      <!-- <img
-        v-for="index in stars"
-        :key="index"
-        src="../../../../assets/star.svg"
-        alt="star"
-      /> -->
-      <span>Stars: {{ stars }}</span>
+  <div>
+    <div v-if="disabled">
+      DISABLED
     </div>
-    <div class="weaponWrapper">
-      <img :src="getWeaponArtById(weaponId)" alt="weapon image">
-    </div>
-    <div class="elementWrapper">
-      <!-- <img :src="getElementImageUrl" alt="element icon" /> -->
-      <span>Element: {{ element }}</span>
+    <div v-else class="mainWrapper" @click="$emit('click')">
+      <div class="starsWrapper">
+        <!-- <img
+          v-for="index in stars"
+          :key="index"
+          src="../../../../assets/star.svg"
+          alt="star"
+        /> -->
+        <span>Stars: {{ stars }}</span>
+      </div>
+      <div class="weaponWrapper">
+        <img :src="getWeaponArtById(weaponId)" alt="weapon image">
+      </div>
+      <div class="elementWrapper">
+        <!-- <img :src="getElementImageUrl" alt="element icon" /> -->
+        <span>Element: {{ element }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -24,21 +29,28 @@
 // import water from '../../../../assets/elements/water.png';
 // import earth from '../../../../assets/elements/earth.png';
 // import lightning from '../../../../assets/elements/lightning.png';
+import { getWeaponArtById } from '../../../../weapon-arts-placeholder';
 
 export default {
   props: {
     stars: {
       type: Number,
       required: true,
-      min: 1,
+      min: 0,
       max: 5,
+      default: 0
     },
     element: {
       type: String,
       required: true,
+      default: ''
     },
     weaponId: {
       type: String
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -56,10 +68,14 @@ export default {
     //   }
     // },
   },
+
+  methods: {
+    getWeaponArtById,
+  }
 };
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .mainWrapper {
   position: relative;
   display: flex;
@@ -75,13 +91,13 @@ export default {
   display: flex;
   height: 13%;
   margin-left: 0.1rem;
-
+  /*
   img {
     height: 0.5rem;
     width: 0.45rem;
     margin-right: 0.125rem;
     pointer-events: none;
-  }
+  } */
 }
 .weaponWrapper {
   display: flex;
@@ -100,9 +116,9 @@ export default {
   border: 1px solid #cec198;
   border-radius: 9999px;
   background-color: #151515;
-  img {
+  /* img {
     max-width: 100%;
     max-height: 100%;
-  }
+  } */
 }
 </style>

@@ -7,13 +7,13 @@
         <div>
           <h3>WEAPON TITLE</h3>
           <pvp-weapon
-            v-for="weaponId in ownedWeaponIds"
-            :key="weaponId"
-            :stars="getWeaponInformation(weaponId).stars"
-            :element="getWeaponInformation(weaponId).element"
-            :weaponId="weaponId"
-            @click="handleWeaponClick(weaponID)"
-            :disabled="ownedWeaponIds.includes(weaponId) && !availableWeaponIds.includes(weaponId)"
+            v-for="weapon in ownedWeaponsWithInformation"
+            :key="weapon.weaponId"
+            :stars="weapon.information.stars"
+            :element="weapon.information.element"
+            :weaponId="weapon.weaponId"
+            @click="handleWeaponClick(weapon.weaponId)"
+            :disabled="ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)"
           />
           <!-- <button
             v-for="weaponId in ownedWeaponIds"
@@ -116,6 +116,7 @@ export default {
       availableWeaponIds: [],
       availableShieldIds: [],
       checkBoxAgreed: false,
+      ownedWeaponsWithInformation: []
     };
   },
 
@@ -139,6 +140,8 @@ export default {
     async getWeaponInformation(weaponId) {
       const { element, stars } = formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
 
+      console.log('ELEMENT: ', element);
+      console.log('Stars: ', stars);
       return {
         element,
         stars
@@ -196,6 +199,15 @@ export default {
 
     this.availableWeaponIds = weaponAvailability.filter(weapon => !weapon.isInArena)
       .map(weapon => weapon.weaponId);
+
+    this.ownedWeaponsWithInformation = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
+      return {
+        weaponId,
+        information: await this.getWeaponInformation(weaponId)
+      };
+    }));
+
+    console.log('sadasd: ', this.ownedWeaponsWithInformation);
 
     const shieldAvailability = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
       return {
