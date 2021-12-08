@@ -1,5 +1,5 @@
 {
-  "supportedChains":["BSC","HECO","OEC","POLYGON"],
+  "supportedChains":["BSC","HECO","OEC","POLYGON","AVAX"],
   "environments": {
     "test": {
       "chains": {
