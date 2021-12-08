@@ -6,14 +6,23 @@
         <br/>
         <div>
           <h3>WEAPON TITLE</h3>
-          <button
+          <pvp-weapon
+            v-for="weaponId in ownedWeaponIds"
+            :key="weaponId"
+            :stars="getWeaponInformation(weaponId).stars"
+            :element="getWeaponInformation(weaponId).element"
+            :weaponId="weaponId"
+            @click="handleWeaponClick(weaponID)"
+            :disabled="ownedWeaponIds.includes(weaponId) && !availableWeaponIds.includes(weaponId)"
+          />
+          <!-- <button
             v-for="weaponId in ownedWeaponIds"
             :key="weaponId"
             @click="handleWeaponClick(weaponId)"
             :disabled="ownedWeaponIds.includes(weaponId) && !availableWeaponIds.includes(weaponId)"
           >
             Weapon ID: {{ weaponId }}
-          </button>
+          </button> -->
           <br/>
           <span>Weapon: {{ selectedWeaponId }}</span>
         </div>
@@ -91,9 +100,14 @@
 <script>
 import { mapState } from 'vuex';
 import BN from 'bignumber.js';
+import PvPWeapon from '../../components/PvPWeapon.vue';
 import { weaponFromContract as formatWeapon } from '../../../../../contract-models';
 
 export default {
+  components: {
+    'pvp-weapon': PvPWeapon
+  },
+
   data() {
     return {
       entryWager: null,
@@ -120,6 +134,15 @@ export default {
 
     handleShieldClick(shieldId) {
       this.selectedShieldId = shieldId;
+    },
+
+    async getWeaponInformation(weaponId) {
+      const { element, stars } = formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
+
+      return {
+        element,
+        stars
+      };
     },
 
     async handleEnterArenaClick() {
@@ -183,8 +206,6 @@ export default {
 
     this.availableShieldIds = shieldAvailability.filter(shield => !shield.isInArena)
       .map(shield => shield.shieldId);
-
-    console.log('SAD: ', formatWeapon('10', await this.contracts().Weapons.methods.get('10').call({ from: this.defaultAccount })));
   }
 
 };
