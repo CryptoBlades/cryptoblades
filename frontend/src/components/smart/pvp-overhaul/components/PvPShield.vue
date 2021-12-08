@@ -12,8 +12,8 @@
           alt="star"
         />
       </div>
-      <div class="weaponWrapper">
-        <img :src="getWeaponArtById(weaponId)" alt="weapon image">
+      <div class="shieldWrapper">
+        <img :src="getShieldArt(shieldId)" alt="shield image">
       </div>
       <div class="elementWrapper">
         <img :src="getElementImageUrl" alt="element icon" />
@@ -27,7 +27,8 @@ import fire from '../../../../assets/elements/fire.png';
 import water from '../../../../assets/elements/water.png';
 import earth from '../../../../assets/elements/earth.png';
 import lightning from '../../../../assets/elements/lightning.png';
-import { getWeaponArtById } from '../../../../weapon-arts-placeholder';
+import foundersShield from '../../../../assets/shield1.png';
+import legendaryShield from '../../../../assets/shield2.png';
 
 export default {
   props: {
@@ -43,7 +44,7 @@ export default {
       required: true,
       default: ''
     },
-    weaponId: {
+    shieldId: {
       type: String
     },
     disabled: {
@@ -68,7 +69,17 @@ export default {
   },
 
   methods: {
-    getWeaponArtById,
+    getShieldArt(shieldId) {
+      if(shieldId <= 10000){
+        return foundersShield;
+      }
+      else if (shieldId > 10000 || shieldId <= 25000){
+        return legendaryShield;
+      }
+      else{
+        return '';
+      }
+    },
   }
 };
 </script>
@@ -97,7 +108,7 @@ export default {
     pointer-events: none;
   }
 }
-.weaponWrapper {
+.shieldWrapper {
   display: flex;
   height: 90%;
 }

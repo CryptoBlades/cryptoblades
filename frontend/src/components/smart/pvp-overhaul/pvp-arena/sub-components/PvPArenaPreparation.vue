@@ -9,36 +9,31 @@
           <pvp-weapon
             v-for="weapon in ownedWeaponsWithInformation"
             :key="weapon.weaponId"
-            :stars="weapon.information.stars"
+            :stars="weapon.information.stars + 1"
             :element="weapon.information.element"
             :weaponId="weapon.weaponId"
             @click="handleWeaponClick(weapon.weaponId)"
             :disabled="ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)"
           />
-          <!-- <button
-            v-for="weaponId in ownedWeaponIds"
-            :key="weaponId"
-            @click="handleWeaponClick(weaponId)"
-            :disabled="ownedWeaponIds.includes(weaponId) && !availableWeaponIds.includes(weaponId)"
-          >
-            Weapon ID: {{ weaponId }}
-          </button> -->
           <br/>
           <span>Weapon: {{ selectedWeaponId }}</span>
+          <button @click="() => selectedWeaponId = null">Clear Weapon</button>
         </div>
         <br/>
         <div>
           <h3>SHIELD TITLE</h3>
-          <button
-            v-for="shieldId in ownedShieldIds"
-            :key="shieldId"
-            @click="handleShieldClick(shieldId)"
-            :disabled="ownedShieldIds.includes(shieldId) && !availableShieldIds.includes(shieldId)"
-          >
-            Shield ID: {{ shieldId }}
-          </button>
+          <pvp-shield
+            v-for="shield in ownedShieldsWithInformation"
+            :key="shield.shieldId"
+            :stars="shield.information.stars + 1"
+            :element="shield.information.element"
+            :shieldId="shield.shieldId"
+            @click="handleShieldClick(shield.shieldId)"
+            :disabled="ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)"
+          />
           <br/>
           <span>Shield: {{ selectedShieldId }}</span>
+          <button @click="() => selectedShieldId = null">Clear Shield</button>
         </div>
       </div>
 
@@ -101,11 +96,14 @@
 import { mapState } from 'vuex';
 import BN from 'bignumber.js';
 import PvPWeapon from '../../components/PvPWeapon.vue';
+import PvPShield from '../../components/PvPShield.vue';
 import { weaponFromContract as formatWeapon } from '../../../../../contract-models';
+import { shieldFromContract as formatShield } from '../../../../../contract-models';
 
 export default {
   components: {
-    'pvp-weapon': PvPWeapon
+    'pvp-weapon': PvPWeapon,
+    'pvp-shield': PvPShield
   },
 
   data() {
@@ -116,7 +114,8 @@ export default {
       availableWeaponIds: [],
       availableShieldIds: [],
       checkBoxAgreed: false,
-      ownedWeaponsWithInformation: []
+      ownedWeaponsWithInformation: [],
+      ownedShieldsWithInformation: []
     };
   },
 
@@ -140,8 +139,15 @@ export default {
     async getWeaponInformation(weaponId) {
       const { element, stars } = formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
 
-      console.log('ELEMENT: ', element);
-      console.log('Stars: ', stars);
+      return {
+        element,
+        stars
+      };
+    },
+
+    async getShieldInformation(shieldId) {
+      const { element, stars } = formatShield(`${shieldId}`, await this.contracts().Shields.methods.get(`${shieldId}`).call({ from: this.defaultAccount }));
+
       return {
         element,
         stars
@@ -207,8 +213,6 @@ export default {
       };
     }));
 
-    console.log('sadasd: ', this.ownedWeaponsWithInformation);
-
     const shieldAvailability = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
       return {
         shieldId,
@@ -218,6 +222,13 @@ export default {
 
     this.availableShieldIds = shieldAvailability.filter(shield => !shield.isInArena)
       .map(shield => shield.shieldId);
+
+    this.ownedShieldsWithInformation = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
+      return {
+        shieldId,
+        information: await this.getShieldInformation(shieldId)
+      };
+    }));
   }
 
 };

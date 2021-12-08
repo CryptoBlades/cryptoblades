@@ -11,6 +11,7 @@ import Leaderboard from './views/Leaderboard.vue';
 import Portal from './views/Portal.vue';
 import Options from './views/Options.vue';
 import PvP from './components/smart/pvp-overhaul/PvP.vue';
+import PvPOLD from './views/PvPOLD.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 
@@ -66,6 +67,7 @@ function createRouter() {
 
   if(featureFlagPvP){
     router.addRoute({ path: '/pvp', name: 'pvp', component:PvP});
+    router.addRoute({ path: '/pvpold', name: 'pvpold', component:PvPOLD});
   }
 
   return router;
