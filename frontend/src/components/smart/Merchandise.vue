@@ -1,13 +1,13 @@
 <template>
   <div>
-    <MerchandiseCart :cartEntries="cartEntries" :isOrderLoading="isOrderLoading"/>
-    <MerchandiseList :isOrderLoading="isOrderLoading"/>
+    <MerchandiseCart :cartEntries="cartEntries" :isOrderLoading="isOrderLoading" :showFiatPrices="showFiatPrices"/>
+    <MerchandiseList :isOrderLoading="isOrderLoading" :showFiatPrices="showFiatPrices"/>
     <b-modal ref="order-complete-modal" ok-only no-close-on-backdrop hide-header-close
              :title="$t('market.merchandise.orderCompleted', {orderNumber})">
-      <p>{{$t('market.merchandise.thankYouForShopping')}}</p>
-      <span>{{$t('market.merchandise.yourShippingMethod')}}: </span>
-      <p class="font-weight-bold">{{shipping}}</p>
-      <p>{{$t('market.merchandise.checkYourEmail')}}</p>
+      <p>{{ $t('market.merchandise.thankYouForShopping') }}</p>
+      <span>{{ $t('market.merchandise.yourShippingMethod') }}: </span>
+      <p class="font-weight-bold">{{ shipping }}</p>
+      <p>{{ $t('market.merchandise.checkYourEmail') }}</p>
     </b-modal>
   </div>
 </template>
@@ -24,6 +24,7 @@ interface Data {
   orderNumber: number;
   shipping: string;
   isOrderLoading: boolean;
+  showFiatPrices: boolean;
 }
 
 export default Vue.extend({
@@ -37,6 +38,7 @@ export default Vue.extend({
       orderNumber: 0,
       shipping: '',
       isOrderLoading: false,
+      showFiatPrices: true,
     } as Data;
   },
 

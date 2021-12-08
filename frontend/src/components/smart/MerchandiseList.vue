@@ -29,7 +29,7 @@
       align="center"
     />
     <ShippingInfoModal/>
-    <VariantChoiceModal/>
+    <VariantChoiceModal :showFiatPrices="showFiatPrices"/>
   </div>
 </template>
 
@@ -95,6 +95,9 @@ export default Vue.extend({
 
   props: {
     isOrderLoading: {
+      type: Boolean,
+    },
+    showFiatPrices: {
       type: Boolean,
     }
   },

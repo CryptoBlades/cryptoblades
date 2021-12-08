@@ -19,8 +19,9 @@
           </div>
         </div>
         <p>{{ $t('market.merchandise.variant') }}: {{ selectedVariant.name }}</p>
-        <span>{{ selectedVariant.retail_price.toLocaleString() }} {{ selectedVariant.currency }}</span>
-        /
+        <span v-if="showFiatPrices">{{ selectedVariant.retail_price.toLocaleString() }} {{
+            selectedVariant.currency
+          }} / </span>
         <span v-if="selectedVariant">
           <CurrencyConverter :skill="fromWeiEther(retailPriceInSkill)"
                              :show-value-in-skill-only="true"/>
@@ -35,10 +36,10 @@
             <b-button class="btn-primary" type="button" @click="addQuantity"><i class="fas fa-plus"></i></b-button>
           </div>
         </div>
-        <span>{{ $t('market.merchandise.totalPrice') }}: {{ totalPrice.toLocaleString() }} {{
+        <span>{{ $t('market.merchandise.totalPrice') }}: </span>
+        <span v-if="showFiatPrices">{{ totalPrice.toLocaleString() }} {{
             selectedVariant.currency
-          }}</span>
-        /
+          }} / </span>
         <span v-if="selectedVariant">
           <CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)"
                              :show-value-in-skill-only="true"/>
@@ -137,6 +138,12 @@ export default Vue.extend({
       totalPriceInSkill: 0,
       skillPrice: 0,
     } as Data;
+  },
+
+  props: {
+    showFiatPrices: {
+      type: Boolean,
+    }
   },
 
   computed: {

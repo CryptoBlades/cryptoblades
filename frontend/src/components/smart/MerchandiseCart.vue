@@ -20,10 +20,10 @@
                alt="">
           <div class="d-flex flex-column justify-content-center align-items-center flex-grow-1 w-50">
             <p>{{ cartEntry.variant.name }}</p>
-            <div class="d-inline"><span>Price: {{ cartEntry.variant.retail_price }} {{
+            <div class="d-inline"><span>{{ $t('market.merchandise.price') }}: </span><span
+              v-if="showFiatPrices">{{ cartEntry.variant.retail_price }} {{
                 cartEntry.variant.currency
-              }}</span>
-              /
+              }} / </span>
               <span><CurrencyConverter v-if="cartEntry.variant && cartEntry.variant.retail_price"
                                        :skill="fromWeiEther(toBN(usdToSkill(cartEntry)))"
                                        :show-value-in-skill-only="true"/></span></div>
@@ -46,9 +46,10 @@
       <template #modal-footer>
         <div class="cart-footer">
           <div v-if="cartEntries.length !== 0">
-            <span>{{ $t('market.merchandise.total') }}: {{ totalPrice.toFixed(2) }} {{
+            <span>{{ $t('market.merchandise.total') }}: </span>
+            <span v-if="showFiatPrices">{{ totalPrice.toFixed(2) }} {{
                 cartEntries[0].variant.currency
-              }} </span>/
+              }} / </span>
             <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/></span>
           </div>
           <span class="d-inline-block"
@@ -99,6 +100,9 @@ export default Vue.extend({
     cartEntries: {
       type: Array as PropType<CartEntry[]>,
       required: true
+    },
+    showFiatPrices: {
+      type: Boolean,
     }
   },
 
