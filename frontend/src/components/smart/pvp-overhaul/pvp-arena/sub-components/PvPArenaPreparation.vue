@@ -96,8 +96,6 @@ import { mapState } from 'vuex';
 import BN from 'bignumber.js';
 import PvPWeapon from '../../components/PvPWeapon.vue';
 import PvPShield from '../../components/PvPShield.vue';
-import { weaponFromContract as formatWeapon } from '../../../../../contract-models';
-import { shieldFromContract as formatShield } from '../../../../../contract-models';
 
 export default {
   components: {
@@ -120,20 +118,29 @@ export default {
         power: null,
         rank: null
       }
-    }
+    },
+    entryWager: {
+      default: null
+    },
+    availableWeaponIds: {
+      default: []
+    },
+    availableShieldIds: {
+      default: []
+    },
+    ownedWeaponsWithInformation: {
+      default: []
+    },
+    ownedShieldsWithInformation: {
+      default: []
+    },
   },
 
   data() {
     return {
-      // TODO: Most of these can be props
-      entryWager: null,
       selectedWeaponId: null,
       selectedShieldId: null,
-      availableWeaponIds: [],
-      availableShieldIds: [],
       checkBoxAgreed: false,
-      ownedWeaponsWithInformation: [],
-      ownedShieldsWithInformation: []
     };
   },
 
@@ -156,24 +163,6 @@ export default {
 
     handleShieldClick(shieldId) {
       this.selectedShieldId = shieldId;
-    },
-
-    async getWeaponInformation(weaponId) {
-      const { element, stars } = formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
-
-      return {
-        element,
-        stars
-      };
-    },
-
-    async getShieldInformation(shieldId) {
-      const { element, stars } = formatShield(`${shieldId}`, await this.contracts().Shields.methods.get(`${shieldId}`).call({ from: this.defaultAccount }));
-
-      return {
-        element,
-        stars
-      };
     },
 
     async handleEnterArenaClick() {
@@ -208,49 +197,11 @@ export default {
           return;
         }
 
-        // Do something when succesful
+        this.$emit('enteredArena');
       } else {
         console.log('Missing data');
       }
     },
   },
-
-  async created() {
-    this.entryWager = await this.contracts().PvpArena.methods.getEntryWager(this.currentCharacterId).call({ from: this.defaultAccount });
-
-    const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
-      return {
-        weaponId,
-        isInArena: await this.contracts().PvpArena.methods.isWeaponInArena(weaponId).call({ from: this.defaultAccount })
-      };
-    }));
-
-    this.availableWeaponIds = weaponAvailability.filter(weapon => !weapon.isInArena)
-      .map(weapon => weapon.weaponId);
-
-    this.ownedWeaponsWithInformation = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
-      return {
-        weaponId,
-        information: await this.getWeaponInformation(weaponId)
-      };
-    }));
-
-    const shieldAvailability = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
-      return {
-        shieldId,
-        isInArena: await this.contracts().PvpArena.methods.isShieldInArena(shieldId).call({ from: this.defaultAccount })
-      };
-    }));
-
-    this.availableShieldIds = shieldAvailability.filter(shield => !shield.isInArena)
-      .map(shield => shield.shieldId);
-
-    this.ownedShieldsWithInformation = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
-      return {
-        shieldId,
-        information: await this.getShieldInformation(shieldId)
-      };
-    }));
-  }
 };
 </script>
