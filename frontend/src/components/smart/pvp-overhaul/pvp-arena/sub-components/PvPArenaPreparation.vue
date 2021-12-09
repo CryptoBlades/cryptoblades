@@ -6,30 +6,34 @@
         <br/>
         <div>
           <h3>WEAPON TITLE</h3>
-          <button
-            v-for="weaponId in ownedWeaponIds"
-            :key="weaponId"
-            @click="handleWeaponClick(weaponId)"
-            :disabled="ownedWeaponIds.includes(weaponId) && !availableWeaponIds.includes(weaponId)"
-          >
-            Weapon ID: {{ weaponId }}
-          </button>
+          <pvp-weapon
+            v-for="weapon in ownedWeaponsWithInformation"
+            :key="weapon.weaponId"
+            :stars="weapon.information.stars + 1"
+            :element="weapon.information.element"
+            :weaponId="weapon.weaponId"
+            @click="handleWeaponClick(weapon.weaponId)"
+            :disabled="ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)"
+          />
           <br/>
           <span>Weapon: {{ selectedWeaponId }}</span>
+          <button @click="() => selectedWeaponId = null">Clear Weapon</button>
         </div>
         <br/>
         <div>
           <h3>SHIELD TITLE</h3>
-          <button
-            v-for="shieldId in ownedShieldIds"
-            :key="shieldId"
-            @click="handleShieldClick(shieldId)"
-            :disabled="ownedShieldIds.includes(shieldId) && !availableShieldIds.includes(shieldId)"
-          >
-            Shield ID: {{ shieldId }}
-          </button>
+          <pvp-shield
+            v-for="shield in ownedShieldsWithInformation"
+            :key="shield.shieldId"
+            :stars="shield.information.stars + 1"
+            :element="shield.information.element"
+            :shieldId="shield.shieldId"
+            @click="handleShieldClick(shield.shieldId)"
+            :disabled="ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)"
+          />
           <br/>
           <span>Shield: {{ selectedShieldId }}</span>
+          <button @click="() => selectedShieldId = null">Clear Shield</button>
         </div>
       </div>
 
@@ -45,7 +49,7 @@
         <br/>
         <input type="checkbox" v-model="checkBoxAgreed" /><span>I understand.</span>
         <br/>
-        <button @click="handleEnterArenaClick()">
+        <button @click="handleEnterArenaClick()" :disabled="!selectedWeaponId">
           Enter Arena
           <br/>
           $SKILL: {{ formattedEntryWager }}
@@ -58,31 +62,30 @@
         <div>
           <h3>PVP Rewards Pool ($SKILL)</h3>
           <br/>
-          <span>POOL HERE</span>
+          <span>{{ formatedTierRewardsPool }}</span>
         </div>
         <div>
           <h3>Top Players</h3>
           <br/>
-          <span>1</span>
+          <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || '-' }} / RANK: {{ tierTopRankers[0] && tierTopRankers[0].rank }}</span>
           <br/>
-          <span>2</span>
+          <span>Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || '-' }} / RANK: {{ tierTopRankers[1] && tierTopRankers[1].rank }}</span>
           <br/>
-          <span>3</span>
+          <span>Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || '-' }} / RANK: {{ tierTopRankers[2] && tierTopRankers[2].rank }}</span>
           <br/>
-          <button>View All Rankings</button>
         </div>
       </div>
 
       <div>
-        <h2>CHARACTER NAME</h2>
+        <h2>{{ characterInformation.name || '' }}</h2>
         <br/>
-        <span>Power</span>
+        <span>Power: {{ characterInformation.power }}</span>
+        <!-- <br/>
+        <span>Damage Multiplier</span> -->
         <br/>
-        <span>Damage Multiplier</span>
+        <span>Level: {{ characterInformation.level }}</span>
         <br/>
-        <span>Level</span>
-        <br/>
-        <span>Current Rank</span>
+        <span>Current Rank: {{ characterInformation.rank }}</span>
       </div>
     </div>
   </div>
@@ -91,17 +94,46 @@
 <script>
 import { mapState } from 'vuex';
 import BN from 'bignumber.js';
+import PvPWeapon from '../../components/PvPWeapon.vue';
+import PvPShield from '../../components/PvPShield.vue';
 import { weaponFromContract as formatWeapon } from '../../../../../contract-models';
+import { shieldFromContract as formatShield } from '../../../../../contract-models';
 
 export default {
+  components: {
+    'pvp-weapon': PvPWeapon,
+    'pvp-shield': PvPShield
+  },
+
+  props: {
+    tierRewardsPool: {
+      default: null
+    },
+    tierTopRankers: {
+      default: []
+    },
+    characterInformation: {
+      default: {
+        tier: null,
+        name: '',
+        level: null,
+        power: null,
+        rank: null
+      }
+    }
+  },
+
   data() {
     return {
+      // TODO: Most of these can be props
       entryWager: null,
       selectedWeaponId: null,
       selectedShieldId: null,
       availableWeaponIds: [],
       availableShieldIds: [],
       checkBoxAgreed: false,
+      ownedWeaponsWithInformation: [],
+      ownedShieldsWithInformation: []
     };
   },
 
@@ -110,7 +142,11 @@ export default {
 
     formattedEntryWager() {
       return new BN(this.entryWager).div(new BN(10).pow(18)).toFixed(0);
-    }
+    },
+
+    formatedTierRewardsPool() {
+      return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
+    },
   },
 
   methods: {
@@ -120,6 +156,24 @@ export default {
 
     handleShieldClick(shieldId) {
       this.selectedShieldId = shieldId;
+    },
+
+    async getWeaponInformation(weaponId) {
+      const { element, stars } = formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
+
+      return {
+        element,
+        stars
+      };
+    },
+
+    async getShieldInformation(shieldId) {
+      const { element, stars } = formatShield(`${shieldId}`, await this.contracts().Shields.methods.get(`${shieldId}`).call({ from: this.defaultAccount }));
+
+      return {
+        element,
+        stars
+      };
     },
 
     async handleEnterArenaClick() {
@@ -174,6 +228,13 @@ export default {
     this.availableWeaponIds = weaponAvailability.filter(weapon => !weapon.isInArena)
       .map(weapon => weapon.weaponId);
 
+    this.ownedWeaponsWithInformation = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
+      return {
+        weaponId,
+        information: await this.getWeaponInformation(weaponId)
+      };
+    }));
+
     const shieldAvailability = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
       return {
         shieldId,
@@ -184,8 +245,12 @@ export default {
     this.availableShieldIds = shieldAvailability.filter(shield => !shield.isInArena)
       .map(shield => shield.shieldId);
 
-    console.log('SAD: ', formatWeapon('10', await this.contracts().Weapons.methods.get('10').call({ from: this.defaultAccount })));
+    this.ownedShieldsWithInformation = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
+      return {
+        shieldId,
+        information: await this.getShieldInformation(shieldId)
+      };
+    }));
   }
-
 };
 </script>
