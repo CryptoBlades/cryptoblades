@@ -18,15 +18,16 @@
         @enteredArena="handleEnteredArena"
       />
       <pvp-arena-summary
-        v-if="false"
+        v-else-if="isCharacterInArena && !isMatchMaking"
         :tierRewardsPool="tierRewardsPool"
         :tierTopRankers="tierTopRankers"
         :characterInformation="characterInformation"
         :activeWeaponWithInformation="activeWeaponWithInformation"
         :activeShieldWithInformation="activeShieldWithInformation"
+        @enterMatchMaking="handleEnterMatchMaking"
       />
       <!-- Should use router -->
-      <pvp-arena-matchmaking v-if="isCharacterInArena" />
+      <pvp-arena-matchmaking v-else-if="isCharacterInArena && isMatchMaking" @goBackToSummary="goBackToSummary" />
     </div>
   </div>
 </template>
@@ -83,6 +84,11 @@ export default {
   },
 
   methods: {
+    // delete this
+    goBackToSummary() {
+      this.isMatchMaking = false;
+    },
+
     async getWeaponInformation(weaponId) {
       const { element, stars } = formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
 
@@ -103,6 +109,10 @@ export default {
 
     handleEnteredArena() {
       this.isCharacterInArena = true;
+    },
+
+    handleEnterMatchMaking() {
+      this.isMatchMaking = true;
     }
   },
 

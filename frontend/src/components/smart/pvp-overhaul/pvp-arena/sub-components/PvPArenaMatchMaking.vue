@@ -9,6 +9,8 @@
     <button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading">Find match</button>
     <button v-if="hasPendingDuel"  @click="reRollOpponent" :disabled="loading || !hasPendingDuel">Re-roll Opponent</button>
   </div>
+  <!-- Delete this -->
+  <button @click="goBackToSummary" :disabled="loading">BACK TO ARENA SUMMARY</button>
 </div>
 </template>
 
@@ -33,6 +35,11 @@ export default {
   },
 
   methods: {
+    goBackToSummary() {
+      console.log('asdasd');
+      this.$emit('goBackToSummary');
+    },
+
     async leaveArena() {
       this.loading = true;
       try {
@@ -87,7 +94,7 @@ export default {
     this.decisionSeconds = await this.contracts().PvpArena.methods.decisionSeconds().call();
 
     // TODO: set up reroll cost
-    // this.reRollCost = 
+    // this.reRollCost =
 
     console.log('this.hasPendingDuel', this.hasPendingDuel);
     console.log('this.isWithinDecisionTime', this.isWithinDecisionTime);
