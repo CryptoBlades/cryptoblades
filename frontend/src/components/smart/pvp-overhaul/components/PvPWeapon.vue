@@ -51,6 +51,7 @@ export default {
       default: false
     }
   },
+
   computed: {
     getElementImageUrl() {
       if (this.element === 'Fire') {
@@ -69,7 +70,7 @@ export default {
 
   methods: {
     getWeaponArtById,
-  }
+  },
 };
 </script>
 
