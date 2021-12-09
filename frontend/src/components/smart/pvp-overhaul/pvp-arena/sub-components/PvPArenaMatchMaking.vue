@@ -3,7 +3,7 @@
   <div>arena matchmaking</div>
   <div>
     <p>
-      {{this.decisionTimeLeft}}
+      {{ this.loading ? '...' : this.decisionTimeLeft}}
     </p>
     <button @click="leaveArena" :disabled="loading">Leave arena</button>
     <button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading">Find match</button>
@@ -19,7 +19,7 @@ export default {
   inject: ['web3'],
   data() {
     return {
-      loading: false,
+      loading: true,
       hasPendingDuel: false,
       decisionTimeLeft: 0,
     };
@@ -60,7 +60,7 @@ export default {
     async reRollOpponent() {
       this.loading = true;
       try {
-        await this.contracts().SkillToken.methds.approve(this.contracts().PvpArena.options.address, ).send({ from: this.defaultAccount });
+        // await this.contracts().SkillToken.methods.approve(this.contracts().PvpArena.options.address, this.web3.utils.toWei(this.rerollCost)).send({ from: this.defaultAccount });
         await this.contracts().PvpArena.methods.reRollOpponent(this.currentCharacterId).send({ from: this.defaultAccount });
       } catch (err) {
         console.log('err', err);
@@ -79,12 +79,15 @@ export default {
     // TODOS:
     // * [ ] Is player in an active duel
     // * [ ] Is player waiting for a duel to process
+    // * [ ] Reroll opponent
     // * [x] Find match functionality
     // * [x] Leave arena functionality
     this.hasPendingDuel = await this.contracts().PvpArena.methods.hasPendingDuel(this.currentCharacterId).call();
     this.isWithinDecisionTime = await this.contracts().PvpArena.methods.isCharacterWithinDecisionTime(this.currentCharacterId).call();
     this.decisionSeconds = await this.contracts().PvpArena.methods.decisionSeconds().call();
-    
+
+    // TODO: set up reroll cost
+    // this.reRollCost = 
 
     console.log('this.hasPendingDuel', this.hasPendingDuel);
     console.log('this.isWithinDecisionTime', this.isWithinDecisionTime);
@@ -100,6 +103,8 @@ export default {
         }
       }, 1000);
     }
+
+    this.loading = false;
 
   }
 };
