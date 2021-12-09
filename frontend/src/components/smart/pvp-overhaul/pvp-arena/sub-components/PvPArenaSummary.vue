@@ -15,27 +15,19 @@
       <button @click="setTab(1)">Duel History</button>
 
       <div v-if="tab === 0">
-        <h2>Equip a Sword and a Shield (optional)</h2>
+        <pvp-weapon
+          v-if="activeWeaponWithInformation.weaponId"
+          :stars="activeWeaponWithInformation.information.stars + 1"
+          :element="activeWeaponWithInformation.information.element"
+          :weaponId="activeWeaponWithInformation.weaponId"
+        />
         <br/>
-        <div>
-          <h3>WEAPON TITLE</h3>
-          <pvp-weapon
-            v-if="activeWeaponWithInformation.weaponId"
-            :stars="activeWeaponWithInformation.information.stars + 1"
-            :element="activeWeaponWithInformation.information.element"
-            :weaponId="activeWeaponWithInformation.weaponId"
-          />
-        </div>
-        <br/>
-        <div>
-          <h3>SHIELD TITLE</h3>
-          <pvp-shield
-            v-if="activeShieldWithInformation.shieldId"
-            :stars="activeShieldWithInformation.information.stars + 1"
-            :element="activeShieldWithInformation.information.element"
-            :shieldId="activeShieldWithInformation.shieldId"
-          />
-        </div>
+        <pvp-shield
+          v-if="activeShieldWithInformation.shieldId"
+          :stars="activeShieldWithInformation.information.stars + 1"
+          :element="activeShieldWithInformation.information.element"
+          :shieldId="activeShieldWithInformation.shieldId"
+        />
       </div>
 
       <div v-else>

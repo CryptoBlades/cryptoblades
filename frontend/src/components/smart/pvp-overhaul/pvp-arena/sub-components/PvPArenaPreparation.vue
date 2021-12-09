@@ -199,6 +199,9 @@ export default {
 
         this.$emit('enteredArena');
       } else {
+        console.log(this.currentCharacterId);
+        console.log(this.selectedWeaponId);
+        console.log(this.entryWager);
         console.log('Missing data');
       }
     },

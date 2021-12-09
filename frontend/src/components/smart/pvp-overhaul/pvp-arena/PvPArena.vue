@@ -251,12 +251,12 @@ export default {
 
           this.activeWeaponWithInformation = {
             weaponId: fighter.weaponID,
-            information: this.getWeaponInformation(fighter.weaponID)
+            information: await this.getWeaponInformation(fighter.weaponID)
           };
 
           this.activeShieldWithInformation = {
             shieldId: fighter.shieldID,
-            information: this.getShieldInformation(fighter.shieldID)
+            information: await this.getShieldInformation(fighter.shieldID)
           };
         }
 
