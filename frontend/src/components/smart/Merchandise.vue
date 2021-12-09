@@ -1,7 +1,7 @@
 <template>
   <div>
     <MerchandiseCart :cartEntries="cartEntries" :isOrderLoading="isOrderLoading" :showFiatPrices="showFiatPrices"/>
-    <MerchandiseList :isOrderLoading="isOrderLoading" :showFiatPrices="showFiatPrices"/>
+    <MerchandiseList :isOrderLoading="isOrderLoading"/>
     <b-modal ref="order-complete-modal" ok-only no-close-on-backdrop hide-header-close
              :title="$t('market.merchandise.orderCompleted', {orderNumber})">
       <p>{{ $t('market.merchandise.thankYouForShopping') }}</p>
@@ -9,6 +9,9 @@
       <p class="font-weight-bold">{{ shipping }}</p>
       <p>{{ $t('market.merchandise.checkYourEmail') }}</p>
     </b-modal>
+    <OrderSummaryModal :showFiatPrices="showFiatPrices"/>
+    <ShippingInfoModal/>
+    <VariantChoiceModal :showFiatPrices="showFiatPrices"/>
   </div>
 </template>
 
@@ -16,8 +19,10 @@
 import Vue from 'vue';
 import MerchandiseList from '@/components/smart/MerchandiseList.vue';
 import MerchandiseCart from '@/components/smart/MerchandiseCart.vue';
-import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import VariantChoiceModal, {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {BModal} from 'bootstrap-vue';
+import OrderSummaryModal from '@/components/smart/OrderSummaryModal.vue';
+import ShippingInfoModal from '@/components/smart/ShippingInfoModal.vue';
 
 interface Data {
   cartEntries: CartEntry[];
@@ -29,7 +34,7 @@ interface Data {
 
 export default Vue.extend({
   components: {
-    MerchandiseList, MerchandiseCart
+    MerchandiseList, MerchandiseCart, OrderSummaryModal, ShippingInfoModal, VariantChoiceModal
   },
 
   data() {

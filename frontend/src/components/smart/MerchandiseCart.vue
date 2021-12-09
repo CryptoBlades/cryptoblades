@@ -6,10 +6,8 @@
       {{ $t('market.merchandise.yourCart') }} ({{ cartEntries.length }})
     </b-button>
 
-    <b-modal class="centered-modal" v-model="showModal" button-size="lg" size="xl" scrollable>
-      <template #modal-title>
-        {{ $t('market.merchandise.yourCart') }}
-      </template>
+    <b-modal class="centered-modal" v-model="showModal" button-size="lg" size="xl" scrollable
+             :title="$t('market.merchandise.yourCart')">
       <div v-if="cartEntries.length === 0" class="d-flex justify-content-center">
         <h3>{{ $t('market.merchandise.nothingInCart') }}</h3>
       </div>

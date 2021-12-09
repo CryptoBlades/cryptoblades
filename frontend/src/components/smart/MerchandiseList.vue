@@ -28,8 +28,6 @@
       :per-page="perPage"
       align="center"
     />
-    <ShippingInfoModal/>
-    <VariantChoiceModal :showFiatPrices="showFiatPrices"/>
   </div>
 </template>
 
@@ -38,8 +36,8 @@ import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {fromWeiEther} from '@/utils/common';
 import api from '@/api';
-import ShippingInfoModal, {Recipient} from '@/components/smart/ShippingInfoModal.vue';
-import VariantChoiceModal from '@/components/smart/VariantChoiceModal.vue';
+import {Recipient} from '@/components/smart/ShippingInfoModal.vue';
+import {ShippingRate} from '@/components/smart/OrderSummaryModal.vue';
 
 export interface Product {
   id: number;
@@ -54,10 +52,11 @@ export interface Product {
 export interface MerchandiseOrder {
   recipient: Recipient;
   items: Item[];
+  shippingRate?: ShippingRate;
 }
 
 export interface Item {
-  sync_variant_id: number;
+  external_variant_id: string;
   product_id: string;
   quantity: number;
 }
@@ -77,9 +76,7 @@ interface StoreMappedActions {
 }
 
 export default Vue.extend({
-  components: {
-    VariantChoiceModal, ShippingInfoModal
-  },
+  components: {},
 
   data() {
     return {
@@ -95,9 +92,6 @@ export default Vue.extend({
 
   props: {
     isOrderLoading: {
-      type: Boolean,
-    },
-    showFiatPrices: {
       type: Boolean,
     }
   },

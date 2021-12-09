@@ -48,6 +48,9 @@ export default {
   getMerchandiseCountries(): Promise<ApiResponse<Country[]>> {
     return this.execute(HttpMethod.GET, '/merchant/countries');
   },
+  getShippingRates(merchandiseOrder: any): Promise<ApiResponse<any>> {
+    return this.execute(HttpMethod.POST, '/merchant/shipping/rates', merchandiseOrder);
+  },
   createMerchandiseOrder(merchandiseOrder: MerchandiseOrder): Promise<ApiResponse<any>> {
     return this.execute(HttpMethod.POST, '/merchant/create_order', merchandiseOrder);
   },

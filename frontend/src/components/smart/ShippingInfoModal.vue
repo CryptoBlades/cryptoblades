@@ -1,10 +1,8 @@
 <template>
   <b-modal class="centered-modal" @ok="buyItem" v-model="showModal"
-           :ok-title="$t('market.merchandise.submitOrder')"
-           :ok-disabled="!shippingInformationComplete" button-size="lg" no-close-on-backdrop>
-    <template #modal-title>
-      {{ $t('market.merchandise.deliveryAddress') }}
-    </template>
+           :ok-title="$t('market.merchandise.submitOrder')" :title="$t('market.merchandise.deliveryAddress')"
+           :ok-disabled="!shippingInformationComplete"
+           button-size="lg" no-close-on-backdrop>
     <b-form-input type="text"
                   class="mt-2 mb-2" v-model="recipient.name" :placeholder="$t('market.merchandise.fullName')"/>
     <b-form-input type="email" :state="emailState"
@@ -59,8 +57,8 @@ export interface Recipient {
   name: string;
   email: string;
   phone: string;
-  country: string;
-  state?: string;
+  country_code: string;
+  state_code?: string;
   address1: string;
   address2?: string;
   city: string;
@@ -79,11 +77,11 @@ export interface State {
   code: string;
 }
 
-// interface OrderItem {
-//   sync_variant_id: number;
-//   product_id: string;
-//   quantity: number;
-// }
+export interface OrderItem {
+  external_variant_id: string;
+  product_id: string;
+  quantity: number;
+}
 
 interface StoreMappedActions {
   purchaseMerchandise(payload: { ids: number[], amounts: number[], totalPrice: BigNumber }): Promise<number>;
@@ -116,7 +114,7 @@ export default Vue.extend({
     emailState() {
       return this.$data.recipient.email && this.$data.recipient.email.includes('@');
     },
-    shippingInformationComplete() {
+    shippingInformationComplete(): boolean {
       return this.$data.recipient.name
         && this.$data.recipient.email
         && this.$data.recipient.phone
@@ -124,7 +122,7 @@ export default Vue.extend({
           || (this.$data.selectedCountry && this.$data.selectedCountry.states && this.$data.selectedCountry.states.length !== 0 && this.$data.selectedState))
         && this.$data.recipient.address1
         && this.$data.recipient.city
-        && this.$data.recipient.zip;
+        && !!this.$data.recipient.zip;
     }
   },
 
@@ -142,7 +140,12 @@ export default Vue.extend({
       this.countries = response.result;
     },
 
-    async buyItem() {
+    async buyItem(bvModalEvt: Event) {
+      bvModalEvt.preventDefault();
+      if (!this.selectedCountry) return;
+      this.recipient.country_code = this.selectedCountry.code;
+      this.recipient.state_code = this.selectedState?.code;
+      this.$root.$emit('order-summary-modal', this.recipient, this.cartEntries);
 
       // if (!this.selectedCountry) return;
       // this.$root.$emit('merchandise-order-loading', true);

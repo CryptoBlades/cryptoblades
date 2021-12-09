@@ -1,10 +1,7 @@
 <template>
   <b-modal class="centered-modal" v-model="showModal" @ok="addToCart"
-           :ok-title="$t('market.merchandise.addToCart')"
+           :ok-title="$t('market.merchandise.addToCart')" :title="$t('market.merchandise.chooseVariant')"
            :ok-disabled="false" button-size="lg" size="xl" scrollable>
-    <template #modal-title>
-      {{ $t('market.merchandise.chooseVariant') }}
-    </template>
     <div class="variant-container">
       <div class="p-2" v-if="selectedVariant">
         <img class="preview" :src="selectedVariant.files.find(file => isFileTypePreview(file)).preview_url" alt=""/>
