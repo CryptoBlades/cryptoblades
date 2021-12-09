@@ -49,7 +49,7 @@
         <br/>
         <input type="checkbox" v-model="checkBoxAgreed" /><span>I understand.</span>
         <br/>
-        <button @click="handleEnterArenaClick()">
+        <button @click="handleEnterArenaClick()" :disabled="!selectedWeaponId">
           Enter Arena
           <br/>
           $SKILL: {{ formattedEntryWager }}
@@ -62,31 +62,30 @@
         <div>
           <h3>PVP Rewards Pool ($SKILL)</h3>
           <br/>
-          <span>POOL HERE</span>
+          <span>{{ formatedTierRewardsPool }}</span>
         </div>
         <div>
           <h3>Top Players</h3>
           <br/>
-          <span>1</span>
+          <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || '-' }} / RANK: {{ tierTopRankers[0] && tierTopRankers[0].rank }}</span>
           <br/>
-          <span>2</span>
+          <span>Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || '-' }} / RANK: {{ tierTopRankers[1] && tierTopRankers[1].rank }}</span>
           <br/>
-          <span>3</span>
+          <span>Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || '-' }} / RANK: {{ tierTopRankers[2] && tierTopRankers[2].rank }}</span>
           <br/>
-          <button>View All Rankings</button>
         </div>
       </div>
 
       <div>
-        <h2>CHARACTER NAME</h2>
+        <h2>{{ characterInformation.name || '' }}</h2>
         <br/>
-        <span>Power</span>
+        <span>Power: {{ characterInformation.power }}</span>
+        <!-- <br/>
+        <span>Damage Multiplier</span> -->
         <br/>
-        <span>Damage Multiplier</span>
+        <span>Level: {{ characterInformation.level }}</span>
         <br/>
-        <span>Level</span>
-        <br/>
-        <span>Current Rank</span>
+        <span>Current Rank: {{ characterInformation.rank }}</span>
       </div>
     </div>
   </div>
@@ -106,8 +105,27 @@ export default {
     'pvp-shield': PvPShield
   },
 
+  props: {
+    tierRewardsPool: {
+      default: null
+    },
+    tierTopRankers: {
+      default: []
+    },
+    characterInformation: {
+      default: {
+        tier: null,
+        name: '',
+        level: null,
+        power: null,
+        rank: null
+      }
+    }
+  },
+
   data() {
     return {
+      // TODO: Most of these can be props
       entryWager: null,
       selectedWeaponId: null,
       selectedShieldId: null,
@@ -124,7 +142,11 @@ export default {
 
     formattedEntryWager() {
       return new BN(this.entryWager).div(new BN(10).pow(18)).toFixed(0);
-    }
+    },
+
+    formatedTierRewardsPool() {
+      return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
+    },
   },
 
   methods: {
@@ -230,6 +252,5 @@ export default {
       };
     }));
   }
-
 };
 </script>
