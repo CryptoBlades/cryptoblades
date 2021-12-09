@@ -18,14 +18,15 @@
         @enteredArena="handleEnteredArena"
       />
       <pvp-arena-summary
-        v-if="isCharacterInArena"
+        v-if="false"
         :tierRewardsPool="tierRewardsPool"
         :tierTopRankers="tierTopRankers"
         :characterInformation="characterInformation"
         :activeWeaponWithInformation="activeWeaponWithInformation"
         :activeShieldWithInformation="activeShieldWithInformation"
       />
-      <pvp-arena-matchmaking v-if="false" />
+      <!-- Should use router -->
+      <pvp-arena-matchmaking v-if="isCharacterInArena" />
     </div>
   </div>
 </template>
