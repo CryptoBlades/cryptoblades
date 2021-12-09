@@ -11,8 +11,8 @@
         :tierTopRankers="tierTopRankers"
         :characterInformation="characterInformation"
       />
-      <pvp-arena-summary v-if="isCharacterInArena" />
-      <pvp-arena-matchmaking v-if="false" />
+      <pvp-arena-matchmaking v-if="isCharacterInArena" />
+      <pvp-arena-summary v-if="false" />
     </div>
   </div>
 </template>
