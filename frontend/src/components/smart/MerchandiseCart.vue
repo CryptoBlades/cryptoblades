@@ -6,7 +6,7 @@
       {{ $t('market.merchandise.yourCart') }} ({{ cartEntries.length }})
     </b-button>
 
-    <b-modal class="centered-modal" ref="merchandise-cart-modal" button-size="lg" size="xl" scrollable>
+    <b-modal class="centered-modal" v-model="showModal" button-size="lg" size="xl" scrollable>
       <template #modal-title>
         {{ $t('market.merchandise.yourCart') }}
       </template>
@@ -45,21 +45,31 @@
       </div>
       <template #modal-footer>
         <div class="cart-footer">
-          <div v-if="cartEntries.length !== 0">
-            <span>{{ $t('market.merchandise.total') }}: </span>
-            <span v-if="showFiatPrices">{{ totalPrice.toFixed(2) }} {{
-                cartEntries[0].variant.currency
-              }} / </span>
-            <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/></span>
+          <div>
+            <span class="p-2"></span>
           </div>
-          <span class="d-inline-block"
-                v-b-tooltip="{title: !canAffordMerch() ? $t('market.merchandise.insufficientFunds') : null}">
-          <b-button :disabled="isPlaceOrderButtonDisabled()"
-                    variant="primary"
-                    @click="openAddressModal">
-            {{ $t('market.merchandise.placeOrder') }}
-          </b-button>
-          </span>
+          <div class="d-flex align-items-center">
+            <div v-if="cartEntries.length !== 0" class="p-2">
+              <span>{{ $t('market.merchandise.total') }}: </span>
+              <span v-if="showFiatPrices">{{ totalPrice.toFixed(2) }} {{
+                  cartEntries[0].variant.currency
+                }} / </span>
+              <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)"
+                                       :show-value-in-skill-only="true"/> + SHIPPING <Hint
+                text="Shipping cost will be known after the next step"/></span>
+            </div>
+            <span id="place-order-button-wrapper" class="d-inline-block">
+              <b-button
+                :disabled="isPlaceOrderButtonDisabled()"
+                variant="primary"
+                @click="openAddressModal">
+                {{ $t('market.merchandise.placeOrder') }}
+              </b-button>
+            </span>
+            <b-tooltip :disabled="canAffordMerch()" target="place-order-button-wrapper" variant="danger">
+              {{ $t('market.merchandise.insufficientFunds') }}
+            </b-tooltip>
+          </div>
         </div>
       </template>
     </b-modal>
@@ -68,12 +78,12 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {BModal} from 'bootstrap-vue';
 import {PropType} from 'vue/types/options';
 import {CartEntry, FileType} from '@/components/smart/VariantChoiceModal.vue';
 import {mapActions, mapState} from 'vuex';
 import {fromWeiEther, toBN} from '@/utils/common';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
+import Hint from '@/components/Hint.vue';
 
 interface StoreMappedActions {
   currentSkillPrice(): Promise<string>;
@@ -84,6 +94,7 @@ interface Data {
   totalPriceInSkill: number;
   skillPrice: number;
   isOrderLoading: boolean;
+  showModal: boolean;
 }
 
 export default Vue.extend({
@@ -93,6 +104,7 @@ export default Vue.extend({
       totalPriceInSkill: 0,
       skillPrice: 0,
       isOrderLoading: false,
+      showModal: false,
     } as Data;
   },
 
@@ -106,7 +118,7 @@ export default Vue.extend({
     }
   },
 
-  components: {CurrencyConverter},
+  components: {CurrencyConverter, Hint},
 
   computed: {
     ...mapState(['skillBalance']),
@@ -142,6 +154,9 @@ export default Vue.extend({
       if (!cartEntry?.variant) return;
       return +cartEntry.variant.retail_price * this.skillPrice;
     },
+    calculateShippingPrice() {
+
+    },
     removeCartEntry(cartEntry: CartEntry) {
       this.cartEntries.splice(this.cartEntries.indexOf(cartEntry), 1);
       this.calculateTotalPrice();
@@ -163,14 +178,8 @@ export default Vue.extend({
     this.$root.$on('merchandise-cart-modal', async (open: boolean) => {
       this.skillPrice = +await this.currentSkillPrice();
       this.calculateTotalPrice();
-      const modal = this.$refs['merchandise-cart-modal'] as BModal;
-      if (modal) {
-        if (open) {
-          modal.show();
-        } else {
-          modal.hide();
-        }
-      }
+      this.calculateShippingPrice();
+      this.showModal = open;
     });
     this.$root.$on('merchandise-order-loading', (isOrderLoading: boolean) => {
       this.isOrderLoading = isOrderLoading;
@@ -206,6 +215,8 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  width: 100%;
+  justify-content: space-between;
 }
 
 @media (max-width: 576px) {

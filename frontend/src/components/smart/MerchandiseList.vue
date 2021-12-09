@@ -78,7 +78,7 @@ interface StoreMappedActions {
 
 export default Vue.extend({
   components: {
-    ShippingInfoModal, VariantChoiceModal
+    VariantChoiceModal, ShippingInfoModal
   },
 
   data() {

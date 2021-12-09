@@ -1,5 +1,5 @@
 <template>
-  <b-modal class="centered-modal" ref="merchandise-variant-modal" @ok="addToCart"
+  <b-modal class="centered-modal" v-model="showModal" @ok="addToCart"
            :ok-title="$t('market.merchandise.addToCart')"
            :ok-disabled="false" button-size="lg" size="xl" scrollable>
     <template #modal-title>
@@ -52,7 +52,6 @@
 <script lang="ts">
 import Vue from 'vue';
 import api from '@/api';
-import {BModal} from 'bootstrap-vue';
 import {Product} from '@/components/smart/MerchandiseList.vue';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
 import {fromWeiEther} from '@/utils/common';
@@ -123,6 +122,7 @@ interface Data {
   totalPrice: number;
   totalPriceInSkill: number;
   skillPrice: number;
+  showModal: boolean;
 }
 
 export default Vue.extend({
@@ -137,6 +137,7 @@ export default Vue.extend({
       totalPrice: 0,
       totalPriceInSkill: 0,
       skillPrice: 0,
+      showModal: false,
     } as Data;
   },
 
@@ -208,18 +209,16 @@ export default Vue.extend({
   async mounted() {
     this.$root.$on('merchandise-variant-modal', async (product: Product) => {
       this.product = product;
-      const modal = this.$refs['merchandise-variant-modal'] as BModal;
-      if (modal) {
-        if (this.product) {
-          this.skillPrice = +await this.currentSkillPrice();
-          await this.fetchVariants(this.product.id);
-          this.selectedVariant = this.variants[0];
-          this.calculateTotalPrice();
-          modal.show();
-        } else {
-          this.variants = [];
-          modal.hide();
-        }
+      if (this.product) {
+        this.skillPrice = +await this.currentSkillPrice();
+        await this.fetchVariants(this.product.id);
+        this.selectedVariant = this.variants[0];
+        this.calculateTotalPrice();
+        this.showModal = true;
+      } else {
+        this.variants = [];
+        this.selectedVariant = undefined;
+        this.showModal = false;
       }
     });
   }
