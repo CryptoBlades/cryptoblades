@@ -18,7 +18,7 @@
       <button @click="reRollOpponent" :disabled="loading || !hasPendingDuel || isCharacterInDuelQueue">
         Re-roll Opponent {{ formattedReRollCost }} $SKILL
       </button>
-      <button @click="leaveArena" :disabled="loading">Leave arena</button>
+      <button @click="leaveArena" :disabled="loading || isCharacterInDuelQueue">Leave arena</button>
     </div>
     <div>
       <h1>CHARACTER INFO: </h1>
@@ -67,10 +67,18 @@
         :shieldId="opponentActiveShieldWithInformation.shieldId"
       />
     </div>
-
-    <!-- TODO: Delete this -->
-    <br/>
     <button @click="goBackToSummary" :disabled="loading">BACK TO ARENA SUMMARY</button>
+    <!-- TODO: Get rank variation from contract -->
+    <pvp-duel-modal
+      v-if="duelResult.result"
+      :result="duelResult.result"
+      :attackerRoll="duelResult.attackerRoll"
+      :defenderRoll="duelResult.defenderRoll"
+      :skillEarned="duelResult.skillDifference"
+      :rankVariation="duelResult.result === 'win' ? 5 : -3"
+      :userCurrentRank="duelResult.rankDifference"
+      @close-modal="handleCloseModal"
+    />
   </div>
 </template>
 
@@ -78,14 +86,17 @@
 import { mapState } from 'vuex';
 import PvPWeapon from '../../components/PvPWeapon.vue';
 import PvPShield from '../../components/PvPShield.vue';
+import PvPDuelModal from '../../components/PvPDuelModal.vue';
 import BN from 'bignumber.js';
+import { duelResultFromContract as formatDuelResult } from '../../../../../contract-models';
 
 export default {
   inject: ['web3'],
 
   components: {
     'pvp-weapon': PvPWeapon,
-    'pvp-shield': PvPShield
+    'pvp-shield': PvPShield,
+    'pvp-duel-modal': PvPDuelModal
   },
 
   props: {
@@ -150,6 +161,13 @@ export default {
       },
       duelQueue: [],
       isCharacterInDuelQueue: false,
+      duelResult: {
+        attackerRoll: null,
+        defenderRoll: null,
+        skillDifference: null,
+        rankDifference: null,
+        result: ''
+      }
     };
   },
 
@@ -218,9 +236,48 @@ export default {
       this.loading = false;
     },
 
+    async listenForDuel(contracts) {
+      const currentBlock = await this.web3.eth.getBlockNumber();
+
+      const subscription = this.web3.eth.subscribe('newBlockHeaders', async () => {
+        const duelFinishedResult = await contracts.PvpArena.getPastEvents('DuelFinished', {
+          filter: { attacker: this.currentCharacterId },
+          toBlock: 'latest',
+          fromBlock: currentBlock
+        });
+
+        if (duelFinishedResult.length) {
+          const formattedResult = formatDuelResult(duelFinishedResult[0].returnValues);
+
+          this.duelResult.result = formattedResult.attackerRoll > formattedResult.defenderRoll ? 'win' : 'lose';
+          this.duelResult.attackerRoll = formattedResult.attackerRoll;
+          this.duelResult.defenderRoll = formattedResult.defenderRoll;
+          this.duelResult.skillDifference = this.duelResult.result === 'win' ?
+            +this.formattedDuelCost * 0.7 :
+            -this.formattedDuelCost;
+          // TODO: Make this prettier
+          this.duelResult.rankDifference = this.duelResult.result === 'win' ?
+            this.characterInformation.rank + 5 :
+            this.characterInformation.rank - 3 <= 0 ?
+              0 :
+              this.characterInformation.rank - 3;
+
+          subscription.unsubscribe((error, result) => {
+            if (!error) {
+              console.log(result);
+            } else {
+              console.log(error);
+            }
+          });
+        }
+      });
+    },
+
     async preparePerformDuel() {
       try {
-        await this.contracts().PvpArena.methods.preparePerformDuel(this.currentCharacterId).call({from: this.defaultAccount});
+        await this.listenForDuel(this.contracts());
+
+        await this.contracts().PvpArena.methods.preparePerformDuel(this.currentCharacterId).send({from: this.defaultAccount});
       } catch (err) {
         console.log('prepare perform duel error: ', err);
       }
@@ -228,24 +285,34 @@ export default {
       this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
 
       this.isCharacterInDuelQueue = true;
+    },
+
+    clearDuelResult() {
+      this.duelResult = {
+        attackerRoll: null,
+        defenderRoll: null,
+        skillDifference: null,
+        rankDifference: null
+      };
+    },
+
+    handleCloseModal() {
+      this.clearDuelResult();
     }
   },
 
   async created() {
-    // TODOS:
-    // * [x] Is player in an active duel
-    // * [ ] Is player waiting for a duel to process
-    // * [x] Reroll opponent
-    // * [x] Find match functionality
-    // * [x] Leave arena functionality
     this.hasPendingDuel = await this.contracts().PvpArena.methods.hasPendingDuel(this.currentCharacterId).call();
 
     this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
 
-    if (this.duelQueue.includes(this.currentCharacterId)) {
+    if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
       this.isCharacterInDuelQueue = true;
+
+      await this.listenForDuel(this.contracts());
     }
 
+    console.log('duel queue: ', this.duelQueue);
     // TODO: use this
     this.isWithinDecisionTime = await this.contracts().PvpArena.methods.isCharacterWithinDecisionTime(this.currentCharacterId).call();
 
@@ -264,8 +331,9 @@ export default {
 
       this.decisionTimeLeft = (this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
 
+      // Note: This gives a 400 seconds decisionTimeLeft locally. Test if it's ok on testnet.
       this.timer = setInterval(() => {
-        if (this.hasPendingDuel) {
+        if (this.hasPendingDuel && !this.isCharacterInDuelQueue) {
           const timeNow = Math.floor((new Date()).getTime() / 1000);
           this.decisionTimeLeft = Math.max(this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
         }
@@ -293,6 +361,20 @@ export default {
 
       if (value.defenderID) {
         this.$emit('updateOpponentInformation', value.defenderID);
+        this.hasPendingDuel = true;
+
+        const timeNow = Math.floor((new Date()).getTime() / 1000);
+
+        this.decisionTimeLeft = (this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
+
+        // Note: This gives a 400 seconds decisionTimeLeft locally. Test if it's ok on testnet.
+        this.timer = setInterval(() => {
+          if (this.hasPendingDuel && !this.isCharacterInDuelQueue) {
+            const timeNow = Math.floor((new Date()).getTime() / 1000);
+            this.decisionTimeLeft = Math.max(this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
+          }
+        }, 1000);
+
       } else {
         this.$emit('clearOpponentInformation');
       }
