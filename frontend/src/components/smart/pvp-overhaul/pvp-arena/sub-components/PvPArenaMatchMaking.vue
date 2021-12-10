@@ -139,7 +139,6 @@ export default {
       duel: {
         attackerID: null,
         defenderID: null,
-        // FIXME: Check if we use the next 2 properties
         createdAt: null,
         isPending: null
       },
@@ -227,7 +226,7 @@ export default {
     this.decisionSeconds = await this.contracts().PvpArena.methods.decisionSeconds().call();
 
     this.wager = await this.contracts().PvpArena.methods.getCharacterWager(this.currentCharacterId).call({ from: this.defaultAccount });
-    // TODO: set up reroll cost
+
     this.duelCost = await this.contracts().PvpArena.methods.getDuelCost(this.currentCharacterId).call({ from: this.defaultAccount });
 
     this.reRollCost = this.duelCost * ((await this.contracts().PvpArena.methods.reRollFeePercent().call({ from: this.defaultAccount })) / 100);
@@ -245,6 +244,16 @@ export default {
           this.decisionTimeLeft = Math.max(this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
         }
       }, 1000);
+
+    } else {
+      this.duel = {
+        attackerID: null,
+        defenderID: null,
+        createdAt: null,
+        isPending: null
+      };
+
+      this.decisionTimeLeft = 0;
     }
 
     this.loading = false;
@@ -256,10 +265,45 @@ export default {
 
       if (value.defenderID) {
         this.$emit('updateOpponentInformation', value.defenderID);
+      } else {
+        this.$emit('clearOpponentInformation');
       }
 
       this.loading = false;
-    }
+    },
+
+    // async currentCharacterId(value) {
+    //   this.loading = true;
+
+    //   this.hasPendingDuel = await this.contracts().PvpArena.methods.hasPendingDuel(value).call();
+
+    //   this.isWithinDecisionTime = await this.contracts().PvpArena.methods.isCharacterWithinDecisionTime(value).call();
+
+    //   this.decisionSeconds = await this.contracts().PvpArena.methods.decisionSeconds().call();
+
+    //   this.wager = await this.contracts().PvpArena.methods.getCharacterWager(value).call({ from: this.defaultAccount });
+
+    //   this.duelCost = await this.contracts().PvpArena.methods.getDuelCost(value).call({ from: this.defaultAccount });
+
+    //   this.reRollCost = this.duelCost * ((await this.contracts().PvpArena.methods.reRollFeePercent().call({ from: this.defaultAccount })) / 100);
+
+    //   if (this.hasPendingDuel) {
+    //     const timeNow = Math.floor((new Date()).getTime() / 1000);
+
+    //     this.duel = await this.contracts().PvpArena.methods.duelByAttacker(value).call();
+
+    //     this.decisionTimeLeft = (this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
+
+    //     this.timer = setInterval(() => {
+    //       if (this.hasPendingDuel) {
+    //         const timeNow = Math.floor((new Date()).getTime() / 1000);
+    //         this.decisionTimeLeft = Math.max(this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
+    //       }
+    //     }, 1000);
+    //   }
+
+    //   this.loading = false;
+    // }
   }
 };
 

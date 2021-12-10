@@ -37,6 +37,7 @@
         :opponentActiveWeaponWithInformation="opponentActiveWeaponWithInformation"
         :opponentActiveShieldWithInformation="opponentActiveShieldWithInformation"
         @updateOpponentInformation="updateOpponentInformation"
+        @clearOpponentInformation="clearOpponentInformation"
         @goBackToSummary="goBackToSummary"
       />
     </div>
@@ -163,6 +164,25 @@ export default {
       this.opponentActiveShieldWithInformation = {
         shieldId: fighter.shieldID,
         information: await this.getShieldInformation(fighter.shieldID)
+      };
+    },
+
+    async clearOpponentInformation() {
+      this.opponentInformation = {
+        element: '',
+        name: '',
+        level: null,
+        rank: null
+      };
+
+      this.opponentActiveWeaponWithInformation = {
+        weaponId: null,
+        information: {}
+      };
+
+      this.opponentActiveShieldWithInformation = {
+        shieldId: null,
+        information: {}
       };
     }
   },
