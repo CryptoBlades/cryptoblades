@@ -7,7 +7,7 @@
       <li class="product" v-for="product in productsForPage" :key="product.id">
         <div class="d-flex flex-column w-100 h-100 align-items-center">
           <img class="product-img" :src="product.thumbnail_url" alt=""/>
-          <div class="text-center font-weight-bold">
+          <div class="text-center font-weight-bold p-1">
             {{ product.name }}
           </div>
         </div>
@@ -37,7 +37,6 @@ import {mapActions} from 'vuex';
 import {fromWeiEther} from '@/utils/common';
 import api from '@/api';
 import {Recipient} from '@/components/smart/ShippingInfoModal.vue';
-import {ShippingRate} from '@/components/smart/OrderSummaryModal.vue';
 
 export interface Product {
   id: number;
@@ -52,7 +51,7 @@ export interface Product {
 export interface MerchandiseOrder {
   recipient: Recipient;
   items: Item[];
-  shippingRate?: ShippingRate;
+  shipping?: string;
 }
 
 export interface Item {

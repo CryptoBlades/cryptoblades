@@ -1,6 +1,6 @@
 <template>
-  <b-modal class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop
-           :title="'Order summary'" size="xl">
+  <b-modal class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop scrollable
+           :title="'Order summary'" size="xl" @close="selectedShippingRate = undefined">
     <div class="cart-entries-container">
       <div class="cart-entry-container" v-for="cartEntry in cartEntries" :key="cartEntry.variant.external_id">
         <img class="variant-image flex-grow-1 m-2"
@@ -24,30 +24,31 @@
     <template #modal-footer>
       <div class="cart-footer">
         <div class="d-flex flex-column p-2">
-          <span class="font-weight-bold">Shipping information: </span>
-          <span>Name: {{ recipient.name }}</span>
-          <span>Address: {{ recipient.address1 }}</span>
-          <span>{{ recipient.address2 }}</span>
-          <span>{{ recipient.city }} {{ recipient.country_code }} {{ recipient.state_code }}</span>
-          <span>Zip-code: {{ recipient.zip }}</span>
-          <span>Phone number: {{ recipient.phone }}</span>
-          <span>Email address: {{ recipient.email }}</span>
+          <span class="font-weight-bold">{{ $t('market.merchandise.shippingInformation') }}: </span>
+          <span>{{ recipient.name }}</span>
+          <span>{{ recipient.address1 }}</span>
+          <span v-if="recipient.address2">{{ recipient.address2 }}</span>
+          <span>{{ recipient.city }}, {{ recipient.country_code }}<span
+            v-if="recipient.state_code">, {{ recipient.state_code }}</span></span>
+          <span>{{ recipient.zip }}</span>
+          <span>{{ recipient.phone }}</span>
+          <span>{{ recipient.email }}</span>
           <span v-if="recipient.company">Company: {{ recipient.company }}</span>
         </div>
         <div class="d-flex align-items-center">
           <div v-if="cartEntries.length !== 0" class="costs-container">
             <div class="d-flex flex-column">
               <span class="font-weight-bold">Shipping method: </span>
-              <b-form-select
-                class="mt-2 mb-2"
-                v-model="selectedShippingRate">
+              <b-form-select class="mt-2 mb-2" v-model="selectedShippingRate" @change="calculateTotalPrice">
                 <b-form-select-option :value="undefined">{{
                     $t('market.merchandise.pleaseSelectAnOption')
                   }}
                 </b-form-select-option>
                 <b-form-select-option v-for="shippingRate in shippingRates" :key="shippingRate.id"
-                                      :value="shippingRate">
-                  {{ shippingRate.name }} - {{ shippingRate.rate }} {{ shippingRate.currency }}
+                                      :value="shippingRate"> {{ shippingRate.name }} - <span
+                  v-if="showFiatPrices">{{ shippingRate.rate }} {{ shippingRate.currency }} / </span>
+                  <CurrencyConverter :skill="fromWeiEther(toBN(calculateShippingPriceInSkill(shippingRate.rate)))"
+                                     :show-value-in-skill-only="true"/>
                 </b-form-select-option>
               </b-form-select>
             </div>
@@ -56,19 +57,21 @@
               <span v-if="showFiatPrices">{{ totalPrice.toFixed(2) }} {{
                   cartEntries[0].variant.currency
                 }} / </span>
-              <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)"
-                                       :show-value-in-skill-only="true"/></span>
+              <CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/>
             </div>
-          </div>
-          <span id="place-order-button-wrapper" class="d-inline-block">
-              <b-button
-                variant="primary" size="lg">
+            <span id="place-order-button-wrapper" class="d-inline-block">
+              <b-button :disabled="!canAffordMerch() || !selectedShippingRate" variant="primary" size="lg" block
+                        @click="confirmOrder">
                 {{ $t('market.merchandise.placeOrder') }}
               </b-button>
             </span>
-          <b-tooltip target="place-order-button-wrapper" variant="danger">
-            {{ $t('market.merchandise.insufficientFunds') }}
-          </b-tooltip>
+            <b-tooltip v-if="!canAffordMerch()" target="place-order-button-wrapper" variant="danger">
+              {{ $t('market.merchandise.insufficientFunds') }}
+            </b-tooltip>
+            <b-tooltip v-else-if="!selectedShippingRate" target="place-order-button-wrapper">
+              {{ $t('market.merchandise.pleaseSelectShippingMethod') }}
+            </b-tooltip>
+          </div>
         </div>
       </div>
     </template>
@@ -81,7 +84,7 @@ import {CartEntry, FileType} from '@/components/smart/VariantChoiceModal.vue';
 import {OrderItem, Recipient} from '@/components/smart/ShippingInfoModal.vue';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
 import {fromWeiEther, toBN} from '@/utils/common';
-import {mapActions} from 'vuex';
+import {mapActions, mapState} from 'vuex';
 import api from '@/api';
 import {MerchandiseOrder} from '@/components/smart/MerchandiseList.vue';
 
@@ -90,12 +93,6 @@ interface StoreMappedActions {
 }
 
 export interface ShippingRate {
-  // currency: "USD"
-  // id: "STANDARD"
-  // maxDeliveryDays: 20
-  // minDeliveryDays: 10
-  // name: "Flat Rate (Estimated delivery: Dec 27⁠–Jan 10) "
-  // rate: "7.69"
   currency: string;
   id: string;
   maxDeliveryDays: number;
@@ -140,7 +137,9 @@ export default Vue.extend({
   },
 
   components: {CurrencyConverter},
-
+  computed: {
+    ...mapState(['skillBalance']),
+  },
   methods: {
     ...mapActions(['currentSkillPrice']) as StoreMappedActions,
     fromWeiEther,
@@ -152,8 +151,22 @@ export default Vue.extend({
       if (!cartEntry?.variant) return;
       return +cartEntry.variant.retail_price * this.skillPrice;
     },
-    async buyItem() {
+    async confirmOrder() {
+      if (!this.selectedShippingRate) return;
+      const orderItems = this.cartEntries.map(cartEntry => {
+        return {
+          external_variant_id: cartEntry.variant.external_id,
+          quantity: cartEntry.quantity
+        } as OrderItem;
+      });
+      const merchandiseOrder: MerchandiseOrder = {
+        recipient: this.recipient,
+        items: orderItems,
+        shipping: this.selectedShippingRate.id,
+      };
 
+      console.log(merchandiseOrder);
+      await api.createMerchandiseOrder(merchandiseOrder);
       // if (!this.selectedCountry) return;
       // this.$root.$emit('merchandise-order-loading', true);
       // this.recipient.country = this.selectedCountry.code;
@@ -184,14 +197,30 @@ export default Vue.extend({
       //   this.$root.$emit('merchandise-order-loading', false);
       // }
     },
-    calculateTotalPrice() {
-      this.totalPrice = this.cartEntries.map(cartEntry => +cartEntry.variant.retail_price * cartEntry.quantity)
+    getTotalCartPrice() {
+      return this.cartEntries.map(cartEntry => +cartEntry.variant.retail_price * cartEntry.quantity)
         .reduce((a, b) => a + b, 0);
+    },
+    calculateShippingPriceInSkill(price: number) {
+      return price * this.skillPrice;
+    },
+    calculateTotalPrice() {
+      this.totalPrice = this.getTotalCartPrice() + this.getShippingPrice();
       this.totalPriceInSkill = this.totalPrice * this.skillPrice;
       console.log(this.totalPriceInSkill);
       console.log(this.totalPrice);
     },
-    async calculateShipping() {
+    getShippingPrice() {
+      return this.selectedShippingRate?.rate ? +this.selectedShippingRate.rate : 0;
+    },
+
+    canAffordMerch() {
+      const cost = toBN(this.totalPriceInSkill);
+      const balance = toBN(this.skillBalance);
+      return balance.isGreaterThanOrEqualTo(cost);
+    },
+
+    async getShippingRates() {
       const orderItems = this.cartEntries.map(cartEntry => {
         return {
           external_variant_id: cartEntry.variant.external_id,
@@ -202,25 +231,23 @@ export default Vue.extend({
         recipient: this.recipient,
         items: orderItems
       };
-
-      const shippingRate = await api.getShippingRates(merchandiseOrder);
-      console.log(shippingRate);
-      this.shippingRates = shippingRate.result;
-
-    },
+      const response = await api.getShippingRates(merchandiseOrder);
+      if (response.code !== 200) {
+        return;
+      }
+      this.shippingRates = response.result;
+    }
   },
 
   async mounted() {
     this.$root.$on('order-summary-modal', async (recipient: Recipient, cartEntries: CartEntry[]) => {
       this.skillPrice = +await this.currentSkillPrice();
-      console.log(recipient);
-      console.log(cartEntries);
       if (recipient) {
         this.cartEntries = cartEntries;
         this.recipient = recipient;
         this.skillPrice = +await this.currentSkillPrice();
         this.calculateTotalPrice();
-        await this.calculateShipping();
+        await this.getShippingRates();
         this.showModal = true;
       } else {
         this.showModal = false;
@@ -234,7 +261,7 @@ export default Vue.extend({
 .costs-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
   padding: 0.5rem;
 }
 </style>

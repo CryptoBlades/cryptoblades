@@ -3,7 +3,7 @@
     <b-button variant="primary" class="shop-button hidden"></b-button>
     <h2 v-if="isOrderLoading">{{ $t('market.merchandise.completingYourOrder') }}</h2>
     <b-button variant="primary" class="shop-button" :disabled="isOrderLoading" @click="openCartModal">
-      {{ $t('market.merchandise.yourCart') }} ({{ cartEntries.length }})
+      <i class="fas fa-shopping-cart p-1"></i>{{ $t('market.merchandise.cart') }} ({{ cartEntries.length }})
     </b-button>
 
     <b-modal class="centered-modal" v-model="showModal" button-size="lg" size="xl" scrollable
@@ -47,26 +47,20 @@
             <span class="p-2"></span>
           </div>
           <div class="d-flex align-items-center">
-            <div v-if="cartEntries.length !== 0" class="p-2">
-              <span>{{ $t('market.merchandise.total') }}: </span>
-              <span v-if="showFiatPrices">{{ totalPrice.toFixed(2) }} {{
+            <div v-if="cartEntries.length !== 0" class="d-flex flex-column p-3">
+              <span class="font-weight-bold">{{ $t('market.merchandise.total') }}: </span>
+              <div><span v-if="showFiatPrices">{{ totalPrice.toFixed(2) }} {{
                   cartEntries[0].variant.currency
                 }} / </span>
-              <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)"
-                                       :show-value-in-skill-only="true"/> + SHIPPING <Hint
-                text="Shipping cost will be known after the next step"/></span>
+                <CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/>
+                <span> + SHIPPING <Hint text="Shipping cost will be known after the next step"/></span></div>
             </div>
-            <span id="place-order-button-wrapper" class="d-inline-block">
-              <b-button
-                :disabled="isPlaceOrderButtonDisabled()"
-                variant="primary"
-                @click="openAddressModal">
-                {{ $t('market.merchandise.placeOrder') }}
-              </b-button>
-            </span>
-            <b-tooltip :disabled="canAffordMerch()" target="place-order-button-wrapper" variant="danger">
-              {{ $t('market.merchandise.insufficientFunds') }}
-            </b-tooltip>
+            <b-button
+              :disabled="isContinueToCheckoutButtonDisabled()"
+              variant="primary" size="lg"
+              @click="openAddressModal">
+              {{ $t('market.merchandise.continue') }}
+            </b-button>
           </div>
         </div>
       </template>
@@ -152,9 +146,6 @@ export default Vue.extend({
       if (!cartEntry?.variant) return;
       return +cartEntry.variant.retail_price * this.skillPrice;
     },
-    calculateShippingPrice() {
-
-    },
     removeCartEntry(cartEntry: CartEntry) {
       this.cartEntries.splice(this.cartEntries.indexOf(cartEntry), 1);
       this.calculateTotalPrice();
@@ -162,8 +153,8 @@ export default Vue.extend({
     isMinusButtonDisabled(cartEntry: CartEntry) {
       return cartEntry.quantity <= 1;
     },
-    isPlaceOrderButtonDisabled() {
-      return this.cartEntries.length === 0 || !this.canAffordMerch();
+    isContinueToCheckoutButtonDisabled() {
+      return this.cartEntries.length === 0;
     },
     canAffordMerch() {
       const cost = toBN(this.totalPriceInSkill);
@@ -176,7 +167,6 @@ export default Vue.extend({
     this.$root.$on('merchandise-cart-modal', async (open: boolean) => {
       this.skillPrice = +await this.currentSkillPrice();
       this.calculateTotalPrice();
-      this.calculateShippingPrice();
       this.showModal = open;
     });
     this.$root.$on('merchandise-order-loading', (isOrderLoading: boolean) => {

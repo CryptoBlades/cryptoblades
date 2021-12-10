@@ -1,6 +1,6 @@
 <template>
   <b-modal class="centered-modal" @ok="buyItem" v-model="showModal"
-           :ok-title="$t('market.merchandise.submitOrder')" :title="$t('market.merchandise.deliveryAddress')"
+           :ok-title="$t('market.merchandise.continue')" :title="$t('market.merchandise.deliveryAddress')"
            :ok-disabled="!shippingInformationComplete"
            button-size="lg" no-close-on-backdrop>
     <b-form-input type="text"
@@ -12,7 +12,7 @@
     <b-form-select
       class="mt-2 mb-2" v-model="selectedCountry" @change="countryChanged">
       <b-form-select-option :value="undefined">{{
-          $t('market.merchandise.pleaseSelectAnOption')
+          $t('market.merchandise.pleaseSelectACountry')
         }}
       </b-form-select-option>
       <b-form-select-option v-for="country in countries" :key="country.code" :value="country">{{
@@ -24,7 +24,7 @@
       class="mt-2 mb-2" v-if="selectedCountry && selectedCountry.states && selectedCountry.states.length !== 0"
       v-model="selectedState">
       <b-form-select-option :value="undefined">{{
-          $t('market.merchandise.pleaseSelectAnOption')
+          $t('market.merchandise.pleaseSelectAState')
         }}
       </b-form-select-option>
       <b-form-select-option v-for="state in selectedCountry.states" :key="state.code" :value="state">{{
