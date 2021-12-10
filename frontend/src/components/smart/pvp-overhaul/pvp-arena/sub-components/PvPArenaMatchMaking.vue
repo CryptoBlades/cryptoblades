@@ -10,8 +10,14 @@
       <p>
         DECISION TIME: {{ this.loading ? '...' : this.decisionTimeLeft}}
       </p>
-      <button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading">Find match</button>
-      <button @click="reRollOpponent" :disabled="loading || !hasPendingDuel">Re-roll Opponent {{ formattedReRollCost }} $SKILL</button>
+      <button v-if="isCharacterInDuelQueue">IN-PROGRESS</button>
+      <div v-else>
+        <button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading">Find match</button>
+        <button v-else @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue">DUEL</button>
+      </div>
+      <button @click="reRollOpponent" :disabled="loading || !hasPendingDuel || isCharacterInDuelQueue">
+        Re-roll Opponent {{ formattedReRollCost }} $SKILL
+      </button>
       <button @click="leaveArena" :disabled="loading">Leave arena</button>
     </div>
     <div>
@@ -142,6 +148,8 @@ export default {
         createdAt: null,
         isPending: null
       },
+      duelQueue: [],
+      isCharacterInDuelQueue: false,
     };
   },
 
@@ -208,17 +216,35 @@ export default {
       this.duel = await this.contracts().PvpArena.methods.duelByAttacker(this.currentCharacterId).call();
 
       this.loading = false;
+    },
+
+    async preparePerformDuel() {
+      try {
+        await this.contracts().PvpArena.methods.preparePerformDuel(this.currentCharacterId).call({from: this.defaultAccount});
+      } catch (err) {
+        console.log('prepare perform duel error: ', err);
+      }
+
+      this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
+
+      this.isCharacterInDuelQueue = true;
     }
   },
 
   async created() {
     // TODOS:
-    // * [ ] Is player in an active duel
+    // * [x] Is player in an active duel
     // * [ ] Is player waiting for a duel to process
     // * [x] Reroll opponent
     // * [x] Find match functionality
     // * [x] Leave arena functionality
     this.hasPendingDuel = await this.contracts().PvpArena.methods.hasPendingDuel(this.currentCharacterId).call();
+
+    this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
+
+    if (this.duelQueue.includes(this.currentCharacterId)) {
+      this.isCharacterInDuelQueue = true;
+    }
 
     // TODO: use this
     this.isWithinDecisionTime = await this.contracts().PvpArena.methods.isCharacterWithinDecisionTime(this.currentCharacterId).call();
@@ -256,6 +282,8 @@ export default {
       this.decisionTimeLeft = 0;
     }
 
+    this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
+
     this.loading = false;
   },
 
@@ -271,39 +299,6 @@ export default {
 
       this.loading = false;
     },
-
-    // async currentCharacterId(value) {
-    //   this.loading = true;
-
-    //   this.hasPendingDuel = await this.contracts().PvpArena.methods.hasPendingDuel(value).call();
-
-    //   this.isWithinDecisionTime = await this.contracts().PvpArena.methods.isCharacterWithinDecisionTime(value).call();
-
-    //   this.decisionSeconds = await this.contracts().PvpArena.methods.decisionSeconds().call();
-
-    //   this.wager = await this.contracts().PvpArena.methods.getCharacterWager(value).call({ from: this.defaultAccount });
-
-    //   this.duelCost = await this.contracts().PvpArena.methods.getDuelCost(value).call({ from: this.defaultAccount });
-
-    //   this.reRollCost = this.duelCost * ((await this.contracts().PvpArena.methods.reRollFeePercent().call({ from: this.defaultAccount })) / 100);
-
-    //   if (this.hasPendingDuel) {
-    //     const timeNow = Math.floor((new Date()).getTime() / 1000);
-
-    //     this.duel = await this.contracts().PvpArena.methods.duelByAttacker(value).call();
-
-    //     this.decisionTimeLeft = (this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
-
-    //     this.timer = setInterval(() => {
-    //       if (this.hasPendingDuel) {
-    //         const timeNow = Math.floor((new Date()).getTime() / 1000);
-    //         this.decisionTimeLeft = Math.max(this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
-    //       }
-    //     }, 1000);
-    //   }
-
-    //   this.loading = false;
-    // }
   }
 };
 
