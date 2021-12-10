@@ -53,7 +53,9 @@
                   cartEntries[0].variant.currency
                 }} / </span>
                 <CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/>
-                <span> + SHIPPING <Hint text="Shipping cost will be known after the next step"/></span></div>
+                <span class="text-uppercase"> + {{ $t('market.merchandise.shipping') }} </span>
+                <i v-b-tooltip="$t('market.merchandise.shippingCostAfterNextStep')" class="far fa-question-circle"/>
+              </div>
             </div>
             <b-button
               :disabled="isContinueToCheckoutButtonDisabled()"
@@ -75,7 +77,6 @@ import {CartEntry, FileType} from '@/components/smart/VariantChoiceModal.vue';
 import {mapActions, mapState} from 'vuex';
 import {fromWeiEther, toBN} from '@/utils/common';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
-import Hint from '@/components/Hint.vue';
 
 interface StoreMappedActions {
   currentSkillPrice(): Promise<string>;
@@ -110,7 +111,7 @@ export default Vue.extend({
     }
   },
 
-  components: {CurrencyConverter, Hint},
+  components: {CurrencyConverter},
 
   computed: {
     ...mapState(['skillBalance']),

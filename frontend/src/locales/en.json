@@ -519,6 +519,8 @@
       "city": "City",
       "zipCode": "Zip code",
       "companyOptional": "Company (optional)",
+      "shipping": "Shipping",
+      "shippingCostAfterNextStep": "Shipping cost will be known after the next step",
 
       "orderCompleted": "Order #{orderNumber} completed",
       "thankYouForShopping": "Thank you for shopping with us!",
