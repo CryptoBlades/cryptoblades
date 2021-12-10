@@ -68,6 +68,7 @@ export default {
     display: flex;
     min-height: 90vh;
     flex-direction: column;
+    position: relative;
   }
 
   section {

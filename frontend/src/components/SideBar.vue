@@ -1,10 +1,11 @@
 <template>
   <aside>
     <b-navbar-nav>
-      <li class="character active">
-        <router-link :to="{ name: 'character-id-name' }" exact class="nav-link">
+      <li class="character" :class="{ active: characterID === '1' }">
+        <router-link to="/character/1" exact class="nav-link">
           <div class="icon-wrap">
-            <img src="../assets/new-ui/icon-alien-fire.png" alt="character">
+            <img v-if="characterID !== '1'" src="../assets/new-ui/alien-fire.png" alt="character">
+            <img v-if="characterID === '1'" src="../assets/new-ui/icon-alien-fire.png" alt="character">
           </div>
           <div class="info-wrap">
             <span class="character-name">ZhangTsun</span>
@@ -13,10 +14,11 @@
           </div>
         </router-link>
       </li>
-      <li class="character">
-        <router-link :to="{ name: 'character-id-name' }" exact class="nav-link">
+      <li class="character" :class="{ active: characterID === '2' }">
+        <router-link to="/character/2"  exact class="nav-link">
           <div class="icon-wrap">
-            <img src="../assets/new-ui/icon-nature.png" alt="character">
+            <img v-if="characterID !== '2'" src="../assets/new-ui/icon-nature.png" alt="character">
+            <img v-if="characterID === '2'" src="../assets/new-ui/icon-earth.png" alt="character">
           </div>
           <div class="info-wrap">
             <span class="character-name">Zenkai</span>
@@ -26,7 +28,7 @@
         </router-link>
       </li>
       <li class="character">
-        <router-link :to="{ name: 'character-id-name' }" exact class="nav-link">
+        <router-link to="/character/3"  exact class="nav-link">
           <div class="icon-wrap">
             <img src="../assets/new-ui/icon-nature.png" alt="character">
           </div>
@@ -38,7 +40,7 @@
         </router-link>
       </li>
       <li class="character">
-        <router-link :to="{ name: 'character-id-name' }" exact class="nav-link">
+        <router-link to="/character/3" exact class="nav-link">
           <div class="icon-wrap">
             <img src="../assets/new-ui/icon-nature.png" alt="character">
           </div>
@@ -71,6 +73,11 @@ export default {
   name: 'SideBar',
   components : {
   },
+  computed : {
+    characterID() {
+      return this.$route.params.id;
+    },
+  }
 };
 </script>
 
