@@ -94,7 +94,8 @@ export default {
         name: '',
         level: null,
         power: null,
-        rank: null
+        rank: null,
+        element: null,
       }
     },
     activeWeaponWithInformation: {
