@@ -4,7 +4,7 @@
       LOADING!
     </div>
 
-    <div v-if="!loading">
+    <div v-else>
       <pvp-arena-preparation
         v-if="!isCharacterInArena"
         :tierRewardsPool="tierRewardsPool"
@@ -39,6 +39,7 @@
         @updateOpponentInformation="updateOpponentInformation"
         @clearOpponentInformation="clearOpponentInformation"
         @goBackToSummary="goBackToSummary"
+        @kickCharacterFromArena="kickCharacterFromArena"
       />
     </div>
   </div>
@@ -184,6 +185,10 @@ export default {
         shieldId: null,
         information: {}
       };
+    },
+
+    kickCharacterFromArena() {
+      this.isCharacterInArena = false;
     }
   },
 

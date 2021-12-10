@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div class="pvpWrapper">
     <div v-if="!currentCharacterId && currentCharacterId !== 0">
       You need at least one character to enter PvP!
     </div>
     <div v-else>
-      <pvp-nav-bar @changeTab="onChangeTab"/>
+      <pvp-nav-bar :tabNumber="tab" @changeTab="onChangeTab" />
       <pvp-arena v-if="tab === 0" />
       <pvp-leaderboards v-if="tab === 1" />
     </div>
@@ -42,3 +42,22 @@ export default {
   }
 };
 </script>
+
+<style scoped lang="scss">
+//TODO: Check for proper font-family inheritance
+// @font-face {
+//   font-family: 'Trajan';
+//   src: url('../../../assets/fonts/Trajan.ttf') format('truetype');
+// }
+.pvpWrapper {
+  // background-image: url('../../../assets/pvpBackgroundImage.png');
+  padding: 1rem 4rem 4rem 4rem;
+  margin: -2rem -1rem 0 -1rem;
+  @media only screen and (min-width: 1440px) {
+    padding: 1 6rem 6rem 6rem;
+  }
+  @media only screen and (min-width: 1980px) {
+    padding: 1 12rem 12rem 12rem;
+  }
+}
+</style>

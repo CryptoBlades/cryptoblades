@@ -1,7 +1,7 @@
 <template>
-  <div class="modalWrapper">
+  <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
-      <!-- <img src="../../../../assets/separatorTop.svg" alt="Top separator"> -->
+      <img src="../../../../assets/separatorTop.svg" alt="Top separator">
       <div v-if="true" class="modalTitle">You have won the duel!</div>
       <div v-else class="modalTitle"> You have lost the duel!</div>
       <ul>
@@ -10,62 +10,56 @@
           <span class="chevron">></span>
           <span>{{ attackerRoll }}</span>
         </li>
-        <!-- <pvp-separator /> -->
+        <pvp-separator />
         <li>
           <span>Opponent rolled</span>
           <span class="chevron">></span>
           <span>{{ defenderRoll }}</span>
         </li>
-        <!-- <pvp-separator /> -->
+        <pvp-separator />
       </ul>
-      <div class="earnWrapper">You earned: {{ skillEarned }} $SKILL</div>
+      <div class="earnWrapper">You {{ result === 'win' ? 'earned' : 'lost'}}: {{ skillEarned }} $SKILL</div>
       <div class="rankWrapper">
         <span>Updated rank: </span>
         <span>{{ userCurrentRank }}</span>
         <span>({{ rankVariation }} Rank)</span>
       </div>
-      <!-- <img src="../../../../assets/separatorBottom.svg" alt="Bottom separator"> -->
+      <img src="../../../../assets/separatorBottom.svg" alt="Bottom separator">
     </div>
     <div class="closeWrapper">
       <p>Tap anywhere to close</p>
       <button @click="close">
-        <!-- <img src="../../../../assets/closeModal.svg" alt="Bottom separator"> -->
+        <img src="../../../../assets/closeModal.svg" alt="Bottom separator">
       </button>
     </div>
   </div>
 </template>
 
 <script>
-// import PvPSeparator from '../components/PvPSeparator.vue';
+import PvPSeparator from '../components/PvPSeparator.vue';
 
 export default {
-  // components: {
-  //   'pvp-separator': PvPSeparator
-  // },
+  components: {
+    'pvp-separator': PvPSeparator
+  },
 
   props: {
     result: {
-      type: String,
       default: ''
     },
     attackerRoll: {
-      type: Number,
       default: null
     },
     defenderRoll: {
-      type: Number,
       default: null
     },
     skillEarned: {
-      type: Number,
       default: null
     },
     rankVariation: {
-      type: Number,
       default: null
     },
     userCurrentRank: {
-      type: Number,
       default: null
     }
   },

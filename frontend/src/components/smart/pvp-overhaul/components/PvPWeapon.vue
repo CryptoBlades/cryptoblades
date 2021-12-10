@@ -79,12 +79,15 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 5rem;
-  width: 5rem;
+  height: 4.5rem;
+  width: 4.5rem;
   padding: 0.25rem;
   border-radius: 0.375rem;
   background-color: #151515;
   border: 1px solid #cec198;
+  :hover {
+    cursor: pointer;
+  }
 }
 .starsWrapper {
   display: flex;
@@ -100,7 +103,9 @@ export default {
 }
 .weaponWrapper {
   display: flex;
-  height: 90%;
+  margin: 0 auto;
+  height: 80%;
+  width: 80%;
 }
 .elementWrapper {
   position: absolute;
@@ -110,7 +115,7 @@ export default {
   margin-right: auto;
   left: 0;
   right: 0;
-  bottom: -15%;
+  bottom: -25%;
   padding: 0.2rem;
   border: 1px solid #cec198;
   border-radius: 9999px;
