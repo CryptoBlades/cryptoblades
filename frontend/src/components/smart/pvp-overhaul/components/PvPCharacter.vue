@@ -1,7 +1,7 @@
 <template>
   <div class="pvpCharacterWrapper">
     <img :src="characterArtSrc" alt="character" class="characterImg" />
-    <!-- <img src="../../../../assets/placeholder/standImage.png" alt="stand" class="characterStand" /> -->
+    <img src="../../../../assets/placeholder/standImage.png" alt="stand" class="characterStand" />
   </div>
 </template>
 

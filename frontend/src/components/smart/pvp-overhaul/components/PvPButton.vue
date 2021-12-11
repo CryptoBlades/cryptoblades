@@ -32,14 +32,21 @@ export default {
 button {
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 2rem;
+  padding: 2rem;
+  height: 100%;
+  width: 100%;
   align-items: center;
   vertical-align: middle;
   background-image: url('../../../../assets/buttonOutline.svg');
-  background-repeat: no-repeat;
-  background-size: contain;
   background-color: transparent;
-  border: none;
+  // background-size: auto 100%;
+  // background-repeat: no-repeat;
+  // background-position: left top;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  max-width: max-content;
+  border: 1px solid red;
   &.secondary {
     background-color:#141414;
     border: 1px solid #edcd90;
@@ -48,8 +55,8 @@ button {
     background-image: none;
   }
   .text {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 200;
     color: #dabe75;
     font-family: 'Trajan';
     &.whiteText {
@@ -61,7 +68,6 @@ button {
   }
   .subtext {
     font-size: 0.875rem;
-    line-height: 1.25rem;
     color: #b4b0a7;
     &.whiteText {
       color: white;

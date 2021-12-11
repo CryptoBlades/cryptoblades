@@ -118,7 +118,7 @@
       <div class="arenaInformation">
         <h1 class="title">ARENA INFORMATION</h1>
         <div class="tokenCard">
-          <!-- <img src="../../../../../assets/skillToken.png" alt="skill token" /> -->
+          <img src="../../../../../assets/skillToken.png" alt="skill token" />
           <div class="tokenCardInfo">
             <span class="text">PVP Rewards Pool ($SKILL)</span>
             <span class="number">{{ formatedTierRewardsPool }}</span>
