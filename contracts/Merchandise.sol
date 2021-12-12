@@ -94,12 +94,12 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
             basketItems[i] = getBasketItem(orderId, i);
             basketAmounts[i] = getBasketItemAmount(orderId, i);
         }
-        
+
         paidAmount = orderPaidAmount[orderId];
         timestamp = getOrderTimestamp(orderId);
         status = getOrderStatus(orderId);
     }
-    
+
     function getBasketSize(uint256 orderId) public view returns(uint256) {
         return orderBaskets[orderId].length;
     }
@@ -107,7 +107,7 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
     function getBasketItem(uint256 orderId, uint256 basketItemIndex) public view returns(uint32) {
         return (orderBaskets[orderId][basketItemIndex] & 0xffffff00) >> 8;
     }
-    
+
     function getBasketItemAmount(uint256 orderId, uint256 basketItemIndex) public view returns(uint32) {
         return orderBaskets[orderId][basketItemIndex] & 0xff;
     }
@@ -165,7 +165,7 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
         //uint256 payingAmount = getPriceOfBasket(items,amounts) + extraCost;
 
         game.payContractTokenOnly(user, payingAmount, vars[VAR_TRACK_INCOME] != 0);
-            
+
         /*orderBuyer[nextOrderID] = user;
         orderData[nextOrderID] = now << 8; // lowest 8 bits is status (default 0)
 
@@ -176,6 +176,23 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
 
         emit OrderPlaced(user, nextOrderID, payingAmount, items, amounts);
         return nextOrderID++;
+    }
+
+    function createOrder(address user, uint256 orderNumber, uint256 payingAmount) external restricted {
+        require(orderData[orderNumber] & 0xff == 0, "Order already saved");
+        orderBuyer[orderNumber] = user;
+        game.payContractTokenOnly(user, payingAmount, vars[VAR_TRACK_INCOME] != 0);
+        orderPaidAmount[orderNumber] = payingAmount;
+
+//        emit OrderSaved(user, orderNumber);
+    }
+
+//    function isOrderPaidFor(uint256 orderNumber, uint256 orderPrice) public view returns (bool) {
+//        return orderPaidAmount[orderNumber] == orderPrice;
+//    }
+
+    function getOrderPaidAmount(uint256 orderNumber) public view returns (uint256) {
+        return orderPaidAmount[orderNumber];
     }
 
     function setOrderStatus(uint256 orderId, uint8 status) external restricted {
@@ -222,7 +239,7 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
          _isAdmin();
         _;
     }
-    
+
     function _isAdmin() internal view {
          require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
     }

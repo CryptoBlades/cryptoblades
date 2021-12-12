@@ -50,8 +50,6 @@
 import Vue from 'vue';
 import api from '@/api';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
-import {mapActions} from 'vuex';
-import BigNumber from 'bignumber.js';
 
 export interface Recipient {
   name: string;
@@ -81,10 +79,6 @@ export interface OrderItem {
   external_variant_id: string;
   product_id: string;
   quantity: number;
-}
-
-interface StoreMappedActions {
-  purchaseMerchandise(payload: { ids: number[], amounts: number[], totalPrice: BigNumber }): Promise<number>;
 }
 
 interface Data {
@@ -127,7 +121,6 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['purchaseMerchandise']) as StoreMappedActions,
     countryChanged() {
       this.selectedState = undefined;
     },
@@ -146,36 +139,6 @@ export default Vue.extend({
       this.recipient.country_code = this.selectedCountry.code;
       this.recipient.state_code = this.selectedState?.code;
       this.$root.$emit('order-summary-modal', this.recipient, this.cartEntries);
-
-      // if (!this.selectedCountry) return;
-      // this.$root.$emit('merchandise-order-loading', true);
-      // this.recipient.country = this.selectedCountry.code;
-      // this.recipient.state = this.selectedState?.code;
-      // const orderItems = this.cartEntries.map(cartEntry => {
-      //   return {
-      //     sync_variant_id: cartEntry.variant.id,
-      //     quantity: cartEntry.quantity
-      //   } as OrderItem;
-      // });
-      // const merchandiseOrder: MerchandiseOrder = {
-      //   recipient: this.recipient,
-      //   items: orderItems
-      // };
-      //
-      // this.$root.$emit('merchandise-cart-modal', false);
-      // try {
-      //   await this.purchaseMerchandise({
-      //     ids: merchandiseOrder.items.map(item => item.sync_variant_id),
-      //     amounts: merchandiseOrder.items.map(item => item.quantity),
-      //     totalPrice: toBN(this.totalPriceInSkill),
-      //   });
-      //   const apiResponse = await api.createMerchandiseOrder(merchandiseOrder);
-      //   this.$root.$emit('order-complete-modal', apiResponse.result.id, apiResponse.result.shipping_service_name);
-      // } catch (e) {
-      //   console.error(e);
-      // } finally {
-      //   this.$root.$emit('merchandise-order-loading', false);
-      // }
     },
   },
 

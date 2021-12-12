@@ -2979,18 +2979,18 @@ export function createStore(web3: Web3) {
           .currentPrice().call(defaultCallOptions(state));
       },
 
-      async purchaseMerchandise({ state }, {ids, amounts, totalPrice}) {
+      async createOrder({ state }, {orderNumber, payingAmount}) {
         const { CryptoBlades, SkillToken, Merchandise } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Merchandise || !state.defaultAccount) return;
 
         await SkillToken.methods
-          .approve(CryptoBlades.options.address, totalPrice)
+          .approve(CryptoBlades.options.address, payingAmount)
           .send({
             from: state.defaultAccount
           });
 
         return await Merchandise.methods
-          .placeOrder(state.defaultAccount, totalPrice, ids, amounts)
+          .createOrder(state.defaultAccount, orderNumber, payingAmount)
           .send({
             from: state.defaultAccount
           });

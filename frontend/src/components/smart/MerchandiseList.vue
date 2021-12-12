@@ -53,6 +53,8 @@ export interface MerchandiseOrder {
   recipient: Recipient;
   items: Item[];
   shipping?: string;
+  wallet?: string;
+  totalPriceInSkill?: number;
 }
 
 export interface Item {
@@ -74,6 +76,7 @@ interface Data {
 
 interface StoreMappedActions {
   getItemPrice(payload: { id: number }): Promise<number>;
+
   currentSkillPrice(): Promise<string>;
 }
 

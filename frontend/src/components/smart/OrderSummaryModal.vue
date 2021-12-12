@@ -39,7 +39,8 @@
           <div v-if="cartEntries.length !== 0" class="costs-container w-100">
             <div class="d-flex flex-column">
               <span class="font-weight-bold">Shipping method: </span>
-              <b-form-select class="mt-2 mb-2" v-model="selectedShippingRate" :disabled="areShippingRatesLoading" @change="calculateTotalPrice">
+              <b-form-select class="mt-2 mb-2" v-model="selectedShippingRate" :disabled="areShippingRatesLoading"
+                             @change="calculateTotalPrice">
                 <b-form-select-option :value="undefined">{{
                     areShippingRatesLoading ? $t('market.merchandise.loadingShippingOptions') : $t('market.merchandise.pleaseSelectAnOption')
                   }}
@@ -60,9 +61,10 @@
               <CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/>
             </div>
             <span id="place-order-button-wrapper" class="d-inline-block">
-              <b-button :disabled="!canAffordMerch() || !selectedShippingRate" variant="primary" size="lg" block
+              <b-button :disabled="!canAffordMerch() || !selectedShippingRate || isOrderLoading" variant="primary"
+                        size="lg" block
                         @click="confirmOrder">
-                {{ $t('market.merchandise.placeOrder') }}
+                {{ $t('market.merchandise.placeOrder') }} <i v-if="isOrderLoading" class="fas fa-spinner fa-spin"></i>
               </b-button>
             </span>
             <b-tooltip v-if="!canAffordMerch()" target="place-order-button-wrapper" variant="danger">
@@ -87,9 +89,12 @@ import {fromWeiEther, toBN} from '@/utils/common';
 import {mapActions, mapState} from 'vuex';
 import api from '@/api';
 import {MerchandiseOrder} from '@/components/smart/MerchandiseList.vue';
+import BigNumber from 'bignumber.js';
 
 interface StoreMappedActions {
   currentSkillPrice(): Promise<string>;
+
+  createOrder(payload: { orderNumber: number, payingAmount: BigNumber }): Promise<void>;
 }
 
 export interface ShippingRate {
@@ -140,10 +145,10 @@ export default Vue.extend({
 
   components: {CurrencyConverter},
   computed: {
-    ...mapState(['skillBalance']),
+    ...mapState(['skillBalance', 'defaultAccount']),
   },
   methods: {
-    ...mapActions(['currentSkillPrice']) as StoreMappedActions,
+    ...mapActions(['currentSkillPrice', 'createOrder']) as StoreMappedActions,
     fromWeiEther,
     toBN,
     isFileTypePreview(file: File) {
@@ -165,39 +170,28 @@ export default Vue.extend({
         recipient: this.recipient,
         items: orderItems,
         shipping: this.selectedShippingRate.id,
+        wallet: this.defaultAccount,
+        totalPriceInSkill: this.totalPriceInSkill,
       };
 
-      console.log(merchandiseOrder);
-      await api.createMerchandiseOrder(merchandiseOrder);
-      // if (!this.selectedCountry) return;
-      // this.$root.$emit('merchandise-order-loading', true);
-      // this.recipient.country = this.selectedCountry.code;
-      // this.recipient.state = this.selectedState?.code;
-      // const orderItems = this.cartEntries.map(cartEntry => {
-      //   return {
-      //     sync_variant_id: cartEntry.variant.id,
-      //     quantity: cartEntry.quantity
-      //   } as OrderItem;
-      // });
-      // const merchandiseOrder: MerchandiseOrder = {
-      //   recipient: this.recipient,
-      //   items: orderItems
-      // };
-      //
-      // this.$root.$emit('merchandise-cart-modal', false);
-      // try {
-      //   await this.purchaseMerchandise({
-      //     ids: merchandiseOrder.items.map(item => item.sync_variant_id),
-      //     amounts: merchandiseOrder.items.map(item => item.quantity),
-      //     totalPrice: toBN(this.totalPriceInSkill),
-      //   });
-      //   const apiResponse = await api.createMerchandiseOrder(merchandiseOrder);
-      //   this.$root.$emit('order-complete-modal', apiResponse.result.id, apiResponse.result.shipping_service_name);
-      // } catch (e) {
-      //   console.error(e);
-      // } finally {
-      //   this.$root.$emit('merchandise-order-loading', false);
-      // }
+      try {
+        this.$root.$emit('merchandise-order-loading', true);
+        this.isOrderLoading = true;
+        const response = await api.createMerchandiseOrder(merchandiseOrder);
+        await this.createOrder({
+          orderNumber: response.result.id,
+          payingAmount: toBN(this.totalPriceInSkill),
+        });
+        this.$root.$emit('order-complete-modal', response.result.id, response.result.shipping_service_name);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.$root.$emit('merchandise-order-loading', false);
+        this.$root.$emit('merchandise-cart-modal', false);
+        this.$root.$emit('merchandise-address-modal', false);
+        this.isOrderLoading = false;
+        this.showModal = false;
+      }
     },
     getTotalCartPrice() {
       return this.cartEntries.map(cartEntry => +cartEntry.variant.retail_price * cartEntry.quantity)
