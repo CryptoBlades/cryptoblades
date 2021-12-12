@@ -48,11 +48,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import api from '@/api';
 import {Product} from '@/components/smart/MerchandiseList.vue';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
 import {fromWeiEther} from '@/utils/common';
-import {mapActions} from 'vuex';
 
 export interface CartEntry {
   product: Product;
@@ -106,10 +104,6 @@ export enum FileType {
   PREVIEW = 'preview',
 }
 
-interface StoreMappedActions {
-  currentSkillPrice(): Promise<string>;
-}
-
 interface Data {
   variants: Variant[];
   selectedVariant?: Variant;
@@ -151,15 +145,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['currentSkillPrice']) as StoreMappedActions,
     fromWeiEther,
-    async fetchVariants(productId: number) {
-      const response = await api.getMerchandiseProductVariants(productId);
-      if (response.code !== 200) {
-        return;
-      }
-      this.variants = response.result.sync_variants;
-    },
     addToCart() {
       if (!this.product || !this.selectedVariant) return;
 
@@ -204,14 +190,14 @@ export default Vue.extend({
   },
 
   async mounted() {
-    this.$root.$on('merchandise-variant-modal', async (product: Product) => {
+    this.$root.$on('merchandise-variant-modal', async (product: Product, variants: Variant[], skillPrice: number) => {
       this.product = product;
       if (this.product) {
-        this.skillPrice = +await this.currentSkillPrice();
-        await this.fetchVariants(this.product.id);
+        this.variants = variants;
+        this.skillPrice = skillPrice;
         this.selectedVariant = this.variants[0];
-        this.calculateTotalPrice();
         this.showModal = true;
+        this.calculateTotalPrice();
       } else {
         this.variants = [];
         this.selectedVariant = undefined;

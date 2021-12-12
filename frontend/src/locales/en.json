@@ -528,6 +528,7 @@
       "checkYourEmail": "Check your email for order details!",
       "pleaseSelectShippingMethod": "Please select a shipping method",
       "shippingInformation": "Shipping information",
+      "loadingShippingOptions": "Loading shipping options...",
 
       "completingYourOrder": "Completing your order...",
       "yourCart": "Your cart",

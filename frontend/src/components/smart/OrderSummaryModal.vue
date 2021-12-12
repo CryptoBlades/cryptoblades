@@ -33,15 +33,15 @@
           <span>{{ recipient.zip }}</span>
           <span>{{ recipient.phone }}</span>
           <span>{{ recipient.email }}</span>
-          <span v-if="recipient.company">Company: {{ recipient.company }}</span>
+          <span v-if="recipient.company">{{ recipient.company }}</span>
         </div>
-        <div class="d-flex align-items-center">
-          <div v-if="cartEntries.length !== 0" class="costs-container">
+        <div class="d-flex align-items-center w-50">
+          <div v-if="cartEntries.length !== 0" class="costs-container w-100">
             <div class="d-flex flex-column">
               <span class="font-weight-bold">Shipping method: </span>
-              <b-form-select class="mt-2 mb-2" v-model="selectedShippingRate" @change="calculateTotalPrice">
+              <b-form-select class="mt-2 mb-2" v-model="selectedShippingRate" :disabled="areShippingRatesLoading" @change="calculateTotalPrice">
                 <b-form-select-option :value="undefined">{{
-                    $t('market.merchandise.pleaseSelectAnOption')
+                    areShippingRatesLoading ? $t('market.merchandise.loadingShippingOptions') : $t('market.merchandise.pleaseSelectAnOption')
                   }}
                 </b-form-select-option>
                 <b-form-select-option v-for="shippingRate in shippingRates" :key="shippingRate.id"
@@ -109,6 +109,7 @@ interface Data {
   totalPrice: number;
   totalPriceInSkill: number;
   isOrderLoading: boolean;
+  areShippingRatesLoading: boolean;
   shippingMethod: string;
   shippingRates: ShippingRate[];
   selectedShippingRate?: ShippingRate;
@@ -124,6 +125,7 @@ export default Vue.extend({
       totalPrice: 0,
       totalPriceInSkill: 0,
       isOrderLoading: false,
+      areShippingRatesLoading: false,
       shippingMethod: '',
       shippingRates: [],
       selectedShippingRate: undefined,
@@ -207,8 +209,6 @@ export default Vue.extend({
     calculateTotalPrice() {
       this.totalPrice = this.getTotalCartPrice() + this.getShippingPrice();
       this.totalPriceInSkill = this.totalPrice * this.skillPrice;
-      console.log(this.totalPriceInSkill);
-      console.log(this.totalPrice);
     },
     getShippingPrice() {
       return this.selectedShippingRate?.rate ? +this.selectedShippingRate.rate : 0;
@@ -241,14 +241,16 @@ export default Vue.extend({
 
   async mounted() {
     this.$root.$on('order-summary-modal', async (recipient: Recipient, cartEntries: CartEntry[]) => {
-      this.skillPrice = +await this.currentSkillPrice();
       if (recipient) {
         this.cartEntries = cartEntries;
         this.recipient = recipient;
+        this.showModal = true;
         this.skillPrice = +await this.currentSkillPrice();
         this.calculateTotalPrice();
+        this.areShippingRatesLoading = true;
         await this.getShippingRates();
-        this.showModal = true;
+        this.areShippingRatesLoading = false;
+        this.calculateTotalPrice();
       } else {
         this.showModal = false;
       }
