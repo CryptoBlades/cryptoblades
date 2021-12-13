@@ -33,17 +33,9 @@
               />
             </div>
             <div v-if="tab === 1" class="bottomDuels">
-              <div>
-                <h3>Date</h3>
-                <span></span>
-              </div>
-              <div>
-                <h3>Result</h3>
-                <span></span>
-              </div>
-              <div>
-                <h3>MMR</h3>
-                <span></span>
+              <div v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
+                <span>Date: {{ new Date(duel.timestamp * 1000) }}</span>
+                <span>Result: {{ duel.attackerWon ? 'Win' : 'Lose' }}</span>
               </div>
             </div>
           </div>
@@ -135,6 +127,9 @@ export default {
         information: {}
       }
     },
+    duelHistory: {
+      default: []
+    }
   },
 
   data() {

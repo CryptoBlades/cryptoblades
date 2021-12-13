@@ -23,6 +23,7 @@
         :characterInformation="characterInformation"
         :activeWeaponWithInformation="activeWeaponWithInformation"
         :activeShieldWithInformation="activeShieldWithInformation"
+        :duelHistory="duelHistory"
         @enterMatchMaking="handleEnterMatchMaking"
       />
       <!-- Should use router -->
@@ -53,6 +54,7 @@ import { weaponFromContract as formatWeapon } from '../../../../contract-models'
 import { shieldFromContract as formatShield } from '../../../../contract-models';
 import { pvpFighterFromContract as formatFighter } from '../../../../contract-models';
 import { characterFromContract as formatCharacter } from '../../../../contract-models';
+import { duelResultFromContract as formatDuelResult } from '../../../../contract-models';
 
 export default {
   components: {
@@ -104,6 +106,7 @@ export default {
         shieldId: null,
         information: {}
       },
+      duelHistory: []
     };
   },
 
@@ -295,6 +298,16 @@ export default {
           rank: await this.contracts().PvpArena.methods.getCharacterRankingPoints(rankerId).call({ from: this.defaultAccount })
         };
       }));
+
+      const previousDuels = await this.contracts().PvpArena.getPastEvents('DuelFinished', {
+        filter: {attacker: this.currentCharacterId},
+        toBlock: 'latest',
+        fromBlock: 0
+      });
+
+      this.duelHistory = previousDuels.map(duel => {
+        return formatDuelResult(duel.returnValues);
+      });
     }
 
     this.loading = false;
@@ -390,6 +403,16 @@ export default {
             rank: await this.contracts().PvpArena.methods.getCharacterRankingPoints(rankerId).call({ from: this.defaultAccount })
           };
         }));
+
+        const previousDuels = await this.contracts().PvpArena.getPastEvents('DuelFinished', {
+          filter: {attacker: value},
+          toBlock: 'latest',
+          fromBlock: 0
+        });
+
+        this.duelHistory = previousDuels.map(duel => {
+          return formatDuelResult(duel.returnValues);
+        });
 
         this.isMatchMaking = false;
       }
