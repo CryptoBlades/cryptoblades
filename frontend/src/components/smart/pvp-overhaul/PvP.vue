@@ -44,7 +44,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-// TODO: Check for proper font-family inheritance
 @font-face {
   font-family: 'Trajan';
   src: url('../../../assets/fonts/Trajan.ttf') format('truetype');
@@ -54,10 +53,10 @@ export default {
   padding: 1rem 4rem 4rem 4rem;
   margin: -2rem -1rem 0 -1rem;
   @media only screen and (min-width: 1440px) {
-    padding: 1 6rem 6rem 6rem;
+    padding: 1rem 6rem 6rem 6rem;
   }
   @media only screen and (min-width: 1980px) {
-    padding: 1 12rem 12rem 12rem;
+    padding: 3rem 18rem 18rem 18rem;
   }
 }
 </style>
