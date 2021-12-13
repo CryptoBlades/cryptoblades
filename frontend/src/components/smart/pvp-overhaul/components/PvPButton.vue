@@ -36,7 +36,6 @@ export default {
 button {
   display: flex;
   flex-direction: column;
-  padding: 2rem;
   height: 100%;
   width: 100%;
   align-items: center;
@@ -45,8 +44,9 @@ button {
   background-image: url('../../../../assets/buttonOutline.svg');
   background-color: transparent;
   background-repeat: no-repeat;
-  background-position: center top;
+  background-position: center;
   background-size: 100% 100%;
+  border: none;
 
   img {
     height: 1.25rem;
@@ -80,12 +80,11 @@ button {
     font-weight: 200;
     font-family: 'Trajan';
     color: #EDCD90;
-    &.whiteText {
-      font-size: 1rem;
-      font-weight: 400;
-      font-family: 'Roboto';
-      color: white;
-    }
+  }
+  .whiteText {
+    font-weight: 400;
+    font-family: 'Roboto';
+    color: white;
   }
   .subtext {
     font-size: 0.75rem;
