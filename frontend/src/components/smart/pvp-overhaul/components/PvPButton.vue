@@ -36,7 +36,6 @@ export default {
 button {
   display: flex;
   flex-direction: column;
-  padding: 2rem;
   height: 100%;
   width: 100%;
   align-items: center;
@@ -45,8 +44,8 @@ button {
   background-image: url('../../../../assets/buttonOutline.svg');
   background-color: transparent;
   background-repeat: no-repeat;
-  background-position: center top;
   background-size: 100% 100%;
+  object-fit: fill;
   border: none;
 
   img {
@@ -62,32 +61,35 @@ button {
     border-radius: 5px;
     padding: 0.75rem;
     background-image: none;
+    border: 1px solid #ffffff50;
     &.disabled {
       pointer-events: none;
       opacity: 50%;
-      border: 1px solid #ffffff50;
     }
   }
+
   .text {
     display: flex;
-    margin: auto;
+    margin: 0;
+    margin-bottom: -4px;
     align-items: center;
     vertical-align: middle;
-    margin-top: 4px;
     font-size: 1rem;
+    white-space: nowrap;
     font-weight: 200;
-    color: #EDCD90;
     font-family: 'Trajan';
-    &.whiteText {
-      font-size: 1rem;
-      font-weight: 400;
-      font-family: 'Roboto';
-      color: white;
-    }
+    color: #EDCD90;
+  }
+  .whiteText {
+    font-weight: 400;
+    font-family: 'Roboto';
+    color: white;
   }
   .subtext {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #b4b0a7;
+    margin-top: 0.25rem;
+    font-family: 'Roboto';
     &.whiteText {
       color: white;
     }

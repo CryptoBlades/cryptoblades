@@ -95,8 +95,10 @@
                 <div class="bulletpoint"></div> Leaving the Arena will cost you {{ +formattedEntryWager / 4 }} $SKILL.
               </li>
             </ul>
-            <label class="checkbox">
-              <input type="checkbox" v-model="checkBoxAgreed" />
+            <label class="checkboxWrapper">
+              <div class="checkboxInnerWrapper">
+                <input type="checkbox" v-model="checkBoxAgreed"  class="checkboxInput"/>
+              </div>
               <span>I understand.</span>
             </label>
           </div>
@@ -449,36 +451,45 @@ p, li, span {
         transform: rotate(45deg);
       }
     }
-    .checkbox {
+    .checkboxWrapper {
       display: inline-block;
       align-items: center;
       vertical-align: middle;
       margin-left: 1.75rem;
-      margin-top: 1rem;
+      margin-top: 1.1rem;
       user-select: none;
-      input {
-        height: 1rem;
-        width: 1rem;
-        border: 1px solid #b4b0a7;
-      }
+      .checkboxInnerWrapper {
+        position: absolute;
+        display: inline-block;
+        overflow: hidden;
+        .checkboxInput {
+          width: 1.25rem;
+          height: 1.25rem;
+          cursor: pointer;
+          background: rgba(40,40,40,0.2);
+          appearance: none;
+          position: relative;
+          border: 1px solid #b4b0a7;
+          padding: 4px;
+        }
+        .checkboxInput:checked {
+          background-image: url('../../../../../assets/checkImage.svg');
+          background-repeat: no-repeat;
+          background-size: 75% 50%;
+          background-position: center;
+        }
+    }
       span {
-        margin-left: 0.5rem;
+        margin-left: 2rem;
         color: #b4b0a7;
         font-size: 0.875rem;
-        line-height: 1rem;
       }
     }
   }
   .enterArenaButtonWrapper {
-    display: flex;
-    flex-direction: column;
-    margin: 4rem 0 0 2.5rem;
-    button {
-      max-width: max-content;
-      color: #dabe75;
-      background-color: #151515;
-      border: none;
-    }
+    width: 15rem;
+    height: 5rem;
+    margin-top: 3rem;
   }
 }
 .characterImage {

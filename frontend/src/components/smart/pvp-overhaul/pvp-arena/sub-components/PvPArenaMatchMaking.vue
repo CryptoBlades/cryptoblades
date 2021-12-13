@@ -29,7 +29,7 @@
             <span>Rank: {{ characterInformation.rank }}</span>
           </div>
         </div>
-        <div class="weapons">
+        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="activeWeaponWithInformation.weaponId"
             :stars="activeWeaponWithInformation.information.stars + 1"
@@ -55,20 +55,22 @@
           <pvp-button v-else
           @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
         </div>
-        <pvp-button
-          class="reRollOpponentButton"
-          @click="reRollOpponent" :disabled="loading || !hasPendingDuel || isCharacterInDuelQueue"
-          buttonText="Re-roll Opponent"
-          :buttonsubText="'$SKILL: ' + formattedReRollCost"
-          :secondary="true"
-        />
-        <pvp-button
-          @click="leaveArena"
-          :disabled="loading || isCharacterInDuelQueue"
-          buttonText="Leave Arena"
-          :secondary="true"
-          class="leaveArenaButton"
-        />
+        <div class="rerollButtonWrapper">
+          <pvp-button
+            @click="reRollOpponent" :disabled="loading || !hasPendingDuel || isCharacterInDuelQueue"
+            buttonText="Re-roll Opponent"
+            :buttonsubText="'$SKILL: ' + formattedReRollCost"
+            :secondary="true"
+          />
+        </div>
+        <div class="leaveArenaButtonWrapper">
+          <pvp-button
+            @click="leaveArena"
+            :disabled="loading || isCharacterInDuelQueue"
+            buttonText="Leave Arena"
+            :secondary="true"
+          />
+        </div>
       </div>
       <div class="characterWrapper">
         <div class="elementWrapper">
@@ -85,7 +87,7 @@
             <span>Rank: {{ opponentInformation.rank }}</span>
           </div>
         </div>
-        <div class="weapons">
+        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
             :stars="opponentActiveWeaponWithInformation.information.stars + 1"
@@ -611,8 +613,10 @@ span, p, li, button {
     right: 0;
     margin-right: auto;
     margin-left: auto;
-    div:first-of-type {
-      margin-right: 1rem;
+    .hasShield{
+      div:first-of-type {
+        margin-right: 1rem;
+      }
     }
   }
 }
@@ -621,15 +625,6 @@ span, p, li, button {
   margin-right: 3rem;
   margin-left: 3rem;
   width: 12rem;
-  .matchButtonsWrapper {
-    width: 100%;
-  }
-  .leaveArenaButton {
-    height: 55px;
-  }
-  .reRollOpponentButton {
-    margin-top: 1.5rem;
-  }
   .spinner {
     margin-bottom: 4rem;
     animation: spin 1s linear infinite;
@@ -642,15 +637,19 @@ span, p, li, button {
       }
     }
   }
-  .findMatchButton {
-    margin-bottom: 5rem;
-  }
-  button {
-    margin-bottom: 1.5rem;
+  .matchButtonsWrapper {
     width: 100%;
+    button {
+      height: 5.5rem;
+    }
   }
-  button:last-of-type {
-    margin-bottom: 0;
+  .rerollButtonWrapper {
+    width: 100%;
+    height: 5rem;
+    margin: 1.5rem 0;
+  }
+  .leaveArenaButtonWrapper {
+    width: 100%;
   }
   p {
     font-size: 2.75rem;
