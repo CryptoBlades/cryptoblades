@@ -49,10 +49,11 @@
           <img class="spinner" src="../../../../../assets/loadingSpinner.svg" />
         </div>
         <p v-else>{{ this.decisionTimeLeft }}</p>
-        <button v-if="isCharacterInDuelQueue">IN-PROGRESS</button>
+        <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS"/>
         <div v-else class="matchButtonsWrapper">
           <pvp-button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
-          <pvp-button v-else @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" buttonText="DUEL" />
+          <pvp-button v-else
+          @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
         </div>
         <pvp-button
           class="reRollOpponentButton"
@@ -70,10 +71,10 @@
       </div>
       <div class="characterWrapper">
         <div class="elementWrapper">
-          <!-- <img :src="getOpponentElementSrc" alt="element" /> -->
+          <img :src="getOpponentElementSrc" alt="opponent element" />
         </div>
         <div class="characterImageWrapper">
-          <!-- <pvp-character :characterId="op" /> -->
+          <!-- <pvp-character :characterId="id" /> -->
         </div>
         <div class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
@@ -242,13 +243,13 @@ export default {
     },
 
     getOpponentElementSrc() {
-      if (this.currentOpponent.element === 'fire') {
+      if (this.opponentInformation.element === 'fire') {
         return fireIcon;
       }
-      if (this.currentOpponent.element === 'water') {
+      if (this.opponentInformation.element === 'water') {
         return waterIcon;
       }
-      if (this.currentOpponent.element === 'earth') {
+      if (this.opponentInformation.element === 'earth') {
         return earthIcon;
       }
       return lightningIcon;

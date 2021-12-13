@@ -1,7 +1,10 @@
 <template>
   <button @click="$emit('click')" :disabled="disabled" :class="{'disabled': disabled, 'secondary': this.secondary}">
-    <span class="text" :class="secondary && 'whiteText'">{{ buttonText }}</span
-    ><span class="subtext" :class="secondary && 'whiteText'">{{
+    <span class="text" :class="secondary && 'whiteText'">
+      <img v-if="duelButton" src="../../../../assets/swordsIcon.svg" alt="button icon">
+      {{ buttonText }}
+    </span>
+    <span v-if="secondary" class="subtext" :class="secondary && 'whiteText'">{{
       buttonsubText
     }}</span>
   </button>
@@ -18,6 +21,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    duelButton: {
+      type: Boolean,
+      default: false
+    },
     buttonText: String,
     buttonsubText: String,
   },
@@ -25,21 +32,30 @@ export default {
 </script>
 
 <style scoped lang="scss">
-// @font-face {
-//   font-family: 'Trajan';
-//   src: url('../../../../assets/fonts/Trajan.ttf') format('truetype');
-// }
+
 button {
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 2rem;
+  padding: 2rem;
+  height: 100%;
+  width: 100%;
   align-items: center;
   vertical-align: middle;
+  justify-content: center;
   background-image: url('../../../../assets/buttonOutline.svg');
-  background-repeat: no-repeat;
-  background-size: contain;
   background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: 100% 100%;
   border: none;
+
+  img {
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-right: 0.5rem;
+    margin-top: -4px;
+  }
+
   &.secondary {
     background-color:#141414;
     border: 1px solid #edcd90;
@@ -48,9 +64,14 @@ button {
     background-image: none;
   }
   .text {
+    display: flex;
+    margin: auto;
+    align-items: center;
+    vertical-align: middle;
+    margin-top: 4px;
     font-size: 1rem;
-    font-weight: 600;
-    color: #dabe75;
+    font-weight: 200;
+    color: #EDCD90;
     font-family: 'Trajan';
     &.whiteText {
       font-size: 1rem;
@@ -61,7 +82,6 @@ button {
   }
   .subtext {
     font-size: 0.875rem;
-    line-height: 1.25rem;
     color: #b4b0a7;
     &.whiteText {
       color: white;

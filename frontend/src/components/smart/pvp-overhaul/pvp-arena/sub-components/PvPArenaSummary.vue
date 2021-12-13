@@ -8,7 +8,7 @@
         <div class="buttonWrapper">
           <pvp-button
             @click="handleEnterArenaClick()"
-            buttonText="GO TO ARENA"
+            buttonText="ENTER ARENA"
           />
         </div>
         <div class="bottomWrapper">
@@ -44,7 +44,7 @@
       <div class="arenaInformation">
         <h1 class="title">ARENA INFORMATION</h1>
         <div class="tokenCard">
-          <!-- <img src="../../../../../assets/skillToken.png" alt="skill token" /> -->
+          <img src="../../../../../assets/skillToken.png" alt="skill token" />
           <div class="tokenCardInfo">
             <span class="text">PVP Rewards Pool ($SKILL)</span>
             <span class="number">{{ formatedTierRewardsPool }}</span>
@@ -198,6 +198,8 @@ span, p, li, button, a {
   }
   .buttonWrapper {
     margin-top: 2.25rem;
+    height: 5rem;
+    width: 80%;
   }
 }
 .bottomWrapper {
