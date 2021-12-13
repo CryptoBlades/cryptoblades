@@ -95,9 +95,9 @@
                 <div class="bulletpoint"></div> Leaving the Arena will cost you {{ +formattedEntryWager / 4 }} $SKILL.
               </li>
             </ul>
-            <label class="checkbox">
-              <div class="checkboxContainer">
-                <input type="checkbox" v-model="checkBoxAgreed"  id="checkb"/>
+            <label class="checkboxWrapper">
+              <div class="checkboxInnerWrapper">
+                <input type="checkbox" v-model="checkBoxAgreed"  class="checkboxInput"/>
               </div>
               <span>I understand.</span>
             </label>
@@ -451,34 +451,34 @@ p, li, span {
         transform: rotate(45deg);
       }
     }
-    #checkb {
-      width: 1.25rem;
-      height: 1.25rem;
-      cursor: pointer;
-      background: rgba(40,40,40,0.2);
-      appearance: none;
-      position: relative;
-      border: 1px solid #b4b0a7;
-      padding: 4px;
-    }
-    #checkb:checked {
-      background-image: url('../../../../../assets/checkImage.svg');
-      background-repeat: no-repeat;
-      background-size: 75% 50%;
-      background-position: center;
-    }
-    .checkboxContainer {
-      position: absolute;
-      display: inline-block;
-      overflow: hidden;
-    }
-    .checkbox {
+    .checkboxWrapper {
       display: inline-block;
       align-items: center;
       vertical-align: middle;
       margin-left: 1.75rem;
       margin-top: 1.1rem;
       user-select: none;
+      .checkboxInnerWrapper {
+        position: absolute;
+        display: inline-block;
+        overflow: hidden;
+        .checkboxInput {
+          width: 1.25rem;
+          height: 1.25rem;
+          cursor: pointer;
+          background: rgba(40,40,40,0.2);
+          appearance: none;
+          position: relative;
+          border: 1px solid #b4b0a7;
+          padding: 4px;
+        }
+        .checkboxInput:checked {
+          background-image: url('../../../../../assets/checkImage.svg');
+          background-repeat: no-repeat;
+          background-size: 75% 50%;
+          background-position: center;
+        }
+    }
       span {
         margin-left: 2rem;
         color: #b4b0a7;
