@@ -96,7 +96,9 @@
               </li>
             </ul>
             <label class="checkbox">
-              <input type="checkbox" v-model="checkBoxAgreed" />
+              <div class="checkboxContainer">
+                <input type="checkbox" v-model="checkBoxAgreed"  id="checkb"/>
+              </div>
               <span>I understand.</span>
             </label>
           </div>
@@ -449,20 +451,36 @@ p, li, span {
         transform: rotate(45deg);
       }
     }
+    #checkb {
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+      background: rgba(40,40,40,0.2);
+      appearance: none;
+      position: relative;
+      border: 1px solid #b4b0a7;
+      padding: 4px;
+    }
+    #checkb:checked {
+      background-image: url('../../../../../assets/checkImage.svg');
+      background-repeat: no-repeat;
+      background-size: 75% 50%;
+      background-position: center;
+    }
+    .checkboxContainer {
+      position: absolute;
+      display: inline-block;
+      overflow: hidden;
+    }
     .checkbox {
       display: inline-block;
       align-items: center;
       vertical-align: middle;
       margin-left: 1.75rem;
-      margin-top: 1rem;
+      margin-top: 1.1rem;
       user-select: none;
-      input {
-        height: 1rem;
-        width: 1rem;
-        border: 1px solid #b4b0a7;
-      }
       span {
-        margin-left: 0.5rem;
+        margin-left: 2rem;
         color: #b4b0a7;
         font-size: 0.875rem;
       }
