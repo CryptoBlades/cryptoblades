@@ -1,7 +1,7 @@
 <template>
   <button @click="$emit('click')" :disabled="disabled" :class="{'disabled': disabled, 'secondary': this.secondary}">
-    <span class="text" :class="secondary && 'whiteText'">{{ buttonText }}</span
-    ><span class="subtext" :class="secondary && 'whiteText'">{{
+    <span class="text" :class="secondary && 'whiteText'">{{ buttonText }}</span>
+    <span v-if="secondary" class="subtext" :class="secondary && 'whiteText'">{{
       buttonsubText
     }}</span>
   </button>
@@ -37,16 +37,14 @@ button {
   width: 100%;
   align-items: center;
   vertical-align: middle;
+  justify-content: center;
   background-image: url('../../../../assets/buttonOutline.svg');
   background-color: transparent;
-  // background-size: auto 100%;
-  // background-repeat: no-repeat;
-  // background-position: left top;
-  background-size: cover;
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: center center;
-  max-width: max-content;
-  border: 1px solid red;
+  border: none;
+  
   &.secondary {
     background-color:#141414;
     border: 1px solid #edcd90;
@@ -55,7 +53,10 @@ button {
     background-image: none;
   }
   .text {
-    font-size: 1.25rem;
+    display: flex;
+    margin: auto;
+    margin-top: 4px;
+    font-size: 1rem;
     font-weight: 200;
     color: #dabe75;
     font-family: 'Trajan';
