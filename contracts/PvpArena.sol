@@ -92,6 +92,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Duel) public duelByAttacker;
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
+    /// @dev character's tier when it last entered arena. Used to reset rank if it changes.
+    mapping(uint256 => uint256) public previousCharacterTierOnArena;
     /// @dev defender is in a duel that has not finished processing.
     mapping(uint256 => uint256) public seasonByCharacter;
     /// @dev excess wager by character for when they re-enter the arena
@@ -226,6 +228,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID,
         bool useShield
     ) external enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
+        // if (previousCharacterTierOnArena)
+
         if (seasonByCharacter[characterID] == 0) {
             seasonByCharacter[characterID] = currentRankedSeason;
         }
@@ -408,13 +412,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
                 (, , , uint8 defenderShieldTrait) = shields.getFightData(
                     fighterByCharacter[defenderID].shieldID,
-                    attackerTrait
+                    defenderTrait
                 );
 
                 if (
                     game.isTraitEffectiveAgainst(
                         defenderShieldTrait,
-                        defenderTrait
+                        attackerTrait
                     )
                 ) {
                     defenderShieldDefense = 10;
