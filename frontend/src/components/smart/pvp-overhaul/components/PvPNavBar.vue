@@ -9,6 +9,10 @@
         <img src="../../../../assets/crownIcon.svg" />
         <span>Leaderboard</span>
       </button>
+      <button @click="setTab(2)" :class="tabNumber === 2 && 'active'">
+        <img src="../../../../assets/crownIcon.svg" />
+        <span>Rewards</span>
+      </button>
     </nav>
   </div>
 </template>
@@ -67,8 +71,8 @@ export default {
       border-bottom: 2px solid #edcd90;
     }
   }
-  button:first-of-type {
-    margin-right: 2.5rem;
+  button:nth-of-type(2) {
+    margin: 0 2.5rem;
   }
 }
 </style>

@@ -302,6 +302,9 @@ export default {
   flex-direction: column;
   min-height: 100vh;
 }
+p, li, span {
+  font-family: 'Roboto';
+}
 .popoverWrapper {
   height: 450px;
   overflow-y: auto;
@@ -334,6 +337,7 @@ export default {
   margin-bottom: 0.75rem;
   color: #cec198;
   font-size: 1.25rem;
+  font-family: 'Trajan';
   line-height: 1.75rem;
   padding: 0;
 }
@@ -552,7 +556,6 @@ export default {
       span {
         color: #cec198;
         font-size: 0.875rem;
-        line-height: 1.25rem;
       }
     }
   }
@@ -560,7 +563,6 @@ export default {
     margin-top: 0.75rem;
     color: #cec198;
     font-size: 0.875rem;
-    line-height: 1.25rem;
   }
   .characterAttrsList {
     margin-top: 2.25rem;
@@ -568,7 +570,7 @@ export default {
       margin-bottom: 1rem;
       color: #cec198;
       font-size: 1.25rem;
-      line-height: 1.75rem;
+      font-family: 'Trajan';
     }
   }
 }
