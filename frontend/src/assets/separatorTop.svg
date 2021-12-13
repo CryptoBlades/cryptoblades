@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="667.709" height="99.72" viewBox="0 0 667.709 99.72">
+  <g id="Group_692" data-name="Group 692" transform="translate(-625.795 -429.419)">
+    <line id="Line_84" data-name="Line 84" x2="300" transform="translate(993.504 493.814)" fill="none" stroke="#edcd90" stroke-width="1"/>
+    <line id="Line_85" data-name="Line 85" x2="300" transform="translate(625.795 493.779)" fill="none" stroke="#edcd90" stroke-width="1"/>
+    <g id="Group_690" data-name="Group 690">
+      <g id="Ellipse_29" data-name="Ellipse 29" transform="translate(1010.164 492.639) rotate(150)" fill="none" stroke="#edcd90" stroke-width="2" stroke-dasharray="100 70">
+        <circle cx="36.5" cy="36.5" r="36.5" stroke="none"/>
+        <circle cx="36.5" cy="36.5" r="35.5" fill="none"/>
+      </g>
+      <g id="_x31_30_x2C__sword_x2C__fencing_x2C__sports_x2C__weapon" transform="translate(944.566 462.174)">
+        <g id="XMLID_13813_" transform="translate(-0.482)">
+          <path id="XMLID_13814_" d="M93.907,97.409l2.4-2.4L88.685,87.4a.424.424,0,0,1,.6-.6L96.9,94.414l2.4-2.4-8.134-8.134L84.289,82.14l1.49,7.142Z" transform="translate(-84.159 -82.14)" fill="#edcd90"/>
+          <rect id="XMLID_13815_" width="3.388" height="5.745" transform="translate(16.335 21.857) rotate(-45)" fill="#edcd90"/>
+          <path id="XMLID_13816_" d="M83.552,369.317a2.307,2.307,0,0,0-.687,1.575A2.028,2.028,0,0,0,84.916,373a2.3,2.3,0,0,0,1.631-.688l2-2-2.995-2.995Z" transform="translate(-82.864 -341.395)" fill="#edcd90"/>
+          <path id="XMLID_13817_" d="M372.276,370.892a2.306,2.306,0,0,0-.687-1.575l-2-2-2.995,2.995,2,2a2.3,2.3,0,0,0,1.631.688,2.028,2.028,0,0,0,2.051-2.108Z" transform="translate(-340.803 -341.395)" fill="#edcd90"/>
+          <rect id="XMLID_13818_" width="4.235" height="1.694" transform="translate(6.284 28.316) rotate(-135)" fill="#edcd90"/>
+          <rect id="XMLID_13819_" width="4.235" height="1.694" transform="translate(8.082 26.52) rotate(-135)" fill="#edcd90"/>
+          <path id="XMLID_13820_" d="M171.067,82.14l-6.874,1.744-8.434,8.434-5.99,5.99-4.362,4.362,2.4,2.4L166.073,86.8a.423.423,0,1,1,.6.6L148.4,105.664l2.4,2.4,18.778-18.778Z" transform="translate(-139.723 -82.14)" fill="#edcd90"/>
+          <rect id="XMLID_13821_" width="4.235" height="1.694" transform="translate(22.195 25.322) rotate(-45)" fill="#edcd90"/>
+          <rect id="XMLID_13822_" width="4.235" height="1.694" transform="translate(23.991 27.118) rotate(-45)" fill="#edcd90"/>
+          <rect id="XMLID_13823_" width="3.388" height="5.745" transform="translate(25.789 20.529) rotate(135)" fill="#edcd90"/>
+        </g>
+      </g>
+      <g id="Rectangle_702" data-name="Rectangle 702" transform="translate(937.844 477.529) rotate(-45)" fill="none" stroke="#edcd90" stroke-width="1">
+        <rect width="31.764" height="31.764" stroke="none"/>
+        <rect x="0.5" y="0.5" width="30.764" height="30.764" fill="none"/>
+      </g>
+    </g>
+  </g>
+</svg>

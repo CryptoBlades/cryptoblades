@@ -1,77 +1,80 @@
 <template>
-  <div>
-    <div>
-      <div>
-        <h2>Arena</h2>
-        <br/>
-        <span>Enter the Arena and win rewards ($SKILL).</span>
-        <br/>
-        <button @click="handleEnterArenaClick()">
-          Enter Arena
-        </button>
-      </div>
-
-      <button @click="setTab(0)">Equipment</button>
-      <button @click="setTab(1)">Duel History</button>
-
-      <div v-if="tab === 0">
-        <h2>Equip a Sword and a Shield (optional)</h2>
-        <br/>
-        <div>
-          <h3>WEAPON TITLE</h3>
-          <pvp-weapon
-            v-if="activeWeaponWithInformation.weaponId"
-            :stars="activeWeaponWithInformation.information.stars + 1"
-            :element="activeWeaponWithInformation.information.element"
-            :weaponId="activeWeaponWithInformation.weaponId"
+  <div class="wrapper">
+    <div class="mainWrapper">
+      <div class="arenaSignup">
+        <h1 class="title">ARENA SIGNUP</h1>
+        <p>Enter the arena and win rewards ($SKILL).</p>
+        <div></div>
+        <div class="buttonWrapper">
+          <pvp-button
+            @click="handleEnterArenaClick()"
+            buttonText="GO TO ARENA"
           />
         </div>
-        <br/>
-        <div>
-          <h3>SHIELD TITLE</h3>
-          <pvp-shield
-            v-if="activeShieldWithInformation.shieldId"
-            :stars="activeShieldWithInformation.information.stars + 1"
-            :element="activeShieldWithInformation.information.element"
-            :shieldId="activeShieldWithInformation.shieldId"
-          />
+        <div class="bottomWrapper">
+          <div class="bottomWrapperNav">
+            <button @click="setTab(0)" :class="tab === 0 && 'active'">Equipment</button>
+            <button @click="setTab(1)" :class="tab === 1 && 'active'">Duel history</button>
+          </div>
+          <div class="bottomWrapperInner">
+            <div v-if="tab === 0" class="bottomWeapons">
+              <pvp-weapon
+                v-if="activeWeaponWithInformation.weaponId"
+                :stars="activeWeaponWithInformation.information.stars + 1"
+                :element="activeWeaponWithInformation.information.element"
+                :weaponId="activeWeaponWithInformation.weaponId"
+              />
+              <br/>
+              <pvp-shield
+                v-if="activeShieldWithInformation.shieldId"
+                :stars="activeShieldWithInformation.information.stars + 1"
+                :element="activeShieldWithInformation.information.element"
+                :shieldId="activeShieldWithInformation.shieldId"
+              />
+            </div>
+            <div v-if="tab === 1" class="bottomDuels">
+              DUEL HISTORY
+            </div>
+          </div>
         </div>
       </div>
-
-      <div v-else>
-        DUEL HISTORY
+      <div class="characterImage">
+        <pvp-character :characterId="currentCharacterId" />
       </div>
-
-      <div>
-        <h2>Arena Information</h2>
-        <br/>
-        <div>
-          <h3>PVP Rewards Pool ($SKILL)</h3>
-          <br/>
-          <span>{{ formatedTierRewardsPool }}</span>
+      <div class="arenaInformation">
+        <h1 class="title">ARENA INFORMATION</h1>
+        <div class="tokenCard">
+          <!-- <img src="../../../../../assets/skillToken.png" alt="skill token" /> -->
+          <div class="tokenCardInfo">
+            <span class="text">PVP Rewards Pool ($SKILL)</span>
+            <span class="number">{{ formatedTierRewardsPool }}</span>
+          </div>
         </div>
-        <div>
-          <h3>Top Players</h3>
-          <br/>
-          <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || '-' }} / RANK: {{ tierTopRankers[0] && tierTopRankers[0].rank }}</span>
-          <br/>
-          <span>Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || '-' }} / RANK: {{ tierTopRankers[1] && tierTopRankers[1].rank }}</span>
-          <br/>
-          <span>Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || '-' }} / RANK: {{ tierTopRankers[2] && tierTopRankers[2].rank }}</span>
-          <br/>
-        </div>
-      </div>
-
-      <div>
-        <h2>{{ characterInformation.name || '' }}</h2>
-        <br/>
-        <span>Power: {{ characterInformation.power }}</span>
-        <!-- <br/>
-        <span>Damage Multiplier</span> -->
-        <br/>
-        <span>Level: {{ characterInformation.level }}</span>
-        <br/>
-        <span>Current Rank: {{ characterInformation.rank }}</span>
+        <ul class="topPlayersList">
+          <li class="header">
+            <span>Top Players</span><span>$SKILL Earned</span>
+          </li>
+          <li>
+            <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
+            <span>{{ tierTopRankers[0] && tierTopRankers[0].rank || 'N/A' }}</span>
+          </li>
+          <li>
+            <span>Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || 'N/A' }}</span>
+            <span>{{ tierTopRankers[1] && tierTopRankers[1].rank || 'N/A'}}</span>
+          </li>
+          <li>
+            <span>Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || 'N/A' }}</span>
+            <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
+          </li>
+        </ul>
+        <a href="/" class="rankings">View all rankings</a>
+        <ul class="characterAttrsList">
+          <li class="characterName">{{ characterInformation.name || '' }}</li>
+          <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
+          <!-- <li><span>Damage multiplier</span><span>453</span></li> -->
+          <li><span>Level</span><span>{{ characterInformation.level }}</span></li>
+          <li><span>Current rank</span><span>{{ characterInformation.rank }}</span></li>
+        </ul>
       </div>
     </div>
   </div>
@@ -82,13 +85,15 @@ import { mapState } from 'vuex';
 import BN from 'bignumber.js';
 import PvPWeapon from '../../components/PvPWeapon.vue';
 import PvPShield from '../../components/PvPShield.vue';
-
+import PvPButton from '../../components/PvPButton.vue';
+import PvPCharacter from '../../components/PvPCharacter.vue';
 export default {
   components: {
     'pvp-weapon': PvPWeapon,
-    'pvp-shield': PvPShield
+    'pvp-shield': PvPShield,
+    'pvp-button': PvPButton,
+    'pvp-character': PvPCharacter
   },
-
   props: {
     tierRewardsPool: {
       default: null
@@ -102,7 +107,8 @@ export default {
         name: '',
         level: null,
         power: null,
-        rank: null
+        rank: null,
+        element: null,
       }
     },
     activeWeaponWithInformation: {
@@ -118,29 +124,250 @@ export default {
       }
     },
   },
-
   data() {
     return {
       tab: 0
     };
   },
-
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount']),
-
     formatedTierRewardsPool() {
       return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
     },
   },
-
   methods: {
     setTab(tabNumber) {
       this.tab = tabNumber;
     },
-
     async handleEnterArenaClick() {
-      return 2;
+      this.$emit('enterMatchMaking');
     },
   },
 };
 </script>
+
+<style scoped lang="scss">
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+span, p, li, button, a {
+  font-family: 'Roboto';
+}
+.mainWrapper {
+  display: flex;
+  justify-content: space-between;
+}
+.title {
+  margin-bottom: 0.75rem;
+  color: #cec198;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-family: 'Trajan';
+}
+.arenaSignup {
+  p {
+    color: #b4b0a7;
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  .top {
+    display: flex;
+    margin-top: 1.5rem;
+    vertical-align: middle;
+    align-items: center;
+    .circle {
+      display: flex;
+      width: 1.75rem;
+      height: 1.75rem;
+      margin-right: 1rem;
+      align-items: center;
+      vertical-align: middle;
+      justify-content: center;
+      border-radius: 9999px;
+      border: 2px solid #cec198;
+    }
+    img {
+      height: 0.75rem;
+      width: 0.75rem;
+    }
+    p {
+      color: #cec198;
+    }
+  }
+  .buttonWrapper {
+    margin-top: 2.25rem;
+  }
+}
+.bottomWrapper {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  margin-top: 4rem;
+  .bottomWrapperNav {
+    display: flex;
+    border-bottom: 1px solid #363636;
+    button {
+      display: flex;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      align-items: center;
+      vertical-align: middle;
+      color: #b4b0a7;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      border-bottom: 2px solid transparent;
+      border-right: none;
+      border-left: none;
+      border-top: none;
+      background-color: transparent;
+      img {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
+      }
+      :hover {
+        cursor: pointer;
+      }
+      &.active {
+        color: #CEC198;
+        border-bottom: 2px solid #CEC198;
+      }
+    }
+    button:first-of-type {
+      margin-right: 2rem;
+    }
+  }
+  .bottomWrapperInner {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #363636;
+  }
+  .bottomWeapons {
+    display: flex;
+    div:first-of-type {
+      margin-right: 1rem;
+    }
+  }
+  .bottomDuels {
+    display: flex;
+    justify-content: space-between;
+    ul {
+      margin-bottom: 0;
+      padding-left: 0;
+      list-style-type: none;
+      li {
+        color: #b4b0a7;
+        &.lose {
+          color: red;
+        }
+        &.win {
+          color: green;
+        }
+      }
+      li:first-of-type {
+        color: white;
+        margin-bottom: 1rem;
+      }
+    }
+  }
+}
+.characterImage {
+  display: flex;
+  width: 50%;
+  padding: 3rem 0;
+  margin: 0 1rem;
+  @media only screen and (min-width: 1440px) {
+    width: 40%;
+    margin: 0;
+  }
+  @media only screen and (min-width: 1980px) {
+    width: 30%;
+  }
+}
+.arenaInformation {
+  display: flex;
+  flex-direction: column;
+  .tokenCard {
+    display: flex;
+    padding: 1rem 2rem 1rem 1.5rem;
+    border-radius: 0.375rem;
+    align-items: center;
+    vertical-align: middle;
+    background-color: rgba(0, 0, 0, 0.3);
+    img {
+      width: 4rem;
+      height: 4rem;
+    }
+    .tokenCardInfo {
+      display: flex;
+      flex-direction: column;
+      margin-left: 1rem;
+      .text {
+        color: #cec198;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+      }
+      .number {
+        color: #ffffff;
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+      }
+    }
+  }
+  .topPlayersList,
+  .characterAttrsList {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    padding: 0;
+    span {
+      color: #b4b0a7;
+      font-size: 0.75rem;
+      line-height: 1rem;
+    }
+    span:nth-of-type(2) {
+      margin-left: auto;
+    }
+    li {
+      display: flex;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #363636;
+    }
+    li:first-of-type,
+    li:last-of-type {
+      padding-bottom: 0;
+      border-style: none;
+    }
+  }
+  .topPlayersList {
+    .header {
+      margin-bottom: 1rem;
+      span {
+        color: #cec198;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+      }
+    }
+  }
+  .rankings {
+    margin-top: 0.75rem;
+    color: #cec198;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  .characterAttrsList {
+    margin-top: 2.25rem;
+    .characterName {
+      margin-bottom: 1rem;
+      color: #cec198;
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+      font-family: 'Trajan';
+    }
+  }
+}
+</style>

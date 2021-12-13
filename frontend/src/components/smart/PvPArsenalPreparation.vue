@@ -289,7 +289,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 
 .equipped-container {
   background-color: transparent;
