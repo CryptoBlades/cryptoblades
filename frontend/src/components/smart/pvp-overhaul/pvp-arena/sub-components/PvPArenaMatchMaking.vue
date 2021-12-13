@@ -75,7 +75,7 @@
           <img :src="getOpponentElementSrc" alt="opponent element" />
         </div>
         <div class="characterImageWrapper">
-          <pvp-character :characterId="this.defenderId" />
+          <!-- <pvp-character :characterId="this.duel.defenderId" /> -->
         </div>
         <div class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>

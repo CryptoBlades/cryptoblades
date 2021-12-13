@@ -27,7 +27,7 @@ export default {
   data() {
     return {
       tab: 0,
-      isCharacterMatchmaking: Boolean
+      isCharacterMatchmaking: false
     };
   },
 
