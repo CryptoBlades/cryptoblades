@@ -44,8 +44,8 @@ button {
   background-image: url('../../../../assets/buttonOutline.svg');
   background-color: transparent;
   background-repeat: no-repeat;
-  background-position: center;
   background-size: 100% 100%;
+  object-fit: fill;
   border: none;
 
   img {
@@ -61,22 +61,21 @@ button {
     border-radius: 5px;
     padding: 0.75rem;
     background-image: none;
+    border: 1px solid #ffffff50;
     &.disabled {
       pointer-events: none;
       opacity: 50%;
-      border: 1px solid #ffffff50;
     }
   }
 
   .text {
     display: flex;
     margin: 0;
+    margin-bottom: -4px;
     align-items: center;
     vertical-align: middle;
     font-size: 1rem;
-    line-height: 1.5rem;
     white-space: nowrap;
-    padding-top: 4px;
     font-weight: 200;
     font-family: 'Trajan';
     color: #EDCD90;

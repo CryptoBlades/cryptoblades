@@ -55,13 +55,14 @@
           <pvp-button v-else
           @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
         </div>
-        <pvp-button
-          @click="reRollOpponent" :disabled="loading || !hasPendingDuel || isCharacterInDuelQueue"
-          buttonText="Re-roll Opponent"
-          :buttonsubText="'$SKILL: ' + formattedReRollCost"
-          :secondary="true"
-          class="reRollOpponentButton"
-        />
+        <div class="rerollButtonWrapper">
+          <pvp-button
+            @click="reRollOpponent" :disabled="loading || !hasPendingDuel || isCharacterInDuelQueue"
+            buttonText="Re-roll Opponent"
+            :buttonsubText="'$SKILL: ' + formattedReRollCost"
+            :secondary="true"
+          />
+        </div>
         <div class="leaveArenaButtonWrapper">
           <pvp-button
             @click="leaveArena"
@@ -642,12 +643,13 @@ span, p, li, button {
       height: 5.5rem;
     }
   }
-  .leaveArenaButtonWrapper {
+  .rerollButtonWrapper {
     width: 100%;
-  }
-  .reRollOpponentButton {
     height: 5rem;
     margin: 1.5rem 0;
+  }
+  .leaveArenaButtonWrapper {
+    width: 100%;
   }
   p {
     font-size: 2.75rem;

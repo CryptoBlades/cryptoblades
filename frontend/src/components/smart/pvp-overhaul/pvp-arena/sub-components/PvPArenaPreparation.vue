@@ -470,15 +470,9 @@ p, li, span {
     }
   }
   .enterArenaButtonWrapper {
-    display: flex;
-    flex-direction: column;
-    margin: 4rem 0 0 2.5rem;
-    button {
-      max-width: max-content;
-      color: #dabe75;
-      background-color: #151515;
-      border: none;
-    }
+    width: 15rem;
+    height: 5rem;
+    margin-top: 3rem;
   }
 }
 .characterImage {
