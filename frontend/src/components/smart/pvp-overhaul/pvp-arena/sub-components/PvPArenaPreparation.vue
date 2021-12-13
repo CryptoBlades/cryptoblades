@@ -109,7 +109,6 @@
             :buttonsubText="'$SKILL: ' + formattedEntryWager"
             :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
           />
-          <!-- <button @click="handleEnterArenaClick()">enter arena</button> -->
         </div>
       </div>
       <div class="characterImage">
@@ -311,6 +310,7 @@ export default {
   background-color: black;
   border: 1px solid #cec198;
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
   .popoverTitle {
     color: #cec198;
     font-size: 1.25rem;
@@ -322,9 +322,6 @@ export default {
     grid-template-rows: repeat(4, 1fr);
     grid-column-gap: 1rem;
     grid-row-gap: 2rem;
-    .disabled {
-      color: white;
-    }
   }
 }
 .mainWrapper {
@@ -476,6 +473,7 @@ export default {
       max-width: max-content;
       color: #dabe75;
       background-color: #151515;
+      border: none;
     }
   }
 }

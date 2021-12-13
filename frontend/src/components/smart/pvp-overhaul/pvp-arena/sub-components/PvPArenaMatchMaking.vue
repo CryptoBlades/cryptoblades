@@ -67,6 +67,7 @@
           :disabled="loading || isCharacterInDuelQueue"
           buttonText="Leave Arena"
           :secondary="true"
+          class="leaveArenaButton"
         />
       </div>
       <div class="characterWrapper">
@@ -74,7 +75,7 @@
           <img :src="getOpponentElementSrc" alt="opponent element" />
         </div>
         <div class="characterImageWrapper">
-          <!-- <pvp-character :characterId="id" /> -->
+          <pvp-character :characterId="this.defenderId" />
         </div>
         <div class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
@@ -608,7 +609,7 @@ span, p, li, button {
   }
   .weapons {
     position: absolute;
-    bottom: -15%;
+    bottom: -12%;
     display: flex;
     left: 0;
     justify-content: center;
@@ -627,6 +628,9 @@ span, p, li, button {
   width: 12rem;
   .matchButtonsWrapper {
     width: 100%;
+  }
+  .leaveArenaButton {
+    height: 55px;
   }
   .reRollOpponentButton {
     margin-top: 1.5rem;
