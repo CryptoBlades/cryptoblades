@@ -198,7 +198,8 @@ span, p, li, button, a {
   }
   .buttonWrapper {
     margin-top: 2.25rem;
-    width: 90%;
+    height: 5rem;
+    width: 80%;
   }
 }
 .bottomWrapper {

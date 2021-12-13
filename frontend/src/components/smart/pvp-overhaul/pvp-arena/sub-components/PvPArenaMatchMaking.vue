@@ -49,7 +49,7 @@
           <img class="spinner" src="../../../../../assets/loadingSpinner.svg" />
         </div>
         <p v-else>{{ this.decisionTimeLeft }}</p>
-        <button v-if="isCharacterInDuelQueue">IN-PROGRESS</button>
+        <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS"/>
         <div v-else class="matchButtonsWrapper">
           <pvp-button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
           <pvp-button v-else @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" buttonText="DUEL" />

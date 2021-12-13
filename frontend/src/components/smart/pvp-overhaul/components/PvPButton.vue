@@ -40,11 +40,11 @@ button {
   justify-content: center;
   background-image: url('../../../../assets/buttonOutline.svg');
   background-color: transparent;
-  background-size: contain;
   background-repeat: no-repeat;
-  background-position: center center;
+  background-position: center top;
+  background-size: 100% 100%;
   border: none;
-  
+
   &.secondary {
     background-color:#141414;
     border: 1px solid #edcd90;
