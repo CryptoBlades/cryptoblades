@@ -262,7 +262,7 @@ export default {
 
       try {
         await this.contracts().PvpArena.methods.withdrawFromArena(this.currentCharacterId).send({ from: this.defaultAccount });
-        // TODO: Redirect to preparation view
+
         this.$emit('leaveArena');
       } catch (err) {
         console.log('leave arena error: ', err);

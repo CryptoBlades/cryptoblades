@@ -140,7 +140,7 @@
             <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
           </li>
         </ul>
-        <a href="#" class="rankings">View all rankings</a>
+        <!-- <a href="#" class="rankings">View all rankings</a> -->
         <ul class="characterAttrsList">
           <li class="characterName">{{ characterInformation.name || '' }}</li>
           <li><span>Power </span><span>{{ characterInformation.power }}</span></li>

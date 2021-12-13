@@ -1,11 +1,15 @@
 <template>
-  <div class="pvpWrapper" @isMatchmaking="isCharacterMatchmaking">
+  <div class="pvpWrapper">
     <div v-if="!currentCharacterId && currentCharacterId !== 0">
       You need at least one character to enter PvP!
     </div>
     <div v-else>
-      <pvp-nav-bar :tabNumber="tab" @changeTab="onChangeTab" v-if="!isCharacterMatchmaking" />
-      <pvp-arena v-if="tab === 0" />
+      <pvp-nav-bar :tabNumber="tab" @changeTab="onChangeTab" v-if="!isCharacterMatchMaking" />
+      <pvp-arena
+        v-if="tab === 0"
+        @enterMatchMaking="handleEnterMatchMaking"
+        @leaveMatchMaking="handleLeaveMatchMaking"
+      />
       <pvp-leaderboards v-if="tab === 1" />
     </div>
   </div>
@@ -27,7 +31,7 @@ export default {
   data() {
     return {
       tab: 0,
-      isCharacterMatchmaking: false
+      isCharacterMatchMaking: false
     };
   },
 
@@ -39,6 +43,14 @@ export default {
     // TODO: Use router for this.
     onChangeTab(tabNumber) {
       this.tab = tabNumber;
+    },
+
+    handleEnterMatchMaking() {
+      this.isCharacterMatchMaking = true;
+    },
+
+    handleLeaveMatchMaking() {
+      this.isCharacterMatchMaking = false;
     }
   }
 };

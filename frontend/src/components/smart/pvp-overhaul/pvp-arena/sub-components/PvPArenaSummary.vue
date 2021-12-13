@@ -67,7 +67,7 @@
             <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
           </li>
         </ul>
-        <a href="/" class="rankings">View all rankings</a>
+        <!-- <a href="/" class="rankings">View all rankings</a> -->
         <ul class="characterAttrsList">
           <li class="characterName">{{ characterInformation.name || '' }}</li>
           <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
@@ -94,6 +94,7 @@ export default {
     'pvp-button': PvPButton,
     'pvp-character': PvPCharacter
   },
+
   props: {
     tierRewardsPool: {
       default: null
@@ -124,21 +125,25 @@ export default {
       }
     },
   },
+
   data() {
     return {
       tab: 0
     };
   },
+
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount']),
     formatedTierRewardsPool() {
       return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
     },
   },
+
   methods: {
     setTab(tabNumber) {
       this.tab = tabNumber;
     },
+
     async handleEnterArenaClick() {
       this.$emit('enterMatchMaking');
     },

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="loading">
-        <img class="loadingSpinner" src="../../../../../assets/loadingSpinner.svg" />
+        <img class="loadingSpinner" src="../../../../assets/loadingSpinner.svg" />
     </div>
     <div v-else>
       <pvp-arena-preparation
@@ -150,11 +150,12 @@ export default {
 
     handleEnterMatchMaking() {
       this.isMatchMaking = true;
-      this.$emit('isMatchmaking', this.isMatchMaking);
+      this.$emit('enterMatchMaking');
     },
 
     leaveArena() {
       this.isCharacterInArena = false;
+      this.$emit('leaveMatchMaking');
     },
 
     async updateOpponentInformation(defenderId) {
@@ -302,6 +303,8 @@ export default {
   watch: {
     async currentCharacterId(value) {
       this.loading = true;
+
+      this.$emit('leaveMatchMaking');
 
       if (value !== null) {
         this.characterInformation.name = getCharacterNameFromSeed(value);
