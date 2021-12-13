@@ -1,9 +1,8 @@
 <template>
   <div>
     <div v-if="loading">
-      LOADING!
+        <img class="loadingSpinner" src="../../../../../assets/loadingSpinner.svg" />
     </div>
-
     <div v-else>
       <pvp-arena-preparation
         v-if="!isCharacterInArena"
@@ -142,6 +141,7 @@ export default {
 
     handleEnterMatchMaking() {
       this.isMatchMaking = true;
+      this.$emit('isMatchmaking', this.isMatchMaking);
     },
 
     async updateOpponentInformation(defenderId) {
@@ -374,3 +374,19 @@ export default {
   }
 };
 </script>
+
+<style scoped lang="scss">
+  .loadingSpinner {
+    height: 3rem;
+    width: 3rem;
+    animation: spin 1s linear infinite;
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  }
+</style>

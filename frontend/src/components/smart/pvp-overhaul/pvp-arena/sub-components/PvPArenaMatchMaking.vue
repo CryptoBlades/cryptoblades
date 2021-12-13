@@ -483,7 +483,7 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  margin-top: 3.5rem;
+  margin-top: 1rem;
 }
 span, p, li, button {
   font-family: 'Roboto';
