@@ -33,7 +33,18 @@
               />
             </div>
             <div v-if="tab === 1" class="bottomDuels">
-              DUEL HISTORY
+              <div>
+                <h3>Date</h3>
+                <span></span>
+              </div>
+              <div>
+                <h3>Result</h3>
+                <span></span>
+              </div>
+              <div>
+                <h3>MMR</h3>
+                <span></span>
+              </div>
             </div>
           </div>
         </div>
