@@ -1,5 +1,6 @@
 <template>
-  <div class="leaderboardsWrapper">
+  <div class="leaderboardWrapper">
+    <h1 class="leaderboardTitle">ARENA LEADERBOARD</h1>
     <div class="filtersWrapper">
       <div class="selectWrapper">
         <label for="tier">Tier: </label>
@@ -90,10 +91,18 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.leaderboardsWrapper {
+.leaderboardWrapper {
   display: flex;
   flex-direction: column;
   width: 100%;
+  .leaderboardTitle {
+    margin-bottom: 1rem;
+    padding: 0;
+    color: #cec198;
+    font-size: 1.25rem;
+    font-family: 'Trajan';
+    line-height: 1.75rem;
+  }
   .filtersWrapper {
     display: flex;
     height: 2.5rem;
