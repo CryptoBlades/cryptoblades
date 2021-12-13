@@ -34,7 +34,7 @@
             </div>
             <div v-if="tab === 1" class="bottomDuels">
               <div v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
-                <span>Date: {{ new Date(duel.timestamp * 1000) }}</span>
+                <span>Date: {{ dayjs(new Date(duel.timestamp * 1000)).format('YYYY/MM/DD') }}</span>
                 <span>Result: {{ duel.attackerWon ? 'Win' : 'Lose' }}</span>
               </div>
             </div>
@@ -90,6 +90,8 @@ import PvPWeapon from '../../components/PvPWeapon.vue';
 import PvPShield from '../../components/PvPShield.vue';
 import PvPButton from '../../components/PvPButton.vue';
 import PvPCharacter from '../../components/PvPCharacter.vue';
+import dayjs from 'dayjs';
+
 export default {
   components: {
     'pvp-weapon': PvPWeapon,
@@ -134,7 +136,8 @@ export default {
 
   data() {
     return {
-      tab: 0
+      tab: 0,
+      dayjs
     };
   },
 
