@@ -62,6 +62,11 @@ button {
     border-radius: 5px;
     padding: 0.75rem;
     background-image: none;
+    &.disabled {
+      pointer-events: none;
+      opacity: 50%;
+      border: 1px solid #ffffff50;
+    }
   }
   .text {
     display: flex;
@@ -91,6 +96,5 @@ button {
 .disabled {
   pointer-events: none;
   opacity: 50%;
-  border: 1px solid #ffffff50;
 }
 </style>
