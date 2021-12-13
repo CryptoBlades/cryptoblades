@@ -88,6 +88,7 @@ button {
   .subtext {
     font-size: 0.75rem;
     color: #b4b0a7;
+    margin-top: 0.25rem;
     font-family: 'Roboto';
     &.whiteText {
       color: white;
