@@ -1,6 +1,6 @@
 <template>
   <div class="pvpCharacterWrapper">
-    <img :src="characterArtSrc" alt="character" class="characterImg" />
+    <img v-if="characterId || characterId === 0" :src="characterArtSrc" alt="character" class="characterImg" />
     <img src="../../../../assets/placeholder/standImage.png" alt="stand" class="characterStand" />
   </div>
 </template>

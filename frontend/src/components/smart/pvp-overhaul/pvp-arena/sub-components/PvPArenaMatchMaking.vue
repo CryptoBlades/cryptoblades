@@ -72,10 +72,10 @@
       </div>
       <div class="characterWrapper">
         <div class="elementWrapper">
-          <img :src="getOpponentElementSrc" alt="opponent element" />
+          <img v-if="opponentInformation.id" :src="getOpponentElementSrc" alt="opponent element" />
         </div>
         <div class="characterImageWrapper">
-          <!-- <pvp-character :characterId="this.duel.defenderId" /> -->
+          <pvp-character :characterId="opponentInformation.id" />
         </div>
         <div class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
@@ -101,7 +101,6 @@
         </div>
       </div>
     </div>
-    <button @click="goBackToSummary" :disabled="loading">BACK TO ARENA SUMMARY</button>
     <!-- TODO: Get rank variation from contract -->
     <pvp-duel-modal
       v-if="duelResult.result"
@@ -117,7 +116,6 @@
 </template>
 
 <script>
-// import PvPCharacter from '../../components/PvPCharacter.vue';
 import BN from 'bignumber.js';
 import { mapState } from 'vuex';
 import PvPWeapon from '../../components/PvPWeapon.vue';
@@ -168,6 +166,7 @@ export default {
     },
     opponentInformation: {
       default: {
+        if: null,
         element: '',
         name: '',
         level: null,
@@ -258,17 +257,13 @@ export default {
   },
 
   methods: {
-    // TODO: delete this
-    goBackToSummary() {
-      this.$emit('goBackToSummary');
-    },
-
     async leaveArena() {
       this.loading = true;
 
       try {
         await this.contracts().PvpArena.methods.withdrawFromArena(this.currentCharacterId).send({ from: this.defaultAccount });
         // TODO: Redirect to preparation view
+        this.$emit('leaveArena');
       } catch (err) {
         console.log('leave arena error: ', err);
       }
