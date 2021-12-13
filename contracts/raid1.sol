@@ -185,14 +185,15 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
                                     characterID,
                                     uint8(staminaCost),
-                                    true)
+                                    true,
+                                    2)
                                 );
 
         (/*int128 weaponMultTarget*/,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(msg.sender,
-                weaponID, charTrait, uint8(durabilityCost), true);
+                weaponID, charTrait, uint8(durabilityCost), true, 2);
         
         uint24 power = getPlayerFinalPower(
             getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
@@ -335,6 +336,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
                         raidPlayerPower[claimRaidIndex]/raidParticipants[claimRaidIndex].length)
                 );
             }
+            weapons.setNftVar(raider.wepID, 1, 0); // NFTVAR_BUSY
             characters.processRaidParticipation(raider.charID, victory, uint16(earlyMultiplier.mulu(xpReward)));
         }
 
