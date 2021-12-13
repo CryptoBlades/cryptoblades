@@ -54,7 +54,6 @@ export interface MerchandiseOrder {
   items: Item[];
   shipping?: string;
   wallet?: string;
-  totalPriceInSkill?: number;
 }
 
 export interface Item {

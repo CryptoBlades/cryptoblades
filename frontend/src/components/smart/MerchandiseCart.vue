@@ -125,7 +125,9 @@ export default Vue.extend({
       this.$root.$emit('merchandise-address-modal', this.totalPriceInSkill, this.cartEntries);
     },
     async openCartModal() {
-      this.$root.$emit('merchandise-cart-modal', true);
+      this.skillPrice = +await this.currentSkillPrice();
+      this.calculateTotalPrice();
+      this.showModal = true;
     },
     isFileTypePreview(file: File) {
       return file.type === FileType.PREVIEW;

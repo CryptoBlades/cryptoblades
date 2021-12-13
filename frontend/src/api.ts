@@ -18,6 +18,7 @@ interface ApiResponse<T> {
     offset: number;
     total: number;
   };
+  totalPriceInSkill?: string;
 }
 
 const client = axios.create({

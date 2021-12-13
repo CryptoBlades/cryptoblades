@@ -171,18 +171,19 @@ export default Vue.extend({
         items: orderItems,
         shipping: this.selectedShippingRate.id,
         wallet: this.defaultAccount,
-        totalPriceInSkill: this.totalPriceInSkill,
       };
 
       try {
         this.$root.$emit('merchandise-order-loading', true);
         this.isOrderLoading = true;
         const response = await api.createMerchandiseOrder(merchandiseOrder);
-        await this.createOrder({
-          orderNumber: response.result.id,
-          payingAmount: toBN(this.totalPriceInSkill),
-        });
-        this.$root.$emit('order-complete-modal', response.result.id, response.result.shipping_service_name);
+        if (response.totalPriceInSkill) {
+          await this.createOrder({
+            orderNumber: response.result.id,
+            payingAmount: toBN(response.totalPriceInSkill),
+          });
+          this.$root.$emit('order-complete-modal', response.result.id, response.result.shipping_service_name);
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -236,6 +237,7 @@ export default Vue.extend({
   async mounted() {
     this.$root.$on('order-summary-modal', async (recipient: Recipient, cartEntries: CartEntry[]) => {
       if (recipient) {
+        this.selectedShippingRate = undefined;
         this.cartEntries = cartEntries;
         this.recipient = recipient;
         this.showModal = true;
