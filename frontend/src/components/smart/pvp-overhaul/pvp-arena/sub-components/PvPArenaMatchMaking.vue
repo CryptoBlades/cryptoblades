@@ -51,9 +51,8 @@
         <p v-else>{{ this.decisionTimeLeft }}</p>
         <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS"/>
         <div v-else class="matchButtonsWrapper">
-          <!-- <pvp-button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" /> -->
-          <pvp-button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading" :duelButton="true" buttonText="DUEL" />
-          <pvp-button v-else @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" buttonText="DUEL" />
+          <pvp-button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
+          <pvp-button v-else @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
         </div>
         <pvp-button
           class="reRollOpponentButton"
