@@ -12,6 +12,7 @@
     "@openzeppelin/contracts-upgradeable": "^3.4.1",
     "@truffle/hdwallet-provider": "^1.5.0",
     "abdk-libraries-solidity": "2.4.0",
+    "dayjs": "^1.10.7",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
