@@ -23,7 +23,7 @@ export function getCharacterArt(character: ICharacter) {
 }
 
 export function getCharacterArtById(characterId: number) {
-  if (!characterId) {
+  if (!characterId && characterId !== 0) {
     return null;
   }
 

@@ -27,7 +27,6 @@
         @enterMatchMaking="handleEnterMatchMaking"
       />
       <!-- Should use router -->
-      <!-- TODO: delete go back to summary functionality -->
       <pvp-arena-matchmaking
         v-else-if="isCharacterInArena && isMatchMaking"
         :characterInformation="characterInformation"
@@ -38,8 +37,8 @@
         :opponentActiveShieldWithInformation="opponentActiveShieldWithInformation"
         @updateOpponentInformation="updateOpponentInformation"
         @clearOpponentInformation="clearOpponentInformation"
-        @goBackToSummary="goBackToSummary"
         @kickCharacterFromArena="kickCharacterFromArena"
+        @leaveArena="leaveArena"
       />
     </div>
   </div>
@@ -92,6 +91,7 @@ export default {
         information: {}
       },
       opponentInformation: {
+        id: null,
         element: '',
         name: '',
         level: null,
@@ -113,11 +113,6 @@ export default {
   },
 
   methods: {
-    // TODO: delete this
-    goBackToSummary() {
-      this.isMatchMaking = false;
-    },
-
     async getWeaponInformation(weaponId) {
       const { element, stars } = formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
 
@@ -136,15 +131,35 @@ export default {
       };
     },
 
-    handleEnteredArena() {
+    async handleEnteredArena() {
       this.isCharacterInArena = true;
+
+      const fighter = formatFighter(await this.contracts().PvpArena.methods.fighterByCharacter(this.currentCharacterId).call({ from: this.defaultAccount }));
+
+      this.activeWeaponWithInformation = {
+        weaponId: fighter.weaponID,
+        information: await this.getWeaponInformation(fighter.weaponID)
+      };
+
+      if (fighter.useShield) {
+        this.activeShieldWithInformation = {
+          shieldId: fighter.shieldID,
+          information: await this.getShieldInformation(fighter.shieldID)
+        };
+      }
     },
 
     handleEnterMatchMaking() {
       this.isMatchMaking = true;
     },
 
+    leaveArena() {
+      this.isCharacterInArena = false;
+    },
+
     async updateOpponentInformation(defenderId) {
+      this.opponentInformation.id = defenderId;
+
       this.opponentInformation.name = getCharacterNameFromSeed(defenderId);
 
       this.opponentInformation.level = await this.contracts().Characters.methods.getLevel(defenderId).call({ from: this.defaultAccount });
@@ -162,14 +177,17 @@ export default {
         information: await this.getWeaponInformation(fighter.weaponID)
       };
 
-      this.opponentActiveShieldWithInformation = {
-        shieldId: fighter.shieldID,
-        information: await this.getShieldInformation(fighter.shieldID)
-      };
+      if (fighter.useShield) {
+        this.opponentActiveShieldWithInformation = {
+          shieldId: fighter.shieldID,
+          information: await this.getShieldInformation(fighter.shieldID)
+        };
+      }
     },
 
     async clearOpponentInformation() {
       this.opponentInformation = {
+        id: null,
         element: '',
         name: '',
         level: null,
@@ -257,10 +275,12 @@ export default {
           information: await this.getWeaponInformation(fighter.weaponID)
         };
 
-        this.activeShieldWithInformation = {
-          shieldId: fighter.shieldID,
-          information: await this.getShieldInformation(fighter.shieldID)
-        };
+        if (fighter.useShield) {
+          this.activeShieldWithInformation = {
+            shieldId: fighter.shieldID,
+            information: await this.getShieldInformation(fighter.shieldID)
+          };
+        }
       }
 
       this.tierRewardsPool = await this.contracts().PvpArena.methods.getRankingRewardsPool(this.characterInformation.tier).call({ from: this.defaultAccount });
@@ -347,10 +367,12 @@ export default {
             information: await this.getWeaponInformation(fighter.weaponID)
           };
 
-          this.activeShieldWithInformation = {
-            shieldId: fighter.shieldID,
-            information: await this.getShieldInformation(fighter.shieldID)
-          };
+          if (fighter.useShield) {
+            this.activeShieldWithInformation = {
+              shieldId: fighter.shieldID,
+              information: await this.getShieldInformation(fighter.shieldID)
+            };
+          }
         }
 
         this.tierRewardsPool = await this.contracts().PvpArena.methods.getRankingRewardsPool(this.characterInformation.tier)
