@@ -93,7 +93,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev ranking points by character
     mapping(uint256 => uint256) public characterRankingPoints;
     /// @dev character's tier when it last entered arena. Used to reset rank if it changes.
-    mapping(uint256 => uint256) public previousCharacterTierOnArena;
+    mapping(uint256 => uint8) public previousCharacterTierOnArena;
+    /// @dev If a character has ever been inside the arena before.
+    mapping(uint256 => bool) public hasEnteredArena;
     /// @dev defender is in a duel that has not finished processing.
     mapping(uint256 => uint256) public seasonByCharacter;
     /// @dev excess wager by character for when they re-enter the arena
@@ -228,7 +230,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID,
         bool useShield
     ) external enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
-        // if (previousCharacterTierOnArena)
+        if (previousCharacterTierOnArena[characterID] != getArenaTier(characterID) && hasEnteredArena[characterID]) {
+            characterRankingPoints[characterID] = 0;
+        }
 
         if (seasonByCharacter[characterID] == 0) {
             seasonByCharacter[characterID] = currentRankedSeason;
@@ -257,6 +261,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             wager.add(getCharacterWager(characterID)),
             useShield
         );
+
+        if (!hasEnteredArena[characterID]) {
+            hasEnteredArena[characterID] = true;
+        }
+        
+        previousCharacterTierOnArena[characterID] = getArenaTier(characterID);
 
         excessWagerByCharacter[characterID] = 0;
 

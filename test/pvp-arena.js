@@ -223,6 +223,82 @@ contract("PvpArena", (accounts) => {
         ).to.equal(currentSeason);
       });
 
+      it("should reset character's rank if it changes tier", async () => {
+        const weapon1ID = await helpers.createWeapon(
+          accounts[1],
+          "111",
+          helpers.elements.water,
+          {
+            weapons,
+          }
+        );
+        const weapon2ID = await helpers.createWeapon(
+          accounts[2],
+          "111",
+          helpers.elements.fire,
+          {
+            weapons,
+          }
+        );
+
+        character1ID = await createCharacterInPvpTier(
+          accounts[1],
+          2,
+          "222",
+          weapon1ID
+        );
+        character2ID = await createCharacterInPvpTier(
+          accounts[2],
+          2,
+          "222",
+          weapon2ID
+        );
+
+        await characters.setTrait(character1ID, helpers.elements.water, {
+          from: accounts[0],
+        });
+        await characters.setTrait(character2ID, helpers.elements.fire, {
+          from: accounts[0],
+        });
+
+        await time.increase(await pvpArena.unattackableSeconds());
+        await pvpArena.requestOpponent(character1ID, {
+          from: accounts[1],
+        });
+
+        await pvpArena.preparePerformDuel(character1ID, { from: accounts[1] });
+
+        let duelQueue = await pvpArena.getDuelQueue();
+
+        await pvpArena.performDuels(duelQueue, {
+          from: accounts[0],
+        });
+
+        expect(
+          (
+            await pvpArena.getCharacterRankingPoints(character1ID, {
+              from: accounts[1],
+            })
+          ).toString()
+        ).to.equal("5");
+
+        await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+
+        await helpers.levelUpTo(character1ID, 30, { characters });
+
+        await pvpArena.enterArena(character1ID, weapon1ID, 0, false, {
+          from: accounts[1],
+        });
+
+        expect(
+          (
+            await pvpArena.getCharacterRankingPoints(character1ID, {
+              from: accounts[1],
+            })
+          ).toString()
+        ).to.equal("0");
+      });
+
       it("should reset character's rank and place it in current season if it's off-season. Resets rankings by tier as well (leaderboard)", async () => {
         const weapon1ID = await helpers.createWeapon(
           accounts[1],
