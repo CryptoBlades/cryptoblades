@@ -171,6 +171,7 @@ export default Vue.extend({
         items: orderItems,
         shipping: this.selectedShippingRate.id,
         wallet: this.defaultAccount,
+        currentChain: localStorage.getItem('currentChain') || 'BSC',
       };
 
       try {

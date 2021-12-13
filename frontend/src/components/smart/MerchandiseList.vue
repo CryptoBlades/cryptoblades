@@ -54,6 +54,7 @@ export interface MerchandiseOrder {
   items: Item[];
   shipping?: string;
   wallet?: string;
+  currentChain?: string;
 }
 
 export interface Item {
