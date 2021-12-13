@@ -465,7 +465,6 @@ p, li, span {
         margin-left: 0.5rem;
         color: #b4b0a7;
         font-size: 0.875rem;
-        line-height: 1rem;
       }
     }
   }
