@@ -95,6 +95,9 @@ export default {
   display: flex;
   flex-direction: column;
   width: 100%;
+  label, select, option, ul, li, span {
+    font-family: 'Roboto';
+  }
   .leaderboardTitle {
     margin-bottom: 1rem;
     padding: 0;
@@ -148,17 +151,17 @@ export default {
     }
     .selectWrapper:first-of-type {
       select {
-        padding-left: 2.5rem;
+        padding-left: 2.75rem;
       }
     }
     .selectWrapper:nth-of-type(2) {
       select {
-        padding-left: 4rem;
+        padding-left: 4.75rem;
       }
     }
     .selectWrapper:last-of-type {
       select {
-        padding-left: 7.25rem;
+        padding-left: 8.75rem;
       }
     }
   }

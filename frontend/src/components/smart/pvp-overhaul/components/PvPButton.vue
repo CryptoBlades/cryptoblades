@@ -47,7 +47,6 @@ button {
   background-repeat: no-repeat;
   background-position: center top;
   background-size: 100% 100%;
-  border: none;
 
   img {
     height: 1.25rem;
@@ -68,16 +67,19 @@ button {
       border: 1px solid #ffffff50;
     }
   }
+
   .text {
     display: flex;
-    margin: auto;
+    margin: 0;
     align-items: center;
     vertical-align: middle;
-    margin-top: 4px;
     font-size: 1rem;
+    line-height: 1.5rem;
+    white-space: nowrap;
+    padding-top: 4px;
     font-weight: 200;
-    color: #EDCD90;
     font-family: 'Trajan';
+    color: #EDCD90;
     &.whiteText {
       font-size: 1rem;
       font-weight: 400;
@@ -86,8 +88,9 @@ button {
     }
   }
   .subtext {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #b4b0a7;
+    font-family: 'Roboto';
     &.whiteText {
       color: white;
     }
