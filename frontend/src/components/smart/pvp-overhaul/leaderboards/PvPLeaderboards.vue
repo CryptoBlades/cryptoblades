@@ -1,6 +1,7 @@
 <template>
   <div class="leaderboardWrapper">
-    <h1 class="leaderboardTitle">ARENA LEADERBOARD</h1>
+    Leaderboards coming soon!
+    <!-- <h1 class="leaderboardTitle">ARENA LEADERBOARD</h1>
     <div class="filtersWrapper">
       <div class="selectWrapper">
         <label for="tier">Tier: </label>
@@ -54,7 +55,7 @@
           <span>3</span>
         </li>
       </ul>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -63,27 +64,27 @@ export default {
   data() {
     return {
       players: [
-        {
-          name: 'Player1',
-          rank: 1,
-          level: 55,
-          element: 'fire',
-          earnedSkill: 21
-        },
-        {
-          name: 'Player2',
-          rank: 2,
-          level: 48,
-          element: 'fire',
-          earnedSkill: 20
-        },
-        {
-          name: 'Player3',
-          rank: 3,
-          level: 13,
-          element: 'earth',
-          earnedSkill: 19
-        }
+        // {
+        //   name: 'Player1',
+        //   rank: 1,
+        //   level: 55,
+        //   element: 'fire',
+        //   earnedSkill: 21
+        // },
+        // {
+        //   name: 'Player2',
+        //   rank: 2,
+        //   level: 48,
+        //   element: 'fire',
+        //   earnedSkill: 20
+        // },
+        // {
+        //   name: 'Player3',
+        //   rank: 3,
+        //   level: 13,
+        //   element: 'earth',
+        //   earnedSkill: 19
+        // }
       ]
     };
   }
