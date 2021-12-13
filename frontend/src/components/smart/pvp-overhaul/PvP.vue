@@ -7,6 +7,7 @@
       <pvp-nav-bar :tabNumber="tab" @changeTab="onChangeTab" v-if="!isCharacterMatchmaking" />
       <pvp-arena v-if="tab === 0" />
       <pvp-leaderboards v-if="tab === 1" />
+      <pvp-rewards v-if="tab === 2" />
     </div>
   </div>
 </template>
@@ -15,11 +16,13 @@
 import { mapState } from 'vuex';
 import PvPNavBar from './components/PvPNavBar.vue';
 import PvPLeaderboards from './leaderboards/PvPLeaderboards.vue';
+import PvPRewards from './rewards/PvPRewards.vue';
 import PvPArena from './pvp-arena/PvPArena.vue';
 
 export default {
   components: {
     'pvp-nav-bar': PvPNavBar,
+    'pvp-rewards': PvPRewards,
     'pvp-arena': PvPArena,
     'pvp-leaderboards': PvPLeaderboards
   },
