@@ -364,7 +364,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 0);
         weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 0);
-        shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
+        if(fighter.useShield)
+            shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
     }
 
     /// @dev performs all queued duels
@@ -924,7 +925,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 0);
         weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 0);
-        shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
+        if(fighter.useShield)
+            shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
     }
 
     /// @dev attempts to find an opponent for a character.
