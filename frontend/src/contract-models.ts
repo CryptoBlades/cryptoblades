@@ -6,9 +6,6 @@ import {
   WeaponTrait,
   WeaponElement,
   IRaidState,
-  IPvPFighterState,
-  IDuelByAttacker,
-  IDuelResult,
   IPartnerProject
 } from './interfaces';
 import { Nft } from './interfaces/Nft';
@@ -198,7 +195,7 @@ export function raidFromContract(data: string[]): IRaidState {
   };
 }
 
-export function pvpFighterFromContract(data: [string,string,string,string,boolean]): IPvPFighterState {
+export function pvpFighterFromContract(data: [string,string,string,string,boolean]) {
   const characterID = data[0];
   const characterTrait = '0';
   const weaponID = data[1];
@@ -212,7 +209,7 @@ export function pvpFighterFromContract(data: [string,string,string,string,boolea
   };
 }
 
-export function duelByAttackerFromContract(data: [string,string,string,boolean]): IDuelByAttacker {
+export function duelByAttackerFromContract(data: [string,string,string,boolean]) {
   const attackerId = data[0];
   const defenderId = data[1];
   const createdAt = data[2];
@@ -222,7 +219,7 @@ export function duelByAttackerFromContract(data: [string,string,string,boolean])
   };
 }
 
-export function duelResultFromContract(data: [string,string,string,string,string,boolean]): IDuelResult {
+export function duelResultFromContract(data: [string,string,string,string,string,boolean]) {
   const attackerId = data[0];
   const defenderId = data[1];
   const timestamp = data[2];
