@@ -338,7 +338,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
         raidsDone[id] = raidsDone[id] + 1;
         raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
-        nftVars[id][NFTVAR_BUSY] = 0;
+        require(nftVars[id][NFTVAR_BUSY] == 0); // raids do not apply busy flag for now
+        //nftVars[id][NFTVAR_BUSY] = 0;
         _gainXp(id, xp);
     }
 
