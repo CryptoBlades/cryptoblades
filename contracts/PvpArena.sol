@@ -272,8 +272,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         skillToken.transferFrom(msg.sender, address(this), wager);
         // set the character as BUSY setting NFTVAR_BUSY to 1
-        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 1);
-        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 1);
+        characters.setNftVar(characterID, 1, 1);
+        weapons.setNftVar(weaponID, 1, 1);
     }
 
     /// @dev attempts to find an opponent for a character
@@ -362,10 +362,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
         // setting characters, weapons and shield NFTVAR_BUSY to 0
-        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 0);
-        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 0);
+        characters.setNftVar(characterID, 1, 0);
+        weapons.setNftVar(weaponID, 1, 0);
         if(fighter.useShield)
-            shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
+            shields.setNftVar(shieldID, 1, 0);
     }
 
     /// @dev performs all queued duels
@@ -923,10 +923,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
         // setting characters, weapons and shield NFTVAR_BUSY to 0
-        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 0);
-        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 0);
+        characters.setNftVar(characterID, 1, 0);
+        weapons.setNftVar(weaponID, 1, 0);
         if(fighter.useShield)
-            shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
+            shields.setNftVar(shieldID, 1, 0);
     }
 
     /// @dev attempts to find an opponent for a character.
@@ -1113,4 +1113,51 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         gameCofferTaxDue = 0;
     }
 
+    function setBaseWagerInCents(uint256 cents) external restricted {
+        _baseWagerUSD  = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setTierWagerInCents(uint256 cents) external restricted {
+        _tierWagerUSD = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setPrizePercentage(uint256 index, uint256 value) external restricted {
+        prizePercentages[index] = value;
+    }
+
+    function setWageringFactor(uint8 factor) external restricted {
+        wageringFactor = factor;
+    }
+
+    function setReRollFeePercent(uint256 percent) external restricted {
+        reRollFeePercent = percent;
+    }
+
+    function setRankingsPoolTaxPercent(uint8 percent) external restricted {
+        _rankingsPoolTaxPercent = percent;
+    }
+
+    function setUnattackableSeconds(uint256 secs) external restricted {
+        unattackableSeconds = secs;
+    }
+
+    function setDecisionSeconds(uint256 secs) external restricted {
+        decisionSeconds = secs;
+    }
+
+    function setWinningPoints(uint8 pts) external restricted {
+        winningPoints = pts;
+    }
+
+    function setLosingPoints(uint8 pts) external restricted {
+        losingPoints = pts;
+    }
+
+    function setMaxCharactersPerRanking(uint8 max) external restricted {
+        _maxCharactersPerRanking = max;
+    }
+
+    function setSeasonDuration(uint256 duration) external restricted {
+        seasonDuration = duration;
+    }
 }
