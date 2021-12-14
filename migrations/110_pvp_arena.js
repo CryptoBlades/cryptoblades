@@ -29,10 +29,14 @@ module.exports = async function (deployer, network, accounts) {
 
     await pvpArena.grantRole(await pvpArena.GAME_ADMIN(), accounts[0]);
 
-    await upgradeProxy(Characters.address, Characters, { deployer });
-    await upgradeProxy(Weapons.address, Weapons, { deployer });
+    const characters = await upgradeProxy(Characters.address, Characters, { deployer });
+    const weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
     await upgradeProxy(Raid1.address, Raid1, { deployer });
 
     const GAME_ADMIN = await game.GAME_ADMIN();
     await game.grantRole(GAME_ADMIN, pvpArena.address);
+
+    await characters.grantRole(await characters.GAME_ADMIN(), pvpArena.address);
+    await weapons.grantRole(await weapons.GAME_ADMIN(), pvpArena.address);
+    await shields.grantRole(await shields.GAME_ADMIN(), pvpArena.address);
 };
