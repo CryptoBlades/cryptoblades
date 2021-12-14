@@ -1,13 +1,13 @@
 import { Contract as Web3EthContract } from 'web3-eth-contract';
 import type {
-  IERC20, IStakingRewards, KingStakingRewardsUpgradeable,
-  CryptoBlades, Characters, Weapons, RaidBasic, IRandoms,
+  IERC20, IERC721, IStakingRewards, INftStakingRewards, KingStakingRewardsUpgradeable,
+  KingStakingRewardsUpgradeable90, KingStakingRewardsUpgradeable180, CryptoBlades, Characters, Weapons, RaidBasic, IRandoms,
   NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables,
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
   CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox,
   WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale, CBKLand, Treasury, Merchandise
 } from '../../../build/abi-interfaces';
-import { StakeType } from './State';
+import { StakeType, NftStakeType } from './State';
 
 interface TypeSafeContract<Abi> {
   methods: Abi;
@@ -20,9 +20,15 @@ export type StakingContracts = Partial<Record<StakeType, {
   StakingToken: Contract<IERC20>
 }>>;
 
+export type NftStakingContracts = Partial<Record<NftStakeType, {
+  StakingRewards: Contract<INftStakingRewards>,
+  StakingToken: Contract<IERC721>
+}>>;
+
 export interface Contracts {
   SkillToken: Contract<IERC20>;
   staking: StakingContracts;
+  nftStaking: NftStakingContracts;
 
   CryptoBlades?: Contract<CryptoBlades>;
   Randoms?: Contract<IRandoms>;
@@ -51,5 +57,7 @@ export interface Contracts {
 
   Treasury?: Contract<Treasury>;
   KingStakingRewardsUpgradeable?: Contract<KingStakingRewardsUpgradeable>;
+  KingStakingRewardsUpgradeable90?: Contract<KingStakingRewardsUpgradeable90>;
+  KingStakingRewardsUpgradeable180?: Contract<KingStakingRewardsUpgradeable180>;
   Merchandise?: Contract<Merchandise>;
 }

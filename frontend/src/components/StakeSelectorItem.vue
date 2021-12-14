@@ -24,10 +24,11 @@
         </tr>
         <tr v-if="estimatedYield" :title="$t('stake.StakeSelectorItem.yieldTooltip')">
           <th class="bold">
-            {{$t('stake.StakeSelectorItem.apy')}}
+            {{ isNftStaking ? $t('stake.StakeSelectorItem.yield') : $t('stake.StakeSelectorItem.apy') }}
           </th>
           <td class="align-right">
-            {{ estimatedYield.multipliedBy(100).toFixed(2) }}%
+            {{ isNftStaking ? estimatedYield.toFixed(2) : estimatedYield.multipliedBy(100).toFixed(2) }}
+            {{ isNftStaking ? '/NFT' : '%' }}
           </td>
         </tr>
         <tr v-if="minimumStakeTime !== 0">
@@ -54,6 +55,7 @@
 
 <script>
 import { formatDurationFromSeconds } from '../utils/date-time';
+import { isNftStakeType } from '../interfaces/State';
 
 export default {
   props: ['stakeTitle', 'stakeTokenName', 'rewardTokenName', 'stakeType', 'minimumStakeTime', 'estimatedYield', 'deprecated'],
@@ -61,6 +63,9 @@ export default {
   computed: {
     minimumStakeTimeFormatted() {
       return formatDurationFromSeconds(this.minimumStakeTime);
+    },
+    isNftStaking() {
+      return isNftStakeType(this.stakeType);
     }
   }
 };

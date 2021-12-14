@@ -566,6 +566,7 @@
       "earn" : "Earn",
       "yieldTooltip" : "Estimated yield per year and token.",
       "apy" : "APY",
+      "yield": "YIELD",
       "stakeLocked" : "Stake locked",
       "warning" : "Warning",
       "select" : "Select",
