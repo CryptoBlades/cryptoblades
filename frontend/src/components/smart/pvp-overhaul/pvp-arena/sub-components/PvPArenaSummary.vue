@@ -32,11 +32,15 @@
                 :shieldId="activeShieldWithInformation.shieldId"
               />
             </div>
-            <div v-if="tab === 1" class="bottomDuels">
-              <div v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
-                <span>Date: {{ dayjs(new Date(duel.timestamp * 1000)).format('YYYY/MM/DD') }}</span>
-                <span>Result: {{ duel.attackerWon ? 'Win' : 'Lose' }}</span>
-              </div>
+             <div v-if="tab === 1" class="bottomDuels">
+              <div v-if="duelHistory.length === 0" class="noDuels">You have not disputed any duels yet!</div>
+              <ul v-else>
+                <li><span>Date</span><span>Result</span></li>
+                <li v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
+                  <span class="date">{{ dayjs(new Date(duel.timestamp * 1000)).format('YYYY/MM/DD') }}</span>
+                  <span :class="{'lost': duel.attackerWon ? 'Win' : 'Lose'}" class="result">{{ duel.attackerWon ? 'Win' : 'Lose' }}</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -269,12 +273,32 @@ span, p, li, button, a {
   .bottomDuels {
     display: flex;
     justify-content: space-between;
+    span, li, div {
+      font-family: 'Roboto';
+    }
+    .date {
+      color: #B4B0A7;
+    }
+    .result {
+      color: green;
+      .lost {
+        color: red;
+      }
+    }
     ul {
       margin-bottom: 0;
       padding-left: 0;
+      width: 100%;
       list-style-type: none;
       li {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
         color: #b4b0a7;
+        span {
+          display: flex;
+          flex: 1;
+        }
         &.lose {
           color: red;
         }
