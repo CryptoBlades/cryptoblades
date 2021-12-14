@@ -4,7 +4,7 @@ import type {
   KingStakingRewardsUpgradeable90, KingStakingRewardsUpgradeable180, CryptoBlades, Characters, Weapons, RaidBasic, IRandoms,
   NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables,
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
-  CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox,
+  CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox, PvpArena,
   WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale, CBKLand, Treasury, Merchandise
 } from '../../../build/abi-interfaces';
 import { StakeType, NftStakeType } from './State';
@@ -49,6 +49,7 @@ export interface Contracts {
   RaidTrinket?: Contract<RaidTrinket>;
   Junk?: Contract<Junk>;
   KeyLootbox?: Contract<KeyLootbox>;
+  PvpArena?: Contract<PvpArena>;
   WeaponCosmetics?: Contract<WeaponCosmetics>;
   CharacterCosmetics?: Contract<CharacterCosmetics>;
   NFTStorage?: Contract<NFTStorage>;

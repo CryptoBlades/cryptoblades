@@ -10,6 +10,8 @@ export const market_blockchain = ['1', 'true', 't'].includes((process.env.VUE_AP
 
 export const portal = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG_PORTAL + '').toLowerCase());
 
+export const pvp = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG_PVP + '').toLowerCase());
+
 export const nft_bridge = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG_NFT_BRIDGE + '').toLowerCase());
 
 export const merchandise = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG_MERCHANDISE + '').toLowerCase());
