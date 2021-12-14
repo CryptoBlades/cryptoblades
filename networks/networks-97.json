@@ -1883,7 +1883,7 @@
     },
     "links": {},
     "address": "0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
-    "transactionHash": "0x44e71b77655b0077d151ad8d0b705c3850e94255c21e0e9fb3022dcd7f3d85a4"
+    "transactionHash": "0x8de06df1b4d4c085d779151f18d150b74ce5ab1476c84e1d3e1b1a762f7645f3"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2252,7 +2252,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0x4fd7140009a2ececb6a0952d9092ae591fc0f9cc1aa9543b4383c215da7365a6"
+    "transactionHash": "0x891335d3d77776d0cb43704598b111f19b2f998840aff215f7087a08a8ae1f70"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -3470,11 +3470,161 @@
     "address": "0x878dAf16db17994E95e67f70339c6312dd9b18DC",
     "transactionHash": "0x1261943fbdebdcb74d6f9087bafaffb09d5175545d3ad0a29df3d8c5547c6743"
   },
+  "build/contracts/PvpArena.json": {
+    "events": {
+      "0xbe8eca8f617751ef3f00e1554fdea3b45573e38958e187e31d65e6cb48fd96fb": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "attacker",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "defender",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "attackerRoll",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "defenderRoll",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "attackerWon",
+            "type": "bool"
+          }
+        ],
+        "name": "DuelFinished",
+        "type": "event"
+      },
+      "0x726fe078bf7fe774b0e24dab9e3e552115c43acafc7000faf681463474b3570d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "attacker",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "defender",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "NewDuel",
+        "type": "event"
+      },
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x89267c2f1ca67E3FDa3700a48560b3E022793c00",
+    "transactionHash": "0x7d2ea296e5805c98fd3ab119affd216f4e72104dccfbd229d1f31fcc8f356b8d"
+  },
   "build/contracts/Raid1.json": {
     "events": {},
     "links": {},
     "address": "0x86Ab07F69046475D14d69127d76Cef9bA91fbC39",
-    "transactionHash": "0x7e95a63ef3ea98e67e007a8592908ee536f1b4f1584fae6320eb0ab0f5d967cb"
+    "transactionHash": "0xc3abb46fe05eae0777464e389799f2edebc8b772d7ba21c43c4fd25e980c5195"
   },
   "build/contracts/RaidBasic.json": {
     "events": {},
@@ -3832,7 +3982,7 @@
     },
     "links": {},
     "address": "0xF3e470DceE011E55b8912ebC58499CE33c863A17",
-    "transactionHash": "0x0c00844da566d3cf8804aad3b35c3e5c39a4b106489e0577e5d719694b75d5fa"
+    "transactionHash": "0xcd44c3a783a4c6d0a68c89e4620b605fcc5733c1da9afbcd7236fb84f1d09906"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
@@ -4702,6 +4852,6 @@
     },
     "links": {},
     "address": "0x672E4CddA311b3BfAd1e09313241C62B4eFF5782",
-    "transactionHash": "0xc409171d2973b15b7fa1407a9013a96faae2c8a15aa7031b78c61638e7cfe2f9"
+    "transactionHash": "0xdee0aecd3c628c4ae6dc6a2b7f495434a6ca021c2d39c92c2738b70e4f375836"
   }
 }
