@@ -71,10 +71,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         cosmetics: 0-255 but only 24 is used, may want to cap so future expansions dont change existing weps
     */
 
-    function migrateTo_NftVars() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-        // NFTVAR_BUSY = 1;
-    }
     struct Weapon {
         uint16 properties; // right to left: 3b stars, 2b trait, 7b stat pattern, 4b EMPTY
         // stats (each point refers to .25% improvement)

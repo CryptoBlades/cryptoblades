@@ -43,11 +43,6 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         cosmetics: 0-255, to be used for future display purposes
     */
 
-    function migrateTo_NftVars() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-        // NFTVAR_BUSY = 1;
-    }
-
     struct Shield {
         uint16 properties; // right to left: 3b stars, 2b trait, 7b stat pattern, 4b EMPTY
         // stats (each point refers to .25% improvement)
@@ -128,11 +123,11 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getOwnedBy(address owner) public view returns(uint256[] memory) {
-        uint256[] memory shieldTokens = new uint256[](balanceOf(owner));
-        for(uint256 i = 0; i < shieldTokens.length; i++) {
-            shieldTokens[i] = tokenOfOwnerByIndex(owner, i);
+        uint256[] memory tokens = new uint256[](balanceOf(owner));
+        for(uint256 i = 0; i < tokens.length; i++) {
+            tokens[i] = tokenOfOwnerByIndex(owner, i);
         }
-        return shieldTokens;
+        return tokens;
     }
 
     function mintForPurchase(address buyer) external restricted {

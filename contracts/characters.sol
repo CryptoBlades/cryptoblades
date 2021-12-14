@@ -6,8 +6,6 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
-import "./interfaces/ITransferCooldownable.sol";
-import "./PvpArena.sol";
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
@@ -77,16 +75,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         characterLimit = 4;
     }
 
-    function migrateTo_PvpArena(PvpArena _pvp) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-        pvp = _pvp;
-    }
-
-    function migrateTo_NftVars() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-        // NFTVAR_BUSY = 1;
-    }
-
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-256
@@ -125,7 +113,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
 
-    PvpArena public pvp;
     mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
 
@@ -274,10 +261,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function _gainXp(uint256 id, uint256 xp) internal {
         Character storage char = tokens[id];
         if (char.level < 255) {
-            uint256 newXp = char.xp.add(xp);
-            uint256 requiredToLevel = experienceTable[char.level]; // technically next level
+            uint newXp = char.xp.add(xp);
+            uint requiredToLevel = experienceTable[char.level]; // technically next level
             // we get the current character tier and reset points if he changes tier by leveling up
-            uint256 prevTier = pvp.getArenaTier(id);
             while (newXp >= requiredToLevel) {
                 newXp = newXp - requiredToLevel;
                 char.level += 1;
@@ -285,10 +271,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
                 if (char.level < 255)
                     requiredToLevel = experienceTable[char.level];
                 else newXp = 0;
-            }
-            uint256 newTier = pvp.getArenaTier(id);
-            if (prevTier < newTier) {
-                pvp.resetCharacterRankingPoints(id);
             }
             char.xp = uint16(newXp);
         }
@@ -336,7 +318,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         nftVars[id][NFTVAR_BUSY] |= busyFlag;
 
         Character storage char = tokens[id];
-        require(getNftVar(id, NFTVAR_BUSY) == 0, "Character is busy");
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
         require((staminaPoints > 0 && allowNegativeStamina) // we allow going into negative, but not starting negative
             || staminaPoints >= amount, "Not enough stamina!");

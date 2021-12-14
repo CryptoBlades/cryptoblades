@@ -170,9 +170,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     function joinRaid(uint256 characterID, uint256 weaponID) public {
         // owner and stamina/durability checks in the fightdata functions
-        //check if weapon is busy
-        require(characters.getNftVar(characterID, characters.NFTVAR_BUSY()) == 0, "Character is busy");
-        require(weapons.getNftVar(weaponID, weapons.NFTVAR_BUSY()) == 0, "Weapon is busy");
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
@@ -220,8 +217,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             joinCostPaid = game.usdToSkill(joinCost);
             game.payContractTokenOnly(msg.sender, joinCostPaid);
         }
-        characters.setNftVar(characterID,characters.NFTVAR_BUSY(), 1);
-        weapons.setNftVar(weaponID,weapons.NFTVAR_BUSY(), 1);
         emit RaidJoined(raidIndex,
             msg.sender,
             characterID,
@@ -343,8 +338,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             }
             //weapons.setNftVar(raider.wepID, 1, 0); // NFTVAR_BUSY // no busy flag for raids for now
             characters.processRaidParticipation(raider.charID, victory, uint16(earlyMultiplier.mulu(xpReward)));
-            // set weapon as not busy, this is the only place we can place it due to weapons contract size.
-            weapons.setNftVar(raider.wepID, weapons.NFTVAR_BUSY(), 0);
         }
 
         raidRewardClaimed[claimRaidIndex][msg.sender] = true;
