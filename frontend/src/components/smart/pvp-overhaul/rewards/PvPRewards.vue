@@ -3,25 +3,62 @@
     <h1>REWARDS</h1>
     <p>Here you can claim your rewards</p>
     <ul>
-      <li><div class="bulletpoint"></div> Lorem ipsum dolor sit amet.</li>
-      <li><div class="bulletpoint"></div> Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptates, rerum?</li>
-      <li><div class="bulletpoint"></div> Lorem ipsum dolor sit amet consectetur adipisicing.</li>
-      <li><div class="bulletpoint"></div> Lorem ipsum dolor sit amet.</li>
-      <li><div class="bulletpoint"></div> Lorem ipsum dolor sit amet.</li>
+      <li><div class="bulletpoint"></div>Seasonal rewards are distributed at the end of every ranked season to the top 3 ranking players in each tier.</li>
+      <li><div class="bulletpoint"></div>Your rewards will accumulate over time.</li>
+      <li><div class="bulletpoint"></div>Just click 'CLAIM REWARDS' to claim your skill!</li>
+      <li><div class="bulletpoint"></div>Your available skill: {{ formattedAvailableSkill }} $SKILL</li>
     </ul>
-    <pvp-button buttonText="CLAIM REWARDS" />
+    <pvp-button buttonText="CLAIM REWARDS" @click="claimRewards" />
   </div>
 </template>
 
 
 <script>
+import BN from 'bignumber.js';
+import { mapState } from 'vuex';
 import PvPButton from '../components/PvPButton.vue';
 
 export default {
   components: {
     'pvp-button': PvPButton
-  }
+  },
 
+  data() {
+    return {
+      loading: true,
+      availableSkill: null,
+    };
+  },
+
+  computed: {
+    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
+
+    formattedAvailableSkill() {
+      return new BN(this.availableSkill).div(new BN(10).pow(18)).toFixed(2);
+    },
+  },
+
+  methods: {
+    async claimRewards() {
+      this.loading = true;
+
+      try {
+        await this.contracts().PvpArena.methods.withdrawRankedRewards().send({ from: this.defaultAccount });
+
+        this.availableSkill = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
+      } catch (err) {
+        console.log('withdraw rewards error: ', err);
+      }
+
+      this.loading = false;
+    }
+  },
+
+  async created() {
+    this.availableSkill = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
+
+    this.loading = false;
+  }
 };
 </script>
 
