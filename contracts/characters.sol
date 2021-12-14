@@ -263,7 +263,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         if (char.level < 255) {
             uint newXp = char.xp.add(xp);
             uint requiredToLevel = experienceTable[char.level]; // technically next level
-            // we get the current character tier and reset points if he changes tier by leveling up
             while (newXp >= requiredToLevel) {
                 newXp = newXp - requiredToLevel;
                 char.level += 1;
