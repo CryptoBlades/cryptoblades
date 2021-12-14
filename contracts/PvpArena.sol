@@ -51,7 +51,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     IERC20 public skillToken;
     IRandoms public randoms;
 
-
     /// @dev how much of a duel's bounty is sent to the rankings pool
     uint8 private _rankingsPoolTaxPercent;
     /// @dev how many times the cost of battling must be wagered to enter the arena
@@ -80,7 +79,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint8 private _maxCharactersPerRanking;
     /// @dev amount of skill due for game coffers from tax
     uint256 public gameCofferTaxDue;
-
     /// @dev percentages of ranked prize distribution by fighter rank (represented as index)
     uint256[] public prizePercentages;
     /// @dev characters by id that are on queue to perform a duel

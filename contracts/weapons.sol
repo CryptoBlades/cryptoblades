@@ -133,7 +133,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
     event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
-
+    
     modifier restricted() {
         _restricted();
         _;
@@ -672,7 +672,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(fighter == ownerOf(id) && nftVars[id][NFTVAR_BUSY] == 0);
         nftVars[id][NFTVAR_BUSY] |= busyFlag;
         drainDurability(id, drainAmount, allowNegativeDurability);
-
         Weapon storage wep = tokens[id];
         return (
             oneFrac.add(powerMultPerPointBasic.mul(

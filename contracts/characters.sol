@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
-
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
@@ -261,17 +260,16 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function _gainXp(uint256 id, uint256 xp) internal {
         Character storage char = tokens[id];
-        if(char.level < 255) {
+        if (char.level < 255) {
             uint newXp = char.xp.add(xp);
             uint requiredToLevel = experienceTable[char.level]; // technically next level
-            while(newXp >= requiredToLevel) {
+            while (newXp >= requiredToLevel) {
                 newXp = newXp - requiredToLevel;
                 char.level += 1;
                 emit LevelUp(ownerOf(id), id, char.level);
-                if(char.level < 255)
+                if (char.level < 255)
                     requiredToLevel = experienceTable[char.level];
-                else
-                    newXp = 0;
+                else newXp = 0;
             }
             char.xp = uint16(newXp);
         }
@@ -382,5 +380,4 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function setNftVar(uint256 characterID, uint256 nftVar, uint256 value) public restricted {
         nftVars[characterID][nftVar] = value;
     }
-
 }

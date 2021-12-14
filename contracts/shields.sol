@@ -78,7 +78,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
 
     event NewShield(uint256 indexed shield, address indexed minter);
-
+    
     modifier restricted() {
         _restricted();
         _;

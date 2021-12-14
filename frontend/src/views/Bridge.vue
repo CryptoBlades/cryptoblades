@@ -88,8 +88,8 @@
             (currentTransferNFTId == selectedNftId && transferStatus != transferStates.restored) ||
             !storedNftsIds.includes(String(selectedNftId))"
             variant="primary"
-              @click="withdrawItem()" class="gtag-link-others"
-              tagname="click_transfer_bridge">Withdraw from <br> Storage</b-button>
+            @click="withdrawItem()" class="gtag-link-others"
+            tagname="click_transfer_bridge">Withdraw from <br> Storage</b-button>
           </div>
           <div class="p-2">
             <b-button
@@ -584,6 +584,7 @@ export default Vue.extend({
         this.transferStatus = transferStates.restored;
       }
       this.currentTransferQueuePosition = await this.checkQueuePosition(parseInt(id,10));
+
       const currentTransferTokenAddress = transfer[1];
       this.currentTransferNFTId = transfer[2];
       const currentTransferChainId = transfer[5];
