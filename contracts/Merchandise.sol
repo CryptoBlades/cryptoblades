@@ -179,19 +179,6 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
     }
 
     function createOrder(address user, uint256 orderNumber, uint256 payingAmount) external restricted {
-        require(vars[VAR_ORDERS_ENABLED] != 0, "Cannot place orders right now");
-        require(orderData[orderNumber] & 0xff == 0, "Order already saved");
-        orderData[orderNumber] = orderNumber;
-        orderBuyer[orderNumber] = user;
-        game.payContractTokenOnly(user, payingAmount, vars[VAR_TRACK_INCOME] != 0);
-        orderPaidAmount[orderNumber] = payingAmount;
-    }
-
-    function getOrderPaidAmount(uint256 orderNumber) public view returns (uint256) {
-        return orderPaidAmount[orderNumber];
-    }
-
-    function createOrder(address user, uint256 orderNumber, uint256 payingAmount) external restricted {
         require(orderData[orderNumber] & 0xff == 0, "Order already saved");
         orderBuyer[orderNumber] = user;
         game.payContractTokenOnly(user, payingAmount, vars[VAR_TRACK_INCOME] != 0);
