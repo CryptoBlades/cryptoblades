@@ -152,8 +152,6 @@ export interface IState {
   currentNftType: string | null;
   currentNftId: number | null;
 
-  currentTab: number;
-
   staking: Record<StakeType, IStakeState>;
   stakeOverviews: Record<StakeType, IStakeOverviewState>;
 

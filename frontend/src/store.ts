@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
-import _, { isUndefined, values, parseInt } from 'lodash';
+import _, { isUndefined, values } from 'lodash';
 import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
 
 import { getConfigValue, setUpContracts } from './contracts';
@@ -119,7 +119,6 @@ export function createStore(web3: Web3) {
       currentWeaponId: null,
       currentNftType: null,
       currentNftId: null,
-      currentTab: 0,
       weaponDurabilities: {},
       weaponRenames: {},
       maxDurability: 0,
@@ -1586,7 +1585,7 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacterRename', charId);
         }
       },
-      async fetchCharacterRename({ state, commit }, characterId) {
+      async fetchCharacterRename({ state, commit }, characterId: number) {
         const renameString = await state.contracts().CharacterRenameTagConsumables!.methods
           .getCharacterRename(characterId)
           .call(defaultCallOptions(state));
@@ -3312,7 +3311,7 @@ export function createStore(web3: Web3) {
 
         try {
           await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('') + price)
+            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
             .send({
               from: state.defaultAccount
             });
@@ -3390,6 +3389,124 @@ export function createStore(web3: Web3) {
 
         await Promise.all([
           dispatch('fetchCharacter', id),
+        ]);
+      },
+      async fetchOwnedWeaponCosmetics({ state }, {cosmetic}) {
+        const { WeaponCosmetics } = state.contracts();
+        if(!WeaponCosmetics || !state.defaultAccount) return;
+        return await WeaponCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
+      },
+      async purchaseWeaponCosmetic({ state, dispatch }, {cosmetic, price}) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !WeaponCosmetics || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseWeaponCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill')
+        ]);
+      },
+      async changeWeaponCosmetic({ state, dispatch}, { id, cosmetic }) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !WeaponCosmetics || !state.defaultAccount) return;
+
+        await WeaponCosmetics.methods
+          .applyCosmetic(id, cosmetic)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchWeaponCosmetic', id)
+        ]);
+      },
+      async removeWeaponCosmetic({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !WeaponCosmetics || !state.defaultAccount) return;
+
+        await WeaponCosmetics.methods
+          .removeCosmetic(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchWeaponCosmetic', id)
+        ]);
+      },
+      async fetchOwnedCharacterCosmetics({ state }, {cosmetic}) {
+        const { CharacterCosmetics } = state.contracts();
+        if(!CharacterCosmetics || !state.defaultAccount) return;
+        return await CharacterCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
+      },
+      async purchaseCharacterCosmetic({ state, dispatch }, {cosmetic, price}) {
+        const { CryptoBlades, SkillToken, CharacterCosmetics, Blacksmith } = state.contracts();
+        if(!CryptoBlades || !CharacterCosmetics || !Blacksmith || !state.defaultAccount) return;
+
+        try {
+          await SkillToken.methods
+            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
+            .send({
+              from: state.defaultAccount
+            });
+        } catch(err) {
+          console.error(err);
+        }
+
+        await Blacksmith.methods.purchaseCharacterCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
+          from: state.defaultAccount,
+          gas: '500000'
+        });
+
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill')
+        ]);
+      },
+      async changeCharacterCosmetic({ state, dispatch}, { id, cosmetic }) {
+        const { CryptoBlades, SkillToken, CharacterCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterCosmetics || !state.defaultAccount) return;
+
+        await CharacterCosmetics.methods
+          .applyCosmetic(id, cosmetic)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacterCosmetic', id)
+        ]);
+      },
+      async removeCharacterCosmetic({ state, dispatch}, { id }) {
+        const { CryptoBlades, SkillToken, CharacterCosmetics } = state.contracts();
+        if(!CryptoBlades || !SkillToken || !CharacterCosmetics || !state.defaultAccount) return;
+
+        await CharacterCosmetics.methods
+          .removeCosmetic(id)
+          .send({
+            from: state.defaultAccount,
+            gas: '5000000'
+          });
+
+        await Promise.all([
+          dispatch('fetchCharacterCosmetic', id)
         ]);
       },
       async fetchPartnerProjects({ state, dispatch }) {
