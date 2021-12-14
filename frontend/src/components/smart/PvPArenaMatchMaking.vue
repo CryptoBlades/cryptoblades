@@ -46,7 +46,7 @@
       </div>
       <div class="middleButtons">
         <div v-if="this.loading">
-          <img class="spinner" src="../../../../../assets/loadingSpinner.svg" />
+          <img class="spinner" src="../../assets/loadingSpinner.svg" />
         </div>
         <p v-else>{{ this.decisionTimeLeft }}</p>
         <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS"/>
@@ -120,17 +120,17 @@
 <script>
 import BN from 'bignumber.js';
 import { mapState } from 'vuex';
-import PvPWeapon from '../../components/PvPWeapon.vue';
-import PvPShield from '../../components/PvPShield.vue';
-import PvPSeparator from '../../components/PvPSeparator.vue';
-import PvPCharacter from '../../components/PvPCharacter.vue';
-import PvPButton from '../../components/PvPButton.vue';
-import fireIcon from '../../../../../assets/elements/fire.png';
-import waterIcon from '../../../../../assets/elements/water.png';
-import earthIcon from '../../../../../assets/elements/earth.png';
-import lightningIcon from '../../../../../assets/elements/lightning.png';
-import PvPDuelModal from '../../components/PvPDuelModal.vue';
-import { duelResultFromContract as formatDuelResult } from '../../../../../contract-models';
+import PvPWeapon from './PvPWeapon.vue';
+import PvPShield from './PvPShield.vue';
+import PvPSeparator from './PvPSeparator.vue';
+import PvPCharacter from './PvPCharacter.vue';
+import PvPButton from './PvPButton.vue';
+import fireIcon from '../../assets/elements/fire.png';
+import waterIcon from '../../assets/elements/water.png';
+import earthIcon from '../../assets/elements/earth.png';
+import lightningIcon from '../../assets/elements/lightning.png';
+import PvPDuelModal from './PvPDuelModal.vue';
+import { duelResultFromContract as formatDuelResult } from '../../contract-models';
 export default {
   inject: ['web3'],
 

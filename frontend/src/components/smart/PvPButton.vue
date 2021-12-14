@@ -1,7 +1,7 @@
 <template>
   <button @click="$emit('click')" :disabled="disabled" :class="{'disabled': disabled, 'secondary': this.secondary}">
     <span class="text" :class="secondary && 'whiteText'">
-      <img v-if="duelButton" src="../../../../assets/swordsIcon.svg" alt="button icon">
+      <img v-if="duelButton" src="../../assets/swordsIcon.svg" alt="button icon">
       {{ buttonText }}
     </span>
     <span v-if="secondary" class="subtext" :class="secondary && 'whiteText'">{{
@@ -41,7 +41,7 @@ button {
   align-items: center;
   vertical-align: middle;
   justify-content: center;
-  background-image: url('../../../../assets/buttonOutline.svg');
+  background-image: url('../../assets/buttonOutline.svg');
   background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;

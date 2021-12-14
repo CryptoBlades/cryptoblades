@@ -2,15 +2,15 @@
   <div class="wrapper">
     <nav class="defaultNav">
       <button @click="setTab(0)" :class="tabNumber === 0 && 'active'">
-        <img src="../../../../assets/swordsIcon.svg"/>
+        <img src="../../assets/swordsIcon.svg"/>
         <span>Arena</span>
       </button>
       <button @click="setTab(1)" :class="tabNumber === 1 && 'active'">
-        <img src="../../../../assets/crownIcon.svg" />
+        <img src="../../assets/crownIcon.svg" />
         <span>Leaderboard</span>
       </button>
       <button @click="setTab(2)" :class="tabNumber === 2 && 'active'">
-        <img src="../../../../assets/crownIcon.svg" />
+        <img src="../../assets/crownIcon.svg" />
         <span>Rewards</span>
       </button>
     </nav>

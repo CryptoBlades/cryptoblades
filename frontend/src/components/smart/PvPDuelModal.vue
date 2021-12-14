@@ -1,7 +1,7 @@
 <template>
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
-      <img src="../../../../assets/separatorTop.svg" alt="Top separator">
+      <img src="../../assets/separatorTop.svg" alt="Top separator">
       <div v-if="true" class="modalTitle">You have won the duel!</div>
       <div v-else class="modalTitle"> You have lost the duel!</div>
       <ul>
@@ -24,19 +24,19 @@
         <span>{{ userCurrentRank }}</span>
         <span>({{ rankVariation }} Rank)</span>
       </div>
-      <img src="../../../../assets/separatorBottom.svg" alt="Bottom separator">
+      <img src="../../assets/separatorBottom.svg" alt="Bottom separator">
     </div>
     <div class="closeWrapper">
       <p>Tap anywhere to close</p>
       <button @click="close">
-        <img src="../../../../assets/closeModal.svg" alt="Bottom separator">
+        <img src="../../assets/closeModal.svg" alt="Bottom separator">
       </button>
     </div>
   </div>
 </template>
 
 <script>
-import PvPSeparator from '../components/PvPSeparator.vue';
+import PvPSeparator from './PvPSeparator.vue';
 
 export default {
   components: {

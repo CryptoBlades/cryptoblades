@@ -16,7 +16,7 @@
             <div class="weaponsWrapper">
               <div v-if="!selectedWeaponId" :class="{ disabledStyles: ownedWeaponsWithInformation.length === 0 }" class="weaponButtonWrapper">
                 <button class="selectWeaponButton" id="weapon-popover">
-                  <img class="placeholderImage" src="../../../../../assets/swordPlaceholder.svg" alt="sword" />
+                  <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
                   <b-popover ref="popover" target="weapon-popover" triggers="hover" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Weapons</p>
                     <div class="popoverGrid">
@@ -44,7 +44,7 @@
               </div>
               <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
                 <button class="selectWeaponButton" id="shield-popover">
-                  <img class="placeholderImage" src="../../../../../assets/shieldPlaceholder.svg" alt="shield" />
+                  <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
                   <b-popover target="shield-popover" placement="right" triggers="hover" custom-class="popoverWrapper">
                     <p class="popoverTitle">Shields</p>
                     <div class="popoverGrid">
@@ -119,7 +119,7 @@
       <div class="arenaInformation">
         <h1 class="title">ARENA INFORMATION</h1>
         <div class="tokenCard">
-          <img src="../../../../../assets/skillToken.png" alt="skill token" />
+          <img src="../../assets/skillToken.png" alt="skill token" />
           <div class="tokenCardInfo">
             <span class="text">PVP Rewards Pool ($SKILL)</span>
             <span class="number">{{ formatedTierRewardsPool }}</span>
@@ -159,13 +159,13 @@
 import { mapState } from 'vuex';
 import BN from 'bignumber.js';
 import { BPopover } from 'bootstrap-vue';
-import PvPWeapon from '../../components/PvPWeapon.vue';
-import PvPShield from '../../components/PvPShield.vue';
-import PvPCharacter from '../../components/PvPCharacter.vue';
-import PvPButton from '../../components/PvPButton.vue';
-import PvPSeparator from '../../components/PvPSeparator.vue';
-import checkIcon from '../../../../../assets/checkImage.svg';
-import ellipseIcon from '../../../../../assets/ellipseImage.svg';
+import PvPWeapon from './PvPWeapon.vue';
+import PvPShield from './PvPShield.vue';
+import PvPCharacter from './PvPCharacter.vue';
+import PvPButton from './PvPButton.vue';
+import PvPSeparator from './PvPSeparator.vue';
+import checkIcon from '../../assets/checkImage.svg';
+import ellipseIcon from '../../assets/ellipseImage.svg';
 export default {
   components: {
     'pvp-weapon': PvPWeapon,
@@ -473,7 +473,7 @@ p, li, span {
           padding: 4px;
         }
         .checkboxInput:checked {
-          background-image: url('../../../../../assets/checkImage.svg');
+          background-image: url('../../assets/checkImage.svg');
           background-repeat: no-repeat;
           background-size: 75% 50%;
           background-position: center;

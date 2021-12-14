@@ -18,10 +18,10 @@
 
 <script>
 import { mapState } from 'vuex';
-import PvPNavBar from './components/PvPNavBar.vue';
-import PvPLeaderboards from './leaderboards/PvPLeaderboards.vue';
-import PvPRewards from './rewards/PvPRewards.vue';
-import PvPArena from './pvp-arena/PvPArena.vue';
+import PvPNavBar from '../components/smart/PvPNavBar.vue';
+import PvPLeaderboards from '../components/smart/PvPLeaderboards.vue';
+import PvPRewards from '../components/smart/PvPRewards.vue';
+import PvPArena from '../components/smart/PvPArena.vue';
 
 export default {
   components: {
@@ -62,10 +62,10 @@ export default {
 <style scoped lang="scss">
 @font-face {
   font-family: 'Trajan';
-  src: url('../../../assets/fonts/Trajan.ttf') format('truetype');
+  src: url('../assets/fonts/Trajan.ttf') format('truetype');
 }
 .pvpWrapper {
-  background-image: url('../../../assets/pvpBackgroundImage.png');
+  background-image: url('../assets/pvpBackgroundImage.png');
   padding: 1rem 4rem 4rem 4rem;
   margin: -2rem -1rem 0 -1rem;
   @media only screen and (min-width: 1440px) {

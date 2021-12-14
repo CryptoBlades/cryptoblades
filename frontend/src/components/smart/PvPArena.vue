@@ -1,877 +1,440 @@
 <template>
   <div>
-
-    <div v-if="!isLoading">
-    <pvp-divider>
-    </pvp-divider>
+    <div v-if="loading">
+        <img class="loadingSpinner" src="../../assets/loadingSpinner.svg" />
     </div>
-
-        <b-row>
-          <b-col>
-            <div class="preloader-container"
-              v-if="isLoading">
-                <pvp-preloader></pvp-preloader>
-                  <div class="preloader-text">
-                    <span v-if="isLoading">Please wait ...</span>
-                  </div>
-            </div>
-          </b-col>
-        </b-row>
-
-    <b-row
-      id="arena-character-buttons"
-      v-if="!pvp.isDuelResult && !isLoading">
-      <b-col
-        v-for="character in inPvPCharacters"
-        :key="character.id">
-      <pvp-character
-              :character="character"
-              :currentCharacterId="currentPvPCharacterId"
-              :inPvP="false"></pvp-character>
-      </b-col>
-    </b-row>
-
-    <b-row v-if="!isLoading">
-      <div
-        class="go-back-container">
-        <span
-            @click="goTo">
-          <img
-            id="go-back-img"
-            src="../../assets/go-back.svg"/>GO BACK</span>
-      </div>
-    </b-row>
-
-    <b-row
-      v-if="!pvp.isDuelResult && !isLoading">
-      <div class="timer-container">
-        <span id="timer" v-text="this.pvp.decisionTime"/>
-      </div>
-    </b-row>
-
-    <b-row
-      v-if="!pvp.isDuelResult && !isLoading">
-      <b-col>
-        <b-row>
-          <pvp-fighter
-            :characterId="currentPvPCharacterId"
-            :show="true"
-            :isAttacker="true"></pvp-fighter>
-        </b-row>
-      </b-col>
-
-      <b-col>
-        <b-row>
-          <div
-            v-if="!this.pvp.duelByAttacker.isPending && this.pvp.decisionTime === '00:00'"
-            class="find-opponent-container"
-            @click="findOpponent(currentPvPCharacterId)">
-              <img id="find-opponent-img" src="../../assets/winged-shield.svg"/>
-          </div>
-          <div
-            v-if="getIsShown"
-            class="duel-container">
-              <img
-                  id="duel-img"
-                  src="../../assets/crossed-swords.svg"
-                  @click="performDuel(currentPvPCharacterId)"/>
-          </div>
-        </b-row>
-        <b-row>
-          <div
-            class="withdraw-container">
-              <span
-                @click="characterWithdraw()">
-                <img
-                  id="withdraw-img"
-                  src="../../assets/run.svg"/>WITHDRAW</span>
-          </div>
-          <div
-            v-if="this.pvp.duelByAttacker.isPending"
-            class="reroll-container">
-              <span
-                @click="reRollOpponent(currentPvPCharacterId)">
-                <img
-                  id="reroll-img"
-                  src="../../assets/rolling-dices.svg"/>REROLL</span>
-          </div>
-        </b-row>
-        <b-row>
-            <b-col>
-              <div class="pvp-rewards-container">
-                <span class="pvp-rewards-header">PvP Rewards</span>
-                <div
-                  class="arena-tier-container">
-                    <span
-                      class="arena-tier-label">
-                        Arena Tier
-                      <span class="arena-tier-value">{{getRewardsArenaTier}}</span></span>
-                </div>
-                <div class="ranking-rewards-pool-container">
-                    <span
-                      class="ranking-rewards-pool-label">
-                        Rewards Pool
-                      <span class="ranking-rewards-pool-value"> {{getRankingRewardsPool}}</span>Skill</span>
-                </div>
-                <div class="view-stats-container">
-                  <span
-                    class="view-stats-label"
-                    @click="openStats()">VIEW STATS</span>
-                </div>
-              </div>
-            </b-col>
-        </b-row>
-      </b-col>
-
-      <b-col>
-        <b-row>
-          <pvp-fighter
-            :characterId="this.pvp.duelByAttacker.defenderId"
-            :show="getIsShown"
-            :isAttacker="false"></pvp-fighter>
-        </b-row>
-      </b-col>
-    </b-row>
-
-    <b-row
-      v-if="pvp.isDuelResult && !isLoading">
-      <div class="duel-result-container">
-        <div class="duel-result">
-         <p
-          class="duel-win-result-text"
-          v-if="this.pvp.duelResult.attackerWon">YOU WIN</p>
-         <p
-          class="duel-lose-result-text"
-          v-if="!this.pvp.duelResult.attackerWon">YOU LOST</p>
-          <span
-              class="duel-result-roll-label">You rolled
-            </span>
-            <span
-              class="duel-result-roll-value"
-              v-text="this.pvp.duelResult.attackerRoll"/><br>
-            <span
-              class="duel-result-roll-label">Enemy rolled
-            </span>
-            <span
-              class="duel-result-roll-value"
-              v-text="this.pvp.duelResult.defenderRoll"/><br>
-        </div>
-        <div class="duel-result-rewards"
-          v-if="this.pvp.duelResult.attackerWon">
-            <span
-              class="duel-result-rewards-label">SKILL
-            </span>
-            <span
-              class="duel-result-rewards-won-value">+ {{getWinDuelReward}}</span><br>
-            <span
-              class="duel-result-rewards-label">RANK POINTS
-            </span>
-            <span
-              class="duel-result-rewards-won-value">+ {{winningPoints}}</span><br>
-               <span
-              class="duel-result-rewards-label">NEW RANK
-            </span>
-            <span
-              class="duel-result-rewards-won-value">{{getNewRankAfterVictory}}</span><br>
-        </div>
-        <div class="duel-result-rewards"
-          v-if="!this.pvp.duelResult.attackerWon">
-            <span
-              class="duel-result-rewards-label">SKILL
-            </span>
-            <span
-              class="duel-result-rewards-lost-value">- {{getLoseDuelReward}}</span><br>
-            <span
-              class="duel-result-rewards-label">RANK POINTS
-            </span>
-            <span
-              class="duel-result-rewards-lost-value">- {{losingPoints}}</span><br>
-              <span
-              class="duel-result-rewards-label">NEW RANK
-            </span>
-            <span
-              class="duel-result-rewards-lost-value">{{getNewRankAfterLoss}}</span><br>
-        </div>
-
-        <div class="duel-result-ok-button">
-              <span
-                @click="afterDuelChecks()">OK
-              </span>
-        </div>
-      </div>
-    </b-row>
-
-    <div class="arena-footer">
+    <div v-else>
+      <pvp-arena-preparation
+        v-if="!isCharacterInArena"
+        :tierRewardsPool="tierRewardsPool"
+        :tierTopRankers="tierTopRankers"
+        :characterInformation="characterInformation"
+        :entryWager="entryWager"
+        :availableWeaponIds="availableWeaponIds"
+        :availableShieldIds="availableShieldIds"
+        :ownedWeaponsWithInformation="ownedWeaponsWithInformation"
+        :ownedShieldsWithInformation="ownedShieldsWithInformation"
+        @enteredArena="handleEnteredArena"
+      />
+      <pvp-arena-summary
+        v-else-if="isCharacterInArena && !isMatchMaking"
+        :tierRewardsPool="tierRewardsPool"
+        :tierTopRankers="tierTopRankers"
+        :characterInformation="characterInformation"
+        :activeWeaponWithInformation="activeWeaponWithInformation"
+        :activeShieldWithInformation="activeShieldWithInformation"
+        :duelHistory="duelHistory"
+        @enterMatchMaking="handleEnterMatchMaking"
+      />
+      <!-- Should use router -->
+      <pvp-arena-matchmaking
+        v-else-if="isCharacterInArena && isMatchMaking"
+        :characterInformation="characterInformation"
+        :activeWeaponWithInformation="activeWeaponWithInformation"
+        :activeShieldWithInformation="activeShieldWithInformation"
+        :opponentInformation="opponentInformation"
+        :opponentActiveWeaponWithInformation="opponentActiveWeaponWithInformation"
+        :opponentActiveShieldWithInformation="opponentActiveShieldWithInformation"
+        @updateOpponentInformation="updateOpponentInformation"
+        @clearOpponentInformation="clearOpponentInformation"
+        @kickCharacterFromArena="kickCharacterFromArena"
+        @leaveArena="leaveArena"
+      />
     </div>
-
-    <pvp-duel
-      v-if="pvp.isPerformDuel"
-      :attackerId="this.pvp.duelResult.attackerId"
-      :defenderId="this.pvp.duelResult.defenderId"></pvp-duel>
-
-    <b-modal
-      id="withdraw-character"
-      title="WITHDRAW CHARACTER"
-      @ok="withdrawFromArena(currentPvPCharacterId)">
-        <span class="withdraw-modal-question">Are you sure you want to withdraw
-          <span class ="withdraw-modal-variable">{{getCharacterName(currentPvPCharacterId)}}</span> ?
-        </span><br>
-      <div class="withdraw-skill-balance-container">
-        <div class="withdraw-skill-balance-header">Wagered Skill Balance</div>
-        <div class="withdraw-skill-balance-content">
-          <span class="withdraw-skill-balance-label">Wagered Skill</span>
-          <span class="withdraw-skill-balance-value">{{getWageredSkill}}</span><br>
-        </div>
-      </div>
-    </b-modal>
-
-      <div>
-        <pvp-stats v-if="this.pvp.showStats" :characterID="this.currentPvPCharacterId"></pvp-stats>
-      </div>
-
   </div>
 </template>
 
 <script>
-import { mapGetters, mapMutations, mapState } from 'vuex';
-import PvPCharacter from './PvPCharacter.vue';
-import PvPFighter from './PvPFighter.vue';
-import PvPDuel from './PvPDuel.vue';
-import PvPDivider from './PvPDivider.vue';
-import PvPStats from './PvPStats.vue';
-import PvPPreloader from './Preloader.vue';
-import BN from 'bignumber.js';
+import { mapState } from 'vuex';
+import PvPArenaPreparation from './PvPArenaPreparation.vue';
+import PvPArenaSummary from './PvPArenaSummary.vue';
+import PvPArenaMatchMaking from './PvPArenaMatchMaking.vue';
+import { getCharacterNameFromSeed } from '../../character-name';
+import { weaponFromContract as formatWeapon } from '../../contract-models';
+import { shieldFromContract as formatShield } from '../../contract-models';
+import { pvpFighterFromContract as formatFighter } from '../../contract-models';
+import { characterFromContract as formatCharacter } from '../../contract-models';
+import { duelResultFromContract as formatDuelResult } from '../../contract-models';
 
 export default {
+  components: {
+    'pvp-arena-preparation': PvPArenaPreparation,
+    'pvp-arena-summary': PvPArenaSummary,
+    'pvp-arena-matchmaking': PvPArenaMatchMaking
+  },
 
-  data(){
-    return{
-      totalWithdrawableSkill: '',
-      isShown: false,
-      previousRankPoints: '',
-      newRankPoints: '',
-      showStats: false,
-      winningPoints: 0,
-      losingPoints: 0
+  data() {
+    return {
+      loading: true,
+      isCharacterInArena: false,
+      entryWager: null,
+      isMatchMaking: false,
+      tierRewardsPool: null,
+      tierTopRankers: [],
+      characterInformation: {
+        tier: null,
+        name: '',
+        level: null,
+        power: null,
+        rank: null,
+        element: null,
+      },
+      availableWeaponIds: [],
+      availableShieldIds: [],
+      ownedWeaponsWithInformation: [],
+      ownedShieldsWithInformation: [],
+      activeWeaponWithInformation: {
+        weaponId: null,
+        information: {}
+      },
+      activeShieldWithInformation: {
+        shieldId: null,
+        information: {}
+      },
+      opponentInformation: {
+        id: null,
+        element: '',
+        name: '',
+        level: null,
+        rank: null
+      },
+      opponentActiveWeaponWithInformation: {
+        weaponId: null,
+        information: {}
+      },
+      opponentActiveShieldWithInformation: {
+        shieldId: null,
+        information: {}
+      },
+      duelHistory: []
     };
   },
 
-  computed:{
-    ...mapState(['pvp','isLoading']),
-    ...mapGetters([
-      'inPvPCharacters',
-      'currentPvPCharacterId',
-      'getCharacterName'
-    ]),
+  computed: {
+    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
+  },
 
-    getIsShown(){
-      return this.pvp.duelByAttacker.isPending && this.pvp.decisionTime !== '00:00';
+  methods: {
+    async getWeaponInformation(weaponId) {
+      const { element, stars } = formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
+
+      return {
+        element,
+        stars
+      };
     },
 
-    getWinDuelReward(){
-      const duelReward = new BN(this.pvp.duelCost).div(new BN(10).pow(18)).toFixed(4) - (new BN(this.pvp.duelCost).div(new BN(10).pow(18)).toFixed(4) * 0.30);
-      return duelReward;
-    },
-    getLoseDuelReward(){
-      const duelReward = new BN(this.pvp.duelCost).div(new BN(10).pow(18)).toFixed(4);
-      return duelReward;
+    async getShieldInformation(shieldId) {
+      const { element, stars } = formatShield(`${shieldId}`, await this.contracts().Shields.methods.get(`${shieldId}`).call({ from: this.defaultAccount }));
+
+      return {
+        element,
+        stars
+      };
     },
 
-    getRankingPointAdjustment(){
-      const rankPointAdjustment = Math.abs(this.previousRankPoints - this.newRankPoints);
-      return rankPointAdjustment;
+    async handleEnteredArena() {
+      this.isCharacterInArena = true;
+
+      const fighter = formatFighter(await this.contracts().PvpArena.methods.fighterByCharacter(this.currentCharacterId).call({ from: this.defaultAccount }));
+
+      this.activeWeaponWithInformation = {
+        weaponId: fighter.weaponID,
+        information: await this.getWeaponInformation(fighter.weaponID)
+      };
+
+      if (fighter.useShield) {
+        this.activeShieldWithInformation = {
+          shieldId: fighter.shieldID,
+          information: await this.getShieldInformation(fighter.shieldID)
+        };
+      }
     },
 
-    getWageredSkill(){
-      const wageredSkill = new BN(this.pvp.wageredSkill).div(new BN(10).pow(18)).toFixed(4);
-      return wageredSkill;
+    handleEnterMatchMaking() {
+      this.isMatchMaking = true;
+      this.$emit('enterMatchMaking');
     },
 
-    getNewRankAfterVictory() {
-      return +(this.pvp.characterRankingPoints) + +(this.winningPoints);
+    leaveArena() {
+      this.isCharacterInArena = false;
+      this.$emit('leaveMatchMaking');
     },
 
-    getNewRankAfterLoss() {
-      return +(this.pvp.characterRankingPoints) - +(this.losingPoints) < 0 ? 0 : +(this.pvp.characterRankingPoints) - +(this.losingPoints);
+    async updateOpponentInformation(defenderId) {
+      this.opponentInformation.id = defenderId;
+
+      this.opponentInformation.name = getCharacterNameFromSeed(defenderId);
+
+      this.opponentInformation.level = await this.contracts().Characters.methods.getLevel(defenderId).call({ from: this.defaultAccount });
+
+      this.opponentInformation.rank = await this.contracts().PvpArena.methods.getCharacterRankingPoints(defenderId)
+        .call({ from: this.defaultAccount });
+
+      this.opponentInformation.element = formatCharacter(defenderId, await this.contracts().Characters.methods.get(`${defenderId}`)
+        .call({ from: this.defaultAccount })).traitName;
+
+      const fighter = formatFighter(await this.contracts().PvpArena.methods.fighterByCharacter(defenderId).call({ from: this.defaultAccount }));
+
+      this.opponentActiveWeaponWithInformation = {
+        weaponId: fighter.weaponID,
+        information: await this.getWeaponInformation(fighter.weaponID)
+      };
+
+      if (fighter.useShield) {
+        this.opponentActiveShieldWithInformation = {
+          shieldId: fighter.shieldID,
+          information: await this.getShieldInformation(fighter.shieldID)
+        };
+      }
     },
 
-    getRewardsArenaTier(){
-      const rewardsArenaTier = this.pvp.rewards.tier;
-      return rewardsArenaTier;
+    async clearOpponentInformation() {
+      this.opponentInformation = {
+        id: null,
+        element: '',
+        name: '',
+        level: null,
+        rank: null
+      };
+
+      this.opponentActiveWeaponWithInformation = {
+        weaponId: null,
+        information: {}
+      };
+
+      this.opponentActiveShieldWithInformation = {
+        shieldId: null,
+        information: {}
+      };
     },
 
-    getRankingRewardsPool(){
-      const rankingRewardsPool = new BN(this.pvp.rewards.rankingRewardsPool).div(new BN(10).pow(18)).toFixed(4);
-      return rankingRewardsPool;
+    kickCharacterFromArena() {
+      this.isCharacterInArena = false;
     }
   },
 
-  methods:{
-    ...mapMutations([
-      'setCurrentCharacter',
-      'setCurrentPvPCharacter',
-      'updateShowStats',
-      'updateIsLoading',
-      'updateHasPendingDuel',
-      'updateIsDuelResult'
-    ]),
+  async created() {
+    // Note: currentCharacterId can be 0
+    if (this.currentCharacterId !== null) {
+      this.characterInformation.name = getCharacterNameFromSeed(this.currentCharacterId);
 
-    openStats(){
-      this.updateShowStats(true);
-    },
+      this.characterInformation.tier = await this.contracts().PvpArena.methods.getArenaTier(this.currentCharacterId).call({ from: this.defaultAccount });
 
-    async afterDuelChecks(){
-      this.updateIsDuelResult(false);
+      this.characterInformation.level = await this.contracts().Characters.methods.getLevel(this.currentCharacterId).call({ from: this.defaultAccount });
 
-      if(this.pvp.participatingCharacters.length < 1){
-        await this.$store.dispatch('fetchArenaPage', {page: '0'});
-      }
-      else{
-        this.setCurrentPvPCharacter(this.pvp.participatingCharacters[0]);
-        await this.$store.dispatch('updatePvPDetails', {characterID: this.pvp.participatingCharacters[0]});
+      this.characterInformation.power = await this.contracts().Characters.methods.getPower(this.currentCharacterId).call({ from: this.defaultAccount });
 
-      }
-    },
+      this.characterInformation.rank = await this.contracts().PvpArena.methods.getCharacterRankingPoints(this.currentCharacterId)
+        .call({ from: this.defaultAccount });
 
-    async goTo(){
-      this.setCurrentCharacter(this.currentPvPCharacterId);
+      this.characterInformation.element = formatCharacter(this.currentCharacterId, await this.contracts().Characters.methods.get(`${this.currentCharacterId}`)
+        .call({ from: this.defaultAccount })).traitName;
 
-      await Promise.all([
-        this.$store.dispatch('updatePvPDetails', {characterID: this.currentPvPCharacterId}),
-        this.$store.dispatch('fetchArenaPage', {page: '0'})
-      ]);
-    },
+      this.entryWager = await this.contracts().PvpArena.methods.getEntryWager(this.currentCharacterId).call({ from: this.defaultAccount });
 
-    async findOpponent(characterID){
-      this.updateIsLoading(true);
-      const errorMessage = await this.$store.dispatch('getOpponent', {characterID});
+      const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
+        return {
+          weaponId,
+          isInArena: await this.contracts().PvpArena.methods.isWeaponInArena(weaponId).call({ from: this.defaultAccount })
+        };
+      }));
 
-      if(errorMessage && errorMessage.code === 4001){
-        this.$dialog.notify.error(errorMessage.message, {position: 'bottom-left'});
-      }
-      else if(errorMessage && errorMessage.code !== 4001 && errorMessage){
-        this.$dialog.notify.error('No opponents available in tier. Try again.', {position: 'bottom-left'});
-      }
-      else if(errorMessage && errorMessage.code !== 4001 && this.pvp.hasPendingDuel){
-        this.$dialog.notify.error('Opponent already requested', {position: 'bottom-left'});
-      }
+      this.availableWeaponIds = weaponAvailability.filter(weapon => !weapon.isInArena)
+        .map(weapon => weapon.weaponId);
 
+      this.ownedWeaponsWithInformation = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
+        return {
+          weaponId,
+          information: await this.getWeaponInformation(weaponId)
+        };
+      }));
 
-      this.updateIsLoading(false);
-      this.clearAllTicker();
-      this.ticker();
+      const shieldAvailability = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
+        return {
+          shieldId,
+          isInArena: await this.contracts().PvpArena.methods.isShieldInArena(shieldId).call({ from: this.defaultAccount })
+        };
+      }));
 
-    },
+      this.availableShieldIds = shieldAvailability.filter(shield => !shield.isInArena)
+        .map(shield => shield.shieldId);
 
-    async reRollOpponent(characterID){
-      this.updateIsLoading(true);
+      this.ownedShieldsWithInformation = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
+        return {
+          shieldId,
+          information: await this.getShieldInformation(shieldId)
+        };
+      }));
 
-      const errorMessage = await this.$store.dispatch('reRollOpponent',{characterID});
-
-      if(errorMessage && errorMessage.code === 4001){
-        this.$dialog.notify.error(errorMessage.message, {position: 'bottom-left'});
-      }else if (errorMessage && errorMessage.code !== 4001 && !this.pvp.hasPendingDuel){
-        this.$dialog.notify.error('Character is not dueling', {position: 'bottom-left'});
+      if (await this.contracts().PvpArena.methods.isCharacterInArena(this.currentCharacterId).call({ from: this.defaultAccount })) {
+        this.isCharacterInArena = true;
       }
 
-      this.updateIsLoading(false);
-      this.clearAllTicker();
-      this.ticker();
-    },
+      if (this.isCharacterInArena) {
+        const fighter = formatFighter(await this.contracts().PvpArena.methods.fighterByCharacter(this.currentCharacterId).call({ from: this.defaultAccount }));
 
-    async performDuel(characterID){
-      this.updateIsLoading(true);
-      const errorMessage = await this.$store.dispatch('preparePerformDuel', {characterID});
+        this.activeWeaponWithInformation = {
+          weaponId: fighter.weaponID,
+          information: await this.getWeaponInformation(fighter.weaponID)
+        };
 
-      if(errorMessage !== undefined && errorMessage.code === 4001){
-        this.$dialog.notify.error(errorMessage.message, {position: 'bottom-left'});
-      }else if (errorMessage !== undefined && errorMessage.code !== 4001){
-        this.$dialog.notify.error('Something went wrong with the duel queue. Please try again', {position: 'bottom-left'});
+        if (fighter.useShield) {
+          this.activeShieldWithInformation = {
+            shieldId: fighter.shieldID,
+            information: await this.getShieldInformation(fighter.shieldID)
+          };
+        }
       }
 
-      if(!errorMessage){
-        this.waitForDuel(characterID);
-      }
-    },
+      this.tierRewardsPool = await this.contracts().PvpArena.methods.getRankingRewardsPool(this.characterInformation.tier).call({ from: this.defaultAccount });
 
-    async waitForDuel(characterID){
-      await this.$store.dispatch('waitForDuelResult', {characterID});
-    },
+      const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopRankers(this.currentCharacterId).call({ from: this.defaultAccount });
 
-    async withdrawFromArena(characterID){
-      const inDuel = this.pvp.hasPendingDuel;
+      this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+        return {
+          rankerId,
+          name: getCharacterNameFromSeed(rankerId),
+          rank: await this.contracts().PvpArena.methods.getCharacterRankingPoints(rankerId).call({ from: this.defaultAccount })
+        };
+      }));
 
-      const errorMessage = await this.$store.dispatch('withdrawFromArena',{inDuel,characterID});
+      const previousDuels = await this.contracts().PvpArena.getPastEvents('DuelFinished', {
+        filter: {attacker: this.currentCharacterId},
+        toBlock: 'latest',
+        fromBlock: 0
+      });
 
-      if(errorMessage && errorMessage.code === 4001){
-        this.$dialog.notify.error(errorMessage.message, {position: 'bottom-left'});
-      }else if (errorMessage && errorMessage.code !== 4001){
-        this.$dialog.notify.error('Something went wrong withdrawing your character. Please try again', {position: 'bottom-left'});
-      }
-    },
-
-    ticker(){
-      window.setInterval(this.getDecisionTime, 1000);
-    },
-
-    getDecisionTime(){
-
-      const decisionTimeInterval = (this.pvp.duelByAttacker.createdAt * 1000) + 150000;
-
-      const decisionTime = new Date(decisionTimeInterval);
-
-      const currentDate = new Date();
-
-      const distance =  decisionTime - currentDate;
-
-      const minutes = new Date(distance).getMinutes();
-      const seconds = new Date(distance).getSeconds();
-
-      let formattedMinutes;
-      let formattedSeconds;
-
-      if(minutes < 10 ){
-        formattedMinutes = `0${minutes.toString()}`;
-      } else{
-        formattedMinutes = minutes.toString();
-      }
-      if(seconds < 10 ){
-        formattedSeconds = `0${seconds.toString()}`;
-      } else {
-        formattedSeconds = seconds.toString();
-      }
-
-      this.$store.dispatch('fetchDecisionTime',{decisionTime:`${formattedMinutes}:${formattedSeconds}`});
-
-      if(distance < 0 || !this.pvp.hasPendingDuel){
-        this.$store.dispatch('fetchDecisionTime',{decisionTime:'00:00'});
-        this.clearAllTicker();
-      }
-    },
-
-    clearAllTicker(){
-      this.$store.dispatch('fetchDecisionTime',{decisionTime:'00:00'});
-      for(let i=0;i<999999;i++){
-        clearInterval(i);
-      }
-    },
-
-    characterWithdraw(){
-      this.$bvModal.show('withdraw-character');
+      this.duelHistory = previousDuels.map(duel => {
+        return formatDuelResult(duel.returnValues);
+      });
     }
 
+    this.loading = false;
   },
 
-  async created(){
-    this.updateIsLoading(true);
-    this.winningPoints = await this.$store.dispatch('fetchWinningPoints');
-    this.losingPoints = await this.$store.dispatch('fetchLosingPoints');
-    this.clearAllTicker();
-    this.ticker();
-    this.updateIsLoading(false);
+  watch: {
+    async currentCharacterId(value) {
+      this.loading = true;
 
-    if ((await this.$store.dispatch('fetchDuelQueue')).map(characterID => characterID.toString()).includes(this.currentPvPCharacterId.toString())) {
-      this.updateIsLoading(true);
-      await this.waitForDuel(this.currentPvPCharacterId);
+      this.$emit('leaveMatchMaking');
+
+      if (value !== null) {
+        this.characterInformation.name = getCharacterNameFromSeed(value);
+
+        this.characterInformation.tier = await this.contracts().PvpArena.methods.getArenaTier(value).call({ from: this.defaultAccount });
+
+        this.characterInformation.level = await this.contracts().Characters.methods.getLevel(value).call({ from: this.defaultAccount });
+
+        this.characterInformation.power = await this.contracts().Characters.methods.getPower(value).call({ from: this.defaultAccount });
+
+        this.characterInformation.rank = await this.contracts().PvpArena.methods.getCharacterRankingPoints(value).call({ from: this.defaultAccount });
+
+        this.characterInformation.element = formatCharacter(value, await this.contracts().Characters.methods.get(`${value}`)
+          .call({ from: this.defaultAccount })).traitName;
+
+        this.entryWager = await this.contracts().PvpArena.methods.getEntryWager(this.currentCharacterId).call({ from: this.defaultAccount });
+
+        const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
+          return {
+            weaponId,
+            isInArena: await this.contracts().PvpArena.methods.isWeaponInArena(weaponId).call({ from: this.defaultAccount })
+          };
+        }));
+
+        this.availableWeaponIds = weaponAvailability.filter(weapon => !weapon.isInArena)
+          .map(weapon => weapon.weaponId);
+
+        this.ownedWeaponsWithInformation = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
+          return {
+            weaponId,
+            information: await this.getWeaponInformation(weaponId)
+          };
+        }));
+
+        const shieldAvailability = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
+          return {
+            shieldId,
+            isInArena: await this.contracts().PvpArena.methods.isShieldInArena(shieldId).call({ from: this.defaultAccount })
+          };
+        }));
+
+        this.availableShieldIds = shieldAvailability.filter(shield => !shield.isInArena)
+          .map(shield => shield.shieldId);
+
+        this.ownedShieldsWithInformation = await Promise.all(this.ownedShieldIds.map(async (shieldId) => {
+          return {
+            shieldId,
+            information: await this.getShieldInformation(shieldId)
+          };
+        }));
+
+        if (await this.contracts().PvpArena.methods.isCharacterInArena(value).call({ from: this.defaultAccount })) {
+          this.isCharacterInArena = true;
+        } else {
+          this.isCharacterInArena = false;
+        }
+
+        if (this.isCharacterInArena) {
+          const fighter = formatFighter(await this.contracts().PvpArena.methods.fighterByCharacter(value).call({ from: this.defaultAccount }));
+
+          this.activeWeaponWithInformation = {
+            weaponId: fighter.weaponID,
+            information: await this.getWeaponInformation(fighter.weaponID)
+          };
+
+          if (fighter.useShield) {
+            this.activeShieldWithInformation = {
+              shieldId: fighter.shieldID,
+              information: await this.getShieldInformation(fighter.shieldID)
+            };
+          }
+        }
+
+        this.tierRewardsPool = await this.contracts().PvpArena.methods.getRankingRewardsPool(this.characterInformation.tier)
+          .call({ from: this.defaultAccount });
+
+        const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopRankers(value).call({ from: this.defaultAccount });
+
+        this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+          return {
+            rankerId,
+            name: getCharacterNameFromSeed(rankerId),
+            rank: await this.contracts().PvpArena.methods.getCharacterRankingPoints(rankerId).call({ from: this.defaultAccount })
+          };
+        }));
+
+        const previousDuels = await this.contracts().PvpArena.getPastEvents('DuelFinished', {
+          filter: {attacker: value},
+          toBlock: 'latest',
+          fromBlock: 0
+        });
+
+        this.duelHistory = previousDuels.map(duel => {
+          return formatDuelResult(duel.returnValues);
+        });
+
+        this.isMatchMaking = false;
+      }
+
+      this.loading = false;
     }
-  },
-
-  components:{
-    'pvp-character': PvPCharacter,
-    'pvp-fighter': PvPFighter,
-    'pvp-duel': PvPDuel,
-    'pvp-divider': PvPDivider,
-    'pvp-stats': PvPStats,
-    'pvp-preloader': PvPPreloader
   }
-
 };
 </script>
 
-<style>
-#arena-character-buttons {
-  border-bottom: 2px solid #968332;
-  margin-bottom: 50px;
-  padding-bottom: 40px;
-  text-align: center;
-}
-
-.find-opponent-container {
-  margin: auto;
-  height: 200px;
-  width: 200px;
-}
-
-#find-opponent-img:hover {
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff;
-  animation: burn 1s 1 forwards;
-  cursor: pointer;
-}
-
-.duel-container {
-  margin: auto;
-  height: 200px;
-  width: 200px;
-  margin-bottom: 50px;
-}
-
-#duel-img:hover {
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff;
-  animation: burn 1s 1 forwards;
-  cursor: pointer;
-}
-
-.withdraw-container {
-  margin: auto;
-  height: 25px;
-  width: auto;
-  cursor: pointer;
-}
-
-.withdraw-container:hover {
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff;
-  animation: burn 1s 1 forwards;
-}
-
-#withdraw-img {
-  height: 25px;
-  width: 25px;
-}
-
-.go-back-container {
-  margin-bottom: 10px;
-  height: 25px;
-  width: 200px;
-  cursor: pointer;
-}
-
-.go-back-container:hover {
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff;
-  animation: burn 1s 1 forwards;
-}
-
-#go-back-img {
-  height: 25px;
-  width: 25px;
-}
-
-.reroll-container {
-  margin: auto;
-  height: 25px;
-  width: auto;
-  cursor: pointer;
-}
-
-.reroll-container:hover {
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff;
-  animation: burn 1s 1 forwards;
-}
-
-#reroll-img {
-  height: 25px;
-  width: 25px;
-}
-
-.arena-footer {
-  border-top: 2px solid #968332;
-  margin-top: 50px;
-  height: 100px;
-  width: auto;
-}
-
-.timer-container {
-  margin: auto;
-  height: 100px;
-  margin-bottom: 10px;
-}
-
-#timer {
-  color: white;
-  font-size: 50px;
-}
-
-.duel-result-container {
-  background-image: url('../../assets/duel-result-bg.svg');
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-color: transparent;
-  background-position-x: -83px;
-  background-position-y: -16px;
-  height: 600px;
-  width: 500px;
-  margin: auto;
-  animation: glow 3s infinite linear;
-}
-
-.duel-result {
-  position: relative;
-  top: 50px;
-  text-align: center;
-  height: 200px;
-}
-
-.duel-result-ok-button {
-  text-align: center;
-  font-weight: bold;
-  font-size: 20px;
-  margin: 180px auto;
-  height: 30px;
-  width: 100px;
-  box-shadow: -10px 10px 20px #000;
-  color: #fff;
-}
-
-.duel-result-ok-button:hover {
-  cursor: pointer;
-}
-
-.duel-win-result-text {
-  margin-bottom: 30px;
-  font-size: 30px;
-  font-weight: 900;
-  font-family: initial;
-  letter-spacing: 10px;
-  color: #ffd20b;
-  text-shadow: 0 0 10px #000, 0 0 20px #fff;
-}
-
-.duel-win-result-text::before {
-    content: "";
-    position: absolute;
-    top: 20px;
-    height: 80%;
-    width: 40%;
-    background-image: url("../../assets/victory-banner.svg");
-    background-repeat: no-repeat;
-    background-size: cover;
-    filter: drop-shadow(0 0 10px #000) drop-shadow(0 0 20px #fff) drop-shadow(0 0 30px #ffd20b);
-    z-index: -1;
-}
-
-.duel-lose-result-text {
-  margin-bottom: 20px;
-  font-size: 30px;
-  font-weight: 900;
-  font-family: initial;
-  letter-spacing: 10px;
-  color: rgb(107, 8, 8);
-  text-shadow: 0 0 5px #000, 0 0 5px #fff;
-}
-
-.duel-lose-result-text::before {
-    content: "";
-    position: absolute;
-    height: 90%;
-    width: 46%;
-    background-image: url("../../assets/blood.svg");
-    background-repeat: no-repeat;
-    background-size: cover;
-    filter: drop-shadow(0 0 10px #000) drop-shadow(0 0 20px #fff) drop-shadow(0 0 30px #000);
-    opacity: 0.8;
-    z-index: -1;
-}
-
-.duel-result-rewards {
-  text-align: center;
-  font-weight: 900;
-  font-size: 20px;
-  margin: 60px auto;
-}
-
-.duel-result-rewards-label {
-  font-size: 15px;
-  font-weight: 900;
-  color: #000;
-}
-
-.duel-result-rewards-won-value {
-  font-size: 15px;
-  font-weight: bold;
-  color: greenyellow;
-  text-shadow: 0 0 10px #fff;
-}
-
-.duel-result-rewards-lost-value {
-  font-size: 15px;
-  font-weight: bold;
-  color: maroon;
-  text-shadow: 0 0 10px #000;
-}
-
-.duel-result-roll-label {
-  margin-right: 10px;
-  font-size: 20px;
-  font-weight: 900;
-  color: #000;
-  text-shadow: 0 0 10px #fff;
-}
-
-.duel-result-roll-value {
-  font-size: 15px;
-  letter-spacing: 1px;
-  font-weight: bold;
-  color: #fff;
-  text-shadow: 0 0 10px #000;
-}
-
-
-.arena-tier-container {
-  margin: auto;
-  height: 25px;
-}
-
-.arena-tier-label {
-  font-size: 15px;
-  font-weight: bolder;
-  color: #968332;
-  letter-spacing: 1px;
-}
-
-.arena-tier-value {
-  font-size: 15px;
-  color: #fff;
-}
-
-.ranking-rewards-pool-container {
-  margin: auto;
-  height: 25px;
-  width: auto;
-}
-
-.ranking-rewards-pool-label {
-  font-size: 15px;
-  font-weight: bolder;
-  color: #968332;
-  letter-spacing: 1px;
-}
-
-.ranking-rewards-pool-value {
-  font-size: 15px;
-  margin-right: 10px;
-  color: #fff;
-}
-
-.view-stats-container {
-  margin: auto;
-  height: 25px;
-  width: auto;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-.view-stats-label {
-  font-size: 15px;
-  font-weight: bolder;
-  color: #968332;
-  letter-spacing: 1px;
-  cursor: pointer;
-}
-
-.view-stats-label:hover{
-  text-shadow: 0 0 10px #fff;
-}
-
-.pvp-rewards-container {
-  margin: 40px auto;
-  text-align: center;
-  box-shadow: 0 0 10px #fff;
-  border: 2px solid #968332;
-  border-radius: 10px;
-}
-
-.pvp-rewards-header {
-  font-size: 20px;
-  font-weight: bolder;
-  color: #968332;
-  letter-spacing: 1px;
-}
-
-.not-withdrawable {
-  cursor: not-allowed;
-}
-
-.withdraw-character {
-  height: 200px;
-}
-
-.withdraw-modal-question {
-  font-size: 15px;
-  font-weight: bold;
-  color:#968332;
-}
-
-.withdraw-modal-variable {
-  font-size: 15px;
-  font-weight: bold;
-  color:#fff;
-}
-
-.withdraw-skill-balance-container {
-  width: 80%;
-  margin: 10px auto;
-  text-align: center;
-}
-
-.withdraw-skill-balance-header {
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: 1px;
-}
-
-.withdraw-skill-balance-content {
-  padding: 20px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  box-shadow: 0 0 20px #000;
-}
-
-.withdraw-skill-balance-label {
-  font-size: 15px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  margin-right: 5px;
-}
-
-.withdraw-skill-balance-value {
-  font-size: 15px;
-  font-weight: bold;
-  color: #fff;
-}
-
-.modal-title {
-  font-size: 25px;
-  letter-spacing: 2px;
-  font-weight: bold;
-  color: #968332;
-}
-
-.arena-preloader-container{
-  height: 500px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
-
-@keyframes burn {
-  from {
-    filter: drop-shadow( 0px 0px 0px #968332);
+<style scoped lang="scss">
+  .loadingSpinner {
+    height: 3rem;
+    width: 3rem;
+    animation: spin 1s linear infinite;
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
   }
-  to {
-    filter: drop-shadow( 0px 0px 50px #fff);
-  }
-}
-
-@keyframes glow {
-  0% {
-    filter: drop-shadow( 0px 0px 0px #fff);
-  }
-  50% {
-    filter: drop-shadow( 0px 0px 10px #fff);
-  }
-  100% {
-    filter: drop-shadow( 0px 0px 0px #fff);
-  }
-}
-
 </style>

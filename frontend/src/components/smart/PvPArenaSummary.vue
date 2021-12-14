@@ -51,7 +51,7 @@
       <div class="arenaInformation">
         <h1 class="title">ARENA INFORMATION</h1>
         <div class="tokenCard">
-          <img src="../../../../../assets/skillToken.png" alt="skill token" />
+          <img src="../../assets/skillToken.png" alt="skill token" />
           <div class="tokenCardInfo">
             <span class="text">PVP Rewards Pool ($SKILL)</span>
             <span class="number">{{ formatedTierRewardsPool }}</span>
@@ -90,10 +90,10 @@
 <script>
 import { mapState } from 'vuex';
 import BN from 'bignumber.js';
-import PvPWeapon from '../../components/PvPWeapon.vue';
-import PvPShield from '../../components/PvPShield.vue';
-import PvPButton from '../../components/PvPButton.vue';
-import PvPCharacter from '../../components/PvPCharacter.vue';
+import PvPWeapon from './PvPWeapon.vue';
+import PvPShield from './PvPShield.vue';
+import PvPButton from './PvPButton.vue';
+import PvPCharacter from './PvPCharacter.vue';
 import dayjs from 'dayjs';
 
 export default {

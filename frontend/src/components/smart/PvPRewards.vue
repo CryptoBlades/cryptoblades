@@ -16,7 +16,7 @@
 <script>
 import BN from 'bignumber.js';
 import { mapState } from 'vuex';
-import PvPButton from '../components/PvPButton.vue';
+import PvPButton from './PvPButton.vue';
 
 export default {
   components: {
