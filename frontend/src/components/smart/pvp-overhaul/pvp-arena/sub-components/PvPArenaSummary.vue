@@ -38,7 +38,7 @@
                 <li><span>Date</span><span>Result</span></li>
                 <li v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
                   <span class="date">{{ dayjs(new Date(duel.timestamp * 1000)).format('YYYY/MM/DD') }}</span>
-                  <span :class="{'lost': duel.attackerWon ? 'Win' : 'Lose'}" class="result">{{ duel.attackerWon ? 'Win' : 'Lose' }}</span>
+                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? 'Win' : 'Lose' }}</span>
                 </li>
               </ul>
             </div>
@@ -281,9 +281,9 @@ span, p, li, button, a {
     }
     .result {
       color: green;
-      .lost {
-        color: red;
-      }
+    }
+    .lost {
+      color: red;
     }
     ul {
       margin-bottom: 0;
@@ -298,12 +298,6 @@ span, p, li, button, a {
         span {
           display: flex;
           flex: 1;
-        }
-        &.lose {
-          color: red;
-        }
-        &.win {
-          color: green;
         }
       }
       li:first-of-type {
