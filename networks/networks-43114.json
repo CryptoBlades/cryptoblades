@@ -2259,13 +2259,70 @@
     },
     "links": {},
     "address": "0x46419526a59ec1d73b72620ae16da091bE8486bd",
-    "transactionHash": "0x6431394f12a247cafa328b072f4bf7205f619af3ec177db06670bc92c5bba7ea"
+    "transactionHash": "0x8c3c5b5d659a35329628886de3013034b8444327db436472c405fd8a4ce080fe"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
     "links": {},
     "address": "0x3670C066960252fA7F614B4D886EB399cD292Ceb",
     "transactionHash": "0xd5400a9f21eb7f9edbdd17108e49f802635e3dda268e337d48da10f988e26b4c"
+  },
+  "build/contracts/ExperimentToken2.json": {
+    "events": {
+      "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "spender",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          }
+        ],
+        "name": "Approval",
+        "type": "event"
+      },
+      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          }
+        ],
+        "name": "Transfer",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0xC28a73FCb6248Cb1718A50a9EC9cBC361dee3ea1",
+    "transactionHash": "0x4a8ffecc66dd9fb7574893576006418c0123417c798c2bda9569574249454cc6"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -2754,7 +2811,7 @@
     },
     "links": {},
     "address": "0x71A57Fa35bdc38695a685af5652dfAA80466E55B",
-    "transactionHash": "0x5079411bfcd8d793a63a3cf04fc5b02fa401405b3b00a969153b2787c4d2848c"
+    "transactionHash": "0xae14a232169a8b37a6c5c0ca3683991142ce38f6c0f8739ab0dd0ddac61c8cf4"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -3009,7 +3066,7 @@
     "events": {},
     "links": {},
     "address": "0x66eb98A303Eb58c0f153e3B47d31d3B28550F1Aa",
-    "transactionHash": "0x6d2a4569771e7c09108eef8b29187c288120accc438d66fed5dc4b3d101bfd42"
+    "transactionHash": "0x0a373882462a4265c6dcf4ddb963801473e5ea7a369d6a7a61d945d690bd6404"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -3474,6 +3531,12 @@
     "links": {},
     "address": "0x483416eB3aFA601B9C6385f63CeC0C82B6aBf1fb",
     "transactionHash": "0xed1cf8f4867f783748c75141be232c8be790272ee144b7d97b1aff663c23f645"
+  },
+  "build/contracts/Treasury.json": {
+    "events": {},
+    "links": {},
+    "address": "0x5B1cCb62D2F9c8523abBa89A56432005cef03b99",
+    "transactionHash": "0x0f2288650fa420187d5c7c5b69e2f01921166315664917715518e71af18e48ba"
   },
   "build/contracts/WaxBridge.json": {
     "events": {

@@ -44,6 +44,12 @@
       </li>
     </router-link>
 
+    <router-link :to="{ name: 'treasury' }" exact class="nav-link">
+      <li class="nav-item nav-top-links" >
+        <span class="gtag-link-others" tagname="treasury_screen">Treasury</span>
+      </li>
+    </router-link>
+
   </b-navbar-nav>
 </template>
 

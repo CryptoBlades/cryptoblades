@@ -84,7 +84,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function migrateTo_NftVars() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-        NFTVAR_BUSY = 1;
+        // NFTVAR_BUSY = 1;
     }
 
     /*
@@ -126,8 +126,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     mapping(uint256 => uint256) public raidsWon;
 
     PvpArena public pvp;
-    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;
-    uint256 public NFTVAR_BUSY;
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
+    uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -268,6 +268,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function gainXp(uint256 id, uint16 xp) public restricted {
+        _gainXp(id, xp);
+    }
+
+    function _gainXp(uint256 id, uint256 xp) internal {
         Character storage char = tokens[id];
         if (char.level < 255) {
             uint256 newXp = char.xp.add(xp);
@@ -288,6 +292,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             }
             char.xp = uint16(newXp);
         }
+    }
+
+    function gainXpAll(uint256[] calldata chars, uint256[] calldata xps) external restricted {
+        for(uint i = 0; i < chars.length; i++)
+            _gainXp(chars[i], xps[i]);
     }
 
     function getStaminaTimestamp(uint256 id) public view noFreshLookup(id) returns (uint64) {
@@ -322,8 +331,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getFightDataAndDrainStamina(address fighter,
-        uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
-        require(fighter == ownerOf(id));
+        uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint96) {
+        require(fighter == ownerOf(id) && nftVars[id][NFTVAR_BUSY] == 0);
+        nftVars[id][NFTVAR_BUSY] |= busyFlag;
+
         Character storage char = tokens[id];
         require(getNftVar(id, NFTVAR_BUSY) == 0, "Character is busy");
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
@@ -345,16 +356,32 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
         raidsDone[id] = raidsDone[id] + 1;
         raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
-        gainXp(id, xp);
-        setNftVar(id,NFTVAR_BUSY, 0);
+        require(nftVars[id][NFTVAR_BUSY] == 0); // raids do not apply busy flag for now
+        //nftVars[id][NFTVAR_BUSY] = 0;
+        _gainXp(id, xp);
     }
 
-    function canRaid(address user, uint256 id) public view returns (bool) {
-        require(getNftVar(id, NFTVAR_BUSY) == 0, "Character is busy");
-        return ownerOf(id) == user && getStaminaPoints(id) > 0;
+    function getCharactersOwnedBy(address wallet) public view returns(uint256[] memory chars) {
+        uint256 count = balanceOf(wallet);
+        chars = new uint256[](count);
+        for(uint256 i = 0; i < count; i++)
+            chars[i] = tokenOfOwnerByIndex(wallet, i);
+    }
+
+    function getReadyCharacters(address wallet) public view returns(uint256[] memory chars) {
+        uint256[] memory owned = getCharactersOwnedBy(wallet);
+        uint256 ready = 0;
+        for(uint i = 0; i < owned.length; i++)
+            if(nftVars[owned[i]][NFTVAR_BUSY] == 0)
+                ready++;
+        chars = new uint[](ready);
+        for(uint i = 0; i < owned.length; i++)
+            if(nftVars[owned[i]][NFTVAR_BUSY] == 0)
+                chars[--ready] = owned[i];
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        require(nftVars[tokenId][NFTVAR_BUSY] == 0);
         if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to)) {
             require(balanceOf(to) < characterLimit, "Recv has too many characters");
         }
@@ -367,11 +394,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         characterLimit = max;
     }
 
-    // functions to get and set the NFT vars
     function getNftVar(uint256 characterID, uint256 nftVar) public view returns(uint256) {
         return nftVars[characterID][nftVar];
     }
-    function setNftVar(uint256 characterID, uint256 nftVar, uint8 value) public {
+    function setNftVar(uint256 characterID, uint256 nftVar, uint256 value) public restricted {
         nftVars[characterID][nftVar] = value;
     }
 }

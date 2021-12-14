@@ -134,6 +134,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     Promos public promos;
 
+    string private _localChainPrefix;
+
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTTransferOutRequest(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -429,6 +431,15 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         transferOutOfPlayers[msg.sender] = _transfersOutCount;
         transferOutOfNFTs[address(_tokenAddress)][_id] = _transfersOutCount;
 
+        // Set the chainid if none is set already
+        // Not set => this is a local mint that was not bridged in
+        // Set it to LocalPrefixMintId (Example BSC123, HECO456)
+        if(bytes(nftChainIds[address(_tokenAddress)][_id]).length == 0){
+            string memory chainId = buildChainId(_id);
+            nftChainIds[address(_tokenAddress)][_id] = chainId;
+            nftChainIdsToMintId[address(_tokenAddress)][chainId] = _id;
+        }
+        
         emit NFTTransferOutRequest(msg.sender, _tokenAddress, _id);
     }
 
@@ -548,6 +559,14 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(forced || (bytes(nftChainIds[nftAddress][nftId]).length == 0 && nftChainIdsToMintId[nftAddress][chainId] == 0), "NA");
         nftChainIds[nftAddress][nftId] = chainId;
         nftChainIdsToMintId[nftAddress][chainId] = nftId;
+    }
+
+    function setLocalChainPrefix(string calldata prefix) external restricted {
+        _localChainPrefix = prefix;
+    }
+
+    function getLocalChainPrefix() public view returns (string memory) {
+        return _localChainPrefix;
     }
 
     function setBridgeFee(uint256 newFee) external restricted {
@@ -681,5 +700,27 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         level = uint8((metaData >> 8) & 0xFF);
         xp = uint16(metaData  >> 16 & 0xFFFF);
         appliedCosmetic = uint32((metaData >> 32) & 0xFFFFFFFF);
+    }
+
+    
+    function buildChainId(uint256 sourceId) internal view returns (string memory) {
+        return string(abi.encodePacked(_localChainPrefix, uint2str(sourceId)));
+    }
+
+    function uint2str(uint i) internal pure returns (string memory) {
+        if (i == 0) return "0";
+        uint j = i;
+        uint length;
+        while (j != 0) {
+            length++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(length);
+        uint k = length - 1;
+        while (i != 0) {
+            bstr[k--] = byte(uint8(48 + i % 10));
+            i /= 10;
+        }
+        return string(bstr);
     }
 }

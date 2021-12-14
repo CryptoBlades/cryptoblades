@@ -73,7 +73,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function migrateTo_NftVars() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-        NFTVAR_BUSY = 1;
+        // NFTVAR_BUSY = 1;
     }
     struct Weapon {
         uint16 properties; // right to left: 3b stars, 2b trait, 7b stat pattern, 4b EMPTY
@@ -130,14 +130,14 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     mapping(uint256 => uint256) public numberParameters;
 
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
+    uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
+
     event Burned(address indexed owner, uint256 indexed burned);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
     event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
     
-    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;
-    uint256 public NFTVAR_BUSY;
-
     modifier restricted() {
         _restricted();
         _;
@@ -670,12 +670,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getFightDataAndDrainDurability(address fighter,
-        uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability) public
+        uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability, uint256 busyFlag) public
         restricted
     returns (int128, int128, uint24, uint8) {
-        // check if the weapon is busy, there is no space in the contract so we can't add an exaplanation
-        require(getNftVar(id, NFTVAR_BUSY) == 0);
-        require(fighter == ownerOf(id));
+        require(fighter == ownerOf(id) && nftVars[id][NFTVAR_BUSY] == 0);
+        nftVars[id][NFTVAR_BUSY] |= busyFlag;
         drainDurability(id, drainAmount, allowNegativeDurability);
         Weapon storage wep = tokens[id];
         return (
@@ -749,6 +748,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint64(maxDurability * secondsPerDurability);
     }
 
+    function getNftVar(uint256 weaponID, uint256 nftVar) public view returns(uint256) {
+        return nftVars[weaponID][nftVar];
+    }
+    function setNftVar(uint256 weaponID, uint256 nftVar, uint256 value) public restricted {
+        nftVars[weaponID][nftVar] = value;
+    }
+
     function setFeatureEnabled(uint256 bit, bool enabled) public restricted {
         if (enabled) {
             numberParameters[NUMBERPARAMETER_FEATURE_BITS] |= bit;
@@ -762,6 +768,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        require(nftVars[tokenId][NFTVAR_BUSY] == 0);
         // Always allow minting and burning.
         if(from != address(0) && to != address(0)) {
             // But other transfers require the feature to be enabled.
@@ -771,11 +778,5 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
                 require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to));
             }
         }
-    }
-    function getNftVar(uint256 weaponID, uint256 nftVar) public view returns(uint256) {
-        return nftVars[weaponID][nftVar];
-    }
-    function setNftVar(uint256 weaponID, uint256 nftVar, uint8 value) public {
-        nftVars[weaponID][nftVar] = value;
     }
 }

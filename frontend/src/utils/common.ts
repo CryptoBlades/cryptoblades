@@ -5,6 +5,8 @@ import Web3 from 'web3';
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
 BigNumber.config({ EXPONENTIAL_AT: 100 });
 
+const web3 = new Web3(Web3.givenProvider || process.env.VUE_APP_WEB3_FALLBACK_PROVIDER);
+
 export const apiUrl = (url: string) => `${process.env.VUE_APP_API_URL || 'https://api.cryptoblades.io'}/${url}`;
 
 export const getCurrentGasPrices = async () => {
@@ -47,4 +49,22 @@ export const copyNftUrl = (id: number | string, type?: string): void => {
   dummy.select();
   document.execCommand('copy');
   document.body.removeChild(dummy);
+};
+
+export const addTokenToMetamask = async (address: string, symbol: string): Promise<void> => {
+  try {
+    await (web3.currentProvider as any).request({
+      method: 'wallet_watchAsset',
+      params: {
+        type: 'ERC20',
+        options: {
+          address,
+          symbol,
+          decimals: 18
+        },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+  }
 };

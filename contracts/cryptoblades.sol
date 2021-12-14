@@ -282,13 +282,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
-                char, staminaCostFight * fightMultiplier, false));
+                char, staminaCostFight * fightMultiplier, false, 0));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(msg.sender, wep, charTrait,
-                durabilityCostFight * fightMultiplier, false);
+                durabilityCostFight * fightMultiplier, false, 0);
 
         // dirty variable reuse to avoid stack limits
         target = grabTarget(
@@ -322,7 +322,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
 
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
-        uint256 tokens = getTokenGainForFight(targetPower) * fightMultiplier;
+        uint256 tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
 
         if(playerRoll < monsterRoll) {
             tokens = 0;
@@ -349,14 +349,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint24(target & 0xFFFFFF);
     }
 
-    function getTokenGainForFight(uint24 monsterPower) public view returns (uint256) {
+    function getTokenGainForFight(uint24 monsterPower, bool applyLimit) public view returns (uint256) {
         // monsterPower / avgPower * payPerFight * powerMultiplier
         uint256 amount = ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
             .mulu(vars[VAR_HOURLY_PAY_PER_FIGHT]);
         
         if(amount > vars[VAR_PARAM_MAX_FIGHT_PAYOUT])
             amount = vars[VAR_PARAM_MAX_FIGHT_PAYOUT];
-        if(vars[VAR_HOURLY_DISTRIBUTION] < amount * 5) // the * 5 is a temp measure until we can sync frontend on main
+        if(vars[VAR_HOURLY_DISTRIBUTION] < amount * 5 && applyLimit) // the * 5 is a temp measure until we can sync frontend on main
             amount = 0;
         return amount;
     }
@@ -448,7 +448,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint32 enemyIndex,
         uint256 currentHour
     ) private pure returns (uint32) {
-        require(enemyIndex < 4, "High target index");
+        require(enemyIndex < 4);
 
         uint256 enemySeed = uint256(keccak256(abi.encodePacked(
             staminaTimestamp, currentHour, playerPower, enemyIndex
@@ -539,19 +539,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(num > 0 && num <= 10);
         for (uint i = 0; i < num; i++) {
             weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))), chosenElement);
-        }
-    }
-
-    function mintWeaponNforAddress(address _minter, uint32 num)
-        public
-        onlyNonContract
-        oncePerBlock(_minter)
-    {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(GAME_ADMIN, msg.sender));
-        require(num > 0 && num <= 50);
-
-        for (uint i = 0; i < num; i++) {
-            weapons.mint(_minter, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), _minter, i))), 100);
         }
     }
 
@@ -825,6 +812,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
+    function deductAfterPartnerClaim(uint256 amount, address player) external restricted {
+        tokenRewards[player] = tokenRewards[player].sub(amount);
+        _trackIncome(amount);
+    }
+
     function trackIncome(uint256 income) public restricted {
         _trackIncome(income);
     }
@@ -1033,15 +1025,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function claimXpRewards() public {
         // our characters go to the tavern to rest
         // they meditate on what they've learned
-        for(uint256 i = 0; i < characters.balanceOf(msg.sender); i++) {
-            uint256 char = characters.tokenOfOwnerByIndex(msg.sender, i);
-            uint256 xpRewardsToClaim = xpRewards[char];
-            xpRewards[char] = 0;
-            if (xpRewardsToClaim > 65535) {
-                xpRewardsToClaim = 65535;
-            }
-            characters.gainXp(char, uint16(xpRewardsToClaim));
+
+        uint256[] memory chars = characters.getReadyCharacters(msg.sender);
+        require(chars.length > 0);
+        uint256[] memory xps = new uint256[](chars.length);
+        for(uint256 i = 0; i < chars.length; i++) {
+            xps[i] = xpRewards[chars[i]];
+            xpRewards[chars[i]] = 0;
         }
+        characters.gainXpAll(chars, xps);
     }
 
     function getTokenRewards() public view returns (uint256) {

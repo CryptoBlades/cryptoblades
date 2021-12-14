@@ -30,6 +30,28 @@
         </div>
       </div>
 
+      <div class="row" v-if="!selectedWeaponId">
+        <div class="col-12 text-center">
+          <h2>{{ $t('combat.nextHourlyUpdate') }}
+            <i id="next-hourly-update-hint" class="far fa-question-circle hint"/>
+          </h2>
+          <b-tooltip target="next-hourly-update-hint">
+            {{ $t('combat.hourlyUpdateHint') }} <a href="https://discord.gg/cryptoblades" target="_blank">https://discord.gg/cryptoblades</a>
+          </b-tooltip>
+          <h4>{{ timeToNextAllowanceText }}</h4>
+        </div>
+        <div class="col-12 text-center">
+          <h2>{{ $t('combat.expectedEarnings') }}</h2>
+          <h5>
+            <CurrencyConverter :skill="expectedSkill" :showValueInUsdOnly="false"/>
+            (
+            <CurrencyConverter :skill="expectedSkill" :showValueInUsdOnly="true"/>
+            )
+            <Hint id="expectedSkillHint" :text="$t('combat.forStaminaFight', {stamina: 40})"/>
+            <br>{{ $t('combat.averagePower') }}: <b>{{ powerAvg }}</b></h5>
+        </div>
+      </div>
+
       <img src="../assets/divider7.png" class="info-divider enemy-divider" />
 
       <div class="row" v-if="currentCharacterStamina >= staminaPerFight">
@@ -147,13 +169,14 @@
 // import Character from "../components/Character.vue";
 import BigButton from '../components/BigButton.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
-import { getEnemyArt } from '../enemy-art';
-import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, WeaponElement } from '../interfaces';
+import {getEnemyArt} from '../enemy-art';
+import {CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, WeaponElement} from '../interfaces';
 import Hint from '../components/Hint.vue';
 import CombatResults from '../components/CombatResults.vue';
-import { toBN, fromWeiEther } from '../utils/common';
+import {fromWeiEther, toBN} from '../utils/common';
 import WeaponIcon from '../components/WeaponIcon.vue';
-import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
+import CurrencyConverter from '../components/CurrencyConverter.vue';
 
 export default {
   data() {
@@ -175,7 +198,12 @@ export default {
       targetToFight: null,
       targetToFightIndex: null,
       minutesToNextAllowance: null,
+      secondsToNextAllowance: null,
       lastAllowanceSkill: null,
+      nextAllowanceCounter: null,
+      timeToNextAllowanceText: '',
+      powerAvg: null,
+      expectedSkill: null,
     };
   },
 
@@ -183,8 +211,17 @@ export default {
     this.intervalSeconds = setInterval(() => (this.timeSeconds = new Date().getSeconds()), 5000);
     this.intervalMinutes = setInterval(() => (this.timeMinutes = new Date().getMinutes()), 20000);
     this.staminaPerFight = 40 * Number(localStorage.getItem('fightMultiplier'));
-  },
+    this.counterInterval = setInterval(async () => {
+      await this.getNextAllowanceTime();
+      await this.getExpectedPayout();
+    }, 1000);
 
+  },
+  beforeDestroy() {
+    clearInterval(this.intervalSeconds);
+    clearInterval(this.intervalMinutes);
+    clearInterval(this.counterInterval);
+  },
   computed: {
     ...mapState(['currentCharacterId']),
     ...mapGetters([
@@ -237,7 +274,7 @@ export default {
 
   methods: {
     ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
-      'fetchAllowanceTimestamp', 'fetchHourlyAllowance']),
+      'fetchAllowanceTimestamp', 'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -299,11 +336,22 @@ export default {
       return 0;
     },
 
+    async getExpectedPayout() {
+      this.powerAvg = await this.fetchHourlyPowerAverage();
+      this.expectedSkill = fromWeiEther(await this.fetchHourlyPayPerFight());
+    },
     async getNextAllowanceTime(){
       const allowanceTimestamp = await this.fetchAllowanceTimestamp();
       const currentTime = Math.round(Date.now() / 1000);
-      const minutesToNextAllowance = Math.round(60 - (currentTime - allowanceTimestamp)/60);
-      this.minutesToNextAllowance = minutesToNextAllowance;
+      const diff =  (currentTime - allowanceTimestamp);
+      this.minutesToNextAllowance = Math.floor(60 - (diff)/60);
+      this.secondsToNextAllowance = Math.round(60 - (diff)%60);
+      if(diff/60 >= 60){
+        this.timeToNextAllowanceText = 'Allowance update any moment now ...';
+      }
+      else{
+        this.timeToNextAllowanceText = this.minutesToNextAllowance + ' minutes and ' + this.secondsToNextAllowance + ' seconds';
+      }
     },
     async getHourlyAllowance(){
       const fetchHourlyAllowance = await this.fetchHourlyAllowance();
@@ -421,7 +469,7 @@ export default {
       if(!this.targets) return;
       const expectedPayouts = new Array(4);
       for(let i = 0; i < this.targets.length; i++) {
-        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower(this.targets[i].power);
+        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: this.targets[i].power });
         expectedPayouts[i] = expectedPayout;
       }
       this.targetExpectedPayouts = expectedPayouts;
@@ -434,6 +482,7 @@ export default {
     Hint,
     CombatResults,
     WeaponIcon,
+    CurrencyConverter,
   },
 };
 </script>
@@ -716,7 +765,10 @@ h1 {
   display: block;
   text-align: center;
 }
-
+#hourlyUpdateHint, #expectedSkillHint{
+  margin:0;
+  font-size: 1em;
+}
 @media (max-width: 575.98px) {
   .show-reforged {
     width: 100%;

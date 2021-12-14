@@ -12,6 +12,8 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
     using SafeMath for uint64;
 
+    // NOTE: It was decided to not calculate prices on-chain, so a lot of variables/functions are unused
+
     /* ========== CONSTANTS ========== */
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
@@ -40,7 +42,7 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint32[]) public orderBaskets; // 8 bits amount, 24 bits itemID
     mapping(uint256 => uint256) public orderData; // 8 bits status, rest is timestamp (for now)
 
-    event OrderPlaced(address indexed buyer, uint256 indexed orderId);
+    event OrderPlaced(address indexed buyer, uint256 indexed orderId, uint256 paid, uint256[] items, uint8[] amounts);
     event OrderStatusChanged(uint256 indexed orderId, uint8 indexed newStatus);
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
@@ -156,23 +158,23 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
             itemPrices[items[i]] = usdCents;
     }
 
-    function placeOrder(address user, uint256 extraCost, uint256[] calldata items, uint8[] calldata amounts) external restricted
+    function placeOrder(address user, uint256 payingAmount, uint256[] calldata items, uint8[] calldata amounts) external restricted
     returns (uint256) {
         require(vars[VAR_ORDERS_ENABLED] != 0, "Cannot place orders right now");
 
-        uint256 payingAmount = getPriceOfBasket(items,amounts) + extraCost;
+        //uint256 payingAmount = getPriceOfBasket(items,amounts) + extraCost;
 
         game.payContractTokenOnly(user, payingAmount, vars[VAR_TRACK_INCOME] != 0);
             
-        orderBuyer[nextOrderID] = user;
+        /*orderBuyer[nextOrderID] = user;
         orderData[nextOrderID] = now << 8; // lowest 8 bits is status (default 0)
 
         for(uint i = 0; i < items.length; i++) {
             orderBaskets[nextOrderID].push(amounts[i] | (uint32(items[i]) << 8));
         }
-        orderPaidAmount[nextOrderID] = payingAmount;
+        orderPaidAmount[nextOrderID] = payingAmount;*/
 
-        emit OrderPlaced(user, nextOrderID);
+        emit OrderPlaced(user, nextOrderID, payingAmount, items, amounts);
         return nextOrderID++;
     }
 

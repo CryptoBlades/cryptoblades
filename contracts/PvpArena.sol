@@ -12,7 +12,6 @@ import "./cryptoblades.sol";
 import "./characters.sol";
 import "./weapons.sol";
 import "./shields.sol";
-import "./raid1.sol";
 
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
@@ -50,9 +49,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     Weapons public weapons;
     Shields public shields;
     IERC20 public skillToken;
-    Raid1 public raids;
     IRandoms public randoms;
-
 
     /// @dev how much of a duel's bounty is sent to the rankings pool
     uint8 private _rankingsPoolTaxPercent;
@@ -80,7 +77,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint8 public losingPoints;
     /// @dev amount of players that are considered for the top ranking
     uint8 private _maxCharactersPerRanking;
-
+    /// @dev amount of skill due for game coffers from tax
+    uint256 public gameCofferTaxDue;
     /// @dev percentages of ranked prize distribution by fighter rank (represented as index)
     uint256[] public prizePercentages;
     /// @dev characters by id that are on queue to perform a duel
@@ -188,7 +186,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function initialize(
         address gameContract,
         address shieldsContract,
-        address raidContract,
         address randomsContract
     ) public initializer {
         __AccessControl_init_unchained();
@@ -199,7 +196,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         weapons = Weapons(game.weapons());
         shields = Shields(shieldsContract);
         skillToken = IERC20(game.skillToken());
-        raids = Raid1(raidContract);
         randoms = IRandoms(randomsContract);
 
         // TODO: Tweak these values, they are placeholders
@@ -274,8 +270,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         skillToken.transferFrom(msg.sender, address(this), wager);
         // set the character as BUSY setting NFTVAR_BUSY to 1
-        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 1);
-        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 1);
+        characters.setNftVar(characterID, 1, 1);
+        weapons.setNftVar(weaponID, 1, 1);
     }
 
     /// @dev attempts to find an opponent for a character
@@ -364,9 +360,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
         // setting characters, weapons and shield NFTVAR_BUSY to 0
-        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 0);
-        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 0);
-        shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
+        characters.setNftVar(characterID, 1, 0);
+        weapons.setNftVar(weaponID, 1, 0);
+        if(fighter.useShield)
+            shields.setNftVar(shieldID, 1, 0);
     }
 
     /// @dev performs all queued duels
@@ -490,7 +487,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             // add to the rankings pool
             _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
                 getArenaTier(attackerID)
-            ].add(bountyDistribution.rankingPoolTax);
+            ].add(bountyDistribution.rankingPoolTax / 2);
+            gameCofferTaxDue += bountyDistribution.rankingPoolTax / 2;
 
             _updateLastActivityTimestamp(attackerID);
             _updateLastActivityTimestamp(defenderID);
@@ -923,9 +921,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _weaponsInArena[weaponID] = false;
         _shieldsInArena[shieldID] = false;
         // setting characters, weapons and shield NFTVAR_BUSY to 0
-        characters.setNftVar(characterID, characters.NFTVAR_BUSY(), 0);
-        weapons.setNftVar(weaponID, weapons.NFTVAR_BUSY(), 0);
-        shields.setNftVar(shieldID, shields.NFTVAR_BUSY(), 0);
+        characters.setNftVar(characterID, 1, 0);
+        weapons.setNftVar(weaponID, 1, 0);
+        if(fighter.useShield)
+            shields.setNftVar(shieldID, 1, 0);
     }
 
     /// @dev attempts to find an opponent for a character.
@@ -1106,4 +1105,57 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return _rankingEarningsByPlayer[msg.sender];
     }
 
+    function fillGameCoffers() public restricted {
+        skillToken.safeTransfer(address(game), gameCofferTaxDue);
+        game.trackIncome(gameCofferTaxDue);
+        gameCofferTaxDue = 0;
+    }
+
+    function setBaseWagerInCents(uint256 cents) external restricted {
+        _baseWagerUSD  = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setTierWagerInCents(uint256 cents) external restricted {
+        _tierWagerUSD = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setPrizePercentage(uint256 index, uint256 value) external restricted {
+        prizePercentages[index] = value;
+    }
+
+    function setWageringFactor(uint8 factor) external restricted {
+        wageringFactor = factor;
+    }
+
+    function setReRollFeePercent(uint256 percent) external restricted {
+        reRollFeePercent = percent;
+    }
+
+    function setRankingsPoolTaxPercent(uint8 percent) external restricted {
+        _rankingsPoolTaxPercent = percent;
+    }
+
+    function setUnattackableSeconds(uint256 secs) external restricted {
+        unattackableSeconds = secs;
+    }
+
+    function setDecisionSeconds(uint256 secs) external restricted {
+        decisionSeconds = secs;
+    }
+
+    function setWinningPoints(uint8 pts) external restricted {
+        winningPoints = pts;
+    }
+
+    function setLosingPoints(uint8 pts) external restricted {
+        losingPoints = pts;
+    }
+
+    function setMaxCharactersPerRanking(uint8 max) external restricted {
+        _maxCharactersPerRanking = max;
+    }
+
+    function setSeasonDuration(uint256 duration) external restricted {
+        seasonDuration = duration;
+    }
 }

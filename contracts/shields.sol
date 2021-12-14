@@ -45,7 +45,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function migrateTo_NftVars() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-        NFTVAR_BUSY = 1;
+        // NFTVAR_BUSY = 1;
     }
 
     struct Shield {
@@ -79,11 +79,11 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     Promos public promos;
 
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
+    uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
+
     event NewShield(uint256 indexed shield, address indexed minter);
-
-    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;
-    uint256 public NFTVAR_BUSY;
-
+    
     modifier restricted() {
         _restricted();
         _;
@@ -128,11 +128,11 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getOwnedBy(address owner) public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](balanceOf(owner));
-        for(uint256 i = 0; i < tokens.length; i++) {
-            tokens[i] = tokenOfOwnerByIndex(owner, i);
+        uint256[] memory shieldTokens = new uint256[](balanceOf(owner));
+        for(uint256 i = 0; i < shieldTokens.length; i++) {
+            shieldTokens[i] = tokenOfOwnerByIndex(owner, i);
         }
-        return tokens;
+        return shieldTokens;
     }
 
     function mintForPurchase(address buyer) external restricted {
@@ -377,8 +377,8 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount) public
         restricted noFreshLookup(id)
     returns (int128, int128, uint24, uint8) {
-                // check if the Shield is busy
-        require(getNftVar(id, NFTVAR_BUSY) == 0, "Shield is busy");
+
+        require(nftVars[id][NFTVAR_BUSY] == 0, "Shield is busy");
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require(durabilityPoints >= drainAmount, "Not enough durability!");
 
@@ -448,14 +448,15 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint64(maxDurability * secondsPerDurability);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
-        require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
-    }
-
     function getNftVar(uint256 shieldID, uint256 nftVar) public view returns(uint256) {
         return nftVars[shieldID][nftVar];
     }
-    function setNftVar(uint256 shieldID, uint256 nftVar, uint8 value) public {
+    function setNftVar(uint256 shieldID, uint256 nftVar, uint256 value) public restricted {
         nftVars[shieldID][nftVar] = value;
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false
+            && nftVars[tokenId][NFTVAR_BUSY] == 0);
     }
 }

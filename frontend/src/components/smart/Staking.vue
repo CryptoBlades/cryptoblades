@@ -11,7 +11,7 @@
           <h1 class="no-margin center-text">{{$t('stake.rewardsAvailable')}}</h1>
           <p class="center-text">{{$t('stake.have')}}</p>
           <p class="center-text selectable">
-            {{ currentRewardEarned.toFixed(18) }} SKILL
+            {{ currentRewardEarned.toFixed(18) }} {{stakingRewardsName}}
           </p>
           <p class="center-text">{{$t('stake.toBeClaimed')}}</p>
           <button
@@ -205,7 +205,23 @@ export default {
     unlockTimeLeftInternal() { return this.stakeData.unlockTimeLeft; },
 
     stakingTokenName() {
-      return this.stakeType === 'skill' || this.stakeType === 'skill2' ? 'SKILL' : 'SKILL-WBNB';
+      switch(this.stakeType) {
+      case 'skill':
+      case 'skill2':
+        return 'SKILL';
+      case 'king':
+        return 'KING';
+      case 'lp':
+      case 'lp2':
+        return 'SKILL-WBNB';
+      default:
+        return 'unknown';
+      }
+    },
+
+    stakingRewardsName() {
+      if(this.stakeType === 'king') return 'KING';
+      return 'SKILL';
     },
 
     minimumStakeTimeFormatted() {
@@ -340,7 +356,7 @@ export default {
       case 'stakeLocked':
         return this.$t('stake.sorryStake', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
-        return this.t('stake.connectToWalletButtonLabel');
+        return this.$t('stake.connectToWalletButtonLabel');
       }
     },
 
@@ -402,6 +418,8 @@ export default {
       'fetchStakeDetails',
       'stake',
       'unstake',
+      'unstakeKing',
+      'claimKingReward',
       'stakeUnclaimedRewards',
       'claimReward',
     ]),
@@ -457,7 +475,12 @@ export default {
           await this.stake({ amount, stakeType: this.stakeType });
         } else {
           //unstake
-          await this.unstake({ amount, stakeType: this.stakeType });
+          if(this.stakeType === 'king') {
+            await this.unstakeKing({ amount });
+          }
+          else {
+            await this.unstake({ amount, stakeType: this.stakeType });
+          }
         }
       } catch (e) {
         console.error(e);
@@ -484,7 +507,12 @@ export default {
       try {
         this.rewardClaimLoading = true;
 
-        await this.claimReward({ stakeType: this.stakeType });
+        if(this.stakeType === 'king') {
+          await this.claimKingReward();
+        }
+        else {
+          await this.claimReward({ stakeType: this.stakeType });
+        }
       } catch (e) {
         console.error(e);
       } finally {

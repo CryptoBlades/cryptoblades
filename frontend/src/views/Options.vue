@@ -56,6 +56,15 @@
               </b-form-select>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
+              <h4>Payout Currency</h4>
+              <b-form-select size="lg" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
+                <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
+                <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">
+                  {{p.tokenSymbol}} ({{p.name}})
+                </b-form-select-option>
+              </b-form-select>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>{{$t("options.language")}}</h4>
               <b-form-select class="select-box" size="lg" v-model="$i18n.locale">
                 <b-form-select-option v-for="(value, key) in languages" :key="key" :value="key">
@@ -64,8 +73,8 @@
               </b-form-select>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>{{$t("options.currenChain")}}</h4>
-              <b-form-select class="select-box" size="lg" v-model="currentChain" @change="setCurrentChain()">
+              <h4>Current chain</h4>
+              <b-form-select size="lg" v-model="currentChain" @change="setCurrentChain()">
                 <b-form-select-option v-for="chain in supportedChains" :key="chain" :value="chain">
                   {{chain}}
                 </b-form-select-option>
@@ -91,10 +100,12 @@ import { toBN, fromWeiEther } from '../utils/common';
 import i18n from '../i18n';
 import { getConfigValue } from '@/contracts';
 import config from '../../app-config.json';
+import { SupportedProject } from './Treasury.vue';
 
 interface StoreMappedState {
   skillRewards: string;
   directStakeBonusPercent: number;
+  payoutCurrencyId: string;
 }
 
 interface StoreMappedActions {
@@ -102,6 +113,7 @@ interface StoreMappedActions {
   setUpContracts(): Promise<void>;
   initialize(): Promise<void>;
   configureMetaMask(networkId: number): Promise<void>;
+  fetchPartnerProjects(): Promise<void>;
 }
 interface Data {
   showGraphics: boolean;
@@ -118,6 +130,7 @@ interface Data {
 interface StoreMappedGetters {
   rewardsClaimTaxAsFactorBN: BigNumber;
   maxRewardsClaimTaxAsFactorBN: BigNumber;
+  getPartnerProjects: SupportedProject[];
 }
 
 enum ClaimStage {
@@ -127,7 +140,7 @@ enum ClaimStage {
 }
 
 export default Vue.extend({
-  created() {
+  async created() {
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
@@ -140,6 +153,7 @@ export default Vue.extend({
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
     this.currentChain = localStorage.getItem('currentChain') || 'BSC';
     this.supportedChains = config.supportedChains;
+    await this.fetchPartnerProjects();
   },
 
   data() {
@@ -159,8 +173,8 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN']) as Accessors<StoreMappedGetters>),
+    ...(mapState(['skillRewards', 'directStakeBonusPercent', 'payoutCurrencyId']) as Accessors<StoreMappedState>),
+    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
@@ -185,6 +199,23 @@ export default Vue.extend({
       }
       return true;
     },
+    supportedProjects(): SupportedProject[] {
+      const supportedProjects = this.getPartnerProjects.map(p => {
+        return {
+          id: p.id,
+          name: p.name,
+          tokenSymbol: p.tokenSymbol,
+          tokenAddress: p.tokenAddress,
+          tokenSupply: p.tokenSupply,
+          tokensClaimed: p.tokensClaimed,
+          tokenPrice: p.tokenPrice,
+          isActive: p.isActive
+        };
+      });
+
+      return supportedProjects;
+    },
+
     languages(): { [key: string]: string } {
       const rObj: { [key: string]: string } = {};
       for (const [key, value] of Object.entries(i18n.messages)) {
@@ -196,8 +227,8 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['claimTokenRewards','setUpContracts','initialize','configureMetaMask']) as StoreMappedActions),
-    ...mapMutations(['setNetworkId']),
+    ...(mapActions(['claimTokenRewards','setUpContracts','initialize','configureMetaMask','fetchPartnerProjects']) as StoreMappedActions),
+    ...mapMutations(['setNetworkId','updatePayoutCurrencyId']),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');

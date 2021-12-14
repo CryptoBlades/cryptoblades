@@ -188,14 +188,15 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
                                     characterID,
                                     uint8(staminaCost),
-                                    true)
+                                    true,
+                                    0) // no busy flag for raids for now
                                 );
 
         (/*int128 weaponMultTarget*/,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(msg.sender,
-                weaponID, charTrait, uint8(durabilityCost), true);
+                weaponID, charTrait, uint8(durabilityCost), true, 0); // no busy flag for raids for now
         
         uint24 power = getPlayerFinalPower(
             getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
@@ -340,6 +341,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
                         raidPlayerPower[claimRaidIndex]/raidParticipants[claimRaidIndex].length)
                 );
             }
+            //weapons.setNftVar(raider.wepID, 1, 0); // NFTVAR_BUSY // no busy flag for raids for now
             characters.processRaidParticipation(raider.charID, victory, uint16(earlyMultiplier.mulu(xpReward)));
             // set weapon as not busy, this is the only place we can place it due to weapons contract size.
             weapons.setNftVar(raider.wepID, weapons.NFTVAR_BUSY(), 0);

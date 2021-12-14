@@ -16,7 +16,15 @@
     "readyToClaim":"Rewards ready to claim!",
     "timeSince" : "Time since last withdraw: n/a",
     "withdrawalInfoText1" : "You can withdraw max 10% of amount over 1 SKILL or 2 days worth of fights per day (whatever is greater). Remaining claimable amount today: ",
-    "withdrawalInfoText2" : "You can withdraw 1 day worth of fights per day. Remaining claimable amount today: "
+    "withdrawalInfoText2" : "You can withdraw 1 day worth of fights per day. Remaining claimable amount today: ",
+    "clickDetails" : "Click to claim and see the details",
+    "claim":"Claim",
+    "claimRewards": "Claim Rewards",
+    "payoutCurrency": "Payout Currency",
+    "partnerTokenClaimed": "This partner tokens have been claimed already.",
+    "slippage": "Slippage",
+    "skillAmount": "Skill Amount",
+    "multiplierAtZero": "Multiplier is at x0, try again later..."
   },
   "CharacterDisplay":{
     "loading":"Loading...",
@@ -58,7 +66,7 @@
   },
   "nftOptionsDropdown" : {
     "left" : "left"
-  },  
+  },
   "EarningsCalculator" : {
     "nextMilestone": "Next Milestone",
     "earningsCalculator": "Earnings Calculator",
@@ -235,7 +243,12 @@
       "veryLikely": "Very Likely"
     },
     "moreStamina": "You need more stamina to fight!",
-    "pleaseSelect": "Please select Stamina Cost per Fight"
+    "pleaseSelect": "Please select Stamina Cost per Fight",
+    "hourlyUpdateHint": "We release a certain amount of the reward pool every hour, and if it's drained the earnings will be zero until the next hour. Still have questions? Join our discord for more information!",
+    "forStaminaFight": "for a {stamina} Stamina Fight",
+    "averagePower": "Average Power",
+    "expectedEarnings": "Expected Earnings",
+    "nextHourlyUpdate": "Next Hourly Update"
   },
   "raid":{
     "title":"Hellborn raid",
@@ -332,7 +345,7 @@
     "targetBuyerAddress":"Target Buyer Address (optional)",
     "listingConfirmation": "Do you want to sell your {activeType} for ",
     "buyerFee" : "The buyer will pay an extra {activeListingMarketTax}% market fee for a total of",
-    
+
     "weaponsSold" : "Weapons Sold",
     "viewWeapons" : "View weapons you have sold.",
     "weaponTxHistory" : "Weapon Transaction History",
@@ -488,6 +501,39 @@
 
       "characterBronzeborder" : "Character Bronze Border",
       "characterBronzeborderDesc" : ""
+    },
+    "merchandise": {
+      "merchandise": "Merchandise",
+
+      "deliveryAddress": "Delivery Address",
+      "submitOrder": "Submit order",
+      "fullName": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "pleaseSelectAnOption": "Please select an option",
+      "addressLine1": "Address line 1",
+      "addressLine2": "Address line 2",
+      "city": "City",
+      "zipCode": "Zip code",
+      "companyOptional": "Company (optional)",
+
+      "orderCompleted": "Order #{orderNumber} completed",
+      "thankYouForShopping": "Thank you for shopping with us!",
+      "yourShippingMethod": "Your shipping method",
+      "checkYourEmail": "Check your email for order details!",
+
+      "completingYourOrder": "Completing your order...",
+      "yourCart": "Your cart",
+      "nothingInCart": "Nothing in cart",
+      "total": "Total",
+      "insufficientFunds": "Insufficient funds",
+      "placeOrder": "Place order",
+
+      "nothingToBuyAtThisTime": "Nothing to buy at this time",
+      "chooseVariant": "Choose variant",
+      "addToCart": "Add to cart",
+      "variant": "Variant",
+      "totalPrice": "Total price"
     }
   },
   "stake":{
@@ -694,5 +740,19 @@
     "lightning" : "Lightning",
     "water" : "Water"
   },
-  "copyLink": "Copy link"
+  "copyLink": "Copy link",
+  "Treasury": {
+    "formulaDetailsTitle": "Claiming Formula Details",
+    "partneredProjects": "Partnered Projects",
+    "payoutCurrency": "Payout Currency"
+  },
+  "PartneredProject": {
+    "multiplier": "Multiplier",
+    "distribution": "Distribution",
+    "days": "days",
+    "add": "Add",
+    "claimed": "Claimed",
+    "more": "More",
+    "less": "Less"
+  }
 }

@@ -6,8 +6,8 @@ import { Nft } from './Nft';
 import { IShield } from './Shield';
 import BigNumber from 'bignumber.js';
 
-export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2';
-export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2'];
+export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king';
+export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king'];
 
 export function isStakeType(stakeType: string): stakeType is StakeType {
   return allStakeTypes.includes(stakeType as StakeType);
@@ -132,6 +132,62 @@ export interface IPvPReward{
   allUnclaimedDuelEarnings: string;
   unclaimedDuelEarningsById: string;
 }
+export interface IPartnerProject {
+  id: string;
+  name: string;
+  tokenSymbol: string;
+  tokenAddress: string;
+  tokenSupply: string;
+  tokensClaimed: string;
+  tokenPrice: string;
+  isActive: boolean;
+}
+
+export interface IItemPrices {
+  itemWeaponRenamePrice: string;
+  itemCharacterRenamePrice: string;
+  itemCharacterTraitChangeFirePrice: string;
+  itemCharacterTraitChangeEarthPrice: string;
+  itemCharacterTraitChangeWaterPrice: string;
+  itemCharacterTraitChangeLightningPrice: string;
+  itemWeaponCosmeticGrayscalePrice: string;
+  itemWeaponCosmeticContrastPrice: string;
+  itemWeaponCosmeticSepiaPrice: string;
+  itemWeaponCosmeticInvertPrice: string;
+  itemWeaponCosmeticBlurPrice: string;
+  itemWeaponCosmeticFireGlowPrice: string;
+  itemWeaponCosmeticEarthGlowPrice: string;
+  itemWeaponCosmeticLightningGlowPrice: string;
+  itemWeaponCosmeticWaterGlowPrice: string;
+  itemWeaponCosmeticRainbowGlowPrice: string;
+  itemWeaponCosmeticDarkGlowPrice: string;
+  itemWeaponCosmeticGhostPrice: string;
+  itemWeaponCosmeticPoliceLightsPrice: string;
+  itemWeaponCosmeticNeonBorderPrice: string;
+  itemWeaponCosmeticRotatingNeonBorderPrice: string;
+  itemWeaponCosmeticDiamondBorderPrice: string;
+  itemWeaponCosmeticGoldBorderPrice: string;
+  itemWeaponCosmeticSilverBorderPrice: string;
+  itemWeaponCosmeticBronzeBorderPrice: string;
+  itemCharacterCosmeticGrayscalePrice: string;
+  itemCharacterCosmeticContrastPrice: string;
+  itemCharacterCosmeticSepiaPrice: string;
+  itemCharacterCosmeticInvertPrice: string;
+  itemCharacterCosmeticBlurPrice: string;
+  itemCharacterCosmeticFireGlowPrice: string;
+  itemCharacterCosmeticEarthGlowPrice: string;
+  itemCharacterCosmeticLightningGlowPrice: string;
+  itemCharacterCosmeticWaterGlowPrice: string;
+  itemCharacterCosmeticRainbowGlowPrice: string;
+  itemCharacterCosmeticDarkGlowPrice: string;
+  itemCharacterCosmeticGhostPrice: string;
+  itemCharacterCosmeticPoliceLightsPrice: string;
+  itemCharacterCosmeticNeonBorderPrice: string;
+  itemCharacterCosmeticDiamondBorderPrice: string;
+  itemCharacterCosmeticGoldBorderPrice: string;
+  itemCharacterCosmeticSilverBorderPrice: string;
+  itemCharacterCosmeticBronzeBorderPrice: string;
+}
 
 export interface IState {
   contracts: () => Contracts;
@@ -207,4 +263,10 @@ export interface IState {
   keyboxes: Record<number, Nft>;
 
   nfts: Record<string, Record<number | string, Nft>>;
+
+  partnerProjects: Record<number, IPartnerProject>;
+  payoutCurrencyId: string;
+  defaultSlippage: string;
+
+  itemPrices: IItemPrices;
 }

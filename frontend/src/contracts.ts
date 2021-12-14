@@ -15,6 +15,7 @@ import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
 import { abi as blacksmithAbi } from '../../build/contracts/Blacksmith.json';
 import { abi as shieldsAbi } from '../../build/contracts/Shields.json';
 import { abi as cbkLandSaleAbi } from '../../build/contracts/CBKLandSale.json';
+import { abi as merchandiseAbi, networks as merchandiseNetworks } from '../../build/contracts/Merchandise.json';
 import { abi as cbkLandAbi } from '../../build/contracts/CBKLand.json';
 import { abi as weaponRenameTagConsumablesAbi } from '../../build/contracts/WeaponRenameTagConsumables.json';
 import { abi as characterRenameTagConsumablesAbi } from '../../build/contracts/CharacterRenameTagConsumables.json';
@@ -32,6 +33,10 @@ import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/Pv
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as storageAbi } from '../../build/contracts/NFTStorage.json';
+import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/contracts/Treasury.json';
+import { abi as kingStakingRewardsUpgradeableAbi,
+  networks as kingStakingRewardsUpgradeableNetworks }
+  from '../../build/contracts/KingStakingRewardsUpgradeable.json';
 import config from '../app-config.json';
 
 
@@ -208,6 +213,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const cbkLandSaleAddr = await Blacksmith.methods.cbkLandSale().call();
   const CBKLandSale = new web3.eth.Contract(cbkLandSaleAbi as Abi, cbkLandSaleAddr);
 
+  const merchandiseAddr = getConfigValue('VUE_APP_MERCHANDISE_CONTRACT_ADDRESS') || (merchandiseNetworks as Networks)[networkId]!.address;
+  const Merchandise = new web3.eth.Contract(merchandiseAbi as Abi, merchandiseAddr);
+
   const cbkLandAddr = await CBKLandSale.methods.cbkLand().call();
   const CBKLand = new web3.eth.Contract(cbkLandAbi as Abi, cbkLandAddr);
 
@@ -252,17 +260,29 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const waxBridgeContractAddr = getConfigValue('VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS') || (waxBridgeNetworks as Networks)[networkId]!.address;
   const WaxBridge = new web3.eth.Contract(waxBridgeAbi as Abi, waxBridgeContractAddr);
 
+  const treasuryContractAddr = getConfigValue('VUE_APP_TREASURY_CONTRACT_ADDRESS') || (treasuryNetworks as Networks)[networkId]!.address;
+  const Treasury = new web3.eth.Contract(treasuryAbi as Abi, treasuryContractAddr);
+
+  let KingStakingRewardsUpgradeable;
+  if(stakingContracts.staking.king) {
+    const kingStakingRewardsUpgradeableAddress = getConfigValue('VUE_APP_KING_STAKING_REWARDS_CONTRACT_ADDRESS')
+      || (kingStakingRewardsUpgradeableNetworks as Networks)[networkId]!.address;
+    KingStakingRewardsUpgradeable = new web3.eth.Contract(kingStakingRewardsUpgradeableAbi as Abi, kingStakingRewardsUpgradeableAddress);
+  }
+
   return {
     ...stakingContracts,
     CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
-    NFTStorage, CBKLandSale, CBKLand,
+    NFTStorage, CBKLandSale, CBKLand, Merchandise,
     ...raidContracts,
     ...pvpContracts,
     ...marketContracts,
     WaxBridge,
+    Treasury,
+    KingStakingRewardsUpgradeable
   };
 }
 

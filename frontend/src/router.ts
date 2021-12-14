@@ -13,6 +13,7 @@ import Options from './views/Options.vue';
 import PvP from './views/PvP.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
+import Treasury from './views/Treasury.vue';
 
 import {
   raid as featureFlagRaid,
@@ -52,7 +53,8 @@ function createRouter() {
       { path: '/options', name: 'options', component: Options },
       { path: '/nft-display', name: 'nft-display', component: NftDisplay },
       { path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true },
-      { path: '/bridge', name:'bridge', component: Bridge }
+      { path: '/bridge', name:'bridge', component: Bridge },
+      { path: '/treasury', name: 'treasury', component: Treasury },
     ]
   });
 

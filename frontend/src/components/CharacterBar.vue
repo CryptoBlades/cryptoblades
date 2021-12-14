@@ -1,26 +1,43 @@
 <template>
   <div class="character-bar">
     <character-display />
-
-    <ins class="adsbygoogle"
-        style="display:block"
-        data-ad-client="ca-pub-6717992096530538"
-        data-ad-slot="5115599573"
-        data-ad-format="auto"
-        data-full-width-responsive="true"></ins>
+        <div class="ad-container">
+        <Adsense v-if="showAds && !isMobile()"
+          data-ad-client="ca-pub-6717992096530538"
+          data-ad-slot="5115599573"
+          data-ad-format="auto"
+          data-full-width-responsive="yes"
+          >
+        </Adsense>
+      </div>
 
     <img src="../assets/infoDivider.png" class="info-divider">
   </div>
 </template>
 
 <script lang="ts">
+import Vue from 'vue';
 import CharacterDisplay from './smart/CharacterDisplay.vue';
+import '@/mixins/general';
 
-export default {
+export default Vue.extend({
   components: {
     CharacterDisplay,
   },
-};
+  data() {
+    return {
+      showAds: false
+    };
+  },
+  methods: {
+    checkStorage() {
+      this.showAds =  localStorage.getItem('show-ads') === 'true';
+    },
+  },
+  async mounted() {
+    this.checkStorage();
+  },
+});
 </script>
 
 <style scoped>

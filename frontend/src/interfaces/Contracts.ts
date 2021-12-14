@@ -1,11 +1,11 @@
 import { Contract as Web3EthContract } from 'web3-eth-contract';
 import type {
-  IERC20, IStakingRewards,
+  IERC20, IStakingRewards, KingStakingRewardsUpgradeable,
   CryptoBlades, Characters, Weapons, RaidBasic, IRandoms,
   NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables,
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
   CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox, PvpArena,
-  WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale, CBKLand
+  WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale, CBKLand, Treasury, Merchandise
 } from '../../../build/abi-interfaces';
 import { StakeType } from './State';
 
@@ -49,4 +49,8 @@ export interface Contracts {
   NFTStorage?: Contract<NFTStorage>;
   CBKLandSale?: Contract<CBKLandSale>;
   CBKLand?: Contract<CBKLand>;
+
+  Treasury?: Contract<Treasury>;
+  KingStakingRewardsUpgradeable?: Contract<KingStakingRewardsUpgradeable>;
+  Merchandise?: Contract<Merchandise>;
 }
