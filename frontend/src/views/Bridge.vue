@@ -6,11 +6,19 @@
     <div class="row m-3 justify-content-center">
       <h3>Transfer NFTs to another chain</h3>
     </div>
-    <div class="row mt-3 mb-3 justify-content-center">
+    <div class="row mt-3 justify-content-center">
       <p v-if="bridgeFee">
         Bridge Transfer Fee: <CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/> &nbsp;
         <b-icon-question-circle class="centered-icon" scale="0.8"
         v-tooltip.bottom="`The fee is deducted when you request a transfer under the 'Storage' tab.`"
+        />
+      </p>
+    </div>
+    <div class="row mb-3 justify-content-center">
+      <p v-if="queueLength">
+        Queue length: <b>{{queueLength}}</b> &nbsp;
+        <b-icon-question-circle class="centered-icon" scale="0.8"
+        v-tooltip.bottom="`There are currently ${queueLength} NFTs in queue for transfer`"
         />
       </p>
     </div>
@@ -76,9 +84,12 @@
             </b-button>
           </div>
           <div class="p-2">
-            <b-button :disabled="selectedNftId === '' || currentTransferNFTId == selectedNftId" variant="primary"
-              @click="withdrawItem()" class="gtag-link-others"
-              tagname="click_transfer_bridge">Withdraw from <br> Storage</b-button>
+            <b-button :disabled="selectedNftId === '' ||
+            (currentTransferNFTId == selectedNftId && transferStatus != transferStates.restored) ||
+            !storedNftsIds.includes(String(selectedNftId))"
+            variant="primary"
+            @click="withdrawItem()" class="gtag-link-others"
+            tagname="click_transfer_bridge">Withdraw from <br> Storage</b-button>
           </div>
           <div class="p-2">
             <b-button
@@ -134,7 +145,8 @@
           </div>
           <div class="text-center">
             Status: {{transferStatus}} <br>
-            To Chain: {{currentTransferChain}}
+            To Chain: {{currentTransferChain}} <br>
+            <span v-if="transferStatus === transferStates.pending"> Your place in Queue: {{currentTransferQueuePosition}}</span><br>
           </div>
           <br>
           <div class="outcome" v-if="cancellingRequest">
@@ -287,6 +299,8 @@ interface StoreMappedActions {
   chainEnabled(payload: {
     chainId: string;
   }): Promise<boolean>;
+  getBridgeTransferAt(): Promise<number>;
+  getBridgeTransfers(): Promise<number>;
 }
 
 enum transferStates{
@@ -319,7 +333,7 @@ export default Vue.extend({
       ownerAddress: '',
       nftType: 'weapon',
       selectedNftId: '' as string,
-      storedNftsIds: [],
+      storedNftsIds: [] as string[],
       currentChain: '',
       targetChain: '',
       targetChainId: '',
@@ -342,7 +356,10 @@ export default Vue.extend({
       withdrawingFromBridge: false,
       enabledChains: [] as string[],
       bridgeFee: '',
-      loadedStorage: false
+      loadedStorage: false,
+      currentTransferQueuePosition: 0,
+      queueLength: 0,
+      refreshIntervall: 0 as number,
     };
   },
 
@@ -388,6 +405,10 @@ export default Vue.extend({
     canBridge(){
       if (!this.canAffordBridge) return false;
 
+      else if(!this.enabledChains.length) return false;
+
+      else if(!this.storedNftsIds.includes(String(this.selectedNftId))) return false;
+
       else if(this.transferStatus === transferStates.done && this.currentTransferNFTId === String(this.selectedNftId)) return false;
 
       else if(this.transferStatus === transferStates.pending || this.transferStatus === this.transferStates.processing) return false;
@@ -399,7 +420,9 @@ export default Vue.extend({
     canAffordBridge(){
       const cost = toBN(this.bridgeFee);
       const balance = toBN(this.skillBalance);
-      return balance.isGreaterThanOrEqualTo(cost);
+      const skillRewards = toBN(this.skillRewards);
+      const totalBalance = balance.plus(skillRewards);
+      return totalBalance.isGreaterThanOrEqualTo(cost);
     },
   },
   created(){
@@ -420,6 +443,11 @@ export default Vue.extend({
   async mounted(){
     if (!this.contracts.NFTStorage) return;
     this.bridgeFee = await this.contracts.NFTStorage.methods.getBridgeFee().call({ from: this.defaultAccount });
+    await this.showStorage();
+    this.refreshIntervall = window.setInterval(async () => await this.showStorage(), 5000);
+  },
+  beforeDestroy(){
+    clearInterval(this.refreshIntervall);
   },
   methods: {
     ...(mapActions([
@@ -439,6 +467,8 @@ export default Vue.extend({
       'getReceivedNFTs',
       'getReceivedNFT',
       'chainEnabled',
+      'getBridgeTransferAt',
+      'getBridgeTransfers',
     ]) as StoreMappedActions),
     convertWeiToSkill(wei: string): string {
       return fromWeiEther(wei);
@@ -515,7 +545,20 @@ export default Vue.extend({
       });
       return chainId;
     },
+    async checkQueuePosition(id: number){
+      const transferAt = await this.getBridgeTransferAt();
+      const bridgetransfers = await this.getBridgeTransfers();
+      if(this.transferStatus === transferStates.pending && bridgetransfers > transferAt) return (id - transferAt);
+      else return 0;
+    },
+    async checkQueueLength(){
+      const transferAt = await this.getBridgeTransferAt();
+      const bridgetransfers = await this.getBridgeTransfers();
+      this.queueLength = bridgetransfers - transferAt;
+      if(this.queueLength < 0) this.queueLength = 0;
+    },
     async getStatus(){
+      await this.checkQueueLength();
       const id = await this.getBridgeTransferId();
       const transfer= await this.getBridgeTransfer({
         transferId: id,
@@ -540,6 +583,7 @@ export default Vue.extend({
       else if(transfer[6] === '5'){
         this.transferStatus = transferStates.restored;
       }
+      this.currentTransferQueuePosition = await this.checkQueuePosition(parseInt(id,10));
 
       const currentTransferTokenAddress = transfer[1];
       this.currentTransferNFTId = transfer[2];
@@ -614,7 +658,7 @@ export default Vue.extend({
 /deep/ .character-list{
   justify-content: center;
 }
-/deep/ .currentTransferNFT .weapon-grid{
+/deep/ .weapon-grid{
   grid-template-columns: repeat(auto-fit,12em);
 	box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
 	transform: scale(1);

@@ -4,7 +4,6 @@ import { ITarget } from './Target';
 import { Contracts } from './Contracts';
 import { Nft } from './Nft';
 import { IShield } from './Shield';
-import BigNumber from 'bignumber.js';
 
 export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king';
 export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king'];
@@ -51,86 +50,6 @@ export interface IRaidState {
   accountPower: string;
 
   //isOwnedCharacterRaidingById: Record<number, boolean>; // ?
-}
-
-export interface IPvPFighterState {
-  characterID: string;
-  characterTrait: string;
-  weaponID: string;
-  weapon: IWeapon | null;
-  shieldID: string;
-  shield: IShield | null;
-  wageredSkill: string;
-  useShield: boolean;
-}
-
-export interface IPvPState {
-  type: string | number;
-  page: string | number;
-  entryWager: string | number;
-  wageredSkill: string | number;
-  arenaTier: string | number;
-  participatingCharacters: string[];
-  participatingWeapons: string[];
-  participatingShields: string[];
-  currentPvPCharacterId: number | null;
-  traitBonus: string;
-  attackerFighter: IPvPFighterState;
-  defenderFighter: IPvPFighterState;
-  duelCost: string | number;
-  isAttackerWithinDecisionTime: boolean;
-  isCharacterAttackable: boolean;
-  isCharacterInArena: boolean;
-  isWeaponInArena: boolean;
-  isShieldInArena: boolean;
-  isPerformDuel: boolean;
-  isDuelResult: boolean;
-  duelResult: IDuelResult | null;
-  duelByAttacker: IDuelByAttacker | null;
-  decisionTime: string;
-  rewards: IPvPReward;
-  hasPendingDuel: boolean;
-  characterRankingPoints: string;
-  showStats: boolean;
-  currentRankedSeason: string;
-  seasonDuration: string;
-  seasonStartedAt: string;
-  duelQueue: BigNumber[];
-}
-
-export interface IDuelByAttacker {
-  attackerId: string;
-  defenderId: string;
-  createdAt: string;
-  isPending: boolean;
-}
-
-export interface IDuelResult {
-  attackerId: string;
-  attackerRoll: string;
-  attackerWon: boolean;
-  defenderId: string;
-  defenderRoll: string;
-  timestamp: string;
-  previousDuelReward: string | number;
-  newDuelReward: string | number;
-}
-
-export interface IInventory{
-  id: number,
-  name: string;
-}
-
-export interface IFilter{
-  element: string;
-  stars: number;
-}
-
-export interface IPvPReward{
-  tier: string,
-  rankingRewardsPool: string,
-  allUnclaimedDuelEarnings: string;
-  unclaimedDuelEarningsById: string;
 }
 export interface IPartnerProject {
   id: string;
@@ -239,15 +158,6 @@ export interface IState {
   stakeOverviews: Record<StakeType, IStakeOverviewState>;
 
   raid: IRaidState;
-
-  pvp: IPvPState;
-
-  isLoading: boolean;
-
-  inventory: IInventory[];
-
-  weaponFilter: IFilter;
-  shieldFilter: IFilter;
 
   waxBridgeWithdrawableBnb: string;
   waxBridgeRemainingWithdrawableBnbDuringPeriod: string;
