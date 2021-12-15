@@ -164,12 +164,13 @@ export default {
     ul {
       display: flex;
       flex-direction: column;
+      width: 30%;
       margin: 1.5rem 0;
       padding: 0;
-      list-style-type: none;
       align-items: center;
       justify-content: center;
-      width: 30%;
+      vertical-align: middle;
+      list-style-type: none;
       li {
         display: flex;
         text-align: center;
