@@ -134,6 +134,7 @@ export default {
     },
 
     async handleEnteredArena() {
+      this.loading = true;
       this.isCharacterInArena = true;
 
       const fighter = formatFighter(await this.contracts().PvpArena.methods.fighterByCharacter(this.currentCharacterId).call({ from: this.defaultAccount }));
@@ -149,6 +150,7 @@ export default {
           information: await this.getShieldInformation(fighter.shieldID)
         };
       }
+      this.loading = false;
     },
 
     handleEnterMatchMaking() {
@@ -425,8 +427,11 @@ export default {
 
 <style scoped lang="scss">
   .loadingSpinner {
+    display: flex;
     height: 3rem;
     width: 3rem;
+    margin: 0 auto;
+    margin-top: 3rem ;
     animation: spin 1s linear infinite;
     @keyframes spin {
       from {

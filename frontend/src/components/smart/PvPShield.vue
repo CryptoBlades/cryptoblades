@@ -1,9 +1,6 @@
 <template>
   <div>
-    <div v-if="disabled">
-      DISABLED
-    </div>
-    <div v-else class="mainWrapper" @click="$emit('click')">
+    <div class="mainWrapper" @click="$emit('click')">
       <div class="starsWrapper">
         <img
           v-for="index in stars"
@@ -98,6 +95,10 @@ export default {
   :hover {
     cursor: pointer;
   }
+}
+.disabled {
+  opacity: 30%;
+  pointer-events: none;
 }
 .starsWrapper {
   display: flex;
