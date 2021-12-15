@@ -19,8 +19,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME = keccak256("GAME");
 
-    uint256 public constant SHIELD_SKILL_FEE = 3 ether;
-
     uint256 public constant ITEM_WEAPON_RENAME = 1;
     uint256 public constant ITEM_CHARACTER_RENAME = 2;
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_FIRE = 3;
@@ -29,6 +27,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant ITEM_CHARACTER_TRAITCHANGE_LIGHTNING = 6;
     uint256 public constant ITEM_COSMETIC_WEAPON = 7; // series
     uint256 public constant ITEM_COSMETIC_CHARACTER = 8; // series
+    uint256 public constant ITEM_SHIELD = 9;
 
     uint256 public constant NUMBERPARAMETER_GIVEN_TICKETS = uint256(keccak256("GIVEN_TICKETS"));
     uint256 public constant NUMBERPARAMETER_SPENT_TICKETS = uint256(keccak256("SPENT_TICKETS"));
@@ -151,8 +150,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         uint256 BIT_LEGENDARY_DEFENDER = promos.BIT_LEGENDARY_DEFENDER();
 
         require(!promos.getBit(msg.sender, BIT_LEGENDARY_DEFENDER), "Limit 1");
+        require(itemFlatPrices[ITEM_SHIELD] > 0);
         promos.setBit(msg.sender, BIT_LEGENDARY_DEFENDER);
-        game.payContractTokenOnly(msg.sender, SHIELD_SKILL_FEE);
+        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_SHIELD]);
         shields.mintForPurchase(msg.sender);
     }
 
