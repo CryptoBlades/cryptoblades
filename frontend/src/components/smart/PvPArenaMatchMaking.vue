@@ -21,7 +21,7 @@
         <div class="characterImageWrapper">
           <pvp-character :characterId="currentCharacterId" />
         </div>
-        <div class="info">
+        <div v-if="characterInformation" class="info">
           <h1 class="characterName">{{ characterInformation.name }}</h1>
           <div class="infoDetails">
             <span>Level: {{ characterInformation.level }}</span>
@@ -76,10 +76,10 @@
         <div class="elementWrapper">
           <img v-if="opponentInformation.id" :src="getOpponentElementSrc" alt="opponent element" />
         </div>
-        <div class="characterImageWrapper">
+        <div v-if="opponentInformation.id" class="characterImageWrapper">
           <pvp-character :characterId="opponentInformation.id" />
         </div>
-        <div class="info">
+        <div v-if="opponentInformation.id" class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
           <div class="infoDetails">
             <span>Level: {{ opponentInformation.level }}</span>
