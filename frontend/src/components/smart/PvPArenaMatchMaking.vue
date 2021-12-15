@@ -280,6 +280,9 @@ export default {
         await this.contracts().PvpArena.methods.requestOpponent(this.currentCharacterId).send({ from: this.defaultAccount });
       } catch (err) {
         console.log('find match error: ', err);
+
+        this.loading = false;
+        return;
       }
 
       this.duel = await this.contracts().PvpArena.methods.duelByAttacker(this.currentCharacterId).call();
