@@ -427,6 +427,8 @@ export default {
   .loadingSpinner {
     height: 3rem;
     width: 3rem;
+    margin: 0 auto;
+    margin-top: 3rem ;
     animation: spin 1s linear infinite;
     @keyframes spin {
       from {

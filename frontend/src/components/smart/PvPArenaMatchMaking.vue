@@ -45,7 +45,7 @@
         </div>
       </div>
       <div class="middleButtons">
-        <div v-if="this.loading">
+        <div v-if="this.loading || isCharacterInDuelQueue">
           <img class="spinner" src="../../assets/loadingSpinner.svg" />
         </div>
         <p v-else>{{ this.decisionTimeLeft }}</p>
