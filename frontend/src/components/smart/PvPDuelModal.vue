@@ -2,7 +2,7 @@
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
       <img src="../../assets/separatorTop.svg" alt="Top separator">
-      <div v-if="true" class="modalTitle">You have won the duel!</div>
+      <div v-if="attackerRoll > defenderRoll" class="modalTitle">You have won the duel!</div>
       <div v-else class="modalTitle"> You have lost the duel!</div>
       <ul>
         <li>
@@ -120,6 +120,10 @@ export default {
   justify-content: center;
   background-color: rgb(20, 20, 20, 0.96);
 
+  span, li, p {
+    font-family: 'Roboto';
+  }
+
   .modalInnerWrapper {
     position: relative;
     z-index: 9999;
@@ -152,19 +156,21 @@ export default {
     .modalTitle {
       margin-top: 1rem;
       color: #EDCD90;
-      font-size: 2rem;
-      line-height: 2.25rem;
+      font-size: 1.5rem;
+      line-height: 2rem;
+      font-family: 'Trajan';
     }
 
     ul {
       display: flex;
       flex-direction: column;
+      width: 30%;
       margin: 1.5rem 0;
       padding: 0;
-      list-style-type: none;
       align-items: center;
       justify-content: center;
-      width: 30%;
+      vertical-align: middle;
+      list-style-type: none;
       li {
         display: flex;
         text-align: center;
@@ -181,9 +187,9 @@ export default {
     }
     .earnWrapper {
       margin-bottom: 2rem;
-      font-size: 1.5rem;
-      line-height: 2rem;
+      font-size: 1.25rem;
       color: #EDCD90;
+      font-family: 'Roboto';
     }
     .rankWrapper {
       margin-bottom: 2rem;
