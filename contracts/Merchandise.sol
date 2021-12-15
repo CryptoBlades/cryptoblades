@@ -43,6 +43,7 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public orderData; // 8 bits status, rest is timestamp (for now)
 
     event OrderPlaced(address indexed buyer, uint256 indexed orderId, uint256 paid, uint256[] items, uint8[] amounts);
+    event OrderSaved(address indexed user, uint256 indexed orderNumber, uint256 payingAmount);
     event OrderStatusChanged(uint256 indexed orderId, uint8 indexed newStatus);
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
@@ -184,12 +185,8 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
         game.payContractTokenOnly(user, payingAmount, vars[VAR_TRACK_INCOME] != 0);
         orderPaidAmount[orderNumber] = payingAmount;
 
-//        emit OrderSaved(user, orderNumber);
+        emit OrderSaved(user, orderNumber, payingAmount);
     }
-
-//    function isOrderPaidFor(uint256 orderNumber, uint256 orderPrice) public view returns (bool) {
-//        return orderPaidAmount[orderNumber] == orderPrice;
-//    }
 
     function getOrderPaidAmount(uint256 orderNumber) public view returns (uint256) {
         return orderPaidAmount[orderNumber];
