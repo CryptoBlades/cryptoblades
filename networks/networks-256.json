@@ -2830,7 +2830,7 @@
     },
     "links": {},
     "address": "0xD40AACCeD966076B62a5baC7A49da4517cB39b73",
-    "transactionHash": "0xb7306a13a36b3fadd15b571a6405573a708c4c127f6a32ef4d207c1be8d6379c"
+    "transactionHash": "0xe56c14659a660b04f799ae2eb08320da821ae69947cf7777920ca9665873f2c8"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -3568,7 +3568,7 @@
     },
     "links": {},
     "address": "0x4C455E5c781Ad558B3d9AdbD2c5bdAb13dD08c35",
-    "transactionHash": "0xa06c839f450220895d078a60dd0f4263b0be0b801f6badc96778bd3e48f2e238"
+    "transactionHash": "0xfb71d63ec0795cf33e304f3c8d31c5879183fa80a9201de30d52fa9bbca1e0d0"
   },
   "build/contracts/Raid1.json": {
     "events": {},
