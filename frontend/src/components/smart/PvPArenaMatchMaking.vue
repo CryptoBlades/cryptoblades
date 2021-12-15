@@ -349,17 +349,25 @@ export default {
     },
 
     async preparePerformDuel() {
+      this.loading = true;
+
       try {
         await this.listenForDuel(this.contracts());
 
         await this.contracts().PvpArena.methods.preparePerformDuel(this.currentCharacterId).send({from: this.defaultAccount});
       } catch (err) {
         console.log('prepare perform duel error: ', err);
+
+        this.loading = false;
+
+        return;
       }
 
       this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
 
       this.isCharacterInDuelQueue = true;
+
+      this.loading = false;
     },
 
     clearDuelResult() {
@@ -395,6 +403,8 @@ export default {
   },
 
   async created() {
+    this.loading = true;
+
     this.hasPendingDuel = await this.contracts().PvpArena.methods.hasPendingDuel(this.currentCharacterId).call();
 
     this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
@@ -404,7 +414,6 @@ export default {
 
       await this.listenForDuel(this.contracts());
     }
-
 
     // TODO: use this
     this.isWithinDecisionTime = await this.contracts().PvpArena.methods.isCharacterWithinDecisionTime(this.currentCharacterId).call();

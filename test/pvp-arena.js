@@ -1418,7 +1418,7 @@ contract("PvpArena", (accounts) => {
 
   describe("#performDuels", async () => {
     describe("happy path", () => {
-      describe("attacker wins", () => {
+      describe.only("attacker wins", () => {
         let character1ID;
         let character2ID;
         let character1Wager;
@@ -1486,6 +1486,7 @@ contract("PvpArena", (accounts) => {
           });
 
           let duelQueue = await pvpArena.getDuelQueue();
+          // weon tiene 1, rerrollea, no hace el duelo, que pasa si duelea o lo duelean
 
           const { tx } = await pvpArena.performDuels(duelQueue, {
             from: accounts[0],

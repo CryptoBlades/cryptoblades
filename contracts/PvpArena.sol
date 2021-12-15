@@ -367,7 +367,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev performs all queued duels
-    function performDuels(uint256[] calldata attackerIDs) external restricted {
+    function performDuels(uint256[] memory attackerIDs) public restricted {
         for (uint256 i = 0; i < attackerIDs.length; i++) {
             uint256 attackerID = attackerIDs[i];
             if (!_duelQueue.contains(attackerID)) continue;
@@ -1001,6 +1001,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev ends a ranked season and starts a new one
     function restartRankedSeason() external restricted {
+        uint256[] memory duelQueue = getDuelQueue();
+
+        if (duelQueue.length > 0) {
+            performDuels(duelQueue);
+        }
+
         // Note: Loops over 15 tiers. Should not be reachable anytime in the foreseeable future.
         for (uint8 i = 0; i <= 15; i++) {
             if (
