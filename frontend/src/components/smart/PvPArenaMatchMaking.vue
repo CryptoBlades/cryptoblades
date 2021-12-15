@@ -613,7 +613,7 @@ span, p, li, button {
     right: 0;
     margin-right: auto;
     margin-left: auto;
-    .hasShield{
+    &.hasShield{
       div:first-of-type {
         margin-right: 1rem;
       }
