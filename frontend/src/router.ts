@@ -10,13 +10,17 @@ import Market from './views/Market.vue';
 import Leaderboard from './views/Leaderboard.vue';
 import Portal from './views/Portal.vue';
 import Options from './views/Options.vue';
+import PvP from './views/PvP.vue';
 import NftDisplay from './views/NftDisplay.vue';
+import Bridge from './views/Bridge.vue';
+import Treasury from './views/Treasury.vue';
 
 import {
   raid as featureFlagRaid,
   stakeOnly as featureFlagStakeOnly,
   market as featureFlagMarket,
-  portal as featureFlagPortal
+  portal as featureFlagPortal,
+  pvp as featureFlagPvP
 } from './feature-flags';
 
 function createRouter() {
@@ -48,7 +52,9 @@ function createRouter() {
       { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
       { path: '/options', name: 'options', component: Options },
       { path: '/nft-display', name: 'nft-display', component: NftDisplay },
-      { path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true }
+      { path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true },
+      { path: '/bridge', name:'bridge', component: Bridge },
+      { path: '/treasury', name: 'treasury', component: Treasury },
     ]
   });
 
@@ -58,6 +64,10 @@ function createRouter() {
 
   if(featureFlagPortal) {
     router.addRoute({ path: '/portal', name: 'portal', component: Portal });
+  }
+
+  if(featureFlagPvP){
+    router.addRoute({ path: '/pvp', name: 'pvp', component:PvP});
   }
 
   return router;

@@ -1,5 +1,5 @@
 <template>
-  <div class="character-art" v-tooltip="tooltipHtml(character)" ref="el">
+  <div class="character-art" ref="el">
     <div class="trait" v-if="!portrait">
       <span :class="characterTrait.toLowerCase() + '-icon circle-element'"></span>
     </div>
@@ -27,24 +27,23 @@
       <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
     </div>
     <div class="score-id-container">
-    <div class="black-outline" v-if="!portrait">ID <span class="white">{{ character.id }}</span></div>
+    <div class="black-outline" v-if="!portrait">{{$t('CharacterArt.id')}} <span class="white">{{ character.id }}</span></div>
     <div class="black-outline" v-if="!portrait">
-      Score <span class="white">{{ heroScore.toLocaleString() }}</span>
-      <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Hero score is a measure of your hero's combat prowess so far.
-        It goes up when you win and down when you lose. It is also temporarily disabled!`"/>
+      {{$t('CharacterArt.score')}} <span class="white">{{ heroScore.toLocaleString() }}</span>
+      <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('CharacterArt.scoreTooltip')"/>
     </div>
     </div>
 
     <div v-if="!portrait && isMarket" class="small-stamina-char"
       :style="`--staminaReady: ${(timestampToStamina(character.staminaTimestamp)/maxStamina)*100}%;`"
       v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
-      <div class="stamina-text black-outline">STA {{ timestampToStamina(character.staminaTimestamp) }} / 200</div>
+      <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ timestampToStamina(character.staminaTimestamp) }} / 200</div>
     </div>
 
     <div class="xp" v-if="!portrait">
       <b-progress :max="RequiredXp(character.level)" variant="success"
-      v-tooltip.bottom="`Claimable XP ${this.getCharacterUnclaimedXp(character.id)}`">
-        <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} XP</strong>
+      v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
+        <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} {{$t('CharacterArt.xp')}}</strong>
         <b-progress-bar :value="character.xp || 0"></b-progress-bar>
       </b-progress>
     </div>
@@ -116,7 +115,6 @@ export default {
     ...mapState(['maxStamina']),
     ...mapGetters([
       'getCharacterName',
-      'transferCooldownOfCharacterId',
       'getCharacterUnclaimedXp',
       'timeUntilCharacterHasMaxStamina',
       'charactersWithIds',
@@ -131,26 +129,12 @@ export default {
   methods: {
     RequiredXp,
 
-    tooltipHtml(character) {
-      if (!character) return '';
-
-      const cooldown = this.transferCooldownOfCharacterId(this.character.id);
-      if (cooldown) {
-        if (cooldown === 86400)
-          // edge case for when it's exactly 1 day and the iso string cant display
-          return 'May not be traded for: 1 day';
-        else return `May not be traded for: ${new Date(cooldown * 1000).toISOString().substr(11, 8)}`;
-      }
-
-      return '';
-    },
-
     getCleanCharacterName(id) {
       return getCleanName(this.getCharacterName(id));
     },
 
     staminaToolTipHtml(time) {
-      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
+      return this.$t('CharacterArt.staminaTooltip') + time;
     },
 
     timestampToStamina(timestamp) {

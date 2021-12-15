@@ -12,25 +12,31 @@
       <b-container v-if="fightResults.isVictory">
         <b-row>
           <b-col class="text-left no-padding">
-            <h4>You earned:</h4>
+            <h4>{{$t('combatResults.earned')}}</h4>
           </b-col>
           <b-col class="text-center no-padding">
             <h4>
               {{formattedUsd}}
-              <Hint text="SKILL earned is based on gas costs of the network plus a factor of your power" />
+              <Hint :text="$t('combatResults.hint')" />
             </h4>
             <h6 class="formatted-skill">{{formattedSkill}}</h6>
             <h5>{{formattedXpGain}}</h5>
           </b-col>
         </b-row>
       </b-container>
-      <h6 class="text-left gas-spent">You spent {{fightResults.bnbGasUsed}} BNB on gas fees </h6>
+      <h6 class="text-left gas-spent">
+        {{$t('combatResults.gasFee', {
+          bnbGasUsed : fightResults.bnbGasUsed,
+          gasToken : gasToken
+          })
+        }}
+      </h6>
       <img src="../assets/divider4.png" class="expander-divider">
       <b-container>
         <b-row>
           <b-col class="text-left no-padding">
-            <h5 class="no-margin">You rolled:</h5>
-            <h5 class="no-margin">Enemy rolled:</h5>
+            <h5 class="no-margin">{{$t('combatResults.youRolled')}}</h5>
+            <h5 class="no-margin">{{$t('combatResults.enemyRolled')}}</h5>
           </b-col>
           <b-col class="text-center no-padding">
             <h5 class="no-margin">{{fightResults.playerRoll}}</h5>
@@ -40,18 +46,17 @@
       </b-container>
     </div>
   </div>
-
     <div class="bot-bg-img promotion-decoration">
       <img src="../assets/border-element.png">
     </div>
-
-    <div>
-      <ins class="adsbygoogle"
-          style="display:block"
+        <div>
+      <Adsense v-if="showAds && !isMobile()"
           data-ad-client="ca-pub-6717992096530538"
           data-ad-slot="5115599573"
           data-ad-format="auto"
-          data-full-width-responsive="true"></ins>
+          data-full-width-responsive="yes"
+          >
+        </Adsense>
     </div>
   </div>
 </template>
@@ -62,6 +67,10 @@ import { toBN, fromWeiEther } from '../utils/common';
 import Hint from '../components/Hint.vue';
 import {PropType} from 'vue/types/options';
 import axios from 'axios';
+import { getConfigValue } from '@/contracts';
+import i18n from '@/i18n';
+import {TranslateResult} from 'vue-i18n';
+import '@/mixins/general';
 
 interface CombatResult {
   isVictory: boolean;
@@ -85,12 +94,15 @@ export default Vue.extend({
   data() {
     return {
       skillPrice: 0,
+      gasToken: '',
+      showAds: false
     };
   },
 
   computed: {
-    formattedOutcome(): string {
-      return `You ${this.fightResults.isVictory ? 'won' : 'lost'} the fight!`;
+    formattedOutcome(): TranslateResult {
+      if(this.fightResults.isVictory) return i18n.t('combatResults.won');
+      else return i18n.t('combatResults.lost');
     },
     formattedUsd(): string {
       return `$${(this.calculateSkillPriceInUsd()).toFixed(2)}`;
@@ -105,7 +117,6 @@ export default Vue.extend({
       return this.fightResults.xpGain + ' xp';
     }
   },
-
   methods: {
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
@@ -113,13 +124,18 @@ export default Vue.extend({
     },
     calculateSkillPriceInUsd(): number {
       return fromWeiEther(this.fightResults.skillGain) as unknown as number * this.skillPrice as unknown as number;
-    }
+    },
+    checkStorage() {
+      this.showAds =  localStorage.getItem('show-ads') === 'true';
+    },
   },
 
   async mounted() {
+    this.gasToken = getConfigValue('currencySymbol') || 'BNB';
     await this.fetchPrices();
+    await new Promise(f => setTimeout(f, 1000));
+    this.checkStorage();
   },
-
   components: {
     Hint,
   },

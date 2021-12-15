@@ -2,60 +2,254 @@
   <div>
     <div v-if="isShop">
       <div class="centered-text-div" v-if="(!nftIdTypes || nftIdTypes.length === 0)">
-        <span>Nothing to buy at this time</span>
+        <span>{{$t('nftList.nothing')}}</span>
+      </div>
+      <div class="centered-text-div" v-if="isSpecials && !canPurchaseLand && purchase">
+        <span>{{$t('nftList.onlyOne')}}</span><br/>
+        <span>{{$t('nftList.tier')}}: {{purchase.tier}}</span><br/>
+        <span v-if="purchase.tier !== '1'">{{$t('nftList.chunkID')}}: {{purchase.chunkId}}</span>
+      </div>
+      <div class="centered-text-div" v-if="isSpecials">
+        <b-button
+          variant="primary"
+          class="shop-button"
+          @click="showMapModal()">
+            <span class="gtag-link-others">
+              {{$t('nftList.showMap')}}
+            </span>
+        </b-button>
+      </div>
+      <div class="centered-text-div mt-2" v-if="isSpecials && landSaleAllowed && canPurchaseLand">
+        <h4>{{$t('nftList.currencyToBuy')}}</h4>
+        <b-form-select v-model="selectedCurrency" @change="onCurrencyChange()" class="mb-2">
+          <b-form-select-option :value="null" disabled>{{$t('nftList.select')}}</b-form-select-option>
+          <b-form-select-option :value="0">SKILL</b-form-select-option>
+          <b-form-select-option :value="1">KING</b-form-select-option>
+        </b-form-select>
       </div>
       <ul class="nft-grid">
         <li class="nft"
-        v-for="nft in nftIdTypes" :key="`${nft.type}.${nft.id}`">
+            v-for="nft in nftIdTypes" :key="`${nft.type}.${nft.id}`"
+            :style="(nft.type === 'claimT2Land' && playerReservedT2Chunks.length === 0) ||
+                (nft.type === 'claimT3Land' && playerReservedT3Chunks.length === 0) ? 'display: none' : null">
           <nft-icon :nft="nft" :isShop="isShop" :favorite="isFavorite(nft.typeId, nft.id)"
             v-tooltip.top="{ content: itemDescriptionHtml(nft) , trigger: (isMobile() ? 'click' : 'hover') }"
                       @mouseover="hover = !isMobile() || true"
                       @mouseleave="hover = !isMobile()" />
           <b-button
+            :disabled="buyButtonDisabled(nft.type)"
             variant="primary"
             class="shop-button"
             @click="buyItem(nft)">
-            <span class="gtag-link-others">
-              Buy ({{ nft.nftPrice }} SKILL)
+            <span class="gtag-link-others" v-if="nft.type !== 't1land' && nft.type !== 't2land' && nft.type !== 't3land'
+              && nft.type !== 'claimT2Land' && nft.type !== 'claimT3Land'">
+              {{$t('nftList.buy')}} ({{ nft.nftPrice }} SKILL)
+            </span>
+            <span class="gtag-link-others" v-else-if="nft.type === 't1land'"
+                  v-tooltip.top="{ content: maxPrecisionSkill(t1LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
+                  @mouseover="hover = !isMobile() || true"
+                  @mouseleave="hover = !isMobile()">
+              {{$t('nftList.buy')}} (<CurrencyConverter :king="t1LandPrice" :skill="t1LandPrice"
+                                      :show-value-in-skill-only="selectedCurrency === 0"
+                                      :show-value-in-king-only="selectedCurrency === 1"
+                                      :max-decimals="2"/>)
+            </span>
+            <span class="gtag-link-others" v-else-if="nft.type === 't2land'"
+                  v-tooltip.top="{ content: maxPrecisionSkill(t2LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
+                  @mouseover="hover = !isMobile() || true"
+                  @mouseleave="hover = !isMobile()">
+              {{$t('nftList.buy')}} (<CurrencyConverter :king="t2LandPrice" :skill="t2LandPrice"
+                                      :show-value-in-skill-only="selectedCurrency === 0"
+                                      :show-value-in-king-only="selectedCurrency === 1"
+                                      :max-decimals="2"/>)
+            </span>
+            <span class="gtag-link-others" v-else-if="nft.type === 't3land'"
+                  v-tooltip.top="{ content: maxPrecisionSkill(t3LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
+                  @mouseover="hover = !isMobile() || true"
+                  @mouseleave="hover = !isMobile()">
+              {{$t('nftList.buy')}} (<CurrencyConverter :king="t3LandPrice" :skill="t3LandPrice"
+                                      :show-value-in-skill-only="selectedCurrency === 0"
+                                      :show-value-in-king-only="selectedCurrency === 1"
+                                      :max-decimals="2"/>)
+            </span>
+            <span class="gtag-link-others" v-else-if="nft.type === 'claimT2Land'">
+              {{$t('nftList.claim2')}}
+            </span>
+            <span class="gtag-link-others" v-else-if="nft.type === 'claimT3Land'">
+              {{$t('nftList.claim3')}}
             </span>
           </b-button>
         </li>
       </ul>
+      <div class="centered-text-div mt-3" v-if="isSpecials && ownedLands.length !== 0">
+        <h4>{{$t('nftList.owned')}} {{ownedLands.length > 1 ? "lands" : 'land'}}:</h4>
+        <ul class="list-group raid-details mb-4" v-for="(land, index) in ownedLands" :key="index">
+          <li class="list-group-item d-flex justify-content-between align-items-center details-text">
+            {{$t('nftList.tier')}}
+            <span class="badge badge-primary badge-pill">{{ land.tier }}</span>
+          </li>
+          <li v-if="land.chunkId !== '0'" class="list-group-item d-flex justify-content-between align-items-center details-text">
+            {{$t('nftList.chunkID')}}
+            <span class="badge badge-primary badge-pill">{{ land.chunkId }}</span>
+          </li>
+        </ul>
+      </div>
     </div>
 
+    <b-modal class="map-modal" :title="$t('nftList.chooseZone')" ref="map-modal" size="xl" hide-footer
+             @hide="clearMapSelections()">
+      <div class="w-100 padding-bottom-100">
+        <div class="map-grid">
+          <div class="zone" v-for="zoneId in zonesIds" :key="zoneId" @click="showZoneModal(zoneId)">
+            <span>{{zonesPopulation[zoneId]}}/{{maxZonePopulation.toLocaleString()}}</span>
+          </div>
+        </div>
+      </div>
+    </b-modal>
+
+    <b-modal class="map-modal" :title="$t('nftList.chooseZone')" ref="t2-claim-map-modal" size="xl" hide-footer
+             @hide="clearMapSelections()">
+      <div class="w-100 padding-bottom-100">
+        <div class="map-grid">
+          <div class="zone" :class="[playerReservedT2Zones.includes(zoneId) ? 'available' : null ]"
+               v-for="zoneId in zonesIds" :key="zoneId"
+               @click="playerReservedT2Zones.includes(zoneId) && showT2ZoneModal(zoneId)">
+            <span v-if="playerReservedT2Zones.includes(zoneId)">{{$t('nftList.available')}}</span>
+            <span>{{zonesPopulation[zoneId]}}/{{maxZonePopulation.toLocaleString()}}</span>
+          </div>
+        </div>
+      </div>
+    </b-modal>
+
+    <b-modal class="map-modal" :title="$t('nftList.chooseZone')" ref="t3-claim-map-modal" size="xl" hide-footer
+             @hide="clearMapSelections()">
+      <div class="w-100 padding-bottom-100">
+        <div class="map-grid">
+          <div class="zone" :class="[playerReservedT3Zones.includes(zoneId) ? 'available' : null ]"
+               v-for="zoneId in zonesIds" :key="zoneId"
+               @click="playerReservedT3Zones.includes(zoneId) && showT3ZoneModal(zoneId)">
+            <span v-if="playerReservedT3Zones.includes(zoneId)">{{$t('nftList.available')}}</span>
+          </div>
+        </div>
+      </div>
+    </b-modal>
+
+    <b-modal ref="zone-modal" :title="$t('nftList.chooseChunk')" size="lg"
+             @hide="selectedChunk = undefined" :hide-footer="!selectedTier">
+      <div class="w-100 padding-bottom-100">
+        <div v-if="selectedZone !== undefined" class="zone-grid"
+             :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
+          <div class="chunk"
+               :class="[reservedChunks.includes(chunkId.toString())
+                    || (selectedTier === 3 && takenT3Chunks.includes(chunkId.toString())) ? 'reserved' : null ]"
+               v-for="(chunkId, index) in chunksIds" :key="chunkId"
+               @click="selectChunk(chunkId, index)"
+               :style="[ selectedChunk === chunkId ? {backgroundColor: 'greenyellow'} : null ]">
+            <span>ID: {{chunkId}}</span>
+            <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
+            <span v-if="selectedTier === 3 && takenT3Chunks.includes(chunkId.toString())">{{$t('nftList.taken')}}</span>
+            <span v-else-if="reservedChunks.includes(chunkId.toString())">{{$t('nftList.reserved')}}</span>
+          </div>
+        </div>
+      </div>
+      <template #modal-footer>
+        <b-button class="mt-3" block @click="purchaseLand(selectedChunk)"
+                  :disabled="selectedChunk === undefined || !selectedChunkAvailable">{{$t('nftList.buyLand')}}</b-button>
+      </template>
+    </b-modal>
+
+    <b-modal ref="t2-claim-zone-modal" :title="$t('nftList.chooseChunk')" size="lg"
+             @hide="selectedChunk = undefined">
+      <div class="w-100 padding-bottom-100">
+        <div v-if="selectedZone !== undefined" class="zone-grid"
+             :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
+          <div class="chunk" :class="[playerReservedT2Chunks.includes(chunkId.toString()) ? 'available' : null ]"
+               v-for="(chunkId, index) in chunksIds" :key="chunkId"
+               @click="playerReservedT2Chunks.includes(chunkId.toString()) && selectAvailableChunk(chunkId, index)"
+               :style="[ selectedChunk === chunkId ? {opacity: '1'} : null ]">
+            <span>ID: {{chunkId}}</span>
+            <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
+            <span v-if="playerReservedT2Chunks.includes(chunkId.toString())">{{$t('nftList.available2')}}</span>
+          </div>
+        </div>
+      </div>
+      <template #modal-footer>
+        <b-button class="mt-3" block @click="claimLand(selectedChunk)"
+                  :disabled="selectedChunk === undefined || !selectedChunkAvailable">{{$t('nftList.claimLand')}}</b-button>
+      </template>
+    </b-modal>
+
+    <b-modal ref="t3-claim-zone-modal" :title="$t('nftList.chooseChunk')" size="lg"
+             @hide="selectedChunk = undefined">
+      <div class="w-100 padding-bottom-100">
+        <div v-if="selectedZone !== undefined" class="zone-grid"
+             :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
+          <div class="chunk" :class="[playerReservedT3Chunks.includes(chunkId.toString()) ? 'available' : null ]"
+               v-for="(chunkId, index) in chunksIds" :key="chunkId"
+               @click="playerReservedT3Chunks.includes(chunkId.toString()) && selectAvailableChunk(chunkId, index)"
+               :style="[ selectedChunk === chunkId ? {opacity: '1'} : null ]">
+            <span>ID: {{chunkId}}</span>
+            <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
+            <span v-if="playerReservedT3Chunks.includes(chunkId.toString())">{{$t('nftList.available2')}}</span>
+          </div>
+        </div>
+      </div>
+      <template #modal-footer>
+        <b-button class="mt-3" block @click="claimLand(selectedChunk)"
+                  :disabled="selectedChunk === undefined || !selectedChunkAvailable">{{$t('nftList.claimLand')}}</b-button>
+      </template>
+    </b-modal>
+
     <div v-if="!isShop">
+      <div>
+        <h1 v-if="isLandTab">{{$t('nftList.lands')}} ({{totalNonIgnoredLandsCount}})</h1>
+      </div>
       <div class="filters row mt-2" v-if="!isReward">
-        <div v-if="!isMarket" class="col-sm-6 col-md-4 dropdown-elem">
-          <strong>Nft Type</strong>
+        <div v-if="!isMarket && !isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
+          <strong>{{$t('nftList.nftType')}}</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox']" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land']" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
-        <div class="col-sm-6 col-md-4 dropdown-elem">
-          <strong>Stars</strong>
+        <div v-if="!isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
+          <strong>{{$t('nftList.stars')}}</strong>
           <select class="form-control" v-model="starFilter" @change="saveFilters()">
-            <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
-        <div class="col-sm-6 col-md-4 dropdown-elem">
-          <strong>Element</strong>
+        <div v-if="!isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
+          <strong>{{$t('nftList.element')}}</strong>
           <select class="form-control" v-model="elementFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || 'Any' }}</option>
+            <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div class="col-sm-6 col-md-4 dropdown-elem" v-if="isMarket">
-          <strong>Sort</strong>
+          <strong>{{$t('nftList.sort')}}</strong>
           <select class="form-control" v-model="priceSort" @change="saveFilters()">
-            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || 'Any' }}</option>
+            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
-        <div v-if="showFavoriteToggle" class="show-favorite">
+        <div v-if="showFavoriteToggle && !isLandTab" class="show-favorite">
           <b-check class="show-favorite-checkbox" v-model="showFavoriteNfts" />
-          <strong>Show Favorite</strong>
+          <strong>{{$t('nftList.showFavorite')}}</strong>
+        </div>
+
+        <div v-if="isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
+          <strong>{{$t('nftList.tier')}}</strong>
+          <select class="form-control" v-model="tierFilter">
+            <option v-for="x in ['', 1, 2, 3]" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+          </select>
+        </div>
+
+        <div v-if="isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
+          <strong>{{$t('nftList.chunkID')}}</strong>
+          <select class="form-control" v-model="chunkIdFilter">
+            <option v-for="x in ownedChunkIds" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+          </select>
         </div>
 
         <b-button
@@ -64,19 +258,30 @@
           @click="clearFilters"
         >
           <span>
-            Clear Filters
+            {{$t('nftList.clearFilters')}}
           </span>
         </b-button>
       </div>
       <div class="centered-text-div" v-if="isReward && nftIdTypes.length === 0">
-        Nothing dropped for you this time.
+        {{$t('nftList.noDrop')}}
       </div>
+
+      <b-pagination v-if="isLandTab" class="customPagination"
+        v-visible="nonIgnoredNfts && totalNonIgnoredLandsCount > showLimit"
+        align="center" v-model="currentPage"
+        :total-rows="totalNonIgnoredLandsCount"
+        :per-page="showLimit"
+        first-number
+        last-number
+      ></b-pagination>
+
       <ul class="nft-grid">
         <li class="nft" v-for="nft in nonIgnoredNfts" :key="`${nft.type}.${nft.id}`"
           :class="{ selected: highlight !== null && `${nft.type}.${nft.id}` === highlight }"
           @click="onNftClick(nft.type, nft.id)"
           @contextmenu="canFavorite && toggleFavorite($event, nft.type, nft.id)"
         >
+          <nft-options-dropdown v-if="showNftOptions" :nftType="nft.type" :nftId="nft.id" :options="options" class="nft-options"/>
           <nft-icon :favorite="isFavorite(nft.type, nft.id)" :nft="nft" :isShop="isShop"/>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :nft="nft"></slot>
@@ -84,6 +289,15 @@
           <slot name="sold" :nft="nft"></slot>
         </li>
       </ul>
+
+      <b-pagination v-if="isLandTab" class="customPagination"
+        v-visible="nonIgnoredNfts && totalNonIgnoredLandsCount > showLimit"
+        align="center" v-model="currentPage"
+        :total-rows="totalNonIgnoredLandsCount"
+        :per-page="showLimit"
+        first-number
+        last-number
+      ></b-pagination>
     </div>
   </div>
 </template>
@@ -98,11 +312,24 @@ import { Nft } from '@/interfaces/Nft';
 import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
 import { IState } from '@/interfaces';
+import { BModal } from 'bootstrap-vue';
+import {copyNftUrl, fromWeiEther} from '@/utils/common';
+import _ from 'lodash';
+import CurrencyConverter from '@/components/CurrencyConverter.vue';
+import BigNumber from 'bignumber.js';
+import i18n from '@/i18n';
+import { NftOption } from '../NftOptionsDropdown.vue';
+import NftOptionsDropdown from '../NftOptionsDropdown.vue';
+
+interface Land {
+  tier: string,
+  chunkId: string,
+}
 
 const sorts = [
-  { name: 'Any', dir: '' },
-  { name: 'Price: Low -> High', dir: 1 },
-  { name: 'Price: High -> Low', dir: -1 },
+  { name: i18n.t('nftList.sorts.any'), dir: '' },
+  { name: i18n.t('nftList.sorts.lowToHigh'), dir: 1 },
+  { name: i18n.t('nftList.sorts.highToLow'), dir: -1 },
 ];
 
 interface Data {
@@ -112,6 +339,50 @@ interface Data {
   favorites: Record<string, Record<number, boolean>>;
   priceSort: string;
   showFavoriteNfts: boolean;
+  landSaleAllowed: boolean;
+  canPurchaseLand: boolean;
+  purchase: Land | undefined;
+  selectedTier: number;
+  selectedCurrency: number;
+  selectedZone: number | undefined;
+  selectedChunk: number | undefined;
+  selectedChunkAvailable: boolean;
+  selectedChunkPopulation: number | undefined;
+  selectedT2ReservationId: number | undefined;
+  selectedT3ReservationId: number | undefined;
+  maxZonePopulation: number;
+  maxChunkPopulation: number;
+  zonesIds: number[];
+  zonesPopulation: number[];
+  chunksIds: number[];
+  takenT3Chunks: number[],
+  chunksPopulation: number[];
+  reservedChunks: string[];
+  t1LandAvailable: boolean;
+  t2LandAvailable: boolean;
+  t3LandAvailable: boolean;
+  checkIfCanPurchaseLandInterval: ReturnType<typeof setInterval> | null;
+  checkOwnedLandsInterval: ReturnType<typeof setInterval> | null;
+  checkPlayerReservedLandInterval: ReturnType<typeof setInterval> | null;
+  fetchNftsInterval: ReturnType<typeof setInterval> | null;
+  t1LandPrice: string;
+  t2LandPrice: string;
+  t3LandPrice: string;
+  t1LandPriceInWei: string;
+  t2LandPriceInWei: string;
+  t3LandPriceInWei: string;
+  playerReservedT2Chunks: number[];
+  playerReservedT3Chunks: number[];
+  playerReservedT2Zones: number[];
+  playerReservedT3Zones: number[];
+  reservationIdT2ToChunks: Map<number, number[]>;
+  reservationIdT3ToChunks: Map<number, number[]>;
+  ownedLands: Land[];
+  tierFilter: string;
+  chunkIdFilter: string;
+  currentPage: number;
+  totalItemsCount: number;
+  options: NftOption[];
 }
 
 export interface NftIdType {
@@ -141,14 +412,33 @@ interface StoreMappedActions {
   updateTrinketIds(): Promise<void>;
   updateJunkIds(): Promise<void>;
   updateKeyLootboxIds(): Promise<void>;
-  purchaseRenameTag(): Promise<void>;
-  purchaseRenameTagDeal(): Promise<void>;
-  purchaseWeaponRenameTag(): Promise<void>;
-  purchaseWeaponRenameTagDeal(): Promise<void>;
-  purchaseCharacterFireTraitChange(): Promise<void>;
-  purchaseCharacterEarthTraitChange(): Promise<void>;
-  purchaseCharacterWaterTraitChange(): Promise<void>;
-  purchaseCharacterLightningTraitChange(): Promise<void>;
+  purchaseRenameTag(obj: {price: number}): Promise<void>;
+  purchaseRenameTagDeal(obj: {price: number}): Promise<void>;
+  purchaseWeaponRenameTag(obj: {price: number}): Promise<void>;
+  purchaseWeaponRenameTagDeal(obj: {price: number}): Promise<void>;
+  purchaseCharacterFireTraitChange(obj: {price: number}): Promise<void>;
+  purchaseCharacterEarthTraitChange(obj: {price: number}): Promise<void>;
+  purchaseCharacterWaterTraitChange(obj: {price: number}): Promise<void>;
+  purchaseCharacterLightningTraitChange(obj: {price: number}): Promise<void>;
+  purchaseWeaponCosmetic(obj: {cosmetic: number, price: number}): Promise<void>;
+  purchaseCharacterCosmetic(obj: {cosmetic: number, price: number}): Promise<void>;
+  getAllZonesPopulation(): Promise<number[]>;
+  checkIfChunkAvailable(payload: { tier: number, chunkId: number }): Promise<boolean>;
+  getZoneChunkPopulation(payload: {zoneId: string}): Promise<number[]>;
+  getChunkPopulation(payload: {chunkIds: number[]}): Promise<number[]>;
+  getPurchase(): Promise<{tier: string, chunkId: string}>;
+  purchaseT1CBKLand(payload: {price: string, currency: number}): Promise<void>;
+  purchaseT2CBKLand(payload: {price: string, chunkId: number, currency: number}): Promise<void>;
+  purchaseT3CBKLand(payload: {price: string, chunkId: number, currency: number}): Promise<void>;
+  getCBKLandPrice(payload: {tier: number, currency: number}): Promise<string>;
+  getReservedChunksIds(): Promise<string[]>;
+  getAvailableLand(): Promise<{t1Land: string, t2Land: string, t3Land: string}>;
+  fetchIsLandSaleAllowed(): Promise<boolean>;
+  getPlayerReservedLand(): Promise<{t2Reservations: number[], t3Reservations: number[]}>;
+  getChunksOfReservation(payload: {reservationId: number}): Promise<number[]>;
+  claimPlayerReservedLand(payload: {reservationId: number, chunkId: number, tier: number}): Promise<void>;
+  getOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string }[]>;
+  getTakenT3Chunks(): Promise<number[]>;
 }
 
 export default Vue.extend({
@@ -215,6 +505,18 @@ export default Vue.extend({
       type: Boolean,
       default: true,
     },
+    isSpecials: {
+      type: Boolean,
+      default: false,
+    },
+    isLandTab: {
+      type: Boolean,
+      default: false
+    },
+    showNftOptions: {
+      type: Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -226,11 +528,57 @@ export default Vue.extend({
       priceSort: '',
       sorts,
       showFavoriteNfts: true,
+      landSaleAllowed: false,
+      canPurchaseLand: false,
+      purchase: undefined,
+      selectedTier: 0,
+      selectedCurrency: 0,
+      selectedZone: undefined,
+      selectedChunk: undefined,
+      selectedChunkAvailable: false,
+      selectedChunkPopulation: 0,
+      selectedT2ReservationId: undefined,
+      selectedT3ReservationId: undefined,
+      maxZonePopulation: 10000,
+      maxChunkPopulation: 100,
+      zonesIds: Array.from({length: 100}, (x, i) => i),
+      zonesPopulation: [],
+      chunksIds: Array.from({length: 100}, (x, i) => i),
+      takenT3Chunks: [],
+      chunksPopulation: [],
+      reservedChunks: [],
+      t1LandAvailable: false,
+      t2LandAvailable: false,
+      t3LandAvailable: false,
+      checkIfCanPurchaseLandInterval: null,
+      checkOwnedLandsInterval: null,
+      checkPlayerReservedLandInterval: null,
+      fetchNftsInterval: null,
+      t1LandPrice: '',
+      t2LandPrice: '',
+      t3LandPrice: '',
+      t1LandPriceInWei: '',
+      t2LandPriceInWei: '',
+      t3LandPriceInWei: '',
+      playerReservedT2Chunks: [],
+      playerReservedT3Chunks: [],
+      playerReservedT2Zones: [],
+      playerReservedT3Zones: [],
+      reservationIdT2ToChunks: new Map(),
+      reservationIdT3ToChunks: new Map(),
+      ownedLands: [],
+      tierFilter: '',
+      chunkIdFilter: '',
+      currentPage: 1,
+      totalItemsCount: 0,
+      options: []
     } as Data;
   },
 
   components: {
-    NftIcon
+    CurrencyConverter,
+    NftIcon,
+    NftOptionsDropdown
   },
 
   computed: {
@@ -278,7 +626,26 @@ export default Vue.extend({
         return this.nftsWithIdType(this.nftsToDisplay).concat(rewardedDust).concat(rewardedWeapons).filter(Boolean);
       }
 
+      if(this.isLandTab) {
+        return this.ownedLands.map((x, i) => { return { type: `t${x.tier}land`, id: i, tier: +x.tier, chunkId: +x.chunkId }; });
+      }
+
       return this.nftsWithIdType(this.nftsToDisplay).filter(Boolean);
+    },
+
+    totalNonIgnoredLandsCount(): number {
+      let items: Nft[] = [];
+      this.displayNfts.forEach((x) => items.push(x));
+
+      if(this.tierFilter && this.isLandTab) {
+        items = items.filter((x) => x.tier === +this.tierFilter);
+      }
+
+      if(this.chunkIdFilter && this.isLandTab) {
+        items = items.filter((x) => x.chunkId === +this.chunkIdFilter);
+      }
+
+      return items.length;
     },
 
     nonIgnoredNfts(): Nft[] {
@@ -307,8 +674,17 @@ export default Vue.extend({
         items = items.filter((x) => x.element?.includes(this.elementFilter));
       }
 
+      if(this.tierFilter && this.isLandTab) {
+        items = items.filter((x) => x.tier === +this.tierFilter);
+      }
+
+      if(this.chunkIdFilter && this.isLandTab) {
+        items = items.filter((x) => x.chunkId === +this.chunkIdFilter);
+      }
+
       if (this.showLimit > 0 && items.length > this.showLimit) {
-        items = items.slice(0, this.showLimit);
+        const offset = (this.currentPage-1) * this.showLimit;
+        items = items.slice(offset, offset + this.showLimit);
       }
 
       const favoriteNfts: Nft[] = [];
@@ -321,6 +697,11 @@ export default Vue.extend({
       }
 
       return favoriteNfts.concat(items);
+    },
+
+    ownedChunkIds(): string[] {
+      const uniqChunkIds = _.uniq(this.ownedLands.map(x => +x.chunkId)).sort((a, b) => a - b).map(x => x.toString());
+      return [''].concat(uniqChunkIds);
     }
   },
 
@@ -364,7 +745,11 @@ export default Vue.extend({
       'updateJunkIds', 'updateKeyLootboxIds', 'purchaseRenameTag', 'purchaseWeaponRenameTag',
       'purchaseRenameTagDeal', 'purchaseWeaponRenameTagDeal',
       'purchaseCharacterFireTraitChange', 'purchaseCharacterEarthTraitChange',
-      'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange'
+      'purchaseCharacterWaterTraitChange', 'purchaseCharacterLightningTraitChange',
+      'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic', 'getAllZonesPopulation', 'checkIfChunkAvailable',
+      'getZoneChunkPopulation', 'getChunkPopulation', 'purchaseT1CBKLand', 'purchaseT2CBKLand', 'purchaseT3CBKLand', 'getCBKLandPrice',
+      'getPurchase', 'getReservedChunksIds', 'getAvailableLand', 'fetchIsLandSaleAllowed', 'getPlayerReservedLand',
+      'getChunksOfReservation', 'claimPlayerReservedLand', 'getOwnedLands', 'getTakenT3Chunks'
     ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
@@ -402,6 +787,8 @@ export default Vue.extend({
       this.starFilter = '';
       this.elementFilter = '';
       this.priceSort = '';
+      this.tierFilter = '';
+      this.chunkIdFilter = '';
 
       this.$emit('nft-filters-changed');
     },
@@ -438,8 +825,230 @@ export default Vue.extend({
       }
     },
 
+    async checkIfCanPurchaseLand() {
+      const purchase = await this.getPurchase();
+      if(purchase) {
+        this.purchase = purchase;
+        this.canPurchaseLand = purchase.tier === '0';
+      }
+    },
+
     isFavorite(type: string, id: number): boolean {
       return this.favorites && this.favorites[type] && this.favorites[type][id];
+    },
+
+    async showMapModal() {
+      this.zonesPopulation = await this.getAllZonesPopulation();
+      (this.$refs['map-modal'] as BModal).show();
+    },
+
+    async showT2MapModal() {
+      this.zonesPopulation = await this.getAllZonesPopulation();
+      (this.$refs['t2-claim-map-modal'] as BModal).show();
+    },
+
+    async showT3MapModal() {
+      this.zonesPopulation = await this.getAllZonesPopulation();
+      (this.$refs['t3-claim-map-modal'] as BModal).show();
+    },
+
+    async showZoneModal(zoneId: number) {
+      this.selectedZone = zoneId;
+      await this.updateChunksPopulation(zoneId);
+      (this.$refs['zone-modal'] as BModal).show();
+    },
+
+    async showT2ZoneModal(zoneId: number) {
+      this.selectedZone = zoneId;
+      await this.updateChunksPopulation(zoneId);
+      (this.$refs['t2-claim-zone-modal'] as BModal).show();
+    },
+
+    async showT3ZoneModal(zoneId: number) {
+      this.selectedZone = zoneId;
+      await this.updateChunksPopulation(zoneId);
+      (this.$refs['t3-claim-zone-modal'] as BModal).show();
+    },
+
+    async selectChunk(chunkId: number, index: number) {
+      if(this.reservedChunks.includes(chunkId.toString())) {
+        this.selectedChunk = undefined;
+        return;
+      }
+      this.selectedChunk = chunkId;
+      this.selectedChunkPopulation = this.chunksPopulation[index];
+      if(this.selectedTier){
+        this.selectedChunkAvailable = await this.checkIfChunkAvailable({tier: this.selectedTier, chunkId});
+      }
+    },
+
+    selectAvailableChunk(chunkId: number, index: number) {
+      this.selectedChunk = chunkId;
+      this.selectedChunkPopulation = this.chunksPopulation[index];
+      this.selectedT2ReservationId = [...this.reservationIdT2ToChunks.entries()]
+        .filter(({ 1: reservationChunks }) => reservationChunks.includes(chunkId)).map(([k]) => k)[0];
+      this.selectedT3ReservationId = [...this.reservationIdT3ToChunks.entries()]
+        .filter(({ 1: reservationChunks }) => reservationChunks.includes(chunkId)).map(([k]) => k)[0];
+      this.selectedChunkAvailable = true;
+    },
+
+    clearMapSelections() {
+      this.selectedZone = undefined;
+      this.selectedTier = 0;
+    },
+
+    calculateChunksIds(zoneId: number) {
+      const chunksIds = [] as number[];
+      for (let i = 0; i < 10; i++) {
+        for (let j = 0; j < 10; j++) {
+          let chunkId = 0;
+          if(+zoneId < 10) {
+            chunkId = i * 100 + j + +zoneId * 10;
+          }
+          else if (+zoneId >= 10 && +zoneId < 100) {
+            const zoneIdNumbers = this.splitNum(+zoneId);
+            chunkId = i * 100 + j + zoneIdNumbers[0] * 1000 + zoneIdNumbers[1] * 10;
+          }
+          chunksIds.push(chunkId);
+        }
+      }
+      this.chunksIds = chunksIds;
+    },
+
+    splitNum(num: number) {
+      return String(num).split('').map(Number);
+    },
+
+    maxPrecisionSkill(listedPrice: string): string {
+      return this.convertStringToDecimal(fromWeiEther(listedPrice), 8);
+    },
+
+    convertStringToDecimal(val: string, maxDecimals: number) {
+      return new BigNumber(val).toFixed(maxDecimals);
+    },
+
+    calculateZoneId(chunkId: number) {
+      const chunkIdNumbers = this.splitNum(chunkId);
+      if(chunkId < 100) {
+        return Math.floor(chunkId / 10);
+      } else if (chunkId >= 100 && chunkId < 1000) {
+        return chunkIdNumbers[1];
+      } else {
+        return Math.floor(+(chunkIdNumbers[0].toString() + chunkIdNumbers[2].toString()));
+      }
+    },
+
+    async onCurrencyChange() {
+      await this.refreshLandPrices();
+    },
+
+    async fetchNfts() {
+      await this.updateTrinketIds();
+      await this.updateJunkIds();
+      await this.updateKeyLootboxIds();
+
+      this.fetchNftsInterval = setInterval(async () => {
+        await this.updateTrinketIds();
+        await this.updateJunkIds();
+        await this.updateKeyLootboxIds();
+      }, 3000);
+    },
+
+    async refreshLandPrices() {
+      this.t1LandPriceInWei = await this.getCBKLandPrice({tier: 1, currency: this.selectedCurrency});
+      this.t1LandPrice = fromWeiEther(this.t1LandPriceInWei);
+      this.t2LandPriceInWei = await this.getCBKLandPrice({tier: 2, currency: this.selectedCurrency});
+      this.t2LandPrice = fromWeiEther(this.t2LandPriceInWei);
+      this.t3LandPriceInWei = await this.getCBKLandPrice({tier: 3, currency: this.selectedCurrency});
+      this.t3LandPrice = fromWeiEther(this.t3LandPriceInWei);
+    },
+
+    async updateChunksPopulation(zoneId: number) {
+      this.calculateChunksIds(zoneId);
+      this.chunksPopulation = await this.getChunkPopulation({chunkIds: this.chunksIds});
+    },
+
+    async purchaseLand(chunkId: number) {
+      const chunkAvailable = await this.checkIfChunkAvailable({tier: this.selectedTier, chunkId});
+      if (!chunkAvailable) {
+        console.error('Chunk not available');
+        return;
+      }
+      const price = await this.getCBKLandPrice({tier: this.selectedTier, currency: this.selectedCurrency});
+      if(this.selectedTier === 2) {
+        await this.purchaseT2CBKLand({price, chunkId, currency: this.selectedCurrency}).then(() => {
+          if(this.selectedZone !== undefined) {
+            this.updateChunksPopulation(this.selectedZone);
+          }
+          (this.$refs['zone-modal'] as BModal).hide();
+          (this.$refs['map-modal'] as BModal).hide();
+        });
+      }
+      if(this.selectedTier === 3) {
+        await this.purchaseT3CBKLand({price, chunkId, currency: this.selectedCurrency}).then(() => {
+          if(this.selectedZone !== undefined) {
+            this.updateChunksPopulation(this.selectedZone);
+          }
+          (this.$refs['zone-modal'] as BModal).hide();
+          (this.$refs['map-modal'] as BModal).hide();
+        });
+      }
+      await this.checkIfCanPurchaseLand();
+    },
+
+    async claimLand(chunkId: number) {
+      if (!(this.selectedT2ReservationId || this.selectedT3ReservationId)) {
+        return;
+      }
+
+      if(this.selectedTier === 2 && this.selectedT2ReservationId) {
+        await this.claimPlayerReservedLand({
+          reservationId: this.selectedT2ReservationId,
+          chunkId,
+          tier: this.selectedTier
+        }).then(async () => {
+          if (this.selectedZone !== undefined) {
+            await this.updateChunksPopulation(this.selectedZone);
+          }
+          (this.$refs['t2-claim-zone-modal'] as BModal).hide();
+          (this.$refs['t2-claim-map-modal'] as BModal).hide();
+          (this.$refs['t3-claim-zone-modal'] as BModal).hide();
+          (this.$refs['t3-claim-map-modal'] as BModal).hide();
+          const results = await this.getOwnedLands();
+          this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+        });
+      }
+      if(this.selectedTier === 3 && this.selectedT3ReservationId) {
+        await this.claimPlayerReservedLand({
+          reservationId: this.selectedT3ReservationId,
+          chunkId,
+          tier: this.selectedTier
+        }).then(async () => {
+          if (this.selectedZone !== undefined) {
+            await this.updateChunksPopulation(this.selectedZone);
+          }
+          (this.$refs['t2-claim-zone-modal'] as BModal).hide();
+          (this.$refs['t2-claim-map-modal'] as BModal).hide();
+          (this.$refs['t3-claim-zone-modal'] as BModal).hide();
+          (this.$refs['t3-claim-map-modal'] as BModal).hide();
+          const results = await this.getOwnedLands();
+          this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+        });
+      }
+      await this.checkIfCanPurchaseLand();
+    },
+
+    buyButtonDisabled(type: string) {
+      if((type === 't1land' || type === 't2land' || type === 't3land' ) && !this.canPurchaseLand){
+        return true;
+      }
+      if(type === 't1land' && !this.t1LandAvailable) {
+        return true;
+      }
+      if(type === 't2land' && !this.t2LandAvailable) {
+        return true;
+      }
+      return type === 't3land' && !this.t3LandAvailable;
     },
 
     async buyItem(item: nftItem) {
@@ -448,46 +1057,79 @@ export default Vue.extend({
       }
 
       if(item.type === 'CharacterRenameTag'){
-        await this.purchaseRenameTag();
+        await this.purchaseRenameTag({price: item.nftPrice || 0});
       }
       if(item.type === 'CharacterRenameTagDeal'){
-        await this.purchaseRenameTagDeal();
+        await this.purchaseRenameTagDeal({price: item.nftPrice || 0});
       }
-
       if(item.type === 'WeaponRenameTag'){
-        await this.purchaseWeaponRenameTag();
+        await this.purchaseWeaponRenameTag({price: item.nftPrice || 0});
       }
       if(item.type === 'WeaponRenameTagDeal'){
-        await this.purchaseWeaponRenameTagDeal();
+        await this.purchaseWeaponRenameTagDeal({price: item.nftPrice || 0});
       }
-
       if(item.type === 'CharacterFireTraitChange'){
-        await this.purchaseCharacterFireTraitChange();
+        await this.purchaseCharacterFireTraitChange({price: item.nftPrice || 0});
       }
       if(item.type === 'CharacterEarthTraitChange'){
-        await this.purchaseCharacterEarthTraitChange();
+        await this.purchaseCharacterEarthTraitChange({price: item.nftPrice || 0});
       }
       if(item.type === 'CharacterWaterTraitChange'){
-        await this.purchaseCharacterWaterTraitChange();
+        await this.purchaseCharacterWaterTraitChange({price: item.nftPrice || 0});
       }
       if(item.type === 'CharacterLightningTraitChange'){
-        await this.purchaseCharacterLightningTraitChange();
+        await this.purchaseCharacterLightningTraitChange({price: item.nftPrice || 0});
+      }
+      if(item.type === 'WeaponCosmetic'){
+        await this.purchaseWeaponCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});
+      }
+      if(item.type === 'CharacterCosmetic'){
+        await this.purchaseCharacterCosmetic({cosmetic: +item.id, price: item.nftPrice || 0});
+      }
+      if(item.type === 't1land'){
+        const price = await this.getCBKLandPrice({tier: 1, currency: this.selectedCurrency});
+        await this.purchaseT1CBKLand({price, currency: this.selectedCurrency});
+        await this.checkIfCanPurchaseLand();
+      }
+      if(item.type === 't2land'){
+        this.selectedTier = 2;
+        this.showMapModal();
+      }
+      if(item.type === 't3land'){
+        this.selectedTier = 3;
+        this.showMapModal();
+      }
+      if(item.type === 'claimT2Land'){
+        this.selectedTier = 2;
+        this.showT2MapModal();
+      }
+      if(item.type === 'claimT3Land'){
+        this.selectedTier = 3;
+        this.showT3MapModal();
       }
     },
     itemDescriptionHtml(item: SkillShopListing): string {
       return item.name + '<br>' + item.description;
-    }
+    },
+
+    updateOptions() {
+      if (this.isMarket) {
+        this.options = [
+          {
+            name: i18n.t('copyLink').toString(),
+            amount: 0,
+            handler: copyNftUrl,
+            hasDefaultOption: true,
+            noAmount: true
+          },
+        ];
+      }
+    },
   },
 
   async mounted() {
     this.checkStorageFavorite();
-
-    if(!this.showGivenNftIdTypes) {
-      await this.fetchShields(this.ownedShieldIds);
-      await this.updateTrinketIds();
-      await this.updateJunkIds();
-      await this.updateKeyLootboxIds();
-    }
+    this.updateOptions();
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());
 
@@ -500,6 +1142,119 @@ export default Vue.extend({
       this.typeFilter = sessionStorage.getItem('nft-typefilter') || '';
       this.starFilter = sessionStorage.getItem('nft-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('nft-elementfilter') || '';
+    }
+
+    if(!this.showGivenNftIdTypes) {
+      await this.fetchShields(this.ownedShieldIds);
+      await this.fetchNfts();
+    }
+
+    this.landSaleAllowed = await this.fetchIsLandSaleAllowed();
+
+    await this.checkIfCanPurchaseLand();
+    this.checkIfCanPurchaseLandInterval = setInterval(async () => {
+      await this.checkIfCanPurchaseLand();
+    }, 3000);
+
+    const results = await this.getOwnedLands();
+    if(results){
+      this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+    }
+
+    this.checkOwnedLandsInterval = setInterval(async () => {
+      const results = await this.getOwnedLands();
+      if(results) {
+        this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
+      }
+    }, 3000);
+
+    this.reservedChunks = await this.getReservedChunksIds();
+    const {t1Land, t2Land, t3Land} = await this.getAvailableLand();
+    this.t1LandAvailable = t1Land !== '0';
+    this.t2LandAvailable = t2Land !== '0';
+    this.t3LandAvailable = t3Land !== '0';
+    await this.refreshLandPrices();
+    await this.onCurrencyChange();
+    const playerReservedLand = await this.getPlayerReservedLand();
+    if(playerReservedLand){
+      Promise.all(playerReservedLand.t2Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
+        .then(playerReservedT2Chunks => {
+          playerReservedLand.t2Reservations.map((reservationId, index) =>
+            this.reservationIdT2ToChunks.set(+reservationId, playerReservedT2Chunks[index].map(chunkId => +chunkId)));
+          this.playerReservedT2Chunks = playerReservedT2Chunks.flat();
+          const zonesIds: number[] = [];
+          this.playerReservedT2Chunks.forEach(chunkId => {
+            const zoneId = this.calculateZoneId(chunkId);
+            if(zonesIds.indexOf(zoneId) === -1) {
+              zonesIds.push(zoneId);
+            }
+          });
+          this.playerReservedT2Zones = zonesIds;
+        });
+      Promise.all(playerReservedLand.t3Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
+        .then(async playerReservedT3Chunks => {
+          this.takenT3Chunks = await this.getTakenT3Chunks();
+          this.playerReservedT3Chunks = _.without(playerReservedT3Chunks.flat(), ...this.takenT3Chunks);
+          playerReservedLand.t3Reservations.map((reservationId, index) =>
+            this.reservationIdT3ToChunks.set(+reservationId, playerReservedT3Chunks[index]
+              .filter(chunkId => !this.takenT3Chunks.includes(chunkId)).map(chunkId => +chunkId)));
+          const zonesIds: number[] = [];
+          this.playerReservedT3Chunks.forEach(chunkId => {
+            const zoneId = this.calculateZoneId(chunkId);
+            if (zonesIds.indexOf(zoneId) === -1) {
+              zonesIds.push(zoneId);
+            }
+          });
+          this.playerReservedT3Zones = zonesIds;
+        });
+    }
+    this.checkPlayerReservedLandInterval = setInterval(async () => {
+      const playerReservedLand = await this.getPlayerReservedLand();
+      Promise.all(playerReservedLand.t2Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
+        .then(playerReservedT2Chunks => {
+          playerReservedLand.t2Reservations.map((reservationId, index) =>
+            this.reservationIdT2ToChunks.set(+reservationId, playerReservedT2Chunks[index].map(chunkId => +chunkId)));
+          this.playerReservedT2Chunks = playerReservedT2Chunks.flat();
+          const zonesIds: number[] = [];
+          this.playerReservedT2Chunks.forEach(chunkId => {
+            const zoneId = this.calculateZoneId(chunkId);
+            if(zonesIds.indexOf(zoneId) === -1) {
+              zonesIds.push(zoneId);
+            }
+          });
+          this.playerReservedT2Zones = zonesIds;
+        });
+      Promise.all(playerReservedLand.t3Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
+        .then(async playerReservedT3Chunks => {
+          this.takenT3Chunks = await this.getTakenT3Chunks();
+          this.playerReservedT3Chunks = _.without(playerReservedT3Chunks.flat(), ...this.takenT3Chunks);
+          playerReservedLand.t3Reservations.map((reservationId, index) =>
+            this.reservationIdT3ToChunks.set(+reservationId, playerReservedT3Chunks[index]
+              .filter(chunkId => !this.takenT3Chunks.includes(chunkId)).map(chunkId => +chunkId)));
+          const zonesIds: number[] = [];
+          this.playerReservedT3Chunks.forEach(chunkId => {
+            const zoneId = this.calculateZoneId(chunkId);
+            if (zonesIds.indexOf(zoneId) === -1) {
+              zonesIds.push(zoneId);
+            }
+          });
+          this.playerReservedT3Zones = zonesIds;
+        });
+    }, 3000);
+  },
+
+  beforeDestroy() {
+    if(this.checkIfCanPurchaseLandInterval){
+      clearInterval(this.checkIfCanPurchaseLandInterval);
+    }
+    if(this.checkPlayerReservedLandInterval){
+      clearInterval(this.checkPlayerReservedLandInterval);
+    }
+    if(this.checkOwnedLandsInterval){
+      clearInterval(this.checkOwnedLandsInterval);
+    }
+    if(this.fetchNftsInterval) {
+      clearInterval(this.fetchNftsInterval);
     }
   }
 });
@@ -522,6 +1277,12 @@ export default Vue.extend({
   cursor: pointer;
   position: relative;
   overflow: hidden;
+}
+
+.nft-options {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 .centered-text-div {
@@ -577,11 +1338,84 @@ export default Vue.extend({
   outline: solid currentcolor 2px;
 }
 
+.map-modal {
+  max-width: 100%;
+  margin: 0.5rem;
+}
+
+.padding-bottom-100 {
+  padding-bottom: 100%;
+}
+
+.map-grid,
+.zone-grid {
+  background-size: cover;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  float: left;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+}
+
+.map-grid {
+  background-image: url(../../assets/map.png);
+}
+
+.zone,
+.chunk {
+  opacity: 1;
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-shadow: 0px 2px 1px rgb(0 0 0), 0px 4px 7px rgb(0 0 0 / 40%), 0px 9px 12px rgb(0 0 0 / 10%);
+  font-weight: bolder;
+}
+
+.zone:hover,
+.chunk:hover {
+  background-color: greenyellow;
+  transform: scale(1.1);
+}
+
+.available {
+  background-color: greenyellow;
+  opacity: 0.5;
+}
+
+.reserved {
+  background-color: black;
+  opacity: 0.5;
+}
+
+.reserved:hover {
+  background-color: black;
+}
+
+.details-text {
+  font-size: 1.2em;
+  color: #ccae4f;
+}
+
+.details-text > span {
+  background-color: #ccae4f;
+}
 
 @media (max-width: 576px) {
   .weapon-grid {
     justify-content: center;
     margin-top: 10px;
+  }
+
+  .zone,
+  .chunk {
+    font-size: 0.5rem;
   }
 
   .show-favorite {
