@@ -341,6 +341,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         excessWagerByCharacter[characterID] = fighter.wager;
 
+        // Shield removed first before the fighter is deleted
+        if(fighter.useShield) {
+            shields.setNftVar(shieldID, 1, 0);
+            _shieldsInArena[shieldID] = false;
+        }
+
         delete fighterByCharacter[characterID];
         delete duelByAttacker[characterID];
 
@@ -358,12 +364,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
-        _shieldsInArena[shieldID] = false;
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, 1, 0);
         weapons.setNftVar(weaponID, 1, 0);
-        if(fighter.useShield)
-            shields.setNftVar(shieldID, 1, 0);
     }
 
     /// @dev performs all queued duels
@@ -902,6 +905,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         excessWagerByCharacter[characterID] = fighter.wager;
 
+        // Shield removed first before the fighter is deleted
+        if(fighter.useShield) {
+            shields.setNftVar(shieldID, 1, 0);
+            _shieldsInArena[shieldID] = false;
+        }
+
         delete fighterByCharacter[characterID];
         delete duelByAttacker[characterID];
 
@@ -919,12 +928,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
-        _shieldsInArena[shieldID] = false;
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, 1, 0);
         weapons.setNftVar(weaponID, 1, 0);
-        if(fighter.useShield)
-            shields.setNftVar(shieldID, 1, 0);
     }
 
     /// @dev attempts to find an opponent for a character.
