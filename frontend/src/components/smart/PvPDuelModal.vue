@@ -2,7 +2,7 @@
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
       <img src="../../assets/separatorTop.svg" alt="Top separator">
-      <div v-if="true" class="modalTitle">You have won the duel!</div>
+      <div v-if="attackerRoll > defenderRoll" class="modalTitle">You have won the duel!</div>
       <div v-else class="modalTitle"> You have lost the duel!</div>
       <ul>
         <li>
@@ -120,7 +120,7 @@ export default {
   justify-content: center;
   background-color: rgb(20, 20, 20, 0.96);
 
-  span, li {
+  span, li, p {
     font-family: 'Roboto';
   }
 

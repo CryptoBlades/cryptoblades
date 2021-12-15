@@ -45,11 +45,11 @@
         </div>
       </div>
       <div class="middleButtons">
-        <div v-if="this.loading">
+        <div v-if="this.loading || isCharacterInDuelQueue">
           <img class="spinner" src="../../assets/loadingSpinner.svg" />
         </div>
-        <p v-else>{{ this.decisionTimeLeft }}</p>
-        <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS"/>
+        <p v-if="hasPendingDuel && !isCharacterInDuelQueue">{{ this.decisionTimeLeft }}</p>
+        <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
         <div v-else class="matchButtonsWrapper">
           <pvp-button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
           <pvp-button v-else
@@ -281,6 +281,8 @@ export default {
         await this.contracts().PvpArena.methods.requestOpponent(this.currentCharacterId).send({ from: this.defaultAccount });
       } catch (err) {
         console.log('find match error: ', err);
+        this.loading = false;
+        return;
       }
 
       this.duel = await this.contracts().PvpArena.methods.duelByAttacker(this.currentCharacterId).call();
