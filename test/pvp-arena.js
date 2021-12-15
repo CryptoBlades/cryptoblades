@@ -1418,7 +1418,7 @@ contract("PvpArena", (accounts) => {
 
   describe("#performDuels", async () => {
     describe("happy path", () => {
-      describe.only("attacker wins", () => {
+      describe("attacker wins", () => {
         let character1ID;
         let character2ID;
         let character1Wager;
