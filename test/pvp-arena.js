@@ -1491,42 +1491,6 @@ contract("PvpArena", (accounts) => {
             from: accounts[0],
           });
 
-
-
-
-
-    
-
-          await time.increase(await pvpArena.unattackableSeconds());
-          await pvpArena.requestOpponent(character1ID, {
-            from: accounts[1],
-          });
-          await pvpArena.preparePerformDuel(character1ID, {
-            from: accounts[1],
-          });
-
-          duelQueue = await pvpArena.getDuelQueue();
-
-          await pvpArena.performDuels(duelQueue, {
-            from: accounts[0],
-          });
-
-          await time.increase(await pvpArena.unattackableSeconds());
-
-          await pvpArena.requestOpponent(character2ID, {
-            from: accounts[2],
-          });
-
-          await time.increase(await pvpArena.unattackableSeconds());
-
-          await pvpArena.reRollOpponent(character2ID, { from: accounts[2] });
-
-          console.log('SADASDGHJSAVD: ', (await pvpArena.getCharacterWager(character2ID, {
-            from: accounts[2],
-          })).toString());
-
-
-
           previousBalance = await skillToken.balanceOf(accounts[1]);
           duelEvent = await expectEvent.inTransaction(
             tx,
