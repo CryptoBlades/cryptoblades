@@ -120,6 +120,10 @@ export default {
   justify-content: center;
   background-color: rgb(20, 20, 20, 0.96);
 
+  span, li {
+    font-family: 'Roboto';
+  }
+
   .modalInnerWrapper {
     position: relative;
     z-index: 9999;
@@ -152,8 +156,9 @@ export default {
     .modalTitle {
       margin-top: 1rem;
       color: #EDCD90;
-      font-size: 2rem;
-      line-height: 2.25rem;
+      font-size: 1.5rem;
+      line-height: 2rem;
+      font-family: 'Trajan';
     }
 
     ul {
@@ -181,9 +186,9 @@ export default {
     }
     .earnWrapper {
       margin-bottom: 2rem;
-      font-size: 1.5rem;
-      line-height: 2rem;
+      font-size: 1.25rem;
       color: #EDCD90;
+      font-family: 'Roboto';
     }
     .rankWrapper {
       margin-bottom: 2rem;

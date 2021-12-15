@@ -45,7 +45,7 @@
         </div>
       </div>
       <div class="middleButtons">
-        <div v-if="this.loading || isCharacterInDuelQueue">
+        <div v-if="this.loading">
           <img class="spinner" src="../../assets/loadingSpinner.svg" />
         </div>
         <p v-else>{{ this.decisionTimeLeft }}</p>
@@ -104,8 +104,9 @@
       </div>
     </div>
     <!-- TODO: Get rank variation from contract -->
+      <!-- v-if="duelResult.result" -->
     <pvp-duel-modal
-      v-if="duelResult.result"
+      v-if="true"
       :result="duelResult.result"
       :attackerRoll="duelResult.attackerRoll"
       :defenderRoll="duelResult.defenderRoll"
