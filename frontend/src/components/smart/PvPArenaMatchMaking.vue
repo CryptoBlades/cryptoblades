@@ -87,6 +87,7 @@
             <span>Rank: {{ opponentInformation.rank }}</span>
           </div>
         </div>
+        <div v-else class="findOpponentMessage">Press "FIND MATCH" to find an opponent!</div>
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
@@ -566,6 +567,15 @@ span, p, li, button {
   }
   @media screen and (min-width: 2560px) {
     width: 15%;
+  }
+  .findOpponentMessage {
+    display: flex;
+    width: 75%;
+    margin: auto;
+    color: gray;
+    font-family: 'Trajan';
+    font-weight: 200;
+    text-align: center;
   }
   .characterImageWrapper {
     display: flex;
