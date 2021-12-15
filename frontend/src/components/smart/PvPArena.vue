@@ -425,6 +425,7 @@ export default {
 
 <style scoped lang="scss">
   .loadingSpinner {
+    display: flex;
     height: 3rem;
     width: 3rem;
     margin: 0 auto;

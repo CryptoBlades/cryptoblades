@@ -19,7 +19,7 @@
                   <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
                   <b-popover ref="popover" target="weapon-popover" triggers="hover" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Weapons</p>
-                    <div class="popoverGrid">
+                    <div v-if="ownedWeaponsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-weapon
                         v-for="weapon in ownedWeaponsWithInformation"
                         :key="weapon.weaponId"
@@ -31,6 +31,7 @@
                         :disabled="ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)"
                       />
                     </div>
+                    <div v-else class="noWeaponsOrShields">You have no weapons.</div>
                   </b-popover>
                 </button>
               </div>
@@ -47,7 +48,7 @@
                   <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
                   <b-popover target="shield-popover" placement="right" triggers="hover" custom-class="popoverWrapper">
                     <p class="popoverTitle">Shields</p>
-                    <div class="popoverGrid">
+                    <div v-if="ownedShieldsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-shield
                         v-for="shield in ownedShieldsWithInformation"
                         :key="shield.shieldId"
@@ -59,6 +60,7 @@
                         :disabled="ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)"
                       />
                     </div>
+                    <div v-else class="noWeaponsOrShields">You have no shields.</div>
                   </b-popover>
                 </button>
               </div>
@@ -328,6 +330,11 @@ p, li, span {
     grid-column-gap: 1rem;
     grid-row-gap: 2rem;
   }
+}
+.noWeaponsOrShields {
+  font-family: 'Roboto';
+  color: #b4b0a7;
+  font-size: 1rem;
 }
 .mainWrapper {
   display: flex;
