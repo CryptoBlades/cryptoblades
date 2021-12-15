@@ -21,7 +21,7 @@
         <div class="characterImageWrapper">
           <pvp-character :characterId="currentCharacterId" />
         </div>
-        <div class="info">
+        <div v-if="characterInformation" class="info">
           <h1 class="characterName">{{ characterInformation.name }}</h1>
           <div class="infoDetails">
             <span>Level: {{ characterInformation.level }}</span>
@@ -45,15 +45,24 @@
         </div>
       </div>
       <div class="middleButtons">
-        <div v-if="this.loading">
-          <img class="spinner" src="../../assets/loadingSpinner.svg" />
+        <div class="middleButtonsStatus">
+          <div v-if="this.loading || isCharacterInDuelQueue">
+            <img class="spinner" src="../../assets/loadingSpinner.svg" />
+          </div>
+          <p v-if="hasPendingDuel && !isCharacterInDuelQueue && !this.loading && this.decisionTimeLeft">
+            <span>You have</span>
+            <span>{{ this.decisionTimeLeft }}</span>
+            <span>to accept the duel</span>
+          </p>
+          <span v-else-if="this.decisionTimeLeft === 0 && !this.loading && isCharacterInDuelQueue">Duel has expired.</span>
         </div>
-        <p v-else>{{ this.decisionTimeLeft }}</p>
-        <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS"/>
-        <div v-else class="matchButtonsWrapper">
-          <pvp-button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
-          <pvp-button v-else
-          @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
+        <div class="middleMatchProgressButtons">
+          <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
+          <div v-else class="matchButtonsWrapper">
+            <pvp-button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
+            <pvp-button v-else
+            @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
+          </div>
         </div>
         <div class="rerollButtonWrapper">
           <pvp-button
@@ -76,10 +85,10 @@
         <div class="elementWrapper">
           <img v-if="opponentInformation.id" :src="getOpponentElementSrc" alt="opponent element" />
         </div>
-        <div class="characterImageWrapper">
+        <div v-if="opponentInformation.id" class="characterImageWrapper">
           <pvp-character :characterId="opponentInformation.id" />
         </div>
-        <div class="info">
+        <div v-if="opponentInformation.id" class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
           <div class="infoDetails">
             <span>Level: {{ opponentInformation.level }}</span>
@@ -87,6 +96,7 @@
             <span>Rank: {{ opponentInformation.rank }}</span>
           </div>
         </div>
+        <span v-else class="findMatchMessage">Press FIND MATCH to find an opponent!</span>
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
@@ -131,6 +141,7 @@ import earthIcon from '../../assets/elements/earth.png';
 import lightningIcon from '../../assets/elements/lightning.png';
 import PvPDuelModal from './PvPDuelModal.vue';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
+
 export default {
   inject: ['web3'],
 
@@ -579,6 +590,19 @@ span, p, li, button {
   @media screen and (min-width: 2560px) {
     width: 15%;
   }
+  .findMatchMessage {
+    display: flex;
+    width: 75%;
+    margin: auto;
+    color: gray;
+    font-family: 'Trajan';
+    font-weight: 200;
+    text-align: center;
+    span {
+      color: #EDCD90;
+      font-family: 'Trajan';
+    }
+  }
   .characterImageWrapper {
     display: flex;
     margin-right: auto;
@@ -625,7 +649,7 @@ span, p, li, button {
     right: 0;
     margin-right: auto;
     margin-left: auto;
-    .hasShield{
+    &.hasShield{
       div:first-of-type {
         margin-right: 1rem;
       }
@@ -634,11 +658,9 @@ span, p, li, button {
 }
 .middleButtons {
   flex-direction: column;
-  margin-right: 3rem;
-  margin-left: 3rem;
-  width: 12rem;
+  margin: 0 3rem;
+  width: 13rem;
   .spinner {
-    margin-bottom: 4rem;
     animation: spin 1s linear infinite;
     @keyframes spin {
       from {
@@ -647,6 +669,38 @@ span, p, li, button {
       to {
         transform: rotate(360deg);
       }
+    }
+  }
+  .middleButtonsStatus {
+    width: 100%;
+    display: flex;
+    height: 7rem;
+    flex-direction: column;
+    justify-content: center;
+    vertical-align: middle;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 1rem;
+
+    p {
+      display: flex;
+      flex-direction: column;
+    }
+    span:first-of-type, span:last-of-type {
+      font-size: .75rem;
+      color: #cec198;
+    }
+    span:nth-of-type(2) {
+      font-size: 2.25rem;
+      color: white;
+      margin: 0;
+    }
+  }
+  .middleMatchProgressButtons {
+    width: 100%;
+    height: 5.5rem;
+    button {
+      height: 100%;
     }
   }
   .matchButtonsWrapper {
@@ -663,14 +717,8 @@ span, p, li, button {
   .leaveArenaButtonWrapper {
     width: 100%;
   }
-  p {
-    font-size: 2.75rem;
-    margin-bottom: 4rem;
-    color: white;
-  }
   @media screen and (min-width: 1280px) {
-    margin-right: 5rem;
-    margin-left: 5rem;
+    margin: 0 5rem;
   }
 }
 </style>
