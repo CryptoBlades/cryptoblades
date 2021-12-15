@@ -12,7 +12,7 @@ This code is open, but not open source. It is not licensed, which means you cann
 1. Install [MetaMask](https://metamask.io/).
 1. Create a new connection to connect to Ganache with these settings: http://localhost:7545, any name, any chain id
 1. In Ganache, click the key icon on the right side of any address and grab the private key.
-1. In MetaMask, create a new account, import from private key, and paste the key in there. 
+1. In MetaMask, create a new account, import from private key, and paste the key in there.
 
 You should now have 100 fake eth! You're now fake rich.
 
@@ -25,6 +25,7 @@ You should now have 100 fake eth! You're now fake rich.
 1. `npm run start:frontend`
 
 For Windows developers experiencing errors follow these steps:
+
 1. `rm -r build`
 1. `npm run contract:prepare` (this builds your contracts)
 1. `rm -r build/contracts`
@@ -56,9 +57,33 @@ There are optional environment variables, most of which have sensible defaults i
 - `npm run contract:deploy` - deploy the Truffle contracts for testing
 
 ## Errors
+
 - If you run into any error at all during the build process you may need to reset [Ganache](https://www.trufflesuite.com/ganache) by deleting previous workspaces and going through the Ganache setup process again including importing a new account for Metamask.
 - Artifacts are from different compiler runs `- rm -rf build/`
 
 ## Config
+
 - All network config is in app-config.json
 - If you want to add a new network: add it's configuration in app-config.json and add update currentTokenPrice getter in EarningsCalculator.
+
+## i18n (Internationalization) - Adding strings for translation
+
+- We use [vue-18n](https://kazupon.github.io/vue-i18n/) for internationalization
+- Fallback is English, if a string is not added or empty
+
+### Replacing strings in the code
+
+- Replace strings in template with `{{$t('keyName')}}`
+- Replace strings in script with `i18n.t('keyName')`
+- Pass objects/values with `{{$t('keyName', someValue)}}` and use it in en.json:
+  `"keyName": "This is {someValue} !"`
+- You can use markdown by using v-html:
+  `<p v-html="$t('keyName'})"></p>` with `"keyName": "This is <b>bold</b>"`
+- Avoid splitting up strings. If a sentences is split up, it can't be translated in some language properly. ([example](https://github.com/CryptoBlades/cryptoblades/blob/57eb5224f2a2149ccb9f3e5f52bb54eb700dbe53/frontend/src/views/Plaza.vue#L22-L24) and [docu](https://kazupon.github.io/vue-i18n/guide/interpolation.html#basic-usage))
+
+### Adding a new language
+
+- Add a new JSON file to ~/frontend/src/locales/ by copying en.json and renaming it to your language code.
+  [Use the 2-Letter ISO code of your language](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
+- Language is loaded on startup and added to the language drop-down of the Options page.
+- The value for the drop-down is "name" at the root of the json map.
