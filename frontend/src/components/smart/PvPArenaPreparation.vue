@@ -127,7 +127,7 @@
         </div>
         <ul class="topPlayersList">
           <li class="header">
-            <span>Top Players</span><span>$SKILL Earned</span>
+            <span>Top Players</span><span>Rank</span>
           </li>
           <li>
             <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
