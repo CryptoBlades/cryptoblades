@@ -96,7 +96,7 @@ interface StoreMappedActions {
 
   createOrder(payload: { orderNumber: number, payingAmount: BigNumber }): Promise<void>;
 
-  canUserBeCharged(payload: { payingAmount: BigNumber }): Promise<boolean>;
+  canUserAfford(payload: { payingAmount: BigNumber }): Promise<boolean>;
 }
 
 export interface ShippingRate {
@@ -149,10 +149,10 @@ export default Vue.extend({
 
   components: {CurrencyConverter},
   computed: {
-    ...mapState(['skillBalance', 'defaultAccount']),
+    ...mapState(['defaultAccount']),
   },
   methods: {
-    ...mapActions(['currentSkillPrice', 'createOrder', 'canUserBeCharged']) as StoreMappedActions,
+    ...mapActions(['currentSkillPrice', 'createOrder', 'canUserAfford']) as StoreMappedActions,
     fromWeiEther,
     toBN,
     isFileTypePreview(file: File) {
@@ -216,7 +216,7 @@ export default Vue.extend({
     },
 
     async fetchCanAffordMerch() {
-      return await this.canUserBeCharged({payingAmount: toBN(this.totalPriceInSkill)});
+      return await this.canUserAfford({payingAmount: toBN(this.totalPriceInSkill)});
     },
 
     async getShippingRates() {

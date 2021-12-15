@@ -3004,13 +3004,19 @@ export function createStore(web3: Web3) {
           });
       },
 
-      async canUserBeCharged({ state }, {payingAmount}) {
-        const { Merchandise } = state.contracts();
-        if(!Merchandise || !state.defaultAccount) return;
+      async canUserAfford({ state }, {payingAmount}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
 
-        return await Merchandise.methods
-          .canUserBeCharged(state.defaultAccount, payingAmount)
+        const unclaimedSkill = await CryptoBlades.methods
+          .getTokenRewardsFor(state.defaultAccount)
           .call(defaultCallOptions(state));
+
+        const walletSkill = state.skillBalance;
+
+        const totalSkill = +unclaimedSkill + +walletSkill;
+
+        return totalSkill >= payingAmount;
       },
 
       async claimTokenRewards({ state, dispatch }) {
