@@ -116,7 +116,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => uint256[]) private _rankingByTier;
     /// @dev defender is in a duel that has not finished processing
     mapping(uint256 => bool) public characterDefending;
-
+    
+    /// @dev percentage of entry wager charged when withdrawing from arena with pending duel
+    uint256 public withdrawFeePercent;
 
 
     event NewDuel(
@@ -201,6 +203,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // TODO: Tweak these values, they are placeholders
         wageringFactor = 3;
         reRollFeePercent = 25;
+        withdrawFeePercent = 25;
         _baseWagerUSD = ABDKMath64x64.divu(500, 100); // $5
         _tierWagerUSD = ABDKMath64x64.divu(50, 100); // $0.5
         _rankingsPoolTaxPercent = 15;
@@ -341,6 +344,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         excessWagerByCharacter[characterID] = fighter.wager;
 
+        // Shield removed first before the fighter is deleted
+        if(fighter.useShield) {
+            shields.setNftVar(shieldID, 1, 0);
+            _shieldsInArena[shieldID] = false;
+        }
+
         delete fighterByCharacter[characterID];
         delete duelByAttacker[characterID];
 
@@ -358,16 +367,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
-        _shieldsInArena[shieldID] = false;
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, 1, 0);
         weapons.setNftVar(weaponID, 1, 0);
-        if(fighter.useShield)
-            shields.setNftVar(shieldID, 1, 0);
     }
 
     /// @dev performs all queued duels
-    function performDuels(uint256[] calldata attackerIDs) external restricted {
+    function performDuels(uint256[] memory attackerIDs) public restricted {
         for (uint256 i = 0; i < attackerIDs.length; i++) {
             uint256 attackerID = attackerIDs[i];
             if (!_duelQueue.contains(attackerID)) continue;
@@ -455,16 +461,23 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             fighterByCharacter[winnerID].wager = fighterByCharacter[winnerID]
                 .wager
                 .add(bountyDistribution.winnerReward);
-            fighterByCharacter[loserID].wager = fighterByCharacter[loserID]
-                .wager
-                .sub(bountyDistribution.loserPayment);
+
+            uint256 loserWager;
+
+            if (fighterByCharacter[loserID].wager < bountyDistribution.loserPayment) {
+                loserWager = 0;
+            } else {
+                loserWager = fighterByCharacter[loserID].wager.sub(bountyDistribution.loserPayment);
+            }
+
+            fighterByCharacter[loserID].wager = loserWager;
 
             characterDefending[defenderID] = false;
 
             if (
                 fighterByCharacter[loserID].wager < getDuelCost(loserID) ||
                 fighterByCharacter[loserID].wager <
-                getEntryWager(loserID).div(4)
+                getEntryWager(loserID).mul(withdrawFeePercent).div(100)
             ) {
                 _removeCharacterFromArena(loserID);
             }
@@ -472,8 +485,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             // add ranking points to the winner
             characterRankingPoints[winnerID] = characterRankingPoints[winnerID]
                 .add(winningPoints);
-            // check if the loser's current raking points are 3 or less and set them to 0 if that's the case, else subtract the ranking points
-            if (characterRankingPoints[loserID] <= 3) {
+            // check if the loser's current raking points are 'losingPoints' or less and set them to 0 if that's the case, else subtract the ranking points
+            if (characterRankingPoints[loserID] <= losingPoints) {
                 characterRankingPoints[loserID] = 0;
             } else {
                 characterRankingPoints[loserID] = characterRankingPoints[
@@ -515,7 +528,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 entryWager = getEntryWager(characterID);
 
         if (hasPendingDuel(characterID)) {
-            wager = wager.sub(entryWager.div(4));
+            if (wager < entryWager.mul(withdrawFeePercent).div(100)) {
+                wager = 0;
+            } else {
+                wager = wager.sub(entryWager.mul(withdrawFeePercent).div(100));
+            }
         }
 
         _removeCharacterFromArena(characterID);
@@ -902,6 +919,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         excessWagerByCharacter[characterID] = fighter.wager;
 
+        // Shield removed first before the fighter is deleted
+        if(fighter.useShield) {
+            shields.setNftVar(shieldID, 1, 0);
+            _shieldsInArena[shieldID] = false;
+        }
+
         delete fighterByCharacter[characterID];
         delete duelByAttacker[characterID];
 
@@ -919,12 +942,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         _charactersInArena[characterID] = false;
         _weaponsInArena[weaponID] = false;
-        _shieldsInArena[shieldID] = false;
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, 1, 0);
         weapons.setNftVar(weaponID, 1, 0);
-        if(fighter.useShield)
-            shields.setNftVar(shieldID, 1, 0);
     }
 
     /// @dev attempts to find an opponent for a character.
@@ -1001,6 +1021,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev ends a ranked season and starts a new one
     function restartRankedSeason() external restricted {
+        uint256[] memory duelQueue = getDuelQueue();
+
+        if (duelQueue.length > 0) {
+            performDuels(duelQueue);
+        }
+
         // Note: Loops over 15 tiers. Should not be reachable anytime in the foreseeable future.
         for (uint8 i = 0; i <= 15; i++) {
             if (
@@ -1129,6 +1155,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     function setReRollFeePercent(uint256 percent) external restricted {
         reRollFeePercent = percent;
+    }
+
+    function setWithdrawFeePercent(uint256 percent) external restricted {
+        withdrawFeePercent = percent;
     }
 
     function setRankingsPoolTaxPercent(uint8 percent) external restricted {

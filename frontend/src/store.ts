@@ -2983,21 +2983,40 @@ export function createStore(web3: Web3) {
           .currentPrice().call(defaultCallOptions(state));
       },
 
-      async purchaseMerchandise({ state }, {ids, amounts, totalPrice}) {
+      async createOrder({ state }, {orderNumber, payingAmount}) {
         const { CryptoBlades, SkillToken, Merchandise } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Merchandise || !state.defaultAccount) return;
 
+        const skillNeeded = await CryptoBlades.methods
+          .getSkillNeededFromUserWallet(state.defaultAccount, payingAmount, true)
+          .call(defaultCallOptions(state));
+
         await SkillToken.methods
-          .approve(CryptoBlades.options.address, totalPrice)
+          .approve(CryptoBlades.options.address, skillNeeded)
           .send({
             from: state.defaultAccount
           });
 
         return await Merchandise.methods
-          .placeOrder(state.defaultAccount, totalPrice, ids, amounts)
+          .createOrder(state.defaultAccount, orderNumber, payingAmount)
           .send({
             from: state.defaultAccount
           });
+      },
+
+      async canUserAfford({ state }, {payingAmount}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const unclaimedSkill = await CryptoBlades.methods
+          .getTokenRewardsFor(state.defaultAccount)
+          .call(defaultCallOptions(state));
+
+        const walletSkill = state.skillBalance;
+
+        const totalSkill = +unclaimedSkill + +walletSkill;
+
+        return totalSkill >= payingAmount;
       },
 
       async claimTokenRewards({ state, dispatch }) {

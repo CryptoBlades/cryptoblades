@@ -3,13 +3,11 @@
     <b-button variant="primary" class="shop-button hidden"></b-button>
     <h2 v-if="isOrderLoading">{{ $t('market.merchandise.completingYourOrder') }}</h2>
     <b-button variant="primary" class="shop-button" :disabled="isOrderLoading" @click="openCartModal">
-      {{ $t('market.merchandise.yourCart') }} ({{ cartEntries.length }})
+      <i class="fas fa-shopping-cart p-1"></i>{{ $t('market.merchandise.cart') }} ({{ cartEntries.length }})
     </b-button>
 
-    <b-modal class="centered-modal" ref="merchandise-cart-modal" button-size="lg" size="xl" scrollable>
-      <template #modal-title>
-        {{ $t('market.merchandise.yourCart') }}
-      </template>
+    <b-modal class="centered-modal" v-model="showModal" button-size="lg" size="xl" scrollable
+             :title="$t('market.merchandise.yourCart')">
       <div v-if="cartEntries.length === 0" class="d-flex justify-content-center">
         <h3>{{ $t('market.merchandise.nothingInCart') }}</h3>
       </div>
@@ -20,10 +18,10 @@
                alt="">
           <div class="d-flex flex-column justify-content-center align-items-center flex-grow-1 w-50">
             <p>{{ cartEntry.variant.name }}</p>
-            <div class="d-inline"><span>Price: {{ cartEntry.variant.retail_price }} {{
+            <div class="d-inline"><span>{{ $t('market.merchandise.price') }}: </span><span
+              v-if="showFiatPrices">{{ cartEntry.variant.retail_price }} {{
                 cartEntry.variant.currency
-              }}</span>
-              /
+              }} / </span>
               <span><CurrencyConverter v-if="cartEntry.variant && cartEntry.variant.retail_price"
                                        :skill="fromWeiEther(toBN(usdToSkill(cartEntry)))"
                                        :show-value-in-skill-only="true"/></span></div>
@@ -45,20 +43,27 @@
       </div>
       <template #modal-footer>
         <div class="cart-footer">
-          <div v-if="cartEntries.length !== 0">
-            <span>{{ $t('market.merchandise.total') }}: {{ totalPrice.toFixed(2) }} {{
-                cartEntries[0].variant.currency
-              }} </span>/
-            <span><CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/></span>
+          <div>
+            <span class="p-2"></span>
           </div>
-          <span class="d-inline-block"
-                v-b-tooltip="{title: !canAffordMerch() ? $t('market.merchandise.insufficientFunds') : null}">
-          <b-button :disabled="isPlaceOrderButtonDisabled()"
-                    variant="primary"
-                    @click="openAddressModal">
-            {{ $t('market.merchandise.placeOrder') }}
-          </b-button>
-          </span>
+          <div class="d-flex align-items-center">
+            <div v-if="cartEntries.length !== 0" class="d-flex flex-column p-3">
+              <span class="font-weight-bold">{{ $t('market.merchandise.total') }}: </span>
+              <div><span v-if="showFiatPrices">{{ totalPrice.toFixed(2) }} {{
+                  cartEntries[0].variant.currency
+                }} / </span>
+                <CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/>
+                <span class="text-uppercase"> + {{ $t('market.merchandise.shipping') }} </span>
+                <i v-b-tooltip="$t('market.merchandise.shippingCostAfterNextStep')" class="far fa-question-circle"/>
+              </div>
+            </div>
+            <b-button
+              :disabled="isContinueToCheckoutButtonDisabled()"
+              variant="primary" size="lg"
+              @click="openAddressModal">
+              {{ $t('market.merchandise.continue') }}
+            </b-button>
+          </div>
         </div>
       </template>
     </b-modal>
@@ -67,7 +72,6 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {BModal} from 'bootstrap-vue';
 import {PropType} from 'vue/types/options';
 import {CartEntry, FileType} from '@/components/smart/VariantChoiceModal.vue';
 import {mapActions, mapState} from 'vuex';
@@ -83,6 +87,7 @@ interface Data {
   totalPriceInSkill: number;
   skillPrice: number;
   isOrderLoading: boolean;
+  showModal: boolean;
 }
 
 export default Vue.extend({
@@ -92,6 +97,7 @@ export default Vue.extend({
       totalPriceInSkill: 0,
       skillPrice: 0,
       isOrderLoading: false,
+      showModal: false,
     } as Data;
   },
 
@@ -99,6 +105,9 @@ export default Vue.extend({
     cartEntries: {
       type: Array as PropType<CartEntry[]>,
       required: true
+    },
+    showFiatPrices: {
+      type: Boolean,
     }
   },
 
@@ -116,7 +125,9 @@ export default Vue.extend({
       this.$root.$emit('merchandise-address-modal', this.totalPriceInSkill, this.cartEntries);
     },
     async openCartModal() {
-      this.$root.$emit('merchandise-cart-modal', true);
+      this.skillPrice = +await this.currentSkillPrice();
+      this.calculateTotalPrice();
+      this.showModal = true;
     },
     isFileTypePreview(file: File) {
       return file.type === FileType.PREVIEW;
@@ -145,8 +156,8 @@ export default Vue.extend({
     isMinusButtonDisabled(cartEntry: CartEntry) {
       return cartEntry.quantity <= 1;
     },
-    isPlaceOrderButtonDisabled() {
-      return this.cartEntries.length === 0 || !this.canAffordMerch();
+    isContinueToCheckoutButtonDisabled() {
+      return this.cartEntries.length === 0;
     },
     canAffordMerch() {
       const cost = toBN(this.totalPriceInSkill);
@@ -159,14 +170,7 @@ export default Vue.extend({
     this.$root.$on('merchandise-cart-modal', async (open: boolean) => {
       this.skillPrice = +await this.currentSkillPrice();
       this.calculateTotalPrice();
-      const modal = this.$refs['merchandise-cart-modal'] as BModal;
-      if (modal) {
-        if (open) {
-          modal.show();
-        } else {
-          modal.hide();
-        }
-      }
+      this.showModal = open;
     });
     this.$root.$on('merchandise-order-loading', (isOrderLoading: boolean) => {
       this.isOrderLoading = isOrderLoading;
@@ -202,6 +206,8 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  width: 100%;
+  justify-content: space-between;
 }
 
 @media (max-width: 576px) {
