@@ -289,6 +289,7 @@ export default {
           return;
         }
         this.$emit('enteredArena');
+        window.location.reload();
       } else {
         console.log(this.currentCharacterId);
         console.log(this.selectedWeaponId);
