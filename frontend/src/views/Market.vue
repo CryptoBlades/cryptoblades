@@ -681,7 +681,8 @@
           </div>
         </div>
       </b-tab>
-      <b-tab v-if="isMerchandiseEnabled" @click="clearData();browseTabActive = false;skillShopTabActive = false">
+      <b-tab v-if="isMerchandiseEnabled && currentChainSupportsMerchandise()"
+             @click="clearData();browseTabActive = false;skillShopTabActive = false">
         <template #title>
           {{$t('market.merchandise.merchandise')}}
           <hint class="hint" text="You can buy real merchandise in here" />
@@ -705,31 +706,36 @@
 <script lang="ts">
 import assert from 'assert';
 import Vue from 'vue';
-import { BModal } from 'bootstrap-vue';
+import {BModal} from 'bootstrap-vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import Hint from '../components/Hint.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
 import Web3 from 'web3';
-import { mapActions, mapGetters, mapState } from 'vuex';
-import { Accessors } from 'vue/types/options';
-import { Contract, Contracts, IState } from '../interfaces';
-import { Characters, Weapons, Shields } from '../../../build/abi-interfaces';
-import { SkillShopListing } from '@/interfaces/SkillShopListing';
+import {mapActions, mapGetters, mapState} from 'vuex';
+import {Accessors} from 'vue/types/options';
+import {Contract, Contracts, IState} from '../interfaces';
+import {Characters, Shields, Weapons} from '../../../build/abi-interfaces';
+import {SkillShopListing} from '@/interfaces/SkillShopListing';
 import BigNumber from 'bignumber.js';
-import { traitNameToNumber } from '@/contract-models';
-import { market_blockchain as useBlockchain } from './../feature-flags';
-import { CharacterTransactionHistoryData, ICharacterHistory,
-  IWeaponHistory, WeaponTransactionHistoryData,
-  IShieldHistory, ShieldTransactionHistoryData } from '@/interfaces/History';
-import { getShieldNameFromSeed } from '@/shield-name';
-import { fromWeiEther, apiUrl } from '@/utils/common';
-import NftList, { NftIdType } from '@/components/smart/NftList.vue';
-import { getCleanName } from '@/rename-censor';
+import {traitNameToNumber} from '@/contract-models';
+import {market_blockchain as useBlockchain, merchandise as merchandiseEnabled} from './../feature-flags';
+import {
+  CharacterTransactionHistoryData,
+  ICharacterHistory,
+  IShieldHistory,
+  IWeaponHistory,
+  ShieldTransactionHistoryData,
+  WeaponTransactionHistoryData
+} from '@/interfaces/History';
+import {getShieldNameFromSeed} from '@/shield-name';
+import {apiUrl, fromWeiEther} from '@/utils/common';
+import NftList, {NftIdType} from '@/components/smart/NftList.vue';
+import {getCleanName} from '@/rename-censor';
 import i18n from '@/i18n';
-import { toInteger } from 'lodash';
+import {toInteger} from 'lodash';
 import Merchandise from '@/components/smart/Merchandise.vue';
-import { merchandise as merchandiseEnabled } from './../feature-flags';
+import config from '../../app-config.json';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
@@ -771,6 +777,7 @@ interface Data {
   landSaleAllowed: boolean;
   reservedSaleAllowed: boolean;
   isMerchandiseEnabled: boolean;
+  merchandiseSupportedChains: string[];
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields'
@@ -876,6 +883,7 @@ export default Vue.extend({
       landSaleAllowed: false,
       reservedSaleAllowed: false,
       isMerchandiseEnabled: merchandiseEnabled,
+      merchandiseSupportedChains: config.merchandiseSupportedChains,
     } as Data;
   },
 
@@ -2302,7 +2310,15 @@ export default Vue.extend({
       }
 
       return input[0].toUpperCase() + input.slice(1);
-    }
+    },
+
+    currentChainSupportsMerchandise() {
+      const currentChain = localStorage.getItem('currentChain');
+      if (!currentChain || !this.merchandiseSupportedChains) {
+        return false;
+      }
+      return this.merchandiseSupportedChains.includes(currentChain);
+    },
 
   },
 

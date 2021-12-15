@@ -1,14 +1,17 @@
 <template>
   <div>
-    <MerchandiseCart :cartEntries="cartEntries" :isOrderLoading="isOrderLoading"/>
+    <MerchandiseCart :cartEntries="cartEntries" :isOrderLoading="isOrderLoading" :showFiatPrices="showFiatPrices"/>
     <MerchandiseList :isOrderLoading="isOrderLoading"/>
     <b-modal ref="order-complete-modal" ok-only no-close-on-backdrop hide-header-close
              :title="$t('market.merchandise.orderCompleted', {orderNumber})">
-      <p>{{$t('market.merchandise.thankYouForShopping')}}</p>
-      <span>{{$t('market.merchandise.yourShippingMethod')}}: </span>
-      <p class="font-weight-bold">{{shipping}}</p>
-      <p>{{$t('market.merchandise.checkYourEmail')}}</p>
+      <p>{{ $t('market.merchandise.thankYouForShopping') }}</p>
+      <span>{{ $t('market.merchandise.yourShippingMethod') }}: </span>
+      <p class="font-weight-bold">{{ shipping }}</p>
+      <p>{{ $t('market.merchandise.checkYourEmail') }}</p>
     </b-modal>
+    <OrderSummaryModal :showFiatPrices="showFiatPrices"/>
+    <ShippingInfoModal/>
+    <VariantChoiceModal :showFiatPrices="showFiatPrices"/>
   </div>
 </template>
 
@@ -16,19 +19,22 @@
 import Vue from 'vue';
 import MerchandiseList from '@/components/smart/MerchandiseList.vue';
 import MerchandiseCart from '@/components/smart/MerchandiseCart.vue';
-import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import VariantChoiceModal, {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {BModal} from 'bootstrap-vue';
+import OrderSummaryModal from '@/components/smart/OrderSummaryModal.vue';
+import ShippingInfoModal from '@/components/smart/ShippingInfoModal.vue';
 
 interface Data {
   cartEntries: CartEntry[];
   orderNumber: number;
   shipping: string;
   isOrderLoading: boolean;
+  showFiatPrices: boolean;
 }
 
 export default Vue.extend({
   components: {
-    MerchandiseList, MerchandiseCart
+    MerchandiseList, MerchandiseCart, OrderSummaryModal, ShippingInfoModal, VariantChoiceModal
   },
 
   data() {
@@ -37,6 +43,7 @@ export default Vue.extend({
       orderNumber: 0,
       shipping: '',
       isOrderLoading: false,
+      showFiatPrices: true,
     } as Data;
   },
 
