@@ -51,7 +51,6 @@ export interface IRaidState {
 
   //isOwnedCharacterRaidingById: Record<number, boolean>; // ?
 }
-
 export interface IPartnerProject {
   id: string;
   name: string;

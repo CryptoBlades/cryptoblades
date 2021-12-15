@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
-
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
@@ -113,6 +112,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
+
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
+    uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -253,21 +255,29 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function gainXp(uint256 id, uint16 xp) public restricted {
+        _gainXp(id, xp);
+    }
+
+    function _gainXp(uint256 id, uint256 xp) internal {
         Character storage char = tokens[id];
-        if(char.level < 255) {
+        if (char.level < 255) {
             uint newXp = char.xp.add(xp);
             uint requiredToLevel = experienceTable[char.level]; // technically next level
-            while(newXp >= requiredToLevel) {
+            while (newXp >= requiredToLevel) {
                 newXp = newXp - requiredToLevel;
                 char.level += 1;
                 emit LevelUp(ownerOf(id), id, char.level);
-                if(char.level < 255)
+                if (char.level < 255)
                     requiredToLevel = experienceTable[char.level];
-                else
-                    newXp = 0;
+                else newXp = 0;
             }
             char.xp = uint16(newXp);
         }
+    }
+
+    function gainXpAll(uint256[] calldata chars, uint256[] calldata xps) external restricted {
+        for(uint i = 0; i < chars.length; i++)
+            _gainXp(chars[i], xps[i]);
     }
 
     function getStaminaTimestamp(uint256 id) public view noFreshLookup(id) returns (uint64) {
@@ -302,8 +312,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getFightDataAndDrainStamina(address fighter,
-        uint256 id, uint8 amount, bool allowNegativeStamina) public restricted returns(uint96) {
-        require(fighter == ownerOf(id));
+        uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint96) {
+        require(fighter == ownerOf(id) && nftVars[id][NFTVAR_BUSY] == 0);
+        nftVars[id][NFTVAR_BUSY] |= busyFlag;
+
         Character storage char = tokens[id];
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
         require((staminaPoints > 0 && allowNegativeStamina) // we allow going into negative, but not starting negative
@@ -324,10 +336,32 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
         raidsDone[id] = raidsDone[id] + 1;
         raidsWon[id] = won ? (raidsWon[id] + 1) : (raidsWon[id]);
-        gainXp(id, xp);
+        require(nftVars[id][NFTVAR_BUSY] == 0); // raids do not apply busy flag for now
+        //nftVars[id][NFTVAR_BUSY] = 0;
+        _gainXp(id, xp);
+    }
+
+    function getCharactersOwnedBy(address wallet) public view returns(uint256[] memory chars) {
+        uint256 count = balanceOf(wallet);
+        chars = new uint256[](count);
+        for(uint256 i = 0; i < count; i++)
+            chars[i] = tokenOfOwnerByIndex(wallet, i);
+    }
+
+    function getReadyCharacters(address wallet) public view returns(uint256[] memory chars) {
+        uint256[] memory owned = getCharactersOwnedBy(wallet);
+        uint256 ready = 0;
+        for(uint i = 0; i < owned.length; i++)
+            if(nftVars[owned[i]][NFTVAR_BUSY] == 0)
+                ready++;
+        chars = new uint[](ready);
+        for(uint i = 0; i < owned.length; i++)
+            if(nftVars[owned[i]][NFTVAR_BUSY] == 0)
+                chars[--ready] = owned[i];
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        require(nftVars[tokenId][NFTVAR_BUSY] == 0);
         if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to)) {
             require(balanceOf(to) < characterLimit, "Recv has too many characters");
         }
@@ -338,5 +372,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function setCharacterLimit(uint256 max) public restricted {
         characterLimit = max;
+    }
+
+    function getNftVar(uint256 characterID, uint256 nftVar) public view returns(uint256) {
+        return nftVars[characterID][nftVar];
+    }
+    function setNftVar(uint256 characterID, uint256 nftVar, uint256 value) public restricted {
+        nftVars[characterID][nftVar] = value;
     }
 }
