@@ -474,7 +474,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             if (
                 fighterByCharacter[loserID].wager < getDuelCost(loserID) ||
                 fighterByCharacter[loserID].wager <
-                getEntryWager(loserID).div(uint256(100).div(withdrawFeePercent))
+                getEntryWager(loserID).mul(withdrawFeePercent).div(100)
             ) {
                 _removeCharacterFromArena(loserID);
             }
@@ -525,10 +525,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 entryWager = getEntryWager(characterID);
 
         if (hasPendingDuel(characterID)) {
-            if (wager < entryWager.div(uint256(100).div(withdrawFeePercent))) {
+            if (wager < entryWager.mul(withdrawFeePercent).div(100)) {
                 wager = 0;
             } else {
-                wager = wager.sub(entryWager.div(uint256(100).div(withdrawFeePercent)));
+                wager = wager.sub(entryWager.mul(withdrawFeePercent).div(100));
             }
         }
 
