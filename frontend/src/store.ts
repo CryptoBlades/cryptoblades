@@ -2987,8 +2987,12 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, Merchandise } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Merchandise || !state.defaultAccount) return;
 
+        const skillNeeded = await CryptoBlades.methods
+          .getSkillNeededFromUserWallet(state.defaultAccount, payingAmount, true)
+          .call(defaultCallOptions(state));
+
         await SkillToken.methods
-          .approve(CryptoBlades.options.address, payingAmount)
+          .approve(CryptoBlades.options.address, skillNeeded)
           .send({
             from: state.defaultAccount
           });
@@ -2998,6 +3002,15 @@ export function createStore(web3: Web3) {
           .send({
             from: state.defaultAccount
           });
+      },
+
+      async canUserBeCharged({ state }, {payingAmount}) {
+        const { Merchandise } = state.contracts();
+        if(!Merchandise || !state.defaultAccount) return;
+
+        return await Merchandise.methods
+          .canUserBeCharged(state.defaultAccount, payingAmount)
+          .call(defaultCallOptions(state));
       },
 
       async claimTokenRewards({ state, dispatch }) {

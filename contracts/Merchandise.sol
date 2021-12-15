@@ -38,12 +38,13 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
     uint256 public nextOrderID;
     uint256 public lowestUnprocessedOrderID;
     mapping(uint256 => address) public orderBuyer;
+    mapping(uint256 => uint256) public externalOrderId;
     mapping(uint256 => uint256) public orderPaidAmount;
     mapping(uint256 => uint32[]) public orderBaskets; // 8 bits amount, 24 bits itemID
     mapping(uint256 => uint256) public orderData; // 8 bits status, rest is timestamp (for now)
 
     event OrderPlaced(address indexed buyer, uint256 indexed orderId, uint256 paid, uint256[] items, uint8[] amounts);
-    event OrderSaved(address indexed user, uint256 indexed orderNumber, uint256 payingAmount);
+    event OrderSaved(address indexed user, uint256 indexed orderNumber, uint256 indexed internalOrderNumber, uint256 payingAmount);
     event OrderStatusChanged(uint256 indexed orderId, uint8 indexed newStatus);
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
@@ -86,13 +87,19 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
         skillOracle = newOracle;
     }
 
-    function createOrder(address user, uint256 orderNumber, uint256 payingAmount) external restricted {
+    function setItemPrice(uint256 item, uint256 usdCents) external restricted {
+        itemPrices[item] = usdCents;
+    }
+
+    function createOrder(address user, uint256 orderNumber, uint256 payingAmount) external returns (uint256) {
         require(vars[VAR_ORDERS_ENABLED] != 0, "Cannot place orders right now");
         orderBuyer[orderNumber] = user;
         game.payContractTokenOnly(user, payingAmount, vars[VAR_TRACK_INCOME] != 0);
         orderPaidAmount[orderNumber] += payingAmount;
+        externalOrderId[nextOrderID] = orderNumber;
 
-        emit OrderSaved(user, orderNumber, payingAmount);
+        emit OrderSaved(user, orderNumber, nextOrderID, payingAmount);
+        return nextOrderID++;
     }
 
     function getOrderPaidAmount(uint256 orderNumber) public view returns (uint256) {

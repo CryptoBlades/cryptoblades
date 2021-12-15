@@ -61,13 +61,13 @@
               <CurrencyConverter :skill="fromWeiEther(totalPriceInSkill)" :show-value-in-skill-only="true"/>
             </div>
             <span id="place-order-button-wrapper" class="d-inline-block">
-              <b-button :disabled="!canAffordMerch() || !selectedShippingRate || isOrderLoading" variant="primary"
+              <b-button :disabled="!canAffordMerch || !selectedShippingRate || isOrderLoading" variant="primary"
                         size="lg" block
                         @click="confirmOrder">
                 {{ $t('market.merchandise.placeOrder') }} <i v-if="isOrderLoading" class="fas fa-spinner fa-spin"></i>
               </b-button>
             </span>
-            <b-tooltip v-if="!canAffordMerch()" target="place-order-button-wrapper" variant="danger">
+            <b-tooltip v-if="!canAffordMerch" target="place-order-button-wrapper" variant="danger">
               {{ $t('market.merchandise.insufficientFunds') }}
             </b-tooltip>
             <b-tooltip v-else-if="!selectedShippingRate" target="place-order-button-wrapper">
@@ -95,6 +95,8 @@ interface StoreMappedActions {
   currentSkillPrice(): Promise<string>;
 
   createOrder(payload: { orderNumber: number, payingAmount: BigNumber }): Promise<void>;
+
+  canUserBeCharged(payload: { payingAmount: BigNumber }): Promise<boolean>;
 }
 
 export interface ShippingRate {
@@ -118,6 +120,7 @@ interface Data {
   shippingMethod: string;
   shippingRates: ShippingRate[];
   selectedShippingRate?: ShippingRate;
+  canAffordMerch: boolean;
 }
 
 export default Vue.extend({
@@ -134,6 +137,7 @@ export default Vue.extend({
       shippingMethod: '',
       shippingRates: [],
       selectedShippingRate: undefined,
+      canAffordMerch: false,
     } as Data;
   },
 
@@ -148,7 +152,7 @@ export default Vue.extend({
     ...mapState(['skillBalance', 'defaultAccount']),
   },
   methods: {
-    ...mapActions(['currentSkillPrice', 'createOrder']) as StoreMappedActions,
+    ...mapActions(['currentSkillPrice', 'createOrder', 'canUserBeCharged']) as StoreMappedActions,
     fromWeiEther,
     toBN,
     isFileTypePreview(file: File) {
@@ -202,18 +206,17 @@ export default Vue.extend({
     calculateShippingPriceInSkill(price: number) {
       return price * this.skillPrice;
     },
-    calculateTotalPrice() {
+    async calculateTotalPrice() {
       this.totalPrice = this.getTotalCartPrice() + this.getShippingPrice();
       this.totalPriceInSkill = this.totalPrice * this.skillPrice;
+      this.canAffordMerch = await this.fetchCanAffordMerch();
     },
     getShippingPrice() {
-      return this.selectedShippingRate?.rate ? +this.selectedShippingRate.rate : 0;
+      return this.selectedShippingRate ? +this.selectedShippingRate.rate : 0;
     },
 
-    canAffordMerch() {
-      const cost = toBN(this.totalPriceInSkill);
-      const balance = toBN(this.skillBalance);
-      return balance.isGreaterThanOrEqualTo(cost);
+    async fetchCanAffordMerch() {
+      return await this.canUserBeCharged({payingAmount: toBN(this.totalPriceInSkill)});
     },
 
     async getShippingRates() {
@@ -243,11 +246,11 @@ export default Vue.extend({
         this.recipient = recipient;
         this.showModal = true;
         this.skillPrice = +await this.currentSkillPrice();
-        this.calculateTotalPrice();
+        await this.calculateTotalPrice();
         this.areShippingRatesLoading = true;
         await this.getShippingRates();
         this.areShippingRatesLoading = false;
-        this.calculateTotalPrice();
+        await this.calculateTotalPrice();
       } else {
         this.showModal = false;
       }
