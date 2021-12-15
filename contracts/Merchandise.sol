@@ -38,10 +38,10 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
     uint256 public nextOrderID;
     uint256 public lowestUnprocessedOrderID;
     mapping(uint256 => address) public orderBuyer;
-    mapping(uint256 => uint256) public externalOrderId;
     mapping(uint256 => uint256) public orderPaidAmount;
     mapping(uint256 => uint32[]) public orderBaskets; // 8 bits amount, 24 bits itemID
     mapping(uint256 => uint256) public orderData; // 8 bits status, rest is timestamp (for now)
+    mapping(uint256 => uint256) public externalOrderId;
 
     event OrderPlaced(address indexed buyer, uint256 indexed orderId, uint256 paid, uint256[] items, uint8[] amounts);
     event OrderSaved(address indexed user, uint256 indexed orderNumber, uint256 indexed internalOrderNumber, uint256 payingAmount);
