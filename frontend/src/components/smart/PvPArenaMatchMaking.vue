@@ -104,9 +104,8 @@
       </div>
     </div>
     <!-- TODO: Get rank variation from contract -->
-      <!-- v-if="duelResult.result" -->
     <pvp-duel-modal
-      v-if="true"
+      v-if="duelResult.result"
       :result="duelResult.result"
       :attackerRoll="duelResult.attackerRoll"
       :defenderRoll="duelResult.defenderRoll"
