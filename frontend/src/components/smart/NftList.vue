@@ -1062,14 +1062,12 @@ export default Vue.extend({
       if(item.type === 'CharacterRenameTagDeal'){
         await this.purchaseRenameTagDeal({price: item.nftPrice || 0});
       }
-
       if(item.type === 'WeaponRenameTag'){
         await this.purchaseWeaponRenameTag({price: item.nftPrice || 0});
       }
       if(item.type === 'WeaponRenameTagDeal'){
         await this.purchaseWeaponRenameTagDeal({price: item.nftPrice || 0});
       }
-
       if(item.type === 'CharacterFireTraitChange'){
         await this.purchaseCharacterFireTraitChange({price: item.nftPrice || 0});
       }

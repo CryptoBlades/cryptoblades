@@ -8,18 +8,21 @@ import { getConfigValue, setUpContracts } from './contracts';
 
 import {
   characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract,
-  trinketFromContract, junkFromContract, partnerProjectFromContract
+  trinketFromContract, junkFromContract,
+  partnerProjectFromContract
 } from './contract-models';
+
 import {
   Contract, Contracts, isStakeType, IStakeOverviewState,
-  IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState, IPartnerProject
+  IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState,
+  IPartnerProject
 } from './interfaces';
 import { getCharacterNameFromSeed } from './character-name';
 import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
 
 import {
   raid as featureFlagRaid,
-  stakeOnly as featureFlagStakeOnly
+  stakeOnly as featureFlagStakeOnly,
 } from './feature-flags';
 import { IERC721, IStakingRewards, IERC20 } from '../../build/abi-interfaces';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
@@ -118,8 +121,9 @@ export function createStore(web3: Web3) {
       currentNftId: null,
       weaponDurabilities: {},
       weaponRenames: {},
+      maxDurability: 0,
+      isInCombat: false,
       weaponCosmetics: {},
-      maxDurability: 0,      isInCombat: false,
       isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
 
       targetsByCharacterIdAndWeaponId: {},
@@ -1557,6 +1561,7 @@ export function createStore(web3: Web3) {
           [...Array(numberOfCharacters).keys()].map((_, i) =>
             state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
         );
+
         return characters;
       },
       async getAccountWeapons({state}) {
@@ -2520,7 +2525,6 @@ export function createStore(web3: Web3) {
 
         return await Promise.all(landsIds.map(landId => CBKLand.methods.get(landId).call(defaultCallOptions(state))));
       },
-
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
@@ -3505,7 +3509,6 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacterCosmetic', id)
         ]);
       },
-
       async fetchPartnerProjects({ state, dispatch }) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
@@ -3606,7 +3609,6 @@ export function createStore(web3: Web3) {
           skillAddress: getConfigValue('VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS')
         });
       },
-
       async configureChainNet(
         { commit },
         { networkId, chainId, chainName, currencyName, currencySymbol, currencyDecimals, rpcUrls, blockExplorerUrls, skillAddress }:
@@ -3670,8 +3672,8 @@ export function createStore(web3: Web3) {
 
         window.location.reload();
       },
-
       async storeItem({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
         const NFTContract: Contract<IERC721> =
