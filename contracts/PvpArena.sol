@@ -57,8 +57,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint8 public wageringFactor;
     /// @dev percentage of duel cost charged when rerolling opponent
     uint256 public reRollFeePercent;
-    /// @dev percentage of entry wager charged when withdrawing from arena with pending duel
-    uint256 public withdrawFeePercent;
     /// @dev the base amount wagered per duel in dollars
     int128 private _baseWagerUSD;
     /// @dev how much extra USD is wagered per level tier
@@ -118,7 +116,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => uint256[]) private _rankingByTier;
     /// @dev defender is in a duel that has not finished processing
     mapping(uint256 => bool) public characterDefending;
-
+    
+    /// @dev percentage of entry wager charged when withdrawing from arena with pending duel
+    uint256 public withdrawFeePercent;
 
 
     event NewDuel(
