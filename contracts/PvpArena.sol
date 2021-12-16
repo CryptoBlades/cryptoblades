@@ -57,8 +57,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint8 public wageringFactor;
     /// @dev percentage of duel cost charged when rerolling opponent
     uint256 public reRollFeePercent;
-    /// @dev percentage of entry wager charged when withdrawing from arena with pending duel
-    uint256 public withdrawFeePercent;
     /// @dev the base amount wagered per duel in dollars
     int128 private _baseWagerUSD;
     /// @dev how much extra USD is wagered per level tier
@@ -119,6 +117,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev defender is in a duel that has not finished processing
     mapping(uint256 => bool) public characterDefending;
 
+    /// @dev percentage of entry wager charged when withdrawing from arena with pending duel
+    uint256 public withdrawFeePercent;
 
 
     event NewDuel(
@@ -330,6 +330,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     function clearDuelQueue() external restricted {
         for (uint256 i = 0; i < _duelQueue.length(); i++) {
+            // Remove id 0 separately
+            if (duelByAttacker[_duelQueue.at(i)].defenderID > 0) {
+                characterDefending[duelByAttacker[_duelQueue.at(i)].defenderID] = false;
+            }
+
             _duelQueue.remove(_duelQueue.at(i));
         }
     }
