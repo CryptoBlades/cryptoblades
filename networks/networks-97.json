@@ -2845,11 +2845,79 @@
         ],
         "name": "RoleRevoked",
         "type": "event"
+      },
+      "0x1b1d034796c423df538af62990031bdfdc8f13b166ebc28cf0ca6c90548f1b9a": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "buyer",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "orderId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "paid",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256[]",
+            "name": "items",
+            "type": "uint256[]"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8[]",
+            "name": "amounts",
+            "type": "uint8[]"
+          }
+        ],
+        "name": "OrderPlaced",
+        "type": "event"
+      },
+      "0xf8717a3804b1a7e7e3afdfd2ac32d32fa94013039f14030688c9bd602f98601f": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "orderNumber",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "internalOrderNumber",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "payingAmount",
+            "type": "uint256"
+          }
+        ],
+        "name": "OrderSaved",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xC2C3F4548fc5D81cD8867D52fE414BF365cba8D1",
-    "transactionHash": "0x3344fcbff1ff4e26d63d8b4b3aa580e3a796a1aeeb360d3f0c367bfd55fe1521"
+    "transactionHash": "0x3d98db57b1f97a398e349c8230eb819b7eaed20454f2fd4682eb92dd923db629"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -3618,7 +3686,7 @@
     },
     "links": {},
     "address": "0x89267c2f1ca67E3FDa3700a48560b3E022793c00",
-    "transactionHash": "0x031adf4464b43777b2ece2341b15acbda56773bd347a75e32673cb1d0bf27ebb"
+    "transactionHash": "0xb815a229aae63e34e774efbd305580528d144f659ba26bcfd8748d0a9ff8f685"
   },
   "build/contracts/Raid1.json": {
     "events": {},
