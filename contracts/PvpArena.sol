@@ -138,7 +138,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     modifier characterInArena(uint256 characterID) {
         require(
             isCharacterInArena(characterID),
-            "Character is not in the arena"
+            "Char not in the arena"
         );
         _;
     }
@@ -146,7 +146,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     modifier isOwnedCharacter(uint256 characterID) {
         require(
             characters.ownerOf(characterID) == msg.sender,
-            "Character is not owned by sender"
+            "Char not owned by sender"
         );
         _;
     }
@@ -157,7 +157,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        require(hasRole(GAME_ADMIN, msg.sender), "Not admin");
     }
 
     modifier enteringArenaChecks(
@@ -168,18 +168,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     ) {
         require(
             characters.ownerOf(characterID) == msg.sender,
-            "Not character owner"
+            "Not char owner"
         );
-        require(weapons.ownerOf(weaponID) == msg.sender, "Not weapon owner");
+        require(weapons.ownerOf(weaponID) == msg.sender, "Not wpn owner");
         // Check if character and weapon are busy
-        require(characters.getNftVar(characterID, 1) == 0, "Character is busy");
-        require(weapons.getNftVar(weaponID, 1) == 0, "Weapon is busy");
+        require(characters.getNftVar(characterID, 1) == 0, "Char busy");
+        require(weapons.getNftVar(weaponID, 1) == 0, "Wpn busy");
         if (useShield) {
             require(
                 shields.ownerOf(shieldID) == msg.sender,
                 "Not shield owner"
             );
-            require(shields.getNftVar(shieldID, 1) == 0, "Shield is busy");
+            require(shields.getNftVar(shieldID, 1) == 0, "Shld busy");
         }
 
         _;
@@ -278,7 +278,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterInArena(characterID)
         isOwnedCharacter(characterID)
     {
-        require(!hasPendingDuel(characterID), "Opponent already requested");
+        require(!hasPendingDuel(characterID), "Enemy already requested");
         _assignOpponent(characterID);
     }
 
@@ -288,7 +288,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterInArena(characterID)
         isOwnedCharacter(characterID)
     {
-        require(hasPendingDuel(characterID), "Character is not dueling");
+        require(hasPendingDuel(characterID), "Char not in duel");
 
         _assignOpponent(characterID);
 
@@ -304,7 +304,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         external
         isOwnedCharacter(attackerID)
     {
-        require(hasPendingDuel(attackerID), "Character not in a duel");
+        require(hasPendingDuel(attackerID), "Char not in duel");
         require(
             isCharacterWithinDecisionTime(attackerID),
             "Decision time expired"
@@ -312,7 +312,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         require(
             !_duelQueue.contains(attackerID),
-            "Character is already in duel queue"
+            "Char in duel queue"
         );
 
         uint256 defenderID = getOpponent(attackerID);
@@ -346,7 +346,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     // This function is used for debugging, remove later.
     function forceRemoveCharacterFromArena(uint256 characterID) external restricted {
-        require(isCharacterInArena(characterID), "Character not in arena");
+        require(isCharacterInArena(characterID), "Char not in arena");
         Fighter storage fighter = fighterByCharacter[characterID];
 
         uint256 weaponID = fighter.weaponID;
@@ -779,7 +779,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev get an attacker's opponent
     function getOpponent(uint256 characterID) public view returns (uint256) {
-        require(hasPendingDuel(characterID), "Character has no pending duel");
+        require(hasPendingDuel(characterID), "Char has no pending duel");
         return duelByAttacker[characterID].defenderID;
     }
 
@@ -921,7 +921,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev removes a character from the arena's state
     function _removeCharacterFromArena(uint256 characterID) private {
-        require(isCharacterInArena(characterID), "Character not in arena");
+        require(isCharacterInArena(characterID), "Char not in arena");
         Fighter storage fighter = fighterByCharacter[characterID];
 
         uint256 weaponID = fighter.weaponID;
@@ -938,7 +938,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         delete fighterByCharacter[characterID];
         delete duelByAttacker[characterID];
 
-        require(!characterDefending[characterID], "Defender duel in process");
+        require(!characterDefending[characterID], "Def duel ongoing");
 
         _fightersByPlayer[characters.ownerOf(characterID)].remove(characterID);
 
@@ -963,8 +963,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         EnumerableSet.UintSet storage fightersInTier = _fightersByTier[tier];
 
-        require(fightersInTier.length() != 0, "No opponents available in tier");
-        require(!_duelQueue.contains(characterID), "Character is in duel queue");
+        require(fightersInTier.length() != 0, "No enemy in tier");
+        require(!_duelQueue.contains(characterID), "Char in queue");
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
@@ -994,7 +994,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             break;
         }
 
-        require(foundOpponent, "No opponent found");
+        require(foundOpponent, "No enemy found");
 
         duelByAttacker[characterID] = Duel(
             characterID,
@@ -1020,13 +1020,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         return fighters;
-    }
-
-    /// @dev set the ranking points of a player to 0 and update the rank,
-    function resetCharacterRankingPoints(uint256 characterID) external restricted {
-        //TODO Determine if this is the right approach as it might less efficient gas wise
-        characterRankingPoints[characterID] = 0;
-        processLoser(characterID);
     }
 
     /// @dev ends a ranked season and starts a new one
