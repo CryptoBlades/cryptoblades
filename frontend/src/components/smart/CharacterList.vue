@@ -476,6 +476,7 @@ export default {
 }
 
 .character-list {
+  justify-content: center;
   list-style-type: none;
   margin: 0;
   padding: 0;
