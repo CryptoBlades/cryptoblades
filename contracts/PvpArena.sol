@@ -231,15 +231,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             characterRankingPoints[characterID] = 0;
         }
 
-        if (seasonByCharacter[characterID] == 0) {
-            seasonByCharacter[characterID] = currentRankedSeason;
-        }
-
-        if (seasonByCharacter[characterID] != currentRankedSeason) {
-            characterRankingPoints[characterID] = 0;
-            seasonByCharacter[characterID] = currentRankedSeason;
-        }
-
         uint256 wager = getEntryWager(characterID);
         uint8 tier = getArenaTier(characterID);
 
@@ -264,9 +255,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         excessWagerByCharacter[characterID] = 0;
 
         // add the character into the tier's ranking if it is not full yet
-        uint256 fightersAmount = _fightersByTier[tier].length();
-        if (fightersAmount <= _maxCharactersPerRanking) {
+        if (_rankingByTier[tier].length <= _maxCharactersPerRanking && seasonByCharacter[characterID] != currentRankedSeason) {
             _rankingByTier[tier].push(characterID);
+        }
+
+        if (seasonByCharacter[characterID] != currentRankedSeason) {
+            characterRankingPoints[characterID] = 0;
+            seasonByCharacter[characterID] = currentRankedSeason;
         }
         // character starts unattackable
         _updateLastActivityTimestamp(characterID);
@@ -321,6 +316,16 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         );
 
         uint256 defenderID = getOpponent(attackerID);
+
+        if (seasonByCharacter[attackerID] != currentRankedSeason) {
+            characterRankingPoints[attackerID] = 0;
+            seasonByCharacter[attackerID] = currentRankedSeason;
+        }
+
+        if (seasonByCharacter[defenderID] != currentRankedSeason) {
+            characterRankingPoints[defenderID] = 0;
+            seasonByCharacter[defenderID] = currentRankedSeason;
+        }
 
         characterDefending[defenderID] = true;
 
@@ -1025,7 +1030,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev ends a ranked season and starts a new one
-    function restartRankedSeason() external restricted {
+    function restartRankedSeason() public restricted {
         uint256[] memory duelQueue = getDuelQueue();
 
         if (duelQueue.length > 0) {
@@ -1081,12 +1086,38 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             // Note: We reset ranking prize pools.
             _rankingsPoolByTier[i] = 0;
 
-            // Note: We reset top players by tier.
-            delete _rankingByTier[i];
+            // We reset top players' scores
+            for (uint256 k = 0; k < 4; k++) {
+                characterRankingPoints[_rankingByTier[i][k]] = 0;
+            }
+
+            // [x] resetear scores de top 4 players
+            // [x] tambien resetearlos en prepareperformduel
+            // [ ] revisar enter arena
+            // [ ] revisar logica de entrar al ranking
+            // [ ] ver q mierda hacer con el estado actual del contrato (quizas una funcion que llene el ranking by tier con los wnes q pilla)
         }
 
         currentRankedSeason = currentRankedSeason.add(1);
         seasonStartedAt = block.timestamp;
+    }
+
+    // This function is used for debugging, remove later.
+    function populateTierTopRankers() external restricted {
+        restartRankedSeason();
+
+        for (uint8 i = 0; i <= 15; i++) {
+            if (
+                _fightersByTier[i].length() == 0 ||
+                _rankingByTier[i].length == 0
+            ) {
+                continue;
+            }
+
+            for (uint j = 0; j < _fightersByTier[i].length() && j < 4; j++) {
+                _rankingByTier[i][j] = _fightersByTier[i].at(j);
+            }
+        }
     }
 
     /// @dev increases a players withdrawable funds depending on their position in the ranked leaderboard
