@@ -7,16 +7,17 @@
       <li class="product" v-for="product in productsForPage" :key="product.id">
         <div class="d-flex flex-column w-100 h-100 align-items-center">
           <img class="product-img" :src="product.thumbnail_url" alt=""/>
-          <div class="text-center font-weight-bold">
+          <div class="text-center font-weight-bold p-1">
             {{ product.name }}
           </div>
         </div>
         <b-button
           variant="primary"
           class="shop-button"
-          :disabled="isOrderLoading"
+          :disabled="isOrderLoading || isVariantModalLoading"
           @click="openChooseVariantModal(product)">
           <span>{{ $t('market.merchandise.chooseVariant') }}</span>
+          <i v-if="isOrderLoading || isVariantModalLoading" class="fas fa-spinner fa-spin"></i>
         </b-button>
       </li>
     </ul>
@@ -28,8 +29,6 @@
       :per-page="perPage"
       align="center"
     />
-    <ShippingInfoModal/>
-    <VariantChoiceModal/>
   </div>
 </template>
 
@@ -38,8 +37,7 @@ import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {fromWeiEther} from '@/utils/common';
 import api from '@/api';
-import ShippingInfoModal, {Recipient} from '@/components/smart/ShippingInfoModal.vue';
-import VariantChoiceModal from '@/components/smart/VariantChoiceModal.vue';
+import {Recipient} from '@/components/smart/ShippingInfoModal.vue';
 
 export interface Product {
   id: number;
@@ -54,10 +52,13 @@ export interface Product {
 export interface MerchandiseOrder {
   recipient: Recipient;
   items: Item[];
+  shipping?: string;
+  wallet?: string;
+  currentChain?: string;
 }
 
 export interface Item {
-  sync_variant_id: number;
+  external_variant_id: string;
   product_id: string;
   quantity: number;
 }
@@ -66,6 +67,7 @@ interface Data {
   products: Product[];
   selectedProduct?: Product;
   isLoading: boolean;
+  isVariantModalLoading: boolean;
   currentPage: number;
   perPage: number;
   offset: number;
@@ -74,18 +76,19 @@ interface Data {
 
 interface StoreMappedActions {
   getItemPrice(payload: { id: number }): Promise<number>;
+
+  currentSkillPrice(): Promise<string>;
 }
 
 export default Vue.extend({
-  components: {
-    ShippingInfoModal, VariantChoiceModal
-  },
+  components: {},
 
   data() {
     return {
       products: [],
       selectedProduct: undefined,
       isLoading: false,
+      isVariantModalLoading: false,
       currentPage: 1,
       perPage: 30,
       offset: 0,
@@ -112,7 +115,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['getItemPrice']) as StoreMappedActions,
+    ...mapActions(['getItemPrice', 'currentSkillPrice']) as StoreMappedActions,
     fromWeiEther,
 
     async fetchProducts() {
@@ -128,9 +131,21 @@ export default Vue.extend({
       } while (result.length === 100);
     },
 
+    async fetchVariants(productId: number) {
+      const response = await api.getMerchandiseProductVariants(productId);
+      if (response.code !== 200) {
+        return;
+      }
+      return response.result.sync_variants;
+    },
+
     async openChooseVariantModal(product: Product) {
+      this.isVariantModalLoading = true;
       this.selectedProduct = product;
-      this.$root.$emit('merchandise-variant-modal', this.selectedProduct);
+      const variants = await this.fetchVariants(product.id);
+      const skillPrice = +await this.currentSkillPrice();
+      this.$root.$emit('merchandise-variant-modal', this.selectedProduct, variants, skillPrice);
+      this.isVariantModalLoading = false;
     },
     isMobile() {
       return screen.width <= 576;

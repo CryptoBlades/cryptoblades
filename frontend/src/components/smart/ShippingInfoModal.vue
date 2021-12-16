@@ -1,9 +1,8 @@
 <template>
-  <b-modal class="centered-modal" ref="merchandise-address-modal" @ok="buyItem" :ok-title="$t('market.merchandise.submitOrder')"
-           :ok-disabled="disablePlaceOrderButton" button-size="lg">
-    <template #modal-title>
-      {{$t('market.merchandise.deliveryAddress')}}
-    </template>
+  <b-modal class="centered-modal" @ok="buyItem" v-model="showModal"
+           :ok-title="$t('market.merchandise.continue')" :title="$t('market.merchandise.deliveryAddress')"
+           :ok-disabled="!shippingInformationComplete"
+           button-size="lg" no-close-on-backdrop>
     <b-form-input type="text"
                   class="mt-2 mb-2" v-model="recipient.name" :placeholder="$t('market.merchandise.fullName')"/>
     <b-form-input type="email" :state="emailState"
@@ -12,7 +11,10 @@
                   class="mt-2 mb-2" v-model="recipient.phone" :placeholder="$t('market.merchandise.phone')"/>
     <b-form-select
       class="mt-2 mb-2" v-model="selectedCountry" @change="countryChanged">
-      <b-form-select-option :value="undefined">{{ $t('market.merchandise.pleaseSelectAnOption') }}</b-form-select-option>
+      <b-form-select-option :value="undefined">{{
+          $t('market.merchandise.pleaseSelectACountry')
+        }}
+      </b-form-select-option>
       <b-form-select-option v-for="country in countries" :key="country.code" :value="country">{{
           country.name
         }}
@@ -21,7 +23,10 @@
     <b-form-select
       class="mt-2 mb-2" v-if="selectedCountry && selectedCountry.states && selectedCountry.states.length !== 0"
       v-model="selectedState">
-      <b-form-select-option :value="undefined">{{ $t('market.merchandise.pleaseSelectAnOption') }}</b-form-select-option>
+      <b-form-select-option :value="undefined">{{
+          $t('market.merchandise.pleaseSelectAState')
+        }}
+      </b-form-select-option>
       <b-form-select-option v-for="state in selectedCountry.states" :key="state.code" :value="state">{{
           state.name
         }}
@@ -36,31 +41,27 @@
     <b-form-input type="text"
                   class="mt-2 mb-2" v-model="recipient.zip" :placeholder="$t('market.merchandise.zipCode')"/>
     <b-form-input type="text"
-                  class="mt-2 mb-2" v-model="recipient.company" :placeholder="$t('market.merchandise.companyOptional')"/>
+                  class="mt-2 mb-2" v-model="recipient.company"
+                  :placeholder="$t('market.merchandise.companyOptional')"/>
   </b-modal>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import api from '@/api';
-import {BModal} from 'bootstrap-vue';
-import {MerchandiseOrder} from '@/components/smart/MerchandiseList.vue';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
-import {mapActions} from 'vuex';
-import BigNumber from 'bignumber.js';
-import {toBN} from '@/utils/common';
 
 export interface Recipient {
   name: string;
   email: string;
   phone: string;
-  country: string;
-  state?: string;
+  country_code: string;
+  state_code?: string;
   address1: string;
   address2?: string;
   city: string;
   zip: string;
-  company: string;
+  company?: string;
 }
 
 export interface Country {
@@ -74,14 +75,10 @@ export interface State {
   code: string;
 }
 
-interface OrderItem {
-  sync_variant_id: number;
+export interface OrderItem {
+  external_variant_id: string;
   product_id: string;
   quantity: number;
-}
-
-interface StoreMappedActions {
-  purchaseMerchandise(payload: { ids: number[], amounts: number[], totalPrice: BigNumber }): Promise<number>;
 }
 
 interface Data {
@@ -91,6 +88,7 @@ interface Data {
   recipient: Recipient;
   cartEntries: CartEntry[];
   totalPriceInSkill: number;
+  showModal: boolean;
 }
 
 export default Vue.extend({
@@ -102,6 +100,7 @@ export default Vue.extend({
       recipient: {} as Recipient,
       cartEntries: [],
       totalPriceInSkill: 0,
+      showModal: false,
     } as Data;
   },
 
@@ -109,20 +108,19 @@ export default Vue.extend({
     emailState() {
       return this.$data.recipient.email && this.$data.recipient.email.includes('@');
     },
-    disablePlaceOrderButton() {
-      return !this.$data.recipient.name
-        || !this.$data.recipient.email
-        || !this.$data.recipient.phone
-        || !this.$data.selectedCountry
-        || (this.$data.selectedCountry.states && this.$data.selectedCountry.states.length !== 0 && !this.$data.selectedState)
-        || !this.$data.recipient.address1
-        || !this.$data.recipient.city
-        || !this.$data.recipient.zip;
+    shippingInformationComplete(): boolean {
+      return this.$data.recipient.name
+        && this.$data.recipient.email
+        && this.$data.recipient.phone
+        && (this.$data.selectedCountry && (!this.$data.selectedCountry.states || this.$data.selectedCountry.states.length === 0)
+          || (this.$data.selectedCountry && this.$data.selectedCountry.states && this.$data.selectedCountry.states.length !== 0 && this.$data.selectedState))
+        && this.$data.recipient.address1
+        && this.$data.recipient.city
+        && !!this.$data.recipient.zip;
     }
   },
 
   methods: {
-    ...mapActions(['purchaseMerchandise']) as StoreMappedActions,
     countryChanged() {
       this.selectedState = undefined;
     },
@@ -135,51 +133,24 @@ export default Vue.extend({
       this.countries = response.result;
     },
 
-    async buyItem() {
+    async buyItem(bvModalEvt: Event) {
+      bvModalEvt.preventDefault();
       if (!this.selectedCountry) return;
-      this.$root.$emit('merchandise-order-loading', true);
-      this.recipient.country = this.selectedCountry.code;
-      this.recipient.state = this.selectedState?.code;
-      const orderItems = this.cartEntries.map(cartEntry => {
-        return {
-          sync_variant_id: cartEntry.variant.id,
-          quantity: cartEntry.quantity
-        } as OrderItem;
-      });
-      const merchandiseOrder: MerchandiseOrder = {
-        recipient: this.recipient,
-        items: orderItems
-      };
-
-      this.$root.$emit('merchandise-cart-modal', false);
-      try {
-        await this.purchaseMerchandise({
-          ids: merchandiseOrder.items.map(item => item.sync_variant_id),
-          amounts: merchandiseOrder.items.map(item => item.quantity),
-          totalPrice: toBN(this.totalPriceInSkill),
-        });
-        const apiResponse = await api.createMerchandiseOrder(merchandiseOrder);
-        this.$root.$emit('order-complete-modal', apiResponse.result.id, apiResponse.result.shipping_service_name);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        this.$root.$emit('merchandise-order-loading', false);
-      }
+      this.recipient.country_code = this.selectedCountry.code;
+      this.recipient.state_code = this.selectedState?.code;
+      this.$root.$emit('order-summary-modal', this.recipient, this.cartEntries);
     },
   },
 
   async mounted() {
     await this.fetchCountries();
     this.$root.$on('merchandise-address-modal', (totalPriceInSkill: number, cartEntries: CartEntry[]) => {
-      const modal = this.$refs['merchandise-address-modal'] as BModal;
-      if (modal) {
-        if (totalPriceInSkill) {
-          this.totalPriceInSkill = totalPriceInSkill;
-          this.cartEntries = cartEntries;
-          modal.show();
-        } else {
-          modal.hide();
-        }
+      if (totalPriceInSkill) {
+        this.totalPriceInSkill = totalPriceInSkill;
+        this.cartEntries = cartEntries;
+        this.showModal = true;
+      } else {
+        this.showModal = false;
       }
     });
   }

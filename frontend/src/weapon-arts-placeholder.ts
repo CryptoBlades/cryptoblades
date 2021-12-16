@@ -18,3 +18,11 @@ export function getWeaponArt(weapon: IWeapon) {
 
   return allImages[weapon.id % allImages.length];
 }
+
+export function getWeaponArtById(weaponId: number) {
+  if (!weaponId) {
+    return null;
+  }
+
+  return allImages[weaponId % allImages.length];
+}
