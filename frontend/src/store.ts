@@ -2998,7 +2998,7 @@ export function createStore(web3: Web3) {
           });
 
         return await Merchandise.methods
-          .createOrder(state.defaultAccount, orderNumber, payingAmount)
+          .createOrder(orderNumber, payingAmount)
           .send({
             from: state.defaultAccount
           });

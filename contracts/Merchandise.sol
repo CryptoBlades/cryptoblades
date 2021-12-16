@@ -91,14 +91,14 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
         itemPrices[item] = usdCents;
     }
 
-    function createOrder(address user, uint256 orderNumber, uint256 payingAmount) external returns (uint256) {
+    function createOrder(uint256 orderNumber, uint256 payingAmount) external returns (uint256) {
         require(vars[VAR_ORDERS_ENABLED] != 0, "Cannot place orders right now");
-        orderBuyer[orderNumber] = user;
-        game.payContractTokenOnly(user, payingAmount, vars[VAR_TRACK_INCOME] != 0);
+        orderBuyer[orderNumber] = msg.sender;
+        game.payContractTokenOnly(msg.sender, payingAmount, vars[VAR_TRACK_INCOME] != 0);
         orderPaidAmount[orderNumber] += payingAmount;
         externalOrderId[nextOrderID] = orderNumber;
 
-        emit OrderSaved(user, orderNumber, nextOrderID, payingAmount);
+        emit OrderSaved(msg.sender, orderNumber, nextOrderID, payingAmount);
         return nextOrderID++;
     }
 
