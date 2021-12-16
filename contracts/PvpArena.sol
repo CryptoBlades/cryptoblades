@@ -1090,12 +1090,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             for (uint256 k = 0; k < 4; k++) {
                 characterRankingPoints[_rankingByTier[i][k]] = 0;
             }
-
-            // [x] resetear scores de top 4 players
-            // [x] tambien resetearlos en prepareperformduel
-            // [ ] revisar enter arena
-            // [ ] revisar logica de entrar al ranking
-            // [ ] ver q mierda hacer con el estado actual del contrato (quizas una funcion que llene el ranking by tier con los wnes q pilla)
         }
 
         currentRankedSeason = currentRankedSeason.add(1);
