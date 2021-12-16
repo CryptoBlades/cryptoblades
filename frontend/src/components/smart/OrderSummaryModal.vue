@@ -185,7 +185,7 @@ export default Vue.extend({
         if (response.totalPriceInSkill) {
           await this.createOrder({
             orderNumber: response.result.id,
-            payingAmount: response.totalPriceInSkill,
+            payingAmount: toBN(response.totalPriceInSkill),
           });
           this.$root.$emit('order-complete-modal', response.result.id, response.result.shipping_service_name);
         }

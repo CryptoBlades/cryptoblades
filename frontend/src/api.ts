@@ -2,7 +2,6 @@ import axios from 'axios';
 import {MerchandiseOrder, Product} from '@/components/smart/MerchandiseList.vue';
 import {Country} from '@/components/smart/ShippingInfoModal.vue';
 import {ProductDetails} from '@/components/smart/VariantChoiceModal.vue';
-import BigNumber from 'bignumber.js';
 
 enum HttpMethod {
   GET = 'GET',
@@ -19,7 +18,7 @@ interface ApiResponse<T> {
     offset: number;
     total: number;
   };
-  totalPriceInSkill?: BigNumber;
+  totalPriceInSkill?: string;
 }
 
 const client = axios.create({
