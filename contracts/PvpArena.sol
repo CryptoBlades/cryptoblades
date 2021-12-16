@@ -116,7 +116,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => uint256[]) private _rankingByTier;
     /// @dev defender is in a duel that has not finished processing
     mapping(uint256 => bool) public characterDefending;
-    
+
     /// @dev percentage of entry wager charged when withdrawing from arena with pending duel
     uint256 public withdrawFeePercent;
 
@@ -330,6 +330,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     function clearDuelQueue() external restricted {
         for (uint256 i = 0; i < _duelQueue.length(); i++) {
+            // Remove id 0 separately
+            if (duelByAttacker[_duelQueue.at(i)].defenderID > 0) {
+                characterDefending[duelByAttacker[_duelQueue.at(i)].defenderID] = false;
+            }
+
             _duelQueue.remove(_duelQueue.at(i));
         }
     }
