@@ -71,6 +71,7 @@ To run tests locally simply run
 > NOTE: Careful, this is not using migrations but rather fixtures which should be kept up to date (`/test/helpers/prepareContracts.js`)
 
 ## Config
+
 - All network config is in app-config.json
 - If you want to add a new network: add it's configuration in app-config.json and add update currentTokenPrice getter in EarningsCalculator.
 
@@ -89,3 +90,26 @@ Run the frontend pointing to hardhat:
 
 If you get any issues during deployment, run:
 `truffle compile --all`
+
+## i18n (Internationalization) - Adding strings for translation
+
+- We use [vue-18n](https://kazupon.github.io/vue-i18n/) for internationalization
+- Fallback is English, if a string is not added or empty
+
+### Replacing strings in the code
+
+- Replace strings in template with `{{$t('keyName')}}`
+- Replace strings in script with `i18n.t('keyName')`
+- Pass objects/values with `{{$t('keyName', someValue)}}` and use it in en.json:
+  `"keyName": "This is {someValue} !"`
+- You can use markdown by using v-html:
+  `<p v-html="$t('keyName'})"></p>` with `"keyName": "This is <b>bold</b>"`
+- Avoid splitting up strings. If a sentences is split up, it can't be translated in some language properly. ([example](https://github.com/CryptoBlades/cryptoblades/blob/57eb5224f2a2149ccb9f3e5f52bb54eb700dbe53/frontend/src/views/Plaza.vue#L22-L24) and [docu](https://kazupon.github.io/vue-i18n/guide/interpolation.html#basic-usage))
+
+### Adding a new language
+
+- Add a new JSON file to ~/frontend/src/locales/ by copying en.json and renaming it to your language code.
+  [Use the 2-Letter ISO code of your language](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
+- Language is loaded on startup and added to the language drop-down of the Options page.
+- The value for the drop-down is "name" at the root of the json map.
+
