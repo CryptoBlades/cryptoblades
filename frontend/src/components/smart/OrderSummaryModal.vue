@@ -90,11 +90,12 @@ import {mapActions, mapState} from 'vuex';
 import api from '@/api';
 import {MerchandiseOrder} from '@/components/smart/MerchandiseList.vue';
 import BigNumber from 'bignumber.js';
+import Web3 from 'web3';
 
 interface StoreMappedActions {
   currentSkillPrice(): Promise<string>;
 
-  createOrder(payload: { orderNumber: number, payingAmount: BigNumber }): Promise<void>;
+  createOrder(payload: { orderNumber: number, payingAmount: string }): Promise<void>;
 
   canUserAfford(payload: { payingAmount: BigNumber }): Promise<boolean>;
 }
@@ -185,7 +186,7 @@ export default Vue.extend({
         if (response.totalPriceInSkill) {
           await this.createOrder({
             orderNumber: response.result.id,
-            payingAmount: toBN(response.totalPriceInSkill),
+            payingAmount: Web3.utils.toWei(response.totalPriceInSkill.toString(), 'ether'),
           });
           this.$root.$emit('order-complete-modal', response.result.id, response.result.shipping_service_name);
         }
