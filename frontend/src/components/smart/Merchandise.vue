@@ -87,6 +87,11 @@ export default Vue.extend({
     this.$root.$on('merchandise-order-loading', (isOrderLoading: boolean) => {
       this.isOrderLoading = isOrderLoading;
     });
+    this.$root.$on('toggle-fiat-prices', () => {
+      this.showFiatPrices = !this.showFiatPrices;
+      if (this.showFiatPrices) localStorage.setItem('showFiatPrices', 'true');
+      else localStorage.setItem('showFiatPrices', 'false');
+    });
   }
 
 });

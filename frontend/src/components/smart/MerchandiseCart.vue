@@ -1,5 +1,9 @@
 <template>
   <div class="d-flex m-3 cart-container">
+    <div class="d-flex justify-content-between align-items-center">
+      <strong>{{ $t('market.merchandise.showFiatPrices') }}</strong>
+      <b-form-checkbox class="m-2" size="sm" :checked="showFiatPrices" @change="toggleShowFiatPrices()" switch></b-form-checkbox>
+    </div>
     <b-button variant="primary" class="shop-button" @click="openCartModal">
       <i class="fas fa-shopping-cart p-1"></i>{{ $t('market.merchandise.cart') }} ({{ cartEntries.length }})
     </b-button>
@@ -160,6 +164,9 @@ export default Vue.extend({
     isContinueToCheckoutButtonDisabled() {
       return this.cartEntries.length === 0;
     },
+    toggleShowFiatPrices() {
+      this.$root.$emit('toggle-fiat-prices');
+    },
     canAffordMerch() {
       const cost = toBN(this.totalPriceInSkill);
       const balance = toBN(this.skillBalance);
@@ -201,7 +208,7 @@ export default Vue.extend({
 }
 
 .cart-container {
-  justify-content: end;
+  justify-content: space-between;
 }
 
 .cart-footer {

@@ -538,6 +538,7 @@
       "total": "Total",
       "insufficientFunds": "Insufficient funds",
       "placeOrder": "Place order",
+      "showFiatPrices": "Show Fiat prices",
 
       "nothingToBuyAtThisTime": "Nothing to buy at this time",
       "chooseVariant": "Choose variant",
