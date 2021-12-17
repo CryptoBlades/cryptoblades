@@ -515,7 +515,7 @@
       "pleaseSelectACountry": "Please select a country",
       "pleaseSelectAState": "Please select a state",
       "addressLine1": "Address line 1",
-      "addressLine2": "Address line 2",
+      "addressLine2": "Address line 2 (Optional)",
       "city": "City",
       "zipCode": "Zip code",
       "companyOptional": "Company (optional)",
@@ -523,8 +523,11 @@
       "shippingCostAfterNextStep": "Shipping cost will be known after the next step",
 
       "orderCompleted": "Order #{orderNumber} completed",
+      "orderError": "An error occurred",
+      "pleaseTryAgainLater": "Please try again later",
       "thankYouForShopping": "Thank you for shopping with us!",
       "yourShippingMethod": "Your shipping method",
+      "shippingMethod": "Shipping method",
       "checkYourEmail": "Check your email for order details!",
       "pleaseSelectShippingMethod": "Please select a shipping method",
       "shippingInformation": "Shipping information",
@@ -538,6 +541,7 @@
       "total": "Total",
       "insufficientFunds": "Insufficient funds",
       "placeOrder": "Place order",
+      "showFiatPrices": "Show Fiat prices",
 
       "nothingToBuyAtThisTime": "Nothing to buy at this time",
       "chooseVariant": "Choose variant",

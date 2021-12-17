@@ -3686,7 +3686,7 @@
     },
     "links": {},
     "address": "0x89267c2f1ca67E3FDa3700a48560b3E022793c00",
-    "transactionHash": "0xb815a229aae63e34e774efbd305580528d144f659ba26bcfd8748d0a9ff8f685"
+    "transactionHash": "0x57af5c566505eda3f7b1c31f20817246755f41462b8e3e755ce4868d3ad23a48"
   },
   "build/contracts/Raid1.json": {
     "events": {},

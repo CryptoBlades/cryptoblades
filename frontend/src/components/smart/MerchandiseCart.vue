@@ -1,8 +1,10 @@
 <template>
-  <div class="d-flex justify-content-between m-3 cart-container">
-    <b-button variant="primary" class="shop-button hidden"></b-button>
-    <h2 v-if="isOrderLoading">{{ $t('market.merchandise.completingYourOrder') }}</h2>
-    <b-button variant="primary" class="shop-button" :disabled="isOrderLoading" @click="openCartModal">
+  <div class="d-flex m-3 cart-container">
+    <div class="d-flex justify-content-between align-items-center">
+      <strong>{{ $t('market.merchandise.showFiatPrices') }}</strong>
+      <b-form-checkbox class="m-2" size="sm" :checked="showFiatPrices" @change="toggleShowFiatPrices()" switch></b-form-checkbox>
+    </div>
+    <b-button variant="primary" class="shop-button" @click="openCartModal">
       <i class="fas fa-shopping-cart p-1"></i>{{ $t('market.merchandise.cart') }} ({{ cartEntries.length }})
     </b-button>
 
@@ -36,7 +38,7 @@
               <b-button class="btn-primary" type="button" @click="addQuantity(cartEntry)"><i class="fas fa-plus"></i>
               </b-button>
             </div>
-            <b-button class="btn-danger" type="button" @click="removeCartEntry(cartEntry)"><i class="fas fa-trash"></i>
+            <b-button class="btn-danger" type="button" @click="deleteCartEntry(cartEntry)"><i class="fas fa-trash"></i>
             </b-button>
           </div>
         </div>
@@ -74,9 +76,13 @@
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
 import {CartEntry, FileType} from '@/components/smart/VariantChoiceModal.vue';
-import {mapActions, mapState} from 'vuex';
+import {mapActions, mapMutations, mapState} from 'vuex';
 import {fromWeiEther, toBN} from '@/utils/common';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
+
+interface StoreMappedMutations {
+  removeCartEntry(cartEntry: CartEntry): void;
+}
 
 interface StoreMappedActions {
   currentSkillPrice(): Promise<string>;
@@ -86,7 +92,6 @@ interface Data {
   totalPrice: number;
   totalPriceInSkill: number;
   skillPrice: number;
-  isOrderLoading: boolean;
   showModal: boolean;
 }
 
@@ -96,7 +101,6 @@ export default Vue.extend({
       totalPrice: 0,
       totalPriceInSkill: 0,
       skillPrice: 0,
-      isOrderLoading: false,
       showModal: false,
     } as Data;
   },
@@ -119,6 +123,7 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['currentSkillPrice']) as StoreMappedActions,
+    ...mapMutations(['removeCartEntry']) as StoreMappedMutations,
     fromWeiEther,
     toBN,
     async openAddressModal() {
@@ -149,8 +154,8 @@ export default Vue.extend({
       if (!cartEntry?.variant) return;
       return +cartEntry.variant.retail_price * this.skillPrice;
     },
-    removeCartEntry(cartEntry: CartEntry) {
-      this.cartEntries.splice(this.cartEntries.indexOf(cartEntry), 1);
+    deleteCartEntry(cartEntry: CartEntry) {
+      this.removeCartEntry(cartEntry);
       this.calculateTotalPrice();
     },
     isMinusButtonDisabled(cartEntry: CartEntry) {
@@ -158,6 +163,9 @@ export default Vue.extend({
     },
     isContinueToCheckoutButtonDisabled() {
       return this.cartEntries.length === 0;
+    },
+    toggleShowFiatPrices() {
+      this.$root.$emit('toggle-fiat-prices');
     },
     canAffordMerch() {
       const cost = toBN(this.totalPriceInSkill);
@@ -171,9 +179,6 @@ export default Vue.extend({
       this.skillPrice = +await this.currentSkillPrice();
       this.calculateTotalPrice();
       this.showModal = open;
-    });
-    this.$root.$on('merchandise-order-loading', (isOrderLoading: boolean) => {
-      this.isOrderLoading = isOrderLoading;
     });
   },
 });
@@ -202,6 +207,10 @@ export default Vue.extend({
   visibility: hidden;
 }
 
+.cart-container {
+  justify-content: space-between;
+}
+
 .cart-footer {
   display: flex;
   align-items: center;
@@ -222,9 +231,7 @@ export default Vue.extend({
   }
 
   .cart-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5em;
+    justify-content: center;
   }
 }
 </style>

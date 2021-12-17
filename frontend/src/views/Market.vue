@@ -2313,7 +2313,7 @@ export default Vue.extend({
     },
 
     currentChainSupportsMerchandise() {
-      const currentChain = localStorage.getItem('currentChain');
+      const currentChain = localStorage.getItem('currentChain') || 'BSC';
       if (!currentChain || !this.merchandiseSupportedChains) {
         return false;
       }
