@@ -38,10 +38,10 @@
         <div class="d-flex align-items-center w-50">
           <div v-if="cartEntries.length !== 0" class="costs-container w-100">
             <div class="d-flex flex-column">
-              <span class="font-weight-bold">Shipping method: </span>
+              <span class="font-weight-bold">{{ $t('market.merchandise.shippingMethod') }}: </span>
               <b-form-select class="mt-2 mb-2" v-model="selectedShippingRate" :disabled="areShippingRatesLoading"
                              @change="calculateTotalPrice">
-                <b-form-select-option :value="undefined">{{
+                <b-form-select-option :value="undefined" disabled>{{
                     areShippingRatesLoading ? $t('market.merchandise.loadingShippingOptions') : $t('market.merchandise.pleaseSelectAnOption')
                   }}
                 </b-form-select-option>
@@ -191,6 +191,7 @@ export default Vue.extend({
           this.$root.$emit('order-complete-modal', response.result.id, response.result.shipping_service_name);
         }
       } catch (e) {
+        this.$root.$emit('order-error-modal', e);
         console.error(e);
       } finally {
         this.$root.$emit('merchandise-order-loading', false);

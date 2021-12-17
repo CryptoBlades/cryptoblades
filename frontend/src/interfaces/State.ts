@@ -4,6 +4,7 @@ import { ITarget } from './Target';
 import { Contracts } from './Contracts';
 import { Nft } from './Nft';
 import { IShield } from './Shield';
+import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 
 export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king';
 export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king'];
@@ -134,6 +135,7 @@ export interface IState {
   ownedKeyLootboxIds: number[];
   maxStamina: number;
   ownedDust: string[];
+  cartEntries: CartEntry[];
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
