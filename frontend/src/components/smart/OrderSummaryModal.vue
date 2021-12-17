@@ -41,7 +41,7 @@
               <span class="font-weight-bold">Shipping method: </span>
               <b-form-select class="mt-2 mb-2" v-model="selectedShippingRate" :disabled="areShippingRatesLoading"
                              @change="calculateTotalPrice">
-                <b-form-select-option :value="undefined">{{
+                <b-form-select-option :value="undefined" disabled>{{
                     areShippingRatesLoading ? $t('market.merchandise.loadingShippingOptions') : $t('market.merchandise.pleaseSelectAnOption')
                   }}
                 </b-form-select-option>

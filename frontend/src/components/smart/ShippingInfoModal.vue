@@ -11,7 +11,7 @@
                   class="mt-2 mb-2" v-model="recipient.phone" :placeholder="$t('market.merchandise.phone')"/>
     <b-form-select
       class="mt-2 mb-2" v-model="selectedCountry" @change="countryChanged">
-      <b-form-select-option :value="undefined">{{
+      <b-form-select-option :value="undefined" disabled>{{
           $t('market.merchandise.pleaseSelectACountry')
         }}
       </b-form-select-option>
@@ -23,7 +23,7 @@
     <b-form-select
       class="mt-2 mb-2" v-if="selectedCountry && selectedCountry.states && selectedCountry.states.length !== 0"
       v-model="selectedState">
-      <b-form-select-option :value="undefined">{{
+      <b-form-select-option :value="undefined" disabled>{{
           $t('market.merchandise.pleaseSelectAState')
         }}
       </b-form-select-option>

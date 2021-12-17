@@ -515,7 +515,7 @@
       "pleaseSelectACountry": "Please select a country",
       "pleaseSelectAState": "Please select a state",
       "addressLine1": "Address line 1",
-      "addressLine2": "Address line 2",
+      "addressLine2": "Address line 2 (Optional)",
       "city": "City",
       "zipCode": "Zip code",
       "companyOptional": "Company (optional)",

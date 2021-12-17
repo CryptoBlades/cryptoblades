@@ -51,6 +51,7 @@ import Vue from 'vue';
 import {Product} from '@/components/smart/MerchandiseList.vue';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
 import {fromWeiEther} from '@/utils/common';
+import {mapMutations} from 'vuex';
 
 export interface CartEntry {
   product: Product;
@@ -104,6 +105,10 @@ export enum FileType {
   PREVIEW = 'preview',
 }
 
+interface StoreMappedMutations {
+  addCartEntry(cartEntry: CartEntry): void;
+}
+
 interface Data {
   variants: Variant[];
   selectedVariant?: Variant;
@@ -145,6 +150,7 @@ export default Vue.extend({
   },
 
   methods: {
+    ...mapMutations(['addCartEntry']) as StoreMappedMutations,
     fromWeiEther,
     addToCart() {
       if (!this.product || !this.selectedVariant) return;
@@ -155,7 +161,7 @@ export default Vue.extend({
         quantity: this.quantity,
       } as CartEntry;
 
-      this.$root.$emit('add-to-cart', cartEntry);
+      this.addCartEntry(cartEntry);
       this.quantity = 1;
     },
     isFileTypePreview(file: File) {
