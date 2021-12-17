@@ -9,6 +9,10 @@
       <p class="font-weight-bold">{{ shipping }}</p>
       <p>{{ $t('market.merchandise.checkYourEmail') }}</p>
     </b-modal>
+    <b-modal ref="order-error-modal" ok-only no-close-on-backdrop hide-header-close
+             :title="$t('market.merchandise.orderError')">
+      <p>{{ $t('market.merchandise.pleaseTryAgainLater') }}</p>
+    </b-modal>
     <OrderSummaryModal :showFiatPrices="showFiatPrices"/>
     <ShippingInfoModal/>
     <VariantChoiceModal :showFiatPrices="showFiatPrices"/>
@@ -78,6 +82,16 @@ export default Vue.extend({
           this.shipping = shipping;
           this.clearCartEntries();
           this.cartEntries = this.getCartEntries;
+          modal.show();
+        } else {
+          modal.hide();
+        }
+      }
+    });
+    this.$root.$on('order-error-modal', (error: any) => {
+      const modal = this.$refs['order-error-modal'] as BModal;
+      if (modal) {
+        if (error) {
           modal.show();
         } else {
           modal.hide();

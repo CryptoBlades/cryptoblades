@@ -523,6 +523,8 @@
       "shippingCostAfterNextStep": "Shipping cost will be known after the next step",
 
       "orderCompleted": "Order #{orderNumber} completed",
+      "orderError": "An error occurred",
+      "pleaseTryAgainLater": "Please try again later",
       "thankYouForShopping": "Thank you for shopping with us!",
       "yourShippingMethod": "Your shipping method",
       "checkYourEmail": "Check your email for order details!",

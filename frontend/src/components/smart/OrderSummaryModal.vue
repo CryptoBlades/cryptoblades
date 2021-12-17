@@ -191,6 +191,7 @@ export default Vue.extend({
           this.$root.$emit('order-complete-modal', response.result.id, response.result.shipping_service_name);
         }
       } catch (e) {
+        this.$root.$emit('order-error-modal', e);
         console.error(e);
       } finally {
         this.$root.$emit('merchandise-order-loading', false);
