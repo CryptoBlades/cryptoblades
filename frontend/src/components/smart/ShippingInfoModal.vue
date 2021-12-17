@@ -3,11 +3,11 @@
            :ok-title="$t('market.merchandise.continue')" :title="$t('market.merchandise.deliveryAddress')"
            :ok-disabled="!shippingInformationComplete"
            button-size="lg" no-close-on-backdrop>
-    <b-form-input type="text"
+    <b-form-input type="text" maxlength="50"
                   class="mt-2 mb-2" v-model="recipient.name" :placeholder="$t('market.merchandise.fullName')"/>
-    <b-form-input type="email" :state="emailState"
+    <b-form-input type="email" :state="emailState" maxlength="50"
                   class="mt-2 mb-2" v-model="recipient.email" :placeholder="$t('market.merchandise.email')"/>
-    <b-form-input type="tel"
+    <b-form-input type="tel" maxlength="30"
                   class="mt-2 mb-2" v-model="recipient.phone" :placeholder="$t('market.merchandise.phone')"/>
     <b-form-select
       class="mt-2 mb-2" v-model="selectedCountry" @change="countryChanged">
@@ -32,15 +32,15 @@
         }}
       </b-form-select-option>
     </b-form-select>
-    <b-form-input type="text"
+    <b-form-input type="text" maxlength="60"
                   class="mt-2 mb-2" v-model="recipient.address1" :placeholder="$t('market.merchandise.addressLine1')"/>
-    <b-form-input type="text"
+    <b-form-input type="text" maxlength="60"
                   class="mt-2 mb-2" v-model="recipient.address2" :placeholder="$t('market.merchandise.addressLine2')"/>
-    <b-form-input type="text"
+    <b-form-input type="text" maxlength="50"
                   class="mt-2 mb-2" v-model="recipient.city" :placeholder="$t('market.merchandise.city')"/>
-    <b-form-input type="text"
+    <b-form-input type="text" maxlength="50"
                   class="mt-2 mb-2" v-model="recipient.zip" :placeholder="$t('market.merchandise.zipCode')"/>
-    <b-form-input type="text"
+    <b-form-input type="text" maxlength="50"
                   class="mt-2 mb-2" v-model="recipient.company"
                   :placeholder="$t('market.merchandise.companyOptional')"/>
   </b-modal>
