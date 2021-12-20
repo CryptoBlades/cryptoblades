@@ -120,6 +120,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev percentage of entry wager charged when withdrawing from arena with pending duel
     uint256 public withdrawFeePercent;
 
+    /// @dev allows or blocks entering arena (we can extend later to disable other parts such as rerolls)
+    uint256 public arenaAccess; // 0 = cannot join, 1 = can join
+
 
     event NewDuel(
         uint256 indexed attacker,
@@ -136,18 +139,20 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     );
 
     modifier characterInArena(uint256 characterID) {
+        _characterInArena(characterID);
+        _;
+    }
+    
+    function _characterInArena(uint256 characterID) internal view {
         require(
             isCharacterInArena(characterID),
             "Char not in the arena"
         );
-        _;
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
         require(
-            characters.ownerOf(characterID) == msg.sender,
-            "Char not owned by sender"
-        );
+            characters.ownerOf(characterID) == msg.sender);
         _;
     }
 
@@ -166,21 +171,16 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID,
         bool useShield
     ) {
-        require(
-            characters.ownerOf(characterID) == msg.sender,
-            "Not char owner"
-        );
-        require(weapons.ownerOf(weaponID) == msg.sender, "Not wpn owner");
+        require(characters.ownerOf(characterID) == msg.sender
+            && weapons.ownerOf(weaponID) == msg.sender);
         // Check if character and weapon are busy
         require(characters.getNftVar(characterID, 1) == 0, "Char busy");
         require(weapons.getNftVar(weaponID, 1) == 0, "Wpn busy");
         if (useShield) {
-            require(
-                shields.ownerOf(shieldID) == msg.sender,
-                "Not shield owner"
-            );
+            require(shields.ownerOf(shieldID) == msg.sender);
             require(shields.getNftVar(shieldID, 1) == 0, "Shld busy");
         }
+        require((arenaAccess & 1) == 1, "Arena locked");
 
         _;
     }
@@ -1210,5 +1210,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     function setSeasonDuration(uint256 duration) external restricted {
         seasonDuration = duration;
+    }
+
+    function setArenaAccess(uint256 accessFlags) external restricted {
+        arenaAccess = accessFlags;
     }
 }
