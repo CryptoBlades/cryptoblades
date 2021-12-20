@@ -46,7 +46,7 @@
       <div class="stakePage medium-dark-bg">
         <div class="sPElement input">
           <div class="inputBody">
-            <div v-bind:class="isNftStaking ? 'd-flex align-items-center w-100' : 'flex_row'">
+            <div :class="isNftStaking ? 'd-flex align-items-center w-100' : 'flex_row'">
               <input
                 v-if="!isNftStaking"
                 class="token-amount-input"
@@ -65,16 +65,16 @@
               />
               <div v-if="isNftStaking" class="mr-2 ml-3">ID:</div>
               <b-form-select
-                class="nft-id-select"
+                class="w-100"
                 v-if="isNftStaking"
                 :title="$t('stake.tokenAmount')"
                 v-model="idToStake">
                 <template #first>
-                  <b-form-select-option :value="null" disabled>Pick ID</b-form-select-option>
+                  <b-form-select-option :value="null" disabled>{{$t('stake.pickId')}}</b-form-select-option>
                 </template>
-                <option v-for="x in (isDeposit ? ownedLandIds : stakedIds)" :value="x.id" :key="x.id">{{x.id}} (Tier {{x.tier}})</option>
+                <option v-for="x in (isDeposit ? ownedLandIds : stakedIds)" :value="x.id" :key="x.id">{{x.id}} ({{$t('stake.tier')}} {{x.tier}})</option>
               </b-form-select>
-              <div v-bind:class="isNftStaking ? 'ml-2 mr-3' : 'ant-col'">{{ stakingTokenName }}</div>
+              <div :class="isNftStaking ? 'ml-2 mr-3' : 'ant-col'">{{ stakingTokenName }}</div>
             </div>
             <div class="balance" id="balance" @click="!isNftStaking && onMAX">
               {{$t('stake.wallet')}} {{ inputSideBalance }}
@@ -516,7 +516,7 @@ export default {
         }
         if(isNftStakeType(this.stakeType)) {
           await this.updateOwnedLands();
-          this.idToStake = null;
+          this.idToStake = undefined;
         }
       } catch (e) {
         console.error(e);
@@ -615,7 +615,7 @@ export default {
     },
     isDeposit() {
       this.textAmount = '';
-      this.idToStake = null;
+      this.idToStake = undefined;
     },
     async defaultAccount(newVal) {
       if (newVal) {
@@ -889,10 +889,6 @@ export default {
 
 .gold-text {
   color: #9e8a57;
-}
-
-.nft-id-select {
-  width: 100%;
 }
 
 </style>

@@ -7,16 +7,29 @@ const SkillStakingRewardsUpgradeable180 = artifacts.require('SkillStakingRewards
 const CBKLandT1StakingRewardsUpgradeable = artifacts.require('CBKLandT1StakingRewardsUpgradeable');
 const CBKLandT2StakingRewardsUpgradeable = artifacts.require('CBKLandT2StakingRewardsUpgradeable');
 const CBKLandT3StakingRewardsUpgradeable = artifacts.require('CBKLandT3StakingRewardsUpgradeable');
-const CBKLand = artifacts.require('CBKLand');
-const ExperimentToken2 = artifacts.require('ExperimentToken2');
 
 module.exports = async function (deployer, network, accounts) {
-  if (network === 'bscmainnet' || network === 'bscmainnet-fork') {
-    const ownerAddress = '0xa2bB660A6A3Bb5c74E36415ffe5D4862eFfc417A';
-    const rewardDistributorAddress = '0xa2bB660A6A3Bb5c74E36415ffe5D4862eFfc417A';
-    const kingTokenAddress = '0x0ccd575bf9378c06f6dca82f8122f570769f00c2';
-    const skillTokenAddress = '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
-    const cbkLandTokenAddress = '0xd3b5df75a4d0d87Add79A5bdAB2f865928F7Fc8e';
+  if (network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'bsctestnet' || network === 'bsctestnet-fork') {
+    let ownerAddress;
+    let rewardDistributorAddress;
+    let kingTokenAddress;
+    let skillTokenAddress;
+    let cbkLandTokenAddress;
+
+    if(network === 'bscmainnet' || network === 'bscmainnet-fork') {
+      ownerAddress = '0xa2bB660A6A3Bb5c74E36415ffe5D4862eFfc417A';
+      rewardDistributorAddress = '0xa2bB660A6A3Bb5c74E36415ffe5D4862eFfc417A';
+      kingTokenAddress = '0x0ccd575bf9378c06f6dca82f8122f570769f00c2';
+      skillTokenAddress = '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab';
+      cbkLandTokenAddress = '0xd3b5df75a4d0d87Add79A5bdAB2f865928F7Fc8e';
+    } 
+    else if(network === 'bsctestnet' || network === 'bsctestnet-fork') {
+      ownerAddress = '0xa2bB660A6A3Bb5c74E36415ffe5D4862eFfc417A';
+      rewardDistributorAddress = '0xa2bB660A6A3Bb5c74E36415ffe5D4862eFfc417A';
+      kingTokenAddress = '0x61F5197b43493a332A0E7D55B7ACa7c277e0BC4b'; //ExperimentToken address
+      skillTokenAddress = '0xcAF53066e36EeF55eD0663419ADfF6E503bd134F';
+      cbkLandTokenAddress = '0xE986e14afe3744a986F1A4Bcaa174C84ae1C4B91';
+    }
 
     // ERC20
     const KingStaking90 = await deployProxy(KingStakingRewardsUpgradeable90, [ownerAddress, rewardDistributorAddress, kingTokenAddress, kingTokenAddress, 7 * 24 * 60 * 60], { deployer });
