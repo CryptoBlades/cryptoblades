@@ -4,7 +4,10 @@
            :ok-disabled="false" button-size="lg" size="xl" scrollable>
     <div class="variant-container">
       <div class="p-2" v-if="selectedVariant">
-        <img class="preview" :src="selectedVariant.files.find(file => isFileTypePreview(file)).preview_url" alt=""/>
+        <div class="preview-container">
+          <img class="preview" :src="selectedVariant.files.find(file => isFileTypePreview(file)).preview_url" alt=""/>
+          <img class="preview-thumbnail" :src="loadPreviewThumbnail()" alt=""/>
+        </div>
       </div>
       <div class="p-2 w-100" v-if="selectedVariant">
         <div class="thumbnail-list pb-2">
@@ -103,6 +106,10 @@ interface File {
 export enum FileType {
   DEFAULT = 'default',
   PREVIEW = 'preview',
+  BACK = 'back',
+  EMBROIDERY_CHEST_LEFT = 'embroidery_chest_left',
+  EMBROIDERY_CHEST_RIGHT = 'embroidery_chest_right',
+  EMBROIDERY_CHEST_CENTER = 'embroidery_chest_center',
 }
 
 interface StoreMappedMutations {
@@ -164,8 +171,32 @@ export default Vue.extend({
       this.addCartEntry(cartEntry);
       this.quantity = 1;
     },
+    loadPreviewThumbnail() {
+      if (!this.selectedVariant) return;
+      const image = this.selectedVariant.files.find(file => this.isFileTypeDefault(file)
+        || this.isFileTypeBack(file)
+        || this.isFileTypeEmbroideryChestLeft(file)
+        || this.isFileTypeEmbroideryChestRight(file)
+        || this.isFileTypeEmbroideryChestCenter(file));
+      return image ? image.thumbnail_url : '';
+    },
     isFileTypePreview(file: File) {
       return file.type === FileType.PREVIEW;
+    },
+    isFileTypeDefault(file: File) {
+      return file.type === FileType.DEFAULT;
+    },
+    isFileTypeBack(file: File) {
+      return file.type === FileType.BACK;
+    },
+    isFileTypeEmbroideryChestLeft(file: File) {
+      return file.type === FileType.EMBROIDERY_CHEST_LEFT;
+    },
+    isFileTypeEmbroideryChestRight(file: File) {
+      return file.type === FileType.EMBROIDERY_CHEST_RIGHT;
+    },
+    isFileTypeEmbroideryChestCenter(file: File) {
+      return file.type === FileType.EMBROIDERY_CHEST_CENTER;
     },
     selectVariant(variant: Variant) {
       this.selectedVariant = variant;
@@ -239,6 +270,18 @@ export default Vue.extend({
 .preview {
   max-width: 100%;
   object-fit: scale-down;
+}
+
+.preview-container {
+  max-width: 100%;
+  position: relative;
+}
+
+.preview-thumbnail {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  max-width: 25%;
 }
 
 .quantity-display {
