@@ -9,6 +9,16 @@ module.exports = async function (deployer, network, accounts) {
     const ITEM_SHIELD = await blacksmith.ITEM_SHIELD();
     await blacksmith.setFlatPriceOfItem(ITEM_SHIELD, web3.utils.toWei('3.0', 'ether'));
 
-    await upgradeProxy(PvpArena.address, PvpArena, { deployer });
+    if (network === "development"
+    || network === "development-fork"
+    || network === 'bsctestnet'
+    || network === 'bsctestnet-fork'
+    || network === 'hecotestnet'
+    || network === 'okextestnet'
+    || network === 'polygontestnet'
+    || network === 'avaxtestnet'
+    || network === 'avaxtestnet-fork') {
+        await upgradeProxy(PvpArena.address, PvpArena, { deployer });
+    }
     await upgradeProxy(Shields.address, Shields, { deployer });
 };
