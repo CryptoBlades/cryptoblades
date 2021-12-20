@@ -416,8 +416,9 @@ p, li, span {
         background: #b53c48;
         border: none;
         color: white;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
+        border-radius: 0.2rem;
+        font-size: 0.7rem;
+        font-family: 'Roboto';
       }
       .weaponButtonWrapper {
         margin-right: 1.5rem;
