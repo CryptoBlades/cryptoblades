@@ -190,8 +190,9 @@ export default Vue.extend({
   background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
 }
 .partner-logo {
-  width: 100px;
-  height: 100px;
+  max-width: 100px;
+  height: max-content;
+  align-self: center;
 }
 .multiplier-text {
   font-size: 0.8rem;
