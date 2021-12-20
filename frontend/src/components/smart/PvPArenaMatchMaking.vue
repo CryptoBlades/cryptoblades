@@ -45,6 +45,7 @@
         </div>
       </div>
       <div class="middleButtons">
+        <span class="errorMessage">{{ errorMessage }}</span>
         <div class="middleButtonsStatus">
           <div v-if="this.loading || isCharacterInDuelQueue">
             <img class="spinner" src="../../assets/loadingSpinner.svg" />
@@ -63,8 +64,6 @@
             <pvp-button v-else
             @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
           </div>
-          <span class="errorMessage">{{ performDuelErrorMessage }}</span>
-          <span class="errorMessage">{{ findMatchErrorMessage }}</span>
         </div>
         <div class="rerollButtonWrapper">
           <pvp-button
@@ -73,7 +72,6 @@
             :buttonsubText="'$SKILL: ' + formattedReRollCost"
             :secondary="true"
           />
-          <span class="errorMessage">{{ reRollErrorMessage }}</span>
         </div>
         <div class="leaveArenaButtonWrapper">
           <pvp-button
@@ -83,7 +81,6 @@
             :secondary="true"
           />
         </div>
-        <span class="errorMessage">{{ leaveArenaErrorMessage }}</span>
       </div>
       <div class="characterWrapper">
         <div class="elementWrapper">
@@ -206,9 +203,7 @@ export default {
 
   data() {
     return {
-      leaveArenaErrorMessage: '',
-      findMatchErrorMessage: '',
-      reRollErrorMessage: '',
+      errorMessage: '',
       loading: true,
       hasPendingDuel: false,
       decisionTimeLeft: 0,
@@ -286,7 +281,6 @@ export default {
         this.$emit('leaveArena');
       } catch (err) {
         console.log('leave arena error: ', err);
-        this.leaveArenaErrorMessage = 'There has been an error while leaving the arena. Try again.';
       }
 
       this.loading = false;
@@ -298,8 +292,10 @@ export default {
       try {
         await this.contracts().PvpArena.methods.requestOpponent(this.currentCharacterId).send({ from: this.defaultAccount });
       } catch (err) {
-        console.log('find match error: ', err);
-        this.findMatchErrorMessage = 'There has been an error while trying to find a match. Try again.';
+        console.log('find match error: ', err.message);
+        if(err.message.includes('No opponent found')) {
+          this.errorMessage = 'No opponent has been found. Try again.';
+        }
         this.loading = false;
         return;
       }
@@ -318,8 +314,10 @@ export default {
 
         await this.contracts().PvpArena.methods.reRollOpponent(this.currentCharacterId).send({ from: this.defaultAccount });
       } catch (err) {
-        console.log('reroll opponent error: ', err);
-        this.reRollErrorMessage = 'There has been an error while trying to find a new opponent. Try again.';
+        console.log('reroll opponent error: ', err.message);
+        if(err.message.includes('Character is not dueling')) {
+          this.errorMessage = 'The character is not dueling. Try again.';
+        }
         this.loading = false;
 
         return;
@@ -375,8 +373,17 @@ export default {
 
         await this.contracts().PvpArena.methods.preparePerformDuel(this.currentCharacterId).send({from: this.defaultAccount});
       } catch (err) {
-        console.log('prepare perform duel error: ', err);
-        this.performDuelErrorMessage = 'The duel has not been possible to start. Try again';
+        console.log('prepare perform duel error: ', err.message);
+
+        if(err.message.includes('Character not in a duel')) {
+          this.errorMessage = 'The character is not in a duel. Try again';
+        }
+        if(err.message.includes('Decision time expired')) {
+          this.errorMessage = 'Time for accepting the duel has ended.';
+        }
+        if(err.message.includes('Character is already in duel queue')) {
+          this.errorMessage = 'The character is already waiting for an opponent.';
+        }
         this.loading = false;
 
         return;
