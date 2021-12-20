@@ -69,7 +69,7 @@
           </span>
         </b-modal>
       </b-tab>
-      <b-tab title="Storage" @click="showStorage(); selectedNftId = ''">
+      <b-tab title="Storage" @click="showStorage(); selectedNftId = ''; targetChain = ''">
         <div class="btnRow d-flex flex-row justify-content-center" v-if="loadedStorage">
           <div class="p-2">
             <b-button variant="primary" @click="nftType = 'weapon'; selectedNftId = ''; getStoredIds()"
@@ -108,6 +108,7 @@
           <div class="p-4 w-25" v-if="transferStatus != transferStates.pending && storedNftsIds.length !== 0">
             <h4 class="text-center">Select target chain</h4>
             <select class="form-control" v-model="targetChain">
+              <option :value="''" disabled>Select a chain</option>
               <option v-for="chain in chainsToSendTo" :value="chain" :key="chain"
                 :disabled="!enabledChains.includes(chain)">
                 {{ chain }} <span v-if="!enabledChains.includes(chain)"> is not enabled for transfer </span>
@@ -431,7 +432,6 @@ export default Vue.extend({
     //remove currentChain from chains to send to
     this.currentChain = localStorage.getItem('currentChain') || 'BSC';
     this.chainsToSendTo = this.supportedChains.filter(item => item !== this.currentChain);
-    this.targetChain = this.chainsToSendTo[0];
 
     //check current net by checking url
     const env = window.location.href.startsWith('https://test') ? 'test' : 'production'; //const env = 'test';

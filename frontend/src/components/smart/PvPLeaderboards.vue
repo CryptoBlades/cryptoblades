@@ -1,6 +1,6 @@
 <template>
   <div class="leaderboardWrapper">
-    Leaderboards coming soon!
+    <span>Leaderboards coming soon!</span>
     <!-- <h1 class="leaderboardTitle">ARENA LEADERBOARD</h1>
     <div class="filtersWrapper">
       <div class="selectWrapper">

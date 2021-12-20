@@ -41,8 +41,10 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public orderPaidAmount;
     mapping(uint256 => uint32[]) public orderBaskets; // 8 bits amount, 24 bits itemID
     mapping(uint256 => uint256) public orderData; // 8 bits status, rest is timestamp (for now)
+    mapping(uint256 => uint256) public externalOrderId;
 
     event OrderPlaced(address indexed buyer, uint256 indexed orderId, uint256 paid, uint256[] items, uint8[] amounts);
+    event OrderSaved(address indexed user, uint256 indexed orderNumber, uint256 indexed internalOrderNumber, uint256 payingAmount);
     event OrderStatusChanged(uint256 indexed orderId, uint8 indexed newStatus);
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
@@ -60,65 +62,6 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
     }
 
     /* ========== VIEWS ========== */
-
-    function getPriceOfItem(uint256 item) public view returns (uint256) {
-        return itemPrices[item] * skillOracle.currentPrice() / 100;
-    }
-
-    function getPriceOfBasket(uint256[] memory items, uint8[] memory amounts) public view returns (uint256) {
-        require(items.length == amounts.length, "Basket mismatch");
-        uint256 sumCents = 0;
-        for(uint i = 0; i < items.length; i++) {
-            require(itemPrices[items[i]] > 0 && amounts[i] > 0, "Invalid item");
-            sumCents = sumCents.add(itemPrices[items[i]].mul(amounts[i]));
-        }
-        return sumCents.mul(skillOracle.currentPrice()) / 100;
-    }
-
-    function getOrder(uint256 orderId) public view
-        returns(
-            address buyer,
-            uint32[] memory basketItems,
-            uint32[] memory basketAmounts,
-            uint256 paidAmount,
-            uint256 timestamp,
-            uint8 status
-        )
-    {
-        buyer = orderBuyer[orderId];
-
-        uint256 basketSize = getBasketSize(orderId);
-        basketItems = new uint32[](basketSize);
-        basketAmounts = new uint32[](basketSize);
-        for(uint i = 0; i < basketSize; i++) {
-            basketItems[i] = getBasketItem(orderId, i);
-            basketAmounts[i] = getBasketItemAmount(orderId, i);
-        }
-        
-        paidAmount = orderPaidAmount[orderId];
-        timestamp = getOrderTimestamp(orderId);
-        status = getOrderStatus(orderId);
-    }
-    
-    function getBasketSize(uint256 orderId) public view returns(uint256) {
-        return orderBaskets[orderId].length;
-    }
-
-    function getBasketItem(uint256 orderId, uint256 basketItemIndex) public view returns(uint32) {
-        return (orderBaskets[orderId][basketItemIndex] & 0xffffff00) >> 8;
-    }
-    
-    function getBasketItemAmount(uint256 orderId, uint256 basketItemIndex) public view returns(uint32) {
-        return orderBaskets[orderId][basketItemIndex] & 0xff;
-    }
-
-    function getOrderTimestamp(uint256 orderId) public view returns (uint256) {
-        return orderData[orderId] >> 8;
-    }
-
-    function getOrderStatus(uint256 orderId) public view returns (uint8) {
-        return uint8(orderData[orderId] & 0xff);
-    }
 
     function getUserAllowanceRequired(address user, uint256 charge) public view returns (uint256) {
         uint256 unclaimedSkill = game.getTokenRewardsFor(user);
@@ -148,53 +91,19 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
         itemPrices[item] = usdCents;
     }
 
-    function setItemPrices(uint256[] calldata items, uint256[] calldata usdCents) external restricted {
-        for(uint i = 0; i < items.length; i++)
-            itemPrices[items[i]] = usdCents[i];
-    }
-
-    function setItemsToPrice(uint256[] calldata items, uint256 usdCents) external restricted {
-        for(uint i = 0; i < items.length; i++)
-            itemPrices[items[i]] = usdCents;
-    }
-
-    function placeOrder(address user, uint256 payingAmount, uint256[] calldata items, uint8[] calldata amounts) external restricted
-    returns (uint256) {
+    function createOrder(uint256 orderNumber, uint256 payingAmount) external returns (uint256) {
         require(vars[VAR_ORDERS_ENABLED] != 0, "Cannot place orders right now");
+        orderBuyer[orderNumber] = msg.sender;
+        game.payContractTokenOnly(msg.sender, payingAmount, vars[VAR_TRACK_INCOME] != 0);
+        orderPaidAmount[orderNumber] += payingAmount;
+        externalOrderId[nextOrderID] = orderNumber;
 
-        //uint256 payingAmount = getPriceOfBasket(items,amounts) + extraCost;
-
-        game.payContractTokenOnly(user, payingAmount, vars[VAR_TRACK_INCOME] != 0);
-            
-        /*orderBuyer[nextOrderID] = user;
-        orderData[nextOrderID] = now << 8; // lowest 8 bits is status (default 0)
-
-        for(uint i = 0; i < items.length; i++) {
-            orderBaskets[nextOrderID].push(amounts[i] | (uint32(items[i]) << 8));
-        }
-        orderPaidAmount[nextOrderID] = payingAmount;*/
-
-        emit OrderPlaced(user, nextOrderID, payingAmount, items, amounts);
+        emit OrderSaved(msg.sender, orderNumber, nextOrderID, payingAmount);
         return nextOrderID++;
     }
 
-    function setOrderStatus(uint256 orderId, uint8 status) external restricted {
-        _setOrderStatus(orderId, status);
-    }
-
-    function _setOrderStatus(uint256 orderId, uint8 status) internal {
-        orderData[orderId] = ((orderData[orderId] >> 8) << 8) | status;
-        emit OrderStatusChanged(orderId, status);
-    }
-
-    function setOrderStatuses(uint256[] calldata orderIds, uint8[] calldata statuses) external restricted {
-        for(uint i = 0; i < orderIds.length; i++)
-            _setOrderStatus(orderIds[i], statuses[i]);
-    }
-
-    function setOrdersToStatus(uint256[] calldata orderIds, uint8 status) external restricted {
-        for(uint i = 0; i < orderIds.length; i++)
-            _setOrderStatus(orderIds[i], status);
+    function getOrderPaidAmount(uint256 orderNumber) public view returns (uint256) {
+        return orderPaidAmount[orderNumber];
     }
 
     function setVar(uint256 varField, uint256 value) external restricted {
@@ -222,7 +131,7 @@ contract Merchandise is Initializable, AccessControlUpgradeable {
          _isAdmin();
         _;
     }
-    
+
     function _isAdmin() internal view {
          require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
     }

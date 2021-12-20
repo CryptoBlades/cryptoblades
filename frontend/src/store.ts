@@ -1,34 +1,48 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
-import _, { isUndefined, values } from 'lodash';
-import { toBN, bnMinimum, gasUsedToBnb } from './utils/common';
+import _, {isUndefined, values} from 'lodash';
+import {bnMinimum, gasUsedToBnb, toBN} from './utils/common';
 
-import { getConfigValue, setUpContracts } from './contracts';
+import {getConfigValue, setUpContracts} from './contracts';
 
 import {
-  characterFromContract, targetFromContract, weaponFromContract, shieldFromContract, raidFromContract,
-  trinketFromContract, junkFromContract,
-  partnerProjectFromContract
+  characterFromContract,
+  junkFromContract,
+  partnerProjectFromContract,
+  raidFromContract,
+  shieldFromContract,
+  targetFromContract,
+  trinketFromContract,
+  weaponFromContract
 } from './contract-models';
 
 import {
-  Contract, Contracts, isStakeType, IStakeOverviewState,
-  IStakeState, IState, IWeb3EventSubscription, StakeType, IRaidState, IPartnerProject, NftStakeType, isNftStakeType} from './interfaces';
-import { getCharacterNameFromSeed } from './character-name';
-import { approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd } from './contract-call-utils';
+  Contract,
+  Contracts,
+  IPartnerProject,
+  IRaidState,
+  isStakeType,
+  IStakeOverviewState,
+  IStakeState,
+  IState,
+  IWeb3EventSubscription,
+  StakeType,
+  NftStakeType,
+  isNftStakeType
+} from './interfaces';
+import {getCharacterNameFromSeed} from './character-name';
+import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './contract-call-utils';
 
-import {
-  raid as featureFlagRaid,
-  stakeOnly as featureFlagStakeOnly,
-} from './feature-flags';
-import { IERC721, IStakingRewards, INftStakingRewards, IERC20 } from '../../build/abi-interfaces';
-import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from './stake-types';
-import { Nft } from './interfaces/Nft';
-import { getWeaponNameFromSeed } from '@/weapon-name';
+import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly,} from './feature-flags';
+import {IERC20, IERC721, IStakingRewards, INftStakingRewards} from '../../build/abi-interfaces';
+import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
+import {Nft} from './interfaces/Nft';
+import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
+import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -116,6 +130,7 @@ export function createStore(web3: Web3) {
       maxStamina: 0,
       currentCharacterId: null,
       ownedDust: [],
+      cartEntries: [],
 
       characters: {},
       characterStaminas: {},
@@ -387,6 +402,10 @@ export function createStore(web3: Web3) {
           const dust = state.ownedDust[1];
           return dust;
         };
+      },
+
+      getCartEntries(state) {
+        return state.cartEntries;
       },
 
       ownWeapons(state, getters) {
@@ -673,6 +692,23 @@ export function createStore(web3: Web3) {
         if (!state.ownedShieldIds.includes(shieldId)) {
           state.ownedShieldIds.push(shieldId);
         }
+      },
+
+      addCartEntry(state: IState, cartEntry: CartEntry) {
+        const duplicatedEntry = state.cartEntries.find(entry => entry.variant.id === cartEntry.variant.id);
+        if (duplicatedEntry) {
+          const entryIndex = state.cartEntries.indexOf(duplicatedEntry);
+          state.cartEntries.splice(entryIndex, 1);
+        }
+        state.cartEntries.push(cartEntry);
+      },
+
+      removeCartEntry(state: IState, cartEntry: CartEntry) {
+        state.cartEntries.splice(state.cartEntries.indexOf(cartEntry), 1);
+      },
+
+      clearCartEntries(state: IState) {
+        state.cartEntries = [];
       },
 
       updateCharacter(state: IState, { characterId, character }) {
@@ -3052,21 +3088,42 @@ export function createStore(web3: Web3) {
           .currentPrice().call(defaultCallOptions(state));
       },
 
-      async purchaseMerchandise({ state }, {ids, amounts, totalPrice}) {
+      async createOrder({ state, dispatch }, {orderNumber, payingAmount}) {
         const { CryptoBlades, SkillToken, Merchandise } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Merchandise || !state.defaultAccount) return;
 
+        const skillNeeded = await CryptoBlades.methods
+          .getSkillNeededFromUserWallet(state.defaultAccount, payingAmount, true)
+          .call(defaultCallOptions(state));
+
         await SkillToken.methods
-          .approve(CryptoBlades.options.address, totalPrice)
+          .approve(CryptoBlades.options.address, skillNeeded)
           .send({
             from: state.defaultAccount
           });
 
-        return await Merchandise.methods
-          .placeOrder(state.defaultAccount, totalPrice, ids, amounts)
+        await Merchandise.methods
+          .createOrder(orderNumber, payingAmount)
           .send({
             from: state.defaultAccount
           });
+
+        dispatch('fetchSkillBalance');
+      },
+
+      async canUserAfford({ state }, {payingAmount}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const unclaimedSkill = await CryptoBlades.methods
+          .getTokenRewardsFor(state.defaultAccount)
+          .call(defaultCallOptions(state));
+
+        const walletSkill = state.skillBalance;
+
+        const totalSkill = +unclaimedSkill + +walletSkill;
+
+        return totalSkill >= payingAmount;
       },
 
       async claimTokenRewards({ state, dispatch }) {

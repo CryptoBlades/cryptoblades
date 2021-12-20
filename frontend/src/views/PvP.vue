@@ -1,6 +1,6 @@
 <template>
   <div class="pvpWrapper">
-    <div v-if="!currentCharacterId && currentCharacterId !== 0">
+    <div class="noCharacter" v-if="!currentCharacterId && currentCharacterId !== 0">
       You need at least one character to enter PvP!
     </div>
     <div v-else>
@@ -65,9 +65,17 @@ export default {
   src: url('../assets/fonts/Trajan.ttf') format('truetype');
 }
 .pvpWrapper {
+  min-height: 100vh;
   background-image: url('../assets/pvpBackgroundImage.png');
   padding: 1rem 4rem 4rem 4rem;
   margin: -2rem -1rem 0 -1rem;
+
+  .noCharacter {
+    margin-top: 3rem;
+    font-size: 1rem;
+    font-family: 'Roboto';
+  }
+
   @media only screen and (min-width: 1440px) {
     padding: 1rem 6rem 6rem 6rem;
   }

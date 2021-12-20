@@ -174,7 +174,7 @@
     },
     "links": {},
     "address": "0x2405BA415A532dE0FD22906470c7E85C77e74BD0",
-    "transactionHash": "0xba279769dd92bc48519879654552ea11e1de8e6d95fc446c03e06a13585cbd26"
+    "transactionHash": "0xaa0f4afc44396bea9e90b0383329a9a854d7fa0361fb0689b57a1811ecf5acb0"
   },
   "build/contracts/CBKLand.json": {
     "events": {
@@ -2826,11 +2826,79 @@
         ],
         "name": "RoleRevoked",
         "type": "event"
+      },
+      "0x1b1d034796c423df538af62990031bdfdc8f13b166ebc28cf0ca6c90548f1b9a": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "buyer",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "orderId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "paid",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256[]",
+            "name": "items",
+            "type": "uint256[]"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8[]",
+            "name": "amounts",
+            "type": "uint8[]"
+          }
+        ],
+        "name": "OrderPlaced",
+        "type": "event"
+      },
+      "0xf8717a3804b1a7e7e3afdfd2ac32d32fa94013039f14030688c9bd602f98601f": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "orderNumber",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "internalOrderNumber",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "payingAmount",
+            "type": "uint256"
+          }
+        ],
+        "name": "OrderSaved",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xD40AACCeD966076B62a5baC7A49da4517cB39b73",
-    "transactionHash": "0xb7306a13a36b3fadd15b571a6405573a708c4c127f6a32ef4d207c1be8d6379c"
+    "transactionHash": "0x7b84a7519c8dd95356e42e55a822c1a48f68011a3b1819e0695f4d527815b64e"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -3568,7 +3636,7 @@
     },
     "links": {},
     "address": "0x4C455E5c781Ad558B3d9AdbD2c5bdAb13dD08c35",
-    "transactionHash": "0x06272e5b679d4d59bbc7f80dff2f737b3b2b5e5b9e2f5149c35f437d229fa9c1"
+    "transactionHash": "0x48884f1e6f438f25d86e4377b0d490f6275a312559c6cbf7c4ac173d602ab834"
   },
   "build/contracts/Raid1.json": {
     "events": {},
@@ -3932,7 +4000,7 @@
     },
     "links": {},
     "address": "0xbbCA928DddEDE7615f45823Cf30c7F05063ef1Cb",
-    "transactionHash": "0x5ab0f242115a5fbde85e6cc97ffa379dcc5951bd7fb5c43633086844d53238cf"
+    "transactionHash": "0xfb247e5fabeeb51bd015094d7e7ff9ff14aa387a38d6199fad61792e13abfe34"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
