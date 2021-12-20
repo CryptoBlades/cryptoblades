@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="loading">
-        <img class="loadingSpinner" src="../../assets/loadingSpinner.svg" />
+      <img class="loadingSpinner" src="../../assets/loadingSpinner.svg" />
     </div>
     <div v-else>
       <pvp-arena-preparation
