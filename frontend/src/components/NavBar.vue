@@ -116,7 +116,6 @@ a.router-link-active {
  .navbar-expand-sm {
     text-align: center;
     margin: 0 auto;
-    display: block;
   }
 }
 
@@ -147,7 +146,6 @@ a.router-link-active {
   .navbar-expand-sm {
     text-align: center;
     margin: 0 auto;
-    display: block;
   }
   .nav-logo{
     margin-right:0 !important;

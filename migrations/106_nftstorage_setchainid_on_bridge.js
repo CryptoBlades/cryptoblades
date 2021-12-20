@@ -3,7 +3,7 @@ const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 const NFTStorage = artifacts.require("NFTStorage");
 module.exports = async function (deployer, network, accounts) {
    const storage = await upgradeProxy(NFTStorage.address, NFTStorage, { deployer });
-   
+
 	if (network === 'development' || network === 'development-fork' || network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'bscmainnet' || network === 'bscmainnet-fork') {
 		await storage.setLocalChainPrefix('BSC');
 	}
