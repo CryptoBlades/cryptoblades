@@ -7,9 +7,12 @@ const SkillStakingRewardsUpgradeable180 = artifacts.require('SkillStakingRewards
 const CBKLandT1StakingRewardsUpgradeable = artifacts.require('CBKLandT1StakingRewardsUpgradeable');
 const CBKLandT2StakingRewardsUpgradeable = artifacts.require('CBKLandT2StakingRewardsUpgradeable');
 const CBKLandT3StakingRewardsUpgradeable = artifacts.require('CBKLandT3StakingRewardsUpgradeable');
+const CBKLand = artifacts.require('CBKLand');
 
 module.exports = async function (deployer, network, accounts) {
   if (network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'bsctestnet' || network === 'bsctestnet-fork') {
+    await upgradeProxy(CBKLand.address, CBKLand, { deployer });
+    
     let ownerAddress;
     let rewardDistributorAddress;
     let kingTokenAddress;

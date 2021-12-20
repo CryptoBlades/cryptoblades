@@ -26,7 +26,7 @@ contract CBKLandT2StakingRewardsUpgradeable is NftStakingRewardsUpgradeable {
     }
     
     function stake(uint256 id) public virtual override {
-      (uint256 landTier,,,,) = __cbkLand.get(id);
+      uint256 landTier = __cbkLand.getLandTier(id);
       require(landTier == stakeTier, 'Land tier mismatch');
       super.stake(id);
     }
