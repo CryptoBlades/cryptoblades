@@ -117,7 +117,7 @@
             :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
           />
         </div>
-        <span class="errorMessage">{{ enterArenaError }}</span>
+        <span class="errorMessage">{{ errorMessage }}</span>
       </div>
       <div class="characterImage">
         <pvp-character :characterId="currentCharacterId" />
@@ -216,7 +216,7 @@ export default {
   },
   data() {
     return {
-      enterArenaError: '',
+      errorMessage: '',
       loading: false,
       selectedWeaponId: null,
       selectedWeaponStars: null,
@@ -283,7 +283,7 @@ export default {
             });
         } catch(err) {
           console.log('Enter Arena Approval Error: ', err);
-          this.enterArenaError = 'There has been an error while entering the arena. Try again.';
+          this.errorMessage = 'There has been an error while entering the arena. Try again.';
           return;
         }
         try {
@@ -294,7 +294,7 @@ export default {
             });
         } catch(err){
           console.log('Enter Arena Error: ', err);
-          this.enterArenaError = 'There has been an error while entering the arena. Try again.';
+          this.errorMessage = 'There has been an error while entering the arena. Try again.';
           return;
         }
         this.$emit('enteredArena');

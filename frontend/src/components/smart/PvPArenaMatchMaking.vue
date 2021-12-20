@@ -45,7 +45,7 @@
         </div>
       </div>
       <div class="middleButtons">
-        <span class="errorMessage">{{ errorMessage }}</span>
+        <span class="errorMessage"> errorMessage {{ errorMessage }}</span>
         <div class="middleButtonsStatus">
           <div v-if="this.loading || isCharacterInDuelQueue">
             <img class="spinner" src="../../assets/loadingSpinner.svg" />
@@ -281,6 +281,7 @@ export default {
         this.$emit('leaveArena');
       } catch (err) {
         console.log('leave arena error: ', err);
+        this.errorMessage = 'There has been an error while leaving the arena.';
       }
 
       this.loading = false;
