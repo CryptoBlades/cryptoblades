@@ -45,7 +45,7 @@
         </div>
       </div>
       <div class="middleButtons">
-        <span class="errorMessage"> errorMessage {{ errorMessage }}</span>
+        <span class="errorMessage">{{ errorMessage }}</span>
         <div class="middleButtonsStatus">
           <div v-if="this.loading || isCharacterInDuelQueue">
             <img class="spinner" src="../../assets/loadingSpinner.svg" />
@@ -277,11 +277,15 @@ export default {
 
       try {
         await this.contracts().PvpArena.methods.withdrawFromArena(this.currentCharacterId).send({ from: this.defaultAccount });
-
         this.$emit('leaveArena');
       } catch (err) {
         console.log('leave arena error: ', err);
-        this.errorMessage = 'There has been an error while leaving the arena.';
+        if(err.message.includes('Character not in arena')) {
+          this.errorMessage = 'The character is not in the arena.';
+        }
+        if(err.message.includes('Defender duel in process')) {
+          this.errorMessage = 'Duel in process.';
+        }
       }
 
       this.loading = false;
