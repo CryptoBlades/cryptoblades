@@ -297,6 +297,15 @@ export default {
         if(err.message.includes('No opponent found')) {
           this.errorMessage = 'No opponent has been found. Try again.';
         }
+        if(err.message.includes('Opponent already requested')) {
+          this.errorMessage = 'An opponent has already been requested.';
+        }
+        if(err.message.includes('No opponents available in tier')) {
+          this.errorMessage = 'No opponents available in this tier.';
+        }
+        if(err.message.includes('Character is in duel queue')) {
+          this.errorMessage = 'The character is already in a duel queue.';
+        }
         this.loading = false;
         return;
       }
@@ -318,6 +327,15 @@ export default {
         console.log('reroll opponent error: ', err.message);
         if(err.message.includes('Character is not dueling')) {
           this.errorMessage = 'The character is not dueling. Try again.';
+        }
+        if(err.message.includes('No opponent found')) {
+          this.errorMessage = 'No opponent has been found. Try again.';
+        }
+        if(err.message.includes('No opponents available in tier')) {
+          this.errorMessage = 'No opponents available in this tier.';
+        }
+        if(err.message.includes('Character is in duel queue')) {
+          this.errorMessage = 'The character is already in a duel queue.';
         }
         this.loading = false;
 
@@ -380,7 +398,7 @@ export default {
           this.errorMessage = 'The character is not in a duel. Try again';
         }
         if(err.message.includes('Decision time expired')) {
-          this.errorMessage = 'Time for accepting the duel has ended.';
+          this.errorMessage = 'Decision time expired.';
         }
         if(err.message.includes('Character is already in duel queue')) {
           this.errorMessage = 'The character is already waiting for an opponent.';
