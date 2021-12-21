@@ -45,7 +45,6 @@
         </div>
       </div>
       <div class="middleButtons">
-        <span class="errorMessage">{{ errorMessage }}</span>
         <div class="middleButtonsStatus">
           <div v-if="this.loading || isCharacterInDuelQueue">
             <img class="spinner" src="../../assets/loadingSpinner.svg" />
@@ -203,7 +202,6 @@ export default {
 
   data() {
     return {
-      errorMessage: '',
       loading: true,
       hasPendingDuel: false,
       decisionTimeLeft: 0,
@@ -274,17 +272,16 @@ export default {
   methods: {
     async leaveArena() {
       this.loading = true;
-
       try {
         await this.contracts().PvpArena.methods.withdrawFromArena(this.currentCharacterId).send({ from: this.defaultAccount });
         this.$emit('leaveArena');
       } catch (err) {
         console.log('leave arena error: ', err);
         if(err.message.includes('Character not in arena')) {
-          this.errorMessage = 'The character is not in the arena.';
+          this.$dialog.notify.error('The character is not in the arena.');
         }
         if(err.message.includes('Defender duel in process')) {
-          this.errorMessage = 'Duel in process.';
+          this.$dialog.notify.error('Duel already in process.');
         }
       }
 
@@ -299,16 +296,16 @@ export default {
       } catch (err) {
         console.log('find match error: ', err.message);
         if(err.message.includes('No opponent found')) {
-          this.errorMessage = 'No opponent has been found. Try again.';
+          this.$dialog.notify.error('No opponent has been found. Try again.');
         }
         if(err.message.includes('Opponent already requested')) {
-          this.errorMessage = 'An opponent has already been requested.';
+          this.$dialog.notify.error('An opponent has already been requested.');
         }
         if(err.message.includes('No opponents available in tier')) {
-          this.errorMessage = 'No opponents available in this tier.';
+          this.$dialog.notify.error('No opponents available in this tier.');
         }
         if(err.message.includes('Character is in duel queue')) {
-          this.errorMessage = 'The character is already in a duel queue.';
+          this.$dialog.notify.error('The character is already in a duel queue.');
         }
         this.loading = false;
         return;
@@ -330,16 +327,16 @@ export default {
       } catch (err) {
         console.log('reroll opponent error: ', err.message);
         if(err.message.includes('Character is not dueling')) {
-          this.errorMessage = 'The character is not dueling. Try again.';
+          this.$dialog.notify.error('The character is not dueling. Try again.');
         }
         if(err.message.includes('No opponent found')) {
-          this.errorMessage = 'No opponent has been found. Try again.';
+          this.$dialog.notify.error('No opponent has been found. Try again.');
         }
         if(err.message.includes('No opponents available in tier')) {
-          this.errorMessage = 'No opponents available in this tier.';
+          this.$dialog.notify.error('No opponents available in this tier.');
         }
         if(err.message.includes('Character is in duel queue')) {
-          this.errorMessage = 'The character is already in a duel queue.';
+          this.$dialog.notify.error('The character is already in a duel queue.');
         }
         this.loading = false;
 
@@ -399,13 +396,13 @@ export default {
         console.log('prepare perform duel error: ', err.message);
 
         if(err.message.includes('Character not in a duel')) {
-          this.errorMessage = 'The character is not in a duel. Try again';
+          this.$dialog.notify.error('The character is not in a duel. Try again');
         }
         if(err.message.includes('Decision time expired')) {
-          this.errorMessage = 'Decision time expired.';
+          this.$dialog.notify.error('Decision time expired.');
         }
         if(err.message.includes('Character is already in duel queue')) {
-          this.errorMessage = 'The character is already waiting for an opponent.';
+          this.$dialog.notify.error('The character is already waiting for an opponent.');
         }
         this.loading = false;
 
@@ -758,13 +755,5 @@ span, p, li, button {
   @media screen and (min-width: 1280px) {
     margin: 0 5rem;
   }
-}
-.errorMessage {
-  display: flex;
-  align-self: center;
-  justify-content: center;
-  width: auto;
-  text-align: center;
-  color: #b53c48;
 }
 </style>
