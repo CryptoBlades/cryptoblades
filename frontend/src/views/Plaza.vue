@@ -1,13 +1,17 @@
 <template>
   <div class="body main-font">
-    <ins class="61c208e596bc5000134ec909" style="display:inline-block;width:970px;height:90px;"></ins>
-    <script2>!function (e, n, c, t, o, r) {
-      !function e(n, c, t, o, r, m, s, a) {
-        s = c.getElementsByTagName(t)[0], (a = c.createElement(t)).async = !0, a.src = "https://" + r[m] + "/js/" + o + ".js", a.onerror = function () {
-          a.remove(), (m += 1) >= r.length || e(n, c, t, o, r, m)
+    <div v-if="showAds && !isMobile()">
+      <ins class="61c208e596bc5000134ec909" style="display:inline-block;width:970px;height:90px;"></ins>
+      <script2>!function (e, n, c, t, o, r) {
+        !function e(n, c, t, o, r, m, s, a) {
+        s = c.getElementsByTagName(t)[0], (a = c.createElement(t)).async = !0, a.src = "https://" + r[m] + "/js/" + o +
+        ".js", a.onerror = function () {
+        a.remove(), (m += 1) >= r.length || e(n, c, t, o, r, m)
         }, s.parentNode.insertBefore(a, s)
-      }(window, document, "script", "61c208e596bc5000134ec909", ["cdn.bmcdn2.com"], 0)
-    }();</script2>
+        }(window, document, "script", "61c208e596bc5000134ec909", ["cdn.bmcdn2.com"], 0)
+        }();
+      </script2>
+    </div>
     <div v-if="ownCharacters.length === 0" class="blank-slate">
       <div class="current-promotion">
         <div class="tob-bg-img promotion-decoration">
@@ -71,6 +75,7 @@ import i18n from '@/i18n';
 
 interface Data {
   recruitCost: string;
+  showAds: boolean;
 }
 
 export default Vue.extend({
@@ -116,6 +121,7 @@ export default Vue.extend({
   data() {
     return {
       recruitCost: '0',
+      showAds: false
     } as Data;
   },
 
@@ -139,6 +145,13 @@ export default Vue.extend({
       const balance = toBN(this.skillBalance);
       return balance.isGreaterThanOrEqualTo(cost);
     },
+    checkStorage() {
+      this.showAds =  localStorage.getItem('show-ads') === 'true';
+    },
+  },
+
+  async mounted() {
+    this.checkStorage();
   },
 
   components: {
