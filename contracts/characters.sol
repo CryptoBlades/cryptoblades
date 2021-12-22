@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
+import "./Garrison.sol";
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
@@ -75,6 +76,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         characterLimit = 4;
     }
 
+    function migrateTo_1a19cbb(Garrison _garrison) external {
+        garrison = _garrison;
+    }
+
     /*
         visual numbers start at 0, increment values by 1
         levels: 1-256
@@ -115,6 +120,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
+
+    Garrison public garrison;
+    mapping(uint256 => bool) public isStaminaLocked;
+    mapping(uint256 => uint8) public lockedStaminaPoints;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -182,8 +191,16 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
         tokens.push(Character(xp, level, trait, staminaTimestamp));
         cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
-        _mint(minter, tokenID);
-        emit NewCharacter(tokenID, minter);
+        address receiver = minter;
+        if(minter != address(0) && minter != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, minter) && balanceOf(minter) >= characterLimit) {
+            receiver = address(garrison);
+            garrison.redirectToGarrison(minter, tokenID);
+            _mint(address(garrison), tokenID);
+        }
+        else {
+            _mint(minter, tokenID);
+        }
+        emit NewCharacter(tokenID, receiver);
     }
 
     function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID) minterOnly public returns (uint256) {
@@ -198,8 +215,16 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
             tokens.push(Character(xp, level, trait, staminaTimestamp));
             cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
-            _mint(minter, tokenID);
-            emit NewCharacter(tokenID, minter);
+            address receiver = minter;
+            if(minter != address(0) && minter != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, minter) && balanceOf(minter) >= characterLimit) {
+                receiver = address(garrison);
+                garrison.redirectToGarrison(minter, tokenID);
+                _mint(address(garrison), tokenID);
+            }
+            else {
+                _mint(minter, tokenID);
+            }
+            emit NewCharacter(tokenID, receiver);
         }
         else {
             Character storage ch = tokens[tokenID];
@@ -289,6 +314,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getStaminaPoints(uint256 id) public view noFreshLookup(id) returns (uint8) {
+        if(isStaminaLocked[id] == true) {
+            return lockedStaminaPoints[id];
+        }
         return getStaminaPointsFromTimestamp(tokens[id].staminaTimestamp);
     }
 
@@ -362,12 +390,32 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(nftVars[tokenId][NFTVAR_BUSY] == 0);
-        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to)) {
-            require(balanceOf(to) < characterLimit, "Recv has too many characters");
-        }
 
         promos.setBit(from, promos.BIT_FIRST_CHARACTER());
         promos.setBit(to, promos.BIT_FIRST_CHARACTER());
+    }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId) override public {
+        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to) && balanceOf(to) >= characterLimit) { 
+            garrison.redirectToGarrison(to, tokenId);
+            super.safeTransferFrom(from, address(garrison), tokenId);
+        }
+        else {
+            super.safeTransferFrom(from, to, tokenId);
+        }
+    }
+
+    function unlockStamina(uint256 tokenId) external restricted {
+        Character storage char = tokens[tokenId];
+        char.staminaTimestamp = uint64(now.sub(uint64(lockedStaminaPoints[tokenId].mul(secondsPerStamina))));
+        delete isStaminaLocked[tokenId];
+        delete lockedStaminaPoints[tokenId];
+    }
+
+    function lockStamina(uint256 tokenId) external restricted {
+        uint8 currentStaminaPoints = getStaminaPointsFromTimestamp(tokens[tokenId].staminaTimestamp);
+        lockedStaminaPoints[tokenId] = currentStaminaPoints;
+        isStaminaLocked[tokenId] = true;
     }
 
     function setCharacterLimit(uint256 max) public restricted {

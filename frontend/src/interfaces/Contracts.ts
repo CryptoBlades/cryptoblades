@@ -2,7 +2,7 @@ import { Contract as Web3EthContract } from 'web3-eth-contract';
 import type {
   IERC20, IStakingRewards, KingStakingRewardsUpgradeable,
   CryptoBlades, Characters, Weapons, RaidBasic, IRandoms,
-  NFTMarket, WaxBridge, Blacksmith, Shields, CharacterRenameTagConsumables,
+  NFTMarket, WaxBridge, Blacksmith, Shields, Garrison, CharacterRenameTagConsumables,
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
   CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox, PvpArena,
   WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale, CBKLand, Treasury, Merchandise
@@ -33,6 +33,7 @@ export interface Contracts {
   NFTMarket?: Contract<NFTMarket>;
   WaxBridge?: Contract<WaxBridge>;
   Shields?: Contract<Shields>;
+  Garrison?: Contract<Garrison>;
   CharacterRenameTagConsumables?: Contract<CharacterRenameTagConsumables>;
   WeaponRenameTagConsumables?: Contract<WeaponRenameTagConsumables>;
   CharacterFireTraitChangeConsumables?: Contract <CharacterFireTraitChangeConsumables>;

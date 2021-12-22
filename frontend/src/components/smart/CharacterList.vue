@@ -54,10 +54,12 @@
           <slot name="above" :character="c"></slot>
         </div>
         <slot name="sold" :character="c"></slot>
-        <nft-options-dropdown v-if="showNftOptions" :nftType="'character'" :nftId="c.id" :options="options" class="nft-options"/>
+        <nft-options-dropdown v-if="showNftOptions" :nftType="'character'" :nftId="c.id" :options="options"
+          :showTransfer="!isMarket && !isGarrison" class="nft-options"/>
         <div class="art" >
           <div class="animation" />
-          <CharacterArt :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(c.id) : '']" :character="c" :isMarket="isMarket"/>
+          <CharacterArt :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(c.id) : '']"
+            :character="c" :isMarket="isMarket" :isGarrison="isGarrison"/>
         </div>
       </li>
     </ul>
@@ -152,6 +154,10 @@ export default {
     showNftOptions: {
       type: Boolean,
       default: false
+    },
+    isGarrison: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -192,19 +198,21 @@ export default {
   },
 
   computed: {
-    ...mapState(['maxStamina', 'ownedCharacterIds']),
-    ...mapGetters(['getCharacterName', 'allStaminas', 'charactersWithIds', 'getCharacterCosmetic']),
+    ...mapState(['maxStamina', 'ownedCharacterIds', 'ownedGarrisonCharacterIds']),
+    ...mapGetters(['getCharacterName', 'allStaminas', 'charactersWithIds', 'garrisonCharactersWithIds', 'getCharacterCosmetic']),
 
     characterIdsToDisplay() {
       if(this.showGivenCharacterIds) {
         return this.characterIds;
       }
 
-      return this.ownedCharacterIds;
+      return this.isGarrison ? this.ownedGarrisonCharacterIds : this.ownedCharacterIds;
     },
 
     displayCharacters() {
-      return this.charactersWithIds(this.characterIdsToDisplay).filter(Boolean);
+      return this.isGarrison
+        ? this.garrisonCharactersWithIds(this.characterIdsToDisplay).filter(Boolean)
+        : this.charactersWithIds(this.characterIdsToDisplay).filter(Boolean);
     },
 
     filteredCharacters() {
@@ -289,7 +297,7 @@ export default {
       'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater',
       'fetchTotalCharacterFireTraitChanges','fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
-      'fetchOwnedCharacterCosmetics','changeCharacterCosmetic','removeCharacterCosmetic']),
+      'fetchOwnedCharacterCosmetics','changeCharacterCosmetic','removeCharacterCosmetic','restoreFromGarrison', 'sendToGarrison']),
 
     getCharacterArt,
 
@@ -333,7 +341,27 @@ export default {
     },
 
     updateOptions() {
-      if(!this.isMarket) {
+      if(this.isMarket) {
+        this.options = [
+          {
+            name: this.$t('copyLink'),
+            amount: 0,
+            handler: copyNftUrl,
+            hasDefaultOption: true,
+            noAmount: true
+          },
+        ];
+      } else if(this.isGarrison) {
+        this.options = [
+          {
+            name: this.$t('characterList.restoreToPlaza'),
+            amount: 0,
+            handler: this.onRestoreToPlaza,
+            hasDefaultOption: true,
+            noAmount: true
+          },
+        ];
+      } else {
         this.options = [
           {
             name: this.$t('characterList.rename'),
@@ -351,18 +379,27 @@ export default {
             handler: this.openChangeSkin,
             hasDefaultOption: true,
           },
-        ];
-      } else {
-        this.options = [
           {
-            name: this.$t('copyLink'),
+            name: this.$t('characterList.sendToGarrison'),
             amount: 0,
-            handler: copyNftUrl,
+            handler: this.onSendToGarrison,
             hasDefaultOption: true,
             noAmount: true
           },
         ];
       }
+    },
+
+    async onRestoreToPlaza(id) {
+      if(this.ownedCharacterIds.length < 4) {
+        await this.restoreFromGarrison(id);
+      } else {
+        this.$dialog.notify.error(this.$t('characterList.plazaFull'));
+      }
+    },
+
+    async onSendToGarrison(id) {
+      await this.sendToGarrison(id);
     },
 
     openRenameCharacter(id) {

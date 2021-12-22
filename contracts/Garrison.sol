@@ -12,6 +12,8 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+
     // STATE
     Characters characters;
 
@@ -20,6 +22,8 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
     mapping(address => EnumerableSet.UintSet) userGarrison;
     mapping(uint256 => address) characterOwner;
     EnumerableSet.UintSet private allCharactersInGarrison;
+
+    event CharacterReceived(uint256 indexed character, address indexed minter);
 
     function initialize(Characters _characters)
         public
@@ -33,7 +37,7 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
 
     // MODIFIERS
     modifier restricted() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(GAME_ADMIN, msg.sender), "Not admin");
         _;
     }
 
@@ -49,23 +53,39 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
 
     // VIEWS
     function getUserCharacters() public view  returns (uint256[] memory tokens) {
-        uint256 amount = userGarrison[msg.sender].length();
+        uint256 amount = balanceOf(msg.sender);
         tokens = new uint256[](amount);
 
         EnumerableSet.UintSet storage storedTokens = userGarrison[msg.sender];
 
-        for (uint256 i = 0; i < storedTokens.length(); i++) {
+        for (uint256 i = 0; i < amount; i++) {
             uint256 id = storedTokens.at(i);
                 tokens[i] = id;
         }
     }
 
+    function balanceOf(address user) public view returns(uint256) {
+        return userGarrison[user].length();
+    }
+
     // MUTATIVE
     function sendToGarrison(uint256 id) public {
-        characters.safeTransferFrom(msg.sender, address(this), id);
         characterOwner[id] = msg.sender;
         userGarrison[msg.sender].add(id);
         allCharactersInGarrison.add(id);
+        characters.lockStamina(id);
+        characters.safeTransferFrom(msg.sender, address(this), id);
+
+        emit CharacterReceived(id, msg.sender);
+    }
+
+    function redirectToGarrison(address user, uint256 id) restricted external {
+        characterOwner[id] = user;
+        userGarrison[user].add(id);
+        allCharactersInGarrison.add(id);
+        characters.lockStamina(id);
+
+        emit CharacterReceived(id, user);
     }
 
     function restoreFromGarrison(uint256 id)
@@ -73,9 +93,11 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
         isCharacterOwner(id)
         isInGarrison(id)
     {
+        require(characters.balanceOf(msg.sender) < characters.characterLimit(), "Receiver has too many characters");
         delete characterOwner[id];
         userGarrison[msg.sender].remove(id);
         allCharactersInGarrison.remove(id);
+        characters.unlockStamina(id);
         characters.safeTransferFrom(address(this), msg.sender, id);
     }
 

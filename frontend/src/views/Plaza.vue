@@ -25,30 +25,67 @@
           <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer"> {{$t("plaza.buyBNBTransak")}}</a>.
       </div>
     </div>
-    <div class="row mt-3" v-if="ownCharacters.length > 0">
-      <div class="col">
-        <div v-if="ownCharacters.length > 0">
-          <div class="d-flex justify-content-space-between">
-            <h1>{{$t('characters')}} ({{ ownCharacters.length }} / 4)</h1>
-            <b-button
-              v-if="ownCharacters.length < 4"
-              :disabled="!canRecruit()"
-              variant="primary"
-              class="ml-auto gtag-link-others"
-              @click="onMintCharacter"
-              v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
-              {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
-            </b-button>
-          </div>
+    <b-tabs justified>
+      <b-tab @click="garrisonTabActive = false">
+        <template #title>
+          {{$t('plaza.plaza')}}
+          <hint class="hint" :text="$t('plaza.plazaHint')" />
+        </template>
+        <div class="row mt-3" v-if="ownCharacters.length > 0">
+          <div class="col">
+            <div v-if="ownCharacters.length > 0">
+              <div class="d-flex justify-content-space-between">
+                <h1>{{$t('characters')}} ({{ ownCharacters.length }} / 4)</h1>
+                <b-button
+                  :disabled="!canRecruit()"
+                  variant="primary"
+                  class="ml-auto gtag-link-others"
+                  @click="onMintCharacter"
+                  v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+                  {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
+                </b-button>
+              </div>
 
-          <character-list
-            :value="currentCharacterId"
-            :showNftOptions="true"
-            @input="setCurrentCharacter"
-          />
+              <character-list
+                :value="currentCharacterId"
+                :showNftOptions="true"
+                @input="setCurrentCharacter"
+              />
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </b-tab>
+      <b-tab @click="garrisonTabActive = true">
+        <template #title>
+          {{$t('plaza.garrison')}}
+          <hint class="hint" :text="$t('plaza.garrisonHint')" />
+        </template>
+        <div class="row mt-3" v-if="ownCharacters.length > 0">
+          <div class="col">
+            <div v-if="ownCharacters.length > 0">
+              <div class="d-flex justify-content-space-between">
+                <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
+                <b-button
+                  v-if="ownCharacters.length === 4"
+                  :disabled="!canRecruit()"
+                  variant="primary"
+                  class="ml-auto gtag-link-others"
+                  @click="onMintCharacter"
+                  v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+                  {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
+                </b-button>
+              </div>
+
+              <character-list
+                :showNftOptions="true"
+                :isGarrison="true"
+                @input="setCurrentCharacter"
+              />
+            </div>
+          </div>
+        </div>
+      </b-tab>
+    </b-tabs>
   </div>
 </template>
 
@@ -56,6 +93,7 @@
 import BN from 'bignumber.js';
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
+import Hint from '../components/Hint.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import Vue from 'vue';
@@ -63,11 +101,12 @@ import i18n from '@/i18n';
 
 interface Data {
   recruitCost: string;
+  garrisonTabActive: boolean;
 }
 
 export default Vue.extend({
   computed: {
-    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
+    ...mapState(['characters', 'ownedGarrisonCharacterIds', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
     ...mapGetters([
       'contracts',
       'ownCharacters',
@@ -108,6 +147,7 @@ export default Vue.extend({
   data() {
     return {
       recruitCost: '0',
+      garrisonTabActive: false
     } as Data;
   },
 
@@ -136,6 +176,7 @@ export default Vue.extend({
   components: {
     BigButton,
     CharacterList,
+    Hint
   },
 });
 </script>
