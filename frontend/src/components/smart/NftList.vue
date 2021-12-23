@@ -30,8 +30,8 @@
       <ul class="nft-grid">
         <li class="nft"
             v-for="nft in nftIdTypes" :key="`${nft.type}.${nft.id}`"
-            :style="(nft.type === 'claimT2Land' && playerReservedT2Chunks.length === 0) ||
-                (nft.type === 'claimT3Land' && playerReservedT3Chunks.length === 0) ? 'display: none' : null">
+            :style="(nft.type === 'claimT2Land' && !userHasReservationsForTier(2)) ||
+                (nft.type === 'claimT3Land' && !userHasReservationsForTier(3)) ? 'display: none' : null">
           <nft-icon :nft="nft" :isShop="isShop" :favorite="isFavorite(nft.typeId, nft.id)"
             v-tooltip.top="{ content: itemDescriptionHtml(nft) , trigger: (isMobile() ? 'click' : 'hover') }"
                       @mouseover="hover = !isMobile() || true"
@@ -46,28 +46,28 @@
               {{$t('nftList.buy')}} ({{ nft.nftPrice }} SKILL)
             </span>
             <span class="gtag-link-others" v-else-if="nft.type === 't1land'"
-                  v-tooltip.top="{ content: maxPrecisionSkill(t1LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
+                  v-tooltip.top="{ content: maxPrecisionSkill(t1LandPrice) , trigger: (isMobile() ? 'click' : 'hover') }"
                   @mouseover="hover = !isMobile() || true"
                   @mouseleave="hover = !isMobile()">
-              {{$t('nftList.buy')}} (<CurrencyConverter :king="t1LandPrice" :skill="t1LandPrice"
+              {{$t('nftList.buy')}} (<CurrencyConverter :king="convertFromWeiEther(t1LandPrice)" :skill="convertFromWeiEther(t1LandPrice)"
                                       :show-value-in-skill-only="selectedCurrency === 0"
                                       :show-value-in-king-only="selectedCurrency === 1"
                                       :max-decimals="2"/>)
             </span>
             <span class="gtag-link-others" v-else-if="nft.type === 't2land'"
-                  v-tooltip.top="{ content: maxPrecisionSkill(t2LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
+                  v-tooltip.top="{ content: maxPrecisionSkill(t2LandPrice) , trigger: (isMobile() ? 'click' : 'hover') }"
                   @mouseover="hover = !isMobile() || true"
                   @mouseleave="hover = !isMobile()">
-              {{$t('nftList.buy')}} (<CurrencyConverter :king="t2LandPrice" :skill="t2LandPrice"
+              {{$t('nftList.buy')}} (<CurrencyConverter :king="convertFromWeiEther(t2LandPrice)" :skill="convertFromWeiEther(t2LandPrice)"
                                       :show-value-in-skill-only="selectedCurrency === 0"
                                       :show-value-in-king-only="selectedCurrency === 1"
                                       :max-decimals="2"/>)
             </span>
             <span class="gtag-link-others" v-else-if="nft.type === 't3land'"
-                  v-tooltip.top="{ content: maxPrecisionSkill(t3LandPriceInWei) , trigger: (isMobile() ? 'click' : 'hover') }"
+                  v-tooltip.top="{ content: maxPrecisionSkill(t3LandPrice) , trigger: (isMobile() ? 'click' : 'hover') }"
                   @mouseover="hover = !isMobile() || true"
                   @mouseleave="hover = !isMobile()">
-              {{$t('nftList.buy')}} (<CurrencyConverter :king="t3LandPrice" :skill="t3LandPrice"
+              {{$t('nftList.buy')}} (<CurrencyConverter :king="convertFromWeiEther(t3LandPrice)" :skill="convertFromWeiEther(t3LandPrice)"
                                       :show-value-in-skill-only="selectedCurrency === 0"
                                       :show-value-in-king-only="selectedCurrency === 1"
                                       :max-decimals="2"/>)
@@ -111,10 +111,10 @@
              @hide="clearMapSelections()">
       <div class="w-100 padding-bottom-100">
         <div class="map-grid">
-          <div class="zone" :class="[playerReservedT2Zones.includes(zoneId) ? 'available' : null ]"
+          <div class="zone" :class="[reservationsIncludeZoneIdForTier(zoneId, 2) ? 'available' : null ]"
                v-for="zoneId in zonesIds" :key="zoneId"
-               @click="playerReservedT2Zones.includes(zoneId) && showT2ZoneModal(zoneId)">
-            <span v-if="playerReservedT2Zones.includes(zoneId)">{{$t('nftList.available')}}</span>
+               @click="reservationsIncludeZoneIdForTier(zoneId, 2) && showT2ZoneModal(zoneId)">
+            <span v-if="reservationsIncludeZoneIdForTier(zoneId, 2)">{{$t('nftList.available')}}</span>
             <span>{{zonesPopulation[zoneId]}}/{{maxZonePopulation.toLocaleString()}}</span>
           </div>
         </div>
@@ -125,10 +125,10 @@
              @hide="clearMapSelections()">
       <div class="w-100 padding-bottom-100">
         <div class="map-grid">
-          <div class="zone" :class="[playerReservedT3Zones.includes(zoneId) ? 'available' : null ]"
+          <div class="zone" :class="[reservationsIncludeZoneIdForTier(zoneId, 3) ? 'available' : null ]"
                v-for="zoneId in zonesIds" :key="zoneId"
-               @click="playerReservedT3Zones.includes(zoneId) && showT3ZoneModal(zoneId)">
-            <span v-if="playerReservedT3Zones.includes(zoneId)">{{$t('nftList.available')}}</span>
+               @click="reservationsIncludeZoneIdForTier(zoneId, 3) && showT3ZoneModal(zoneId)">
+            <span v-if="reservationsIncludeZoneIdForTier(zoneId, 3)">{{$t('nftList.available')}}</span>
           </div>
         </div>
       </div>
@@ -163,13 +163,13 @@
       <div class="w-100 padding-bottom-100">
         <div v-if="selectedZone !== undefined" class="zone-grid"
              :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
-          <div class="chunk" :class="[playerReservedT2Chunks.includes(chunkId.toString()) ? 'available' : null ]"
+          <div class="chunk" :class="[reservationsIncludeChunkIdForTier(chunkId, 2) ? 'available' : null ]"
                v-for="(chunkId, index) in chunksIds" :key="chunkId"
-               @click="playerReservedT2Chunks.includes(chunkId.toString()) && selectAvailableChunk(chunkId, index)"
+               @click="reservationsIncludeChunkIdForTier(chunkId, 2) && selectAvailableChunk(chunkId, index)"
                :style="[ selectedChunk === chunkId ? {opacity: '1'} : null ]">
             <span>ID: {{chunkId}}</span>
             <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
-            <span v-if="playerReservedT2Chunks.includes(chunkId.toString())">{{$t('nftList.available2')}}</span>
+            <span v-if="reservationsIncludeChunkIdForTier(chunkId, 2)">{{$t('nftList.available2')}}</span>
           </div>
         </div>
       </div>
@@ -184,13 +184,13 @@
       <div class="w-100 padding-bottom-100">
         <div v-if="selectedZone !== undefined" class="zone-grid"
              :style="{ backgroundImage: `url(${require(`@/assets/map-pieces/${selectedZone}.png`)})` }">
-          <div class="chunk" :class="[playerReservedT3Chunks.includes(chunkId.toString()) ? 'available' : null ]"
+          <div class="chunk" :class="[reservationsIncludeChunkIdForTier(chunkId, 3) ? 'available' : null ]"
                v-for="(chunkId, index) in chunksIds" :key="chunkId"
-               @click="playerReservedT3Chunks.includes(chunkId.toString()) && selectAvailableChunk(chunkId, index)"
+               @click="reservationsIncludeChunkIdForTier(chunkId,3) && selectAvailableChunk(chunkId, index)"
                :style="[ selectedChunk === chunkId ? {opacity: '1'} : null ]">
             <span>ID: {{chunkId}}</span>
             <span>{{chunksPopulation[index]}}/{{maxChunkPopulation.toLocaleString()}}</span>
-            <span v-if="playerReservedT3Chunks.includes(chunkId.toString())">{{$t('nftList.available2')}}</span>
+            <span v-if="reservationsIncludeChunkIdForTier(chunkId, 3)">{{$t('nftList.available2')}}</span>
           </div>
         </div>
       </div>
@@ -303,12 +303,12 @@
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import Events from '../../events';
 import {Nft as nftItem} from '../../interfaces/Nft';
-import { SkillShopListing } from '../../interfaces/SkillShopListing';
+import {SkillShopListing} from '../../interfaces/SkillShopListing';
 import NftIcon from '../NftIcon.vue';
-import { Nft } from '@/interfaces/Nft';
+import {Nft} from '@/interfaces/Nft';
 import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
 import { IState } from '@/interfaces';
@@ -324,6 +324,14 @@ import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 interface Land {
   tier: string,
   chunkId: string,
+  reseller?: string,
+}
+
+interface Reservation {
+  id: number,
+  tier: number,
+  chunks: number[],
+  zones: number[],
 }
 
 const sorts = [
@@ -348,8 +356,7 @@ interface Data {
   selectedChunk: number | undefined;
   selectedChunkAvailable: boolean;
   selectedChunkPopulation: number | undefined;
-  selectedT2ReservationId: number | undefined;
-  selectedT3ReservationId: number | undefined;
+  selectedReservation: Reservation | undefined;
   maxZonePopulation: number;
   maxChunkPopulation: number;
   zonesIds: number[];
@@ -368,15 +375,7 @@ interface Data {
   t1LandPrice: string;
   t2LandPrice: string;
   t3LandPrice: string;
-  t1LandPriceInWei: string;
-  t2LandPriceInWei: string;
-  t3LandPriceInWei: string;
-  playerReservedT2Chunks: number[];
-  playerReservedT3Chunks: number[];
-  playerReservedT2Zones: number[];
-  playerReservedT3Zones: number[];
-  reservationIdT2ToChunks: Map<number, number[]>;
-  reservationIdT3ToChunks: Map<number, number[]>;
+  reservations: Reservation[];
   ownedLands: Land[];
   tierFilter: string;
   chunkIdFilter: string;
@@ -437,7 +436,7 @@ interface StoreMappedActions {
   getPlayerReservedLand(): Promise<{t2Reservations: number[], t3Reservations: number[]}>;
   getChunksOfReservation(payload: {reservationId: number}): Promise<number[]>;
   claimPlayerReservedLand(payload: {reservationId: number, chunkId: number, tier: number}): Promise<void>;
-  getOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string }[]>;
+  getOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }[]>;
   getTakenT3Chunks(): Promise<number[]>;
 }
 
@@ -537,8 +536,7 @@ export default Vue.extend({
       selectedChunk: undefined,
       selectedChunkAvailable: false,
       selectedChunkPopulation: 0,
-      selectedT2ReservationId: undefined,
-      selectedT3ReservationId: undefined,
+      selectedReservation: undefined,
       maxZonePopulation: 10000,
       maxChunkPopulation: 100,
       zonesIds: Array.from({length: 100}, (x, i) => i),
@@ -557,15 +555,7 @@ export default Vue.extend({
       t1LandPrice: '',
       t2LandPrice: '',
       t3LandPrice: '',
-      t1LandPriceInWei: '',
-      t2LandPriceInWei: '',
-      t3LandPriceInWei: '',
-      playerReservedT2Chunks: [],
-      playerReservedT3Chunks: [],
-      playerReservedT2Zones: [],
-      playerReservedT3Zones: [],
-      reservationIdT2ToChunks: new Map(),
-      reservationIdT3ToChunks: new Map(),
+      reservations: [],
       ownedLands: [],
       tierFilter: '',
       chunkIdFilter: '',
@@ -885,10 +875,7 @@ export default Vue.extend({
     selectAvailableChunk(chunkId: number, index: number) {
       this.selectedChunk = chunkId;
       this.selectedChunkPopulation = this.chunksPopulation[index];
-      this.selectedT2ReservationId = [...this.reservationIdT2ToChunks.entries()]
-        .filter(({ 1: reservationChunks }) => reservationChunks.includes(chunkId)).map(([k]) => k)[0];
-      this.selectedT3ReservationId = [...this.reservationIdT3ToChunks.entries()]
-        .filter(({ 1: reservationChunks }) => reservationChunks.includes(chunkId)).map(([k]) => k)[0];
+      this.selectedReservation = this.reservations.find(reservation => reservation.chunks.includes(chunkId));
       this.selectedChunkAvailable = true;
     },
 
@@ -917,6 +904,13 @@ export default Vue.extend({
 
     splitNum(num: number) {
       return String(num).split('').map(Number);
+    },
+
+    convertFromWeiEther(value: string|BigNumber): string | undefined {
+      if(!value) {
+        return;
+      }
+      return fromWeiEther(value);
     },
 
     maxPrecisionSkill(listedPrice: string): string {
@@ -955,12 +949,9 @@ export default Vue.extend({
     },
 
     async refreshLandPrices() {
-      this.t1LandPriceInWei = await this.getCBKLandPrice({tier: 1, currency: this.selectedCurrency});
-      this.t1LandPrice = fromWeiEther(this.t1LandPriceInWei);
-      this.t2LandPriceInWei = await this.getCBKLandPrice({tier: 2, currency: this.selectedCurrency});
-      this.t2LandPrice = fromWeiEther(this.t2LandPriceInWei);
-      this.t3LandPriceInWei = await this.getCBKLandPrice({tier: 3, currency: this.selectedCurrency});
-      this.t3LandPrice = fromWeiEther(this.t3LandPriceInWei);
+      this.t1LandPrice = await this.getCBKLandPrice({tier: 1, currency: this.selectedCurrency});
+      this.t2LandPrice = await this.getCBKLandPrice({tier: 2, currency: this.selectedCurrency});
+      this.t3LandPrice = await this.getCBKLandPrice({tier: 3, currency: this.selectedCurrency});
     },
 
     async updateChunksPopulation(zoneId: number) {
@@ -997,45 +988,68 @@ export default Vue.extend({
     },
 
     async claimLand(chunkId: number) {
-      if (!(this.selectedT2ReservationId || this.selectedT3ReservationId)) {
+      if (!this.selectedReservation) {
         return;
       }
 
-      if(this.selectedTier === 2 && this.selectedT2ReservationId) {
-        await this.claimPlayerReservedLand({
-          reservationId: this.selectedT2ReservationId,
-          chunkId,
-          tier: this.selectedTier
-        }).then(async () => {
-          if (this.selectedZone !== undefined) {
-            await this.updateChunksPopulation(this.selectedZone);
-          }
-          (this.$refs['t2-claim-zone-modal'] as BModal).hide();
-          (this.$refs['t2-claim-map-modal'] as BModal).hide();
-          (this.$refs['t3-claim-zone-modal'] as BModal).hide();
-          (this.$refs['t3-claim-map-modal'] as BModal).hide();
-          const results = await this.getOwnedLands();
-          this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
-        });
+      await this.claimPlayerReservedLand({
+        reservationId: this.selectedReservation.id,
+        chunkId,
+        tier: this.selectedReservation.tier
+      });
+      if (this.selectedZone !== undefined) {
+        await this.updateChunksPopulation(this.selectedZone);
       }
-      if(this.selectedTier === 3 && this.selectedT3ReservationId) {
-        await this.claimPlayerReservedLand({
-          reservationId: this.selectedT3ReservationId,
-          chunkId,
-          tier: this.selectedTier
-        }).then(async () => {
-          if (this.selectedZone !== undefined) {
-            await this.updateChunksPopulation(this.selectedZone);
-          }
-          (this.$refs['t2-claim-zone-modal'] as BModal).hide();
-          (this.$refs['t2-claim-map-modal'] as BModal).hide();
-          (this.$refs['t3-claim-zone-modal'] as BModal).hide();
-          (this.$refs['t3-claim-map-modal'] as BModal).hide();
-          const results = await this.getOwnedLands();
-          this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
-        });
-      }
+      (this.$refs['t2-claim-zone-modal'] as BModal).hide();
+      (this.$refs['t2-claim-map-modal'] as BModal).hide();
+      (this.$refs['t3-claim-zone-modal'] as BModal).hide();
+      (this.$refs['t3-claim-map-modal'] as BModal).hide();
+      await this.fetchOwnedLands();
       await this.checkIfCanPurchaseLand();
+    },
+
+    userHasReservationsForTier(tier: number) {
+      return this.reservations.filter(reservation => reservation.tier === tier).flatMap(reservation => reservation.chunks).length !== 0;
+    },
+
+    reservationsIncludeChunkIdForTier(chunkId: number, tier: number) {
+      return this.reservations.filter(reservation => reservation.tier === tier).flatMap(reservation => reservation.chunks).includes(chunkId);
+    },
+
+    reservationsIncludeZoneIdForTier(zoneId: number, tier: number) {
+      return this.reservations.filter(reservation => reservation.tier === tier).flatMap(reservation => reservation.zones).includes(zoneId);
+    },
+
+    async fetchReservations() {
+      const playerReservedLand = await this.getPlayerReservedLand();
+      if (playerReservedLand) {
+        this.takenT3Chunks = await this.getTakenT3Chunks();
+        const t2Reservations = await Promise.all(playerReservedLand.t2Reservations.map(async (reservationId) => {
+          return await this.mapToReservation(reservationId, 2);
+        }));
+
+        const t3Reservations = await Promise.all(playerReservedLand.t3Reservations.map(async (reservationId) => {
+          return await this.mapToReservation(reservationId, 3);
+        }));
+        this.reservations = [...t2Reservations, ...t3Reservations];
+      }
+    },
+
+    async mapToReservation(id: number, tier: number) {
+      let chunks = await this.getChunksOfReservation({reservationId: id});
+      if(tier === 3 ) {
+        chunks = _.without(chunks.flat(), ...this.takenT3Chunks);
+      }
+      const zones = [...new Set(chunks.map(chunkId => this.calculateZoneId(chunkId)))];
+      chunks = chunks.map(Number);
+      return {id, tier, chunks, zones,} as Reservation;
+    },
+
+    async fetchOwnedLands() {
+      const results = await this.getOwnedLands();
+      if(results){
+        this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1], reseller: result[4]}));
+      }
     },
 
     buyButtonDisabled(type: string) {
@@ -1152,21 +1166,10 @@ export default Vue.extend({
     this.landSaleAllowed = await this.fetchIsLandSaleAllowed();
 
     await this.checkIfCanPurchaseLand();
-    this.checkIfCanPurchaseLandInterval = setInterval(async () => {
-      await this.checkIfCanPurchaseLand();
-    }, 3000);
+    this.checkIfCanPurchaseLandInterval = setInterval(await this.checkIfCanPurchaseLand,3000);
 
-    const results = await this.getOwnedLands();
-    if(results){
-      this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
-    }
-
-    this.checkOwnedLandsInterval = setInterval(async () => {
-      const results = await this.getOwnedLands();
-      if(results) {
-        this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1]}));
-      }
-    }, 3000);
+    await this.fetchOwnedLands();
+    this.checkOwnedLandsInterval = setInterval(await this.fetchOwnedLands, 3000);
 
     this.reservedChunks = await this.getReservedChunksIds();
     const {t1Land, t2Land, t3Land} = await this.getAvailableLand();
@@ -1175,72 +1178,9 @@ export default Vue.extend({
     this.t3LandAvailable = t3Land !== '0';
     await this.refreshLandPrices();
     await this.onCurrencyChange();
-    const playerReservedLand = await this.getPlayerReservedLand();
-    if(playerReservedLand){
-      Promise.all(playerReservedLand.t2Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
-        .then(playerReservedT2Chunks => {
-          playerReservedLand.t2Reservations.map((reservationId, index) =>
-            this.reservationIdT2ToChunks.set(+reservationId, playerReservedT2Chunks[index].map(chunkId => +chunkId)));
-          this.playerReservedT2Chunks = playerReservedT2Chunks.flat();
-          const zonesIds: number[] = [];
-          this.playerReservedT2Chunks.forEach(chunkId => {
-            const zoneId = this.calculateZoneId(chunkId);
-            if(zonesIds.indexOf(zoneId) === -1) {
-              zonesIds.push(zoneId);
-            }
-          });
-          this.playerReservedT2Zones = zonesIds;
-        });
-      Promise.all(playerReservedLand.t3Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
-        .then(async playerReservedT3Chunks => {
-          this.takenT3Chunks = await this.getTakenT3Chunks();
-          this.playerReservedT3Chunks = _.without(playerReservedT3Chunks.flat(), ...this.takenT3Chunks);
-          playerReservedLand.t3Reservations.map((reservationId, index) =>
-            this.reservationIdT3ToChunks.set(+reservationId, playerReservedT3Chunks[index]
-              .filter(chunkId => !this.takenT3Chunks.includes(chunkId)).map(chunkId => +chunkId)));
-          const zonesIds: number[] = [];
-          this.playerReservedT3Chunks.forEach(chunkId => {
-            const zoneId = this.calculateZoneId(chunkId);
-            if (zonesIds.indexOf(zoneId) === -1) {
-              zonesIds.push(zoneId);
-            }
-          });
-          this.playerReservedT3Zones = zonesIds;
-        });
-    }
-    this.checkPlayerReservedLandInterval = setInterval(async () => {
-      const playerReservedLand = await this.getPlayerReservedLand();
-      Promise.all(playerReservedLand.t2Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
-        .then(playerReservedT2Chunks => {
-          playerReservedLand.t2Reservations.map((reservationId, index) =>
-            this.reservationIdT2ToChunks.set(+reservationId, playerReservedT2Chunks[index].map(chunkId => +chunkId)));
-          this.playerReservedT2Chunks = playerReservedT2Chunks.flat();
-          const zonesIds: number[] = [];
-          this.playerReservedT2Chunks.forEach(chunkId => {
-            const zoneId = this.calculateZoneId(chunkId);
-            if(zonesIds.indexOf(zoneId) === -1) {
-              zonesIds.push(zoneId);
-            }
-          });
-          this.playerReservedT2Zones = zonesIds;
-        });
-      Promise.all(playerReservedLand.t3Reservations.map(reservationId => this.getChunksOfReservation({reservationId})))
-        .then(async playerReservedT3Chunks => {
-          this.takenT3Chunks = await this.getTakenT3Chunks();
-          this.playerReservedT3Chunks = _.without(playerReservedT3Chunks.flat(), ...this.takenT3Chunks);
-          playerReservedLand.t3Reservations.map((reservationId, index) =>
-            this.reservationIdT3ToChunks.set(+reservationId, playerReservedT3Chunks[index]
-              .filter(chunkId => !this.takenT3Chunks.includes(chunkId)).map(chunkId => +chunkId)));
-          const zonesIds: number[] = [];
-          this.playerReservedT3Chunks.forEach(chunkId => {
-            const zoneId = this.calculateZoneId(chunkId);
-            if (zonesIds.indexOf(zoneId) === -1) {
-              zonesIds.push(zoneId);
-            }
-          });
-          this.playerReservedT3Zones = zonesIds;
-        });
-    }, 3000);
+
+    await this.fetchReservations();
+    this.checkPlayerReservedLandInterval = setInterval(await this.fetchReservations, 3000);
   },
 
   beforeDestroy() {

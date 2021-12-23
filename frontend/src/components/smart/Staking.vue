@@ -46,8 +46,9 @@
       <div class="stakePage medium-dark-bg">
         <div class="sPElement input">
           <div class="inputBody">
-            <div class="flex_row">
+            <div :class="isNftStaking ? 'd-flex align-items-center w-100' : 'flex_row'">
               <input
+                v-if="!isNftStaking"
                 class="token-amount-input"
                 inputmode="decimal"
                 :title="$t('stake.tokenAmount')"
@@ -62,9 +63,20 @@
                 value=""
                 v-model="textAmount"
               />
-              <div class="ant-col">{{ stakingTokenName }}</div>
+              <div v-if="isNftStaking" class="mr-2 ml-3">ID:</div>
+              <b-form-select
+                class="w-100"
+                v-if="isNftStaking"
+                :title="$t('stake.tokenAmount')"
+                v-model="idToStake">
+                <template #first>
+                  <b-form-select-option :value="null" disabled>{{$t('stake.pickId')}}</b-form-select-option>
+                </template>
+                <option v-for="x in (isDeposit ? ownedLandIds : stakedIds)" :value="x.id" :key="x.id">{{x.id}} ({{$t('stake.tier')}} {{x.tier}})</option>
+              </b-form-select>
+              <div :class="isNftStaking ? 'ml-2 mr-3' : 'ant-col'">{{ stakingTokenName }}</div>
             </div>
-            <div class="balance" id="balance" @click="onMAX">
+            <div class="balance" id="balance" @click="!isNftStaking && onMAX">
               {{$t('stake.wallet')}} {{ inputSideBalance }}
             </div>
           </div>
@@ -94,7 +106,7 @@
                 {{ stakingTokenName }}
               </div>
             </div>
-            <div class="balance" id="balance" @click="onMAX">
+            <div class="balance" id="balance" @click="!isNftStaking && onMAX">
               {{$t('stake.wallet')}} {{ outputSideBalance }}
             </div>
           </div>
@@ -152,7 +164,7 @@ import { toBN } from '../../utils/common';
 import { mapActions, mapState } from 'vuex';
 
 import { formatDurationFromSeconds, secondsToDDHHMMSS } from '../../utils/date-time';
-import { isStakeType } from '../../interfaces/State';
+import { isStakeType, isNftStakeType } from '../../interfaces/State';
 
 
 export default {
@@ -160,14 +172,15 @@ export default {
     stakeType: {
       type: String,
       validator(type) {
-        return isStakeType(type);
+        return isStakeType(type) || isNftStakeType(type);
       }
-    }
+    },
   },
 
   data() {
     return {
       textAmount: '',
+      idToStake: null,
       isDeposit: true,
       loading: false,
       errorWhenUpdating: null,
@@ -175,10 +188,16 @@ export default {
 
       stakeUnlockTimeLeftCurrentEstimate: 0,
       stakeRewardDistributionTimeLeftCurrentEstimate: 0,
+      ownedLandIds: [],
+      stakedIds: []
     };
   },
   async mounted() {
     await this.fetchData();
+
+    if(this.stakeType.startsWith('cbkLand')) {
+      await this.updateOwnedLands();
+    }
 
     this.stakeUnlockTimeLeftCurrentEstimate = this.unlockTimeLeftInternal;
     this.stakeRewardDistributionTimeLeftCurrentEstimate = this.rewardDistributionTimeLeftInternal;
@@ -214,13 +233,17 @@ export default {
       case 'lp':
       case 'lp2':
         return 'SKILL-WBNB';
+      case 'cbkLandT1':
+      case 'cbkLandT2':
+      case 'cbkLandT3':
+        return 'CBKL';
       default:
         return 'unknown';
       }
     },
 
     stakingRewardsName() {
-      if(this.stakeType === 'king') return 'KING';
+      if(this.stakeType === 'king' || this.stakeType.startsWith('cbkLand')) return 'KING';
       return 'SKILL';
     },
 
@@ -274,12 +297,12 @@ export default {
 
     inputSideBalance() {
       const b = this.isDeposit ? this.walletBalance : this.stakedBalance;
-      return b.dividedBy(1e18).toFixed(6);
+      return this.isNftStaking ? b : b.dividedBy(1e18).toFixed(6);
     },
 
     outputSideBalance() {
       const b = this.isDeposit ? this.stakedBalance : this.walletBalance;
-      return b.dividedBy(1e18).toFixed(6);
+      return this.isNftStaking ? b : b.dividedBy(1e18).toFixed(6);
     },
 
     currentState() {
@@ -311,7 +334,11 @@ export default {
         return 'waiting';
       }
 
-      if (this.textAmount <= 0) {
+      if (isStakeType(this.stakeType) && this.textAmount <= 0) {
+        return 'inputIsZero';
+      }
+
+      if (isNftStakeType(this.stakeType) && this.idToStake === null) {
         return 'inputIsZero';
       }
 
@@ -412,6 +439,10 @@ export default {
       const b = toBN(this.skillRewards);
       return b.dividedBy(1e18).toFixed(4);
     },
+
+    isNftStaking() {
+      return isNftStakeType(this.stakeType);
+    }
   },
   methods: {
     ...mapActions([
@@ -422,6 +453,8 @@ export default {
       'claimKingReward',
       'stakeUnclaimedRewards',
       'claimReward',
+      'getOwnedLandIdsWithTier',
+      'getStakedIds'
     ]),
 
     updateEstimates() {
@@ -465,8 +498,7 @@ export default {
     },
     async onSubmit() {
       if (this.loading || this.currentState !== 'ok') return;
-
-      const amount = this.bigNumberAmount.toString();
+      const amount = isNftStakeType(this.stakeType) ? this.idToStake.toString() : this.bigNumberAmount.toString();
 
       try {
         this.loading = true;
@@ -481,6 +513,10 @@ export default {
           else {
             await this.unstake({ amount, stakeType: this.stakeType });
           }
+        }
+        if(isNftStakeType(this.stakeType)) {
+          await this.updateOwnedLands();
+          this.idToStake = undefined;
         }
       } catch (e) {
         console.error(e);
@@ -533,6 +569,11 @@ export default {
         this.loading = false;
       }
     },
+
+    async updateOwnedLands() {
+      this.ownedLandIds = await this.getOwnedLandIdsWithTier();
+      this.stakedIds = await this.getStakedIds(this.stakeType);
+    }
   },
   watch: {
     rewardDistributionTimeLeftInternal(newValue, oldValue) {
@@ -574,6 +615,7 @@ export default {
     },
     isDeposit() {
       this.textAmount = '';
+      this.idToStake = undefined;
     },
     async defaultAccount(newVal) {
       if (newVal) {
