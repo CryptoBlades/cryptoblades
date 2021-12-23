@@ -54,7 +54,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev amount of points subtracted by losing duel
     uint8 public losingPoints;
     /// @dev max amount of top characters by tier
-    uint8 private _maxTopCharactersPerTier && seasonByCharacter[characterID] != currentRankedSeasonsPerTier;
+    uint8 private _maxTopCharactersPerTier;
     /// @dev percentage of duel cost charged when rerolling opponent
     uint256 public reRollFeePercent;
     /// @dev percentage of entry wager charged when withdrawing from arena with pending duel
@@ -184,7 +184,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         wageringFactor = 3;
         winningPoints = 5;
         losingPoints = 3;
-        _maxTopCharactersPerTier && seasonByCharacter[characterID] != currentRankedSeasonsPerTier = 4;
+        _maxTopCharactersPerTier = 4;
         reRollFeePercent = 25;
         withdrawFeePercent = 25;
         currentRankedSeason = 1;
@@ -212,12 +212,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             rankingPointsByCharacter[characterID] = 0;
         }
 
-        if (_topRankingCharactersByTier[tier].length < _maxTopCharactersPerTier && seasonByCharacter[characterID] != currentRankedSeasons) {
+        if (_topRankingCharactersByTier[tier].length < _maxTopCharactersPerTier && seasonByCharacter[characterID] != currentRankedSeason) {
             _topRankingCharactersByTier[tier].push(characterID);
         }
 
         if (seasonByCharacter[characterID] != currentRankedSeason) {
-            characterRankingPoints[characterID] = 0;
+            rankingPointsByCharacter[characterID] = 0;
             seasonByCharacter[characterID] = currentRankedSeason;
         }
 
