@@ -15,6 +15,9 @@ export default {
     Header,
     Main
   },
+  mounted() {
+    console.log('App Component '+this.$appIcon.Fire);
+  }
 };
 
 </script>

@@ -11,12 +11,13 @@
 <script>
 import HeaderNav from '@/components/HeaderNav';
 import HeaderBurgerMenu from '@/components/HeaderBurgerMenu';
+
 export default {
   name: 'Header',
   components : {
     HeaderNav,
     HeaderBurgerMenu
-  },
+  }
 };
 </script>
 

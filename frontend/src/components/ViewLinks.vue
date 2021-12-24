@@ -5,25 +5,25 @@
     </li>
     <li class="character">
       <router-link :to="{ name: 'character' }" exact class="nav-link">
-        <img src="../assets/new-ui/icon-character.png" alt="character">
+        <div class="icon" v-html="$appIcon.NavIcon.Character"></div>
         <div>Character</div>
       </router-link>
     </li>
     <li class="blacksmith">
       <router-link :to="{ name: 'blacksmith' }" exact class="nav-link">
-        <img src="../assets/new-ui/icon-blacksmith.png" alt="blacksmith">
+        <div class="icon" v-html="$appIcon.NavIcon.Blacksmith"></div>
         <div>Blacksmith</div>
       </router-link>
     </li>
     <li class="marketplace">
       <router-link :to="{ name: 'marketplace' }" exact class="nav-link">
-        <img src="../assets/new-ui/icon-balance.png" alt="marketplace">
+        <div class="icon" v-html="$appIcon.NavIcon.Marketplace"></div>
         <div>Marketplace</div>
       </router-link>
     </li>
     <li class="leaderboard">
       <router-link :to="{ name: 'leaderboard' }" exact class="nav-link leaderboard">
-        <img src="../assets/new-ui/icon-leaderboard.png" alt="leaderboard">
+        <div class="icon" v-html="$appIcon.NavIcon.Leaderboard"></div>
         <div>Leaderboard</div>
       </router-link>
     </li>
@@ -67,7 +67,7 @@ li .nav-link {
   font-weight: 500;
   text-align: center;
 }
-li .nav-link img {
+li .nav-link .icon {
   margin-bottom: 5px;
 }
 .play-to-earn {

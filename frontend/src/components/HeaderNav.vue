@@ -28,6 +28,9 @@ export default {
     currentRouteName() {
       return this.$route.name;
     }
+  },
+  mounted() {
+    console.log('Header Nav '+this.$appIcon.NavIcon.Character);
   }
 };
 </script>

@@ -16,7 +16,10 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import '@/styles/global.css';
 
+import {AppIcons} from '@/app-icons';
 import App from './App.vue';
+
+Vue.prototype.$appIcon = AppIcons;
 
 import {
   raid as featureFlagRaid,
