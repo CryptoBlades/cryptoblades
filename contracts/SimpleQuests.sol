@@ -13,12 +13,12 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
-    
+
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    
+
     function initialize() public initializer {
-        
+
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
@@ -47,7 +47,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         // pass 0 as ID to check if not on quest
         require(questData[0] == id, "On quest revert");
     }
-    
+
     uint8 public constant VAR_CONTRACT_ENABLED = 1;
     mapping(uint256 => uint256) public vars;
 
@@ -77,13 +77,13 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function requestQuest(uint256 characterID) external questsEnabled {
         uint256[3] questData = getCharacterQuestData
-        assertOnQuest(characterID, 0);
+//        assertOnQuest(characterID, 0);
         // submits a seed request with a randoms ID (this randoms ID is shared with all in a block)
         // it will complete by the randoms bot/contract automatically
     }
 
     function submitProgress(uint256 characterID, uint256 amount) external questsEnabled {
-        assertOnQuest()
+        assertOnQuest();
     }
 
     function submitProgressForced(uint256 characterID, uint256 amount) external restricted questsEnabled {

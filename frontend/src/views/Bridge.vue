@@ -645,7 +645,6 @@ export default Vue.extend({
   flex-wrap: wrap;
 }
 .btn{
-  width: 150px;
   line-height: 1.25em;
   height: 4em;
   white-space:nowrap;
