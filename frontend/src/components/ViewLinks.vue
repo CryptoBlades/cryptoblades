@@ -39,19 +39,19 @@
 
     <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">PvP</span>
+        <span class="gtag-link-others">{{ $t("viewLink.pvp") }}</span>
       </li>
     </router-link>
 
     <router-link v-if="quests" :to="{ name: 'quests' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">Quests</span>
+        <span class="gtag-link-others">{{ $t("viewLink.quests") }}</span>
       </li>
     </router-link>
 
     <router-link :to="{ name: 'treasury' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">Treasury</span>
+        <span class="gtag-link-others">{{ $t("viewLink.treasury") }}</span>
       </li>
     </router-link>
 
@@ -83,6 +83,6 @@ a {
 .nav-top-links > span {
   color: #BFA765;
   font-size: 1.1em;
-  padding: 0px 5px 0px 5px;
+  padding: 0 5px 0 5px;
 }
 </style>

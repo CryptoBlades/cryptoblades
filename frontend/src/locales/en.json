@@ -7,7 +7,9 @@
       "raid": "Raid",
       "pvp": "PvP",
       "market": "Market",
-      "stake": "Stake"
+      "stake": "Stake",
+      "quests": "Quests",
+      "treasury": "Treasury"
   },
   "ClaimRewardsBar":{
     "rewards": "Rewards",
