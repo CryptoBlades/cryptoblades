@@ -1,52 +1,57 @@
 <template>
   <b-navbar-nav>
 
-    <router-link :to="{ name: 'plaza' }" exact class="nav-link"
-    v-if="!featureFlagStakeOnly">
+    <router-link v-if="!stakeOnly" :to="{ name: 'plaza' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="plaza_screen">{{ $t("viewLink.plaza") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.plaza") }}</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'blacksmith' }" exact class="nav-link"   v-if="!featureFlagStakeOnly">
-      <li class="nav-item nav-top-links" >
-        <span class="gtag-link-others" tagname="blacksmith_screen">{{ $t("viewLink.blacksmith") }}</span>
-      </li>
-    </router-link>
-
-    <router-link :to="{ name: 'combat' }" exact class="nav-link"  v-if="!featureFlagStakeOnly">
-      <li class="nav-item nav-top-links" >
-        <span class="gtag-link-others" tagname="combat_screen">{{ $t("viewLink.combat") }}</span>
-      </li>
-    </router-link>
-
-    <router-link :to="{ name: 'raid' }" exact class="nav-link"  v-if="!featureFlagStakeOnly && featureFlagRaid">
+    <router-link v-if="!stakeOnly" :to="{ name: 'blacksmith' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="raid_screen">{{ $t("viewLink.raid") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.blacksmith") }}</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'market' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagMarket">
+    <router-link v-if="!stakeOnly" :to="{ name: 'combat' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="market_screen">{{ $t("viewLink.market") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.combat") }}</span>
+      </li>
+    </router-link>
+
+    <router-link v-if="!stakeOnly && raid" :to="{ name: 'raid' }" exact class="nav-link">
+      <li class="nav-item nav-top-links">
+        <span class="gtag-link-others">{{ $t("viewLink.raid") }}</span>
+      </li>
+    </router-link>
+
+    <router-link v-if="!stakeOnly && market" :to="{ name: 'market' }" exact class="nav-link">
+      <li class="nav-item nav-top-links">
+        <span class="gtag-link-others">{{ $t("viewLink.market") }}</span>
       </li>
     </router-link>
 
     <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="stake_screen">{{ $t("viewLink.stake") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.stake") }}</span>
       </li>
     </router-link>
 
-    <router-link v-if="featureFlagPvp" :to="{ name: 'pvp' }" exact class="nav-link">
+    <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="pvp_screen">PvP</span>
+        <span class="gtag-link-others">PvP</span>
+      </li>
+    </router-link>
+
+    <router-link v-if="quests" :to="{ name: 'quests' }" exact class="nav-link">
+      <li class="nav-item nav-top-links">
+        <span class="gtag-link-others">Quests</span>
       </li>
     </router-link>
 
     <router-link :to="{ name: 'treasury' }" exact class="nav-link">
-      <li class="nav-item nav-top-links" >
-        <span class="gtag-link-others" tagname="treasury_screen">Treasury</span>
+      <li class="nav-item nav-top-links">
+        <span class="gtag-link-others">Treasury</span>
       </li>
     </router-link>
 
@@ -54,21 +59,18 @@
 </template>
 
 <script>
-import { market as featureFlagMarket, portal as featureFlagPortal, pvp as featureFlagPvp } from '../feature-flags';
+import {market, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
 
 export default {
-  inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
-
-  computed: {
-    featureFlagMarket() {
-      return featureFlagMarket;
-    },
-    featureFlagPortal() {
-      return featureFlagPortal;
-    },
-    featureFlagPvp() {
-      return featureFlagPvp;
-    }
+  data() {
+    return {
+      stakeOnly,
+      raid,
+      market,
+      portal,
+      pvp,
+      quests,
+    };
   },
 };
 </script>
@@ -79,7 +81,7 @@ a {
 }
 
 .nav-top-links > span {
-  color : #BFA765;
+  color: #BFA765;
   font-size: 1.1em;
   padding: 0px 5px 0px 5px;
 }
