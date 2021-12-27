@@ -85,8 +85,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => bool) private _isWeaponInArena;
     /// @dev if shield is currently in the arena
     mapping(uint256 => bool) private _isShieldInArena;
-    /// @dev if opponent has been matched by someone else
-    mapping(uint256 => bool) public isMatched;
     /// @dev if defender is in a duel that has not finished processing
     mapping(uint256 => bool) public isDefending;
     /// @dev character's tier when it last entered arena. Used to reset rank if it changes
@@ -103,6 +101,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => uint256[]) private _topRankingCharactersByTier;
     /// @dev IDs of characters available for matchmaking by tier
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
+
+    // Note: we might want the NewDuel (NewMatch) event
 
     event DuelFinished(
         uint256 indexed attacker,
@@ -202,7 +202,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 shieldID,
         bool useShield
     ) external enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
-        // TODO: Fill
         uint256 wager = getEntryWager(characterID);
         uint8 tier = getArenaTier(characterID);
 
@@ -229,13 +228,21 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _isShieldInArena[shieldID] = true;
             shields.setNftVar(shieldID, 1, 1);
         }
-        
+
+        uint256 characterWager;
+
+        if (excessWagerByCharacter[characterID] != 0) {
+            characterWager = excessWagerByCharacter[characterID];
+        } else {
+            characterWager = fighterByCharacter[characterID].wager;
+        }
+
         _matchableCharactersByTier[tier].add(characterID);
         fighterByCharacter[characterID] = Fighter(
             characterID,
             weaponID,
             shieldID,
-            wager.add(getCharacterWager(characterID)),
+            wager.add(characterWager),
             useShield  
         );
         previousTierByCharacter[characterID] = getArenaTier(characterID);
@@ -322,7 +329,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             opponentID,
             block.timestamp
         );
-        isMatched[opponentID] = true;
         _matchableCharactersByTier[tier].remove(characterID);
         _matchableCharactersByTier[tier].remove(opponentID);
     }
@@ -339,19 +345,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev gets the amount of SKILL required to enter the arena
     function getEntryWager(uint256 characterID) public view returns (uint256) {
         return getDuelCost(characterID).mul(wageringFactor);
-    }
-
-    /// @dev get's a characters current wager
-    function getCharacterWager(uint256 characterID)
-        public
-        view
-        returns (uint256)
-    {
-        if (excessWagerByCharacter[characterID] != 0) {
-            return excessWagerByCharacter[characterID];
-        }
-
-        return fighterByCharacter[characterID].wager;
     }
 
     /// @dev gets the amount of SKILL that is risked per duel
