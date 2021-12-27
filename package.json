@@ -38,6 +38,7 @@
     "truffle-contract-size": "^2.0.1",
     "truffle-export-abi": "^1.0.1",
     "truffle-plugin-verify": "^0.5.17",
+    "vue-script2": "^2.1.0",
     "yargs": "^17.0.1"
   },
   "scripts": {

@@ -56,13 +56,14 @@
 import BN from 'bignumber.js';
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
-import { fromWeiEther, toBN } from '../utils/common';
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
+import {fromWeiEther, toBN} from '../utils/common';
 import Vue from 'vue';
 import i18n from '@/i18n';
 
 interface Data {
   recruitCost: string;
+  showAds: boolean;
 }
 
 export default Vue.extend({
@@ -108,6 +109,7 @@ export default Vue.extend({
   data() {
     return {
       recruitCost: '0',
+      showAds: false
     } as Data;
   },
 
@@ -131,6 +133,13 @@ export default Vue.extend({
       const balance = toBN(this.skillBalance);
       return balance.isGreaterThanOrEqualTo(cost);
     },
+    checkStorage() {
+      this.showAds =  localStorage.getItem('show-ads') === 'true';
+    },
+  },
+
+  async mounted() {
+    this.checkStorage();
   },
 
   components: {
