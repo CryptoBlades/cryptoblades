@@ -29,7 +29,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 attackerID;
         uint256 defenderID;
         uint256 createdAt;
-        bool isPending;
     }
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
@@ -65,8 +64,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint256 public seasonStartedAt;
     /// @dev interval of ranked season restarts
     uint256 public seasonDuration;
-    /// @dev minimum amount of seconds a character is in the cooldown queue
-    uint256 public cooldownSeconds;
     /// @dev amount of time a match finder has to make a decision
     uint256 public decisionSeconds;
     /// @dev amount of skill due for game coffers from tax
@@ -88,6 +85,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => bool) private _isWeaponInArena;
     /// @dev if shield is currently in the arena
     mapping(uint256 => bool) private _isShieldInArena;
+    /// @dev if opponent has been matched by someone else
+    mapping(uint256 => bool) public isMatched;
     /// @dev if defender is in a duel that has not finished processing
     mapping(uint256 => bool) public isDefending;
     /// @dev character's tier when it last entered arena. Used to reset rank if it changes
@@ -122,7 +121,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function _characterInArena(uint256 characterID) internal view {
         require(
             isCharacterInArena(characterID),
-            "Char not in the arena"
+            "Char not in arena"
         );
     }
 
@@ -190,7 +189,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         currentRankedSeason = 1;
         seasonStartedAt = block.timestamp;
         seasonDuration = 1 days;
-        cooldownSeconds = 2 minutes;
         decisionSeconds = 2 minutes;
         prizePercentages.push(60);
         prizePercentages.push(30);
@@ -222,11 +220,16 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         _isCharacterInArena[characterID] = true;
+        characters.setNftVar(characterID, 1, 1);
+
         _isWeaponInArena[characterID] = true;
+        weapons.setNftVar(weaponID, 1, 1);
+
         if (useShield) {
             _isShieldInArena[shieldID] = true;
+            shields.setNftVar(shieldID, 1, 1);
         }
-
+        
         _matchableCharactersByTier[tier].add(characterID);
         fighterByCharacter[characterID] = Fighter(
             characterID,
@@ -239,12 +242,89 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         excessWagerByCharacter[characterID] = 0;
 
         skillToken.transferFrom(msg.sender, address(this), wager);
+    }
 
-        characters.setNftVar(characterID, 1, 1);
-        weapons.setNftVar(weaponID, 1, 1);
-        if (useShield) {
-            shields.setNftVar(shieldID, 1, 1);
+    /// @dev attepts to find an opponent for a character
+    function findOpponent(uint256 characterID)
+        external
+        characterInArena(characterID)
+        isOwnedCharacter(characterID)
+    {
+        require(matchByFinder[characterID].createdAt == 0, "Already in match");
+
+        _assignOpponent(characterID);
+    }
+
+    /// @dev attempts to find a new opponent for a fee
+    function reRollOpponent(uint256 characterID)
+        external
+        characterInArena(characterID)
+        isOwnedCharacter(characterID)
+    {
+        require(matchByFinder[characterID].createdAt != 0, "Not in match");
+
+        _assignOpponent(characterID);
+
+        skillToken.transferFrom(
+            msg.sender,
+            address(this),
+            getDuelCost(characterID).mul(reRollFeePercent).div(100)
+        );
+    }
+
+    function _assignOpponent(uint256 characterID) private {
+        uint8 tier = getArenaTier(characterID);
+        EnumerableSet.UintSet storage matchableCharacters = _matchableCharactersByTier[tier];
+
+        require(matchableCharacters.length() != 0, "No enemy in tier");
+        require(!_duelQueue.contains(characterID), "Char dueling");
+
+        uint256 seed = randoms.getRandomSeed(msg.sender);
+        uint256 randomIndex = RandomUtil.randomSeededMinMax(
+            0,
+            matchableCharacters.length() - 1,
+            seed
+        );
+        uint256 opponentID;
+        uint256 matchableCharactersCount = matchableCharacters.length(); 
+        bool foundOpponent = false;
+
+        for (uint256 i = 0; i < matchableCharactersCount; i++) {
+            uint256 index = (randomIndex + 1) % matchableCharactersCount;
+            uint256 candidateID = matchableCharacters.at(index);
+
+            if (candidateID == characterID) {
+                if (matchableCharactersCount == 1) {
+                    break;
+                }
+                if (matchableCharacters.at(matchableCharactersCount - 1) == candidateID) {
+                    candidateID = matchableCharacters.at(0);
+                } else {
+                    candidateID = matchableCharacters.at(index + 1);
+                }
+            }
+            if (
+                characters.ownerOf(candidateID) ==
+                characters.ownerOf(characterID)
+            ) {
+                continue;
+            }
+
+            foundOpponent = true;
+            opponentID = candidateID;
+            break;
         }
+
+        require(foundOpponent, "No enemy found");
+
+        matchByFinder[characterID] = Match(
+            characterID,
+            opponentID,
+            block.timestamp
+        );
+        isMatched[opponentID] = true;
+        _matchableCharactersByTier[tier].remove(characterID);
+        _matchableCharactersByTier[tier].remove(opponentID);
     }
 
     /// @dev checks if a character is in the arena
