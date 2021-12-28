@@ -16,6 +16,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint8;
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
+    using SafeERC20 for IERC20;
+
 
     struct Fighter {
         uint256 characterID;
@@ -264,6 +266,33 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         skillToken.transferFrom(msg.sender, address(this), wager);
     }
 
+    /// @dev withdraws a character and its items from the arena.
+    /// if the character is in a battle, a penalty is charged
+    function withdrawFromArena(uint256 characterID) 
+        external
+        isOwnedCharacter(characterID)
+        characterInArena(characterID)
+    {
+        Fighter storage fighter = fighterByCharacter[characterID];
+        uint256 wager = fighter.wager;
+        uint256 entryWager = getEntryWager(characterID);
+
+        if (matchByFinder[characterID].createdAt != 0) {
+            if (wager < entryWager.mul(withdrawFeePercent).div(100)) {
+                wager = 0;
+            } else {
+                wager = wager.sub(entryWager.mul(withdrawFeePercent).div(100));
+            }
+        }
+
+        _removeCharacterFromArena(characterID);
+
+        excessWagerByCharacter[characterID] = 0;
+        fighter.wager = 0;
+
+        skillToken.safeTransfer(msg.sender, wager);
+    }
+
     /// @dev attepts to find an opponent for a character
     function findOpponent(uint256 characterID)
         external
@@ -421,5 +450,46 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         );
         _matchableCharactersByTier[tier].remove(characterID);
         _matchableCharactersByTier[tier].remove(opponentID);
+    }
+
+    /// @dev removes a character from arena and clears it's matches
+    function _removeCharacterFromArena(uint256 characterID)
+        private
+        characterInArena(characterID)
+    {
+        require(!isDefending[characterID], "Defender duel in process");
+
+        Fighter storage fighter = fighterByCharacter[characterID];
+
+        uint256 weaponID = fighter.weaponID;
+        uint256 shieldID = fighter.shieldID;
+
+        excessWagerByCharacter[characterID] = fighter.wager;
+
+        // Shield removed first before the fighter is deleted
+        if (fighter.useShield) {
+            _isShieldInArena[shieldID] = false;
+            shields.setNftVar(shieldID, 1, 0);
+        }
+
+        delete fighterByCharacter[characterID];
+        delete matchByFinder[characterID];
+
+        if (_duelQueue.contains(characterID)) {
+            _duelQueue.remove(characterID);
+        }
+
+        uint8 tier = getArenaTier(characterID);
+
+        if (_matchableCharactersByTier[tier].contains(characterID)) {
+            _matchableCharactersByTier[tier].remove(characterID);
+        }
+
+        _isCharacterInArena[characterID] = false;
+        _isWeaponInArena[weaponID] = false;
+
+        // setting characters, weapons and shield NFTVAR_BUSY to 0
+        characters.setNftVar(characterID, 1, 0);
+        weapons.setNftVar(weaponID, 1, 0);
     }
 }
