@@ -123,7 +123,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     Garrison public garrison;
     mapping(uint256 => bool) public isStaminaLocked;
-    mapping(uint256 => uint8) public lockedStaminaPoints;
+    mapping(uint256 => uint16) public lockedStaminaPoints;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -315,7 +315,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function getStaminaPoints(uint256 id) public view noFreshLookup(id) returns (uint8) {
         if(isStaminaLocked[id] == true) {
-            return lockedStaminaPoints[id];
+            return uint8(lockedStaminaPoints[id]);
         }
         return getStaminaPointsFromTimestamp(tokens[id].staminaTimestamp);
     }
