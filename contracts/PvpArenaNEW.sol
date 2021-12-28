@@ -126,6 +126,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         );
     }
 
+    modifier characterWithinDecisionTime(uint256 characterID) {
+        _characterWithinDecisionTime(characterID);
+        _;
+    }
+    
+    function _characterWithinDecisionTime(uint256 characterID) internal view {
+        require(
+            isCharacterWithinDecisionTime(characterID),
+            "Decision time expired"
+        );
+    }
+
     modifier isOwnedCharacter(uint256 characterID) {
         require(
             characters.ownerOf(characterID) == msg.sender);
@@ -280,6 +292,83 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         );
     }
 
+    /// @dev adds a character to the duel queue
+    function prepareDuel(uint256 attackerID)
+        external
+        isOwnedCharacter(attackerID)
+        characterInArena(attackerID)
+        characterWithinDecisionTime(attackerID)
+    {
+        require(!_duelQueue.contains(attackerID), "Char in duel queue");
+
+        uint256 defenderID = getOpponent(attackerID);
+
+        if (seasonByCharacter[attackerID] != currentRankedSeason) {
+            rankingPointsByCharacter[attackerID] = 0;
+            seasonByCharacter[attackerID] = currentRankedSeason;
+        }
+
+        if (seasonByCharacter[defenderID] != currentRankedSeason) {
+            rankingPointsByCharacter[defenderID] = 0;
+            seasonByCharacter[defenderID] = currentRankedSeason;
+        }
+
+        isDefending[defenderID] = true;
+
+        _duelQueue.add(attackerID);
+    }
+
+    /// @dev checks if a character is in the arena
+    function isCharacterInArena(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return _isCharacterInArena[characterID];
+    }
+
+    /// @dev wether or not the character is still in time to start a duel
+    function isCharacterWithinDecisionTime(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return
+            matchByFinder[characterID].createdAt.add(decisionSeconds) >
+            block.timestamp;
+    }
+
+    /// @dev gets the amount of SKILL required to enter the arena
+    function getEntryWager(uint256 characterID) public view returns (uint256) {
+        return getDuelCost(characterID).mul(wageringFactor);
+    }
+
+    /// @dev gets the amount of SKILL that is risked per duel
+    function getDuelCost(uint256 characterID) public view returns (uint256) {
+        int128 tierExtra = ABDKMath64x64
+            .divu(getArenaTier(characterID).mul(100), 100)
+            .mul(_tierWagerUSD);
+
+        return game.usdToSkill(_baseWagerUSD.add(tierExtra));
+    }
+
+    /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
+    function getArenaTier(uint256 characterID) public view returns (uint8) {
+        uint256 level = characters.getLevel(characterID);
+        return uint8(level.div(10));
+    }
+
+    /// @dev get an attacker's opponent
+    function getOpponent(uint256 attackerID) 
+        public
+        view
+        characterWithinDecisionTime(attackerID)
+        returns (uint256) 
+    {
+        return matchByFinder[attackerID].defenderID;
+    }
+
+    /// @dev assigns an opponent to a character
     function _assignOpponent(uint256 characterID) private {
         uint8 tier = getArenaTier(characterID);
         EnumerableSet.UintSet storage matchableCharacters = _matchableCharactersByTier[tier];
@@ -332,34 +421,5 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         );
         _matchableCharactersByTier[tier].remove(characterID);
         _matchableCharactersByTier[tier].remove(opponentID);
-    }
-
-    /// @dev checks if a character is in the arena
-    function isCharacterInArena(uint256 characterID)
-        public
-        view
-        returns (bool)
-    {
-        return _isCharacterInArena[characterID];
-    }
-
-    /// @dev gets the amount of SKILL required to enter the arena
-    function getEntryWager(uint256 characterID) public view returns (uint256) {
-        return getDuelCost(characterID).mul(wageringFactor);
-    }
-
-    /// @dev gets the amount of SKILL that is risked per duel
-    function getDuelCost(uint256 characterID) public view returns (uint256) {
-        int128 tierExtra = ABDKMath64x64
-            .divu(getArenaTier(characterID).mul(100), 100)
-            .mul(_tierWagerUSD);
-
-        return game.usdToSkill(_baseWagerUSD.add(tierExtra));
-    }
-
-    /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
-    function getArenaTier(uint256 characterID) public view returns (uint8) {
-        uint256 level = characters.getLevel(characterID);
-        return uint8(level.div(10));
     }
 }
