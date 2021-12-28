@@ -102,6 +102,7 @@ import i18n from '@/i18n';
 interface Data {
   recruitCost: string;
   garrisonTabActive: boolean;
+  showAds: boolean;
 }
 
 export default Vue.extend({
@@ -147,7 +148,8 @@ export default Vue.extend({
   data() {
     return {
       recruitCost: '0',
-      garrisonTabActive: false
+      garrisonTabActive: false,
+      showAds: false
     } as Data;
   },
 
@@ -171,6 +173,13 @@ export default Vue.extend({
       const balance = toBN(this.skillBalance);
       return balance.isGreaterThanOrEqualTo(cost);
     },
+    checkStorage() {
+      this.showAds =  localStorage.getItem('show-ads') === 'true';
+    },
+  },
+
+  async mounted() {
+    this.checkStorage();
   },
 
   components: {

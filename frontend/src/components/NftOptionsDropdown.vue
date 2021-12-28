@@ -75,8 +75,8 @@ export default Vue.extend({
     },
     showTransfer: {
       type: Boolean,
-      default: true
-    }
+      default: false,
+    },
   },
   data: () => ({
     receiverAddress: '' as string,

@@ -205,7 +205,7 @@
     },
     "links": {},
     "address": "0xD52e4004979DD3a44A7a6BB2F85A7b0c109e255a",
-    "transactionHash": "0xf33ea1e84c0f8a79c816b118bebfaf77118aabc67d8ab52e4b61221336f626c9"
+    "transactionHash": "0xa08ff585d8a599cf89aaf18207a156b4b21f8e9b81250c3f8ffd927160e842e3"
   },
   "build/contracts/CBKLand.json": {
     "events": {
@@ -1978,7 +1978,7 @@
     },
     "links": {},
     "address": "0x28857ccCCa599f0876792094870758A18F581Dc0",
-    "transactionHash": "0xbc7f573e4551d70aee8fbe3e77dfa769bca1a55f9d411a8124accf55645dedff"
+    "transactionHash": "0x5d04a9e0352276c94ec252e123cc033b4c52192070cc42b3551741b1a3d092ae"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2259,7 +2259,7 @@
     },
     "links": {},
     "address": "0x46419526a59ec1d73b72620ae16da091bE8486bd",
-    "transactionHash": "0x8c3c5b5d659a35329628886de3013034b8444327db436472c405fd8a4ce080fe"
+    "transactionHash": "0x6f529e6034209d45951073e6d52a2e72991797ad713cf6188af253ca2dd8d2d2"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
@@ -2811,7 +2811,7 @@
     },
     "links": {},
     "address": "0x71A57Fa35bdc38695a685af5652dfAA80466E55B",
-    "transactionHash": "0xae14a232169a8b37a6c5c0ca3683991142ce38f6c0f8739ab0dd0ddac61c8cf4"
+    "transactionHash": "0xaa6e46a8f0c6da7c7a0d6d434fb0476a05cc04ce3c705430ccbdaac50825c674"
   },
   "build/contracts/Migrations.json": {
     "events": {},
@@ -3154,7 +3154,7 @@
     "events": {},
     "links": {},
     "address": "0xbAC6B71a5bC3517Bee588299980B3C357a518e5C",
-    "transactionHash": "0xfb6e288560e68e2bd68e04f465ea72e133e54bf06cd2b45d7168a40c8cab26b4"
+    "transactionHash": "0xe650ad8df2654e3f214bb04d4174becfd519bdbcd5b5e8ba926a33bc1ea2164c"
   },
   "build/contracts/RaidBasic.json": {
     "events": {},
@@ -3512,7 +3512,7 @@
     },
     "links": {},
     "address": "0x1609BD8ea43b1c23dE90071B82CD08FA098DdCF3",
-    "transactionHash": "0xf1b32d6a8090bbd58925739dd283c91b606a456acc4b0bf840653a0f52ddec67"
+    "transactionHash": "0x75642c4d496605d6ba7adcde495376c80b074f0b0947b23a37c92d84f08cdf0a"
   },
   "build/contracts/SkillStakingRewards.json": {
     "events": {},
@@ -4287,6 +4287,6 @@
     },
     "links": {},
     "address": "0xe8f172B51186A4c8127D5eE05617dCA6aAf478fE",
-    "transactionHash": "0x7b3dbf75e77682320f137ead5f1a69e7782f172134e6ad964db675ead042b1c9"
+    "transactionHash": "0xa051ca520f22dd1b4064050f8dd662a674e9631efbf4a43f53777bb333f4b942"
   }
 }

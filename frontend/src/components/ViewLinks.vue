@@ -38,7 +38,7 @@
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'pvp' }" exact class="nav-link">
+    <router-link v-if="featureFlagPvp" :to="{ name: 'pvp' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
         <span class="gtag-link-others" tagname="pvp_screen">PvP</span>
       </li>
@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { market as featureFlagMarket, portal as featureFlagPortal } from '../feature-flags';
+import { market as featureFlagMarket, portal as featureFlagPortal, pvp as featureFlagPvp } from '../feature-flags';
 
 export default {
   inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
@@ -65,6 +65,9 @@ export default {
     },
     featureFlagPortal() {
       return featureFlagPortal;
+    },
+    featureFlagPvp() {
+      return featureFlagPvp;
     }
   },
 };

@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build && npm run crush-images && npm run copy:abi",
+    "build": "vue-cli-service build && npm run crush-images && npm run copy:abi && npm run copy:abiinterface && npm run copy:appconfig",
     "lint": "vue-cli-service lint",
     "start": "npm run serve",
     "crush-images": "node scripts/crush-images",
-    "copy:abi": "copyfiles -f \"../build/contracts/*.json\" ./dist/abi"
+    "copy:abi": "copyfiles -f \"../build/contracts/*.json\" ./dist/abi",
+    "copy:abiinterface": "copyfiles -f \"../build/abi-interfaces.ts\" ./dist/abi",
+    "copy:appconfig": "copyfiles -f \"../frontend/app-config.json\" ./dist/app"
   },
   "dependencies": {
     "@metamask/onboarding": "^1.0.1",
