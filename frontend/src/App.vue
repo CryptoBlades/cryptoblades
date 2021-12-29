@@ -280,6 +280,13 @@ export default {
     Events.$on('setting:hideRewards', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
     Events.$on('setting:hideWalletWarning', () => this.checkStorage());
+    // Events.$on('garrison:characterReceived', (e) => {
+    //   this.$dialog.notify.warning(`${i18n.t('app.warning.message.newCharacter')} ID: ${e.id} ${i18n.t('app.warning.message.inGarrison')}!`,
+    //     {
+    //       timeout: 5000,
+    //     },
+    //   );
+    // });
 
     document.body.addEventListener('click', (e) => {
       const tagname = e.target.getAttribute('tagname');
