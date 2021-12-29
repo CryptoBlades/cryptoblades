@@ -135,6 +135,7 @@ export interface IState {
   inGameOnlyFunds: string;
   directStakeBonusPercent: number;
   ownedCharacterIds: number[];
+  ownedGarrisonCharacterIds: number[];
   ownedWeaponIds: number[];
   ownedShieldIds: number[];
   ownedTrinketIds: number[];
@@ -146,6 +147,7 @@ export interface IState {
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
+  garrisonCharacters: Record<number, ICharacter>;
   characterStaminas: Record<number, number>;
   characterRenames: Record<number, string>;
   characterCosmetics: Record<number, string>;

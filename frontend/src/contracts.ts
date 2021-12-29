@@ -22,6 +22,7 @@ import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
 import { abi as blacksmithAbi } from '../../build/contracts/Blacksmith.json';
 import { abi as shieldsAbi } from '../../build/contracts/Shields.json';
+import { abi as garrisonAbi } from '../../build/contracts/Garrison.json';
 import { abi as cbkLandSaleAbi } from '../../build/contracts/CBKLandSale.json';
 import { abi as merchandiseAbi, networks as merchandiseNetworks } from '../../build/contracts/Merchandise.json';
 import { abi as cbkLandAbi } from '../../build/contracts/CBKLand.json';
@@ -240,6 +241,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
+  const garrisonAddr = await Characters.methods.garrison().call();
+  const Garrison = new web3.eth.Contract(garrisonAbi as Abi, garrisonAddr);
+
   const shieldsAddr = await Blacksmith.methods.shields().call();
   const Shields = new web3.eth.Contract(shieldsAbi as Abi, shieldsAddr);
 
@@ -356,7 +360,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   return {
     ...stakingContracts,
-    CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
+    CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, Garrison, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,

@@ -85,7 +85,11 @@
     "buyBNBTransak" : "buy BNB with Transak",
     "recruitNew": "Recruit new character",
     "recruit": "Recruit",
-    "couldNotMint":"Could not mint character: insufficient funds or transaction denied."
+    "couldNotMint":"Could not mint character: insufficient funds or transaction denied.",
+    "plaza": "Plaza",
+    "plazaHint": "Your active characters are in Plaza.",
+    "garrison": "Garrison",
+    "garrisonHint": "Your idle characters are in Garrison. While in Garrison they cannot fight and their stamina does not regenerate."
   },
   "characterList" : {
     "level" : "Level",
@@ -109,7 +113,10 @@
     "changeCharacterTrait" : "Change Character's Trait",
     "pickTrait" : "Pick a trait to switch to.",
     "changeCharacterSkin" : "Change Character's Skin",
-    "pickSkin" : "Pick a skin to switch to."
+    "pickSkin" : "Pick a skin to switch to.",
+    "sendToGarrison": "Send to Garrison",
+    "restoreToPlaza": "Restore to Plaza",
+    "plazaFull": "Your Plaza is full..."
   },
   "weaponGrid":{
     "stars" : "Stars",

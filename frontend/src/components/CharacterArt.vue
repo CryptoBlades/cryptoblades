@@ -34,10 +34,10 @@
     </div>
     </div>
 
-    <div v-if="!portrait && isMarket" class="small-stamina-char"
-      :style="`--staminaReady: ${(timestampToStamina(character.staminaTimestamp)/maxStamina)*100}%;`"
+    <div v-if="!portrait && (isMarket || isGarrison)" class="small-stamina-char"
+      :style="`--staminaReady: ${(characterStamina/maxStamina)*100}%;`"
       v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
-      <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ timestampToStamina(character.staminaTimestamp) }} / 200</div>
+      <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ characterStamina }} / 200</div>
     </div>
 
     <div class="xp" v-if="!portrait">
@@ -81,7 +81,7 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character', 'portrait', 'isMarket'],
+  props: ['character', 'portrait', 'isMarket', 'isGarrison'],
   components: {
     //SmallButton,
   },
@@ -112,17 +112,23 @@ export default {
   },
 
   computed: {
-    ...mapState(['maxStamina']),
+    ...mapState(['maxStamina', 'characterStaminas']),
     ...mapGetters([
       'getCharacterName',
       'getCharacterUnclaimedXp',
       'timeUntilCharacterHasMaxStamina',
       'charactersWithIds',
+      'garrisonCharactersWithIds'
     ]),
 
     characterTrait() {
-      const characterWithId = this.charactersWithIds && this.charactersWithIds([this.character.id]);
-      return characterWithId && CharacterTrait[characterWithId[0].trait] || CharacterTrait[this.character.trait];
+      const characterWithId = this.charactersWithIds &&
+        this.isGarrison ? this.garrisonCharactersWithIds([this.character.id])[0] : this.charactersWithIds([this.character.id])[0];
+      return characterWithId && CharacterTrait[characterWithId.trait] || CharacterTrait[this.character.trait];
+    },
+
+    characterStamina() {
+      return this.isGarrison ? this.characterStaminas[this.character.id] : this.timestampToStamina(this.character.staminaTimestamp);
     }
   },
 

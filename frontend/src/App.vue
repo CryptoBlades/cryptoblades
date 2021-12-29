@@ -114,7 +114,8 @@ export default {
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
+    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl',
+      'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
       return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
@@ -319,6 +320,9 @@ export default {
 
     this.pollCharactersStaminaIntervalId = setInterval(async () => {
       this.ownCharacters.forEach(async (c) => {
+        await this.updateCharacterStamina(c.id);
+      });
+      this.ownGarrisonCharacters.forEach(async (c) => {
         await this.updateCharacterStamina(c.id);
       });
     }, 3000);
