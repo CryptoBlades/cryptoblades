@@ -368,26 +368,24 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             performDuels(duelQueue);
         }
 
-        // Note: Loops over 15 tiers. Should not be reachable anytime in the foreseeable future.
+        // Loops over 15 tiers. Should not be reachable anytime in the foreseeable future
         for (uint8 i = 0; i <= 15; i++) {
             if (_topRankingCharactersByTier[i].length == 0) {
                 continue;
             }
 
-            uint256 difference;
+            uint256 difference = 0;
 
             if (_topRankingCharactersByTier[i].length <= prizePercentages.length) {
                 difference = prizePercentages.length - _topRankingCharactersByTier[i].length;
-            } else {
-                difference = 0;
             }
 
-            // Note: If there are less players than top positions, excess is transferred to top 1.
+            // If there are less players than top positions, excess is transferred to top 1
             if (_topRankingCharactersByTier[i].length < prizePercentages.length) {
                 uint256 excessPercentage;
                 address topOnePlayer = characters.ownerOf(_topRankingCharactersByTier[i][0]);
 
-                // Note: We accumulate excess percentage.
+                // We accumulate excess percentage
                 for (
                     uint256 j = prizePercentages.length - difference;
                     j < prizePercentages.length;
@@ -398,7 +396,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                     );
                 }
 
-                // Note: We assign excessive rewards to top 1 player.
+                // We assign excessive rewards to top 1 player
                 _rankingRewardsByPlayer[
                     topOnePlayer
                 ] = _rankingRewardsByPlayer[topOnePlayer].add(
@@ -406,12 +404,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 );
             }
 
-            // Note: We assign rewards normally to all possible players.
+            // We assign rewards normally to all possible players
             for (uint8 h = 0; h < prizePercentages.length - difference; h++) {
                 _assignRewards(_topRankingCharactersByTier[i][h], h, _rankingsPoolByTier[i]);
             }
 
-            // Note: We reset ranking prize pools.
+            // We reset ranking prize pools
             _rankingsPoolByTier[i] = 0;
 
             // We reset top players' scores
