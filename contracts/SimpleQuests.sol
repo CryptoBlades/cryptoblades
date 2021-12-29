@@ -76,7 +76,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function requestQuest(uint256 characterID) external questsEnabled {
-        uint256[3] questData = getCharacterQuestData
+        uint256[3] questData = getCharacterQuestData(characterID);
 //        assertOnQuest(characterID, 0);
         // submits a seed request with a randoms ID (this randoms ID is shared with all in a block)
         // it will complete by the randoms bot/contract automatically
