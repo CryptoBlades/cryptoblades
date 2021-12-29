@@ -1148,6 +1148,7 @@ export function createStore(web3: Web3) {
                 const characterId = data.returnValues.character;
 
                 commit('addNewOwnedGarrisonCharacterId', characterId);
+                //Events.$emit('garrison:characterReceived', { id: characterId });
 
                 await Promise.all([
                   dispatch('fetchCharacter', { characterId }),

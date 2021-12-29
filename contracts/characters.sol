@@ -122,8 +122,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
 
     Garrison public garrison;
-    mapping(uint256 => bool) public isStaminaLocked;
-    mapping(uint256 => uint16) public lockedStaminaPoints;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -236,7 +234,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             CharacterCosmetics storage cc = cosmetics[tokenID];
             cc.seed = seed;
         }
-        
+
         return tokenID;
     }
 
@@ -314,9 +312,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getStaminaPoints(uint256 id) public view noFreshLookup(id) returns (uint8) {
-        if(isStaminaLocked[id] == true) {
-            return uint8(lockedStaminaPoints[id]);
-        }
         return getStaminaPointsFromTimestamp(tokens[id].staminaTimestamp);
     }
 
@@ -396,26 +391,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId) override public {
-        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to) && balanceOf(to) >= characterLimit) { 
+        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to) && balanceOf(to) >= characterLimit) {
             garrison.redirectToGarrison(to, tokenId);
             super.safeTransferFrom(from, address(garrison), tokenId);
         }
         else {
             super.safeTransferFrom(from, to, tokenId);
         }
-    }
-
-    function unlockStamina(uint256 tokenId) external restricted {
-        Character storage char = tokens[tokenId];
-        char.staminaTimestamp = uint64(now.sub(uint64(lockedStaminaPoints[tokenId].mul(secondsPerStamina))));
-        delete isStaminaLocked[tokenId];
-        delete lockedStaminaPoints[tokenId];
-    }
-
-    function lockStamina(uint256 tokenId) external restricted {
-        uint8 currentStaminaPoints = getStaminaPointsFromTimestamp(tokens[tokenId].staminaTimestamp);
-        lockedStaminaPoints[tokenId] = currentStaminaPoints;
-        isStaminaLocked[tokenId] = true;
     }
 
     function setCharacterLimit(uint256 max) public restricted {

@@ -73,7 +73,6 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
         characterOwner[id] = msg.sender;
         userGarrison[msg.sender].add(id);
         allCharactersInGarrison.add(id);
-        characters.lockStamina(id);
         characters.safeTransferFrom(msg.sender, address(this), id);
 
         emit CharacterReceived(id, msg.sender);
@@ -83,7 +82,6 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
         characterOwner[id] = user;
         userGarrison[user].add(id);
         allCharactersInGarrison.add(id);
-        characters.lockStamina(id);
 
         emit CharacterReceived(id, user);
     }
@@ -97,7 +95,6 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
         delete characterOwner[id];
         userGarrison[msg.sender].remove(id);
         allCharactersInGarrison.remove(id);
-        characters.unlockStamina(id);
         characters.safeTransferFrom(address(this), msg.sender, id);
     }
 

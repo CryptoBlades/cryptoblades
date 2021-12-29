@@ -733,7 +733,9 @@
         "watchGettingStartedVideo" : "Watch 'Getting Started' Video",
         "or": "or",
         "buyWithTransak" : "Buy with Transak",
-        "questionDiscord": "If you have any questions, please join our Discord:"
+        "questionDiscord": "If you have any questions, please join our Discord:",
+        "newCharacter": "New character",
+        "inGarrison:": "appeared in Garrison"
       }
     },
     "notification": {
