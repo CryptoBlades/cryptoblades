@@ -114,7 +114,8 @@ export default {
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl', 'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
+    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl',
+      'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
       return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
