@@ -16,6 +16,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     using SafeMath for uint8;
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
+    using SafeERC20 for IERC20;
+
 
     struct Fighter {
         uint256 characterID;
@@ -123,6 +125,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         require(
             isCharacterInArena(characterID),
             "Char not in arena"
+        );
+    }
+
+    modifier characterWithinDecisionTime(uint256 characterID) {
+        _characterWithinDecisionTime(characterID);
+        _;
+    }
+    
+    function _characterWithinDecisionTime(uint256 characterID) internal view {
+        require(
+            isCharacterWithinDecisionTime(characterID),
+            "Decision time expired"
         );
     }
 
@@ -252,6 +266,33 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         skillToken.transferFrom(msg.sender, address(this), wager);
     }
 
+    /// @dev withdraws a character and its items from the arena.
+    /// if the character is in a battle, a penalty is charged
+    function withdrawFromArena(uint256 characterID) 
+        external
+        isOwnedCharacter(characterID)
+        characterInArena(characterID)
+    {
+        Fighter storage fighter = fighterByCharacter[characterID];
+        uint256 wager = fighter.wager;
+        uint256 entryWager = getEntryWager(characterID);
+
+        if (matchByFinder[characterID].createdAt != 0) {
+            if (wager < entryWager.mul(withdrawFeePercent).div(100)) {
+                wager = 0;
+            } else {
+                wager = wager.sub(entryWager.mul(withdrawFeePercent).div(100));
+            }
+        }
+
+        _removeCharacterFromArena(characterID);
+
+        excessWagerByCharacter[characterID] = 0;
+        fighter.wager = 0;
+
+        skillToken.safeTransfer(msg.sender, wager);
+    }
+
     /// @dev attepts to find an opponent for a character
     function findOpponent(uint256 characterID)
         external
@@ -280,6 +321,83 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         );
     }
 
+    /// @dev adds a character to the duel queue
+    function prepareDuel(uint256 attackerID)
+        external
+        isOwnedCharacter(attackerID)
+        characterInArena(attackerID)
+        characterWithinDecisionTime(attackerID)
+    {
+        require(!_duelQueue.contains(attackerID), "Char in duel queue");
+
+        uint256 defenderID = getOpponent(attackerID);
+
+        if (seasonByCharacter[attackerID] != currentRankedSeason) {
+            rankingPointsByCharacter[attackerID] = 0;
+            seasonByCharacter[attackerID] = currentRankedSeason;
+        }
+
+        if (seasonByCharacter[defenderID] != currentRankedSeason) {
+            rankingPointsByCharacter[defenderID] = 0;
+            seasonByCharacter[defenderID] = currentRankedSeason;
+        }
+
+        isDefending[defenderID] = true;
+
+        _duelQueue.add(attackerID);
+    }
+
+    /// @dev checks if a character is in the arena
+    function isCharacterInArena(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return _isCharacterInArena[characterID];
+    }
+
+    /// @dev wether or not the character is still in time to start a duel
+    function isCharacterWithinDecisionTime(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return
+            matchByFinder[characterID].createdAt.add(decisionSeconds) >
+            block.timestamp;
+    }
+
+    /// @dev gets the amount of SKILL required to enter the arena
+    function getEntryWager(uint256 characterID) public view returns (uint256) {
+        return getDuelCost(characterID).mul(wageringFactor);
+    }
+
+    /// @dev gets the amount of SKILL that is risked per duel
+    function getDuelCost(uint256 characterID) public view returns (uint256) {
+        int128 tierExtra = ABDKMath64x64
+            .divu(getArenaTier(characterID).mul(100), 100)
+            .mul(_tierWagerUSD);
+
+        return game.usdToSkill(_baseWagerUSD.add(tierExtra));
+    }
+
+    /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
+    function getArenaTier(uint256 characterID) public view returns (uint8) {
+        uint256 level = characters.getLevel(characterID);
+        return uint8(level.div(10));
+    }
+
+    /// @dev get an attacker's opponent
+    function getOpponent(uint256 attackerID) 
+        public
+        view
+        characterWithinDecisionTime(attackerID)
+        returns (uint256) 
+    {
+        return matchByFinder[attackerID].defenderID;
+    }
+
+    /// @dev assigns an opponent to a character
     function _assignOpponent(uint256 characterID) private {
         uint8 tier = getArenaTier(characterID);
         EnumerableSet.UintSet storage matchableCharacters = _matchableCharactersByTier[tier];
@@ -334,32 +452,44 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _matchableCharactersByTier[tier].remove(opponentID);
     }
 
-    /// @dev checks if a character is in the arena
-    function isCharacterInArena(uint256 characterID)
-        public
-        view
-        returns (bool)
+    /// @dev removes a character from arena and clears it's matches
+    function _removeCharacterFromArena(uint256 characterID)
+        private
+        characterInArena(characterID)
     {
-        return _isCharacterInArena[characterID];
-    }
+        require(!isDefending[characterID], "Defender duel in process");
 
-    /// @dev gets the amount of SKILL required to enter the arena
-    function getEntryWager(uint256 characterID) public view returns (uint256) {
-        return getDuelCost(characterID).mul(wageringFactor);
-    }
+        Fighter storage fighter = fighterByCharacter[characterID];
 
-    /// @dev gets the amount of SKILL that is risked per duel
-    function getDuelCost(uint256 characterID) public view returns (uint256) {
-        int128 tierExtra = ABDKMath64x64
-            .divu(getArenaTier(characterID).mul(100), 100)
-            .mul(_tierWagerUSD);
+        uint256 weaponID = fighter.weaponID;
+        uint256 shieldID = fighter.shieldID;
 
-        return game.usdToSkill(_baseWagerUSD.add(tierExtra));
-    }
+        excessWagerByCharacter[characterID] = fighter.wager;
 
-    /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
-    function getArenaTier(uint256 characterID) public view returns (uint8) {
-        uint256 level = characters.getLevel(characterID);
-        return uint8(level.div(10));
+        // Shield removed first before the fighter is deleted
+        if (fighter.useShield) {
+            _isShieldInArena[shieldID] = false;
+            shields.setNftVar(shieldID, 1, 0);
+        }
+
+        delete fighterByCharacter[characterID];
+        delete matchByFinder[characterID];
+
+        if (_duelQueue.contains(characterID)) {
+            _duelQueue.remove(characterID);
+        }
+
+        uint8 tier = getArenaTier(characterID);
+
+        if (_matchableCharactersByTier[tier].contains(characterID)) {
+            _matchableCharactersByTier[tier].remove(characterID);
+        }
+
+        _isCharacterInArena[characterID] = false;
+        _isWeaponInArena[weaponID] = false;
+
+        // setting characters, weapons and shield NFTVAR_BUSY to 0
+        characters.setNftVar(characterID, 1, 0);
+        weapons.setNftVar(weaponID, 1, 0);
     }
 }
