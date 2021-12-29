@@ -6,11 +6,18 @@ import { Nft } from './Nft';
 import { IShield } from './Shield';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 
-export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king';
-export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king'];
+export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king' | 'skill90' | 'skill180' | 'king90' | 'king180';
+export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king', 'skill90', 'skill180', 'king90', 'king180'];
+export type NftStakeType = 'cbkLandT1' | 'cbkLandT2' | 'cbkLandT3';
+export const allNftStakeTypes: NftStakeType[] = ['cbkLandT1', 'cbkLandT2', 'cbkLandT3'];
+
 
 export function isStakeType(stakeType: string): stakeType is StakeType {
   return allStakeTypes.includes(stakeType as StakeType);
+}
+
+export function isNftStakeType(stakeType: string): stakeType is NftStakeType {
+  return allNftStakeTypes.includes(stakeType as NftStakeType);
 }
 
 export interface IWeb3EventSubscription {
@@ -156,8 +163,8 @@ export interface IState {
   currentNftType: string | null;
   currentNftId: number | null;
 
-  staking: Record<StakeType, IStakeState>;
-  stakeOverviews: Record<StakeType, IStakeOverviewState>;
+  staking: Record<StakeType | NftStakeType, IStakeState>;
+  stakeOverviews: Record<StakeType | NftStakeType, IStakeOverviewState>;
 
   raid: IRaidState;
 

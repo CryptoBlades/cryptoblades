@@ -27,13 +27,15 @@ import {
   IStakeState,
   IState,
   IWeb3EventSubscription,
-  StakeType
+  StakeType,
+  NftStakeType,
+  isNftStakeType
 } from './interfaces';
 import {getCharacterNameFromSeed} from './character-name';
 import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './contract-call-utils';
 
 import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly,} from './feature-flags';
-import {IERC20, IERC721, IStakingRewards} from '../../build/abi-interfaces';
+import {IERC20, IERC721, IStakingRewards, INftStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
 import {Nft} from './interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
@@ -52,14 +54,22 @@ interface SetEventSubscriptionsPayload {
 }
 
 type StakingRewardsAlias = Contract<IStakingRewards> | null;
+type NftStakingRewardsAlias = Contract<INftStakingRewards> | null;
 
 interface StakingContracts {
-  StakingRewards: StakingRewardsAlias,
-  StakingToken: Contract<IERC20> | null,
+  StakingRewards: NftStakingRewardsAlias | StakingRewardsAlias,
+  StakingToken: Contract<IERC20> | Contract<IERC721> | null,
   RewardToken: Contracts['SkillToken'],
 }
 
-function getStakingContracts(contracts: Contracts, stakeType: StakeType): StakingContracts {
+function getStakingContracts(contracts: Contracts, stakeType: StakeType | NftStakeType): StakingContracts {
+  if(isNftStakeType(stakeType)) {
+    return {
+      StakingRewards: contracts.nftStaking[stakeType]?.StakingRewards || null,
+      StakingToken: contracts.nftStaking[stakeType]?.StakingToken || null,
+      RewardToken: contracts.SkillToken
+    };
+  }
   return {
     StakingRewards: contracts.staking[stakeType]?.StakingRewards || null,
     StakingToken: contracts.staking[stakeType]?.StakingToken || null,
@@ -153,14 +163,28 @@ export function createStore(web3: Web3) {
         skill2: { ...defaultStakeState },
         lp: { ...defaultStakeState },
         lp2: { ...defaultStakeState },
-        king: { ...defaultStakeState }
+        king: { ...defaultStakeState },
+        king90: { ...defaultStakeState },
+        king180: { ...defaultStakeState },
+        skill90: { ...defaultStakeState },
+        skill180: { ...defaultStakeState },
+        cbkLandT1: { ...defaultStakeState },
+        cbkLandT2: { ...defaultStakeState },
+        cbkLandT3: { ...defaultStakeState }
       },
       stakeOverviews: {
         skill: { ...defaultStakeOverviewState },
         skill2: { ...defaultStakeOverviewState },
         lp: { ...defaultStakeOverviewState },
         lp2: { ...defaultStakeOverviewState },
-        king: { ...defaultStakeOverviewState }
+        king: { ...defaultStakeOverviewState },
+        king90: { ...defaultStakeOverviewState },
+        king180: { ...defaultStakeOverviewState },
+        skill90: { ...defaultStakeOverviewState },
+        skill180: { ...defaultStakeOverviewState },
+        cbkLandT1: { ...defaultStakeOverviewState },
+        cbkLandT2: { ...defaultStakeOverviewState },
+        cbkLandT3: { ...defaultStakeOverviewState }
       },
 
       raid: {
@@ -243,6 +267,10 @@ export function createStore(web3: Web3) {
 
       availableStakeTypes(state: IState) {
         return Object.keys(state.contracts().staking).filter(isStakeType);
+      },
+
+      availableNftStakeTypes(state: IState) {
+        return Object.keys(state.contracts().nftStaking).filter(isNftStakeType);
       },
 
       hasStakedBalance(state) {
@@ -1212,7 +1240,7 @@ export function createStore(web3: Web3) {
 
         }
 
-        function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias) {
+        function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias | NftStakingRewardsAlias) {
           if(!StakingRewards) return;
 
           subscriptions.push(
@@ -2092,6 +2120,12 @@ export function createStore(web3: Web3) {
           (getters.availableStakeTypes as StakeType[])
             .map(stakeType =>
               dispatch('fetchStakeOverviewDataPartial', { stakeType })
+            ),
+        );
+        await Promise.all(
+          (getters.availableNftStakeTypes as NftStakeType[])
+            .map(stakeType =>
+              dispatch('fetchStakeOverviewDataPartial', { stakeType })
             )
         );
       },
@@ -2149,7 +2183,7 @@ export function createStore(web3: Web3) {
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
 
-        const stakeData: { stakeType: StakeType } & IStakeState = {
+        const stakeData: { stakeType: StakeType | NftStakeType } & IStakeState = {
           stakeType,
           ownBalance,
           stakedBalance,
@@ -2199,6 +2233,26 @@ export function createStore(web3: Web3) {
         });
 
         await dispatch('fetchStakeDetails', { stakeType: 'king' });
+      },
+
+      async getStakedIds({ state }, stakeType) {
+        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
+        const CBKLand = state.contracts().CBKLand!;
+        if(!StakingRewards || !CBKLand || !state.defaultAccount || !isNftStakeType(stakeType)) return;
+
+        const stakedIds = await (StakingRewards as NftStakingRewardsAlias)?.methods.stakedIdsOf(state.defaultAccount).call({
+          from: state.defaultAccount,
+        });
+
+        if(!stakedIds) return [];
+
+        const landIdsWithTier = await Promise.all(stakedIds.map(async (landId: string) =>
+        {
+          const land = await CBKLand.methods.get(landId).call(defaultCallOptions(state));
+          return { id: landId, tier: land[0] };
+        }));
+
+        return landIdsWithTier;
       },
 
       async claimKingReward({ state, dispatch }) {
@@ -2629,6 +2683,25 @@ export function createStore(web3: Web3) {
 
         return await Promise.all(landsIds.map(landId => CBKLand.methods.get(landId).call(defaultCallOptions(state))));
       },
+
+      async getOwnedLandIdsWithTier({state}) {
+        const CBKLand = state.contracts().CBKLand!;
+
+        if (!state.defaultAccount || !CBKLand) return;
+
+        const landsIds = await CBKLand.methods
+          .getOwned(state.defaultAccount)
+          .call(defaultCallOptions(state));
+
+        const landIdsWithTier = await Promise.all(landsIds.map(async (landId: string) =>
+        {
+          const land = await CBKLand.methods.get(landId).call(defaultCallOptions(state));
+          return { id: landId, tier: land[0] };
+        }));
+
+        return landIdsWithTier;
+      },
+
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
