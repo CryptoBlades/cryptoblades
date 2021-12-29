@@ -102,6 +102,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(address => uint256) private _rankingRewardsByPlayer;
     /// @dev top ranking characters by tier
     mapping(uint8 => uint256[]) private _topRankingCharactersByTier;
+    /// @dev accumulated skill pool per tier
+    mapping(uint8 => uint256) private _rankingsPoolByTier;
     /// @dev IDs of characters available for matchmaking by tier
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
 
@@ -347,6 +349,76 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _duelQueue.add(attackerID);
     }
 
+    /// @dev allows a player to withdraw their ranking earnings
+    function withdrawRankedRewards() external {
+        uint256 amountToTransfer = _rankingRewardsByPlayer[msg.sender];
+
+        if (amountToTransfer > 0) {
+            _rankingRewardsByPlayer[msg.sender] = 0;
+
+            skillToken.safeTransfer(msg.sender, amountToTransfer);
+        }
+    }
+
+    /// @dev restarts ranked season
+    function restartRankedSeason() public restricted {
+        uint256[] memory duelQueue = getDuelQueue();
+
+        if (duelQueue.length > 0) {
+            performDuels(duelQueue);
+        }
+
+        // Loops over 15 tiers. Should not be reachable anytime in the foreseeable future
+        for (uint8 i = 0; i <= 15; i++) {
+            if (_topRankingCharactersByTier[i].length == 0) {
+                continue;
+            }
+
+            uint256 difference = 0;
+
+            if (_topRankingCharactersByTier[i].length <= prizePercentages.length) {
+                difference = prizePercentages.length - _topRankingCharactersByTier[i].length;
+            }
+
+            // If there are less players than top positions, excess is transferred to top 1
+            if (_topRankingCharactersByTier[i].length < prizePercentages.length) {
+                uint256 excessPercentage;
+                address topOnePlayer = characters.ownerOf(_topRankingCharactersByTier[i][0]);
+
+                // We accumulate excess percentage
+                for (
+                    uint256 j = prizePercentages.length - difference;
+                    j < prizePercentages.length;
+                    j++
+                ) {
+                    excessPercentage = excessPercentage.add(
+                        prizePercentages[j]
+                    );
+                }
+
+                // We assign excessive rewards to top 1 player
+                _rankingRewardsByPlayer[
+                    topOnePlayer
+                ] = _rankingRewardsByPlayer[topOnePlayer].add(
+                    (_rankingsPoolByTier[i].mul(excessPercentage)).div(100)
+                );
+            }
+
+            // We assign rewards normally to all possible players
+            for (uint8 h = 0; h < prizePercentages.length - difference; h++) {
+                _assignRewards(_topRankingCharactersByTier[i][h], h, _rankingsPoolByTier[i]);
+            }
+
+            // We reset ranking prize pools
+            _rankingsPoolByTier[i] = 0;
+
+            // We reset top players' scores
+            for (uint256 k = 0; k < 4; k++) {
+                rankingPointsByCharacter[_topRankingCharactersByTier[i][k]] = 0;
+            }
+        }
+    }
+
     /// @dev checks if a character is in the arena
     function isCharacterInArena(uint256 characterID)
         public
@@ -395,6 +467,55 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         returns (uint256) 
     {
         return matchByFinder[attackerID].defenderID;
+    }
+
+    /// @dev gets the accumulated ranking rewards pool per tier
+    function getRankingRewardsPool(uint8 tier) public view returns (uint256) {
+        return _rankingsPoolByTier[tier];
+    }
+
+    /// @dev get the top ranked characters by a character's ID
+    function getTierTopCharacters(uint256 characterID)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        uint8 tier = getArenaTier(characterID);
+        uint256 arrayLength;
+        // we return only the top 3 players, returning the array without the pivot ranker if it exists
+        if (_topRankingCharactersByTier[tier].length == _maxTopCharactersPerTier) {
+            arrayLength = _topRankingCharactersByTier[tier].length - 1;
+        } else {
+            arrayLength = _topRankingCharactersByTier[tier].length;
+        }
+        uint256[] memory topRankers = new uint256[](arrayLength);
+        for (uint256 i = 0; i < arrayLength; i++) {
+            topRankers[i] = _topRankingCharactersByTier[tier][i];
+        }
+
+        return topRankers;
+    }
+
+    /// @dev returns ranked prize percentages distribution
+    function getPrizePercentages() external view returns (uint256[] memory) {
+        return prizePercentages;
+    }
+
+    /// @dev returns the account's ranking prize pool earnings
+    function getPlayerPrizePoolRewards() view public returns(uint256){
+        return _rankingRewardsByPlayer[msg.sender];
+    }
+
+    /// @dev returns the current duel queue
+    function getDuelQueue() public view returns (uint256[] memory) {
+        uint256 length = _duelQueue.length();
+        uint256[] memory values = new uint256[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            values[i] = _duelQueue.at(i);
+        }
+
+        return values;
     }
 
     /// @dev assigns an opponent to a character
@@ -452,6 +573,21 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         _matchableCharactersByTier[tier].remove(opponentID);
     }
 
+    /// @dev increases a player's withdrawable funds depending on their position in the ranked leaderboard
+    function _assignRewards(
+        uint256 characterID,
+        uint8 position,
+        uint256 pool
+    ) private {
+        uint256 percentage = prizePercentages[position];
+        uint256 amountToTransfer = (pool.mul(percentage)).div(100);
+        address playerToTransfer = characters.ownerOf(characterID);
+
+        _rankingRewardsByPlayer[playerToTransfer] = _rankingRewardsByPlayer[
+            playerToTransfer
+        ].add(amountToTransfer);
+    }
+
     /// @dev removes a character from arena and clears it's matches
     function _removeCharacterFromArena(uint256 characterID)
         private
@@ -491,5 +627,86 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, 1, 0);
         weapons.setNftVar(weaponID, 1, 0);
+    }
+
+    function fillGameCoffers() public restricted {
+        skillToken.safeTransfer(address(game), gameCofferTaxDue);
+        game.trackIncome(gameCofferTaxDue);
+        gameCofferTaxDue = 0;
+    }
+
+    function setBaseWagerInCents(uint256 cents) external restricted {
+        _baseWagerUSD  = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setTierWagerInCents(uint256 cents) external restricted {
+        _tierWagerUSD = ABDKMath64x64.divu(cents, 100);
+    }
+
+    function setPrizePercentage(uint256 index, uint256 value) external restricted {
+        prizePercentages[index] = value;
+    }
+
+    function setWageringFactor(uint8 factor) external restricted {
+        wageringFactor = factor;
+    }
+
+    function setReRollFeePercent(uint256 percent) external restricted {
+        reRollFeePercent = percent;
+    }
+
+    function setWithdrawFeePercent(uint256 percent) external restricted {
+        withdrawFeePercent = percent;
+    }
+
+    function setRankingsPoolTaxPercent(uint8 percent) external restricted {
+        _rankingsPoolTaxPercent = percent;
+    }
+
+    function setDecisionSeconds(uint256 secs) external restricted {
+        decisionSeconds = secs;
+    }
+
+    function setWinningPoints(uint8 pts) external restricted {
+        winningPoints = pts;
+    }
+
+    function setLosingPoints(uint8 pts) external restricted {
+        losingPoints = pts;
+    }
+
+    function setMaxTopCharactersPerTier(uint8 max) external restricted {
+        _maxTopCharactersPerTier = max;
+    }
+
+    function setSeasonDuration(uint256 duration) external restricted {
+        seasonDuration = duration;
+    }
+
+    function setArenaAccess(uint256 accessFlags) external restricted {
+        arenaAccess = accessFlags;
+    }
+
+    // Note: The following are debugging functions. Remove later.
+    
+    function clearDuelQueue() external restricted {
+        uint256 length = _duelQueue.length();
+
+        for (uint256 i = 0; i < length; i++) {
+            if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
+                isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
+            }
+
+            _duelQueue.remove(_duelQueue.at(i));
+        }
+
+        isDefending[0] = false;
+    }
+
+    function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
+        public
+        restricted
+    {
+        rankingPointsByCharacter[characterID] = newRankingPoints;
     }
 }
