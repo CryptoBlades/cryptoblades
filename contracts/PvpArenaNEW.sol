@@ -72,7 +72,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint256 public seasonStartedAt;
     /// @dev interval of ranked season restarts
     uint256 public seasonDuration;
-    // TODO: USE THIS!!
     /// @dev amount of time a match finder has to make a decision
     uint256 public decisionSeconds;
     /// @dev amount of skill due for game coffers from tax
@@ -592,8 +591,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ].add(bountyDistribution.rankingPoolTax / 2);
 
             gameCofferTaxDue += bountyDistribution.rankingPoolTax / 2;
-
-            // TODO: Do we need to reset the match by finder?
             
             _duelQueue.remove(attackerID);
         }
