@@ -6,17 +6,20 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-
-import "../cryptoblades.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 
 // Inheritance
-import "./interfaces/IStakingRewards.sol";
+import "./interfaces/INftStakingRewards.sol";
 import "./RewardsDistributionRecipientUpgradeable.sol";
 import "./FailsafeUpgradeable.sol";
+import "../CBKLand.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/stakingrewards
-contract StakingRewardsUpgradeable is
-    IStakingRewards,
+contract NftStakingRewardsUpgradeable is
+    INftStakingRewards,
+    IERC721ReceiverUpgradeable,
     Initializable,
     RewardsDistributionRecipientUpgradeable,
     ReentrancyGuardUpgradeable,
@@ -25,14 +28,16 @@ contract StakingRewardsUpgradeable is
 {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
+    using EnumerableSet for EnumerableSet.UintSet;
 
     /* ========== STATE VARIABLES ========== */
 
     IERC20 public rewardsToken;
-    IERC20 public stakingToken;
+    IERC721 public stakingToken;
     uint256 public periodFinish;
     uint256 public override rewardRate;
     uint256 public override rewardsDuration;
+    uint256 public override minimumStakeAmount;
     uint256 public override minimumStakeTime;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
@@ -41,13 +46,9 @@ contract StakingRewardsUpgradeable is
     mapping(address => uint256) public rewards;
 
     uint256 private _totalSupply;
-    mapping(address => uint256) private _balances;
+    mapping(address => EnumerableSet.UintSet) private _userStakedNfts;
+    mapping(uint256 => address) private _stakedNftOwner;
     mapping(address => uint256) private _stakeTimestamp;
-
-    // used only by the SKILL-for-SKILL staking contract
-    CryptoBlades internal __game;
-
-    uint256 public override minimumStakeAmount;
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -65,11 +66,10 @@ contract StakingRewardsUpgradeable is
         __ReentrancyGuard_init_unchained();
         __RewardsDistributionRecipient_init_unchained();
 
-        // for consistency with the old contract
         transferOwnership(_owner);
 
         rewardsToken = IERC20(_rewardsToken);
-        stakingToken = IERC20(_stakingToken);
+        stakingToken = IERC721(_stakingToken);
         rewardsDistribution = _rewardsDistribution;
         minimumStakeTime = _minimumStakeTime;
 
@@ -78,23 +78,27 @@ contract StakingRewardsUpgradeable is
         rewardsDuration = 180 days;
     }
 
-    function migrateTo_8cb6e70(uint256 _minimumStakeAmount) external onlyOwner {
-        minimumStakeAmount = _minimumStakeAmount;
-    }
-
     /* ========== VIEWS ========== */
 
     function totalSupply() external view override returns (uint256) {
         return _totalSupply;
     }
 
-    function balanceOf(address account)
+    function stakedIdsOf(address account)
         external
         view
         override
-        returns (uint256)
+        returns (uint256[] memory stakedIds)
     {
-        return _balances[account];
+        uint256 amount = _userStakedNfts[account].length();
+        stakedIds = new uint256[](amount);
+
+        EnumerableSet.UintSet storage stakedNfts = _userStakedNfts[account];
+
+        for (uint256 i = 0; i < stakedNfts.length(); i++) {
+            uint256 id = stakedNfts.at(i);
+            stakedIds[i] = id;
+        }
     }
 
     function lastTimeRewardApplicable() public view override returns (uint256) {
@@ -110,16 +114,14 @@ contract StakingRewardsUpgradeable is
                 lastTimeRewardApplicable()
                     .sub(lastUpdateTime)
                     .mul(rewardRate)
-                    .mul(1e18)
                     .div(_totalSupply)
             );
     }
 
     function earned(address account) public view override returns (uint256) {
         return
-            _balances[account]
+            _userStakedNfts[account].length()
                 .mul(rewardPerToken().sub(userRewardPerTokenPaid[account]))
-                .div(1e18)
                 .add(rewards[account]);
     }
 
@@ -129,53 +131,68 @@ contract StakingRewardsUpgradeable is
 
     function getStakeRewardDistributionTimeLeft()
         external
-        override
         view
+        override
         returns (uint256)
     {
         (bool success, uint256 diff) = periodFinish.trySub(block.timestamp);
         return success ? diff : 0;
     }
 
-    function getStakeUnlockTimeLeft() external override view returns (uint256) {
-        if(periodFinish <= block.timestamp) return 0;
-        (bool success, uint256 diff) =
-            _stakeTimestamp[msg.sender].add(minimumStakeTime).trySub(
-                block.timestamp
-            );
+    function getStakeUnlockTimeLeft() external view override returns (uint256) {
+        (bool success, uint256 diff) = _stakeTimestamp[msg.sender]
+            .add(minimumStakeTime)
+            .trySub(block.timestamp);
         return success ? diff : 0;
+    }
+
+    function balanceOf(address account) external view override returns (uint256) {
+        return _userStakedNfts[account].length();
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    function stake(uint256 amount)
-        external
+    function stake(uint256 id)
+        public
+        virtual
         override
         normalMode
         nonReentrant
         whenNotPaused
         updateReward(msg.sender)
     {
-        _stake(msg.sender, amount);
-        stakingToken.safeTransferFrom(msg.sender, address(this), amount);
+        _totalSupply = _totalSupply.add(1);
+        _userStakedNfts[msg.sender].add(id);
+        _stakedNftOwner[id] = msg.sender;
+        if (_stakeTimestamp[msg.sender] == 0) {
+            _stakeTimestamp[msg.sender] = block.timestamp;
+        }
+        stakingToken.safeTransferFrom(msg.sender, address(this), id);
+        emit Staked(msg.sender, id);
     }
 
-    function withdraw(uint256 amount)
+    function withdraw(uint256 id)
         public
         override
         normalMode
         nonReentrant
+        isOwner(id)
         updateReward(msg.sender)
     {
         require(
             minimumStakeTime == 0 ||
                 block.timestamp.sub(_stakeTimestamp[msg.sender]) >=
-                minimumStakeTime ||
-                periodFinish <= block.timestamp,
+                minimumStakeTime,
             "Cannot withdraw until minimum staking time has passed"
         );
-        _unstake(msg.sender, amount);
-        stakingToken.safeTransfer(msg.sender, amount);
+        _totalSupply = _totalSupply.sub(1);
+        _userStakedNfts[msg.sender].remove(id);
+        delete _stakedNftOwner[id];
+        if (_userStakedNfts[msg.sender].length() == 0) {
+            _stakeTimestamp[msg.sender] = 0;
+        }
+        stakingToken.safeTransferFrom(address(this), msg.sender, id);
+        emit Withdrawn(msg.sender, id);
     }
 
     function getReward()
@@ -188,8 +205,7 @@ contract StakingRewardsUpgradeable is
         require(
             minimumStakeTime == 0 ||
                 block.timestamp.sub(_stakeTimestamp[msg.sender]) >=
-                minimumStakeTime ||
-                periodFinish <= block.timestamp,
+                minimumStakeTime,
             "Cannot get reward until minimum staking time has passed"
         );
         uint256 reward = rewards[msg.sender];
@@ -201,16 +217,41 @@ contract StakingRewardsUpgradeable is
     }
 
     function exit() external override normalMode {
-        withdraw(_balances[msg.sender]);
+        require(
+            minimumStakeTime == 0 ||
+                block.timestamp.sub(_stakeTimestamp[msg.sender]) >=
+                minimumStakeTime,
+            "Cannot withdraw until minimum staking time has passed"
+        );
+
+        uint256 amount = _userStakedNfts[msg.sender].length();
+        _totalSupply = _totalSupply.sub(amount);
+        EnumerableSet.UintSet storage stakedNfts = _userStakedNfts[msg.sender];
+
+        for (uint256 i = 0; i < stakedNfts.length(); i++) {
+            uint256 id = stakedNfts.at(i);
+            stakedNfts.remove(id);
+            delete _stakedNftOwner[id];
+            stakingToken.safeTransferFrom(address(this), msg.sender, id);
+        }
+
+        if (_userStakedNfts[msg.sender].length() == 0) {
+            _stakeTimestamp[msg.sender] = 0;
+        }
+
         getReward();
     }
 
     function recoverOwnStake() external failsafeMode {
-        uint256 amount = _balances[msg.sender];
-        if (amount > 0) {
-            _totalSupply = _totalSupply.sub(amount);
-            _balances[msg.sender] = _balances[msg.sender].sub(amount);
-            stakingToken.safeTransfer(msg.sender, amount);
+        uint256 amount = _userStakedNfts[msg.sender].length();
+        _totalSupply = _totalSupply.sub(amount);
+        EnumerableSet.UintSet storage stakedNfts = _userStakedNfts[msg.sender];
+
+        for (uint256 i = 0; i < stakedNfts.length(); i++) {
+            uint256 id = stakedNfts.at(i);
+            stakedNfts.remove(id);
+            delete _stakedNftOwner[id];
+            stakingToken.safeTransferFrom(address(this), msg.sender, id);
         }
     }
 
@@ -286,15 +327,6 @@ contract StakingRewardsUpgradeable is
         emit RewardsDurationUpdated(rewardsDuration);
     }
 
-    function setMinimumStakeTime(uint256 _minimumStakeTime)
-        external
-        normalMode
-        onlyOwner
-    {
-        minimumStakeTime = _minimumStakeTime;
-        emit MinimumStakeTimeUpdated(_minimumStakeTime);
-    }
-
     function setMinimumStakeAmount(uint256 _minimumStakeAmount)
         external
         normalMode
@@ -302,6 +334,15 @@ contract StakingRewardsUpgradeable is
     {
         minimumStakeAmount = _minimumStakeAmount;
         emit MinimumStakeAmountUpdated(_minimumStakeAmount);
+    }
+
+    function setMinimumStakeTime(uint256 _minimumStakeTime)
+        external
+        normalMode
+        onlyOwner
+    {
+        minimumStakeTime = _minimumStakeTime;
+        emit MinimumStakeTimeUpdated(_minimumStakeTime);
     }
 
     function enableFailsafeMode() public override normalMode onlyOwner {
@@ -314,51 +355,12 @@ contract StakingRewardsUpgradeable is
         super.enableFailsafeMode();
     }
 
-    function recoverExtraStakingTokensToOwner() external onlyOwner {
-        // stake() and withdraw() should guarantee that
-        // _totalSupply <= stakingToken.balanceOf(this)
-        uint256 stakingTokenAmountBelongingToOwner =
-            stakingToken.balanceOf(address(this)).sub(_totalSupply);
-
-        if (stakingTokenAmountBelongingToOwner > 0) {
-            stakingToken.safeTransfer(
-                owner(),
-                stakingTokenAmountBelongingToOwner
-            );
-        }
-    }
-
     function pause() external onlyOwner whenNotPaused {
         _pause();
     }
 
     function unpause() external onlyOwner whenPaused {
         _unpause();
-    }
-
-    /* ========== INTERNAL FUNCTIONS ========== */
-
-    function _stake(address staker, uint256 amount) internal
-    {
-        require(amount >= minimumStakeAmount, "Minimum stake amount required");
-        _totalSupply = _totalSupply.add(amount);
-        _balances[staker] = _balances[staker].add(amount);
-        _stakeTimestamp[staker] = block.timestamp; // reset timer on adding to stake
-
-        emit Staked(staker, amount);
-    }
-
-    function _unstake(address staker, uint256 amount) internal
-    {
-        require(amount > 0, "Cannot withdraw 0");
-        _totalSupply = _totalSupply.sub(amount);
-        _balances[staker] = _balances[staker].sub(amount);
-        if (_balances[staker] == 0) {
-            _stakeTimestamp[staker] = 0;
-        } else {
-            _stakeTimestamp[staker] = block.timestamp;
-        }
-        emit Withdrawn(staker, amount);
     }
 
     /* ========== MODIFIERS ========== */
@@ -382,7 +384,32 @@ contract StakingRewardsUpgradeable is
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
     event RewardsDurationUpdated(uint256 newDuration);
-    event MinimumStakeTimeUpdated(uint256 newMinimumStakeTime);
     event MinimumStakeAmountUpdated(uint256 newMinimumStakeAmount);
+    event MinimumStakeTimeUpdated(uint256 newMinimumStakeTime);
     event Recovered(address token, uint256 amount);
+
+    /* ========== MODIFIERS ========== */
+    modifier isOwner(uint256 id) {
+        require(_stakedNftOwner[id] == msg.sender, "Access denied");
+        _;
+    }
+
+    // something
+    function onERC721Received(
+        address, /* operator */
+        address, /* from */
+        uint256 _id,
+        bytes calldata /* data */
+    ) external override returns (bytes4) {
+        // NOTE: The contract address is always the message sender.
+        address _tokenAddress = msg.sender;
+
+        require(
+            address(stakingToken) ==_tokenAddress &&
+                _stakedNftOwner[_id] != address(0),
+            "Token ID not listed"
+        );
+
+        return IERC721ReceiverUpgradeable.onERC721Received.selector;
+    }
 }

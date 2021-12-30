@@ -148,4 +148,8 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function setTierStr(uint256 tier, uint256 index, string memory val) public restricted {
         tierStrData[tier][index] = val;
     }
+
+    function getLandTier(uint256 id) public view returns (uint256) {
+        return landData[id][LT];
+    }
 }

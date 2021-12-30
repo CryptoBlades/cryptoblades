@@ -6,7 +6,7 @@
       @click="nftType ? option.handler(nftId, nftType) : option.handler(nftId)">
         {{option.name}} <span v-if="!option.noAmount">({{option.amount}} {{$t('nftOptionsDropdown.left')}})</span>
       </b-dropdown-item>
-      <b-dropdown-item @click="resultMsg = ''; $refs['character-transfer-modal'].show()" v-if="showTransfer">
+      <b-dropdown-item v-if="showTransfer" @click="resultMsg = ''; $refs['character-transfer-modal'].show()">
         Transfer
       </b-dropdown-item>
     </b-dropdown>
