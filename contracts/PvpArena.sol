@@ -152,10 +152,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotUnderAttack(uint256 characterID) internal view {
-        require(
-            isCharacterNotUnderAttack(characterID),
-            "Under attack"
-        );
+        require(isCharacterNotUnderAttack(characterID), "Under attack");
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
@@ -402,14 +399,22 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             uint256 difference = 0;
 
-            if (_topRankingCharactersByTier[i].length <= prizePercentages.length) {
-                difference = prizePercentages.length - _topRankingCharactersByTier[i].length;
+            if (
+                _topRankingCharactersByTier[i].length <= prizePercentages.length
+            ) {
+                difference =
+                    prizePercentages.length -
+                    _topRankingCharactersByTier[i].length;
             }
 
             // If there are less players than top positions, excess is transferred to top 1
-            if (_topRankingCharactersByTier[i].length < prizePercentages.length) {
+            if (
+                _topRankingCharactersByTier[i].length < prizePercentages.length
+            ) {
                 uint256 excessPercentage;
-                address topOnePlayer = characters.ownerOf(_topRankingCharactersByTier[i][0]);
+                address topOnePlayer = characters.ownerOf(
+                    _topRankingCharactersByTier[i][0]
+                );
 
                 // We accumulate excess percentage
                 for (
@@ -423,16 +428,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 }
 
                 // We assign excessive rewards to top 1 player
-                _rankingRewardsByPlayer[
+                _rankingRewardsByPlayer[topOnePlayer] = _rankingRewardsByPlayer[
                     topOnePlayer
-                ] = _rankingRewardsByPlayer[topOnePlayer].add(
-                    (rankingsPoolByTier[i].mul(excessPercentage)).div(100)
-                );
+                ].add((rankingsPoolByTier[i].mul(excessPercentage)).div(100));
             }
 
             // We assign rewards normally to all possible players
             for (uint8 h = 0; h < prizePercentages.length - difference; h++) {
-                _assignRewards(_topRankingCharactersByTier[i][h], h, rankingsPoolByTier[i]);
+                _assignRewards(
+                    _topRankingCharactersByTier[i][h],
+                    h,
+                    rankingsPoolByTier[i]
+                );
             }
 
             // We reset ranking prize pools
@@ -591,7 +598,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ].add(bountyDistribution.rankingPoolTax / 2);
 
             gameCofferTaxDue += bountyDistribution.rankingPoolTax / 2;
-            
+
             _duelQueue.remove(attackerID);
         }
     }
@@ -600,7 +607,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function processWinner(uint256 winnerID) private {
         uint256 rankingPoints = rankingPointsByCharacter[winnerID];
         uint8 tier = getArenaTier(winnerID);
-        uint256[] storage topRankingCharacters = _topRankingCharactersByTier[tier];
+        uint256[] storage topRankingCharacters = _topRankingCharactersByTier[
+            tier
+        ];
         uint256 winnerPosition;
         bool winnerInRanking;
 
@@ -616,7 +625,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         if (
             !winnerInRanking &&
             rankingPoints >=
-            rankingPointsByCharacter[topRankingCharacters[topRankingCharacters.length - 1]]
+            rankingPointsByCharacter[
+                topRankingCharacters[topRankingCharacters.length - 1]
+            ]
         ) {
             topRankingCharacters[topRankingCharacters.length - 1] = winnerID;
             winnerPosition = topRankingCharacters.length - 1;
@@ -624,8 +635,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         for (winnerPosition; winnerPosition > 0; winnerPosition--) {
             if (
-                rankingPointsByCharacter[topRankingCharacters[winnerPosition]] >=
-                rankingPointsByCharacter[topRankingCharacters[winnerPosition - 1]]
+                rankingPointsByCharacter[
+                    topRankingCharacters[winnerPosition]
+                ] >=
+                rankingPointsByCharacter[
+                    topRankingCharacters[winnerPosition - 1]
+                ]
             ) {
                 uint256 oldCharacter = topRankingCharacters[winnerPosition - 1];
                 topRankingCharacters[winnerPosition - 1] = winnerID;
@@ -691,9 +706,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         returns (bool)
     {
         return
-            (finderByOpponent[characterID] == 0
-            && matchByFinder[0].defenderID != characterID)
-            || !isCharacterWithinDecisionTime(finderByOpponent[characterID]);
+            (finderByOpponent[characterID] == 0 &&
+                matchByFinder[0].defenderID != characterID) ||
+            !isCharacterWithinDecisionTime(finderByOpponent[characterID]);
     }
 
     /// @dev gets the amount of SKILL required to enter the arena
@@ -717,11 +732,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev get an attacker's opponent
-    function getOpponent(uint256 attackerID)
-        public
-        view
-        returns (uint256)
-    {
+    function getOpponent(uint256 attackerID) public view returns (uint256) {
         return matchByFinder[attackerID].defenderID;
     }
 
@@ -734,7 +745,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint8 tier = getArenaTier(characterID);
         uint256 arrayLength;
         // we return only the top 3 players, returning the array without the pivot ranker if it exists
-        if (_topRankingCharactersByTier[tier].length == _maxTopCharactersPerTier) {
+        if (
+            _topRankingCharactersByTier[tier].length == _maxTopCharactersPerTier
+        ) {
             arrayLength = _topRankingCharactersByTier[tier].length - 1;
         } else {
             arrayLength = _topRankingCharactersByTier[tier].length;
@@ -753,7 +766,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev returns the account's ranking prize pool earnings
-    function getPlayerPrizePoolRewards() view public returns(uint256){
+    function getPlayerPrizePoolRewards() public view returns (uint256) {
         return _rankingRewardsByPlayer[msg.sender];
     }
 
@@ -986,14 +999,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function setBaseWagerInCents(uint256 cents) external restricted {
-        _baseWagerUSD  = ABDKMath64x64.divu(cents, 100);
+        _baseWagerUSD = ABDKMath64x64.divu(cents, 100);
     }
 
     function setTierWagerInCents(uint256 cents) external restricted {
         _tierWagerUSD = ABDKMath64x64.divu(cents, 100);
     }
 
-    function setPrizePercentage(uint256 index, uint256 value) external restricted {
+    function setPrizePercentage(uint256 index, uint256 value)
+        external
+        restricted
+    {
         prizePercentages[index] = value;
     }
 
@@ -1038,7 +1054,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     // Note: The following are debugging functions. Remove later.
-    
+
     function clearDuelQueue() external restricted {
         uint256 length = _duelQueue.length();
 
