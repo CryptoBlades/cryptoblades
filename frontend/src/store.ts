@@ -27,13 +27,15 @@ import {
   IStakeState,
   IState,
   IWeb3EventSubscription,
-  StakeType
+  StakeType,
+  NftStakeType,
+  isNftStakeType
 } from './interfaces';
 import {getCharacterNameFromSeed} from './character-name';
 import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './contract-call-utils';
 
 import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly,} from './feature-flags';
-import {IERC20, IERC721, IStakingRewards} from '../../build/abi-interfaces';
+import {IERC20, IERC721, IStakingRewards, INftStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
 import {Nft} from './interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
@@ -52,14 +54,22 @@ interface SetEventSubscriptionsPayload {
 }
 
 type StakingRewardsAlias = Contract<IStakingRewards> | null;
+type NftStakingRewardsAlias = Contract<INftStakingRewards> | null;
 
 interface StakingContracts {
-  StakingRewards: StakingRewardsAlias,
-  StakingToken: Contract<IERC20> | null,
+  StakingRewards: NftStakingRewardsAlias | StakingRewardsAlias,
+  StakingToken: Contract<IERC20> | Contract<IERC721> | null,
   RewardToken: Contracts['SkillToken'],
 }
 
-function getStakingContracts(contracts: Contracts, stakeType: StakeType): StakingContracts {
+function getStakingContracts(contracts: Contracts, stakeType: StakeType | NftStakeType): StakingContracts {
+  if(isNftStakeType(stakeType)) {
+    return {
+      StakingRewards: contracts.nftStaking[stakeType]?.StakingRewards || null,
+      StakingToken: contracts.nftStaking[stakeType]?.StakingToken || null,
+      RewardToken: contracts.SkillToken
+    };
+  }
   return {
     StakingRewards: contracts.staking[stakeType]?.StakingRewards || null,
     StakingToken: contracts.staking[stakeType]?.StakingToken || null,
@@ -112,6 +122,7 @@ export function createStore(web3: Web3) {
       inGameOnlyFunds: '0',
       directStakeBonusPercent: 10,
       ownedCharacterIds: [],
+      ownedGarrisonCharacterIds: [],
       ownedWeaponIds: [],
       ownedShieldIds: [],
       ownedTrinketIds: [],
@@ -123,6 +134,7 @@ export function createStore(web3: Web3) {
       cartEntries: [],
 
       characters: {},
+      garrisonCharacters: {},
       characterStaminas: {},
       characterRenames: {},
       characterCosmetics: {},
@@ -151,14 +163,28 @@ export function createStore(web3: Web3) {
         skill2: { ...defaultStakeState },
         lp: { ...defaultStakeState },
         lp2: { ...defaultStakeState },
-        king: { ...defaultStakeState }
+        king: { ...defaultStakeState },
+        king90: { ...defaultStakeState },
+        king180: { ...defaultStakeState },
+        skill90: { ...defaultStakeState },
+        skill180: { ...defaultStakeState },
+        cbkLandT1: { ...defaultStakeState },
+        cbkLandT2: { ...defaultStakeState },
+        cbkLandT3: { ...defaultStakeState }
       },
       stakeOverviews: {
         skill: { ...defaultStakeOverviewState },
         skill2: { ...defaultStakeOverviewState },
         lp: { ...defaultStakeOverviewState },
         lp2: { ...defaultStakeOverviewState },
-        king: { ...defaultStakeOverviewState }
+        king: { ...defaultStakeOverviewState },
+        king90: { ...defaultStakeOverviewState },
+        king180: { ...defaultStakeOverviewState },
+        skill90: { ...defaultStakeOverviewState },
+        skill180: { ...defaultStakeOverviewState },
+        cbkLandT1: { ...defaultStakeOverviewState },
+        cbkLandT2: { ...defaultStakeOverviewState },
+        cbkLandT3: { ...defaultStakeOverviewState }
       },
 
       raid: {
@@ -241,6 +267,10 @@ export function createStore(web3: Web3) {
 
       availableStakeTypes(state: IState) {
         return Object.keys(state.contracts().staking).filter(isStakeType);
+      },
+
+      availableNftStakeTypes(state: IState) {
+        return Object.keys(state.contracts().nftStaking).filter(isNftStakeType);
       },
 
       hasStakedBalance(state) {
@@ -347,9 +377,21 @@ export function createStore(web3: Web3) {
         return getters.charactersWithIds(state.ownedCharacterIds);
       },
 
+      ownGarrisonCharacters(state, getters) {
+        return getters.garrisonCharactersWithIds(state.ownedGarrisonCharacterIds);
+      },
+
       charactersWithIds(state) {
         return (characterIds: (string | number)[]) => {
           const characters = characterIds.map((id) => state.characters[+id]);
+          if (characters.some((w) => w === null)) return [];
+          return characters.filter(Boolean);
+        };
+      },
+
+      garrisonCharactersWithIds(state) {
+        return (characterIds: (string | number)[]) => {
+          const characters = characterIds.map((id) => state.garrisonCharacters[+id]);
           if (characters.some((w) => w === null)) return [];
           return characters.filter(Boolean);
         };
@@ -614,7 +656,7 @@ export function createStore(web3: Web3) {
       },
 
       updateUserDetails(state: IState, payload) {
-        const keysToAllow = ['ownedCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability',
+        const keysToAllow = ['ownedCharacterIds', 'ownedGarrisonCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability',
           'ownedShieldIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedKeyLootboxIds'];
         for (const key of keysToAllow) {
           if (Object.hasOwnProperty.call(payload, key)) {
@@ -654,6 +696,12 @@ export function createStore(web3: Web3) {
         }
       },
 
+      addNewOwnedGarrisonCharacterId(state: IState, characterId: number) {
+        if (!state.ownedGarrisonCharacterIds.includes(characterId)) {
+          state.ownedGarrisonCharacterIds.push(characterId);
+        }
+      },
+
       addNewOwnedWeaponId(state: IState, weaponId: number) {
         if (!state.ownedWeaponIds.includes(weaponId)) {
           state.ownedWeaponIds.push(weaponId);
@@ -685,6 +733,10 @@ export function createStore(web3: Web3) {
 
       updateCharacter(state: IState, { characterId, character }) {
         Vue.set(state.characters, characterId, character);
+      },
+
+      updateGarrisonCharacter(state: IState, { characterId, character }) {
+        Vue.set(state.garrisonCharacters, characterId, character);
       },
 
       updateShield(state: IState, { shieldId, shield }) {
@@ -1075,7 +1127,31 @@ export function createStore(web3: Web3) {
                 commit('addNewOwnedCharacterId', characterId);
 
                 await Promise.all([
-                  dispatch('fetchCharacter', characterId),
+                  dispatch('fetchCharacter', { characterId }),
+                  dispatch('fetchSkillBalance'),
+                  dispatch('fetchFightRewardSkill'),
+                  dispatch('fetchFightRewardXp'),
+                  dispatch('fetchDustBalance')
+                ]);
+              })
+          );
+
+          subscriptions.push(
+            state.contracts().Garrison!.events.CharacterReceived(
+              { filter: { minter: state.defaultAccount } },
+              async (err: Error, data: any) => {
+                if (err) {
+                  console.error(err, data);
+                  return;
+                }
+
+                const characterId = data.returnValues.character;
+
+                commit('addNewOwnedGarrisonCharacterId', characterId);
+                //Events.$emit('garrison:characterReceived', { id: characterId });
+
+                await Promise.all([
+                  dispatch('fetchCharacter', { characterId }),
                   dispatch('fetchSkillBalance'),
                   dispatch('fetchFightRewardSkill'),
                   dispatch('fetchFightRewardXp'),
@@ -1129,7 +1205,7 @@ export function createStore(web3: Web3) {
               }
 
               await Promise.all([
-                dispatch('fetchCharacter', data.returnValues.character),
+                dispatch('fetchCharacter', { characterId: data.returnValues.character }),
                 dispatch('fetchSkillBalance')
               ]);
             })
@@ -1165,7 +1241,7 @@ export function createStore(web3: Web3) {
 
         }
 
-        function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias) {
+        function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias | NftStakingRewardsAlias) {
           if(!StakingRewards) return;
 
           subscriptions.push(
@@ -1230,9 +1306,9 @@ export function createStore(web3: Web3) {
 
       async fetchUserGameDetails({ state, dispatch, commit }) {
         if(featureFlagStakeOnly) return;
-
         const [
           ownedCharacterIds,
+          ownedGarrisonCharacterIds,
           ownedWeaponIds,
           ownedShieldIds,
           ownedTrinketIds,
@@ -1242,6 +1318,7 @@ export function createStore(web3: Web3) {
           maxDurability,
         ] = await Promise.all([
           dispatch('getAccountCharacters'),
+          dispatch('getAccountGarrisonCharacters'),
           dispatch('getAccountWeapons'),
           state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state)),
           state.contracts().RaidTrinket!.methods.getOwned().call(defaultCallOptions(state)) || [],
@@ -1253,6 +1330,7 @@ export function createStore(web3: Web3) {
 
         commit('updateUserDetails', {
           ownedCharacterIds: Array.from(ownedCharacterIds),
+          ownedGarrisonCharacterIds: Array.from(ownedGarrisonCharacterIds),
           ownedWeaponIds: Array.from(ownedWeaponIds),
           ownedShieldIds: Array.from(ownedShieldIds),
           ownedTrinketIds: Array.from(ownedTrinketIds),
@@ -1264,6 +1342,7 @@ export function createStore(web3: Web3) {
 
         await Promise.all([
           dispatch('fetchCharacters', ownedCharacterIds),
+          dispatch('fetchGarrisonCharacters', ownedGarrisonCharacterIds),
           dispatch('fetchWeapons', ownedWeaponIds),
           dispatch('fetchShields', ownedShieldIds),
           dispatch('fetchTrinkets', ownedTrinketIds),
@@ -1290,10 +1369,13 @@ export function createStore(web3: Web3) {
         if(featureFlagStakeOnly) return;
 
         const ownedCharacterIds = await dispatch('getAccountCharacters');
+        const ownedGarrisonCharacterIds = await dispatch('getAccountGarrisonCharacters');
         commit('updateUserDetails', {
-          ownedCharacterIds: Array.from(ownedCharacterIds)
+          ownedCharacterIds: Array.from(ownedCharacterIds),
+          ownedGarrisonCharacterIds: Array.from(ownedGarrisonCharacterIds)
         });
         await dispatch('fetchCharacters', ownedCharacterIds);
+        await dispatch('fetchGarrisonCharacters', ownedGarrisonCharacterIds);
       },
 
       async updateShieldIds({ state, dispatch, commit }) {
@@ -1392,10 +1474,14 @@ export function createStore(web3: Web3) {
       },
 
       async fetchCharacters({ dispatch }, characterIds: (string | number)[]) {
-        await Promise.all(characterIds.map(id => dispatch('fetchCharacter', id)));
+        await Promise.all(characterIds.map(id => dispatch('fetchCharacter', { characterId: id })));
       },
 
-      async fetchCharacter({ state, commit }, characterId: string | number) {
+      async fetchGarrisonCharacters({ dispatch }, garrisonCharacterIds: (string | number)[]) {
+        await Promise.all(garrisonCharacterIds.map(id => dispatch('fetchCharacter', { characterId: id, inGarrison: true })));
+      },
+
+      async fetchCharacter({ state, commit }, { characterId, inGarrison = false }: { characterId: string | number, inGarrison: boolean}) {
         const { Characters } = state.contracts();
         if(!Characters) return;
 
@@ -1406,7 +1492,12 @@ export function createStore(web3: Web3) {
               await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
             );
 
-            commit('updateCharacter', { characterId, character });
+            if(!inGarrison) {
+              commit('updateCharacter', { characterId, character });
+            }
+            else {
+              commit('updateGarrisonCharacter', { characterId, character });
+            }
           })(),
         ]);
       },
@@ -1568,6 +1659,8 @@ export function createStore(web3: Web3) {
 
       async setupCharacterStaminas({ dispatch }) {
         const ownedCharacterIds = await dispatch('getAccountCharacters');
+        const ownedGarrisonCharacterIds = await dispatch('getAccountGarrisonCharacters');
+        ownedCharacterIds.push(...ownedGarrisonCharacterIds);
 
         for (const charId of ownedCharacterIds) {
           dispatch('fetchCharacterStamina', charId);
@@ -1596,6 +1689,10 @@ export function createStore(web3: Web3) {
 
         return characters;
       },
+      async getAccountGarrisonCharacters({state}) {
+        if(!state.defaultAccount) return;
+        return await state.contracts().Garrison!.methods.getUserCharacters().call(defaultCallOptions(state));
+      },
       async getAccountWeapons({state}) {
         if(!state.defaultAccount) return;
         const numberOfWeapons = parseInt(await state.contracts().Weapons!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
@@ -1607,6 +1704,8 @@ export function createStore(web3: Web3) {
       },
       async setupCharacterRenames({ dispatch }) {
         const ownedCharacterIds = await dispatch('getAccountCharacters');
+        const ownedGarrisonCharacterIds = await dispatch('getAccountGarrisonCharacters');
+        ownedCharacterIds.push(...ownedGarrisonCharacterIds);
 
         for (const charId of ownedCharacterIds) {
           dispatch('fetchCharacterRename', charId);
@@ -1627,6 +1726,8 @@ export function createStore(web3: Web3) {
       },
       async setupCharacterCosmetics({ dispatch }) {
         const ownedCharacterIds = await dispatch('getAccountCharacters');
+        const ownedGarrisonCharacterIds = await dispatch('getAccountGarrisonCharacters');
+        ownedCharacterIds.push(...ownedGarrisonCharacterIds);
 
         for (const charId of ownedCharacterIds) {
           dispatch('fetchCharacterCosmetic', charId);
@@ -2020,6 +2121,12 @@ export function createStore(web3: Web3) {
           (getters.availableStakeTypes as StakeType[])
             .map(stakeType =>
               dispatch('fetchStakeOverviewDataPartial', { stakeType })
+            ),
+        );
+        await Promise.all(
+          (getters.availableNftStakeTypes as NftStakeType[])
+            .map(stakeType =>
+              dispatch('fetchStakeOverviewDataPartial', { stakeType })
             )
         );
       },
@@ -2077,7 +2184,7 @@ export function createStore(web3: Web3) {
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
 
-        const stakeData: { stakeType: StakeType } & IStakeState = {
+        const stakeData: { stakeType: StakeType | NftStakeType } & IStakeState = {
           stakeType,
           ownBalance,
           stakedBalance,
@@ -2127,6 +2234,26 @@ export function createStore(web3: Web3) {
         });
 
         await dispatch('fetchStakeDetails', { stakeType: 'king' });
+      },
+
+      async getStakedIds({ state }, stakeType) {
+        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
+        const CBKLand = state.contracts().CBKLand!;
+        if(!StakingRewards || !CBKLand || !state.defaultAccount || !isNftStakeType(stakeType)) return;
+
+        const stakedIds = await (StakingRewards as NftStakingRewardsAlias)?.methods.stakedIdsOf(state.defaultAccount).call({
+          from: state.defaultAccount,
+        });
+
+        if(!stakedIds) return [];
+
+        const landIdsWithTier = await Promise.all(stakedIds.map(async (landId: string) =>
+        {
+          const land = await CBKLand.methods.get(landId).call(defaultCallOptions(state));
+          return { id: landId, tier: land[0] };
+        }));
+
+        return landIdsWithTier;
       },
 
       async claimKingReward({ state, dispatch }) {
@@ -2557,6 +2684,25 @@ export function createStore(web3: Web3) {
 
         return await Promise.all(landsIds.map(landId => CBKLand.methods.get(landId).call(defaultCallOptions(state))));
       },
+
+      async getOwnedLandIdsWithTier({state}) {
+        const CBKLand = state.contracts().CBKLand!;
+
+        if (!state.defaultAccount || !CBKLand) return;
+
+        const landsIds = await CBKLand.methods
+          .getOwned(state.defaultAccount)
+          .call(defaultCallOptions(state));
+
+        const landIdsWithTier = await Promise.all(landsIds.map(async (landId: string) =>
+        {
+          const land = await CBKLand.methods.get(landId).call(defaultCallOptions(state));
+          return { id: landId, tier: land[0] };
+        }));
+
+        return landIdsWithTier;
+      },
+
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
@@ -3303,7 +3449,7 @@ export function createStore(web3: Web3) {
           });
 
         await Promise.all([
-          dispatch('fetchCharacter', id),
+          dispatch('fetchCharacter', { characterId: id }),
         ]);
       },
 
@@ -3349,7 +3495,7 @@ export function createStore(web3: Web3) {
           });
 
         await Promise.all([
-          dispatch('fetchCharacter', id),
+          dispatch('fetchCharacter', { characterId: id }),
         ]);
       },
 
@@ -3395,7 +3541,7 @@ export function createStore(web3: Web3) {
           });
 
         await Promise.all([
-          dispatch('fetchCharacter', id),
+          dispatch('fetchCharacter', { characterId: id }),
         ]);
       },
 
@@ -3441,7 +3587,7 @@ export function createStore(web3: Web3) {
           });
 
         await Promise.all([
-          dispatch('fetchCharacter', id),
+          dispatch('fetchCharacter', { characterId: id }),
         ]);
       },
       async fetchOwnedWeaponCosmetics({ state }, {cosmetic}) {
@@ -3943,6 +4089,23 @@ export function createStore(web3: Web3) {
             });
           await dispatch('updateWeaponIds');
         }
+      },
+
+      async restoreFromGarrison({ state, dispatch }, characterId) {
+        const { Garrison } = state.contracts();
+        if(!Garrison || !state.defaultAccount) return;
+
+        await Garrison.methods.restoreFromGarrison(characterId).send({ from: state.defaultAccount });
+        await dispatch('updateCharacterIds');
+      },
+
+      async sendToGarrison({ state, dispatch }, characterId) {
+        const { Garrison, Characters } = state.contracts();
+        if(!Garrison || !Characters || !state.defaultAccount) return;
+
+        await Characters.methods.approve(Garrison.options.address, characterId).send(defaultCallOptions(state));
+        await Garrison.methods.sendToGarrison(characterId).send({ from: state.defaultAccount });
+        await dispatch('updateCharacterIds');
       }
     },
   });

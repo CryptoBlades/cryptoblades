@@ -66,8 +66,7 @@
           data-ad-slot="5115599573"
           data-ad-format="auto"
           data-full-width-responsive="yes"
-          >
-        </Adsense>
+          />
       </div>
     </div>
   </div>
@@ -114,7 +113,8 @@ export default {
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
+    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl',
+      'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
       return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
@@ -279,6 +279,13 @@ export default {
     Events.$on('setting:hideRewards', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
     Events.$on('setting:hideWalletWarning', () => this.checkStorage());
+    // Events.$on('garrison:characterReceived', (e) => {
+    //   this.$dialog.notify.warning(`${i18n.t('app.warning.message.newCharacter')} ID: ${e.id} ${i18n.t('app.warning.message.inGarrison')}!`,
+    //     {
+    //       timeout: 5000,
+    //     },
+    //   );
+    // });
 
     document.body.addEventListener('click', (e) => {
       const tagname = e.target.getAttribute('tagname');
@@ -321,9 +328,16 @@ export default {
       this.ownCharacters.forEach(async (c) => {
         await this.updateCharacterStamina(c.id);
       });
+      this.ownGarrisonCharacters.forEach(async (c) => {
+        await this.updateCharacterStamina(c.id);
+      });
     }, 3000);
 
     this.availableStakeTypes.forEach((item) => {
+      this.fetchStakeDetails({ stakeType: item });
+    });
+
+    this.availableNftStakeTypes.forEach((item) => {
       this.fetchStakeDetails({ stakeType: item });
     });
 
