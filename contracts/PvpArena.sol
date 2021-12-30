@@ -314,7 +314,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         skillToken.safeTransfer(msg.sender, wager);
     }
 
-    /// @dev attepts to find an opponent for a character
+    /// @dev attempts to find an opponent for a character
     function findOpponent(uint256 characterID)
         external
         isOwnedCharacter(characterID)
@@ -802,7 +802,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         bool foundOpponent = false;
 
         for (uint256 i = 0; i < matchableCharactersCount; i++) {
-            uint256 index = (randomIndex + 1) % matchableCharactersCount;
+            uint256 index = (randomIndex + i) % matchableCharactersCount;
             uint256 candidateID = matchableCharacters.at(index);
 
             if (candidateID == characterID) {
