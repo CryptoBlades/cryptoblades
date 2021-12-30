@@ -14,6 +14,7 @@ import "./shields.sol";
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeMath for uint8;
+    using SafeMath for uint24;
     using SafeMath for uint256;
     using ABDKMath64x64 for int128;
     using SafeERC20 for IERC20;
@@ -30,6 +31,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 attackerID;
         uint256 defenderID;
         uint256 createdAt;
+    }
+
+    struct BountyDistribution {
+        uint256 winnerReward;
+        uint256 loserPayment;
+        uint256 rankingPoolTax;
     }
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
@@ -89,6 +96,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => bool) private _isShieldInArena;
     /// @dev if defender is in a duel that has not finished processing
     mapping(uint256 => bool) public isDefending;
+    /// @dev if a character is someone else's opponent
+    mapping(uint256 => uint256) public finderByOpponent;
     /// @dev character's tier when it last entered arena. Used to reset rank if it changes
     mapping(uint256 => uint8) public previousTierByCharacter;
     /// @dev excess wager by character for when they re-enter the arena
@@ -97,8 +106,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public seasonByCharacter;
     /// @dev ranking points by character
     mapping(uint256 => uint256) public rankingPointsByCharacter;
-    /// @dev ranking funds accumulated per tier
-    mapping(uint8 => uint256) public rankingsPoolByTier;
     /// @dev funds available for withdrawal by address
     mapping(address => uint256) private _rankingRewardsByPlayer;
     /// @dev top ranking characters by tier
@@ -137,6 +144,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         require(
             isCharacterWithinDecisionTime(characterID),
             "Decision time expired"
+        );
+    }
+
+    modifier characterNotUnderAttack(uint256 characterID) {
+        _characterNotUnderAttack(characterID);
+        _;
+    }
+
+    function _characterNotUnderAttack(uint256 characterID) internal view {
+        require(
+            isCharacterNotUnderAttack(characterID),
+            "Under attack"
         );
     }
 
@@ -277,6 +296,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         external
         isOwnedCharacter(characterID)
         characterInArena(characterID)
+        characterNotUnderAttack(characterID)
     {
         Fighter storage fighter = fighterByCharacter[characterID];
         uint256 wager = fighter.wager;
@@ -301,8 +321,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev attepts to find an opponent for a character
     function findOpponent(uint256 characterID)
         external
-        characterInArena(characterID)
         isOwnedCharacter(characterID)
+        characterInArena(characterID)
+        characterNotUnderAttack(characterID)
     {
         require(matchByFinder[characterID].createdAt == 0, "Already in match");
 
@@ -313,9 +334,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function reRollOpponent(uint256 characterID)
         external
         characterInArena(characterID)
+        characterNotUnderAttack(characterID)
         isOwnedCharacter(characterID)
     {
         require(matchByFinder[characterID].createdAt != 0, "Not in match");
+
+        delete finderByOpponent[matchByFinder[characterID].defenderID];
 
         _assignOpponent(characterID);
 
@@ -530,13 +554,21 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             fighterByCharacter[loserID].wager = loserWager;
 
+            delete matchByFinder[attackerID];
+            delete finderByOpponent[defenderID];
+            isDefending[defenderID] = false;
+
             if (
                 fighterByCharacter[loserID].wager < getDuelCost(loserID) ||
                 fighterByCharacter[loserID].wager <
                 getEntryWager(loserID).mul(withdrawFeePercent).div(100)
             ) {
                 _removeCharacterFromArena(loserID);
+            } else {
+                _matchableCharactersByTier[getArenaTier(defenderID)].add(defenderID);
             }
+
+            _matchableCharactersByTier[getArenaTier(attackerID)].add(attackerID);
 
             // Add ranking points to the winner
             rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
@@ -555,15 +587,92 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             processLoser(loserID);
 
             // Add to the rankings pool
-            rankingsPoolByTier[getArenaTier(attackerID)] = rankingsPoolByTier[
+            _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
                 getArenaTier(attackerID)
             ].add(bountyDistribution.rankingPoolTax / 2);
 
             gameCofferTaxDue += bountyDistribution.rankingPoolTax / 2;
 
             // TODO: Do we need to reset the match by finder?
-
+            
             _duelQueue.remove(attackerID);
+        }
+    }
+
+    /// @dev updates the rank of the winner of a duel
+    function processWinner(uint256 winnerID) private {
+        uint256 rankingPoints = rankingPointsByCharacter[winnerID];
+        uint8 tier = getArenaTier(winnerID);
+        uint256[] storage topRankingCharacters = _topRankingCharactersByTier[tier];
+        uint256 winnerPosition;
+        bool winnerInRanking;
+
+        // check if winner is withing the top 4
+        for (uint8 i = 0; i < topRankingCharacters.length; i++) {
+            if (winnerID == topRankingCharacters[i]) {
+                winnerPosition = i;
+                winnerInRanking = true;
+                break;
+            }
+        }
+        // if the winner is not in the top characters we then compare it to the last character of the top rank, swapping positions if the condition is met
+        if (
+            !winnerInRanking &&
+            rankingPoints >=
+            getCharacterRankingPoints(topRankingCharacters[topRankingCharacters.length - 1])
+        ) {
+            topRankingCharacters[topRankingCharacters.length - 1] = winnerID;
+            winnerPosition = topRankingCharacters.length - 1;
+        }
+
+        for (winnerPosition; winnerPosition > 0; winnerPosition--) {
+            if (
+                getCharacterRankingPoints(topRankingCharacters[winnerPosition]) >=
+                getCharacterRankingPoints(topRankingCharacters[winnerPosition - 1])
+            ) {
+                uint256 oldCharacter = topRankingCharacters[winnerPosition - 1];
+                topRankingCharacters[winnerPosition - 1] = winnerID;
+                topRankingCharacters[winnerPosition] = oldCharacter;
+            } else {
+                break;
+            }
+        }
+    }
+
+    /// @dev updates the rank of the loser of a duel
+    function processLoser(uint256 loserID) private {
+        uint256 rankingPoints = rankingPointsByCharacter[loserID];
+        uint8 tier = getArenaTier(loserID);
+        uint256[] storage ranking = _topRankingCharactersByTier[tier];
+        uint256 loserPosition;
+        bool loserFound;
+
+        // check if the loser is in the top 4
+        for (uint8 i = 0; i < ranking.length; i++) {
+            if (loserID == ranking[i]) {
+                loserPosition = i;
+                loserFound = true;
+                break;
+            }
+        }
+        // if the character is within the top 4, compare it to the character that precedes it and swap positions if the condition is met
+        if (loserFound) {
+            for (
+                loserPosition;
+                loserPosition < ranking.length - 1;
+                loserPosition++
+            ) {
+                if (
+                    rankingPoints <
+                    getCharacterRankingPoints(ranking[loserPosition + 1])
+                ) {
+                    uint256 oldCharacter = ranking[loserPosition + 1];
+                    ranking[loserPosition + 1] = loserID;
+                    ranking[loserPosition] = oldCharacter;
+                } else {
+                    break;
+                }
+            }
         }
     }
 
@@ -585,6 +694,18 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return
             matchByFinder[characterID].createdAt.add(decisionSeconds) >
             block.timestamp;
+    }
+
+    /// @dev checks wether or not the character is actively someone else's opponent
+    function isCharacterNotUnderAttack(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return
+            (finderByOpponent[characterID] == 0
+            && matchByFinder[0].defenderID != characterID)
+            || !isCharacterWithinDecisionTime(finderByOpponent[characterID]);
     }
 
     /// @dev gets the amount of SKILL required to enter the arena
@@ -611,7 +732,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function getOpponent(uint256 attackerID)
         public
         view
-        characterWithinDecisionTime(attackerID)
         returns (uint256)
     {
         return matchByFinder[attackerID].defenderID;
@@ -664,6 +784,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         return values;
+    }
+
+    /// @dev get the character's ranking points
+    function getCharacterRankingPoints(uint256 characterID)
+        public
+        view
+        returns (uint256)
+    {
+        return rankingPointsByCharacter[characterID];
     }
 
     /// @dev assigns an opponent to a character
@@ -721,6 +850,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             opponentID,
             block.timestamp
         );
+        finderByOpponent[opponentID] = characterID;
         _matchableCharactersByTier[tier].remove(characterID);
         _matchableCharactersByTier[tier].remove(opponentID);
     }
@@ -779,6 +909,100 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, 1, 0);
         weapons.setNftVar(weaponID, 1, 0);
+    }
+
+    function _getCharacterPowerRoll(uint256 characterID, uint8 opponentTrait)
+        private
+        view
+        returns (uint24)
+    {
+        uint8 trait = characters.getTrait(characterID);
+        uint24 basePower = characters.getPower(characterID);
+        uint256 weaponID = fighterByCharacter[characterID].weaponID;
+        uint256 seed = randoms.getRandomSeedUsingHash(
+            msg.sender,
+            blockhash(block.number)
+        );
+
+        bool useShield = fighterByCharacter[characterID].useShield;
+        int128 bonusShieldStats;
+        if (useShield) {
+            bonusShieldStats = _getShieldStats(characterID);
+        }
+
+        (
+            ,
+            int128 weaponMultFight,
+            uint24 weaponBonusPower,
+            uint8 weaponTrait
+        ) = weapons.getFightData(weaponID, trait);
+
+        int128 playerTraitBonus = getPVPTraitBonusAgainst(
+            trait,
+            weaponTrait,
+            opponentTrait
+        );
+
+        uint256 playerFightPower = game.getPlayerPower(
+            basePower,
+            weaponMultFight.add(bonusShieldStats),
+            weaponBonusPower
+        );
+
+        uint256 playerPower = RandomUtil.plusMinus10PercentSeeded(
+            playerFightPower,
+            seed
+        );
+
+        return uint24(playerTraitBonus.mulu(playerPower));
+    }
+
+    function getPVPTraitBonusAgainst(
+        uint8 characterTrait,
+        uint8 weaponTrait,
+        uint8 opponentTrait
+    ) public view returns (int128) {
+        int128 traitBonus = ABDKMath64x64.fromUInt(1);
+        int128 fightTraitBonus = game.fightTraitBonus();
+        int128 charTraitFactor = ABDKMath64x64.divu(50, 100);
+        if (characterTrait == weaponTrait) {
+            traitBonus = traitBonus.add(fightTraitBonus);
+        }
+
+        // We apply 50% of char trait bonuses because they are applied twice (once per fighter)
+        if (game.isTraitEffectiveAgainst(characterTrait, opponentTrait)) {
+            traitBonus = traitBonus.add(fightTraitBonus.mul(charTraitFactor));
+        } else if (
+            game.isTraitEffectiveAgainst(opponentTrait, characterTrait)
+        ) {
+            traitBonus = traitBonus.sub(fightTraitBonus.mul(charTraitFactor));
+        }
+        return traitBonus;
+    }
+
+    function _getShieldStats(uint256 characterID)
+        private
+        view
+        returns (int128)
+    {
+        uint8 trait = characters.getTrait(characterID);
+        uint256 shieldID = fighterByCharacter[characterID].shieldID;
+        (, int128 shieldMultFight, , ) = shields.getFightData(shieldID, trait);
+        return (shieldMultFight);
+    }
+
+    function _getDuelBountyDistribution(uint256 attackerID)
+        private
+        view
+        returns (BountyDistribution memory bountyDistribution)
+    {
+        uint256 duelCost = getDuelCost(attackerID);
+        uint256 bounty = duelCost.mul(2);
+        uint256 poolTax = _rankingsPoolTaxPercent.mul(bounty).div(100);
+
+        uint256 reward = bounty.sub(poolTax).sub(duelCost);
+
+        return BountyDistribution(reward, duelCost, poolTax);
     }
 
     function fillGameCoffers() public restricted {
