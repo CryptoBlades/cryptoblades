@@ -88,11 +88,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev Active match by characterID of the finder
     mapping(uint256 => Match) public matchByFinder;
     /// @dev if character is currently in the arena
-    mapping(uint256 => bool) private _isCharacterInArena;
+    mapping(uint256 => bool) public isCharacterInArena;
     /// @dev if weapon is currently in the arena
-    mapping(uint256 => bool) private _isWeaponInArena;
+    mapping(uint256 => bool) public isWeaponInArena;
     /// @dev if shield is currently in the arena
-    mapping(uint256 => bool) private _isShieldInArena;
+    mapping(uint256 => bool) public isShieldInArena;
     /// @dev if defender is in a duel that has not finished processing
     mapping(uint256 => bool) public isDefending;
     /// @dev if a character is someone else's opponent
@@ -131,7 +131,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterInArena(uint256 characterID) internal view {
-        require(isCharacterInArena(characterID), "Char not in arena");
+        require(isCharacterInArena[characterID], "Char not in arena");
     }
 
     modifier characterWithinDecisionTime(uint256 characterID) {
@@ -256,14 +256,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             seasonByCharacter[characterID] = currentRankedSeason;
         }
 
-        _isCharacterInArena[characterID] = true;
+        isCharacterInArena[characterID] = true;
         characters.setNftVar(characterID, 1, 1);
 
-        _isWeaponInArena[characterID] = true;
+        isWeaponInArena[characterID] = true;
         weapons.setNftVar(weaponID, 1, 1);
 
         if (useShield) {
-            _isShieldInArena[shieldID] = true;
+            isShieldInArena[shieldID] = true;
             shields.setNftVar(shieldID, 1, 1);
         }
 
@@ -673,15 +673,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
     }
 
-    /// @dev checks if a character is in the arena
-    function isCharacterInArena(uint256 characterID)
-        public
-        view
-        returns (bool)
-    {
-        return _isCharacterInArena[characterID];
-    }
-
     /// @dev wether or not the character is still in time to start a duel
     function isCharacterWithinDecisionTime(uint256 characterID)
         public
@@ -869,7 +860,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         // Shield removed first before the fighter is deleted
         if (fighter.useShield) {
-            _isShieldInArena[shieldID] = false;
+            isShieldInArena[shieldID] = false;
             shields.setNftVar(shieldID, 1, 0);
         }
 
@@ -886,8 +877,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _matchableCharactersByTier[tier].remove(characterID);
         }
 
-        _isCharacterInArena[characterID] = false;
-        _isWeaponInArena[weaponID] = false;
+        isCharacterInArena[characterID] = false;
+        isWeaponInArena[weaponID] = false;
 
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, 1, 0);
