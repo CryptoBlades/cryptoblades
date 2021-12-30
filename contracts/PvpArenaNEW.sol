@@ -105,12 +105,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public seasonByCharacter;
     /// @dev ranking points by character
     mapping(uint256 => uint256) public rankingPointsByCharacter;
+    /// @dev accumulated skill pool per tier
+    mapping(uint8 => uint256) public rankingsPoolByTier;
     /// @dev funds available for withdrawal by address
     mapping(address => uint256) private _rankingRewardsByPlayer;
     /// @dev top ranking characters by tier
     mapping(uint8 => uint256[]) private _topRankingCharactersByTier;
-    /// @dev accumulated skill pool per tier
-    mapping(uint8 => uint256) private _rankingsPoolByTier;
     /// @dev IDs of characters available for matchmaking by tier
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
 
@@ -426,17 +426,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 _rankingRewardsByPlayer[
                     topOnePlayer
                 ] = _rankingRewardsByPlayer[topOnePlayer].add(
-                    (_rankingsPoolByTier[i].mul(excessPercentage)).div(100)
+                    (rankingsPoolByTier[i].mul(excessPercentage)).div(100)
                 );
             }
 
             // We assign rewards normally to all possible players
             for (uint8 h = 0; h < prizePercentages.length - difference; h++) {
-                _assignRewards(_topRankingCharactersByTier[i][h], h, _rankingsPoolByTier[i]);
+                _assignRewards(_topRankingCharactersByTier[i][h], h, rankingsPoolByTier[i]);
             }
 
             // We reset ranking prize pools
-            _rankingsPoolByTier[i] = 0;
+            rankingsPoolByTier[i] = 0;
 
             // We reset top players' scores
             for (uint256 k = 0; k < 4; k++) {
@@ -564,10 +564,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ) {
                 _removeCharacterFromArena(loserID);
             } else {
-                _matchableCharactersByTier[getArenaTier(defenderID)].add(defenderID);
+                _matchableCharactersByTier[getArenaTier(loserID)].add(loserID);
             }
 
-            _matchableCharactersByTier[getArenaTier(attackerID)].add(attackerID);
+            _matchableCharactersByTier[getArenaTier(winnerID)].add(winnerID);
 
             // Add ranking points to the winner
             rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
@@ -586,7 +586,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             processLoser(loserID);
 
             // Add to the rankings pool
-            _rankingsPoolByTier[getArenaTier(attackerID)] = _rankingsPoolByTier[
+            rankingsPoolByTier[getArenaTier(attackerID)] = rankingsPoolByTier[
                 getArenaTier(attackerID)
             ].add(bountyDistribution.rankingPoolTax / 2);
 
@@ -616,7 +616,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         if (
             !winnerInRanking &&
             rankingPoints >=
-            getCharacterRankingPoints(topRankingCharacters[topRankingCharacters.length - 1])
+            rankingPointsByCharacter[topRankingCharacters[topRankingCharacters.length - 1]]
         ) {
             topRankingCharacters[topRankingCharacters.length - 1] = winnerID;
             winnerPosition = topRankingCharacters.length - 1;
@@ -624,8 +624,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         for (winnerPosition; winnerPosition > 0; winnerPosition--) {
             if (
-                getCharacterRankingPoints(topRankingCharacters[winnerPosition]) >=
-                getCharacterRankingPoints(topRankingCharacters[winnerPosition - 1])
+                rankingPointsByCharacter[topRankingCharacters[winnerPosition]] >=
+                rankingPointsByCharacter[topRankingCharacters[winnerPosition - 1]]
             ) {
                 uint256 oldCharacter = topRankingCharacters[winnerPosition - 1];
                 topRankingCharacters[winnerPosition - 1] = winnerID;
@@ -661,7 +661,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ) {
                 if (
                     rankingPoints <
-                    getCharacterRankingPoints(ranking[loserPosition + 1])
+                    rankingPointsByCharacter[ranking[loserPosition + 1]]
                 ) {
                     uint256 oldCharacter = ranking[loserPosition + 1];
                     ranking[loserPosition + 1] = loserID;
@@ -734,11 +734,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return matchByFinder[attackerID].defenderID;
     }
 
-    /// @dev gets the accumulated ranking rewards pool per tier
-    function getRankingRewardsPool(uint8 tier) public view returns (uint256) {
-        return _rankingsPoolByTier[tier];
-    }
-
     /// @dev get the top ranked characters by a character's ID
     function getTierTopCharacters(uint256 characterID)
         public
@@ -781,15 +776,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         return values;
-    }
-
-    /// @dev get the character's ranking points
-    function getCharacterRankingPoints(uint256 characterID)
-        public
-        view
-        returns (uint256)
-    {
-        return rankingPointsByCharacter[characterID];
     }
 
     /// @dev assigns an opponent to a character
