@@ -66,8 +66,7 @@
           data-ad-slot="5115599573"
           data-ad-format="auto"
           data-full-width-responsive="yes"
-          >
-        </Adsense>
+          />
       </div>
     </div>
   </div>
