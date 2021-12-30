@@ -51,8 +51,8 @@ module.exports = async function (deployer, network, accounts) {
     const CBKLandT1Staking = await deployProxy(CBKLandT1StakingRewardsUpgradeable, [ownerAddress, rewardDistributorAddress, kingTokenAddress, cbkLandTokenAddress, 7 * 24 * 60 * 60, cbkLandTokenAddress], { deployer });
     await CBKLandT1Staking.setRewardsDuration('2592000')
     const CBKLandT2Staking = await deployProxy(CBKLandT2StakingRewardsUpgradeable, [ownerAddress, rewardDistributorAddress, kingTokenAddress, cbkLandTokenAddress, 7 * 24 * 60 * 60, cbkLandTokenAddress], { deployer });
-    await CBKLandT2Staking.setRewardsDuration('7776000')
+    await CBKLandT2Staking.setRewardsDuration('2592000')
     const CBKLandT3Staking = await deployProxy(CBKLandT3StakingRewardsUpgradeable, [ownerAddress, rewardDistributorAddress, kingTokenAddress, cbkLandTokenAddress, 7 * 24 * 60 * 60, cbkLandTokenAddress], { deployer });
-    await CBKLandT3Staking.setRewardsDuration('15552000')
+    await CBKLandT3Staking.setRewardsDuration('2592000')
   }
 };
