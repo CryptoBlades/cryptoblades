@@ -89,7 +89,7 @@
     "plaza": "Plaza",
     "plazaHint": "Your active characters are in Plaza.",
     "garrison": "Garrison",
-    "garrisonHint": "Your idle characters are in Garrison. While in Garrison they cannot fight and their stamina does not regenerate."
+    "garrisonHint": "Your idle characters are in Garrison. While in Garrison they cannot fight."
   },
   "characterList" : {
     "level" : "Level",
