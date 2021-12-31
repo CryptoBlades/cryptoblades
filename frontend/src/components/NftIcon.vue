@@ -175,7 +175,7 @@ export default {
       if(this.nft.type === 'dust4b') return this.$t('nftIcon.greaterDust');
       if(this.nft.type === 'dust5b') return this.$t('nftIcon.powerfulDust');
       if(this.nft.type === 't1') return this.$t('nftIcon.lesserDust');
-      if(this.nft.type.includes('land')) return this.$t('nftIcon.land', {tier : this.nft.tier}) `Tier ${this.nft.tier} Land`;
+      if(this.nft.type.includes('land')) return this.$t('nftIcon.land', {tier : this.nft.tier});
 
       const wrapInSpan = (spanClass, text) => {
         return `<span class="${spanClass.toLowerCase()}">${text}</span><span class="${spanClass.toLowerCase()+'-icon'}"></span>`;
