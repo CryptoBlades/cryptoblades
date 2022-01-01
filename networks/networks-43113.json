@@ -3514,8 +3514,8 @@
       }
     },
     "links": {},
-    "address": "0x0D23a1342A6AeC074A02A2baa0C792aAcFF3fF4b",
-    "transactionHash": "0xdea4b91f0a4d2975f43082b9254d099821f61853be94ca40796f4d4ba629b588"
+    "address": "0x651CC58453588daD4be6b7C1b949a68089E1C91c",
+    "transactionHash": "0x378a1c5e78553135c4172ef9dfb2b856d7be00bd1c32b23290d370b85a24bf5d"
   },
   "build/contracts/Raid1.json": {
     "events": {},
