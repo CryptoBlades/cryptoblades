@@ -584,10 +584,11 @@
     "noUnclaimedRewards" : "No unclaimed rewards to stake",
     "StakeSelectorItem" : {
       "earn" : "Earn",
-      "yieldTooltip" : "Estimated yield per year and token.",
+      "yieldTooltip" : "Estimated yearly yield per NFT.",
       "apy" : "APY",
       "yield": "YIELD",
       "stakeLocked" : "Stake locked",
+      "rewardsDuration": "Distribution",
       "warning" : "Warning",
       "select" : "Select",
       "deprecatedTooltip" : "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."

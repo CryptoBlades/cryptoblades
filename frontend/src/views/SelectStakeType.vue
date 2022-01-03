@@ -9,6 +9,7 @@
           :stakeType="e.stakeType"
           :minimumStakeTime="stakeOverviews[e.stakeType].minimumStakeTime"
           :estimatedYield="estimatedYields[e.stakeType]"
+          :rewardsDuration="stakeOverviews[e.stakeType].rewardsDuration"
           :deprecated="e.deprecated" />
       </li>
     </ul>
