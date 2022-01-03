@@ -362,7 +362,7 @@
       </b-tab>
       <b-tab>
         <template #title>
-          Lands <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Lands are available in the skill shop.`"/>
+          {{$t('blacksmith.lands')}} <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('blacksmith.landsAvailable')"/>
         </template>
         <div class="row mt-3">
           <div class="col">
