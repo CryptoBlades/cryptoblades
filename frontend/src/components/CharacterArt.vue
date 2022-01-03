@@ -6,6 +6,9 @@
 
     <div class="placeholder d-flex align-items-start justify-content-center p-1"
       >
+      <div class="character-power">
+        {{characterTotalPower}} PWR
+      </div>
       <div class="w-100" :style="{
         'background-image': 'url(' + getCharacterArt(character) + ')',
       }"
@@ -118,7 +121,8 @@ export default {
       'getCharacterUnclaimedXp',
       'timeUntilCharacterHasMaxStamina',
       'charactersWithIds',
-      'garrisonCharactersWithIds'
+      'garrisonCharactersWithIds',
+      'getCharacterPower'
     ]),
 
     characterTrait() {
@@ -129,6 +133,10 @@ export default {
 
     characterStamina() {
       return this.isGarrison ? this.characterStaminas[this.character.id] : this.timestampToStamina(this.character.staminaTimestamp);
+    },
+
+    characterTotalPower() {
+      return this.getCharacterPower(this.character.id);
     }
   },
 
@@ -638,5 +646,12 @@ export default {
   right: 0;
   text-align: center;
   color: #fff;
+}
+
+.character-power {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  font-size: 0.82em;
 }
 </style>

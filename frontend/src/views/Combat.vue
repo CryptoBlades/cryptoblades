@@ -170,7 +170,7 @@
 import BigButton from '../components/BigButton.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import {getEnemyArt} from '../enemy-art';
-import {CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, WeaponElement} from '../interfaces';
+import {CharacterTrait, GetTotalMultiplierForTrait, WeaponElement} from '../interfaces';
 import Hint from '../components/Hint.vue';
 import CombatResults from '../components/CombatResults.vue';
 import {fromWeiEther, toBN} from '../utils/common';
@@ -232,7 +232,8 @@ export default {
       'currentCharacterStamina',
       'getWeaponDurability',
       'fightGasOffset',
-      'fightBaseline'
+      'fightBaseline',
+      'getCharacterPower'
     ]),
 
     targets() {
@@ -287,7 +288,7 @@ export default {
       return CharacterTrait[trait];
     },
     getWinChance(enemyPower, enemyElement) {
-      const characterPower = CharacterPower(this.currentCharacter.level);
+      const characterPower = this.getCharacterPower(this.currentCharacter.id);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
       const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === this.selectedWeaponId);
       this.selectedWeapon = selectedWeapon;
@@ -415,12 +416,11 @@ export default {
     },
 
     getPotentialXp(targetToFight) {
-      const characterPower = CharacterPower(this.currentCharacter.level);
+      const characterPower = this.getCharacterPower(this.currentCharacter.id);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
       const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === this.selectedWeaponId);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
       const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
-
       //Formula taken from getXpGainForFight funtion of cryptoblades.sol
       return Math.floor((targetToFight.power / totalPower) * this.fightXpGain) * this.fightMultiplier;
     },

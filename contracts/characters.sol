@@ -26,7 +26,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_1ee400a() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
 
         experienceTable = [
             16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 33, 36, 39, 42, 46, 50, 55, 60, 66
@@ -54,7 +54,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_951a020() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
 
         // Apparently ERC165 interfaces cannot be removed in this version of the OpenZeppelin library.
         // But if we remove the registration, then while local deployments would not register the interface ID,
@@ -65,18 +65,20 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
 
         promos = _promos;
     }
 
     function migrateTo_b627f23() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
 
         characterLimit = 4;
     }
 
     function migrateTo_1a19cbb(Garrison _garrison) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
+
         garrison = _garrison;
     }
 
@@ -123,8 +125,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     Garrison public garrison;
 
+    mapping(uint256 => uint256) public bonusPower;
+    mapping(address => uint256) public soulSupply;
+
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
+    event Burned(address indexed owner, uint256 indexed id);
 
     modifier restricted() {
         _restricted();
@@ -132,7 +138,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        require(hasRole(GAME_ADMIN, msg.sender), "NA");
     }
 
     modifier noFreshLookup(uint256 id) {
@@ -238,6 +244,44 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokenID;
     }
 
+    function burnIntoCharacter(uint256 burnId, uint256 targetCharId) external restricted {
+        uint256 burnPower = bonusPower[burnId].add(getPowerAtLevel(tokens[burnId].level));
+        address burnOwner = ownerOf(burnId);
+        if(burnOwner == address(garrison)) {
+            burnOwner = garrison.getCharacterOwner(burnId);
+            garrison.updateOnBurn(burnOwner, burnId);
+        }
+        _burn(burnId);
+        bonusPower[targetCharId] = burnPower.add(bonusPower[targetCharId]);
+
+        emit Burned(
+            burnOwner,
+            burnId
+        );
+    }
+
+    function burnIntoSoul(uint256 burnId, address soulRecipient) external restricted {
+        uint256 soulAmount = uint256(getPowerAtLevel(tokens[burnId].level)).add(bonusPower[burnId]).div(10);
+        address burnOwner = ownerOf(burnId);
+        if(burnOwner == address(garrison)) {
+            garrison.updateOnBurn(burnOwner, burnId);
+        }
+        _burn(burnId);
+        soulSupply[soulRecipient] = soulSupply[soulRecipient].add(soulAmount);
+
+        emit Burned(
+            soulRecipient,
+            burnId
+        );
+    }
+
+    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) public {
+        require(soulSupply[msg.sender] >= soulAmount, 'Not enough soul');
+        soulSupply[msg.sender] = soulSupply[msg.sender].sub(soulAmount);
+        uint256 burnPower = soulAmount.mul(10);
+        bonusPower[targetCharId] = burnPower.add(bonusPower[targetCharId]);
+    }
+
     function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return tokens[id].level; // this is used by dataminers and it benefits us
     }
@@ -248,6 +292,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function getPower(uint256 id) public view noFreshLookup(id) returns (uint24) {
         return getPowerAtLevel(tokens[id].level);
+    }
+
+    function getTotalPower(uint256 id) public view noFreshLookup(id) returns (uint256) {
+        return bonusPower[id].add(getPowerAtLevel(tokens[id].level));
     }
 
     function getPowerAtLevel(uint8 level) public pure returns (uint24) {
@@ -275,6 +323,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function getXp(uint256 id) public view noFreshLookup(id) returns (uint32) {
         return tokens[id].xp;
+    }
+
+    function getSoulSupply(address player) public view returns(uint256) {
+        return soulSupply[player];
     }
 
     function gainXp(uint256 id, uint16 xp) public restricted {
@@ -353,7 +405,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint96(char.trait | (getPowerAtLevel(char.level) << 8) | (preTimestamp << 32));
+        return uint96(char.trait | (uint24(getTotalPower(id)) << 8) | (preTimestamp << 32));
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {

@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./characters.sol";
 
@@ -68,6 +69,10 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
         return userGarrison[user].length();
     }
 
+    function getCharacterOwner(uint256 id) public view returns(address) {
+        return characterOwner[id];
+    }
+
     // MUTATIVE
     function sendToGarrison(uint256 id) public {
         characterOwner[id] = msg.sender;
@@ -101,6 +106,12 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
     function swapWithGarrison(uint256 plazaId, uint256 garrisonId) external {
       sendToGarrison(plazaId);
       restoreFromGarrison(garrisonId);
+    }
+
+    function updateOnBurn(address playerAddress, uint256 burnedId) external restricted {
+        delete characterOwner[burnedId];
+        userGarrison[playerAddress].remove(burnedId);
+        allCharactersInGarrison.remove(burnedId);
     }
 
     function allowToken(IERC721 _tokenAddress) public restricted {

@@ -43,6 +43,7 @@ import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
 import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/contracts/Treasury.json';
+import { abi as burningManagerAbi, networks as burningManagerNetworks } from '../../build/contracts/BurningManager.json';
 import { abi as kingStakingRewardsUpgradeableAbi,
   networks as kingStakingRewardsUpgradeableNetworks }
   from '../../build/contracts/KingStakingRewardsUpgradeable.json';
@@ -65,6 +66,7 @@ import {
   stakeOnly as featureFlagStakeOnly,
   market as featureFlagMarket,
   pvp as featureFlagPvP,
+  burningManager as featureFlagBurningManager
 } from './feature-flags';
 
 interface RaidContracts {
@@ -337,6 +339,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const treasuryContractAddr = getConfigValue('VUE_APP_TREASURY_CONTRACT_ADDRESS') || (treasuryNetworks as Networks)[networkId]!.address;
   const Treasury = new web3.eth.Contract(treasuryAbi as Abi, treasuryContractAddr);
 
+  let BurningManager;
+  if(featureFlagBurningManager) {
+    const burningManagerContractAddr = getConfigValue('VUE_APP_BURNING_MANAGER_CONTRACT_ADDRESS') || (burningManagerNetworks as Networks)[networkId]!.address;
+    BurningManager = new web3.eth.Contract(burningManagerAbi as Abi, burningManagerContractAddr);
+  }
+
   let KingStakingRewardsUpgradeable;
   if(stakingContracts.staking.king) {
     const kingStakingRewardsUpgradeableAddress = getConfigValue('VUE_APP_KING_STAKING_REWARDS_CONTRACT_ADDRESS')
@@ -370,6 +378,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     ...marketContracts,
     WaxBridge,
     Treasury,
+    BurningManager,
     KingStakingRewardsUpgradeable,
     KingStakingRewardsUpgradeable90,
     KingStakingRewardsUpgradeable180
