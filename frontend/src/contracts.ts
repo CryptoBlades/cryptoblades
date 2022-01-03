@@ -1,12 +1,20 @@
 import { abi as erc20Abi } from '../../build/contracts/IERC20.json';
+import { abi as erc721Abi } from '../../build/contracts/IERC721.json';
 
 import { networks as skillStakingRewardsNetworks } from '../../build/contracts/SkillStakingRewardsUpgradeable.json';
+import { networks as skillStakingRewards90Networks } from '../../build/contracts/SkillStakingRewardsUpgradeable90.json';
+import { networks as skillStakingRewards180Networks } from '../../build/contracts/SkillStakingRewardsUpgradeable180.json';
 import { networks as lpStakingRewardsNetworks } from '../../build/contracts/LPStakingRewardsUpgradeable.json';
 import { networks as lp2StakingRewardsNetworks } from '../../build/contracts/LP2StakingRewardsUpgradeable.json';
 import { networks as skillTokenNetworks } from '../../build/contracts/SkillToken.json';
 import { networks as lpTokenNetworks } from '../../build/contracts/ExperimentToken.json';
 import { networks as lp2TokenNetworks } from '../../build/contracts/ExperimentToken2.json';
+import { networks as cbkLandT1StakingRewardsNetworks } from '../../build/contracts/CBKLandT1StakingRewardsUpgradeable.json';
+import { networks as cbkLandT2StakingRewardsNetworks } from '../../build/contracts/CBKLandT2StakingRewardsUpgradeable.json';
+import { networks as cbkLandT3StakingRewardsNetworks } from '../../build/contracts/CBKLandT3StakingRewardsUpgradeable.json';
+import { networks as cbkLandNetworks } from '../../build/contracts/CBKLand.json';
 import { abi as stakingRewardsAbi } from '../../build/contracts/IStakingRewards.json';
+import { abi as nftStakingRewardsAbi } from '../../build/contracts/INftStakingRewards.json';
 
 import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../build/contracts/CryptoBlades.json';
 import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/Raid1.json';
@@ -14,6 +22,7 @@ import { abi as charactersAbi } from '../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
 import { abi as blacksmithAbi } from '../../build/contracts/Blacksmith.json';
 import { abi as shieldsAbi } from '../../build/contracts/Shields.json';
+import { abi as garrisonAbi } from '../../build/contracts/Garrison.json';
 import { abi as cbkLandSaleAbi } from '../../build/contracts/CBKLandSale.json';
 import { abi as merchandiseAbi, networks as merchandiseNetworks } from '../../build/contracts/Merchandise.json';
 import { abi as cbkLandAbi } from '../../build/contracts/CBKLand.json';
@@ -37,13 +46,19 @@ import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/co
 import { abi as kingStakingRewardsUpgradeableAbi,
   networks as kingStakingRewardsUpgradeableNetworks }
   from '../../build/contracts/KingStakingRewardsUpgradeable.json';
+import { abi as kingStakingRewardsUpgradeable90Abi,
+  networks as kingStakingRewardsUpgradeable90Networks }
+  from '../../build/contracts/KingStakingRewardsUpgradeable90.json';
+import { abi as kingStakingRewardsUpgradeable180Abi,
+  networks as kingStakingRewardsUpgradeable180Networks }
+  from '../../build/contracts/KingStakingRewardsUpgradeable180.json';
 import config from '../app-config.json';
 
 
 import Web3 from 'web3';
-import { Contracts, isStakeType, StakeType, StakingContracts } from './interfaces';
+import { Contracts, isStakeType, isNftStakeType, StakeType, NftStakeType, StakingContracts, NftStakingContracts } from './interfaces';
 
-import { StakingContractEntry, stakingContractsInfo } from './stake-types';
+import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } from './stake-types';
 
 import {
   raid as featureFlagRaid,
@@ -77,8 +92,8 @@ export function getConfigValue(key: string): any {
     return process.env[key];
   }
 
-  if(process.env.NODE_ENV === 'development') return '';
-  const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
+  //if(process.env.NODE_ENV === 'development') return '';
+  const env = 'test';//window.location.href.startsWith('https://test') ? 'test' : 'production';
   const chain = localStorage.getItem('currentChain') || 'BSC';
   return (config as Config).environments[env].chains[chain][key];
 }
@@ -94,6 +109,14 @@ const stakingContractAddressesFromBuild: Partial<Record<StakeType, Partial<Staki
     stakingRewardsAddress: (skillStakingRewardsNetworks as Networks)[networkId]?.address,
     stakingTokenAddress: (skillTokenNetworks as Networks)[networkId]?.address
   },
+  skill90: {
+    stakingRewardsAddress: (skillStakingRewards90Networks as Networks)[networkId]?.address,
+    stakingTokenAddress: (skillTokenNetworks as Networks)[networkId]?.address
+  },
+  skill180: {
+    stakingRewardsAddress: (skillStakingRewards180Networks as Networks)[networkId]?.address,
+    stakingTokenAddress: (skillTokenNetworks as Networks)[networkId]?.address
+  },
   lp: {
     stakingRewardsAddress: (lpStakingRewardsNetworks as Networks)[networkId]?.address,
     stakingTokenAddress: (lpTokenNetworks as Networks)[networkId]?.address
@@ -101,6 +124,21 @@ const stakingContractAddressesFromBuild: Partial<Record<StakeType, Partial<Staki
   lp2: {
     stakingRewardsAddress: (lp2StakingRewardsNetworks as Networks)[networkId]?.address,
     stakingTokenAddress: (lp2TokenNetworks as Networks)[networkId]?.address
+  }
+};
+
+const nftStakingContractAddressesFromBuild: Partial<Record<NftStakeType, Partial<StakingContractEntry>>> = {
+  cbkLandT1: {
+    stakingRewardsAddress: (cbkLandT1StakingRewardsNetworks as Networks)[networkId]?.address,
+    stakingTokenAddress: (cbkLandNetworks as Networks)[networkId]?.address
+  },
+  cbkLandT2: {
+    stakingRewardsAddress: (cbkLandT2StakingRewardsNetworks as Networks)[networkId]?.address,
+    stakingTokenAddress: (cbkLandNetworks as Networks)[networkId]?.address
+  },
+  cbkLandT3: {
+    stakingRewardsAddress: (cbkLandT3StakingRewardsNetworks as Networks)[networkId]?.address,
+    stakingTokenAddress: (cbkLandNetworks as Networks)[networkId]?.address
   }
 };
 
@@ -123,11 +161,32 @@ function getStakingContractsInfoWithDefaults(): Partial<Record<StakeType, Partia
   return out;
 }
 
+function getNftStakingContractsInfoWithDefaults(): Partial<Record<NftStakeType, Partial<StakingContractEntry>>> {
+  const out: Partial<Record<NftStakeType, Partial<StakingContractEntry>>> = {};
+
+  for(const nftStakeType of Object.keys(nftStakingContractsInfo).filter(isNftStakeType)) {
+    const nftStakingContractInfo = nftStakingContractsInfo[nftStakeType]!;
+    if(nftStakingContractInfo.stakingRewardsAddress && nftStakingContractInfo.stakingTokenAddress) {
+      out[nftStakeType] = {
+        stakingRewardsAddress: nftStakingContractInfo.stakingRewardsAddress,
+        stakingTokenAddress: nftStakingContractInfo.stakingTokenAddress
+      };
+    }
+    else {
+      out[nftStakeType] = Object.assign({}, nftStakingContractInfo, nftStakingContractAddressesFromBuild[nftStakeType]);
+    }
+  }
+
+  return out;
+}
+
 async function setUpStakingContracts(web3: Web3) {
   networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
   const stakingContractsInfo = getStakingContractsInfoWithDefaults();
+  const nftStakingContractsInfo = getNftStakingContractsInfoWithDefaults();
 
   const staking: StakingContracts = {};
+  const nftStaking: NftStakingContracts = {};
 
   for(const stakeType of Object.keys(stakingContractsInfo).filter(isStakeType)) {
     const stakingContractInfo = stakingContractsInfo[stakeType]!;
@@ -139,13 +198,24 @@ async function setUpStakingContracts(web3: Web3) {
     };
   }
 
+  for(const stakeType of Object.keys(nftStakingContractsInfo).filter(isNftStakeType)) {
+    const nftStakingContractInfo = nftStakingContractsInfo[stakeType]!;
+
+    if(!nftStakingContractInfo.stakingRewardsAddress || !nftStakingContractInfo.stakingTokenAddress) continue;
+    nftStaking[stakeType] = {
+      StakingRewards: new web3.eth.Contract(nftStakingRewardsAbi as Abi, nftStakingContractInfo.stakingRewardsAddress),
+      StakingToken: new web3.eth.Contract(erc721Abi as Abi, nftStakingContractInfo.stakingTokenAddress)
+    };
+  }
+
   const skillTokenAddress = getConfigValue('VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS') || (skillTokenNetworks as Networks)[networkId]!.address;
   const SkillToken = new web3.eth.Contract(erc20Abi as Abi, skillTokenAddress);
 
   return {
     SkillToken,
 
-    staking
+    staking,
+    nftStaking
   };
 }
 
@@ -170,6 +240,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Characters = new web3.eth.Contract(charactersAbi as Abi, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
+
+  const garrisonAddr = await Characters.methods.garrison().call();
+  const Garrison = new web3.eth.Contract(garrisonAbi as Abi, garrisonAddr);
 
   const shieldsAddr = await Blacksmith.methods.shields().call();
   const Shields = new web3.eth.Contract(shieldsAbi as Abi, shieldsAddr);
@@ -271,9 +344,23 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     KingStakingRewardsUpgradeable = new web3.eth.Contract(kingStakingRewardsUpgradeableAbi as Abi, kingStakingRewardsUpgradeableAddress);
   }
 
+  let KingStakingRewardsUpgradeable90;
+  if(stakingContracts.staking.king) {
+    const kingStakingRewardsUpgradeable90Address = getConfigValue('VUE_APP_KING_STAKING_REWARDS_90_CONTRACT_ADDRESS')
+      || (kingStakingRewardsUpgradeable90Networks as Networks)[networkId]!.address;
+    KingStakingRewardsUpgradeable90 = new web3.eth.Contract(kingStakingRewardsUpgradeable90Abi as Abi, kingStakingRewardsUpgradeable90Address);
+  }
+
+  let KingStakingRewardsUpgradeable180;
+  if(stakingContracts.staking.king) {
+    const kingStakingRewardsUpgradeable180Address = getConfigValue('VUE_APP_KING_STAKING_REWARDS_180_CONTRACT_ADDRESS')
+      || (kingStakingRewardsUpgradeable180Networks as Networks)[networkId]!.address;
+    KingStakingRewardsUpgradeable180 = new web3.eth.Contract(kingStakingRewardsUpgradeable180Abi as Abi, kingStakingRewardsUpgradeable180Address);
+  }
+
   return {
     ...stakingContracts,
-    CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
+    CryptoBlades, Randoms, Characters, Weapons, Blacksmith, Shields, Garrison, WeaponRenameTagConsumables, CharacterRenameTagConsumables,
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
@@ -283,7 +370,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     ...marketContracts,
     WaxBridge,
     Treasury,
-    KingStakingRewardsUpgradeable
+    KingStakingRewardsUpgradeable,
+    KingStakingRewardsUpgradeable90,
+    KingStakingRewardsUpgradeable180
   };
 }
 

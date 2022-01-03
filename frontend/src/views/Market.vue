@@ -931,7 +931,7 @@ export default Vue.extend({
     },
 
     canPurchase(): boolean {
-      return this.activeType === 'weapon' || this.activeType === 'shield' || this.ownCharacters.length < 4 ;
+      return this.activeType === 'weapon' || this.activeType === 'shield' || this.activeType === 'character' ;
     },
 
     specialOffersNftList(): SkillShopListing[] {
