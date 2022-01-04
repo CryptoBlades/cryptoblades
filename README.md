@@ -82,6 +82,9 @@ This repository uses Truffle, but if for some reason, you'd prefer using hardhat
 Turn on the Hardhat node:
 `npx hardhat node`
 
+Generate Hardhat artifacts:
+`npx hardhat compile`
+
 Deploy to the Hardhat node:
 `export ETH_DEV_RPC_PORT=8545 && npm run deploy --reset`
 
@@ -112,6 +115,7 @@ If you get any issues during deployment, run:
   [Use the 2-Letter ISO code of your language](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
 - Language is loaded on startup and added to the language drop-down of the Options page.
 - The value for the drop-down is "name" at the root of the json map.
+
 
 ### i18n Manager App
 
