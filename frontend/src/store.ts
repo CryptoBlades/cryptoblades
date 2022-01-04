@@ -2214,6 +2214,48 @@ export function createStore(web3: Web3) {
         await dispatch('fetchStakeDetails', { stakeType });
       },
 
+      async stakeNfts({ state, dispatch }, { ids, stakeType }: { ids: string[], stakeType: StakeType }) {
+        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
+        if(!StakingRewards || !StakingToken) return;
+
+        if(ids.length === 1) {
+          await StakingToken.methods.approve(StakingRewards.options.address, ids[0]).send({
+            from: state.defaultAccount
+          });
+
+          await StakingRewards.methods.stake(ids[0]).send({
+            from: state.defaultAccount,
+          });
+        } else {
+          await (StakingToken as Contract<IERC721>).methods.setApprovalForAll(StakingRewards.options.address, true).send({
+            from: state.defaultAccount
+          });
+
+          await (StakingRewards as Contract<INftStakingRewards>).methods.bulkStake(ids).send({
+            from: state.defaultAccount,
+          });
+        }
+
+        await dispatch('fetchStakeDetails', { stakeType });
+      },
+
+      async unstakeNfts({ state, dispatch }, { ids, stakeType }: { ids: string[], stakeType: StakeType }) {
+        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
+        if(!StakingRewards || !StakingToken) return;
+
+        if(ids.length === 1) {
+          await StakingRewards.methods.withdraw(ids[0]).send({
+            from: state.defaultAccount,
+          });
+        } else {
+          await (StakingRewards as Contract<INftStakingRewards>).methods.bulkWithdraw(ids).send({
+            from: state.defaultAccount,
+          });
+        }
+
+        await dispatch('fetchStakeDetails', { stakeType });
+      },
+
       async unstake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
         const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
         if(!StakingRewards) return;
