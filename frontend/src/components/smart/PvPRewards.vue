@@ -58,7 +58,7 @@ export default {
     this.availableSkill = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
 
     this.loading = false;
-  },
+  }
 };
 </script>
 
