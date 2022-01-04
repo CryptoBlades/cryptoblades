@@ -153,7 +153,7 @@ contract NftStakingRewardsUpgradeable is
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     function stake(uint256 id)
-        external
+        public
         virtual
         override
         normalMode
@@ -171,8 +171,9 @@ contract NftStakingRewardsUpgradeable is
         emit Staked(msg.sender, id);
     }
 
-    function bulkStake(uint256[] calldata ids)
-        external
+    function bulkStake(uint256[] memory ids)
+        public
+        virtual
         override
         normalMode
         nonReentrant
@@ -220,7 +221,7 @@ contract NftStakingRewardsUpgradeable is
         override
         normalMode
         nonReentrant
-        whenNotPaused
+        isOwnerOfIds(ids)
         updateReward(msg.sender)
     {
         require(
@@ -439,6 +440,13 @@ contract NftStakingRewardsUpgradeable is
     modifier isOwner(uint256 id) {
         require(_stakedNftOwner[id] == msg.sender, "Access denied");
         _;
+    }
+
+    modifier isOwnerOfIds(uint256[] memory ids) {
+        for(uint i = 0; i < ids.length; i++) {
+            require(_stakedNftOwner[ids[i]] == msg.sender, "Access denied");
+            _;
+        }
     }
 
     // something

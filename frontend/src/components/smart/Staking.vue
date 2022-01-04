@@ -64,8 +64,11 @@
                 v-model="textAmount"
               />
               <div v-if="isNftStaking" class="mr-2 ml-3">ID(s):</div>
-              <multiselect class="overflow" v-model="idsToStake" :options="(isDeposit ? ownedLandIds : stakedIds) || []" :max="10"
-              :multiple="true" :close-on-select="false" :clear-on-select="false" :placeholder="$t('stake.pickId')" label="id" track-by="id">
+              <multiselect v-if="isNftStaking" class="overflow" v-model="idsToStake"
+                :options="(isDeposit ? ownedLandIds: stakedIds).filter(x => +x.tier === +tier || !tier) || []"
+                :max="10" :multiple="true" :close-on-select="false" :clear-on-select="false" :placeholder="$t('stake.pickId')"
+                :custom-label="idWithTier" track-by="id"
+              >
                 <template slot="selection" :slot-scope="{ idsToStake }">
                   <span class="multiselect__single" v-if="idsToStake && idsToStake.length">{{ idsToStake.length }} IDs selected</span>
                 </template>
@@ -172,6 +175,10 @@ export default {
         return isStakeType(type) || isNftStakeType(type);
       }
     },
+    tier: {
+      type: Number,
+      default: 0
+    }
   },
 
   components: {
@@ -464,6 +471,10 @@ export default {
       'getOwnedLandIdsWithTier',
       'getStakedIds'
     ]),
+
+    idWithTier({ id, tier }) {
+      return `${id} (${this.$t('stake.tier')} ${tier})`;
+    },
 
     updateEstimates() {
       if (this.stakeUnlockTimeLeftCurrentEstimate > 0) {
