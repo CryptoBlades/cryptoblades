@@ -82,6 +82,9 @@ This repository uses Truffle, but if for some reason, you'd prefer using hardhat
 Turn on the Hardhat node:
 `npx hardhat node`
 
+Generate Hardhat artifacts:
+`npx hardhat compile`
+
 Deploy to the Hardhat node:
 `export ETH_DEV_RPC_PORT=8545 && npm run deploy --reset`
 

@@ -276,6 +276,9 @@ span, p, li, button, a {
     span, li, div {
       font-family: 'Roboto';
     }
+    .noDuels {
+      font-size: .85rem;
+    }
     .date {
       color: #B4B0A7;
     }

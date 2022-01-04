@@ -160,6 +160,7 @@ export default {
 
     leaveArena() {
       this.isCharacterInArena = false;
+      this.isMatchMaking = false;
       this.$emit('leaveMatchMaking');
     },
 
@@ -170,7 +171,7 @@ export default {
 
       this.opponentInformation.level = await this.contracts().Characters.methods.getLevel(defenderId).call({ from: this.defaultAccount });
 
-      this.opponentInformation.rank = await this.contracts().PvpArena.methods.getCharacterRankingPoints(defenderId)
+      this.opponentInformation.rank = await this.contracts().PvpArena.methods.rankingPointsByCharacter(defenderId)
         .call({ from: this.defaultAccount });
 
       this.opponentInformation.element = formatCharacter(defenderId, await this.contracts().Characters.methods.get(`${defenderId}`)
@@ -227,7 +228,7 @@ export default {
 
       this.characterInformation.power = await this.contracts().Characters.methods.getPower(this.currentCharacterId).call({ from: this.defaultAccount });
 
-      this.characterInformation.rank = await this.contracts().PvpArena.methods.getCharacterRankingPoints(this.currentCharacterId)
+      this.characterInformation.rank = await this.contracts().PvpArena.methods.rankingPointsByCharacter(this.currentCharacterId)
         .call({ from: this.defaultAccount });
 
       this.characterInformation.element = formatCharacter(this.currentCharacterId, await this.contracts().Characters.methods.get(`${this.currentCharacterId}`)
@@ -289,15 +290,15 @@ export default {
         }
       }
 
-      this.tierRewardsPool = await this.contracts().PvpArena.methods.getRankingRewardsPool(this.characterInformation.tier).call({ from: this.defaultAccount });
+      this.tierRewardsPool = await this.contracts().PvpArena.methods.rankingsPoolByTier(this.characterInformation.tier).call({ from: this.defaultAccount });
 
-      const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopRankers(this.currentCharacterId).call({ from: this.defaultAccount });
+      const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopCharacters(this.currentCharacterId).call({ from: this.defaultAccount });
 
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
         return {
           rankerId,
           name: getCharacterNameFromSeed(rankerId),
-          rank: await this.contracts().PvpArena.methods.getCharacterRankingPoints(rankerId).call({ from: this.defaultAccount })
+          rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount })
         };
       }));
 
@@ -330,7 +331,7 @@ export default {
 
         this.characterInformation.power = await this.contracts().Characters.methods.getPower(value).call({ from: this.defaultAccount });
 
-        this.characterInformation.rank = await this.contracts().PvpArena.methods.getCharacterRankingPoints(value).call({ from: this.defaultAccount });
+        this.characterInformation.rank = await this.contracts().PvpArena.methods.rankingPointsByCharacter(value).call({ from: this.defaultAccount });
 
         this.characterInformation.element = formatCharacter(value, await this.contracts().Characters.methods.get(`${value}`)
           .call({ from: this.defaultAccount })).traitName;
@@ -393,16 +394,16 @@ export default {
           }
         }
 
-        this.tierRewardsPool = await this.contracts().PvpArena.methods.getRankingRewardsPool(this.characterInformation.tier)
+        this.tierRewardsPool = await this.contracts().PvpArena.methods.rankingsPoolByTier(this.characterInformation.tier)
           .call({ from: this.defaultAccount });
 
-        const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopRankers(value).call({ from: this.defaultAccount });
+        const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopCharacters(value).call({ from: this.defaultAccount });
 
         this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
           return {
             rankerId,
             name: getCharacterNameFromSeed(rankerId),
-            rank: await this.contracts().PvpArena.methods.getCharacterRankingPoints(rankerId).call({ from: this.defaultAccount })
+            rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount })
           };
         }));
 
