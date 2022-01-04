@@ -21,6 +21,11 @@
       "logo": "cryptomeda.png",
       "details": "Cryptomeda is a gaming ecosystem that uniquely blends NFT collectibles, DEFI mechanics, and iconic crypto characters into an exciting fantasy world. Players of all experience levels can explore Cryptomeda and find various opportunities to earn.",
       "website": "https://cryptomeda.tech/"
+    },
+    "Seedify": {
+      "logo": "seedify.png",
+      "details": "",
+      "website": "https://launchpad.seedify.fund/"
     }
   }
 }
