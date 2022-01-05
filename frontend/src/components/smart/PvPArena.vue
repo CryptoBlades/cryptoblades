@@ -391,6 +391,11 @@ export default {
               shieldId: fighter.shieldID,
               information: await this.getShieldInformation(fighter.shieldID)
             };
+          } else {
+            this.activeShieldWithInformation = {
+              shieldId: null,
+              information: {}
+            };
           }
         }
 

@@ -286,6 +286,7 @@ export default {
             });
         } catch(err) {
           console.log('Enter Arena Approval Error: ', err);
+          this.loading = false;
           this.handleErrorMessage();
           return;
         }
@@ -297,6 +298,7 @@ export default {
             });
         } catch(err){
           console.log('Enter Arena Error: ', err);
+          this.loading = false;
           this.handleErrorMessage();
           return;
         }
