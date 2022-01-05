@@ -505,7 +505,7 @@
     },
     "links": {},
     "address": "0x140d3a7fE604FA6d1dFa8b377eAA507D85cD37cF",
-    "transactionHash": "0x75b48e9f116b3e3f10348b423530fd3780386faef8ae9aa752ab24c68b9b71ca"
+    "transactionHash": "0x7e1ed8261e54e893438770bd518a15fcc167847505cbe6d78981c01418cea6cb"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -2309,6 +2309,106 @@
     "address": "0x7B6D33F224Fe801f04B855b90efb4a50f02F0E56",
     "transactionHash": "0xfb0ea9b6235d573a03ea134446abc886dbc5011a7d0cd78810d21022fa6895d0"
   },
+  "build/contracts/Garrison.json": {
+    "events": {
+      "0xefe6a80b6beaa729816c7b03af9a2105b626fdada4a5209d81a95f8d1880b253": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "character",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "minter",
+            "type": "address"
+          }
+        ],
+        "name": "CharacterReceived",
+        "type": "event"
+      },
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x4D1559DF0B0724aC4bb095C713564211613683Ed"
+  },
   "build/contracts/Junk.json": {
     "events": {
       "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
@@ -3036,7 +3136,8 @@
       }
     },
     "links": {},
-    "address": "0x34d32231e778D53A97AD23Ff932ebDfD8e52162f"
+    "address": "0x34d32231e778D53A97AD23Ff932ebDfD8e52162f",
+    "transactionHash": "0xbc7450f3243f1fd999bfa7cb882375c3d3cea0bac394ea454d8cf6fbf9a0b5fd"
   },
   "build/contracts/Merchandise.json": {
     "events": {
@@ -4798,7 +4899,7 @@
     },
     "links": {},
     "address": "0x96a5448BB59aD9Cccc3a4112c2c57a420768b499",
-    "transactionHash": "0x01a20f5f13b32b3ce1c5a6d2bc483d665c6cca0e5605b8d4469d003fc6346508"
+    "transactionHash": "0xf94f7b79a2cfcd182e8c991937c5c401b54ee1e86f3daf7331b6acc9292e4daa"
   },
   "build/contracts/SkillToken.json": {
     "events": {},

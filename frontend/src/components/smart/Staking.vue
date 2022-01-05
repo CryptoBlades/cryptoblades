@@ -227,8 +227,12 @@ export default {
       switch(this.stakeType) {
       case 'skill':
       case 'skill2':
+      case 'skill90':
+      case 'skill180':
         return 'SKILL';
       case 'king':
+      case 'king90':
+      case 'king180':
         return 'KING';
       case 'lp':
       case 'lp2':
@@ -243,7 +247,7 @@ export default {
     },
 
     stakingRewardsName() {
-      if(this.stakeType === 'king' || this.stakeType.startsWith('cbkLand')) return 'KING';
+      if(this.stakeType.startsWith('king') || this.stakeType.startsWith('cbkLand')) return 'KING';
       return 'SKILL';
     },
 

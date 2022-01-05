@@ -22,20 +22,20 @@ import {
   Contracts,
   IPartnerProject,
   IRaidState,
+  isNftStakeType,
   isStakeType,
   IStakeOverviewState,
   IStakeState,
   IState,
   IWeb3EventSubscription,
-  StakeType,
   NftStakeType,
-  isNftStakeType
+  StakeType
 } from './interfaces';
 import {getCharacterNameFromSeed} from './character-name';
 import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './contract-call-utils';
 
 import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly,} from './feature-flags';
-import {IERC20, IERC721, IStakingRewards, INftStakingRewards} from '../../build/abi-interfaces';
+import {IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
 import {Nft} from './interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
@@ -1151,7 +1151,7 @@ export function createStore(web3: Web3) {
                 //Events.$emit('garrison:characterReceived', { id: characterId });
 
                 await Promise.all([
-                  dispatch('fetchCharacter', { characterId }),
+                  dispatch('fetchCharacter', { characterId, inGarrison: true }),
                   dispatch('fetchSkillBalance'),
                   dispatch('fetchFightRewardSkill'),
                   dispatch('fetchFightRewardXp'),
@@ -4009,10 +4009,9 @@ export function createStore(web3: Web3) {
       async chainEnabled({ state }, { chainId }: { chainId: string }) {
         const { NFTStorage } = state.contracts();
         if (!NFTStorage || !state.defaultAccount) return;
-        const isEnabled = await NFTStorage.methods
+        return await NFTStorage.methods
           .chainBridgeEnabled(chainId)
           .call(defaultCallOptions(state));
-        return isEnabled;
       },
       async getBridgeTransferAt({ state }) {
         const { NFTStorage } = await state.contracts();

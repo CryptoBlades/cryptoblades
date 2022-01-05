@@ -82,6 +82,9 @@ This repository uses Truffle, but if for some reason, you'd prefer using hardhat
 Turn on the Hardhat node:
 `npx hardhat node`
 
+Generate Hardhat artifacts:
+`npx hardhat compile`
+
 Deploy to the Hardhat node:
 `export ETH_DEV_RPC_PORT=8545 && npm run deploy --reset`
 
@@ -113,3 +116,10 @@ If you get any issues during deployment, run:
 - Language is loaded on startup and added to the language drop-down of the Options page.
 - The value for the drop-down is "name" at the root of the json map.
 
+
+### i18n Manager App
+
+- Adding translations is easier with the use of [i18n-manager](https://www.electronjs.org/apps/i18n-manager)
+- Download the app, install it on your device and run it.
+- Point it to the folder containing locale files. (frontend/src/locales)
+- Add translations, save with ctrl + s, you should be able to see changes immediately after rebuilding

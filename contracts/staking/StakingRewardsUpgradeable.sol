@@ -138,6 +138,7 @@ contract StakingRewardsUpgradeable is
     }
 
     function getStakeUnlockTimeLeft() external override view returns (uint256) {
+        if(periodFinish <= block.timestamp) return 0;
         (bool success, uint256 diff) =
             _stakeTimestamp[msg.sender].add(minimumStakeTime).trySub(
                 block.timestamp
@@ -169,7 +170,8 @@ contract StakingRewardsUpgradeable is
         require(
             minimumStakeTime == 0 ||
                 block.timestamp.sub(_stakeTimestamp[msg.sender]) >=
-                minimumStakeTime,
+                minimumStakeTime ||
+                periodFinish <= block.timestamp,
             "Cannot withdraw until minimum staking time has passed"
         );
         _unstake(msg.sender, amount);
@@ -186,7 +188,8 @@ contract StakingRewardsUpgradeable is
         require(
             minimumStakeTime == 0 ||
                 block.timestamp.sub(_stakeTimestamp[msg.sender]) >=
-                minimumStakeTime,
+                minimumStakeTime ||
+                periodFinish <= block.timestamp,
             "Cannot get reward until minimum staking time has passed"
         );
         uint256 reward = rewards[msg.sender];

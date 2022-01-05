@@ -49,7 +49,7 @@
           <div v-if="this.loading || isCharacterInDuelQueue">
             <img class="spinner" src="../../assets/loadingSpinner.svg" />
           </div>
-          <p v-if="hasPendingDuel && !isCharacterInDuelQueue && !this.loading && this.decisionTimeLeft">
+          <p v-if="isInMatch && !isCharacterInDuelQueue && !this.loading && this.decisionTimeLeft">
             <span>You have</span>
             <span>{{ this.decisionTimeLeft }}</span>
             <span>to accept the duel</span>
@@ -59,14 +59,14 @@
         <div class="middleMatchProgressButtons">
           <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
-            <pvp-button v-if="!hasPendingDuel" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
+            <pvp-button v-if="!isInMatch" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
             <pvp-button v-else
-            @click="preparePerformDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
+            @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
           </div>
         </div>
         <div class="rerollButtonWrapper">
           <pvp-button
-            @click="reRollOpponent" :disabled="loading || !hasPendingDuel || isCharacterInDuelQueue"
+            @click="reRollOpponent" :disabled="loading || !isInMatch || isCharacterInDuelQueue"
             buttonText="Re-roll Opponent"
             :buttonsubText="'$SKILL: ' + formattedReRollCost"
             :secondary="true"
@@ -203,17 +203,15 @@ export default {
   data() {
     return {
       loading: true,
-      hasPendingDuel: false,
+      isInMatch: false,
       decisionTimeLeft: 0,
-      isWithinDecisionTime: false,
       wager: null,
       duelCost: null,
       reRollCost: null,
-      duel: {
+      match: {
         attackerID: null,
         defenderID: null,
         createdAt: null,
-        isPending: null
       },
       duelQueue: [],
       isCharacterInDuelQueue: false,
@@ -270,6 +268,13 @@ export default {
   },
 
   methods: {
+    handleErrorMessage(value, errorMessage, returnedMessage) {
+      if (value.includes(`reverted with reason string '${errorMessage}'`)) {
+        return this.$dialog.notify.error(returnedMessage);
+      }
+      return 'There has been an error. Try again.';
+    },
+
     async leaveArena() {
       this.loading = true;
 
@@ -278,30 +283,49 @@ export default {
 
         this.$emit('leaveArena');
       } catch (err) {
-        console.log('leave arena error: ', err);
+        console.log('leave arena error: ', err.message);
+
+        this.handleErrorMessage(err.message, 'Char not in arena', 'The character is not in the arena');
+        this.handleErrorMessage(err.message, 'Defender duel in process', 'Duel already in process');
       }
 
       this.loading = false;
     },
 
     async findMatch() {
+      if (!(await this.contracts().PvpArena.methods.isCharacterNotUnderAttack(this.currentCharacterId).call())) {
+        alert('You are currently under attack. Please wait a moment.');
+        return;
+      }
+
       this.loading = true;
 
       try {
-        await this.contracts().PvpArena.methods.requestOpponent(this.currentCharacterId).send({ from: this.defaultAccount });
+        await this.contracts().PvpArena.methods.findOpponent(this.currentCharacterId).send({ from: this.defaultAccount });
       } catch (err) {
-        console.log('find match error: ', err);
+        console.log('find match error: ', err.message);
+
+        this.handleErrorMessage(err.message, 'No enemy found', 'No opponent has been found. Try again.');
+        this.handleErrorMessage(err.message, 'Already in match', 'An opponent has already been requested.');
+        this.handleErrorMessage(err.message, 'No enemy in tier', 'No opponents available in this tier.');
+        this.handleErrorMessage(err.message, 'Char dueling', 'The character is already in a duel queue.');
+        this.handleErrorMessage(err.message, 'Char not in arena', 'The character is not in the arena.');
 
         this.loading = false;
         return;
       }
 
-      this.duel = await this.contracts().PvpArena.methods.duelByAttacker(this.currentCharacterId).call();
+      this.match = await this.contracts().PvpArena.methods.matchByFinder(this.currentCharacterId).call();
 
       this.loading = false;
     },
 
     async reRollOpponent() {
+      if (!(await this.contracts().PvpArena.methods.isCharacterNotUnderAttack(this.currentCharacterId).call())) {
+        alert('You are currently under attack. Please wait a moment.');
+        return;
+      }
+
       this.loading = true;
 
       try {
@@ -310,14 +334,19 @@ export default {
 
         await this.contracts().PvpArena.methods.reRollOpponent(this.currentCharacterId).send({ from: this.defaultAccount });
       } catch (err) {
-        console.log('reroll opponent error: ', err);
+        console.log('reroll opponent error: ', err.message);
+
+        this.handleErrorMessage(err.message, 'No enemy found', 'No opponent has been found. Try again.');
+        this.handleErrorMessage(err.message, 'Not in match', 'The character is not in a match. Try again.');
+        this.handleErrorMessage(err.message, 'No enemy in tier', 'No opponents available in this tier.');
+        this.handleErrorMessage(err.message, 'Char dueling', 'The character is already in a duel queue.');
 
         this.loading = false;
 
         return;
       }
 
-      this.duel = await this.contracts().PvpArena.methods.duelByAttacker(this.currentCharacterId).call();
+      this.match = await this.contracts().PvpArena.methods.matchByFinder(this.currentCharacterId).call();
 
       this.loading = false;
     },
@@ -359,15 +388,19 @@ export default {
       });
     },
 
-    async preparePerformDuel() {
+    async prepareDuel() {
       this.loading = true;
 
       try {
         await this.listenForDuel(this.contracts());
 
-        await this.contracts().PvpArena.methods.preparePerformDuel(this.currentCharacterId).send({from: this.defaultAccount});
+        await this.contracts().PvpArena.methods.prepareDuel(this.currentCharacterId).send({from: this.defaultAccount});
       } catch (err) {
-        console.log('prepare perform duel error: ', err);
+        console.log('prepare perform duel error: ', err.message);
+
+        this.handleErrorMessage(err.message, 'Decision time expired', 'Decision time expired.');
+        this.handleErrorMessage(err.message, 'Char in duel queue', 'The character is already waiting for an opponent.');
+        this.handleErrorMessage(err.message, 'Not in match', 'The character is not in a duel. Try again.');
 
         this.loading = false;
 
@@ -386,7 +419,8 @@ export default {
         attackerRoll: null,
         defenderRoll: null,
         skillDifference: null,
-        rankDifference: null
+        rankDifference: null,
+        result: ''
       };
     },
 
@@ -394,18 +428,17 @@ export default {
       this.clearDuelResult();
       this.decisionTimeLeft = 0;
 
-      this.hasPendingDuel = false;
+      this.isInMatch = false;
 
-      this.duel = {
+      this.match = {
         attackerID: null,
         defenderID: null,
         createdAt: null,
-        isPending: null
       };
 
       this.isCharacterInDuelQueue = false;
 
-      this.wager = await this.contracts().PvpArena.methods.getCharacterWager(this.currentCharacterId).call({ from: this.defaultAccount });
+      this.wager = (await this.contracts().PvpArena.methods.fighterByCharacter(this.currentCharacterId).call({ from: this.defaultAccount })).wager;
 
       if (this.wager < this.duelCost) {
         this.$emit('kickCharacterFromArena');
@@ -416,7 +449,7 @@ export default {
   async created() {
     this.loading = true;
 
-    this.hasPendingDuel = await this.contracts().PvpArena.methods.hasPendingDuel(this.currentCharacterId).call();
+    this.isInMatch = (await this.contracts().PvpArena.methods.matchByFinder(this.currentCharacterId).call()).createdAt !== '0';
 
     this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
 
@@ -426,38 +459,34 @@ export default {
       await this.listenForDuel(this.contracts());
     }
 
-    // TODO: use this
-    this.isWithinDecisionTime = await this.contracts().PvpArena.methods.isCharacterWithinDecisionTime(this.currentCharacterId).call();
-
     this.decisionSeconds = await this.contracts().PvpArena.methods.decisionSeconds().call();
 
-    this.wager = await this.contracts().PvpArena.methods.getCharacterWager(this.currentCharacterId).call({ from: this.defaultAccount });
+    this.wager = (await this.contracts().PvpArena.methods.fighterByCharacter(this.currentCharacterId).call({ from: this.defaultAccount })).wager;
 
     this.duelCost = await this.contracts().PvpArena.methods.getDuelCost(this.currentCharacterId).call({ from: this.defaultAccount });
 
     this.reRollCost = this.duelCost * ((await this.contracts().PvpArena.methods.reRollFeePercent().call({ from: this.defaultAccount })) / 100);
 
-    if (this.hasPendingDuel) {
+    if (this.isInMatch) {
       const timeNow = Math.floor((new Date()).getTime() / 1000);
 
-      this.duel = await this.contracts().PvpArena.methods.duelByAttacker(this.currentCharacterId).call();
+      this.match = await this.contracts().PvpArena.methods.matchByFinder(this.currentCharacterId).call();
 
-      this.decisionTimeLeft = (this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
+      this.decisionTimeLeft = (this.decisionSeconds - (timeNow - this.match.createdAt), 0);
 
       // Note: This gives a 400 seconds decisionTimeLeft locally. Test if it's ok on testnet.
       this.timer = setInterval(() => {
-        if (this.hasPendingDuel && !this.isCharacterInDuelQueue) {
+        if (this.isInMatch && !this.isCharacterInDuelQueue) {
           const timeNow = Math.floor((new Date()).getTime() / 1000);
 
-          this.decisionTimeLeft = Math.max(this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
+          this.decisionTimeLeft = Math.max(this.decisionSeconds - (timeNow - this.match.createdAt), 0);
         }
       }, 1000);
     } else {
-      this.duel = {
+      this.match = {
         attackerID: null,
         defenderID: null,
         createdAt: null,
-        isPending: null
       };
 
       this.decisionTimeLeft = 0;
@@ -469,24 +498,24 @@ export default {
   },
 
   watch: {
-    async duel(value) {
+    async match(value) {
       this.loading = true;
 
       if (value.defenderID) {
         this.$emit('updateOpponentInformation', value.defenderID);
 
-        this.hasPendingDuel = true;
+        this.isInMatch = true;
 
         const timeNow = Math.floor((new Date()).getTime() / 1000);
 
-        this.decisionTimeLeft = (this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
+        this.decisionTimeLeft = (this.decisionSeconds - (timeNow - this.match.createdAt), 0);
 
         // Note: This gives a 400 seconds decisionTimeLeft locally. Test if it's ok on testnet.
         this.timer = setInterval(() => {
-          if (this.hasPendingDuel && !this.isCharacterInDuelQueue) {
+          if (this.isInMatch && !this.isCharacterInDuelQueue) {
             const timeNow = Math.floor((new Date()).getTime() / 1000);
 
-            this.decisionTimeLeft = Math.max(this.decisionSeconds - (timeNow - this.duel.createdAt), 0);
+            this.decisionTimeLeft = Math.max(this.decisionSeconds - (timeNow - this.match.createdAt), 0);
           }
         }, 1000);
       } else {

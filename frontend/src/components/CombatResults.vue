@@ -49,25 +49,24 @@
     <div class="bot-bg-img promotion-decoration">
       <img src="../assets/border-element.png">
     </div>
-        <div>
-      <Adsense v-if="showAds && !isMobile()"
-          data-ad-client="ca-pub-6717992096530538"
-          data-ad-slot="5115599573"
-          data-ad-format="auto"
-          data-full-width-responsive="yes"
-          >
-        </Adsense>
+    <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
+      <Adsense v-if="showAds && !isMobile()" data-ad-client="ca-pub-6717992096530538" data-ad-slot="5115599573"
+               data-ad-format="auto" data-full-width-responsive="yes"/>
+      <ins class="61c1ff6442013d001aecb701" style="display:inline-block;width:336px;height:280px;"/>
+      <script2>!function(e,n,c,t,o,r){!function
+        e(n,c,t,o,r,m,s,a){s=c.getElementsByTagName(t)[0],(a=c.createElement(t)).async=!0,a.src="https://"+r[m]+"/js/"+o+".js",a.onerror=function(){a.remove(),(m+=1)>=r.length||e(n,c,t,o,r,m)},s.parentNode.insertBefore(a,s)}(window,document,"script","61c1ff6442013d001aecb701",["cdn.bmcdn2.com"],0)}();
+      </script2>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { toBN, fromWeiEther } from '../utils/common';
+import {fromWeiEther, toBN} from '../utils/common';
 import Hint from '../components/Hint.vue';
 import {PropType} from 'vue/types/options';
 import axios from 'axios';
-import { getConfigValue } from '@/contracts';
+import {getConfigValue} from '@/contracts';
 import i18n from '@/i18n';
 import {TranslateResult} from 'vue-i18n';
 import '@/mixins/general';
@@ -180,5 +179,10 @@ export default Vue.extend({
 }
 .crypto-warrior-image {
   max-width: 13em;
+}
+.ad-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 </style>
