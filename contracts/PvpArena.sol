@@ -115,7 +115,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
 
     // Note: we might want the NewDuel (NewMatch) event
-
+    
     event DuelFinished(
         uint256 indexed attacker,
         uint256 indexed defender,
@@ -256,7 +256,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         isCharacterInArena[characterID] = true;
         characters.setNftVar(characterID, 1, 1);
 
-        isWeaponInArena[characterID] = true;
+        isWeaponInArena[weaponID] = true;
         weapons.setNftVar(weaponID, 1, 1);
 
         if (useShield) {
@@ -333,9 +333,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterNotUnderAttack(characterID)
         isOwnedCharacter(characterID)
     {
+        uint256 opponentID = getOpponent(characterID);
+
         require(matchByFinder[characterID].createdAt != 0, "Not in match");
 
-        delete finderByOpponent[matchByFinder[characterID].defenderID];
+        delete finderByOpponent[opponentID];
+        if (isCharacterInArena[opponentID]) {
+            _matchableCharactersByTier[getArenaTier(opponentID)].add(opponentID);
+        }
 
         _assignOpponent(characterID);
 
@@ -444,12 +449,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             // We reset ranking prize pools
             rankingsPoolByTier[i] = 0;
-
+ 
             // We reset top players' scores
-            for (uint256 k = 0; k < 4; k++) {
+            for (uint256 k = 0; k < _topRankingCharactersByTier[i].length; k++) {
                 rankingPointsByCharacter[_topRankingCharactersByTier[i][k]] = 0;
             }
         }
+
+        currentRankedSeason = currentRankedSeason.add(1);
+        seasonStartedAt = block.timestamp;
     }
 
     /// @dev performs a list of duels

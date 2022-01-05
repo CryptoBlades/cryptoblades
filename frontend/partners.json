@@ -21,6 +21,22 @@
       "logo": "cryptomeda.png",
       "details": "Cryptomeda is a gaming ecosystem that uniquely blends NFT collectibles, DEFI mechanics, and iconic crypto characters into an exciting fantasy world. Players of all experience levels can explore Cryptomeda and find various opportunities to earn.",
       "website": "https://cryptomeda.tech/"
+    },
+    "Seedify": {
+      "logo": "seedify.png",
+      "details": "At Seedify, we provide curated Initial Game Offerings (IGOs) through our platform, supporting quality blockchain games reach crowdsourced funding, as well as helping them with community building and marketing; while providing an avenue for our community to get the tokens of upcoming blockchain games before they get listed on exchanges. We expect that blockchain gaming will bring millions of new users to blockchain, while creating many new jobs, financial benefits, as well as increasing the adoption rate of blockchain drastically. If you want to take part in Initial Game Offerings (IGOs) through Seedify, and get tokens of the games you like before they get listed on exchanges, here you can find out more on how to participate in IGOs and join the revolution!",
+      "website": "https://launchpad.seedify.fund/"
+    },
+    "CryptoBlades": {
+      "logo": "SKILL.png",
+      "details": "SKILL is the native token of the CryptoBlades ecosystem, used for crafting character and weapon NFTs, trading on our NFT marketplace, utilizing our Bridge, or even purchasing merchandise. As CryptoBlades continues to grow in product offerings, SKILL token will grow with it!",
+      "website": "https://www.cryptoblades.io/"
+    },
+    "CryptoBlades Kingdoms": {
+      "logo": "KING.png",
+      "details": "KING is the native token for CryptoBlades Kingdoms, our community focused kingdom management game. Additionally, KING is the backing token for Omnus, our interactive 3D metaverse that resides within a world made up of our Land NFTs.",
+      "website": "https://cryptobladeskingdoms.io/",
+      "note": "This token has a 1% fee upon claiming"
     }
   }
 }

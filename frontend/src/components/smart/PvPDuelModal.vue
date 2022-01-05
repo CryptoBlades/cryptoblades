@@ -6,7 +6,7 @@
       <div v-else class="modalTitle"> You have lost the duel!</div>
       <ul>
         <li>
-          <span>You Rolled</span>
+          <span>You rolled</span>
           <span class="chevron">></span>
           <span>{{ attackerRoll }}</span>
         </li>
@@ -173,6 +173,9 @@ export default {
       list-style-type: none;
       li {
         display: flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
         text-align: center;
         padding: 0.5rem 0;
         span {
