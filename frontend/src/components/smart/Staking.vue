@@ -65,12 +65,12 @@
               />
               <div v-if="isNftStaking" class="mr-2 ml-3">ID(s):</div>
               <multiselect v-if="isNftStaking" class="overflow" v-model="idsToStake"
-                :options="(isDeposit ? ownedLandIds: stakedIds).filter(x => +x.tier === +tier || !tier) || []"
+                :options="(isDeposit ? ownedLandIds : stakedIds).filter(x => +x.tier === +tier || !tier) || []"
                 :max="10" :multiple="true" :close-on-select="false" :clear-on-select="false" :placeholder="$t('stake.pickId')"
                 :custom-label="idWithTier" track-by="id"
               >
                 <template slot="selection" :slot-scope="{ idsToStake }">
-                  <span class="multiselect__single" v-if="idsToStake && idsToStake.length">{{ idsToStake.length }} IDs selected</span>
+                  <span class="multiselect__single" v-if="idsToStake && idsToStake.length">{{ idsToStake.length }} {{$t('stake.idsSelected')}}</span>
                 </template>
               </multiselect>
               <div :class="isNftStaking ? 'ml-2 mr-3' : 'ant-col'">{{ stakingTokenName }}</div>
