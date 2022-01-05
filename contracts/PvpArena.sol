@@ -446,7 +446,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             rankingsPoolByTier[i] = 0;
 
             // We reset top players' scores
-            for (uint256 k = 0; k < 4; k++) {
+            for (uint256 k = 0; k < _topRankingCharactersByTier[i].length; k++) {
                 rankingPointsByCharacter[_topRankingCharactersByTier[i][k]] = 0;
             }
         }
