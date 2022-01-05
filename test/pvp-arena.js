@@ -757,7 +757,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe.only("#withdrawFromArena", () => {
+  describe("#withdrawFromArena", () => {
     it("should withdraw the character from the arena", async () => {
       const character1ID = await createCharacterInPvpTier(
         accounts[1],
@@ -769,40 +769,30 @@ contract("PvpArena", (accounts) => {
         2,
         "221"
       );
-      let myParticipatingCharacters =
-        await pvpArena.getMyParticipatingCharacters({
-          from: accounts[1],
-        });
 
-      let foundCharacter = myParticipatingCharacters.some((characterID) => {
-        return characterID.toString() === character1ID.toString();
-      });
-      expect(foundCharacter).to.equal(true);
+      expect(await pvpArena.isCharacterInArena(character1ID, {
+        from: accounts[1],
+      })).to.equal(true);
+
+      expect(await pvpArena.isCharacterInArena(character2ID, {
+        from: accounts[1],
+      })).to.equal(true);
 
       await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
 
-      myParticipatingCharacters = await pvpArena.getMyParticipatingCharacters({
+      expect(await pvpArena.isCharacterInArena(character1ID, {
         from: accounts[1],
-      });
+      })).to.equal(false);
 
-      foundCharacter = myParticipatingCharacters.some((characterID) => {
-        return characterID.toString() === character1ID.toString();
-      });
-
-      expect(foundCharacter).to.equal(false);
-      let isCharacterInArena = await pvpArena.isCharacterInArena(character1ID);
-      expect(isCharacterInArena).to.equal(false);
+      expect(await pvpArena.isCharacterInArena(character2ID, {
+        from: accounts[1],
+      })).to.equal(true);
 
       await pvpArena.withdrawFromArena(character2ID, { from: accounts[1] });
 
-      myParticipatingCharacters = await pvpArena.getMyParticipatingCharacters({
+      expect(await pvpArena.isCharacterInArena(character2ID, {
         from: accounts[1],
-      });
-
-      expect(myParticipatingCharacters.length).to.equal(0);
-
-      isCharacterInArena = await pvpArena.isCharacterInArena(character2ID);
-      expect(isCharacterInArena).to.equal(false);
+      })).to.equal(false);
     });
 
     it("should refund the wager", async () => {
@@ -811,7 +801,7 @@ contract("PvpArena", (accounts) => {
         1,
         "222"
       );
-      const characterWager = await pvpArena.getCharacterWager(character2ID);
+      const characterWager = (await pvpArena.fighterByCharacter(character2ID)).wager;
       const previousBalance = await skillToken.balanceOf(accounts[1]);
       await pvpArena.withdrawFromArena(character2ID, { from: accounts[1] });
 
@@ -830,10 +820,10 @@ contract("PvpArena", (accounts) => {
       );
       await createCharacterInPvpTier(accounts[2], 4, "221");
 
-      const characterWager = await pvpArena.getCharacterWager(character1ID);
+      const characterWager = (await pvpArena.fighterByCharacter(character1ID)).wager;
       const previousBalance = await skillToken.balanceOf(accounts[1]);
 
-      const wagerMinusPenalty = toBN(characterWager - characterWager * 0.25);
+      const wagerMinusPenalty = toBN(characterWager - characterWager * (await pvpArena.withdrawFeePercent())/100);
 
       await time.increase(await pvpArena.decisionSeconds());
       await pvpArena.findOpponent(character1ID, {
@@ -849,25 +839,20 @@ contract("PvpArena", (accounts) => {
     });
 
     it("should withdraw the character's weapon", async () => {
+      const weapon1ID = await helpers.createWeapon(accounts[1], "123", 0, { weapons });
+
       const character1ID = await createCharacterInPvpTier(
         accounts[1],
         4,
-        "222"
+        "222",
+        weapon1ID
       );
 
-      let myWeapons = await pvpArena.getMyParticipatingWeapons({
-        from: accounts[1],
-      });
-
-      expect(myWeapons.length).to.equal(1);
+      expect(await pvpArena.isWeaponInArena(weapon1ID)).to.equal(true);
 
       await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
 
-      myWeapons = await pvpArena.getMyParticipatingWeapons({
-        from: accounts[1],
-      });
-
-      expect(myWeapons.length).to.equal(0);
+      expect(await pvpArena.isWeaponInArena(weapon1ID)).to.equal(false);
     });
 
     it("should withdraw the character's shield", async () => {
@@ -892,19 +877,11 @@ contract("PvpArena", (accounts) => {
         from: accounts[1],
       });
 
-      let myShields = await pvpArena.getMyParticipatingShields({
-        from: accounts[1],
-      });
-
-      expect(myShields.length).to.equal(1);
+      expect(await pvpArena.isShieldInArena(shieldID)).to.equal(true);
 
       await pvpArena.withdrawFromArena(characterID, { from: accounts[1] });
 
-      myShields = await pvpArena.getMyParticipatingShields({
-        from: accounts[1],
-      });
-
-      expect(myShields.length).to.equal(0);
+      expect(await pvpArena.isShieldInArena(shieldID)).to.equal(false);
     });
 
     describe("with unclaimed earnings", async () => {
@@ -966,14 +943,14 @@ contract("PvpArena", (accounts) => {
             from: accounts[0],
           });
 
-          wager = await pvpArena.getCharacterWager(character1ID);
+          wager = (await pvpArena.fighterByCharacter(character1ID)).wager;
         });
 
         it("should pay the owner the character's earnings", async () => {
           const previousBalance = await skillToken.balanceOf(accounts[1]);
           await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
 
-          const newWager = await pvpArena.getCharacterWager(character1ID);
+          const newWager = (await pvpArena.fighterByCharacter(character1ID)).wager;
 
           const balance = await skillToken.balanceOf(accounts[1]);
 
@@ -1042,7 +1019,7 @@ contract("PvpArena", (accounts) => {
             from: accounts[0],
           });
 
-          wager = await pvpArena.getCharacterWager(character1ID);
+          wager = (await pvpArena.fighterByCharacter(character1ID)).wager;
 
           await time.increase(await pvpArena.decisionSeconds());
 
@@ -1055,7 +1032,7 @@ contract("PvpArena", (accounts) => {
           const previousBalance = await skillToken.balanceOf(accounts[1]);
           await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
 
-          const newWager = await pvpArena.getCharacterWager(character1ID);
+          const newWager = (await pvpArena.fighterByCharacter(character1ID)).wager;
 
           const balance = await skillToken.balanceOf(accounts[1]);
 
@@ -1071,9 +1048,9 @@ contract("PvpArena", (accounts) => {
         it("should reset the character's duel", async () => {
           await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
 
-          const hasPendingDuel = await pvpArena.hasPendingDuel(character1ID);
+          const isInMatch = (await pvpArena.matchByFinder(character1ID)).createdAt.toString() !== '0';
 
-          expect(hasPendingDuel).to.equal(false);
+          expect(isInMatch).to.equal(false);
         });
       });
     });
@@ -1133,7 +1110,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[0],
         });
 
-        wager = await pvpArena.getCharacterWager(character1ID);
+        wager = (await pvpArena.fighterByCharacter(character1ID)).wager;
 
         await time.increase(await pvpArena.decisionSeconds());
 
@@ -1148,7 +1125,7 @@ contract("PvpArena", (accounts) => {
         const previousBalance = await skillToken.balanceOf(accounts[1]);
 
         await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
-        const newWager = await pvpArena.getCharacterWager(character1ID);
+        const newWager = (await pvpArena.fighterByCharacter(character1ID)).wager;
 
         const balance = await skillToken.balanceOf(accounts[1]);
 
@@ -1163,7 +1140,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe("#prepareDuel", () => {
+  describe.only("#prepareDuel", () => {
     let weapon1ID;
     let weapon2ID;
     let character1ID;

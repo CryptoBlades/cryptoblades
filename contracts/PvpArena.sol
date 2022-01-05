@@ -256,7 +256,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         isCharacterInArena[characterID] = true;
         characters.setNftVar(characterID, 1, 1);
 
-        isWeaponInArena[characterID] = true;
+        isWeaponInArena[weaponID] = true;
         weapons.setNftVar(weaponID, 1, 1);
 
         if (useShield) {
@@ -450,6 +450,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 rankingPointsByCharacter[_topRankingCharactersByTier[i][k]] = 0;
             }
         }
+
+        currentRankedSeason = currentRankedSeason.add(1);
+        seasonStartedAt = block.timestamp;
     }
 
     /// @dev performs a list of duels
