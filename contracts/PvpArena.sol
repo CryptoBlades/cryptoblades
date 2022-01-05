@@ -333,9 +333,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterNotUnderAttack(characterID)
         isOwnedCharacter(characterID)
     {
+        uint256 opponentID = getOpponent(characterID);
+
         require(matchByFinder[characterID].createdAt != 0, "Not in match");
 
-        delete finderByOpponent[matchByFinder[characterID].defenderID];
+        delete finderByOpponent[opponentID];
+        if (isCharacterInArena[opponentID]) {
+            _matchableCharactersByTier[getArenaTier(opponentID)].add(opponentID);
+        }
 
         _assignOpponent(characterID);
 
