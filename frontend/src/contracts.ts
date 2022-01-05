@@ -41,7 +41,7 @@ import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/
 import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
-import { abi as storageAbi } from '../../build/contracts/NFTStorage.json';
+import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
 import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/contracts/Treasury.json';
 import { abi as kingStakingRewardsUpgradeableAbi,
   networks as kingStakingRewardsUpgradeableNetworks }
@@ -280,8 +280,8 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const cosmeticsCharacterAddr = await Blacksmith.methods.getAddressOfItem(cosmeticsCharacterIndex).call();
   const CharacterCosmetics = new web3.eth.Contract(characterCosmeticsAbi as Abi, cosmeticsCharacterAddr);
 
-  const NFTStorageAddr = getConfigValue('VUE_APP_STORAGE_CONTRACT_ADDRESS') || process.env.VUE_APP_STORAGE_CONTRACT_ADDRESS;
-  const NFTStorage = new web3.eth.Contract(storageAbi as Abi, NFTStorageAddr);
+  const NFTStorageAddr = getConfigValue('VUE_APP_STORAGE_CONTRACT_ADDRESS') || (nftStorageNetworks as Networks)[networkId]!.address;
+  const NFTStorage = new web3.eth.Contract(nftStorageAbi as Abi, NFTStorageAddr);
 
   const cbkLandSaleAddr = await Blacksmith.methods.cbkLandSale().call();
   const CBKLandSale = new web3.eth.Contract(cbkLandSaleAbi as Abi, cbkLandSaleAddr);
