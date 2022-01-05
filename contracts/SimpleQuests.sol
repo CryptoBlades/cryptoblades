@@ -16,6 +16,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
+    Characters public characters;
+
 
     function initialize() public initializer {
 
@@ -62,28 +64,35 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     mapping(uint32 => Quest) public questList;
 
-    uint256[3] public constant CHARACTER_QUEST_DATA_KEYS = [100,101,102];
+//    uint256[3] public constant CHARACTER_QUEST_DATA_KEYS = [100,101,102];
+    uint256 public constant CHARACTER_QUEST_DATA_KEY_ID = 100;
+    uint256 public constant CHARACTER_QUEST_DATA_KEY_PROGRESS = 101;
+    uint256 public constant CHARACTER_QUEST_DATA_KEY_REPUTATION = 102;
 
     event QuestComplete(uint256 indexed questID, uint256 indexed characterID);
 
-    function getQuestID(uint256 characterID) external view returns(uint32) {
+    function getQuestID(uint256 characterID) external view returns(uint256) {
         // doubles as an "are we on a quest" check
-        return characters.getNftVar(characters.NFTVAR_SIMPLEQUEST_ID); // if 0, we are not on a quest
+        return characters.getNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID()); // if 0, we are not on a quest
     }
 
-    function getCharacterQuestData(uint256 characterID) public view returns(uint256[3] memory) {
-        return characters.getNFTVars(characterID, CHARACTER_QUEST_DATA_KEYS);
+    function getCharacterQuestData(uint256 characterID) public view returns (uint256[] memory) {
+        uint256[] memory questDataKeys = new uint256[](3);
+        questDataKeys[0] = CHARACTER_QUEST_DATA_KEY_ID;
+        questDataKeys[1] = CHARACTER_QUEST_DATA_KEY_PROGRESS;
+        questDataKeys[2] = CHARACTER_QUEST_DATA_KEY_REPUTATION;
+        return characters.getNFTVars(characterID, questDataKeys);
     }
 
     function requestQuest(uint256 characterID) external questsEnabled {
-        uint256[3] questData = getCharacterQuestData(characterID);
+        uint256[] memory questData = getCharacterQuestData(characterID);
 //        assertOnQuest(characterID, 0);
         // submits a seed request with a randoms ID (this randoms ID is shared with all in a block)
         // it will complete by the randoms bot/contract automatically
     }
 
     function submitProgress(uint256 characterID, uint256 amount) external questsEnabled {
-        assertOnQuest();
+//        assertOnQuest();
     }
 
     function submitProgressForced(uint256 characterID, uint256 amount) external restricted questsEnabled {

@@ -388,22 +388,22 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function setNFTVar(uint256 id, uint256 field, uint256 value) public restricted {
-        nftVar[id][field] = value;
+        nftVars[id][field] = value;
     }
 
-    function setNFTVars(uint256 id, uint256[] calldata fields, uint256[] calldata values) public restricted {
+    function setNFTVars(uint256 id, uint256[] memory fields, uint256[] memory values) public restricted {
         for(uint i = 0; i < fields.length; i++)
-            nftVar[id][fields[i]] = values[i];
+            nftVars[id][fields[i]] = values[i];
     }
 
     function getNFTVar(uint256 id, uint256 field) public view returns (uint256) {
-        return nftVar[id][field];
+        return nftVars[id][field];
     }
 
-    function getNFTVars(uint256 id, uint256[] calldata fields) public view returns(uint256[] memory values) {
-        values = new uint256[fields.length];
-        for(uint i = 0; fields.length; i++)
-            values[i] = nftVar[id][fields[i]];
+    function getNFTVars(uint256 id, uint256[] memory fields) public view returns(uint256[] memory values) {
+        values = new uint256[](fields.length);
+        for(uint i = 0; i < fields.length; i++)
+            values[i] = nftVars[id][fields[i]];
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
