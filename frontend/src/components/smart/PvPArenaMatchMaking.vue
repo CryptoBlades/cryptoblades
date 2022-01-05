@@ -330,7 +330,7 @@ export default {
 
       try {
         await this.contracts().SkillToken.methods
-          .approve(this.contracts().PvpArena.options.address, `${this.reRollCost}`).send({ from: this.defaultAccount });
+          .approve(this.contracts().PvpArena.options.address, `${this.reRollCost.toFixed(0)}`).send({ from: this.defaultAccount });
 
         await this.contracts().PvpArena.methods.reRollOpponent(this.currentCharacterId).send({ from: this.defaultAccount });
       } catch (err) {
