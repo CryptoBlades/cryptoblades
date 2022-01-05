@@ -115,7 +115,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
 
     // Note: we might want the NewDuel (NewMatch) event
-
+    
     event DuelFinished(
         uint256 indexed attacker,
         uint256 indexed defender,
@@ -444,9 +444,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             // We reset ranking prize pools
             rankingsPoolByTier[i] = 0;
-
+ 
             // We reset top players' scores
-            for (uint256 k = 0; k < 4; k++) {
+            for (uint256 k = 0; k < _topRankingCharactersByTier[i].length; k++) {
                 rankingPointsByCharacter[_topRankingCharactersByTier[i][k]] = 0;
             }
         }
