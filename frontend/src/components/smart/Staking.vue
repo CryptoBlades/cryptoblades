@@ -161,13 +161,14 @@
 <script>
 import { toBN } from '../../utils/common';
 import { mapActions, mapState } from 'vuex';
+import Vue from 'vue';
 
 import { formatDurationFromSeconds, secondsToDDHHMMSS } from '../../utils/date-time';
 import { isStakeType, isNftStakeType } from '../../interfaces/State';
 import Multiselect from 'vue-multiselect';
 
 
-export default {
+export default Vue.extend({
   props: {
     stakeType: {
       type: String,
@@ -652,7 +653,7 @@ export default {
       }
     },
   },
-};
+});
 </script>
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
