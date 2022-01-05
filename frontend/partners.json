@@ -35,7 +35,8 @@
     "CryptoBlades Kingdoms": {
       "logo": "KING.png",
       "details": "KING is the native token for CryptoBlades Kingdoms, our community focused kingdom management game. Additionally, KING is the backing token for Omnus, our interactive 3D metaverse that resides within a world made up of our Land NFTs.",
-      "website": "https://cryptobladeskingdoms.io/"
+      "website": "https://cryptobladeskingdoms.io/",
+      "note": "This token has a 1% fee upon claiming"
     }
   }
 }

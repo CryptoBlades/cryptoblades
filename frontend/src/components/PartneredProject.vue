@@ -1,6 +1,7 @@
 <template>
   <div class="partner-div m-4">
-    <div class="d-flex">
+    <div class="d-flex relative">
+      <b-icon-exclamation-circle class="partner-note" variant="danger" scale="1.2" v-if="partnerNote" v-tooltip="partnerNote"/>
       <img :src="partnerLogoPath" class="partner-logo"/>
       <div class="d-flex flex-column justify-content-center ml-2">
         <h4 class="d-flex align-items-center partner-name">{{name}}</h4>
@@ -119,6 +120,10 @@ export default Vue.extend({
       return (partnersInfo as PartnersInfo).partners[this.name].website;
     },
 
+    partnerNote(): string {
+      return (partnersInfo as PartnersInfo).partners[this.name].note;
+    },
+
     partnerLogoPath(): string {
       const fileName = (partnersInfo as PartnersInfo).partners[this.name].logo;
       return this.imgPath(fileName);
@@ -188,6 +193,7 @@ export default Vue.extend({
   border-radius: 10px;
   padding: 5px;
   background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
+  position: relative;
 }
 .partner-logo {
   max-width: 100px;
@@ -223,5 +229,11 @@ export default Vue.extend({
 }
 .low-multiplier {
   color: rgb(212, 147, 25);
+}
+
+.partner-note {
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 </style>
