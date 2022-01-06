@@ -98,7 +98,7 @@
         <div class="d-flex flex-row w-100 align-items-baseline">
           <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
           <b-form-select class="w-50 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-            <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
+            <b-form-select-option v-if="currentNetworkId !== 56" :value="'-1'">SKILL</b-form-select-option>
             <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
           </b-form-select>
         </div>
@@ -152,6 +152,7 @@ interface StoreMappedState {
   directStakeBonusPercent: number;
   payoutCurrencyId: string;
   defaultSlippage: string;
+  currentNetworkId: number;
 }
 
 interface StoreMappedGetters {
@@ -202,7 +203,7 @@ export default Vue.extend({
 
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent',
-      'payoutCurrencyId', 'defaultSlippage']) as Accessors<StoreMappedState>),
+      'payoutCurrencyId', 'defaultSlippage', 'currentNetworkId']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName', 'getPartnerProjects'
     ]) as Accessors<StoreMappedGetters>),
