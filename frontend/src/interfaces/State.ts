@@ -184,6 +184,7 @@ export interface IState {
   nfts: Record<string, Record<number | string, Nft>>;
 
   partnerProjects: Record<number, IPartnerProject>;
+  partnerProjectMultipliers: Record<number, string>;
   payoutCurrencyId: string;
   defaultSlippage: string;
 

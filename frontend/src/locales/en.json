@@ -24,7 +24,9 @@
     "partnerTokenClaimed": "This partner tokens have been claimed already.",
     "slippage": "Slippage",
     "skillAmount": "Skill Amount",
-    "multiplierAtZero": "Multiplier is at x0, try again later..."
+    "multiplierAtZero": "Multiplier is at x0, try again later...",
+    "lowMultiplier": "Current multiplier is low, you will receive only",
+    "ofClaimedTokens": "of claimed tokens."
   },
   "CharacterDisplay": {
     "loading": "Loading...",

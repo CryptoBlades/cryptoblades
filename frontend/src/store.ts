@@ -207,6 +207,7 @@ export function createStore(web3: Web3) {
       waxBridgeTimeUntilLimitExpires: 0,
 
       partnerProjects: {},
+      partnerProjectMultipliers: {},
       payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
       defaultSlippage: '0',
 
@@ -850,6 +851,10 @@ export function createStore(web3: Web3) {
 
       updateDefaultSlippage(state: IState, slippage) {
         state.defaultSlippage = slippage;
+      },
+
+      updatePartnerProjectMultiplier(state: IState, { partnerProjectId, multiplier }) {
+        Vue.set(state.partnerProjectMultipliers, partnerProjectId, multiplier);
       },
 
       updatePayoutCurrencyId(state: IState, newPayoutCurrencyId) {
@@ -3740,11 +3745,12 @@ export function createStore(web3: Web3) {
         commit('updateDefaultSlippage', slippage);
       },
 
-      async getPartnerProjectMultiplier({ state }, id) {
+      async getPartnerProjectMultiplier({ state, commit }, id) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
         const multiplier = await Treasury.methods.getProjectMultiplier(id).call(defaultCallOptions(state));
+        commit('updatePartnerProjectMultiplier', { partnerProjectId: id, multiplier });
 
         return multiplier;
       },

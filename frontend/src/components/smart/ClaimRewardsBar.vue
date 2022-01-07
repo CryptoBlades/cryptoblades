@@ -122,6 +122,9 @@
         <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
           <h5>{{$t('ClaimRewardsBar.partnerTokenClaimed')}}</h5>
         </div>
+        <div class="mt-3" v-if="selectedPartneredProject && formattedMultiplier < 0.5">
+          <h6>{{$t('ClaimRewardsBar.lowMultiplier')}} {{(formattedMultiplier*100).toFixed(2)}}% {{$t('ClaimRewardsBar.ofClaimedTokens')}}</h6>
+        </div>
         <div class="mt-3" v-if="!selectedPartneredProject">
           <h5>{{withdrawalInfoText}}</h5>
           <h6>{{$t('ClaimRewardsBar.earlyWithdrawTax')}}: {{ formattedRewardsClaimTax }} {{$t('ClaimRewardsBar.taxReduce')}} {{getTaxTimerNextTick}}</h6>
@@ -153,6 +156,7 @@ interface StoreMappedState {
   payoutCurrencyId: string;
   defaultSlippage: string;
   currentNetworkId: number;
+  partnerProjectMultipliers: Record<number, string>;
 }
 
 interface StoreMappedGetters {
@@ -203,10 +207,14 @@ export default Vue.extend({
 
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent',
-      'payoutCurrencyId', 'defaultSlippage', 'currentNetworkId']) as Accessors<StoreMappedState>),
+      'payoutCurrencyId', 'defaultSlippage', 'currentNetworkId', 'partnerProjectMultipliers']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName', 'getPartnerProjects'
     ]) as Accessors<StoreMappedGetters>),
+
+    formattedMultiplier(): number {
+      return this.selectedPartneredProject && +toBN(this.partnerProjectMultipliers[+this.selectedPartneredProject.id]).div(toBN(10).pow(18)).toFixed(4) || 1;
+    },
 
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
