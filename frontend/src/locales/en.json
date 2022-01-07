@@ -760,7 +760,8 @@
   "Treasury": {
     "formulaDetailsTitle": "Claiming Formula Details",
     "partneredProjects": "Partnered Projects",
-    "payoutCurrency": "Payout Currency"
+    "payoutCurrency": "Payout Currency",
+    "payoutFormulaExplanation": "Payout formula is designed to guarantee that rewards will be distributed over assumed distribution time.\n\nMultiplier is evenly increasing throughout a day at a speed of 100% per day.\n\nEvery claim lowers the multiplier based on the amount of partner tokens claimed and the desired distribution time.\n\nThat means multiplier can go below x1 resulting in claiming less partner tokens than the claimed SKILL tokens are worth.\n\nE.g. The supply of partner tokens is 100 tokens. The distribution time is 10 days.\nIn this scenario each partner token (1) claimed will lower the multiplier by 1 / (100 / 10) = 0.1 = 10%\n\nYou can adjust the amount of SKILL that you want to claim as well as slippage.\n\nSlippage will protect you from claiming less tokens than you intended - if some else claims right before you, lowering the multiplier enough, your transaction will fail instead of claiming less tokens."
   },
   "PartneredProject": {
     "multiplier": "Multiplier",
