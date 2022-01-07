@@ -25,7 +25,8 @@
     "slippage": "Slippage",
     "skillAmount": "Skill Amount",
     "multiplierAtZero": "Multiplier is at x0, try again later...",
-    "lowMultiplier": "Current multiplier is low, you will receive only",
+    "lowMultiplier": "Current multiplier is low, you will receive only {currentMultiplier} of claimed tokens.",
+    "realWithdrawValueClaimable": "Currently you'll earn {actualAmount} {tokenSymbol} for withdrawing {skillAmount} SKILL.",
     "ofClaimedTokens": "of claimed tokens."
   },
   "CharacterDisplay": {

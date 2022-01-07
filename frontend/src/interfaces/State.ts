@@ -185,6 +185,7 @@ export interface IState {
 
   partnerProjects: Record<number, IPartnerProject>;
   partnerProjectMultipliers: Record<number, string>;
+  partnerProjectRatios: Record<number, string>;
   payoutCurrencyId: string;
   defaultSlippage: string;
 

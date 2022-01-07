@@ -208,6 +208,7 @@ export function createStore(web3: Web3) {
 
       partnerProjects: {},
       partnerProjectMultipliers: {},
+      partnerProjectRatios: {},
       payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
       defaultSlippage: '0',
 
@@ -855,6 +856,10 @@ export function createStore(web3: Web3) {
 
       updatePartnerProjectMultiplier(state: IState, { partnerProjectId, multiplier }) {
         Vue.set(state.partnerProjectMultipliers, partnerProjectId, multiplier);
+      },
+
+      updatePartnerProjectRatio(state: IState, { partnerProjectId, ratio }) {
+        Vue.set(state.partnerProjectRatios, partnerProjectId, ratio);
       },
 
       updatePayoutCurrencyId(state: IState, newPayoutCurrencyId) {
@@ -3773,11 +3778,12 @@ export function createStore(web3: Web3) {
         return claimedAmount;
       },
 
-      async getSkillToPartnerRatio({ state }, id) {
+      async getSkillToPartnerRatio({ state, commit }, id) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
         const ratio = await Treasury.methods.getSkillToPartnerRatio(id).call(defaultCallOptions(state));
+        commit('updatePartnerProjectRatio', { partnerProjectId: id, ratio });
 
         return ratio;
       },
