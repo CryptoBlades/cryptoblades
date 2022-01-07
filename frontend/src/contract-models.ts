@@ -234,6 +234,18 @@ export function duelResultFromContract(data: [string,string,string,string,string
   };
 }
 
+export function characterKickedEventFromContract(data: [string,string,string]) {
+  const characterId = data[0];
+  const kickedBy = data[1];
+  const timestamp = data[2];
+
+  return {
+    characterId,
+    kickedBy,
+    timestamp
+  };
+}
+
 export function partnerProjectFromContract(data: [string, string, string, string, string, string, string, boolean]): IPartnerProject {
   const id = data[0];
   const name = data[1];

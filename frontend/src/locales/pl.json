@@ -638,6 +638,11 @@
       "highToLow": "Cena: Wysoka -> Niska"
     }
   },
+  "pvp": {
+    "lastDefeated": "Ostatnio zostałeś pokonany przez:",
+    "tapAnywhere": "Dotknij w dowolnym miejscu, aby zamknąć",
+    "kicked": "Zostałeś wyrzucony z areny!"
+  },
   "app": {
     "cantView": "W tej chwili nie możesz wyświetlić aplikacji. Możesz spróbować wyczyścić LocalStorage, aby zresetować ustawienia.",
     "warning": {
