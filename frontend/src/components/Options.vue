@@ -9,9 +9,11 @@
 
         <b-dropdown-header>{{$t('optionsMenu.links')}}</b-dropdown-header>
 
-        <b-dropdown-item @click="onClaimTokens()"><i class="fa fa-coins mr-2"></i>{{$t('optionsMenu.claimSkill')}} </b-dropdown-item>
+          <b-dropdown-item v-if="currentChainSupportsClaimTokens()" @click="onClaimTokens()"><i
+            class="fa fa-coins mr-2"></i>{{ $t('optionsMenu.claimSkill') }}
+          </b-dropdown-item>
 
-        <b-dropdown-item :to="{ name: 'leaderboard' }" class="gtag-link-others" tagname="leaderboard_screen">
+          <b-dropdown-item :to="{ name: 'leaderboard' }" class="gtag-link-others" tagname="leaderboard_screen">
         <i class="fa fa-trophy mr-2"></i>{{$t('optionsMenu.leaderboard')}}
         </b-dropdown-item>
 
@@ -90,12 +92,12 @@
 
 <script lang="ts">
 import Events from '../events';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import BigNumber from 'bignumber.js';
-import { Accessors } from 'vue/types/options';
+import {Accessors} from 'vue/types/options';
 import Vue from 'vue';
-import { toBN, fromWeiEther } from '../utils/common';
-import { nft_bridge as bridgeEnabled } from './../feature-flags';
+import {fromWeiEther, toBN} from '../utils/common';
+import {nft_bridge as bridgeEnabled} from './../feature-flags';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -168,10 +170,7 @@ export default Vue.extend({
       return `${toBN(skillLost).toFixed(4)}`;
     },
     canClaimTokens(): boolean {
-      if(toBN(this.skillRewards).lte(0)) {
-        return false;
-      }
-      return true;
+      return !toBN(this.skillRewards).lte(0);
     },
   },
 
@@ -225,6 +224,10 @@ export default Vue.extend({
       else localStorage.setItem('showSkillInUsd', 'false');
 
       Events.$emit('setting:showSkillInUsd', { value: this.showSkillInUsd });
+    },
+
+    currentChainSupportsClaimTokens() {
+      return (localStorage.getItem('currentChain') || 'BSC') !== 'BSC';
     },
   }
 });
