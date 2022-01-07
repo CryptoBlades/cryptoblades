@@ -231,18 +231,7 @@ export default {
     async kickCharacterFromArena() {
       this.isCharacterInArena = false;
 
-      const kickedEvents = await this.getKickedEvents(this.contracts());
-
-      if (kickedEvents.length) {
-        const formattedResult = formatCharacterKickedEvent(kickedEvents[kickedEvents.length - 1].returnValues);
-
-        if (+localStorage.getItem(`${getCharacterNameFromSeed(this.currentCharacterId)}: lastKickedTime`) < +formattedResult.timestamp) {
-          localStorage.setItem(`${getCharacterNameFromSeed(this.currentCharacterId)}: lastKickedTime`, formattedResult.timestamp);
-
-          this.recentlyKicked.characterId = formattedResult.characterId;
-          this.recentlyKicked.kickedBy = formattedResult.kickedBy;
-        }
-      }
+      await this.processCharacterKick();
     },
 
     async updateRank() {
@@ -255,14 +244,40 @@ export default {
       this.recentlyKicked.kickedBy = null;
     },
 
-    async getKickedEvents(contracts) {
+    async getKickedEvents(contracts, blockToScanFrom = 'earliest') {
       const kickedEvents = await contracts.PvpArena.getPastEvents('CharacterKicked', {
         filter: { characterID: this.currentCharacterId },
         toBlock: 'latest',
-        fromBlock: 'earliest'
+        fromBlock: blockToScanFrom
       });
 
       return kickedEvents;
+    },
+
+    async processCharacterKick() {
+      let blockToScanFrom;
+      const lastKickedBlock = localStorage.getItem(`${this.currentCharacterId}-lastKickedBlock`);
+
+      if (lastKickedBlock) {
+        blockToScanFrom = lastKickedBlock;
+      }
+
+      const kickedEvents = await this.getKickedEvents(this.contracts(), blockToScanFrom);
+
+      if (kickedEvents.length && !this.isCharacterInArena) {
+        const formattedResult = formatCharacterKickedEvent(kickedEvents[kickedEvents.length - 1].returnValues);
+        const lastKickedEventBlockNumber = kickedEvents[kickedEvents.length - 1].blockNumber;
+
+        const key = `${this.currentCharacterId}-lastKickedTime`;
+
+        if (+localStorage.getItem(key) < +formattedResult.timestamp) {
+          localStorage.setItem(key, +formattedResult.timestamp);
+          localStorage.setItem(`${this.currentCharacterId}-lastKickedBlock`, lastKickedEventBlockNumber);
+
+          this.recentlyKicked.characterId = formattedResult.characterId;
+          this.recentlyKicked.kickedBy = formattedResult.kickedBy;
+        }
+      }
     }
   },
 
@@ -361,18 +376,7 @@ export default {
         return formatDuelResult(duel.returnValues);
       });
 
-      const kickedEvents = await this.getKickedEvents(this.contracts());
-
-      if (kickedEvents.length && !this.isCharacterInArena) {
-        const formattedResult = formatCharacterKickedEvent(kickedEvents[kickedEvents.length - 1].returnValues);
-
-        if (+localStorage.getItem(`${getCharacterNameFromSeed(this.currentCharacterId)}: lastKickedTime`) < +formattedResult.timestamp) {
-          localStorage.setItem(`${getCharacterNameFromSeed(this.currentCharacterId)}: lastKickedTime`, formattedResult.timestamp);
-
-          this.recentlyKicked.characterId = formattedResult.characterId;
-          this.recentlyKicked.kickedBy = formattedResult.kickedBy;
-        }
-      }
+      await this.processCharacterKick();
     }
 
     this.loading = false;
@@ -484,18 +488,7 @@ export default {
           return formatDuelResult(duel.returnValues);
         });
 
-        const kickedEvents = await this.getKickedEvents(this.contracts());
-
-        if (kickedEvents.length && !this.isCharacterInArena) {
-          const formattedResult = formatCharacterKickedEvent(kickedEvents[kickedEvents.length - 1].returnValues);
-
-          if (+localStorage.getItem(`${getCharacterNameFromSeed(this.currentCharacterId)}: lastKickedTime`) < +formattedResult.timestamp) {
-            localStorage.setItem(`${getCharacterNameFromSeed(this.currentCharacterId)}: lastKickedTime`, formattedResult.timestamp);
-
-            this.recentlyKicked.characterId = formattedResult.characterId;
-            this.recentlyKicked.kickedBy = formattedResult.kickedBy;
-          }
-        }
+        await this.processCharacterKick();
 
         this.isMatchMaking = false;
       }
