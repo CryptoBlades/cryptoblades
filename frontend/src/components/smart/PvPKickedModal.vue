@@ -2,17 +2,17 @@
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
       <img src="../../assets/separatorTop.svg" alt="Top separator">
-      <div class="modalTitle">You were kicked from the arena!</div>
+      <div class="modalTitle">{{$t('pvp.kicked')}}</div>
       <ul>
         <li>
-          <span>You were last defeated by: {{ kickedByName }}</span>
+          <span>{{$t('pvp.lastDefeated')}}{{ kickedByName }}</span>
         </li>
         <pvp-separator />
       </ul>
       <img src="../../assets/separatorBottom.svg" alt="Bottom separator">
     </div>
     <div class="closeWrapper">
-      <p>Tap anywhere to close</p>
+      <p>{{$t('pvp.tapAnywhere')}}</p>
       <button @click="close">
         <img src="../../assets/closeModal.svg" alt="Bottom separator">
       </button>
