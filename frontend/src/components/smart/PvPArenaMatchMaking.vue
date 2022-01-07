@@ -362,7 +362,7 @@ export default {
         });
 
         if (duelFinishedResult.length) {
-          const formattedResult = formatDuelResult(duelFinishedResult[0].returnValues);
+          const formattedResult = formatDuelResult(duelFinishedResult[duelFinishedResult.length - 1].returnValues);
 
           this.duelResult.result = formattedResult.attackerRoll > formattedResult.defenderRoll ? 'win' : 'lose';
           this.duelResult.attackerRoll = formattedResult.attackerRoll;
@@ -443,6 +443,8 @@ export default {
       if (this.wager < this.duelCost) {
         this.$emit('kickCharacterFromArena');
       }
+
+      this.$emit('updateRank');
     }
   },
 
