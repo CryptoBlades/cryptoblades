@@ -580,6 +580,11 @@
       "highToLow": "Preis: Hoch -> Niedrig"
     }
   },
+  "pvp": {
+    "lastDefeated": "Du wurdest zuletzt besiegt von: ",
+    "tapAnywhere": "Tippen Sie zum Schließen auf eine beliebige Stelle",
+    "kicked": "Du wurdest aus der Arena geworfen!"
+  },
   "app": {
     "cantView": "Du kannst das Spiel gerade nicht ansehen. Versuche den LocalStorage zu löschen, um deine Einstellunge zurückzusetzen.",
     "warning": {
