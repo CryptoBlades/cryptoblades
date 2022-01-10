@@ -197,7 +197,7 @@ export default Vue.extend({
 }
 .partner-logo {
   max-width: 100px;
-  height: max-content;
+  height: auto;
   align-self: center;
 }
 .multiplier-text {
