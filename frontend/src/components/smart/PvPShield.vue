@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="mainWrapper" @click="$emit('click')">
+    <div class="mainWrapper" @click="$emit('click')" :id="`${shieldId}-info`">
       <div class="starsWrapper">
         <img
-          v-for="index in stars"
+          v-for="index in (shield.stars + 1)"
           :key="index"
           src="../../assets/star.svg"
           alt="star"
@@ -11,6 +11,11 @@
       </div>
       <div class="shieldWrapper">
         <img :src="getShieldArt(shieldId)" alt="shield image">
+        <b-popover ref="shield-info" :target="`${shieldId}-info`" triggers="hover">
+          <div v-if="shieldId" class="shield-icon-wrapper">
+            <nft-icon class="shield-icon" :nft="formattedShield" />
+          </div>
+        </b-popover>
       </div>
       <div class="elementWrapper">
         <img :src="getElementImageUrl" alt="element icon" />
@@ -26,20 +31,18 @@ import earth from '../../assets/elements/earth.png';
 import lightning from '../../assets/elements/lightning.png';
 import foundersShield from '../../assets/shield1.png';
 import legendaryShield from '../../assets/shield2.png';
+import { BPopover } from 'bootstrap-vue';
+import NftIcon from '../NftIcon.vue';
 
 export default {
+  components: {
+    'nft-icon': NftIcon,
+    'b-popover': BPopover,
+  },
+
   props: {
-    stars: {
-      type: Number,
+    shield: {
       required: true,
-      min: 0,
-      max: 5,
-      default: 0
-    },
-    element: {
-      type: String,
-      required: true,
-      default: ''
     },
     shieldId: {
       type: String
@@ -49,6 +52,7 @@ export default {
       default: false
     }
   },
+
   computed: {
     getElementImageUrl() {
       if (this.element === 'Fire') {
@@ -63,6 +67,13 @@ export default {
         return lightning;
       }
     },
+
+    formattedShield() {
+      return {
+        ...this.shield,
+        type: 'shield'
+      };
+    }
   },
 
   methods: {
@@ -136,5 +147,17 @@ export default {
     max-width: 100%;
     max-height: 100%;
   }
+}
+.shield-icon {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.shield-icon-wrapper {
+  background: rgba(255, 255, 255, 0.1);
+  width: 12em;
+  height: 12em;
+  margin: 0 auto;
 }
 </style>

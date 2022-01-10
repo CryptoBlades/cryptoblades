@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="mainWrapper" @click="$emit('click')">
+    <div class="mainWrapper" @click="$emit('click')" :id="`${weaponId}-info`">
       <div class="starsWrapper">
         <img
-          v-for="index in stars"
+          v-for="index in (weapon.stars + 1)"
           :key="index"
           src="../../assets/star.svg"
           alt="star"
@@ -11,6 +11,11 @@
       </div>
       <div class="weaponWrapper">
         <img :src="getWeaponArtById(weaponId)" alt="weapon image">
+        <b-popover ref="weapon-info" :target="`${weaponId}-info`" triggers="hover">
+          <div v-if="weaponId" class="weapon-icon-wrapper">
+            <weapon-icon class="weapon-icon" :weapon="weapon" />
+          </div>
+        </b-popover>
       </div>
       <div class="elementWrapper">
         <img :src="getElementImageUrl" alt="element icon" />
@@ -25,20 +30,18 @@ import water from '../../assets/elements/water.png';
 import earth from '../../assets/elements/earth.png';
 import lightning from '../../assets/elements/lightning.png';
 import { getWeaponArtById } from '../../weapon-arts-placeholder';
+import { BPopover } from 'bootstrap-vue';
+import WeaponIcon from '../WeaponIcon.vue';
 
 export default {
+  components: {
+    'weapon-icon': WeaponIcon,
+    'b-popover': BPopover,
+  },
+
   props: {
-    stars: {
-      type: Number,
+    weapon: {
       required: true,
-      min: 0,
-      max: 5,
-      default: 0
-    },
-    element: {
-      type: String,
-      required: true,
-      default: ''
     },
     weaponId: {
       type: String
@@ -51,13 +54,13 @@ export default {
 
   computed: {
     getElementImageUrl() {
-      if (this.element === 'Fire') {
+      if (this.weapon.element === 'Fire') {
         return fire;
       }
-      if (this.element === 'Water') {
+      if (this.weapon.element === 'Water') {
         return water;
       }
-      if (this.element === 'Earth') {
+      if (this.weapon.element === 'Earth') {
         return earth;
       } else {
         return lightning;
@@ -126,5 +129,17 @@ export default {
     max-width: 100%;
     max-height: 100%;
   }
+}
+.weapon-icon {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.weapon-icon-wrapper {
+  background: rgba(255, 255, 255, 0.1);
+  width: 12em;
+  height: 12em;
+  margin: 0 auto;
 }
 </style>

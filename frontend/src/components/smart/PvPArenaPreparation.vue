@@ -19,17 +19,16 @@
               <div v-if="!selectedWeaponId" :class="{ disabledStyles: ownedWeaponsWithInformation.length === 0 }" class="weaponButtonWrapper">
                 <button class="selectWeaponButton" id="weapon-popover">
                   <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
-                  <b-popover ref="popover" target="weapon-popover" triggers="hover" placement="right" custom-class="popoverWrapper">
+                  <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Weapons</p>
                     <div v-if="ownedWeaponsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-weapon
                         v-for="weapon in ownedWeaponsWithInformation"
                         :key="weapon.weaponId"
-                        :stars="weapon.information.stars + 1"
-                        :element="weapon.information.element"
+                        :weapon="weapon.information"
                         :weaponId="weapon.weaponId"
                         :class="{'disabled': ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)}"
-                        @click="handleWeaponClick(weapon.weaponId, weapon.information.stars, weapon.information.element)"
+                        @click="handleWeaponClick(weapon.weaponId, weapon.information)"
                         :disabled="ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)"
                       />
                     </div>
@@ -39,8 +38,7 @@
               </div>
               <div v-else class="weaponButtonWrapper">
                 <pvp-weapon
-                  :stars="selectedWeaponStars + 1"
-                  :element="selectedWeaponElement"
+                  :weapon="selectedWeapon"
                   :weaponId="selectedWeaponId"
                 />
                 <button @click="handleClearWeapon()" class="clearWeaponButton">Clear</button>
@@ -48,17 +46,16 @@
               <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
                 <button class="selectWeaponButton" id="shield-popover">
                   <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
-                  <b-popover target="shield-popover" placement="right" triggers="hover" custom-class="popoverWrapper">
+                  <b-popover target="shield-popover" placement="right" triggers="click blur" custom-class="popoverWrapper">
                     <p class="popoverTitle">Shields</p>
                     <div v-if="ownedShieldsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-shield
                         v-for="shield in ownedShieldsWithInformation"
                         :key="shield.shieldId"
-                        :stars="shield.information.stars + 1"
-                        :element="shield.information.element"
+                        :shield="shield.information"
                         :shieldId="shield.shieldId"
                         :class="{'disabled': ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)}"
-                        @click="handleShieldClick(shield.shieldId, shield.information.stars, shield.information.element)"
+                        @click="handleShieldClick(shield.shieldId, shield.information)"
                         :disabled="ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)"
                       />
                     </div>
@@ -68,8 +65,7 @@
               </div>
               <div v-else class="shieldButtonWrapper">
                 <pvp-shield
-                  :stars="selectedShieldStars + 1"
-                  :element="selectedShieldElement"
+                  :shield="selectedShield"
                   :shieldId="selectedShieldId"
                 />
                 <button @click="handleClearShield" class="clearShieldButton">Clear</button>
@@ -216,11 +212,9 @@ export default {
     return {
       loading: false,
       selectedWeaponId: null,
-      selectedWeaponStars: null,
-      selectedWeaponElement: null,
+      selectedWeapon: null,
       selectedShieldId: null,
-      selectedShieldStars: null,
-      selectedShieldElement: null,
+      selectedShield: null,
       checkBoxAgreed: false,
     };
   },
@@ -243,25 +237,21 @@ export default {
       }
       return 'There has been an error. Try again.';
     },
-    handleWeaponClick(weaponId, weaponStars, weaponElement) {
+    handleWeaponClick(weaponId, weapon) {
       this.selectedWeaponId = weaponId;
-      this.selectedWeaponStars = weaponStars;
-      this.selectedWeaponElement = weaponElement;
+      this.selectedWeapon = weapon;
     },
     handleClearWeapon() {
       this.selectedWeaponId = null;
-      this.selectedWeaponStars = null;
-      this.selectedWeaponElement = null;
+      this.selectedWeapon = null;
     },
-    handleShieldClick(shieldId, shieldStars, shieldElement) {
+    handleShieldClick(shieldId, shield) {
       this.selectedShieldId = shieldId;
-      this.selectedShieldStars = shieldStars;
-      this.selectedShieldElement = shieldElement;
+      this.selectedShield = shield;
     },
     handleClearShield() {
       this.selectedShieldId = null;
-      this.selectedShieldStars = null;
-      this.selectedShieldElement = null;
+      this.selectedShield = null;
     },
     onOpen() {
       this.$refs.popover.$emit('open');

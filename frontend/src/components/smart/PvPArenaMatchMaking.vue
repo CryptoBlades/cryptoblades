@@ -32,14 +32,12 @@
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="activeWeaponWithInformation.weaponId"
-            :stars="activeWeaponWithInformation.information.stars + 1"
-            :element="activeWeaponWithInformation.information.element"
+            :weapon="activeWeaponWithInformation.information"
             :weaponId="activeWeaponWithInformation.weaponId"
           />
           <pvp-shield
             v-if="activeShieldWithInformation.shieldId"
-            :stars="activeShieldWithInformation.information.stars + 1"
-            :element="activeShieldWithInformation.information.element"
+            :shield="activeShieldWithInformation.information"
             :shieldId="activeShieldWithInformation.shieldId"
           />
         </div>
