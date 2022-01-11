@@ -166,11 +166,11 @@ export default {
         }
       }
       if(avg.length > 0) {
-        let test = 0;
-        avg.forEach(function (item) {
-          test += item;
+        let totalStats = 0;
+        avg.forEach(function (stat) {
+          totalStats += stat;
         });
-        ttHtml += `<br>AVG: +${ test / avg.length }`;
+        ttHtml += `<br>AVG: +${ totalStats / avg.length }`;
       }
 
       if(this.weapon.lowStarBurnPoints > 0) {
