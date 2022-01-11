@@ -51,7 +51,6 @@
                 <pvp-weapon
                   :weapon="selectedWeapon"
                   :weaponId="selectedWeaponId"
-                  :hasInfoPopover="false"
                   class="weaponPlaceholder"
                 />
                 <button @click="handleClearWeapon()" class="clearWeaponButton">Clear</button>
@@ -91,7 +90,6 @@
                 <pvp-shield
                   :shield="selectedShield"
                   :shieldId="selectedShieldId"
-                  :hasInfoPopover="false"
                 />
                 <button @click="handleClearShield" class="clearShieldButton">Clear</button>
               </div>
