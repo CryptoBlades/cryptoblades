@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="mainWrapper" @click="$emit('click')" :id="`${shieldId}-info`">
+    <div class="mainWrapper" @click="$emit('click')" :id="`${shieldId}-info`" :class="{ withoutInfoPopover: !hasInfoPopover}">
       <div class="starsWrapper">
         <img
           v-for="index in (shield.stars + 1)"
@@ -14,7 +14,13 @@
         <b-popover v-if="hasInfoPopover" ref="shield-info" :target="`${shieldId}-info`"
         triggers="hover" data-trigger="focus" placement="top right" custom-class="popover">
           <div v-if="shieldId" class="shield-icon-wrapper">
-            <nft-icon class="shield-icon" :nft="formattedShield" />
+            <!-- <nft-icon class="shield-icon" :nft="formattedShield" /> -->
+                        <span>Shield stats</span>
+            <ul class="statsWrapper">
+              <li :class="getStatStyles(shield.stat1)" v-if="shield.stat1Value !== 0">{{shield.stat1}} +{{shield.stat1Value}}</li>
+              <li :class="getStatStyles(shield.stat2)" v-if="shield.stat2Value !== 0">{{shield.stat2}} +{{shield.stat2Value}}</li>
+              <li :class="getStatStyles(shield.stat3)" v-if="shield.stat3Value !== 0">{{shield.stat3}} +{{shield.stat3Value}}</li>
+            </ul>
           </div>
         </b-popover>
       </div>
@@ -33,11 +39,11 @@ import lightning from '../../assets/elements/lightning.png';
 import foundersShield from '../../assets/shield1.png';
 import legendaryShield from '../../assets/shield2.png';
 import { BPopover } from 'bootstrap-vue';
-import NftIcon from '../NftIcon.vue';
+// import NftIcon from '../NftIcon.vue';
 
 export default {
   components: {
-    'nft-icon': NftIcon,
+    // 'nft-icon': NftIcon,
     'b-popover': BPopover,
   },
 
@@ -93,6 +99,15 @@ export default {
         return '';
       }
     },
+    getStatStyles(value) {
+      return {
+        red: value && value === 'STR',
+        cyan: value && value === 'INT',
+        green: value && value === 'DEX',
+        yellow: value && value === 'CHA',
+        brown: value && value === 'PWR',
+      };
+    },
   }
 };
 </script>
@@ -110,6 +125,27 @@ export default {
   border: 1px solid #cec198;
   :hover {
     cursor: pointer;
+  }
+}
+.red {
+  color: red;
+}
+.cyan {
+  color: cyan;
+}
+.green {
+  color: green;
+}
+.yellow {
+  color: yellow;
+}
+.brown {
+  color: #9e8a57;
+}
+.withoutInfoPopover {
+  pointer-events: none;
+  :hover {
+    cursor: default;
   }
 }
 .disabled {
@@ -160,9 +196,21 @@ export default {
   overflow: hidden;
 }
 .shield-icon-wrapper {
-  background: rgba(255, 255, 255, 0.1);
-  width: 12em;
-  height: 12em;
+  font-family: 'Roboto';
+  width: max-content;
   margin: 0 auto;
+  background-color: black;
+  padding: 0;
+  span {
+    font-family: 'Roboto';
+  }
+  ul {
+    margin: .75rem 0 0 0;
+    padding: 0;
+  }
+  li {
+    font-family: 'Roboto';
+    list-style: none;
+  }
 }
 </style>
