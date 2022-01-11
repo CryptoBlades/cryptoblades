@@ -77,6 +77,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_1a19cbb(Garrison _garrison) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
         garrison = _garrison;
     }
 
