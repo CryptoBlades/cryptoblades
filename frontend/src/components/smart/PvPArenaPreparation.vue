@@ -17,16 +17,16 @@
             <pvp-separator dark vertical />
             <div class="weaponsWrapper">
               <div v-if="!selectedWeaponId" :class="{ disabledStyles: ownedWeaponsWithInformation.length === 0 }" class="weaponButtonWrapper">
-                <button class="selectWeaponButton" id="weapon-popover">
+                <a tabindex="0" class="selectWeaponButton" id="weapon-popover">
                   <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
-                  <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
+                  <b-popover ref="popover" target="weapon-popover" trigger="click" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Weapons</p>
-                    <select v-model="weaponStarFilter">
+                    <select v-model="weaponStarFilter" class="selectFilter">
                       <option v-for="weaponStarOption in weaponStarOptions" :value="weaponStarOption.value" :key="weaponStarOption.value">
                         {{ weaponStarOption.text }}
                       </option>
                     </select>
-                    <select v-model="weaponElementFilter">
+                    <select v-model="weaponElementFilter" class="selectFilter">
                       <option v-for="weaponElementOption in weaponElementOptions" :value="weaponElementOption.value" :key="weaponElementOption.value">
                         {{ weaponElementOption.text }}
                       </option>
@@ -44,12 +44,14 @@
                     </div>
                     <div v-else class="noWeaponsOrShields">You have no weapons.</div>
                   </b-popover>
-                </button>
+                </a>
               </div>
               <div v-else class="weaponButtonWrapper">
                 <pvp-weapon
                   :weapon="selectedWeapon"
                   :weaponId="selectedWeaponId"
+                  :clickable="false"
+                  class="weaponPlaceholder"
                 />
                 <button @click="handleClearWeapon()" class="clearWeaponButton">Clear</button>
               </div>
@@ -481,7 +483,11 @@ p, li, span {
     grid-template-rows: repeat(4, 1fr);
     grid-column-gap: 1rem;
     grid-row-gap: 2rem;
+    margin-top: 1rem;
   }
+}
+.selectFilter {
+  margin-right: 1rem;
 }
 .noWeaponsOrShields {
   font-family: 'Roboto';
@@ -568,6 +574,9 @@ p, li, span {
         margin-right: 1.5rem;
         position: relative;
       }
+      .weaponPlaceholder {
+        pointer-events: none;
+      }
       .shieldButtonWrapper {
         position: relative;
       }
@@ -581,6 +590,9 @@ p, li, span {
         border-radius: 0.375rem;
         border: 1px solid #cec198;
         background-color: #141414;
+        :hover {
+          cursor: pointer;
+        }
         .placeholderImage {
           width: 2.25rem;
           height: 2.25rem;

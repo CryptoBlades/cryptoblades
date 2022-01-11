@@ -11,9 +11,14 @@
       </div>
       <div class="weaponWrapper">
         <img :src="getWeaponArtById(weaponId)" alt="weapon image">
-        <b-popover ref="weapon-info" :target="`${weaponId}-info`" triggers="hover">
+        <b-popover v-if="clickable === true" :target="`${weaponId}-info`" triggers="hover" data-trigger="focus" placement="right">
           <div v-if="weaponId" class="weapon-icon-wrapper">
-            <weapon-icon class="weapon-icon" :weapon="weapon" />
+            <span>Stats</span>
+            <div class="statsWrapper">
+              <span v-if="weapon.stat1Value !== 0">{{weapon.stat1}}: {{weapon.stat1Value}}</span>
+              <span v-if="weapon.stat2Value !== 0">{{weapon.stat2}}: {{weapon.stat2Value}}</span>
+              <span v-if="weapon.stat3Value !== 0">{{weapon.stat3}}: {{weapon.stat3Value}}</span>
+            </div>
           </div>
         </b-popover>
       </div>
@@ -31,15 +36,17 @@ import earth from '../../assets/elements/earth.png';
 import lightning from '../../assets/elements/lightning.png';
 import { getWeaponArtById } from '../../weapon-arts-placeholder';
 import { BPopover } from 'bootstrap-vue';
-import WeaponIcon from '../WeaponIcon.vue';
 
 export default {
   components: {
-    'weapon-icon': WeaponIcon,
     'b-popover': BPopover,
   },
 
   props: {
+    clickable: {
+      type: Boolean,
+      default: true
+    },
     weapon: {
       required: true,
     },
@@ -111,6 +118,9 @@ export default {
   height: 80%;
   width: 80%;
 }
+.statsWrapper {
+  margin-top: 1rem;
+}
 .elementWrapper {
   position: absolute;
   display: flex;
@@ -135,9 +145,11 @@ export default {
   width: 100%;
   position: relative;
   overflow: hidden;
+  background: #000;
 }
 .weapon-icon-wrapper {
   background: rgba(255, 255, 255, 0.1);
+  font-family: 'Roboto';
   width: 12em;
   height: 12em;
   margin: 0 auto;
