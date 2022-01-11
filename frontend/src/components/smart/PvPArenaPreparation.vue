@@ -21,8 +21,15 @@
                   <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
                   <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Weapons</p>
-                    <select v-model="starFilter">
-                      <option v-for="x in ['', 1, 2, 3, 4, 5]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+                    <select v-model="weaponStarFilter">
+                      <option v-for="weaponStarOption in weaponStarOptions" :value="weaponStarOption.value" :key="weaponStarOption.value">
+                        {{ weaponStarOption.text }}
+                      </option>
+                    </select>
+                    <select v-model="weaponElementFilter">
+                      <option v-for="weaponElementOption in weaponElementOptions" :value="weaponElementOption.value" :key="weaponElementOption.value">
+                        {{ weaponElementOption.text }}
+                      </option>
                     </select>
                     <div v-if="ownedWeaponsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-weapon
@@ -51,6 +58,16 @@
                   <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
                   <b-popover target="shield-popover" placement="right" triggers="click blur" custom-class="popoverWrapper">
                     <p class="popoverTitle">Shields</p>
+                    <select v-model="shieldStarFilter">
+                      <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
+                        {{ shieldStarOption.text }}
+                      </option>
+                    </select>
+                    <select v-model="shieldElementFilter">
+                      <option v-for="shieldElementOption in shieldElementOptions" :value="shieldElementOption.value" :key="shieldElementOption.value">
+                        {{ shieldElementOption.text }}
+                      </option>
+                    </select>
                     <div v-if="ownedShieldsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-shield
                         v-for="shield in filteredShieldsWithInformation"
@@ -168,6 +185,8 @@ import PvPButton from './PvPButton.vue';
 import PvPSeparator from './PvPSeparator.vue';
 import checkIcon from '../../assets/checkImage.svg';
 import ellipseIcon from '../../assets/ellipseImage.svg';
+import i18n from '../../i18n';
+
 export default {
   components: {
     'pvp-weapon': PvPWeapon,
@@ -220,7 +239,40 @@ export default {
       checkBoxAgreed: false,
       filteredWeaponsWithInformation: this.ownedWeaponsWithInformation,
       filteredShieldsWithInformation: this.ownedShieldsWithInformation,
-      starFilter: '',
+      weaponStarFilter: 0,
+      weaponStarOptions: [
+        { text: i18n.t('nftList.sorts.any'), value: 0 },
+        { text: '1', value: 1 },
+        { text: '2', value: 2 },
+        { text: '3', value: 3 },
+        { text: '4', value: 4 },
+        { text: '5', value: 5 },
+      ],
+      weaponElementFilter: '',
+      weaponElementOptions: [
+        { value: '', text: i18n.t('nftList.sorts.any') },
+        { value: 'Earth', text: i18n.t('traits.earth') },
+        { value: 'Fire', text: i18n.t('traits.fire') },
+        { value: 'Lightning', text: i18n.t('traits.lightning') },
+        { value: 'Water', text: i18n.t('traits.water') }
+      ],
+      shieldStarFilter: 0,
+      shieldStarOptions: [
+        { text: i18n.t('nftList.sorts.any'), value: 0 },
+        { text: '1', value: 1 },
+        { text: '2', value: 2 },
+        { text: '3', value: 3 },
+        { text: '4', value: 4 },
+        { text: '5', value: 5 },
+      ],
+      shieldElementFilter: '',
+      shieldElementOptions: [
+        { value: '', text: i18n.t('nftList.sorts.any') },
+        { value: 'Earth', text: i18n.t('traits.earth') },
+        { value: 'Fire', text: i18n.t('traits.fire') },
+        { value: 'Lightning', text: i18n.t('traits.lightning') },
+        { value: 'Water', text: i18n.t('traits.water') }
+      ]
     };
   },
   computed: {
@@ -309,13 +361,91 @@ export default {
   },
 
   watch: {
-    starFilter(value) {
-      if (!+value) {
-        this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation;
+    weaponStarFilter(value) {
+      if (!value && !this.weaponElementFilter) {
+        if (!this.weaponElementFilter) {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation;
+        } else {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.element === this.weaponElementFilter;
+          });
+        }
       } else {
-        this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
-          return weapon.information.stars === +value - 1;
-        });
+        if (!this.weaponElementFilter) {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.stars === value - 1;
+          });
+        } else {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.stars === value - 1 && weapon.information.element === this.weaponElementFilter;
+          });
+        }
+      }
+    },
+
+    weaponElementFilter(value) {
+      if (!value) {
+        if (!this.weaponStarFilter) {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation;
+        } else {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.stars === this.weaponStarFilter - 1;
+          });
+        }
+      } else {
+        if (!this.weaponStarFilter) {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.element === value;
+          });
+        } else {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.stars === this.weaponStarFilter - 1 && weapon.information.element === value;
+          });
+        }
+      }
+    },
+
+    shieldStarFilter(value) {
+      if (!value && !this.shieldElementFilter) {
+        if (!this.shieldElementFilter) {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation;
+        } else {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.element === this.shieldElementFilter;
+          });
+        }
+      } else {
+        if (!this.shieldElementFilter) {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.stars === value - 1;
+          });
+        } else {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.stars === value - 1 && shield.information.element === this.shieldElementFilter;
+          });
+        }
+      }
+    },
+
+    shieldElementFilter(value) {
+      if (!value) {
+        if (!this.shieldStarFilter) {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation;
+        } else {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.stars === this.shieldStarFilter - 1;
+          });
+        }
+      } else {
+        if (!this.shieldStarFilter) {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.element === value;
+          });
+        } else {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.stars === this.shieldStarFilter - 1 && shield.information.element === value;
+          });
+        }
       }
     }
   }
