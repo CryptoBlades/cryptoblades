@@ -132,8 +132,9 @@ export default {
       if(this.weapon.element) {
         ttHtml += `<br>Element: ${wrapInSpan(this.weapon.element, this.weapon.element)}`;
       }
-
+      const avg = [];
       if(this.weapon.stat1Value) {
+        avg.push(this.weapon.stat1Value);
         ttHtml += `<br>${wrapInSpan(this.weapon.stat1, this.weapon.stat1)}: +${this.weapon.stat1Value}`;
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
@@ -144,6 +145,7 @@ export default {
       }
 
       if(this.weapon.stat2Value) {
+        avg.push(this.weapon.stat2Value);
         ttHtml += `<br>${wrapInSpan(this.weapon.stat2, this.weapon.stat2)}: +${this.weapon.stat2Value}`;
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
@@ -154,6 +156,7 @@ export default {
       }
 
       if(this.weapon.stat3Value) {
+        avg.push(this.weapon.stat3Value);
         ttHtml += `<br>${wrapInSpan(this.weapon.stat3, this.weapon.stat3)}: +${this.weapon.stat3Value}`;
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
@@ -161,6 +164,13 @@ export default {
             '+'+Stat3PercentForChar(this.weapon, +this.currentCharacter.trait)+'%')
           })`;
         }
+      }
+      if(avg.length > 0) {
+        let test = 0;
+        avg.forEach(function (item) {
+          test += item;
+        });
+        ttHtml += `<br>AVG: +${ test / avg.length }`;
       }
 
       if(this.weapon.lowStarBurnPoints > 0) {

@@ -200,7 +200,9 @@ export default {
         ttHtml += `<br>Element: ${wrapInSpan(this.nft.element, this.nft.element)}`;
       }
 
+      const avg = [];
       if(this.nft.stat1Value) {
+        avg.push(this.nft.stat1Value);
         ttHtml += `<br>${wrapInSpan(this.nft.stat1, this.nft.stat1)}: +${this.nft.stat1Value}`;
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
@@ -211,6 +213,7 @@ export default {
       }
 
       if(this.nft.stat2Value) {
+        avg.push(this.nft.stat2Value);
         ttHtml += `<br>${wrapInSpan(this.nft.stat2, this.nft.stat2)}: +${this.nft.stat2Value}`;
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
@@ -221,6 +224,7 @@ export default {
       }
 
       if(this.nft.stat3Value) {
+        avg.push(this.nft.stat3Value);
         ttHtml += `<br>${wrapInSpan(this.nft.stat3, this.nft.stat3)}: +${this.nft.stat3Value}`;
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
@@ -228,6 +232,14 @@ export default {
             '+'+Stat3PercentForChar(this.nft, +this.currentCharacter.trait)+'%')
           })`;
         }
+      }
+
+      if(avg.length > 0) {
+        let test = 0;
+        avg.forEach(function (item) {
+          test += item;
+        });
+        ttHtml += `<br>AVG: +${ test / avg.length }`;
       }
 
       return ttHtml;
