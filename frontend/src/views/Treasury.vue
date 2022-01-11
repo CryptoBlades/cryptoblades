@@ -10,7 +10,6 @@
     <div class="d-flex w-100 align-items-baseline mt-3">
       <h5>{{$t('Treasury.payoutCurrency')}}:</h5>
       <b-form-select class="w-25 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-        <b-form-select-option v-if="currentNetworkId !== 56" :value="-1">SKILL</b-form-select-option>
         <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
       </b-form-select>
     </div>

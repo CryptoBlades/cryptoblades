@@ -58,7 +58,6 @@
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Payout Currency</h4>
               <b-form-select size="lg" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-                <b-form-select-option v-if="currentNetworkId !== 56" :value="'-1'">SKILL</b-form-select-option>
                 <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">
                   {{p.tokenSymbol}} ({{p.name}})
                 </b-form-select-option>
