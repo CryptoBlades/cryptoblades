@@ -31,6 +31,7 @@
                         {{ weaponElementOption.text }}
                       </option>
                     </select>
+                    <button v-if="weaponStarFilter || weaponElementFilter" @click="clearFilters()" class="clearFiltersButton">Clear</button>
                     <div v-if="ownedWeaponsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-weapon
                         v-for="weapon in filteredWeaponsWithInformation"
@@ -50,7 +51,7 @@
                 <pvp-weapon
                   :weapon="selectedWeapon"
                   :weaponId="selectedWeaponId"
-                  :clickable="false"
+                  :hasInfoPopover="false"
                   class="weaponPlaceholder"
                 />
                 <button @click="handleClearWeapon()" class="clearWeaponButton">Clear</button>
@@ -290,6 +291,10 @@ export default {
     },
   },
   methods: {
+    clearFilters() {
+      this.weaponStarFilter = 0;
+      this.weaponElementFilter = '';
+    },
     handleErrorMessage(value, errorMessage, returnedMessage) {
       if(value.includes(`reverted with reason string '${errorMessage}'`)) {
         return this.$dialog.notify.error(returnedMessage);
@@ -486,6 +491,12 @@ p, li, span {
     margin-top: 1rem;
   }
 }
+.clearFiltersButton {
+  background-color: transparent;
+  font-family: 'Roboto';
+  color: white;
+  border: none;
+}
 .selectFilter {
   margin-right: 1rem;
   padding: .25rem;
@@ -495,6 +506,10 @@ p, li, span {
   background-color: #151515;
   border-color: transparent;
   border-radius: 0.2rem;
+  width: 6rem;
+}
+.selectFilter:first-of-type {
+  width: 4rem
 }
 .noWeaponsOrShields {
   font-family: 'Roboto';
@@ -580,9 +595,6 @@ p, li, span {
       .weaponButtonWrapper {
         margin-right: 1.5rem;
         position: relative;
-      }
-      .weaponPlaceholder {
-        pointer-events: none;
       }
       .shieldButtonWrapper {
         position: relative;

@@ -34,11 +34,13 @@
             v-if="activeWeaponWithInformation.weaponId"
             :weapon="activeWeaponWithInformation.information"
             :weaponId="activeWeaponWithInformation.weaponId"
+            :hasInfoPopover="false"
           />
           <pvp-shield
             v-if="activeShieldWithInformation.shieldId"
             :shield="activeShieldWithInformation.information"
             :shieldId="activeShieldWithInformation.shieldId"
+            :hasInfoPopover="false"
           />
         </div>
       </div>
@@ -100,11 +102,13 @@
             v-if="opponentActiveWeaponWithInformation.weaponId"
             :weapon="opponentActiveWeaponWithInformation.information"
             :weaponId="opponentActiveWeaponWithInformation.weaponId"
+            :hasInfoPopover="false"
           />
           <pvp-shield
             v-if="opponentActiveShieldWithInformation.shieldId"
             :shield="opponentActiveShieldWithInformation.information"
             :shieldId="opponentActiveShieldWithInformation.shieldId"
+            :hasInfoPopover="false"
           />
         </div>
       </div>

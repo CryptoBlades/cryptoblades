@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="mainWrapper" @click="$emit('click')" :id="`${weaponId}-info`">
+    <div class="mainWrapper" @click="$emit('click')" :id="`${weaponId}-info`" :class="{ withoutInfoPopover: !hasInfoPopover}">
       <div class="starsWrapper">
         <img
           v-for="index in (weapon.stars + 1)"
@@ -11,7 +11,7 @@
       </div>
       <div class="weaponWrapper">
         <img :src="getWeaponArtById(weaponId)" alt="weapon image">
-        <b-popover v-if="clickable === true" :target="`${weaponId}-info`" triggers="hover" data-trigger="focus" placement="right">
+        <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info`" triggers="hover" data-trigger="focus" placement="right">
           <div v-if="weaponId" class="weapon-icon-wrapper">
             <span>Stats</span>
             <div class="statsWrapper">
@@ -43,7 +43,7 @@ export default {
   },
 
   props: {
-    clickable: {
+    hasInfoPopover: {
       type: Boolean,
       default: true
     },
@@ -94,6 +94,12 @@ export default {
   border: 1px solid #cec198;
   :hover {
     cursor: pointer;
+  }
+}
+.withoutInfoPopover {
+  pointer-events: none;
+  :hover {
+    cursor: default;
   }
 }
 .disabled {
