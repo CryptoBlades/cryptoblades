@@ -538,55 +538,19 @@ export default {
 }
 
 .glow-1 {
-  animation: glow-1 2000ms ease-out infinite alternate;
+  box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
 }
 
 .glow-2 {
-  animation: glow-2 2000ms ease-out infinite alternate;
+  box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
 }
 
 .glow-3 {
-  animation: glow-3 2000ms ease-out infinite alternate;
+  box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
 }
 
 .glow-4 {
-  animation: glow-4 2000ms ease-out infinite alternate;
-}
-
-@keyframes glow-1 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(0, 162, 255, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
-  }
-}
-
-@keyframes glow-2 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(125, 0, 125, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
-  }
-}
-
-@keyframes glow-3 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(255, 102, 0, 0.3);
-  }
-  100% {
-    box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
-  }
-}
-
-@keyframes glow-4 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(125, 0, 0, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
-  }
+  box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
 }
 
 .animation {
