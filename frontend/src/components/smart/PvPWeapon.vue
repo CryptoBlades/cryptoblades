@@ -11,13 +11,13 @@
       </div>
       <div class="weaponWrapper">
         <img :src="getWeaponArtById(weaponId)" alt="weapon image">
-        <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info`" triggers="hover" data-trigger="focus" placement="top right" class="popover">
+        <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info`" triggers="hover" data-trigger="focus" placement="top right" custom-class="popover">
           <div v-if="weaponId" class="weapon-icon-wrapper">
             <span>Weapon stats</span>
             <ul class="statsWrapper">
-              <li v-if="weapon.stat1Value !== 0">{{weapon.stat1}}: +{{weapon.stat1Value}}</li>
-              <li v-if="weapon.stat2Value !== 0">{{weapon.stat2}}: +{{weapon.stat2Value}}</li>
-              <li v-if="weapon.stat3Value !== 0">{{weapon.stat3}}: +{{weapon.stat3Value}}</li>
+              <li :class="getStatStyles(weapon.stat1)" v-if="weapon.stat1Value !== 0">{{weapon.stat1}} +{{weapon.stat1Value}}</li>
+              <li :class="getStatStyles(weapon.stat2)" v-if="weapon.stat2Value !== 0">{{weapon.stat2}} +{{weapon.stat2Value}}</li>
+              <li :class="getStatStyles(weapon.stat3)" v-if="weapon.stat3Value !== 0">{{weapon.stat3}} +{{weapon.stat3Value}}</li>
             </ul>
           </div>
         </b-popover>
@@ -71,10 +71,19 @@ export default {
       } else {
         return lightning;
       }
-    },
+    }
   },
   methods: {
     getWeaponArtById,
+    getStatStyles(value) {
+      return {
+        red: value && value === 'STR',
+        cyan: value && value === 'INT',
+        green: value && value === 'DEX',
+        yellow: value && value === 'CHA',
+        brown: value && value === 'PWR',
+      };
+    },
   },
 };
 </script>
@@ -136,13 +145,6 @@ export default {
   margin: 0 auto;
   height: 80%;
   width: 80%;
-
-.popover-body {
-  background-color: yellow;
-  .arrow {
-    background-color: yellow;
-  }
-}
 }
 .statsWrapper {
   margin-top: 1rem;

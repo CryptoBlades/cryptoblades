@@ -476,7 +476,6 @@ p, li, span {
   background-color: black;
   border: 1px solid #cec198;
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
   .popoverTitle {
     color: #cec198;
     font-size: 1.25rem;
