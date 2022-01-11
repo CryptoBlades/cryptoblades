@@ -91,6 +91,7 @@
                 <pvp-shield
                   :shield="selectedShield"
                   :shieldId="selectedShieldId"
+                  :hasInfoPopover="false"
                 />
                 <button @click="handleClearShield" class="clearShieldButton">Clear</button>
               </div>

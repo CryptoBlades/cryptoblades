@@ -11,7 +11,8 @@
       </div>
       <div class="shieldWrapper">
         <img :src="getShieldArt(shieldId)" alt="shield image">
-        <b-popover ref="shield-info" :target="`${shieldId}-info`" triggers="hover">
+        <b-popover v-if="hasInfoPopover" ref="shield-info" :target="`${shieldId}-info`"
+        triggers="hover" data-trigger="focus" placement="top right" custom-class="popover">
           <div v-if="shieldId" class="shield-icon-wrapper">
             <nft-icon class="shield-icon" :nft="formattedShield" />
           </div>
@@ -41,6 +42,10 @@ export default {
   },
 
   props: {
+    hasInfoPopover: {
+      type: Boolean,
+      default: true
+    },
     shield: {
       required: true,
     },
