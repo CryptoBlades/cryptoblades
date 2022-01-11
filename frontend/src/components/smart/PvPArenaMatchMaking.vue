@@ -120,7 +120,7 @@
       :attackerRoll="duelResult.attackerRoll"
       :defenderRoll="duelResult.defenderRoll"
       :skillEarned="duelResult.skillDifference"
-      :rankVariation="duelResult.result === 'win' ? 5 : -3"
+      :rankVariation="duelResult.result === 'win' ? '+5' : '-3'"
       :userCurrentRank="duelResult.rankDifference"
       @close-modal="handleCloseModal"
     />
@@ -364,14 +364,14 @@ export default {
         if (duelFinishedResult.length) {
           const formattedResult = formatDuelResult(duelFinishedResult[duelFinishedResult.length - 1].returnValues);
 
-          this.duelResult.result = formattedResult.attackerRoll > formattedResult.defenderRoll ? 'win' : 'lose';
+          this.duelResult.result = formattedResult.attackerWon ? 'win' : 'lose';
           this.duelResult.attackerRoll = formattedResult.attackerRoll;
           this.duelResult.defenderRoll = formattedResult.defenderRoll;
-          this.duelResult.skillDifference = this.duelResult.result === 'win' ?
+          this.duelResult.skillDifference = formattedResult.attackerWon ?
             +this.formattedDuelCost * 0.7 :
-            -this.formattedDuelCost;
+            this.formattedDuelCost;
           // TODO: Make this prettier
-          this.duelResult.rankDifference = this.duelResult.result === 'win' ?
+          this.duelResult.rankDifference = formattedResult.attackerWon ?
             +this.characterInformation.rank + 5 :
             +this.characterInformation.rank - 3 <= 0 ?
               0 :
