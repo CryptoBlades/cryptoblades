@@ -31,7 +31,7 @@
                         {{ weaponElementOption.text }}
                       </option>
                     </select>
-                    <button v-if="weaponStarFilter || weaponElementFilter" @click="clearFilters()" class="clearFiltersButton">Clear</button>
+                    <button v-if="weaponStarFilter || weaponElementFilter" @click="clearWeaponFilters()" class="clearFiltersButton">Clear</button>
                     <div v-if="ownedWeaponsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-weapon
                         v-for="weapon in filteredWeaponsWithInformation"
@@ -57,20 +57,21 @@
                 <button @click="handleClearWeapon()" class="clearWeaponButton">Clear</button>
               </div>
               <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
-                <button class="selectWeaponButton" id="shield-popover">
+                <a tabindex="0" class="selectWeaponButton" id="shield-popover">
                   <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
                   <b-popover target="shield-popover" placement="right" triggers="click blur" custom-class="popoverWrapper">
                     <p class="popoverTitle">Shields</p>
-                    <select v-model="shieldStarFilter">
+                    <select v-model="shieldStarFilter" class="selectFilter">
                       <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
                         {{ shieldStarOption.text }}
                       </option>
                     </select>
-                    <select v-model="shieldElementFilter">
+                    <select v-model="shieldElementFilter" class="selectFilter">
                       <option v-for="shieldElementOption in shieldElementOptions" :value="shieldElementOption.value" :key="shieldElementOption.value">
                         {{ shieldElementOption.text }}
                       </option>
                     </select>
+                    <button v-if="shieldStarFilter || shieldElementFilter" @click="clearShieldFilters()" class="clearFiltersButton">Clear</button>
                     <div v-if="ownedShieldsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-shield
                         v-for="shield in filteredShieldsWithInformation"
@@ -84,7 +85,7 @@
                     </div>
                     <div v-else class="noWeaponsOrShields">You have no shields.</div>
                   </b-popover>
-                </button>
+                </a>
               </div>
               <div v-else class="shieldButtonWrapper">
                 <pvp-shield
@@ -291,9 +292,13 @@ export default {
     },
   },
   methods: {
-    clearFilters() {
+    clearWeaponFilters() {
       this.weaponStarFilter = 0;
       this.weaponElementFilter = '';
+    },
+    clearShieldFilters() {
+      this.shieldStarFilter = 0;
+      this.shieldElementFilter = '';
     },
     handleErrorMessage(value, errorMessage, returnedMessage) {
       if(value.includes(`reverted with reason string '${errorMessage}'`)) {
