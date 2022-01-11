@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="mainWrapper" @click="$emit('click')" :id="`${shieldId}-info`" :class="{ withoutInfoPopover: !hasInfoPopover}">
+    <div class="mainWrapper" @click="$emit('click')" :id="`${shieldId}-info-s`" :class="{ withoutInfoPopover: !hasInfoPopover}">
       <div class="starsWrapper">
         <img
           v-for="index in (shield.stars + 1)"
@@ -11,8 +11,8 @@
       </div>
       <div class="shieldWrapper">
         <img :src="getShieldArt(shieldId)" alt="shield image">
-        <b-popover v-if="hasInfoPopover" ref="shield-info" :target="`${shieldId}-info`"
-        triggers="hover" data-trigger="focus" placement="top right" custom-class="popover">
+        <b-popover v-if="hasInfoPopover" ref="shield-info" :target="`${shieldId}-info-s`"
+        triggers="hover" data-trigger="focus" placement="top right" custom-class="customPopover">
           <div v-if="shieldId" class="shield-icon-wrapper">
             <span>Shield stats</span>
             <ul class="statsWrapper">
@@ -124,6 +124,10 @@ export default {
     cursor: pointer;
   }
 }
+.customPopover {
+  border: 1px solid #d6d8d9;
+  background: #000;
+}
 .red {
   color: red;
 }
@@ -199,6 +203,7 @@ export default {
   background-color: black;
   padding: 0;
   span {
+    color: #cec198;
     font-family: 'Roboto';
   }
   ul {
