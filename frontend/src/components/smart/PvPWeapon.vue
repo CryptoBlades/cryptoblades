@@ -11,7 +11,8 @@
       </div>
       <div class="weaponWrapper">
         <img :src="getWeaponArtById(weaponId)" alt="weapon image">
-        <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info`" triggers="hover" data-trigger="focus" placement="top right" custom-class="popover">
+        <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info`" variant="dark"
+        triggers="hover" data-trigger="focus" placement="top right" custom-class="customPopover">
           <div v-if="weaponId" class="weapon-icon-wrapper">
             <span>Weapon stats</span>
             <ul class="statsWrapper">
@@ -77,11 +78,11 @@ export default {
     getWeaponArtById,
     getStatStyles(value) {
       return {
-        red: value && value === 'STR',
-        cyan: value && value === 'INT',
-        green: value && value === 'DEX',
-        yellow: value && value === 'CHA',
-        brown: value && value === 'PWR',
+        red: value === 'STR',
+        cyan: value === 'INT',
+        green: value === 'DEX',
+        yellow: value === 'CHA',
+        brown: value === 'PWR',
       };
     },
   },
@@ -102,6 +103,11 @@ export default {
   :hover {
     cursor: pointer;
   }
+}
+
+.customPopover {
+  border: 1px solid #d6d8d9;
+  background: #000;
 }
 .red {
   color: red;
@@ -146,9 +152,7 @@ export default {
   height: 80%;
   width: 80%;
 }
-.statsWrapper {
-  margin-top: 1rem;
-}
+
 .elementWrapper {
   position: absolute;
   display: flex;
@@ -173,15 +177,17 @@ export default {
   width: 100%;
   position: relative;
   overflow: hidden;
-  background: #000;
 }
 .weapon-icon-wrapper {
   font-family: 'Roboto';
   width: max-content;
   margin: 0 auto;
-  background-color: black;
   padding: 0;
+  .statsWrapper {
+  margin-top: 1rem;
+}
   span {
+    color: #cec198;
     font-family: 'Roboto';
   }
   ul {
