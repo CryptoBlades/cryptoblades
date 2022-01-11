@@ -170,6 +170,10 @@ export default {
   margin: 0 auto;
   height: 80%;
   width: 80%;
+  img {
+    display: flex;
+    margin: 0 auto;
+  }
 }
 .elementWrapper {
   position: absolute;
