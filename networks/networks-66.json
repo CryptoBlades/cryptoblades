@@ -1852,7 +1852,7 @@
     },
     "links": {},
     "address": "0x6A1d1803d4EDF5CF27EDb64ae95A22F81707eA38",
-    "transactionHash": "0x8dcd89cd0244951e9cff1d30fa26a4c07cc8efe6b51a1442539374a13e41b474"
+    "transactionHash": "0x7b1c0a292fdd80e1f31680c8143f41461136e1c4718407d2e3e8d55a38c61686"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {

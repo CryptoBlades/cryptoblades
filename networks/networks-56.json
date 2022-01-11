@@ -1751,7 +1751,7 @@
     },
     "links": {},
     "address": "0xc6f252c2CdD4087e30608A35c022ce490B58179b",
-    "transactionHash": "0x1b85ad7b3d2012e529908578d5579cdfe71d021af80342a1d7c6fc8f67ac1e3c"
+    "transactionHash": "0xd03355960ab9d649abdfc2521095c562197c8b1bfbbad23f5733ab977706bafd"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {},
