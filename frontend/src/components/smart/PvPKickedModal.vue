@@ -2,32 +2,17 @@
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
       <img src="../../assets/separatorTop.svg" alt="Top separator">
-      <div v-if="result === 'win'" class="modalTitle">You have won the duel!</div>
-      <div v-else class="modalTitle"> You have lost the duel!</div>
+      <div class="modalTitle">{{$t('pvp.kicked')}}</div>
       <ul>
         <li>
-          <span>You rolled</span>
-          <span class="chevron">></span>
-          <span>{{ attackerRoll }}</span>
-        </li>
-        <pvp-separator />
-        <li>
-          <span>Opponent rolled</span>
-          <span class="chevron">></span>
-          <span>{{ defenderRoll }}</span>
+          <span>{{$t('pvp.lastDefeated')}}{{ kickedByName }}</span>
         </li>
         <pvp-separator />
       </ul>
-      <div class="earnWrapper">You {{ result === 'win' ? 'earned' : 'lost'}}: {{ skillEarned }} $SKILL</div>
-      <div class="rankWrapper">
-        <span>Updated rank: </span>
-        <span>{{ userCurrentRank }}</span>
-        <span>({{ rankVariation }} Rank)</span>
-      </div>
       <img src="../../assets/separatorBottom.svg" alt="Bottom separator">
     </div>
     <div class="closeWrapper">
-      <p>Tap anywhere to close</p>
+      <p>{{$t('pvp.tapAnywhere')}}</p>
       <button @click="close">
         <img src="../../assets/closeModal.svg" alt="Bottom separator">
       </button>
@@ -37,6 +22,7 @@
 
 <script>
 import PvPSeparator from './PvPSeparator.vue';
+import { getCharacterNameFromSeed } from '../../character-name';
 
 export default {
   components: {
@@ -44,22 +30,7 @@ export default {
   },
 
   props: {
-    result: {
-      required: true
-    },
-    attackerRoll: {
-      default: null
-    },
-    defenderRoll: {
-      default: null
-    },
-    skillEarned: {
-      default: null
-    },
-    rankVariation: {
-      default: null
-    },
-    userCurrentRank: {
+    kickedBy: {
       default: null
     }
   },
@@ -68,6 +39,12 @@ export default {
     return {
       showModal: false
     };
+  },
+
+  computed: {
+    kickedByName() {
+      return getCharacterNameFromSeed(this.kickedBy);
+    }
   },
 
   methods: {

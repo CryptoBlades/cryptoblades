@@ -3,34 +3,23 @@
     <div class="d-flex flex-column align-items-center w-50">
       <div class="d-flex">
         <h3 class="mt-2"> {{$t('Treasury.partneredProjects')}} </h3>
-        <b-icon-question-circle class="h3 mt-2 ml-3 pointer" @click="openFormulaDetails" v-tooltip="'Click for details'"/>
+        <b-icon-question-circle class="h3 mt-2 ml-3 pointer" @click="openFormulaDetails"/>
       </div>
-      <img src="../assets/divider4.png" class="expander-divider">
+      <img src="../assets/divider4.png" class="expander-divider" alt="">
     </div>
-    <div class="d-flex w-100 align-items-baseline mt-3 pl-5">
+    <div class="d-flex w-100 align-items-baseline mt-3">
       <h5>{{$t('Treasury.payoutCurrency')}}:</h5>
       <b-form-select class="w-25 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-        <b-form-select-option v-if="currentNetworkId !== 56" :value="-1">SKILL</b-form-select-option>
         <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
       </b-form-select>
     </div>
-    <div class="d-flex w-100 pt-2 pr-5 pl-5 pb-2 flex-wrap">
+    <div class="d-flex w-100 pt-2 pb-2 flex-wrap projects-container">
       <partnered-project v-for="p in supportedProjects" :key="p.id" :id="p.id" :name="p.name" :tokenSymbol="p.tokenSymbol"
         :tokenSupply="p.tokenSupply" :tokenPrice="p.tokenPrice" :logoFileName="getLogoFile(p.name)"
         :tokenAddress="p.tokenAddress"/>
     </div>
     <b-modal ok-only class="centered-modal" ref="formula-details-modal" :title="$t('Treasury.formulaDetailsTitle')">
-      <span>
-        Payout formula is designed to guarantee that rewards will be distributed over assumed distribution time.<br><br>
-        Multiplier is evenly increasing throughout a day at a speed of 100% per day.<br><br>
-        Every claim lowers the multiplier based on the amount of partner tokens claimed and the desired distribution time.<br><br>
-        That means multiplier can go below x1 resulting in claiming less partner tokens than the claimed SKILL tokens are worth.<br><br>
-        E.g. The supply of partner tokens is 100 tokens. The distribution time is 10 days.<br>
-        In this scenario each partner token (1) claimed will lower the multiplier by 1 / (100 / 10) = 0.1 = 10%<br><br>
-        You can adjust the amount of SKILL that you want to claim as well as slippage.<br><br>
-        Slippage will protect you from claiming less tokens than you intended -
-        if some else claims right before you, lowering the multiplier enough, your transaction will fail instead of claiming less tokens.
-      </span>
+      <span class="white-space">{{$t('Treasury.payoutFormulaExplanation')}}</span>
     </b-modal>
   </div>
 </template>
@@ -38,8 +27,8 @@
 <script lang='ts'>
 import PartneredProject from '@/components/PartneredProject.vue';
 import Vue from 'vue';
-import { Accessors } from 'vue/types/options';
-import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
+import {Accessors} from 'vue/types/options';
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 
 export interface SupportedProject {
   id: string;
@@ -83,7 +72,7 @@ export default Vue.extend({
     ...(mapState(['payoutCurrencyId', 'currentNetworkId']) as Accessors<StoreMappedState>),
 
     supportedProjects(): SupportedProject[] {
-      const supportedProjects = this.getPartnerProjects.map(p => {
+      return this.getPartnerProjects.map(p => {
         return {
           id: p.id,
           name: p.name,
@@ -95,8 +84,6 @@ export default Vue.extend({
           isActive: p.isActive
         };
       });
-
-      return supportedProjects;
     }
   },
 
@@ -131,5 +118,13 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.white-space {
+  white-space: break-spaces;
+}
 
+@media (max-width: 576px) {
+  .projects-container {
+    justify-content: center;
+  }
+}
 </style>
