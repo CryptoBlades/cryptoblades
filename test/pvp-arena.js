@@ -172,7 +172,7 @@ contract("PvpArena", (accounts) => {
       it("should reset character's rank if it changes tier", async () => {
         const weapon1ID = await helpers.createWeapon(
           accounts[1],
-          "111",
+          "101",
           helpers.elements.water,
           {
             weapons,
@@ -207,7 +207,6 @@ contract("PvpArena", (accounts) => {
           from: accounts[0],
         });
 
-        await time.increase(await pvpArena.decisionSeconds());
         await pvpArena.findOpponent(character1ID, {
           from: accounts[1],
         });
@@ -248,7 +247,7 @@ contract("PvpArena", (accounts) => {
       it("should reset character's rank and place it in current season if it's off-season. Resets rankings by tier as well (leaderboard)", async () => {
         const weapon1ID = await helpers.createWeapon(
           accounts[1],
-          "111",
+          "101",
           helpers.elements.water,
           {
             weapons,
@@ -349,7 +348,7 @@ contract("PvpArena", (accounts) => {
       it("should add pre-existing wager for characters re-entering arena", async () => {
         const weapon1ID = await helpers.createWeapon(
           accounts[1],
-          "111",
+          "101",
           helpers.elements.water,
           {
             weapons,
@@ -365,7 +364,7 @@ contract("PvpArena", (accounts) => {
         );
         const weapon3ID = await helpers.createWeapon(
           accounts[3],
-          "111",
+          "161",
           helpers.elements.earth,
           {
             weapons,
@@ -894,7 +893,7 @@ contract("PvpArena", (accounts) => {
         beforeEach(async () => {
           const weapon1ID = await helpers.createWeapon(
             accounts[1],
-            "111",
+            "101",
             helpers.elements.water,
             {
               weapons,
@@ -970,7 +969,7 @@ contract("PvpArena", (accounts) => {
         beforeEach(async () => {
           const weapon1ID = await helpers.createWeapon(
             accounts[1],
-            "111",
+            "101",
             helpers.elements.water,
             {
               weapons,
@@ -1063,7 +1062,7 @@ contract("PvpArena", (accounts) => {
       beforeEach(async () => {
         const weapon1ID = await helpers.createWeapon(
           accounts[1],
-          "111",
+          "101",
           helpers.elements.water,
           {
             weapons,
@@ -1252,7 +1251,7 @@ contract("PvpArena", (accounts) => {
           // the same
           const weapon1ID = await helpers.createWeapon(
             accounts[1],
-            "111",
+            "101",
             helpers.elements.water,
             {
               weapons,
@@ -1424,7 +1423,7 @@ contract("PvpArena", (accounts) => {
         beforeEach(async () => {
           weapon1ID = await helpers.createWeapon(
             accounts[1],
-            "111",
+            "101",
             helpers.elements.water,
             {
               weapons,
@@ -1512,7 +1511,7 @@ contract("PvpArena", (accounts) => {
           );
           weapon2ID = await helpers.createWeapon(
             accounts[2],
-            "111",
+            "101",
             helpers.elements.water,
             {
               weapons,
@@ -1882,7 +1881,7 @@ contract("PvpArena", (accounts) => {
         character4ID = await createCharacterInPvpTier(
           accounts[2],
           2,
-          "222",
+          "201",
           weapon1ID
         );
         await characters.setTrait(character4ID, helpers.elements.water, {
@@ -1977,7 +1976,7 @@ contract("PvpArena", (accounts) => {
         character6ID = await createCharacterInPvpTier(
           accounts[2],
           2,
-          "222",
+          "201",
           weapon1ID
         );
 
@@ -2050,7 +2049,7 @@ contract("PvpArena", (accounts) => {
         character2ID = await createCharacterInPvpTier(
           accounts[2],
           2,
-          "222",
+          "201",
           weapon1ID
         );
         await characters.setTrait(character2ID, helpers.elements.water, {
@@ -2117,7 +2116,7 @@ contract("PvpArena", (accounts) => {
         character5ID = await createCharacterInPvpTier(
           accounts[2],
           2,
-          "222",
+          "201",
           weapon1ID
         );
 
