@@ -2019,7 +2019,7 @@
     },
     "links": {},
     "address": "0x929059Fef67b88CE2F4127e59B50bEA123981998",
-    "transactionHash": "0xf7fb91246cf206539caca1fa999aef31ed8baab2a637c8237484ba8b3bf8ec12"
+    "transactionHash": "0x74291876804375bb1290fd116ae72213ad71daa2b5157a2c0279e18c850d483b"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
