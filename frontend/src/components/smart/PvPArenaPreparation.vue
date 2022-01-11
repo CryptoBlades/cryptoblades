@@ -494,7 +494,8 @@ p, li, span {
 .clearFiltersButton {
   background-color: transparent;
   font-family: 'Roboto';
-  color: white;
+  color: #cec198;
+  font-size: .75rem;
   border: none;
 }
 .selectFilter {

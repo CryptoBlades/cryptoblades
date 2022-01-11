@@ -11,14 +11,14 @@
       </div>
       <div class="weaponWrapper">
         <img :src="getWeaponArtById(weaponId)" alt="weapon image">
-        <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info`" triggers="hover" data-trigger="focus" placement="right">
+        <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info`" triggers="hover" data-trigger="focus" placement="top right" class="popover">
           <div v-if="weaponId" class="weapon-icon-wrapper">
-            <span>Stats</span>
-            <div class="statsWrapper">
-              <span v-if="weapon.stat1Value !== 0">{{weapon.stat1}}: {{weapon.stat1Value}}</span>
-              <span v-if="weapon.stat2Value !== 0">{{weapon.stat2}}: {{weapon.stat2Value}}</span>
-              <span v-if="weapon.stat3Value !== 0">{{weapon.stat3}}: {{weapon.stat3Value}}</span>
-            </div>
+            <span>Weapon stats</span>
+            <ul class="statsWrapper">
+              <li v-if="weapon.stat1Value !== 0">{{weapon.stat1}}: +{{weapon.stat1Value}}</li>
+              <li v-if="weapon.stat2Value !== 0">{{weapon.stat2}}: +{{weapon.stat2Value}}</li>
+              <li v-if="weapon.stat3Value !== 0">{{weapon.stat3}}: +{{weapon.stat3Value}}</li>
+            </ul>
           </div>
         </b-popover>
       </div>
@@ -58,7 +58,6 @@ export default {
       default: false
     }
   },
-
   computed: {
     getElementImageUrl() {
       if (this.weapon.element === 'Fire') {
@@ -74,7 +73,6 @@ export default {
       }
     },
   },
-
   methods: {
     getWeaponArtById,
   },
@@ -95,6 +93,21 @@ export default {
   :hover {
     cursor: pointer;
   }
+}
+.red {
+  color: red;
+}
+.cyan {
+  color: cyan;
+}
+.green {
+  color: green;
+}
+.yellow {
+  color: yellow;
+}
+.brown {
+  color: #9e8a57;
 }
 .withoutInfoPopover {
   pointer-events: none;
@@ -123,6 +136,13 @@ export default {
   margin: 0 auto;
   height: 80%;
   width: 80%;
+
+.popover-body {
+  background-color: yellow;
+  .arrow {
+    background-color: yellow;
+  }
+}
 }
 .statsWrapper {
   margin-top: 1rem;
@@ -154,10 +174,21 @@ export default {
   background: #000;
 }
 .weapon-icon-wrapper {
-  background: rgba(255, 255, 255, 0.1);
   font-family: 'Roboto';
-  width: 12em;
-  height: 12em;
+  width: max-content;
   margin: 0 auto;
+  background-color: black;
+  padding: 0;
+  span {
+    font-family: 'Roboto';
+  }
+  ul {
+    margin: .75rem 0 0 0;
+    padding: 0;
+  }
+  li {
+    font-family: 'Roboto';
+    list-style: none;
+  }
 }
 </style>
