@@ -21,9 +21,12 @@
                   <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
                   <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Weapons</p>
+                    <select v-model="starFilter">
+                      <option v-for="x in ['', 1, 2, 3, 4, 5]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+                    </select>
                     <div v-if="ownedWeaponsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-weapon
-                        v-for="weapon in ownedWeaponsWithInformation"
+                        v-for="weapon in filteredWeaponsWithInformation"
                         :key="weapon.weaponId"
                         :weapon="weapon.information"
                         :weaponId="weapon.weaponId"
@@ -50,7 +53,7 @@
                     <p class="popoverTitle">Shields</p>
                     <div v-if="ownedShieldsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-shield
-                        v-for="shield in ownedShieldsWithInformation"
+                        v-for="shield in filteredShieldsWithInformation"
                         :key="shield.shieldId"
                         :shield="shield.information"
                         :shieldId="shield.shieldId"
@@ -127,7 +130,7 @@
         </div>
         <ul class="topPlayersList">
           <li class="header">
-            <span>Top Players</span><span>Rank</span>
+            <span>Top Players</span><span>MMR</span>
           </li>
           <li>
             <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
@@ -146,9 +149,8 @@
         <ul class="characterAttrsList">
           <li class="characterName">{{ characterInformation.name || '' }}</li>
           <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
-          <!-- <li><span>Damage multiplier</span><span>453</span></li> -->
           <li><span>Level</span><span>{{ characterInformation.level }}</span></li>
-          <li><span>Current rank</span><span>{{ characterInformation.rank }}</span></li>
+          <li><span>Current MMR</span><span>{{ characterInformation.rank }}</span></li>
         </ul>
       </div>
     </div>
@@ -216,6 +218,9 @@ export default {
       selectedShieldId: null,
       selectedShield: null,
       checkBoxAgreed: false,
+      filteredWeaponsWithInformation: this.ownedWeaponsWithInformation,
+      filteredShieldsWithInformation: this.ownedShieldsWithInformation,
+      starFilter: '',
     };
   },
   computed: {
@@ -302,6 +307,18 @@ export default {
       this.loading = false;
     },
   },
+
+  watch: {
+    starFilter(value) {
+      if (!+value) {
+        this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation;
+      } else {
+        this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+          return weapon.information.stars === +value - 1;
+        });
+      }
+    }
+  }
 };
 </script>
 
