@@ -488,6 +488,13 @@ p, li, span {
 }
 .selectFilter {
   margin-right: 1rem;
+  padding: .25rem;
+  font-family: 'Roboto';
+  font-size: .75rem;
+  color: #b4b0a7;
+  background-color: #151515;
+  border-color: transparent;
+  border-radius: 0.2rem;
 }
 .noWeaponsOrShields {
   font-family: 'Roboto';
