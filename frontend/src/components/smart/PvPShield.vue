@@ -14,8 +14,7 @@
         <b-popover v-if="hasInfoPopover" ref="shield-info" :target="`${shieldId}-info`"
         triggers="hover" data-trigger="focus" placement="top right" custom-class="popover">
           <div v-if="shieldId" class="shield-icon-wrapper">
-            <!-- <nft-icon class="shield-icon" :nft="formattedShield" /> -->
-                        <span>Shield stats</span>
+            <span>Shield stats</span>
             <ul class="statsWrapper">
               <li :class="getStatStyles(shield.stat1)" v-if="shield.stat1Value !== 0">{{shield.stat1}} +{{shield.stat1Value}}</li>
               <li :class="getStatStyles(shield.stat2)" v-if="shield.stat2Value !== 0">{{shield.stat2}} +{{shield.stat2Value}}</li>
@@ -39,11 +38,9 @@ import lightning from '../../assets/elements/lightning.png';
 import foundersShield from '../../assets/shield1.png';
 import legendaryShield from '../../assets/shield2.png';
 import { BPopover } from 'bootstrap-vue';
-// import NftIcon from '../NftIcon.vue';
 
 export default {
   components: {
-    // 'nft-icon': NftIcon,
     'b-popover': BPopover,
   },
 

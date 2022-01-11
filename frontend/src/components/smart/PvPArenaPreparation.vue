@@ -31,7 +31,7 @@
                         {{ weaponElementOption.text }}
                       </option>
                     </select>
-                    <button v-if="weaponStarFilter || weaponElementFilter" @click="clearWeaponFilters()" class="clearFiltersButton">Clear</button>
+                    <button v-if="weaponStarFilter || weaponElementFilter" @click="handleClearWeaponFilters()" class="clearFiltersButton">Clear</button>
                     <div v-if="ownedWeaponsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-weapon
                         v-for="weapon in filteredWeaponsWithInformation"
@@ -59,7 +59,7 @@
               <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
                 <a tabindex="0" class="selectWeaponButton" id="shield-popover">
                   <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
-                  <b-popover target="shield-popover" placement="right" triggers="click blur" custom-class="popoverWrapper">
+                  <b-popover ref="popover" target="shield-popover" trigger="click" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Shields</p>
                     <select v-model="shieldStarFilter" class="selectFilter">
                       <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
@@ -71,7 +71,7 @@
                         {{ shieldElementOption.text }}
                       </option>
                     </select>
-                    <button v-if="shieldStarFilter || shieldElementFilter" @click="clearShieldFilters()" class="clearFiltersButton">Clear</button>
+                    <button v-if="shieldStarFilter || shieldElementFilter" @click="handleClearShieldFilters()" class="clearFiltersButton">Clear</button>
                     <div v-if="ownedShieldsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-shield
                         v-for="shield in filteredShieldsWithInformation"
@@ -293,11 +293,11 @@ export default {
     },
   },
   methods: {
-    clearWeaponFilters() {
+    handleClearWeaponFilters() {
       this.weaponStarFilter = 0;
       this.weaponElementFilter = '';
     },
-    clearShieldFilters() {
+    handleClearShieldFilters() {
       this.shieldStarFilter = 0;
       this.shieldElementFilter = '';
     },
