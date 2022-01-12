@@ -165,7 +165,16 @@
             <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
           </li>
         </ul>
-        <!-- <a href="#" class="rankings">View all rankings</a> -->
+        <ul class="topPlayersList">
+          <li class="header">
+            <span>Current Season</span><span>Restarts In</span>
+          </li>
+          <li>
+            <span>2</span>
+            <span>13:00:02</span>
+          </li>
+        </ul>
+
         <ul class="characterAttrsList">
           <li class="characterName">{{ characterInformation.name || '' }}</li>
           <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
