@@ -120,7 +120,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     uint256 public constant NFTVAR_SIMPLEQUEST_ID = 100;
     uint256 public constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
-    uint256 public constant NFTVAR_REPUTATION = 102;
+    uint256 public constant NFTVAR_SIMPLEQUEST_TYPE = 102;
+    uint256 public constant NFTVAR_REPUTATION = 103;
 
     mapping(uint256 => mapping(uint256 => uint256)) public nftVars; // nftID, fieldID, value
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
