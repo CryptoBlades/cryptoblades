@@ -170,11 +170,12 @@
             <span>Current Season</span><span>Restarts In</span>
           </li>
           <li>
-            <span>2</span>
-            <span>13:00:02</span>
+            <span>{{ currentRankedSeason }}</span>
+            <vue-countdown :time="secondsBeforeNextSeason * 1000" v-slot="{ days, hours, minutes, seconds }">
+              {{ days && days || '' }} {{ days && 'days, ' || '' }}{{ hours }}:{{ minutes }}:{{ seconds }}
+            </vue-countdown>
           </li>
         </ul>
-
         <ul class="characterAttrsList">
           <li class="characterName">{{ characterInformation.name || '' }}</li>
           <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
@@ -198,6 +199,7 @@ import PvPSeparator from './PvPSeparator.vue';
 import checkIcon from '../../assets/checkImage.svg';
 import ellipseIcon from '../../assets/ellipseImage.svg';
 import i18n from '../../i18n';
+import VueCountdown from '@chenfengyuan/vue-countdown';
 
 const defaultStarOptions = [
   { text: i18n.t('nftList.sorts.any'), value: 0 },
@@ -223,14 +225,22 @@ export default {
     'pvp-button': PvPButton,
     'pvp-separator': PvPSeparator,
     'pvp-character': PvPCharacter,
-    'b-popover': BPopover
+    'b-popover': BPopover,
+    'vue-countdown': VueCountdown
   },
+
   props: {
     tierRewardsPool: {
       default: null
     },
     tierTopRankers: {
       default: []
+    },
+    currentRankedSeason: {
+      default: null
+    },
+    secondsBeforeNextSeason: {
+      default: null
     },
     characterInformation: {
       default: {
