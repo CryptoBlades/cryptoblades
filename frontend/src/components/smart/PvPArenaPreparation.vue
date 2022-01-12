@@ -19,7 +19,7 @@
               <div v-if="!selectedWeaponId" :class="{ disabledStyles: ownedWeaponsWithInformation.length === 0 }" class="weaponButtonWrapper">
                 <a tabindex="0" class="selectWeaponButton" id="weapon-popover">
                   <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
-                  <b-popover ref="popover" target="weapon-popover" trigger="click" placement="right" custom-class="popoverWrapper">
+                  <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Weapons</p>
                     <select v-model="weaponStarFilter" class="selectFilter">
                       <option v-for="weaponStarOption in weaponStarOptions" :value="weaponStarOption.value" :key="weaponStarOption.value">
@@ -58,7 +58,7 @@
               <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
                 <a tabindex="0" class="selectWeaponButton" id="shield-popover">
                   <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
-                  <b-popover ref="popover" target="shield-popover" trigger="click" placement="right" custom-class="popoverWrapper">
+                  <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Shields</p>
                     <select v-model="shieldStarFilter" class="selectFilter">
                       <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
@@ -190,6 +190,23 @@ import checkIcon from '../../assets/checkImage.svg';
 import ellipseIcon from '../../assets/ellipseImage.svg';
 import i18n from '../../i18n';
 
+const defaultStarOptions = [
+  { text: i18n.t('nftList.sorts.any'), value: 0 },
+  { text: '1', value: 1 },
+  { text: '2', value: 2 },
+  { text: '3', value: 3 },
+  { text: '4', value: 4 },
+  { text: '5', value: 5 },
+];
+
+const defaultElementOptions = [
+  { value: '', text: i18n.t('nftList.sorts.any') },
+  { value: 'Earth', text: i18n.t('traits.earth') },
+  { value: 'Fire', text: i18n.t('traits.fire') },
+  { value: 'Lightning', text: i18n.t('traits.lightning') },
+  { value: 'Water', text: i18n.t('traits.water') }
+];
+
 export default {
   components: {
     'pvp-weapon': PvPWeapon,
@@ -243,39 +260,13 @@ export default {
       filteredWeaponsWithInformation: this.ownedWeaponsWithInformation,
       filteredShieldsWithInformation: this.ownedShieldsWithInformation,
       weaponStarFilter: 0,
-      weaponStarOptions: [
-        { text: i18n.t('nftList.sorts.any'), value: 0 },
-        { text: '1', value: 1 },
-        { text: '2', value: 2 },
-        { text: '3', value: 3 },
-        { text: '4', value: 4 },
-        { text: '5', value: 5 },
-      ],
+      weaponStarOptions: defaultStarOptions,
       weaponElementFilter: '',
-      weaponElementOptions: [
-        { value: '', text: i18n.t('nftList.sorts.any') },
-        { value: 'Earth', text: i18n.t('traits.earth') },
-        { value: 'Fire', text: i18n.t('traits.fire') },
-        { value: 'Lightning', text: i18n.t('traits.lightning') },
-        { value: 'Water', text: i18n.t('traits.water') }
-      ],
+      weaponElementOptions: defaultElementOptions,
       shieldStarFilter: 0,
-      shieldStarOptions: [
-        { text: i18n.t('nftList.sorts.any'), value: 0 },
-        { text: '1', value: 1 },
-        { text: '2', value: 2 },
-        { text: '3', value: 3 },
-        { text: '4', value: 4 },
-        { text: '5', value: 5 },
-      ],
+      shieldStarOptions: defaultStarOptions,
       shieldElementFilter: '',
-      shieldElementOptions: [
-        { value: '', text: i18n.t('nftList.sorts.any') },
-        { value: 'Earth', text: i18n.t('traits.earth') },
-        { value: 'Fire', text: i18n.t('traits.fire') },
-        { value: 'Lightning', text: i18n.t('traits.lightning') },
-        { value: 'Water', text: i18n.t('traits.water') }
-      ]
+      shieldElementOptions: defaultElementOptions
     };
   },
   computed: {
