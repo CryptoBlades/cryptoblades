@@ -131,7 +131,7 @@
         </div>
         <ul class="topPlayersList">
           <li class="header">
-            <span>Top Players</span><span>Rank</span>
+            <span>Top Players</span><span>Ranking Points</span>
           </li>
           <li>
             <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
@@ -152,7 +152,7 @@
           <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
           <!-- <li><span>Damage multiplier</span><span>453</span></li> -->
           <li><span>Level</span><span>{{ characterInformation.level }}</span></li>
-          <li><span>Current rank</span><span>{{ characterInformation.rank }}</span></li>
+          <li><span>Current ranking points</span><span>{{ characterInformation.rank }}</span></li>
         </ul>
       </div>
     </div>

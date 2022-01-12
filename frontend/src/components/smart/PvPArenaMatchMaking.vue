@@ -59,7 +59,10 @@
         <div class="middleMatchProgressButtons">
           <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
-            <pvp-button v-if="!isInMatch" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
+            <div v-if="!isInMatch">
+              <pvp-button @click="findMatch" :disabled="loading || this.matchableCharacters <= 1"  buttonText="FIND MATCH" />
+              <div class="matchablePlayersText">Players in this tier: {{this.matchableCharacters - 1}}</div>
+            </div>
             <pvp-button v-else
             @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
           </div>
@@ -96,7 +99,8 @@
             <span>Rank: {{ opponentInformation.rank }}</span>
           </div>
         </div>
-        <span v-else class="findMatchMessage">Press FIND MATCH to find an opponent!</span>
+        <div v-else class="findMatchMessage">Press FIND MATCH to find an opponent!
+        </div>
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
@@ -221,7 +225,8 @@ export default {
         skillDifference: null,
         rankDifference: null,
         result: ''
-      }
+      },
+      matchableCharacters: 0,
     };
   },
 
@@ -450,11 +455,11 @@ export default {
 
   async created() {
     this.loading = true;
-
+    console.log('this is',this.characterInformation);
     this.isInMatch = (await this.contracts().PvpArena.methods.matchByFinder(this.currentCharacterId).call()).createdAt !== '0';
 
     this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
-
+    this.matchableCharacters = await this.contracts().PvpArena.methods.matchablePlayers(this.currentCharacterId).call();
     if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
       this.isCharacterInDuelQueue = true;
 
@@ -603,6 +608,8 @@ span, p, li, button {
   justify-content: flex-end;
   align-items: center;
 }
+.playersInArenaText{
+}
 .characterWrapper {
   position: relative;
   flex-direction: column;
@@ -735,10 +742,16 @@ span, p, li, button {
     }
   }
   .matchButtonsWrapper {
-    width: 100%;
+    width: 100%;;
     button {
       height: 5.5rem;
     }
+  }
+  .matchablePlayersText{
+    display:flex;
+    justify-content: center;
+      color: #cec198;
+      font-size: 0.95rem;
   }
   .rerollButtonWrapper {
     width: 100%;
