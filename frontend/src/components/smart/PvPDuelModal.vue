@@ -2,7 +2,7 @@
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
       <img src="../../assets/separatorTop.svg" alt="Top separator">
-      <div v-if="attackerRoll > defenderRoll" class="modalTitle">You have won the duel!</div>
+      <div v-if="result === 'win'" class="modalTitle">You have won the duel!</div>
       <div v-else class="modalTitle"> You have lost the duel!</div>
       <ul>
         <li>
@@ -45,7 +45,7 @@ export default {
 
   props: {
     result: {
-      default: ''
+      required: true
     },
     attackerRoll: {
       default: null

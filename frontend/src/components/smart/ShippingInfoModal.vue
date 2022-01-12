@@ -43,6 +43,8 @@
     <b-form-input type="text" maxlength="50"
                   class="mt-2 mb-2" v-model="recipient.company"
                   :placeholder="$t('market.merchandise.companyOptional')"/>
+    <b-form-input type="text" maxlength="14" v-if="selectedCountry && selectedCountry.code === 'BR'"
+                  class="mt-2 mb-2" v-model="recipient.tax_number" :placeholder="$t('market.merchandise.taxNumber')"/>
   </b-modal>
 </template>
 
@@ -62,6 +64,7 @@ export interface Recipient {
   city: string;
   zip: string;
   company?: string;
+  tax_number?: string;
 }
 
 export interface Country {
@@ -116,7 +119,8 @@ export default Vue.extend({
           || (this.$data.selectedCountry && this.$data.selectedCountry.states && this.$data.selectedCountry.states.length !== 0 && this.$data.selectedState))
         && this.$data.recipient.address1
         && this.$data.recipient.city
-        && !!this.$data.recipient.zip;
+        && !!this.$data.recipient.zip
+        && (this.$data.selectedCountry && this.$data.selectedCountry.code !== 'BR' || this.$data.recipient.tax_number);
     }
   },
 
