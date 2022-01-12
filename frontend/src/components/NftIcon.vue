@@ -239,7 +239,7 @@ export default {
         avg.forEach(function (stat) {
           totalStats += stat;
         });
-        ttHtml += `<br>AVG: +${ totalStats / avg.length }`;
+        ttHtml += `<br>${this.$t('weaponGrid.average')}: +${ totalStats / avg.length }`;
       }
 
       return ttHtml;

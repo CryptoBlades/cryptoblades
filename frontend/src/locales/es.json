@@ -121,7 +121,8 @@
     "renamePlaceholder": "New Name",
     "isProfanish": "This name contains profanish words and thus will be displayed as follows:",
     "changeWeaponSkill": "Change Weapon's Skill",
-    "pickSkin": "Pick a skin to switch to."
+    "pickSkin": "Pick a skin to switch to.",
+    "average": "AVG"
   },
   "weaponIcon": {
     "durability": "Durability:",

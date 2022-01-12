@@ -132,7 +132,8 @@
     "renamePlaceholder": "Nowa Nazwa",
     "isProfanish": "Ta nazwa zawiera wulgarne słowa i dlatego będzie wyświetlana w następujący sposób:",
     "changeWeaponSkill": "Zmień Skórkę Broni",
-    "pickSkin": "Wybierz skórkę na którą chcesz zmienić."
+    "pickSkin": "Wybierz skórkę na którą chcesz zmienić.",
+    "average": "AVG"
   },
   "weaponIcon": {
     "durability": "Wytrzymałość: ",
