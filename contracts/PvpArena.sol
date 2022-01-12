@@ -924,8 +924,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint24 basePower = characters.getPower(characterID);
         uint256 weaponID = fighterByCharacter[characterID].weaponID;
         uint256 seed = randoms.getRandomSeedUsingHash(
-            msg.sender,
-            blockhash(block.number)
+            characters.ownerOf(characterID),
+            blockhash(block.number - 1)
         );
 
         bool useShield = fighterByCharacter[characterID].useShield;
