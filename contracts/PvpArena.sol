@@ -113,8 +113,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => uint256[]) private _topRankingCharactersByTier;
     /// @dev IDs of characters available for matchmaking by tier
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
-
-    // Note: we might want the NewDuel (NewMatch) event
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -123,6 +121,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 attackerRoll,
         uint256 defenderRoll,
         bool attackerWon
+    );
+
+    event CharacterKicked(
+        uint256 indexed characterID,
+        uint256 kickedBy,
+        uint256 timestamp
     );
 
     modifier characterInArena(uint256 characterID) {
@@ -578,6 +582,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 getEntryWager(loserID).mul(withdrawFeePercent).div(100)
             ) {
                 _removeCharacterFromArena(loserID);
+                emit CharacterKicked(
+                    loserID,
+                    winnerID,
+                    block.timestamp
+                );
             } else {
                 _matchableCharactersByTier[getArenaTier(loserID)].add(loserID);
             }
@@ -915,8 +924,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint24 basePower = characters.getPower(characterID);
         uint256 weaponID = fighterByCharacter[characterID].weaponID;
         uint256 seed = randoms.getRandomSeedUsingHash(
-            msg.sender,
-            blockhash(block.number)
+            characters.ownerOf(characterID),
+            blockhash(block.number - 1)
         );
 
         bool useShield = fighterByCharacter[characterID].useShield;

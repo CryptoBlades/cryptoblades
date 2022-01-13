@@ -58,7 +58,6 @@
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Payout Currency</h4>
               <b-form-select size="lg" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-                <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
                 <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">
                   {{p.tokenSymbol}} ({{p.name}})
                 </b-form-select-option>
@@ -106,6 +105,7 @@ interface StoreMappedState {
   skillRewards: string;
   directStakeBonusPercent: number;
   payoutCurrencyId: string;
+  currentNetworkId: number;
 }
 
 interface StoreMappedActions {
@@ -173,7 +173,7 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['skillRewards', 'directStakeBonusPercent', 'payoutCurrencyId']) as Accessors<StoreMappedState>),
+    ...(mapState(['skillRewards', 'directStakeBonusPercent', 'payoutCurrencyId', 'currentNetworkId']) as Accessors<StoreMappedState>),
     ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {

@@ -121,7 +121,8 @@
     "renamePlaceholder": "Neuer Name",
     "isProfanish": "Dieser Name enthält nicht erlaubte Wörter und wird deshalb wie folgt dargestellt:",
     "changeWeaponSkill": "Element der Waffe ändern",
-    "pickSkin": "Wähle einen Skin zum Wechseln aus."
+    "pickSkin": "Wähle einen Skin zum Wechseln aus.",
+    "average": "AVG"
   },
   "weaponIcon": {
     "durability": "Haltbarkeit",
@@ -579,6 +580,11 @@
       "lowToHigh": "Preis: Niedrig -> Hoch",
       "highToLow": "Preis: Hoch -> Niedrig"
     }
+  },
+  "pvp": {
+    "lastDefeated": "Du wurdest zuletzt besiegt von: ",
+    "tapAnywhere": "Tippen Sie zum Schließen auf eine beliebige Stelle",
+    "kicked": "Du wurdest aus der Arena geworfen!"
   },
   "app": {
     "cantView": "Du kannst das Spiel gerade nicht ansehen. Versuche den LocalStorage zu löschen, um deine Einstellunge zurückzusetzen.",

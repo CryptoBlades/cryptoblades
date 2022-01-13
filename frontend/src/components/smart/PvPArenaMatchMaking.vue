@@ -32,15 +32,15 @@
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="activeWeaponWithInformation.weaponId"
-            :stars="activeWeaponWithInformation.information.stars + 1"
-            :element="activeWeaponWithInformation.information.element"
+            :weapon="activeWeaponWithInformation.information"
             :weaponId="activeWeaponWithInformation.weaponId"
+            :hasInfoPopover="false"
           />
           <pvp-shield
             v-if="activeShieldWithInformation.shieldId"
-            :stars="activeShieldWithInformation.information.stars + 1"
-            :element="activeShieldWithInformation.information.element"
+            :shield="activeShieldWithInformation.information"
             :shieldId="activeShieldWithInformation.shieldId"
+            :hasInfoPopover="false"
           />
         </div>
       </div>
@@ -100,15 +100,15 @@
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
-            :stars="opponentActiveWeaponWithInformation.information.stars + 1"
-            :element="opponentActiveWeaponWithInformation.information.element"
+            :weapon="opponentActiveWeaponWithInformation.information"
             :weaponId="opponentActiveWeaponWithInformation.weaponId"
+            :hasInfoPopover="false"
           />
           <pvp-shield
             v-if="opponentActiveShieldWithInformation.shieldId"
-            :stars="opponentActiveShieldWithInformation.information.stars + 1"
-            :element="opponentActiveShieldWithInformation.information.element"
+            :shield="opponentActiveShieldWithInformation.information"
             :shieldId="opponentActiveShieldWithInformation.shieldId"
+            :hasInfoPopover="false"
           />
         </div>
       </div>
@@ -120,7 +120,7 @@
       :attackerRoll="duelResult.attackerRoll"
       :defenderRoll="duelResult.defenderRoll"
       :skillEarned="duelResult.skillDifference"
-      :rankVariation="duelResult.result === 'win' ? 5 : -3"
+      :rankVariation="duelResult.result === 'win' ? '+5' : '-3'"
       :userCurrentRank="duelResult.rankDifference"
       @close-modal="handleCloseModal"
     />
@@ -362,16 +362,16 @@ export default {
         });
 
         if (duelFinishedResult.length) {
-          const formattedResult = formatDuelResult(duelFinishedResult[0].returnValues);
+          const formattedResult = formatDuelResult(duelFinishedResult[duelFinishedResult.length - 1].returnValues);
 
-          this.duelResult.result = formattedResult.attackerRoll > formattedResult.defenderRoll ? 'win' : 'lose';
+          this.duelResult.result = formattedResult.attackerWon ? 'win' : 'lose';
           this.duelResult.attackerRoll = formattedResult.attackerRoll;
           this.duelResult.defenderRoll = formattedResult.defenderRoll;
-          this.duelResult.skillDifference = this.duelResult.result === 'win' ?
+          this.duelResult.skillDifference = formattedResult.attackerWon ?
             +this.formattedDuelCost * 0.7 :
-            -this.formattedDuelCost;
+            this.formattedDuelCost;
           // TODO: Make this prettier
-          this.duelResult.rankDifference = this.duelResult.result === 'win' ?
+          this.duelResult.rankDifference = formattedResult.attackerWon ?
             +this.characterInformation.rank + 5 :
             +this.characterInformation.rank - 3 <= 0 ?
               0 :
@@ -443,6 +443,8 @@ export default {
       if (this.wager < this.duelCost) {
         this.$emit('kickCharacterFromArena');
       }
+
+      this.$emit('updateRank');
     }
   },
 

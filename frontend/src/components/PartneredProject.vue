@@ -187,7 +187,7 @@ export default Vue.extend({
 
 <style scoped>
 .partner-div {
-  width: 280px;
+  width: 290px;
   height: 230px;
   border: 2px solid #9e8a57;
   border-radius: 10px;
@@ -197,14 +197,14 @@ export default Vue.extend({
 }
 .partner-logo {
   max-width: 100px;
-  height: max-content;
+  height: auto;
   align-self: center;
 }
 .multiplier-text {
   font-size: 0.8rem;
 }
 .collapse-style {
-  width: 280px;
+  width: 290px;
   border: 2px solid #9e8a57;
   border-radius: 10px;
   background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);

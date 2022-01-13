@@ -38,9 +38,15 @@
         @updateOpponentInformation="updateOpponentInformation"
         @clearOpponentInformation="clearOpponentInformation"
         @kickCharacterFromArena="kickCharacterFromArena"
+        @updateRank="updateRank"
         @leaveArena="leaveArena"
       />
     </div>
+    <pvp-kicked-modal
+      v-if="recentlyKicked.characterId"
+      :kickedBy="recentlyKicked.kickedBy"
+      @close-modal="handleCloseModal"
+    />
   </div>
 </template>
 
@@ -49,18 +55,24 @@ import { mapState } from 'vuex';
 import PvPArenaPreparation from './PvPArenaPreparation.vue';
 import PvPArenaSummary from './PvPArenaSummary.vue';
 import PvPArenaMatchMaking from './PvPArenaMatchMaking.vue';
+import PvPKickedModal from './PvPKickedModal.vue';
 import { getCharacterNameFromSeed } from '../../character-name';
 import { weaponFromContract as formatWeapon } from '../../contract-models';
 import { shieldFromContract as formatShield } from '../../contract-models';
 import { pvpFighterFromContract as formatFighter } from '../../contract-models';
 import { characterFromContract as formatCharacter } from '../../contract-models';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
+import { characterKickedEventFromContract as formatCharacterKickedEvent } from '../../contract-models';
+
 
 export default {
+  inject: ['web3'],
+
   components: {
     'pvp-arena-preparation': PvPArenaPreparation,
     'pvp-arena-summary': PvPArenaSummary,
-    'pvp-arena-matchmaking': PvPArenaMatchMaking
+    'pvp-arena-matchmaking': PvPArenaMatchMaking,
+    'pvp-kicked-modal': PvPKickedModal
   },
 
   data() {
@@ -106,7 +118,11 @@ export default {
         shieldId: null,
         information: {}
       },
-      duelHistory: []
+      duelHistory: [],
+      recentlyKicked: {
+        characterId: null,
+        kickedBy: null
+      }
     };
   },
 
@@ -116,21 +132,11 @@ export default {
 
   methods: {
     async getWeaponInformation(weaponId) {
-      const { element, stars } = formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
-
-      return {
-        element,
-        stars
-      };
+      return formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
     },
 
     async getShieldInformation(shieldId) {
-      const { element, stars } = formatShield(`${shieldId}`, await this.contracts().Shields.methods.get(`${shieldId}`).call({ from: this.defaultAccount }));
-
-      return {
-        element,
-        stars
-      };
+      return formatShield(`${shieldId}`, await this.contracts().Shields.methods.get(`${shieldId}`).call({ from: this.defaultAccount }));
     },
 
     async handleEnteredArena() {
@@ -212,8 +218,56 @@ export default {
       };
     },
 
-    kickCharacterFromArena() {
+    async kickCharacterFromArena() {
       this.isCharacterInArena = false;
+
+      await this.processCharacterKick();
+    },
+
+    async updateRank() {
+      this.characterInformation.rank = await this.contracts().PvpArena.methods.rankingPointsByCharacter(this.currentCharacterId)
+        .call({ from: this.defaultAccount });
+    },
+
+    handleCloseModal() {
+      this.recentlyKicked.characterId = null;
+      this.recentlyKicked.kickedBy = null;
+    },
+
+    async getKickedEvents(contracts, blockToScanFrom = 'earliest') {
+      const kickedEvents = await contracts.PvpArena.getPastEvents('CharacterKicked', {
+        filter: { characterID: this.currentCharacterId },
+        toBlock: 'latest',
+        fromBlock: blockToScanFrom
+      });
+
+      return kickedEvents;
+    },
+
+    async processCharacterKick() {
+      let blockToScanFrom;
+      const lastKickedBlock = localStorage.getItem(`${this.currentCharacterId}-lastKickedBlock`);
+
+      if (lastKickedBlock) {
+        blockToScanFrom = lastKickedBlock;
+      }
+
+      const kickedEvents = await this.getKickedEvents(this.contracts(), blockToScanFrom);
+
+      if (kickedEvents.length && !this.isCharacterInArena) {
+        const formattedResult = formatCharacterKickedEvent(kickedEvents[kickedEvents.length - 1].returnValues);
+        const lastKickedEventBlockNumber = kickedEvents[kickedEvents.length - 1].blockNumber;
+
+        const key = `${this.currentCharacterId}-lastKickedTime`;
+
+        if (+localStorage.getItem(key) < +formattedResult.timestamp) {
+          localStorage.setItem(key, +formattedResult.timestamp);
+          localStorage.setItem(`${this.currentCharacterId}-lastKickedBlock`, lastKickedEventBlockNumber);
+
+          this.recentlyKicked.characterId = formattedResult.characterId;
+          this.recentlyKicked.kickedBy = formattedResult.kickedBy;
+        }
+      }
     }
   },
 
@@ -311,6 +365,8 @@ export default {
       this.duelHistory = previousDuels.map(duel => {
         return formatDuelResult(duel.returnValues);
       });
+
+      await this.processCharacterKick();
     }
 
     this.loading = false;
@@ -421,6 +477,8 @@ export default {
         this.duelHistory = previousDuels.map(duel => {
           return formatDuelResult(duel.returnValues);
         });
+
+        await this.processCharacterKick();
 
         this.isMatchMaking = false;
       }
