@@ -746,7 +746,7 @@ span, p, li, button {
     }
   }
   .matchButtonsWrapper {
-    width: 100%;;
+    width: 100%;
     button {
       height: 5.5rem;
     }
