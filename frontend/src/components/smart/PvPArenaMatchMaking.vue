@@ -459,7 +459,7 @@ export default {
 
   async created() {
     this.loading = true;
-    console.log('this is',this.characterInformation);
+
     this.isInMatch = (await this.contracts().PvpArena.methods.matchByFinder(this.currentCharacterId).call()).createdAt !== '0';
 
     this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
