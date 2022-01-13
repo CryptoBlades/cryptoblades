@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="mainWrapper" @click="$emit('click')">
+    <div class="mainWrapper" @click="$emit('click')" :id="`${shieldId}-info-s`" :class="{ withoutInfoPopover: !hasInfoPopover}">
       <div class="starsWrapper">
         <img
-          v-for="index in stars"
+          v-for="index in (shield.stars + 1)"
           :key="index"
           src="../../assets/star.svg"
           alt="star"
@@ -11,6 +11,17 @@
       </div>
       <div class="shieldWrapper">
         <img :src="getShieldArt(shieldId)" alt="shield image">
+        <b-popover v-if="hasInfoPopover" ref="shield-info" :target="`${shieldId}-info-s`"
+        triggers="hover" data-trigger="focus" placement="top right" custom-class="customPopover">
+          <div v-if="shieldId" class="shield-icon-wrapper">
+            <span>Shield stats</span>
+            <ul class="statsWrapper">
+              <li :class="getStatStyles(shield.stat1)" v-if="shield.stat1Value !== 0">{{shield.stat1}} +{{shield.stat1Value}}</li>
+              <li :class="getStatStyles(shield.stat2)" v-if="shield.stat2Value !== 0">{{shield.stat2}} +{{shield.stat2Value}}</li>
+              <li :class="getStatStyles(shield.stat3)" v-if="shield.stat3Value !== 0">{{shield.stat3}} +{{shield.stat3Value}}</li>
+            </ul>
+          </div>
+        </b-popover>
       </div>
       <div class="elementWrapper">
         <img :src="getElementImageUrl" alt="element icon" />
@@ -26,20 +37,20 @@ import earth from '../../assets/elements/earth.png';
 import lightning from '../../assets/elements/lightning.png';
 import foundersShield from '../../assets/shield1.png';
 import legendaryShield from '../../assets/shield2.png';
+import { BPopover } from 'bootstrap-vue';
 
 export default {
+  components: {
+    'b-popover': BPopover,
+  },
+
   props: {
-    stars: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 5,
-      default: 0
+    hasInfoPopover: {
+      type: Boolean,
+      default: true
     },
-    element: {
-      type: String,
+    shield: {
       required: true,
-      default: ''
     },
     shieldId: {
       type: String
@@ -49,6 +60,7 @@ export default {
       default: false
     }
   },
+
   computed: {
     getElementImageUrl() {
       if (this.element === 'Fire') {
@@ -63,6 +75,13 @@ export default {
         return lightning;
       }
     },
+
+    formattedShield() {
+      return {
+        ...this.shield,
+        type: 'shield'
+      };
+    }
   },
 
   methods: {
@@ -76,6 +95,15 @@ export default {
       else{
         return '';
       }
+    },
+    getStatStyles(value) {
+      return {
+        red: value && value === 'STR',
+        cyan: value && value === 'INT',
+        green: value && value === 'DEX',
+        yellow: value && value === 'CHA',
+        brown: value && value === 'PWR',
+      };
     },
   }
 };
@@ -94,6 +122,31 @@ export default {
   border: 1px solid #cec198;
   :hover {
     cursor: pointer;
+  }
+}
+.customPopover {
+  border: 1px solid #d6d8d9;
+  background: #000;
+}
+.red {
+  color: red;
+}
+.cyan {
+  color: cyan;
+}
+.green {
+  color: green;
+}
+.yellow {
+  color: yellow;
+}
+.brown {
+  color: #9e8a57;
+}
+.withoutInfoPopover {
+  pointer-events: none;
+  :hover {
+    cursor: default;
   }
 }
 .disabled {
@@ -117,6 +170,10 @@ export default {
   margin: 0 auto;
   height: 80%;
   width: 80%;
+  img {
+    display: flex;
+    margin: 0 auto;
+  }
 }
 .elementWrapper {
   position: absolute;
@@ -135,6 +192,31 @@ export default {
   img {
     max-width: 100%;
     max-height: 100%;
+  }
+}
+.shield-icon {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.shield-icon-wrapper {
+  font-family: 'Roboto';
+  width: max-content;
+  margin: 0 auto;
+  background-color: black;
+  padding: 0;
+  span {
+    color: #cec198;
+    font-family: 'Roboto';
+  }
+  ul {
+    margin: .75rem 0 0 0;
+    padding: 0;
+  }
+  li {
+    font-family: 'Roboto';
+    list-style: none;
   }
 }
 </style>

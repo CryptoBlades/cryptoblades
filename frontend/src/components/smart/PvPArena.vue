@@ -132,21 +132,11 @@ export default {
 
   methods: {
     async getWeaponInformation(weaponId) {
-      const { element, stars } = formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
-
-      return {
-        element,
-        stars
-      };
+      return formatWeapon(`${weaponId}`, await this.contracts().Weapons.methods.get(`${weaponId}`).call({ from: this.defaultAccount }));
     },
 
     async getShieldInformation(shieldId) {
-      const { element, stars } = formatShield(`${shieldId}`, await this.contracts().Shields.methods.get(`${shieldId}`).call({ from: this.defaultAccount }));
-
-      return {
-        element,
-        stars
-      };
+      return formatShield(`${shieldId}`, await this.contracts().Shields.methods.get(`${shieldId}`).call({ from: this.defaultAccount }));
     },
 
     async handleEnteredArena() {
