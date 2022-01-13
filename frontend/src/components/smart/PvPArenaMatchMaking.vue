@@ -614,8 +614,6 @@ span, p, li, button {
   justify-content: flex-end;
   align-items: center;
 }
-.playersInArenaText{
-}
 .characterWrapper {
   position: relative;
   flex-direction: column;
