@@ -32,15 +32,15 @@
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="activeWeaponWithInformation.weaponId"
-            :stars="activeWeaponWithInformation.information.stars + 1"
-            :element="activeWeaponWithInformation.information.element"
+            :weapon="activeWeaponWithInformation.information"
             :weaponId="activeWeaponWithInformation.weaponId"
+            :hasInfoPopover="false"
           />
           <pvp-shield
             v-if="activeShieldWithInformation.shieldId"
-            :stars="activeShieldWithInformation.information.stars + 1"
-            :element="activeShieldWithInformation.information.element"
+            :shield="activeShieldWithInformation.information"
             :shieldId="activeShieldWithInformation.shieldId"
+            :hasInfoPopover="false"
           />
         </div>
       </div>
@@ -100,15 +100,15 @@
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
-            :stars="opponentActiveWeaponWithInformation.information.stars + 1"
-            :element="opponentActiveWeaponWithInformation.information.element"
+            :weapon="opponentActiveWeaponWithInformation.information"
             :weaponId="opponentActiveWeaponWithInformation.weaponId"
+            :hasInfoPopover="false"
           />
           <pvp-shield
             v-if="opponentActiveShieldWithInformation.shieldId"
-            :stars="opponentActiveShieldWithInformation.information.stars + 1"
-            :element="opponentActiveShieldWithInformation.information.element"
+            :shield="opponentActiveShieldWithInformation.information"
             :shieldId="opponentActiveShieldWithInformation.shieldId"
+            :hasInfoPopover="false"
           />
         </div>
       </div>
