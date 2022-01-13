@@ -17,14 +17,16 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     Characters public characters;
+    Weapons public weapons;
 
 
-    function initialize(Characters _characters) public initializer {
+    function initialize(Characters _characters, Weapons _weapons) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
 
         characters = _characters;
+        weapons = _weapons;
         nextQuestID = 1;
     }
 
@@ -65,9 +67,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 reputationAmount;
     }
 
-    //Quest example: tier = 1, id = TBA, requirementType = 1, requirementAmount = 2, rewardType = 1, rewardAmount = 1, reputationAmount = 12
-    // do 2 raids for 1x3* sword
-
     // have quests rarities on certain indexes (0 - common, 1 - uncommon, 2 - rare, 3 - epic)
     // or have quests in different arrays and join them on allQuestsList
     mapping(uint32 => Quest[]) public quests;
@@ -103,9 +102,16 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     //    uint256 public constant NFTVAR_REPUTATION = 103;
 
     event QuestComplete(uint256 indexed questID, uint256 indexed characterID);
+    event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
 
-    function addNewQuest(uint8 tier, uint32 requirementType, uint32 rewardType, uint256 requirementAmount, uint256 rewardAmount, uint256 reputationAmount) public {
-        quests[tier].push(Quest(0, tier, requirementType, rewardType, requirementAmount, rewardAmount, reputationAmount));
+    //Quest example: tier = 1, id = TBA, requirementType = 1, requirementAmount = 2, rewardType = 1, rewardAmount = 1, reputationAmount = 12
+    // do 2 raids for 1x3* sword
+    function addNewQuest(uint32 index, uint8 tier, uint32 requirementType, uint32 rewardType, uint256 requirementAmount, uint256 rewardAmount, uint256 reputationAmount) public {
+        quests[tier][index] = Quest(0, tier, requirementType, rewardType, requirementAmount, rewardAmount, reputationAmount);
+    }
+
+    function deleteQuest(uint8 tier, uint32 index) public {
+        delete quests[tier][index];
     }
 
     function getCharacterQuestData(uint256 characterID) public view returns (uint256[] memory) {
@@ -125,6 +131,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID(), quest.id);
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), quest.requirementType);
+        emit QuestAssigned(quest.id, characterID);
         return quest.id;
     }
 
@@ -139,12 +146,14 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return quest;
     }
 
-    function completeQuest(uint256 characterID) external questsEnabled {
+    function completeQuest(uint256 characterID) external {
         uint256[] memory questData = getCharacterQuestData(characterID);
         assertOnQuest(questData);
         assertQuestCompleted(questData);
         uint256 questID = questData[0];
         uint256 currentReputation = questData[3];
+        // reward for completing quest
+        rewardQuest(questID, characterID);
         characters.setNftVar(characterID, characters.NFTVAR_REPUTATION(), currentReputation + questList[questID].reputationAmount);
         // clear quest data
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID(), 0);
@@ -152,8 +161,23 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), 0);
 
         emit QuestComplete(questID, characterID);
-        // after quest completition, assign new quest to the character
+        // after quest competition, assign new quest to the character
         assignNewQuest(characterID);
+    }
+
+    function rewardQuest(uint256 questID, uint256 characterID) private {
+        Quest memory quest = questList[questID];
+        if (quest.rewardType == 1) {// do a package, like, rewardType >= 1 && rewardType <= 4 and use the same mintWeaponWithStars based on that
+            // for now, rewardType = 1 means 3* sword
+            // stars = 2 for 3* sword
+            // random seed
+            // random element = 100??
+            for (uint8 i = 0; i < quest.rewardAmount; i++) {
+                uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1))));
+                uint256 weaponID = weapons.mintWeaponWithStars(characters.ownerOf(characterID), 2, seed / 100, 100);
+            }
+
+        }
     }
 
     //    function requestQuest(uint256 characterID) external questsEnabled {
@@ -164,7 +188,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     //    }
 
     function submitProgress(uint256 characterID, uint256 amount) external questsEnabled {
-        //        assertOnQuest();
+        uint256[] memory questData = getCharacterQuestData(characterID);
+        assertOnQuest(questData);
     }
 
     function submitProgressForced(uint256 characterID, uint256 amount) external restricted questsEnabled {
