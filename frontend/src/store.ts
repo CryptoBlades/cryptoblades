@@ -2650,7 +2650,7 @@ export function createStore(web3: Web3) {
       },
 
       async isShieldPurchased({state}) {
-        const Promos = state.contracts().Promos!;
+        const { Promos } = state.contracts();
         if (!state.defaultAccount || !Promos) return;
 
         return await Promos.methods
