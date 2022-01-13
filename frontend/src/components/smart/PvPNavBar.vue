@@ -11,7 +11,7 @@
       </button>
       <button @click="setTab(2)" :class="tabNumber === 2 && 'active'">
         <img src="../../assets/crownIcon.svg" />
-        <span>Rewards</span>
+        <span>Rewards{{ hasRewards && ' !' || '' }}</span>
       </button>
     </nav>
   </div>
@@ -22,6 +22,9 @@ export default {
   props: {
     tabNumber: {
       default: 0
+    },
+    hasRewards: {
+      default: false,
     }
   },
 

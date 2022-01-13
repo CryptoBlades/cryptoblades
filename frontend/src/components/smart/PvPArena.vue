@@ -286,31 +286,53 @@ export default {
       }
     },
 
-    async listenForSeasonRestart(contracts) {
-      const currentBlock = await this.web3.eth.getBlockNumber();
-      console.log('asda');
-      this.web3.eth.subscribe('newBlockHeaders', async () => {
+    async listenForSeasonRestart(contracts, initialBlock) {
+      let blockToScan = initialBlock;
+      let scanning = false;
 
-        const seasonRestartedEvents = await contracts.PvpArena.getPastEvents('SeasonRestarted', {
-          toBlock: 'latest',
-          fromBlock: currentBlock
-        });
+      this.web3.eth.subscribe('newBlockHeaders', async (_, result) => {
+        try {
+          if (scanning) {
+            return;
+          }
+          scanning = true;
 
-        const newSeason = seasonRestartedEvents[seasonRestartedEvents.length - 1].returnValues[0] || 0;
-        console.log(seasonRestartedEvents);
-        if (seasonRestartedEvents.length && +newSeason === +this.currentRankedSeason + 1) {
-          console.log('asda');
-          this.$dialog.notify.success('A new PvP season has begun!');
-          await this.updateSecondsBeforeSeason();
+          const seasonRestartedEvents = await contracts.PvpArena.getPastEvents('SeasonRestarted', {
+            fromBlock: blockToScan,
+            toBlock: 'latest',
+          });
+
+          blockToScan = result.number + 1;
+
+          if (seasonRestartedEvents.length) {
+            this.$dialog.notify.success('A new PvP season has begun!');
+            await this.updateSecondsBeforeSeason();
+          }
+
+          this.tierRewardsPool = await this.contracts().PvpArena.methods.rankingsPoolByTier(this.characterInformation.tier).call({ from: this.defaultAccount });
+
+          const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopCharacters(this.currentCharacterId).call({ from: this.defaultAccount });
+
+          this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+            return {
+              rankerId,
+              name: getCharacterNameFromSeed(rankerId),
+              rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount })
+            };
+          }));
+        } finally {
+          scanning = false;
         }
       });
     }
   },
 
   async created() {
+    const currentBlock = await this.web3.eth.getBlockNumber();
+
     await this.updateSecondsBeforeSeason();
 
-    await this.listenForSeasonRestart(this.contracts());
+    await this.listenForSeasonRestart(this.contracts(), currentBlock);
 
     // Note: currentCharacterId can be 0
     if (this.currentCharacterId !== null) {
