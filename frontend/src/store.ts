@@ -2649,6 +2649,17 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
+      async isShieldPurchased({state}) {
+        const Promos = state.contracts().Promos!;
+        if (!state.defaultAccount || !Promos) return;
+
+        return await Promos.methods
+          .getBit(
+            state.defaultAccount,
+            parseInt(await Promos.methods.BIT_LEGENDARY_DEFENDER().call(defaultCallOptions(state)), 10))
+          .call(defaultCallOptions(state));
+      },
+
       async getChunksOfReservation({state}, {reservationId}) {
         const CBKLandSale = state.contracts().CBKLandSale!;
 
