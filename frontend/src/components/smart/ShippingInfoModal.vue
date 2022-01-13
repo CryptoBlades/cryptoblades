@@ -43,7 +43,7 @@
     <b-form-input type="text" maxlength="50"
                   class="mt-2 mb-2" v-model="recipient.company"
                   :placeholder="$t('market.merchandise.companyOptional')"/>
-    <b-form-input type="text" maxlength="14" v-if="selectedCountry && selectedCountry.code === 'BR'"
+    <b-form-input type="text" maxlength="11" v-if="selectedCountry && selectedCountry.code === 'BR'"
                   class="mt-2 mb-2" v-model="recipient.tax_number" :placeholder="$t('market.merchandise.taxNumber')"/>
   </b-modal>
 </template>
@@ -120,7 +120,8 @@ export default Vue.extend({
         && this.$data.recipient.address1
         && this.$data.recipient.city
         && !!this.$data.recipient.zip
-        && (this.$data.selectedCountry && this.$data.selectedCountry.code !== 'BR' || this.$data.recipient.tax_number);
+        && (this.$data.selectedCountry && this.$data.selectedCountry.code !== 'BR'
+          || (this.$data.recipient.tax_number && this.$data.recipient.tax_number.length === 11));
     }
   },
 
@@ -142,8 +143,20 @@ export default Vue.extend({
       if (!this.selectedCountry) return;
       this.recipient.country_code = this.selectedCountry.code;
       this.recipient.state_code = this.selectedState?.code;
+      const taxNumber = this.recipient.tax_number;
+      if (taxNumber) {
+        this.recipient.tax_number = this.convertToCPFFormat(taxNumber);
+      }
       this.$root.$emit('order-summary-modal', this.recipient, this.cartEntries);
     },
+
+    convertToCPFFormat(taxNumber: string) {
+      const taxNumberArray = Array.from(taxNumber);
+      taxNumberArray.splice(3, 0, '.');
+      taxNumberArray.splice(7, 0, '.');
+      taxNumberArray.splice(11, 0, '-');
+      return taxNumberArray.join('');
+    }
   },
 
   async mounted() {
