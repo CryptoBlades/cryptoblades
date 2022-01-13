@@ -57,8 +57,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     uint256 public nextQuestID;
 
     struct Quest {
-        uint8 tier;
         uint256 id;
+        uint8 tier;
         uint32 requirementType;
         uint32 rewardType;
         uint256 requirementAmount;
@@ -100,40 +100,40 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Quest) public questList;
 
     //    uint256[3] public constant CHARACTER_QUEST_DATA_KEYS = [100,101,102];
-    //    uint256 public constant NFTVAR_SIMPLEQUEST_ID = 100;
-    //    uint256 public constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
-    //    uint256 public constant NFTVAR_SIMPLEQUEST_TYPE = 102;
-    //    uint256 public constant NFTVAR_REPUTATION = 103;
+    uint256 public constant NFTVAR_SIMPLEQUEST_ID = 100;
+    uint256 public constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
+    uint256 public constant NFTVAR_SIMPLEQUEST_TYPE = 102;
+    uint256 public constant NFTVAR_REPUTATION = 103;
 
     event QuestComplete(uint256 indexed questID, uint256 indexed characterID);
 
     function addNewQuest(uint8 tier, uint32 requirementType, uint32 rewardType, uint256 requirementAmount, uint256 rewardAmount, uint256 reputationAmount) public {
-        quests[tier].push(Quest(tier, 0, requirementType, rewardType, requirementAmount, rewardAmount, reputationAmount));
+        quests[tier].push(Quest(0, tier, requirementType, rewardType, requirementAmount, rewardAmount, reputationAmount));
     }
 
     function getQuestID(uint256 characterID) external view returns (uint256) {
         // doubles as an "are we on a quest" check
-        return characters.getNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID());
+        return characters.getNftVar(characterID, NFTVAR_SIMPLEQUEST_ID);
         // if 0, we are not on a quest
     }
 
     function getCharacterQuestData(uint256 characterID) public view returns (uint256[] memory) {
         uint256[] memory questDataKeys = new uint256[](4);
-        questDataKeys[0] = characters.NFTVAR_SIMPLEQUEST_ID();
-        questDataKeys[1] = characters.NFTVAR_SIMPLEQUEST_PROGRESS();
-        questDataKeys[2] = characters.NFTVAR_SIMPLEQUEST_TYPE();
-        questDataKeys[3] = characters.NFTVAR_REPUTATION();
+        questDataKeys[0] = NFTVAR_SIMPLEQUEST_ID;
+        questDataKeys[1] = NFTVAR_SIMPLEQUEST_PROGRESS;
+        questDataKeys[2] = NFTVAR_SIMPLEQUEST_TYPE;
+        questDataKeys[3] = NFTVAR_REPUTATION;
         return characters.getNFTVars(characterID, questDataKeys);
     }
 
     function assignNewQuest(uint256 characterID) public returns (uint256) {
         uint256[] memory questData = getCharacterQuestData(characterID);
         assertNotOnQuest(questData);
+        // tier should be chosen by random, based on % for reputation level, for now, we take common
         Quest memory quest = getNewQuest(0);
-        // tier should be chosen by random, based on % for reputation level
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID(), quest.id);
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), quest.requirementType);
+        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_ID, quest.id);
+        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS, 0);
+        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_TYPE, quest.requirementType);
         return quest.id;
     }
 
@@ -155,13 +155,11 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         require(isQuestCompleted(characterID), "Quest not completed");
         uint256 questID = questData[0];
         uint256 currentReputation = questData[3];
-        uint256 reputationReward = questList[questID].reputationAmount;
-        // add reputation to current reputation held
-        characters.setNftVar(characterID, characters.NFTVAR_REPUTATION(), currentReputation + reputationReward);
+        characters.setNftVar(characterID, NFTVAR_REPUTATION, currentReputation + questList[questID].reputationAmount);
         // clear quest data
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID(), 0);
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), 0);
+        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_ID, 0);
+        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS, 0);
+        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_TYPE, 0);
 
         emit QuestComplete(questID, characterID);
     }
