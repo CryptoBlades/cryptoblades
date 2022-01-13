@@ -20,15 +20,13 @@
             <div v-if="tab === 0" class="bottomWeapons">
               <pvp-weapon
                 v-if="activeWeaponWithInformation.weaponId"
-                :stars="activeWeaponWithInformation.information.stars + 1"
-                :element="activeWeaponWithInformation.information.element"
+                :weapon="activeWeaponWithInformation.information"
                 :weaponId="activeWeaponWithInformation.weaponId"
               />
               <br/>
               <pvp-shield
                 v-if="activeShieldWithInformation.shieldId"
-                :stars="activeShieldWithInformation.information.stars + 1"
-                :element="activeShieldWithInformation.information.element"
+                :shield="activeShieldWithInformation.information"
                 :shieldId="activeShieldWithInformation.shieldId"
               />
             </div>
