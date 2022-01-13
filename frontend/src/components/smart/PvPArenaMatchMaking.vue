@@ -60,8 +60,8 @@
           <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
             <div v-if="!isInMatch">
-              <pvp-button @click="findMatch" :disabled="loading || this.matchableCharacters <= 1"  buttonText="FIND MATCH" />
-              <div class="matchablePlayersText">Players in this tier: {{this.matchableCharacters - 1}}</div>
+              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayers <= 1"  buttonText="FIND MATCH" />
+              <div class="matchablePlayersText">Players in this tier: {{formattedMatchablePlayers}}</div>
             </div>
             <pvp-button v-else
             @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
@@ -226,7 +226,7 @@ export default {
         rankDifference: null,
         result: ''
       },
-      matchableCharacters: 0,
+      matchablePlayers: null,
     };
   },
 
@@ -244,6 +244,10 @@ export default {
     formattedReRollCost() {
       return new BN(this.reRollCost).div(new BN(10).pow(18)).toFixed(2);
     },
+    formattedMatchablePlayers(){
+      // TODO subtract from this number the player's other characters that are locked in the arena
+      return this.matchablePlayers - 1;
+    },
 
     getCharacterElementSrc() {
       if (this.characterInformation.element === 'Fire') {
@@ -259,13 +263,13 @@ export default {
     },
 
     getOpponentElementSrc() {
-      if (this.opponentInformation.element === 'fire') {
+      if (this.opponentInformation.element === 'Fire') {
         return fireIcon;
       }
-      if (this.opponentInformation.element === 'water') {
+      if (this.opponentInformation.element === 'Water') {
         return waterIcon;
       }
-      if (this.opponentInformation.element === 'earth') {
+      if (this.opponentInformation.element === 'Earth') {
         return earthIcon;
       }
       return lightningIcon;
@@ -459,7 +463,9 @@ export default {
     this.isInMatch = (await this.contracts().PvpArena.methods.matchByFinder(this.currentCharacterId).call()).createdAt !== '0';
 
     this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
-    this.matchableCharacters = await this.contracts().PvpArena.methods.matchablePlayers(this.currentCharacterId).call();
+
+    this.matchablePlayers = await this.contracts().PvpArena.methods.getMatchablePlayers(this.currentCharacterId).call();
+
     if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
       this.isCharacterInDuelQueue = true;
 
