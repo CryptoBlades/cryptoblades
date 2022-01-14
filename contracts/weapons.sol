@@ -510,6 +510,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         burnDust[playerAddress] = burnDustValue;
     }
 
+    function decrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) public restricted {
+        _decrementDustSupplies(playerAddress, amountLB, amount4B, amount5B);
+    }
+
     function _decrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
         uint32[] memory supplies = getDustSupplies(playerAddress);
         require(supplies[0] >= amountLB && supplies[1] >= amount4B && supplies[2] >= amount5B);

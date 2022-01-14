@@ -71,8 +71,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 reputationAmount;
     }
 
-    enum RequirementType{NONE, RAID, WEAPON, JUNK}
-    enum RewardType{WEAPON, JUNK}
+    enum RequirementType{NONE, WEAPON, JUNK, DUST, RAID}
+    enum RewardType{NONE, WEAPON, JUNK, DUST}
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     // have quests rarities on certain indexes (0 - common, 1 - uncommon, 2 - rare, 3 - epic)
@@ -129,7 +129,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     //move element to be deleted at the end, pop it
     function deleteQuest(uint8 tier, uint32 index) public {
         require(index < quests[tier].length, "Index out of bounds");
-        quests[tier][index] = quests[tier][quests[tier].length-1];
+        quests[tier][index] = quests[tier][quests[tier].length - 1];
         quests[tier].pop();
     }
 
@@ -161,7 +161,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function getNewQuest(uint8 tier) private returns (Quest memory) {
         // get random index from 0 to length - 1, which will indicate predetermined quest
         // uint32 index = random(quests.length);
-        Quest memory quest = quests[tier][quests[tier].length-1];
+        Quest memory quest = quests[tier][quests[tier].length - 1];
         quest.id = nextQuestID++;
         questList[quest.id] = quest;
         // should assign new ID to quest and save it in questsList array (all quests are there)
@@ -173,6 +173,13 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return assignNewQuest(characterID);
     }
 
+    function clearQuestData(uint256 characterID) public {
+        // clear quest data
+        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID(), 0);
+        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
+        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), 0);
+    }
+
     function completeQuest(uint256 characterID) external {
         uint256[] memory questData = getCharacterQuestData(characterID);
         assertOnQuest(questData);
@@ -182,11 +189,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         // reward for completing quest
         rewardQuest(questID, characterID);
         characters.setNftVar(characterID, characters.NFTVAR_REPUTATION(), currentReputation + questList[questID].reputationAmount);
-        // clear quest data
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID(), 0);
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), 0);
-
+        clearQuestData(characterID);
         emit QuestComplete(questID, characterID);
         // after quest competition, assign new quest to the character
         assignNewQuest(characterID);
@@ -207,6 +210,13 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             for (uint8 i = 0; i < quest.rewardAmount; i++) {
                 junk.mint(msg.sender, uint8(quest.rewardRarity));
             }
+        } else if (quest.rewardType == RewardType.DUST) {
+            uint32[] memory incrementDustSupplies = new uint32[](weapons.getDustSupplies(msg.sender).length);
+            incrementDustSupplies[uint256(quest.rewardRarity)] = uint32(quest.rewardAmount);
+            weapons.incrementDustSupplies(msg.sender, incrementDustSupplies[0], incrementDustSupplies[1], incrementDustSupplies[2]);
+        }
+        else {
+            revert("Unknown reward type");
         }
     }
 
@@ -224,9 +234,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                     revert("Wrong weapon rarity");
                 }
                 weapons.burnWithoutDust(tokenID);
-                uint currentProgress = characters.getNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS());
-                characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), ++currentProgress);
-                emit QuestProgressed(questData[0], characterID);
+                incrementQuestProgress(characterID, questData[0], 1);
             }
         } else if (quest.requirementType == RequirementType.JUNK) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
@@ -238,12 +246,31 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                     revert("Wrong junk rarity");
                 }
                 junk.burn(tokenID);
-                uint currentProgress = characters.getNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS());
-                characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), ++currentProgress);
-                emit QuestProgressed(questData[0], characterID);
+                incrementQuestProgress(characterID, questData[0], 1);
             }
+        } else {
+            revert("Unknown requirement type");
         }
         // should I automatically complete the quest and assign new one? or should I let user complete quest later
+    }
+
+    function submitDustProgress(uint256 characterID, uint32 amount) public {
+        uint256[] memory questData = getCharacterQuestData(characterID);
+        assertOnQuest(questData);
+        Quest memory quest = questList[questData[0]];
+        require(quest.requirementType == RequirementType.DUST, "Wrong quest type");
+        uint32[] memory dustSupplies = weapons.getDustSupplies(msg.sender);
+        require(amount <= dustSupplies[uint256(quest.requirementRarity)], "Not enough dust supply");
+        uint32[] memory decrementDustSupplies = new uint32[](dustSupplies.length);
+        decrementDustSupplies[uint256(quest.requirementRarity)] = amount;
+        weapons.decrementDustSupplies(msg.sender, decrementDustSupplies[0], decrementDustSupplies[1], decrementDustSupplies[2]);
+        incrementQuestProgress(characterID, questData[0], amount);
+    }
+
+    function incrementQuestProgress(uint256 characterID, uint256 questID, uint256 progress) private {
+        uint currentProgress = characters.getNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS());
+        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), currentProgress + progress);
+        emit QuestProgressed(questID, characterID);
     }
 
 }
