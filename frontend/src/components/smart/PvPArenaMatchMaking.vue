@@ -60,8 +60,8 @@
           <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
             <div v-if="!isInMatch">
-              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayers <= 1"  buttonText="FIND MATCH" />
-              <div class="matchablePlayersText">Players in this tier: {{formattedMatchablePlayers}}</div>
+              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount <= 1"  buttonText="FIND MATCH" />
+              <div class="matchablePlayersCountText">Players in this tier: {{formattedMatchablePlayersCount}}</div>
             </div>
             <pvp-button v-else
             @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
@@ -226,7 +226,7 @@ export default {
         rankDifference: null,
         result: ''
       },
-      matchablePlayers: null,
+      matchablePlayersCount: null,
     };
   },
 
@@ -244,9 +244,9 @@ export default {
     formattedReRollCost() {
       return new BN(this.reRollCost).div(new BN(10).pow(18)).toFixed(2);
     },
-    formattedMatchablePlayers(){
+    formattedMatchablePlayersCount(){
       // TODO subtract from this number the player's other characters that are locked in the arena
-      return this.matchablePlayers - 1;
+      return this.matchablePlayersCount - 1;
     },
 
     getCharacterElementSrc() {
@@ -464,7 +464,7 @@ export default {
 
     this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
 
-    this.matchablePlayers = await this.contracts().PvpArena.methods.getMatchablePlayers(this.currentCharacterId).call();
+    this.matchablePlayersCount = await this.contracts().PvpArena.methods.getMatchablePlayerCount(this.currentCharacterId).call();
 
     if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
       this.isCharacterInDuelQueue = true;
@@ -751,7 +751,7 @@ span, p, li, button {
       height: 5.5rem;
     }
   }
-  .matchablePlayersText{
+  .matchablePlayersCountText{
     display:flex;
     justify-content: center;
       color: #cec198;

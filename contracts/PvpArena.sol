@@ -1092,7 +1092,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         rankingPointsByCharacter[characterID] = newRankingPoints;
     }
     /// @dev returns the amount of matcheable characters
-    function getMatchablePlayers(uint256 characterID) public view returns(uint){
+    function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
         uint8 tier = getArenaTier(characterID);
         return _matchableCharactersByTier[tier].length();   
     }
