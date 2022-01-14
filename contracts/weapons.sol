@@ -121,7 +121,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     Promos public promos;
 
     uint256 public constant BIT_FEATURE_TRANSFER_BLOCKED = 1;
-    
+
     uint256 public constant NUMBERPARAMETER_FEATURE_BITS = uint256(keccak256("FEATURE_BITS"));
 
     mapping(uint256 => uint256) public numberParameters;
@@ -133,7 +133,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
     event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
-    
+
     modifier restricted() {
         _restricted();
         _;
@@ -310,7 +310,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         }
         WeaponCosmetics storage wc = cosmetics[tokenID];
         wc.seed = cosmeticSeed;
-        
+
         tokens[tokenID].level = level;
         durabilityTimestamp[tokenID] = uint64(now); // avoid chain jumping abuse
         WeaponBurnPoints storage wbp = burnPoints[tokenID];
@@ -567,6 +567,17 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _burn(burnID);
         if(promos.getBit(burnOwner, 4) == false)
             _incrementDustSupplies(burnOwner, values[0], values[1], values[2]);
+
+        emit Burned(
+            burnOwner,
+            burnID
+        );
+    }
+
+    function burnWithoutDust(uint256 burnID) public restricted {
+        address burnOwner = ownerOf(burnID);
+
+        _burn(burnID);
 
         emit Burned(
             burnOwner,

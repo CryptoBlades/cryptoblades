@@ -18,15 +18,17 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     Characters public characters;
     Weapons public weapons;
+    Junk public junk;
 
 
-    function initialize(Characters _characters, Weapons _weapons) public initializer {
+    function initialize(Characters _characters, Weapons _weapons, Junk _junk) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
 
         characters = _characters;
         weapons = _weapons;
+        junk = _junk;
         nextQuestID = 1;
     }
 
@@ -69,8 +71,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 reputationAmount;
     }
 
-    enum RequirementType{NONE, RAID}
-    enum RewardType{SWORD, JUNK}
+    enum RequirementType{NONE, RAID, WEAPON, JUNK}
+    enum RewardType{WEAPON, JUNK}
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     // have quests rarities on certain indexes (0 - common, 1 - uncommon, 2 - rare, 3 - epic)
@@ -109,6 +111,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     event QuestComplete(uint256 indexed questID, uint256 indexed characterID);
     event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
+    event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
 
     //Quest example: tier = 1, id = TBA, requirementType = 1, requirementAmount = 2, rewardType = 1, rewardAmount = 1, reputationAmount = 12
     // do 2 raids for 1x3* sword
@@ -139,7 +142,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return characters.getNFTVars(characterID, questDataKeys);
     }
 
-    function assignNewQuestForCharacter(uint256 characterID) public returns (uint256) {
+    function requestQuest(uint256 characterID) public returns (uint256) {
         uint256[] memory questData = getCharacterQuestData(characterID);
         assertNotOnQuest(questData);
         return assignNewQuest(characterID);
@@ -191,7 +194,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function rewardQuest(uint256 questID, uint256 characterID) private {
         Quest memory quest = questList[questID];
-        if (quest.rewardType == RewardType.SWORD) {// do a package, like, rewardType >= 1 && rewardType <= 4 and use the same mintWeaponWithStars based on that
+        if (quest.rewardType == RewardType.WEAPON) {// do a package, like, rewardType >= 1 && rewardType <= 4 and use the same mintWeaponWithStars based on that
             // for now, rewardType = 1 means 3* sword
             // stars = 2 for 3* sword
             // random seed
@@ -203,20 +206,26 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
     }
 
-    //    function requestQuest(uint256 characterID) external questsEnabled {
-    //        uint256[] memory questData = getCharacterQuestData(characterID);
-    //        assertOnQuest(questData);
-    //        // submits a seed request with a randoms ID (this randoms ID is shared with all in a block)
-    //        // it will complete by the randoms bot/contract automatically
-    //    }
-
-//    function submitProgress(uint256 characterID, uint256 amount) external questsEnabled {
-//        uint256[] memory questData = getCharacterQuestData(characterID);
-//        assertOnQuest(questData);
-//    }
-
-//    function submitProgressForced(uint256 characterID, uint256 amount) external restricted questsEnabled {
-//
-//    }
+    function submitProgress(uint256 characterID, uint256[] memory tokenIds) public {
+        uint256[] memory questData = getCharacterQuestData(characterID);
+        assertOnQuest(questData);
+        Quest memory quest = questList[questData[0]];
+        if (quest.requirementType == RequirementType.WEAPON) {
+            for (uint256 i = 0; i < tokenIds.length; i++) {
+                uint256 tokenID = tokenIds[i];
+                if (weapons.ownerOf(tokenID) != msg.sender) {
+                    revert("You don't own this weapon");
+                }
+                if ((weapons.getStars(tokenID) - 1) != uint256(quest.requirementRarity)) {
+                    revert("Wrong weapon rarity");
+                }
+                weapons.burnWithoutDust(tokenID);
+                uint currentProgress = characters.getNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS());
+                characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), ++currentProgress);
+                emit QuestProgressed(questData[0], characterID);
+            }
+        }
+        // should I automatically complete the quest and assign new one? or should I let user complete quest later
+    }
 
 }
