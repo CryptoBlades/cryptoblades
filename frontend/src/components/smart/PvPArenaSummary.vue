@@ -72,11 +72,20 @@
             <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
           </li>
         </ul>
-        <!-- <a href="/" class="rankings">View all rankings</a> -->
+        <ul class="topPlayersList">
+          <li class="header">
+            <span>Current Season</span><span>Restarts In</span>
+          </li>
+          <li>
+            <span>{{ currentRankedSeason }}</span>
+            <vue-countdown :time="secondsBeforeNextSeason * 1000" v-slot="{ days, hours, minutes, seconds }">
+              {{ days && days || '' }} {{ days && 'days, ' || '' }}{{ hours }}:{{ minutes }}:{{ seconds }}
+            </vue-countdown>
+          </li>
+        </ul>
         <ul class="characterAttrsList">
           <li class="characterName">{{ characterInformation.name || '' }}</li>
           <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
-          <!-- <li><span>Damage multiplier</span><span>453</span></li> -->
           <li><span>Level</span><span>{{ characterInformation.level }}</span></li>
           <li><span>Current rank</span><span>{{ characterInformation.rank }}</span></li>
         </ul>
@@ -93,13 +102,15 @@ import PvPShield from './PvPShield.vue';
 import PvPButton from './PvPButton.vue';
 import PvPCharacter from './PvPCharacter.vue';
 import dayjs from 'dayjs';
+import VueCountdown from '@chenfengyuan/vue-countdown';
 
 export default {
   components: {
     'pvp-weapon': PvPWeapon,
     'pvp-shield': PvPShield,
     'pvp-button': PvPButton,
-    'pvp-character': PvPCharacter
+    'pvp-character': PvPCharacter,
+    'vue-countdown': VueCountdown
   },
 
   props: {
@@ -108,6 +119,12 @@ export default {
     },
     tierTopRankers: {
       default: []
+    },
+    currentRankedSeason: {
+      default: null
+    },
+    secondsBeforeNextSeason: {
+      default: null
     },
     characterInformation: {
       default: {
