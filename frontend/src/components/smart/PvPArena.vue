@@ -91,6 +91,7 @@ export default {
       seasonStartedAt: null,
       seasonDuration: null,
       secondsBeforeNextSeason: null,
+      restartEventSubscription: null,
       characterInformation: {
         tier: null,
         name: '',
@@ -290,7 +291,7 @@ export default {
       let blockToScan = initialBlock;
       let scanning = false;
 
-      this.web3.eth.subscribe('newBlockHeaders', async (_, result) => {
+      const subscription = this.web3.eth.subscribe('newBlockHeaders', async (_, result) => {
         try {
           if (scanning) {
             return;
@@ -324,6 +325,8 @@ export default {
           scanning = false;
         }
       });
+
+      this.restartEventSubscription = subscription;
     }
   },
 
@@ -438,8 +441,10 @@ export default {
     await this.updateSecondsBeforeSeason();
   },
 
-  unmounted() {
-    this.web3.eth.clearSubscriptions();
+  destroyed() {
+    if (this.restartEventSubscription.id) {
+      this.restartEventSubscription.unsubscribe();
+    }
   },
 
   watch: {
