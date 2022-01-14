@@ -55,7 +55,7 @@
           <span>3</span>
         </li>
       </ul>
-    </div>
+    </div> -->
   </div>
 </template>
 
