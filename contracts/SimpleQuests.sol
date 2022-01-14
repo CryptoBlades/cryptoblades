@@ -203,6 +203,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - i - 1))));
                 uint256 weaponID = weapons.mintWeaponWithStars(characters.ownerOf(characterID), uint256(quest.rewardRarity), seed / 100, 100);
             }
+        } else if (quest.rewardType == RewardType.JUNK) {
+            for (uint8 i = 0; i < quest.rewardAmount; i++) {
+                junk.mint(msg.sender, uint8(quest.rewardRarity));
+            }
         }
     }
 
@@ -220,6 +224,20 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                     revert("Wrong weapon rarity");
                 }
                 weapons.burnWithoutDust(tokenID);
+                uint currentProgress = characters.getNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS());
+                characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), ++currentProgress);
+                emit QuestProgressed(questData[0], characterID);
+            }
+        } else if (quest.requirementType == RequirementType.JUNK) {
+            for (uint256 i = 0; i < tokenIds.length; i++) {
+                uint256 tokenID = tokenIds[i];
+                if (junk.ownerOf(tokenID) != msg.sender) {
+                    revert("You don't own this junk");
+                }
+                if (junk.getStars(tokenID) != uint256(quest.requirementRarity)) {
+                    revert("Wrong junk rarity");
+                }
+                junk.burn(tokenID);
                 uint currentProgress = characters.getNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS());
                 characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), ++currentProgress);
                 emit QuestProgressed(questData[0], characterID);

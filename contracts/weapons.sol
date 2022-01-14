@@ -576,13 +576,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function burnWithoutDust(uint256 burnID) public restricted {
         address burnOwner = ownerOf(burnID);
-
         _burn(burnID);
-
-        emit Burned(
-            burnOwner,
-            burnID
-        );
+        emit Burned(burnOwner, burnID);
     }
 
     function reforge(uint256 reforgeID, uint256 burnID) public restricted {

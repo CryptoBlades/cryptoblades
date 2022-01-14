@@ -23,8 +23,9 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     Promos public promos;
 
     mapping(uint256 => uint8) public tokenStars;
-    
+
     event Minted(uint256 indexed id, address indexed minter);
+    event Burned(uint256 indexed id, address indexed burner);
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
@@ -50,13 +51,23 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokens;
     }
 
-    function mint(address minter, uint8 mintStars) public restricted returns(uint256) {
+    function getStars(uint256 id) public view returns (uint8) {
+        return tokenStars[id];
+    }
 
+    function mint(address minter, uint8 mintStars) public restricted returns(uint256) {
         uint256 tokenID = totalSupply();
         tokenStars[tokenID] = mintStars;
         _mint(minter, tokenID);
         emit Minted(tokenID, minter);
         return tokenID;
+    }
+
+    function burn(uint256 tokenID) public restricted {
+        address burner = ownerOf(tokenID);
+        _burn(tokenID);
+        delete tokenStars[tokenID];
+        emit Burned(tokenID, burner);
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
