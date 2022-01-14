@@ -61,16 +61,17 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 id;
         uint8 tier;
         RequirementType requirementType;
-        RewardType rewardType;
-        RewardRarity rewardRarity;
+        Rarity requirementRarity;
         uint256 requirementAmount;
+        RewardType rewardType;
+        Rarity rewardRarity;
         uint256 rewardAmount;
         uint256 reputationAmount;
     }
 
     enum RequirementType{NONE, RAID}
     enum RewardType{SWORD, JUNK}
-    enum RewardRarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
+    enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     // have quests rarities on certain indexes (0 - common, 1 - uncommon, 2 - rare, 3 - epic)
     // or have quests in different arrays and join them on allQuestsList
@@ -111,12 +112,22 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     //Quest example: tier = 1, id = TBA, requirementType = 1, requirementAmount = 2, rewardType = 1, rewardAmount = 1, reputationAmount = 12
     // do 2 raids for 1x3* sword
-    function addNewQuest(uint8 tier, RequirementType requirementType, RewardType rewardType, RewardRarity rewardRarity, uint256 requirementAmount, uint256 rewardAmount, uint256 reputationAmount) public {
-        quests[tier].push(Quest(0, tier, requirementType, rewardType, rewardRarity, requirementAmount, rewardAmount, reputationAmount));
+    function addNewQuest(uint8 tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
+        RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) public {
+        quests[tier].push(Quest(0, tier,
+            requirementType, requirementRarity, requirementAmount,
+            rewardType, rewardRarity, rewardAmount, reputationAmount));
     }
 
+    function getQuestArrayLength(uint8 tier) public view returns (uint256) {
+        return quests[tier].length;
+    }
+
+    //move element to be deleted at the end, pop it
     function deleteQuest(uint8 tier, uint32 index) public {
-        delete quests[tier][index];
+        require(index < quests[tier].length, "Index out of bounds");
+        quests[tier][index] = quests[tier][quests[tier].length-1];
+        quests[tier].pop();
     }
 
     function getCharacterQuestData(uint256 characterID) public view returns (uint256[] memory) {
@@ -128,9 +139,13 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return characters.getNFTVars(characterID, questDataKeys);
     }
 
-    function assignNewQuest(uint256 characterID) public returns (uint256) {
+    function assignNewQuestForCharacter(uint256 characterID) public returns (uint256) {
         uint256[] memory questData = getCharacterQuestData(characterID);
         assertNotOnQuest(questData);
+        return assignNewQuest(characterID);
+    }
+
+    function assignNewQuest(uint256 characterID) private returns (uint256) {
         // tier should be chosen by random, based on % for reputation level, for now, we take common
         Quest memory quest = getNewQuest(0);
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID(), quest.id);
@@ -142,13 +157,17 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function getNewQuest(uint8 tier) private returns (Quest memory) {
         // get random index from 0 to length - 1, which will indicate predetermined quest
-        uint32 index = 0;
         // uint32 index = random(quests.length);
-        Quest memory quest = quests[tier][index];
+        Quest memory quest = quests[tier][quests[tier].length-1];
         quest.id = nextQuestID++;
         questList[quest.id] = quest;
         // should assign new ID to quest and save it in questsList array (all quests are there)
         return quest;
+    }
+
+    // free for now, later should be restrained and user has to pay stamina or something
+    function skipQuest(uint256 characterID) public returns (uint256) {
+        return assignNewQuest(characterID);
     }
 
     function completeQuest(uint256 characterID) external {
@@ -178,10 +197,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             // random seed
             // random element = 100??
             for (uint8 i = 0; i < quest.rewardAmount; i++) {
-                uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1))));
+                uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - i - 1))));
                 uint256 weaponID = weapons.mintWeaponWithStars(characters.ownerOf(characterID), uint256(quest.rewardRarity), seed / 100, 100);
             }
-
         }
     }
 
