@@ -171,9 +171,10 @@
           </li>
           <li>
             <span>{{ currentRankedSeason }}</span>
-            <vue-countdown :time="secondsBeforeNextSeason * 1000" v-slot="{ days, hours, minutes, seconds }">
+            <vue-countdown v-if="secondsBeforeNextSeason" :time="secondsBeforeNextSeason * 1000" v-slot="{ days, hours, minutes, seconds }">
               {{ days && days || '' }} {{ days && 'days, ' || '' }}{{ hours }}:{{ minutes }}:{{ seconds }}
             </vue-countdown>
+            <span v-else>-</span>
           </li>
         </ul>
         <ul class="characterAttrsList">
