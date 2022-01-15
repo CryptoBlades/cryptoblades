@@ -1,33 +1,15 @@
 <template>
   <div class="leaderboardWrapper">
-    <span>Leaderboards coming soon!</span>
-    <!-- <h1 class="leaderboardTitle">ARENA LEADERBOARD</h1>
+    <h1 class="leaderboardTitle">ARENA LEADERBOARD</h1>
+    <h2>value: {{tierFilter}}</h2>
     <div class="filtersWrapper">
       <div class="selectWrapper">
         <label for="tier">Tier: </label>
-        <select name="tier" id="tier">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-        </select>
-      </div>
-      <div class="selectWrapper">
-        <label for="element">Element: </label>
-        <select name="element" id="element">
-          <option value="1">Fire</option>
-          <option value="2">Earth</option>
-          <option value="3">Lightning</option>
-          <option value="4">Water</option>
-        </select>
-      </div>
-      <div class="selectWrapper">
-        <label for="numberOfListings">Listings per page: </label>
-        <select name="numberOfListings" id="numberOfListings">
-          <option value="1">10</option>
-          <option value="2">20</option>
-          <option value="3">30</option>
-          <option value="4">40</option>
+        <select @change="handleValue" v-model="tierFilter" name="tier" id="tier">
+          <option v-for="tierFilterOption in tierFilterOptions"
+           :value="tierFilterOption.value" :key="tierFilterOption.value">
+            {{ tierFilterOption.value }}
+          </option>
         </select>
       </div>
     </div>
@@ -38,55 +20,96 @@
           <span>Name</span>
           <span>Level</span>
           <span>Element</span>
-          <span>Earned SKILLs</span>
+          <span>MMR</span>
         </li>
         <li>
           <span>1</span>
-          <span>Player 1</span>
-          <span>11</span>
-          <span>Fire</span>
-          <span>4</span>
+          <span>{{tierTopRankers[0].name}}</span>
+          <span>{{tierTopRankers[0].level}}</span>
+          <span>{{tierTopRankers[0].element}}</span>
+          <span>{{tierTopRankers[0].rank}}</span>
         </li>
         <li>
           <span>2</span>
-          <span>Player 2</span>
-          <span>12</span>
-          <span>Earth</span>
+          <span>{{tierTopRankers[1].name}}</span>
+          <span>{{tierTopRankers[1].level}}</span>
+          <span>{{tierTopRankers[1].element}}</span>
+          <span>{{tierTopRankers[1].rank}}</span>
+        </li>
+        <li>
           <span>3</span>
+          <span>{{tierTopRankers[2].name}}</span>
+          <span>{{tierTopRankers[2].level}}</span>
+          <span>{{tierTopRankers[2].element}}</span>
+          <span>{{tierTopRankers[2].rank}}</span>
         </li>
       </ul>
-    </div> -->
+    </div>
   </div>
 </template>
 
 <script>
+import { getCharacterNameFromSeed } from '../../character-name';
+import { mapState } from 'vuex';
+import { characterFromContract as formatCharacter } from '../../contract-models';
 export default {
+  inject: ['web3'],
   data() {
     return {
-      players: [
-        // {
-        //   name: 'Player1',
-        //   rank: 1,
-        //   level: 55,
-        //   element: 'fire',
-        //   earnedSkill: 21
-        // },
-        // {
-        //   name: 'Player2',
-        //   rank: 2,
-        //   level: 48,
-        //   element: 'fire',
-        //   earnedSkill: 20
-        // },
-        // {
-        //   name: 'Player3',
-        //   rank: 3,
-        //   level: 13,
-        //   element: 'earth',
-        //   earnedSkill: 19
-        // }
-      ]
+      tierTopRankers: [],
+      tier: 0,
+      tierFilterOptions: [
+        { text: '1', value: 0 },
+        { text: '2', value: 2 },
+        { text: '3', value: 3 },
+        { text: '4', value: 4 },
+        { text: '5', value: 5 },
+        { text: '6', value: 6 },
+        { text: '7', value: 7 },
+        { text: '8', value: 8 },
+      ],
+      tierFilter: 0,
     };
+  },
+  computed: {
+    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
+  },
+  methods: {
+    async handleValue(){
+      console.log('runs');
+      const tierTopRankersIds
+      = await this.contracts().PvpArena.methods.getTierTopCharacters(this.tierFilter).call({ from: this.defaultAccount });
+      console.log(tierTopRankersIds);
+      this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+        return {
+          rankerId,
+          name: getCharacterNameFromSeed(rankerId),
+          rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount }),
+          level: await this.contracts().Characters.methods.getLevel(rankerId).call({ from: this.defaultAccount }),
+          element: formatCharacter(rankerId, await this.contracts().Characters.methods.get(`${rankerId}`)
+            .call({ from: this.defaultAccount })).traitName
+        };
+      }));
+    }
+  },
+  async created(){
+    //Leaderboards will be improved, for now they will only show top 3 rankers of each tier
+    const tierTopRankersIds
+    = await this.contracts().PvpArena.methods.getTierTopCharacters(this.tierFilter).call({ from: this.defaultAccount });
+    console.log(tierTopRankersIds);
+    this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+      return {
+        rankerId,
+        name: getCharacterNameFromSeed(rankerId),
+        rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount }),
+        level: await this.contracts().Characters.methods.getLevel(rankerId).call({ from: this.defaultAccount }),
+        element: formatCharacter(rankerId, await this.contracts().Characters.methods.get(`${rankerId}`)
+          .call({ from: this.defaultAccount })).traitName
+      };
+    }));
+  },
+  watch: {
+
   }
 };
 </script>
