@@ -1,0 +1,38 @@
+name: Build and Deploy
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 14
+        uses: actions/setup-node@v1
+        with:
+          node-version: "14"
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - name: Setup frontend for testnet
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/task/newGameUI' }}
+        run: node scripts/ci-setup-frontend-for-testnet.js
+
+      - name: Build smart contracts
+        run: npm run build -- --all
+
+      - run: npm run build:frontend
+
+      - name: Deploy testnet frontend
+        uses: netlify/actions/cli@6c34c3fcafc69ac2e1d6dbf226560329c6dfc51b
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/task/newGameUI' }}
+        with:
+          args: deploy --dir=frontend/dist --prod
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_TESTNET_SITE_ID_TEMP_UI }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
