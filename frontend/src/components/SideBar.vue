@@ -1,6 +1,6 @@
 <template>
   <aside>
-    <b-navbar-nav>
+    <b-navbar-nav v-if="!isBlackSmith">
       <li class="character" :class="{ active: characterID === '1' }">
         <router-link to="/character/1" exact class="nav-link">
           <div class="icon-wrap">
@@ -53,6 +53,42 @@
       </li>
     </b-navbar-nav>
 
+    <b-navbar-nav v-if="isBlackSmith">
+      <li class="character blacksmith" :class="{active : isActive('forge') || isActive('salvage')}">
+        <router-link to="/forge" exact class="nav-link">
+          <div class="icon-wrap">
+            <div class="icon" v-html="$appIcon.NavIcon.Blacksmith"></div>
+          </div>
+          <div class="info-wrap">
+            <span class="character-name">Forge</span>
+            <span class="character-level">Forge Random Equipment</span>
+          </div>
+        </router-link>
+      </li>
+      <li class="character blacksmith" :class="{active : isActive('perfection')}">
+        <router-link to="/perfection" exact class="nav-link">
+          <div class="icon-wrap">
+            <div class="icon" v-html="$appIcon.NavIcon.Perfection"></div>
+          </div>
+          <div class="info-wrap">
+            <span class="character-name">Perfection</span>
+            <span class="character-level">Enhance Your Equipment</span>
+          </div>
+        </router-link>
+      </li>
+      <li class="character blacksmith" :class="{active : isActive('inventory')}">
+        <router-link to="/inventory" exact class="nav-link">
+          <div class="icon-wrap">
+            <div class="icon" v-html="$appIcon.NavIcon.Inventory"></div>
+          </div>
+          <div class="info-wrap">
+            <span class="character-name">Inventory</span>
+            <span class="character-level">See What's in your Bag</span>
+          </div>
+        </router-link>
+      </li>
+    </b-navbar-nav>
+
     <div class="sponsor">
       <div class="label">Sponsored By:</div>
       <div class="sponsor-info">
@@ -73,7 +109,15 @@ export default {
   name: 'SideBar',
   components : {
   },
+  methods : {
+    isActive(nav){
+      return this.$route.name === nav;
+    }
+  },
   computed : {
+    isBlackSmith() {
+      return ['forge','perfection','inventory', 'salvage'].includes(this.$route.name);
+    },
     characterID() {
       return this.$route.params.id;
     },
@@ -103,7 +147,7 @@ aside {
 .character .icon-wrap {
   width: 83px;
   height: 83px;
-  background: url("../assets/new-ui/icon-frame.png") no-repeat;
+  background: url("../assets/new-ui/icon-frame.svg") no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,7 +196,12 @@ aside {
   color: #fff;
 }
 .character.active .icon-wrap {
-  background: url("../assets/new-ui/icon-frame-active.png") no-repeat;
+  background: url("../assets/new-ui/icon-frame-active.svg") no-repeat;
+}
+
+.blacksmith .character-level,
+.blacksmith.active .character-level {
+  color: #7F8693;
 }
 
 /*Sponsor*/

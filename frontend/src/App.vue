@@ -16,7 +16,7 @@ export default {
     Main
   },
   mounted() {
-    console.log('App Component '+this.$appIcon.Fire);
+    //console.log('App Component '+this.$appIcon.Fire);
   }
 };
 

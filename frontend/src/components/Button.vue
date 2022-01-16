@@ -1,16 +1,27 @@
 <template>
   <div class="btn-wrap">
-    <router-link :to="{ name: route }" class="button" :class="size">
+    <!--  router button  -->
+    <router-link :to="{ name: route }" class="button" :class="size" v-if="route">
       <span>{{ mainText }}</span>
       <span class="sub">{{ subText }}</span>
     </router-link>
+    <!-- normal button  -->
+    <a href="#" class="button" :class="size" v-if="targetRef" @click="showTarget()">
+      <span>{{ mainText }}</span>
+      <span class="sub">{{ subText }}</span>
+    </a>
   </div>
 </template>
 
 <script lang="ts">
 
 export default {
-  props: ['mainText', 'subText', 'disabled', 'route', 'size'],
+  props: ['mainText', 'subText', 'disabled', 'route', 'size', 'targetRef'],
+  methods : {
+    showTarget(){
+      this.$emit('click',this.targetRef);
+    }
+  }
 };
 
 </script>

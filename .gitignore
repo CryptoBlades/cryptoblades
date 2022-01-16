@@ -10,3 +10,5 @@ report*.json
 .vs
 public/abi
 .idea/
+.notes
+*-x.*

@@ -36,7 +36,8 @@ export default {
     justify-content: center;
     margin-bottom: 12px;
   }
-  .icon-frame-sm img {
+  .icon-frame-sm img,
+  .icon-frame-sm svg {
     width: 18px;
   }
   .icon-frame-sm.active {

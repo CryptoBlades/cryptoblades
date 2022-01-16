@@ -13,6 +13,8 @@ import Options from './views/Options.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 import Character from './views/Character.vue';
+import Forge from './views/Forge.vue';
+import Salvage from './views/Salvage.vue';
 
 //new game UI
 import Home from './views/Home.vue';
@@ -49,6 +51,10 @@ function createRouter() {
       { path: '/play-to-earn', name: 'play-to-earn', component: Home },
       { path: '/character/:id', name: 'character', component: Character },
       { path: '/blacksmith', name: 'blacksmith', component: Blacksmith },
+      { path: '/forge', name: 'forge', component: Forge },
+      { path: '/salvage', name: 'salvage', component: Salvage },
+      { path: '/perfection', name: 'perfection', component: Blacksmith },
+      { path: '/inventory', name: 'inventory', component: Blacksmith },
       { path: '/marketplace', name: 'marketplace', component: Market },
       { path: '/leaderboard', name: 'leaderboard', component: Leaderboard },
       //end new

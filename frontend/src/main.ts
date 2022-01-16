@@ -20,6 +20,7 @@ import {AppIcons} from '@/app-icons';
 import App from './App.vue';
 
 Vue.prototype.$appIcon = AppIcons;
+Vue.prototype.$eventBus = new Vue();
 
 import {
   raid as featureFlagRaid,
