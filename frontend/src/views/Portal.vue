@@ -1,31 +1,31 @@
 <template>
   <div class="body main-font">
     <div class="blank-slate">
-      Portal
+      {{$t('portal.title')}}
       <div>
-        The portal allows you to convert your other currencies to BNB. Currently, the portal supports <a href="https://on.wax.io/wax-io/" target="_blank">WAX</a>.
+        {{$t('portal.text1')}} <a href="https://on.wax.io/wax-io/" target="_blank">WAX</a>.
       </div>
       <br />
       <div class="sub-container" v-if="transactionResults != null && !waitingResults">
-        We'll get your BNB to you ASAP!
+        {{$t('portal.text2')}}
       </div>
       <div class="loading-container waiting" v-if="waitingResults">
         <i class="fas fa-spinner fa-spin"></i>
-        Waiting for transaction results...
+        {{$t('portal.waiting')}}
       </div>
       <div class="blank-slate" v-if="userAccount === null && !has5SkillBalance">
-        In order to use the Portal, you will need at least <b>5 SKILL!</b> Please add some here:
-        <a v-bind:href="`${getExchangeUrl}`" target="_blank">Swap SKILL/BNB</a>
+        <span v-html="$t('portal.minimumSkill')"></span>
+        <a v-bind:href="`${getExchangeUrl}`" target="_blank">{{$t('portal.swap')}}</a>
       </div>
       <div class="blank-slate" v-if="userAccount === null && has5SkillBalance">
-        Connect WAX wallet
+        {{$t('portal.connectWallet')}}
         <br />
-        <big-button class="button" v-if="userAccount === null" mainText="WAX Login" @click="waxLogin" />
+        <big-button class="button" v-if="userAccount === null" :mainText="$t('portal.waxLogin')" @click="waxLogin" />
       </div>
       <div class="blank-slate" v-if="userAccount != null">
-        How much WAX do you want to transfer? You have: {{ waxBalance }}.
+        {{$t('portal.amount')}} {{ waxBalance }}.
         <input v-model="WAXAmount" placeholder="How much WAX?" @input="change($event)" @change="change($event)" />
-        <div class="error" v-if="!isValid">Invalid WAX amount. Please use the format: "X.xxxxxxxx" (8 decimals).</div>
+        <div class="error" v-if="!isValid">{{$t('portal.amount')}}</div>
         <br />
         <big-button class="button" v-if="userAccount != null" :disabled="!isValid" mainText="Submit" @click="sign" />
       </div>
@@ -39,6 +39,7 @@ import * as waxjs from '@waxio/waxjs/dist';
 import { mapGetters, mapState } from 'vuex';
 const wax = new waxjs.WaxJS('https://wax.greymass.com', null, null, false);
 import { toBN, fromWeiEther } from '../utils/common';
+import { getConfigValue } from '../contracts';
 
 export default {
   data() {
@@ -91,7 +92,7 @@ export default {
                 ],
                 data: {
                   from: wax.userAccount, //user's BSC Address
-                  to: process.env.VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS, //CB Wallet Address
+                  to: getConfigValue('VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS'), //CB Wallet Address
                   quantity: toBN(this.WAXAmount).toFixed(8) + ' WAX', //WAX *needs* to be here.
                   memo: this.defaultAccount,
                 },

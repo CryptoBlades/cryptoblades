@@ -49,7 +49,7 @@ contract ChainlinkRandoms is IRandoms, Pausable, AccessControl, VRFConsumerBase 
     }
 
     function getRandomSeedUsingHash(address user, bytes32 hash) public override view returns (uint256) {
-        return uint256(keccak256(abi.encodePacked(user, seed, hash, gasleft())));
+        return uint256(keccak256(abi.encodePacked(user, seed, hash)));
     }
 
     // Mutative

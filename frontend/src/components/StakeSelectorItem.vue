@@ -8,7 +8,7 @@
       <table class="stake-data-table">
         <tr>
           <th class="bold">
-            Stake
+            {{$t('stake.stake')}}
           </th>
           <td class="align-right">
             {{ stakeTokenName }}
@@ -16,26 +16,36 @@
         </tr>
         <tr>
           <th class="bold">
-            Earn
+            {{$t('stake.StakeSelectorItem.earn')}}
           </th>
           <td class="align-right">
             {{ rewardTokenName }}
           </td>
         </tr>
-        <tr v-if="estimatedYield" title="Estimated yield per year and token.">
+        <tr v-if="estimatedYield" :title="$t('stake.StakeSelectorItem.yieldTooltip')">
           <th class="bold">
-            APY
+            {{ isNftStaking ? $t('stake.StakeSelectorItem.yield') : $t('stake.StakeSelectorItem.apy') }}
+            <b-icon-question-circle v-if="isNftStaking" v-tooltip="$t('stake.StakeSelectorItem.yieldTooltip')"/>
           </th>
           <td class="align-right">
-            {{ estimatedYield.multipliedBy(100).toFixed(2) }}%
+            {{ isNftStaking ? estimatedYield.toFixed(2) : estimatedYield.multipliedBy(100).toFixed(2) }}
+            {{ isNftStaking ? '/NFT' : '%' }}
           </td>
         </tr>
         <tr v-if="minimumStakeTime !== 0">
           <th class="bold">
-            Stake locked
+            {{$t('stake.StakeSelectorItem.stakeLocked')}}
           </th>
           <td class="align-right">
             {{ minimumStakeTimeFormatted }}
+          </td>
+        </tr>
+        <tr v-if="rewardsDuration !== 0">
+          <th class="bold">
+            {{$t('stake.StakeSelectorItem.rewardsDuration')}}
+          </th>
+          <td class="align-right">
+            {{ rewardsDurationFormatted }}
           </td>
         </tr>
       </table>
@@ -44,24 +54,29 @@
       class="stake-select-button button dark-bg-text"
       :class="{ deprecated: deprecated }"
       :to="{ name: 'stake', params: { stakeType } }">
-        <span v-if="deprecated">Warning</span>
-        <span v-if="!deprecated">Select</span>
+        <span v-if="deprecated">{{$t('stake.StakeSelectorItem.warning')}}</span>
+        <span v-if="!deprecated">{{$t('stake.StakeSelectorItem.select')}}</span>
         <b-icon-question-circle-fill v-if="deprecated"
-          v-tooltip="`This stake pool has been deprecated, and should not be staked in anymore.
-          You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed.`" />
+          v-tooltip="$t('stake.StakeSelectorItem.deprecatedTooltip')" />
     </router-link>
   </div>
 </template>
 
 <script>
 import { formatDurationFromSeconds } from '../utils/date-time';
+import { isNftStakeType } from '../interfaces/State';
 
 export default {
-  props: ['stakeTitle', 'stakeTokenName', 'rewardTokenName', 'stakeType', 'minimumStakeTime', 'estimatedYield', 'deprecated'],
-
+  props: ['stakeTitle', 'stakeTokenName', 'rewardTokenName', 'stakeType', 'minimumStakeTime', 'estimatedYield', 'rewardsDuration', 'deprecated'],
   computed: {
     minimumStakeTimeFormatted() {
       return formatDurationFromSeconds(this.minimumStakeTime);
+    },
+    isNftStaking() {
+      return isNftStakeType(this.stakeType);
+    },
+    rewardsDurationFormatted() {
+      return formatDurationFromSeconds(this.rewardsDuration);
     }
   }
 };

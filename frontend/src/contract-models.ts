@@ -1,9 +1,18 @@
 
-import { ICharacter, ITarget, IWeapon, WeaponTrait, WeaponElement } from './interfaces';
+import {
+  ICharacter,
+  ITarget,
+  IWeapon,
+  WeaponTrait,
+  WeaponElement,
+  IRaidState,
+  IPartnerProject
+} from './interfaces';
+import { Nft } from './interfaces/Nft';
 import { IShield } from './interfaces/Shield';
 
 export function traitNumberToName(traitNum: number): string {
-  switch(traitNum) {
+  switch(+traitNum) {
   case WeaponElement.Fire:        return 'Fire';
   case WeaponElement.Earth:       return 'Earth';
   case WeaponElement.Water:       return 'Water';
@@ -66,6 +75,23 @@ export function statNumberToName(statNum: number): string {
 
 export function getWeaponTraitFromProperties(properties: number): number {
   return (properties >> 3) & 0x3;
+}
+
+export function trinketFromContract(id: string | number, data: string[]): Nft {
+  return {
+    id: +id,
+    type: 'trinket',
+    stars: +data[0],
+    //effect: +data[1]
+  };
+}
+
+export function junkFromContract(id: string | number, stars: string): Nft {
+  return {
+    id: +id,
+    type: 'junk',
+    stars: +stars,
+  };
 }
 
 export function shieldFromContract(id: string | number, data: string[]): IShield {
@@ -147,5 +173,90 @@ export function targetFromContract(data: string): ITarget {
     original: data,
     power: n & 0b11111111_11111111_11111111,
     trait: n >> 24
+  };
+}
+
+export function raidFromContract(data: string[]): IRaidState {
+  const index = data[0];
+  const expectedFinishTime = data[1];
+  const raiderCount = data[2];
+  const playerPower = data[3];
+  const bossPower = data[4];
+  const bossTrait = data[5];
+  const status = data[6];
+  const joinSkill = data[7];
+  const staminaCost = data[8];
+  const durabilityCost = data[9];
+  const xpReward = data[10];
+  const accountPower = data[11];
+  return {
+    index, expectedFinishTime, raiderCount, playerPower, bossPower, bossTrait, status,
+    joinSkill, staminaCost, durabilityCost, xpReward, accountPower
+  };
+}
+
+export function pvpFighterFromContract(data: [string,string,string,string,boolean]) {
+  const characterID = data[0];
+  const characterTrait = '0';
+  const weaponID = data[1];
+  const weapon = null;
+  const shieldID = data[2];
+  const shield = null;
+  const wageredSkill = data[3];
+  const useShield = data[4];
+  return {
+    characterID, characterTrait, weaponID, weapon, shieldID, shield, wageredSkill, useShield
+  };
+}
+
+export function duelByAttackerFromContract(data: [string,string,string,boolean]) {
+  const attackerId = data[0];
+  const defenderId = data[1];
+  const createdAt = data[2];
+  const isPending = data[3];
+  return {
+    attackerId,defenderId,createdAt,isPending
+  };
+}
+
+export function duelResultFromContract(data: [string,string,string,string,string,boolean]) {
+  const attackerId = data[0];
+  const defenderId = data[1];
+  const timestamp = data[2];
+  const attackerRoll = data[3];
+  const defenderRoll = data[4];
+  const attackerWon = data[5];
+  const previousDuelReward = 0;
+  const newDuelReward = 0;
+
+  return {
+    attackerId,attackerRoll,attackerWon,defenderId,defenderRoll,timestamp, previousDuelReward, newDuelReward
+  };
+}
+
+export function characterKickedEventFromContract(data: [string,string,string]) {
+  const characterId = data[0];
+  const kickedBy = data[1];
+  const timestamp = data[2];
+
+  return {
+    characterId,
+    kickedBy,
+    timestamp
+  };
+}
+
+export function partnerProjectFromContract(data: [string, string, string, string, string, string, string, boolean]): IPartnerProject {
+  const id = data[0];
+  const name = data[1];
+  const tokenSymbol = data[2];
+  const tokenAddress = data[3];
+  const tokenSupply = data[4];
+  const tokensClaimed = data[5];
+  const tokenPrice = data[6];
+  const isActive = data[7];
+
+  return {
+    id, name, tokenSymbol, tokenAddress, tokenSupply, tokensClaimed, tokenPrice, isActive
   };
 }

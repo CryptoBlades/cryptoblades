@@ -5,13 +5,16 @@
     <div class="content dark-bg-text">
       <router-view v-if="canShowApp" />
     </div>
+    <div class="content dark-bg-text" v-if="!canShowApp">
+      {{$t('app.cantView')}}
+    </div>
     <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
-        <span class="starter-panel-heading">Metamask Not Detected Or Incorrect Network</span>
+        <span class="starter-panel-heading">{{ $t('app.warning.title') }}</span>
         <div class="center">
-          <big-button class="button" :mainText="`Add MetaMask`" @click="startOnboarding" v-if="showMetamaskWarning" />
-          <big-button class="button" :mainText="`Switch to BSC Network`" @click="configureMetaMask" v-if="showNetworkError" />
-          <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
+          <big-button class="button" :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
+          <big-button class="button" :mainText="$t('app.warning.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
+          <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.buttons.hide')" />
         </div>
       </div>
     </div>
@@ -20,41 +23,50 @@
       v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))"
     >
       <div class="starter-panel">
-        <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
-        <span class="starter-panel-heading">{{ errorMessage || 'Get Started With CryptoBlades' }}</span>
-        <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="" srcset="" />
+        <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
+        <span class="starter-panel-heading">{{ errorMessage || $t('app.warning.start') }}</span>
+        <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
         <div>
-          <big-button class="button mm-button" :mainText="`Configure MetaMask`" @click="configureMetaMask" />
-          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button" :mainText="`Connect to MetaMask`" @click="connectMetamask" />
+          <big-button class="button mm-button" :mainText="$t('app.warning.buttons.confMetamask')" @click="configureMetamask" />
+          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button"
+          :mainText="$t('app.warning.buttons.startMetamask')" @click="connectMetamask" />
         </div>
         <div class="seperator"></div>
         <div class="instructions-list">
-          <p>
-            Get started in less than 10 minutes! To recruit your first character you need {{ recruitCost }} SKILL and .001 BNB for gas. You will also need .0015
-            BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!
-          </p>
+          <p>{{ $t('app.warning.message.instructions', {recruitCost: this.recruitCost}) }}</p>
           <ul class="unstyled-list">
-            <li>1. Buying BNB with fiat: <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">Watch Video</a></li>
             <li>
-              2. Once you have BNB, go to ApeSwap to obtain SKILL tokens:<br />
-              <a v-bind:href="`${getExchangeUrl}`" target="_blank">Trade SKILL/BNB</a>
+              1. {{ $t('app.warning.message.inst1') }}
+              <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.watchVideo')}}</a>
+              {{$t('app.warning.message.or')}}
+              <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.buyWithTransak')}}</a>
             </li>
             <li>
-              3. Follow this tutorial to swap BNB for SKILL: <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">Watch Video</a>
+              2. {{ $t('app.warning.message.inst2') }}<br />
+              <a v-bind:href="`${getExchangeUrl}`" target="_blank">{{ $t('trade') }} SKILL/BNB</a>
             </li>
             <li>
-              4. That's it! Now you can create your first character: (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer"
-                >Watch 'Getting Started' Video</a
-              >)
+              3. {{ $t('app.warning.message.inst3') }} <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">{{ $t('app.warning.message.watchVideo', {name:''}) }}</a>
+            </li>
+            <li>
+              4. {{ $t('app.warning.message.inst4') }} (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">{{ $t('app.warning.message.watchGettingStartedVideo', {name:"'Getting Started' "}) }}</a>)
             </li>
           </ul>
           <p>
-            If you have any questions, please join our Discord:
+            {{ $t('app.warning.message.questionDiscord') }}
             <a href="https://discord.gg/cryptoblades" target="_blank" rel="noopener noreferrer">https://discord.gg/cryptoblades</a>
           </p>
         </div>
         <div class="seperator"></div>
-        <small-button class="button" @click="toggleHideWalletWarning" :text="'Hide Warning'" />
+        <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
+      </div>
+      <div class="ad-container">
+        <Adsense v-if="showAds && !isMobile()"
+          data-ad-client="ca-pub-6717992096530538"
+          data-ad-slot="5115599573"
+          data-ad-format="auto"
+          data-full-width-responsive="yes"
+          />
       </div>
     </div>
   </div>
@@ -73,6 +85,9 @@ import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import { apiUrl } from './utils/common';
+import i18n from './i18n';
+import { getConfigValue } from './contracts';
+import '@/mixins/general';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -90,16 +105,19 @@ export default {
   data: () => ({
     errorMessage: '',
     hideWalletWarning: false,
+    showAds: false,
     isConnecting: false,
     recruitCost: '',
+    isOptions: false,
   }),
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
+    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl',
+      'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
-      return this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError;
+      return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
     },
 
     showMetamaskWarning() {
@@ -121,6 +139,10 @@ export default {
     },
     $route(to) {
       // react to route changes
+      if(to.path === '/options') {
+        return this.isOptions = true;
+      } else this.isOptions = false;
+
       window.gtag('event', 'page_view', {
         page_title: to.name,
         page_location: to.fullPath,
@@ -135,11 +157,14 @@ export default {
     ...mapActions([
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
-      'fetchCharacterTransferCooldownForOwnCharacters',
       'setupWeaponDurabilities',
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
+      'configureMetaMask'
+    ]),
+    ...mapGetters([
+      'getExchangeTransakUrl'
     ]),
 
     async updateCharacterStamina(id) {
@@ -152,8 +177,8 @@ export default {
 
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+      this.showAds =  localStorage.getItem('show-ads') === 'true';
     },
-
     async initializeRecruitCost() {
       const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
@@ -171,115 +196,25 @@ export default {
       const onboarding = new MetaMaskOnboarding();
       onboarding.startOnboarding();
     },
-    async configureMetaMask() {
-      const web3 = this.web3.currentProvider;
-      if (this.currentNetworkId === 97) {
-        try {
-          await web3.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x61' }],
-          });
-        } catch (switchError) {
-          try {
-            await web3.request({
-              method: 'wallet_addEthereumChain',
-              params: [
-                {
-                  chainId: '0x61',
-                  chainName: 'Binance Smart Chain Testnet',
-                  nativeCurrency: {
-                    name: 'Binance Coin',
-                    symbol: 'BNB',
-                    decimals: 18,
-                  },
-                  rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
-                  blockExplorerUrls: ['https://testnet.bscscan.com'],
-                },
-              ],
-            });
-          } catch (addError) {
-            console.error(addError);
-          }
-        }
-
-        try {
-          await web3.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: '0xcaf53066e36eef55ed0663419adff6e503bd134f',
-                symbol: 'SKILL',
-                decimals: 18,
-                image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
-              },
-            },
-          });
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        {
-          try {
-            await web3.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: '0x38' }],
-            });
-          } catch (switchError) {
-            try {
-              await web3.request({
-                method: 'wallet_addEthereumChain',
-                params: [
-                  {
-                    chainId: '0x38',
-                    chainName: 'Binance Smart Chain Mainnet',
-                    nativeCurrency: {
-                      name: 'Binance Coin',
-                      symbol: 'BNB',
-                      decimals: 18,
-                    },
-                    rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                    blockExplorerUrls: ['https://bscscan.com/'],
-                  },
-                ],
-              });
-            } catch (addError) {
-              console.error(addError);
-            }
-          }
-
-          try {
-            await web3.request({
-              method: 'wallet_watchAsset',
-              params: {
-                type: 'ERC20',
-                options: {
-                  address: '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab',
-                  symbol: 'SKILL',
-                  decimals: 18,
-                  image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
-                },
-              },
-            });
-          } catch (error) {
-            console.error(error);
-          }
-        }
-      }
+    async configureMetamask() {
+      await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
 
     async connectMetamask() {
       const web3 = this.web3.currentProvider;
       this.isConnecting = true;
-      this.errorMessage = 'Connecting to MetaMask...';
+      this.errorMessage = i18n.t('app.warning.errorMessage.connecting');
       web3
         .request({ method: 'eth_requestAccounts' })
         .then(() => {
-          this.errorMessage = 'Success: MetaMask connected.';
+          this.errorMessage = i18n.t('app.warning.errorMessage.success');
           this.isConnecting = false;
+
+          this.initializeStore();
+          this.toggleHideWalletWarning();
         })
         .catch(() => {
-          this.errorMessage = 'Error: MetaMask could not get permissions.';
+          this.errorMessage = i18n.t('app.warning.errorMessage.error');
           this.isConnecting = false;
         });
     },
@@ -300,9 +235,7 @@ export default {
         !this.showMetamaskWarning &&
         (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
       ) {
-        this.$dialog.notify.warning(
-          `You have hidden the wallet warning and it would now be displayed. If you are trying to play,
-        please disable the option and follow the instructions, otherwise close and ignore.`,
+        this.$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
           {
             timeout: 0,
           },
@@ -317,18 +250,18 @@ export default {
       const lastHash = localStorage.getItem('lastnotification');
       let shouldContinue = true;
 
-      notifications.forEach((notif) => {
+      notifications.forEach((notification) => {
         if (!shouldContinue) return;
 
-        if (lastHash === notif.hash) {
+        if (lastHash === notification.hash) {
           shouldContinue = false;
           return;
         }
 
         this.$dialog.notify.warning(
-          `${notif.title}
+          `${notification.title}
           <br>
-          <a href="${notif.link}" target="_blank">Check it out!</a>
+          <a href="${notification.link}" target="_blank">Check it out!</a>
           `,
           {
             timeout: 300000,
@@ -346,6 +279,13 @@ export default {
     Events.$on('setting:hideRewards', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
     Events.$on('setting:hideWalletWarning', () => this.checkStorage());
+    // Events.$on('garrison:characterReceived', (e) => {
+    //   this.$dialog.notify.warning(`${i18n.t('app.warning.message.newCharacter')} ID: ${e.id} ${i18n.t('app.warning.message.inGarrison')}!`,
+    //     {
+    //       timeout: 5000,
+    //     },
+    //   );
+    // });
 
     document.body.addEventListener('click', (e) => {
       const tagname = e.target.getAttribute('tagname');
@@ -365,17 +305,19 @@ export default {
         });
       }
     });
-
     this.showWarningDialog();
+    if(this.hideWalletWarning) {
+      this.configureMetamask();
+    }
   },
 
   async created() {
     try {
       await this.initializeStore();
     } catch (e) {
-      this.errorMessage = 'Welcome to CryptoBlades. Here is how you can get started.';
+      this.errorMessage = i18n.t('app.warning.errorMessage.welcome');
       if (e.code === 4001) {
-        this.errorMessage = 'Error: MetaMask could not get permissions.';
+        this.errorMessage = i18n.t('app.warning.errorMessage.error');
       }
 
       console.error(e);
@@ -386,15 +328,21 @@ export default {
       this.ownCharacters.forEach(async (c) => {
         await this.updateCharacterStamina(c.id);
       });
+      this.ownGarrisonCharacters.forEach(async (c) => {
+        await this.updateCharacterStamina(c.id);
+      });
     }, 3000);
 
     this.availableStakeTypes.forEach((item) => {
       this.fetchStakeDetails({ stakeType: item });
     });
 
+    this.availableNftStakeTypes.forEach((item) => {
+      this.fetchStakeDetails({ stakeType: item });
+    });
+
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
-        this.fetchCharacterTransferCooldownForOwnCharacters(),
         this.setupWeaponDurabilities(),
         this.fetchWaxBridgeDetails(),
         this.fetchRewardsClaimTax(),
@@ -683,7 +631,7 @@ div.bg-success {
 
 .content {
   padding: 0 1em;
-  height: calc(100vh - 56px);
+  height: auto;
   background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }

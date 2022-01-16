@@ -5,72 +5,99 @@
         <template #button-content>
           <i class="fa fa-bars"></i>
         </template>
-
         <b-dropdown-group>
 
-        <b-dropdown-header>Links</b-dropdown-header>
+        <b-dropdown-header>{{$t('optionsMenu.links')}}</b-dropdown-header>
 
-        <b-dropdown-item @click="onClaimTokens()"><i class="fa fa-coins mr-2"></i>Claim Skill </b-dropdown-item>
+          <b-dropdown-item v-if="currentChainSupportsClaimTokens()" @click="onClaimTokens()"><i
+            class="fa fa-coins mr-2"></i>{{ $t('optionsMenu.claimSkill') }}
+          </b-dropdown-item>
 
-        <b-dropdown-item @click.native="$router.push('leaderboard')" class="gtag-link-others" tagname="leaderboard_screen">
-        <i class="fa fa-trophy mr-2"></i>Leaderboard
+          <b-dropdown-item :to="{ name: 'leaderboard' }" class="gtag-link-others" tagname="leaderboard_screen">
+        <i class="fa fa-trophy mr-2"></i>{{$t('optionsMenu.leaderboard')}}
         </b-dropdown-item>
 
-        <b-dropdown-item @click.native="$router.push('portal')"><i class="fa fa-dungeon mr-2"></i>Portal</b-dropdown-item>
+        <b-dropdown-item :to="{ name: 'portal' }"><i class="fa fa-dungeon mr-2"></i>{{$t('optionsMenu.portal')}}</b-dropdown-item>
 
-        <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank"><i class="fa fa-book mr-2"></i>Wiki <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
+        <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank"><i class="fa fa-book mr-2"></i>{{$t('optionsMenu.wiki')}} <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
+
+        <b-dropdown-item :to="{ name: 'nft-display' }">
+          <img src="https://seiyria.com/gameicons-font/svg/crystal-ball.svg" class="nft-display-icon"/>
+           {{$t('optionsMenu.nftDisplay')}}
+        </b-dropdown-item>
+
+        <b-dropdown-item :to="{ name: 'bridge' }" v-if="isBridgeEnabled">
+           <i class="fa fa-exchange-alt mr-2"></i>{{$t('optionsMenu.bridgeNfts')}}
+        </b-dropdown-item>
 
         </b-dropdown-group>
+
         <hr class="border-light">
 
         <b-dropdown-group class="mb-2">
 
-       <b-dropdown-item  @click.native="$router.push('options')">
-        <i class="fa fa-cog mr-2"></i>Options
+       <b-dropdown-item :to="{ name: 'options' }">
+        <i class="fa fa-cog mr-2"></i>{{$t('optionsMenu.options')}}
         </b-dropdown-item>
         </b-dropdown-group>
       </b-nav-item-dropdown>
     </b-navbar-nav>
 
-    <b-modal class="centered-modal" ref="need-gas-modal" title="Need Withdraw?"
-      @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Portal" >
-        Need Withdraw? Try our WAX Portal, which will pay you .5% under market rate to sell your WAX for BNB!
+    <b-modal class="centered-modal" ref="need-gas-modal" :title="$t('needGasModal.title')"
+      @ok="claimSkill(ClaimStage.Stake)" :ok-title="$t('needGasModal.okTitle')"
+      @cancel="$router.push({ name: 'portal' })" :cancel-title="$t('needGasModal.cancelTitle')" >
+        {{$t('needGasModal.needWithdraw')}}
         <div class="text-center">
           <hr class="hr-divider">
-          Hold Reminder:<br>
-          A percentage of your earning goes back to the community,<br>
-          <u>if you withdraw early</u>
+          {{$t('needGasModal.holdReminder')}}<br>
+          <span v-html="$t('needGasModal.holdReminderText')"></span>
           <div class="row">
-            <div class="col-5">Your early withdraw tax</div>
+            <div class="col-5">{{$t('needGasModal.yourTax')}}</div>
             <div class="col-2"><span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></div>
-            <div class="col-5 text-left">Reduces 1% per day<br>
-              Reset to 15% after withdraw</div>
+            <div class="col-5 text-left">{{$t('needGasModal.reduces1')}}<br>
+              {{$t('needGasModal.reduces2')}}</div>
           </div>
         </div>
     </b-modal>
-    <b-modal class="centered-modal" ref="stake-suggestion-modal" title="Stake Skill"
-      @ok="$router.push({ name: 'select-stake-type' })" ok-only ok-title="Go to Stake" >
-        You can avoid paying the 15% tax by staking unclaimed skill rewards for 7 days. If you stake your SKILL now, we'll give you a
-        50% bonus in-game only SKILL that you can use right away!
-      <a href="#" @click="claimSkill(ClaimStage.Claim)"> <br>No thanks, I'd rather {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " +
-        this.formattedTaxAmount + " in taxes and " : ""  }}forfeit my bonus </a>
+    <b-modal class="centered-modal" ref="stake-suggestion-modal" :title="$t('stakeModal.title')"
+      @ok="$router.push({ name: 'select-stake-type' })"
+      :ok-title="$t('stakeModal.okTitle')"
+      :cancel-title="$t('stakeModal.cancelTitle')"
+      >
+        {{$t('stakeModal.stakeText')}}
+      <a href="#" @click="claimSkill(ClaimStage.Claim)">
+      <br>
+      <span v-if="(this.rewardsClaimTaxAsFactorBN > 0)">{{$t('stakeModal.bonusWarning1')}}</span>
+      <span v-else>{{$t('stakeModal.bonusWarning2', {formattedTaxAmount : this.formattedTaxAmount})}}</span>      </a>
     </b-modal>
-    <b-modal class="centered-modal" ref="claim-confirmation-modal" title="Claim Skill" ok-title="I am sure"
-      @ok="onClaimTokens()"> You are about to {{ (this.rewardsClaimTaxAsFactorBN > 0)?"pay " + formattedRewardsClaimTax +
-      " tax for early withdrawal, costing you " + this.formattedTaxAmount + " SKILL. You will also " : "" }}
-      miss out on {{formattedBonusLost}} bonus SKILL. Are you sure
-      you wish to continue? <b>This action cannot be undone.</b>
+    <b-modal class="centered-modal" ref="claim-confirmation-modal"
+    :title="$t('stakeModal.confirmModal.title')"
+    :ok-title="$t('stakeModal.confirmModal.okTitle')"
+    :cancel-title="$t('stakeModal.confirmModal.cancelTitle')"
+    @ok="onClaimTokens()">
+      <span v-if="(this.rewardsClaimTaxAsFactorBN > 0)">
+        {{$t('stakeModal.confirmModal.claimWarning2', {
+          formattedRewardsClaimTax,
+          formattedTaxAmount : this.formattedTaxAmount,
+          formattedBonusLost
+          } )}}
+      </span>
+      <span v-else>
+        {{$t('stakeModal.confirmModal.claimWarning1', {formattedBonusLost})}}
+      </span>
+      <b>{{$t('stakeModal.confirmModal.cantBeUndone')}}</b>
     </b-modal>
   </div>
 </template>
 
 <script lang="ts">
 import Events from '../events';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import BigNumber from 'bignumber.js';
-import { Accessors } from 'vue/types/options';
+import {Accessors} from 'vue/types/options';
 import Vue from 'vue';
-import { toBN, fromWeiEther } from '../utils/common';
+import {fromWeiEther, toBN} from '../utils/common';
+import {nft_bridge as bridgeEnabled} from './../feature-flags';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -81,9 +108,11 @@ interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
 }
 interface Data {
+  isBridgeEnabled: boolean;
   showGraphics: boolean;
   hideRewards: boolean;
   hideWalletWarning: boolean;
+  showSkillInUsd: boolean;
 }
 
 interface StoreMappedGetters {
@@ -102,13 +131,16 @@ export default Vue.extend({
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+    this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
   },
 
   data() {
     return {
+      isBridgeEnabled: bridgeEnabled,
       showGraphics: false,
       hideRewards: false,
       hideWalletWarning: false,
+      showSkillInUsd: false,
       ClaimStage
     } as Data;
   },
@@ -138,10 +170,7 @@ export default Vue.extend({
       return `${toBN(skillLost).toFixed(4)}`;
     },
     canClaimTokens(): boolean {
-      if(toBN(this.skillRewards).lte(0)) {
-        return false;
-      }
-      return true;
+      return !toBN(this.skillRewards).lte(0);
     },
   },
 
@@ -188,8 +217,26 @@ export default Vue.extend({
 
       Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
     },
+
+    toggleShowSkillInUsd() {
+      this.showSkillInUsd = !this.showSkillInUsd;
+      if (this.showSkillInUsd) localStorage.setItem('showSkillInUsd', 'true');
+      else localStorage.setItem('showSkillInUsd', 'false');
+
+      Events.$emit('setting:showSkillInUsd', { value: this.showSkillInUsd });
+    },
+
+    currentChainSupportsClaimTokens() {
+      return (localStorage.getItem('currentChain') || 'BSC') !== 'BSC';
+    },
   }
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.nft-display-icon {
+  margin-left: -3px;
+  height: 20px;
+  filter: invert(75%) sepia(8%) saturate(243%) hue-rotate(8deg) brightness(96%) contrast(81%);
+}
+</style>

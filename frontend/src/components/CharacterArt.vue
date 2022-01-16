@@ -1,7 +1,7 @@
 <template>
-  <div class="character-art" v-tooltip="tooltipHtml(character)" ref="el">
+  <div class="character-art" ref="el">
     <div class="trait" v-if="!portrait">
-      <span :class="trait.toLowerCase() + '-icon circle-element'"></span>
+      <span :class="characterTrait.toLowerCase() + '-icon circle-element'"></span>
     </div>
 
     <div class="placeholder d-flex align-items-start justify-content-center p-1"
@@ -23,28 +23,27 @@
     </div>
 
     <div class="name-lvl-container">
-      <div class="name black-outline" v-if="!portrait">{{ getCharacterName(character.id) }} </div>
+      <div class="name black-outline" v-if="!portrait">{{ getCleanCharacterName(character.id) }} </div>
       <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
     </div>
     <div class="score-id-container">
-    <div class="black-outline" v-if="!portrait">ID <span class="white">{{ character.id }}</span></div>
+    <div class="black-outline" v-if="!portrait">{{$t('CharacterArt.id')}} <span class="white">{{ character.id }}</span></div>
     <div class="black-outline" v-if="!portrait">
-      Score <span class="white">{{ heroScore.toLocaleString() }}</span>
-      <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="`Hero score is a measure of your hero's combat prowess so far.
-        It goes up when you win and down when you lose. It is also temporarily disabled!`"/>
+      {{$t('CharacterArt.score')}} <span class="white">{{ heroScore.toLocaleString() }}</span>
+      <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('CharacterArt.scoreTooltip')"/>
     </div>
     </div>
 
-    <div v-if="!portrait && isMarket" class="small-stamina-char"
-      :style="`--staminaReady: ${(timestampToStamina(character.staminaTimestamp)/maxStamina)*100}%;`"
+    <div v-if="!portrait && (isMarket || isGarrison)" class="small-stamina-char"
+      :style="`--staminaReady: ${(characterStamina/maxStamina)*100}%;`"
       v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
-      <div class="stamina-text black-outline">STA {{ timestampToStamina(character.staminaTimestamp) }} / 200</div>
+      <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ characterStamina }} / 200</div>
     </div>
 
     <div class="xp" v-if="!portrait">
       <b-progress :max="RequiredXp(character.level)" variant="success"
-      v-tooltip.bottom="`Claimable XP ${this.getCharacterUnclaimedXp(character.id)}`">
-        <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} XP</strong>
+      v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
+        <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} {{$t('CharacterArt.xp')}}</strong>
         <b-progress-bar :value="character.xp || 0"></b-progress-bar>
       </b-progress>
     </div>
@@ -63,6 +62,7 @@ import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
 import { mapGetters, mapState } from 'vuex';
+import { getCleanName } from '../rename-censor';
 //import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
@@ -81,7 +81,7 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character', 'portrait', 'isMarket'],
+  props: ['character', 'portrait', 'isMarket', 'isGarrison'],
   components: {
     //SmallButton,
   },
@@ -105,41 +105,42 @@ export default {
       modelLoader: null,
       textureLoader: null,
       body: null,
-      trait: CharacterTrait[this.character.trait],
+      trait: this.characterTrait,
       showPlaceholder: false,
       heroScore: 0
     };
   },
 
   computed: {
-    ...mapState(['maxStamina']),
+    ...mapState(['maxStamina', 'characterStaminas']),
     ...mapGetters([
       'getCharacterName',
-      'transferCooldownOfCharacterId',
       'getCharacterUnclaimedXp',
-      'timeUntilCharacterHasMaxStamina'
+      'timeUntilCharacterHasMaxStamina',
+      'charactersWithIds',
+      'garrisonCharactersWithIds'
     ]),
+
+    characterTrait() {
+      const characterWithId = this.charactersWithIds &&
+        this.isGarrison ? this.garrisonCharactersWithIds([this.character.id])[0] : this.charactersWithIds([this.character.id])[0];
+      return characterWithId && CharacterTrait[characterWithId.trait] || CharacterTrait[this.character.trait];
+    },
+
+    characterStamina() {
+      return this.isGarrison ? this.characterStaminas[this.character.id] : this.timestampToStamina(this.character.staminaTimestamp);
+    }
   },
 
   methods: {
     RequiredXp,
 
-    tooltipHtml(character) {
-      if (!character) return '';
-
-      const cooldown = this.transferCooldownOfCharacterId(this.character.id);
-      if (cooldown) {
-        if (cooldown === 86400)
-          // edge case for when it's exactly 1 day and the iso string cant display
-          return 'May not be traded for: 1 day';
-        else return `May not be traded for: ${new Date(cooldown * 1000).toISOString().substr(11, 8)}`;
-      }
-
-      return '';
+    getCleanCharacterName(id) {
+      return getCleanName(this.getCharacterName(id));
     },
 
     staminaToolTipHtml(time) {
-      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
+      return this.$t('CharacterArt.staminaTooltip') + time;
     },
 
     timestampToStamina(timestamp) {
@@ -220,6 +221,7 @@ export default {
       this.scene.add(light);
     },
     setupModel() {
+      if(!this.scene) return;
       this.setupLighting();
       this.allLoaded = false;
       this.allLoadStarted = false;

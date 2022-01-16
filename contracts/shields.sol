@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "./Promos.sol";
 import "./util.sol";
 
 contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
@@ -24,6 +25,12 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         defenseMultPerPointBasic =  ABDKMath64x64.divu(1, 400); // 0.25%
         defenseMultPerPointDEF = defenseMultPerPointBasic.mul(ABDKMath64x64.divu(103, 100)); // 0.2575% (+3%)
         defenseMultPerPointMatching = defenseMultPerPointBasic.mul(ABDKMath64x64.divu(107, 100)); // 0.2675% (+7%)
+    }
+
+    function migrateTo_surprise(Promos _promos) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        promos = _promos;
     }
 
     /*
@@ -65,8 +72,14 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint256 public constant maxDurability = 20;
     uint256 public constant secondsPerDurability = 3000; //50 * 60
 
-    event NewShield(uint256 indexed shield, address indexed minter);
+    Promos public promos;
 
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
+    uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
+    uint256 public constant NFTVAR_SHIELD_TYPE = 2; // 0 = normal, 1 = founders, 2 = legendary defender
+
+    event NewShield(uint256 indexed shield, address indexed minter);
+    
     modifier restricted() {
         _restricted();
         _;
@@ -119,8 +132,8 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function mintForPurchase(address buyer) external restricted {
-        require(totalSupply() < 10000, "Out of stock"); // temporary restriction
-        mint(buyer, uint256(keccak256(abi.encodePacked(buyer, block.timestamp, blockhash(block.number - 1), gasleft()))));
+        require(totalSupply() < 25000, "Out of stock"); // temporary restriction
+        mint(buyer, uint256(keccak256(abi.encodePacked(buyer, blockhash(block.number - 1)))));
     }
 
     function mint(address minter, uint256 seed) public restricted returns(uint256) {
@@ -361,6 +374,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         restricted noFreshLookup(id)
     returns (int128, int128, uint24, uint8) {
 
+        require(nftVars[id][NFTVAR_BUSY] == 0, "Shield is busy");
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require(durabilityPoints >= drainAmount, "Not enough durability!");
 
@@ -371,7 +385,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         else {
             durabilityTimestamp[id] = uint64(durabilityTimestamp[id] + drainTime);
         }
-        
+
         Shield storage shd = tokens[id];
         return (
             shieldBaseMultiplier.add(defenseMultPerPointBasic.mul(
@@ -428,5 +442,21 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function getDurabilityMaxWait() public pure returns (uint64) {
         return uint64(maxDurability * secondsPerDurability);
+    }
+
+    function getNftVar(uint256 shieldID, uint256 nftVar) public view returns(uint256) {
+        return nftVars[shieldID][nftVar];
+    }
+    function setNftVar(uint256 shieldID, uint256 nftVar, uint256 value) public restricted {
+        nftVars[shieldID][nftVar] = value;
+    }
+    function setNftVars(uint256[] calldata ids, uint256 nftVar, uint256 value) external restricted {
+        for(uint i = 0; i < ids.length; i++)
+            nftVars[ids[i]][nftVar] = value;
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false
+            && nftVars[tokenId][NFTVAR_BUSY] == 0);
     }
 }

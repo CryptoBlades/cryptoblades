@@ -1,66 +1,113 @@
 <template>
   <div class="body main-font">
-
     <div v-if="ownCharacters.length === 0" class="blank-slate">
       <div class="current-promotion">
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="../assets/border-element.png">
         </div>
-        <strong class="upper-text">Start earning today!</strong>
+        <strong class="upper-text">{{ $t("plaza.welcome") }}</strong>
         <div class="bot-bg-img promotion-decoration">
             <img src="../assets/border-element.png">
         </div>
       </div>
       <big-button
         class="button"
-        :mainText="`Recruit character for ${recruitCost} SKILL`"
+        :mainText="$t('plaza.recruitCharacter') + ` ${recruitCost} SKILL`"
         :disabled="!canRecruit()"
         @click="onMintCharacter"
         tagname="recruit_character"
       />
       <div v-if="formatSkill() < recruitCost" >
         <br>
-        You can buy more SKILL from <a v-bind:href="`${getExchangeUrl}`" target="_blank">here</a>.
+        <i18n path="plaza.notEnoughSkill" tag="label" for="plaza.notEnoughSkillLink">
+          <a v-bind:href="`${getExchangeUrl}`" target="_blank" rel="noopener noreferrer">{{$t("plaza.notEnoughSkillLink")}}</a>
+        </i18n>
+          <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer"> {{$t("plaza.buyBNBTransak")}}</a>.
       </div>
     </div>
-    <div class="row mt-3" v-if="ownCharacters.length > 0">
-      <div class="col">
-        <div v-if="ownCharacters.length > 0">
-          <div class="d-flex justify-content-space-between">
-            <h1>Characters ({{ ownCharacters.length }} / 4)</h1>
+    <b-tabs justified>
+      <b-tab @click="garrisonTabActive = false">
+        <template #title>
+          {{$t('plaza.plaza')}}
+          <hint class="hint" :text="$t('plaza.plazaHint')" />
+        </template>
+        <div class="row mt-3" v-if="ownCharacters.length > 0">
+          <div class="col">
+            <div v-if="ownCharacters.length > 0">
+              <div class="d-flex justify-content-space-between">
+                <h1>{{$t('characters')}} ({{ ownCharacters.length }} / 4)</h1>
+                <b-button
+                  :disabled="!canRecruit()"
+                  variant="primary"
+                  class="ml-auto gtag-link-others"
+                  @click="onMintCharacter"
+                  v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+                  {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
+                </b-button>
+              </div>
 
-            <b-button
-              v-if="ownCharacters.length < 4"
-              :disabled="!canRecruit()"
-              variant="primary"
-              class="ml-auto gtag-link-others"
-              @click="onMintCharacter"
-              v-tooltip="'Recruit new character'" tagname="recruit_character">
-              Recruit ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
-            </b-button>
+              <character-list
+                :value="currentCharacterId"
+                :showNftOptions="true"
+                @input="setCurrentCharacter"
+              />
+            </div>
           </div>
-
-          <character-list
-            :value="currentCharacterId"
-            @input="setCurrentCharacter"
-          />
         </div>
-      </div>
-    </div>
+      </b-tab>
+      <b-tab @click="garrisonTabActive = true">
+        <template #title>
+          {{$t('plaza.garrison')}}
+          <hint class="hint" :text="$t('plaza.garrisonHint')" />
+        </template>
+        <div class="row mt-3" v-if="ownCharacters.length > 0">
+          <div class="col">
+            <div v-if="ownCharacters.length > 0">
+              <div class="d-flex justify-content-space-between">
+                <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
+                <b-button
+                  v-if="ownCharacters.length === 4"
+                  :disabled="!canRecruit()"
+                  variant="primary"
+                  class="ml-auto gtag-link-others"
+                  @click="onMintCharacter"
+                  v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+                  {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
+                </b-button>
+              </div>
+
+              <character-list
+                :showNftOptions="true"
+                :isGarrison="true"
+                @input="setCurrentCharacter"
+              />
+            </div>
+          </div>
+        </div>
+      </b-tab>
+    </b-tabs>
   </div>
 </template>
 
-<script>
+<script lang='ts'>
 import BN from 'bignumber.js';
-
 import BigButton from '../components/BigButton.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
+import Hint from '../components/Hint.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
+import Vue from 'vue';
+import i18n from '@/i18n';
 
-export default {
+interface Data {
+  recruitCost: string;
+  garrisonTabActive: boolean;
+  showAds: boolean;
+}
+
+export default Vue.extend({
   computed: {
-    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
+    ...mapState(['characters', 'ownedGarrisonCharacterIds', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
     ...mapGetters([
       'contracts',
       'ownCharacters',
@@ -71,7 +118,7 @@ export default {
       'getExchangeUrl',
     ]),
 
-    character() {
+    character(): any {
       if (!this.currentCharacter) {
         return {
           id: null,
@@ -92,28 +139,30 @@ export default {
   },
 
   async created() {
+    console.log(this.getExchangeUrl, this.getExchangeTransakUrl());
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
-    this.recruitCost = BN(skillRecruitCost).div(BN(10).pow(18)).toFixed(4);
-
-    console.log(this.recruitCost, this.formatSkill());
+    this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
   },
 
   data() {
     return {
-      recruitCost: this.recruitCost
-    };
+      recruitCost: '0',
+      garrisonTabActive: false,
+      showAds: false
+    } as Data;
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter']),
+    ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
       try {
         await this.mintCharacter();
       } catch (e) {
-        this.$dialog.notify.error('Could not mint character: insufficient funds or transaction denied.');
+        (this as any).$dialog.notify.error(i18n.t('plaza.couldNotMint'));
       }
     },
     formatSkill() {
@@ -123,14 +172,22 @@ export default {
       const cost = toBN(this.recruitCost);
       const balance = toBN(this.skillBalance);
       return balance.isGreaterThanOrEqualTo(cost);
-    }
+    },
+    checkStorage() {
+      this.showAds =  localStorage.getItem('show-ads') === 'true';
+    },
+  },
+
+  async mounted() {
+    this.checkStorage();
   },
 
   components: {
     BigButton,
     CharacterList,
+    Hint
   },
-};
+});
 </script>
 
 <style scoped>

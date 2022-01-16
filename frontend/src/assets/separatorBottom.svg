@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="451.764" height="32.527" viewBox="0 0 451.764 32.527">
+  <g id="separator" transform="translate(-743.736 -1316.201)">
+    <g id="Rectangle_582" data-name="Rectangle 582" transform="translate(952.737 1332.465) rotate(-45)" fill="#000e1d" stroke="#edcd90" stroke-width="1">
+      <rect width="23" height="23" stroke="none"/>
+      <rect x="0.5" y="0.5" width="22" height="22" fill="none"/>
+    </g>
+    <line id="Line_84" data-name="Line 84" x2="210" transform="translate(985.5 1332.5)" fill="none" stroke="#edcd90" stroke-width="1"/>
+    <path id="Path_173" data-name="Path 173" d="M0,0H210" transform="translate(743.736 1332.465)" fill="none" stroke="#edcd90" stroke-width="1"/>
+  </g>
+</svg>

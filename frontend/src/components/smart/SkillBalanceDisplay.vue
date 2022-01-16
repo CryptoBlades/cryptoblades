@@ -1,12 +1,24 @@
 <template>
   <div class="skill-balance-display">
-    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="'Buy SKILL'" @click="onBuySkill">
+    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
+      <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
+      <div class="buy-skill-modal">
+        <div class="buy-skill-modal-child">
+         <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
+              <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">{{$t('skillBalanceDisplay.buyWithCrypto')}}</b-button>
+        </div>
+        <div class="buy-skill-modal-child">
+              <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
+              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">{{$t('skillBalanceDisplay.buyWithFiat')}}</b-button>
+        </div>
+      </div>
+    </b-modal>
       <!-- <i class="fa fa-plus gtag-link-others" tagname="buy_skill"></i> -->
       <img src="../../assets/addButton.png" class="add-button gtag-link-others"  tagname="buy_skill">
     </div>
 
     <div class="balance-container">
-      <strong class="mr-2 balance-text">Total Balance</strong>
+      <strong class="mr-2 balance-text">{{$t('skillBalanceDisplay.totalBalance')}}</strong>
       <span class="balance"
         v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
         @mouseover="hover = !isMobile() || true"
@@ -33,10 +45,14 @@ import { mapActions, mapState, mapGetters } from 'vuex';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { IState } from '@/interfaces';
 import { formatDurationFromSeconds } from '@/utils/date-time';
+import { BModal } from 'bootstrap-vue';
+import i18n from '@/i18n';
+import {TranslateResult} from 'vue-i18n';
 
 type StoreMappedState = Pick<IState, 'skillRewards' | 'skillBalance' | 'inGameOnlyFunds' | 'waxBridgeWithdrawableBnb' | 'waxBridgeTimeUntilLimitExpires'>;
 
 interface StoreMappedGetters {
+  getExchangeTransakUrl: string;
   getExchangeUrl: string;
   availableBNB: string;
 }
@@ -52,7 +68,8 @@ export default Vue.extend({
       'waxBridgeTimeUntilLimitExpires']) as Accessors<StoreMappedState>),
     ...(mapGetters({
       availableBNB: 'waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod',
-      getExchangeUrl: 'getExchangeUrl'
+      getExchangeUrl: 'getExchangeUrl',
+      getExchangeTransakUrl: 'getExchangeTransakUrl'
     }) as Accessors<StoreMappedGetters>),
 
     formattedTotalSkillBalance(): string {
@@ -86,16 +103,18 @@ export default Vue.extend({
       return formatDurationFromSeconds(this.waxBridgeTimeUntilLimitExpires);
     },
 
-    bnbClaimTooltip(): string {
+    bnbClaimTooltip(): TranslateResult {
       if(!this.canWithdrawBnb) {
-        return `
-          You have reached your limit for withdrawing BNB from the portal for this period,
-          please wait about ${this.durationUntilLimitPeriodOver}
-          (${this.formattedTotalAvailableBnb} left)
-        `;
+        return i18n.t('skillBalanceDisplay.reachedPortalLimit', {
+          durationUntilLimitPeriodOver : this.durationUntilLimitPeriodOver,
+          formattedTotalAvailableBnb : this.formattedTotalAvailableBnb,
+        });
       }
 
-      return `${this.formattedBnbThatCanBeWithdrawn} of ${this.formattedTotalAvailableBnb} withdrawable from the portal`;
+      return i18n.t('skillBalanceDisplay.withdrawablePortal', {
+        formattedBnbThatCanBeWithdrawn : this.formattedBnbThatCanBeWithdrawn,
+        formattedTotalAvailableBnb : this.formattedTotalAvailableBnb,
+      });
     },
     formattedInGameOnlyFunds(): string {
       const skillBalance = fromWeiEther(this.inGameOnlyFunds);
@@ -109,11 +128,11 @@ export default Vue.extend({
       let html =  toBN(skillBalance).toFixed(4) + ' SKILL';
 
       if(parseFloat(skillRewards) !== 0){
-        html += '<br>+ WITHDRAWABLE ' + toBN(skillRewards).toFixed(4) + ' SKILL';
+        html += i18n.t('skillBalanceDisplay.withdrawable') + toBN(skillRewards).toFixed(4) + ' SKILL';
       }
 
       if(parseFloat(inGameOnlyFundsBalance) !== 0){
-        html += '<br>+ IN GAME ONLY ' + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
+        html += i18n.t('skillBalanceDisplay.igo') + toBN(inGameOnlyFundsBalance).toFixed(4) + ' SKILL';
       }
 
       return html;
@@ -135,15 +154,21 @@ export default Vue.extend({
     onBuySkill() {
       window.open(this.getExchangeUrl, '_blank');
     },
-
+    onBuyTransak() {
+      window.open(this.getExchangeTransakUrl, '_blank');
+    },
     async onWithdrawBNB() {
       if(!this.canWithdrawBnb) return;
 
       await this.withdrawBnbFromWaxBridge();
+    },
+    showModal() {
+      (this.$refs['transak-buy'] as BModal).show();
     }
   },
 
   components: {
+    BModal
   }
 });
 </script>
@@ -169,5 +194,24 @@ export default Vue.extend({
 }
 .add-button:hover {
   cursor: pointer;
+}
+.buy-skill-modal {
+  display: flex;
+  justify-content: space-between;
+}
+.buy-skill-modal-child{
+  width: 50%;
+  height: 300px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10%;
+  display: flex;
+  flex-direction: column;
+}
+.img-apeswap, .img-transak {
+  width:100%;
+  max-width: 250px;
+  height: auto;
+  margin-bottom: 30px;
 }
 </style>

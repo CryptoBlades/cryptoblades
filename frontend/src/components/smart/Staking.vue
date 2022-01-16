@@ -8,12 +8,12 @@
         :class="{ 'height-minimized': !showRewardClaimSection }"
       >
         <div class="reward-claim-inner-wrapper">
-          <h1 class="no-margin center-text">Rewards are available!</h1>
-          <p class="center-text">You have:</p>
+          <h1 class="no-margin center-text">{{$t('stake.rewardsAvailable')}}</h1>
+          <p class="center-text">{{$t('stake.have')}}</p>
           <p class="center-text selectable">
-            {{ currentRewardEarned.toFixed(18) }} SKILL
+            {{ currentRewardEarned.toFixed(18) }} {{stakingRewardsName}}
           </p>
-          <p class="center-text">to be claimed.</p>
+          <p class="center-text">{{$t('stake.toBeClaimed')}}</p>
           <button
             class="StakeButton claim-button"
             :class="{
@@ -32,25 +32,26 @@
             :class="{ switch_active: isDeposit }"
             @click="isDeposit = true"
           >
-            <span>Stake</span>
+            <span>{{$t('stake.stake')}}</span>
           </button>
           <button
             class="switch"
             :class="{ switch_active: !isDeposit }"
             @click="isDeposit = false"
           >
-            <span>Unstake</span>
+            <span>{{$t('stake.unstake')}}</span>
           </button>
         </div>
       </div>
       <div class="stakePage medium-dark-bg">
         <div class="sPElement input">
           <div class="inputBody">
-            <div class="flex_row">
+            <div :class="isNftStaking ? 'd-flex align-items-center w-100' : 'flex_row'">
               <input
+                v-if="!isNftStaking"
                 class="token-amount-input"
                 inputmode="decimal"
-                title="Token Amount"
+                :title="$t('stake.tokenAmount')"
                 autocomplete="off"
                 autocorrect="off"
                 type="text"
@@ -62,10 +63,21 @@
                 value=""
                 v-model="textAmount"
               />
-              <div class="ant-col">{{ stakingTokenName }}</div>
+              <div v-if="isNftStaking" class="mr-2 ml-3">ID:</div>
+              <b-form-select
+                class="w-100"
+                v-if="isNftStaking"
+                :title="$t('stake.tokenAmount')"
+                v-model="idToStake">
+                <template #first>
+                  <b-form-select-option :value="null" disabled>{{$t('stake.pickId')}}</b-form-select-option>
+                </template>
+                <option v-for="x in (isDeposit ? ownedLandIds : stakedIds)" :value="x.id" :key="x.id">{{x.id}} ({{$t('stake.tier')}} {{x.tier}})</option>
+              </b-form-select>
+              <div :class="isNftStaking ? 'ml-2 mr-3' : 'ant-col'">{{ stakingTokenName }}</div>
             </div>
-            <div class="balance" id="balance" @click="onMAX">
-              wallet: {{ inputSideBalance }}
+            <div class="balance" id="balance" @click="!isNftStaking && onMAX">
+              {{$t('stake.wallet')}} {{ inputSideBalance }}
             </div>
           </div>
         </div>
@@ -78,7 +90,7 @@
               <input
                 class="token-amount-input"
                 inputmode="decimal"
-                title="Token Amount"
+                :title="$t('stake.tokenAmount')"
                 autocomplete="off"
                 autocorrect="off"
                 type="text"
@@ -94,8 +106,8 @@
                 {{ stakingTokenName }}
               </div>
             </div>
-            <div class="balance" id="balance" @click="onMAX">
-              wallet: {{ outputSideBalance }}
+            <div class="balance" id="balance" @click="!isNftStaking && onMAX">
+              {{$t('stake.wallet')}} {{ outputSideBalance }}
             </div>
           </div>
         </div>
@@ -103,10 +115,8 @@
         <p
           class="no-margin spacing-top"
           v-if="isDeposit && stakeData.rewardMinimumStakeTime > 0"
+          v-html="$t('stake.stakeNote', { minimumStakeTimeFormatted})"
         >
-          <span class="bold">NOTE</span>: You will not be able to unstake or
-          claim rewards until {{ minimumStakeTimeFormatted }} has passed since
-          your initial stake.
         </p>
 
         <button
@@ -117,12 +127,12 @@
         >
           <span v-if="loading">
             <!-- <ImageVue :src="'loading.svg'" :size="'45px'" /> -->
-            Loading...
+            {{$t('stake.loading')}}
           </span>
           <span class="gold-text" v-else>
             {{ submitButtonLabel }}
             <b-icon-exclamation-circle class="centered-icon" scale="0.9" v-if="tryingToUnstake"
-              v-tooltip="`Unstaking will lock remaining funds for another ${minimumStakeTimeFormatted}`"/>
+              v-tooltip="$t('stake.lockedNote', {minimumStakeTimeFormatted})"/>
           </span>
         </button>
 
@@ -138,10 +148,10 @@
             Loading...
           </span>
           <span class="gold-text" v-else-if="canStakeUnclaimedRewards">
-            Stake all of unclaimed rewards ({{ formattedSkillRewards }} SKILL)
+            {{$t('stake.stakeAllUnclaimedRewards', {formattedSkillRewards})}}
           </span>
           <span class="gold-text" v-else>
-            No unclaimed rewards to stake
+            {{$t('stake.noUnclaimedRewards')}}
           </span>
         </button>
       </div>
@@ -154,33 +164,23 @@ import { toBN } from '../../utils/common';
 import { mapActions, mapState } from 'vuex';
 
 import { formatDurationFromSeconds, secondsToDDHHMMSS } from '../../utils/date-time';
-import { isStakeType } from '../../interfaces/State';
-import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from '../../stake-types';
+import { isStakeType, isNftStakeType } from '../../interfaces/State';
 
-const connectToWalletButtonLabel = 'Connect to wallet ↗';
-const amountIsTooBigButtonLabel = 'Amount is too big';
-const contractIsFullButtonLabel = 'Contract is Full';
-const enterAnAmountButtonLabel = 'Enter an amount';
-const insufficientBalanceButtonLabel = 'Insufficient balance';
-const notEnoughFundsInExitPoolButtonLabel = 'Not enough funds in Exit Pool';
-const waitingButtonLabel = 'Waiting...';
-
-const stakeButtonLabel = 'Stake';
-const unstakeButtonLabel = 'Unstake';
 
 export default {
   props: {
     stakeType: {
       type: String,
       validator(type) {
-        return isStakeType(type);
+        return isStakeType(type) || isNftStakeType(type);
       }
-    }
+    },
   },
 
   data() {
     return {
       textAmount: '',
+      idToStake: null,
       isDeposit: true,
       loading: false,
       errorWhenUpdating: null,
@@ -188,10 +188,16 @@ export default {
 
       stakeUnlockTimeLeftCurrentEstimate: 0,
       stakeRewardDistributionTimeLeftCurrentEstimate: 0,
+      ownedLandIds: [],
+      stakedIds: []
     };
   },
   async mounted() {
     await this.fetchData();
+
+    if(this.stakeType.startsWith('cbkLand')) {
+      await this.updateOwnedLands();
+    }
 
     this.stakeUnlockTimeLeftCurrentEstimate = this.unlockTimeLeftInternal;
     this.stakeRewardDistributionTimeLeftCurrentEstimate = this.rewardDistributionTimeLeftInternal;
@@ -218,7 +224,31 @@ export default {
     unlockTimeLeftInternal() { return this.stakeData.unlockTimeLeft; },
 
     stakingTokenName() {
-      return this.stakeType === 'skill' || this.stakeType === 'skill2' ? 'SKILL' : 'SKILL-WBNB';
+      switch(this.stakeType) {
+      case 'skill':
+      case 'skill2':
+      case 'skill90':
+      case 'skill180':
+        return 'SKILL';
+      case 'king':
+      case 'king90':
+      case 'king180':
+        return 'KING';
+      case 'lp':
+      case 'lp2':
+        return 'SKILL-WBNB';
+      case 'cbkLandT1':
+      case 'cbkLandT2':
+      case 'cbkLandT3':
+        return 'CBKL';
+      default:
+        return 'unknown';
+      }
+    },
+
+    stakingRewardsName() {
+      if(this.stakeType.startsWith('king') || this.stakeType.startsWith('cbkLand')) return 'KING';
+      return 'SKILL';
     },
 
     minimumStakeTimeFormatted() {
@@ -271,12 +301,12 @@ export default {
 
     inputSideBalance() {
       const b = this.isDeposit ? this.walletBalance : this.stakedBalance;
-      return b.dividedBy(1e18).toFixed(6);
+      return this.isNftStaking ? b : b.dividedBy(1e18).toFixed(6);
     },
 
     outputSideBalance() {
       const b = this.isDeposit ? this.stakedBalance : this.walletBalance;
-      return b.dividedBy(1e18).toFixed(6);
+      return this.isNftStaking ? b : b.dividedBy(1e18).toFixed(6);
     },
 
     currentState() {
@@ -308,7 +338,11 @@ export default {
         return 'waiting';
       }
 
-      if (this.textAmount <= 0) {
+      if (isStakeType(this.stakeType) && this.textAmount <= 0) {
+        return 'inputIsZero';
+      }
+
+      if (isNftStakeType(this.stakeType) && this.idToStake === null) {
         return 'inputIsZero';
       }
 
@@ -337,23 +371,23 @@ export default {
     submitButtonLabel() {
       switch (this.currentState) {
       case 'ok':
-        return this.isDeposit ? stakeButtonLabel : unstakeButtonLabel;
+        return this.isDeposit ? this.$t('stake.stakeButtonLabel') : this.$t('stake.unstakeButtonLabel');
       case 'contractFull':
-        return contractIsFullButtonLabel;
+        return this.$t('stake.contractIsFullButtonLabel');
       case 'amountIsTooBig':
-        return amountIsTooBigButtonLabel;
+        return this.$t('stake.amountIsTooBigButtonLabel');
       case 'waiting':
-        return waitingButtonLabel;
+        return this.$t('stake.waitingButtonLabel');
       case 'inputIsZero':
-        return enterAnAmountButtonLabel;
+        return this.$t('stake.enterAnAmountButtonLabel');
       case 'insufficientBalance':
-        return insufficientBalanceButtonLabel;
+        return this.$t('stake.insufficientBalanceButtonLabel');
       case 'notEnoughFundsInExitPool':
-        return notEnoughFundsInExitPoolButtonLabel;
+        return this.$t('stake.notEnoughFundsInExitPoolButtonLabel');
       case 'stakeLocked':
-        return `Sorry, stake is still locked; please wait about ${this.estimatedUnlockTimeLeftFormatted}`;
+        return this.$t('stake.sorryStake', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
-        return connectToWalletButtonLabel;
+        return this.$t('stake.connectToWalletButtonLabel');
       }
     },
 
@@ -376,11 +410,11 @@ export default {
     claimRewardButtonLabel() {
       switch (this.rewardClaimState) {
       case 'loading':
-        return 'Loading...';
+        return this.$t('stake.loading');
       case 'rewardLocked':
-        return `Sorry, reward is still locked; please wait about ${this.estimatedUnlockTimeLeftFormatted}`;
+        return this.$t('stake.sorryReward', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
-        return 'Claim reward';
+        return this.$t('stake.claimReward');
       }
     },
 
@@ -396,8 +430,8 @@ export default {
     },
 
     stakeUnclaimedRewardsButtonShown() {
-      return stakeTypeThatCanHaveUnclaimedRewardsStakedTo === this.stakeType && this.isDeposit;
-      // return true;
+      return false;
+      // return stakeTypeThatCanHaveUnclaimedRewardsStakedTo === this.stakeType && this.isDeposit;
     },
 
     canStakeUnclaimedRewards() {
@@ -409,14 +443,22 @@ export default {
       const b = toBN(this.skillRewards);
       return b.dividedBy(1e18).toFixed(4);
     },
+
+    isNftStaking() {
+      return isNftStakeType(this.stakeType);
+    }
   },
   methods: {
     ...mapActions([
       'fetchStakeDetails',
       'stake',
       'unstake',
+      'unstakeKing',
+      'claimKingReward',
       'stakeUnclaimedRewards',
       'claimReward',
+      'getOwnedLandIdsWithTier',
+      'getStakedIds'
     ]),
 
     updateEstimates() {
@@ -460,8 +502,7 @@ export default {
     },
     async onSubmit() {
       if (this.loading || this.currentState !== 'ok') return;
-
-      const amount = this.bigNumberAmount.toString();
+      const amount = isNftStakeType(this.stakeType) ? this.idToStake.toString() : this.bigNumberAmount.toString();
 
       try {
         this.loading = true;
@@ -470,7 +511,16 @@ export default {
           await this.stake({ amount, stakeType: this.stakeType });
         } else {
           //unstake
-          await this.unstake({ amount, stakeType: this.stakeType });
+          if(this.stakeType === 'king') {
+            await this.unstakeKing({ amount });
+          }
+          else {
+            await this.unstake({ amount, stakeType: this.stakeType });
+          }
+        }
+        if(isNftStakeType(this.stakeType)) {
+          await this.updateOwnedLands();
+          this.idToStake = undefined;
         }
       } catch (e) {
         console.error(e);
@@ -497,7 +547,12 @@ export default {
       try {
         this.rewardClaimLoading = true;
 
-        await this.claimReward({ stakeType: this.stakeType });
+        if(this.stakeType === 'king') {
+          await this.claimKingReward();
+        }
+        else {
+          await this.claimReward({ stakeType: this.stakeType });
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -518,6 +573,11 @@ export default {
         this.loading = false;
       }
     },
+
+    async updateOwnedLands() {
+      this.ownedLandIds = await this.getOwnedLandIdsWithTier();
+      this.stakedIds = await this.getStakedIds(this.stakeType);
+    }
   },
   watch: {
     rewardDistributionTimeLeftInternal(newValue, oldValue) {
@@ -559,6 +619,7 @@ export default {
     },
     isDeposit() {
       this.textAmount = '';
+      this.idToStake = undefined;
     },
     async defaultAccount(newVal) {
       if (newVal) {

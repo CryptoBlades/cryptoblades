@@ -23,23 +23,24 @@
 
         <div class="character-data-column dark-bg-text">
           <span v-if="!isLoadingCharacter" class="name bold character-name">{{
-            getCharacterName(currentCharacterId)
+            getCleanCharacterName(currentCharacterId)
           }} <span :class="traits[currentCharacter.trait].toLowerCase() + '-icon trait-icon'"></span></span>
-          <span v-if="isLoadingCharacter" class="name bold">Loading...</span>
+          <span v-if="isLoadingCharacter" class="name bold">{{$t('CharacterDisplay.loading')}}</span>
           <span v-if="!isLoadingCharacter" class="subtext subtext-stats">
-            <b>Level</b> <span>{{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP) </span>
-            <b>Power:</b> <span>{{CharacterPower(currentCharacter.level).toLocaleString()}}</span>
-            <Hint class="power-hint" text="Power increases by 10 every level up,
-              <br>and multiplied every 10 level ups
-              <br>Level 1: 1000
-              <br>Level 10: 1090
-              <br>Level 11: 2200
-              <br>Level 20: 2380
-              <br>Level 21: 3600" />
+            <b>{{$t('CharacterDisplay.level')}} </b>
+            <span>{{ currentCharacter.level + 1 }} ({{ currentCharacter.xp }} / {{RequiredXp(currentCharacter.level).toLocaleString()}} XP) </span>
+            <b>{{$t('CharacterDisplay.power')}}: </b>
+            <span>{{CharacterPower(currentCharacter.level).toLocaleString()}}</span>
+            <Hint class="power-hint" :text="$t('CharacterDisplay.powerIncrease')+
+              `<br>${$t('CharacterDisplay.level')} 1: 1000
+              <br>${$t('CharacterDisplay.level')} 10: 1090
+              <br>${$t('CharacterDisplay.level')} 11: 2200
+              <br>${$t('CharacterDisplay.level')} 20: 2380
+              <br>${$t('CharacterDisplay.level')} 21: 3600`" />
           </span>
         </div>
 
-        <earnings-calculator/>
+        <earnings-calculator />
       </div>
     </transition>
 
@@ -54,7 +55,7 @@
           @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
         >
           <div class="name-list">
-            {{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+            {{ getCleanCharacterName(c.id) }} Lv.{{ c.level + 1}}
           </div>
           <div class="small-stamina-char"
             :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
@@ -74,7 +75,7 @@
           @click="!getIsInCombat && setCurrentCharacter(c.id)"
         >
         <div class="name-list"
-        >{{ getCharacterName(c.id) }} Lv.{{ c.level + 1}}
+        >{{ getCleanCharacterName(c.id) }} Lv.{{ c.level + 1}}
           <small-bar
             :showMinimalVersion="true"
             v-if="!isLoadingCharacter"
@@ -99,6 +100,7 @@ import { RequiredXp } from '../../interfaces';
 import Hint from '../Hint.vue';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../../utils/common';
+import { getCleanName } from '../../rename-censor';
 
 export default Vue.extend({
   components: {
@@ -131,7 +133,7 @@ export default Vue.extend({
     filteredCharactersForList(): any {
       const items: any  = this.ownCharacters;
       return items;
-    }
+    },
   },
 
   data() {
@@ -162,6 +164,10 @@ export default Vue.extend({
       const skillBalance = fromWeiEther(skill.toString());
       return toBN(skillBalance).toNumber();
     },
+
+    getCleanCharacterName(id: string): string {
+      return getCleanName(this.getCharacterName(id));
+    }
   },
 });
 </script>
