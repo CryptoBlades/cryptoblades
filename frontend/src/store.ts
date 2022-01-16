@@ -3184,6 +3184,13 @@ export function createStore(web3: Web3) {
         dispatch('fetchSkillBalance');
       },
 
+      async getCharacterQuestData({ state }, {characterId}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.getCharacterQuestData(characterId).call(defaultCallOptions(state));
+      },
+
       async canUserAfford({ state }, {payingAmount}) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades || !state.defaultAccount) return;

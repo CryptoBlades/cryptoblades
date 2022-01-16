@@ -115,9 +115,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     //Quest example: tier = 1, id = TBA, requirementType = 1, requirementAmount = 2, rewardType = 1, rewardAmount = 1, reputationAmount = 12
     // do 2 raids for 1x3* sword
-    function addNewQuest(uint8 tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
+    function addNewQuest(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
         RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) public {
-        quests[tier].push(Quest(0, tier,
+        quests[uint8(tier)].push(Quest(0, tier,
             requirementType, requirementRarity, requirementAmount,
             rewardType, rewardRarity, rewardAmount, reputationAmount));
     }
