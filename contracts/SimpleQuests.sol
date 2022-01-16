@@ -133,6 +133,12 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         quests[tier].pop();
     }
 
+    function getQuestData(uint256 questID) public view returns (uint256[]) {
+        Quest quest = questList[questID];
+        return [quest.id, quest.tier, quest.requirementType, quest.requirementRarity, quest.requirementAmount,
+            quest.rewardType, quest.rewardRarity, quest.rewardAmount, quest.reputationAmount];
+    }
+
     function getCharacterQuestData(uint256 characterID) public view returns (uint256[] memory) {
         uint256[] memory questDataKeys = new uint256[](4);
         questDataKeys[0] = characters.NFTVAR_SIMPLEQUEST_ID();
@@ -197,8 +203,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function rewardQuest(uint256 questID, uint256 characterID) private {
         Quest memory quest = questList[questID];
-        if (quest.rewardType == RewardType.WEAPON) {// do a package, like, rewardType >= 1 && rewardType <= 4 and use the same mintWeaponWithStars based on that
-            // for now, rewardType = 1 means 3* sword
+        if (quest.rewardType == RewardType.WEAPON) {
+            // rewardType = 1
             // stars = 2 for 3* sword
             // random seed
             // random element = 100??
