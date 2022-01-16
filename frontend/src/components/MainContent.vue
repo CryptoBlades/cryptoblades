@@ -67,6 +67,7 @@ export default {
   .main-content {
     flex-grow: 1;
     display: flex;
+    flex-wrap: wrap;
     min-height: 90vh;
     flex-direction: column;
     position: relative;

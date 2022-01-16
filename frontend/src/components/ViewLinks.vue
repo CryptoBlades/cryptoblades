@@ -4,7 +4,7 @@
       <Button mainText="Play-to-earn" route="play-to-earn" :class="{ active : isActive('play-to-earn')}"/>
     </li>
     <li class="character" :class="{ active : isActive('character')}">
-      <router-link :to="{ name: 'character' }" exact class="nav-link">
+      <router-link to="/character/1" exact class="nav-link">
         <div class="icon" v-html="$appIcon.NavIcon.Character"></div>
         <div>Character</div>
       </router-link>

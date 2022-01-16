@@ -15,6 +15,7 @@ import Bridge from './views/Bridge.vue';
 import Character from './views/Character.vue';
 import Forge from './views/Forge.vue';
 import Salvage from './views/Salvage.vue';
+import Perfection from './views/Perfection.vue';
 
 //new game UI
 import Home from './views/Home.vue';
@@ -53,7 +54,8 @@ function createRouter() {
       { path: '/blacksmith', name: 'blacksmith', component: Blacksmith },
       { path: '/forge', name: 'forge', component: Forge },
       { path: '/salvage', name: 'salvage', component: Salvage },
-      { path: '/perfection', name: 'perfection', component: Blacksmith },
+      { path: '/perfection', name: 'perfection', component: Perfection },
+      { path: '/perfection/:id', name: 'perfection', component: Perfection },
       { path: '/inventory', name: 'inventory', component: Blacksmith },
       { path: '/marketplace', name: 'marketplace', component: Market },
       { path: '/leaderboard', name: 'leaderboard', component: Leaderboard },

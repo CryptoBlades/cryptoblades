@@ -49,6 +49,7 @@
 <script>
 import Button from '@/components/Button';
 export default {
+  props: ['ctaBg'],
   name: 'HomeRaidCard',
   components: {
     Button
@@ -59,6 +60,17 @@ export default {
 <style scoped>
 .raid-card {
   display: flex;
+  position: relative;
+  background: #404857 url("../assets/new-ui/background/c1242c0420541b3ea3f38f98c9da34ad.png") no-repeat center;
+}
+.raid-card .background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: red;
+}
+.raid-card > div {
+  position: relative;
 }
 .char-info {
   flex-grow: 1;

@@ -14,8 +14,8 @@
       </div>
 
       <div class="cta-btns">
-        <Button mainText="Forge X1" sub-text="0.0529 SKILL" target-ref="forgeResult" @click="generateResult" size="lg"/>
-        <Button mainText="Forge X10" sub-text="0.0529 SKILL" target-ref="forgeResult" @click="generateResult" size="lg"/>
+        <Button mainText="Forge X1" sub-text="0.0529 SKILL" target-ref="forge" @btnAction="generateResult" size="lg"/>
+        <Button mainText="Forge X10" sub-text="0.0529 SKILL" target-ref="forge" @btnAction="generateResult" size="lg"/>
       </div>
     </div>
 
@@ -23,148 +23,7 @@
       <div class="result-wrapper">
         <div class="head-image" v-html="$appIcon.forgeResultHead"></div>
         <h3>The Dwarves Have Forged You Weapons</h3>
-        <ul class="weapons">
-          <li class="weapon-card">
-            <div class="top">
-              <span class="orange">Legendary</span>
-              <span>#203991</span>
-            </div>
-            <div class="middle"><img src="../assets/new-ui/weapon/weapon5.png" alt="weapon5"></div>
-            <div class="bot">
-              <div class="icon" v-html="$appIcon.Fire"></div>
-              <div class="footer-info">
-                <p><strong>Malignant Swiftblade</strong></p>
-                <p>Multiplier: 3.4</p>
-              </div>
-            </div>
-          </li>
-          <li class="weapon-card">
-            <div class="top">
-              <span class="purple">Mythical</span>
-              <span>#203991</span>
-            </div>
-            <div class="middle"><img src="../assets/new-ui/weapon/weapon5.png" alt="weapon5"></div>
-            <div class="bot">
-              <div class="icon" v-html="$appIcon.Fire"></div>
-              <div class="footer-info">
-                <p><strong>Malignant Swiftblade</strong></p>
-                <p>Multiplier: 3.4</p>
-              </div>
-            </div>
-          </li>
-          <li class="weapon-card">
-            <div class="top">
-              <span class="purple">Mythical</span>
-              <span>#203991</span>
-            </div>
-            <div class="middle"><img src="../assets/new-ui/weapon/weapon5.png" alt="weapon5"></div>
-            <div class="bot">
-              <div class="icon" v-html="$appIcon.Fire"></div>
-              <div class="footer-info">
-                <p><strong>Malignant Swiftblade</strong></p>
-                <p>Multiplier: 3.4</p>
-              </div>
-            </div>
-          </li>
-          <li class="weapon-card">
-            <div class="top">
-              <span class="green">Unique</span>
-              <span>#203991</span>
-            </div>
-            <div class="middle"><img src="../assets/new-ui/weapon/weapon5.png" alt="weapon5"></div>
-            <div class="bot">
-              <div class="icon" v-html="$appIcon.Fire"></div>
-              <div class="footer-info">
-                <p><strong>Malignant Swiftblade</strong></p>
-                <p>Multiplier: 3.4</p>
-              </div>
-            </div>
-          </li>
-          <li class="weapon-card">
-            <div class="top">
-              <span class="blue">Rare</span>
-              <span>#203991</span>
-            </div>
-            <div class="middle"><img src="../assets/new-ui/weapon/weapon5.png" alt="weapon5"></div>
-            <div class="bot">
-              <div class="icon" v-html="$appIcon.Fire"></div>
-              <div class="footer-info">
-                <p><strong>Malignant Swiftblade</strong></p>
-                <p>Multiplier: 3.4</p>
-              </div>
-            </div>
-          </li>
-          <li class="weapon-card">
-            <div class="top">
-              <span class="blue">Rare</span>
-              <span>#203991</span>
-            </div>
-            <div class="middle"><img src="../assets/new-ui/weapon/weapon5.png" alt="weapon5"></div>
-            <div class="bot">
-              <div class="icon" v-html="$appIcon.Fire"></div>
-              <div class="footer-info">
-                <p><strong>Malignant Swiftblade</strong></p>
-                <p>Multiplier: 3.4</p>
-              </div>
-            </div>
-          </li>
-          <li class="weapon-card">
-            <div class="top">
-              <span class="">Normal</span>
-              <span>#203991</span>
-            </div>
-            <div class="middle"><img src="../assets/new-ui/weapon/weapon5.png" alt="weapon5"></div>
-            <div class="bot">
-              <div class="icon" v-html="$appIcon.Fire"></div>
-              <div class="footer-info">
-                <p><strong>Malignant Swiftblade</strong></p>
-                <p>Multiplier: 3.4</p>
-              </div>
-            </div>
-          </li>
-          <li class="weapon-card">
-            <div class="top">
-              <span class="">Normal</span>
-              <span>#203991</span>
-            </div>
-            <div class="middle"><img src="../assets/new-ui/weapon/weapon5.png" alt="weapon5"></div>
-            <div class="bot">
-              <div class="icon" v-html="$appIcon.Fire"></div>
-              <div class="footer-info">
-                <p><strong>Malignant Swiftblade</strong></p>
-                <p>Multiplier: 3.4</p>
-              </div>
-            </div>
-          </li>
-          <li class="weapon-card">
-            <div class="top">
-              <span class="">Normal</span>
-              <span>#203991</span>
-            </div>
-            <div class="middle"><img src="../assets/new-ui/weapon/weapon5.png" alt="weapon5"></div>
-            <div class="bot">
-              <div class="icon" v-html="$appIcon.Fire"></div>
-              <div class="footer-info">
-                <p><strong>Malignant Swiftblade</strong></p>
-                <p>Multiplier: 3.4</p>
-              </div>
-            </div>
-          </li>
-          <li class="weapon-card">
-            <div class="top">
-              <span class="">Normal</span>
-              <span>#203991</span>
-            </div>
-            <div class="middle"><img src="../assets/new-ui/weapon/weapon5.png" alt="weapon5"></div>
-            <div class="bot">
-              <div class="icon" v-html="$appIcon.Fire"></div>
-              <div class="footer-info">
-                <p><strong>Malignant Swiftblade</strong></p>
-                <p>Multiplier: 3.4</p>
-              </div>
-            </div>
-          </li>
-        </ul>
+        <Weapons />
         <div class="sep" v-html="$appIcon.separator"></div>
         <div class="close-text">Tap Anywhere To Close</div>
         <div class="close-icon" v-html="$appIcon.closeIcon"></div>
@@ -174,17 +33,17 @@
 </template>
 <script>
 import Button from '@/components/Button';
+import Weapons from '@/components/blacksmith/Weapon';
 export default {
   name: 'Home',
-  components : { Button },
+  components : { Button,Weapons },
   data() {
     return {
       forgeResult : false
     };
   },
   methods : {
-    generateResult (targetRef) {
-      console.log(targetRef);
+    generateResult () {
       this.forgeResult = true;
     },
     closeResult() {
@@ -255,53 +114,6 @@ export default {
 .forge-result .result-wrapper .sep {
   margin-bottom: 26px;
 }
-.forge-result .result-wrapper .weapons {
-  padding: 0;
-  list-style: none;
-  margin-bottom: 39px;
-  display: flex;
-  flex-wrap: wrap;
-}
-.forge-result .result-wrapper .weapons .weapon-card {
-  background: #000E29;
-  border: 1px solid #43506A;
-  border-radius: 5px;
-  margin: 0 11px 40px;
-  padding: 15px;
-  max-width: 166px;
-}
-.forge-result .result-wrapper .weapons .weapon-card .top,
-.forge-result .result-wrapper .weapons .weapon-card .bot {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  font-size: 10px;
-  color: #9198A7;
-}
-.forge-result .result-wrapper .weapons .weapon-card .top {
-  align-items: center;
-}
-.forge-result .result-wrapper .weapons .weapon-card .top span:first-child {
-  background: #43506A;
-  color: #fff;
-  text-align: center;
-  min-width: 53px;
-  padding: 5px;
-  border-radius: 4px;
-}
-.forge-result .result-wrapper .weapons .weapon-card .top span.orange {
-  background: #D16100;
-}
-.forge-result .result-wrapper .weapons .weapon-card .top span.purple {
-  background: #7C1EC1;
-}
-.forge-result .result-wrapper .weapons .weapon-card .top span.green {
-  background: #7BA224;
-}
-.forge-result .result-wrapper .weapons .weapon-card .top span.blue {
-  background: #3997F5;
-}
-
 
 .forge-result .result-wrapper .weapons .weapon-card .bot {
   align-items: baseline;

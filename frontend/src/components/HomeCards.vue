@@ -6,7 +6,7 @@
       </div>
       <div class="rcard">
         <CTA
-          cta-bg="../assets/new-ui/background/bg-49.png"
+          cta-bg="adventure"
           cta-title="Adventure"
           cta-desc="Engage on PVE battles to earn rewards."
           btn-text="Combat"
@@ -14,7 +14,7 @@
           btn-size="m"
         />
         <CTA
-          cta-bg="../assets/new-ui/background/bg-49.png"
+          cta-bg="rank-match"
           cta-title="Rank Match"
           cta-desc="Defeat other Players on PVP battles to earn rewards."
           btn-text="Sign Up"
@@ -50,7 +50,6 @@ export default {
 .content-wrap .card-item {
   border-radius: 10px;
   border: 1px solid #404857;
-  background: #404857 url("../assets/new-ui/background/bg-49.png") no-repeat center;
   background-size: cover;
 }
 </style>

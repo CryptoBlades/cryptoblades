@@ -144,6 +144,18 @@ export const AppIcons = {
     '      <circle cx="20" cy="20" r="19.5" fill="none"/>\n' +
     '    </g>\n' +
     '  </g>\n' +
-    '</svg>\n'
+    '</svg>\n',
+  forgePower : '<svg xmlns="http://www.w3.org/2000/svg" width="14.146" height="14.146" viewBox="0 0 14.146 14.146">\n' +
+    '  <g id="_5378838_fight_game_games_gaming_play_icon" data-name="5378838_fight_game_games_gaming_play_icon" transform="translate(0.5 0.5)">\n' +
+    '    <path id="Path_9" data-name="Path 9" d="M228.282,152.3l5.813-4.547L234.87,144l-3.753.775-4.547,5.813" ' +
+    'transform="translate(-221.725 -144)" fill="none" stroke="#b5851a" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>\n' +
+    '    <path id="Path_10" data-name="Path 10" d="M170.991,235.54l2.139-1.133a13.8,13.8,0,0,0-5.738-5.738l-1.133,2.139A11.372,11.372,0,0,1,170.991,235.54Z" ' +
+    'transform="translate(-164.954 -223.701)" fill="none" stroke="#b5851a" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>\n' +
+    '    <path id="Path_11" data-name="Path 11" d="M147.126,285.57,144,288.7l1.711,1.711,3.126-3.126" transform="translate(-144 -277.262)" ' +
+    'fill="none" stroke="#b5851a" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>\n' +
+    '  </g>\n' +
+    '</svg>\n',
+  forgeStrength : '',
+  forgeIntelligence : ''
 };
 

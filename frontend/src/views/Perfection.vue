@@ -1,26 +1,12 @@
 <template>
   <div class="main-content">
-    <div class="content-wrap">
-      <div class="roadmap">
-        <router-link to="/forge" exact class="forge active">
-          <div class="icon-frame-sm"><div v-html="$appIcon.NavIcon.Blacksmith"></div></div>
-          <span>Forge</span>
-        </router-link>
-        <div class="sep"></div>
-        <router-link to="/salvage" exact class="salvage">
-          <div class="icon-frame-sm active"><div v-html="$appIcon.NavIcon.Perfection"></div></div>
-          <span>Salvage</span>
-        </router-link>
-      </div>
-    </div>
-
-    <div class="content-wrap">
+    <div class="content-wrap" v-if="!weaponId">
       <div class="inventory-wrap">
-        <h2>Inventory</h2>
+        <h2>Equipment Perfection</h2>
+        <p>Select equipment to enhance.</p>
         <div class="btn-tabs">
           <a href="javascript:void(0)" class="active">Weapons</a>
           <a href="javascript:void(0)"><div class="locked" v-html="$appIcon.NavIcon.Perfection"></div>Shields</a>
-          <a href="javascript:void(0)"><div class="locked" v-html="$appIcon.NavIcon.Perfection"></div> Junks</a>
         </div>
         <div class="weapon-filter">
           <div class="category">
@@ -32,55 +18,30 @@
             <input type="checkbox" id="show-fav"> <label for="show-fav">Show Favorites Only</label>
           </div>
         </div>
-        <Weapons />
+        <EquipmentReforge />
       </div>
-      <div class="inventory-sidebar">
-        <h2>You will receive</h2>
-        <div class="salvage-receivable">
-          <div class="salvage s-orange">
-            <div class="image">
-              <img src="../assets/new-ui/dust/powerfulDust.png" alt="character">
-            </div>
-            <div class="info">
-              <div>Powerful Dust</div>
-              <div>x1</div>
-            </div>
-          </div>
-          <div class="salvage s-purple">
-            <div class="image">
-              <img src="../assets/new-ui/dust/greaterDust.png" alt="character">
-            </div>
-            <div class="info">
-              <div>Powerful Dust</div>
-              <div>x1</div>
-            </div>
-          </div>
-          <div class="salvage">
-            <div class="image">
-              <img src="../assets/new-ui/dust/lesserDust.png" alt="character">
-            </div>
-            <div class="info">
-              <div>Powerful Dust</div>
-              <div>x1</div>
-            </div>
-          </div>
-        </div>
-        <h2></h2>
-        <Button mainText="Salvage" sub-text="0.05 SKILL" target-ref="salvage" @btnAction="salvage" size="lg"/>
-      </div>
+    </div>
+    <div class="reforge" v-if="weaponId">
+      <EnhanceEquipment :id="weaponId"/>
     </div>
  </div>
 </template>
 <script>
-import Button from '@/components/Button';
-import Weapons from '@/components/blacksmith/Weapon';
+import EquipmentReforge from '@/components/blacksmith/EquipmentReforge';
+import EnhanceEquipment from '@/components/blacksmith/EnhanceEquipment';
+
 export default {
   name: 'Home',
-  components : { Weapons, Button },
+  components : { EquipmentReforge, EnhanceEquipment },
   data() {
     return {
       forgeResult : false
     };
+  },
+  computed : {
+    weaponId() {
+      return this.$route.params.id;
+    }
   },
   methods : {
     salvage () {
@@ -164,9 +125,16 @@ export default {
 /*Inventory*/
 .inventory-wrap {
   max-width: 1020px;
-  background: rgb(0 9 26 / 65%);
-  padding: 40px;
-  margin-bottom: 60px;
+  margin: 0 auto 60px;
+  padding-top: 40px;
+}
+.inventory-wrap h2,
+.inventory-wrap p {
+  text-align: center;
+}
+.inventory-wrap p {
+  color: #848A95;
+  margin-bottom: 70px;
 }
 
 /*Sidebar*/
