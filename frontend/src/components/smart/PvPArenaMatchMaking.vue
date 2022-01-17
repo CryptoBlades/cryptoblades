@@ -32,15 +32,15 @@
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="activeWeaponWithInformation.weaponId"
-            :stars="activeWeaponWithInformation.information.stars + 1"
-            :element="activeWeaponWithInformation.information.element"
+            :weapon="activeWeaponWithInformation.information"
             :weaponId="activeWeaponWithInformation.weaponId"
+            :hasInfoPopover="false"
           />
           <pvp-shield
             v-if="activeShieldWithInformation.shieldId"
-            :stars="activeShieldWithInformation.information.stars + 1"
-            :element="activeShieldWithInformation.information.element"
+            :shield="activeShieldWithInformation.information"
             :shieldId="activeShieldWithInformation.shieldId"
+            :hasInfoPopover="false"
           />
         </div>
       </div>
@@ -59,7 +59,10 @@
         <div class="middleMatchProgressButtons">
           <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
-            <pvp-button v-if="!isInMatch" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
+            <div v-if="!isInMatch">
+              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount < 1"  buttonText="FIND MATCH" />
+              <div class="matchablePlayersCountText">Players in this tier: {{formattedMatchablePlayersCount}}</div>
+            </div>
             <pvp-button v-else
             @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
           </div>
@@ -96,19 +99,20 @@
             <span>Rank: {{ opponentInformation.rank }}</span>
           </div>
         </div>
-        <span v-else class="findMatchMessage">Press FIND MATCH to find an opponent!</span>
+        <div v-else class="findMatchMessage">Press FIND MATCH to find an opponent!
+        </div>
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
-            :stars="opponentActiveWeaponWithInformation.information.stars + 1"
-            :element="opponentActiveWeaponWithInformation.information.element"
+            :weapon="opponentActiveWeaponWithInformation.information"
             :weaponId="opponentActiveWeaponWithInformation.weaponId"
+            :hasInfoPopover="false"
           />
           <pvp-shield
             v-if="opponentActiveShieldWithInformation.shieldId"
-            :stars="opponentActiveShieldWithInformation.information.stars + 1"
-            :element="opponentActiveShieldWithInformation.information.element"
+            :shield="opponentActiveShieldWithInformation.information"
             :shieldId="opponentActiveShieldWithInformation.shieldId"
+            :hasInfoPopover="false"
           />
         </div>
       </div>
@@ -221,7 +225,8 @@ export default {
         skillDifference: null,
         rankDifference: null,
         result: ''
-      }
+      },
+      matchablePlayersCount: null,
     };
   },
 
@@ -239,6 +244,10 @@ export default {
     formattedReRollCost() {
       return new BN(this.reRollCost).div(new BN(10).pow(18)).toFixed(2);
     },
+    formattedMatchablePlayersCount(){
+      // TODO subtract from this number the player's other characters that are locked in the arena
+      return this.matchablePlayersCount - 1;
+    },
 
     getCharacterElementSrc() {
       if (this.characterInformation.element === 'Fire') {
@@ -254,13 +263,13 @@ export default {
     },
 
     getOpponentElementSrc() {
-      if (this.opponentInformation.element === 'fire') {
+      if (this.opponentInformation.element === 'Fire') {
         return fireIcon;
       }
-      if (this.opponentInformation.element === 'water') {
+      if (this.opponentInformation.element === 'Water') {
         return waterIcon;
       }
-      if (this.opponentInformation.element === 'earth') {
+      if (this.opponentInformation.element === 'Earth') {
         return earthIcon;
       }
       return lightningIcon;
@@ -454,6 +463,8 @@ export default {
     this.isInMatch = (await this.contracts().PvpArena.methods.matchByFinder(this.currentCharacterId).call()).createdAt !== '0';
 
     this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
+
+    this.matchablePlayersCount = await this.contracts().PvpArena.methods.getMatchablePlayerCount(this.currentCharacterId).call();
 
     if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
       this.isCharacterInDuelQueue = true;
@@ -739,6 +750,12 @@ span, p, li, button {
     button {
       height: 5.5rem;
     }
+  }
+  .matchablePlayersCountText{
+    display:flex;
+    justify-content: center;
+      color: #cec198;
+      font-size: 0.95rem;
   }
   .rerollButtonWrapper {
     width: 100%;
