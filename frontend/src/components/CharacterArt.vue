@@ -7,7 +7,7 @@
     <div class="placeholder d-flex align-items-start justify-content-center p-1"
       >
       <div class="character-power">
-        {{characterTotalPower}} PWR
+        {{characterPower}} PWR
       </div>
       <div class="w-100" :style="{
         'background-image': 'url(' + getCharacterArt(character) + ')',
@@ -135,7 +135,7 @@ export default {
       return this.isGarrison ? this.characterStaminas[this.character.id] : this.timestampToStamina(this.character.staminaTimestamp);
     },
 
-    characterTotalPower() {
+    characterPower() {
       return this.getCharacterPower(this.character.id);
     }
   },

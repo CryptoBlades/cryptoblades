@@ -21,7 +21,7 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
     EnumerableSet.AddressSet private supportedTokenTypes;
 
     mapping(address => EnumerableSet.UintSet) userGarrison;
-    mapping(uint256 => address) characterOwner;
+    mapping(uint256 => address) public characterOwner;
     EnumerableSet.UintSet private allCharactersInGarrison;
 
     event CharacterReceived(uint256 indexed character, address indexed minter);
@@ -67,10 +67,6 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
 
     function balanceOf(address user) public view returns(uint256) {
         return userGarrison[user].length();
-    }
-
-    function getCharacterOwner(uint256 id) public view returns(address) {
-        return characterOwner[id];
     }
 
     // MUTATIVE

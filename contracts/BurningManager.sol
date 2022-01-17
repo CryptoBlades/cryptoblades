@@ -39,7 +39,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     }
 
     function _isCharacterOwner(uint256 burnId) internal view {
-        require(hasRole(BURNER_ROLE, msg.sender) || characters.ownerOf(burnId) == msg.sender || garrison.getCharacterOwner(burnId) == msg.sender, 'Not owner');
+        require(hasRole(BURNER_ROLE, msg.sender) || characters.ownerOf(burnId) == msg.sender || garrison.characterOwner(burnId) == msg.sender, 'Not owner');
     }
 
     modifier isCharactersOwner(uint256[] memory burnIds) {
@@ -49,7 +49,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
 
     function _isCharactersOwner(uint256[] memory burnIds) internal view {
         for(uint i = 0; i < burnIds.length; i++) {
-            require(hasRole(BURNER_ROLE, msg.sender) || characters.ownerOf(burnIds[i]) == msg.sender || garrison.getCharacterOwner(burnIds[i]) == msg.sender, 'Not owner');
+            require(hasRole(BURNER_ROLE, msg.sender) || characters.ownerOf(burnIds[i]) == msg.sender || garrison.characterOwner(burnIds[i]) == msg.sender, 'Not owner');
         }
     }
 
@@ -70,10 +70,10 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         characters.burnIntoSoul(burnId, tx.origin);
     }
 
-    function burnCharactersIntoCharacter(uint256[] memory burnIds, uint256 targetCharId) public isCharactersOwner(burnIds) {
+    function burnCharactersIntoCharacter(uint256[] memory burnIds, uint256 targetId) public isCharactersOwner(burnIds) {
         game.payContractTokenOnly(msg.sender, burnCharacterFee.mul(burnIds.length));
         for(uint i = 0; i < burnIds.length; i++) {
-            characters.burnIntoCharacter(burnIds[i], targetCharId);
+            characters.burnIntoCharacter(burnIds[i], targetId);
         }
     }
 

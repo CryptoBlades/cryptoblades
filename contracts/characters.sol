@@ -248,7 +248,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         uint256 burnPower = bonusPower[burnId].add(getPowerAtLevel(tokens[burnId].level));
         address burnOwner = ownerOf(burnId);
         if(burnOwner == address(garrison)) {
-            burnOwner = garrison.getCharacterOwner(burnId);
+            burnOwner = garrison.characterOwner(burnId);
             garrison.updateOnBurn(burnOwner, burnId);
         }
         _burn(burnId);
@@ -323,10 +323,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function getXp(uint256 id) public view noFreshLookup(id) returns (uint32) {
         return tokens[id].xp;
-    }
-
-    function getSoulSupply(address player) public view returns(uint256) {
-        return soulSupply[player];
     }
 
     function gainXp(uint256 id, uint16 xp) public restricted {

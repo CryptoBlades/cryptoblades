@@ -1474,7 +1474,7 @@ export function createStore(web3: Web3) {
       async fetchSoulBalance({ state }) {
         const { Characters } = state.contracts();
         if(!Characters || !state.defaultAccount) return;
-        const soulBalance = await Characters.methods.getSoulSupply(state.defaultAccount).call(defaultCallOptions(state));
+        const soulBalance = await Characters.methods.soulSupply(state.defaultAccount).call(defaultCallOptions(state));
 
         return soulBalance;
       },
