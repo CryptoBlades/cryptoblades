@@ -2,11 +2,11 @@
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
       <img src="../../assets/separatorTop.svg" alt="Top separator">
-      <div class="modalTitle">You are currently under attack!</div>
+      <div class="modalTitle">{{$t('pvp.currentlyUnderAttack')}}</div>
       <ul>
         <li>
           <span>
-            Please wait a moment
+            {{$t('pvp.pleaseWait')}}
           </span>
         </li>
       </ul>
