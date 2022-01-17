@@ -4,11 +4,12 @@
       <img class="default-placeholder" v-if="nft.type === 'weapon'" src="../assets/placeholder/sword-placeholder-1.png"
         v-tooltip="$t('nftIcon.weaponTooltip', {stars: stars || '2-5'})"/>
       <div v-if="nft.type === 'weapon'" class="default-info">{{stars || '2-5'}}*</div>
-
       <img class="default-junk-placeholder" v-if="nft.type === 'junk'" src="../assets/junk/junk3.png"
-        v-tooltip="$t('nftIcon.junkTooltip')" />
+        v-tooltip="$t('nftIcon.junkTooltip', {stars: stars || '1-5'})" />
+      <div v-if="nft.type === 'junk'" class="default-info">{{stars || '1-5'}}*</div>
       <img class="default-trinket-placeholder" v-if="nft.type === 'trinket'" src="../assets/trinkets/trinket1.png"
-        v-tooltip="$t('nftIcon.trinketTooltip')" />
+        v-tooltip="$t('nftIcon.trinketTooltip', {stars: stars || '1-5'})" />
+      <div v-if="nft.type === 'trinket'" class="default-info">{{stars || '1-5'}}*</div>
       <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
         v-tooltip="$t('nftIcon.secretTooltip')" />
       <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../assets/dusts/LesserDust.png"
