@@ -4,7 +4,7 @@
     <div class="filtersWrapper">
       <div class="selectWrapper">
         <label for="tier">Tier: </label>
-        <select @change="handleValue" v-model="tierFilter" name="tier" id="tier">
+        <select v-model="tierFilter" name="tier" id="tier">
           <option v-for="tierFilterOption in tierFilterOptions"
            :value="tierFilterOption.value" :key="tierFilterOption.value">
             {{ tierFilterOption.value }}
@@ -79,7 +79,7 @@ export default {
       this.tier = this.tierFilter;
       const tierTopRankersIds
       = await this.contracts().PvpArena.methods.getTierTopCharacters(this.tierFilter).call({ from: this.defaultAccount });
-      console.log(tierTopRankersIds);
+      console.log('handlevalue runs', tierTopRankersIds);
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
         return {
           rankerId,
@@ -96,7 +96,6 @@ export default {
     //Leaderboards will be improved, for now they will only show top 3 rankers of each tier
     const tierTopRankersIds
     = await this.contracts().PvpArena.methods.getTierTopCharacters(this.tierFilter).call({ from: this.defaultAccount });
-    console.log(tierTopRankersIds);
     this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
       return {
         rankerId,
@@ -109,7 +108,10 @@ export default {
     }));
   },
   watch: {
-
+    async tierFilter(value){
+      console.log('this runs', value);
+      this.handleValue();
+    }
   }
 };
 </script>
