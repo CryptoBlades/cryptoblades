@@ -129,6 +129,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 timestamp
     );
 
+    event SeasonRestarted(
+        uint256 indexed newSeason,
+        uint256 timestamp
+    );
+
     modifier characterInArena(uint256 characterID) {
         _characterInArena(characterID);
         _;
@@ -462,6 +467,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         currentRankedSeason = currentRankedSeason.add(1);
         seasonStartedAt = block.timestamp;
+
+        emit SeasonRestarted(
+                currentRankedSeason,
+                seasonStartedAt
+            );
     }
 
     /// @dev performs a list of duels
