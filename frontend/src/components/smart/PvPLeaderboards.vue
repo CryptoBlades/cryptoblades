@@ -1,7 +1,6 @@
 <template>
   <div class="leaderboardWrapper">
     <h1 class="leaderboardTitle">ARENA LEADERBOARD</h1>
-    <h2>value: {{tierFilter}}</h2>
     <div class="filtersWrapper">
       <div class="selectWrapper">
         <label for="tier">Tier: </label>
@@ -15,6 +14,7 @@
     </div>
     <div class="listWrapper">
       <ul class="playerList">
+          <h2>value: {{tierFilter}}</h2>
         <li>
           <span>Rank</span>
           <span>Name</span>
@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     async handleValue(){
-      console.log('runs');
+      this.tier = this.tierFilter;
       const tierTopRankersIds
       = await this.contracts().PvpArena.methods.getTierTopCharacters(this.tierFilter).call({ from: this.defaultAccount });
       console.log(tierTopRankersIds);
