@@ -29,7 +29,7 @@
             <span>Rank: {{ characterInformation.rank }}</span>
           </div>
         </div>
-        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
+        <div class="weapons" >
           <pvp-weapon
             v-if="activeWeaponWithInformation.weaponId"
             :weapon="activeWeaponWithInformation.information"
@@ -41,6 +41,7 @@
             :shield="activeShieldWithInformation.information"
             :shieldId="activeShieldWithInformation.shieldId"
             :hasInfoPopover="false"
+            class="shield"
           />
         </div>
       </div>
@@ -101,7 +102,7 @@
         </div>
         <div v-else class="findMatchMessage">Press FIND MATCH to find an opponent!
         </div>
-        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
+        <div class="weapons">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
             :weapon="opponentActiveWeaponWithInformation.information"
@@ -113,6 +114,7 @@
             :shield="opponentActiveShieldWithInformation.information"
             :shieldId="opponentActiveShieldWithInformation.shieldId"
             :hasInfoPopover="false"
+            class="shield"
           />
         </div>
       </div>
@@ -691,10 +693,8 @@ span, p, li, button {
     right: 0;
     margin-right: auto;
     margin-left: auto;
-    &.hasShield{
-      div:first-of-type {
-        margin-right: 1rem;
-      }
+    .shield {
+      margin-left: 1rem;
     }
   }
 }
