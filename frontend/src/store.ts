@@ -3191,6 +3191,29 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.getCharacterQuestData(characterId).call(defaultCallOptions(state));
       },
 
+      async getQuestData({ state }, {questId}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.getQuestData(questId).call(defaultCallOptions(state));
+      },
+
+      async skipQuest({ state }, {characterID}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        console.log('Skip quest for: ', characterID);
+        return await SimpleQuests.methods.skipQuest(characterID).send(defaultCallOptions(state));
+      },
+
+      async completeQuest({ state }, {characterID}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        console.log('Complete quest for: ', characterID);
+        return await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
+      },
+
       async canUserAfford({ state }, {payingAmount}) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades || !state.defaultAccount) return;

@@ -1,73 +1,56 @@
 <template>
   <div class="d-flex flex-column quests-container">
-    <div v-for="c in filteredCharacters" :key="c.id" class="row quest-row">
-      <div class="character"
-           :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : undefined]">
+    <div v-for="character in characters" :key="character.id" class="row quest-row">
+      <div v-if="character.questData" class="character"
+           :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(character.id) : undefined]">
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
-          <slot name="above" :character="c"></slot>
+          <slot name="above" :character="character"></slot>
         </div>
-        <slot name="sold" :character="c"></slot>
+        <slot name="sold" :character="character"></slot>
         <div class="art">
           <div class="animation"/>
           <CharacterArt
-            :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(c.id) : undefined]"
-            :character="c" :hideIdContainer="true" :hideXpBar="true"/>
+            :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(character.id) : undefined]"
+            :character="character" :hideIdContainer="true" :hideXpBar="true"/>
         </div>
         <div class="xp">
-          <span>Reputation lvl {{ reputationLevel }}</span>
-          <strong class="outline xp-text">{{ currentReputation || 0 }} / {{ maxReputation }}</strong>
-          <b-progress class="reputation-progress" :max="maxReputation" :value="currentReputation" variant="primary"/>
+          <span>Reputation lvl {{ 0 }}</span>
+          <strong class="outline xp-text">{{ character.questData.reputation || 0 }} / {{ 9999 }}</strong>
+          <b-progress class="reputation-progress" :max="9999" :value="character.questData.reputation"
+                      variant="primary"/>
         </div>
       </div>
-      <div class="quest-details d-flex flex-column justify-content-between">
-        <div class="d-flex h-100">
-          <div class="quest-info d-flex flex-column">
-            <div class="quest-description">
-              <span>Epic quest</span>
-              <span>{{Array(5).fill('★').join('')}}</span>
-              <span>Do {{questGoal}} raids</span>
-            </div>
-            <div>
-              <img :src="getFoundersShield" class="quest-goal-image" alt=""/>
-            </div>
-            <div class="quest-progress">
-              <strong class="quest-progress-text">{{ currentReputation || 0 }} / {{ maxReputation }}</strong>
-              <b-progress class="reputation-progress" :max="maxReputation" :value="currentReputation" variant="primary"/>
-            </div>
-          </div>
-          <div class="reward-info d-flex flex-column">
-            <div class="quest-description">
-              <span class="font-weight-bold">Reward</span>
-              <span>2 reputation</span>
-              <span>1x <span>{{Array(5).fill('★').join('')}}</span> sword</span>
-            </div>
-            <div>
-              <img :src="getQuestReward" class="quest-goal-image" alt=""/>
-            </div>
-          </div>
-        </div>
-        <div class="d-flex">
-          <b-button variant="primary" class="flex-grow-1">
-            Submit
-          </b-button>
-          <b-button variant="primary" class="flex-grow-1">
-            Re-quest / Complete
-          </b-button>
-        </div>
-      </div>
+      <QuestDetails v-if="character.questData && character.questData.id !== 0" :questData="character.questData" :characterId="character.id"/>
     </div>
   </div>
 </template>
 
-<script>
-
-import CharacterArt from '@/components/CharacterArt';
-import {mapGetters, mapState} from 'vuex';
+<script lang="ts">
+import Vue from 'vue';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import foundersShield from '../assets/shield1.png';
-import questReward from '../assets/shield2.png';
+import {Nft} from '@/interfaces/Nft';
+import {Accessors} from 'vue/types/options';
+import QuestDetails, {RequirementType} from '@/components/smart/QuestDetails.vue';
+import CharacterArt from '@/components/CharacterArt.vue';
 
-export default {
-  components: {CharacterArt},
+export interface QuestData {
+  id: number;
+  progress: number;
+  type: RequirementType;
+  reputation: number;
+}
+
+interface StoreMappedActions {
+  getCharacterQuestData(payload: { characterId: string | number }): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }>;
+}
+
+interface StoreMappedGetters {
+  charactersWithIds(ids: (string | number)[]): Nft[];
+}
+
+export default Vue.extend({
+  components: {CharacterArt, QuestDetails},
 
   props: {
     showCosmetics: {
@@ -78,33 +61,37 @@ export default {
 
   data() {
     return {
-      reputationLevel: 2,
-      currentReputation: 20,
-      maxReputation: 100,
-      questGoal: 2,
-      questProgress: 1,
+      characters: [] as Nft[],
     };
   },
 
   computed: {
     ...mapState(['ownedCharacterIds']),
-    ...mapGetters(['charactersWithIds', 'getCharacterCosmetic']),
+    ...mapGetters(['charactersWithIds', 'getCharacterCosmetic']) as Accessors<StoreMappedGetters>,
 
     getFoundersShield() {
       return foundersShield;
     },
-
-    getQuestReward() {
-      return questReward;
-    },
-
-    filteredCharacters() {
-      return this.charactersWithIds(this.ownedCharacterIds).filter(Boolean);
-    },
   },
 
-  methods: {}
-};
+  methods: {
+    ...mapActions(['getCharacterQuestData']) as StoreMappedActions,
+  },
+
+  async mounted() {
+    this.characters = this.charactersWithIds(this.ownedCharacterIds).filter(Boolean);
+    for (const character of this.characters) {
+      const questDataRaw = await this.getCharacterQuestData({characterId: character.id});
+      console.log(questDataRaw);
+      character.questData = {
+        id: +questDataRaw[0],
+        progress: +questDataRaw[1],
+        type: +questDataRaw[2] as RequirementType,
+        reputation: +questDataRaw[3],
+      } as QuestData;
+    }
+  },
+});
 </script>
 
 <style scoped lang="scss">

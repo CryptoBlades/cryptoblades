@@ -61,7 +61,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     struct Quest {
         uint256 id;
-        uint8 tier;
+        Rarity tier;
         RequirementType requirementType;
         Rarity requirementRarity;
         uint256 requirementAmount;
@@ -133,10 +133,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         quests[tier].pop();
     }
 
-    function getQuestData(uint256 questID) public view returns (uint256[]) {
-        Quest quest = questList[questID];
-        return [quest.id, quest.tier, quest.requirementType, quest.requirementRarity, quest.requirementAmount,
-            quest.rewardType, quest.rewardRarity, quest.rewardAmount, quest.reputationAmount];
+    function getQuestData(uint256 questID) public view returns (uint256, Rarity, RequirementType, Rarity, uint256, RewardType, Rarity, uint256, uint256) {
+        Quest memory quest = questList[questID];
+        return (quest.id, quest.tier, quest.requirementType, quest.requirementRarity, quest.requirementAmount,
+            quest.rewardType, quest.rewardRarity, quest.rewardAmount, quest.reputationAmount);
     }
 
     function getCharacterQuestData(uint256 characterID) public view returns (uint256[] memory) {
@@ -236,7 +236,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 if (weapons.ownerOf(tokenID) != msg.sender) {
                     revert("You don't own this weapon");
                 }
-                if ((weapons.getStars(tokenID) - 1) != uint256(quest.requirementRarity)) {
+                if ((weapons.getStars(tokenID)) != uint256(quest.requirementRarity)) {
                     revert("Wrong weapon rarity");
                 }
                 weapons.burnWithoutDust(tokenID);

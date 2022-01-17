@@ -541,6 +541,32 @@
       "totalPrice": "Total price"
     }
   },
+  "quests": {
+    "rarity": {
+      "COMMON": "Common",
+      "UNCOMMON": "Uncommon",
+      "RARE": "Rare",
+      "EPIC": "Epic",
+      "LEGENDARY": "Legendary"
+    },
+    "requirement": {
+      "NONE": "None",
+      "WEAPON": "Weapon",
+      "JUNK": "Junk",
+      "DUST": "Dust",
+      "RAID": "Raid"
+    },
+    "reward": {
+      "NONE": "None",
+      "WEAPON": "Weapon",
+      "JUNK": "Junk",
+      "DUST": "Dust"
+    },
+    "skip": "Skip",
+    "complete": "Complete",
+    "submit": "Submit",
+    "reputation": "Reputation"
+  },
   "stake": {
     "unknownStakeType": "Unknown stake type, please try again.",
     "rewardsAvailable": "Rewards are available!",
