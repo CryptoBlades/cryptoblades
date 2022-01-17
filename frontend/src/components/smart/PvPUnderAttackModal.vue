@@ -2,14 +2,14 @@
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
       <img src="../../assets/separatorTop.svg" alt="Top separator">
-      <div class="modalTitle">Wait!</div>
+      <div class="modalTitle">You are currently under attack!</div>
       <ul>
         <li>
-          <span>You are currently under attack!</span>
+          <span>
+            Please wait a moment
+          </span>
         </li>
-        <pvp-separator />
       </ul>
-      <img src="../../assets/separatorBottom.svg" alt="Bottom separator">
     </div>
     <div class="closeWrapper">
       <p>{{$t('pvp.tapAnywhere')}}</p>
@@ -21,23 +21,17 @@
 </template>
 
 <script>
-import PvPSeparator from './PvPSeparator.vue';
 
 export default {
-  components: {
-    'pvp-separator': PvPSeparator
-  },
-
   props: {
-    isUnderattack: {
-      type: Boolean,
-      default: false,
+    isUnderAttack: {
+      default: null
     }
   },
 
   data() {
     return {
-      showModal: false
+      showModal: false,
     };
   },
 
@@ -49,7 +43,7 @@ export default {
   },
 
   updated() {
-    if (this.result) {
+    if (this.isUnderAttack) {
       this.showModal = true;
     } else {
       this.showModal = false;
@@ -72,7 +66,6 @@ export default {
 .preventScroll {
   position: relative;
   overflow: hidden;
-  border: 3px solid red;
 }
 
 .modalWrapper {

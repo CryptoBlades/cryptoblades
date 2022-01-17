@@ -120,7 +120,6 @@
       </div>
     </div>
     <!-- TODO: Get rank variation from contract -->
-    <pvp-under-attack-modal :isUnderAttack="isUnderAttack" />
     <pvp-duel-modal
       v-if="duelResult.result"
       :result="duelResult.result"
@@ -129,6 +128,11 @@
       :skillEarned="duelResult.skillDifference"
       :rankVariation="duelResult.result === 'win' ? '+5' : '-3'"
       :userCurrentRank="duelResult.rankDifference"
+      @close-modal="handleCloseModal"
+    />
+    <pvp-under-attack-modal
+      v-if="this.isUnderAttack"
+      :isUnderAttack="isUnderAttack"
       @close-modal="handleCloseModal"
     />
   </div>
@@ -160,7 +164,7 @@ export default {
     'pvp-separator': PvPSeparator,
     'pvp-button': PvPButton,
     'pvp-duel-modal': PvPDuelModal,
-    'pvp-under-attack-modal': PvPDuelModal
+    'pvp-under-attack-modal': PvPUnderAttackModal
   },
 
   props: {
@@ -452,6 +456,7 @@ export default {
       };
 
       this.isCharacterInDuelQueue = false;
+      this.isUnderAttack = false;
 
       this.wager = (await this.contracts().PvpArena.methods.fighterByCharacter(this.currentCharacterId).call({ from: this.defaultAccount })).wager;
 
