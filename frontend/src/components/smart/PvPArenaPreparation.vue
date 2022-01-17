@@ -129,7 +129,7 @@
             <ul>
               <li>
                 <div class="bulletpoint"></div>
-                {{$t('pvp.enterArenaWillCost', formattedEntryWager)}}
+                {{$t('pvp.enterArenaWillCost', {formattedEntryWager})}}
               </li>
               <li>
                 <div class="bulletpoint"></div>
@@ -137,7 +137,7 @@
               </li>
               <li>
                 <div class="bulletpoint"></div>
-                {{$t('pvp.leavingWillCost', leavingArenaCost)}}
+                {{$t('pvp.leavingWillCost', {leavingArenaCost})}}
               </li>
             </ul>
             <label class="checkboxWrapper">
@@ -154,7 +154,7 @@
         <div class="enterArenaButtonWrapper">
           <pvp-button
             @click="handleEnterArenaClick()"
-            :buttonText="i18n.t('pvp.enterArenaCaps')"
+            :buttonText="enterArenaButtonText"
             :buttonsubText="'$SKILL: ' + formattedEntryWager"
             :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
           />
@@ -287,6 +287,9 @@ export default {
     getIconSource () {
       return this.checkBoxAgreed && this.selectedWeaponId ? checkIcon : ellipseIcon;
     },
+    enterArenaButtonText() {
+      return i18n.t('pvp.enterArenaCaps');
+    }
   },
   methods: {
     handleClearWeaponFilters() {

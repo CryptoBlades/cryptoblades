@@ -7,12 +7,12 @@
         </h1>
         <p>
           {{$t('pvp.enterAndWin')}}
-          Enter the arena and win rewards ($SKILL).</p>
+          ($SKILL).</p>
         <div></div>
         <div class="buttonWrapper">
           <pvp-button
             @click="handleEnterArenaClick()"
-            :buttonText="i18n.t('pvp.enterArenaCaps')"
+            :buttonText="enterArenaButtonText"
           />
         </div>
         <div class="bottomWrapper">
@@ -81,6 +81,7 @@ import PvPButton from './PvPButton.vue';
 import PvPCharacter from './PvPCharacter.vue';
 import dayjs from 'dayjs';
 import PvPArenaInfo from './PvPArenaInfo.vue';
+import i18n from '../../i18n';
 
 export default {
   components: {
@@ -140,6 +141,9 @@ export default {
 
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount']),
+    enterArenaButtonText() {
+      return i18n.t('pvp.enterArenaCaps');
+    }
   },
 
   methods: {

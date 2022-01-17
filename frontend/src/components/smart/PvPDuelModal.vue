@@ -27,19 +27,20 @@
         <pvp-separator />
       </ul>
       <div class="earnWrapper">
-        {{$t('pvp.you')}}
-        <!-- VER ACA Q AHCER -->
         <span v-if="result === 'win'">
           {{$t('pvp.youEarned', skillEarned)}}
         </span>
         <span v-else>
           {{$t('pvp.youLost', skillEarned)}}
         </span>
+      </div>
       <div class="rankWrapper">
         <span>
           {{$t('pvp.updatedRank')}}
         </span>
-        <span>{{ userCurrentRank }}</span>
+        <span>
+          {{ userCurrentRank }}
+        </span>
         <span>({{ rankVariation }}
           {{$t('pvp.rank')}})
         </span>

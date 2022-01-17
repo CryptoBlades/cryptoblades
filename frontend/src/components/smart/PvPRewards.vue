@@ -21,11 +21,11 @@
       </li>
       <li>
         <div class="bulletpoint"></div>
-        {{$t('pvp.yourAvailableSkill', formattedAvailableSkill)}}
+        {{$t('pvp.yourAvailableSkill', {formattedAvailableSkill})}}
         $SKILL
       </li>
     </ul>
-    <pvp-button :buttonText="i18n.t('claimRewardsCaps')" @click="claimRewards" />
+    <pvp-button :buttonText="claimRewardsButtonText" @click="claimRewards" />
   </div>
 </template>
 
@@ -34,6 +34,7 @@
 import BN from 'bignumber.js';
 import { mapState } from 'vuex';
 import PvPButton from './PvPButton.vue';
+import i18n from '../../i18n';
 
 export default {
   components: {
@@ -53,6 +54,9 @@ export default {
     formattedAvailableSkill() {
       return new BN(this.availableSkill).div(new BN(10).pow(18)).toFixed(2);
     },
+    claimRewardsButtonText() {
+      return i18n.t('pvp.claimRewardsCaps');
+    }
   },
 
   methods: {

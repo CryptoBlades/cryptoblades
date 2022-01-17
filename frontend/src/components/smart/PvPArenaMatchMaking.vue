@@ -61,8 +61,7 @@
           </div>
           <p v-if="isInMatch && !isCharacterInDuelQueue && !this.loading && this.decisionTimeLeft">
             <span>
-              <!-- PROBAR BIENE STA -->
-              {{$t('pvp.timeToAcceptDuel', this.decisionTimeLeft)}}
+              {{$t('pvp.timeToAcceptDuel', {decisionTimeLeft: this.decisionTimeLeft})}}
             </span>
           </p>
           <span v-else-if="this.decisionTimeLeft === 0 && !this.loading && isCharacterInDuelQueue">
@@ -70,17 +69,17 @@
           </span>
         </div>
         <div class="middleMatchProgressButtons">
-          <pvp-button v-if="isCharacterInDuelQueue" :buttonText="i18n.t('pvp.inProgressCaps')" :disabled="true"/>
+          <pvp-button v-if="isCharacterInDuelQueue" :buttonText="inProgressButtonText" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
-            <pvp-button v-if="!isInMatch" @click="findMatch" :disabled="loading" :buttonText="i18n.t('pvp.findMatchCaps')" />
+            <pvp-button v-if="!isInMatch" @click="findMatch" :disabled="loading" :buttonText="findMatchButtonText" />
             <pvp-button v-else
-            @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" :buttonText="i18n.t('pvp.duelCaps')" />
+            @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" :buttonText="duelButtonText" />
           </div>
         </div>
         <div class="rerollButtonWrapper">
           <pvp-button
             @click="reRollOpponent" :disabled="loading || !isInMatch || isCharacterInDuelQueue"
-            :buttonText="i18n.t('pvp.reRoll')"
+            :buttonText="reRollButtonText"
             :buttonsubText="'$SKILL: ' + formattedReRollCost"
             :secondary="true"
           />
@@ -89,7 +88,7 @@
           <pvp-button
             @click="leaveArena"
             :disabled="loading || isCharacterInDuelQueue"
-            :buttonText="i18n.t('pvp.leaveArena')"
+            :buttonText="leaveArenaButtonText"
             :secondary="true"
           />
         </div>
@@ -105,12 +104,10 @@
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
           <div class="infoDetails">
             <span>
-              {{$t('pvp.level')}}
-              Level: {{ opponentInformation.level }}</span>
+              {{$t('pvp.level')}}: {{ opponentInformation.level }}</span>
             <pvp-separator vertical class="separator" />
             <span>
-              {{$t('pvp.rank')}}
-              Rank: {{ opponentInformation.rank }}</span>
+              {{$t('pvp.rank')}}: {{ opponentInformation.rank }}</span>
           </div>
         </div>
         <span v-else class="findMatchMessage">
@@ -160,6 +157,7 @@ import earthIcon from '../../assets/elements/earth.png';
 import lightningIcon from '../../assets/elements/lightning.png';
 import PvPDuelModal from './PvPDuelModal.vue';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
+import i18n from '../../i18n';
 
 export default {
   inject: ['web3'],
@@ -283,6 +281,26 @@ export default {
         return earthIcon;
       }
       return lightningIcon;
+    },
+
+    inProgressButtonText() {
+      return i18n.t('pvp.inProgressCaps');
+    },
+
+    findMatchButtonText() {
+      return i18n.t('pvp.findMatchCaps');
+    },
+
+    duelButtonText() {
+      return i18n.t('pvp.duelCaps');
+    },
+
+    reRollButtonText() {
+      return i18n.t('pvp.reRoll');
+    },
+
+    leaveArenaButtonText() {
+      return i18n.t('pvp.leaveArena');
     },
   },
 
