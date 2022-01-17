@@ -695,7 +695,9 @@
   "pvp": {
     "lastDefeated": "You were last defeated by: ",
     "tapAnywhere": "Tap anywhere to close",
-    "kicked": "You were kicked from the arena!"
+    "kicked": "You were kicked from the arena!",
+    "currentlyUnderAttack": "You are currently under attack!",
+    "pleaseWait": "Please wait a moment"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
