@@ -21,12 +21,12 @@
                   <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
                   <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Weapons</p>
-                    <select v-model="weaponStarFilter" class="selectFilter">
+                    <select v-model="weaponStarFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="weaponStarOption in weaponStarOptions" :value="weaponStarOption.value" :key="weaponStarOption.value">
                         {{ weaponStarOption.text }}
                       </option>
                     </select>
-                    <select v-model="weaponElementFilter" class="selectFilter">
+                    <select v-model="weaponElementFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="weaponElementOption in weaponElementOptions" :value="weaponElementOption.value" :key="weaponElementOption.value">
                         {{ weaponElementOption.text }}
                       </option>
@@ -60,12 +60,12 @@
                   <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
                   <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Shields</p>
-                    <select v-model="shieldStarFilter" class="selectFilter">
+                    <select v-model="shieldStarFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
                         {{ shieldStarOption.text }}
                       </option>
                     </select>
-                    <select v-model="shieldElementFilter" class="selectFilter">
+                    <select v-model="shieldElementFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="shieldElementOption in shieldElementOptions" :value="shieldElementOption.value" :key="shieldElementOption.value">
                         {{ shieldElementOption.text }}
                       </option>
@@ -487,9 +487,12 @@ p, li, span {
   width: 4rem
 }
 .noWeaponsOrShields {
+  display: flex;
+  margin: 0 auto;
   font-family: 'Roboto';
   color: #b4b0a7;
-  font-size: 1rem;
+  font-size: 0.75rem;
+  margin-top: 1rem;
 }
 .mainWrapper {
   display: flex;
