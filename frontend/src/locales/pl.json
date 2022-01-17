@@ -703,7 +703,9 @@
     "yourAvailableSkill": "Twoja dostępna umiejętność: {formattedAvailableSkill} ",
     "claimRewardsCaps": "ODBIERZ NAGRODY",
     "leaderboard": "Tablica wyników",
-    "rewards": "Nagrody"
+    "rewards": "Nagrody",
+    "currentlyUnderAttack": "Jesteś obecnie atakowany!",
+    "pleaseWait": "Proszę chwilę poczekać"
   },
   "app": {
     "cantView": "W tej chwili nie możesz wyświetlić aplikacji. Możesz spróbować wyczyścić LocalStorage, aby zresetować ustawienia.",

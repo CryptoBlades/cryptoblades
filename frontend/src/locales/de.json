@@ -645,7 +645,9 @@
     "yourAvailableSkill": "Ihr verfügbarer Skill: {formattedAvailableSkill} ",
     "claimRewardsCaps": "BELOHNUNG ENTGEGENNEHMEN",
     "leaderboard": "Bestenliste",
-    "rewards": "Belohnung"
+    "rewards": "Belohnung",
+    "currentlyUnderAttack": "Sie werden derzeit angegriffen!",
+    "pleaseWait": "Bitte warte einen Moment"
   },
   "app": {
     "cantView": "Du kannst das Spiel gerade nicht ansehen. Versuche den LocalStorage zu löschen, um deine Einstellunge zurückzusetzen.",

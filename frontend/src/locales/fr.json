@@ -645,7 +645,9 @@
     "yourAvailableSkill": "Votre compétence disponible : {formattedAvailableSkill} ",
     "claimRewardsCaps": "RÉCLAMER DES RÉCOMPENSES",
     "leaderboard": "Classement",
-    "rewards": "Récompenses"
+    "rewards": "Récompenses",
+    "currentlyUnderAttack": "Vous êtes actuellement attaqué !",
+    "pleaseWait": "Patientez s'il-vous-plait"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
