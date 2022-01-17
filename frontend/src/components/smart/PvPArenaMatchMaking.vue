@@ -130,6 +130,11 @@
       :userCurrentRank="duelResult.rankDifference"
       @close-modal="handleCloseModal"
     />
+    <pvp-under-attack-modal
+      v-if="this.isUnderAttack"
+      :isUnderAttack="isUnderAttack"
+      @close-modal="handleCloseAttackModal"
+    />
   </div>
 </template>
 
@@ -146,6 +151,7 @@ import waterIcon from '../../assets/elements/water.png';
 import earthIcon from '../../assets/elements/earth.png';
 import lightningIcon from '../../assets/elements/lightning.png';
 import PvPDuelModal from './PvPDuelModal.vue';
+import PvPUnderAttackModal from './PvPUnderAttackModal.vue';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
 
 export default {
@@ -157,7 +163,8 @@ export default {
     'pvp-character': PvPCharacter,
     'pvp-separator': PvPSeparator,
     'pvp-button': PvPButton,
-    'pvp-duel-modal': PvPDuelModal
+    'pvp-duel-modal': PvPDuelModal,
+    'pvp-under-attack-modal': PvPUnderAttackModal
   },
 
   props: {
@@ -210,6 +217,7 @@ export default {
     return {
       loading: true,
       isInMatch: false,
+      isUnderAttack: false,
       decisionTimeLeft: 0,
       wager: null,
       duelCost: null,
@@ -305,7 +313,7 @@ export default {
 
     async findMatch() {
       if (!(await this.contracts().PvpArena.methods.isCharacterNotUnderAttack(this.currentCharacterId).call())) {
-        alert('You are currently under attack. Please wait a moment.');
+        this.isUnderAttack = true;
         return;
       }
 
@@ -333,7 +341,7 @@ export default {
 
     async reRollOpponent() {
       if (!(await this.contracts().PvpArena.methods.isCharacterNotUnderAttack(this.currentCharacterId).call())) {
-        alert('You are currently under attack. Please wait a moment.');
+        this.isUnderAttack = true;
         return;
       }
 
@@ -456,6 +464,10 @@ export default {
       }
 
       this.$emit('updateRank');
+    },
+
+    handleCloseAttackModal() {
+      this.isUnderAttack = false;
     }
   },
 
