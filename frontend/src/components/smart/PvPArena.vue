@@ -443,7 +443,7 @@ export default {
   },
 
   destroyed() {
-    if (this.restartEventSubscription.id) {
+    if (this.restartEventSubscription && this.restartEventSubscription.id) {
       this.restartEventSubscription.unsubscribe();
     }
   },
