@@ -3230,6 +3230,14 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.submitProgress(characterID, tokenIds).send(defaultCallOptions(state));
       },
 
+      async submitDustProgress({ state }, {characterID, amount}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        console.log('Submitting quest dust progress for: ', characterID, amount);
+        return await SimpleQuests.methods.submitDustProgress(characterID, amount).send(defaultCallOptions(state));
+      },
+
       async canUserAfford({ state }, {payingAmount}) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades || !state.defaultAccount) return;

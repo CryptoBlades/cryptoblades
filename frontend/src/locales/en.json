@@ -573,7 +573,10 @@
     "reputation": "Reputation",
     "do": "Do",
     "burn": "Burn",
-    "request": "Request"
+    "request": "Request",
+    "turnIn": "Turn in",
+    "howMuchToTurnIn": "How much to turn in?",
+    "setRequiredAmount": "Set required amount"
   },
   "stake": {
     "unknownStakeType": "Unknown stake type, please try again.",

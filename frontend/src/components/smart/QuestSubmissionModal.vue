@@ -1,13 +1,20 @@
 <template>
   <b-modal v-if="quest" class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop scrollable
-           :title="'Turn-in'" size="xl" @close="resetTokens" @cancel="resetTokens" :ok-title="'Submit'"
-           @ok="submit">
+           :title="$t('quests.turnIn')" size="xl" @close="resetTokens" @cancel="resetTokens"
+           :ok-title="$t('quests.submit')"
+           @ok="quest.requirementType === RequirementType.DUST ? submitDust() : submit()">
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    :showGivenWeaponIds="true" @chooseweapon="addBurnToken"
                    :starsOptions="[quest.requirementRarity + 1]"/>
       <weapon-grid :weaponIds="tokensToBurn" :showGivenWeaponIds="true" @chooseweapon="removeBurnToken"
                    :starsOptions="[quest.requirementRarity + 1]"/>
+    </div>
+    <div v-else-if="quest.requirementType === RequirementType.DUST" class="d-flex align-items-center flex-column">
+      <dust-balance-display class="w-50" :rarities="[quest.requirementRarity]"/>
+      <h2>{{ $t('quests.howMuchToTurnIn') }}</h2>
+      <b-form-input type="number" v-model="dustToBurn" class="w-50" :min="0" :max="maxDust()"/>
+      <b-button class="m-3" variant="primary" @click="setRequiredDust">{{ $t('quests.setRequiredAmount') }}</b-button>
     </div>
     <div v-else class="d-flex">
       <nft-list v-model="selectedToken" :showGivenNftIdTypes="true" :nftIdTypes="ownedNftIdTypes"
@@ -23,26 +30,31 @@
 import Vue from 'vue';
 import {Quest, Rarity, RequirementType, RewardType} from '@/components/smart/QuestDetails.vue';
 import WeaponGrid from '@/components/smart/WeaponGrid.vue';
-import {mapActions, mapState} from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
+import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 
 interface StoreMappedActions {
   submitProgress(payload: { characterID: string | number, tokenIds: (string | number)[] }): Promise<void>;
+
+  submitDustProgress(payload: { characterID: string | number, amount: string | number }): Promise<void>;
 }
 
 interface Data {
   quest: Quest | undefined;
   characterId: number | string;
+  questProgress: number;
   showModal: boolean;
   ownedTokens: string[];
   tokensToBurn: (string | number)[];
   ownedNftIdTypes: NftIdType[];
   nftIdTypesToBurn: NftIdType[];
+  dustToBurn: number;
   selectedToken: number | undefined;
 }
 
 export default Vue.extend({
-  components: {WeaponGrid, NftList},
+  components: {WeaponGrid, NftList, DustBalanceDisplay},
 
   props: {},
 
@@ -50,11 +62,13 @@ export default Vue.extend({
     return {
       quest: undefined,
       characterId: '',
+      questProgress: 0,
       showModal: false,
       ownedTokens: [],
       tokensToBurn: [],
       ownedNftIdTypes: [],
       nftIdTypesToBurn: [],
+      dustToBurn: 0,
       selectedToken: undefined,
       RequirementType,
       RewardType,
@@ -65,10 +79,26 @@ export default Vue.extend({
 
   computed: {
     ...mapState(['ownedWeaponIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedShieldIds']),
+    ...mapGetters(['getPowerfulDust', 'getGreaterDust', 'getLesserDust']),
   },
 
   methods: {
-    ...mapActions(['submitProgress']) as StoreMappedActions,
+    ...mapActions(['submitProgress', 'submitDustProgress']) as StoreMappedActions,
+
+    maxDust() {
+      if (this.quest?.requirementRarity === Rarity.COMMON) {
+        return this.getLesserDust();
+      } else if (this.quest?.requirementRarity === Rarity.UNCOMMON) {
+        return this.getGreaterDust();
+      } else if (this.quest?.requirementRarity === Rarity.RARE) {
+        return this.getPowerfulDust();
+      } else return 0;
+    },
+
+    setRequiredDust() {
+      if (!this.quest) return;
+      this.dustToBurn = this.quest.requirementAmount - this.questProgress;
+    },
 
     addBurnToken(id: number) {
       this.tokensToBurn.push(id.toString());
@@ -99,19 +129,26 @@ export default Vue.extend({
       this.resetTokens();
     },
 
+    async submitDust() {
+      await this.submitDustProgress({characterID: this.characterId, amount: this.dustToBurn});
+      this.resetTokens();
+    },
+
     resetTokens() {
       this.ownedTokens = [];
       this.ownedNftIdTypes = [];
       this.tokensToBurn = [];
       this.nftIdTypesToBurn = [];
+      this.dustToBurn = 0;
     }
   },
 
   async mounted() {
-    this.$root.$on('quest-submission-modal', (quest: Quest, characterId: string | number) => {
+    this.$root.$on('quest-submission-modal', (quest: Quest, characterId: string | number, questProgress: number) => {
       if (quest) {
         this.quest = quest;
         this.characterId = characterId;
+        this.questProgress = questProgress;
         this.showModal = true;
         if (this.quest.requirementType === RequirementType.WEAPON) {
           this.ownedTokens = this.ownedWeaponIds;
