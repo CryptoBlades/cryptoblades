@@ -13,6 +13,7 @@
     "copy:appconfig": "copyfiles -f \"../frontend/app-config.json\" ./dist/app"
   },
   "dependencies": {
+    "@chenfengyuan/vue-countdown": "^1.1.5",
     "@metamask/onboarding": "^1.0.1",
     "@types/three": "^0.129.0",
     "@waxio/waxjs": "^0.0.15",
