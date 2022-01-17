@@ -2,8 +2,8 @@
   <div v-bind:class="isDefault ? 'default-icon-wrapper' : 'nft-icon-wrapper'">
     <div v-if="isDefault" class="nft-default-icon">
       <img class="default-placeholder" v-if="nft.type === 'weapon'" src="../assets/placeholder/sword-placeholder-1.png"
-        v-tooltip="$t('nftIcon.weaponTooltip')"/>
-      <div v-if="nft.type === 'weapon'" class="default-info">2-5*</div>
+        v-tooltip="$t('nftIcon.weaponTooltip', {stars: stars || '2-5'})"/>
+      <div v-if="nft.type === 'weapon'" class="default-info">{{stars || '2-5'}}*</div>
 
       <img class="default-junk-placeholder" v-if="nft.type === 'junk'" src="../assets/junk/junk3.png"
         v-tooltip="$t('nftIcon.junkTooltip')" />
@@ -163,7 +163,7 @@ import { getWeaponArt } from '../weapon-arts-placeholder';
 import { Stat1PercentForChar, Stat2PercentForChar, Stat3PercentForChar } from '../interfaces';
 
 export default {
-  props: ['nft', 'isDefault', 'isShop', 'favorite'],
+  props: ['nft', 'isDefault', 'isShop', 'favorite', 'stars'],
   async created() {
 
   },

@@ -1,16 +1,26 @@
 <template>
   <div class="quest-details d-flex flex-column justify-content-between">
     <div v-if="quest" class="d-flex h-100">
-      <div class="quest-info d-flex flex-column">
+      <div class="quest-info d-flex flex-column justify-content-center">
         <div class="quest-description">
-          <span>{{ $t(`quests.rarity.${Rarity[quest.tier]}`) }} quest</span>
-          <span>{{ Array(quest.tier + 1).fill('★').join('') }}</span>
-          <span>Do {{ quest.requirementAmount }} {{
+          <span class="font-weight-bold">{{ $t(`quests.rarity.${Rarity[quest.tier]}`) }} quest</span>
+<!--          <span>{{ Array(quest.tier + 1).fill('★').join('') }}</span>-->
+          <span>{{
+              quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.burn')
+            }} {{ quest.requirementAmount }}x {{
               Array(quest.requirementRarity + 1).fill('★').join('')
             }} {{ $t(`quests.requirement.${RequirementType[quest.requirementType]}`) }}</span>
         </div>
-        <div>
-          <img :src="getFoundersShield" class="quest-goal-image" alt=""/>
+        <div class="d-flex justify-content-center p-3">
+          <nft-icon v-if="quest.requirementType === RewardType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
+                    :stars="quest.requirementRarity + 1"/>
+          <nft-icon v-else-if="quest.requirementType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"/>
+          <nft-icon v-else-if="quest.requirementType === RewardType.DUST && quest.requirementRarity === Rarity.COMMON"
+                    :isDefault="true" :nft="{ type: 'lbdust' }"/>
+          <nft-icon v-else-if="quest.requirementType === RewardType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
+                    :isDefault="true" :nft="{ type: '4bdust' }"/>
+          <nft-icon v-else-if="quest.requirementType === RewardType.DUST && quest.requirementRarity === Rarity.RARE"
+                    :isDefault="true" :nft="{ type: '5bdust' }"/>
         </div>
         <div class="quest-progress">
           <strong class="quest-progress-text">{{ questData.progress || 0 }} / {{ quest.requirementAmount }}</strong>
@@ -18,7 +28,7 @@
                       variant="primary"/>
         </div>
       </div>
-      <div class="reward-info d-flex flex-column">
+      <div class="reward-info d-flex flex-column justify-content-center">
         <div class="quest-description">
           <span class="font-weight-bold">Reward</span>
           <span>{{ quest.reputationAmount }} {{ $t('quests.reputation') }}</span>
@@ -26,9 +36,19 @@
               Array(quest.rewardRarity + 1).fill('★').join('')
             }}</span> {{ $t(`quests.reward.${RewardType[quest.rewardType]}`) }}</span>
         </div>
-        <div>
-          <img :src="getFoundersShield" class="quest-goal-image" alt=""/>
+        <div class="d-flex justify-content-center p-3">
+          <nft-icon v-if="quest.rewardType === RewardType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
+                    :stars="quest.rewardRarity + 1"/>
+          <nft-icon v-else-if="quest.rewardType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"/>
+          <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.COMMON"
+                    :isDefault="true" :nft="{ type: 'lbdust' }"/>
+          <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.UNCOMMON"
+                    :isDefault="true" :nft="{ type: '4bdust' }"/>
+          <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.RARE"
+                    :isDefault="true" :nft="{ type: '5bdust' }"/>
         </div>
+        <!--        <nft-icon :isDefault="true" :nft="{ type: 'trinket' }"/>-->
+        <!--        <nft-icon :isDefault="true" :nft="{ type: 'secret' }"/>-->
       </div>
     </div>
     <div class="d-flex">
@@ -50,8 +70,8 @@ import Vue from 'vue';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {mapActions, mapGetters, mapMutations} from 'vuex';
 import {Accessors, PropType} from 'vue/types/options';
-import foundersShield from '@/assets/shield1.png';
 import {QuestData} from '@/views/Quests.vue';
+import NftIcon from '@/components/NftIcon.vue';
 
 export enum RequirementType {
   NONE, WEAPON, JUNK, DUST, RAID
@@ -102,7 +122,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {},
+  components: {NftIcon},
 
   props: {
     questData: {
@@ -126,6 +146,10 @@ export default Vue.extend({
   },
 
 
+  computed: {
+    ...mapGetters(['getCartEntries']) as Accessors<StoreMappedGetters>,
+  },
+
   methods: {
     ...mapMutations(['clearCartEntries']) as StoreMappedMutations,
     ...mapActions(['getCharacterQuestData', 'getQuestData', 'skipQuest', 'completeQuest']) as StoreMappedActions,
@@ -137,14 +161,6 @@ export default Vue.extend({
     async complete() {
       await this.completeQuest({characterID: this.characterId});
     },
-  },
-
-  computed: {
-    ...mapGetters(['getCartEntries']) as Accessors<StoreMappedGetters>,
-
-    getFoundersShield() {
-      return foundersShield;
-    }
   },
 
   async mounted() {
@@ -170,6 +186,11 @@ export default Vue.extend({
 <style scoped>
 .quest-info {
   border-right: 1px solid;
+}
+
+.quest-info,
+.reward-info {
+  flex: 1;
 }
 
 .quest-progress {
@@ -222,5 +243,6 @@ export default Vue.extend({
 .quest-goal-image {
   max-width: 100%;
   height: auto;
+  width: 100%;
 }
 </style>

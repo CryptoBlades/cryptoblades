@@ -43,7 +43,7 @@
     "enemyRolled": "Enemy rolled:"
   },
   "nftIcon": {
-    "weaponTooltip": "Weapons (2-5*)",
+    "weaponTooltip": "Weapons ({stars}*)",
     "junkTooltip": "Junk (1-5*)",
     "trinketTooltip": "Trinket (1-5*)",
     "secretTooltip": "Secret (??)",

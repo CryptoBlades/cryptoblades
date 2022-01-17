@@ -51,7 +51,7 @@
     "enemyRolled": "Przeciwnik wyrzucił:"
   },
   "nftIcon": {
-    "weaponTooltip": "Bronie (2-5*)",
+    "weaponTooltip": "Bronie ({stars}*)",
     "junkTooltip": "Śmieci (1-5*)",
     "trinketTooltip": "Trinket (1-5*)",
     "secretTooltip": "Sekret (??)",

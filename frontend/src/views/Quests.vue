@@ -139,16 +139,6 @@ export default Vue.extend({
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
 }
 
-.quest-info {
-  border-right: 1px solid;
-}
-
-.quest-progress {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .reputation-progress {
   width: 75%;
 }
@@ -168,31 +158,9 @@ export default Vue.extend({
   bottom: -12%;
 }
 
-.quest-progress-text {
-
-}
-
 .quest-row,
 .quests-container {
   gap: 1rem;
-}
-
-.quest-details {
-  border: 1px solid;
-  border-radius: 5px;
-  width: 25rem;
-  height: auto;
-}
-
-.quest-description {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.quest-goal-image {
-  max-width: 100%;
-  height: auto;
 }
 
 @media (max-width: 576px) {

@@ -53,7 +53,7 @@
     "enemyRolled": "Enemy rolled:"
   },
   "nftIcon": {
-    "weaponTooltip": "Weapons (2-5*)",
+    "weaponTooltip": "Weapons ({stars}*)",
     "junkTooltip": "Junk (1-5*)",
     "trinketTooltip": "Trinket (1-5*)",
     "secretTooltip": "Secret (??)",
@@ -565,7 +565,9 @@
     "skip": "Skip",
     "complete": "Complete",
     "submit": "Submit",
-    "reputation": "Reputation"
+    "reputation": "Reputation",
+    "do": "Do",
+    "burn": "Burn"
   },
   "stake": {
     "unknownStakeType": "Unknown stake type, please try again.",
