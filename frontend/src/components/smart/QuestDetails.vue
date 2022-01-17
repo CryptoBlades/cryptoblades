@@ -14,7 +14,8 @@
         <div class="d-flex justify-content-center p-3">
           <nft-icon v-if="quest.requirementType === RewardType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
                     :stars="quest.requirementRarity + 1"/>
-          <nft-icon v-else-if="quest.requirementType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"/>
+          <nft-icon v-else-if="quest.requirementType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"
+                    :stars="quest.requirementRarity + 1"/>
           <nft-icon v-else-if="quest.requirementType === RewardType.DUST && quest.requirementRarity === Rarity.COMMON"
                     :isDefault="true" :nft="{ type: 'lbdust' }"/>
           <nft-icon v-else-if="quest.requirementType === RewardType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
@@ -39,7 +40,8 @@
         <div class="d-flex justify-content-center p-3">
           <nft-icon v-if="quest.rewardType === RewardType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
                     :stars="quest.rewardRarity + 1"/>
-          <nft-icon v-else-if="quest.rewardType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"/>
+          <nft-icon v-else-if="quest.rewardType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"
+                    :stars="quest.rewardRarity + 1"/>
           <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.COMMON"
                     :isDefault="true" :nft="{ type: 'lbdust' }"/>
           <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.UNCOMMON"
