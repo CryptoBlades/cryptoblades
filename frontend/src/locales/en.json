@@ -178,7 +178,8 @@
     "renamePlaceholder": "New Name",
     "isProfanish": "This name contains profanish words and thus will be displayed as follows:",
     "changeWeaponSkill": "Change Weapon's Skin",
-    "pickSkin": "Pick a skin to switch to."
+    "pickSkin": "Pick a skin to switch to.",
+    "average": "AVG"
   },
   "weaponIcon": {
     "durability": "Durability:",
@@ -513,6 +514,7 @@
       "addressLine2": "Address line 2 (Optional)",
       "city": "City",
       "zipCode": "Zip code",
+      "taxNumber": "Tax number (CPF number)",
       "companyOptional": "Company (optional)",
       "shipping": "Shipping",
       "shippingCostAfterNextStep": "Shipping cost will be known after the next step",
