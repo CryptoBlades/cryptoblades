@@ -20,7 +20,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     PartnerProject[] private partneredProjects;
     mapping(uint256 => uint256) projectAddedBlockNumber;
     mapping(uint256 => uint256) tokensClaimed;
-    uint256 skillPrice;
+    uint256 public skillPrice;
 
     struct PartnerProject {
         uint256 id;
@@ -47,7 +47,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         // multiplier increases every second by 1e18/multiplierUnit
         multiplierUnit = 1e4;
     }
-    
+
     modifier restricted() {
         _restricted();
         _;
@@ -72,7 +72,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     function getActivePartnerProjectsIds() public view returns (uint256[] memory){
         uint256 activeCount = getAmountOfActiveProjects();
         uint256 counter = 0;
-        
+
         uint256[] memory activeProjectsIds = new uint256[](activeCount);
         for(uint i = 0; i < partneredProjects.length; i++) {
             if(partneredProjects[i].isActive) {
@@ -92,7 +92,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     function getProjectMultiplier(uint256 partnerId) public view returns(uint256) {
         if(block.timestamp >= multiplierTimestamp[partnerId]) {
-            return uint(1e18).div(multiplierUnit).mul(block.timestamp.sub(multiplierTimestamp[partnerId])).add(1e18); 
+            return uint(1e18).div(multiplierUnit).mul(block.timestamp.sub(multiplierTimestamp[partnerId])).add(1e18);
         }
         uint256 multiplierDecrease = uint(1e18).div(multiplierUnit).mul(multiplierTimestamp[partnerId].sub(block.timestamp));
         if(multiplierDecrease > 1e18) {
@@ -165,7 +165,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
             skillToDeduct = skillToDeduct.mul(remainingPartnerTokenSupply).div(partnerTokenAmount);
             partnerTokenAmount = remainingPartnerTokenSupply;
         }
-        
+
         game.deductAfterPartnerClaim(skillToDeduct, msg.sender);
         tokensClaimed[partnerId] += partnerTokenAmount;
         IERC20(partneredProjects[partnerId].tokenAddress).safeTransfer(msg.sender, partnerTokenAmount);
