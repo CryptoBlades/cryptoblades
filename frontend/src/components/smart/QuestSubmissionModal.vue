@@ -19,9 +19,9 @@
     <div v-else class="d-flex">
       <nft-list v-model="selectedToken" :showGivenNftIdTypes="true" :nftIdTypes="ownedNftIdTypes"
                 @choosenft="addNftIdType" :starsOptions="[quest.requirementRarity + 1]"
-                :typesOptions="[RequirementType[quest.requirementType]]"/>
+                :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
       <nft-list :showGivenNftIdTypes="true" :nftIdTypes="nftIdTypesToBurn" @choosenft="removeNftIdType"
-                :starsOptions="[quest.requirementRarity + 1]" :typesOptions="[RequirementType[quest.requirementType]]"/>
+                :starsOptions="[quest.requirementRarity + 1]" :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
     </div>
   </b-modal>
 </template>
@@ -84,6 +84,10 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['submitProgress', 'submitDustProgress']) as StoreMappedActions,
+
+    upperFirstChar(text: string) {
+      return text[0].toUpperCase() + text.slice(1).toLowerCase();
+    },
 
     maxDust() {
       if (this.quest?.requirementRarity === Rarity.COMMON) {
