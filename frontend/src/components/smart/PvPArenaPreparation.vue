@@ -21,12 +21,12 @@
                   <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
                   <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Weapons</p>
-                    <select v-model="weaponStarFilter" class="selectFilter">
+                    <select v-model="weaponStarFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="weaponStarOption in weaponStarOptions" :value="weaponStarOption.value" :key="weaponStarOption.value">
                         {{ weaponStarOption.text }}
                       </option>
                     </select>
-                    <select v-model="weaponElementFilter" class="selectFilter">
+                    <select v-model="weaponElementFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="weaponElementOption in weaponElementOptions" :value="weaponElementOption.value" :key="weaponElementOption.value">
                         {{ weaponElementOption.text }}
                       </option>
@@ -60,12 +60,12 @@
                   <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
                   <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">Shields</p>
-                    <select v-model="shieldStarFilter" class="selectFilter">
+                    <select v-model="shieldStarFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
                         {{ shieldStarOption.text }}
                       </option>
                     </select>
-                    <select v-model="shieldElementFilter" class="selectFilter">
+                    <select v-model="shieldElementFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="shieldElementOption in shieldElementOptions" :value="shieldElementOption.value" :key="shieldElementOption.value">
                         {{ shieldElementOption.text }}
                       </option>
@@ -139,51 +139,14 @@
       <div class="characterImage">
         <pvp-character :characterId="currentCharacterId" />
       </div>
-      <div class="arenaInformation">
-        <h1 class="title">ARENA INFORMATION</h1>
-        <div class="tokenCard">
-          <img src="../../assets/skillToken.png" alt="skill token" />
-          <div class="tokenCardInfo">
-            <span class="text">PVP Rewards Pool ($SKILL)</span>
-            <span class="number">{{ formatedTierRewardsPool }}</span>
-          </div>
-        </div>
-        <ul class="topPlayersList">
-          <li class="header">
-            <span>Top Players</span><span>MMR</span>
-          </li>
-          <li>
-            <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[0] && tierTopRankers[0].rank || 'N/A' }}</span>
-          </li>
-          <li>
-            <span>Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[1] && tierTopRankers[1].rank || 'N/A'}}</span>
-          </li>
-          <li>
-            <span>Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
-          </li>
-        </ul>
-        <ul class="topPlayersList">
-          <li class="header">
-            <span>Current Season</span><span>Restarts In</span>
-          </li>
-          <li>
-            <span>{{ currentRankedSeason }}</span>
-            <vue-countdown v-if="secondsBeforeNextSeason" :time="secondsBeforeNextSeason * 1000" v-slot="{ days, hours, minutes, seconds }">
-              {{ days && days || '' }} {{ days && 'days, ' || '' }}{{ hours }}:{{ minutes }}:{{ seconds }}
-            </vue-countdown>
-            <span v-else>-</span>
-          </li>
-        </ul>
-        <ul class="characterAttrsList">
-          <li class="characterName">{{ characterInformation.name || '' }}</li>
-          <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
-          <li><span>Level</span><span>{{ characterInformation.level }}</span></li>
-          <li><span>Current MMR</span><span>{{ characterInformation.rank }}</span></li>
-        </ul>
-      </div>
+      <pvp-arena-information
+        class="arenaInformation"
+        :tierRewardsPool="tierRewardsPool"
+        :tierTopRankers="tierTopRankers"
+        :currentRankedSeason="currentRankedSeason"
+        :secondsBeforeNextSeason="secondsBeforeNextSeason"
+        :characterInformation="characterInformation"
+      />
     </div>
   </div>
 </template>
@@ -200,7 +163,7 @@ import PvPSeparator from './PvPSeparator.vue';
 import checkIcon from '../../assets/checkImage.svg';
 import ellipseIcon from '../../assets/ellipseImage.svg';
 import i18n from '../../i18n';
-import VueCountdown from '@chenfengyuan/vue-countdown';
+import PvPArenaInfo from './PvPArenaInfo.vue';
 
 const defaultStarOptions = [
   { text: i18n.t('nftList.sorts.any'), value: 0 },
@@ -227,7 +190,7 @@ export default {
     'pvp-separator': PvPSeparator,
     'pvp-character': PvPCharacter,
     'b-popover': BPopover,
-    'vue-countdown': VueCountdown
+    'pvp-arena-information': PvPArenaInfo,
   },
 
   props: {
@@ -293,9 +256,6 @@ export default {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
     formattedEntryWager() {
       return new BN(this.entryWager).div(new BN(10).pow(18)).toFixed(0);
-    },
-    formatedTierRewardsPool() {
-      return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
     },
     getIconSource () {
       return this.checkBoxAgreed && this.selectedWeaponId ? checkIcon : ellipseIcon;
@@ -527,9 +487,12 @@ p, li, span {
   width: 4rem
 }
 .noWeaponsOrShields {
+  display: flex;
+  margin: 0 auto;
   font-family: 'Roboto';
   color: #b4b0a7;
-  font-size: 1rem;
+  font-size: 0.75rem;
+  margin-top: 1rem;
 }
 .mainWrapper {
   display: flex;
@@ -660,7 +623,7 @@ p, li, span {
       }
     }
     .checkboxWrapper {
-      display: inline-block;
+      display: inline-flex;
       align-items: center;
       vertical-align: middle;
       margin-left: 1.75rem;
@@ -673,7 +636,6 @@ p, li, span {
         .checkboxInput {
           width: 1.25rem;
           height: 1.25rem;
-          cursor: pointer;
           background: rgba(40,40,40,0.2);
           appearance: none;
           position: relative;
@@ -689,6 +651,7 @@ p, li, span {
     }
       span {
         margin-left: 2rem;
+        margin-bottom: 0.35rem;
         color: #b4b0a7;
         font-size: 0.875rem;
       }
@@ -702,96 +665,19 @@ p, li, span {
 }
 .characterImage {
   display: flex;
-  width: 50%;
+  width: 40%;
   padding: 3rem 0;
   @media only screen and (min-width: 1440px) {
-    width: 40%;
+    width: 30%;
     margin: 0;
   }
   @media only screen and (min-width: 1980px) {
-    width: 30%;
+    width: 20%;
   }
 }
 .arenaInformation {
   display: flex;
   flex-direction: column;
-  .tokenCard {
-    display: flex;
-    padding: 1rem 2rem 1rem 1.5rem;
-    border-radius: 0.375rem;
-    align-items: center;
-    vertical-align: middle;
-    background-color: rgba(0, 0, 0, 0.3);
-    img {
-      width: 4rem;
-      height: 4rem;
-    }
-    .tokenCardInfo {
-      display: flex;
-      flex-direction: column;
-      margin-left: 1rem;
-      .text {
-        color: #cec198;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-      }
-      .number {
-        color: #ffffff;
-        font-size: 1.25rem;
-        line-height: 1.75rem;
-      }
-    }
-  }
-  .topPlayersList,
-  .characterAttrsList {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-top: 1.5rem;
-    padding: 0;
-    span {
-      color: #b4b0a7;
-      font-size: 0.75rem;
-      line-height: 1rem;
-    }
-    span:nth-of-type(2) {
-      margin-left: auto;
-    }
-    li {
-      display: flex;
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #363636;
-    }
-    li:first-of-type,
-    li:last-of-type {
-      padding-bottom: 0;
-      border-style: none;
-    }
-  }
-  .topPlayersList {
-    .header {
-      margin-bottom: 1rem;
-      span {
-        color: #cec198;
-        font-size: 0.875rem;
-      }
-    }
-  }
-  .rankings {
-    margin-top: 0.75rem;
-    color: #cec198;
-    font-size: 0.875rem;
-  }
-  .characterAttrsList {
-    margin-top: 2.25rem;
-    .characterName {
-      margin-bottom: 1rem;
-      color: #cec198;
-      font-size: 1.25rem;
-      font-family: 'Trajan';
-    }
-  }
 }
 .loadingSpinner {
   display: flex;
