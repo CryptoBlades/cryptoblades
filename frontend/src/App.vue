@@ -386,6 +386,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   font-weight: 600;
   text-align: center;
 }
+
 hr.hr-divider {
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
