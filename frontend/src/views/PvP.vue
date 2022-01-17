@@ -1,6 +1,7 @@
 <template>
   <div class="pvpWrapper">
     <div class="noCharacter" v-if="!currentCharacterId && currentCharacterId !== 0">
+      {{$t('pvp.atLeastOneChar')}}
       You need at least one character to enter PvP!
     </div>
     <div v-else>

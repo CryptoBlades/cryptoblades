@@ -2,10 +2,15 @@
   <div class="wrapper">
     <div class="mainWrapper">
       <div class="arenaSignup">
-        <h1 class="title">ARENA SIGNUP</h1>
-        <p>Enter the arena and win rewards ($SKILL).</p>
+        <h1 class="title">
+          {{$t('pvp.arenaSignUpCaps')}}
+          ARENA SIGNUP</h1>
+        <p>
+          {{$t('pvp.enterAndWin')}}
+          Enter the arena and win rewards ($SKILL).</p>
         <div></div>
         <div class="buttonWrapper">
+          <!-- ver q wea {{$t('pvp.arenaSignUpCaps')}} -->
           <pvp-button
             @click="handleEnterArenaClick()"
             buttonText="ENTER ARENA"
@@ -13,7 +18,9 @@
         </div>
         <div class="bottomWrapper">
           <div class="bottomWrapperNav">
-            <button @click="setTab(0)" :class="tab === 0 && 'active'">Equipment</button>
+            <button @click="setTab(0)" :class="tab === 0 && 'active'">
+              {{$t('pvp.equipment')}}
+              Equipment</button>
             <button @click="setTab(1)" :class="tab === 1 && 'active'">Duel history</button>
           </div>
           <div class="bottomWrapperInner">

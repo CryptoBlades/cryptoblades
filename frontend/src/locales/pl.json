@@ -642,7 +642,9 @@
   "pvp": {
     "lastDefeated": "Ostatnio zostałeś pokonany przez:",
     "tapAnywhere": "Dotknij w dowolnym miejscu, aby zamknąć",
-    "kicked": "Zostałeś wyrzucony z areny!"
+    "kicked": "Zostałeś wyrzucony z areny!",
+
+    "atLeastOneChar": "Du benötigst mindestens einen Charakter, um am PvP teilnehmen zu können!"
   },
   "app": {
     "cantView": "W tej chwili nie możesz wyświetlić aplikacji. Możesz spróbować wyczyścić LocalStorage, aby zresetować ustawienia.",

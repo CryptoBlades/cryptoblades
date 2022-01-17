@@ -4,14 +4,20 @@
     </div>
     <div v-else class="arenaPreparationWrapper">    <div class="mainWrapper">
       <div class="arenaSignup">
-        <h1 class="title">ARENA SIGNUP</h1>
-        <p>Enter the arena and win rewards ($SKILL).</p>
+        <h1 class="title">
+          {{$t('pvp.arenaSignUpCaps')}}
+          ARENA SIGNUP</h1>
+        <p>
+          {{$t('pvp.enterAndWin')}}
+          Enter the arena and win rewards ($SKILL).</p>
         <div>
           <div class="top">
             <div class="circle">
               <img :src="getIconSource" />
             </div>
-            <p>Equip a Sword and a Shield (optional).</p>
+            <p>
+              {{$t('pvp.equipSwordAndShield')}}
+              Equip a Sword and a Shield (optional).</p>
           </div>
           <div class="bottomWeapons">
             <pvp-separator dark vertical />
@@ -20,7 +26,9 @@
                 <a tabindex="0" class="selectWeaponButton" id="weapon-popover">
                   <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
                   <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
-                    <p class="popoverTitle">Weapons</p>
+                    <p class="popoverTitle">
+                      {{$t('pvp.weapons')}}
+                      Weapons</p>
                     <select v-model="weaponStarFilter" class="selectFilter">
                       <option v-for="weaponStarOption in weaponStarOptions" :value="weaponStarOption.value" :key="weaponStarOption.value">
                         {{ weaponStarOption.text }}
@@ -43,7 +51,9 @@
                         :disabled="ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)"
                       />
                     </div>
-                    <div v-else class="noWeaponsOrShields">You have no weapons.</div>
+                    <div v-else class="noWeaponsOrShields">
+                      {{$t('pvp.noWeapons')}}
+                      You have no weapons.</div>
                   </b-popover>
                 </a>
               </div>
@@ -53,13 +63,17 @@
                   :weaponId="selectedWeaponId"
                   class="weaponPlaceholder"
                 />
-                <button @click="handleClearWeapon()" class="clearWeaponButton">Clear</button>
+                <button @click="handleClearWeapon()" class="clearWeaponButton">
+                  {{$t('pvp.clear')}}
+                  Clear</button>
               </div>
               <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
                 <a tabindex="0" class="selectWeaponButton" id="shield-popover">
                   <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
                   <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
-                    <p class="popoverTitle">Shields</p>
+                    <p class="popoverTitle">
+                      {{$t('pvp.shields')}}
+                      Shields</p>
                     <select v-model="shieldStarFilter" class="selectFilter">
                       <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
                         {{ shieldStarOption.text }}
@@ -82,7 +96,9 @@
                         :disabled="ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)"
                       />
                     </div>
-                    <div v-else class="noWeaponsOrShields">You have no shields.</div>
+                    <div v-else class="noWeaponsOrShields">
+                      {{$t('pvp.noShields')}}
+                      You have no shields.</div>
                   </b-popover>
                 </a>
               </div>
@@ -91,7 +107,9 @@
                   :shield="selectedShield"
                   :shieldId="selectedShieldId"
                 />
-                <button @click="handleClearShield" class="clearShieldButton">Clear</button>
+                <button @click="handleClearShield" class="clearShieldButton">
+                  {{$t('pvp.clear')}}
+                  Clear</button>
               </div>
             </div>
           </div>
@@ -101,33 +119,45 @@
           <div class="circle">
             <img :src="getIconSource" />
           </div>
-          <p>Enter the Arena</p>
+          <p>
+            {{$t('pvp.enterTheArena')}}
+            Enter the Arena</p>
         </div>
         <div class="bottomList">
           <pvp-separator dark vertical />
           <div>
             <ul>
               <li>
-                <div class="bulletpoint"></div> Entering the Arena will cost you {{ formattedEntryWager }} $SKILL.
+                <div class="bulletpoint"></div>
+                {{$t('pvp.enterArenaWillCost')}}
+                 Entering the Arena will cost you {{ formattedEntryWager }} $SKILL.
               </li>
               <li>
-                <div class="bulletpoint"></div> Players can attack you while you are in the
+                <div class="bulletpoint"></div>
+                {{$t('pvp.playersCanAttackYou')}}
+                 Players can attack you while you are in the
                 Arena.
               </li>
               <li>
-                <div class="bulletpoint"></div> Leaving the Arena will cost you {{ +formattedEntryWager / 4 }} $SKILL.
+                <div class="bulletpoint"></div>
+                {{$t('pvp.leavingWillCost')}}
+                 Leaving the Arena will cost you {{ +formattedEntryWager / 4 }} $SKILL.
               </li>
             </ul>
             <label class="checkboxWrapper">
               <div class="checkboxInnerWrapper">
                 <input type="checkbox" v-model="checkBoxAgreed"  class="checkboxInput"/>
               </div>
-              <span>I understand.</span>
+              <span>
+                {{$t('pvp.iUnderstand')}}
+                I understand.</span>
             </label>
           </div>
         </div>
         </div>
         <div class="enterArenaButtonWrapper">
+          <!-- ver q wea       {{$t('pvp.atLeastOneChar')}}
+ -->
           <pvp-button
             @click="handleEnterArenaClick()"
             buttonText="ENTER ARENA"
@@ -140,37 +170,54 @@
         <pvp-character :characterId="currentCharacterId" />
       </div>
       <div class="arenaInformation">
-        <h1 class="title">ARENA INFORMATION</h1>
+        <h1 class="title">
+          {{$t('pvp.arenaInfoCaps')}}
+          ARENA INFORMATION</h1>
         <div class="tokenCard">
           <img src="../../assets/skillToken.png" alt="skill token" />
           <div class="tokenCardInfo">
-            <span class="text">PVP Rewards Pool ($SKILL)</span>
+            <span class="text">
+              {{$t('pvp.rewardsPoolSkill')}}
+              PVP Rewards Pool ($SKILL)</span>
             <span class="number">{{ formatedTierRewardsPool }}</span>
           </div>
         </div>
         <ul class="topPlayersList">
           <li class="header">
-            <span>Top Players</span><span>MMR</span>
+            <span>
+              {{$t('pvp.topPlayers')}}
+              Top Players</span><span>MMR</span>
           </li>
           <li>
-            <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
+            <span>
+              {{$t('pvp.rank')}}
+              Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
             <span>{{ tierTopRankers[0] && tierTopRankers[0].rank || 'N/A' }}</span>
           </li>
           <li>
-            <span>Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || 'N/A' }}</span>
+            <span>
+              {{$t('pvp.rank')}}
+              Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || 'N/A' }}</span>
             <span>{{ tierTopRankers[1] && tierTopRankers[1].rank || 'N/A'}}</span>
           </li>
           <li>
-            <span>Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || 'N/A' }}</span>
+            <span>
+              {{$t('pvp.rank')}}
+              Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || 'N/A' }}</span>
             <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
           </li>
         </ul>
-        <!-- <a href="#" class="rankings">View all rankings</a> -->
         <ul class="characterAttrsList">
           <li class="characterName">{{ characterInformation.name || '' }}</li>
-          <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
-          <li><span>Level</span><span>{{ characterInformation.level }}</span></li>
-          <li><span>Current MMR</span><span>{{ characterInformation.rank }}</span></li>
+          <li><span>
+            {{$t('pvp.power')}}
+            Power </span><span>{{ characterInformation.power }}</span></li>
+          <li><span>
+            {{$t('pvp.level')}}
+            Level</span><span>{{ characterInformation.level }}</span></li>
+          <li><span>
+            {{$t('pvp.current')}}
+            Current MMR</span><span>{{ characterInformation.rank }}</span></li>
         </ul>
       </div>
     </div>

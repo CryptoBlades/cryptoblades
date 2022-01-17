@@ -1,13 +1,27 @@
 <template>
   <div class="rewardsWrapper">
-    <h1>REWARDS</h1>
-    <p>Here you can claim your rewards</p>
+    <h1>
+      {{$t('pvp.rewardsCaps')}}
+      REWARDS</h1>
+    <p>
+      {{$t('pvp.clickToClaim')}}
+      Here you can claim your rewards</p>
     <ul>
-      <li><div class="bulletpoint"></div>Seasonal rewards are distributed at the end of every ranked season to the top 3 ranking players in each tier.</li>
-      <li><div class="bulletpoint"></div>Your rewards will accumulate over time.</li>
-      <li><div class="bulletpoint"></div>Just click 'CLAIM REWARDS' to claim your skill!</li>
-      <li><div class="bulletpoint"></div>Your available skill: {{ formattedAvailableSkill }} $SKILL</li>
+      <li><div class="bulletpoint"></div>
+        {{$t('pvp.seasonRewardDistribution')}}
+        Seasonal rewards are distributed at the end of every ranked season to the top 3 ranking players in each tier.</li>
+      <li><div class="bulletpoint"></div>
+        {{$t('pvp.rewardsAccumulate')}}
+        Your rewards will accumulate over time.</li>
+      <li><div class="bulletpoint"></div>
+        {{$t('pvp.justClickClaim')}}
+        Just click 'CLAIM REWARDS' to claim your skill!</li>
+      <li><div class="bulletpoint"></div>
+        {{$t('pvp.yourAvailableSkill')}}
+        Your available skill: {{ formattedAvailableSkill }} $SKILL</li>
     </ul>
+    <!--       {{$t('pvp.claimRewardsCaps')}}
+VER Q HACER ACA -->
     <pvp-button buttonText="CLAIM REWARDS" @click="claimRewards" />
   </div>
 </template>
