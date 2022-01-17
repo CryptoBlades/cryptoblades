@@ -21,7 +21,9 @@
             <button @click="setTab(0)" :class="tab === 0 && 'active'">
               {{$t('pvp.equipment')}}
               Equipment</button>
-            <button @click="setTab(1)" :class="tab === 1 && 'active'">Duel history</button>
+            <button @click="setTab(1)" :class="tab === 1 && 'active'">
+              {{$t('pvp.duelHistory')}}
+              Duel history</button>
           </div>
           <div class="bottomWrapperInner">
             <div v-if="tab === 0" class="bottomWeapons">
@@ -40,7 +42,11 @@
              <div v-if="tab === 1" class="bottomDuels">
               <div v-if="duelHistory.length === 0" class="noDuels">You have not disputed any duels yet!</div>
               <ul v-else>
-                <li><span>Date</span><span>Result</span></li>
+                <li><span>
+                  {{$t('pvp.date')}}
+                  Date</span><span>
+                    {{$t('pvp.result')}}
+                    Result</span></li>
                 <li v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
                   <span class="date">{{ dayjs(new Date(duel.timestamp * 1000)).format('YYYY/MM/DD') }}</span>
                   <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? 'Win' : 'Lose' }}</span>
@@ -54,7 +60,9 @@
         <pvp-character :characterId="currentCharacterId" />
       </div>
       <div class="arenaInformation">
-        <h1 class="title">ARENA INFORMATION</h1>
+        <h1 class="title">
+          {{$t('pvp.arenaInformationCaps')}}
+          ARENA INFORMATION</h1>
         <div class="tokenCard">
           <img src="../../assets/skillToken.png" alt="skill token" />
           <div class="tokenCardInfo">
