@@ -531,7 +531,7 @@ export default {
 
       this.decisionTimeLeft = (this.decisionSeconds - (timeNow - this.match.createdAt), 0);
 
-      // Note: This gives a 400 seconds decisionTimeLeft locally. Test if it's ok on testnet.
+      // Note: This gives a 400+ seconds decisionTimeLeft locally. It's okay on Testnet.
       this.timer = setInterval(() => {
         if (this.isInMatch && !this.isCharacterInDuelQueue) {
           const timeNow = Math.floor((new Date()).getTime() / 1000);
