@@ -5,19 +5,24 @@
         <img src="../../assets/swordsIcon.svg"/>
         <span>
           {{$t('pvp.arena')}}
-          Arena</span>
+        </span>
       </button>
       <button @click="setTab(1)" :class="tabNumber === 1 && 'active'">
         <img src="../../assets/crownIcon.svg" />
         <span>
           {{$t('pvp.leaderboard')}}
-          Leaderboard</span>
+        </span>
       </button>
       <button @click="setTab(2)" :class="tabNumber === 2 && 'active'">
         <img src="../../assets/crownIcon.svg" />
         <span>
           {{$t('pvp.rewards')}}
-          Rewards</span>
+          <div class="rewardsIndicator" v-if="hasRewards">
+            <div>
+              <p>!</p>
+            </div>
+          </div>
+        </span>
       </button>
     </nav>
   </div>
@@ -28,6 +33,9 @@ export default {
   props: {
     tabNumber: {
       default: 0
+    },
+    hasRewards: {
+      default: false,
     }
   },
 
@@ -46,6 +54,27 @@ export default {
   border-bottom: 1px solid #363636;
   .defaultNav {
     display: flex;
+
+    .rewardsIndicator {
+      display: inline-flex;
+      justify-content: center;
+      color: black;
+    }
+    .rewardsIndicator > div {
+      background-color: #cec198;
+      border-radius: 50%;
+      height: 1rem;
+      width: 1rem;
+      align-items: center;
+      justify-content: center;
+    }
+    .rewardsIndicator > div p {
+      display: block;
+      color: #000;
+      line-height: normal;
+      text-align: center;
+      font-weight: 500;
+}
   }
   button {
     display: flex;

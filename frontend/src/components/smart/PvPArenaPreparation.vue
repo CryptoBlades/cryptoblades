@@ -6,10 +6,10 @@
       <div class="arenaSignup">
         <h1 class="title">
           {{$t('pvp.arenaSignUpCaps')}}
-          ARENA SIGNUP</h1>
+        </h1>
         <p>
-          {{$t('pvp.enterAndWin')}}
-          Enter the arena and win rewards ($SKILL).</p>
+          {{$t('pvp.enterAndWin')}}($SKILL).
+        </p>
         <div>
           <div class="top">
             <div class="circle">
@@ -17,7 +17,7 @@
             </div>
             <p>
               {{$t('pvp.equipSwordAndShield')}}
-              Equip a Sword and a Shield (optional).</p>
+            </p>
           </div>
           <div class="bottomWeapons">
             <pvp-separator dark vertical />
@@ -28,7 +28,7 @@
                   <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">
                       {{$t('pvp.weapons')}}
-                      Weapons</p>
+                    </p>
                     <select v-model="weaponStarFilter" class="selectFilter">
                       <option v-for="weaponStarOption in weaponStarOptions" :value="weaponStarOption.value" :key="weaponStarOption.value">
                         {{ weaponStarOption.text }}
@@ -53,7 +53,7 @@
                     </div>
                     <div v-else class="noWeaponsOrShields">
                       {{$t('pvp.noWeapons')}}
-                      You have no weapons.</div>
+                    </div>
                   </b-popover>
                 </a>
               </div>
@@ -65,7 +65,7 @@
                 />
                 <button @click="handleClearWeapon()" class="clearWeaponButton">
                   {{$t('pvp.clear')}}
-                  Clear</button>
+                </button>
               </div>
               <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
                 <a tabindex="0" class="selectWeaponButton" id="shield-popover">
@@ -73,7 +73,7 @@
                   <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">
                       {{$t('pvp.shields')}}
-                      Shields</p>
+                    </p>
                     <select v-model="shieldStarFilter" class="selectFilter">
                       <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
                         {{ shieldStarOption.text }}
@@ -98,7 +98,7 @@
                     </div>
                     <div v-else class="noWeaponsOrShields">
                       {{$t('pvp.noShields')}}
-                      You have no shields.</div>
+                    </div>
                   </b-popover>
                 </a>
               </div>
@@ -109,7 +109,7 @@
                 />
                 <button @click="handleClearShield" class="clearShieldButton">
                   {{$t('pvp.clear')}}
-                  Clear</button>
+                </button>
               </div>
             </div>
           </div>
@@ -121,7 +121,7 @@
           </div>
           <p>
             {{$t('pvp.enterTheArena')}}
-            Enter the Arena</p>
+          </p>
         </div>
         <div class="bottomList">
           <pvp-separator dark vertical />
@@ -129,19 +129,15 @@
             <ul>
               <li>
                 <div class="bulletpoint"></div>
-                {{$t('pvp.enterArenaWillCost')}}
-                 Entering the Arena will cost you {{ formattedEntryWager }} $SKILL.
+                {{$t('pvp.enterArenaWillCost', formattedEntryWager)}}
               </li>
               <li>
                 <div class="bulletpoint"></div>
                 {{$t('pvp.playersCanAttackYou')}}
-                 Players can attack you while you are in the
-                Arena.
               </li>
               <li>
                 <div class="bulletpoint"></div>
-                {{$t('pvp.leavingWillCost')}}
-                 Leaving the Arena will cost you {{ +formattedEntryWager / 4 }} $SKILL.
+                {{$t('pvp.leavingWillCost', leavingArenaCost)}}
               </li>
             </ul>
             <label class="checkboxWrapper">
@@ -150,17 +146,15 @@
               </div>
               <span>
                 {{$t('pvp.iUnderstand')}}
-                I understand.</span>
+              </span>
             </label>
           </div>
         </div>
         </div>
         <div class="enterArenaButtonWrapper">
-          <!-- ver q wea       {{$t('pvp.atLeastOneChar')}}
- -->
           <pvp-button
             @click="handleEnterArenaClick()"
-            buttonText="ENTER ARENA"
+            :buttonText="i18n.t('pvp.enterArenaCaps')"
             :buttonsubText="'$SKILL: ' + formattedEntryWager"
             :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
           />
@@ -169,57 +163,14 @@
       <div class="characterImage">
         <pvp-character :characterId="currentCharacterId" />
       </div>
-      <div class="arenaInformation">
-        <h1 class="title">
-          {{$t('pvp.arenaInfoCaps')}}
-          ARENA INFORMATION</h1>
-        <div class="tokenCard">
-          <img src="../../assets/skillToken.png" alt="skill token" />
-          <div class="tokenCardInfo">
-            <span class="text">
-              {{$t('pvp.rewardsPoolSkill')}}
-              PVP Rewards Pool ($SKILL)</span>
-            <span class="number">{{ formatedTierRewardsPool }}</span>
-          </div>
-        </div>
-        <ul class="topPlayersList">
-          <li class="header">
-            <span>
-              {{$t('pvp.topPlayers')}}
-              Top Players</span><span>MMR</span>
-          </li>
-          <li>
-            <span>
-              {{$t('pvp.rank')}}
-              Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[0] && tierTopRankers[0].rank || 'N/A' }}</span>
-          </li>
-          <li>
-            <span>
-              {{$t('pvp.rank')}}
-              Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[1] && tierTopRankers[1].rank || 'N/A'}}</span>
-          </li>
-          <li>
-            <span>
-              {{$t('pvp.rank')}}
-              Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
-          </li>
-        </ul>
-        <ul class="characterAttrsList">
-          <li class="characterName">{{ characterInformation.name || '' }}</li>
-          <li><span>
-            {{$t('pvp.power')}}
-            Power </span><span>{{ characterInformation.power }}</span></li>
-          <li><span>
-            {{$t('pvp.level')}}
-            Level</span><span>{{ characterInformation.level }}</span></li>
-          <li><span>
-            {{$t('pvp.current')}}
-            Current MMR</span><span>{{ characterInformation.rank }}</span></li>
-        </ul>
-      </div>
+      <pvp-arena-information
+        class="arenaInformation"
+        :tierRewardsPool="tierRewardsPool"
+        :tierTopRankers="tierTopRankers"
+        :currentRankedSeason="currentRankedSeason"
+        :secondsBeforeNextSeason="secondsBeforeNextSeason"
+        :characterInformation="characterInformation"
+      />
     </div>
   </div>
 </template>
@@ -236,6 +187,7 @@ import PvPSeparator from './PvPSeparator.vue';
 import checkIcon from '../../assets/checkImage.svg';
 import ellipseIcon from '../../assets/ellipseImage.svg';
 import i18n from '../../i18n';
+import PvPArenaInfo from './PvPArenaInfo.vue';
 
 const defaultStarOptions = [
   { text: i18n.t('nftList.sorts.any'), value: 0 },
@@ -261,14 +213,22 @@ export default {
     'pvp-button': PvPButton,
     'pvp-separator': PvPSeparator,
     'pvp-character': PvPCharacter,
-    'b-popover': BPopover
+    'b-popover': BPopover,
+    'pvp-arena-information': PvPArenaInfo,
   },
+
   props: {
     tierRewardsPool: {
       default: null
     },
     tierTopRankers: {
       default: []
+    },
+    currentRankedSeason: {
+      default: null
+    },
+    secondsBeforeNextSeason: {
+      default: null
     },
     characterInformation: {
       default: {
@@ -321,8 +281,8 @@ export default {
     formattedEntryWager() {
       return new BN(this.entryWager).div(new BN(10).pow(18)).toFixed(0);
     },
-    formatedTierRewardsPool() {
-      return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
+    leavingArenaCost() {
+      return +this.formattedEntryWager / 4;
     },
     getIconSource () {
       return this.checkBoxAgreed && this.selectedWeaponId ? checkIcon : ellipseIcon;
@@ -729,96 +689,19 @@ p, li, span {
 }
 .characterImage {
   display: flex;
-  width: 50%;
+  width: 40%;
   padding: 3rem 0;
   @media only screen and (min-width: 1440px) {
-    width: 40%;
+    width: 30%;
     margin: 0;
   }
   @media only screen and (min-width: 1980px) {
-    width: 30%;
+    width: 20%;
   }
 }
 .arenaInformation {
   display: flex;
   flex-direction: column;
-  .tokenCard {
-    display: flex;
-    padding: 1rem 2rem 1rem 1.5rem;
-    border-radius: 0.375rem;
-    align-items: center;
-    vertical-align: middle;
-    background-color: rgba(0, 0, 0, 0.3);
-    img {
-      width: 4rem;
-      height: 4rem;
-    }
-    .tokenCardInfo {
-      display: flex;
-      flex-direction: column;
-      margin-left: 1rem;
-      .text {
-        color: #cec198;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-      }
-      .number {
-        color: #ffffff;
-        font-size: 1.25rem;
-        line-height: 1.75rem;
-      }
-    }
-  }
-  .topPlayersList,
-  .characterAttrsList {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-top: 1.5rem;
-    padding: 0;
-    span {
-      color: #b4b0a7;
-      font-size: 0.75rem;
-      line-height: 1rem;
-    }
-    span:nth-of-type(2) {
-      margin-left: auto;
-    }
-    li {
-      display: flex;
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #363636;
-    }
-    li:first-of-type,
-    li:last-of-type {
-      padding-bottom: 0;
-      border-style: none;
-    }
-  }
-  .topPlayersList {
-    .header {
-      margin-bottom: 1rem;
-      span {
-        color: #cec198;
-        font-size: 0.875rem;
-      }
-    }
-  }
-  .rankings {
-    margin-top: 0.75rem;
-    color: #cec198;
-    font-size: 0.875rem;
-  }
-  .characterAttrsList {
-    margin-top: 2.25rem;
-    .characterName {
-      margin-bottom: 1rem;
-      color: #cec198;
-      font-size: 1.25rem;
-      font-family: 'Trajan';
-    }
-  }
 }
 .loadingSpinner {
   display: flex;

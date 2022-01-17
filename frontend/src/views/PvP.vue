@@ -2,10 +2,9 @@
   <div class="pvpWrapper">
     <div class="noCharacter" v-if="!currentCharacterId && currentCharacterId !== 0">
       {{$t('pvp.atLeastOneChar')}}
-      You need at least one character to enter PvP!
     </div>
     <div v-else>
-      <pvp-nav-bar :tabNumber="tab" @changeTab="onChangeTab" v-if="!isCharacterMatchMaking" />
+      <pvp-nav-bar :tabNumber="tab" :hasRewards="hasRewards" @changeTab="onChangeTab" v-if="!isCharacterMatchMaking" />
       <pvp-arena
         v-if="tab === 0"
         @enterMatchMaking="handleEnterMatchMaking"
@@ -35,12 +34,13 @@ export default {
   data() {
     return {
       tab: 0,
-      isCharacterMatchMaking: false
+      isCharacterMatchMaking: false,
+      hasRewards: false,
     };
   },
 
   computed: {
-    ...mapState(['currentCharacterId']),
+    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount']),
   },
 
   methods: {
@@ -56,6 +56,17 @@ export default {
     handleLeaveMatchMaking() {
       this.isCharacterMatchMaking = false;
     }
+  },
+
+  async created() {
+    const playerRewards = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
+    this.hasRewards = !!+playerRewards;
+  },
+
+  async updated() {
+    const playerRewards = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
+
+    this.hasRewards = !!+playerRewards;
   }
 };
 </script>

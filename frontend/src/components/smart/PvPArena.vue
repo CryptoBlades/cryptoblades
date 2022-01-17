@@ -14,6 +14,8 @@
         :availableShieldIds="availableShieldIds"
         :ownedWeaponsWithInformation="ownedWeaponsWithInformation"
         :ownedShieldsWithInformation="ownedShieldsWithInformation"
+        :currentRankedSeason="currentRankedSeason"
+        :secondsBeforeNextSeason="secondsBeforeNextSeason"
         @enteredArena="handleEnteredArena"
       />
       <pvp-arena-summary
@@ -24,6 +26,8 @@
         :activeWeaponWithInformation="activeWeaponWithInformation"
         :activeShieldWithInformation="activeShieldWithInformation"
         :duelHistory="duelHistory"
+        :currentRankedSeason="currentRankedSeason"
+        :secondsBeforeNextSeason="secondsBeforeNextSeason"
         @enterMatchMaking="handleEnterMatchMaking"
       />
       <!-- Should use router -->
@@ -83,6 +87,11 @@ export default {
       isMatchMaking: false,
       tierRewardsPool: null,
       tierTopRankers: [],
+      currentRankedSeason: null,
+      seasonStartedAt: null,
+      seasonDuration: null,
+      secondsBeforeNextSeason: null,
+      restartEventSubscription: null,
       characterInformation: {
         tier: null,
         name: '',
@@ -156,6 +165,7 @@ export default {
           information: await this.getShieldInformation(fighter.shieldID)
         };
       }
+
       this.loading = false;
     },
 
@@ -168,6 +178,13 @@ export default {
       this.isCharacterInArena = false;
       this.isMatchMaking = false;
       this.$emit('leaveMatchMaking');
+    },
+
+    async updateSecondsBeforeSeason() {
+      this.currentRankedSeason = await this.contracts().PvpArena.methods.currentRankedSeason().call({ from: this.defaultAccount });
+      this.seasonStartedAt = await this.contracts().PvpArena.methods.seasonStartedAt().call({ from: this.defaultAccount });
+      this.seasonDuration = await this.contracts().PvpArena.methods.seasonDuration().call({ from: this.defaultAccount });
+      this.secondsBeforeNextSeason = (+this.seasonStartedAt + +this.seasonDuration) - (Math.floor(Date.now() / 1000));
     },
 
     async updateOpponentInformation(defenderId) {
@@ -268,10 +285,58 @@ export default {
           this.recentlyKicked.kickedBy = formattedResult.kickedBy;
         }
       }
+    },
+
+    async listenForSeasonRestart(contracts, initialBlock) {
+      let blockToScan = initialBlock;
+      let scanning = false;
+
+      const subscription = this.web3.eth.subscribe('newBlockHeaders', async (_, result) => {
+        try {
+          if (scanning) {
+            return;
+          }
+          scanning = true;
+
+          const seasonRestartedEvents = await contracts.PvpArena.getPastEvents('SeasonRestarted', {
+            fromBlock: blockToScan,
+            toBlock: 'latest',
+          });
+
+          blockToScan = result.number + 1;
+
+          if (seasonRestartedEvents.length) {
+            this.$dialog.notify.success('A new PvP season has begun!');
+            await this.updateSecondsBeforeSeason();
+          }
+
+          this.tierRewardsPool = await this.contracts().PvpArena.methods.rankingsPoolByTier(this.characterInformation.tier).call({ from: this.defaultAccount });
+
+          const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopCharacters(this.currentCharacterId).call({ from: this.defaultAccount });
+
+          this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+            return {
+              rankerId,
+              name: getCharacterNameFromSeed(rankerId),
+              rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount })
+            };
+          }));
+        } finally {
+          scanning = false;
+        }
+      });
+
+      this.restartEventSubscription = subscription;
     }
   },
 
   async created() {
+    const currentBlock = await this.web3.eth.getBlockNumber();
+
+    await this.updateSecondsBeforeSeason();
+
+    await this.listenForSeasonRestart(this.contracts(), currentBlock);
+
     // Note: currentCharacterId can be 0
     if (this.currentCharacterId !== null) {
       this.characterInformation.name = getCharacterNameFromSeed(this.currentCharacterId);
@@ -372,9 +437,21 @@ export default {
     this.loading = false;
   },
 
+  async updated() {
+    await this.updateSecondsBeforeSeason();
+  },
+
+  destroyed() {
+    if (this.restartEventSubscription && this.restartEventSubscription.id) {
+      this.restartEventSubscription.unsubscribe();
+    }
+  },
+
   watch: {
     async currentCharacterId(value) {
       this.loading = true;
+
+      await this.updateSecondsBeforeSeason();
 
       this.$emit('leaveMatchMaking');
 

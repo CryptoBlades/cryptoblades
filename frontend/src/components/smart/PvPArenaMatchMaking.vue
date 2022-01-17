@@ -1,14 +1,20 @@
 <template>
   <div class="wrapper">
     <nav>
-      <div class="navTitle">Arena</div>
+      <div class="navTitle">
+        {{$t('pvp.arena')}}
+      </div>
       <div class="navStats">
         <div>
-          <span>Arena tier:</span>
+          <span>
+            {{$t('pvp.arenaTier')}}
+          </span>
           <span>{{ characterInformation.tier || '-' }}</span>
         </div>
         <div>
-          <span>Wager left:</span>
+          <span>
+            {{$t('pvp.wagerLeft')}}
+          </span>
           <span>{{ formattedWager || '-' }}</span>
         </div>
       </div>
@@ -24,9 +30,13 @@
         <div v-if="characterInformation" class="info">
           <h1 class="characterName">{{ characterInformation.name }}</h1>
           <div class="infoDetails">
-            <span>Level: {{ characterInformation.level }}</span>
+            <span>
+              {{$t('pvp.level')}}: {{ characterInformation.level }}
+            </span>
             <pvp-separator vertical class="separator" />
-            <span>Rank: {{ characterInformation.rank }}</span>
+            <span>
+              {{$t('pvp.rank')}}: {{ characterInformation.rank }}
+            </span>
           </div>
         </div>
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
@@ -50,24 +60,27 @@
             <img class="spinner" src="../../assets/loadingSpinner.svg" />
           </div>
           <p v-if="isInMatch && !isCharacterInDuelQueue && !this.loading && this.decisionTimeLeft">
-            <span>You have</span>
-            <span>{{ this.decisionTimeLeft }}</span>
-            <span>to accept the duel</span>
+            <span>
+              <!-- PROBAR BIENE STA -->
+              {{$t('pvp.timeToAcceptDuel', this.decisionTimeLeft)}}
+            </span>
           </p>
-          <span v-else-if="this.decisionTimeLeft === 0 && !this.loading && isCharacterInDuelQueue">Duel has expired.</span>
+          <span v-else-if="this.decisionTimeLeft === 0 && !this.loading && isCharacterInDuelQueue">
+            {{$t('pvp.duelHasExpired')}}
+          </span>
         </div>
         <div class="middleMatchProgressButtons">
-          <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
+          <pvp-button v-if="isCharacterInDuelQueue" :buttonText="i18n.t('pvp.inProgressCaps')" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
-            <pvp-button v-if="!isInMatch" @click="findMatch" :disabled="loading" buttonText="FIND MATCH" />
+            <pvp-button v-if="!isInMatch" @click="findMatch" :disabled="loading" :buttonText="i18n.t('pvp.findMatchCaps')" />
             <pvp-button v-else
-            @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
+            @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" :buttonText="i18n.t('pvp.duelCaps')" />
           </div>
         </div>
         <div class="rerollButtonWrapper">
           <pvp-button
             @click="reRollOpponent" :disabled="loading || !isInMatch || isCharacterInDuelQueue"
-            buttonText="Re-roll Opponent"
+            :buttonText="i18n.t('pvp.reRoll')"
             :buttonsubText="'$SKILL: ' + formattedReRollCost"
             :secondary="true"
           />
@@ -76,7 +89,7 @@
           <pvp-button
             @click="leaveArena"
             :disabled="loading || isCharacterInDuelQueue"
-            buttonText="Leave Arena"
+            :buttonText="i18n.t('pvp.leaveArena')"
             :secondary="true"
           />
         </div>
@@ -91,12 +104,18 @@
         <div v-if="opponentInformation.id" class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
           <div class="infoDetails">
-            <span>Level: {{ opponentInformation.level }}</span>
+            <span>
+              {{$t('pvp.level')}}
+              Level: {{ opponentInformation.level }}</span>
             <pvp-separator vertical class="separator" />
-            <span>Rank: {{ opponentInformation.rank }}</span>
+            <span>
+              {{$t('pvp.rank')}}
+              Rank: {{ opponentInformation.rank }}</span>
           </div>
         </div>
-        <span v-else class="findMatchMessage">Press FIND MATCH to find an opponent!</span>
+        <span v-else class="findMatchMessage">
+          {{$t('pvp.pressFindMatch')}}
+        </span>
         <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"

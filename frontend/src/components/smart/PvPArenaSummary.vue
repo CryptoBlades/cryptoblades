@@ -4,26 +4,25 @@
       <div class="arenaSignup">
         <h1 class="title">
           {{$t('pvp.arenaSignUpCaps')}}
-          ARENA SIGNUP</h1>
+        </h1>
         <p>
           {{$t('pvp.enterAndWin')}}
           Enter the arena and win rewards ($SKILL).</p>
         <div></div>
         <div class="buttonWrapper">
-          <!-- ver q wea {{$t('pvp.arenaSignUpCaps')}} -->
           <pvp-button
             @click="handleEnterArenaClick()"
-            buttonText="ENTER ARENA"
+            :buttonText="i18n.t('pvp.enterArenaCaps')"
           />
         </div>
         <div class="bottomWrapper">
           <div class="bottomWrapperNav">
             <button @click="setTab(0)" :class="tab === 0 && 'active'">
               {{$t('pvp.equipment')}}
-              Equipment</button>
+            </button>
             <button @click="setTab(1)" :class="tab === 1 && 'active'">
               {{$t('pvp.duelHistory')}}
-              Duel history</button>
+            </button>
           </div>
           <div class="bottomWrapperInner">
             <div v-if="tab === 0" class="bottomWeapons">
@@ -42,14 +41,17 @@
              <div v-if="tab === 1" class="bottomDuels">
               <div v-if="duelHistory.length === 0" class="noDuels">You have not disputed any duels yet!</div>
               <ul v-else>
-                <li><span>
-                  {{$t('pvp.date')}}
-                  Date</span><span>
+                <li>
+                  <span>
+                    {{$t('pvp.date')}}
+                  </span>
+                  <span>
                     {{$t('pvp.result')}}
-                    Result</span></li>
+                  </span>
+                </li>
                 <li v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
                   <span class="date">{{ dayjs(new Date(duel.timestamp * 1000)).format('YYYY/MM/DD') }}</span>
-                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? 'Win' : 'Lose' }}</span>
+                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? i18n.t('pvp.win') : i18n.t('pvp.lose') }}</span>
                 </li>
               </ul>
             </div>
@@ -59,62 +61,34 @@
       <div class="characterImage">
         <pvp-character :characterId="currentCharacterId" />
       </div>
-      <div class="arenaInformation">
-        <h1 class="title">
-          {{$t('pvp.arenaInformationCaps')}}
-          ARENA INFORMATION</h1>
-        <div class="tokenCard">
-          <img src="../../assets/skillToken.png" alt="skill token" />
-          <div class="tokenCardInfo">
-            <span class="text">PVP Rewards Pool ($SKILL)</span>
-            <span class="number">{{ formatedTierRewardsPool }}</span>
-          </div>
-        </div>
-        <ul class="topPlayersList">
-          <li class="header">
-            <span>Top Players</span><span>Rank</span>
-          </li>
-          <li>
-            <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[0] && tierTopRankers[0].rank || 'N/A' }}</span>
-          </li>
-          <li>
-            <span>Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[1] && tierTopRankers[1].rank || 'N/A'}}</span>
-          </li>
-          <li>
-            <span>Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
-          </li>
-        </ul>
-        <!-- <a href="/" class="rankings">View all rankings</a> -->
-        <ul class="characterAttrsList">
-          <li class="characterName">{{ characterInformation.name || '' }}</li>
-          <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
-          <!-- <li><span>Damage multiplier</span><span>453</span></li> -->
-          <li><span>Level</span><span>{{ characterInformation.level }}</span></li>
-          <li><span>Current rank</span><span>{{ characterInformation.rank }}</span></li>
-        </ul>
-      </div>
+      <pvp-arena-information
+        class="arenaInformation"
+        :tierRewardsPool="tierRewardsPool"
+        :tierTopRankers="tierTopRankers"
+        :currentRankedSeason="currentRankedSeason"
+        :secondsBeforeNextSeason="secondsBeforeNextSeason"
+        :characterInformation="characterInformation"
+      />
     </div>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
-import BN from 'bignumber.js';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
 import PvPButton from './PvPButton.vue';
 import PvPCharacter from './PvPCharacter.vue';
 import dayjs from 'dayjs';
+import PvPArenaInfo from './PvPArenaInfo.vue';
 
 export default {
   components: {
     'pvp-weapon': PvPWeapon,
     'pvp-shield': PvPShield,
     'pvp-button': PvPButton,
-    'pvp-character': PvPCharacter
+    'pvp-character': PvPCharacter,
+    'pvp-arena-information': PvPArenaInfo,
   },
 
   props: {
@@ -123,6 +97,12 @@ export default {
     },
     tierTopRankers: {
       default: []
+    },
+    currentRankedSeason: {
+      default: null
+    },
+    secondsBeforeNextSeason: {
+      default: null
     },
     characterInformation: {
       default: {
@@ -160,9 +140,6 @@ export default {
 
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount']),
-    formatedTierRewardsPool() {
-      return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
-    },
   },
 
   methods: {
@@ -323,6 +300,10 @@ span, p, li, button, a {
     }
   }
 }
+.arenaInformation {
+  display: flex;
+  flex-direction: column;
+}
 .characterImage {
   display: flex;
   width: 50%;
@@ -334,90 +315,6 @@ span, p, li, button, a {
   }
   @media only screen and (min-width: 1980px) {
     width: 30%;
-  }
-}
-.arenaInformation {
-  display: flex;
-  flex-direction: column;
-  .tokenCard {
-    display: flex;
-    padding: 1rem 2rem 1rem 1.5rem;
-    border-radius: 0.375rem;
-    align-items: center;
-    vertical-align: middle;
-    background-color: rgba(0, 0, 0, 0.3);
-    img {
-      width: 4rem;
-      height: 4rem;
-    }
-    .tokenCardInfo {
-      display: flex;
-      flex-direction: column;
-      margin-left: 1rem;
-      .text {
-        color: #cec198;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-      }
-      .number {
-        color: #ffffff;
-        font-size: 1.25rem;
-        line-height: 1.75rem;
-      }
-    }
-  }
-  .topPlayersList,
-  .characterAttrsList {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-top: 1.5rem;
-    padding: 0;
-    span {
-      color: #b4b0a7;
-      font-size: 0.75rem;
-      line-height: 1rem;
-    }
-    span:nth-of-type(2) {
-      margin-left: auto;
-    }
-    li {
-      display: flex;
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #363636;
-    }
-    li:first-of-type,
-    li:last-of-type {
-      padding-bottom: 0;
-      border-style: none;
-    }
-  }
-  .topPlayersList {
-    .header {
-      margin-bottom: 1rem;
-      span {
-        color: #cec198;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-      }
-    }
-  }
-  .rankings {
-    margin-top: 0.75rem;
-    color: #cec198;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
-  .characterAttrsList {
-    margin-top: 2.25rem;
-    .characterName {
-      margin-bottom: 1rem;
-      color: #cec198;
-      font-size: 1.25rem;
-      line-height: 1.75rem;
-      font-family: 'Trajan';
-    }
   }
 }
 </style>
