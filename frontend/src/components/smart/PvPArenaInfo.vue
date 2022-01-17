@@ -40,7 +40,7 @@
       <li class="characterName">{{ characterInformation.name || '' }}</li>
       <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
       <li><span>Level</span><span>{{ characterInformation.level }}</span></li>
-      <li><span>Current rank</span><span>{{ characterInformation.rank }}</span></li>
+      <li><span>MMR</span><span>{{ characterInformation.rank }}</span></li>
     </ul>
   </div>
 </template>
