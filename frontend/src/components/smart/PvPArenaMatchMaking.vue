@@ -60,7 +60,7 @@
           <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
             <div v-if="!isInMatch">
-              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount <= 1"  buttonText="FIND MATCH" />
+              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount < 1"  buttonText="FIND MATCH" />
               <div class="matchablePlayersCountText">Players in this tier: {{formattedMatchablePlayersCount}}</div>
             </div>
             <pvp-button v-else
