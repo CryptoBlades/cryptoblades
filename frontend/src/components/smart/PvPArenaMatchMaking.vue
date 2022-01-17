@@ -60,7 +60,7 @@
           <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
             <div v-if="!isInMatch">
-              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount <= 1"  buttonText="FIND MATCH" />
+              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount < 1"  buttonText="FIND MATCH" />
               <div class="matchablePlayersCountText">Players in this tier: {{formattedMatchablePlayersCount}}</div>
             </div>
             <pvp-button v-else
@@ -740,22 +740,25 @@ span, p, li, button {
   }
   .middleMatchProgressButtons {
     width: 100%;
-    height: 5.5rem;
     button {
+      height: 5.5rem;
       height: 100%;
     }
   }
   .matchButtonsWrapper {
     width: 100%;
+
     button {
       height: 5.5rem;
     }
   }
   .matchablePlayersCountText{
-    display:flex;
+    display: flex;
     justify-content: center;
-      color: #cec198;
-      font-size: 0.95rem;
+    color: #cec198;
+    font-size: 0.75rem;
+    margin-top: 1rem;
+    font-family: 'Roboto';
   }
   .rerollButtonWrapper {
     width: 100%;

@@ -623,7 +623,7 @@ p, li, span {
       }
     }
     .checkboxWrapper {
-      display: inline-block;
+      display: inline-flex;
       align-items: center;
       vertical-align: middle;
       margin-left: 1.75rem;
@@ -636,7 +636,6 @@ p, li, span {
         .checkboxInput {
           width: 1.25rem;
           height: 1.25rem;
-          cursor: pointer;
           background: rgba(40,40,40,0.2);
           appearance: none;
           position: relative;
@@ -652,6 +651,7 @@ p, li, span {
     }
       span {
         margin-left: 2rem;
+        margin-bottom: 0.35rem;
         color: #b4b0a7;
         font-size: 0.875rem;
       }
