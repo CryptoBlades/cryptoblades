@@ -20,13 +20,15 @@
                       variant="primary"/>
         </div>
       </div>
-      <QuestDetails v-if="character.questData && character.questData.id !== 0" :questData="character.questData" :characterId="character.id"/>
+      <QuestDetails v-if="character.questData && character.questData.id !== 0" :questData="character.questData"
+                    :characterId="character.id"/>
       <div v-else class="request-quest">
         <b-button variant="primary w-100" @click="request(character.id)">
           {{ $t('quests.request') }}
         </b-button>
       </div>
     </div>
+    <QuestSubmissionModal/>
   </div>
 </template>
 
@@ -38,6 +40,7 @@ import {Nft} from '@/interfaces/Nft';
 import {Accessors} from 'vue/types/options';
 import QuestDetails, {RequirementType} from '@/components/smart/QuestDetails.vue';
 import CharacterArt from '@/components/CharacterArt.vue';
+import QuestSubmissionModal from '@/components/smart/QuestSubmissionModal.vue';
 
 export interface QuestData {
   id: number;
@@ -48,6 +51,7 @@ export interface QuestData {
 
 interface StoreMappedActions {
   getCharacterQuestData(payload: { characterId: string | number }): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }>;
+
   requestQuest(payload: { characterID: string | number }): Promise<void>;
 }
 
@@ -56,7 +60,7 @@ interface StoreMappedGetters {
 }
 
 export default Vue.extend({
-  components: {CharacterArt, QuestDetails},
+  components: {QuestSubmissionModal, CharacterArt, QuestDetails},
 
   props: {
     showCosmetics: {
@@ -183,7 +187,7 @@ export default Vue.extend({
   justify-content: center;
   align-items: stretch;
   width: 25rem;
-  padding: 3rem;
+  padding: 5rem;
 }
 
 @media (max-width: 576px) {

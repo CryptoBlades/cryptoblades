@@ -4,7 +4,7 @@
       <div class="quest-info d-flex flex-column justify-content-center">
         <div class="quest-description">
           <span class="font-weight-bold">{{ $t(`quests.rarity.${Rarity[quest.tier]}`) }} quest</span>
-<!--          <span>{{ Array(quest.tier + 1).fill('★').join('') }}</span>-->
+          <!--          <span>{{ Array(quest.tier + 1).fill('★').join('') }}</span>-->
           <span>{{
               quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.burn')
             }} {{ quest.requirementAmount }}x {{
@@ -52,7 +52,8 @@
       </div>
     </div>
     <div class="d-flex">
-      <b-button variant="primary" class="flex-1" :disabled="quest.requirementType === RequirementType.RAID">
+      <b-button variant="primary" class="flex-1" :disabled="quest.requirementType === RequirementType.RAID || questCanBeCompleted"
+                @click="submit">
         {{ $t('quests.submit') }}
       </b-button>
       <b-button v-if="questCanBeCompleted" variant="primary" class="flex-1" @click="complete">
@@ -67,9 +68,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
-import {mapActions, mapGetters, mapMutations} from 'vuex';
-import {Accessors, PropType} from 'vue/types/options';
+import {mapActions} from 'vuex';
+import {PropType} from 'vue/types/options';
 import {QuestData} from '@/views/Quests.vue';
 import NftIcon from '@/components/NftIcon.vue';
 
@@ -77,15 +77,15 @@ export enum RequirementType {
   NONE, WEAPON, JUNK, DUST, RAID
 }
 
-enum RewardType {
+export enum RewardType {
   NONE, WEAPON, JUNK, DUST
 }
 
-enum Rarity {
+export enum Rarity {
   COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
 }
 
-interface Quest {
+export interface Quest {
   id: number;
   tier: Rarity;
   requirementType: RequirementType;
@@ -106,14 +106,6 @@ interface StoreMappedActions {
   skipQuest(payload: { characterID: string | number }): Promise<void>;
 
   completeQuest(payload: { characterID: string | number }): Promise<void>;
-}
-
-interface StoreMappedMutations {
-  clearCartEntries(): void;
-}
-
-interface StoreMappedGetters {
-  getCartEntries: CartEntry[];
 }
 
 interface Data {
@@ -146,12 +138,9 @@ export default Vue.extend({
   },
 
 
-  computed: {
-    ...mapGetters(['getCartEntries']) as Accessors<StoreMappedGetters>,
-  },
+  computed: {},
 
   methods: {
-    ...mapMutations(['clearCartEntries']) as StoreMappedMutations,
     ...mapActions(['getCharacterQuestData', 'getQuestData', 'skipQuest', 'completeQuest']) as StoreMappedActions,
 
     async skip() {
@@ -161,6 +150,10 @@ export default Vue.extend({
     async complete() {
       await this.completeQuest({characterID: this.characterId});
     },
+
+    submit() {
+      this.$root.$emit('quest-submission-modal', this.quest, this.characterId);
+    }
   },
 
   async mounted() {
