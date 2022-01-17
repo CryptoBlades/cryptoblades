@@ -802,6 +802,7 @@ export default Vue.extend({
     onNftClick(type: string, id: number) {
       this.setCurrentNft({ type, id });
       this.$emit('choose-nft', `${type}.${id}`);
+      this.$emit('choosenft', { type, id });
     },
 
     getFavoritesString(favorites: Record<string, Record<number, boolean>>): string {

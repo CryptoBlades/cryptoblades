@@ -1,13 +1,18 @@
 <template>
   <b-modal v-if="quest" class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop scrollable
-           :title="'Turn-in'" size="xl" @close="tokensToBurn = []" @cancel="tokensToBurn = []" :ok-title="'Submit'"
+           :title="'Turn-in'" size="xl" @close="resetTokens" @cancel="resetTokens" :ok-title="'Submit'"
            @ok="submit">
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
-      <weapon-grid v-model="burnTokenId" :weaponIds="ownedTokens" :ignore="tokensToBurn"
+      <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    :showGivenWeaponIds="true" @chooseweapon="addBurnToken"
                    :starsOptions="[quest.requirementRarity + 1]"/>
       <weapon-grid :weaponIds="tokensToBurn" :showGivenWeaponIds="true" @chooseweapon="removeBurnToken"
                    :starsOptions="[quest.requirementRarity + 1]"/>
+    </div>
+    <div v-else-if="quest.requirementType === RequirementType.JUNK" class="d-flex">
+      <nft-list v-model="selectedToken" :showGivenNftIdTypes="true" :nftIdTypes="ownedNftIdTypes"
+                @choosenft="addNftIdType"/>
+      <nft-list :showGivenNftIdTypes="true" :nftIdTypes="nftIdTypesToBurn" @choosenft="removeNftIdType"/>
     </div>
   </b-modal>
 </template>
@@ -17,6 +22,7 @@ import Vue from 'vue';
 import {Quest, Rarity, RequirementType, RewardType} from '@/components/smart/QuestDetails.vue';
 import WeaponGrid from '@/components/smart/WeaponGrid.vue';
 import {mapActions, mapState} from 'vuex';
+import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 
 interface StoreMappedActions {
   submitProgress(payload: { characterID: string | number, tokenIds: (string | number)[] }): Promise<void>;
@@ -28,11 +34,13 @@ interface Data {
   showModal: boolean;
   ownedTokens: string[];
   tokensToBurn: string[];
-  burnTokenId: number | undefined;
+  ownedNftIdTypes: NftIdType[];
+  nftIdTypesToBurn: NftIdType[];
+  selectedToken: number | undefined;
 }
 
 export default Vue.extend({
-  components: {WeaponGrid},
+  components: {WeaponGrid, NftList},
 
   props: {},
 
@@ -43,7 +51,9 @@ export default Vue.extend({
       showModal: false,
       ownedTokens: [],
       tokensToBurn: [],
-      burnTokenId: undefined,
+      ownedNftIdTypes: [],
+      nftIdTypesToBurn: [],
+      selectedToken: undefined,
       RequirementType,
       RewardType,
       Rarity,
@@ -52,7 +62,7 @@ export default Vue.extend({
 
 
   computed: {
-    ...mapState(['ownedWeaponIds']),
+    ...mapState(['ownedWeaponIds', 'ownedTrinketIds', 'ownedJunkIds']),
   },
 
   methods: {
@@ -61,7 +71,7 @@ export default Vue.extend({
     addBurnToken(id: number) {
       this.tokensToBurn.push(id.toString());
       this.ownedTokens = this.ownedTokens.filter(val => !this.tokensToBurn.includes(val));
-      this.burnTokenId = undefined;
+      this.selectedToken = undefined;
     },
 
     removeBurnToken(id: number) {
@@ -69,8 +79,29 @@ export default Vue.extend({
       this.tokensToBurn = this.tokensToBurn.filter(x => x !== id.toString());
     },
 
+    addNftIdType(nftIdType: NftIdType) {
+      console.log(nftIdType);
+      this.nftIdTypesToBurn.push(nftIdType);
+      this.ownedNftIdTypes = this.ownedNftIdTypes.filter(val => !this.nftIdTypesToBurn.some(nftToBurn => nftToBurn.id === val.id));
+      this.selectedToken = undefined;
+    },
+
+    removeNftIdType(nftIdType: NftIdType) {
+      console.log(nftIdType);
+      this.ownedNftIdTypes.push(nftIdType);
+      this.nftIdTypesToBurn = this.nftIdTypesToBurn.filter(x => x.id !== nftIdType.id);
+    },
+
     async submit() {
       await this.submitProgress({characterID: this.characterId, tokenIds: this.tokensToBurn});
+      this.tokensToBurn = [];
+    },
+
+    resetTokens() {
+      this.ownedTokens = [];
+      this.ownedNftIdTypes = [];
+      this.tokensToBurn = [];
+      this.nftIdTypesToBurn = [];
     }
   },
 
@@ -80,12 +111,18 @@ export default Vue.extend({
         this.quest = quest;
         this.characterId = characterId;
         this.showModal = true;
-        if(this.quest.requirementType === RequirementType.WEAPON) {
+        if (this.quest.requirementType === RequirementType.WEAPON) {
           this.ownedTokens = this.ownedWeaponIds;
+        } else if (this.quest.requirementType === RequirementType.JUNK) {
+          this.ownedTokens = this.ownedJunkIds;
+          this.ownedJunkIds?.forEach((id: string) => this.ownedNftIdTypes.push({id, type: 'junk'}));
+        } else if (this.quest.requirementType === RequirementType.TRINKET) {
+          this.ownedTokens = this.ownedTrinketIds;
+          this.ownedTrinketIds?.forEach((id: string) => this.ownedNftIdTypes.push({id, type: 'trinket'}));
         }
       } else {
         this.showModal = false;
-        this.ownedTokens = [];
+        this.resetTokens();
       }
     });
   }

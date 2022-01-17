@@ -77,11 +77,11 @@ import {QuestData} from '@/views/Quests.vue';
 import NftIcon from '@/components/NftIcon.vue';
 
 export enum RequirementType {
-  NONE, WEAPON, JUNK, DUST, RAID
+  NONE, WEAPON, JUNK, DUST, TRINKET, RAID
 }
 
 export enum RewardType {
-  NONE, WEAPON, JUNK, DUST
+  NONE, WEAPON, JUNK, DUST, TRINKET
 }
 
 export enum Rarity {
