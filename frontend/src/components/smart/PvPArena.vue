@@ -411,7 +411,8 @@ export default {
 
       this.tierRewardsPool = await this.contracts().PvpArena.methods.rankingsPoolByTier(this.characterInformation.tier).call({ from: this.defaultAccount });
 
-      const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopCharacters(this.currentCharacterId).call({ from: this.defaultAccount });
+      const tierTopRankersIds
+      = await this.contracts().PvpArena.methods.getTierTopCharacters(this.characterInformation.tier).call({ from: this.defaultAccount });
 
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
         return {
@@ -535,7 +536,8 @@ export default {
         this.tierRewardsPool = await this.contracts().PvpArena.methods.rankingsPoolByTier(this.characterInformation.tier)
           .call({ from: this.defaultAccount });
 
-        const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopCharacters(value).call({ from: this.defaultAccount });
+        const tierTopRankersIds = await this.contracts().PvpArena.methods.getTierTopCharacters(this.characterInformation.tier)
+          .call({ from: this.defaultAccount });
 
         this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
           return {

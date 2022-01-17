@@ -39,7 +39,7 @@
             </span>
           </div>
         </div>
-        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
+        <div class="weapons" >
           <pvp-weapon
             v-if="activeWeaponWithInformation.weaponId"
             :weapon="activeWeaponWithInformation.information"
@@ -51,6 +51,7 @@
             :shield="activeShieldWithInformation.information"
             :shieldId="activeShieldWithInformation.shieldId"
             :hasInfoPopover="false"
+            class="shield"
           />
         </div>
       </div>
@@ -77,7 +78,10 @@
         <div class="middleMatchProgressButtons">
           <pvp-button v-if="isCharacterInDuelQueue" :buttonText="inProgressButtonText" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
-            <pvp-button v-if="!isInMatch" @click="findMatch" :disabled="loading" :buttonText="findMatchButtonText" />
+            <div v-if="!isInMatch">
+              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount < 1"  :buttonText="findMatchButtonText" />
+              <div class="matchablePlayersCountText">Players in this tier: {{formattedMatchablePlayersCount}}</div>
+            </div>
             <pvp-button v-else
             @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" :buttonText="duelButtonText" />
           </div>
@@ -116,10 +120,10 @@
               {{$t('pvp.rank')}}: {{ opponentInformation.rank }}</span>
           </div>
         </div>
-        <span v-else class="findMatchMessage">
+        <div v-else class="findMatchMessage">
           {{$t('pvp.pressFindMatch')}}
-        </span>
-        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
+        </div>
+        <div class="weapons">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
             :weapon="opponentActiveWeaponWithInformation.information"
@@ -131,6 +135,7 @@
             :shield="opponentActiveShieldWithInformation.information"
             :shieldId="opponentActiveShieldWithInformation.shieldId"
             :hasInfoPopover="false"
+            class="shield"
           />
         </div>
       </div>
@@ -244,7 +249,8 @@ export default {
         skillDifference: null,
         rankDifference: null,
         result: ''
-      }
+      },
+      matchablePlayersCount: null,
     };
   },
 
@@ -262,6 +268,10 @@ export default {
     formattedReRollCost() {
       return new BN(this.reRollCost).div(new BN(10).pow(18)).toFixed(2);
     },
+    formattedMatchablePlayersCount(){
+      // TODO subtract from this number the player's other characters that are locked in the arena
+      return this.matchablePlayersCount - 1;
+    },
 
     getCharacterElementSrc() {
       if (this.characterInformation.element === 'Fire') {
@@ -277,13 +287,13 @@ export default {
     },
 
     getOpponentElementSrc() {
-      if (this.opponentInformation.element === 'fire') {
+      if (this.opponentInformation.element === 'Fire') {
         return fireIcon;
       }
-      if (this.opponentInformation.element === 'water') {
+      if (this.opponentInformation.element === 'Water') {
         return waterIcon;
       }
-      if (this.opponentInformation.element === 'earth') {
+      if (this.opponentInformation.element === 'Earth') {
         return earthIcon;
       }
       return lightningIcon;
@@ -497,6 +507,8 @@ export default {
     this.isInMatch = (await this.contracts().PvpArena.methods.matchByFinder(this.currentCharacterId).call()).createdAt !== '0';
 
     this.duelQueue = await this.contracts().PvpArena.methods.getDuelQueue().call({from: this.defaultAccount});
+
+    this.matchablePlayersCount = await this.contracts().PvpArena.methods.getMatchablePlayerCount(this.currentCharacterId).call();
 
     if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
       this.isCharacterInDuelQueue = true;
@@ -723,10 +735,8 @@ span, p, li, button {
     right: 0;
     margin-right: auto;
     margin-left: auto;
-    &.hasShield{
-      div:first-of-type {
-        margin-right: 1rem;
-      }
+    .shield {
+      margin-left: 1rem;
     }
   }
 }
@@ -772,16 +782,25 @@ span, p, li, button {
   }
   .middleMatchProgressButtons {
     width: 100%;
-    height: 5.5rem;
     button {
+      height: 5.5rem;
       height: 100%;
     }
   }
   .matchButtonsWrapper {
     width: 100%;
+
     button {
       height: 5.5rem;
     }
+  }
+  .matchablePlayersCountText{
+    display: flex;
+    justify-content: center;
+    color: #cec198;
+    font-size: 0.75rem;
+    margin-top: 1rem;
+    font-family: 'Roboto';
   }
   .rerollButtonWrapper {
     width: 100%;

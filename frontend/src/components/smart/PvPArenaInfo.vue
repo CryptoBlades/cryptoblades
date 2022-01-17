@@ -175,6 +175,9 @@ img {
   }
 }
 }
+ul, li, span {
+  font-family: 'Roboto';
+}
 .topPlayersList,
 .characterAttrsList {
 display: flex;
