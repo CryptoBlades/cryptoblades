@@ -8,6 +8,7 @@ import "./weapons.sol";
 import "./Promos.sol";
 import "./util.sol";
 import "./items/Junk.sol";
+import "./items/RaidTrinket.sol";
 
 contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
@@ -19,9 +20,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     Characters public characters;
     Weapons public weapons;
     Junk public junk;
+    RaidTrinket public trinket;
 
-
-    function initialize(Characters _characters, Weapons _weapons, Junk _junk) public initializer {
+    function initialize(Characters _characters, Weapons _weapons, Junk _junk, RaidTrinket _trinket) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
@@ -29,6 +30,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         characters = _characters;
         weapons = _weapons;
         junk = _junk;
+        trinket = _trinket;
         nextQuestID = 1;
     }
 
@@ -71,8 +73,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 reputationAmount;
     }
 
-    enum RequirementType{NONE, WEAPON, JUNK, DUST, RAID}
-    enum RewardType{NONE, WEAPON, JUNK, DUST}
+    enum RequirementType{NONE, WEAPON, JUNK, DUST, TRINKET, RAID}
+    enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET}
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     // have quests rarities on certain indexes (0 - common, 1 - uncommon, 2 - rare, 3 - epic)
@@ -136,7 +138,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function getQuestData(uint256 questID) public view returns (uint256, Rarity, RequirementType, Rarity, uint256, RewardType, Rarity, uint256, uint256) {
         Quest memory quest = questList[questID];
         return (quest.id, quest.tier, quest.requirementType, quest.requirementRarity, quest.requirementAmount,
-            quest.rewardType, quest.rewardRarity, quest.rewardAmount, quest.reputationAmount);
+        quest.rewardType, quest.rewardRarity, quest.rewardAmount, quest.reputationAmount);
     }
 
     function getCharacterQuestData(uint256 characterID) public view returns (uint256[] memory) {
@@ -216,6 +218,12 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             for (uint8 i = 0; i < quest.rewardAmount; i++) {
                 junk.mint(msg.sender, uint8(quest.rewardRarity));
             }
+        } else if (quest.rewardType == RewardType.TRINKET) {
+            for (uint8 i = 0; i < quest.rewardAmount; i++) {
+                uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - i - 1))));
+                uint256 trinketEffect = (seed / 100) % 5;
+                trinket.mint(msg.sender, uint8(quest.rewardRarity), trinketEffect);
+            }
         } else if (quest.rewardType == RewardType.DUST) {
             uint32[] memory incrementDustSupplies = new uint32[](weapons.getDustSupplies(msg.sender).length);
             incrementDustSupplies[uint256(quest.rewardRarity)] = uint32(quest.rewardAmount);
@@ -252,6 +260,18 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                     revert("Wrong junk rarity");
                 }
                 junk.burn(tokenID);
+                incrementQuestProgress(characterID, questData[0], 1);
+            }
+        } else if (quest.requirementType == RequirementType.TRINKET) {
+            for (uint256 i = 0; i < tokenIds.length; i++) {
+                uint256 tokenID = tokenIds[i];
+                if (trinket.ownerOf(tokenID) != msg.sender) {
+                    revert("You don't own this trinket");
+                }
+                if (trinket.getStars(tokenID) != uint256(trinket.requirementRarity)) {
+                    revert("Wrong trinket rarity");
+                }
+                trinket.burn(tokenID);
                 incrementQuestProgress(characterID, questData[0], 1);
             }
         } else {

@@ -43,7 +43,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     uint256 public constant NUMBERPARAMETER_AUTO_DURATION = 1;
     uint256 public constant NUMBERPARAMETER_AUTO_BOSSPOWER_PERCENT = uint256(keccak256("BOSSPOWER_PERCENT"));
-    uint256 public constant SIMPLEQUEST_TYPE_RAID = 4;
+    uint256 public constant SIMPLEQUEST_TYPE_RAID = 5;
 
     CryptoBlades public game;
     Characters public characters;

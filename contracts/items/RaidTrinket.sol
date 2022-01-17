@@ -21,11 +21,12 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
     }
 
     Promos public promos;
-    
+
     mapping(uint256 => uint8) public tokenStars;
     mapping(uint256 => uint256) public tokenEffect;
 
     event Minted(uint256 indexed id, address indexed minter);
+    event Burned(uint256 indexed id, address indexed burner);
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
@@ -53,7 +54,6 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
     }
 
     function mint(address minter, uint8 mintStars, uint256 mintEffect) public restricted returns(uint256) {
-
         uint256 tokenID = totalSupply();
         tokenStars[tokenID] = mintStars;
         tokenEffect[tokenID] = mintEffect;
@@ -61,7 +61,15 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         emit Minted(tokenID, minter);
         return tokenID;
     }
-    
+
+    function burn(uint256 tokenID) public restricted {
+        address burner = ownerOf(tokenID);
+        _burn(tokenID);
+        delete tokenStars[tokenID];
+        delete tokenEffect[tokenID];
+        emit Burned(tokenID, burner);
+    }
+
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
