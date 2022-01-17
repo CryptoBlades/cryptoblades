@@ -56,6 +56,7 @@
     "weaponTooltip": "Weapons ({stars}*)",
     "junkTooltip": "Junk ({stars}*)",
     "trinketTooltip": "Trinket ({stars}*)",
+    "shieldTooltip": "Shield ({stars}*)",
     "secretTooltip": "Secret (??)",
     "lesserDust": "Lesser Dust",
     "greaterDust": "Greater Dust",
@@ -554,12 +555,16 @@
       "WEAPON": "Weapon",
       "JUNK": "Junk",
       "DUST": "Dust",
+      "TRINKET": "Trinket",
+      "SHIELD": "Shield",
       "RAID": "Raid"
     },
     "reward": {
       "NONE": "None",
       "WEAPON": "Weapon",
       "JUNK": "Junk",
+      "TRINKET": "Trinket",
+      "SHIELD": "Shield",
       "DUST": "Dust"
     },
     "skip": "Skip",

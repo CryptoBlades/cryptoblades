@@ -16,6 +16,10 @@
                     :stars="quest.requirementRarity + 1"/>
           <nft-icon v-else-if="quest.requirementType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"
                     :stars="quest.requirementRarity + 1"/>
+          <nft-icon v-else-if="quest.requirementType === RewardType.TRINKET" :isDefault="true" :nft="{ type: 'trinket' }"
+                    :stars="quest.requirementRarity + 1"/>
+          <nft-icon v-else-if="quest.requirementType === RewardType.SHIELD" :isDefault="true" :nft="{ type: 'shield' }"
+                    :stars="quest.requirementRarity + 1"/>
           <nft-icon v-else-if="quest.requirementType === RewardType.DUST && quest.requirementRarity === Rarity.COMMON"
                     :isDefault="true" :nft="{ type: 'lbdust' }"/>
           <nft-icon v-else-if="quest.requirementType === RewardType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
@@ -42,6 +46,10 @@
                     :stars="quest.rewardRarity + 1"/>
           <nft-icon v-else-if="quest.rewardType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"
                     :stars="quest.rewardRarity + 1"/>
+          <nft-icon v-else-if="quest.rewardType === RewardType.TRINKET" :isDefault="true" :nft="{ type: 'trinket' }"
+                    :stars="quest.rewardRarity + 1"/>
+          <nft-icon v-else-if="quest.rewardType === RewardType.SHIELD" :isDefault="true" :nft="{ type: 'shield' }"
+                    :stars="quest.rewardRarity + 1"/>
           <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.COMMON"
                     :isDefault="true" :nft="{ type: 'lbdust' }"/>
           <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.UNCOMMON"
@@ -49,8 +57,6 @@
           <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.RARE"
                     :isDefault="true" :nft="{ type: '5bdust' }"/>
         </div>
-        <!--        <nft-icon :isDefault="true" :nft="{ type: 'trinket' }"/>-->
-        <!--        <nft-icon :isDefault="true" :nft="{ type: 'secret' }"/>-->
       </div>
     </div>
     <div class="d-flex">
@@ -77,11 +83,11 @@ import {QuestData} from '@/views/Quests.vue';
 import NftIcon from '@/components/NftIcon.vue';
 
 export enum RequirementType {
-  NONE, WEAPON, JUNK, DUST, TRINKET, RAID
+  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, RAID
 }
 
 export enum RewardType {
-  NONE, WEAPON, JUNK, DUST, TRINKET
+  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD
 }
 
 export enum Rarity {

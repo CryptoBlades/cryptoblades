@@ -10,6 +10,9 @@
       <img class="default-trinket-placeholder" v-if="nft.type === 'trinket'" src="../assets/trinkets/trinket1.png"
         v-tooltip="$t('nftIcon.trinketTooltip', {stars: stars || '1-5'})" />
       <div v-if="nft.type === 'trinket'" class="default-info">{{stars || '1-5'}}*</div>
+      <img class="default-shield-placeholder" v-if="nft.type === 'shield'" src="../assets/shield2.png"
+        v-tooltip="$t('nftIcon.shieldTooltip', {stars: stars || '1-5'})" />
+      <div v-if="nft.type === 'shield'" class="default-info">{{stars || '1-5'}}*</div>
       <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
         v-tooltip="$t('nftIcon.secretTooltip')" />
       <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../assets/dusts/LesserDust.png"
@@ -389,6 +392,13 @@ export default {
   margin-left: 12px;
   margin-top: 8px;
   transform: scale(1);
+}
+
+.default-shield-placeholder {
+  max-width: 150px;
+  max-height: 130px;
+  margin-left: 13px;
+  margin-top: -9px;
 }
 .default-dust-placeholder {
   max-width: 100px;

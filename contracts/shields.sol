@@ -79,7 +79,8 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint256 public constant NFTVAR_SHIELD_TYPE = 2; // 0 = normal, 1 = founders, 2 = legendary defender
 
     event NewShield(uint256 indexed shield, address indexed minter);
-    
+    event Burned(uint256 indexed shield, address indexed burner);
+
     modifier restricted() {
         _restricted();
         _;
@@ -157,6 +158,13 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         }
 
         return mintShieldWithStars(minter, stars, seed);
+    }
+
+    function burn(uint256 tokenID) public restricted {
+        address burner = ownerOf(tokenID);
+        _burn(tokenID);
+        delete durabilityTimestamp[tokenID];
+        emit Burned(tokenID, burner);
     }
 
     function mintShieldWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {

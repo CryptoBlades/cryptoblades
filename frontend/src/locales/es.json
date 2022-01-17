@@ -44,8 +44,8 @@
   },
   "nftIcon": {
     "weaponTooltip": "Weapons ({stars}*)",
-    "junkTooltip": "Junk (1-5*)",
-    "trinketTooltip": "Trinket (1-5*)",
+    "junkTooltip": "Junk ({stars}*)",
+    "trinketTooltip": "Trinket ({stars}*)",
     "secretTooltip": "Secret (??)",
     "lesserDust": "Lesser Dust",
     "greaterDust": "Greater Dust",

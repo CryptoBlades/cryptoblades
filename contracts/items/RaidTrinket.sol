@@ -53,6 +53,10 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         return tokens;
     }
 
+    function getStars(uint256 id) public view returns (uint8) {
+        return tokenStars[id];
+    }
+
     function mint(address minter, uint8 mintStars, uint256 mintEffect) public restricted returns(uint256) {
         uint256 tokenID = totalSupply();
         tokenStars[tokenID] = mintStars;

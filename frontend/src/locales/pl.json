@@ -52,8 +52,8 @@
   },
   "nftIcon": {
     "weaponTooltip": "Bronie ({stars}*)",
-    "junkTooltip": "Śmieci (1-5*)",
-    "trinketTooltip": "Trinket (1-5*)",
+    "junkTooltip": "Śmieci ({stars}*)",
+    "trinketTooltip": "Trinket ({stars}*)",
     "secretTooltip": "Sekret (??)",
     "lesserDust": "Mniejszy Pył",
     "greaterDust": "Większy Pył",

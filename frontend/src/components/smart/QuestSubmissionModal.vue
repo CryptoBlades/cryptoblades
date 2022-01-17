@@ -9,7 +9,7 @@
       <weapon-grid :weaponIds="tokensToBurn" :showGivenWeaponIds="true" @chooseweapon="removeBurnToken"
                    :starsOptions="[quest.requirementRarity + 1]"/>
     </div>
-    <div v-else-if="quest.requirementType === RequirementType.JUNK" class="d-flex">
+    <div v-else class="d-flex">
       <nft-list v-model="selectedToken" :showGivenNftIdTypes="true" :nftIdTypes="ownedNftIdTypes"
                 @choosenft="addNftIdType" :starsOptions="[quest.requirementRarity + 1]"
                 :typesOptions="[RequirementType[quest.requirementType]]"/>
@@ -64,7 +64,7 @@ export default Vue.extend({
 
 
   computed: {
-    ...mapState(['ownedWeaponIds', 'ownedTrinketIds', 'ownedJunkIds']),
+    ...mapState(['ownedWeaponIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedShieldIds']),
   },
 
   methods: {
@@ -82,7 +82,6 @@ export default Vue.extend({
     },
 
     addNftIdType(nftIdType: NftIdType) {
-      console.log(nftIdType);
       this.nftIdTypesToBurn.push(nftIdType);
       this.ownedNftIdTypes = this.ownedNftIdTypes.filter(val => !this.nftIdTypesToBurn.some(nftToBurn => nftToBurn.id === val.id));
       this.tokensToBurn = this.nftIdTypesToBurn.map(nftIdType => nftIdType.id);
@@ -90,7 +89,6 @@ export default Vue.extend({
     },
 
     removeNftIdType(nftIdType: NftIdType) {
-      console.log(nftIdType);
       this.ownedNftIdTypes.push(nftIdType);
       this.nftIdTypesToBurn = this.nftIdTypesToBurn.filter(x => x.id !== nftIdType.id);
       this.tokensToBurn = this.nftIdTypesToBurn.map(nftIdType => nftIdType.id);
@@ -98,7 +96,7 @@ export default Vue.extend({
 
     async submit() {
       await this.submitProgress({characterID: this.characterId, tokenIds: this.tokensToBurn});
-      this.tokensToBurn = [];
+      this.resetTokens();
     },
 
     resetTokens() {
@@ -123,6 +121,9 @@ export default Vue.extend({
         } else if (this.quest.requirementType === RequirementType.TRINKET) {
           this.ownedTokens = this.ownedTrinketIds;
           this.ownedTrinketIds?.forEach((id: string) => this.ownedNftIdTypes.push({id, type: 'trinket'}));
+        } else if (this.quest.requirementType === RequirementType.SHIELD) {
+          this.ownedTokens = this.ownedShieldIds;
+          this.ownedShieldIds?.forEach((id: string) => this.ownedNftIdTypes.push({id, type: 'shield'}));
         }
       } else {
         this.showModal = false;
