@@ -120,6 +120,7 @@
       </div>
     </div>
     <!-- TODO: Get rank variation from contract -->
+    <pvp-under-attack-modal :isUnderAttack="isUnderAttack" />
     <pvp-duel-modal
       v-if="duelResult.result"
       :result="duelResult.result"
@@ -146,6 +147,7 @@ import waterIcon from '../../assets/elements/water.png';
 import earthIcon from '../../assets/elements/earth.png';
 import lightningIcon from '../../assets/elements/lightning.png';
 import PvPDuelModal from './PvPDuelModal.vue';
+import PvPUnderAttackModal from './PvPUnderAttackModal.vue';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
 
 export default {
@@ -157,7 +159,8 @@ export default {
     'pvp-character': PvPCharacter,
     'pvp-separator': PvPSeparator,
     'pvp-button': PvPButton,
-    'pvp-duel-modal': PvPDuelModal
+    'pvp-duel-modal': PvPDuelModal,
+    'pvp-under-attack-modal': PvPDuelModal
   },
 
   props: {
@@ -210,6 +213,7 @@ export default {
     return {
       loading: true,
       isInMatch: false,
+      isUnderAttack: false,
       decisionTimeLeft: 0,
       wager: null,
       duelCost: null,
@@ -305,7 +309,7 @@ export default {
 
     async findMatch() {
       if (!(await this.contracts().PvpArena.methods.isCharacterNotUnderAttack(this.currentCharacterId).call())) {
-        alert('You are currently under attack. Please wait a moment.');
+        this.isUnderAttack = true;
         return;
       }
 
