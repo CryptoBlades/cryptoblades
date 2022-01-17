@@ -52,8 +52,9 @@
       </div>
     </div>
     <div class="d-flex">
-      <b-button variant="primary" class="flex-1" :disabled="quest.requirementType === RequirementType.RAID || questCanBeCompleted"
+      <b-button variant="primary" class="flex-1" :disabled="quest.requirementType === RequirementType.RAID"
                 @click="submit">
+        <!--      || questCanBeCompleted-->
         {{ $t('quests.submit') }}
       </b-button>
       <b-button v-if="questCanBeCompleted" variant="primary" class="flex-1" @click="complete">

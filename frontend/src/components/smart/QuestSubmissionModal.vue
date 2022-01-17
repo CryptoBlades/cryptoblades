@@ -1,12 +1,12 @@
 <template>
   <b-modal v-if="quest" class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop scrollable
-           :title="'Turn-in'" size="xl" @close="weaponsToBurn = []" @cancel="weaponsToBurn = []" :ok-title="'Submit'"
+           :title="'Turn-in'" size="xl" @close="tokensToBurn = []" @cancel="tokensToBurn = []" :ok-title="'Submit'"
            @ok="submit">
-    <div class="d-flex">
-      <weapon-grid v-model="burnWeaponId" :weaponIds="ownedWeapons" :ignore="weaponsToBurn"
-                   :showGivenWeaponIds="true" @chooseweapon="addBurnWeapon"
+    <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
+      <weapon-grid v-model="burnTokenId" :weaponIds="ownedTokens" :ignore="tokensToBurn"
+                   :showGivenWeaponIds="true" @chooseweapon="addBurnToken"
                    :starsOptions="[quest.requirementRarity + 1]"/>
-      <weapon-grid :weaponIds="weaponsToBurn" :showGivenWeaponIds="true" @chooseweapon="removeBurnWeapon"
+      <weapon-grid :weaponIds="tokensToBurn" :showGivenWeaponIds="true" @chooseweapon="removeBurnToken"
                    :starsOptions="[quest.requirementRarity + 1]"/>
     </div>
   </b-modal>
@@ -26,9 +26,9 @@ interface Data {
   quest: Quest | undefined;
   characterId: number | string;
   showModal: boolean;
-  ownedWeapons: string[];
-  weaponsToBurn: string[];
-  burnWeaponId: number | undefined;
+  ownedTokens: string[];
+  tokensToBurn: string[];
+  burnTokenId: number | undefined;
 }
 
 export default Vue.extend({
@@ -41,9 +41,9 @@ export default Vue.extend({
       quest: undefined,
       characterId: '',
       showModal: false,
-      ownedWeapons: [],
-      weaponsToBurn: [],
-      burnWeaponId: undefined,
+      ownedTokens: [],
+      tokensToBurn: [],
+      burnTokenId: undefined,
       RequirementType,
       RewardType,
       Rarity,
@@ -58,19 +58,19 @@ export default Vue.extend({
   methods: {
     ...mapActions(['submitProgress']) as StoreMappedActions,
 
-    addBurnWeapon(id: number) {
-      this.weaponsToBurn.push(id.toString());
-      this.ownedWeapons = this.ownedWeapons.filter(val => !this.weaponsToBurn.includes(val));
-      this.burnWeaponId = undefined;
+    addBurnToken(id: number) {
+      this.tokensToBurn.push(id.toString());
+      this.ownedTokens = this.ownedTokens.filter(val => !this.tokensToBurn.includes(val));
+      this.burnTokenId = undefined;
     },
 
-    removeBurnWeapon(id: number) {
-      this.ownedWeapons.push(id.toString());
-      this.weaponsToBurn = this.weaponsToBurn.filter(x => x !== id.toString());
+    removeBurnToken(id: number) {
+      this.ownedTokens.push(id.toString());
+      this.tokensToBurn = this.tokensToBurn.filter(x => x !== id.toString());
     },
 
     async submit() {
-      await this.submitProgress({characterID: this.characterId, tokenIds: this.weaponsToBurn});
+      await this.submitProgress({characterID: this.characterId, tokenIds: this.tokensToBurn});
     }
   },
 
@@ -80,10 +80,12 @@ export default Vue.extend({
         this.quest = quest;
         this.characterId = characterId;
         this.showModal = true;
-        this.ownedWeapons = this.ownedWeaponIds;
+        if(this.quest.requirementType === RequirementType.WEAPON) {
+          this.ownedTokens = this.ownedWeaponIds;
+        }
       } else {
         this.showModal = false;
-        this.ownedWeapons = this.ownedWeaponIds;
+        this.ownedTokens = [];
       }
     });
   }
