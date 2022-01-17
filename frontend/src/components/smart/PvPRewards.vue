@@ -5,8 +5,8 @@
     <ul>
       <li><div class="bulletpoint"></div>Seasonal rewards are distributed at the end of every ranked season to the top 3 ranking players in each tier.</li>
       <li><div class="bulletpoint"></div>Your rewards will accumulate over time.</li>
-      <li><div class="bulletpoint"></div>Just click 'CLAIM REWARDS' to claim your skill!</li>
-      <li><div class="bulletpoint"></div>Your available skill: {{ formattedAvailableSkill }} $SKILL</li>
+      <li><div class="bulletpoint"></div>Just click 'CLAIM REWARDS' to claim your $SKILL!</li>
+      <li><div class="bulletpoint"></div>$SKILL available: {{ formattedAvailableSkill }}</li>
     </ul>
     <pvp-button buttonText="CLAIM REWARDS" @click="claimRewards" />
   </div>
