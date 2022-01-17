@@ -15,7 +15,7 @@
       <div v-if="nft.type === 'shield'" class="default-info">{{stars || '1-5'}}*</div>
       <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
         v-tooltip="$t('nftIcon.secretTooltip')" />
-      <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../assets/dusts/LesserDust.png"
+      <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../assets/dusts/lesserDust.png"
         v-tooltip="$t('nftIcon.lesserDust')" />
       <img class="default-dust-placeholder" v-if="nft.type === '4bdust'" src="../assets/dusts/greaterDust.png"
         v-tooltip="$t('nftIcon.greaterDust')" />
@@ -117,7 +117,7 @@
       </div>
 
       <div v-if="nft.type === 'dustLb'" class="nft-details">
-        <img class="placeholder-dust" src="../assets/dusts/LesserDust.png" />
+        <img class="placeholder-dust" src="../assets/dusts/lesserDust.png" />
         <div v-if="!isShop" class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
