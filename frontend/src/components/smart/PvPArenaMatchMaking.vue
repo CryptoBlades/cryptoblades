@@ -29,7 +29,7 @@
             <span>Rank: {{ characterInformation.rank }}</span>
           </div>
         </div>
-        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
+        <div class="weapons" >
           <pvp-weapon
             v-if="activeWeaponWithInformation.weaponId"
             :weapon="activeWeaponWithInformation.information"
@@ -41,6 +41,7 @@
             :shield="activeShieldWithInformation.information"
             :shieldId="activeShieldWithInformation.shieldId"
             :hasInfoPopover="false"
+            class="shield"
           />
         </div>
       </div>
@@ -60,7 +61,7 @@
           <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
             <div v-if="!isInMatch">
-              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount <= 1"  buttonText="FIND MATCH" />
+              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount < 1"  buttonText="FIND MATCH" />
               <div class="matchablePlayersCountText">Players in this tier: {{formattedMatchablePlayersCount}}</div>
             </div>
             <pvp-button v-else
@@ -101,7 +102,7 @@
         </div>
         <div v-else class="findMatchMessage">Press FIND MATCH to find an opponent!
         </div>
-        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
+        <div class="weapons">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
             :weapon="opponentActiveWeaponWithInformation.information"
@@ -113,6 +114,7 @@
             :shield="opponentActiveShieldWithInformation.information"
             :shieldId="opponentActiveShieldWithInformation.shieldId"
             :hasInfoPopover="false"
+            class="shield"
           />
         </div>
       </div>
@@ -691,10 +693,8 @@ span, p, li, button {
     right: 0;
     margin-right: auto;
     margin-left: auto;
-    &.hasShield{
-      div:first-of-type {
-        margin-right: 1rem;
-      }
+    .shield {
+      margin-left: 1rem;
     }
   }
 }
@@ -740,22 +740,25 @@ span, p, li, button {
   }
   .middleMatchProgressButtons {
     width: 100%;
-    height: 5.5rem;
     button {
+      height: 5.5rem;
       height: 100%;
     }
   }
   .matchButtonsWrapper {
     width: 100%;
+
     button {
       height: 5.5rem;
     }
   }
   .matchablePlayersCountText{
-    display:flex;
+    display: flex;
     justify-content: center;
-      color: #cec198;
-      font-size: 0.95rem;
+    color: #cec198;
+    font-size: 0.75rem;
+    margin-top: 1rem;
+    font-family: 'Roboto';
   }
   .rerollButtonWrapper {
     width: 100%;
