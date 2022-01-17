@@ -11,8 +11,10 @@
     </div>
     <div v-else-if="quest.requirementType === RequirementType.JUNK" class="d-flex">
       <nft-list v-model="selectedToken" :showGivenNftIdTypes="true" :nftIdTypes="ownedNftIdTypes"
-                @choosenft="addNftIdType"/>
-      <nft-list :showGivenNftIdTypes="true" :nftIdTypes="nftIdTypesToBurn" @choosenft="removeNftIdType"/>
+                @choosenft="addNftIdType" :starsOptions="[quest.requirementRarity + 1]"
+                :typesOptions="[RequirementType[quest.requirementType]]"/>
+      <nft-list :showGivenNftIdTypes="true" :nftIdTypes="nftIdTypesToBurn" @choosenft="removeNftIdType"
+                :starsOptions="[quest.requirementRarity + 1]" :typesOptions="[RequirementType[quest.requirementType]]"/>
     </div>
   </b-modal>
 </template>
@@ -33,7 +35,7 @@ interface Data {
   characterId: number | string;
   showModal: boolean;
   ownedTokens: string[];
-  tokensToBurn: string[];
+  tokensToBurn: (string | number)[];
   ownedNftIdTypes: NftIdType[];
   nftIdTypesToBurn: NftIdType[];
   selectedToken: number | undefined;
@@ -83,6 +85,7 @@ export default Vue.extend({
       console.log(nftIdType);
       this.nftIdTypesToBurn.push(nftIdType);
       this.ownedNftIdTypes = this.ownedNftIdTypes.filter(val => !this.nftIdTypesToBurn.some(nftToBurn => nftToBurn.id === val.id));
+      this.tokensToBurn = this.nftIdTypesToBurn.map(nftIdType => nftIdType.id);
       this.selectedToken = undefined;
     },
 
@@ -90,6 +93,7 @@ export default Vue.extend({
       console.log(nftIdType);
       this.ownedNftIdTypes.push(nftIdType);
       this.nftIdTypesToBurn = this.nftIdTypesToBurn.filter(x => x.id !== nftIdType.id);
+      this.tokensToBurn = this.nftIdTypesToBurn.map(nftIdType => nftIdType.id);
     },
 
     async submit() {
