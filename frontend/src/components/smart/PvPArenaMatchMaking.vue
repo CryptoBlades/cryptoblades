@@ -270,7 +270,11 @@ export default {
     },
     formattedMatchablePlayersCount(){
       // TODO subtract from this number the player's other characters that are locked in the arena
-      return this.matchablePlayersCount - 1;
+      const formattedMatchablePlayersCount = this.matchablePlayersCount - 1;
+      if (formattedMatchablePlayersCount < 0) {
+        return 0;
+      }
+      return formattedMatchablePlayersCount;
     },
 
     getCharacterElementSrc() {
