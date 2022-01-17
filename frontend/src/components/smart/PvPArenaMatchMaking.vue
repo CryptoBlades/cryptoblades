@@ -133,7 +133,7 @@
     <pvp-under-attack-modal
       v-if="this.isUnderAttack"
       :isUnderAttack="isUnderAttack"
-      @close-modal="handleCloseModal"
+      @close-modal="handleCloseAttackModal"
     />
   </div>
 </template>
@@ -341,7 +341,7 @@ export default {
 
     async reRollOpponent() {
       if (!(await this.contracts().PvpArena.methods.isCharacterNotUnderAttack(this.currentCharacterId).call())) {
-        alert('You are currently under attack. Please wait a moment.');
+        this.isUnderAttack = true;
         return;
       }
 
@@ -456,7 +456,6 @@ export default {
       };
 
       this.isCharacterInDuelQueue = false;
-      this.isUnderAttack = false;
 
       this.wager = (await this.contracts().PvpArena.methods.fighterByCharacter(this.currentCharacterId).call({ from: this.defaultAccount })).wager;
 
@@ -465,6 +464,10 @@ export default {
       }
 
       this.$emit('updateRank');
+    },
+
+    handleCloseAttackModal() {
+      this.isUnderAttack = false;
     }
   },
 
