@@ -21,6 +21,11 @@
         </div>
       </div>
       <QuestDetails v-if="character.questData && character.questData.id !== 0" :questData="character.questData" :characterId="character.id"/>
+      <div v-else class="request-quest">
+        <b-button variant="primary w-100" @click="request(character.id)">
+          {{ $t('quests.request') }}
+        </b-button>
+      </div>
     </div>
   </div>
 </template>
@@ -43,6 +48,7 @@ export interface QuestData {
 
 interface StoreMappedActions {
   getCharacterQuestData(payload: { characterId: string | number }): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }>;
+  requestQuest(payload: { characterID: string | number }): Promise<void>;
 }
 
 interface StoreMappedGetters {
@@ -75,21 +81,30 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['getCharacterQuestData']) as StoreMappedActions,
+    ...mapActions(['getCharacterQuestData', 'requestQuest']) as StoreMappedActions,
+
+    async request(characterId: string | number) {
+      await this.requestQuest({characterID: characterId});
+      await this.refreshQuestData();
+    },
+
+    async refreshQuestData() {
+      for (const character of this.characters) {
+        const questDataRaw = await this.getCharacterQuestData({characterId: character.id});
+        console.log(questDataRaw);
+        character.questData = {
+          id: +questDataRaw[0],
+          progress: +questDataRaw[1],
+          type: +questDataRaw[2] as RequirementType,
+          reputation: +questDataRaw[3],
+        } as QuestData;
+      }
+    }
   },
 
   async mounted() {
     this.characters = this.charactersWithIds(this.ownedCharacterIds).filter(Boolean);
-    for (const character of this.characters) {
-      const questDataRaw = await this.getCharacterQuestData({characterId: character.id});
-      console.log(questDataRaw);
-      character.questData = {
-        id: +questDataRaw[0],
-        progress: +questDataRaw[1],
-        type: +questDataRaw[2] as RequirementType,
-        reputation: +questDataRaw[3],
-      } as QuestData;
-    }
+    await this.refreshQuestData();
   },
 });
 </script>
@@ -161,6 +176,14 @@ export default Vue.extend({
 .quest-row,
 .quests-container {
   gap: 1rem;
+}
+
+.request-quest {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  width: 25rem;
+  padding: 3rem;
 }
 
 @media (max-width: 576px) {

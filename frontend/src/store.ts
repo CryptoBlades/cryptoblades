@@ -3214,6 +3214,14 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
       },
 
+      async requestQuest({ state }, {characterID}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        console.log('Request quest for: ', characterID);
+        return await SimpleQuests.methods.requestQuest(characterID).send(defaultCallOptions(state));
+      },
+
       async canUserAfford({ state }, {payingAmount}) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades || !state.defaultAccount) return;

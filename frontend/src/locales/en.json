@@ -567,7 +567,8 @@
     "submit": "Submit",
     "reputation": "Reputation",
     "do": "Do",
-    "burn": "Burn"
+    "burn": "Burn",
+    "request": "Request"
   },
   "stake": {
     "unknownStakeType": "Unknown stake type, please try again.",

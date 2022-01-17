@@ -52,13 +52,13 @@
       </div>
     </div>
     <div class="d-flex">
-      <b-button variant="primary" class="flex-grow-1">
+      <b-button variant="primary" class="flex-1" :disabled="quest.requirementType === RequirementType.RAID">
         {{ $t('quests.submit') }}
       </b-button>
-      <b-button v-if="questCanBeCompleted" variant="primary" class="flex-grow-1" @click="complete">
+      <b-button v-if="questCanBeCompleted" variant="primary" class="flex-1" @click="complete">
         {{ $t('quests.complete') }}
       </b-button>
-      <b-button v-else variant="primary" class="flex-grow-1" @click="skip">
+      <b-button v-else variant="primary" class="flex-1" @click="skip">
         {{ $t('quests.skip') }}
       </b-button>
     </div>
@@ -188,6 +188,7 @@ export default Vue.extend({
   border-right: 1px solid;
 }
 
+.flex-1,
 .quest-info,
 .reward-info {
   flex: 1;
