@@ -12,9 +12,8 @@
         </select>
       </div>
     </div>
-    <div class="listWrapper">
+    <div v-if="tierTopRankers.length > 1" class="listWrapper">
       <ul class="playerList">
-          <h2>value: {{tierFilter}}</h2>
         <li>
           <span>Rank</span>
           <span>Name</span>
@@ -31,19 +30,22 @@
         </li>
         <li>
           <span>2</span>
-          <span>{{tierTopRankers[1].name}}</span>
-          <span>{{tierTopRankers[1].level}}</span>
-          <span>{{tierTopRankers[1].element}}</span>
-          <span>{{tierTopRankers[1].rank}}</span>
+          <span>{{tierTopRankers[1].name ||null}}</span>
+          <span>{{tierTopRankers[1].level ||null}}</span>
+          <span>{{tierTopRankers[1].element ||null}}</span>
+          <span>{{tierTopRankers[1].rank ||null}}</span>
         </li>
         <li>
           <span>3</span>
-          <span>{{tierTopRankers[2].name}}</span>
-          <span>{{tierTopRankers[2].level}}</span>
-          <span>{{tierTopRankers[2].element}}</span>
-          <span>{{tierTopRankers[2].rank}}</span>
+          <span>{{tierTopRankers[2].name ||null}}</span>
+          <span>{{tierTopRankers[2].level ||null}}</span>
+          <span>{{tierTopRankers[2].element ||null}}</span>
+          <span>{{tierTopRankers[2].rank ||null}}</span>
         </li>
       </ul>
+    </div>
+    <div v-else>
+    <h1 class="leaderboardTitle">NO PLAYERS ON THE SELECTED TIER</h1>
     </div>
   </div>
 </template>
@@ -81,7 +83,7 @@ export default {
       = await this.contracts().PvpArena.methods.getTierTopCharacters(this.tierFilter).call({ from: this.defaultAccount });
       console.log('handlevalue runs', tierTopRankersIds);
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
-        return {
+        if (rankerId) return {
           rankerId,
           name: getCharacterNameFromSeed(rankerId),
           rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount }),
@@ -94,18 +96,7 @@ export default {
   },
   async created(){
     //Leaderboards will be improved, for now they will only show top 3 rankers of each tier
-    const tierTopRankersIds
-    = await this.contracts().PvpArena.methods.getTierTopCharacters(this.tierFilter).call({ from: this.defaultAccount });
-    this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
-      return {
-        rankerId,
-        name: getCharacterNameFromSeed(rankerId),
-        rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount }),
-        level: await this.contracts().Characters.methods.getLevel(rankerId).call({ from: this.defaultAccount }),
-        element: formatCharacter(rankerId, await this.contracts().Characters.methods.get(`${rankerId}`)
-          .call({ from: this.defaultAccount })).traitName
-      };
-    }));
+    this.handleValue();
   },
   watch: {
     async tierFilter(value){
