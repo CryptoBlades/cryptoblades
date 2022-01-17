@@ -28,10 +28,10 @@
       </ul>
       <div class="earnWrapper">
         <span v-if="result === 'win'">
-          {{$t('pvp.youEarned', skillEarned)}}
+          {{$t('pvp.youEarned', {skillEarned})}}
         </span>
         <span v-else>
-          {{$t('pvp.youLost', skillEarned)}}
+          {{$t('pvp.youLost', {skillEarned})}}
         </span>
       </div>
       <div class="rankWrapper">

@@ -58,8 +58,7 @@
       <li>
         <span>{{ currentRankedSeason }}</span>
         <vue-countdown :time="secondsBeforeNextSeason * 1000" v-slot="{ days, hours, minutes, seconds }">
-          <!-- ver q hacer aca {{$t('pvp.arenaSignUpCaps')}} -->
-          {{ days && days || '' }} {{ days && i18n.t('pvp.days') + ', ' || '' }}{{ hours }}:{{ minutes }}:{{ seconds }}
+          {{ days && days || '' }} {{ days && daysText + ', ' || '' }}{{ hours }}:{{ minutes }}:{{ seconds }}
         </vue-countdown>
       </li>
     </ul>
@@ -96,6 +95,7 @@
 <script>
 import BN from 'bignumber.js';
 import VueCountdown from '@chenfengyuan/vue-countdown';
+import i18n from '../../i18n';
 
 export default {
   components: {
@@ -131,6 +131,9 @@ export default {
     formatedTierRewardsPool() {
       return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
     },
+    daysText() {
+      return i18n.t('pvp.days');
+    }
   }
 };
 </script>

@@ -61,7 +61,13 @@
           </div>
           <p v-if="isInMatch && !isCharacterInDuelQueue && !this.loading && this.decisionTimeLeft">
             <span>
-              {{$t('pvp.timeToAcceptDuel', {decisionTimeLeft: this.decisionTimeLeft})}}
+              {{$t('pvp.youHave')}}
+            </span>
+            <span>
+              {{this.decisionTimeLeft}}
+            </span>
+            <span>
+              {{$t('pvp.toAcceptDuel')}}
             </span>
           </p>
           <span v-else-if="this.decisionTimeLeft === 0 && !this.loading && isCharacterInDuelQueue">
