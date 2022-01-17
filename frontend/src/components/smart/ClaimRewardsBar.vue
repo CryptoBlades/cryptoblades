@@ -127,7 +127,7 @@
               $t('ClaimRewardsBar.realWithdrawValueClaimable', {
                 actualAmount: (skillAmount / formattedRatio * formattedMultiplier).toFixed(4),
                 tokenSymbol: selectedPartneredProject.tokenSymbol,
-                skillAmount: skillAmount.toFixed(4)
+                skillAmount: (+skillAmount).toFixed(4)
               })
             }}</h6>
         </div>
@@ -282,7 +282,7 @@ export default Vue.extend({
     },
 
     skillRewardNumber(): number {
-      return +toBN(fromWeiEther(this.skillRewards)).toFixed(18);
+      return +toBN(fromWeiEther(this.skillRewards.substr(0, this.skillRewards.length - 3) + '000'));
     },
 
     withdrawalInfoText(): string {
