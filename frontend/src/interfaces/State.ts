@@ -41,6 +41,7 @@ export interface IStakeOverviewState {
   rewardsDuration: number;
   totalSupply: string;
   minimumStakeTime: number;
+  rewardDistributionTimeLeft: number;
 }
 
 export interface IRaidState {
