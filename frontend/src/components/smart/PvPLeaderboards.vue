@@ -86,6 +86,7 @@ export default {
             .call({ from: this.defaultAccount })).traitName
         };
       }));
+      this.$forceUpdate();
     }
   },
   async created(){
