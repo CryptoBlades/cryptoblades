@@ -129,6 +129,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 timestamp
     );
 
+    event SeasonRestarted(
+        uint256 indexed newSeason,
+        uint256 timestamp
+    );
+
     modifier characterInArena(uint256 characterID) {
         _characterInArena(characterID);
         _;
@@ -462,6 +467,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         currentRankedSeason = currentRankedSeason.add(1);
         seasonStartedAt = block.timestamp;
+
+        emit SeasonRestarted(
+                currentRankedSeason,
+                seasonStartedAt
+            );
     }
 
     /// @dev performs a list of duels
@@ -754,12 +764,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev get the top ranked characters by a character's ID
-    function getTierTopCharacters(uint256 characterID)
+    function getTierTopCharacters(uint8 tier)
         public
         view
         returns (uint256[] memory)
     {
-        uint8 tier = getArenaTier(characterID);
         uint256 arrayLength;
         // we return only the top 3 players, returning the array without the pivot ranker if it exists
         if (
@@ -1091,5 +1100,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         restricted
     {
         rankingPointsByCharacter[characterID] = newRankingPoints;
+    }
+    /// @dev returns the amount of matcheable characters
+    function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
+        uint8 tier = getArenaTier(characterID);
+        return _matchableCharactersByTier[tier].length();   
     }
 }
