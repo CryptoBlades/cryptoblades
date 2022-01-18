@@ -469,6 +469,8 @@
       "stakeLocked": "Stake gesperrt",
       "warning": "Warnung",
       "select": "Wählen",
+      "rewardsAvailableTooltip":"Rewards still available here",
+      "rewardsUnavailableTooltip":"Currently no rewards here",
       "deprecatedTooltip": "Dieser Stake-Pool ist veraltet und in diesen sollte nicht mehr eingezahlt werden. Du kannst immernoch aus diesen auszahlen oder einzahlen, aber auf eigenes Risiko. Dies wird jedoch nicht empfohlen und kann nicht rückgängig gemacht werden."
     }
   },

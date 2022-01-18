@@ -578,6 +578,8 @@
       "rewardsDuration": "Distribution",
       "warning": "Warning",
       "select": "Select",
+      "rewardsAvailableTooltip":"Rewards still available here",
+      "rewardsUnavailableTooltip":"Currently no rewards here",
       "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
     },
     "tier": "Tier",
