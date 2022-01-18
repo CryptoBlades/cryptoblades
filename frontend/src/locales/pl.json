@@ -525,6 +525,8 @@
       "stakeLocked": "Stake locked",
       "warning": "Ostrzeżenie",
       "select": "Wybierz",
+      "rewardsAvailableTooltip":"Nagrody wciąż dostępne",
+      "rewardsUnavailableTooltip":"Aktualnie nagrody nie dostępne",
       "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
     },
     "pickId": "Wybierz ID",
@@ -642,7 +644,9 @@
   "pvp": {
     "lastDefeated": "Ostatnio zostałeś pokonany przez:",
     "tapAnywhere": "Dotknij w dowolnym miejscu, aby zamknąć",
-    "kicked": "Zostałeś wyrzucony z areny!"
+    "kicked": "Zostałeś wyrzucony z areny!",
+    "currentlyUnderAttack": "Jesteś obecnie atakowany!",
+    "pleaseWait": "Proszę chwilę poczekać"
   },
   "app": {
     "cantView": "W tej chwili nie możesz wyświetlić aplikacji. Możesz spróbować wyczyścić LocalStorage, aby zresetować ustawienia.",

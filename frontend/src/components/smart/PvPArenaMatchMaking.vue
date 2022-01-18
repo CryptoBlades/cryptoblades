@@ -29,7 +29,7 @@
             <span>Rank: {{ characterInformation.rank }}</span>
           </div>
         </div>
-        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
+        <div class="weapons" >
           <pvp-weapon
             v-if="activeWeaponWithInformation.weaponId"
             :weapon="activeWeaponWithInformation.information"
@@ -41,6 +41,7 @@
             :shield="activeShieldWithInformation.information"
             :shieldId="activeShieldWithInformation.shieldId"
             :hasInfoPopover="false"
+            class="shield"
           />
         </div>
       </div>
@@ -101,7 +102,7 @@
         </div>
         <div v-else class="findMatchMessage">Press FIND MATCH to find an opponent!
         </div>
-        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
+        <div class="weapons">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
             :weapon="opponentActiveWeaponWithInformation.information"
@@ -113,6 +114,7 @@
             :shield="opponentActiveShieldWithInformation.information"
             :shieldId="opponentActiveShieldWithInformation.shieldId"
             :hasInfoPopover="false"
+            class="shield"
           />
         </div>
       </div>
@@ -127,6 +129,11 @@
       :rankVariation="duelResult.result === 'win' ? '+5' : '-3'"
       :userCurrentRank="duelResult.rankDifference"
       @close-modal="handleCloseModal"
+    />
+    <pvp-under-attack-modal
+      v-if="this.isUnderAttack"
+      :isUnderAttack="isUnderAttack"
+      @close-modal="handleCloseAttackModal"
     />
   </div>
 </template>
@@ -144,6 +151,7 @@ import waterIcon from '../../assets/elements/water.png';
 import earthIcon from '../../assets/elements/earth.png';
 import lightningIcon from '../../assets/elements/lightning.png';
 import PvPDuelModal from './PvPDuelModal.vue';
+import PvPUnderAttackModal from './PvPUnderAttackModal.vue';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
 
 export default {
@@ -155,7 +163,8 @@ export default {
     'pvp-character': PvPCharacter,
     'pvp-separator': PvPSeparator,
     'pvp-button': PvPButton,
-    'pvp-duel-modal': PvPDuelModal
+    'pvp-duel-modal': PvPDuelModal,
+    'pvp-under-attack-modal': PvPUnderAttackModal
   },
 
   props: {
@@ -208,6 +217,7 @@ export default {
     return {
       loading: true,
       isInMatch: false,
+      isUnderAttack: false,
       decisionTimeLeft: 0,
       wager: null,
       duelCost: null,
@@ -303,7 +313,7 @@ export default {
 
     async findMatch() {
       if (!(await this.contracts().PvpArena.methods.isCharacterNotUnderAttack(this.currentCharacterId).call())) {
-        alert('You are currently under attack. Please wait a moment.');
+        this.isUnderAttack = true;
         return;
       }
 
@@ -331,7 +341,7 @@ export default {
 
     async reRollOpponent() {
       if (!(await this.contracts().PvpArena.methods.isCharacterNotUnderAttack(this.currentCharacterId).call())) {
-        alert('You are currently under attack. Please wait a moment.');
+        this.isUnderAttack = true;
         return;
       }
 
@@ -454,6 +464,10 @@ export default {
       }
 
       this.$emit('updateRank');
+    },
+
+    handleCloseAttackModal() {
+      this.isUnderAttack = false;
     }
   },
 
@@ -691,10 +705,8 @@ span, p, li, button {
     right: 0;
     margin-right: auto;
     margin-left: auto;
-    &.hasShield{
-      div:first-of-type {
-        margin-right: 1rem;
-      }
+    .shield {
+      margin-left: 1rem;
     }
   }
 }
@@ -740,22 +752,25 @@ span, p, li, button {
   }
   .middleMatchProgressButtons {
     width: 100%;
-    height: 5.5rem;
     button {
+      height: 5.5rem;
       height: 100%;
     }
   }
   .matchButtonsWrapper {
     width: 100%;
+
     button {
       height: 5.5rem;
     }
   }
   .matchablePlayersCountText{
-    display:flex;
+    display: flex;
     justify-content: center;
-      color: #cec198;
-      font-size: 0.95rem;
+    color: #cec198;
+    font-size: 0.75rem;
+    margin-top: 1rem;
+    font-family: 'Roboto';
   }
   .rerollButtonWrapper {
     width: 100%;

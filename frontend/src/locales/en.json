@@ -578,6 +578,8 @@
       "rewardsDuration": "Distribution",
       "warning": "Warning",
       "select": "Select",
+      "rewardsAvailableTooltip":"Rewards available",
+      "rewardsUnavailableTooltip":"Rewards depleted",
       "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
     },
     "tier": "Tier",
@@ -695,7 +697,9 @@
   "pvp": {
     "lastDefeated": "You were last defeated by: ",
     "tapAnywhere": "Tap anywhere to close",
-    "kicked": "You were kicked from the arena!"
+    "kicked": "You were kicked from the arena!",
+    "currentlyUnderAttack": "You are currently under attack!",
+    "pleaseWait": "Please wait a moment"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",

@@ -469,6 +469,8 @@
       "stakeLocked": "Stake gesperrt",
       "warning": "Warnung",
       "select": "Wählen",
+      "rewardsAvailableTooltip":"Rewards available",
+      "rewardsUnavailableTooltip":"Rewards depleted",
       "deprecatedTooltip": "Dieser Stake-Pool ist veraltet und in diesen sollte nicht mehr eingezahlt werden. Du kannst immernoch aus diesen auszahlen oder einzahlen, aber auf eigenes Risiko. Dies wird jedoch nicht empfohlen und kann nicht rückgängig gemacht werden."
     }
   },
@@ -584,7 +586,9 @@
   "pvp": {
     "lastDefeated": "Du wurdest zuletzt besiegt von: ",
     "tapAnywhere": "Tippen Sie zum Schließen auf eine beliebige Stelle",
-    "kicked": "Du wurdest aus der Arena geworfen!"
+    "kicked": "Du wurdest aus der Arena geworfen!",
+    "currentlyUnderAttack": "Sie werden derzeit angegriffen!",
+    "pleaseWait": "Bitte warte einen Moment"
   },
   "app": {
     "cantView": "Du kannst das Spiel gerade nicht ansehen. Versuche den LocalStorage zu löschen, um deine Einstellunge zurückzusetzen.",

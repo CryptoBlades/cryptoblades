@@ -11,20 +11,21 @@
       </button>
       <button @click="setTab(2)" :class="tabNumber === 2 && 'active'">
         <img src="../../assets/crownIcon.svg" />
-        <span>Rewards
-          <div class="rewardsIndicator" v-if="hasRewards">
-            <div>
-              <p>!</p>
-            </div>
-          </div>
-        </span>
+        <div class="rewardsButtonInner">
+          Rewards
+          <BIcon icon="exclamation-circle-fill" v-if="hasRewards" class="rewardsIcon"/>
+        </div>
       </button>
     </nav>
   </div>
 </template>
 
 <script>
+import { BIcon } from 'bootstrap-vue';
 export default {
+  components: {
+    BIcon,
+  },
   props: {
     tabNumber: {
       default: 0
@@ -33,7 +34,6 @@ export default {
       default: false,
     }
   },
-
   methods: {
     setTab(tabNumber) {
       this.$emit('changeTab', tabNumber);
@@ -49,27 +49,16 @@ export default {
   border-bottom: 1px solid #363636;
   .defaultNav {
     display: flex;
-
-    .rewardsIndicator {
-      display: inline-flex;
-      justify-content: center;
-      color: black;
+    .rewardsButtonInner {
+      display: flex;
+      font-family: 'Roboto';
+      .rewardsIcon {
+        display: flex;
+        margin-left: .5rem;
+        color: #edcd90;
+        font-size: 1.1rem;
+      }
     }
-    .rewardsIndicator > div {
-      background-color: #cec198;
-      border-radius: 50%;
-      height: 1rem;
-      width: 1rem;
-      align-items: center;
-      justify-content: center;
-    }
-    .rewardsIndicator > div p {
-      display: block;
-      color: #000;
-      line-height: normal;
-      text-align: center;
-      font-weight: 500;
-}
   }
   button {
     display: flex;
@@ -77,6 +66,7 @@ export default {
     padding-bottom: 0.5rem;
     align-items: center;
     vertical-align: middle;
+    justify-items: center;
     color: #b4b0a7;
     font-size: 0.875rem;
     line-height: 1.25rem;
@@ -91,6 +81,7 @@ export default {
       margin-right: 0.5rem;
     }
     span {
+      display: flex;
       font-family: 'Roboto';
     }
     :hover {
