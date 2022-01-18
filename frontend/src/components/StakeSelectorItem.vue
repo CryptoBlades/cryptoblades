@@ -104,9 +104,9 @@ export default {
 
     getTooltip(rewardDistributionTimeLeft) {
       if(rewardDistributionTimeLeft > 0) {
-        return 'rewards still available here';
+        return this.$t('stake.StakeSelectorItem.rewardsAvailableTooltip');
       }
-      return 'currently no rewards here';
+      return this.$t('stake.StakeSelectorItem.rewardsUnavailableTooltip');
     },
   },
 };
