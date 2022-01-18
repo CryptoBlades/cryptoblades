@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import PvPNavBar from '../components/smart/PvPNavBar.vue';
 import PvPLeaderboards from '../components/smart/PvPLeaderboards.vue';
 import PvPRewards from '../components/smart/PvPRewards.vue';
@@ -44,6 +44,10 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      'getPlayerPrizePoolRewards'
+    ]),
+
     // TODO: Use router for this.
     onChangeTab(tabNumber) {
       this.tab = tabNumber;
@@ -59,12 +63,12 @@ export default {
   },
 
   async created() {
-    const playerRewards = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
+    const playerRewards = await this.getPlayerPrizePoolRewards();
     this.hasRewards = !!+playerRewards;
   },
 
   async updated() {
-    const playerRewards = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
+    const playerRewards = await this.getPlayerPrizePoolRewards();
 
     this.hasRewards = !!+playerRewards;
   }

@@ -32,7 +32,7 @@
 
 <script>
 import BN from 'bignumber.js';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import PvPButton from './PvPButton.vue';
 import i18n from '../../i18n';
 
@@ -60,13 +60,18 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      'withdrawRankedRewards',
+      'getPlayerPrizePoolRewards'
+    ]),
+
     async claimRewards() {
       this.loading = true;
 
       try {
-        await this.contracts().PvpArena.methods.withdrawRankedRewards().send({ from: this.defaultAccount });
+        await this.withdrawRankedRewards();
 
-        this.availableSkill = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
+        this.availableSkill = await this.getPlayerPrizePoolRewards();
       } catch (err) {
         console.log('withdraw rewards error: ', err);
       }
@@ -76,7 +81,7 @@ export default {
   },
 
   async created() {
-    this.availableSkill = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
+    this.availableSkill = await this.getPlayerPrizePoolRewards();
 
     this.loading = false;
   }
