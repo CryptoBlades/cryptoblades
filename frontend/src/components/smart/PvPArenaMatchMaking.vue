@@ -1,14 +1,20 @@
 <template>
   <div class="wrapper">
     <nav>
-      <div class="navTitle">Arena</div>
+      <div class="navTitle">
+        {{$t('pvp.arena')}}
+      </div>
       <div class="navStats">
         <div>
-          <span>Arena tier:</span>
+          <span>
+            {{$t('pvp.arenaTier')}}
+          </span>
           <span>{{ characterInformation.tier || '-' }}</span>
         </div>
         <div>
-          <span>Wager left:</span>
+          <span>
+            {{$t('pvp.wagerLeft')}}
+          </span>
           <span>{{ formattedWager || '-' }}</span>
         </div>
       </div>
@@ -24,12 +30,16 @@
         <div v-if="characterInformation" class="info">
           <h1 class="characterName">{{ characterInformation.name }}</h1>
           <div class="infoDetails">
-            <span>Level: {{ characterInformation.level }}</span>
+            <span>
+              {{$t('pvp.level')}}: {{ characterInformation.level }}
+            </span>
             <pvp-separator vertical class="separator" />
-            <span>Rank: {{ characterInformation.rank }}</span>
+            <span>
+              {{$t('pvp.rank')}}: {{ characterInformation.rank }}
+            </span>
           </div>
         </div>
-        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
+        <div class="weapons" >
           <pvp-weapon
             v-if="activeWeaponWithInformation.weaponId"
             :weapon="activeWeaponWithInformation.information"
@@ -41,6 +51,7 @@
             :shield="activeShieldWithInformation.information"
             :shieldId="activeShieldWithInformation.shieldId"
             :hasInfoPopover="false"
+            class="shield"
           />
         </div>
       </div>
@@ -50,27 +61,35 @@
             <img class="spinner" src="../../assets/loadingSpinner.svg" />
           </div>
           <p v-if="isInMatch && !isCharacterInDuelQueue && !this.loading && this.decisionTimeLeft">
-            <span>You have</span>
-            <span>{{ this.decisionTimeLeft }}</span>
-            <span>to accept the duel</span>
+            <span>
+              {{$t('pvp.youHave')}}
+            </span>
+            <span>
+              {{this.decisionTimeLeft}}
+            </span>
+            <span>
+              {{$t('pvp.toAcceptDuel')}}
+            </span>
           </p>
-          <span v-else-if="this.decisionTimeLeft === 0 && !this.loading && isCharacterInDuelQueue">Duel has expired.</span>
+          <span v-else-if="this.decisionTimeLeft === 0 && !this.loading && isCharacterInDuelQueue">
+            {{$t('pvp.duelHasExpired')}}
+          </span>
         </div>
         <div class="middleMatchProgressButtons">
-          <pvp-button v-if="isCharacterInDuelQueue" buttonText="IN-PROGRESS" :disabled="true"/>
+          <pvp-button v-if="isCharacterInDuelQueue" :buttonText="inProgressButtonText" :disabled="true"/>
           <div v-else class="matchButtonsWrapper">
             <div v-if="!isInMatch">
-              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount <= 1"  buttonText="FIND MATCH" />
+              <pvp-button @click="findMatch" :disabled="loading || formattedMatchablePlayersCount < 1"  :buttonText="findMatchButtonText" />
               <div class="matchablePlayersCountText">Players in this tier: {{formattedMatchablePlayersCount}}</div>
             </div>
             <pvp-button v-else
-            @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" buttonText="DUEL" />
+            @click="prepareDuel" :disabled="loading || !decisionTimeLeft || isCharacterInDuelQueue" :duelButton="true" :buttonText="duelButtonText" />
           </div>
         </div>
         <div class="rerollButtonWrapper">
           <pvp-button
             @click="reRollOpponent" :disabled="loading || !isInMatch || isCharacterInDuelQueue"
-            buttonText="Re-roll Opponent"
+            :buttonText="reRollButtonText"
             :buttonsubText="'$SKILL: ' + formattedReRollCost"
             :secondary="true"
           />
@@ -79,7 +98,7 @@
           <pvp-button
             @click="leaveArena"
             :disabled="loading || isCharacterInDuelQueue"
-            buttonText="Leave Arena"
+            :buttonText="leaveArenaButtonText"
             :secondary="true"
           />
         </div>
@@ -94,14 +113,17 @@
         <div v-if="opponentInformation.id" class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
           <div class="infoDetails">
-            <span>Level: {{ opponentInformation.level }}</span>
+            <span>
+              {{$t('pvp.level')}}: {{ opponentInformation.level }}</span>
             <pvp-separator vertical class="separator" />
-            <span>Rank: {{ opponentInformation.rank }}</span>
+            <span>
+              {{$t('pvp.rank')}}: {{ opponentInformation.rank }}</span>
           </div>
         </div>
-        <div v-else class="findMatchMessage">Press FIND MATCH to find an opponent!
+        <div v-else class="findMatchMessage">
+          {{$t('pvp.pressFindMatch')}}
         </div>
-        <div class="weapons" :class="{'hasShield': activeShieldWithInformation.shieldId}">
+        <div class="weapons">
           <pvp-weapon
             v-if="opponentActiveWeaponWithInformation.weaponId"
             :weapon="opponentActiveWeaponWithInformation.information"
@@ -113,6 +135,7 @@
             :shield="opponentActiveShieldWithInformation.information"
             :shieldId="opponentActiveShieldWithInformation.shieldId"
             :hasInfoPopover="false"
+            class="shield"
           />
         </div>
       </div>
@@ -127,6 +150,11 @@
       :rankVariation="duelResult.result === 'win' ? '+5' : '-3'"
       :userCurrentRank="duelResult.rankDifference"
       @close-modal="handleCloseModal"
+    />
+    <pvp-under-attack-modal
+      v-if="this.isUnderAttack"
+      :isUnderAttack="isUnderAttack"
+      @close-modal="handleCloseAttackModal"
     />
   </div>
 </template>
@@ -144,7 +172,9 @@ import waterIcon from '../../assets/elements/water.png';
 import earthIcon from '../../assets/elements/earth.png';
 import lightningIcon from '../../assets/elements/lightning.png';
 import PvPDuelModal from './PvPDuelModal.vue';
+import PvPUnderAttackModal from './PvPUnderAttackModal.vue';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
+import i18n from '../../i18n';
 
 export default {
   inject: ['web3'],
@@ -155,7 +185,8 @@ export default {
     'pvp-character': PvPCharacter,
     'pvp-separator': PvPSeparator,
     'pvp-button': PvPButton,
-    'pvp-duel-modal': PvPDuelModal
+    'pvp-duel-modal': PvPDuelModal,
+    'pvp-under-attack-modal': PvPUnderAttackModal
   },
 
   props: {
@@ -208,6 +239,7 @@ export default {
     return {
       loading: true,
       isInMatch: false,
+      isUnderAttack: false,
       decisionTimeLeft: 0,
       wager: null,
       duelCost: null,
@@ -246,7 +278,11 @@ export default {
     },
     formattedMatchablePlayersCount(){
       // TODO subtract from this number the player's other characters that are locked in the arena
-      return this.matchablePlayersCount - 1;
+      const formattedMatchablePlayersCount = this.matchablePlayersCount - 1;
+      if (formattedMatchablePlayersCount < 0) {
+        return 0;
+      }
+      return formattedMatchablePlayersCount;
     },
 
     getCharacterElementSrc() {
@@ -273,6 +309,26 @@ export default {
         return earthIcon;
       }
       return lightningIcon;
+    },
+
+    inProgressButtonText() {
+      return i18n.t('pvp.inProgressCaps');
+    },
+
+    findMatchButtonText() {
+      return i18n.t('pvp.findMatchCaps');
+    },
+
+    duelButtonText() {
+      return i18n.t('pvp.duelCaps');
+    },
+
+    reRollButtonText() {
+      return i18n.t('pvp.reRoll');
+    },
+
+    leaveArenaButtonText() {
+      return i18n.t('pvp.leaveArena');
     },
   },
 
@@ -303,7 +359,7 @@ export default {
 
     async findMatch() {
       if (!(await this.contracts().PvpArena.methods.isCharacterNotUnderAttack(this.currentCharacterId).call())) {
-        alert('You are currently under attack. Please wait a moment.');
+        this.isUnderAttack = true;
         return;
       }
 
@@ -331,7 +387,7 @@ export default {
 
     async reRollOpponent() {
       if (!(await this.contracts().PvpArena.methods.isCharacterNotUnderAttack(this.currentCharacterId).call())) {
-        alert('You are currently under attack. Please wait a moment.');
+        this.isUnderAttack = true;
         return;
       }
 
@@ -454,6 +510,10 @@ export default {
       }
 
       this.$emit('updateRank');
+    },
+
+    handleCloseAttackModal() {
+      this.isUnderAttack = false;
     }
   },
 
@@ -487,7 +547,7 @@ export default {
 
       this.decisionTimeLeft = (this.decisionSeconds - (timeNow - this.match.createdAt), 0);
 
-      // Note: This gives a 400 seconds decisionTimeLeft locally. Test if it's ok on testnet.
+      // Note: This gives a 400+ seconds decisionTimeLeft locally. It's okay on Testnet.
       this.timer = setInterval(() => {
         if (this.isInMatch && !this.isCharacterInDuelQueue) {
           const timeNow = Math.floor((new Date()).getTime() / 1000);
@@ -691,10 +751,8 @@ span, p, li, button {
     right: 0;
     margin-right: auto;
     margin-left: auto;
-    &.hasShield{
-      div:first-of-type {
-        margin-right: 1rem;
-      }
+    .shield {
+      margin-left: 1rem;
     }
   }
 }
@@ -740,22 +798,25 @@ span, p, li, button {
   }
   .middleMatchProgressButtons {
     width: 100%;
-    height: 5.5rem;
     button {
+      height: 5.5rem;
       height: 100%;
     }
   }
   .matchButtonsWrapper {
     width: 100%;
+
     button {
       height: 5.5rem;
     }
   }
   .matchablePlayersCountText{
-    display:flex;
+    display: flex;
     justify-content: center;
-      color: #cec198;
-      font-size: 0.95rem;
+    color: #cec198;
+    font-size: 0.75rem;
+    margin-top: 1rem;
+    font-family: 'Roboto';
   }
   .rerollButtonWrapper {
     width: 100%;

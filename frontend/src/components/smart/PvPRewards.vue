@@ -1,22 +1,40 @@
 <template>
   <div class="rewardsWrapper">
-    <h1>REWARDS</h1>
-    <p>Here you can claim your rewards</p>
+    <h1>
+      {{$t('pvp.rewardsCaps')}}
+    </h1>
+    <p>
+      {{$t('pvp.clickToClaim')}}
+    </p>
     <ul>
-      <li><div class="bulletpoint"></div>Seasonal rewards are distributed at the end of every ranked season to the top 3 ranking players in each tier.</li>
-      <li><div class="bulletpoint"></div>Your rewards will accumulate over time.</li>
-      <li><div class="bulletpoint"></div>Just click 'CLAIM REWARDS' to claim your skill!</li>
-      <li><div class="bulletpoint"></div>Your available skill: {{ formattedAvailableSkill }} $SKILL</li>
+      <li>
+        <div class="bulletpoint"></div>
+        {{$t('pvp.seasonRewardDistribution')}}
+      </li>
+      <li>
+        <div class="bulletpoint"></div>
+        {{$t('pvp.rewardsAccumulate')}}
+      </li>
+      <li>
+        <div class="bulletpoint"></div>
+        {{$t('pvp.justClickClaim')}}
+      </li>
+      <li>
+        <div class="bulletpoint"></div>
+        {{$t('pvp.yourAvailableSkill', {formattedAvailableSkill})}}
+        $SKILL
+      </li>
     </ul>
-    <pvp-button buttonText="CLAIM REWARDS" @click="claimRewards" />
+    <pvp-button :buttonText="claimRewardsButtonText" @click="claimRewards" />
   </div>
 </template>
 
 
 <script>
 import BN from 'bignumber.js';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import PvPButton from './PvPButton.vue';
+import i18n from '../../i18n';
 
 export default {
   components: {
@@ -36,16 +54,24 @@ export default {
     formattedAvailableSkill() {
       return new BN(this.availableSkill).div(new BN(10).pow(18)).toFixed(2);
     },
+    claimRewardsButtonText() {
+      return i18n.t('pvp.claimRewardsCaps');
+    }
   },
 
   methods: {
+    ...mapActions([
+      'withdrawRankedRewards',
+      'getPlayerPrizePoolRewards'
+    ]),
+
     async claimRewards() {
       this.loading = true;
 
       try {
-        await this.contracts().PvpArena.methods.withdrawRankedRewards().send({ from: this.defaultAccount });
+        await this.withdrawRankedRewards();
 
-        this.availableSkill = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
+        this.availableSkill = await this.getPlayerPrizePoolRewards();
       } catch (err) {
         console.log('withdraw rewards error: ', err);
       }
@@ -55,7 +81,7 @@ export default {
   },
 
   async created() {
-    this.availableSkill = await this.contracts().PvpArena.methods.getPlayerPrizePoolRewards().call({ from: this.defaultAccount });
+    this.availableSkill = await this.getPlayerPrizePoolRewards();
 
     this.loading = false;
   }
