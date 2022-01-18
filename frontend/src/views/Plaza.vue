@@ -158,7 +158,8 @@
                 <h1>{{$t('characters')}} ({{ ownCharacters.length }} / 4)</h1>
                 <div class="d-flex justify-content-flex-end ml-auto">
                   <b-button
-                    :disabled="burningEnabled || !haveCharacters"
+                    v-if="burningEnabled"
+                    :disabled="!haveCharacters"
                     variant="primary"
                     class="ml-3 gtag-link-others"
                     @click="toggleSoulCreation"
@@ -197,7 +198,8 @@
                 <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
                 <div class="d-flex justify-content-flex-end ml-auto">
                   <b-button
-                    :disabled="burningEnabled || !haveCharacters"
+                    v-if="burningEnabled"
+                    :disabled="!haveCharacters"
                     variant="primary"
                     class="ml-3 gtag-link-others"
                     @click="toggleSoulCreation"
@@ -532,7 +534,7 @@ export default Vue.extend({
 }
 
 .soul-image {
-  content: url("../assets/dusts/soul.png");
+  content: url("../assets/dusts/soulDust.png");
   max-width: 8em;
 }
 
