@@ -451,13 +451,10 @@ export default {
 
     async prepareCharacterDuel() {
       this.loading = true;
-      console.log('1');
       try {
-        console.log('2');
         await this.listenForDuel(await this.getPvpContract());
-        console.log('3');
+
         await this.prepareDuel(this.currentCharacterId);
-        console.log('4');
       } catch (err) {
         console.log('prepare perform duel error: ', err.message);
 
