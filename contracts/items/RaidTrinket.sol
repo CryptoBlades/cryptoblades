@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../Promos.sol";
+import "../util.sol";
 
 contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
@@ -57,6 +58,14 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         return tokenStars[id];
     }
 
+    function getStars(uint256[] memory ids) public restricted returns (uint8[] memory) {
+        uint8[] memory stars = new uint8[](ids.length);
+        for(uint256 i = 0; i < ids.length; i++) {
+            stars[i] = tokenStars[ids[i]];
+        }
+        return stars;
+    }
+
     function mint(address minter, uint8 mintStars, uint256 mintEffect) public restricted returns(uint256) {
         uint256 tokenID = totalSupply();
         tokenStars[tokenID] = mintStars;
@@ -66,12 +75,27 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         return tokenID;
     }
 
+    //TODO: check how to handle mintEffects
+    function batchMint(address minter, uint8 mintStars, uint32 amount) public restricted returns(uint256[] memory) {
+        uint256[] memory tokenIDs = new uint256[](amount);
+        for(uint256 i = 0; i < amount; i++) {
+            tokenIDs[i] = mint(minter, mintStars, 0);
+        }
+        return tokenIDs;
+    }
+
     function burn(uint256 tokenID) public restricted {
         address burner = ownerOf(tokenID);
         _burn(tokenID);
         delete tokenStars[tokenID];
         delete tokenEffect[tokenID];
         emit Burned(tokenID, burner);
+    }
+
+    function burn(uint256[] memory tokenIDs) public restricted {
+        for(uint i = 0; i < tokenIDs.length; i++) {
+            burn(tokenIDs[i]);
+        }
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {

@@ -81,7 +81,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     // have quests rarities on certain indexes (0 - common, 1 - uncommon, 2 - rare, 3 - epic)
-    mapping(uint32 => Quest[]) public quests;
+    mapping(uint256 => Quest[]) public quests;
     mapping(uint256 => Quest) public questList;
     //    mapping(uint32 => uint32[]) public rewardsTypes;
     //rewardsTypes[0].push(99);
@@ -247,6 +247,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256[] memory questData = getCharacterQuestData(characterID);
         assertOnQuest(questData);
         Quest memory quest = questList[questData[0]];
+        require(tokenIds.length != 0, "No tokenIds provided");
         if (quest.requirementType == RequirementType.WEAPON) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -259,6 +260,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 weapons.burnWithoutDust(tokenID);
                 incrementQuestProgress(characterID, questData[0], 1);
             }
+            emit QuestProgressed(questData[0], characterID);
         } else if (quest.requirementType == RequirementType.JUNK) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -271,6 +273,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 junk.burn(tokenID);
                 incrementQuestProgress(characterID, questData[0], 1);
             }
+            emit QuestProgressed(questData[0], characterID);
         } else if (quest.requirementType == RequirementType.TRINKET) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -283,6 +286,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 trinket.burn(tokenID);
                 incrementQuestProgress(characterID, questData[0], 1);
             }
+            emit QuestProgressed(questData[0], characterID);
         } else if (quest.requirementType == RequirementType.SHIELD) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -295,6 +299,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 shields.burn(tokenID);
                 incrementQuestProgress(characterID, questData[0], 1);
             }
+            emit QuestProgressed(questData[0], characterID);
         } else {
             revert("Unknown requirement type");
         }
@@ -317,7 +322,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function incrementQuestProgress(uint256 characterID, uint256 questID, uint256 progress) private {
         uint currentProgress = characters.getNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS());
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), currentProgress + progress);
-        emit QuestProgressed(questID, characterID);
     }
 
 }

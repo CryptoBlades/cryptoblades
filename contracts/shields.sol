@@ -167,6 +167,12 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         emit Burned(tokenID, burner);
     }
 
+    function burn(uint256[] memory tokenIDs) public restricted {
+        for(uint i = 0; i < tokenIDs.length; i++) {
+            burn(tokenIDs[i]);
+        }
+    }
+
     function mintShieldWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
         require(stars < 8, "Stars parameter too high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
@@ -178,6 +184,16 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             stat3,
             RandomUtil.combineSeeds(seed,3)
         );
+    }
+
+    //TODO: check how to handle seed
+    function mintShieldsWithStars(address minter, uint256 stars, uint32 amount) public restricted returns(uint256[] memory) {
+        require(stars < 8, "Stars parameter too high! (max 7)");
+        uint256[] memory tokens = new uint256[](amount);
+        for(uint i = 0; i < amount; i++) {
+            tokens[i] = mintShieldWithStars(minter, stars, 0);
+        }
+        return tokens;
     }
 
     function performMintShield(address minter,
@@ -267,6 +283,14 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function getStars(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return getStarsFromProperties(getProperties(id));
+    }
+
+    function getStars(uint256[] memory ids) public restricted returns (uint8[] memory) {
+        uint8[] memory stars = new uint8[](ids.length);
+        for(uint256 i = 0; i < ids.length; i++) {
+            stars[i] = getStars(ids[i]);
+        }
+        return stars;
     }
 
     function getStarsFromProperties(uint16 properties) public pure returns (uint8) {
