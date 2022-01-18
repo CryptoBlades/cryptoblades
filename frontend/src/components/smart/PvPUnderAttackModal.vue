@@ -2,32 +2,17 @@
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
       <img src="../../assets/separatorTop.svg" alt="Top separator">
-      <div v-if="result === 'win'" class="modalTitle">You have won the duel!</div>
-      <div v-else class="modalTitle"> You have lost the duel!</div>
+      <div class="modalTitle">{{$t('pvp.currentlyUnderAttack')}}</div>
       <ul>
         <li>
-          <span>You rolled</span>
-          <span class="chevron">></span>
-          <span>{{ attackerRoll }}</span>
+          <span>
+            {{$t('pvp.pleaseWait')}}
+          </span>
         </li>
-        <pvp-separator />
-        <li>
-          <span>Opponent rolled</span>
-          <span class="chevron">></span>
-          <span>{{ defenderRoll }}</span>
-        </li>
-        <pvp-separator />
       </ul>
-      <div class="earnWrapper">You {{ result === 'win' ? 'earned' : 'lost'}}: {{ skillEarned }} $SKILL</div>
-      <div class="rankWrapper">
-        <span>Updated rank: </span>
-        <span>{{ userCurrentRank }}</span>
-        <span>({{ rankVariation }} Rank)</span>
-      </div>
-      <img src="../../assets/separatorBottom.svg" alt="Bottom separator">
     </div>
     <div class="closeWrapper">
-      <p>Tap anywhere to close</p>
+      <p>{{$t('pvp.tapAnywhere')}}</p>
       <button @click="close">
         <img src="../../assets/closeModal.svg" alt="Bottom separator">
       </button>
@@ -36,37 +21,17 @@
 </template>
 
 <script>
-import PvPSeparator from './PvPSeparator.vue';
 
 export default {
-  components: {
-    'pvp-separator': PvPSeparator
-  },
-
   props: {
-    result: {
-      required: true
-    },
-    attackerRoll: {
-      default: null
-    },
-    defenderRoll: {
-      default: null
-    },
-    skillEarned: {
-      default: null
-    },
-    rankVariation: {
-      default: null
-    },
-    userCurrentRank: {
+    isUnderAttack: {
       default: null
     }
   },
 
   data() {
     return {
-      showModal: false
+      showModal: false,
     };
   },
 
@@ -78,7 +43,7 @@ export default {
   },
 
   updated() {
-    if (this.result) {
+    if (this.isUnderAttack) {
       this.showModal = true;
     } else {
       this.showModal = false;
@@ -101,7 +66,6 @@ export default {
 .preventScroll {
   position: relative;
   overflow: hidden;
-  border: 3px solid red;
 }
 
 .modalWrapper {

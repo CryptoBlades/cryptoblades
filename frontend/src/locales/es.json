@@ -121,7 +121,8 @@
     "renamePlaceholder": "New Name",
     "isProfanish": "This name contains profanish words and thus will be displayed as follows:",
     "changeWeaponSkill": "Change Weapon's Skill",
-    "pickSkin": "Pick a skin to switch to."
+    "pickSkin": "Pick a skin to switch to.",
+    "average": "AVG"
   },
   "weaponIcon": {
     "durability": "Durability:",
@@ -468,6 +469,8 @@
       "stakeLocked": "Stake locked",
       "warning": "Warning",
       "select": "Select",
+      "rewardsAvailableTooltip":"Rewards available",
+      "rewardsUnavailableTooltip":"Rewards depleted",
       "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
     }
   },
@@ -583,7 +586,9 @@
   "pvp": {
     "lastDefeated": "Fuiste derrotado por última vez por: ",
     "tapAnywhere": "Click en cualquier lugar para cerrar",
-    "kicked": "Fuiste echado de la arena!"
+    "kicked": "Fuiste echado de la arena!",
+    "currentlyUnderAttack": "Estás bajo ataque!",
+    "pleaseWait": "Por favor espera un momento"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",

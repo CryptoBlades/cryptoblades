@@ -97,7 +97,8 @@ const defaultStakeOverviewState: IStakeOverviewState = {
   rewardRate: '0',
   rewardsDuration: 0,
   totalSupply: '0',
-  minimumStakeTime: 0
+  minimumStakeTime: 0,
+  rewardDistributionTimeLeft: 0
 };
 
 export function createStore(web3: Web3) {
@@ -2150,11 +2151,13 @@ export function createStore(web3: Web3) {
           rewardsDuration,
           totalSupply,
           minimumStakeTime,
+          rewardDistributionTimeLeft,
         ] = await Promise.all([
           StakingRewards.methods.rewardRate().call(defaultCallOptions(state)),
           StakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
           StakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
           StakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
+          StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
         ]);
 
         const stakeSkillOverviewData: IStakeOverviewState = {
@@ -2162,6 +2165,7 @@ export function createStore(web3: Web3) {
           rewardsDuration: parseInt(rewardsDuration, 10),
           totalSupply,
           minimumStakeTime: parseInt(minimumStakeTime, 10),
+          rewardDistributionTimeLeft: parseInt(rewardDistributionTimeLeft, 10),
         };
         commit('updateStakeOverviewDataPartial', { stakeType, ...stakeSkillOverviewData });
       },
@@ -2646,6 +2650,17 @@ export function createStore(web3: Web3) {
 
         return await CBKLandSale.methods
           .getPlayerReservedLand(state.defaultAccount)
+          .call(defaultCallOptions(state));
+      },
+
+      async isShieldPurchased({state}) {
+        const { Promos } = state.contracts();
+        if (!state.defaultAccount || !Promos) return;
+
+        return await Promos.methods
+          .getBit(
+            state.defaultAccount,
+            parseInt(await Promos.methods.BIT_LEGENDARY_DEFENDER().call(defaultCallOptions(state)), 10))
           .call(defaultCallOptions(state));
       },
 
