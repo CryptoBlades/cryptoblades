@@ -81,7 +81,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     // have quests rarities on certain indexes (0 - common, 1 - uncommon, 2 - rare, 3 - epic)
-    // or have quests in different arrays and join them on allQuestsList
     mapping(uint32 => Quest[]) public quests;
     mapping(uint256 => Quest) public questList;
     //    mapping(uint32 => uint32[]) public rewardsTypes;
@@ -243,6 +242,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
     }
 
+    // TODO: Remember to restrict functions, security, kill switch
     function submitProgress(uint256 characterID, uint256[] memory tokenIds) public {
         uint256[] memory questData = getCharacterQuestData(characterID);
         assertOnQuest(questData);
