@@ -647,8 +647,7 @@
     "rewards": "Belohnung",
     "currentlyUnderAttack": "Sie werden derzeit angegriffen!",
     "pleaseWait": "Bitte warte einen Moment",
-    "name": "Name",
-    "leaderBoard": "BESTENLISTE"
+    "name": "Name"
   },
   "app": {
     "cantView": "Du kannst das Spiel gerade nicht ansehen. Versuche den LocalStorage zu löschen, um deine Einstellunge zurückzusetzen.",
