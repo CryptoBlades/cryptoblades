@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^0.1.7",
-    "@chenfengyuan/vue-countdown": "^1.1.5",
     "@openzeppelin/contracts": "^3.4.1",
     "@openzeppelin/contracts-upgradeable": "^3.4.1",
     "@truffle/hdwallet-provider": "^1.5.0",
