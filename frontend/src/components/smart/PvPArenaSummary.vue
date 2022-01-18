@@ -2,19 +2,27 @@
   <div class="wrapper">
     <div class="mainWrapper">
       <div class="arenaSignup">
-        <h1 class="title">ARENA SIGNUP</h1>
-        <p>Enter the arena and win rewards ($SKILL).</p>
+        <h1 class="title">
+          {{$t('pvp.arenaSignUpCaps')}}
+        </h1>
+        <p>
+          {{$t('pvp.enterAndWin')}}
+          ($SKILL).</p>
         <div></div>
         <div class="buttonWrapper">
           <pvp-button
             @click="handleEnterArenaClick()"
-            buttonText="ENTER ARENA"
+            :buttonText="enterArenaButtonText"
           />
         </div>
         <div class="bottomWrapper">
           <div class="bottomWrapperNav">
-            <button @click="setTab(0)" :class="tab === 0 && 'active'">Equipment</button>
-            <button @click="setTab(1)" :class="tab === 1 && 'active'">Duel history</button>
+            <button @click="setTab(0)" :class="tab === 0 && 'active'">
+              {{$t('pvp.equipment')}}
+            </button>
+            <button @click="setTab(1)" :class="tab === 1 && 'active'">
+              {{$t('pvp.duelHistory')}}
+            </button>
           </div>
           <div class="bottomWrapperInner">
             <div v-if="tab === 0" class="bottomWeapons">
@@ -33,10 +41,17 @@
              <div v-if="tab === 1" class="bottomDuels">
               <div v-if="duelHistory.length === 0" class="noDuels">You have not disputed any duels yet!</div>
               <ul v-else>
-                <li><span>Date</span><span>Result</span></li>
+                <li>
+                  <span>
+                    {{$t('pvp.date')}}
+                  </span>
+                  <span>
+                    {{$t('pvp.result')}}
+                  </span>
+                </li>
                 <li v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
                   <span class="date">{{ dayjs(new Date(duel.timestamp * 1000)).format('YYYY/MM/DD') }}</span>
-                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? 'Win' : 'Lose' }}</span>
+                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? i18n.t('pvp.win') : i18n.t('pvp.lose') }}</span>
                 </li>
               </ul>
             </div>
@@ -66,6 +81,7 @@ import PvPButton from './PvPButton.vue';
 import PvPCharacter from './PvPCharacter.vue';
 import dayjs from 'dayjs';
 import PvPArenaInfo from './PvPArenaInfo.vue';
+import i18n from '../../i18n';
 
 export default {
   components: {
@@ -125,6 +141,9 @@ export default {
 
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount']),
+    enterArenaButtonText() {
+      return i18n.t('pvp.enterArenaCaps');
+    }
   },
 
   methods: {
