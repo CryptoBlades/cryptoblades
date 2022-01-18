@@ -1,6 +1,6 @@
 <template>
   <div class="leaderboardWrapper">
-    <h1 class="leaderboardTitle">ARENA LEADERBOARD</h1>
+    <h1 class="leaderboardTitle">ARENA {{$t("pvp.leaderBoard")}}</h1>
     <div class="filtersWrapper">
       <div class="selectWrapper">
         <label for="tier">Tier: </label>
@@ -15,10 +15,10 @@
     <div class="listWrapper">
       <ul class="playerList">
         <li>
-          <span>Rank</span>
-          <span>Name</span>
-          <span>Level</span>
-          <span>Element</span>
+          <span>{{$t('pvp.rank')}}</span>
+          <span>{{$t('pvp.name')}}</span>
+          <span>{{$t('pvp.level')}}</span>
+          <span>{{$t('characterList.element')}}</span>
           <span>MMR</span>
         </li>
         <li>
@@ -49,8 +49,8 @@
 
 <script>
 import { getCharacterNameFromSeed } from '../../character-name';
-import { mapState } from 'vuex';
 import { characterFromContract as formatCharacter } from '../../contract-models';
+import { mapState, mapActions } from 'vuex';
 export default {
   inject: ['web3'],
   data() {
@@ -73,20 +73,24 @@ export default {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
   },
   methods: {
+    ...mapActions([
+      'getCharacter',
+      'getCharacterLevel',
+      'getRankingPointsByCharacter',
+      'getTierTopCharacters',
+    ]),
     async getPlayers(){
       const tierTopRankersIds
-      = await this.contracts().PvpArena.methods.getTierTopCharacters(this.tierFilter).call({ from: this.defaultAccount });
+      = await this.getTierTopCharacters(this.tierFilter);
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
         return {
           rankerId,
           name: getCharacterNameFromSeed(rankerId),
-          rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount }) ,
-          level: await this.contracts().Characters.methods.getLevel(rankerId).call({ from: this.defaultAccount }),
-          element: formatCharacter(rankerId, await this.contracts().Characters.methods.get(`${rankerId}`)
-            .call({ from: this.defaultAccount })).traitName
+          level: await this.getCharacterLevel(rankerId),
+          rank: await this.getRankingPointsByCharacter(rankerId),
+          element: formatCharacter(rankerId, await this.getCharacter(rankerId)).traitName
         };
       }));
-      this.$forceUpdate();
     }
   },
   async created(){
