@@ -1,6 +1,6 @@
 <template>
   <div class="leaderboardWrapper">
-    <h1 class="leaderboardTitle">ARENA {{$t("pvp.leaderBoard")}}</h1>
+    <h1 class="leaderboardTitle">ARENA {{$t("pvp.leaderboard")}}</h1>
     <div class="filtersWrapper">
       <div class="selectWrapper">
         <label for="tier">Tier: </label>
