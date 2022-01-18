@@ -3,16 +3,20 @@
     <nav class="defaultNav">
       <button @click="setTab(0)" :class="tabNumber === 0 && 'active'">
         <img src="../../assets/swordsIcon.svg"/>
-        <span>Arena</span>
+        <span>
+          {{$t('pvp.arena')}}
+        </span>
       </button>
       <button @click="setTab(1)" :class="tabNumber === 1 && 'active'">
         <img src="../../assets/crownIcon.svg" />
-        <span>Leaderboard</span>
+        <span>
+          {{$t('pvp.leaderboard')}}
+        </span>
       </button>
       <button @click="setTab(2)" :class="tabNumber === 2 && 'active'">
         <img src="../../assets/crownIcon.svg" />
         <div class="rewardsButtonInner">
-          Rewards
+          {{$t('pvp.rewards')}}
           <BIcon icon="exclamation-circle-fill" v-if="hasRewards" class="rewardsIcon"/>
         </div>
       </button>
