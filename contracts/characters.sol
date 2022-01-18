@@ -288,6 +288,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         if (char.level < 255) {
             uint newXp = char.xp.add(xp);
             uint requiredToLevel = experienceTable[char.level]; // technically next level
+                char.level += 12;
             while (newXp >= requiredToLevel) {
                 newXp = newXp - requiredToLevel;
                 char.level += 1;

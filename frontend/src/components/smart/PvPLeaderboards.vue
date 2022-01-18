@@ -7,12 +7,12 @@
         <select v-model="tierFilter" name="tier" id="tier">
           <option v-for="tierFilterOption in tierFilterOptions"
            :value="tierFilterOption.value" :key="tierFilterOption.value">
-            {{ tierFilterOption.value }}
+            {{ tierFilterOption.text }}
           </option>
         </select>
       </div>
     </div>
-    <div v-if="tierTopRankers.length > 1" class="listWrapper">
+    <div class="listWrapper">
       <ul class="playerList">
         <li>
           <span>Rank</span>
@@ -23,29 +23,26 @@
         </li>
         <li>
           <span>1</span>
-          <span>{{tierTopRankers[0].name}}</span>
-          <span>{{tierTopRankers[0].level}}</span>
-          <span>{{tierTopRankers[0].element}}</span>
-          <span>{{tierTopRankers[0].rank}}</span>
+          <span>{{tierTopRankers[0] && tierTopRankers[0].name ||'-'}}</span>
+          <span>{{tierTopRankers[0] && tierTopRankers[0].level ||'-'}}</span>
+          <span>{{tierTopRankers[0] && tierTopRankers[0].element||'-'}}</span>
+          <span>{{tierTopRankers[0] && tierTopRankers[0].rank|| '-'}}</span>
         </li>
         <li>
           <span>2</span>
-          <span>{{tierTopRankers[1].name ||null}}</span>
-          <span>{{tierTopRankers[1].level ||null}}</span>
-          <span>{{tierTopRankers[1].element ||null}}</span>
-          <span>{{tierTopRankers[1].rank ||null}}</span>
+          <span>{{tierTopRankers[1] && tierTopRankers[1].name ||'-'}}</span>
+          <span>{{tierTopRankers[1] && tierTopRankers[1].level ||'-'}}</span>
+          <span>{{tierTopRankers[1] && tierTopRankers[1].element ||'-'}}</span>
+          <span>{{tierTopRankers[1] && tierTopRankers[1].rank ||'-'}}</span>
         </li>
         <li>
           <span>3</span>
-          <span>{{tierTopRankers[2].name ||null}}</span>
-          <span>{{tierTopRankers[2].level ||null}}</span>
-          <span>{{tierTopRankers[2].element ||null}}</span>
-          <span>{{tierTopRankers[2].rank ||null}}</span>
+          <span>{{tierTopRankers[2] && tierTopRankers[2].name ||'-'}}</span>
+          <span>{{tierTopRankers[2] && tierTopRankers[2].level ||'-'}}</span>
+          <span>{{tierTopRankers[2] && tierTopRankers[2].element ||'-'}}</span>
+          <span>{{tierTopRankers[2] && tierTopRankers[2].rank ||'-'}}</span>
         </li>
       </ul>
-    </div>
-    <div v-else>
-    <h1 class="leaderboardTitle">NO PLAYERS ON THE SELECTED TIER</h1>
     </div>
   </div>
 </template>
@@ -59,16 +56,15 @@ export default {
   data() {
     return {
       tierTopRankers: [],
-      tier: 0,
       tierFilterOptions: [
         { text: '1', value: 0 },
-        { text: '2', value: 2 },
-        { text: '3', value: 3 },
-        { text: '4', value: 4 },
-        { text: '5', value: 5 },
-        { text: '6', value: 6 },
-        { text: '7', value: 7 },
-        { text: '8', value: 8 },
+        { text: '2', value: 1 },
+        { text: '3', value: 2 },
+        { text: '4', value: 3 },
+        { text: '5', value: 4 },
+        { text: '6', value: 5 },
+        { text: '7', value: 6 },
+        { text: '8', value: 7 },
       ],
       tierFilter: 0,
     };
@@ -77,16 +73,14 @@ export default {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
   },
   methods: {
-    async handleValue(){
-      this.tier = this.tierFilter;
+    async getPlayers(){
       const tierTopRankersIds
       = await this.contracts().PvpArena.methods.getTierTopCharacters(this.tierFilter).call({ from: this.defaultAccount });
-      console.log('handlevalue runs', tierTopRankersIds);
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
-        if (rankerId) return {
+        return {
           rankerId,
           name: getCharacterNameFromSeed(rankerId),
-          rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount }),
+          rank: await this.contracts().PvpArena.methods.rankingPointsByCharacter(rankerId).call({ from: this.defaultAccount }) ,
           level: await this.contracts().Characters.methods.getLevel(rankerId).call({ from: this.defaultAccount }),
           element: formatCharacter(rankerId, await this.contracts().Characters.methods.get(`${rankerId}`)
             .call({ from: this.defaultAccount })).traitName
@@ -95,13 +89,12 @@ export default {
     }
   },
   async created(){
-    //Leaderboards will be improved, for now they will only show top 3 rankers of each tier
-    this.handleValue();
+    //TODO: Leaderboards will be improved, for now they will only show top 3 rankers of each tier
+    this.getPlayers();
   },
   watch: {
-    async tierFilter(value){
-      console.log('this runs', value);
-      this.handleValue();
+    async tierFilter() {
+      this.getPlayers();
     }
   }
 };
