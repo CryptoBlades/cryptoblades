@@ -16,9 +16,8 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     Characters public characters;
     CryptoBlades public game;
     Garrison public garrison;
-    uint256 public burnCharacterFee;
 
-    function initialize(Characters _characters, Garrison _garrison, CryptoBlades _game, uint256 _burnCharacterFee)
+    function initialize(Characters _characters, Garrison _garrison, CryptoBlades _game)
         public
         initializer
     {
@@ -28,7 +27,6 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         characters = _characters;
         garrison = _garrison;
         game = _game;
-        burnCharacterFee = _burnCharacterFee;
     }
 
     // MODIFIERS
@@ -53,32 +51,46 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         }
     }
 
+    // VIEWS
+
+    function burnCharactersFee(uint256[] memory burnIds) public view returns (uint256) {
+        uint256 burnFee = 0;
+        for(uint i = 0; i < burnIds.length; i++) {
+            burnFee += burnCharacterFee(burnIds[i]);
+        }
+        return burnFee;
+    }
+
+    function burnCharacterFee(uint256 burnId) public view returns (uint256) {
+        return (game.vars(game.VAR_HOURLY_PAY_PER_FIGHT()) / game.vars(game.VAR_HOURLY_MAX_POWER_AVERAGE())) * 7 * characters.getTotalPower(burnId) * 60;
+    }
+
     //FUNCTIONS
 
     function burnCharacterIntoCharacter(uint256 burnId, uint256 targetId) external isCharacterOwner(burnId) {
-        game.payContractTokenOnly(msg.sender, burnCharacterFee);
+        game.payContractTokenOnly(msg.sender, burnCharacterFee(burnId));
         characters.burnIntoCharacter(burnId, targetId);
     }
 
     function burnCharacterIntoSoul(uint256 burnId) external isCharacterOwner(burnId) {
-        game.payContractTokenOnly(msg.sender, burnCharacterFee);
+        game.payContractTokenOnly(msg.sender, burnCharacterFee(burnId));
         characters.burnIntoSoul(burnId, msg.sender);
     }
 
     function burnCharacterFromMarket(uint256 burnId) external isCharacterOwner(burnId) {
-        game.payContractTokenOnly(tx.origin, burnCharacterFee);
+        game.payContractTokenOnly(tx.origin, burnCharacterFee(burnId));
         characters.burnIntoSoul(burnId, tx.origin);
     }
 
     function burnCharactersIntoCharacter(uint256[] memory burnIds, uint256 targetId) public isCharactersOwner(burnIds) {
-        game.payContractTokenOnly(msg.sender, burnCharacterFee.mul(burnIds.length));
+        game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
         for(uint i = 0; i < burnIds.length; i++) {
             characters.burnIntoCharacter(burnIds[i], targetId);
         }
     }
 
     function burnCharactersIntoSoul(uint256[] memory burnIds) public isCharactersOwner(burnIds) {
-        game.payContractTokenOnly(msg.sender, burnCharacterFee.mul(burnIds.length));
+        game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
         for(uint i = 0; i < burnIds.length; i++) {
             characters.burnIntoSoul(burnIds[i], msg.sender);
         }

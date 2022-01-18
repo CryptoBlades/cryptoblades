@@ -246,6 +246,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function burnIntoCharacter(uint256 burnId, uint256 targetCharId) external restricted {
         uint256 burnPower = bonusPower[burnId].add(getPowerAtLevel(tokens[burnId].level));
+        require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
         address burnOwner = ownerOf(burnId);
         if(burnOwner == address(garrison)) {
             burnOwner = garrison.characterOwner(burnId);
@@ -277,8 +278,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) public {
         require(soulSupply[msg.sender] >= soulAmount, 'Not enough soul');
-        soulSupply[msg.sender] = soulSupply[msg.sender].sub(soulAmount);
         uint256 burnPower = soulAmount.mul(10);
+        require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
+        soulSupply[msg.sender] = soulSupply[msg.sender].sub(soulAmount);
         bonusPower[targetCharId] = burnPower.add(bonusPower[targetCharId]);
     }
 

@@ -52,9 +52,9 @@
             class="ml-3"
             @click="showBurnConfirmation"
             v-tooltip="$t('plaza.burnSelected')"
-            :disabled="burnCharacterIds.length === 0">
+            :disabled="burnCharacterIds.length === 0 || powerLimitExceeded || (burnOption === 1 && !targetCharacterId)">
             {{$t('plaza.burn')}}: {{burnCharacterIds.length}} {{$t('characters')}}<br>
-            ({{burnCost * burnCharacterIds.length }} SKILL)
+            ({{burnCost }} SKILL)
           </b-button>
           <b-button
             v-if="isUpgrading"
@@ -62,7 +62,7 @@
             class="ml-3"
             @click="showUpgradeConfirmation"
             v-tooltip="$t('plaza.upgradeSelected')"
-            :disabled="soulAmount.toString() === '0' || !targetCharacterId">
+            :disabled="soulAmount.toString() === '0' || !targetCharacterId || powerLimitExceeded">
             {{$t('plaza.upgrade')}} {{$t('character')}}<br>
             ({{soulAmount}} {{$t('plaza.soul')}})
           </b-button>
@@ -70,7 +70,7 @@
             variant="primary"
             class="ml-3 gtag-link-others"
             @click="toggleSoulCreation"
-            v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+            v-tooltip="$t('plaza.recruitNew')">
             {{$t('plaza.cancelBurning')}}
           </b-button>
         </div>
@@ -137,7 +137,7 @@
                 <character-list class="mt-4" v-if="targetCharacterId" :showGivenCharacterIds="true"
                   :characterIds="[targetCharacterId]" />
                 <div v-if="targetCharacterId">
-                  <h2>{{$t('CharacterDisplay.power')}} +{{isUpgrading ? soulAmount * 10 : burnPower}}</h2>
+                  <h2 :class="powerLimitExceeded ? 'text-danger' : ''">{{$t('CharacterDisplay.power')}} +{{burnPower}}/{{remainingPowerLimit}}</h2>
                 </div>
               </div>
             </div>
@@ -158,7 +158,7 @@
                 <h1>{{$t('characters')}} ({{ ownCharacters.length }} / 4)</h1>
                 <div class="d-flex justify-content-flex-end ml-auto">
                   <b-button
-                    :disabled="!haveCharacters"
+                    :disabled="burningEnabled || !haveCharacters"
                     variant="primary"
                     class="ml-3 gtag-link-others"
                     @click="toggleSoulCreation"
@@ -197,7 +197,7 @@
                 <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
                 <div class="d-flex justify-content-flex-end ml-auto">
                   <b-button
-                    :disabled="!haveCharacters"
+                    :disabled="burningEnabled || !haveCharacters"
                     variant="primary"
                     class="ml-3 gtag-link-others"
                     @click="toggleSoulCreation"
@@ -265,6 +265,11 @@ import { fromWeiEther, toBN } from '../utils/common';
 import Vue from 'vue';
 import i18n from '@/i18n';
 import { BModal } from 'bootstrap-vue';
+import { CharacterPower } from '@/interfaces';
+
+import {
+  burningManager as featureFlagBurningManager
+} from '../feature-flags';
 
 interface Data {
   recruitCost: string;
@@ -279,6 +284,7 @@ interface Data {
   burnCost: number;
   isUpgrading: boolean;
   soulAmount: number;
+  remainingPowerLimit: number;
 }
 
 export default Vue.extend({
@@ -320,18 +326,31 @@ export default Vue.extend({
 
     burnPower(): number {
       let power = 0;
-      this.ownCharacters.map((x: { level: number; id: number; }) => {
-        if(this.burnCharacterIds.includes(x.id.toString())) {
-          power += this.getCharacterPower(x.id);
-        }
-      });
-      this.ownGarrisonCharacters.map((x: { level: number; id: number; }) => {
-        if(this.burnCharacterIds.includes(x.id.toString())) {
-          power += this.getCharacterPower(x.id);
-        }
-      });
+      if(!this.isUpgrading) {
+        this.ownCharacters.map((x: { id: number; }) => {
+          if(this.burnCharacterIds.includes(x.id.toString())) {
+            power += this.getCharacterPower(x.id);
+          }
+        });
+        this.ownGarrisonCharacters.map((x: { id: number; }) => {
+          if(this.burnCharacterIds.includes(x.id.toString())) {
+            power += this.getCharacterPower(x.id);
+          }
+        });
+      }
+      else {
+        power = this.soulAmount * 10;
+      }
 
       return power;
+    },
+
+    powerLimitExceeded(): boolean {
+      return (this.isUpgrading || this.burnOption === 1) && this.burnPower > this.remainingPowerLimit;
+    },
+
+    burningEnabled(): boolean {
+      return featureFlagBurningManager;
     }
   },
 
@@ -355,13 +374,14 @@ export default Vue.extend({
       soulBalance: 0,
       burnCost: 0,
       isUpgrading: false,
-      soulAmount: 0
+      soulAmount: 0,
+      remainingPowerLimit: 0
     } as Data;
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
-    ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharacterBurnCost', 'upgradeCharacterWithSoul',
+    ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
       'burnCharacterIntoSoul', 'burnCharactersIntoSoul', 'burnCharacterIntoCharacter', 'burnCharactersIntoCharacter']),
     ...mapGetters(['getExchangeTransakUrl']),
 
@@ -386,34 +406,46 @@ export default Vue.extend({
     async toggleSoulCreation() {
       this.soulCreationActive = !this.soulCreationActive;
       this.soulBalance = await this.fetchSoulBalance();
-      const burnCost = await this.fetchCharacterBurnCost();
-      this.burnCost = +fromWeiEther(burnCost);
+      await this.updateBurnCost();
       if(this.soulCreationActive) {
         this.remainingCharactersIds = this.ownCharacters.map((x: { id: string; }) => x.id.toString()).concat(this.ownedGarrisonCharacterIds);
       }
       this.isUpgrading = false;
     },
-    addBurnCharacter(id: number) {
+    async updateBurnCost() {
+      this.burnCost = this.burnCharacterIds.length > 0 ? +fromWeiEther(await this.fetchCharactersBurnCost(this.burnCharacterIds)) : 0;
+    },
+    async addBurnCharacter(id: number) {
       this.burnCharacterIds.push(id.toString());
       this.remainingCharactersIds = this.remainingCharactersIds.filter(val => !this.burnCharacterIds.includes(val));
+      await this.updateBurnCost();
     },
-    removeBurnCharacter(id: number) {
+    async removeBurnCharacter(id: number) {
       this.remainingCharactersIds.push(id.toString());
       this.burnCharacterIds = this.burnCharacterIds.filter(x => x !== id.toString());
+      await this.updateBurnCost();
     },
     selectTargetCharacterId(id: number) {
       this.targetCharacterId = id.toString();
       this.remainingCharactersIds = this.remainingCharactersIds.filter(val => val.toString() !== this.targetCharacterId);
+      this.updatedRemainingPowerLimit();
+    },
+    updatedRemainingPowerLimit() {
+      const targetCharacter = this.ownCharacters.concat(this.ownGarrisonCharacters)
+        .find((x: { id: any; }) => x.id.toString() === this.targetCharacterId.toString());
+      this.remainingPowerLimit = 4 * CharacterPower(targetCharacter.level) - this.getCharacterPower(this.targetCharacterId.toString());
     },
     clearTargetCharacterId() {
       this.remainingCharactersIds.push(this.targetCharacterId);
       this.targetCharacterId = '';
+      this.remainingPowerLimit = 0;
     },
     clearAllBurn(){
       this.burnCharacterIds = [];
       this.remainingCharactersIds = (this.ownCharacters.map((x: { id: string; }) => x.id.toString())
         .concat(this.ownedGarrisonCharacterIds) as string[])
         .filter(x => x.toString() !== this.targetCharacterId);
+      this.burnCost = 0;
     },
     showBurnConfirmation() {
       (this.$refs['burn-confirmation-modal'] as BModal).show();
@@ -435,20 +467,24 @@ export default Vue.extend({
       else {
         // burning into character
         if(this.burnCharacterIds.length > 1) {
+          console.log('burning');
           await this.burnCharactersIntoCharacter({ burnIds: this.burnCharacterIds, targetId: this.targetCharacterId });
         }
         else {
           await this.burnCharacterIntoCharacter({ burnId: this.burnCharacterIds[0], targetId: this.targetCharacterId });
         }
+        this.updatedRemainingPowerLimit();
       }
       this.soulBalance = await this.fetchSoulBalance();
       this.burnCharacterIds = [];
+      this.burnCost = 0;
     },
     async onUpgradeConfirm() {
       if(!this.targetCharacterId || this.soulAmount === 0) return;
       await this.upgradeCharacterWithSoul({ charId: this.targetCharacterId, soulAmount: this.soulAmount });
       this.soulBalance = await this.fetchSoulBalance();
       this.soulAmount = 0;
+      this.updatedRemainingPowerLimit();
     }
   },
 

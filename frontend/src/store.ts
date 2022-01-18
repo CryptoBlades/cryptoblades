@@ -4150,8 +4150,7 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
         if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
 
-        console.log(burnId);
-        const burnCost = await BurningManager.methods.burnCharacterFee().call(defaultCallOptions(state));
+        const burnCost = await BurningManager.methods.burnCharacterFee(burnId).call(defaultCallOptions(state));
         await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
           from: state.defaultAccount
         });
@@ -4164,7 +4163,7 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
         if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
 
-        const burnCost = await BurningManager.methods.burnCharacterFee().call(defaultCallOptions(state));
+        const burnCost = await BurningManager.methods.burnCharacterFee(burnId).call(defaultCallOptions(state));
         await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
           from: state.defaultAccount
         });
@@ -4176,9 +4175,9 @@ export function createStore(web3: Web3) {
       async burnCharactersIntoCharacter({ state, dispatch }, {burnIds, targetId}) {
         const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
         if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
-        console.log(burnIds);
-        const burnCost = toBN(await BurningManager.methods.burnCharacterFee().call(defaultCallOptions(state)));
-        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost.times(burnIds.length).toString()).send({
+
+        const burnCost = await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
+        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
           from: state.defaultAccount
         });
 
@@ -4190,8 +4189,8 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
         if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
 
-        const burnCost = toBN(await BurningManager.methods.burnCharacterFee().call(defaultCallOptions(state)));
-        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost.times(burnIds.length).toString()).send({
+        const burnCost = await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
+        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
           from: state.defaultAccount
         });
 
@@ -4205,7 +4204,7 @@ export function createStore(web3: Web3) {
 
         await SkillToken.methods.approve(NFTMarket.options.address, maxPrice).send(defaultCallOptions(state));
 
-        const burnCost = await BurningManager.methods.burnCharacterFee().call(defaultCallOptions(state));
+        const burnCost = await BurningManager.methods.burnCharacterFee(charId).call(defaultCallOptions(state));
         await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
           from: state.defaultAccount
         });
@@ -4227,11 +4226,11 @@ export function createStore(web3: Web3) {
         await Characters.methods.upgradeWithSoul(charId, soulAmount).send({ from: state.defaultAccount });
       },
 
-      async fetchCharacterBurnCost({ state }) {
+      async fetchCharactersBurnCost({ state }, burnIds) {
         const { BurningManager } = state.contracts();
         if(!BurningManager || !state.defaultAccount) return;
 
-        return await BurningManager.methods.burnCharacterFee().call(defaultCallOptions(state));
+        return await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
       }
     },
   });
