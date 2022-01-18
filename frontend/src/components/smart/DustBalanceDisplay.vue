@@ -6,7 +6,7 @@
            :class="singleDust ? '' : 'col-lg-2'">
         <div class="dust">
           LB: <span class="text-warning text-nowrap">{{ $t('dustBalanceDisplay.lesserPower') }}</span>
-          <img src="../../assets/dusts/lesserDust.png" class="w-100" alt=""/>
+          <img src="../../assets/dusts/lesserDust.png" class="w-100 p-4" alt=""/>
         </div>
         <h1 class="text-center">{{ $t('dustBalanceDisplay.lesser') }}</h1>
         <div class="boxed">
@@ -17,7 +17,7 @@
            :class="singleDust ? '' : 'col-lg-2'">
         <div class="dust">
           4B: <span class="text-warning text-nowrap">{{ $t('dustBalanceDisplay.greaterPower') }}</span>
-          <img src="../../assets/dusts/greaterDust.png" class="w-100" alt=""/>
+          <img src="../../assets/dusts/greaterDust.png" class="w-100 p-4" alt=""/>
         </div>
         <h1 class="text-center">{{ $t('dustBalanceDisplay.greater') }}</h1>
         <div class="boxed">
@@ -28,7 +28,7 @@
            :class="singleDust ? '' : 'col-lg-2'">
         <div class="dust">
           5B: <span class="text-warning text-nowrap">{{ $t('dustBalanceDisplay.powerfulPower') }}</span>
-          <img src="../../assets/dusts/powerfulDust.png" class="w-100" alt=""/>
+          <img src="../../assets/dusts/powerfulDust.png" class="w-100 p-4" alt=""/>
         </div>
         <h1 class="text-center">{{ $t('dustBalanceDisplay.powerful') }}</h1>
         <div class="boxed">

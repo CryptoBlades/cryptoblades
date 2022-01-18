@@ -401,11 +401,9 @@ export default {
   margin-top: -9px;
 }
 .default-dust-placeholder {
-  max-width: 100px;
-  max-height: 100px;
-  margin-left: 12px;
-  margin-top: 20px;
-  transform: scale(1.5);
+  max-width: 125px;
+  max-height: 125px;
+  margin-left: 7px;
 }
 .default-trinket-placeholder{
   max-width: 100px;

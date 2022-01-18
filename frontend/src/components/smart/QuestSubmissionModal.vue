@@ -11,7 +11,7 @@
                    :starsOptions="[quest.requirementRarity + 1]"/>
     </div>
     <div v-else-if="quest.requirementType === RequirementType.DUST" class="d-flex align-items-center flex-column">
-      <dust-balance-display class="w-50" :rarities="[quest.requirementRarity]"/>
+      <dust-balance-display class="w-50 p-5" :rarities="[quest.requirementRarity]"/>
       <h2>{{ $t('quests.howMuchToTurnIn') }}</h2>
       <b-form-input type="number" v-model="dustToBurn" class="w-50" :min="0" :max="maxDust()"/>
       <b-button class="m-3" variant="primary" @click="setRequiredDust">{{ $t('quests.setRequiredAmount') }}</b-button>
