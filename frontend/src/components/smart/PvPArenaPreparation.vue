@@ -5,7 +5,7 @@
     <div v-else class="arenaPreparationWrapper">    <div class="mainWrapper">
       <div class="arenaSignup">
         <h1 class="title">
-          {{$t('pvp.arenaSignUpCaps')}}
+          {{$t('pvp.arenaSignUp')}}
         </h1>
         <p>
           {{$t('pvp.enterAndWin')}}($SKILL).
@@ -153,8 +153,9 @@
         </div>
         <div class="enterArenaButtonWrapper">
           <pvp-button
+            class="pvpButton"
             @click="handleEnterArenaClick()"
-            :buttonText="enterArenaButtonText"
+            :buttonText="$t('pvp.enterArena')"
             :buttonsubText="'$SKILL: ' + formattedEntryWager"
             :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
           />
@@ -287,9 +288,6 @@ export default {
     getIconSource () {
       return this.checkBoxAgreed && this.selectedWeaponId ? checkIcon : ellipseIcon;
     },
-    enterArenaButtonText() {
-      return i18n.t('pvp.enterArenaCaps');
-    }
   },
   methods: {
     ...mapActions([
@@ -539,6 +537,7 @@ p, li, span {
   font-family: 'Trajan';
   line-height: 1.75rem;
   padding: 0;
+  text-transform: uppercase;
 }
 .arenaSignup {
   p {
@@ -702,6 +701,10 @@ p, li, span {
     width: 15rem;
     height: 5rem;
     margin-top: 3rem;
+
+    .pvpButton {
+      text-transform: uppercase;
+    }
   }
 }
 .characterImage {

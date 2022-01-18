@@ -4310,6 +4310,15 @@ export function createStore(web3: Web3) {
         return matchByFinder;
       },
 
+      async getDuelCost({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const matchByFinder = await PvpArena.methods.getDuelCost(characterId).call({ from: state.defaultAccount });
+
+        return matchByFinder;
+      },
+
       async getMatchablePlayerCount({ state }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
