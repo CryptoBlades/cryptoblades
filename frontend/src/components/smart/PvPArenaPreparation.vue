@@ -24,7 +24,9 @@
             <div class="weaponsWrapper">
               <div v-if="!selectedWeaponId" :class="{ disabledStyles: ownedWeaponsWithInformation.length === 0 }" class="weaponButtonWrapper">
                 <a tabindex="0" class="selectWeaponButton" id="weapon-popover">
-                  <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
+                  <div class="placeholderImageWrapper">
+                    <img src="../../assets/swordPlaceholder.svg" alt="sword" />
+                  </div>
                   <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">{{$t('pvp.weapons')}}</p>
                     <select v-model="weaponStarFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
@@ -67,8 +69,10 @@
               </div>
               <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
                 <a tabindex="0" class="selectWeaponButton" id="shield-popover">
-                  <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
-                  <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
+                  <div class="placeholderImageWrapper">
+                    <img src="../../assets/shieldPlaceholder.svg" alt="shield" />
+                  </div>
+                   <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
                     <p class="popoverTitle">{{$t('pvp.shields')}}</p>
                     <select v-model="shieldStarFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
@@ -617,6 +621,15 @@ p, li, span {
         background-color: #141414;
         :hover {
           cursor: pointer;
+        }
+        .placeholderImageWrapper{
+          width: 4.5rem;
+          height: 4.5rem;
+          padding: 1rem;
+          img {
+            width: 100%;
+            height: 100%;
+          }
         }
         .placeholderImage {
           width: 2.25rem;
