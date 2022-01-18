@@ -3,7 +3,7 @@
     <div class="mainWrapper">
       <div class="arenaSignup">
         <h1 class="title">
-          {{$t('pvp.arenaSignUpCaps')}}
+          {{$t('pvp.arenaSignUp')}}
         </h1>
         <p>
           {{$t('pvp.enterAndWin')}}
@@ -11,8 +11,9 @@
         <div></div>
         <div class="buttonWrapper">
           <pvp-button
+            class="pvpButton"
             @click="handleEnterArenaClick()"
-            :buttonText="enterArenaButtonText"
+            :buttonText="$t('pvp.enterArena')"
           />
         </div>
         <div class="bottomWrapper">
@@ -81,7 +82,6 @@ import PvPButton from './PvPButton.vue';
 import PvPCharacter from './PvPCharacter.vue';
 import dayjs from 'dayjs';
 import PvPArenaInfo from './PvPArenaInfo.vue';
-import i18n from '../../i18n';
 
 export default {
   components: {
@@ -141,9 +141,6 @@ export default {
 
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount']),
-    enterArenaButtonText() {
-      return i18n.t('pvp.enterArenaCaps');
-    }
   },
 
   methods: {
@@ -177,6 +174,7 @@ span, p, li, button, a {
   font-size: 1.25rem;
   line-height: 1.75rem;
   font-family: 'Trajan';
+  text-transform: uppercase;
 }
 .arenaSignup {
   p {
@@ -212,6 +210,10 @@ span, p, li, button, a {
     margin-top: 2.25rem;
     height: 5rem;
     width: 80%;
+
+    .pvpButton {
+      text-transform: uppercase;
+    }
   }
 }
 .bottomWrapper {

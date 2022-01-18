@@ -1,7 +1,7 @@
 <template>
   <div class="rewardsWrapper">
     <h1>
-      {{$t('pvp.rewardsCaps')}}
+      {{$t('pvp.rewards')}}
     </h1>
     <p>
       {{$t('pvp.clickToClaim')}}
@@ -25,7 +25,7 @@
         $SKILL
       </li>
     </ul>
-    <pvp-button :buttonText="claimRewardsButtonText" @click="claimRewards" />
+    <pvp-button :buttonText="$t('pvp.claimRewards')" @click="claimRewards" />
   </div>
 </template>
 
@@ -34,7 +34,6 @@
 import BN from 'bignumber.js';
 import { mapState, mapActions } from 'vuex';
 import PvPButton from './PvPButton.vue';
-import i18n from '../../i18n';
 
 export default {
   components: {
@@ -54,9 +53,6 @@ export default {
     formattedAvailableSkill() {
       return new BN(this.availableSkill).div(new BN(10).pow(18)).toFixed(2);
     },
-    claimRewardsButtonText() {
-      return i18n.t('pvp.claimRewardsCaps');
-    }
   },
 
   methods: {
@@ -99,6 +95,7 @@ export default {
     font-family: 'Trajan';
     color: #cec198;
     padding-top: 0;
+    text-transform: uppercase;
   }
 
   p, li {
@@ -134,6 +131,7 @@ export default {
     margin-top: 1rem;
     width: 14rem;
     height: 5rem;
+    text-transform: uppercase;
   }
 }
 </style>
