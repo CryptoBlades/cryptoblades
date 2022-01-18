@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1 class="title">
-      {{$t('pvp.arenaInformationCaps')}}
+      {{$t('pvp.arenaInformation')}}
     </h1>
     <div class="tokenCard">
       <img src="../../assets/skillToken.png" alt="skill token" />
@@ -146,6 +146,7 @@ export default {
   font-family: 'Trajan';
   line-height: 1.75rem;
   padding: 0;
+  text-transform: uppercase;
 }
 .tokenCard {
 display: flex;
