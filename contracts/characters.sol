@@ -123,6 +123,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     uint256 public constant NFTVAR_SIMPLEQUEST_TYPE = 102;
     uint256 public constant NFTVAR_REPUTATION = 103;
 
+    uint256 public constant SIMPLEQUEST_TYPE_RAID = 6;
+
     mapping(uint256 => mapping(uint256 => uint256)) public nftVars; // nftID, fieldID, value
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
 
@@ -367,6 +369,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         require(nftVars[id][NFTVAR_BUSY] == 0); // raids do not apply busy flag for now
         //nftVars[id][NFTVAR_BUSY] = 0;
         _gainXp(id, xp);
+        if (getNftVar(id, NFTVAR_SIMPLEQUEST_TYPE) == SIMPLEQUEST_TYPE_RAID) {
+            uint currentProgress = getNftVar(id, NFTVAR_SIMPLEQUEST_PROGRESS);
+            setNftVar(id, NFTVAR_SIMPLEQUEST_PROGRESS, ++currentProgress);
+        }
     }
 
     function getCharactersOwnedBy(address wallet) public view returns(uint256[] memory chars) {

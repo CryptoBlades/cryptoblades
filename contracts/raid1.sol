@@ -43,7 +43,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     uint256 public constant NUMBERPARAMETER_AUTO_DURATION = 1;
     uint256 public constant NUMBERPARAMETER_AUTO_BOSSPOWER_PERCENT = uint256(keccak256("BOSSPOWER_PERCENT"));
-    uint256 public constant SIMPLEQUEST_TYPE_RAID = 6;
 
     CryptoBlades public game;
     Characters public characters;
@@ -257,16 +256,6 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
                 );
             emit RewardedTrinket(raidIndex, trinketWinner.owner, trinketStars, trinketEffect, tokenID);
         }
-
-        // "COMPLETE" x raids, so regardless if win or lose
-        for (uint i = 0; i < raidParticipants[raidIndex].length; i++) {
-            Raider memory raider = raidParticipants[raidIndex][i];
-            if (characters.getNftVar(raider.charID, characters.NFTVAR_SIMPLEQUEST_TYPE()) == SIMPLEQUEST_TYPE_RAID) {
-                uint currentProgress = characters.getNftVar(raider.charID, characters.NFTVAR_SIMPLEQUEST_PROGRESS());
-                characters.setNftVar(raider.charID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), ++currentProgress);
-            }
-        }
-
         emit RaidCompleted(raidIndex, outcome, bossPower, roll);
         raidIndex++;
     }
