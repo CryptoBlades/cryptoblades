@@ -35,7 +35,7 @@
             </span>
             <pvp-separator vertical class="separator" />
             <span>
-              {{$t('pvp.rank')}}: {{ characterInformation.rank }}
+              {{$t('pvp.rankingPoints')}}: {{ characterInformation.rank }}
             </span>
           </div>
         </div>
@@ -145,6 +145,8 @@
       v-if="duelResult.result"
       :result="duelResult.result"
       :attackerRoll="duelResult.attackerRoll"
+      :attackerPower="attackerPower"
+      :defenderPower="defenderPower"
       :defenderRoll="duelResult.defenderRoll"
       :skillEarned="duelResult.skillDifference"
       :rankVariation="duelResult.result === 'win' ? '+5' : '-3'"
