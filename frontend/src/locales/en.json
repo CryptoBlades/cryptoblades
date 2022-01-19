@@ -766,7 +766,8 @@
     "rankingPoints": "Ranking points",
     "attackerPower": "Your Power:",
     "opponentPower": "Opponent Power:",
-    "mmr": "Mmr"
+    "mmr": "Mmr",
+    "tier": "Tier"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
