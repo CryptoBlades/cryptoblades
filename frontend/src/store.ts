@@ -43,6 +43,7 @@ import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import config from '../app-config.json';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -97,7 +98,8 @@ const defaultStakeOverviewState: IStakeOverviewState = {
   rewardRate: '0',
   rewardsDuration: 0,
   totalSupply: '0',
-  minimumStakeTime: 0
+  minimumStakeTime: 0,
+  rewardDistributionTimeLeft: 0
 };
 
 export function createStore(web3: Web3) {
@@ -132,6 +134,7 @@ export function createStore(web3: Web3) {
       currentCharacterId: null,
       ownedDust: [],
       cartEntries: [],
+      currentChainSupportsMerchandise: false,
 
       characters: {},
       garrisonCharacters: {},
@@ -422,6 +425,10 @@ export function createStore(web3: Web3) {
 
       getCartEntries(state) {
         return state.cartEntries;
+      },
+
+      getCurrentChainSupportsMerchandise(state) {
+        return state.currentChainSupportsMerchandise;
       },
 
       ownWeapons(state, getters) {
@@ -731,6 +738,15 @@ export function createStore(web3: Web3) {
 
       clearCartEntries(state: IState) {
         state.cartEntries = [];
+      },
+
+      updateCurrentChainSupportsMerchandise(state: IState) {
+        const currentChain = localStorage.getItem('currentChain') || 'BSC';
+        const merchandiseSupportedChains = config.merchandiseSupportedChains;
+        if (!currentChain || !merchandiseSupportedChains) {
+          state.currentChainSupportsMerchandise = false;
+        }
+        state.currentChainSupportsMerchandise = merchandiseSupportedChains.includes(currentChain);
       },
 
       updateCharacter(state: IState, { characterId, character }) {
@@ -2150,11 +2166,13 @@ export function createStore(web3: Web3) {
           rewardsDuration,
           totalSupply,
           minimumStakeTime,
+          rewardDistributionTimeLeft,
         ] = await Promise.all([
           StakingRewards.methods.rewardRate().call(defaultCallOptions(state)),
           StakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
           StakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
           StakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
+          StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
         ]);
 
         const stakeSkillOverviewData: IStakeOverviewState = {
@@ -2162,6 +2180,7 @@ export function createStore(web3: Web3) {
           rewardsDuration: parseInt(rewardsDuration, 10),
           totalSupply,
           minimumStakeTime: parseInt(minimumStakeTime, 10),
+          rewardDistributionTimeLeft: parseInt(rewardDistributionTimeLeft, 10),
         };
         commit('updateStakeOverviewDataPartial', { stakeType, ...stakeSkillOverviewData });
       },
