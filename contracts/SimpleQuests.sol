@@ -52,16 +52,16 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         _;
     }
 
-    function assertOnQuest(uint256[] memory questData) internal pure {
-        require(questData[0] != 0, "Not on quest");
+    function assertOnQuest(uint256 characterID) internal view {
+        require(characterQuest[characterID] != 0, "Not on quest");
     }
 
-    function assertNotOnQuest(uint256[] memory questData) internal pure {
-        require(questData[0] == 0, "Already on quest");
+    function assertNotOnQuest(uint256 characterID) internal view {
+        require(characterQuest[characterID] == 0, "Already on quest");
     }
 
-    function assertQuestCompleted(uint256[] memory questData) internal view {
-        require(questData[1] >= questList[questData[0]].requirementAmount, "Quest not completed");
+    function assertQuestCompleted(uint256 characterID, uint256 questProgress) internal view {
+        require(questProgress >= questList[characterQuest[characterID]].requirementAmount, "Quest not completed");
     }
 
 
@@ -95,6 +95,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     // promo arrays are accordingly (10 - common, 11 - uncommon, 12 - rare, 13 - epic, 14 - legendary (optional))
     mapping(uint256 => Quest[]) public quests;
     mapping(uint256 => Quest) public questList;
+    mapping(uint256 => uint256) public characterQuest;
     //    mapping(uint32 => uint32[]) public rewardsTypes;
     //rewardsTypes[0].push(99);
     //    mapping(uint32 => uint32[]) public requirementsTypes;
@@ -119,8 +120,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     //    mapping(uint32 => Quest) public rareQuestsList;
     //    mapping(uint32 => Quest) public epicQuestsList;
 
-    //    uint256[3] public constant CHARACTER_QUEST_DATA_KEYS = [100,101,102];
-    //    uint256 public constant NFTVAR_SIMPLEQUEST_ID = 100;
+    //    uint256[3] public constant CHARACTER_QUEST_DATA_KEYS = [101,102,103];
     //    uint256 public constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
     //    uint256 public constant NFTVAR_SIMPLEQUEST_TYPE = 102;
     //    uint256 public constant NFTVAR_REPUTATION = 103;
@@ -134,7 +134,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function setVars(uint256[] calldata varFields, uint256[] calldata values) external restricted {
-        for(uint i = 0; i < varFields.length; i++) {
+        for (uint i = 0; i < varFields.length; i++) {
             vars[varFields[i]] = values[i];
         }
     }
@@ -173,24 +173,22 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function getCharacterQuestData(uint256 characterID) public view returns (uint256[] memory) {
-        uint256[] memory questDataKeys = new uint256[](4);
-        questDataKeys[0] = characters.NFTVAR_SIMPLEQUEST_ID();
-        questDataKeys[1] = characters.NFTVAR_SIMPLEQUEST_PROGRESS();
-        questDataKeys[2] = characters.NFTVAR_SIMPLEQUEST_TYPE();
-        questDataKeys[3] = characters.NFTVAR_REPUTATION();
+        uint256[] memory questDataKeys = new uint256[](3);
+        questDataKeys[0] = characters.NFTVAR_SIMPLEQUEST_PROGRESS();
+        questDataKeys[1] = characters.NFTVAR_SIMPLEQUEST_TYPE();
+        questDataKeys[2] = characters.NFTVAR_REPUTATION();
         return characters.getNFTVars(characterID, questDataKeys);
     }
 
     function requestQuest(uint256 characterID) public returns (uint256) {
-        uint256[] memory questData = getCharacterQuestData(characterID);
-        assertNotOnQuest(questData);
+        assertNotOnQuest(characterID);
         return assignNewQuest(characterID);
     }
 
     function assignNewQuest(uint256 characterID) private returns (uint256) {
         // tier should be chosen by random, based on % for reputation level, for now, we take common
         Quest memory quest = getNewQuest(0);
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID(), quest.id);
+        characterQuest[characterID] = quest.id;
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), uint256(quest.requirementType));
         emit QuestAssigned(quest.id, characterID);
@@ -214,17 +212,17 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function clearQuestData(uint256 characterID) public {
         // clear quest data
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_ID(), 0);
+        characterQuest[characterID] = 0;
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), 0);
     }
 
     function completeQuest(uint256 characterID) external {
         uint256[] memory questData = getCharacterQuestData(characterID);
-        assertOnQuest(questData);
-        assertQuestCompleted(questData);
-        uint256 questID = questData[0];
-        uint256 currentReputation = questData[3];
+        assertOnQuest(characterID);
+        assertQuestCompleted(characterID, questData[0]);
+        uint256 questID = characterQuest[characterID];
+        uint256 currentReputation = questData[2];
         // reward for completing quest
         rewardQuest(questID, characterID);
         characters.setNftVar(characterID, characters.NFTVAR_REPUTATION(), currentReputation + questList[questID].reputationAmount);
@@ -273,9 +271,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     // TODO: Remember to restrict functions, security, kill switch
     function submitProgress(uint256 characterID, uint256[] memory tokenIds) public {
-        uint256[] memory questData = getCharacterQuestData(characterID);
-        assertOnQuest(questData);
-        Quest memory quest = questList[questData[0]];
+        assertOnQuest(characterID);
+        uint256 questID = characterQuest[characterID];
+        Quest memory quest = questList[characterQuest[characterID]];
         require(tokenIds.length != 0, "No tokenIds provided");
         if (quest.requirementType == RequirementType.WEAPON) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
@@ -287,9 +285,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                     revert("Wrong weapon rarity");
                 }
                 weapons.burnWithoutDust(tokenID);
-                incrementQuestProgress(characterID, questData[0], 1);
+                incrementQuestProgress(characterID, questID, 1);
             }
-            emit QuestProgressed(questData[0], characterID);
+            emit QuestProgressed(questID, characterID);
         } else if (quest.requirementType == RequirementType.JUNK) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -300,9 +298,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                     revert("Wrong junk rarity");
                 }
                 junk.burn(tokenID);
-                incrementQuestProgress(characterID, questData[0], 1);
+                incrementQuestProgress(characterID, questID, 1);
             }
-            emit QuestProgressed(questData[0], characterID);
+            emit QuestProgressed(questID, characterID);
         } else if (quest.requirementType == RequirementType.TRINKET) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -313,9 +311,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                     revert("Wrong trinket rarity");
                 }
                 trinket.burn(tokenID);
-                incrementQuestProgress(characterID, questData[0], 1);
+                incrementQuestProgress(characterID, questID, 1);
             }
-            emit QuestProgressed(questData[0], characterID);
+            emit QuestProgressed(questID, characterID);
         } else if (quest.requirementType == RequirementType.SHIELD) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -326,9 +324,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                     revert("Wrong shield rarity");
                 }
                 shields.burn(tokenID);
-                incrementQuestProgress(characterID, questData[0], 1);
+                incrementQuestProgress(characterID, questID, 1);
             }
-            emit QuestProgressed(questData[0], characterID);
+            emit QuestProgressed(questID, characterID);
         } else {
             revert("Unknown requirement type");
         }
@@ -336,16 +334,17 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function submitDustProgress(uint256 characterID, uint32 amount) public {
+        assertOnQuest(characterID);
+        uint256 questID = characterQuest[characterID];
         uint256[] memory questData = getCharacterQuestData(characterID);
-        assertOnQuest(questData);
-        Quest memory quest = questList[questData[0]];
+        Quest memory quest = questList[questID];
         require(quest.requirementType == RequirementType.DUST, "Wrong quest type");
         uint32[] memory dustSupplies = weapons.getDustSupplies(msg.sender);
         require(amount <= dustSupplies[uint256(quest.requirementRarity)], "Not enough dust supply");
         uint32[] memory decrementDustSupplies = new uint32[](dustSupplies.length);
         decrementDustSupplies[uint256(quest.requirementRarity)] = amount;
         weapons.decrementDustSupplies(msg.sender, decrementDustSupplies[0], decrementDustSupplies[1], decrementDustSupplies[2]);
-        incrementQuestProgress(characterID, questData[0], amount);
+        incrementQuestProgress(characterID, questID, amount);
     }
 
     function incrementQuestProgress(uint256 characterID, uint256 questID, uint256 progress) private {
