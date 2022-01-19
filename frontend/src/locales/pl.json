@@ -744,8 +744,6 @@
     "noIncomingNfts": "Brak przychodzących NFT!",
     "noRefundOfSpentSkill": "W przypadku anulowania przelewu nie otrzymasz zwrotu wydanej opłaty SKILL!",
     "noWeaponsStored": "Brak przechowywanej broni!",
-    "queueLength": "Długość kolejki",
-    "queueLengthTooltip": "Obecnie w kolejce do przeniesienia jest {queueLength} NFT",
     "requestTransfer": "Poproś o przeniesienie",
     "selectAChain": "Wybierz łańcuch",
     "selectCharacterToWithdraw": "Wybierz postać do wydania",
@@ -764,7 +762,6 @@
     "weaponId": "ID Broni",
     "withdrawCharacter": "Wydaj postać",
     "withdrawFromStorage": "Wydaj ze Schowka",
-    "withdrawWeapon": "Wydaj Broń",
-    "yourPlaceInQueue": "Twoje miejsce w kolejce"
+    "withdrawWeapon": "Wydaj Broń"
   }
 }
