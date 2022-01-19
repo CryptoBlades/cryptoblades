@@ -1,6 +1,6 @@
 <template>
   <div class="leaderboardWrapper">
-    <h1 class="leaderboardTitle">ARENA {{$t("pvp.leaderboard")}}</h1>
+    <h1 class="leaderboardTitle">{{$t("pvp.leaderboard").toUpperCase()}}</h1>
     <div class="filtersWrapper">
       <div class="selectWrapper">
         <label for="tier">Tier: </label>
@@ -19,7 +19,7 @@
           <span>{{$t('pvp.name')}}</span>
           <span>{{$t('pvp.level')}}</span>
           <span>{{$t('characterList.element')}}</span>
-          <span>MMR</span>
+          <span>{{$t('pvp.rankingPoints')}}</span>
         </li>
         <li>
           <span>1</span>
@@ -65,6 +65,8 @@ export default {
         { text: '6', value: 5 },
         { text: '7', value: 6 },
         { text: '8', value: 7 },
+        { text: '9', value: 8 },
+        { text: '10', value: 9 },
       ],
       tierFilter: 0,
     };

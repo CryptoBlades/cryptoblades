@@ -758,14 +758,15 @@
     "justClickClaim": "Just click 'CLAIM REWARDS' to claim your skill!",
     "yourAvailableSkill": "Your available skill: {formattedAvailableSkill} ",
     "claimRewards": "Claim Rewards",
-    "leaderboard": "Leaderboard",
+    "leaderboard": "Arena Leaderboard",
     "rewards": "Rewards",
     "currentlyUnderAttack": "You are currently under attack!",
     "pleaseWait": "Please wait a moment",
     "name": "Name",
     "rankingPoints": "Ranking points",
     "attackerPower": "Your Power:",
-    "opponentPower": "Opponent Power:"
+    "opponentPower": "Opponent Power:",
+    "mmr": "Mmr"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
