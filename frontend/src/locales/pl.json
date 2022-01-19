@@ -706,7 +706,8 @@
     "leaderboard": "Tablica wyników",
     "rewards": "Nagrody",
     "currentlyUnderAttack": "Jesteś obecnie atakowany!",
-    "pleaseWait": "Proszę chwilę poczekać"
+    "pleaseWait": "Proszę chwilę poczekać",
+    "name": "Nazwa"
   },
   "app": {
     "cantView": "W tej chwili nie możesz wyświetlić aplikacji. Możesz spróbować wyczyścić LocalStorage, aby zresetować ustawienia.",
