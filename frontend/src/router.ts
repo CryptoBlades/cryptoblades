@@ -20,8 +20,11 @@ import {
   stakeOnly as featureFlagStakeOnly,
   market as featureFlagMarket,
   portal as featureFlagPortal,
-  pvp as featureFlagPvP
+  pvp as featureFlagPvP,
+  merchandise as featureFlagMerchandise,
 } from './feature-flags';
+import Merchandise from '@/components/smart/Merchandise.vue';
+import {currentChainSupportsMerchandise} from '@/utils/common';
 
 function createRouter() {
   if (featureFlagStakeOnly) {
@@ -68,6 +71,17 @@ function createRouter() {
 
   if(featureFlagPvP){
     router.addRoute({ path: '/pvp', name: 'pvp', component:PvP});
+  }
+
+  const merchandiseRoute = { path: '/merchandise', name: 'merchandise', component:Merchandise,
+    beforeEnter: (to: any, from: any, next: any) => {
+      if (to.name === 'merchandise' && !currentChainSupportsMerchandise()) next(from);
+      else next();
+    }
+  };
+
+  if(featureFlagMerchandise){
+    router.addRoute(merchandiseRoute);
   }
 
   return router;

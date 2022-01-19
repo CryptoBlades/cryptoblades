@@ -7,7 +7,9 @@
     "raid": "Raid",
     "pvp": "PvP",
     "market": "Market",
-    "stake": "Stake"
+    "stake": "Stake",
+    "merchandise": "Merchandise",
+    "merchandiseNotSupportedTooltip": "Currently selected chain does not support Merchandise."
   },
   "ClaimRewardsBar": {
     "rewards": "Rewards",
@@ -578,6 +580,8 @@
       "rewardsDuration": "Distribution",
       "warning": "Warning",
       "select": "Select",
+      "rewardsAvailableTooltip":"Rewards available",
+      "rewardsUnavailableTooltip":"Rewards depleted",
       "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
     },
     "tier": "Tier",

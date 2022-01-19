@@ -1,8 +1,13 @@
 <template>
   <div class="container">
-    <div class="stake-icon-wrapper">
-      <img src="https://seiyria.com/gameicons-font/svg/two-coins.svg" alt="" class="stake-type-icon">
-    </div>
+    <span class="stake-header">
+      <b-icon-exclamation-circle
+      :class="getExclamationMark(rewardDistributionTimeLeft)"
+      v-tooltip="getTooltip(rewardDistributionTimeLeft)"/>
+      <div class="stake-icon-wrapper">
+        <img src="https://seiyria.com/gameicons-font/svg/two-coins.svg" alt="" class="stake-type-icon">
+      </div>
+    </span>
     <h1 class="stake-type-title">{{ stakeTitle }}</h1>
     <div class="table-wrapper">
       <table class="stake-data-table">
@@ -67,7 +72,17 @@ import { formatDurationFromSeconds } from '../utils/date-time';
 import { isNftStakeType } from '../interfaces/State';
 
 export default {
-  props: ['stakeTitle', 'stakeTokenName', 'rewardTokenName', 'stakeType', 'minimumStakeTime', 'estimatedYield', 'rewardsDuration', 'deprecated'],
+  props: [
+    'stakeTitle',
+    'stakeTokenName',
+    'rewardTokenName',
+    'stakeType',
+    'minimumStakeTime',
+    'estimatedYield',
+    'rewardsDuration',
+    'deprecated',
+    'rewardDistributionTimeLeft'
+  ],
   computed: {
     minimumStakeTimeFormatted() {
       return formatDurationFromSeconds(this.minimumStakeTime);
@@ -77,8 +92,23 @@ export default {
     },
     rewardsDurationFormatted() {
       return formatDurationFromSeconds(this.rewardsDuration);
-    }
-  }
+    },
+  },
+  methods: {
+    getExclamationMark(rewardDistributionTimeLeft) {
+      if(rewardDistributionTimeLeft > 0) {
+        return 'green-exclamation-mark';
+      }
+      return 'red-exclamation-mark';
+    },
+
+    getTooltip(rewardDistributionTimeLeft) {
+      if(rewardDistributionTimeLeft > 0) {
+        return this.$t('stake.StakeSelectorItem.rewardsAvailableTooltip');
+      }
+      return this.$t('stake.StakeSelectorItem.rewardsUnavailableTooltip');
+    },
+  },
 };
 </script>
 
@@ -96,7 +126,8 @@ export default {
   width: 5rem;
   height: 5rem;
   padding: 0.5rem;
-  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .stake-type-icon {
@@ -150,5 +181,20 @@ export default {
   background-color: rgba(255, 255, 255, 0.1);
   border-color: currentColor;
   cursor: pointer;
+}
+
+.green-exclamation-mark {
+  float: left;
+  color: rgb(59, 155, 39);
+}
+
+.red-exclamation-mark {
+  float: left;
+  color: rgb(153, 29, 29);
+}
+
+.stake-header {
+  width: 100%;
+  font-size : 1.5em;
 }
 </style>
