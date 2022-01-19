@@ -170,7 +170,7 @@ export default {
         avg.forEach(function (stat) {
           totalStats += stat;
         });
-        ttHtml += `<br>${this.$t('weaponGrid.average')}: +${ totalStats / avg.length }`;
+        ttHtml += `<br>${wrapInSpan('summary-text', this.$t('weaponGrid.average') + ': +' + (totalStats / avg.length).toFixed(2))}`;
       }
 
       if(this.weapon.lowStarBurnPoints > 0) {
