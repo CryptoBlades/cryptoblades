@@ -35,6 +35,11 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         trinket = _trinket;
         shields = _shields;
         nextQuestID = 1;
+        vars[VAR_COMMON_TIER] = 0;
+        vars[VAR_UNCOMMON_TIER] = 1;
+        vars[VAR_RARE_TIER] = 2;
+        vars[VAR_EPIC_TIER] = 3;
+        vars[VAR_LEGENDARY_TIER] = 4;
     }
 
     modifier restricted() {
@@ -59,7 +64,13 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         require(questData[1] >= questList[questData[0]].requirementAmount, "Quest not completed");
     }
 
-    uint8 public constant VAR_CONTRACT_ENABLED = 1;
+
+    uint8 public constant VAR_COMMON_TIER = 0;
+    uint8 public constant VAR_UNCOMMON_TIER = 1;
+    uint8 public constant VAR_RARE_TIER = 2;
+    uint8 public constant VAR_EPIC_TIER = 3;
+    uint8 public constant VAR_LEGENDARY_TIER = 4;
+    uint8 public constant VAR_CONTRACT_ENABLED = 9;
     mapping(uint256 => uint256) public vars;
 
     uint256 public nextQuestID;
@@ -80,7 +91,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD}
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
-    // have quests rarities on certain indexes (0 - common, 1 - uncommon, 2 - rare, 3 - epic)
+    // have quests rarities on certain indexes (0 - common, 1 - uncommon, 2 - rare, 3 - epic, 4 - legendary (optional))
+    // promo arrays are accordingly (10 - common, 11 - uncommon, 12 - rare, 13 - epic, 14 - legendary (optional))
     mapping(uint256 => Quest[]) public quests;
     mapping(uint256 => Quest) public questList;
     //    mapping(uint32 => uint32[]) public rewardsTypes;
@@ -117,11 +129,28 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
     event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
 
+    function setVar(uint256 varField, uint256 value) external restricted {
+        vars[varField] = value;
+    }
+
+    function setVars(uint256[] calldata varFields, uint256[] calldata values) external restricted {
+        for(uint i = 0; i < varFields.length; i++) {
+            vars[varFields[i]] = values[i];
+        }
+    }
+
     //Quest example: tier = 1, id = TBA, requirementType = 1, requirementAmount = 2, rewardType = 1, rewardAmount = 1, reputationAmount = 12
     // do 2 raids for 1x3* sword
     function addNewQuest(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
         RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) public {
         quests[uint8(tier)].push(Quest(0, tier,
+            requirementType, requirementRarity, requirementAmount,
+            rewardType, rewardRarity, rewardAmount, reputationAmount));
+    }
+
+    function addNewPromoQuest(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
+        RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) public {
+        quests[uint8(tier) + 10].push(Quest(0, tier,
             requirementType, requirementRarity, requirementAmount,
             rewardType, rewardRarity, rewardAmount, reputationAmount));
     }
@@ -171,7 +200,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function getNewQuest(uint8 tier) private returns (Quest memory) {
         // get random index from 0 to length - 1, which will indicate predetermined quest
         // uint32 index = random(quests.length);
-        Quest memory quest = quests[tier][quests[tier].length - 1];
+        Quest memory quest = quests[vars[tier]][quests[tier].length - 1];
         quest.id = nextQuestID++;
         questList[quest.id] = quest;
         // should assign new ID to quest and save it in questsList array (all quests are there)
