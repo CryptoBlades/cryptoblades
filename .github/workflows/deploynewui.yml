@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Deploy New UI
 
 on: [push, pull_request]
 
