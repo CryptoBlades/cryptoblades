@@ -2,11 +2,22 @@ import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import config from '../../app-config.json';
+import createRouter from '../router';
+const router = createRouter();
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
 BigNumber.config({ EXPONENTIAL_AT: 100 });
 
 const web3 = new Web3(Web3.givenProvider || process.env.VUE_APP_WEB3_FALLBACK_PROVIDER);
+
+export function addChainToRouter(chain: string){
+  router.replace(
+    {
+      query: Object.assign({ ...router.currentRoute.query }, { chain }),
+    },
+    () => {}
+  );
+}
 
 interface Config {
   environments: Record<string, Chain>;
@@ -25,6 +36,7 @@ interface Chain {
   for (const [chainName, values] of Object.entries(chains)){
     if(+values.VUE_APP_NETWORK_ID === chainId){
       localStorage.setItem('currentChain', chainName);
+      addChainToRouter(chainName);
     }
   }
   window.location.reload();
