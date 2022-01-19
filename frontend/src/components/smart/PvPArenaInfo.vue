@@ -18,7 +18,7 @@
           {{$t('pvp.topPlayers')}}
         </span>
         <span>
-          {{$t('pvp.rank')}}
+          {{$t('pvp.rankingPoints')}}
         </span>
       </li>
       <li>

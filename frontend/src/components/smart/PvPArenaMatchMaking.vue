@@ -145,8 +145,8 @@
       v-if="duelResult.result"
       :result="duelResult.result"
       :attackerRoll="duelResult.attackerRoll"
-      :attackerPower="attackerPower"
-      :defenderPower="defenderPower"
+      :attackerPower="duelResult.attackerPower"
+      :defenderPower="duelResult.defenderPower"
       :defenderRoll="duelResult.defenderRoll"
       :skillEarned="duelResult.skillDifference"
       :rankVariation="duelResult.result === 'win' ? '+5' : '-3'"
@@ -219,7 +219,8 @@ export default {
         element: '',
         name: '',
         level: null,
-        rank: null
+        rank: null,
+        power: null
       }
     },
     opponentActiveWeaponWithInformation: {
@@ -257,7 +258,9 @@ export default {
         defenderRoll: null,
         skillDifference: null,
         rankDifference: null,
-        result: ''
+        result: '',
+        attackerPower: null,
+        defenderPower: null
       },
       matchablePlayersCount: null,
     };
@@ -426,7 +429,8 @@ export default {
 
         if (duelFinishedResult.length) {
           const formattedResult = formatDuelResult(duelFinishedResult[duelFinishedResult.length - 1].returnValues);
-
+          this.duelResult.defenderPower = this.opponentInformation.power;
+          this.duelResult.attackerPower = this.characterInformation.power;
           this.duelResult.result = formattedResult.attackerWon ? 'win' : 'lose';
           this.duelResult.attackerRoll = formattedResult.attackerRoll;
           this.duelResult.defenderRoll = formattedResult.defenderRoll;
@@ -482,7 +486,9 @@ export default {
         defenderRoll: null,
         skillDifference: null,
         rankDifference: null,
-        result: ''
+        result: '',
+        attackerPower: null,
+        defenderPower: null
       };
     },
 
