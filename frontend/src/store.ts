@@ -744,7 +744,7 @@ export function createStore(web3: Web3) {
         const currentChain = localStorage.getItem('currentChain') || 'BSC';
         const merchandiseSupportedChains = config.merchandiseSupportedChains;
         if (!currentChain || !merchandiseSupportedChains) {
-          return false;
+          state.currentChainSupportsMerchandise = false;
         }
         state.currentChainSupportsMerchandise = merchandiseSupportedChains.includes(currentChain);
       },
