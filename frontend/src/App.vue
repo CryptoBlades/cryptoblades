@@ -88,6 +88,7 @@ import { apiUrl } from './utils/common';
 import i18n from './i18n';
 import { getConfigValue } from './contracts';
 import '@/mixins/general';
+import config from '../app-config.json';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -139,6 +140,7 @@ export default {
     },
     $route(to) {
       // react to route changes
+      this.checkChainAndParams();
       if(to.path === '/options') {
         return this.isOptions = true;
       } else this.isOptions = false;
@@ -166,7 +168,35 @@ export default {
     ...mapGetters([
       'getExchangeTransakUrl'
     ]),
+    async checkChainAndParams(){
+      const currentChain = localStorage.getItem('currentChain') || 'BSC';
+      const paramChain = this.$router.currentRoute.query.chain;
+      const supportedChains = config.supportedChains;
 
+      if(!paramChain){
+        this.setChainAndParams(currentChain);
+      }
+
+      //add chain as query param if chain unchanged
+      if(currentChain === paramChain || !paramChain){
+        this.setChainAndParams(currentChain);
+      }
+
+      //set chain in localStorage & MM from query param; check if supported
+      else if (currentChain !== paramChain && supportedChains.includes(paramChain)){
+        localStorage.setItem('currentChain', paramChain);
+        await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
+      }
+    },
+    setChainAndParams(chain){
+      localStorage.setItem('currentChain', chain);
+      this.$router.replace(
+        {
+          query: Object.assign({ ...this.$route.query }, { chain }),
+        },
+        () => {}
+      );
+    },
     async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;
 
@@ -312,6 +342,7 @@ export default {
   },
 
   async created() {
+    this.checkChainAndParams();
     try {
       await this.initializeStore();
     } catch (e) {
@@ -323,6 +354,8 @@ export default {
       console.error(e);
       throw e;
     }
+
+
 
     this.pollCharactersStaminaIntervalId = setInterval(async () => {
       this.ownCharacters.forEach(async (c) => {
