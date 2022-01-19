@@ -1096,9 +1096,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     // Note: The following are debugging functions. Remove later.
 
-    function clearDuelQueue(uint256[] calldata characterIDs) external restricted {
-        uint256 length = characterIDs.length;
-
+    function clearDuelQueue(uint256 length) external restricted {
         for (uint256 i = 0; i < length; i++) {
             if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
                 isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
