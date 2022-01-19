@@ -43,6 +43,7 @@ import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import config from '../app-config.json';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -133,6 +134,7 @@ export function createStore(web3: Web3) {
       currentCharacterId: null,
       ownedDust: [],
       cartEntries: [],
+      currentChainSupportsMerchandise: false,
 
       characters: {},
       garrisonCharacters: {},
@@ -423,6 +425,10 @@ export function createStore(web3: Web3) {
 
       getCartEntries(state) {
         return state.cartEntries;
+      },
+
+      getCurrentChainSupportsMerchandise(state) {
+        return state.currentChainSupportsMerchandise;
       },
 
       ownWeapons(state, getters) {
@@ -732,6 +738,15 @@ export function createStore(web3: Web3) {
 
       clearCartEntries(state: IState) {
         state.cartEntries = [];
+      },
+
+      updateCurrentChainSupportsMerchandise(state: IState) {
+        const currentChain = localStorage.getItem('currentChain') || 'BSC';
+        const merchandiseSupportedChains = config.merchandiseSupportedChains;
+        if (!currentChain || !merchandiseSupportedChains) {
+          state.currentChainSupportsMerchandise = false;
+        }
+        state.currentChainSupportsMerchandise = merchandiseSupportedChains.includes(currentChain);
       },
 
       updateCharacter(state: IState, { characterId, character }) {

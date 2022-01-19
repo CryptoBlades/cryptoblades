@@ -145,6 +145,7 @@ export interface IState {
   maxStamina: number;
   ownedDust: string[];
   cartEntries: CartEntry[];
+  currentChainSupportsMerchandise: boolean;
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
