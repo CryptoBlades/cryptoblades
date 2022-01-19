@@ -89,6 +89,7 @@ import i18n from './i18n';
 import { getConfigValue } from './contracts';
 import '@/mixins/general';
 import config from '../app-config.json';
+import { addChainToRouter } from '@/utils/common';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -174,12 +175,14 @@ export default {
       const supportedChains = config.supportedChains;
 
       if(!paramChain){
-        this.setChainAndParams(currentChain);
+        localStorage.setItem('currentChain', currentChain);
+        addChainToRouter(currentChain);
       }
 
       //add chain as query param if chain unchanged
       if(currentChain === paramChain || !paramChain){
-        this.setChainAndParams(currentChain);
+        localStorage.setItem('currentChain', currentChain);
+        addChainToRouter(currentChain);
       }
 
       //set chain in localStorage & MM from query param; check if supported
@@ -187,15 +190,6 @@ export default {
         localStorage.setItem('currentChain', paramChain);
         await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
       }
-    },
-    setChainAndParams(chain){
-      localStorage.setItem('currentChain', chain);
-      this.$router.replace(
-        {
-          query: Object.assign({ ...this.$route.query }, { chain }),
-        },
-        () => {}
-      );
     },
     async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;

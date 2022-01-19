@@ -10,6 +10,15 @@ BigNumber.config({ EXPONENTIAL_AT: 100 });
 
 const web3 = new Web3(Web3.givenProvider || process.env.VUE_APP_WEB3_FALLBACK_PROVIDER);
 
+export function addChainToRouter(chain: string){
+  router.replace(
+    {
+      query: Object.assign({ ...router.currentRoute.query }, { chain }),
+    },
+    () => {}
+  );
+}
+
 interface Config {
   environments: Record<string, Chain>;
 }
@@ -27,12 +36,7 @@ interface Chain {
   for (const [chainName, values] of Object.entries(chains)){
     if(+values.VUE_APP_NETWORK_ID === chainId){
       localStorage.setItem('currentChain', chainName);
-      router.replace(
-        {
-          query: Object.assign({ ...router.currentRoute.query }, { chain: chainName }),
-        },
-        () => {}
-      );
+      addChainToRouter(chainName);
     }
   }
   window.location.reload();

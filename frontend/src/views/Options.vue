@@ -101,6 +101,7 @@ import i18n from '../i18n';
 import { getConfigValue } from '@/contracts';
 import config from '../../app-config.json';
 import { SupportedProject } from './Treasury.vue';
+import { addChainToRouter } from '@/utils/common';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -303,12 +304,7 @@ export default Vue.extend({
     async setCurrentChain() {
       localStorage.setItem('currentChain', this.currentChain);
       Events.$emit('setting:currentChain', { value: this.currentChain });
-      (this as any).$router.replace(
-        {
-          query: Object.assign({ ...(this as any).$route.query }, { chain: this.currentChain }),
-        },
-        () => {}
-      );
+      addChainToRouter(this.currentChain);
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
   },
