@@ -100,6 +100,7 @@ import i18n from '../i18n';
 import { getConfigValue } from '@/contracts';
 import config from '../../app-config.json';
 import { SupportedProject } from './Treasury.vue';
+import { addChainToRouter } from '@/utils/common';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -228,7 +229,7 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['claimTokenRewards','setUpContracts','initialize','configureMetaMask','fetchPartnerProjects']) as StoreMappedActions),
-    ...mapMutations(['setNetworkId','updatePayoutCurrencyId']),
+    ...mapMutations(['setNetworkId','updatePayoutCurrencyId', 'updateCurrentChainSupportsMerchandise']),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
@@ -301,7 +302,9 @@ export default Vue.extend({
 
     async setCurrentChain() {
       localStorage.setItem('currentChain', this.currentChain);
+      this.updateCurrentChainSupportsMerchandise();
       Events.$emit('setting:currentChain', { value: this.currentChain });
+      addChainToRouter(this.currentChain);
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
   },

@@ -49,7 +49,7 @@ Vue.use(require('vue-script2'));
 Vue.use(Ads.Adsense);
 
 const store = createStore(web3);
-const router = createRouter();
+export const router = createRouter();
 
 new Vue({
   render: h => h(App),

@@ -41,6 +41,7 @@ export interface IStakeOverviewState {
   rewardsDuration: number;
   totalSupply: string;
   minimumStakeTime: number;
+  rewardDistributionTimeLeft: number;
 }
 
 export interface IRaidState {
@@ -144,6 +145,7 @@ export interface IState {
   maxStamina: number;
   ownedDust: string[];
   cartEntries: CartEntry[];
+  currentChainSupportsMerchandise: boolean;
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
