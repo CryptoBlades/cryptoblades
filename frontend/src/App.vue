@@ -493,6 +493,11 @@ button,
   color: yellow;
 }
 
+.summary-text {
+  font-size: 0.8em;
+  color: grey;
+}
+
 .fire-icon,
 .str-icon {
   color: red;
