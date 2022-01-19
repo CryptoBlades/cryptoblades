@@ -65,13 +65,13 @@ export default {
 
   computed: {
     getElementImageUrl() {
-      if (this.element === 'Fire') {
+      if (this.shield.element === 'Fire') {
         return fire;
       }
-      if (this.element === 'Water') {
+      if (this.shield.element === 'Water') {
         return water;
       }
-      if (this.element === 'Earth') {
+      if (this.shield.element === 'Earth') {
         return earth;
       } else {
         return lightning;

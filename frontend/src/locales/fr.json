@@ -648,7 +648,8 @@
     "leaderboard": "Classement",
     "rewards": "Récompenses",
     "currentlyUnderAttack": "Vous êtes actuellement attaqué !",
-    "pleaseWait": "Patientez s'il-vous-plait"
+    "pleaseWait": "Patientez s'il-vous-plait",
+    "name": "Nom"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",

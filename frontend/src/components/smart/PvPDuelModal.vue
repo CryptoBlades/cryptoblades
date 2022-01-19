@@ -14,8 +14,16 @@
             {{$t('pvp.youRolled')}}
           </span>
           <span class="chevron">></span>
-          <span>{{ attackerRoll }}</span>
+          <span>{{attackerRoll}}</span>
         </li>
+        <li>
+          <span>
+            {{$t('pvp.attackerPower')}}
+          </span>
+          <span class="chevron">></span>
+          <span>{{attackerPower}}</span>
+        </li>
+
         <pvp-separator />
         <li>
           <span>
@@ -23,6 +31,13 @@
           </span>
           <span class="chevron">></span>
           <span>{{ defenderRoll }}</span>
+        </li>
+        <li>
+          <span>
+            {{$t('pvp.opponentPower')}}
+          </span>
+          <span class="chevron">></span>
+          <span>{{ defenderPower }}</span>
         </li>
         <pvp-separator />
       </ul>
@@ -83,6 +98,12 @@ export default {
       default: null
     },
     userCurrentRank: {
+      default: null
+    },
+    attackerPower: {
+      default: null
+    },
+    defenderPower: {
       default: null
     }
   },

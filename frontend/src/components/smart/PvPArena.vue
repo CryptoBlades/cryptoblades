@@ -117,7 +117,8 @@ export default {
         element: '',
         name: '',
         level: null,
-        rank: null
+        rank: null,
+        power: null
       },
       opponentActiveWeaponWithInformation: {
         weaponId: null,
@@ -219,6 +220,8 @@ export default {
 
       this.opponentInformation.element = formatCharacter(defenderId, await this.getCharacter(defenderId)).traitName;
 
+      this.opponentInformation.power = await this.getCharacterPower(defenderId);
+
       const fighter = formatFighter(await this.getFighterByCharacter(defenderId));
 
       this.opponentActiveWeaponWithInformation = {
@@ -240,7 +243,8 @@ export default {
         element: '',
         name: '',
         level: null,
-        rank: null
+        rank: null,
+        power: null
       };
 
       this.opponentActiveWeaponWithInformation = {
