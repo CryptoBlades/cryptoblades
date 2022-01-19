@@ -228,7 +228,7 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['claimTokenRewards','setUpContracts','initialize','configureMetaMask','fetchPartnerProjects']) as StoreMappedActions),
-    ...mapMutations(['setNetworkId','updatePayoutCurrencyId']),
+    ...mapMutations(['setNetworkId','updatePayoutCurrencyId', 'updateCurrentChainSupportsMerchandise']),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
@@ -301,6 +301,7 @@ export default Vue.extend({
 
     async setCurrentChain() {
       localStorage.setItem('currentChain', this.currentChain);
+      this.updateCurrentChainSupportsMerchandise();
       Events.$emit('setting:currentChain', { value: this.currentChain });
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
