@@ -103,3 +103,12 @@ export const addTokenToMetamask = async (address: string, symbol: string): Promi
     console.error(error);
   }
 };
+
+export const currentChainSupportsMerchandise = () => {
+  const currentChain = localStorage.getItem('currentChain') || 'BSC';
+  const merchandiseSupportedChains = config.merchandiseSupportedChains;
+  if (!currentChain || !merchandiseSupportedChains) {
+    return false;
+  }
+  return merchandiseSupportedChains.includes(currentChain);
+};
