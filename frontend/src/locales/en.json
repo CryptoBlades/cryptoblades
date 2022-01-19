@@ -7,7 +7,9 @@
     "raid": "Raid",
     "pvp": "PvP",
     "market": "Market",
-    "stake": "Stake"
+    "stake": "Stake",
+    "merchandise": "Merchandise",
+    "merchandiseNotSupportedTooltip": "Currently selected chain does not support Merchandise."
   },
   "ClaimRewardsBar": {
     "rewards": "Rewards",
