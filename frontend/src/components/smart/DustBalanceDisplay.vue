@@ -42,7 +42,7 @@
 <script>
 import Vue from 'vue';
 import {mapGetters} from 'vuex';
-import {Rarity} from '@/components/smart/QuestDetails.vue';
+import {Rarity} from '@/views/Quests.vue';
 
 
 export default Vue.extend({

@@ -180,6 +180,22 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return characters.getNFTVars(characterID, questDataKeys);
     }
 
+    function getCharacterQuestDataDetails(uint256 characterID) public view returns (uint256[] memory, uint256, Rarity,
+        RequirementType, Rarity, uint256,
+        RewardType, Rarity, uint256, uint256) {
+        if (characterQuest[characterID] == 0) {
+            return (getCharacterQuestData(characterID), 0, Rarity.COMMON,
+            RequirementType.NONE, Rarity.COMMON, 0,
+            RewardType.NONE, Rarity.COMMON, 0, 0);
+        }
+        Quest memory quest = questList[characterQuest[characterID]];
+        return (getCharacterQuestData(characterID),
+        quest.id, quest.tier,
+        quest.requirementType, quest.requirementRarity, quest.requirementAmount,
+        quest.rewardType, quest.rewardRarity, quest.rewardAmount,
+        quest.reputationAmount);
+    }
+
     function requestQuest(uint256 characterID) public returns (uint256) {
         assertNotOnQuest(characterID);
         return assignNewQuest(characterID);

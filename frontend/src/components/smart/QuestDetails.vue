@@ -12,24 +12,25 @@
             }} {{ $t(`quests.requirement.${RequirementType[quest.requirementType]}`) }}</span>
         </div>
         <div class="d-flex justify-content-center p-3">
-          <nft-icon v-if="quest.requirementType === RewardType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
+          <nft-icon v-if="quest.requirementType === RequirementType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
                     :stars="quest.requirementRarity + 1"/>
-          <nft-icon v-else-if="quest.requirementType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"
+          <nft-icon v-else-if="quest.requirementType === RequirementType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"
                     :stars="quest.requirementRarity + 1"/>
-          <nft-icon v-else-if="quest.requirementType === RewardType.TRINKET" :isDefault="true" :nft="{ type: 'trinket' }"
+          <nft-icon v-else-if="quest.requirementType === RequirementType.TRINKET" :isDefault="true"
+                    :nft="{ type: 'trinket' }"
                     :stars="quest.requirementRarity + 1"/>
-          <nft-icon v-else-if="quest.requirementType === RewardType.SHIELD" :isDefault="true" :nft="{ type: 'shield' }"
+          <nft-icon v-else-if="quest.requirementType === RequirementType.SHIELD" :isDefault="true" :nft="{ type: 'shield' }"
                     :stars="quest.requirementRarity + 1"/>
-          <nft-icon v-else-if="quest.requirementType === RewardType.DUST && quest.requirementRarity === Rarity.COMMON"
+          <nft-icon v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.COMMON"
                     :isDefault="true" :nft="{ type: 'lbdust' }"/>
-          <nft-icon v-else-if="quest.requirementType === RewardType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
+          <nft-icon v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
                     :isDefault="true" :nft="{ type: '4bdust' }"/>
-          <nft-icon v-else-if="quest.requirementType === RewardType.DUST && quest.requirementRarity === Rarity.RARE"
+          <nft-icon v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.RARE"
                     :isDefault="true" :nft="{ type: '5bdust' }"/>
         </div>
         <div class="quest-progress">
-          <strong class="quest-progress-text">{{ questData.progress || 0 }} / {{ quest.requirementAmount }}</strong>
-          <b-progress class="reputation-progress" :max="quest.requirementAmount" :value="questData.progress"
+          <strong class="quest-progress-text">{{ quest.progress || 0 }} / {{ quest.requirementAmount }}</strong>
+          <b-progress class="reputation-progress" :max="quest.requirementAmount" :value="quest.progress"
                       variant="primary"/>
         </div>
       </div>
@@ -79,46 +80,16 @@
 import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {PropType} from 'vue/types/options';
-import {QuestData} from '@/views/Quests.vue';
+import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import NftIcon from '@/components/NftIcon.vue';
 
-export enum RequirementType {
-  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, RAID
-}
-
-export enum RewardType {
-  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD
-}
-
-export enum Rarity {
-  COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
-}
-
-export interface Quest {
-  id: number;
-  tier: Rarity;
-  requirementType: RequirementType;
-  requirementRarity: Rarity;
-  requirementAmount: number;
-  rewardType: RewardType;
-  rewardRarity: Rarity;
-  rewardAmount: number;
-  reputationAmount: number;
-}
-
 interface StoreMappedActions {
-  getCharacterQuestData(payload: { characterId: number }): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }>;
-
-  getQuestData(payload: { questId: number }):
-  Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string, 5: string, 6: string, 7: string, 8: string, 9: string }>;
-
   skipQuest(payload: { characterID: string | number }): Promise<void>;
 
   completeQuest(payload: { characterID: string | number }): Promise<void>;
 }
 
 interface Data {
-  quest: Quest | undefined;
   questCanBeCompleted: boolean;
 }
 
@@ -126,8 +97,8 @@ export default Vue.extend({
   components: {NftIcon},
 
   props: {
-    questData: {
-      type: Object as PropType<QuestData>,
+    quest: {
+      type: Object as PropType<Quest>,
       required: true,
     },
     characterId: {
@@ -138,7 +109,6 @@ export default Vue.extend({
 
   data() {
     return {
-      quest: undefined,
       questCanBeCompleted: false,
       RequirementType,
       RewardType,
@@ -150,7 +120,7 @@ export default Vue.extend({
   computed: {},
 
   methods: {
-    ...mapActions(['getCharacterQuestData', 'getQuestData', 'skipQuest', 'completeQuest']) as StoreMappedActions,
+    ...mapActions(['skipQuest', 'completeQuest']) as StoreMappedActions,
 
     async skip() {
       await this.skipQuest({characterID: this.characterId});
@@ -161,25 +131,12 @@ export default Vue.extend({
     },
 
     submit() {
-      this.$root.$emit('quest-submission-modal', this.quest, this.characterId, this.questData.progress);
+      this.$root.$emit('quest-submission-modal', this.quest, this.characterId, this.quest.progress);
     }
   },
 
   async mounted() {
-    const questRaw = await this.getQuestData({questId: this.questData.id});
-    this.quest = {
-      id: +questRaw[0],
-      tier: +questRaw[1] as Rarity,
-      requirementType: +questRaw[2] as RequirementType,
-      requirementRarity: +questRaw[3] as Rarity,
-      requirementAmount: +questRaw[4],
-      rewardType: +questRaw[5] as RewardType,
-      rewardRarity: +questRaw[6] as Rarity,
-      rewardAmount: +questRaw[7],
-      reputationAmount: +questRaw[8],
-    } as Quest;
-    console.log(this.quest);
-    this.questCanBeCompleted = this.questData.progress >= this.quest.requirementAmount;
+    this.questCanBeCompleted = this.quest.progress >= this.quest.requirementAmount;
   }
 
 });

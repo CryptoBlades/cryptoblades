@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column quests-container">
     <div v-for="character in characters" :key="character.id" class="row quest-row">
-      <div v-if="character.questData" class="character"
+      <div v-if="character.quest" class="character"
            :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(character.id) : undefined]">
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :character="character"></slot>
@@ -15,12 +15,12 @@
         </div>
         <div class="xp">
           <span>Reputation lvl {{ 0 }}</span>
-          <strong class="outline xp-text">{{ character.questData.reputation || 0 }} / {{ 9999 }}</strong>
-          <b-progress class="reputation-progress" :max="9999" :value="character.questData.reputation"
+          <strong class="outline xp-text">{{ character.quest.reputation || 0 }} / {{ 9999 }}</strong>
+          <b-progress class="reputation-progress" :max="9999" :value="character.quest.reputation"
                       variant="primary"/>
         </div>
       </div>
-      <QuestDetails v-if="character.questData && character.questData.id !== 0" :questData="character.questData"
+      <QuestDetails v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
                     :characterId="character.id"/>
       <div v-else class="request-quest">
         <b-button variant="primary w-100" @click="request(character.id)">
@@ -38,19 +38,39 @@ import {mapActions, mapGetters, mapState} from 'vuex';
 import foundersShield from '../assets/shield1.png';
 import {Nft} from '@/interfaces/Nft';
 import {Accessors} from 'vue/types/options';
-import QuestDetails, {RequirementType} from '@/components/smart/QuestDetails.vue';
+import QuestDetails from '@/components/smart/QuestDetails.vue';
 import CharacterArt from '@/components/CharacterArt.vue';
 import QuestSubmissionModal from '@/components/smart/QuestSubmissionModal.vue';
 
-export interface QuestData {
-  id: number;
+export interface Quest {
   progress: number;
   type: RequirementType;
   reputation: number;
+  id: number;
+  tier: Rarity;
+  requirementType: RequirementType;
+  requirementRarity: Rarity;
+  requirementAmount: number;
+  rewardType: RewardType;
+  rewardRarity: Rarity;
+  rewardAmount: number;
+  reputationAmount: number;
+}
+
+export enum RequirementType {
+  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, RAID
+}
+
+export enum RewardType {
+  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD
+}
+
+export enum Rarity {
+  COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
 }
 
 interface StoreMappedActions {
-  getCharacterQuestData(payload: { characterId: string | number }): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }>;
+  getCharacterQuestData(payload: { characterId: string | number }): Promise<Quest>;
 
   requestQuest(payload: { characterID: string | number }): Promise<void>;
 }
@@ -81,7 +101,7 @@ export default Vue.extend({
 
     getFoundersShield() {
       return foundersShield;
-    },
+    }
   },
 
   methods: {
@@ -94,20 +114,18 @@ export default Vue.extend({
 
     async refreshQuestData() {
       for (const character of this.characters) {
-        const questDataRaw = await this.getCharacterQuestData({characterId: character.id});
-        console.log(questDataRaw);
-        character.questData = {
-          id: +questDataRaw[0],
-          progress: +questDataRaw[1],
-          type: +questDataRaw[2] as RequirementType,
-          reputation: +questDataRaw[3],
-        } as QuestData;
+        character.quest = await this.getCharacterQuestData({characterId: character.id});
+        console.log(character.quest);
       }
+    },
+
+    displayCharacters(): Nft[] {
+      return this.charactersWithIds(this.ownedCharacterIds).filter(Boolean);
     }
   },
 
   async mounted() {
-    this.characters = this.charactersWithIds(this.ownedCharacterIds).filter(Boolean);
+    this.characters = this.displayCharacters();
     await this.refreshQuestData();
   },
 });

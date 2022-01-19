@@ -21,18 +21,19 @@
                 @choosenft="addNftIdType" :starsOptions="[quest.requirementRarity + 1]"
                 :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
       <nft-list :showGivenNftIdTypes="true" :nftIdTypes="nftIdTypesToBurn" @choosenft="removeNftIdType"
-                :starsOptions="[quest.requirementRarity + 1]" :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
+                :starsOptions="[quest.requirementRarity + 1]"
+                :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
     </div>
   </b-modal>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import {Quest, Rarity, RequirementType, RewardType} from '@/components/smart/QuestDetails.vue';
 import WeaponGrid from '@/components/smart/WeaponGrid.vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
+import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 
 interface StoreMappedActions {
   submitProgress(payload: { characterID: string | number, tokenIds: (string | number)[] }): Promise<void>;

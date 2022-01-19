@@ -43,6 +43,7 @@ import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import {Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -3188,14 +3189,23 @@ export function createStore(web3: Web3) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
 
-        return await SimpleQuests.methods.getCharacterQuestData(characterId).call(defaultCallOptions(state));
-      },
-
-      async getQuestData({ state }, {questId}) {
-        const { SimpleQuests } = state.contracts();
-        if(!SimpleQuests || !state.defaultAccount) return;
-
-        return await SimpleQuests.methods.getQuestData(questId).call(defaultCallOptions(state));
+        console.log('getting data for ', characterId);
+        const questDataRaw = await SimpleQuests.methods.getCharacterQuestDataDetails(characterId).call(defaultCallOptions(state));
+        console.log(questDataRaw);
+        return {
+          progress: +questDataRaw[0][0],
+          type: +questDataRaw[0][1] as RequirementType,
+          reputation: +questDataRaw[0][2],
+          id: +questDataRaw[1],
+          tier: +questDataRaw[2] as Rarity,
+          requirementType: +questDataRaw[3] as RequirementType,
+          requirementRarity: +questDataRaw[4] as Rarity,
+          requirementAmount: +questDataRaw[5],
+          rewardType: +questDataRaw[6] as RewardType,
+          rewardRarity: +questDataRaw[7] as Rarity,
+          rewardAmount: +questDataRaw[8],
+          reputationAmount: +questDataRaw[9],
+        };
       },
 
       async skipQuest({ state }, {characterID}) {

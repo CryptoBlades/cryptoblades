@@ -398,14 +398,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getStarsFromProperties(getProperties(id));
     }
 
-    function getStars(uint256[] memory ids) public restricted returns (uint8[] memory) {
-        uint8[] memory stars = new uint8[](ids.length);
-        for(uint256 i = 0; i < ids.length; i++) {
-            stars[i] = getStars(ids[i]);
-        }
-        return stars;
-    }
-
     function getStarsFromProperties(uint16 properties) public pure returns (uint8) {
         return uint8(properties & 0x7); // first two bits for stars
     }
@@ -590,12 +582,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         address burnOwner = ownerOf(burnID);
         _burn(burnID);
         emit Burned(burnOwner, burnID);
-    }
-
-    function burnWithoutDust(uint256[] memory burnIDs) public restricted {
-        for(uint i = 0; i < burnIDs.length; i++) {
-            burnWithoutDust(burnIDs[i]);
-        }
     }
 
     function reforge(uint256 reforgeID, uint256 burnID) public restricted {

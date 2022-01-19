@@ -1,4 +1,5 @@
-import {QuestData} from '@/views/Quests.vue';
+import {Quest} from '@/views/Quests.vue';
+
 
 export interface Nft {
   id: number | string;
@@ -19,7 +20,7 @@ export interface Nft {
   effect?: number;
   tier?: number;
   chunkId?: number;
-  questData?: QuestData;
+  quest?: Quest;
 }
 
 export type NftType = 'weapon' | 'character' | 'shield';
