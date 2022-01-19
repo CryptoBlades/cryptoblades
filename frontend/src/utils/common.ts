@@ -2,8 +2,7 @@ import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import config from '../../app-config.json';
-import createRouter from '../router';
-const router = createRouter();
+import {router} from '../main';
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
 BigNumber.config({ EXPONENTIAL_AT: 100 });
