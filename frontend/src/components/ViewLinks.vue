@@ -55,13 +55,25 @@
       </li>
     </router-link>
 
+    <router-link v-if="featureFlagMerchandise" :to="{ name: 'merchandise' }" exact class="nav-link">
+      <li class="nav-item nav-top-links">
+        <span class="gtag-link-others" :class="supportsMerchandise ? '' : 'disabled'">{{ $t("viewLink.merchandise") }} <hint
+          v-if="!supportsMerchandise" class="hint"
+          :text="$t('viewLink.merchandiseNotSupportedTooltip')"/></span>
+      </li>
+    </router-link>
+
   </b-navbar-nav>
 </template>
 
 <script>
-import {market, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
+import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
+import {mapGetters, mapMutations} from 'vuex';
+import Events from '@/events';
+import Vue from 'vue';
+import Hint from '@/components/Hint';
 
-export default {
+export default Vue.extend({
   data() {
     return {
       stakeOnly,
@@ -70,9 +82,29 @@ export default {
       portal,
       pvp,
       quests,
+      merchandise,
+      supportsMerchandise: false,
     };
   },
-};
+
+  computed: {
+    ...mapGetters(['getCurrentChainSupportsMerchandise']),
+  },
+
+  mounted() {
+    this.updateCurrentChainSupportsMerchandise();
+    this.supportsMerchandise = this.getCurrentChainSupportsMerchandise;
+    Events.$on('setting:currentChain', () => {
+      this.supportsMerchandise = this.getCurrentChainSupportsMerchandise;
+    });
+  },
+  methods: {
+    ...mapMutations(['updateCurrentChainSupportsMerchandise']),
+  },
+  components: {
+    Hint,
+  },
+});
 </script>
 
 <style scoped>
@@ -84,5 +116,10 @@ a {
   color: #BFA765;
   font-size: 1.1em;
   padding: 0 5px 0 5px;
+}
+
+.disabled {
+  cursor: not-allowed;
+  color: gray !important;
 }
 </style>

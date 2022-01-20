@@ -1,11 +1,45 @@
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
+import config from '../../app-config.json';
+import {router} from '../main';
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
 BigNumber.config({ EXPONENTIAL_AT: 100 });
 
 const web3 = new Web3(Web3.givenProvider || process.env.VUE_APP_WEB3_FALLBACK_PROVIDER);
+
+export function addChainToRouter(chain: string){
+  router.replace(
+    {
+      query: Object.assign({ ...router.currentRoute.query }, { chain }),
+    },
+    () => {}
+  );
+}
+
+interface Config {
+  environments: Record<string, Chain>;
+}
+
+interface Chain {
+  chains: Record<string, Record<string, any>>;
+}
+
+// executes when network is changed in MetaMask
+(window as any).ethereum.on('chainChanged', (chainIdHex: string) => {
+  const chainId = parseInt(chainIdHex, 16);
+  const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
+  const chains = (config as Config).environments[env].chains;
+
+  for (const [chainName, values] of Object.entries(chains)){
+    if(+values.VUE_APP_NETWORK_ID === chainId){
+      localStorage.setItem('currentChain', chainName);
+      addChainToRouter(chainName);
+    }
+  }
+  window.location.reload();
+});
 
 export const apiUrl = (url: string) => `${process.env.VUE_APP_API_URL || 'https://api.cryptoblades.io'}/${url}`;
 
@@ -67,4 +101,13 @@ export const addTokenToMetamask = async (address: string, symbol: string): Promi
   } catch (error) {
     console.error(error);
   }
+};
+
+export const currentChainSupportsMerchandise = () => {
+  const currentChain = localStorage.getItem('currentChain') || 'BSC';
+  const merchandiseSupportedChains = config.merchandiseSupportedChains;
+  if (!currentChain || !merchandiseSupportedChains) {
+    return false;
+  }
+  return merchandiseSupportedChains.includes(currentChain);
 };

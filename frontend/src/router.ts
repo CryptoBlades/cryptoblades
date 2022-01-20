@@ -16,7 +16,9 @@ import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
 
-import {market, portal, pvp, quests, raid, stakeOnly} from './feature-flags';
+import {market, portal, raid, stakeOnly, pvp, quests, merchandise} from './feature-flags';
+import Merchandise from '@/components/smart/Merchandise.vue';
+import {currentChainSupportsMerchandise} from '@/utils/common';
 
 export default function createRouter() {
   if (stakeOnly) {
@@ -63,6 +65,16 @@ export default function createRouter() {
 
   if (quests) {
     router.addRoute({path: '/quests', name: 'quests', component: Quests});
+  }
+
+  if(merchandise){
+    const merchandiseRoute = { path: '/merchandise', name: 'merchandise', component:Merchandise,
+      beforeEnter: (to: any, from: any, next: any) => {
+        if (to.name === 'merchandise' && !currentChainSupportsMerchandise()) next(from);
+        else next();
+      }
+    };
+    router.addRoute(merchandiseRoute);
   }
 
   return router;

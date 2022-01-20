@@ -41,6 +41,7 @@ export interface IStakeOverviewState {
   rewardsDuration: number;
   totalSupply: string;
   minimumStakeTime: number;
+  rewardDistributionTimeLeft: number;
 }
 
 export interface IRaidState {
@@ -144,6 +145,7 @@ export interface IState {
   maxStamina: number;
   ownedDust: string[];
   cartEntries: CartEntry[];
+  currentChainSupportsMerchandise: boolean;
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
@@ -184,6 +186,8 @@ export interface IState {
   nfts: Record<string, Record<number | string, Nft>>;
 
   partnerProjects: Record<number, IPartnerProject>;
+  partnerProjectMultipliers: Record<number, string>;
+  partnerProjectRatios: Record<number, string>;
   payoutCurrencyId: string;
   defaultSlippage: string;
 

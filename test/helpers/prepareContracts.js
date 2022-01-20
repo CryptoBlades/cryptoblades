@@ -74,6 +74,7 @@ async function prepareContracts(accounts) {
 
   const charas_GAME_ADMIN = await characters.GAME_ADMIN();
   const weps_GAME_ADMIN = await weapons.GAME_ADMIN();
+  const shields_GAME_ADMIN = await shields.GAME_ADMIN();
   const GAME_ADMIN = await game.GAME_ADMIN();
 
   if (typeof randoms.setMain === 'function') {
@@ -99,6 +100,7 @@ async function prepareContracts(accounts) {
 
   await weapons.grantRole(weps_GAME_ADMIN, game.address);
   await weapons.grantRole(weps_GAME_ADMIN, pvpArena.address);
+  await shields.grantRole(shields_GAME_ADMIN, pvpArena.address);
   await promos.grantRole(promos_GAME_ADMIN, game.address);
   await promos.grantRole(promos_GAME_ADMIN, characters.address);
   await game.grantRole(GAME_ADMIN, raid.address);

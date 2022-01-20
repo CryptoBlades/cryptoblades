@@ -4,75 +4,112 @@
     </div>
     <div v-else class="arenaPreparationWrapper">    <div class="mainWrapper">
       <div class="arenaSignup">
-        <h1 class="title">ARENA SIGNUP</h1>
-        <p>Enter the arena and win rewards ($SKILL).</p>
+        <h1 class="title">
+          {{$t('pvp.arenaSignUp')}}
+        </h1>
+        <p>
+          {{$t('pvp.enterAndWin')}}($SKILL).
+        </p>
         <div>
           <div class="top">
             <div class="circle">
               <img :src="getIconSource" />
             </div>
-            <p>Equip a Sword and a Shield (optional).</p>
+            <p>
+              {{$t('pvp.equipSwordAndShield')}}
+            </p>
           </div>
           <div class="bottomWeapons">
             <pvp-separator dark vertical />
             <div class="weaponsWrapper">
               <div v-if="!selectedWeaponId" :class="{ disabledStyles: ownedWeaponsWithInformation.length === 0 }" class="weaponButtonWrapper">
-                <button class="selectWeaponButton" id="weapon-popover">
-                  <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
-                  <b-popover ref="popover" target="weapon-popover" triggers="hover" placement="right" custom-class="popoverWrapper">
-                    <p class="popoverTitle">Weapons</p>
+                <a tabindex="0" class="selectWeaponButton" id="weapon-popover">
+                  <div class="placeholderImageWrapper">
+                    <img src="../../assets/swordPlaceholder.svg" alt="sword" />
+                  </div>
+                  <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
+                    <p class="popoverTitle">{{$t('pvp.weapons')}}</p>
+                    <select v-model="weaponStarFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
+                      <option v-for="weaponStarOption in weaponStarOptions" :value="weaponStarOption.value" :key="weaponStarOption.value">
+                        {{ weaponStarOption.text }}
+                      </option>
+                    </select>
+                    <select v-model="weaponElementFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
+                      <option v-for="weaponElementOption in weaponElementOptions" :value="weaponElementOption.value" :key="weaponElementOption.value">
+                        {{ weaponElementOption.text }}
+                      </option>
+                    </select>
+                    <button v-if="weaponStarFilter || weaponElementFilter" @click="handleClearWeaponFilters()" class="clearFiltersButton">Clear</button>
                     <div v-if="ownedWeaponsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-weapon
-                        v-for="weapon in ownedWeaponsWithInformation"
+                        v-for="weapon in filteredWeaponsWithInformation"
                         :key="weapon.weaponId"
-                        :stars="weapon.information.stars + 1"
-                        :element="weapon.information.element"
+                        :weapon="weapon.information"
                         :weaponId="weapon.weaponId"
                         :class="{'disabled': ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)}"
-                        @click="handleWeaponClick(weapon.weaponId, weapon.information.stars, weapon.information.element)"
+                        @click="handleWeaponClick(weapon.weaponId, weapon.information)"
                         :disabled="ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)"
                       />
                     </div>
-                    <div v-else class="noWeaponsOrShields">You have no weapons.</div>
+                    <div v-else class="noWeaponsOrShields">
+                      {{$t('pvp.noWeapons')}}
+                    </div>
                   </b-popover>
-                </button>
+                </a>
               </div>
               <div v-else class="weaponButtonWrapper">
                 <pvp-weapon
-                  :stars="selectedWeaponStars + 1"
-                  :element="selectedWeaponElement"
+                  :weapon="selectedWeapon"
                   :weaponId="selectedWeaponId"
+                  class="weaponPlaceholder"
                 />
-                <button @click="handleClearWeapon()" class="clearWeaponButton">Clear</button>
+                <button @click="handleClearWeapon()" class="clearWeaponButton">
+                  {{$t('pvp.clear')}}
+                </button>
               </div>
               <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
-                <button class="selectWeaponButton" id="shield-popover">
-                  <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
-                  <b-popover target="shield-popover" placement="right" triggers="hover" custom-class="popoverWrapper">
-                    <p class="popoverTitle">Shields</p>
+                <a tabindex="0" class="selectWeaponButton" id="shield-popover">
+                  <div class="placeholderImageWrapper">
+                    <img src="../../assets/shieldPlaceholder.svg" alt="shield" />
+                  </div>
+                   <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
+                    <p class="popoverTitle">{{$t('pvp.shields')}}</p>
+                    <select v-model="shieldStarFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
+                      <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
+                        {{ shieldStarOption.text }}
+                      </option>
+                    </select>
+                    <select v-model="shieldElementFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
+                      <option v-for="shieldElementOption in shieldElementOptions" :value="shieldElementOption.value" :key="shieldElementOption.value">
+                        {{ shieldElementOption.text }}
+                      </option>
+                    </select>
+                    <button v-if="shieldStarFilter || shieldElementFilter" @click="handleClearShieldFilters()" class="clearFiltersButton">Clear</button>
                     <div v-if="ownedShieldsWithInformation.length !== 0" class="popoverGrid">
                       <pvp-shield
-                        v-for="shield in ownedShieldsWithInformation"
+                        v-for="shield in filteredShieldsWithInformation"
                         :key="shield.shieldId"
-                        :stars="shield.information.stars + 1"
-                        :element="shield.information.element"
+                        :shield="shield.information"
                         :shieldId="shield.shieldId"
                         :class="{'disabled': ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)}"
-                        @click="handleShieldClick(shield.shieldId, shield.information.stars, shield.information.element)"
+                        @click="handleShieldClick(shield.shieldId, shield.information)"
                         :disabled="ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)"
                       />
                     </div>
-                    <div v-else class="noWeaponsOrShields">You have no shields.</div>
+                    <div v-else class="noWeaponsOrShields">
+                      {{$t('pvp.noShields')}}
+                    </div>
                   </b-popover>
-                </button>
+                </a>
               </div>
               <div v-else class="shieldButtonWrapper">
                 <pvp-shield
-                  :stars="selectedShieldStars + 1"
-                  :element="selectedShieldElement"
+                  :shield="selectedShield"
                   :shieldId="selectedShieldId"
                 />
-                <button @click="handleClearShield" class="clearShieldButton">Clear</button>
+                <button @click="handleClearShield" class="clearShieldButton">
+                  {{$t('pvp.clear')}}
+                </button>
               </div>
             </div>
           </div>
@@ -82,36 +119,43 @@
           <div class="circle">
             <img :src="getIconSource" />
           </div>
-          <p>Enter the Arena</p>
+          <p>
+            {{$t('pvp.enterTheArena')}}
+          </p>
         </div>
         <div class="bottomList">
           <pvp-separator dark vertical />
           <div>
             <ul>
               <li>
-                <div class="bulletpoint"></div> Entering the Arena will cost you {{ formattedEntryWager }} $SKILL.
+                <div class="bulletpoint"></div>
+                {{$t('pvp.enterArenaWillCost', {formattedEntryWager})}}
               </li>
               <li>
-                <div class="bulletpoint"></div> Players can attack you while you are in the
-                Arena.
+                <div class="bulletpoint"></div>
+                {{$t('pvp.playersCanAttackYou')}}
               </li>
               <li>
-                <div class="bulletpoint"></div> Leaving the Arena will cost you {{ +formattedEntryWager / 4 }} $SKILL.
+                <div class="bulletpoint"></div>
+                {{$t('pvp.leavingWillCost', {leavingArenaCost})}}
               </li>
             </ul>
             <label class="checkboxWrapper">
               <div class="checkboxInnerWrapper">
                 <input type="checkbox" v-model="checkBoxAgreed"  class="checkboxInput"/>
               </div>
-              <span>I understand.</span>
+              <span>
+                {{$t('pvp.iUnderstand')}}
+              </span>
             </label>
           </div>
         </div>
         </div>
         <div class="enterArenaButtonWrapper">
           <pvp-button
+            class="pvpButton"
             @click="handleEnterArenaClick()"
-            buttonText="ENTER ARENA"
+            :buttonText="$t('pvp.enterArena')"
             :buttonsubText="'$SKILL: ' + formattedEntryWager"
             :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
           />
@@ -120,47 +164,20 @@
       <div class="characterImage">
         <pvp-character :characterId="currentCharacterId" />
       </div>
-      <div class="arenaInformation">
-        <h1 class="title">ARENA INFORMATION</h1>
-        <div class="tokenCard">
-          <img src="../../assets/skillToken.png" alt="skill token" />
-          <div class="tokenCardInfo">
-            <span class="text">PVP Rewards Pool ($SKILL)</span>
-            <span class="number">{{ formatedTierRewardsPool }}</span>
-          </div>
-        </div>
-        <ul class="topPlayersList">
-          <li class="header">
-            <span>Top Players</span><span>Rank</span>
-          </li>
-          <li>
-            <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[0] && tierTopRankers[0].rank || 'N/A' }}</span>
-          </li>
-          <li>
-            <span>Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[1] && tierTopRankers[1].rank || 'N/A'}}</span>
-          </li>
-          <li>
-            <span>Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || 'N/A' }}</span>
-            <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
-          </li>
-        </ul>
-        <!-- <a href="#" class="rankings">View all rankings</a> -->
-        <ul class="characterAttrsList">
-          <li class="characterName">{{ characterInformation.name || '' }}</li>
-          <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
-          <!-- <li><span>Damage multiplier</span><span>453</span></li> -->
-          <li><span>Level</span><span>{{ characterInformation.level }}</span></li>
-          <li><span>Current rank</span><span>{{ characterInformation.rank }}</span></li>
-        </ul>
-      </div>
+      <pvp-arena-information
+        class="arenaInformation"
+        :tierRewardsPool="tierRewardsPool"
+        :tierTopRankers="tierTopRankers"
+        :currentRankedSeason="currentRankedSeason"
+        :secondsBeforeNextSeason="secondsBeforeNextSeason"
+        :characterInformation="characterInformation"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import BN from 'bignumber.js';
 import { BPopover } from 'bootstrap-vue';
 import PvPWeapon from './PvPWeapon.vue';
@@ -170,6 +187,26 @@ import PvPButton from './PvPButton.vue';
 import PvPSeparator from './PvPSeparator.vue';
 import checkIcon from '../../assets/checkImage.svg';
 import ellipseIcon from '../../assets/ellipseImage.svg';
+import i18n from '../../i18n';
+import PvPArenaInfo from './PvPArenaInfo.vue';
+
+const defaultStarOptions = [
+  { text: i18n.t('nftList.sorts.any'), value: 0 },
+  { text: '1', value: 1 },
+  { text: '2', value: 2 },
+  { text: '3', value: 3 },
+  { text: '4', value: 4 },
+  { text: '5', value: 5 },
+];
+
+const defaultElementOptions = [
+  { value: '', text: i18n.t('nftList.sorts.any') },
+  { value: 'Earth', text: i18n.t('traits.earth') },
+  { value: 'Fire', text: i18n.t('traits.fire') },
+  { value: 'Lightning', text: i18n.t('traits.lightning') },
+  { value: 'Water', text: i18n.t('traits.water') }
+];
+
 export default {
   components: {
     'pvp-weapon': PvPWeapon,
@@ -177,14 +214,22 @@ export default {
     'pvp-button': PvPButton,
     'pvp-separator': PvPSeparator,
     'pvp-character': PvPCharacter,
-    'b-popover': BPopover
+    'b-popover': BPopover,
+    'pvp-arena-information': PvPArenaInfo,
   },
+
   props: {
     tierRewardsPool: {
       default: null
     },
     tierTopRankers: {
       default: []
+    },
+    currentRankedSeason: {
+      default: null
+    },
+    secondsBeforeNextSeason: {
+      default: null
     },
     characterInformation: {
       default: {
@@ -216,12 +261,20 @@ export default {
     return {
       loading: false,
       selectedWeaponId: null,
-      selectedWeaponStars: null,
-      selectedWeaponElement: null,
+      selectedWeapon: null,
       selectedShieldId: null,
-      selectedShieldStars: null,
-      selectedShieldElement: null,
+      selectedShield: null,
       checkBoxAgreed: false,
+      filteredWeaponsWithInformation: this.ownedWeaponsWithInformation,
+      filteredShieldsWithInformation: this.ownedShieldsWithInformation,
+      weaponStarFilter: 0,
+      weaponStarOptions: defaultStarOptions,
+      weaponElementFilter: '',
+      weaponElementOptions: defaultElementOptions,
+      shieldStarFilter: 0,
+      shieldStarOptions: defaultStarOptions,
+      shieldElementFilter: '',
+      shieldElementOptions: defaultElementOptions
     };
   },
   computed: {
@@ -229,39 +282,48 @@ export default {
     formattedEntryWager() {
       return new BN(this.entryWager).div(new BN(10).pow(18)).toFixed(0);
     },
-    formatedTierRewardsPool() {
-      return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
+    leavingArenaCost() {
+      return +this.formattedEntryWager / 4;
     },
     getIconSource () {
       return this.checkBoxAgreed && this.selectedWeaponId ? checkIcon : ellipseIcon;
     },
   },
   methods: {
+    ...mapActions([
+      'approvePvpSkillSpending',
+      'enterArena'
+    ]),
+
+    handleClearWeaponFilters() {
+      this.weaponStarFilter = 0;
+      this.weaponElementFilter = '';
+    },
+    handleClearShieldFilters() {
+      this.shieldStarFilter = 0;
+      this.shieldElementFilter = '';
+    },
     handleErrorMessage(value, errorMessage, returnedMessage) {
       if(value.includes(`reverted with reason string '${errorMessage}'`)) {
         return this.$dialog.notify.error(returnedMessage);
       }
       return 'There has been an error. Try again.';
     },
-    handleWeaponClick(weaponId, weaponStars, weaponElement) {
+    handleWeaponClick(weaponId, weapon) {
       this.selectedWeaponId = weaponId;
-      this.selectedWeaponStars = weaponStars;
-      this.selectedWeaponElement = weaponElement;
+      this.selectedWeapon = weapon;
     },
     handleClearWeapon() {
       this.selectedWeaponId = null;
-      this.selectedWeaponStars = null;
-      this.selectedWeaponElement = null;
+      this.selectedWeapon = null;
     },
-    handleShieldClick(shieldId, shieldStars, shieldElement) {
+    handleShieldClick(shieldId, shield) {
       this.selectedShieldId = shieldId;
-      this.selectedShieldStars = shieldStars;
-      this.selectedShieldElement = shieldElement;
+      this.selectedShield = shield;
     },
     handleClearShield() {
       this.selectedShieldId = null;
-      this.selectedShieldStars = null;
-      this.selectedShieldElement = null;
+      this.selectedShield = null;
     },
     onOpen() {
       this.$refs.popover.$emit('open');
@@ -279,11 +341,7 @@ export default {
         const isUsingShield = this.selectedShieldId !== null;
         const shieldId = this.selectedShieldId === null ? 0 : this.selectedShieldId;
         try {
-          await this.contracts().SkillToken.methods
-            .approve(this.contracts().PvpArena.options.address, this.entryWager)
-            .send({
-              from: this.defaultAccount
-            });
+          await this.approvePvpSkillSpending(this.entryWager);
         } catch(err) {
           console.log('Enter Arena Approval Error: ', err);
           this.loading = false;
@@ -291,11 +349,12 @@ export default {
           return;
         }
         try {
-          await this.contracts().PvpArena.methods
-            .enterArena(this.currentCharacterId, this.selectedWeaponId, shieldId, isUsingShield)
-            .send({
-              from: this.defaultAccount
-            });
+          await this.enterArena({
+            characterId: this.currentCharacterId,
+            weaponId: this.selectedWeaponId,
+            shieldId,
+            useShield: isUsingShield
+          });
         } catch(err){
           console.log('Enter Arena Error: ', err);
           this.loading = false;
@@ -312,6 +371,96 @@ export default {
       this.loading = false;
     },
   },
+
+  watch: {
+    weaponStarFilter(value) {
+      if (!value && !this.weaponElementFilter) {
+        if (!this.weaponElementFilter) {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation;
+        } else {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.element === this.weaponElementFilter;
+          });
+        }
+      } else {
+        if (!this.weaponElementFilter) {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.stars === value - 1;
+          });
+        } else {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.stars === value - 1 && weapon.information.element === this.weaponElementFilter;
+          });
+        }
+      }
+    },
+
+    weaponElementFilter(value) {
+      if (!value) {
+        if (!this.weaponStarFilter) {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation;
+        } else {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.stars === this.weaponStarFilter - 1;
+          });
+        }
+      } else {
+        if (!this.weaponStarFilter) {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.element === value;
+          });
+        } else {
+          this.filteredWeaponsWithInformation = this.ownedWeaponsWithInformation.filter((weapon) => {
+            return weapon.information.stars === this.weaponStarFilter - 1 && weapon.information.element === value;
+          });
+        }
+      }
+    },
+
+    shieldStarFilter(value) {
+      if (!value && !this.shieldElementFilter) {
+        if (!this.shieldElementFilter) {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation;
+        } else {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.element === this.shieldElementFilter;
+          });
+        }
+      } else {
+        if (!this.shieldElementFilter) {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.stars === value - 1;
+          });
+        } else {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.stars === value - 1 && shield.information.element === this.shieldElementFilter;
+          });
+        }
+      }
+    },
+
+    shieldElementFilter(value) {
+      if (!value) {
+        if (!this.shieldStarFilter) {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation;
+        } else {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.stars === this.shieldStarFilter - 1;
+          });
+        }
+      } else {
+        if (!this.shieldStarFilter) {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.element === value;
+          });
+        } else {
+          this.filteredShieldsWithInformation = this.ownedShieldsWithInformation.filter((shield) => {
+            return shield.information.stars === this.shieldStarFilter - 1 && shield.information.element === value;
+          });
+        }
+      }
+    }
+  }
 };
 </script>
 
@@ -332,7 +481,6 @@ p, li, span {
   background-color: black;
   border: 1px solid #cec198;
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
   .popoverTitle {
     color: #cec198;
     font-size: 1.25rem;
@@ -344,12 +492,37 @@ p, li, span {
     grid-template-rows: repeat(4, 1fr);
     grid-column-gap: 1rem;
     grid-row-gap: 2rem;
+    margin-top: 1rem;
   }
 }
+.clearFiltersButton {
+  background-color: transparent;
+  font-family: 'Roboto';
+  color: #cec198;
+  font-size: .75rem;
+  border: none;
+}
+.selectFilter {
+  margin-right: 1rem;
+  padding: .25rem;
+  font-family: 'Roboto';
+  font-size: .75rem;
+  color: #b4b0a7;
+  background-color: #151515;
+  border-color: transparent;
+  border-radius: 0.2rem;
+  width: 6rem;
+}
+.selectFilter:first-of-type {
+  width: 4rem
+}
 .noWeaponsOrShields {
+  display: flex;
+  margin: 0 auto;
   font-family: 'Roboto';
   color: #b4b0a7;
-  font-size: 1rem;
+  font-size: 0.75rem;
+  margin-top: 1rem;
 }
 .mainWrapper {
   display: flex;
@@ -364,6 +537,7 @@ p, li, span {
   font-family: 'Trajan';
   line-height: 1.75rem;
   padding: 0;
+  text-transform: uppercase;
 }
 .arenaSignup {
   p {
@@ -444,6 +618,18 @@ p, li, span {
         border-radius: 0.375rem;
         border: 1px solid #cec198;
         background-color: #141414;
+        :hover {
+          cursor: pointer;
+        }
+        .placeholderImageWrapper{
+          width: 4.5rem;
+          height: 4.5rem;
+          padding: 1rem;
+          img {
+            width: 100%;
+            height: 100%;
+          }
+        }
         .placeholderImage {
           width: 2.25rem;
           height: 2.25rem;
@@ -477,7 +663,7 @@ p, li, span {
       }
     }
     .checkboxWrapper {
-      display: inline-block;
+      display: inline-flex;
       align-items: center;
       vertical-align: middle;
       margin-left: 1.75rem;
@@ -490,7 +676,6 @@ p, li, span {
         .checkboxInput {
           width: 1.25rem;
           height: 1.25rem;
-          cursor: pointer;
           background: rgba(40,40,40,0.2);
           appearance: none;
           position: relative;
@@ -506,6 +691,7 @@ p, li, span {
     }
       span {
         margin-left: 2rem;
+        margin-bottom: 0.35rem;
         color: #b4b0a7;
         font-size: 0.875rem;
       }
@@ -515,100 +701,27 @@ p, li, span {
     width: 15rem;
     height: 5rem;
     margin-top: 3rem;
+
+    .pvpButton {
+      text-transform: uppercase;
+    }
   }
 }
 .characterImage {
   display: flex;
-  width: 50%;
+  width: 40%;
   padding: 3rem 0;
   @media only screen and (min-width: 1440px) {
-    width: 40%;
+    width: 30%;
     margin: 0;
   }
   @media only screen and (min-width: 1980px) {
-    width: 30%;
+    width: 20%;
   }
 }
 .arenaInformation {
   display: flex;
   flex-direction: column;
-  .tokenCard {
-    display: flex;
-    padding: 1rem 2rem 1rem 1.5rem;
-    border-radius: 0.375rem;
-    align-items: center;
-    vertical-align: middle;
-    background-color: rgba(0, 0, 0, 0.3);
-    img {
-      width: 4rem;
-      height: 4rem;
-    }
-    .tokenCardInfo {
-      display: flex;
-      flex-direction: column;
-      margin-left: 1rem;
-      .text {
-        color: #cec198;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-      }
-      .number {
-        color: #ffffff;
-        font-size: 1.25rem;
-        line-height: 1.75rem;
-      }
-    }
-  }
-  .topPlayersList,
-  .characterAttrsList {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-top: 1.5rem;
-    padding: 0;
-    span {
-      color: #b4b0a7;
-      font-size: 0.75rem;
-      line-height: 1rem;
-    }
-    span:nth-of-type(2) {
-      margin-left: auto;
-    }
-    li {
-      display: flex;
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #363636;
-    }
-    li:first-of-type,
-    li:last-of-type {
-      padding-bottom: 0;
-      border-style: none;
-    }
-  }
-  .topPlayersList {
-    .header {
-      margin-bottom: 1rem;
-      span {
-        color: #cec198;
-        font-size: 0.875rem;
-      }
-    }
-  }
-  .rankings {
-    margin-top: 0.75rem;
-    color: #cec198;
-    font-size: 0.875rem;
-  }
-  .characterAttrsList {
-    margin-top: 2.25rem;
-    .characterName {
-      margin-bottom: 1rem;
-      color: #cec198;
-      font-size: 1.25rem;
-      font-family: 'Trajan';
-    }
-  }
 }
 .loadingSpinner {
   display: flex;

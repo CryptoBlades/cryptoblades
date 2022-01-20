@@ -24,6 +24,7 @@ import { abi as blacksmithAbi } from '../../build/contracts/Blacksmith.json';
 import { abi as shieldsAbi } from '../../build/contracts/Shields.json';
 import { abi as garrisonAbi } from '../../build/contracts/Garrison.json';
 import { abi as cbkLandSaleAbi } from '../../build/contracts/CBKLandSale.json';
+import { abi as promosAbi } from '../../build/contracts/Promos.json';
 import { abi as merchandiseAbi, networks as merchandiseNetworks } from '../../build/contracts/Merchandise.json';
 import { abi as cbkLandAbi } from '../../build/contracts/CBKLand.json';
 import { abi as weaponRenameTagConsumablesAbi } from '../../build/contracts/WeaponRenameTagConsumables.json';
@@ -253,6 +254,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const shieldsAddr = await Blacksmith.methods.shields().call();
   const Shields = new web3.eth.Contract(shieldsAbi as Abi, shieldsAddr);
 
+  const promosAddr = await Characters.methods.promos().call();
+  const Promos = new web3.eth.Contract(promosAbi as Abi, promosAddr);
+
   const weaponRenameTagConsumablesIndex = await Blacksmith.methods.ITEM_WEAPON_RENAME().call();
   const weaponRenameTagConsumablesAddr = await Blacksmith.methods.getAddressOfItem(weaponRenameTagConsumablesIndex).call();
   const WeaponRenameTagConsumables = new web3.eth.Contract(weaponRenameTagConsumablesAbi as Abi, weaponRenameTagConsumablesAddr);
@@ -377,7 +381,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
-    NFTStorage, CBKLandSale, CBKLand, Merchandise,
+    NFTStorage, CBKLandSale, CBKLand, Merchandise, Promos,
     ...raidContracts,
     ...pvpContracts,
     ...marketContracts,

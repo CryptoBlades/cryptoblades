@@ -27,7 +27,7 @@ const client = axios.create({
 
 export default {
   async execute(method: HttpMethod, resource: string, data?: any, params?: any): Promise<ApiResponse<any>> {
-    const accessToken = process.env.VUE_APP_API_KEY || 'accessToken';
+    const accessToken = process.env.VUE_APP_API_KEY;
     return client({
       method,
       url: resource,

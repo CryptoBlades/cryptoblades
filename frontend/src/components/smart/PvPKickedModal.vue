@@ -2,70 +2,17 @@
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
       <img src="../../assets/separatorTop.svg" alt="Top separator">
-      <div v-if="result === 'win'" class="modalTitle">
-        {{$t('pvp.wonDuel')}}
-      </div>
-      <div v-else class="modalTitle">
-        {{$t('pvp.lostDuel')}}
-      </div>
+      <div class="modalTitle">{{$t('pvp.kicked')}}</div>
       <ul>
         <li>
-          <span>
-            {{$t('pvp.youRolled')}}
-          </span>
-          <span class="chevron">></span>
-          <span>{{attackerRoll}}</span>
-        </li>
-        <li>
-          <span>
-            {{$t('pvp.attackerPower')}}
-          </span>
-          <span class="chevron">></span>
-          <span>{{attackerPower}}</span>
-        </li>
-
-        <pvp-separator />
-        <li>
-          <span>
-            {{$t('pvp.opponentRolled')}}
-          </span>
-          <span class="chevron">></span>
-          <span>{{ defenderRoll }}</span>
-        </li>
-        <li>
-          <span>
-            {{$t('pvp.opponentPower')}}
-          </span>
-          <span class="chevron">></span>
-          <span>{{ defenderPower }}</span>
+          <span>{{$t('pvp.lastDefeated')}}{{ kickedByName }}</span>
         </li>
         <pvp-separator />
       </ul>
-      <div class="earnWrapper">
-        <span v-if="result === 'win'">
-          {{$t('pvp.youEarned', {skillEarned})}}
-        </span>
-        <span v-else>
-          {{$t('pvp.youLost', {skillEarned})}}
-        </span>
-      </div>
-      <div class="rankWrapper">
-        <span>
-          {{$t('pvp.updatedRank')}}
-        </span>
-        <span>
-          {{ userCurrentRank }}
-        </span>
-        <span>({{ rankVariation }}
-          {{$t('pvp.rank')}})
-        </span>
-      </div>
       <img src="../../assets/separatorBottom.svg" alt="Bottom separator">
     </div>
     <div class="closeWrapper">
-      <p>
-        {{$t('pvp.tapAnywhere')}}
-      </p>
+      <p>{{$t('pvp.tapAnywhere')}}</p>
       <button @click="close">
         <img src="../../assets/closeModal.svg" alt="Bottom separator">
       </button>
@@ -75,6 +22,7 @@
 
 <script>
 import PvPSeparator from './PvPSeparator.vue';
+import { getCharacterNameFromSeed } from '../../character-name';
 
 export default {
   components: {
@@ -82,28 +30,7 @@ export default {
   },
 
   props: {
-    result: {
-      required: true
-    },
-    attackerRoll: {
-      default: null
-    },
-    defenderRoll: {
-      default: null
-    },
-    skillEarned: {
-      default: null
-    },
-    rankVariation: {
-      default: null
-    },
-    userCurrentRank: {
-      default: null
-    },
-    attackerPower: {
-      default: null
-    },
-    defenderPower: {
+    kickedBy: {
       default: null
     }
   },
@@ -112,6 +39,12 @@ export default {
     return {
       showModal: false
     };
+  },
+
+  computed: {
+    kickedByName() {
+      return getCharacterNameFromSeed(this.kickedBy);
+    }
   },
 
   methods: {

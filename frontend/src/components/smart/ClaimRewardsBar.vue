@@ -98,7 +98,6 @@
         <div class="d-flex flex-row w-100 align-items-baseline">
           <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
           <b-form-select class="w-50 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-            <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
             <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
           </b-form-select>
         </div>
@@ -122,6 +121,16 @@
         <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
           <h5>{{$t('ClaimRewardsBar.partnerTokenClaimed')}}</h5>
         </div>
+        <div v-if="selectedPartneredProject" class="mt-3">
+          <h6 v-if="formattedMultiplier < 0.5" class="very-low-multiplier">{{$t('ClaimRewardsBar.lowMultiplier', {currentMultiplier})}}</h6>
+          <h6 >{{
+              $t('ClaimRewardsBar.realWithdrawValueClaimable', {
+                actualAmount: (skillAmount / formattedRatio * formattedMultiplier).toFixed(4),
+                tokenSymbol: selectedPartneredProject.tokenSymbol,
+                skillAmount: (+skillAmount).toFixed(4)
+              })
+            }}</h6>
+        </div>
         <div class="mt-3" v-if="!selectedPartneredProject">
           <h5>{{withdrawalInfoText}}</h5>
           <h6>{{$t('ClaimRewardsBar.earlyWithdrawTax')}}: {{ formattedRewardsClaimTax }} {{$t('ClaimRewardsBar.taxReduce')}} {{getTaxTimerNextTick}}</h6>
@@ -133,15 +142,15 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { Accessors } from 'vue/types/options';
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
+import {Accessors} from 'vue/types/options';
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import BigNumber from 'bignumber.js';
-import { RequiredXp } from '../../interfaces';
-import { ICharacter } from '@/interfaces';
-import { toBN, fromWeiEther } from '../../utils/common';
-import { secondsToDDHHMMSS } from '../../utils/date-time';
-import { getCleanName } from '../../rename-censor';
-import { SupportedProject } from '@/views/Treasury.vue';
+import {RequiredXp} from '../../interfaces';
+import {ICharacter} from '@/interfaces';
+import {fromWeiEther, toBN} from '../../utils/common';
+import {secondsToDDHHMMSS} from '../../utils/date-time';
+import {getCleanName} from '../../rename-censor';
+import {SupportedProject} from '@/views/Treasury.vue';
 import PartneredProject from '../PartneredProject.vue';
 import i18n from '@/i18n';
 
@@ -152,6 +161,9 @@ interface StoreMappedState {
   directStakeBonusPercent: number;
   payoutCurrencyId: string;
   defaultSlippage: string;
+  currentNetworkId: number;
+  partnerProjectMultipliers: Record<number, string>;
+  partnerProjectRatios: Record<number, string>;
 }
 
 interface StoreMappedGetters {
@@ -179,6 +191,7 @@ interface StoreMappedActions {
   fetchRemainingTokenClaimAmountPreTax(): Promise<string>;
   fetchPartnerProjects(): Promise<void>;
   getPartnerProjectMultiplier(id: number): Promise<string>;
+  getSkillToPartnerRatio(id: number): Promise<string>;
 }
 
 export default Vue.extend({
@@ -202,10 +215,19 @@ export default Vue.extend({
 
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent',
-      'payoutCurrencyId', 'defaultSlippage']) as Accessors<StoreMappedState>),
+      'payoutCurrencyId', 'defaultSlippage', 'currentNetworkId', 'partnerProjectMultipliers', 'partnerProjectRatios']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName', 'getPartnerProjects'
     ]) as Accessors<StoreMappedGetters>),
+
+    formattedMultiplier(): number {
+      return this.selectedPartneredProject && +toBN(this.partnerProjectMultipliers[+this.selectedPartneredProject.id]).div(toBN(10).pow(18)).toFixed(4) || 1;
+    },
+
+    formattedRatio(): number {
+      return this.selectedPartneredProject &&
+        +toBN(1).dividedBy(toBN(this.partnerProjectRatios[+this.selectedPartneredProject.id]).dividedBy(toBN(2).exponentiatedBy(64))).toFixed(4) || 1;
+    },
 
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
@@ -236,6 +258,10 @@ export default Vue.extend({
       return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
     },
 
+    currentMultiplier(): string {
+      return (this.formattedMultiplier*100).toFixed(2) + '%';
+    },
+
     getTaxTimerNextTick(): string {
       let frac: BigNumber;
 
@@ -256,7 +282,7 @@ export default Vue.extend({
     },
 
     skillRewardNumber(): number {
-      return +toBN(fromWeiEther(this.skillRewards)).toFixed(17);
+      return +toBN(fromWeiEther(this.skillRewards.substr(0, this.skillRewards.length - 3) + '000'));
     },
 
     withdrawalInfoText(): string {
@@ -343,7 +369,7 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimPartnerToken', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax',
-      'fetchPartnerProjects', 'getPartnerProjectMultiplier']) as StoreMappedActions),
+      'fetchPartnerProjects', 'getPartnerProjectMultiplier', 'getSkillToPartnerRatio']) as StoreMappedActions),
     ...mapMutations(['updatePayoutCurrencyId']),
 
     async onClaimTokens() {
@@ -448,5 +474,9 @@ export default Vue.extend({
 
 .invalid-amount {
   border: 2px solid red;
+}
+
+.very-low-multiplier {
+  color: rgb(223, 17, 17);
 }
 </style>

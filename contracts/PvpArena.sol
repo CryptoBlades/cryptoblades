@@ -113,9 +113,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => uint256[]) private _topRankingCharactersByTier;
     /// @dev IDs of characters available for matchmaking by tier
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
-
-    // Note: we might want the NewDuel (NewMatch) event
-
+    
     event DuelFinished(
         uint256 indexed attacker,
         uint256 indexed defender,
@@ -123,6 +121,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 attackerRoll,
         uint256 defenderRoll,
         bool attackerWon
+    );
+
+    event CharacterKicked(
+        uint256 indexed characterID,
+        uint256 kickedBy,
+        uint256 timestamp
+    );
+
+    event SeasonRestarted(
+        uint256 indexed newSeason,
+        uint256 timestamp
     );
 
     modifier characterInArena(uint256 characterID) {
@@ -256,7 +265,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         isCharacterInArena[characterID] = true;
         characters.setNftVar(characterID, 1, 1);
 
-        isWeaponInArena[characterID] = true;
+        isWeaponInArena[weaponID] = true;
         weapons.setNftVar(weaponID, 1, 1);
 
         if (useShield) {
@@ -333,9 +342,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterNotUnderAttack(characterID)
         isOwnedCharacter(characterID)
     {
+        uint256 opponentID = getOpponent(characterID);
+
         require(matchByFinder[characterID].createdAt != 0, "Not in match");
 
-        delete finderByOpponent[matchByFinder[characterID].defenderID];
+        delete finderByOpponent[opponentID];
+        if (isCharacterInArena[opponentID]) {
+            _matchableCharactersByTier[getArenaTier(opponentID)].add(opponentID);
+        }
 
         _assignOpponent(characterID);
 
@@ -444,12 +458,20 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             // We reset ranking prize pools
             rankingsPoolByTier[i] = 0;
-
+ 
             // We reset top players' scores
             for (uint256 k = 0; k < _topRankingCharactersByTier[i].length; k++) {
                 rankingPointsByCharacter[_topRankingCharactersByTier[i][k]] = 0;
             }
         }
+
+        currentRankedSeason = currentRankedSeason.add(1);
+        seasonStartedAt = block.timestamp;
+
+        emit SeasonRestarted(
+                currentRankedSeason,
+                seasonStartedAt
+            );
     }
 
     /// @dev performs a list of duels
@@ -570,6 +592,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 getEntryWager(loserID).mul(withdrawFeePercent).div(100)
             ) {
                 _removeCharacterFromArena(loserID);
+                emit CharacterKicked(
+                    loserID,
+                    winnerID,
+                    block.timestamp
+                );
             } else {
                 _matchableCharactersByTier[getArenaTier(loserID)].add(loserID);
             }
@@ -737,12 +764,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev get the top ranked characters by a character's ID
-    function getTierTopCharacters(uint256 characterID)
+    function getTierTopCharacters(uint8 tier)
         public
         view
         returns (uint256[] memory)
     {
-        uint8 tier = getArenaTier(characterID);
         uint256 arrayLength;
         // we return only the top 3 players, returning the array without the pivot ranker if it exists
         if (
@@ -907,8 +933,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint24 basePower = characters.getPower(characterID);
         uint256 weaponID = fighterByCharacter[characterID].weaponID;
         uint256 seed = randoms.getRandomSeedUsingHash(
-            msg.sender,
-            blockhash(block.number)
+            characters.ownerOf(characterID),
+            blockhash(block.number - 1)
         );
 
         bool useShield = fighterByCharacter[characterID].useShield;
@@ -1074,5 +1100,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         restricted
     {
         rankingPointsByCharacter[characterID] = newRankingPoints;
+    }
+    /// @dev returns the amount of matcheable characters
+    function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
+        uint8 tier = getArenaTier(characterID);
+        return _matchableCharactersByTier[tier].length();   
     }
 }

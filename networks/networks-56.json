@@ -1751,7 +1751,7 @@
     },
     "links": {},
     "address": "0xc6f252c2CdD4087e30608A35c022ce490B58179b",
-    "transactionHash": "0x1b85ad7b3d2012e529908578d5579cdfe71d021af80342a1d7c6fc8f67ac1e3c"
+    "transactionHash": "0xd03355960ab9d649abdfc2521095c562197c8b1bfbbad23f5733ab977706bafd"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {},
@@ -3969,7 +3969,7 @@
     "events": {},
     "links": {},
     "address": "0x812Fa2f7d89e5d837450702bd51120920dccaA99",
-    "transactionHash": "0x62f2cbbd4424ba333c8f5452d5d02ac27c124274f9dd706cd1d37c5fa3de638f"
+    "transactionHash": "0x34f662c4dada693f7e8a67e94ef1c5440220b27198833969d7f1fd0254fcbb44"
   },
   "build/contracts/WaxBridge.json": {
     "events": {

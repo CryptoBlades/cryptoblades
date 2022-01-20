@@ -204,7 +204,9 @@ export default {
         ttHtml += `<br>Element: ${wrapInSpan(this.nft.element, this.nft.element)}`;
       }
 
+      const avg = [];
       if(this.nft.stat1Value) {
+        avg.push(this.nft.stat1Value);
         ttHtml += `<br>${wrapInSpan(this.nft.stat1, this.nft.stat1)}: +${this.nft.stat1Value}`;
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
@@ -215,6 +217,7 @@ export default {
       }
 
       if(this.nft.stat2Value) {
+        avg.push(this.nft.stat2Value);
         ttHtml += `<br>${wrapInSpan(this.nft.stat2, this.nft.stat2)}: +${this.nft.stat2Value}`;
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
@@ -225,6 +228,7 @@ export default {
       }
 
       if(this.nft.stat3Value) {
+        avg.push(this.nft.stat3Value);
         ttHtml += `<br>${wrapInSpan(this.nft.stat3, this.nft.stat3)}: +${this.nft.stat3Value}`;
         if(this.currentCharacter) {
           ttHtml += ` (${wrapInSpanTextOnly(
@@ -232,6 +236,14 @@ export default {
             '+'+Stat3PercentForChar(this.nft, +this.currentCharacter.trait)+'%')
           })`;
         }
+      }
+
+      if(avg.length > 0) {
+        let totalStats = 0;
+        avg.forEach(function (stat) {
+          totalStats += stat;
+        });
+        ttHtml += `<br>${wrapInSpan('summary-text', this.$t('weaponGrid.average') + ': +' + (totalStats / avg.length).toFixed(2))}`;
       }
 
       return ttHtml;
@@ -547,55 +559,19 @@ export default {
 }
 
 .glow-1 {
-  animation: glow-1 2000ms ease-out infinite alternate;
+  box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
 }
 
 .glow-2 {
-  animation: glow-2 2000ms ease-out infinite alternate;
+  box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
 }
 
 .glow-3 {
-  animation: glow-3 2000ms ease-out infinite alternate;
+  box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
 }
 
 .glow-4 {
-  animation: glow-4 2000ms ease-out infinite alternate;
-}
-
-@keyframes glow-1 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(0, 162, 255, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
-  }
-}
-
-@keyframes glow-2 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(125, 0, 125, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
-  }
-}
-
-@keyframes glow-3 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(255, 102, 0, 0.3);
-  }
-  100% {
-    box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
-  }
-}
-
-@keyframes glow-4 {
-  0% {
-    box-shadow: inset 0 0 10px rgba(125, 0, 0, 0.5);
-  }
-  100% {
-    box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
-  }
+  box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
 }
 
 .animation {
