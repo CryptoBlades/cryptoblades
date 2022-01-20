@@ -43,7 +43,7 @@ import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
-import {Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -3183,6 +3183,60 @@ export function createStore(web3: Web3) {
           });
 
         dispatch('fetchSkillBalance');
+      },
+
+      async getQuestTemplates({state}, {tier}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const questTemplates: Quest[] = [];
+
+        const questTemplatesCount = +await SimpleQuests.methods.getQuestTemplatesCount(tier).call(defaultCallOptions(state));
+
+        if(questTemplatesCount === 0) return questTemplates;
+
+        for (let i = 0; i < questTemplatesCount; i++) {
+          const questTemplateRaw = await SimpleQuests.methods.getQuestTemplate(tier, i).call(defaultCallOptions(state));
+          questTemplates.push({
+            tier: +questTemplateRaw[0],
+            requirementType: +questTemplateRaw[1],
+            requirementRarity: +questTemplateRaw[2],
+            requirementAmount: +questTemplateRaw[3],
+            rewardType: +questTemplateRaw[4],
+            rewardRarity: +questTemplateRaw[5],
+            rewardAmount: +questTemplateRaw[6],
+            reputationAmount: +questTemplateRaw[7]
+          } as Quest);
+        }
+
+        return questTemplates;
+      },
+
+      async addQuestTemplate({state}, {questTemplate}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.addNewQuest(questTemplate.tier,
+          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount,
+          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount,
+          questTemplate.reputationAmount).send(defaultCallOptions(state));
+      },
+
+      async addPromoQuestTemplate({state}, {questTemplate}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.addNewPromoQuest(questTemplate.tier,
+          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount,
+          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount,
+          questTemplate.reputationAmount).send(defaultCallOptions(state));
+      },
+
+      async deleteQuest({state}, {tier, index}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.deleteQuest(tier, index).send(defaultCallOptions(state));
       },
 
       async getCharacterQuestData({ state }, {characterId}) {

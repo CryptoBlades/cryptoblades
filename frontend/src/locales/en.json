@@ -543,14 +543,14 @@
     }
   },
   "quests": {
-    "rarity": {
+    "rarityType": {
       "COMMON": "Common",
       "UNCOMMON": "Uncommon",
       "RARE": "Rare",
       "EPIC": "Epic",
       "LEGENDARY": "Legendary"
     },
-    "requirement": {
+    "requirementType": {
       "NONE": "None",
       "WEAPON": "Weapon",
       "JUNK": "Junk",
@@ -559,7 +559,7 @@
       "SHIELD": "Shield",
       "RAID": "Raid"
     },
-    "reward": {
+    "rewardType": {
       "NONE": "None",
       "WEAPON": "Weapon",
       "JUNK": "Junk",
@@ -567,6 +567,8 @@
       "SHIELD": "Shield",
       "DUST": "Dust"
     },
+    "questsTitle": "Quests",
+    "quest": "Quest",
     "skip": "Skip",
     "complete": "Complete",
     "submit": "Submit",
@@ -576,7 +578,25 @@
     "request": "Request",
     "turnIn": "Turn in",
     "howMuchToTurnIn": "How much to turn in?",
-    "setRequiredAmount": "Set required amount"
+    "setRequiredAmount": "Set required amount",
+    "createNewQuest": "Create new quest",
+    "createNewPromoQuest": "Create new promo quest",
+    "promoQuests": "Promo quests",
+    "questTemplates": "Quest templates",
+    "promoQuestTemplates": "Promo quest templates",
+    "addNewQuest": "Add new quest",
+    "addNewPromoQuest": "Add new promo quest",
+    "deleteQuest": "Delete quest",
+    "questTier": "Quest tier",
+    "templatesTier": "Templates tier",
+    "noQuestTemplatesInSelectedTier": "No quest templates in selected tier",
+    "requirement": "Requirement",
+    "reward": "Reward",
+    "pleaseSelectQuestTier": "Please select quest tier",
+    "pleaseSelectRequirementType": "Please select requirement type",
+    "pleaseSelectRequirementRarity": "Please select requirement rarity",
+    "pleaseSelectRewardType": "Please select reward type",
+    "pleaseSelectRewardRarity": "Please select reward rarity"
   },
   "stake": {
     "unknownStakeType": "Unknown stake type, please try again.",

@@ -3,13 +3,13 @@
     <div v-if="quest" class="d-flex h-100">
       <div class="quest-info d-flex flex-column justify-content-center">
         <div class="quest-description">
-          <span class="font-weight-bold">{{ $t(`quests.rarity.${Rarity[quest.tier]}`) }} quest</span>
-          <!--          <span>{{ Array(quest.tier + 1).fill('★').join('') }}</span>-->
+          <span
+            class="font-weight-bold">{{ $t(`quests.rarityType.${Rarity[quest.tier]}`) }} {{ $t('quests.quest').toLowerCase() }}</span>
           <span>{{
               quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.burn')
             }} {{ quest.requirementAmount }}x {{
               Array(quest.requirementRarity + 1).fill('★').join('')
-            }} {{ $t(`quests.requirement.${RequirementType[quest.requirementType]}`) }}</span>
+            }} {{ $t(`quests.requirementType.${RequirementType[quest.requirementType]}`) }}</span>
         </div>
         <div class="d-flex justify-content-center p-3">
           <nft-icon v-if="quest.requirementType === RequirementType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
@@ -19,16 +19,20 @@
           <nft-icon v-else-if="quest.requirementType === RequirementType.TRINKET" :isDefault="true"
                     :nft="{ type: 'trinket' }"
                     :stars="quest.requirementRarity + 1"/>
-          <nft-icon v-else-if="quest.requirementType === RequirementType.SHIELD" :isDefault="true" :nft="{ type: 'shield' }"
+          <nft-icon v-else-if="quest.requirementType === RequirementType.SHIELD" :isDefault="true"
+                    :nft="{ type: 'shield' }"
                     :stars="quest.requirementRarity + 1"/>
-          <nft-icon v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.COMMON"
-                    :isDefault="true" :nft="{ type: 'lbdust' }"/>
-          <nft-icon v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
-                    :isDefault="true" :nft="{ type: '4bdust' }"/>
-          <nft-icon v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.RARE"
-                    :isDefault="true" :nft="{ type: '5bdust' }"/>
+          <nft-icon
+            v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.COMMON"
+            :isDefault="true" :nft="{ type: 'lbdust' }"/>
+          <nft-icon
+            v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
+            :isDefault="true" :nft="{ type: '4bdust' }"/>
+          <nft-icon
+            v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.RARE"
+            :isDefault="true" :nft="{ type: '5bdust' }"/>
         </div>
-        <div class="quest-progress">
+        <div v-if="!isQuestTemplate" class="quest-progress">
           <strong class="quest-progress-text">{{ quest.progress || 0 }} / {{ quest.requirementAmount }}</strong>
           <b-progress class="reputation-progress" :max="quest.requirementAmount" :value="quest.progress"
                       variant="primary"/>
@@ -36,11 +40,11 @@
       </div>
       <div class="reward-info d-flex flex-column justify-content-center">
         <div class="quest-description">
-          <span class="font-weight-bold">Reward</span>
+          <span class="font-weight-bold">{{ $t('quests.reward') }}</span>
           <span>{{ quest.reputationAmount }} {{ $t('quests.reputation') }}</span>
           <span>{{ quest.rewardAmount }}x <span>{{
               Array(quest.rewardRarity + 1).fill('★').join('')
-            }}</span> {{ $t(`quests.reward.${RewardType[quest.rewardType]}`) }}</span>
+            }}</span> {{ $t(`quests.rewardType.${RewardType[quest.rewardType]}`) }}</span>
         </div>
         <div class="d-flex justify-content-center p-3">
           <nft-icon v-if="quest.rewardType === RewardType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
@@ -60,7 +64,7 @@
         </div>
       </div>
     </div>
-    <div class="d-flex">
+    <div v-if="!isQuestTemplate" class="d-flex">
       <b-button variant="primary" class="flex-1" :disabled="quest.requirementType === RequirementType.RAID"
                 @click="submit">
         <!--      || questCanBeCompleted-->
@@ -71,6 +75,11 @@
       </b-button>
       <b-button v-else variant="primary" class="flex-1" @click="skip">
         {{ $t('quests.skip') }}
+      </b-button>
+    </div>
+    <div v-else-if="isQuestTemplate" class="d-flex">
+      <b-button variant="primary" class="flex-1" @click="deleteQuestTemplate">
+        {{ $t('quests.deleteQuest') }}
       </b-button>
     </div>
   </div>
@@ -87,6 +96,8 @@ interface StoreMappedActions {
   skipQuest(payload: { characterID: string | number }): Promise<void>;
 
   completeQuest(payload: { characterID: string | number }): Promise<void>;
+
+  deleteQuest(payload: { tier: number, index: number }): Promise<void>;
 }
 
 interface Data {
@@ -99,11 +110,19 @@ export default Vue.extend({
   props: {
     quest: {
       type: Object as PropType<Quest>,
-      required: true,
+    },
+    isQuestTemplate: {
+      type: Boolean,
+      default: false,
+    },
+    questIndex: {
+      type: Number,
+    },
+    refreshQuestTemplates: {
+      type: Function,
     },
     characterId: {
       type: Number,
-      required: true,
     }
   },
 
@@ -120,7 +139,7 @@ export default Vue.extend({
   computed: {},
 
   methods: {
-    ...mapActions(['skipQuest', 'completeQuest']) as StoreMappedActions,
+    ...mapActions(['skipQuest', 'completeQuest', 'deleteQuest']) as StoreMappedActions,
 
     async skip() {
       await this.skipQuest({characterID: this.characterId});
@@ -130,13 +149,22 @@ export default Vue.extend({
       await this.completeQuest({characterID: this.characterId});
     },
 
+    async deleteQuestTemplate() {
+      if (this.quest.tier !== undefined) {
+        await this.deleteQuest({tier: this.quest.tier, index: this.questIndex});
+        this.refreshQuestTemplates();
+      }
+    },
+
     submit() {
       this.$root.$emit('quest-submission-modal', this.quest, this.characterId, this.quest.progress);
     }
   },
 
   async mounted() {
-    this.questCanBeCompleted = this.quest.progress >= this.quest.requirementAmount;
+    if (this.quest.progress) {
+      this.questCanBeCompleted = this.quest.progress >= this.quest.requirementAmount;
+    }
   }
 
 });

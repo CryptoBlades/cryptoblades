@@ -155,8 +155,13 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             rewardType, rewardRarity, rewardAmount, reputationAmount));
     }
 
-    function getQuestArrayLength(uint8 tier) public view returns (uint256) {
+    function getQuestTemplatesCount(uint8 tier) public view returns (uint256) {
         return quests[tier].length;
+    }
+
+    function getQuestTemplate(uint8 tier, uint256 index) public view returns (Rarity, RequirementType, Rarity, uint256, RewardType, Rarity, uint256, uint256) {
+        Quest memory quest = quests[tier][index];
+        return (quest.tier, quest.requirementType, quest.requirementRarity, quest.requirementAmount, quest.rewardType, quest.rewardRarity, quest.rewardAmount, quest.reputationAmount);
     }
 
     //move element to be deleted at the end, pop it

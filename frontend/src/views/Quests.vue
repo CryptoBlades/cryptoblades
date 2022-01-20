@@ -29,6 +29,7 @@
       </div>
     </div>
     <QuestSubmissionModal/>
+    <QuestsDashboard/> <!-- TODO: Quests Dashboard is temporarily here, find a place for it elsewhere -->
   </div>
 </template>
 
@@ -41,18 +42,19 @@ import {Accessors} from 'vue/types/options';
 import QuestDetails from '@/components/smart/QuestDetails.vue';
 import CharacterArt from '@/components/CharacterArt.vue';
 import QuestSubmissionModal from '@/components/smart/QuestSubmissionModal.vue';
+import QuestsDashboard from '@/components/smart/QuestsDashboard.vue';
 
 export interface Quest {
-  progress: number;
-  type: RequirementType;
-  reputation: number;
-  id: number;
-  tier: Rarity;
-  requirementType: RequirementType;
-  requirementRarity: Rarity;
+  progress?: number;
+  type?: RequirementType;
+  reputation?: number;
+  id?: number;
+  tier?: Rarity;
+  requirementType?: RequirementType;
+  requirementRarity?: Rarity;
   requirementAmount: number;
-  rewardType: RewardType;
-  rewardRarity: Rarity;
+  rewardType?: RewardType;
+  rewardRarity?: Rarity;
   rewardAmount: number;
   reputationAmount: number;
 }
@@ -80,7 +82,7 @@ interface StoreMappedGetters {
 }
 
 export default Vue.extend({
-  components: {QuestSubmissionModal, CharacterArt, QuestDetails},
+  components: {QuestSubmissionModal, CharacterArt, QuestDetails, QuestsDashboard},
 
   props: {
     showCosmetics: {
