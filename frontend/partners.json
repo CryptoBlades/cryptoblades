@@ -47,6 +47,11 @@
       "logo": "altura.png",
       "details": "Altura provides the tools and infrastructure for developers to create and integrate Smart NFTs in their video games and applications. With Altura, developers can program dynamic functionality in their NFTs.",
       "website": "https://www.alturanft.com/"
+    },
+    "Tryhards": {
+      "logo": "tryhards.png",
+      "details": "TryHards is a play-to-earn metaverse in which players can engage in thrilling top-down PvP and PvE battles using collectible NFT characters and weapons. Players can earn  crystals to upgrade their NFTs and increase their earnings",
+      "website": "https://tryhards.io/"
     }
   }
 }

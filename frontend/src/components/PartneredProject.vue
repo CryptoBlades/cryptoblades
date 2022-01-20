@@ -12,6 +12,8 @@
         <span class="multiplier-text">{{skillToPartnerRatio}} SKILL/{{tokenSymbol}}</span>
         <span v-bind:class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
           class="multiplier-text">{{$t('PartneredProject.multiplier')}}: x{{multiplier}}</span>
+        <span v-bind:class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
+        class="multiplier-text">$/{{$t('PartneredProject.unclaimed')}}: ${{moneyPerUnclaimed}}</span>
         <span class="multiplier-text">{{$t('PartneredProject.distribution')}}: {{distributionTime}} {{$t('PartneredProject.days')}}</span>
       </div>
     </div>
@@ -127,6 +129,10 @@ export default Vue.extend({
     partnerLogoPath(): string {
       const fileName = (partnersInfo as PartnersInfo).partners[this.name].logo;
       return this.imgPath(fileName);
+    },
+
+    moneyPerUnclaimed(): string {
+      return toBN(this.tokenPrice).div(toBN(10).pow(18)).div(+this.skillToPartnerRatio).times(+this.multiplier).toFixed(2);
     }
   },
 
@@ -188,7 +194,7 @@ export default Vue.extend({
 <style scoped>
 .partner-div {
   width: 290px;
-  height: 230px;
+  height: 250px;
   border: 2px solid #9e8a57;
   border-radius: 10px;
   padding: 5px;
