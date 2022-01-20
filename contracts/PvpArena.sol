@@ -113,6 +113,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint8 => uint256[]) private _topRankingCharactersByTier;
     /// @dev IDs of characters available for matchmaking by tier
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
+
+    uint256 duelOffsetCost;
+    address payable pvpBotAddress;
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -242,6 +245,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         prizePercentages.push(60);
         prizePercentages.push(30);
         prizePercentages.push(10);
+        duelOffsetCost = 0.005 ether;
     }
 
     /// @dev enter the arena with a character, a weapon and optionally a shield
@@ -375,12 +379,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev adds a character to the duel queue
     function prepareDuel(uint256 attackerID)
         external
+        payable
         isOwnedCharacter(attackerID)
         characterInArena(attackerID)
         characterWithinDecisionTime(attackerID)
         characterNotInDuel(attackerID)
     {
         require((arenaAccess & 1) == 1, "Arena locked");
+        require(msg.value == duelOffsetCost, "No duel offset");
 
         uint256 defenderID = getOpponent(attackerID);
 
@@ -397,6 +403,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         isDefending[defenderID] = true;
 
         _duelQueue.add(attackerID);
+
+        pvpBotAddress.transfer(msg.value);
     }
 
     /// @dev allows a player to withdraw their ranking earnings
@@ -1092,6 +1100,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     function setArenaAccess(uint256 accessFlags) external restricted {
         arenaAccess = accessFlags;
+    }
+
+    function setDuelOffsetCost(uint256 cost) external restricted {
+        duelOffsetCost = cost;
+    }
+
+    function setPvpBotAddress(address payable botAddress) external restricted {
+        pvpBotAddress = botAddress;
     }
 
     // Note: The following are debugging functions. Remove later.
