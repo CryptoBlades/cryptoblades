@@ -135,6 +135,7 @@ export function createStore(web3: Web3) {
       ownedDust: [],
       cartEntries: [],
       currentChainSupportsMerchandise: false,
+      currentChainSupportsPvP: false,
 
       characters: {},
       garrisonCharacters: {},
@@ -429,6 +430,10 @@ export function createStore(web3: Web3) {
 
       getCurrentChainSupportsMerchandise(state) {
         return state.currentChainSupportsMerchandise;
+      },
+
+      getCurrentChainSupportsPvP(state) {
+        return state.currentChainSupportsPvP;
       },
 
       ownWeapons(state, getters) {
@@ -743,10 +748,21 @@ export function createStore(web3: Web3) {
       updateCurrentChainSupportsMerchandise(state: IState) {
         const currentChain = localStorage.getItem('currentChain') || 'BSC';
         const merchandiseSupportedChains = config.merchandiseSupportedChains;
+        console.log(merchandiseSupportedChains);
         if (!currentChain || !merchandiseSupportedChains) {
           state.currentChainSupportsMerchandise = false;
         }
         state.currentChainSupportsMerchandise = merchandiseSupportedChains.includes(currentChain);
+      },
+
+      updateCurrentChainSupportsPvP(state: IState) {
+        const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
+        const currentChain = localStorage.getItem('currentChain') || 'BSC';
+        const pvpSupportedChains = config.environments[env].pvpSupportedChains;
+        if (!currentChain || !pvpSupportedChains) {
+          state.currentChainSupportsPvP = false;
+        }
+        state.currentChainSupportsPvP = pvpSupportedChains.includes(currentChain);
       },
 
       updateCharacter(state: IState, { characterId, character }) {

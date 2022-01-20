@@ -111,3 +111,13 @@ export const currentChainSupportsMerchandise = () => {
   }
   return merchandiseSupportedChains.includes(currentChain);
 };
+
+export const currentChainSupportsPvP = () => {
+  const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
+  const currentChain = localStorage.getItem('currentChain') || 'BSC';
+  const pvpSupportedChains = config.environments[env].pvpSupportedChains;
+  if (!currentChain || !pvpSupportedChains) {
+    return false;
+  }
+  return pvpSupportedChains.includes(currentChain);
+};

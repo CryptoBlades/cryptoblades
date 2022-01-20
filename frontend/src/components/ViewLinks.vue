@@ -40,7 +40,10 @@
 
     <router-link v-if="featureFlagPvp" :to="{ name: 'pvp' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="pvp_screen">PvP</span>
+        <span class="gtag-link-others" tagname="pvp_screen"
+              :class="supportsPvP ? '' : 'disabled'">PvP <hint
+          v-if="!supportsPvP" class="hint"
+          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
       </li>
     </router-link>
 
@@ -55,7 +58,7 @@
         <span class="gtag-link-others" tagname="merchandise_screen"
               :class="supportsMerchandise ? '' : 'disabled'">{{ $t("viewLink.merchandise") }} <hint
           v-if="!supportsMerchandise" class="hint"
-          :text="$t('viewLink.merchandiseNotSupportedTooltip')"/></span>
+          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
       </li>
     </router-link>
 
@@ -70,21 +73,14 @@ import {
   pvp as featureFlagPvp
 } from '../feature-flags';
 import {mapGetters, mapMutations} from 'vuex';
-import Events from '@/events';
 import Vue from 'vue';
 import Hint from '@/components/Hint';
 
 export default Vue.extend({
   inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
 
-  data() {
-    return {
-      supportsMerchandise: false
-    };
-  },
-
   computed: {
-    ...mapGetters(['getCurrentChainSupportsMerchandise']),
+    ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP']),
     featureFlagMarket() {
       return featureFlagMarket;
     },
@@ -96,18 +92,16 @@ export default Vue.extend({
     },
     featureFlagMerchandise() {
       return featureFlagMerchandise;
+    },
+    supportsMerchandise() {
+      return this.getCurrentChainSupportsMerchandise;
+    },
+    supportsPvP() {
+      return this.getCurrentChainSupportsPvP;
     }
   },
-
-  mounted() {
-    this.updateCurrentChainSupportsMerchandise();
-    this.supportsMerchandise = this.getCurrentChainSupportsMerchandise;
-    Events.$on('setting:currentChain', () => {
-      this.supportsMerchandise = this.getCurrentChainSupportsMerchandise;
-    });
-  },
   methods: {
-    ...mapMutations(['updateCurrentChainSupportsMerchandise']),
+    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP']),
   },
   components: {
     Hint,

@@ -9,7 +9,7 @@
     "market": "Market",
     "stake": "Stake",
     "merchandise": "Merchandise",
-    "merchandiseNotSupportedTooltip": "Currently selected chain does not support Merchandise."
+    "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
   },
   "ClaimRewardsBar": {
     "rewards": "Rewards",
