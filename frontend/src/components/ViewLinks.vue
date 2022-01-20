@@ -55,7 +55,7 @@
       </li>
     </router-link>
 
-    <router-link v-if="featureFlagMerchandise" :to="{ name: 'merchandise' }" exact class="nav-link">
+    <router-link v-if="merchandise" :to="{ name: 'merchandise' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
         <span class="gtag-link-others" :class="supportsMerchandise ? '' : 'disabled'">{{ $t("viewLink.merchandise") }} <hint
           v-if="!supportsMerchandise" class="hint"

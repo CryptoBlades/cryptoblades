@@ -62,13 +62,7 @@ import { Contracts, isStakeType, isNftStakeType, StakeType, NftStakeType, Stakin
 
 import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } from './stake-types';
 
-import {
-  raid as featureFlagRaid,
-  stakeOnly as featureFlagStakeOnly,
-  market as featureFlagMarket,
-  pvp as featureFlagPvP,
-  quests as featureFlagQuests,
-} from './feature-flags';
+import {raid, stakeOnly, market, pvp, quests} from './feature-flags';
 
 interface RaidContracts {
   Raid1?: Contracts['Raid1'];
@@ -230,7 +224,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   const stakingContracts = await setUpStakingContracts(web3);
 
-  if (featureFlagStakeOnly) {
+  if (stakeOnly) {
     return stakingContracts;
   }
 
@@ -306,7 +300,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   let raidTrinketAddress = '';
   let keyboxAddress = '';
   let junkAddress = '';
-  if(featureFlagRaid) {
+  if(raid) {
     const raidContractAddr = getConfigValue('VUE_APP_RAID_CONTRACT_ADDRESS') || (raidNetworks as Networks)[networkId]!.address;
 
     const Raid1 = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
@@ -326,21 +320,21 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Junk = new web3.eth.Contract(junkAbi as Abi, junkAddress);
 
   const marketContracts: MarketContracts = {};
-  if(featureFlagMarket) {
+  if(market) {
     const marketContractAddr = getConfigValue('VUE_APP_MARKET_CONTRACT_ADDRESS') || (marketNetworks as Networks)[networkId]!.address;
 
     marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as Abi, marketContractAddr);
   }
 
   const questsContracts: QuestsContracts = {};
-  if(featureFlagQuests) {
+  if(quests) {
     const simpleQuestsContractAddr = getConfigValue('VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS') || (simpleQuestsNetworks as Networks)[networkId]!.address;
 
     questsContracts.SimpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);
   }
 
   const pvpContracts: PvPContracts = {};
-  if(featureFlagPvP){
+  if(pvp){
     const pvpContractAddr = process.env.VUE_APP_PVP_CONTRACT_ADDRESS ||
     getConfigValue('VUE_APP_PVP_CONTRACT_ADDRESS') || (pvpNetworks as Networks)[networkId]!.address;
 
@@ -393,5 +387,3 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     KingStakingRewardsUpgradeable180
   };
 }
-
-export const INTERFACE_ID_TRANSFER_COOLDOWNABLE = '0xe62e6974';
