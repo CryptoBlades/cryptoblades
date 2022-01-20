@@ -14,14 +14,6 @@
         />
       </p>
     </div>
-    <div class="row mb-3 justify-content-center">
-      <p v-if="queueLength">
-        {{$t('bridge.queueLength')}}: <b>{{queueLength}}</b> &nbsp;
-        <b-icon-question-circle class="centered-icon" scale="0.8"
-        v-tooltip.bottom="$t('bridge.queueLengthTooltip', queueLength)"
-        />
-      </p>
-    </div>
     <b-tabs justified>
       <b-tab :title="$t('bridge.inventory')" @click="nftType = 'weapon'">
         <div class="btnRow d-flex flex-row justify-content-center">
@@ -143,7 +135,6 @@
           <div class="text-center">
             {{$t('bridge.status')}}: {{transferStatus}} <br>
             {{$t('bridge.toChain')}}: {{currentTransferChain}} <br>
-            <span v-if="transferStatus === transferStates.pending"> {{$t('bridge.yourPlaceInQueue')}}: {{currentTransferQueuePosition}}</span><br>
           </div>
           <br>
           <div class="outcome" v-if="cancellingRequest">
@@ -294,8 +285,6 @@ interface StoreMappedActions {
   chainEnabled(payload: {
     chainId: string;
   }): Promise<boolean>;
-  getBridgeTransferAt(): Promise<number>;
-  getBridgeTransfers(): Promise<number>;
 }
 
 enum transferStates{
@@ -352,8 +341,6 @@ export default Vue.extend({
       enabledChains: [] as string[],
       bridgeFee: '',
       loadedStorage: false,
-      currentTransferQueuePosition: 0,
-      queueLength: 0,
       refreshIntervall: 0 as number,
     };
   },
@@ -459,8 +446,6 @@ export default Vue.extend({
       'getReceivedNFTs',
       'getReceivedNFT',
       'chainEnabled',
-      'getBridgeTransferAt',
-      'getBridgeTransfers',
     ]) as StoreMappedActions),
     convertWeiToSkill(wei: string): string {
       return fromWeiEther(wei);
@@ -535,20 +520,7 @@ export default Vue.extend({
         tokenId,
       });
     },
-    async checkQueuePosition(id: number){
-      const transferAt = await this.getBridgeTransferAt();
-      const bridgeTransfers = await this.getBridgeTransfers();
-      if(this.transferStatus === transferStates.pending && bridgeTransfers > transferAt) return (id - transferAt);
-      else return 0;
-    },
-    async checkQueueLength(){
-      const transferAt = await this.getBridgeTransferAt();
-      const bridgeTransfers = await this.getBridgeTransfers();
-      this.queueLength = bridgeTransfers - transferAt;
-      if(this.queueLength < 0) this.queueLength = 0;
-    },
     async getStatus(){
-      await this.checkQueueLength();
       const id = await this.getBridgeTransferId();
       const transfer= await this.getBridgeTransfer({
         transferId: id,
@@ -573,7 +545,6 @@ export default Vue.extend({
       else if(transfer[6] === '5'){
         this.transferStatus = transferStates.restored;
       }
-      this.currentTransferQueuePosition = await this.checkQueuePosition(parseInt(id,10));
 
       const currentTransferTokenAddress = transfer[1];
       this.currentTransferNFTId = transfer[2];
