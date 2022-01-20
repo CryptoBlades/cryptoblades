@@ -4,29 +4,37 @@
     </div>
     <div v-else class="arenaPreparationWrapper">    <div class="mainWrapper">
       <div class="arenaSignup">
-        <h1 class="title">ARENA SIGNUP</h1>
-        <p>Enter the arena and win rewards ($SKILL).</p>
+        <h1 class="title">
+          {{$t('pvp.arenaSignUp')}}
+        </h1>
+        <p>
+          {{$t('pvp.enterAndWin')}}($SKILL).
+        </p>
         <div>
           <div class="top">
             <div class="circle">
               <img :src="getIconSource" />
             </div>
-            <p>Equip a Sword and a Shield (optional).</p>
+            <p>
+              {{$t('pvp.equipSwordAndShield')}}
+            </p>
           </div>
           <div class="bottomWeapons">
             <pvp-separator dark vertical />
             <div class="weaponsWrapper">
               <div v-if="!selectedWeaponId" :class="{ disabledStyles: ownedWeaponsWithInformation.length === 0 }" class="weaponButtonWrapper">
                 <a tabindex="0" class="selectWeaponButton" id="weapon-popover">
-                  <img class="placeholderImage" src="../../assets/swordPlaceholder.svg" alt="sword" />
+                  <div class="placeholderImageWrapper">
+                    <img src="../../assets/swordPlaceholder.svg" alt="sword" />
+                  </div>
                   <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
-                    <p class="popoverTitle">Weapons</p>
-                    <select v-model="weaponStarFilter" class="selectFilter">
+                    <p class="popoverTitle">{{$t('pvp.weapons')}}</p>
+                    <select v-model="weaponStarFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="weaponStarOption in weaponStarOptions" :value="weaponStarOption.value" :key="weaponStarOption.value">
                         {{ weaponStarOption.text }}
                       </option>
                     </select>
-                    <select v-model="weaponElementFilter" class="selectFilter">
+                    <select v-model="weaponElementFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="weaponElementOption in weaponElementOptions" :value="weaponElementOption.value" :key="weaponElementOption.value">
                         {{ weaponElementOption.text }}
                       </option>
@@ -43,7 +51,9 @@
                         :disabled="ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)"
                       />
                     </div>
-                    <div v-else class="noWeaponsOrShields">You have no weapons.</div>
+                    <div v-else class="noWeaponsOrShields">
+                      {{$t('pvp.noWeapons')}}
+                    </div>
                   </b-popover>
                 </a>
               </div>
@@ -53,19 +63,23 @@
                   :weaponId="selectedWeaponId"
                   class="weaponPlaceholder"
                 />
-                <button @click="handleClearWeapon()" class="clearWeaponButton">Clear</button>
+                <button @click="handleClearWeapon()" class="clearWeaponButton">
+                  {{$t('pvp.clear')}}
+                </button>
               </div>
               <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
                 <a tabindex="0" class="selectWeaponButton" id="shield-popover">
-                  <img class="placeholderImage" src="../../assets/shieldPlaceholder.svg" alt="shield" />
-                  <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
-                    <p class="popoverTitle">Shields</p>
-                    <select v-model="shieldStarFilter" class="selectFilter">
+                  <div class="placeholderImageWrapper">
+                    <img src="../../assets/shieldPlaceholder.svg" alt="shield" />
+                  </div>
+                   <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
+                    <p class="popoverTitle">{{$t('pvp.shields')}}</p>
+                    <select v-model="shieldStarFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
                         {{ shieldStarOption.text }}
                       </option>
                     </select>
-                    <select v-model="shieldElementFilter" class="selectFilter">
+                    <select v-model="shieldElementFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
                       <option v-for="shieldElementOption in shieldElementOptions" :value="shieldElementOption.value" :key="shieldElementOption.value">
                         {{ shieldElementOption.text }}
                       </option>
@@ -82,7 +96,9 @@
                         :disabled="ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)"
                       />
                     </div>
-                    <div v-else class="noWeaponsOrShields">You have no shields.</div>
+                    <div v-else class="noWeaponsOrShields">
+                      {{$t('pvp.noShields')}}
+                    </div>
                   </b-popover>
                 </a>
               </div>
@@ -91,7 +107,9 @@
                   :shield="selectedShield"
                   :shieldId="selectedShieldId"
                 />
-                <button @click="handleClearShield" class="clearShieldButton">Clear</button>
+                <button @click="handleClearShield" class="clearShieldButton">
+                  {{$t('pvp.clear')}}
+                </button>
               </div>
             </div>
           </div>
@@ -101,36 +119,43 @@
           <div class="circle">
             <img :src="getIconSource" />
           </div>
-          <p>Enter the Arena</p>
+          <p>
+            {{$t('pvp.enterTheArena')}}
+          </p>
         </div>
         <div class="bottomList">
           <pvp-separator dark vertical />
           <div>
             <ul>
               <li>
-                <div class="bulletpoint"></div> Entering the Arena will cost you {{ formattedEntryWager }} $SKILL.
+                <div class="bulletpoint"></div>
+                {{$t('pvp.enterArenaWillCost', {formattedEntryWager})}}
               </li>
               <li>
-                <div class="bulletpoint"></div> Players can attack you while you are in the
-                Arena.
+                <div class="bulletpoint"></div>
+                {{$t('pvp.playersCanAttackYou')}}
               </li>
               <li>
-                <div class="bulletpoint"></div> Leaving the Arena will cost you {{ +formattedEntryWager / 4 }} $SKILL.
+                <div class="bulletpoint"></div>
+                {{$t('pvp.leavingWillCost', {leavingArenaCost})}}
               </li>
             </ul>
             <label class="checkboxWrapper">
               <div class="checkboxInnerWrapper">
                 <input type="checkbox" v-model="checkBoxAgreed"  class="checkboxInput"/>
               </div>
-              <span>I understand.</span>
+              <span>
+                {{$t('pvp.iUnderstand')}}
+              </span>
             </label>
           </div>
         </div>
         </div>
         <div class="enterArenaButtonWrapper">
           <pvp-button
+            class="pvpButton"
             @click="handleEnterArenaClick()"
-            buttonText="ENTER ARENA"
+            :buttonText="$t('pvp.enterArena')"
             :buttonsubText="'$SKILL: ' + formattedEntryWager"
             :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
           />
@@ -152,7 +177,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import BN from 'bignumber.js';
 import { BPopover } from 'bootstrap-vue';
 import PvPWeapon from './PvPWeapon.vue';
@@ -257,11 +282,19 @@ export default {
     formattedEntryWager() {
       return new BN(this.entryWager).div(new BN(10).pow(18)).toFixed(0);
     },
+    leavingArenaCost() {
+      return +this.formattedEntryWager / 4;
+    },
     getIconSource () {
       return this.checkBoxAgreed && this.selectedWeaponId ? checkIcon : ellipseIcon;
     },
   },
   methods: {
+    ...mapActions([
+      'approvePvpSkillSpending',
+      'enterArena'
+    ]),
+
     handleClearWeaponFilters() {
       this.weaponStarFilter = 0;
       this.weaponElementFilter = '';
@@ -308,11 +341,7 @@ export default {
         const isUsingShield = this.selectedShieldId !== null;
         const shieldId = this.selectedShieldId === null ? 0 : this.selectedShieldId;
         try {
-          await this.contracts().SkillToken.methods
-            .approve(this.contracts().PvpArena.options.address, this.entryWager)
-            .send({
-              from: this.defaultAccount
-            });
+          await this.approvePvpSkillSpending(this.entryWager);
         } catch(err) {
           console.log('Enter Arena Approval Error: ', err);
           this.loading = false;
@@ -320,11 +349,12 @@ export default {
           return;
         }
         try {
-          await this.contracts().PvpArena.methods
-            .enterArena(this.currentCharacterId, this.selectedWeaponId, shieldId, isUsingShield)
-            .send({
-              from: this.defaultAccount
-            });
+          await this.enterArena({
+            characterId: this.currentCharacterId,
+            weaponId: this.selectedWeaponId,
+            shieldId,
+            useShield: isUsingShield
+          });
         } catch(err){
           console.log('Enter Arena Error: ', err);
           this.loading = false;
@@ -487,9 +517,12 @@ p, li, span {
   width: 4rem
 }
 .noWeaponsOrShields {
+  display: flex;
+  margin: 0 auto;
   font-family: 'Roboto';
   color: #b4b0a7;
-  font-size: 1rem;
+  font-size: 0.75rem;
+  margin-top: 1rem;
 }
 .mainWrapper {
   display: flex;
@@ -504,6 +537,7 @@ p, li, span {
   font-family: 'Trajan';
   line-height: 1.75rem;
   padding: 0;
+  text-transform: uppercase;
 }
 .arenaSignup {
   p {
@@ -587,6 +621,15 @@ p, li, span {
         :hover {
           cursor: pointer;
         }
+        .placeholderImageWrapper{
+          width: 4.5rem;
+          height: 4.5rem;
+          padding: 1rem;
+          img {
+            width: 100%;
+            height: 100%;
+          }
+        }
         .placeholderImage {
           width: 2.25rem;
           height: 2.25rem;
@@ -620,7 +663,7 @@ p, li, span {
       }
     }
     .checkboxWrapper {
-      display: inline-block;
+      display: inline-flex;
       align-items: center;
       vertical-align: middle;
       margin-left: 1.75rem;
@@ -633,7 +676,6 @@ p, li, span {
         .checkboxInput {
           width: 1.25rem;
           height: 1.25rem;
-          cursor: pointer;
           background: rgba(40,40,40,0.2);
           appearance: none;
           position: relative;
@@ -649,6 +691,7 @@ p, li, span {
     }
       span {
         margin-left: 2rem;
+        margin-bottom: 0.35rem;
         color: #b4b0a7;
         font-size: 0.875rem;
       }
@@ -658,6 +701,10 @@ p, li, span {
     width: 15rem;
     height: 5rem;
     margin-top: 3rem;
+
+    .pvpButton {
+      text-transform: uppercase;
+    }
   }
 }
 .characterImage {

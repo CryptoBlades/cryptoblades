@@ -681,24 +681,6 @@
           </div>
         </div>
       </b-tab>
-      <b-tab v-if="isMerchandiseEnabled && currentChainSupportsMerchandise()"
-             @click="clearData();browseTabActive = false;skillShopTabActive = false">
-        <template #title>
-          {{$t('market.merchandise.merchandise')}}
-          <hint class="hint" text="You can buy real merchandise in here" />
-        </template>
-
-        <div>
-          <div class="row">
-            <img class="shop-horizontal-divider-top" src="../assets/divider4.png"  alt=""/>
-          </div>
-          <div class="col-sm-12 merchandise-shop-items">
-            <div class="shop-items">
-              <Merchandise />
-            </div>
-          </div>
-        </div>
-      </b-tab>
     </b-tabs>
     <b-modal class="centered-modal text-center" ref="character-buy-modal" :title="$t('market.characterBuyModal')"
       @ok="purchaseNft()" @cancel="purchaseNft(true)">
@@ -736,7 +718,7 @@ import {Characters, Shields, Weapons} from '../../../build/abi-interfaces';
 import {SkillShopListing} from '@/interfaces/SkillShopListing';
 import BigNumber from 'bignumber.js';
 import {traitNameToNumber} from '@/contract-models';
-import {market_blockchain as useBlockchain, merchandise as merchandiseEnabled} from './../feature-flags';
+import {market_blockchain as useBlockchain} from './../feature-flags';
 import {
   CharacterTransactionHistoryData,
   ICharacterHistory,
@@ -751,8 +733,6 @@ import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 import {getCleanName} from '@/rename-censor';
 import i18n from '@/i18n';
 import {toInteger} from 'lodash';
-import Merchandise from '@/components/smart/Merchandise.vue';
-import config from '../../app-config.json';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
@@ -793,8 +773,6 @@ interface Data {
   historyCounter: number;
   landSaleAllowed: boolean;
   reservedSaleAllowed: boolean;
-  isMerchandiseEnabled: boolean;
-  merchandiseSupportedChains: string[];
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields'
@@ -865,7 +843,7 @@ interface StoreMappedActions {
 }
 
 export default Vue.extend({
-  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList, Merchandise },
+  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList },
 
   data() {
     return {
@@ -900,8 +878,6 @@ export default Vue.extend({
       historyCounter: 0,
       landSaleAllowed: false,
       reservedSaleAllowed: false,
-      isMerchandiseEnabled: merchandiseEnabled,
-      merchandiseSupportedChains: config.merchandiseSupportedChains,
     } as Data;
   },
 
@@ -1975,16 +1951,16 @@ export default Vue.extend({
       return shields.idResults;
     },
 
-    async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
-      const url = new URL(apiUrl(`static/market/transactions/${sellerAddress}`));
+    async searchItemsSoldBySeller(nftType: string, sellerAddress: string): Promise<any[]>{
+      const url = new URL(apiUrl(`static/market/transactions/${this.activeChain()}/${nftType}/${sellerAddress}`));
 
-      const weaponsData = await fetch(url.toString());
-      const weapons = await weaponsData.json();
-      return weapons.results;
+      const resultsCursor = await fetch(url.toString());
+      const results = await resultsCursor.json();
+      return results.results;
     },
 
     async showWeaponsSoldModal() {
-      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller('weapon', this.defaultAccount as string);
       this.weaponTransactionHistoryHeader = [
         {
           key: 'weaponId',
@@ -2042,7 +2018,7 @@ export default Vue.extend({
       (this.$refs['weapons-sold-modal'] as BModal).show();
     },
     async showCharactersSoldModal() {
-      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller('character', this.defaultAccount as string);
       this.characterTransactionHistoryHeader = [
         {
           key: 'charId',
@@ -2083,7 +2059,7 @@ export default Vue.extend({
       (this.$refs['characters-sold-modal'] as BModal).show();
     },
     async showShieldsSoldModal() {
-      const shieldHistory: IShieldHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      const shieldHistory: IShieldHistory[] = await this.searchItemsSoldBySeller('shield', this.defaultAccount as string);
       this.shieldTransactionHistoryHeader = [
         {
           key: 'shieldId',
@@ -2340,14 +2316,6 @@ export default Vue.extend({
       return input[0].toUpperCase() + input.slice(1);
     },
 
-    currentChainSupportsMerchandise() {
-      const currentChain = localStorage.getItem('currentChain') || 'BSC';
-      if (!currentChain || !this.merchandiseSupportedChains) {
-        return false;
-      }
-      return this.merchandiseSupportedChains.includes(currentChain);
-    },
-
   },
 
   watch: {
@@ -2489,14 +2457,6 @@ export default Vue.extend({
 }
 
 .special-offer-items {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.merchandise-shop-items {
   height: 100%;
   width: 100%;
   display: flex;

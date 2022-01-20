@@ -170,8 +170,8 @@
         },
         "AVAX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS": "snoui.wam",
-          "VUE_APP_NETWORK_ID":"1",
-          "VUE_APP_EXPECTED_NETWORK_ID":"1",
+          "VUE_APP_NETWORK_ID":"43113",
+          "VUE_APP_EXPECTED_NETWORK_ID":"43113",
           "VUE_APP_EXPECTED_NETWORK_NAME":"Avalance Fuji Testnet",
 
           "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",
@@ -378,8 +378,8 @@
         },
         "AVAX": {
           "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
-          "VUE_APP_NETWORK_ID":"1",
-          "VUE_APP_EXPECTED_NETWORK_ID":"1",
+          "VUE_APP_NETWORK_ID":"43114",
+          "VUE_APP_EXPECTED_NETWORK_ID":"43114",
           "VUE_APP_EXPECTED_NETWORK_NAME":"Avalanche Mainnet",
 
           "VUE_APP_STAKE_TYPES_AVAILABLE":"skill",

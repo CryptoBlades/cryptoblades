@@ -1,46 +1,93 @@
 <template>
   <div>
-    <h1 class="title">ARENA INFORMATION</h1>
+    <h1 class="title">
+      {{$t('pvp.arenaInformation')}}
+    </h1>
     <div class="tokenCard">
       <img src="../../assets/skillToken.png" alt="skill token" />
       <div class="tokenCardInfo">
-        <span class="text">PVP Rewards Pool ($SKILL)</span>
+        <span class="text">
+          {{$t('pvp.rewardsPool')}}($SKILL)
+        </span>
         <span class="number">{{ formatedTierRewardsPool }}</span>
       </div>
     </div>
     <ul class="topPlayersList">
       <li class="header">
-        <span>Top Players</span><span>Rank</span>
+        <span>
+          {{$t('pvp.topPlayers')}}
+        </span>
+        <span>
+          {{$t('pvp.rankingPoints')}}
+        </span>
       </li>
       <li>
-        <span>Rank 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}</span>
-        <span>{{ tierTopRankers[0] && tierTopRankers[0].rank || 'N/A' }}</span>
+        <span>
+          {{$t('pvp.rank')}} 1: {{ tierTopRankers[0] && tierTopRankers[0].name || 'N/A' }}
+        </span>
+        <span>
+          {{ tierTopRankers[0] && tierTopRankers[0].rank || 'N/A' }}
+        </span>
       </li>
       <li>
-        <span>Rank 2: {{ tierTopRankers[1] && tierTopRankers[1].name || 'N/A' }}</span>
-        <span>{{ tierTopRankers[1] && tierTopRankers[1].rank || 'N/A'}}</span>
+        <span>
+          {{$t('pvp.rank')}} 2: {{ tierTopRankers[1] && tierTopRankers[1].name || 'N/A' }}
+        </span>
+        <span>
+          {{ tierTopRankers[1] && tierTopRankers[1].rank || 'N/A'}}
+        </span>
       </li>
       <li>
-        <span>Rank 3: {{ tierTopRankers[2] && tierTopRankers[2].name || 'N/A' }}</span>
-        <span>{{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}</span>
+        <span>
+          {{$t('pvp.rank')}} 3: {{ tierTopRankers[2] && tierTopRankers[2].name || 'N/A' }}
+        </span>
+        <span>
+          {{ tierTopRankers[2] && tierTopRankers[2].rank || 'N/A'}}
+        </span>
       </li>
     </ul>
     <ul class="topPlayersList">
       <li class="header">
-        <span>Current Season</span><span>Restarts In</span>
+        <span>
+          {{$t('pvp.currentSeason')}}
+        </span>
+        <span>
+          {{$t('pvp.restartsIn')}}
+        </span>
       </li>
       <li>
         <span>{{ currentRankedSeason }}</span>
         <vue-countdown :time="secondsBeforeNextSeason * 1000" v-slot="{ days, hours, minutes, seconds }">
-          {{ days && days || '' }} {{ days && 'days, ' || '' }}{{ hours }}:{{ minutes }}:{{ seconds }}
+          {{ days && days || '' }} {{ days && daysText + ', ' || '' }}{{ hours }}:{{ minutes }}:{{ seconds }}
         </vue-countdown>
       </li>
     </ul>
     <ul class="characterAttrsList">
       <li class="characterName">{{ characterInformation.name || '' }}</li>
-      <li><span>Power </span><span>{{ characterInformation.power }}</span></li>
-      <li><span>Level</span><span>{{ characterInformation.level }}</span></li>
-      <li><span>Current rank</span><span>{{ characterInformation.rank }}</span></li>
+      <li>
+        <span>
+          {{$t('pvp.power')}}
+        </span>
+        <span>
+          {{ characterInformation.power }}
+        </span>
+      </li>
+      <li>
+        <span>
+          {{$t('pvp.level')}}
+        </span>
+        <span>
+          {{ characterInformation.level }}
+        </span>
+      </li>
+      <li>
+        <span>
+          {{$t('pvp.currentRank')}}
+        </span>
+        <span>
+          {{ characterInformation.rank }}
+        </span>
+      </li>
     </ul>
   </div>
 </template>
@@ -48,6 +95,7 @@
 <script>
 import BN from 'bignumber.js';
 import VueCountdown from '@chenfengyuan/vue-countdown';
+import i18n from '../../i18n';
 
 export default {
   components: {
@@ -83,6 +131,9 @@ export default {
     formatedTierRewardsPool() {
       return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
     },
+    daysText() {
+      return i18n.t('pvp.days');
+    }
   }
 };
 </script>
@@ -95,6 +146,7 @@ export default {
   font-family: 'Trajan';
   line-height: 1.75rem;
   padding: 0;
+  text-transform: uppercase;
 }
 .tokenCard {
 display: flex;
@@ -123,6 +175,9 @@ img {
     line-height: 1.75rem;
   }
 }
+}
+ul, li, span {
+  font-family: 'Roboto';
 }
 .topPlayersList,
 .characterAttrsList {

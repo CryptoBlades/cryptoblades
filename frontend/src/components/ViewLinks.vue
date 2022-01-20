@@ -2,25 +2,25 @@
   <b-navbar-nav>
 
     <router-link :to="{ name: 'plaza' }" exact class="nav-link"
-    v-if="!featureFlagStakeOnly">
+                 v-if="!featureFlagStakeOnly">
       <li class="nav-item nav-top-links">
         <span class="gtag-link-others" tagname="plaza_screen">{{ $t("viewLink.plaza") }}</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'blacksmith' }" exact class="nav-link"   v-if="!featureFlagStakeOnly">
-      <li class="nav-item nav-top-links" >
+    <router-link :to="{ name: 'blacksmith' }" exact class="nav-link" v-if="!featureFlagStakeOnly">
+      <li class="nav-item nav-top-links">
         <span class="gtag-link-others" tagname="blacksmith_screen">{{ $t("viewLink.blacksmith") }}</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'combat' }" exact class="nav-link"  v-if="!featureFlagStakeOnly">
-      <li class="nav-item nav-top-links" >
+    <router-link :to="{ name: 'combat' }" exact class="nav-link" v-if="!featureFlagStakeOnly">
+      <li class="nav-item nav-top-links">
         <span class="gtag-link-others" tagname="combat_screen">{{ $t("viewLink.combat") }}</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'raid' }" exact class="nav-link"  v-if="!featureFlagStakeOnly && featureFlagRaid">
+    <router-link :to="{ name: 'raid' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagRaid">
       <li class="nav-item nav-top-links">
         <span class="gtag-link-others" tagname="raid_screen">{{ $t("viewLink.raid") }}</span>
       </li>
@@ -45,8 +45,17 @@
     </router-link>
 
     <router-link :to="{ name: 'treasury' }" exact class="nav-link">
-      <li class="nav-item nav-top-links" >
+      <li class="nav-item nav-top-links">
         <span class="gtag-link-others" tagname="treasury_screen">Treasury</span>
+      </li>
+    </router-link>
+
+    <router-link v-if="featureFlagMerchandise" :to="{ name: 'merchandise' }" exact class="nav-link">
+      <li class="nav-item nav-top-links">
+        <span class="gtag-link-others" tagname="merchandise_screen"
+              :class="supportsMerchandise ? '' : 'disabled'">{{ $t("viewLink.merchandise") }} <hint
+          v-if="!supportsMerchandise" class="hint"
+          :text="$t('viewLink.merchandiseNotSupportedTooltip')"/></span>
       </li>
     </router-link>
 
@@ -54,12 +63,28 @@
 </template>
 
 <script>
-import { market as featureFlagMarket, portal as featureFlagPortal, pvp as featureFlagPvp } from '../feature-flags';
+import {
+  market as featureFlagMarket,
+  merchandise as featureFlagMerchandise,
+  portal as featureFlagPortal,
+  pvp as featureFlagPvp
+} from '../feature-flags';
+import {mapGetters, mapMutations} from 'vuex';
+import Events from '@/events';
+import Vue from 'vue';
+import Hint from '@/components/Hint';
 
-export default {
+export default Vue.extend({
   inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
 
+  data() {
+    return {
+      supportsMerchandise: false
+    };
+  },
+
   computed: {
+    ...mapGetters(['getCurrentChainSupportsMerchandise']),
     featureFlagMarket() {
       return featureFlagMarket;
     },
@@ -68,9 +93,26 @@ export default {
     },
     featureFlagPvp() {
       return featureFlagPvp;
+    },
+    featureFlagMerchandise() {
+      return featureFlagMerchandise;
     }
   },
-};
+
+  mounted() {
+    this.updateCurrentChainSupportsMerchandise();
+    this.supportsMerchandise = this.getCurrentChainSupportsMerchandise;
+    Events.$on('setting:currentChain', () => {
+      this.supportsMerchandise = this.getCurrentChainSupportsMerchandise;
+    });
+  },
+  methods: {
+    ...mapMutations(['updateCurrentChainSupportsMerchandise']),
+  },
+  components: {
+    Hint,
+  },
+});
 </script>
 
 <style scoped>
@@ -79,8 +121,13 @@ a {
 }
 
 .nav-top-links > span {
-  color : #BFA765;
+  color: #BFA765;
   font-size: 1.1em;
   padding: 0px 5px 0px 5px;
+}
+
+.disabled {
+  cursor: not-allowed;
+  color: gray !important;
 }
 </style>

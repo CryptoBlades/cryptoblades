@@ -164,6 +164,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         require(isCharacterNotUnderAttack(characterID), "Under attack");
     }
 
+    modifier characterNotInDuel(uint256 characterID) {
+        _characterNotInDuel(characterID);
+        _;
+    }
+
+    function _characterNotInDuel(uint256 characterID) internal view {
+        require(isCharacterNotInDuel(characterID), "In duel queue");
+    }
+
     modifier isOwnedCharacter(uint256 characterID) {
         require(characters.ownerOf(characterID) == msg.sender);
         _;
@@ -302,6 +311,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         isOwnedCharacter(characterID)
         characterInArena(characterID)
         characterNotUnderAttack(characterID)
+        characterNotInDuel(characterID)
     {
         Fighter storage fighter = fighterByCharacter[characterID];
         uint256 wager = fighter.wager;
@@ -329,6 +339,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         isOwnedCharacter(characterID)
         characterInArena(characterID)
         characterNotUnderAttack(characterID)
+        characterNotInDuel(characterID)
     {
         require(matchByFinder[characterID].createdAt == 0, "Already in match");
 
@@ -341,6 +352,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterInArena(characterID)
         characterNotUnderAttack(characterID)
         isOwnedCharacter(characterID)
+        characterNotInDuel(characterID)
     {
         uint256 opponentID = getOpponent(characterID);
 
@@ -366,8 +378,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         isOwnedCharacter(attackerID)
         characterInArena(attackerID)
         characterWithinDecisionTime(attackerID)
+        characterNotInDuel(attackerID)
     {
-        require(!_duelQueue.contains(attackerID), "Char in duel queue");
+        require((arenaAccess & 1) == 1, "Arena locked");
 
         uint256 defenderID = getOpponent(attackerID);
 
@@ -738,6 +751,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             !isCharacterWithinDecisionTime(finderByOpponent[characterID]);
     }
 
+    /// @dev checks wether or not the character is currently in the duel queue
+    function isCharacterNotInDuel(uint256 characterID)
+        public
+        view
+        returns (bool)
+    {
+        return !_duelQueue.contains(characterID) || !isDefending[characterID];
+    }
+
     /// @dev gets the amount of SKILL required to enter the arena
     function getEntryWager(uint256 characterID) public view returns (uint256) {
         return getDuelCost(characterID).mul(wageringFactor);
@@ -815,7 +837,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             storage matchableCharacters = _matchableCharactersByTier[tier];
 
         require(matchableCharacters.length() != 0, "No enemy in tier");
-        require(!_duelQueue.contains(characterID), "Char dueling");
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
@@ -888,8 +909,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         private
         characterInArena(characterID)
     {
-        require(!isDefending[characterID], "Defender duel in process");
-
         Fighter storage fighter = fighterByCharacter[characterID];
 
         uint256 weaponID = fighter.weaponID;
@@ -905,10 +924,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         delete fighterByCharacter[characterID];
         delete matchByFinder[characterID];
-
-        if (_duelQueue.contains(characterID)) {
-            _duelQueue.remove(characterID);
-        }
 
         uint8 tier = getArenaTier(characterID);
 
@@ -1081,9 +1096,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     // Note: The following are debugging functions. Remove later.
 
-    function clearDuelQueue() external restricted {
-        uint256 length = _duelQueue.length();
-
+    function clearDuelQueue(uint256 length) external restricted {
         for (uint256 i = 0; i < length; i++) {
             if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
                 isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
