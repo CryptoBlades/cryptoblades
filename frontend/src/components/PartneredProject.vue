@@ -10,9 +10,9 @@
           <a @click="addTokenToMetamask" class="ml-1 a-button">({{$t('PartneredProject.add')}})</a>
         </div>
         <span class="multiplier-text">{{skillToPartnerRatio}} SKILL/{{tokenSymbol}}</span>
-        <span v-bind:class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
+        <span :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
           class="multiplier-text">{{$t('PartneredProject.multiplier')}}: x{{multiplier}}</span>
-        <span v-bind:class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
+        <span :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
         class="multiplier-text">$/{{$t('PartneredProject.unclaimed')}}: ${{moneyPerUnclaimed}}</span>
         <span class="multiplier-text">{{$t('PartneredProject.distribution')}}: {{distributionTime}} {{$t('PartneredProject.days')}}</span>
       </div>
@@ -23,7 +23,7 @@
     </div>
     <h6 class="mt-1 text-center">{{$t('PartneredProject.claimed')}} {{tokensClaimed}} / {{tokenSupply}}</h6>
     <div class="d-flex flex-column align-items-center w-100">
-      <b-card no-body class="collapse-style" v-bind:class="detailsOpened ? 'on-top' : ''">
+      <b-card no-body class="collapse-style" :class="detailsOpened ? 'on-top' : ''">
         <b-card-header class="d-flex flex-column align-items-center w-100 mt-1 p-0" v-b-toggle="'collapse-' + id" @click="toggleDetails()">
           <h6 class="when-open">{{$t('PartneredProject.less')}}...</h6><h6 class="when-closed">{{$t('PartneredProject.more')}}...</h6>
         </b-card-header>
