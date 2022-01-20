@@ -1472,9 +1472,9 @@ export function createStore(web3: Web3) {
       },
 
       async fetchSoulBalance({ state }) {
-        const { Characters } = state.contracts();
-        if(!Characters || !state.defaultAccount) return;
-        return await Characters.methods.soulSupply(state.defaultAccount).call(defaultCallOptions(state));
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
+        return await BurningManager.methods.userVars(state.defaultAccount, 1).call(defaultCallOptions(state));
       },
 
       async fetchInGameOnlyFunds({ state, commit }) {
@@ -4155,32 +4155,6 @@ export function createStore(web3: Web3) {
         await dispatch('updateCharacterIds');
       },
 
-      async burnCharacterIntoCharacter({ state, dispatch }, {burnId, targetId}) {
-        const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
-        if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
-
-        const burnCost = await BurningManager.methods.burnCharacterFee(burnId).call(defaultCallOptions(state));
-        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
-          from: state.defaultAccount
-        });
-
-        await BurningManager.methods.burnCharacterIntoCharacter(burnId, targetId).send({ from: state.defaultAccount });
-        await dispatch('updateCharacterIds');
-      },
-
-      async burnCharacterIntoSoul({ state, dispatch }, burnId) {
-        const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
-        if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
-
-        const burnCost = await BurningManager.methods.burnCharacterFee(burnId).call(defaultCallOptions(state));
-        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
-          from: state.defaultAccount
-        });
-
-        await BurningManager.methods.burnCharacterIntoSoul(burnId).send({ from: state.defaultAccount });
-        await dispatch('updateCharacterIds');
-      },
-
       async burnCharactersIntoCharacter({ state, dispatch }, {burnIds, targetId}) {
         const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
         if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
@@ -4228,11 +4202,12 @@ export function createStore(web3: Web3) {
         return { seller, nftID, price } as { seller: string, nftID: string, price: string };
       },
 
-      async upgradeCharacterWithSoul({ state }, {charId, soulAmount}) {
-        const { Characters } = state.contracts();
-        if(!Characters || !state.defaultAccount) return;
+      async upgradeCharacterWithSoul({ state, dispatch }, {charId, soulAmount}) {
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
 
-        await Characters.methods.upgradeWithSoul(charId, soulAmount).send({ from: state.defaultAccount });
+        await BurningManager.methods.upgradeCharacterWithSoul(charId, soulAmount).send({ from: state.defaultAccount });
+        await dispatch('fetchCharacterPower', charId);
       },
 
       async fetchCharactersBurnCost({ state }, burnIds) {

@@ -17,6 +17,9 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     CryptoBlades public game;
     Garrison public garrison;
 
+    mapping(address => mapping(uint256 => uint256)) public userVars;
+    uint256 public constant VARS_SOUL_SUPPLY = 1;
+
     function initialize(Characters _characters, Garrison _garrison, CryptoBlades _game)
         public
         initializer
@@ -31,15 +34,6 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
 
     // MODIFIERS
 
-    modifier isCharacterOwner(uint256 burnId) {
-        _isCharacterOwner(burnId);
-        _;
-    }
-
-    function _isCharacterOwner(uint256 burnId) internal view {
-        require(hasRole(BURNER_ROLE, msg.sender) || characters.ownerOf(burnId) == msg.sender || garrison.characterOwner(burnId) == msg.sender, 'Not owner');
-    }
-
     modifier isCharactersOwner(uint256[] memory burnIds) {
         _isCharactersOwner(burnIds);
         _;
@@ -47,7 +41,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
 
     function _isCharactersOwner(uint256[] memory burnIds) internal view {
         for(uint i = 0; i < burnIds.length; i++) {
-            require(hasRole(BURNER_ROLE, msg.sender) || characters.ownerOf(burnIds[i]) == msg.sender || garrison.characterOwner(burnIds[i]) == msg.sender, 'Not owner');
+            require(characters.ownerOf(burnIds[i]) == msg.sender || garrison.characterOwner(burnIds[i]) == msg.sender, 'Not owner');
         }
     }
 
@@ -67,32 +61,29 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
 
     //FUNCTIONS
 
-    function burnCharacterIntoCharacter(uint256 burnId, uint256 targetId) external isCharacterOwner(burnId) {
-        game.payContractTokenOnly(msg.sender, burnCharacterFee(burnId));
-        characters.burnIntoCharacter(burnId, targetId);
-    }
-
-    function burnCharacterIntoSoul(uint256 burnId) external isCharacterOwner(burnId) {
-        game.payContractTokenOnly(msg.sender, burnCharacterFee(burnId));
-        characters.burnIntoSoul(burnId, msg.sender);
-    }
-
-    function burnCharacterFromMarket(uint256 burnId) external isCharacterOwner(burnId) {
+    function burnCharacterFromMarket(uint256 burnId) external {
+        require(hasRole(BURNER_ROLE, msg.sender), 'Not burner');
         game.payContractTokenOnly(tx.origin, burnCharacterFee(burnId));
-        characters.burnIntoSoul(burnId, tx.origin);
+        uint256[] memory burnIds = new uint256[](1);
+        burnIds[0] = burnId;
+        userVars[tx.origin][VARS_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds);
+        characters.burnIntoSoul(burnIds);
     }
 
     function burnCharactersIntoCharacter(uint256[] memory burnIds, uint256 targetId) public isCharactersOwner(burnIds) {
         game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
-        for(uint i = 0; i < burnIds.length; i++) {
-            characters.burnIntoCharacter(burnIds[i], targetId);
-        }
+        characters.burnIntoCharacter(burnIds, targetId);
     }
 
     function burnCharactersIntoSoul(uint256[] memory burnIds) public isCharactersOwner(burnIds) {
         game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
-        for(uint i = 0; i < burnIds.length; i++) {
-            characters.burnIntoSoul(burnIds[i], msg.sender);
-        }
+        userVars[msg.sender][VARS_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds);
+        characters.burnIntoSoul(burnIds);
+    }
+
+    function upgradeCharacterWithSoul(uint256 targetId, uint256 soulAmount) public {
+        require(userVars[msg.sender][VARS_SOUL_SUPPLY] >= soulAmount, 'Not enough soul');
+        userVars[msg.sender][VARS_SOUL_SUPPLY] = userVars[msg.sender][VARS_SOUL_SUPPLY].sub(soulAmount);
+        characters.upgradeWithSoul(targetId, soulAmount);
     }
 }

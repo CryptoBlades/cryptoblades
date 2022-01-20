@@ -39,7 +39,7 @@
             <button
               class="switch"
               :class="{ switch_active: isUpgrading }"
-              @click="isUpgrading = true;"
+              @click="isUpgrading = true; clearAllBurn();"
             >
               <span>{{$t('plaza.upgrade')}}</span>
             </button>
@@ -384,7 +384,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
-      'burnCharacterIntoSoul', 'burnCharactersIntoSoul', 'burnCharacterIntoCharacter', 'burnCharactersIntoCharacter']),
+      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
@@ -459,22 +459,11 @@ export default Vue.extend({
       if(this.burnCharacterIds.length === 0) return;
       if(this.burnOption === 0) {
         // burning into soul
-        if(this.burnCharacterIds.length > 1) {
-          await this.burnCharactersIntoSoul(this.burnCharacterIds);
-        }
-        else {
-          await this.burnCharacterIntoSoul(this.burnCharacterIds[0]);
-        }
+        await this.burnCharactersIntoSoul(this.burnCharacterIds);
       }
       else {
         // burning into character
-        if(this.burnCharacterIds.length > 1) {
-          console.log('burning');
-          await this.burnCharactersIntoCharacter({ burnIds: this.burnCharacterIds, targetId: this.targetCharacterId });
-        }
-        else {
-          await this.burnCharacterIntoCharacter({ burnId: this.burnCharacterIds[0], targetId: this.targetCharacterId });
-        }
+        await this.burnCharactersIntoCharacter({ burnIds: this.burnCharacterIds, targetId: this.targetCharacterId });
         this.updatedRemainingPowerLimit();
       }
       this.soulBalance = await this.fetchSoulBalance();
@@ -484,9 +473,9 @@ export default Vue.extend({
     async onUpgradeConfirm() {
       if(!this.targetCharacterId || this.soulAmount === 0) return;
       await this.upgradeCharacterWithSoul({ charId: this.targetCharacterId, soulAmount: this.soulAmount });
+      this.updatedRemainingPowerLimit();
       this.soulBalance = await this.fetchSoulBalance();
       this.soulAmount = 0;
-      this.updatedRemainingPowerLimit();
     }
   },
 

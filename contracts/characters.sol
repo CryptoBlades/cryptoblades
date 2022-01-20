@@ -26,7 +26,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_1ee400a() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         experienceTable = [
             16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 33, 36, 39, 42, 46, 50, 55, 60, 66
@@ -54,7 +54,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_951a020() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         // Apparently ERC165 interfaces cannot be removed in this version of the OpenZeppelin library.
         // But if we remove the registration, then while local deployments would not register the interface ID,
@@ -65,19 +65,19 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         promos = _promos;
     }
 
     function migrateTo_b627f23() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         characterLimit = 4;
     }
 
     function migrateTo_1a19cbb(Garrison _garrison) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         garrison = _garrison;
     }
@@ -125,8 +125,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     Garrison public garrison;
 
-    mapping(uint256 => uint256) public bonusPower;
-    mapping(address => uint256) public soulSupply;
+    uint256 public constant NFTVAR_BONUS_POWER = 2;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -179,6 +178,14 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function getCosmeticsSeed(uint256 id) public view noFreshLookup(id) returns (uint256) {
         CharacterCosmetics memory cc = cosmetics[id];
         return cc.seed;
+    }
+
+    function getSoulForBurns(uint256[] calldata burnIds) external view returns (uint256) {
+        uint256 soulAmount = 0;
+        for(uint i = 0; i < burnIds.length; i++) {
+            soulAmount += getTotalPower(burnIds[i]).div(10);
+        }
+        return soulAmount;
     }
 
     function mint(address minter, uint256 seed) public restricted {
@@ -244,44 +251,46 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokenID;
     }
 
-    function burnIntoCharacter(uint256 burnId, uint256 targetCharId) external restricted {
-        uint256 burnPower = bonusPower[burnId].add(getPowerAtLevel(tokens[burnId].level));
+    function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId) external restricted {
+        uint256 burnPower = 0;
+        for(uint i = 0; i < burnIds.length; i++) {
+            burnPower += nftVars[NFTVAR_BONUS_POWER][burnIds[i]].add(getPowerAtLevel(tokens[burnIds[i]].level));
+            address burnOwner = ownerOf(burnIds[i]);
+            if(burnOwner == address(garrison)) {
+                burnOwner = garrison.characterOwner(burnIds[i]);
+                garrison.updateOnBurn(burnOwner, burnIds[i]);
+            }
+            _burn(burnIds[i]);
+
+            emit Burned(
+                burnOwner,
+                burnIds[i]
+            );
+        }
         require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
-        address burnOwner = ownerOf(burnId);
-        if(burnOwner == address(garrison)) {
-            burnOwner = garrison.characterOwner(burnId);
-            garrison.updateOnBurn(burnOwner, burnId);
-        }
-        _burn(burnId);
-        bonusPower[targetCharId] = burnPower.add(bonusPower[targetCharId]);
-
-        emit Burned(
-            burnOwner,
-            burnId
-        );
+        nftVars[NFTVAR_BONUS_POWER][targetCharId] = burnPower.add(nftVars[NFTVAR_BONUS_POWER][targetCharId]);
     }
 
-    function burnIntoSoul(uint256 burnId, address soulRecipient) external restricted {
-        uint256 soulAmount = uint256(getPowerAtLevel(tokens[burnId].level)).add(bonusPower[burnId]).div(10);
-        address burnOwner = ownerOf(burnId);
-        if(burnOwner == address(garrison)) {
-            garrison.updateOnBurn(burnOwner, burnId);
-        }
-        _burn(burnId);
-        soulSupply[soulRecipient] = soulSupply[soulRecipient].add(soulAmount);
+    function burnIntoSoul(uint256[] calldata burnIds) external restricted {
+        for(uint i = 0; i < burnIds.length; i++) {
+            address burnOwner = ownerOf(burnIds[i]);
+            if(burnOwner == address(garrison)) {
+                burnOwner = garrison.characterOwner(burnIds[i]);
+                garrison.updateOnBurn(burnOwner, burnIds[i]);
+            }
+            _burn(burnIds[i]);
 
-        emit Burned(
-            soulRecipient,
-            burnId
-        );
+            emit Burned(
+                burnOwner,
+                burnIds[i]
+            );
+        }
     }
 
-    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) public {
-        require(soulSupply[msg.sender] >= soulAmount, 'Not enough soul');
+    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) external restricted {
         uint256 burnPower = soulAmount.mul(10);
         require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
-        soulSupply[msg.sender] = soulSupply[msg.sender].sub(soulAmount);
-        bonusPower[targetCharId] = burnPower.add(bonusPower[targetCharId]);
+        nftVars[NFTVAR_BONUS_POWER][targetCharId] = burnPower.add(nftVars[NFTVAR_BONUS_POWER][targetCharId]);
     }
 
     function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
@@ -297,7 +306,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getTotalPower(uint256 id) public view noFreshLookup(id) returns (uint256) {
-        return bonusPower[id].add(getPowerAtLevel(tokens[id].level));
+        return nftVars[NFTVAR_BONUS_POWER][id].add(getPowerAtLevel(tokens[id].level));
     }
 
     function getPowerAtLevel(uint8 level) public pure returns (uint24) {

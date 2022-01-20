@@ -701,7 +701,7 @@
       </b-tab>
     </b-tabs>
     <b-modal class="centered-modal text-center" ref="character-buy-modal" :title="$t('market.characterBuyModal')"
-      @ok="purchaseNft" @cancel="purchaseNft(true)">
+      @ok="purchaseNft()" @cancel="purchaseNft(true)">
       <template #modal-footer="{ ok, cancel }">
         <div class="w-100 d-flex justify-content-center">
           <b-button class="btn-primary mr-5" @click="cancel()">
