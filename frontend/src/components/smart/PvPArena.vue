@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import PvPArenaPreparation from './PvPArenaPreparation.vue';
 import PvPArenaSummary from './PvPArenaSummary.vue';
 import PvPArenaMatchMaking from './PvPArenaMatchMaking.vue';
@@ -138,6 +138,7 @@ export default {
 
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
+    ...mapGetters(['getCharacterName'])
   },
 
   methods: {
@@ -214,7 +215,7 @@ export default {
 
       this.opponentInformation.name = getCharacterNameFromSeed(defenderId);
 
-      this.opponentInformation.level = await this.getCharacterLevel(defenderId);
+      this.opponentInformation.level = Number(await this.getCharacterLevel(defenderId)) + 1;
 
       this.opponentInformation.rank = await this.getRankingPointsByCharacter(defenderId);
 
@@ -365,7 +366,7 @@ export default {
 
       this.characterInformation.tier = await this.getArenaTier(this.currentCharacterId);
 
-      this.characterInformation.level = await this.getCharacterLevel(this.currentCharacterId);
+      this.characterInformation.level = Number(await this.getCharacterLevel(this.currentCharacterId)) + 1;
 
       this.characterInformation.power = await this.getCharacterPower(this.currentCharacterId);
 
@@ -480,7 +481,7 @@ export default {
 
         this.characterInformation.tier = await this.getArenaTier(value);
 
-        this.characterInformation.level = await this.getCharacterLevel(value);
+        this.characterInformation.level = Number(await this.getCharacterLevel(value)) + 1;
 
         this.characterInformation.power = await this.getCharacterPower(value);
 

@@ -77,7 +77,7 @@
           {{$t('pvp.level')}}
         </span>
         <span>
-          {{ characterInformation.level }}
+          {{ characterInformation.level}}
         </span>
       </li>
       <li>

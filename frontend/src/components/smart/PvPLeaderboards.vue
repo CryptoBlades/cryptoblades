@@ -48,9 +48,9 @@
 </template>
 
 <script>
-import { getCharacterNameFromSeed } from '../../character-name';
+
 import { characterFromContract as formatCharacter } from '../../contract-models';
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 export default {
   inject: ['web3'],
   data() {
@@ -73,6 +73,8 @@ export default {
   },
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
+    ...mapGetters(['getCharacterName'])
+
   },
   methods: {
     ...mapActions([
@@ -87,8 +89,8 @@ export default {
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
         return {
           rankerId,
-          name: getCharacterNameFromSeed(rankerId),
-          level: await this.getCharacterLevel(rankerId),
+          name: this.getCharacterName(rankerId),
+          level: Number(await this.getCharacterLevel(rankerId)) + 1,
           rank: await this.getRankingPointsByCharacter(rankerId),
           element: formatCharacter(rankerId, await this.getCharacter(rankerId)).traitName
         };
