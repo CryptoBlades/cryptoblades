@@ -254,7 +254,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId) external restricted {
         uint256 burnPower = 0;
         for(uint i = 0; i < burnIds.length; i++) {
-            burnPower += nftVars[NFTVAR_BONUS_POWER][burnIds[i]].add(getPowerAtLevel(tokens[burnIds[i]].level));
+            burnPower += nftVars[burnIds[i]][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[burnIds[i]].level));
             address burnOwner = ownerOf(burnIds[i]);
             if(burnOwner == address(garrison)) {
                 burnOwner = garrison.characterOwner(burnIds[i]);
@@ -268,7 +268,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             );
         }
         require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
-        nftVars[NFTVAR_BONUS_POWER][targetCharId] = burnPower.add(nftVars[NFTVAR_BONUS_POWER][targetCharId]);
+        nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
     }
 
     function burnIntoSoul(uint256[] calldata burnIds) external restricted {
@@ -290,7 +290,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) external restricted {
         uint256 burnPower = soulAmount.mul(10);
         require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
-        nftVars[NFTVAR_BONUS_POWER][targetCharId] = burnPower.add(nftVars[NFTVAR_BONUS_POWER][targetCharId]);
+        nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
     }
 
     function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
@@ -306,7 +306,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getTotalPower(uint256 id) public view noFreshLookup(id) returns (uint256) {
-        return nftVars[NFTVAR_BONUS_POWER][id].add(getPowerAtLevel(tokens[id].level));
+        return nftVars[id][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[id].level));
     }
 
     function getPowerAtLevel(uint8 level) public pure returns (uint24) {
