@@ -319,7 +319,7 @@ export default {
   methods: {
     ...mapActions([
       'withdrawFromArena',
-      'getIsCharacterNotUnderAttack',
+      'getIsCharacterUnderAttack',
       'findOpponent',
       'getMatchByFinder',
       'approve',
@@ -360,7 +360,7 @@ export default {
     },
 
     async findMatch() {
-      if (!(await this.getIsCharacterNotUnderAttack(this.currentCharacterId))) {
+      if ((await this.getIsCharacterUnderAttack(this.currentCharacterId))) {
         this.isUnderAttack = true;
         return;
       }
@@ -388,7 +388,7 @@ export default {
     },
 
     async reRollCharacterOpponent() {
-      if (!(await this.getIsCharacterNotUnderAttack(this.currentCharacterId))) {
+      if ((await this.getIsCharacterUnderAttack(this.currentCharacterId))) {
         this.isUnderAttack = true;
         return;
       }
