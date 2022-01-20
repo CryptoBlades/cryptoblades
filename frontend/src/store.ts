@@ -4302,13 +4302,13 @@ export function createStore(web3: Web3) {
         return isCharacterInArena;
       },
 
-      async getIsCharacterNotUnderAttack({ state }, characterId) {
+      async getIsCharacterUnderAttack({ state }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
 
-        const isCharacterNotUnderAttack = await PvpArena.methods.isCharacterNotUnderAttack(characterId).call({ from: state.defaultAccount });
+        const isCharacterUnderAttack = await PvpArena.methods.isCharacterUnderAttack(characterId).call({ from: state.defaultAccount });
 
-        return isCharacterNotUnderAttack;
+        return isCharacterUnderAttack;
       },
 
       async getMatchByFinder({ state }, characterId) {
