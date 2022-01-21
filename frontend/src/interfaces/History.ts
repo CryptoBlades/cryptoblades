@@ -19,7 +19,9 @@ export interface IWeaponHistory{
 export interface WeaponTransactionHistoryData{
   weaponId: string;
   weaponName: string;
-  weaponPrice: number;
+  weaponPrice: string;
+  buyerAddress: string;
+  txHash: string;
 }
 
 export interface ICharacterHistory{
@@ -37,7 +39,9 @@ export interface ICharacterHistory{
 export interface CharacterTransactionHistoryData{
   charId: string;
   charName: string;
-  charPrice: number;
+  charPrice: string;
+  buyerAddress: string;
+  txHash: string;
 }
 
 export interface IShieldHistory{
@@ -61,5 +65,7 @@ export interface IShieldHistory{
 export interface ShieldTransactionHistoryData{
   shieldId: string;
   shieldName: string;
-  shieldPrice: number;
+  shieldPrice: string;
+  buyerAddress: string;
+  txHash: string;
 }

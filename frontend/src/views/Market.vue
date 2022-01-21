@@ -716,6 +716,7 @@ import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 import {getCleanName} from '@/rename-censor';
 import i18n from '@/i18n';
 import {toInteger} from 'lodash';
+import {getConfigValue} from '@/contracts';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
@@ -1966,6 +1967,16 @@ export default Vue.extend({
           key: 'charPrice',
           label: 'Price',
           sortable: true,
+        },
+        {
+          key: 'buyerAddress',
+          label: 'Buyer',
+          sortable: true,
+        },
+        {
+          key: 'txHash',
+          label: 'Transaction ID',
+          sortable: false,
         }
       ];
       if(weaponHistory.length === 0){
@@ -1979,7 +1990,9 @@ export default Vue.extend({
             let items: WeaponTransactionHistoryData = {
               weaponId: weaponHistory[i].weaponId,
               weaponName: getCleanName(this.getWeaponName(weaponHistory[i].weaponId, weaponHistory[i].weaponStars)),
-              weaponPrice: weaponHistory[i].price
+              weaponPrice: weaponHistory[i].price.toFixed(4),
+              buyerAddress: weaponHistory[i].buyerAddress,
+              txHash: this.formatUrl(weaponHistory[i].txHash)
             };
 
             this.weaponTransactionHistoryData.push(items);
@@ -2006,6 +2019,16 @@ export default Vue.extend({
           key: 'charPrice',
           label: 'Price',
           sortable: true,
+        },
+        {
+          key: 'buyerAddress',
+          label: 'Buyer',
+          sortable: true,
+        },
+        {
+          key: 'txHash',
+          label: 'Transaction ID',
+          sortable: false,
         }
       ];
       if(characterHistory.length === 0){
@@ -2020,7 +2043,9 @@ export default Vue.extend({
             let items: CharacterTransactionHistoryData = {
               charId: characterHistory[i].charId,
               charName: getCleanName(this.getCharacterName(characterHistory[i].charId)),
-              charPrice: characterHistory[i].price
+              charPrice: characterHistory[i].price.toFixed(4),
+              buyerAddress: characterHistory[i].buyerAddress,
+              txHash: this.formatUrl(characterHistory[i].txHash)
             };
 
             this.characterTransactionHistoryData.push(items);
@@ -2047,6 +2072,16 @@ export default Vue.extend({
           key: 'shieldPrice',
           label: 'Price',
           sortable: true,
+        },
+        {
+          key: 'buyerAddress',
+          label: 'Buyer',
+          sortable: true,
+        },
+        {
+          key: 'txHash',
+          label: 'Transaction ID',
+          sortable: false,
         }
       ];
 
@@ -2061,7 +2096,9 @@ export default Vue.extend({
             let items: ShieldTransactionHistoryData = {
               shieldId: shieldHistory[i].shieldId,
               shieldName: getShieldNameFromSeed(parseInt(shieldHistory[i].shieldId,10),shieldHistory[i].shieldStars),
-              shieldPrice: shieldHistory[i].price
+              shieldPrice: shieldHistory[i].price.toFixed(4),
+              buyerAddress: shieldHistory[i].buyerAddress,
+              txHash: this.formatUrl(shieldHistory[i].txHash)
             };
 
             this.shieldTransactionHistoryData.push(items);
@@ -2287,6 +2324,10 @@ export default Vue.extend({
 
       return input[0].toUpperCase() + input.slice(1);
     },
+
+    formatUrl(input: string): string {
+      return `<a href="${getConfigValue('blockExplorerUrls')[0]}/tx/${input}">${input.substr(0,4)}...${input.substr(-6)})}</a>`;
+    }
 
   },
 
