@@ -49,7 +49,7 @@ contract('Characters', accounts => {
     it('should work', async () => {
       await characters.mint(accounts[0], '123');
 
-      const events = [];
+      const events = await characters.getPastEvents();
       assertEventEmitted(events, 'NewCharacter', 0);
 
       await characters.gainXp(0, 1000);
