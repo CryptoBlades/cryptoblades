@@ -41,16 +41,16 @@ export default {
     };
   },
 
-  computed: {
+   async computed() {
     ...mapGetters([
       'getCharacterName'
     ]),
     ...mapActions([
       'getRename'
     ]),
-    kickedByName() {
-      const rename = this.getRename(this.kickedBy);
-      return rename? rename : this.getCharacterName(this.kickedBy);
+   kickedByName() {
+      const rename = await this.getRename(this.kickedBy);
+      return rename? rename : await this.getCharacterName(this.kickedBy);
     }
   },
 
