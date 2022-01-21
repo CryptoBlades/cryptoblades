@@ -5,7 +5,7 @@
       <div class="modalTitle">{{$t('pvp.kicked')}}</div>
       <ul>
         <li>
-          <span>{{$t('pvp.lastDefeated')}}{{ this.kickedBy }}</span>
+          <span>{{$t('pvp.lastDefeated')}}{{ kickedBy }}</span>
         </li>
         <pvp-separator />
       </ul>

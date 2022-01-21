@@ -213,7 +213,7 @@ export default {
     async updateOpponentInformation(defenderId) {
       this.opponentInformation.id = defenderId;
       const rename = await this.getRename(defenderId);
-      this.opponentInformation.name = rename? rename : this.getCharacterName(defenderId);
+      this.opponentInformation.name = rename ? rename : this.getCharacterName(defenderId);
 
       this.opponentInformation.level = Number(await this.getCharacterLevel(defenderId)) + 1;
 
@@ -303,7 +303,7 @@ export default {
           this.recentlyKicked.characterId = formattedResult.characterId;
           this.recentlyKicked.kickedBy = formattedResult.kickedBy;
           const rename = await this.getRename(this.recentlyKicked.kickedBy);
-          this.recentlyKicked.kickedBy = rename? rename : await this.getCharacterName(formattedResult.kickedBy);
+          this.recentlyKicked.kickedBy = rename ? rename : await this.getCharacterName(formattedResult.kickedBy);
         }
       }
     },
@@ -336,7 +336,7 @@ export default {
             const rename = await this.getRename(rankerId);
             return {
               rankerId,
-              name: rename? rename : this.getCharacterName(rankerId),
+              name: rename ? rename : this.getCharacterName(rankerId),
               rank: await this.getRankingPointsByCharacter(rankerId)
             };
           }));
@@ -360,7 +360,7 @@ export default {
     if (this.currentCharacterId !== null) {
       const rename = await this.getRename(this.currentCharacterId);
 
-      this.characterInformation.name = rename? rename : this.getCharacterName(this.currentCharacterId);
+      this.characterInformation.name = rename ? rename : this.getCharacterName(this.currentCharacterId);
 
       this.characterInformation.tier = await this.getArenaTier(this.currentCharacterId);
 
@@ -436,7 +436,7 @@ export default {
         const rename = await this.getRename(rankerId);
         return {
           rankerId,
-          name: rename? rename : this.getCharacterName(rankerId),
+          name: rename ? rename : this.getCharacterName(rankerId),
           rank: await this.getRankingPointsByCharacter(rankerId)
         };
       }));
