@@ -280,7 +280,7 @@ export default {
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
     formattedEntryWager() {
-      return new BN(this.entryWager).div(new BN(10).pow(18)).toFixed(2);
+      return new BN(this.entryWager).div(new BN(10).pow(18)).toFixed(0);
     },
     leavingArenaCost() {
       return +this.formattedEntryWager / 4;
