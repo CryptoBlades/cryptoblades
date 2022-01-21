@@ -229,7 +229,7 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['claimTokenRewards','setUpContracts','initialize','configureMetaMask','fetchPartnerProjects']) as StoreMappedActions),
-    ...mapMutations(['setNetworkId','updatePayoutCurrencyId', 'updateCurrentChainSupportsMerchandise']),
+    ...mapMutations(['setNetworkId','updatePayoutCurrencyId', 'updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP']),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
@@ -303,6 +303,7 @@ export default Vue.extend({
     async setCurrentChain() {
       localStorage.setItem('currentChain', this.currentChain);
       this.updateCurrentChainSupportsMerchandise();
+      this.updateCurrentChainSupportsPvP();
       Events.$emit('setting:currentChain', { value: this.currentChain });
       addChainToRouter(this.currentChain);
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
