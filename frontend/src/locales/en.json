@@ -5,9 +5,10 @@
     "blacksmith": "Blacksmith",
     "combat": "Combat",
     "raid": "Raid",
-    "pvp": "PvP",
     "market": "Market",
     "stake": "Stake",
+    "pvp": "PvP",
+    "treasury": "Treasury",
     "merchandise": "Merchandise",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
   },

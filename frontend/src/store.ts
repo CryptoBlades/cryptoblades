@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {bnMinimum, gasUsedToBnb, toBN} from './utils/common';
+import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, gasUsedToBnb, toBN} from './utils/common';
 
 import {getConfigValue, setUpContracts} from './contracts';
 
@@ -43,7 +43,6 @@ import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
-import config from '../app-config.json';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -746,23 +745,11 @@ export function createStore(web3: Web3) {
       },
 
       updateCurrentChainSupportsMerchandise(state: IState) {
-        const currentChain = localStorage.getItem('currentChain') || 'BSC';
-        const merchandiseSupportedChains = config.merchandiseSupportedChains;
-        console.log(merchandiseSupportedChains);
-        if (!currentChain || !merchandiseSupportedChains) {
-          state.currentChainSupportsMerchandise = false;
-        }
-        state.currentChainSupportsMerchandise = merchandiseSupportedChains.includes(currentChain);
+        state.currentChainSupportsMerchandise = currentChainSupportsMerchandise();
       },
 
       updateCurrentChainSupportsPvP(state: IState) {
-        const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
-        const currentChain = localStorage.getItem('currentChain') || 'BSC';
-        const pvpSupportedChains = config.environments[env].pvpSupportedChains;
-        if (!currentChain || !pvpSupportedChains) {
-          state.currentChainSupportsPvP = false;
-        }
-        state.currentChainSupportsPvP = pvpSupportedChains.includes(currentChain);
+        state.currentChainSupportsPvP = currentChainSupportsPvP();
       },
 
       updateCharacter(state: IState, { characterId, character }) {
