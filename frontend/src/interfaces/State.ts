@@ -146,6 +146,7 @@ export interface IState {
   ownedDust: string[];
   cartEntries: CartEntry[];
   currentChainSupportsMerchandise: boolean;
+  currentChainSupportsPvP: boolean;
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;

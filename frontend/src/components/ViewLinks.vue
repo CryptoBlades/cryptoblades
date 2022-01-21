@@ -1,61 +1,61 @@
 <template>
   <b-navbar-nav>
 
-    <router-link :to="{ name: 'plaza' }" exact class="nav-link"
-                 v-if="!featureFlagStakeOnly">
+    <router-link v-if="!stakeOnly" :to="{ name: 'plaza' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="plaza_screen">{{ $t("viewLink.plaza") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.plaza") }}</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'blacksmith' }" exact class="nav-link" v-if="!featureFlagStakeOnly">
+    <router-link v-if="!stakeOnly" :to="{ name: 'blacksmith' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="blacksmith_screen">{{ $t("viewLink.blacksmith") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.blacksmith") }}</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'combat' }" exact class="nav-link" v-if="!featureFlagStakeOnly">
+    <router-link v-if="!stakeOnly" :to="{ name: 'combat' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="combat_screen">{{ $t("viewLink.combat") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.combat") }}</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'raid' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagRaid">
+    <router-link v-if="!stakeOnly && raid" :to="{ name: 'raid' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="raid_screen">{{ $t("viewLink.raid") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.raid") }}</span>
       </li>
     </router-link>
 
-    <router-link :to="{ name: 'market' }" exact class="nav-link" v-if="!featureFlagStakeOnly && featureFlagMarket">
+    <router-link v-if="!stakeOnly && market" :to="{ name: 'market' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="market_screen">{{ $t("viewLink.market") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.market") }}</span>
       </li>
     </router-link>
 
     <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="stake_screen">{{ $t("viewLink.stake") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.stake") }}</span>
       </li>
     </router-link>
 
-    <router-link v-if="featureFlagPvp" :to="{ name: 'pvp' }" exact class="nav-link">
+    <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="pvp_screen">PvP</span>
+        <span class="gtag-link-others" :class="supportsPvP ? '' : 'disabled'">{{ $t("viewLink.pvp") }} <hint
+          v-if="!supportsPvP" class="hint"
+          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
       </li>
     </router-link>
 
     <router-link :to="{ name: 'treasury' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="treasury_screen">Treasury</span>
+        <span class="gtag-link-others">{{ $t("viewLink.treasury") }}</span>
       </li>
     </router-link>
 
-    <router-link v-if="featureFlagMerchandise" :to="{ name: 'merchandise' }" exact class="nav-link">
+    <router-link v-if="merchandise" :to="{ name: 'merchandise' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" tagname="merchandise_screen"
-              :class="supportsMerchandise ? '' : 'disabled'">{{ $t("viewLink.merchandise") }} <hint
+        <span class="gtag-link-others" :class="supportsMerchandise ? '' : 'disabled'">{{ $t("viewLink.merchandise") }} <hint
           v-if="!supportsMerchandise" class="hint"
-          :text="$t('viewLink.merchandiseNotSupportedTooltip')"/></span>
+          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
       </li>
     </router-link>
 
@@ -63,51 +63,26 @@
 </template>
 
 <script>
-import {
-  market as featureFlagMarket,
-  merchandise as featureFlagMerchandise,
-  portal as featureFlagPortal,
-  pvp as featureFlagPvp
-} from '../feature-flags';
-import {mapGetters, mapMutations} from 'vuex';
-import Events from '@/events';
+import {market, merchandise, portal, pvp, raid, stakeOnly} from '@/feature-flags';
+import {mapGetters} from 'vuex';
 import Vue from 'vue';
 import Hint from '@/components/Hint';
 
 export default Vue.extend({
-  inject: ['featureFlagStakeOnly', 'featureFlagRaid'],
-
   data() {
     return {
-      supportsMerchandise: false
+      stakeOnly, raid, market, portal, pvp, merchandise,
     };
   },
 
   computed: {
-    ...mapGetters(['getCurrentChainSupportsMerchandise']),
-    featureFlagMarket() {
-      return featureFlagMarket;
+    ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP']),
+    supportsMerchandise() {
+      return this.getCurrentChainSupportsMerchandise;
     },
-    featureFlagPortal() {
-      return featureFlagPortal;
-    },
-    featureFlagPvp() {
-      return featureFlagPvp;
-    },
-    featureFlagMerchandise() {
-      return featureFlagMerchandise;
+    supportsPvP() {
+      return this.getCurrentChainSupportsPvP;
     }
-  },
-
-  mounted() {
-    this.updateCurrentChainSupportsMerchandise();
-    this.supportsMerchandise = this.getCurrentChainSupportsMerchandise;
-    Events.$on('setting:currentChain', () => {
-      this.supportsMerchandise = this.getCurrentChainSupportsMerchandise;
-    });
-  },
-  methods: {
-    ...mapMutations(['updateCurrentChainSupportsMerchandise']),
   },
   components: {
     Hint,
@@ -123,7 +98,7 @@ a {
 .nav-top-links > span {
   color: #BFA765;
   font-size: 1.1em;
-  padding: 0px 5px 0px 5px;
+  padding: 0 5px 0 5px;
 }
 
 .disabled {

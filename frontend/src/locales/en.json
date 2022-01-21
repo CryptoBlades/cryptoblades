@@ -5,11 +5,12 @@
     "blacksmith": "Blacksmith",
     "combat": "Combat",
     "raid": "Raid",
-    "pvp": "PvP",
     "market": "Market",
     "stake": "Stake",
+    "pvp": "PvP",
+    "treasury": "Treasury",
     "merchandise": "Merchandise",
-    "merchandiseNotSupportedTooltip": "Currently selected chain does not support Merchandise."
+    "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
   },
   "ClaimRewardsBar": {
     "rewards": "Rewards",
@@ -841,6 +842,7 @@
     "add": "Add",
     "claimed": "Claimed",
     "more": "More",
-    "less": "Less"
+    "less": "Less",
+    "unclaimed": "Unclaimed"
   }
 }
