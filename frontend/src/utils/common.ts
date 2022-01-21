@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import config from '../../app-config.json';
 import {router} from '@/main';
-import {getConfigValue} from '@/contracts';
+import {getConfigValue, Networks} from '@/contracts';
 import {networks as pvpNetworks} from '../../../build/contracts/PvpArena.json';
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
@@ -115,6 +115,6 @@ export const currentChainSupportsMerchandise = () => {
 export const currentChainSupportsPvP = () => {
   const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
   const pvpContractAddr = process.env.VUE_APP_PVP_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_PVP_CONTRACT_ADDRESS') || pvpNetworks[networkId]?.address;
+    getConfigValue('VUE_APP_PVP_CONTRACT_ADDRESS') || (pvpNetworks as Networks)[networkId]?.address;
   return !!pvpContractAddr;
 };
