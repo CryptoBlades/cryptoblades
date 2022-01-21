@@ -82,10 +82,10 @@ export default {
       'getRename'
     ]),
     async getPlayers(){
-      const tierTopRankersIds
-      = await this.getTierTopCharacters(this.tierFilter);
+      const tierTopRankersIds = await this.getTierTopCharacters(this.tierFilter);
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
         const rename = await this.getRename(rankerId);
+
         return {
           rankerId,
           name: rename ? rename : this.getCharacterName(rankerId),

@@ -212,7 +212,9 @@ export default {
 
     async updateOpponentInformation(defenderId) {
       this.opponentInformation.id = defenderId;
+
       const rename = await this.getRename(defenderId);
+
       this.opponentInformation.name = rename ? rename : this.getCharacterName(defenderId);
 
       this.opponentInformation.level = Number(await this.getCharacterLevel(defenderId)) + 1;
@@ -434,6 +436,7 @@ export default {
 
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
         const rename = await this.getRename(rankerId);
+
         return {
           rankerId,
           name: rename ? rename : this.getCharacterName(rankerId),
