@@ -5,7 +5,7 @@
       <div class="modalTitle">{{$t('pvp.kicked')}}</div>
       <ul>
         <li>
-          <span>{{$t('pvp.lastDefeated')}}{{ kickedByName }}</span>
+          <span>{{$t('pvp.lastDefeated')}}{{ this.kickedBy }}</span>
         </li>
         <pvp-separator />
       </ul>
@@ -22,7 +22,6 @@
 
 <script>
 import PvPSeparator from './PvPSeparator.vue';
-import { mapActions, mapGetters } from 'vuex';
 
 export default {
   components: {
@@ -37,21 +36,9 @@ export default {
 
   data() {
     return {
+      kicker: null,
       showModal: false
     };
-  },
-
-   async computed() {
-    ...mapGetters([
-      'getCharacterName'
-    ]),
-    ...mapActions([
-      'getRename'
-    ]),
-   kickedByName() {
-      const rename = await this.getRename(this.kickedBy);
-      return rename? rename : await this.getCharacterName(this.kickedBy);
-    }
   },
 
   methods: {
@@ -68,7 +55,6 @@ export default {
       this.showModal = false;
     }
   },
-
   watch: {
     showModal() {
       if (this.showModal) {
