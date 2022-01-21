@@ -1923,16 +1923,16 @@ export default Vue.extend({
       return shields.idResults;
     },
 
-    async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
-      const url = new URL(apiUrl(`static/market/transactions/${sellerAddress}`));
+    async searchItemsSoldBySeller(nftType: string, sellerAddress: string): Promise<any[]>{
+      const url = new URL(apiUrl(`static/market/transactions/${this.activeChain()}/${nftType}/${sellerAddress}`));
 
-      const weaponsData = await fetch(url.toString());
-      const weapons = await weaponsData.json();
-      return weapons.results;
+      const resultsCursor = await fetch(url.toString());
+      const results = await resultsCursor.json();
+      return results.results;
     },
 
     async showWeaponsSoldModal() {
-      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller('weapon', this.defaultAccount as string);
       this.weaponTransactionHistoryHeader = [
         {
           key: 'weaponId',
@@ -1990,7 +1990,7 @@ export default Vue.extend({
       (this.$refs['weapons-sold-modal'] as BModal).show();
     },
     async showCharactersSoldModal() {
-      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller('character', this.defaultAccount as string);
       this.characterTransactionHistoryHeader = [
         {
           key: 'charId',
@@ -2031,7 +2031,7 @@ export default Vue.extend({
       (this.$refs['characters-sold-modal'] as BModal).show();
     },
     async showShieldsSoldModal() {
-      const shieldHistory: IShieldHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      const shieldHistory: IShieldHistory[] = await this.searchItemsSoldBySeller('shield', this.defaultAccount as string);
       this.shieldTransactionHistoryHeader = [
         {
           key: 'shieldId',
