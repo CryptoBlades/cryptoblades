@@ -417,11 +417,15 @@ export default {
       this.loading = false;
     },
 
-    async listenForDuel() {
-      //const currentBlock = await this.web3.eth.getBlockNumber();
+    async listenForDuel(pvpContract) {
+      const currentBlock = await this.web3.eth.getBlockNumber();
 
       const subscription = this.web3.eth.subscribe('newBlockHeaders', async () => {
-        const duelFinishedResult = [];
+        const duelFinishedResult = await pvpContract.getPastEvents('DuelFinished', {
+          filter: { attacker: this.currentCharacterId },
+          toBlock: 'latest',
+          fromBlock: currentBlock
+        });
 
         if (duelFinishedResult.length) {
           const formattedResult = formatDuelResult(duelFinishedResult[duelFinishedResult.length - 1].returnValues);
