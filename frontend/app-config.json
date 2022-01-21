@@ -200,8 +200,7 @@
           "exchangeUrl": "",
           "fightGas": "0.006"
         }
-      },
-      "pvpSupportedChains": ["BSC","HECO","OEC","POLYGON","AVAX"]
+      }
     },
     "production": {
       "chains": {
@@ -406,8 +405,7 @@
           "exchangeUrl": "https://app.pangolin.exchange/#/swap?inputCurrency=0x483416eb3afa601b9c6385f63cec0c82b6abf1fb&outputCurrency=0xc7198437980c041c805a1edcba50c1ce5db95118",
           "fightGas": "0.006"
         }
-      },
-      "pvpSupportedChains": ["HECO","OEC"]
+      }
     }
   }
 }
