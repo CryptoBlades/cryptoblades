@@ -36,7 +36,6 @@ export default {
 
   data() {
     return {
-      kicker: null,
       showModal: false
     };
   },

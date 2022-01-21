@@ -31,7 +31,7 @@
           <h1 class="characterName">{{ characterInformation.name }}</h1>
           <div class="infoDetails">
             <span>
-              {{$t('pvp.level')}}: {{ characterInformation.level}}
+              {{$t('pvp.level')}}: {{ characterInformation.level }}
             </span>
             <pvp-separator vertical class="separator" />
             <span>
