@@ -4222,8 +4222,8 @@ export function createStore(web3: Web3) {
       },
 
       async getRename({state}, characterId){
-        const { CharacterRenameTagConsumables} = state.contracts();
-        const characterRename = await CharacterRenameTagConsumables.methods.getCharacterRename(characterId).call({ from: state.defaultAccount });
+        const { CharacterRenameTagConsumables } = state.contracts();
+        const characterRename = await CharacterRenameTagConsumables?.methods.getCharacterRename(characterId).call({ from: state.defaultAccount });
         if(characterRename !== ''){
           return characterRename;
         }

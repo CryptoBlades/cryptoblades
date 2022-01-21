@@ -212,8 +212,8 @@ export default {
 
     async updateOpponentInformation(defenderId) {
       this.opponentInformation.id = defenderId;
-
-      this.opponentInformation.name = this.getCharacterName(defenderId);
+      const rename = await this.getRename(defenderId);
+      this.opponentInformation.name = rename? rename : this.getCharacterName(defenderId);
 
       this.opponentInformation.level = Number(await this.getCharacterLevel(defenderId)) + 1;
 
@@ -309,7 +309,7 @@ export default {
           const rename = await this.getRename(this.recentlyKicked.kickedBy);
           console.log('formatted kickedBy', formattedResult.kickedBy);
           console.log('rename', rename);
-          this.recentlyKicked.kickedBy = rename? rename : formattedResult.kickedBy;
+          this.recentlyKicked.kickedBy = rename? rename : await this.getCharacterName(formattedResult.kickedBy);
         }
       }
     },
@@ -367,7 +367,9 @@ export default {
 
     // Note: currentCharacterId can be 0
     if (this.currentCharacterId !== null) {
-      this.characterInformation.name = this.getCharacterName(this.currentCharacterId);
+      const rename = await this.getRename(this.currentCharacterId);
+
+      this.characterInformation.name = rename? rename : this.getCharacterName(this.currentCharacterId);
 
       this.characterInformation.tier = await this.getArenaTier(this.currentCharacterId);
 
