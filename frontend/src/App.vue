@@ -75,7 +75,7 @@
 <script>
 import BN from 'bignumber.js';
 
-import { mapState, mapActions, mapGetters } from 'vuex';
+import {mapState, mapActions, mapGetters, mapMutations} from 'vuex';
 import _ from 'lodash';
 import Vue from 'vue';
 import Events from './events';
@@ -169,6 +169,7 @@ export default {
     ...mapGetters([
       'getExchangeTransakUrl'
     ]),
+    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP']),
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BSC';
       const paramChain = this.$router.currentRoute.query.chain;
@@ -190,6 +191,8 @@ export default {
         localStorage.setItem('currentChain', paramChain);
         await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
       }
+      this.updateCurrentChainSupportsMerchandise();
+      this.updateCurrentChainSupportsPvP();
     },
     async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;

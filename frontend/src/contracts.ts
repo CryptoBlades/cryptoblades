@@ -101,7 +101,7 @@ export function getConfigValue(key: string): any {
 
 let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
 
-type Networks = Partial<Record<string, { address: string }>>;
+export type Networks = Partial<Record<string, { address: string }>>;
 
 type Abi = any[];
 
