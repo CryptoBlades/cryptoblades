@@ -22,7 +22,7 @@
 
 <script>
 import PvPSeparator from './PvPSeparator.vue';
-import { getCharacterNameFromSeed } from '../../character-name';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   components: {
@@ -42,8 +42,15 @@ export default {
   },
 
   computed: {
+    ...mapGetters([
+      'getCharacterName'
+    ]),
+    ...mapActions([
+      'getRename'
+    ]),
     kickedByName() {
-      return getCharacterNameFromSeed(this.kickedBy);
+      const rename = this.getRename(this.kickedBy);
+      return rename? rename : this.getCharacterName(this.kickedBy);
     }
   },
 

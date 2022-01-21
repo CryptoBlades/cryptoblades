@@ -60,7 +60,6 @@ import PvPArenaPreparation from './PvPArenaPreparation.vue';
 import PvPArenaSummary from './PvPArenaSummary.vue';
 import PvPArenaMatchMaking from './PvPArenaMatchMaking.vue';
 import PvPKickedModal from './PvPKickedModal.vue';
-import { getCharacterNameFromSeed } from '../../character-name';
 import { weaponFromContract as formatWeapon } from '../../contract-models';
 import { shieldFromContract as formatShield } from '../../contract-models';
 import { pvpFighterFromContract as formatFighter } from '../../contract-models';
@@ -160,7 +159,8 @@ export default {
       'getIsWeaponInArena',
       'getIsShieldInArena',
       'getIsCharacterInArena',
-      'getPvpContract'
+      'getPvpContract',
+      'getRename'
     ]),
 
     async getWeaponInformation(weaponId) {
@@ -213,7 +213,7 @@ export default {
     async updateOpponentInformation(defenderId) {
       this.opponentInformation.id = defenderId;
 
-      this.opponentInformation.name = getCharacterNameFromSeed(defenderId);
+      this.opponentInformation.name = this.getCharacterName(defenderId);
 
       this.opponentInformation.level = Number(await this.getCharacterLevel(defenderId)) + 1;
 
@@ -338,9 +338,10 @@ export default {
           const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
 
           this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+            const rename = await this.getRename(rankerId);
             return {
               rankerId,
-              name: getCharacterNameFromSeed(rankerId),
+              name: rename? rename : this.getCharacterName(rankerId),
               rank: await this.getRankingPointsByCharacter(rankerId)
             };
           }));
@@ -362,7 +363,7 @@ export default {
 
     // Note: currentCharacterId can be 0
     if (this.currentCharacterId !== null) {
-      this.characterInformation.name = getCharacterNameFromSeed(this.currentCharacterId);
+      this.characterInformation.name = this.getCharacterName(this.currentCharacterId);
 
       this.characterInformation.tier = await this.getArenaTier(this.currentCharacterId);
 
@@ -435,9 +436,10 @@ export default {
       const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
 
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+        const rename = await this.getRename(rankerId);
         return {
           rankerId,
-          name: getCharacterNameFromSeed(rankerId),
+          name: rename? rename : this.getCharacterName(rankerId),
           rank: await this.getRankingPointsByCharacter(rankerId)
         };
       }));
@@ -477,7 +479,7 @@ export default {
       this.$emit('leaveMatchMaking');
 
       if (value !== null) {
-        this.characterInformation.name = getCharacterNameFromSeed(value);
+        this.characterInformation.name = this.getCharacterName(value);
 
         this.characterInformation.tier = await this.getArenaTier(value);
 
@@ -559,7 +561,7 @@ export default {
         this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
           return {
             rankerId,
-            name: getCharacterNameFromSeed(rankerId),
+            name: this.getCharacterName(rankerId),
             rank: await this.getRankingPointsByCharacter(rankerId)
           };
         }));

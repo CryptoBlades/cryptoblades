@@ -82,14 +82,16 @@ export default {
       'getCharacterLevel',
       'getRankingPointsByCharacter',
       'getTierTopCharacters',
+      'getRename'
     ]),
     async getPlayers(){
       const tierTopRankersIds
       = await this.getTierTopCharacters(this.tierFilter);
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+        const rename = await this.getRename(rankerId);
         return {
           rankerId,
-          name: this.getCharacterName(rankerId),
+          name: rename ? rename : this.getCharacterName(rankerId),
           level: Number(await this.getCharacterLevel(rankerId)) + 1,
           rank: await this.getRankingPointsByCharacter(rankerId),
           element: formatCharacter(rankerId, await this.getCharacter(rankerId)).traitName
