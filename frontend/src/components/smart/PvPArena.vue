@@ -132,7 +132,8 @@ export default {
       recentlyKicked: {
         characterId: null,
         kickedBy: null
-      }
+      },
+
     };
   },
 
@@ -441,10 +442,12 @@ export default {
         };
       }));
 
+      const fromBlock = await this.web3.eth.getBlockNumber() - 4999;
+
       const previousDuels = await (await this.getPvpContract()).getPastEvents('DuelFinished', {
         filter: {attacker: this.currentCharacterId},
         toBlock: 'latest',
-        fromBlock: 0
+        fromBlock,
       });
 
       this.duelHistory = previousDuels.map(duel => {
@@ -563,10 +566,11 @@ export default {
           };
         }));
 
+        const fromBlock = await this.web3.eth.getBlockNumber() - 4999;
         const previousDuels = await (await this.getPvpContract()).getPastEvents('DuelFinished', {
           filter: {attacker: value},
           toBlock: 'latest',
-          fromBlock: 0
+          fromBlock,
         });
 
         this.duelHistory = previousDuels.map(duel => {
