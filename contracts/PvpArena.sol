@@ -161,7 +161,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotUnderAttack(uint256 characterID) internal view {
-        require(isCharacterNotUnderAttack(characterID), "Under attack");
+        require(!isCharacterUnderAttack(characterID), "Under attack");
     }
 
     modifier characterNotInDuel(uint256 characterID) {
@@ -170,7 +170,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotInDuel(uint256 characterID) internal view {
-        require(isCharacterNotInDuel(characterID), "In duel queue");
+        require(!isCharacterInDuel(characterID), "In duel queue");
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
@@ -740,24 +740,28 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev checks wether or not the character is actively someone else's opponent
-    function isCharacterNotUnderAttack(uint256 characterID)
+    function isCharacterUnderAttack(uint256 characterID)
         public
         view
         returns (bool)
     {
-        return
-            (finderByOpponent[characterID] == 0 &&
-                matchByFinder[0].defenderID != characterID) ||
-            !isCharacterWithinDecisionTime(finderByOpponent[characterID]);
+        if (finderByOpponent[characterID] == 0) {
+            if (matchByFinder[0].defenderID == characterID) {
+                return isCharacterWithinDecisionTime(0);
+            }
+            return false;
+        }
+
+        return isCharacterWithinDecisionTime(finderByOpponent[characterID]);
     }
 
     /// @dev checks wether or not the character is currently in the duel queue
-    function isCharacterNotInDuel(uint256 characterID)
+    function isCharacterInDuel(uint256 characterID)
         public
         view
         returns (bool)
     {
-        return !_duelQueue.contains(characterID) || !isDefending[characterID];
+        return _duelQueue.contains(characterID) || isDefending[characterID];
     }
 
     /// @dev gets the amount of SKILL required to enter the arena

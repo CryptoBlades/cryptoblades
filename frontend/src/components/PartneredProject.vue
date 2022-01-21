@@ -10,8 +10,10 @@
           <a @click="addTokenToMetamask" class="ml-1 a-button">({{$t('PartneredProject.add')}})</a>
         </div>
         <span class="multiplier-text">{{skillToPartnerRatio}} SKILL/{{tokenSymbol}}</span>
-        <span v-bind:class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
+        <span :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
           class="multiplier-text">{{$t('PartneredProject.multiplier')}}: x{{multiplier}}</span>
+        <span :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
+        class="multiplier-text">$/{{$t('PartneredProject.unclaimed')}}: ${{moneyPerUnclaimed}}</span>
         <span class="multiplier-text">{{$t('PartneredProject.distribution')}}: {{distributionTime}} {{$t('PartneredProject.days')}}</span>
       </div>
     </div>
@@ -21,7 +23,7 @@
     </div>
     <h6 class="mt-1 text-center">{{$t('PartneredProject.claimed')}} {{tokensClaimed}} / {{tokenSupply}}</h6>
     <div class="d-flex flex-column align-items-center w-100">
-      <b-card no-body class="collapse-style" v-bind:class="detailsOpened ? 'on-top' : ''">
+      <b-card no-body class="collapse-style" :class="detailsOpened ? 'on-top' : ''">
         <b-card-header class="d-flex flex-column align-items-center w-100 mt-1 p-0" v-b-toggle="'collapse-' + id" @click="toggleDetails()">
           <h6 class="when-open">{{$t('PartneredProject.less')}}...</h6><h6 class="when-closed">{{$t('PartneredProject.more')}}...</h6>
         </b-card-header>
@@ -127,6 +129,10 @@ export default Vue.extend({
     partnerLogoPath(): string {
       const fileName = (partnersInfo as PartnersInfo).partners[this.name].logo;
       return this.imgPath(fileName);
+    },
+
+    moneyPerUnclaimed(): string {
+      return toBN(this.tokenPrice).div(toBN(10).pow(18)).div(+this.skillToPartnerRatio).times(+this.multiplier).toFixed(2);
     }
   },
 
@@ -188,7 +194,7 @@ export default Vue.extend({
 <style scoped>
 .partner-div {
   width: 290px;
-  height: 230px;
+  height: 250px;
   border: 2px solid #9e8a57;
   border-radius: 10px;
   padding: 5px;

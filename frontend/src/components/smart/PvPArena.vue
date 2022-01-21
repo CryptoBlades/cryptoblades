@@ -274,12 +274,8 @@ export default {
       this.recentlyKicked.kickedBy = null;
     },
 
-    async getKickedEvents(pvpContract, blockToScanFrom = 'earliest') {
-      const kickedEvents = await pvpContract.getPastEvents('CharacterKicked', {
-        filter: { characterID: this.currentCharacterId },
-        toBlock: 'latest',
-        fromBlock: blockToScanFrom
-      });
+    async getKickedEvents() {
+      const kickedEvents = [];
 
       return kickedEvents;
     },
@@ -312,23 +308,20 @@ export default {
       }
     },
 
-    async listenForSeasonRestart(pvpContract, initialBlock) {
-      let blockToScan = initialBlock;
+    async listenForSeasonRestart() {
+      //let blockToScan = initialBlock;
       let scanning = false;
 
-      const subscription = this.web3.eth.subscribe('newBlockHeaders', async (_, result) => {
+      const subscription = this.web3.eth.subscribe('newBlockHeaders', async () => {
         try {
           if (scanning) {
             return;
           }
           scanning = true;
 
-          const seasonRestartedEvents = await pvpContract.getPastEvents('SeasonRestarted', {
-            fromBlock: blockToScan,
-            toBlock: 'latest',
-          });
+          const seasonRestartedEvents = [];
 
-          blockToScan = result.number + 1;
+          //blockToScan = result.number + 1;
 
           if (seasonRestartedEvents.length) {
             this.$dialog.notify.success('A new PvP season has begun!');
@@ -448,11 +441,7 @@ export default {
         };
       }));
 
-      const previousDuels = await (await this.getPvpContract()).getPastEvents('DuelFinished', {
-        filter: {attacker: this.currentCharacterId},
-        toBlock: 'latest',
-        fromBlock: 0
-      });
+      const previousDuels = [];
 
       this.duelHistory = previousDuels.map(duel => {
         return formatDuelResult(duel.returnValues);
@@ -570,11 +559,7 @@ export default {
           };
         }));
 
-        const previousDuels = await (await this.getPvpContract()).getPastEvents('DuelFinished', {
-          filter: {attacker: value},
-          toBlock: 'latest',
-          fromBlock: 0
-        });
+        const previousDuels = [];
 
         this.duelHistory = previousDuels.map(duel => {
           return formatDuelResult(duel.returnValues);

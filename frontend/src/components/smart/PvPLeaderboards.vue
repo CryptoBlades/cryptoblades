@@ -3,7 +3,7 @@
     <h1 class="leaderboardTitle">{{$t("pvp.leaderboard").toUpperCase()}}</h1>
     <div class="filtersWrapper">
       <div class="selectWrapper">
-        <label for="tier">Tier: </label>
+        <label for="tier">{{$t("pvp.tier")}} </label>
         <select v-model="tierFilter" name="tier" id="tier">
           <option v-for="tierFilterOption in tierFilterOptions"
            :value="tierFilterOption.value" :key="tierFilterOption.value">
@@ -50,9 +50,8 @@
 <script>
 
 import { characterFromContract as formatCharacter } from '../../contract-models';
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 export default {
-  inject: ['web3'],
   data() {
     return {
       tierTopRankers: [],
@@ -72,9 +71,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
     ...mapGetters(['getCharacterName'])
-
   },
   methods: {
     ...mapActions([
