@@ -114,8 +114,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     /// @dev IDs of characters available for matchmaking by tier
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
 
-    uint256 duelOffsetCost;
-    address payable pvpBotAddress;
+    uint256 public duelOffsetCost;
+    address payable public pvpBotAddress;
     
     event DuelFinished(
         uint256 indexed attacker,
