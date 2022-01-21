@@ -319,7 +319,7 @@ export default {
   methods: {
     ...mapActions([
       'withdrawFromArena',
-      'getIsCharacterNotUnderAttack',
+      'getIsCharacterUnderAttack',
       'findOpponent',
       'getMatchByFinder',
       'approve',
@@ -360,7 +360,7 @@ export default {
     },
 
     async findMatch() {
-      if (!(await this.getIsCharacterNotUnderAttack(this.currentCharacterId))) {
+      if ((await this.getIsCharacterUnderAttack(this.currentCharacterId))) {
         this.isUnderAttack = true;
         return;
       }
@@ -388,7 +388,7 @@ export default {
     },
 
     async reRollCharacterOpponent() {
-      if (!(await this.getIsCharacterNotUnderAttack(this.currentCharacterId))) {
+      if ((await this.getIsCharacterUnderAttack(this.currentCharacterId))) {
         this.isUnderAttack = true;
         return;
       }
@@ -417,15 +417,11 @@ export default {
       this.loading = false;
     },
 
-    async listenForDuel(pvpContract) {
-      const currentBlock = await this.web3.eth.getBlockNumber();
+    async listenForDuel() {
+      //const currentBlock = await this.web3.eth.getBlockNumber();
 
       const subscription = this.web3.eth.subscribe('newBlockHeaders', async () => {
-        const duelFinishedResult = await pvpContract.getPastEvents('DuelFinished', {
-          filter: { attacker: this.currentCharacterId },
-          toBlock: 'latest',
-          fromBlock: currentBlock
-        });
+        const duelFinishedResult = [];
 
         if (duelFinishedResult.length) {
           const formattedResult = formatDuelResult(duelFinishedResult[duelFinishedResult.length - 1].returnValues);

@@ -5,11 +5,12 @@
     "blacksmith": "Blacksmith",
     "combat": "Combat",
     "raid": "Raid",
-    "pvp": "PvP",
     "market": "Market",
     "stake": "Stake",
+    "pvp": "PvP",
+    "treasury": "Treasury",
     "merchandise": "Merchandise",
-    "merchandiseNotSupportedTooltip": "Currently selected chain does not support Merchandise."
+    "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
   },
   "ClaimRewardsBar": {
     "rewards": "Rewards",
@@ -100,8 +101,6 @@
     "transferNftsToAnotherChain": "Transfer NFTs to another chain",
     "bridgeTransferFee": "Bridge Transfer Fee",
     "bridgeTransferFeeTooltip": "The fee is deducted when you request a transfer under the 'Storage' tab.",
-    "queueLength": "Queue Length",
-    "queueLengthTooltip": "There are currently {queueLength} NFTs in queue for transfer",
     "inventory": "Inventory",
     "showWeapons": "Show Weapons",
     "showCharacters": "Show Characters",
@@ -119,7 +118,6 @@
     "currentTransfer": "Current Transfer",
     "status": "Status",
     "toChain": "To Chain",
-    "yourPlaceInQueue": "Your place in Queue",
     "noWeaponsStored": "No Weapons stored!",
     "noCharactersStored": "No Characters stored!",
     "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!",
@@ -766,7 +764,8 @@
     "rankingPoints": "Ranking points",
     "attackerPower": "Your Power:",
     "opponentPower": "Opponent Power:",
-    "mmr": "Mmr"
+    "mmr": "Mmr",
+    "tier": "Tier"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
@@ -843,6 +842,7 @@
     "add": "Add",
     "claimed": "Claimed",
     "more": "More",
-    "less": "Less"
+    "less": "Less",
+    "unclaimed": "Unclaimed"
   }
 }

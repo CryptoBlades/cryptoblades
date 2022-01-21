@@ -2,7 +2,9 @@ import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import config from '../../app-config.json';
-import {router} from '../main';
+import {router} from '@/main';
+import {getConfigValue, Networks} from '@/contracts';
+import {networks as pvpNetworks} from '../../../build/contracts/PvpArena.json';
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
 BigNumber.config({ EXPONENTIAL_AT: 100 });
@@ -69,9 +71,7 @@ export const fromWeiEther = (value: string|BigNumber): string => {
 export const gasUsedToBnb = (gasUsed: number, gasPrice: string): string => {
   const gasCost = gasUsed * Number(gasPrice);
 
-  const bnbGasCost =  Web3.utils.fromWei(gasCost.toString()).toString();
-
-  return  bnbGasCost;
+  return Web3.utils.fromWei(gasCost.toString()).toString();
 };
 
 export const copyNftUrl = (id: number | string, type?: string): void => {
@@ -110,4 +110,11 @@ export const currentChainSupportsMerchandise = () => {
     return false;
   }
   return merchandiseSupportedChains.includes(currentChain);
+};
+
+export const currentChainSupportsPvP = () => {
+  const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
+  const pvpContractAddr = process.env.VUE_APP_PVP_CONTRACT_ADDRESS ||
+    getConfigValue('VUE_APP_PVP_CONTRACT_ADDRESS') || (pvpNetworks as Networks)[networkId]?.address;
+  return !!pvpContractAddr;
 };
