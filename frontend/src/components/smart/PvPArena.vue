@@ -307,8 +307,6 @@ export default {
           this.recentlyKicked.characterId = formattedResult.characterId;
           this.recentlyKicked.kickedBy = formattedResult.kickedBy;
           const rename = await this.getRename(this.recentlyKicked.kickedBy);
-          console.log('formatted kickedBy', formattedResult.kickedBy);
-          console.log('rename', rename);
           this.recentlyKicked.kickedBy = rename? rename : await this.getCharacterName(formattedResult.kickedBy);
         }
       }
