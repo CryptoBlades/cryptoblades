@@ -273,7 +273,7 @@ export default {
       this.recentlyKicked.kickedBy = null;
     },
 
-    async getKickedEvents(pvpContract, blockToScanFrom = 'earliest') {
+    async getKickedEvents() {
       const kickedEvents = [];
 
       return kickedEvents;
@@ -305,11 +305,11 @@ export default {
       }
     },
 
-    async listenForSeasonRestart(pvpContract, initialBlock) {
-      let blockToScan = initialBlock;
+    async listenForSeasonRestart() {
+      //let blockToScan = initialBlock;
       let scanning = false;
 
-      const subscription = this.web3.eth.subscribe('newBlockHeaders', async (_, result) => {
+      const subscription = this.web3.eth.subscribe('newBlockHeaders', async () => {
         try {
           if (scanning) {
             return;
@@ -318,7 +318,7 @@ export default {
 
           const seasonRestartedEvents = [];
 
-          blockToScan = result.number + 1;
+          //blockToScan = result.number + 1;
 
           if (seasonRestartedEvents.length) {
             this.$dialog.notify.success('A new PvP season has begun!');
