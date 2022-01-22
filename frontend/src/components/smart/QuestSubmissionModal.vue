@@ -1,7 +1,7 @@
 <template>
   <b-modal v-if="quest" class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop scrollable
            :title="$t('quests.turnIn')" size="xl" @close="resetTokens" @cancel="resetTokens"
-           :ok-title="$t('quests.submit')" :ok-disabled="isLoading"
+           :ok-title="$t('quests.submit')" :busy="isLoading"
            @ok.prevent="quest.requirementType === RequirementType.DUST ? submitDust() : submit()">
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
@@ -61,6 +61,7 @@ export default Vue.extend({
 
   data() {
     return {
+      quest: undefined,
       characterId: '',
       questProgress: 0,
       showModal: false,
@@ -69,6 +70,7 @@ export default Vue.extend({
       ownedNftIdTypes: [],
       nftIdTypesToBurn: [],
       dustToBurn: 0,
+      selectedToken: undefined,
       isLoading: false,
       RequirementType,
       RewardType,
@@ -161,8 +163,8 @@ export default Vue.extend({
     }
   },
 
-  async mounted() {
-    this.$root.$on('quest-submission-modal', (quest: Quest, characterId: string | number, questProgress: number) => {
+  mounted() {
+    Events.$on('quest-submission-modal', (quest: Quest, characterId: string | number, questProgress: number) => {
       if (quest) {
         this.quest = quest;
         this.characterId = characterId;

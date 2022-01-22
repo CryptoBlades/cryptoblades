@@ -161,7 +161,7 @@ export default Vue.extend({
     },
 
     submit() {
-      this.$root.$emit('quest-submission-modal', this.quest, this.characterId, this.quest.progress);
+      Events.$emit('quest-submission-modal', this.quest, this.characterId, this.quest.progress);
     }
   },
 
