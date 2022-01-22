@@ -553,6 +553,11 @@
       "EPIC": "Epic",
       "LEGENDARY": "Legendary"
     },
+    "dustRarityType": {
+      "LESSER": "Lesser",
+      "GREATER": "Greater",
+      "POWERFUL": "Powerful"
+    },
     "requirementType": {
       "NONE": "None",
       "WEAPON": "Weapon",

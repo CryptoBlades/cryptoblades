@@ -17,8 +17,8 @@
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectQuestTier') }}
             </b-form-select-option>
-            <b-form-select-option v-for="tier in tiers" :key="tier" :value="tier">
-              {{ $t(`quests.rarityType.${Rarity[tier]}`) }}
+            <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity">
+              {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
         </div>
@@ -33,16 +33,27 @@
               {{ $t(`quests.requirementType.${RequirementType[requirementType]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-select class="mt-2 mb-2" v-model="questTemplate.requirementRarity">
+          <b-form-select v-if="questTemplate.requirementType === RequirementType.DUST" class="mt-2 mb-2"
+                         v-model="questTemplate.requirementRarity"
+                         :disabled="questTemplate.requirementType === undefined">
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRequirementRarity') }}
             </b-form-select-option>
-            <b-form-select-option v-for="requirementRarity in requirementRarities" :key="requirementRarity"
-                                  :value="requirementRarity">
-              {{ $t(`quests.rarityType.${Rarity[requirementRarity]}`) }}
+            <b-form-select-option v-for="rarity in dustRarities" :key="rarity" :value="rarity">
+              {{ $t(`quests.dustRarityType.${DustRarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-input v-model="questTemplate.requirementAmount" type="number"/>
+          <b-form-select v-else class="mt-2 mb-2" v-model="questTemplate.requirementRarity"
+                         :disabled="questTemplate.requirementType === undefined">
+            <b-form-select-option :value="undefined" disabled>
+              {{ $t('quests.pleaseSelectRequirementRarity') }}
+            </b-form-select-option>
+            <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity">
+              {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
+            </b-form-select-option>
+          </b-form-select>
+          <b-form-input v-model="questTemplate.requirementAmount"
+                        :disabled="questTemplate.requirementRarity === undefined" type="number"/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reward') }}</label>
         <div class="d-flex align-items-center gap-3">
@@ -54,22 +65,34 @@
               {{ $t(`quests.rewardType.${RewardType[rewardType]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-select class="mt-2 mb-2" v-model="questTemplate.rewardRarity">
+          <b-form-select v-if="questTemplate.rewardType === RewardType.DUST" class="mt-2 mb-2"
+                         v-model="questTemplate.rewardRarity"
+                         :disabled="questTemplate.rewardType === undefined">
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRewardRarity') }}
             </b-form-select-option>
-            <b-form-select-option v-for="rewardRarity in rewardRarities" :key="rewardRarity" :value="rewardRarity">
-              {{ $t(`quests.rarityType.${Rarity[rewardRarity]}`) }}
+            <b-form-select-option v-for="rarity in dustRarities" :key="rarity" :value="rarity">
+              {{ $t(`quests.dustRarityType.${DustRarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-input v-model="questTemplate.rewardAmount" type="number"/>
+          <b-form-select v-else class="mt-2 mb-2" v-model="questTemplate.rewardRarity"
+                         :disabled="questTemplate.rewardType === undefined">
+            <b-form-select-option :value="undefined" disabled>
+              {{ $t('quests.pleaseSelectRewardRarity') }}
+            </b-form-select-option>
+            <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity">
+              {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
+            </b-form-select-option>
+          </b-form-select>
+          <b-form-input v-model="questTemplate.rewardAmount" :disabled="questTemplate.rewardRarity === undefined"
+                        type="number"/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
         <div class="d-flex align-items-center gap-3">
           <b-form-input v-model="questTemplate.reputationAmount" type="number"/>
         </div>
       </div>
-      <b-button variant="primary" @click="onSubmit" :disabled="addNewQuestDisabled()">
+      <b-button variant="primary" @click="onSubmit" :disabled="addNewQuestDisabled() || isLoading">
         {{ promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest') }}
       </b-button>
     </b-form>
@@ -80,7 +103,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import {DustRarity, Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import QuestTemplatesDisplay from '@/components/smart/QuestTemplatesDisplay.vue';
 
 interface StoreMappedActions {
@@ -91,12 +114,12 @@ interface StoreMappedActions {
 
 interface Data {
   questTemplate: Quest;
-  tiers: Rarity[];
+  rarities: Rarity[];
+  dustRarities: DustRarity[];
   requirementTypes: RequirementType[];
-  requirementRarities: Rarity[];
   rewardTypes: RewardType[];
-  rewardRarities: Rarity[];
   promoQuestTemplates: boolean;
+  isLoading: boolean;
 }
 
 export default Vue.extend({
@@ -108,26 +131,25 @@ export default Vue.extend({
   data() {
     return {
       questTemplate: {
-        tier: undefined,
-        requirementType: undefined,
-        requirementRarity: undefined,
+        progress: 0,
+        reputation: 0,
+        id: 0,
         requirementAmount: 0,
-        rewardType: undefined,
-        rewardRarity: undefined,
         rewardAmount: 0,
         reputationAmount: 0,
       },
-      tiers: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
+      rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
+      dustRarities: [DustRarity.LESSER, DustRarity.GREATER, DustRarity.POWERFUL],
       requirementTypes: [RequirementType.NONE, RequirementType.WEAPON, RequirementType.JUNK,
         RequirementType.DUST, RequirementType.TRINKET, RequirementType.SHIELD, RequirementType.RAID],
-      requirementRarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       rewardTypes: [RewardType.NONE, RewardType.WEAPON, RewardType.JUNK,
         RewardType.DUST, RewardType.TRINKET, RewardType.SHIELD],
-      rewardRarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       promoQuestTemplates: false,
+      isLoading: false,
       RequirementType,
       RewardType,
       Rarity,
+      DustRarity,
     } as Data;
   },
 
@@ -135,12 +157,14 @@ export default Vue.extend({
     ...mapActions(['addQuestTemplate', 'addPromoQuestTemplate']) as StoreMappedActions,
 
     async onSubmit() {
+      this.isLoading = true;
       if (this.promoQuestTemplates) {
         await this.addPromoQuestTemplate({questTemplate: this.questTemplate});
       } else {
         await this.addQuestTemplate({questTemplate: this.questTemplate});
       }
       this.refreshQuestTemplates();
+      this.isLoading = false;
     },
 
     refreshQuestTemplates() {

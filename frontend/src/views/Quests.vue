@@ -47,15 +47,15 @@ import Events from '@/events';
 
 export interface Quest {
   progress: number;
-  type: RequirementType;
+  type?: RequirementType;
   reputation: number;
   id: number;
-  tier: Rarity;
-  requirementType: RequirementType;
-  requirementRarity: Rarity;
+  tier?: Rarity;
+  requirementType?: RequirementType;
+  requirementRarity?: Rarity;
   requirementAmount: number;
-  rewardType: RewardType;
-  rewardRarity: Rarity;
+  rewardType?: RewardType;
+  rewardRarity?: Rarity;
   rewardAmount: number;
   reputationAmount: number;
 }
@@ -70,6 +70,10 @@ export enum RewardType {
 
 export enum Rarity {
   COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
+}
+
+export enum DustRarity {
+  LESSER, GREATER, POWERFUL
 }
 
 interface StoreMappedActions {
