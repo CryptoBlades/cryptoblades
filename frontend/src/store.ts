@@ -1712,22 +1712,21 @@ export function createStore(web3: Web3) {
         if(!state.defaultAccount) return;
         const numberOfCharacters = parseInt(await state.contracts().Characters!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
         const characters = await Promise.all(
-          [...Array(numberOfCharacters).keys()].map((_, i) =>
-            state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+          [...Array(numberOfCharacters).keys()].map(async (_, i) =>
+            Number(await state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state))))
         );
-
         return characters;
       },
       async getAccountGarrisonCharacters({state}) {
         if(!state.defaultAccount) return;
-        return await state.contracts().Garrison!.methods.getUserCharacters().call(defaultCallOptions(state));
+        return (await state.contracts().Garrison!.methods.getUserCharacters().call(defaultCallOptions(state))).map((id) => Number(id));
       },
       async getAccountWeapons({state}) {
         if(!state.defaultAccount) return;
         const numberOfWeapons = parseInt(await state.contracts().Weapons!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
         const weapons = await Promise.all(
           [...Array(numberOfWeapons).keys()]
-            .map((_, i) => state.contracts().Weapons!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+            .map(async (_, i) => Number(await state.contracts().Weapons!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state))))
         );
         return weapons;
       },
