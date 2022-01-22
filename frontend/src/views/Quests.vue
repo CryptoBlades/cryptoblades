@@ -23,8 +23,8 @@
       <QuestDetails v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
                     :characterId="character.id"/>
       <div v-else class="request-quest">
-        <b-button variant="primary w-100" @click="request(character.id)">
-          {{ $t('quests.request') }}
+        <b-button variant="primary" @click="request(character.id)">
+          {{ $t('quests.requestQuest') }}
         </b-button>
       </div>
     </div>
@@ -223,9 +223,11 @@ export default Vue.extend({
 .request-quest {
   display: flex;
   justify-content: center;
-  align-items: stretch;
+  align-items: center;
+  border: 1px solid;
+  border-radius: 5px;
   width: 25rem;
-  padding: 5rem;
+  height: auto;
 }
 
 @media (max-width: 576px) {

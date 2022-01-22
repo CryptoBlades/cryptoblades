@@ -578,7 +578,7 @@
     "reputation": "Reputation",
     "do": "Do",
     "burn": "Burn",
-    "request": "Request",
+    "requestQuest": "Request quest",
     "turnIn": "Turn in",
     "howMuchToTurnIn": "How much to turn in?",
     "setRequiredAmount": "Set required amount",

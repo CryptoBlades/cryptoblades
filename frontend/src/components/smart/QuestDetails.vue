@@ -4,7 +4,9 @@
       <div class="quest-info d-flex flex-column justify-content-center">
         <div class="quest-description">
           <span
-            class="font-weight-bold">{{ $t(`quests.rarityType.${Rarity[quest.tier]}`) }} {{ $t('quests.quest').toLowerCase() }}</span>
+            class="font-weight-bold">{{
+              $t(`quests.rarityType.${Rarity[quest.tier]}`)
+            }} {{ $t('quests.quest').toLowerCase() }}</span>
           <span>{{
               quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.burn')
             }} {{ quest.requirementAmount }}x {{
@@ -65,9 +67,8 @@
       </div>
     </div>
     <div v-if="!isQuestTemplate" class="d-flex">
-      <b-button v-if="quest.requirementType !== RequirementType.RAID" variant="primary" class="flex-1"
-                @click="submit">
-        <!--      || questCanBeCompleted-->
+      <b-button v-if="quest.requirementType !== RequirementType.RAID && !questCanBeCompleted" variant="primary"
+                class="flex-1" @click="submit">
         {{ $t('quests.submit') }}
       </b-button>
       <b-button v-if="questCanBeCompleted" variant="primary" class="flex-1" @click="complete">
