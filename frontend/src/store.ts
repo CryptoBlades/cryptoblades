@@ -3326,20 +3326,29 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.requestQuest(characterID).send(defaultCallOptions(state));
       },
 
-      async submitProgress({ state }, {characterID, tokenIds}) {
-        const { SimpleQuests } = state.contracts();
-        if(!SimpleQuests || !state.defaultAccount) return;
+      async submitProgress({state, dispatch}, {characterID, tokenIds}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
 
         console.log('Submitting quest progress for: ', characterID, tokenIds);
-        return await SimpleQuests.methods.submitProgress(characterID, tokenIds).send(defaultCallOptions(state));
+        await SimpleQuests.methods.submitProgress(characterID, tokenIds).send(defaultCallOptions(state));
+
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('updateShieldIds'),
+          dispatch('updateTrinketIds'),
+          dispatch('updateJunkIds'),
+          dispatch('updateKeyLootboxIds'),
+        ]);
       },
 
-      async submitDustProgress({ state }, {characterID, amount}) {
-        const { SimpleQuests } = state.contracts();
-        if(!SimpleQuests || !state.defaultAccount) return;
+      async submitDustProgress({state, dispatch}, {characterID, amount}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
 
         console.log('Submitting quest dust progress for: ', characterID, amount);
-        return await SimpleQuests.methods.submitDustProgress(characterID, amount).send(defaultCallOptions(state));
+        await SimpleQuests.methods.submitDustProgress(characterID, amount).send(defaultCallOptions(state));
+        await dispatch('updateDustBalance');
       },
 
       async canUserAfford({ state }, {payingAmount}) {

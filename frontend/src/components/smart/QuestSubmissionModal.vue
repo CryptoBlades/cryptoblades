@@ -32,9 +32,9 @@ import Vue from 'vue';
 import WeaponGrid from '@/components/smart/WeaponGrid.vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
-import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import Events from '@/events';
+import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 
 interface StoreMappedActions {
   submitProgress(payload: { characterID: string | number, tokenIds: (string | number)[] }): Promise<void>;

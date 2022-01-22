@@ -65,7 +65,7 @@
       </div>
     </div>
     <div v-if="!isQuestTemplate" class="d-flex">
-      <b-button variant="primary" class="flex-1" :disabled="quest.requirementType === RequirementType.RAID"
+      <b-button v-if="quest.requirementType !== RequirementType.RAID" variant="primary" class="flex-1"
                 @click="submit">
         <!--      || questCanBeCompleted-->
         {{ $t('quests.submit') }}
@@ -101,16 +101,13 @@ interface StoreMappedActions {
   deleteQuest(payload: { tier: number, index: number }): Promise<void>;
 }
 
-interface Data {
-  questCanBeCompleted: boolean;
-}
-
 export default Vue.extend({
   components: {NftIcon},
 
   props: {
     quest: {
       type: Object as PropType<Quest>,
+      required: true,
     },
     isQuestTemplate: {
       type: Boolean,
@@ -129,15 +126,18 @@ export default Vue.extend({
 
   data() {
     return {
-      questCanBeCompleted: false,
       RequirementType,
       RewardType,
       Rarity,
-    } as Data;
+    };
   },
 
 
-  computed: {},
+  computed: {
+    questCanBeCompleted(): boolean {
+      return this.quest.progress >= this.quest.requirementAmount;
+    },
+  },
 
   methods: {
     ...mapActions(['skipQuest', 'completeQuest', 'deleteQuest']) as StoreMappedActions,
@@ -163,12 +163,6 @@ export default Vue.extend({
       this.$root.$emit('quest-submission-modal', this.quest, this.characterId, this.quest.progress);
     }
   },
-
-  async mounted() {
-    if (this.quest.progress) {
-      this.questCanBeCompleted = this.quest.progress >= this.quest.requirementAmount;
-    }
-  }
 
 });
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-column quests-container">
-    <div v-for="character in displayCharacters" :key="character.id" class="row quest-row">
+    <div v-for="character in characters" :key="character.id" class="row quest-row">
       <div class="character"
            :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(character.id) : undefined]">
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
@@ -46,16 +46,16 @@ import QuestsDashboard from '@/components/smart/QuestsDashboard.vue';
 import Events from '@/events';
 
 export interface Quest {
-  progress?: number;
-  type?: RequirementType;
-  reputation?: number;
-  id?: number;
-  tier?: Rarity;
-  requirementType?: RequirementType;
-  requirementRarity?: Rarity;
+  progress: number;
+  type: RequirementType;
+  reputation: number;
+  id: number;
+  tier: Rarity;
+  requirementType: RequirementType;
+  requirementRarity: Rarity;
   requirementAmount: number;
-  rewardType?: RewardType;
-  rewardRarity?: Rarity;
+  rewardType: RewardType;
+  rewardRarity: Rarity;
   rewardAmount: number;
   reputationAmount: number;
 }
@@ -84,6 +84,10 @@ interface StoreMappedGetters {
   charactersWithIds(ids: (string | number)[]): Nft[];
 }
 
+interface Data {
+  characters: Nft[];
+}
+
 export default Vue.extend({
   components: {QuestSubmissionModal, CharacterArt, QuestDetails, QuestsDashboard},
 
@@ -95,7 +99,9 @@ export default Vue.extend({
   },
 
   data() {
-    return {};
+    return {
+      characters: [] as Nft[],
+    } as Data;
   },
 
   computed: {
@@ -109,10 +115,6 @@ export default Vue.extend({
     characterIdsToDisplay(): (string | number)[] {
       return this.ownedCharacterIds;
     },
-
-    displayCharacters(): Nft[] {
-      return this.charactersWithIds(this.characterIdsToDisplay).filter(Boolean);
-    },
   },
 
   methods: {
@@ -124,16 +126,15 @@ export default Vue.extend({
     },
 
     async refreshQuestData() {
-      console.log('dupa');
-      this.displayCharacters.map(async (character) => {
+      this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
         character.quest = await this.getCharacterQuestData({characterId: character.id});
-        console.log(character.quest);
-      });
+        console.log(character);
+        return character;
+      }));
     },
   },
 
   async mounted() {
-    await this.fetchCharacters(this.characterIdsToDisplay);
     await this.refreshQuestData();
     Events.$on('refresh-quest-data', async () => {
       console.log('event!');
@@ -142,7 +143,7 @@ export default Vue.extend({
   },
 
   watch: {
-    async characterIdsToDisplay(characterIds) {
+    async ownedCharacterIds(characterIds) {
       await this.fetchCharacters(characterIds);
       await this.refreshQuestData();
     }
