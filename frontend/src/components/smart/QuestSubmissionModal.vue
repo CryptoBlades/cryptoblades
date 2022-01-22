@@ -2,13 +2,13 @@
   <b-modal v-if="quest" class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop scrollable
            :title="$t('quests.turnIn')" size="xl" @close="resetTokens" @cancel="resetTokens"
            :ok-title="$t('quests.submit')"
-           @ok="quest.requirementType === RequirementType.DUST ? submitDust() : submit()">
+           @ok.prevent="quest.requirementType === RequirementType.DUST ? submitDust() : submit()">
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    :showGivenWeaponIds="true" @chooseweapon="addBurnToken"
-                   :starsOptions="[quest.requirementRarity + 1]"/>
+                   :starsOptions="[quest.requirementRarity + 1]" :canFavorite="false"/>
       <weapon-grid :weaponIds="tokensToBurn" :showGivenWeaponIds="true" @chooseweapon="removeBurnToken"
-                   :starsOptions="[quest.requirementRarity + 1]"/>
+                   :starsOptions="[quest.requirementRarity + 1]" :canFavorite="false"/>
     </div>
     <div v-else-if="quest.requirementType === RequirementType.DUST" class="d-flex align-items-center flex-column">
       <dust-balance-display class="w-50 p-5" :rarities="[quest.requirementRarity]"/>
@@ -34,6 +34,7 @@ import {mapActions, mapGetters, mapState} from 'vuex';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import Events from '@/events';
 
 interface StoreMappedActions {
   submitProgress(payload: { characterID: string | number, tokenIds: (string | number)[] }): Promise<void>;
@@ -56,8 +57,6 @@ interface Data {
 
 export default Vue.extend({
   components: {WeaponGrid, NftList, DustBalanceDisplay},
-
-  props: {},
 
   data() {
     return {
@@ -132,11 +131,15 @@ export default Vue.extend({
     async submit() {
       await this.submitProgress({characterID: this.characterId, tokenIds: this.tokensToBurn});
       this.resetTokens();
+      Events.$emit('refresh-quest-data');
+      this.showModal = false;
     },
 
     async submitDust() {
       await this.submitDustProgress({characterID: this.characterId, amount: this.dustToBurn});
       this.resetTokens();
+      Events.$emit('refresh-quest-data');
+      this.showModal = false;
     },
 
     resetTokens() {

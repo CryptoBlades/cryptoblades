@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column quests-container">
-    <div v-for="character in characters" :key="character.id" class="row quest-row">
-      <div v-if="character.quest" class="character"
+    <div v-for="character in displayCharacters" :key="character.id" class="row quest-row">
+      <div class="character"
            :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(character.id) : undefined]">
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :character="character"></slot>
@@ -13,7 +13,7 @@
             :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(character.id) : undefined]"
             :character="character" :hideIdContainer="true" :hideXpBar="true"/>
         </div>
-        <div class="xp">
+        <div v-if="character.quest && character.quest.reputation !== undefined" class="xp">
           <span>Reputation lvl {{ 0 }}</span>
           <strong class="outline xp-text">{{ character.quest.reputation || 0 }} / {{ 9999 }}</strong>
           <b-progress class="reputation-progress" :max="9999" :value="character.quest.reputation"
@@ -43,6 +43,7 @@ import QuestDetails from '@/components/smart/QuestDetails.vue';
 import CharacterArt from '@/components/CharacterArt.vue';
 import QuestSubmissionModal from '@/components/smart/QuestSubmissionModal.vue';
 import QuestsDashboard from '@/components/smart/QuestsDashboard.vue';
+import Events from '@/events';
 
 export interface Quest {
   progress?: number;
@@ -72,6 +73,8 @@ export enum Rarity {
 }
 
 interface StoreMappedActions {
+  fetchCharacters(characterIds: (string | number)[]): Promise<void>;
+
   getCharacterQuestData(payload: { characterId: string | number }): Promise<Quest>;
 
   requestQuest(payload: { characterID: string | number }): Promise<void>;
@@ -92,9 +95,7 @@ export default Vue.extend({
   },
 
   data() {
-    return {
-      characters: [] as Nft[],
-    };
+    return {};
   },
 
   computed: {
@@ -103,11 +104,19 @@ export default Vue.extend({
 
     getFoundersShield() {
       return foundersShield;
-    }
+    },
+
+    characterIdsToDisplay(): (string | number)[] {
+      return this.ownedCharacterIds;
+    },
+
+    displayCharacters(): Nft[] {
+      return this.charactersWithIds(this.characterIdsToDisplay).filter(Boolean);
+    },
   },
 
   methods: {
-    ...mapActions(['getCharacterQuestData', 'requestQuest']) as StoreMappedActions,
+    ...mapActions(['fetchCharacters', 'getCharacterQuestData', 'requestQuest']) as StoreMappedActions,
 
     async request(characterId: string | number) {
       await this.requestQuest({characterID: characterId});
@@ -115,20 +124,28 @@ export default Vue.extend({
     },
 
     async refreshQuestData() {
-      for (const character of this.characters) {
+      console.log('dupa');
+      this.displayCharacters.map(async (character) => {
         character.quest = await this.getCharacterQuestData({characterId: character.id});
         console.log(character.quest);
-      }
+      });
     },
-
-    displayCharacters(): Nft[] {
-      return this.charactersWithIds(this.ownedCharacterIds).filter(Boolean);
-    }
   },
 
   async mounted() {
-    this.characters = this.displayCharacters();
+    await this.fetchCharacters(this.characterIdsToDisplay);
     await this.refreshQuestData();
+    Events.$on('refresh-quest-data', async () => {
+      console.log('event!');
+      await this.refreshQuestData();
+    });
+  },
+
+  watch: {
+    async characterIdsToDisplay(characterIds) {
+      await this.fetchCharacters(characterIds);
+      await this.refreshQuestData();
+    }
   },
 });
 </script>

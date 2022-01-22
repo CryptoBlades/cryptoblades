@@ -33,7 +33,7 @@
             :isDefault="true" :nft="{ type: '5bdust' }"/>
         </div>
         <div v-if="!isQuestTemplate" class="quest-progress">
-          <strong class="quest-progress-text">{{ quest.progress || 0 }} / {{ quest.requirementAmount }}</strong>
+          <strong class="quest-progress-text">{{ quest.progress }} / {{ quest.requirementAmount }}</strong>
           <b-progress class="reputation-progress" :max="quest.requirementAmount" :value="quest.progress"
                       variant="primary"/>
         </div>
@@ -91,6 +91,7 @@ import {mapActions} from 'vuex';
 import {PropType} from 'vue/types/options';
 import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import NftIcon from '@/components/NftIcon.vue';
+import Events from '@/events';
 
 interface StoreMappedActions {
   skipQuest(payload: { characterID: string | number }): Promise<void>;
@@ -143,10 +144,12 @@ export default Vue.extend({
 
     async skip() {
       await this.skipQuest({characterID: this.characterId});
+      Events.$emit('refresh-quest-data');
     },
 
     async complete() {
       await this.completeQuest({characterID: this.characterId});
+      Events.$emit('refresh-quest-data');
     },
 
     async deleteQuestTemplate() {
@@ -191,28 +194,8 @@ export default Vue.extend({
   width: 75%;
 }
 
-.xp {
-  position: absolute;
-  bottom: 30px;
-  width: 100%;
-  display: flex;
-  right: 0;
-  flex-direction: column;
-  align-items: center;
-}
-
-.xp-text {
-  position: absolute;
-  bottom: -12%;
-}
-
 .quest-progress-text {
 
-}
-
-.quest-row,
-.quests-container {
-  gap: 1rem;
 }
 
 .quest-details {
@@ -226,11 +209,5 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.quest-goal-image {
-  max-width: 100%;
-  height: auto;
-  width: 100%;
 }
 </style>
