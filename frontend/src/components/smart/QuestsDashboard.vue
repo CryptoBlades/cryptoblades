@@ -157,14 +157,17 @@ export default Vue.extend({
     ...mapActions(['addQuestTemplate', 'addPromoQuestTemplate']) as StoreMappedActions,
 
     async onSubmit() {
-      this.isLoading = true;
-      if (this.promoQuestTemplates) {
-        await this.addPromoQuestTemplate({questTemplate: this.questTemplate});
-      } else {
-        await this.addQuestTemplate({questTemplate: this.questTemplate});
+      try {
+        this.isLoading = true;
+        if (this.promoQuestTemplates) {
+          await this.addPromoQuestTemplate({questTemplate: this.questTemplate});
+        } else {
+          await this.addQuestTemplate({questTemplate: this.questTemplate});
+        }
+        this.refreshQuestTemplates();
+      } finally {
+        this.isLoading = false;
       }
-      this.refreshQuestTemplates();
-      this.isLoading = false;
     },
 
     refreshQuestTemplates() {

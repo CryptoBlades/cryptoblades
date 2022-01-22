@@ -1,7 +1,7 @@
 <template>
   <b-modal v-if="quest" class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop scrollable
            :title="$t('quests.turnIn')" size="xl" @close="resetTokens" @cancel="resetTokens"
-           :ok-title="$t('quests.submit')"
+           :ok-title="$t('quests.submit')" :ok-disabled="isLoading"
            @ok.prevent="quest.requirementType === RequirementType.DUST ? submitDust() : submit()">
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
@@ -43,7 +43,7 @@ interface StoreMappedActions {
 }
 
 interface Data {
-  quest: Quest | undefined;
+  quest?: Quest;
   characterId: number | string;
   questProgress: number;
   showModal: boolean;
@@ -52,7 +52,7 @@ interface Data {
   ownedNftIdTypes: NftIdType[];
   nftIdTypesToBurn: NftIdType[];
   dustToBurn: number;
-  selectedToken: number | undefined;
+  selectedToken?: number;
   isLoading: boolean;
 }
 
@@ -61,7 +61,6 @@ export default Vue.extend({
 
   data() {
     return {
-      quest: undefined,
       characterId: '',
       questProgress: 0,
       showModal: false,
@@ -70,7 +69,6 @@ export default Vue.extend({
       ownedNftIdTypes: [],
       nftIdTypesToBurn: [],
       dustToBurn: 0,
-      selectedToken: undefined,
       isLoading: false,
       RequirementType,
       RewardType,
@@ -108,7 +106,7 @@ export default Vue.extend({
 
     addBurnToken(id: number) {
       this.tokensToBurn.push(id.toString());
-      this.ownedTokens = this.ownedTokens.filter(val => !this.tokensToBurn.includes(val));
+      this.ownedTokens = this.ownedTokens.filter(val => !this.tokensToBurn.includes(val.toString()));
       this.selectedToken = undefined;
     },
 
@@ -131,21 +129,27 @@ export default Vue.extend({
     },
 
     async submit() {
-      this.isLoading = true;
-      await this.submitProgress({characterID: this.characterId, tokenIds: this.tokensToBurn});
-      this.resetTokens();
-      Events.$emit('refresh-quest-data');
-      this.showModal = false;
-      this.isLoading = false;
+      try {
+        this.isLoading = true;
+        await this.submitProgress({characterID: this.characterId, tokenIds: this.tokensToBurn});
+      } finally {
+        this.resetTokens();
+        Events.$emit('refresh-quest-data');
+        this.showModal = false;
+        this.isLoading = false;
+      }
     },
 
     async submitDust() {
-      this.isLoading = true;
-      await this.submitDustProgress({characterID: this.characterId, amount: this.dustToBurn});
-      this.resetTokens();
-      Events.$emit('refresh-quest-data');
-      this.showModal = false;
-      this.isLoading = false;
+      try {
+        this.isLoading = true;
+        await this.submitDustProgress({characterID: this.characterId, amount: this.dustToBurn});
+      } finally {
+        this.resetTokens();
+        Events.$emit('refresh-quest-data');
+        this.showModal = false;
+        this.isLoading = false;
+      }
     },
 
     resetTokens() {
