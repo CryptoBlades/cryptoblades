@@ -3,7 +3,7 @@
     <b-tab :disabled="!hasQuestsAccess">
       <template #title>
         {{ $t('quests.questsTitle') }}
-        <hint v-if="hasQuestsAccess" :text="$t('admin.doNotHaveAccessTooltip')"/>
+        <hint v-if="!hasQuestsAccess" :text="$t('admin.doNotHaveAccessTooltip')"/>
       </template>
       <QuestsDashboard v-if="hasQuestsAccess"/>
     </b-tab>
