@@ -29,20 +29,17 @@
       </div>
     </div>
     <QuestSubmissionModal/>
-    <QuestsDashboard/> <!-- TODO: Quests Dashboard is temporarily here, find a place for it elsewhere -->
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
-import foundersShield from '../assets/shield1.png';
 import {Nft} from '@/interfaces/Nft';
 import {Accessors} from 'vue/types/options';
 import QuestDetails from '@/components/smart/QuestDetails.vue';
 import CharacterArt from '@/components/CharacterArt.vue';
 import QuestSubmissionModal from '@/components/smart/QuestSubmissionModal.vue';
-import QuestsDashboard from '@/components/smart/QuestsDashboard.vue';
 import Events from '@/events';
 
 export interface Quest {
@@ -93,7 +90,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {QuestSubmissionModal, CharacterArt, QuestDetails, QuestsDashboard},
+  components: {QuestSubmissionModal, CharacterArt, QuestDetails},
 
   props: {
     showCosmetics: {
@@ -111,14 +108,6 @@ export default Vue.extend({
   computed: {
     ...mapState(['ownedCharacterIds']),
     ...mapGetters(['charactersWithIds', 'getCharacterCosmetic']) as Accessors<StoreMappedGetters>,
-
-    getFoundersShield() {
-      return foundersShield;
-    },
-
-    characterIdsToDisplay(): (string | number)[] {
-      return this.ownedCharacterIds;
-    },
   },
 
   methods: {

@@ -53,6 +53,7 @@ interface Data {
   nftIdTypesToBurn: NftIdType[];
   dustToBurn: number;
   selectedToken: number | undefined;
+  isLoading: boolean;
 }
 
 export default Vue.extend({
@@ -70,6 +71,7 @@ export default Vue.extend({
       nftIdTypesToBurn: [],
       dustToBurn: 0,
       selectedToken: undefined,
+      isLoading: false,
       RequirementType,
       RewardType,
       Rarity,
@@ -129,17 +131,21 @@ export default Vue.extend({
     },
 
     async submit() {
+      this.isLoading = true;
       await this.submitProgress({characterID: this.characterId, tokenIds: this.tokensToBurn});
       this.resetTokens();
       Events.$emit('refresh-quest-data');
       this.showModal = false;
+      this.isLoading = false;
     },
 
     async submitDust() {
+      this.isLoading = true;
       await this.submitDustProgress({characterID: this.characterId, amount: this.dustToBurn});
       this.resetTokens();
       Events.$emit('refresh-quest-data');
       this.showModal = false;
+      this.isLoading = false;
     },
 
     resetTokens() {

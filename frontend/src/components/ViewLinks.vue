@@ -65,12 +65,18 @@
       </li>
     </router-link>
 
+    <router-link v-if="hasAdminAccess" :to="{ name: 'admin' }" exact class="nav-link">
+      <li class="nav-item nav-top-links">
+        <span class="gtag-link-others">{{ $t("viewLink.admin") }}</span>
+      </li>
+    </router-link>
+
   </b-navbar-nav>
 </template>
 
 <script>
 import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
-import {mapGetters} from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 import Hint from '@/components/Hint';
 
@@ -84,10 +90,12 @@ export default Vue.extend({
       pvp,
       quests,
       merchandise,
+      hasAdminAccess: false,
     };
   },
 
   computed: {
+    ...mapState(['defaultAccount']),
     ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP']),
     supportsMerchandise() {
       return this.getCurrentChainSupportsMerchandise;
@@ -96,9 +104,30 @@ export default Vue.extend({
       return this.getCurrentChainSupportsPvP;
     }
   },
+
+  methods: {
+    ...mapActions(['userHasAdminAccess']),
+
+    async fetchData() {
+      this.hasAdminAccess = await this.userHasAdminAccess();
+    },
+  },
+
+  mounted() {
+    this.fetchData();
+  },
+
   components: {
     Hint,
   },
+
+  watch: {
+    async defaultAccount(newVal) {
+      if (newVal) {
+        await this.fetchData();
+      }
+    },
+  }
 });
 </script>
 

@@ -11,6 +11,7 @@
     "quests": "Quests",
     "treasury": "Treasury",
     "merchandise": "Merchandise",
+    "admin": "Admin",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
   },
   "ClaimRewardsBar": {
@@ -605,6 +606,9 @@
     "pleaseSelectRequirementRarity": "Please select requirement rarity",
     "pleaseSelectRewardType": "Please select reward type",
     "pleaseSelectRewardRarity": "Please select reward rarity"
+  },
+  "admin": {
+    "doNotHaveAccessTooltip": "You do not have admin access on this contract."
   },
   "stake": {
     "unknownStakeType": "Unknown stake type, please try again.",

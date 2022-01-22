@@ -12,11 +12,12 @@ import Portal from './views/Portal.vue';
 import Options from './views/Options.vue';
 import PvP from './views/PvP.vue';
 import Quests from './views/Quests.vue';
+import Admin from '@/views/Admin.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
 
-import {market, portal, raid, stakeOnly, pvp, quests, merchandise} from './feature-flags';
+import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from './feature-flags';
 import Merchandise from '@/components/smart/Merchandise.vue';
 import {currentChainSupportsMerchandise, currentChainSupportsPvP} from '@/utils/common';
 
@@ -62,6 +63,8 @@ export default function createRouter() {
   if (quests) {
     router.addRoute({path: '/quests', name: 'quests', component: Quests});
   }
+
+  router.addRoute({path: '/admin', name: 'admin', component: Admin});
 
   if (pvp) {
     const pvpRoute = {
