@@ -70,8 +70,7 @@
 
 <script>
 import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
-import {mapGetters, mapMutations} from 'vuex';
-import Events from '@/events';
+import {mapGetters} from 'vuex';
 import Vue from 'vue';
 import Hint from '@/components/Hint';
 
