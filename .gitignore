@@ -12,3 +12,4 @@ report*.json
 public/abi
 cache
 artifacts
+.idea
