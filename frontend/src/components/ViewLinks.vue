@@ -39,7 +39,9 @@
 
     <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.pvp") }}</span>
+        <span class="gtag-link-others" :class="supportsPvP ? '' : 'disabled'">{{ $t("viewLink.pvp") }} <hint
+          v-if="!supportsPvP" class="hint"
+          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
       </li>
     </router-link>
 
@@ -59,7 +61,7 @@
       <li class="nav-item nav-top-links">
         <span class="gtag-link-others" :class="supportsMerchandise ? '' : 'disabled'">{{ $t("viewLink.merchandise") }} <hint
           v-if="!supportsMerchandise" class="hint"
-          :text="$t('viewLink.merchandiseNotSupportedTooltip')"/></span>
+          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
       </li>
     </router-link>
 
@@ -83,23 +85,17 @@ export default Vue.extend({
       pvp,
       quests,
       merchandise,
-      supportsMerchandise: false,
     };
   },
 
   computed: {
-    ...mapGetters(['getCurrentChainSupportsMerchandise']),
-  },
-
-  mounted() {
-    this.updateCurrentChainSupportsMerchandise();
-    this.supportsMerchandise = this.getCurrentChainSupportsMerchandise;
-    Events.$on('setting:currentChain', () => {
-      this.supportsMerchandise = this.getCurrentChainSupportsMerchandise;
-    });
-  },
-  methods: {
-    ...mapMutations(['updateCurrentChainSupportsMerchandise']),
+    ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP']),
+    supportsMerchandise() {
+      return this.getCurrentChainSupportsMerchandise;
+    },
+    supportsPvP() {
+      return this.getCurrentChainSupportsPvP;
+    }
   },
   components: {
     Hint,

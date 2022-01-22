@@ -18,7 +18,7 @@ import Treasury from './views/Treasury.vue';
 
 import {market, portal, raid, stakeOnly, pvp, quests, merchandise} from './feature-flags';
 import Merchandise from '@/components/smart/Merchandise.vue';
-import {currentChainSupportsMerchandise} from '@/utils/common';
+import {currentChainSupportsMerchandise, currentChainSupportsPvP} from '@/utils/common';
 
 export default function createRouter() {
   if (stakeOnly) {
@@ -59,16 +59,24 @@ export default function createRouter() {
     router.addRoute({path: '/portal', name: 'portal', component: Portal});
   }
 
-  if (pvp) {
-    router.addRoute({path: '/pvp', name: 'pvp', component: PvP});
-  }
-
   if (quests) {
     router.addRoute({path: '/quests', name: 'quests', component: Quests});
   }
 
-  if(merchandise){
-    const merchandiseRoute = { path: '/merchandise', name: 'merchandise', component:Merchandise,
+  if (pvp) {
+    const pvpRoute = {
+      path: '/pvp', name: 'pvp', component: PvP,
+      beforeEnter: (to: any, from: any, next: any) => {
+        if (to.name === 'pvp' && !currentChainSupportsPvP()) next(from);
+        else next();
+      }
+    };
+    router.addRoute(pvpRoute);
+  }
+
+  if (merchandise) {
+    const merchandiseRoute = {
+      path: '/merchandise', name: 'merchandise', component: Merchandise,
       beforeEnter: (to: any, from: any, next: any) => {
         if (to.name === 'merchandise' && !currentChainSupportsMerchandise()) next(from);
         else next();

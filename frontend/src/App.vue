@@ -169,7 +169,7 @@ export default {
     ...mapGetters([
       'getExchangeTransakUrl'
     ]),
-    ...mapMutations(['updateCurrentChainSupportsMerchandise']),
+    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP']),
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BSC';
       const paramChain = this.$router.currentRoute.query.chain;
@@ -192,6 +192,7 @@ export default {
         await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
       }
       this.updateCurrentChainSupportsMerchandise();
+      this.updateCurrentChainSupportsPvP();
     },
     async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;
