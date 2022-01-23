@@ -2214,7 +2214,6 @@ export function createStore(web3: Web3) {
           StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
-
         const stakeData: { stakeType: StakeType | NftStakeType } & IStakeState = {
           stakeType,
           ownBalance,
