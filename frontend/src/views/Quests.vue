@@ -14,7 +14,8 @@
             :character="character" :hideIdContainer="true" :hideXpBar="true"/>
         </div>
         <div v-if="character.quest && character.quest.reputation !== undefined" class="xp">
-          <span>Reputation lvl {{ 0 }}</span>
+          <span>Reputation lvl {{ 0 }} <b-icon-question-circle class="pointer"
+                                                               @click="$bvModal.show('reputation-info-modal')"/></span>
           <strong class="outline xp-text">{{ character.quest.reputation || 0 }} / {{ 9999 }}</strong>
           <b-progress class="reputation-progress" :max="9999" :value="character.quest.reputation"
                       variant="primary"/>
@@ -29,6 +30,9 @@
       </div>
     </div>
     <QuestSubmissionModal/>
+    <b-modal id="reputation-info-modal" ok-only class="centered-modal" :title="$t('quests.reputation')">
+      <span class="white-space">{{ $t('quests.reputationExplained') }}</span>
+    </b-modal>
   </div>
 </template>
 
@@ -221,6 +225,10 @@ export default Vue.extend({
   border-radius: 5px;
   width: 25rem;
   height: auto;
+}
+
+.white-space {
+  white-space: break-spaces;
 }
 
 @media (max-width: 576px) {

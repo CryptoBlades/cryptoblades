@@ -605,7 +605,8 @@
     "pleaseSelectRequirementType": "Please select requirement type",
     "pleaseSelectRequirementRarity": "Please select requirement rarity",
     "pleaseSelectRewardType": "Please select reward type",
-    "pleaseSelectRewardRarity": "Please select reward rarity"
+    "pleaseSelectRewardRarity": "Please select reward rarity",
+    "reputationExplained": "Reputation explanation with tiers and percentages"
   },
   "admin": {
     "doNotHaveAccessTooltip": "You do not have admin access on this contract."
