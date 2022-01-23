@@ -5,6 +5,7 @@
         {{ $t('quests.questsTitle') }}
         <hint v-if="!hasQuestsAccess" :text="$t('admin.doNotHaveAccessTooltip')"/>
       </template>
+      <AdminMaker :contract="contracts.SimpleQuests"/>
       <QuestsDashboard v-if="hasQuestsAccess"/>
     </b-tab>
   </b-tabs>
@@ -13,8 +14,9 @@
 <script lang="ts">
 import Vue from 'vue';
 import QuestsDashboard from '@/components/smart/QuestsDashboard.vue';
-import {mapActions, mapState} from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import Hint from '@/components/Hint.vue';
+import AdminMaker from '@/components/smart/AdminMaker.vue';
 
 interface StoreMappedActions {
   userHasQuestsAdminAccess(): Promise<boolean>;
@@ -28,9 +30,10 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {QuestsDashboard, Hint},
+  components: {QuestsDashboard, Hint, AdminMaker},
 
   computed: {
+    ...mapGetters(['contracts']),
     ...mapState(['defaultAccount']),
   },
 

@@ -609,7 +609,10 @@
     "reputationExplained": "Reputation explanation with tiers and percentages"
   },
   "admin": {
-    "doNotHaveAccessTooltip": "You do not have admin access on this contract."
+    "doNotHaveAccessTooltip": "You do not have admin access on this contract.",
+    "grantRole": "Grant role",
+    "grantGameAdminRole": "Grant game admin role",
+    "pasteInValidWalletAddress": "Paste in valid wallet address"
   },
   "stake": {
     "unknownStakeType": "Unknown stake type, please try again.",
