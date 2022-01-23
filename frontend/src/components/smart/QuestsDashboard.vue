@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2">
+  <div class="p-1">
     <h2>{{ promoQuestTemplates ? $t('quests.createNewPromoQuest') : $t('quests.createNewQuest') }}</h2>
     <b-form-group class="m-3">
       <b-form-radio v-model="promoQuestTemplates" @change="refreshQuestTemplates" :value="false">

@@ -1,6 +1,6 @@
 <template>
-  <div class="d-flex flex-column align-items-start gap-2 p-2">
-    <label class="m-0">{{ $t('admin.grantGameAdminRole') }}</label>
+  <div class="d-flex flex-column align-items-start gap-2 p-1">
+    <h2 class="m-0">{{ $t('admin.grantGameAdminRole') }}</h2>
     <b-form-input v-model="walletAddress" :placeholder="$t('admin.pasteInValidWalletAddress')"/>
     <b-button variant="primary" @click="onSubmit" :disabled="!isValidWeb3Address || isLoading">
       {{ $t('admin.grantRole') }}
