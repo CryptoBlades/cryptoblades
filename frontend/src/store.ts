@@ -2,7 +2,14 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, gasUsedToBnb, toBN} from './utils/common';
+import {
+  bnMinimum,
+  currentChainSupportsMerchandise,
+  currentChainSupportsPvP,
+  currentChainSupportsQuests,
+  gasUsedToBnb,
+  toBN
+} from './utils/common';
 
 import {getConfigValue, setUpContracts} from './contracts';
 
@@ -136,6 +143,7 @@ export function createStore(web3: Web3) {
       cartEntries: [],
       currentChainSupportsMerchandise: false,
       currentChainSupportsPvP: false,
+      currentChainSupportsQuests: false,
 
       characters: {},
       garrisonCharacters: {},
@@ -434,6 +442,10 @@ export function createStore(web3: Web3) {
 
       getCurrentChainSupportsPvP(state) {
         return state.currentChainSupportsPvP;
+      },
+
+      getCurrentChainSupportsQuests(state) {
+        return state.currentChainSupportsQuests;
       },
 
       ownWeapons(state, getters) {
@@ -751,6 +763,10 @@ export function createStore(web3: Web3) {
 
       updateCurrentChainSupportsPvP(state: IState) {
         state.currentChainSupportsPvP = currentChainSupportsPvP();
+      },
+
+      updateCurrentChainSupportsQuests(state: IState) {
+        state.currentChainSupportsQuests = currentChainSupportsQuests();
       },
 
       updateCharacter(state: IState, { characterId, character }) {

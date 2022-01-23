@@ -63,7 +63,7 @@ import { Contracts, isStakeType, isNftStakeType, StakeType, NftStakeType, Stakin
 import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } from './stake-types';
 
 import {raid, stakeOnly, market, pvp, quests} from './feature-flags';
-import {currentChainSupportsPvP} from '@/utils/common';
+import {currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 interface RaidContracts {
   Raid1?: Contracts['Raid1'];
@@ -328,7 +328,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   }
 
   const questsContracts: QuestsContracts = {};
-  if(quests) {
+  if(quests && currentChainSupportsQuests()) {
     const simpleQuestsContractAddr = getConfigValue('VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS') || (simpleQuestsNetworks as Networks)[networkId]!.address;
 
     questsContracts.SimpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);

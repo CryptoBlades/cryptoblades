@@ -47,7 +47,9 @@
 
     <router-link v-if="quests" :to="{ name: 'quests' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.quests") }}</span>
+        <span class="gtag-link-others" :class="supportsQuests ? '' : 'disabled'">{{ $t("viewLink.quests") }} <hint
+          v-if="!supportsQuests" class="hint"
+          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
       </li>
     </router-link>
 
@@ -96,12 +98,15 @@ export default Vue.extend({
 
   computed: {
     ...mapState(['defaultAccount']),
-    ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP']),
+    ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP', 'getCurrentChainSupportsQuests']),
     supportsMerchandise() {
       return this.getCurrentChainSupportsMerchandise;
     },
     supportsPvP() {
       return this.getCurrentChainSupportsPvP;
+    },
+    supportsQuests() {
+      return this.getCurrentChainSupportsQuests;
     }
   },
 

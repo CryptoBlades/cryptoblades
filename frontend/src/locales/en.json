@@ -609,6 +609,7 @@
     "reputationExplained": "Reputation explanation with tiers and percentages"
   },
   "admin": {
+    "quests": "Quests",
     "doNotHaveAccessTooltip": "You do not have admin access on this contract.",
     "grantRole": "Grant role",
     "grantGameAdminRole": "Grant game admin role",

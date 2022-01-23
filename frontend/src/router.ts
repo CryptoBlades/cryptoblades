@@ -19,7 +19,7 @@ import Treasury from './views/Treasury.vue';
 
 import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from './feature-flags';
 import Merchandise from '@/components/smart/Merchandise.vue';
-import {currentChainSupportsMerchandise, currentChainSupportsPvP} from '@/utils/common';
+import {currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 export default function createRouter() {
   if (stakeOnly) {
@@ -45,6 +45,7 @@ export default function createRouter() {
       {path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true},
       {path: '/bridge', name: 'bridge', component: Bridge},
       {path: '/treasury', name: 'treasury', component: Treasury},
+      {path: '/admin', name: 'admin', component: Admin},
     ]
   });
 
@@ -61,10 +62,15 @@ export default function createRouter() {
   }
 
   if (quests) {
-    router.addRoute({path: '/quests', name: 'quests', component: Quests});
+    const questsRoute = {
+      path: '/quests', name: 'quests', component: Quests,
+      beforeEnter: (to: any, from: any, next: any) => {
+        if (to.name === 'quests' && !currentChainSupportsQuests()) next(from);
+        else next();
+      }
+    };
+    router.addRoute(questsRoute);
   }
-
-  router.addRoute({path: '/admin', name: 'admin', component: Admin});
 
   if (pvp) {
     const pvpRoute = {

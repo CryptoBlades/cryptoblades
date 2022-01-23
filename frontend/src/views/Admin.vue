@@ -2,7 +2,7 @@
   <b-tabs v-if="hasAccessToAnyTab" justified content-class="mt-3"> <!-- note, use "vertical" if too many tabs -->
     <b-tab :disabled="!hasQuestsAccess">
       <template #title>
-        {{ $t('quests.questsTitle') }}
+        {{ $t('admin.quests') }}
         <hint v-if="!hasQuestsAccess" :text="$t('admin.doNotHaveAccessTooltip')"/>
       </template>
       <AdminMaker :contract="contracts.SimpleQuests"/>
