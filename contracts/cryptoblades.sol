@@ -353,7 +353,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // monsterPower / avgPower * payPerFight * powerMultiplier
         uint256 amount = ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
             .mulu(vars[VAR_HOURLY_PAY_PER_FIGHT]);
-        
+
         if(amount > vars[VAR_PARAM_MAX_FIGHT_PAYOUT])
             amount = vars[VAR_PARAM_MAX_FIGHT_PAYOUT];
         if(vars[VAR_HOURLY_DISTRIBUTION] < amount * 5 && applyLimit) // the * 5 is a temp measure until we can sync frontend on main
@@ -410,7 +410,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             ) = weapons.getFightData(wep, characters.getTrait(char));
 
         return getTargetsInternal(
-            getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
+            getPlayerPower(uint24(characters.getTotalPower(char)), weaponMultTarget, weaponBonusPower),
             characters.getStaminaTimestamp(char),
             now / 1 hours
         );
@@ -1007,7 +1007,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
         return vars[VAR_DAILY_MAX_CLAIM];
     }
-    
+
     function stakeUnclaimedRewards() public {
         stakeUnclaimedRewards(getRemainingTokenClaimAmountPreTax());
     }

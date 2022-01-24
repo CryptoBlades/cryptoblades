@@ -15,3 +15,5 @@ export const pvp = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG
 export const nft_bridge = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG_NFT_BRIDGE + '').toLowerCase());
 
 export const merchandise = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG_MERCHANDISE + '').toLowerCase());
+
+export const burningManager = ['1', 'true', 't'].includes((process.env.VUE_APP_FEATURE_FLAG_BURNING_MANAGER + '').toLowerCase());
