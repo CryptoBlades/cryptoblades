@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {bnMinimum, gasUsedToBnb, toBN} from './utils/common';
+import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, gasUsedToBnb, toBN} from './utils/common';
 
 import {getConfigValue, setUpContracts} from './contracts';
 
@@ -133,10 +133,13 @@ export function createStore(web3: Web3) {
       currentCharacterId: null,
       ownedDust: [],
       cartEntries: [],
+      currentChainSupportsMerchandise: false,
+      currentChainSupportsPvP: false,
 
       characters: {},
       garrisonCharacters: {},
       characterStaminas: {},
+      characterPowers: {},
       characterRenames: {},
       characterCosmetics: {},
       weapons: {},
@@ -316,6 +319,12 @@ export function createStore(web3: Web3) {
         };
       },
 
+      getCharacterPower(state: IState) {
+        return (characterId: number) => {
+          return state.characterPowers[characterId];
+        };
+      },
+
       getCharacterRename(state: IState) {
         return (characterId: number) => {
           return state.characterRenames[characterId];
@@ -423,6 +432,14 @@ export function createStore(web3: Web3) {
 
       getCartEntries(state) {
         return state.cartEntries;
+      },
+
+      getCurrentChainSupportsMerchandise(state) {
+        return state.currentChainSupportsMerchandise;
+      },
+
+      getCurrentChainSupportsPvP(state) {
+        return state.currentChainSupportsPvP;
       },
 
       ownWeapons(state, getters) {
@@ -734,6 +751,14 @@ export function createStore(web3: Web3) {
         state.cartEntries = [];
       },
 
+      updateCurrentChainSupportsMerchandise(state: IState) {
+        state.currentChainSupportsMerchandise = currentChainSupportsMerchandise();
+      },
+
+      updateCurrentChainSupportsPvP(state: IState) {
+        state.currentChainSupportsPvP = currentChainSupportsPvP();
+      },
+
       updateCharacter(state: IState, { characterId, character }) {
         Vue.set(state.characters, characterId, character);
       },
@@ -795,6 +820,9 @@ export function createStore(web3: Web3) {
       },
       updateCharacterStamina(state: IState, { characterId, stamina }) {
         Vue.set(state.characterStaminas, characterId, stamina);
+      },
+      updateCharacterPower(state: IState, { characterId, power }) {
+        Vue.set(state.characterPowers, characterId, +power);
       },
       updateCharacterRename(state: IState, { characterId, renameString }) {
         if(renameString !== undefined){
@@ -1462,6 +1490,12 @@ export function createStore(web3: Web3) {
         ]);
       },
 
+      async fetchSoulBalance({ state }) {
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
+        return await BurningManager.methods.userVars(state.defaultAccount, 1).call(defaultCallOptions(state));
+      },
+
       async fetchInGameOnlyFunds({ state, commit }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades || !state.defaultAccount) return;
@@ -1492,7 +1526,7 @@ export function createStore(web3: Web3) {
         await Promise.all(garrisonCharacterIds.map(id => dispatch('fetchCharacter', { characterId: id, inGarrison: true })));
       },
 
-      async fetchCharacter({ state, commit }, { characterId, inGarrison = false }: { characterId: string | number, inGarrison: boolean}) {
+      async fetchCharacter({ state, commit, dispatch }, { characterId, inGarrison = false }: { characterId: string | number, inGarrison: boolean}) {
         const { Characters } = state.contracts();
         if(!Characters) return;
 
@@ -1502,6 +1536,7 @@ export function createStore(web3: Web3) {
               characterId,
               await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
             );
+            await dispatch('fetchCharacterPower', characterId);
 
             if(!inGarrison) {
               commit('updateCharacter', { characterId, character });
@@ -1511,6 +1546,14 @@ export function createStore(web3: Web3) {
             }
           })(),
         ]);
+      },
+
+      async fetchCharacterPower( {state, commit}, characterId) {
+        const { Characters } = state.contracts();
+        if(!Characters || !state.defaultAccount) return;
+
+        const power = await Characters.methods.getTotalPower(characterId).call(defaultCallOptions(state));
+        commit('updateCharacterPower', { characterId, power });
       },
 
       async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {
@@ -1694,22 +1737,21 @@ export function createStore(web3: Web3) {
         if(!state.defaultAccount) return;
         const numberOfCharacters = parseInt(await state.contracts().Characters!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
         const characters = await Promise.all(
-          [...Array(numberOfCharacters).keys()].map((_, i) =>
-            state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+          [...Array(numberOfCharacters).keys()].map(async (_, i) =>
+            Number(await state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state))))
         );
-
         return characters;
       },
       async getAccountGarrisonCharacters({state}) {
         if(!state.defaultAccount) return;
-        return await state.contracts().Garrison!.methods.getUserCharacters().call(defaultCallOptions(state));
+        return (await state.contracts().Garrison!.methods.getUserCharacters().call(defaultCallOptions(state))).map((id) => Number(id));
       },
       async getAccountWeapons({state}) {
         if(!state.defaultAccount) return;
         const numberOfWeapons = parseInt(await state.contracts().Weapons!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
         const weapons = await Promise.all(
           [...Array(numberOfWeapons).keys()]
-            .map((_, i) => state.contracts().Weapons!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+            .map(async (_, i) => Number(await state.contracts().Weapons!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state))))
         );
         return weapons;
       },
@@ -4040,22 +4082,6 @@ export function createStore(web3: Web3) {
           .chainBridgeEnabled(chainId)
           .call(defaultCallOptions(state));
       },
-      async getBridgeTransferAt({ state }) {
-        const { NFTStorage } = await state.contracts();
-        if (!NFTStorage || !state.defaultAccount) return;
-        const transferAt = await NFTStorage.methods
-          .getBridgeTransferAt()
-          .call(defaultCallOptions(state));
-        return parseInt(transferAt,10);
-      },
-      async getBridgeTransfers({ state }) {
-        const { NFTStorage } = state.contracts();
-        if(!NFTStorage || !state.defaultAccount) return;
-        const bridgeTransfers = await NFTStorage.methods
-          .getBridgeTransfers()
-          .call(defaultCallOptions(state));
-        return parseInt(bridgeTransfers,10);
-      },
 
       async fetchItemPrices({state, commit}){
         const { Blacksmith } = state.contracts();
@@ -4132,6 +4158,381 @@ export function createStore(web3: Web3) {
         await Characters.methods.approve(Garrison.options.address, characterId).send(defaultCallOptions(state));
         await Garrison.methods.sendToGarrison(characterId).send({ from: state.defaultAccount });
         await dispatch('updateCharacterIds');
+      },
+
+      async getWeapon({ state }, weaponId) {
+        const { Weapons } = state.contracts();
+        if (!Weapons || !state.defaultAccount) return;
+
+        const weapon = await Weapons.methods.get(`${weaponId}`).call({ from: state.defaultAccount });
+
+        return weapon;
+      },
+
+      async getShield({ state }, shieldId) {
+        const { Shields } = state.contracts();
+        if (!Shields || !state.defaultAccount) return;
+
+        const shield = await Shields.methods.get(`${shieldId}`).call({ from: state.defaultAccount });
+
+        return shield;
+      },
+
+      async getCharacter({ state }, characterId) {
+        const { Characters } = state.contracts();
+        if (!Characters || !state.defaultAccount) return;
+
+        const character = await Characters.methods.get(`${characterId}`).call({ from: state.defaultAccount });
+
+        return character;
+      },
+
+      async getFighterByCharacter({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const fighter = await PvpArena.methods.fighterByCharacter(characterId).call({ from: state.defaultAccount });
+
+        return fighter;
+      },
+
+      async getCurrentRankedSeason({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const currentRankedSeason = await PvpArena.methods.currentRankedSeason().call({ from: state.defaultAccount });
+
+        return currentRankedSeason;
+      },
+
+      async getSeasonStartedAt({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const seasonStartedAt = await PvpArena.methods.seasonStartedAt().call({ from: state.defaultAccount });
+
+        return seasonStartedAt;
+      },
+
+      async getSeasonDuration({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const seasonDuration = await PvpArena.methods.seasonDuration().call({ from: state.defaultAccount });
+
+        return seasonDuration;
+      },
+
+      async getCharacterLevel({ state }, characterId) {
+        const { Characters } = state.contracts();
+        if (!Characters || !state.defaultAccount) return;
+
+        const characterLevel = await Characters.methods.getLevel(characterId).call({ from: state.defaultAccount });
+
+        return characterLevel;
+      },
+
+      async getRename({state}, characterId){
+        const { CharacterRenameTagConsumables } = state.contracts();
+
+        const characterRename = await CharacterRenameTagConsumables?.methods.getCharacterRename(characterId).call({ from: state.defaultAccount });
+
+        if(characterRename !== '') return characterRename;
+        return;
+      },
+
+      async getCharacterPower({ state }, characterId) {
+        const { Characters } = state.contracts();
+        if (!Characters || !state.defaultAccount) return;
+
+        const characterPower = await Characters.methods.getPower(characterId).call({ from: state.defaultAccount });
+
+        return characterPower;
+      },
+
+      async getRankingPointsByCharacter({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const rankingPointsByCharacter = await PvpArena.methods.rankingPointsByCharacter(characterId).call({ from: state.defaultAccount });
+
+        return rankingPointsByCharacter;
+      },
+
+      async getRankingsPoolByTier({ state }, tier) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const rankingsPoolByTier = await PvpArena.methods.rankingsPoolByTier(tier).call({ from: state.defaultAccount });
+
+        return rankingsPoolByTier;
+      },
+
+      async getTierTopCharacters({ state }, tier) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const tierTopCharacters = await PvpArena.methods.getTierTopCharacters(tier).call({ from: state.defaultAccount });
+
+        return tierTopCharacters;
+      },
+
+      async getArenaTier({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const arenaTier = await PvpArena.methods.getArenaTier(characterId).call({ from: state.defaultAccount });
+
+        return arenaTier;
+      },
+
+      async getEntryWager({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const entryWager = await PvpArena.methods.getEntryWager(characterId).call({ from: state.defaultAccount });
+
+        return entryWager;
+      },
+
+      async getIsWeaponInArena({ state }, weaponId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const isWeaponInArena = await PvpArena.methods.isWeaponInArena(weaponId).call({ from: state.defaultAccount });
+
+        return isWeaponInArena;
+      },
+
+      async getIsShieldInArena({ state }, shieldId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const isShieldInArena = await PvpArena.methods.isShieldInArena(shieldId).call({ from: state.defaultAccount });
+
+        return isShieldInArena;
+      },
+
+      async getIsCharacterInArena({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const isCharacterInArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: state.defaultAccount });
+
+        return isCharacterInArena;
+      },
+
+      async getIsCharacterUnderAttack({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const isCharacterUnderAttack = await PvpArena.methods.isCharacterUnderAttack(characterId).call({ from: state.defaultAccount });
+
+        return isCharacterUnderAttack;
+      },
+
+      async getMatchByFinder({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const matchByFinder = await PvpArena.methods.matchByFinder(characterId).call({ from: state.defaultAccount });
+
+        return matchByFinder;
+      },
+
+      async getDuelQueue({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const matchByFinder = await PvpArena.methods.getDuelQueue().call({ from: state.defaultAccount });
+
+        return matchByFinder;
+      },
+
+      async getDuelCost({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const matchByFinder = await PvpArena.methods.getDuelCost(characterId).call({ from: state.defaultAccount });
+
+        return matchByFinder;
+      },
+
+      async getMatchablePlayerCount({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const matchablePlayerCount = await PvpArena.methods.getMatchablePlayerCount(characterId).call({ from: state.defaultAccount });
+
+        return matchablePlayerCount;
+      },
+
+      async getDecisionSeconds({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const decisionSeconds = await PvpArena.methods.decisionSeconds().call({ from: state.defaultAccount });
+
+        return decisionSeconds;
+      },
+
+      async getReRollFeePercent({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const reRollFeePercent = await PvpArena.methods.reRollFeePercent().call({ from: state.defaultAccount });
+
+        return reRollFeePercent;
+      },
+
+      async getPlayerPrizePoolRewards({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const playerPrizePoolRewards = await PvpArena.methods.getPlayerPrizePoolRewards().call({ from: state.defaultAccount });
+
+        return playerPrizePoolRewards;
+      },
+
+      async getDuelOffsetCost({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const duelOffsetCost = await PvpArena.methods.duelOffsetCost().call({ from: state.defaultAccount });
+
+        return duelOffsetCost;
+      },
+
+      async enterArena({ state }, {characterId, weaponId, shieldId, useShield}) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const res = await PvpArena.methods.enterArena(characterId, weaponId, shieldId, useShield).send({ from: state.defaultAccount });
+
+        return res;
+      },
+
+      async withdrawFromArena({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const res = await PvpArena.methods.withdrawFromArena(characterId).send({ from: state.defaultAccount });
+
+        return res;
+      },
+
+      async findOpponent({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const res = await PvpArena.methods.findOpponent(characterId).send({ from: state.defaultAccount });
+
+        return res;
+      },
+
+      async reRollOpponent({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const res = await PvpArena.methods.reRollOpponent(characterId).send({ from: state.defaultAccount });
+
+        return res;
+      },
+
+      async prepareDuel({ state }, { characterId, duelOffsetCost }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const res = await PvpArena.methods.prepareDuel(characterId).send({ from: state.defaultAccount, value: duelOffsetCost });
+
+        return res;
+      },
+
+      async withdrawRankedRewards({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const res = await PvpArena.methods.withdrawRankedRewards().send({ from: state.defaultAccount });
+
+        return res;
+      },
+
+      async getPvpContract({state}) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        return PvpArena;
+      },
+
+      async approvePvpSkillSpending({state}, amount) {
+        const { PvpArena, SkillToken } = state.contracts();
+        if (!PvpArena || !SkillToken || !state.defaultAccount) return;
+
+        const res = await SkillToken.methods.approve(PvpArena.options.address, `${amount}`).send({ from: state.defaultAccount });
+
+        return res;
+      },
+
+      async burnCharactersIntoCharacter({ state, dispatch }, {burnIds, targetId}) {
+        const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
+        if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
+
+        const burnCost = await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
+        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
+          from: state.defaultAccount
+        });
+
+        await BurningManager.methods.burnCharactersIntoCharacter(burnIds, targetId).send({ from: state.defaultAccount });
+        await dispatch('updateCharacterIds');
+      },
+
+      async burnCharactersIntoSoul({ state, dispatch }, burnIds) {
+        const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
+        if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
+
+        const burnCost = await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
+        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
+          from: state.defaultAccount
+        });
+
+        await BurningManager.methods.burnCharactersIntoSoul(burnIds).send({ from: state.defaultAccount });
+        await dispatch('updateCharacterIds');
+      },
+
+      async purchaseBurnCharacter({ state }, {charId, maxPrice}) {
+        const { NFTMarket, BurningManager, SkillToken, CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !BurningManager || !SkillToken || !NFTMarket || !state.defaultAccount) return;
+
+        await SkillToken.methods.approve(NFTMarket.options.address, maxPrice).send(defaultCallOptions(state));
+
+        const burnCost = await BurningManager.methods.burnCharacterFee(charId).call(defaultCallOptions(state));
+        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
+          from: state.defaultAccount
+        });
+
+        const res = await NFTMarket.methods.purchaseBurnCharacter(charId, maxPrice).send({ from: state.defaultAccount });
+        const {
+          seller,
+          nftID,
+          price
+        } = res.events.PurchasedListing.returnValues;
+
+        return { seller, nftID, price } as { seller: string, nftID: string, price: string };
+      },
+
+      async upgradeCharacterWithSoul({ state, dispatch }, {charId, soulAmount}) {
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
+
+        await BurningManager.methods.upgradeCharacterWithSoul(charId, soulAmount).send({ from: state.defaultAccount });
+        await dispatch('fetchCharacterPower', charId);
+      },
+
+      async fetchCharactersBurnCost({ state }, burnIds) {
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
+
+        return await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
       }
     },
   });

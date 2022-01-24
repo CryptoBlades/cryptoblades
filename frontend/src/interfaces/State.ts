@@ -145,11 +145,14 @@ export interface IState {
   maxStamina: number;
   ownedDust: string[];
   cartEntries: CartEntry[];
+  currentChainSupportsMerchandise: boolean;
+  currentChainSupportsPvP: boolean;
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
   garrisonCharacters: Record<number, ICharacter>;
   characterStaminas: Record<number, number>;
+  characterPowers: Record<number, number>;
   characterRenames: Record<number, string>;
   characterCosmetics: Record<number, string>;
 

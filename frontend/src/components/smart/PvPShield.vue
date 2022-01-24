@@ -14,7 +14,9 @@
         <b-popover v-if="hasInfoPopover" ref="shield-info" :target="`${shieldId}-info-s`"
         triggers="hover" data-trigger="focus" placement="top right" custom-class="customPopover">
           <div v-if="shieldId" class="shield-icon-wrapper">
-            <span>Shield stats</span>
+            <span>
+              {{$t('pvp.shieldStats')}}
+            </span>
             <ul class="statsWrapper">
               <li :class="getStatStyles(shield.stat1)" v-if="shield.stat1Value !== 0">{{shield.stat1}} +{{shield.stat1Value}}</li>
               <li :class="getStatStyles(shield.stat2)" v-if="shield.stat2Value !== 0">{{shield.stat2}} +{{shield.stat2Value}}</li>
@@ -63,13 +65,13 @@ export default {
 
   computed: {
     getElementImageUrl() {
-      if (this.element === 'Fire') {
+      if (this.shield.element === 'Fire') {
         return fire;
       }
-      if (this.element === 'Water') {
+      if (this.shield.element === 'Water') {
         return water;
       }
-      if (this.element === 'Earth') {
+      if (this.shield.element === 'Earth') {
         return earth;
       } else {
         return lightning;
