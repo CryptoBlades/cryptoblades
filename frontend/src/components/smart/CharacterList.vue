@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="filters row mt-2 pl-2" v-if="showFilters" @change="saveFilters()">
-      <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
+      <div :class="isMarket ? 'col-sm-6 col-md-6 col-lg-2 mb-3' : 'col-sm-5 col-md-5 col-lg-3 mb-3'">
         <strong>{{$t('characterList.level')}}</strong>
         <select class="form-control" v-model="levelFilter">
           <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
@@ -10,7 +10,7 @@
         </select>
       </div>
 
-      <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
+      <div :class="isMarket ? 'col-sm-6 col-md-6 col-lg-2 mb-3' : 'col-sm-5 col-md-5 col-lg-3 mb-3'">
         <strong>{{$t('characterList.element')}}</strong>
         <select class="form-control" v-model="elementFilter">
           <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
@@ -297,7 +297,7 @@ export default {
       'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater',
       'fetchTotalCharacterFireTraitChanges','fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
-      'fetchOwnedCharacterCosmetics','changeCharacterCosmetic','removeCharacterCosmetic','restoreFromGarrison', 'sendToGarrison']),
+      'fetchOwnedCharacterCosmetics','changeCharacterCosmetic','removeCharacterCosmetic','restoreFromGarrison', 'sendToGarrison', 'purchaseBurnCharacter']),
 
     getCharacterArt,
 
@@ -349,7 +349,7 @@ export default {
             handler: copyNftUrl,
             hasDefaultOption: true,
             noAmount: true
-          },
+          }
         ];
       } else if(this.isGarrison) {
         this.options = [

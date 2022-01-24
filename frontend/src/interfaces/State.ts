@@ -152,6 +152,7 @@ export interface IState {
   characters: Record<number, ICharacter>;
   garrisonCharacters: Record<number, ICharacter>;
   characterStaminas: Record<number, number>;
+  characterPowers: Record<number, number>;
   characterRenames: Record<number, string>;
   characterCosmetics: Record<number, string>;
 

@@ -15,7 +15,13 @@ module.exports = async function (deployer, network, accounts) {
     const characters = await Characters.deployed();
     const weapons = await Weapons.deployed();
 
-    if (network === 'okexmainnet') {
+    if (network === 'bscmainnet'
+    || network === 'bscmainnet-fork'
+    || network === 'hecomainnet'
+    || network === 'okexmainnet'
+    || network === 'polygonmainnet'
+    || network === 'avaxmainnet'
+    || network === 'avaxmainnet-fork') {
         let randoms = await ChainlinkRandoms.deployed();
 
         const pvpArena = await deployProxy(

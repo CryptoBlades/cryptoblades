@@ -1,4 +1,3 @@
-const web3 = require("web3");
 const {
   expectRevert,
   expectEvent,
@@ -87,6 +86,7 @@ contract("PvpArena", (accounts) => {
     await raid1.grantRole(await raid1.GAME_ADMIN(), accounts[0]);
     
     await pvpArena.setArenaAccess(1, { from: accounts[0] });
+    await pvpArena.setPvpBotAddress(accounts[10], { from: accounts[0] });
   });
 
   describe("#getDuelCost", () => {
@@ -211,7 +211,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1] });
+        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
 
         let duelQueue = await pvpArena.getDuelQueue();
 
@@ -287,7 +287,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1] });
+        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
 
         let duelQueue = await pvpArena.getDuelQueue();
 
@@ -398,7 +398,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1] });
+        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
 
         let duelQueue = await pvpArena.getDuelQueue();
 
@@ -411,7 +411,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1] });
+        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
 
         duelQueue = await pvpArena.getDuelQueue();
 
@@ -438,7 +438,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[2],
         });
 
-        await pvpArena.prepareDuel(character2ID, { from: accounts[2] });
+        await pvpArena.prepareDuel(character2ID, { from: accounts[2], value: await pvpArena.duelOffsetCost() });
 
         duelQueue = await pvpArena.getDuelQueue();
 
@@ -458,7 +458,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1] });
+        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
 
         duelQueue = await pvpArena.getDuelQueue();
 
@@ -934,6 +934,7 @@ contract("PvpArena", (accounts) => {
           });
           await pvpArena.prepareDuel(character1ID, {
             from: accounts[1],
+            value: await pvpArena.duelOffsetCost()
           });
 
           let duelQueue = await pvpArena.getDuelQueue();
@@ -1010,6 +1011,7 @@ contract("PvpArena", (accounts) => {
           });
           await pvpArena.prepareDuel(character1ID, {
             from: accounts[1],
+            value: await pvpArena.duelOffsetCost()
           });
 
           let duelQueue = await pvpArena.getDuelQueue();
@@ -1101,7 +1103,7 @@ contract("PvpArena", (accounts) => {
         await pvpArena.findOpponent(character1ID, {
           from: accounts[1],
         });
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1] });
+        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
 
         let duelQueue = await pvpArena.getDuelQueue();
 
@@ -1194,11 +1196,27 @@ contract("PvpArena", (accounts) => {
 
         expect(previousDuelQueue.length).to.equal(0);
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1] });
+        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
 
         const newDuelQueue = await pvpArena.getDuelQueue();
 
         expect(newDuelQueue.length).to.equal(1);
+      });
+
+      it("transfers duelOffsetCost", async () => {
+        await pvpArena.findOpponent(character1ID, {
+          from: accounts[1],
+        });
+
+        const duelOffsetCostInGwei = web3.utils.fromWei(await pvpArena.duelOffsetCost(), 'Gwei');
+
+        const previousBalanceInGwei = web3.utils.fromWei(await web3.eth.getBalance(accounts[10]), 'Gwei');
+        
+        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+        
+        const nextBalanceInGwei = web3.utils.fromWei(await web3.eth.getBalance(accounts[10]), 'Gwei');
+        
+        expect(+nextBalanceInGwei).to.equal(+previousBalanceInGwei + +duelOffsetCostInGwei);
       });
     });
 
@@ -1212,7 +1230,7 @@ contract("PvpArena", (accounts) => {
         await time.increase(await pvpArena.decisionSeconds());
 
         await expectRevert(
-          pvpArena.prepareDuel(character1ID, { from: accounts[1] }),
+          pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() }),
           "Decision time expired"
         );
       });
@@ -1223,7 +1241,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1] });
+        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
 
         await expectRevert(
           pvpArena.prepareDuel(character1ID, { from: accounts[1] }),
@@ -1300,6 +1318,7 @@ contract("PvpArena", (accounts) => {
 
           await pvpArena.prepareDuel(character1ID, {
             from: accounts[1],
+            value: await pvpArena.duelOffsetCost()
           });
 
           let duelQueue = await pvpArena.getDuelQueue();
@@ -1356,6 +1375,7 @@ contract("PvpArena", (accounts) => {
 
           await pvpArena.prepareDuel(character1ID, {
             from: accounts[1],
+            value: await pvpArena.duelOffsetCost()
           });
 
           let duelQueue = await pvpArena.getDuelQueue();
@@ -1371,6 +1391,7 @@ contract("PvpArena", (accounts) => {
 
           await pvpArena.prepareDuel(character1ID, {
             from: accounts[1],
+            value: await pvpArena.duelOffsetCost()
           });
 
           duelQueue = await pvpArena.getDuelQueue();
@@ -1465,6 +1486,7 @@ contract("PvpArena", (accounts) => {
 
           await pvpArena.prepareDuel(character1ID, {
             from: accounts[1],
+            value: await pvpArena.duelOffsetCost()
           });
 
           let duelQueue = await pvpArena.getDuelQueue();
@@ -1555,6 +1577,7 @@ contract("PvpArena", (accounts) => {
 
           await pvpArena.prepareDuel(character1ID, {
             from: accounts[1],
+            value: await pvpArena.duelOffsetCost()
           });
 
           let duelQueue = await pvpArena.getDuelQueue();
@@ -1766,6 +1789,7 @@ contract("PvpArena", (accounts) => {
       // perform a duel making sure character4 is always going to win
       await pvpArena.prepareDuel(character1ID, {
         from: accounts[1],
+        value: await pvpArena.duelOffsetCost()
       });
 
       let duelQueue = await pvpArena.getDuelQueue();
@@ -1915,7 +1939,7 @@ contract("PvpArena", (accounts) => {
         });
 
         // perform a duel making sure character4 is always going to win
-        await pvpArena.prepareDuel(character4ID, { from: accounts[2] });
+        await pvpArena.prepareDuel(character4ID, { from: accounts[2], value: await pvpArena.duelOffsetCost() });
 
         let duelQueue = await pvpArena.getDuelQueue();
 
@@ -2011,7 +2035,7 @@ contract("PvpArena", (accounts) => {
         });
 
         // perform a duel making sure character6 is always going to win
-        await pvpArena.prepareDuel(character6ID, { from: accounts[2] });
+        await pvpArena.prepareDuel(character6ID, { from: accounts[2], value: await pvpArena.duelOffsetCost() });
 
         let duelQueue = await pvpArena.getDuelQueue();
 
@@ -2071,7 +2095,7 @@ contract("PvpArena", (accounts) => {
         });
 
         // perform a duel making sure character1 is always going to lose, meaning character 2 will be the top 1
-        await pvpArena.prepareDuel(character2ID, { from: accounts[2] });
+        await pvpArena.prepareDuel(character2ID, { from: accounts[2], value: await pvpArena.duelOffsetCost() });
 
         let duelQueue = await pvpArena.getDuelQueue();
 
@@ -2148,7 +2172,7 @@ contract("PvpArena", (accounts) => {
           from: accounts[2],
         });
         // perform a duel making sure character1 is always going to lose
-        await pvpArena.prepareDuel(character5ID, { from: accounts[2] });
+        await pvpArena.prepareDuel(character5ID, { from: accounts[2], value: await pvpArena.duelOffsetCost() });
 
         let duelQueue = await pvpArena.getDuelQueue();
 
@@ -2191,7 +2215,7 @@ contract("PvpArena", (accounts) => {
         from: accounts[1],
       });
 
-      await pvpArena.prepareDuel(character1ID, { from: accounts[1] });
+      await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
 
       let duelQueue = await pvpArena.getDuelQueue();
 
