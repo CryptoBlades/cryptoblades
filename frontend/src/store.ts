@@ -4389,9 +4389,18 @@ export function createStore(web3: Web3) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
 
-        const reRollFeePercent = await PvpArena.methods.getPlayerPrizePoolRewards().call({ from: state.defaultAccount });
+        const playerPrizePoolRewards = await PvpArena.methods.getPlayerPrizePoolRewards().call({ from: state.defaultAccount });
 
-        return reRollFeePercent;
+        return playerPrizePoolRewards;
+      },
+
+      async getDuelOffsetCost({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const duelOffsetCost = await PvpArena.methods.duelOffsetCost().call({ from: state.defaultAccount });
+
+        return duelOffsetCost;
       },
 
       async enterArena({ state }, {characterId, weaponId, shieldId, useShield}) {
@@ -4430,11 +4439,11 @@ export function createStore(web3: Web3) {
         return res;
       },
 
-      async prepareDuel({ state }, characterId) {
+      async prepareDuel({ state }, { characterId, duelOffsetCost }) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
 
-        const res = await PvpArena.methods.prepareDuel(characterId).send({ from: state.defaultAccount });
+        const res = await PvpArena.methods.prepareDuel(characterId).send({ from: state.defaultAccount, value: duelOffsetCost });
 
         return res;
       },
