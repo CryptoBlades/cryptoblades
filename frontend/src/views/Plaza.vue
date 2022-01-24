@@ -52,7 +52,7 @@
             class="ml-3"
             @click="showBurnConfirmation"
             v-tooltip="$t('plaza.burnSelected')"
-            :disabled="burnCharacterIds.length === 0 || powerLimitExceeded || (burnOption === 1 && !targetCharacterId)">
+            :disabled="burnCharacterIds.length === 0 || powerLimitExceeded || (burnOption === 1 && !targetCharacterId) || !canBurn()">
             {{$t('plaza.burn')}}: {{burnCharacterIds.length}} {{$t('characters')}}<br>
             ({{burnCost }} SKILL)
           </b-button>
@@ -400,6 +400,11 @@ export default Vue.extend({
     canRecruit() {
       const cost = toBN(this.recruitCost);
       const balance = toBN(this.skillBalance);
+      return balance.isGreaterThanOrEqualTo(cost);
+    },
+    canBurn() {
+      const cost = toBN(this.burnCost);
+      const balance = toBN(+fromWeiEther(this.skillBalance));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     checkStorage() {
