@@ -281,7 +281,7 @@ export default {
       let fromBlock = blockToScanFrom;
 
       if (!blockToScanFrom) {
-        fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 4800, 0);
+        fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
       }
 
       const kickedEvents = await pvpContract.getPastEvents('CharacterKicked', {
@@ -458,7 +458,7 @@ export default {
         };
       }));
 
-      const fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 4800, 0);
+      const fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
 
       const previousDuels = await (await this.getPvpContract()).getPastEvents('DuelFinished', {
         filter: {attacker: this.currentCharacterId},
@@ -582,7 +582,7 @@ export default {
           };
         }));
 
-        const fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 4800, 0);
+        const fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
 
         const previousDuels = await (await this.getPvpContract()).getPastEvents('DuelFinished', {
           filter: {attacker: value},
