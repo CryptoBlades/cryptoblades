@@ -5,7 +5,7 @@
       <div class="modalTitle">{{$t('pvp.kicked')}}</div>
       <ul>
         <li>
-          <span>{{$t('pvp.lastDefeated')}}{{ kickedByName }}</span>
+          <span>{{$t('pvp.lastDefeated')}}{{ kickedBy }}</span>
         </li>
         <pvp-separator />
       </ul>
@@ -22,7 +22,6 @@
 
 <script>
 import PvPSeparator from './PvPSeparator.vue';
-import { getCharacterNameFromSeed } from '../../character-name';
 
 export default {
   components: {
@@ -41,12 +40,6 @@ export default {
     };
   },
 
-  computed: {
-    kickedByName() {
-      return getCharacterNameFromSeed(this.kickedBy);
-    }
-  },
-
   methods: {
     close() {
       this.showModal = false;
@@ -61,7 +54,6 @@ export default {
       this.showModal = false;
     }
   },
-
   watch: {
     showModal() {
       if (this.showModal) {

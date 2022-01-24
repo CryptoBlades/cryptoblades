@@ -114,10 +114,10 @@
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
           <div class="infoDetails">
             <span>
-              {{$t('pvp.level')}}: {{ opponentInformation.level }}</span>
+              {{$t('pvp.level')}}: {{ opponentInformation.level}}</span>
             <pvp-separator vertical class="separator" />
             <span>
-              {{$t('pvp.rank')}}: {{ opponentInformation.rank }}</span>
+              {{$t('pvp.rankingPoints')}}: {{ opponentInformation.rank }}</span>
           </div>
         </div>
         <div v-else class="findMatchMessage">
