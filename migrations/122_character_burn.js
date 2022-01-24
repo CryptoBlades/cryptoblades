@@ -19,7 +19,7 @@ module.exports = async function (deployer, network) {
     let characters = await upgradeProxy(Characters.address, Characters, { deployer });
     let garrison = await upgradeProxy(Garrison.address, Garrison, { deployer });
     let game = await CryptoBlades.deployed();
-    let burningManager = await deployProxy(BurningManager, [characters.address, garrison.address, game.address, '120000000000000000'], { deployer });
+    let burningManager = await deployProxy(BurningManager, [characters.address, garrison.address, game.address], { deployer });
 
     let BURNER_ROLE = await burningManager.BURNER_ROLE();
     await burningManager.grantRole(BURNER_ROLE, nftMarket.address);
