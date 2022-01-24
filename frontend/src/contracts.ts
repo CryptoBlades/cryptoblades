@@ -69,6 +69,7 @@ import {
   pvp as featureFlagPvP,
   burningManager as featureFlagBurningManager
 } from './feature-flags';
+import {currentChainSupportsPvP} from '@/utils/common';
 
 interface RaidContracts {
   Raid1?: Contracts['Raid1'];
@@ -103,7 +104,7 @@ export function getConfigValue(key: string): any {
 
 let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
 
-type Networks = Partial<Record<string, { address: string }>>;
+export type Networks = Partial<Record<string, { address: string }>>;
 
 type Abi = any[];
 
@@ -329,12 +330,11 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   }
 
   const pvpContracts: PvPContracts = {};
-  if(featureFlagPvP){
+  if(featureFlagPvP && currentChainSupportsPvP()){
     const pvpContractAddr = process.env.VUE_APP_PVP_CONTRACT_ADDRESS ||
     getConfigValue('VUE_APP_PVP_CONTRACT_ADDRESS') || (pvpNetworks as Networks)[networkId]!.address;
 
     pvpContracts.PvpArena = new web3.eth.Contract(pvpAbi as Abi, pvpContractAddr);
-
   }
 
   const waxBridgeContractAddr = getConfigValue('VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS') || (waxBridgeNetworks as Networks)[networkId]!.address;

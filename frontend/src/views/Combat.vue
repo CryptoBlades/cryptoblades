@@ -210,7 +210,7 @@ export default {
   created() {
     this.intervalSeconds = setInterval(() => (this.timeSeconds = new Date().getSeconds()), 5000);
     this.intervalMinutes = setInterval(() => (this.timeMinutes = new Date().getMinutes()), 20000);
-    this.staminaPerFight = 40 * Number(localStorage.getItem('fightMultiplier'));
+    this.updateStaminaPerFight();
     this.counterInterval = setInterval(async () => {
       await this.getNextAllowanceTime();
       await this.getExpectedPayout();
@@ -427,6 +427,7 @@ export default {
 
     setFightMultiplier() {
       localStorage.setItem('fightMultiplier', this.fightMultiplier.toString());
+      this.updateStaminaPerFight();
     },
 
     setStaminaSelectorValues() {
@@ -473,6 +474,10 @@ export default {
         expectedPayouts[i] = expectedPayout;
       }
       this.targetExpectedPayouts = expectedPayouts;
+    },
+
+    updateStaminaPerFight() {
+      this.staminaPerFight = 40 * Number(localStorage.getItem('fightMultiplier'));
     }
   },
 

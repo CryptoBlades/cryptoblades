@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {bnMinimum, gasUsedToBnb, toBN} from './utils/common';
+import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, gasUsedToBnb, toBN} from './utils/common';
 
 import {getConfigValue, setUpContracts} from './contracts';
 
@@ -43,7 +43,6 @@ import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
-import config from '../app-config.json';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -135,6 +134,7 @@ export function createStore(web3: Web3) {
       ownedDust: [],
       cartEntries: [],
       currentChainSupportsMerchandise: false,
+      currentChainSupportsPvP: false,
 
       characters: {},
       garrisonCharacters: {},
@@ -436,6 +436,10 @@ export function createStore(web3: Web3) {
 
       getCurrentChainSupportsMerchandise(state) {
         return state.currentChainSupportsMerchandise;
+      },
+
+      getCurrentChainSupportsPvP(state) {
+        return state.currentChainSupportsPvP;
       },
 
       ownWeapons(state, getters) {
@@ -748,12 +752,11 @@ export function createStore(web3: Web3) {
       },
 
       updateCurrentChainSupportsMerchandise(state: IState) {
-        const currentChain = localStorage.getItem('currentChain') || 'BSC';
-        const merchandiseSupportedChains = config.merchandiseSupportedChains;
-        if (!currentChain || !merchandiseSupportedChains) {
-          state.currentChainSupportsMerchandise = false;
-        }
-        state.currentChainSupportsMerchandise = merchandiseSupportedChains.includes(currentChain);
+        state.currentChainSupportsMerchandise = currentChainSupportsMerchandise();
+      },
+
+      updateCurrentChainSupportsPvP(state: IState) {
+        state.currentChainSupportsPvP = currentChainSupportsPvP();
       },
 
       updateCharacter(state: IState, { characterId, character }) {
@@ -1734,22 +1737,21 @@ export function createStore(web3: Web3) {
         if(!state.defaultAccount) return;
         const numberOfCharacters = parseInt(await state.contracts().Characters!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
         const characters = await Promise.all(
-          [...Array(numberOfCharacters).keys()].map((_, i) =>
-            state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+          [...Array(numberOfCharacters).keys()].map(async (_, i) =>
+            Number(await state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state))))
         );
-
         return characters;
       },
       async getAccountGarrisonCharacters({state}) {
         if(!state.defaultAccount) return;
-        return await state.contracts().Garrison!.methods.getUserCharacters().call(defaultCallOptions(state));
+        return (await state.contracts().Garrison!.methods.getUserCharacters().call(defaultCallOptions(state))).map((id) => Number(id));
       },
       async getAccountWeapons({state}) {
         if(!state.defaultAccount) return;
         const numberOfWeapons = parseInt(await state.contracts().Weapons!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
         const weapons = await Promise.all(
           [...Array(numberOfWeapons).keys()]
-            .map((_, i) => state.contracts().Weapons!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state)))
+            .map(async (_, i) => Number(await state.contracts().Weapons!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state))))
         );
         return weapons;
       },
@@ -4311,13 +4313,13 @@ export function createStore(web3: Web3) {
         return isCharacterInArena;
       },
 
-      async getIsCharacterNotUnderAttack({ state }, characterId) {
+      async getIsCharacterUnderAttack({ state }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
 
-        const isCharacterNotUnderAttack = await PvpArena.methods.isCharacterNotUnderAttack(characterId).call({ from: state.defaultAccount });
+        const isCharacterUnderAttack = await PvpArena.methods.isCharacterUnderAttack(characterId).call({ from: state.defaultAccount });
 
-        return isCharacterNotUnderAttack;
+        return isCharacterUnderAttack;
       },
 
       async getMatchByFinder({ state }, characterId) {
