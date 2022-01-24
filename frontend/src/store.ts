@@ -18,6 +18,7 @@ import {
 } from './contract-models';
 
 import {
+  CharacterPower,
   Contract,
   Contracts,
   IPartnerProject,
@@ -34,7 +35,7 @@ import {
 import {getCharacterNameFromSeed} from './character-name';
 import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './contract-call-utils';
 
-import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly,} from './feature-flags';
+import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly, burningManager as featureFlagBurningManager} from './feature-flags';
 import {IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
 import {Nft} from './interfaces/Nft';
@@ -1551,9 +1552,15 @@ export function createStore(web3: Web3) {
       async fetchCharacterPower( {state, commit}, characterId) {
         const { Characters } = state.contracts();
         if(!Characters || !state.defaultAccount) return;
-
-        const power = await Characters.methods.getTotalPower(characterId).call(defaultCallOptions(state));
-        commit('updateCharacterPower', { characterId, power });
+        if(!featureFlagBurningManager) {
+          const level = await Characters.methods.getLevel(characterId).call(defaultCallOptions(state));
+          const power = CharacterPower(+level);
+          commit('updateCharacterPower', { characterId, power });
+        }
+        else {
+          const power = await Characters.methods.getTotalPower(characterId).call(defaultCallOptions(state));
+          commit('updateCharacterPower', { characterId, power });
+        }
       },
 
       async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {
