@@ -606,7 +606,8 @@
     "pleaseSelectRequirementRarity": "Please select requirement rarity",
     "pleaseSelectRewardType": "Please select reward type",
     "pleaseSelectRewardRarity": "Please select reward rarity",
-    "reputationExplained": "Reputation explanation with tiers and percentages"
+    "reputationExplained": "Reputation explanation with tiers and percentages",
+    "youNeedToHaveAtLeastOneCharacter": "You need to have at least one character to do Quests"
   },
   "admin": {
     "quests": "Quests",

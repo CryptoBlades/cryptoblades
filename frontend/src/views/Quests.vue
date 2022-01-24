@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column quests-container">
+  <div v-if="characters.length !== 0" class="d-flex flex-column quests-container">
     <div v-for="character in characters" :key="character.id" class="row quest-row">
       <div class="character"
            :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(character.id) : undefined]">
@@ -33,6 +33,9 @@
     <b-modal id="reputation-info-modal" ok-only class="centered-modal" :title="$t('quests.reputation')">
       <span class="white-space">{{ $t('quests.reputationExplained') }}</span>
     </b-modal>
+  </div>
+  <div v-else class="m-4 font-weight-bold">
+    {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}
   </div>
 </template>
 
