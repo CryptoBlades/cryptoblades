@@ -596,6 +596,8 @@
     "promoQuestTemplates": "Promo quest templates",
     "addNewQuest": "Add new quest",
     "addNewPromoQuest": "Add new promo quest",
+    "areYouSureAddQuest": "Are you sure you want to add this quest?",
+    "areYouSureAddPromoQuest": "Are you sure you want to add this promo quest?",
     "deleteQuest": "Delete quest",
     "questTier": "Quest tier",
     "templatesTier": "Templates tier",

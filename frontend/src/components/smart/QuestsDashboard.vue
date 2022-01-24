@@ -92,11 +92,21 @@
           <b-form-input v-model="questTemplate.reputationAmount" type="number"/>
         </div>
       </div>
-      <b-button variant="primary" @click="onSubmit" :disabled="addNewQuestDisabled() || isLoading">
+      <b-button variant="primary" @click="showTemplateConfirmationModal = true"
+                :disabled="addNewQuestDisabled()">
         {{ promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest') }}
       </b-button>
     </b-form>
     <QuestTemplatesDisplay :promoQuestTemplates="promoQuestTemplates"/>
+    <b-modal v-model="showTemplateConfirmationModal" @ok.prevent="onSubmit" :ok-disabled="isLoading"
+             :title="promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest')">
+      <div class="d-flex flex-column align-items-center">
+        <h4 class="text-center">
+          {{ promoQuestTemplates ? $t('quests.areYouSureAddPromoQuest') : $t('quests.areYouSureAddQuest') }}
+        </h4>
+        <QuestDetails :quest="questTemplate" :isDisplayOnly="true"/>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -105,6 +115,7 @@ import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {DustRarity, Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import QuestTemplatesDisplay from '@/components/smart/QuestTemplatesDisplay.vue';
+import QuestDetails from '@/components/smart/QuestDetails.vue';
 
 interface StoreMappedActions {
   addQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
@@ -120,13 +131,12 @@ interface Data {
   rewardTypes: RewardType[];
   promoQuestTemplates: boolean;
   isLoading: boolean;
+  showTemplateConfirmationModal: boolean;
 }
 
 export default Vue.extend({
 
-  components: {
-    QuestTemplatesDisplay,
-  },
+  components: {QuestTemplatesDisplay, QuestDetails},
 
   data() {
     return {
@@ -146,6 +156,7 @@ export default Vue.extend({
         RewardType.DUST, RewardType.TRINKET, RewardType.SHIELD],
       promoQuestTemplates: false,
       isLoading: false,
+      showTemplateConfirmationModal: false,
       RequirementType,
       RewardType,
       Rarity,
@@ -167,6 +178,7 @@ export default Vue.extend({
         this.refreshQuestTemplates();
       } finally {
         this.isLoading = false;
+        this.showTemplateConfirmationModal = false;
       }
     },
 

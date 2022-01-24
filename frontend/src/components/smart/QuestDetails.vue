@@ -36,7 +36,7 @@
         </div>
         <div v-if="!isQuestTemplate" class="quest-progress">
           <strong class="quest-progress-text">{{ quest.progress }} / {{ quest.requirementAmount }}</strong>
-          <b-progress class="reputation-progress" :max="quest.requirementAmount" :value="quest.progress"
+          <b-progress class="quest-progress-bar" :class="isDisplayOnly ? 'mb-2' : ''" :max="quest.requirementAmount" :value="quest.progress"
                       variant="primary"/>
         </div>
       </div>
@@ -66,29 +66,31 @@
         </div>
       </div>
     </div>
-    <div v-if="!isQuestTemplate && !isQuestActionLoading" class="d-flex">
-      <b-button v-if="quest.requirementType !== RequirementType.RAID && !questCanBeCompleted" variant="primary"
-                class="flex-1" @click="submit">
-        {{ $t('quests.submit') }}
-      </b-button>
-      <b-button v-if="questCanBeCompleted" variant="primary" class="flex-1" @click="complete">
-        {{ $t('quests.complete') }}
-      </b-button>
-      <b-button v-else variant="primary" class="flex-1" @click="skip" :disabled="!canSkip">
-        {{ $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
-        <hint v-if="!canSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
-      </b-button>
-    </div>
-    <div v-else-if="isQuestTemplate && !isQuestActionLoading" class="d-flex">
-      <b-button variant="primary" class="flex-1" @click="deleteQuestTemplate">
-        {{ $t('quests.deleteQuest') }}
-      </b-button>
-    </div>
-    <div v-else-if="isQuestActionLoading" class="d-flex">
-      <b-button variant="primary" class="flex-1" :disabled="true">
-        <i class="fas fa-spinner fa-spin"></i>
-        {{ $t('quests.loading') }}
-      </b-button>
+    <div v-if="!isDisplayOnly">
+      <div v-if="!isQuestTemplate && !isQuestActionLoading" class="d-flex">
+        <b-button v-if="quest.requirementType !== RequirementType.RAID && !questCanBeCompleted" variant="primary"
+                  class="flex-1" @click="submit">
+          {{ $t('quests.submit') }}
+        </b-button>
+        <b-button v-if="questCanBeCompleted" variant="primary" class="flex-1" @click="complete">
+          {{ $t('quests.complete') }}
+        </b-button>
+        <b-button v-else variant="primary" class="flex-1" @click="skip" :disabled="!canSkip">
+          {{ $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
+          <hint v-if="!canSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
+        </b-button>
+      </div>
+      <div v-else-if="isQuestTemplate && !isQuestActionLoading" class="d-flex">
+        <b-button variant="primary" class="flex-1" @click="deleteQuestTemplate">
+          {{ $t('quests.deleteQuest') }}
+        </b-button>
+      </div>
+      <div v-else-if="isQuestActionLoading" class="d-flex">
+        <b-button variant="primary" class="flex-1" :disabled="true">
+          <i class="fas fa-spinner fa-spin"></i>
+          {{ $t('quests.loading') }}
+        </b-button>
+      </div>
     </div>
   </div>
 </template>
@@ -129,6 +131,10 @@ export default Vue.extend({
       required: true,
     },
     isQuestTemplate: {
+      type: Boolean,
+      default: false,
+    },
+    isDisplayOnly: {
       type: Boolean,
       default: false,
     },
@@ -234,7 +240,7 @@ export default Vue.extend({
   align-items: center;
 }
 
-.reputation-progress {
+.quest-progress-bar {
   width: 75%;
 }
 
