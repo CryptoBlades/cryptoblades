@@ -281,7 +281,7 @@ export default {
       let fromBlock = blockToScanFrom;
 
       if (!blockToScanFrom) {
-        fromBlock = await this.web3.eth.getBlockNumber() - 4800;
+        fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 4800, 0);
       }
 
       const kickedEvents = await pvpContract.getPastEvents('CharacterKicked', {
