@@ -215,7 +215,7 @@ import NftIcon from '@/components/NftIcon.vue';
 import NftList, { NftIdType } from '@/components/smart/NftList.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
 import { GetTotalMultiplierForTrait, IWeapon } from '@/interfaces/Weapon';
-import { CharacterPower, IRaidState, IState } from '@/interfaces';
+import { IRaidState, IState } from '@/interfaces';
 import { getBossArt } from '@/raid-boss-art-placeholder';
 import { traitNumberToName } from '@/contract-models';
 import { fromWeiEther } from '@/utils/common';
@@ -318,7 +318,7 @@ export default Vue.extend({
   computed: {
     ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'ownedCharacterIds', 'defaultAccount']),
     ...mapGetters(['ownCharacters', 'ownWeapons', 'currentCharacter',
-      'currentCharacterStamina', 'getWeaponDurability', 'contracts', 'getCharacterName']),
+      'currentCharacterStamina', 'getWeaponDurability', 'contracts', 'getCharacterName', 'getCharacterPower']),
 
     claimButtonActive(): boolean {
       return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
@@ -333,7 +333,7 @@ export default Vue.extend({
 
     currentCharacterPower(): number {
       if(!this.currentCharacter) return 0;
-      return CharacterPower(this.currentCharacter.level);
+      return this.getCharacterPower(this.currentCharacter.id);
     },
 
     getSelectedWeapon(): IWeapon {

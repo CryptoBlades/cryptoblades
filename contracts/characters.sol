@@ -26,7 +26,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_1ee400a() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         experienceTable = [
             16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 33, 36, 39, 42, 46, 50, 55, 60, 66
@@ -54,7 +54,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_951a020() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         // Apparently ERC165 interfaces cannot be removed in this version of the OpenZeppelin library.
         // But if we remove the registration, then while local deployments would not register the interface ID,
@@ -65,19 +65,19 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         promos = _promos;
     }
 
     function migrateTo_b627f23() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         characterLimit = 4;
     }
 
     function migrateTo_1a19cbb(Garrison _garrison) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         garrison = _garrison;
     }
@@ -125,8 +125,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     Garrison public garrison;
 
+    uint256 public constant NFTVAR_BONUS_POWER = 2;
+
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
+    event Burned(address indexed owner, uint256 indexed id);
 
     modifier restricted() {
         _restricted();
@@ -134,7 +137,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        require(hasRole(GAME_ADMIN, msg.sender), "NA");
     }
 
     modifier noFreshLookup(uint256 id) {
@@ -175,6 +178,14 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function getCosmeticsSeed(uint256 id) public view noFreshLookup(id) returns (uint256) {
         CharacterCosmetics memory cc = cosmetics[id];
         return cc.seed;
+    }
+
+    function getSoulForBurns(uint256[] calldata burnIds) external view returns (uint256) {
+        uint256 soulAmount = 0;
+        for(uint i = 0; i < burnIds.length; i++) {
+            soulAmount += getTotalPower(burnIds[i]).div(10);
+        }
+        return soulAmount;
     }
 
     function mint(address minter, uint256 seed) public restricted {
@@ -240,6 +251,48 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokenID;
     }
 
+    function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId) external restricted {
+        uint256 burnPower = 0;
+        for(uint i = 0; i < burnIds.length; i++) {
+            burnPower += nftVars[burnIds[i]][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[burnIds[i]].level));
+            address burnOwner = ownerOf(burnIds[i]);
+            if(burnOwner == address(garrison)) {
+                burnOwner = garrison.characterOwner(burnIds[i]);
+                garrison.updateOnBurn(burnOwner, burnIds[i]);
+            }
+            _burn(burnIds[i]);
+
+            emit Burned(
+                burnOwner,
+                burnIds[i]
+            );
+        }
+        require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
+        nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
+    }
+
+    function burnIntoSoul(uint256[] calldata burnIds) external restricted {
+        for(uint i = 0; i < burnIds.length; i++) {
+            address burnOwner = ownerOf(burnIds[i]);
+            if(burnOwner == address(garrison)) {
+                burnOwner = garrison.characterOwner(burnIds[i]);
+                garrison.updateOnBurn(burnOwner, burnIds[i]);
+            }
+            _burn(burnIds[i]);
+
+            emit Burned(
+                burnOwner,
+                burnIds[i]
+            );
+        }
+    }
+
+    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) external restricted {
+        uint256 burnPower = soulAmount.mul(10);
+        require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
+        nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
+    }
+
     function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return tokens[id].level; // this is used by dataminers and it benefits us
     }
@@ -250,6 +303,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function getPower(uint256 id) public view noFreshLookup(id) returns (uint24) {
         return getPowerAtLevel(tokens[id].level);
+    }
+
+    function getTotalPower(uint256 id) public view noFreshLookup(id) returns (uint256) {
+        return nftVars[id][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[id].level));
     }
 
     function getPowerAtLevel(uint8 level) public pure returns (uint24) {
@@ -355,7 +412,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint96(char.trait | (getPowerAtLevel(char.level) << 8) | (preTimestamp << 32));
+        return uint96(char.trait | (uint24(getTotalPower(id)) << 8) | (preTimestamp << 32));
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {

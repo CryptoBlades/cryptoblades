@@ -115,7 +115,7 @@
                     <span class="d-block text-center" v-else>{{$t('market.loadingPrice')}}</span>
                     <b-button
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
-                      @click="selectedNftId = id; canPurchase && purchaseNft();"
+                      @click="selectedNftId = id; canPurchase && (activeType === 'character' ? showCharacterPurchaseModal() : purchaseNft());"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
                       class="gtag-link-others" tagname="confirm_purchase">
@@ -378,7 +378,7 @@
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
-                      @click="selectedNftId = id; canPurchase && purchaseNft();"
+                      @click="selectedNftId = id; canPurchase && (activeType === 'character' ? showCharacterPurchaseModal() : purchaseNft());"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
                       class="gtag-link-others" tagname="confirm_purchase">
@@ -421,7 +421,7 @@
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
-                      @click="selectedNftId = id; purchaseNft();"
+                      @click="selectedNftId = id; showCharacterPurchaseModal();"
                       variant="primary"
                       class="gtag-link-others">
                       {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
@@ -682,6 +682,23 @@
         </div>
       </b-tab>
     </b-tabs>
+    <b-modal class="centered-modal text-center" ref="character-buy-modal" :title="$t('market.characterBuyModal')"
+      @ok="purchaseNft()" @cancel="purchaseNft(true)">
+      <template #modal-footer="{ ok, cancel }">
+        <div class="w-100 d-flex justify-content-center">
+          <b-button class="btn-primary mr-5" @click="cancel()">
+            {{$t('market.purchaseAndBurn')}}
+          </b-button>
+          <b-button class="btn-primary" @click="ok()">
+            {{$t('market.purchase')}}
+          </b-button>
+        </div>
+      </template>
+      <div class="d-flex flex-column align-items-center">
+        <character-list class="mt-2 justify-content-center" v-if="selectedNftId || selectedNftId === 0" :showGivenCharacterIds="true"
+          :characterIds="[selectedNftId]" />
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -822,6 +839,7 @@ interface StoreMappedActions {
   fetchIsLandSaleAllowed(): Promise<boolean>;
   reservedSalesAllowed(): Promise<boolean>;
   fetchItemPrices(): Promise<void>;
+  purchaseBurnCharacter({charId, maxPrice}: {charId: string, maxPrice: string}): Promise<void>;
 }
 
 export default Vue.extend({
@@ -1360,6 +1378,7 @@ export default Vue.extend({
       'fetchIsLandSaleAllowed',
       'reservedSalesAllowed',
       'fetchItemPrices',
+      'purchaseBurnCharacter'
     ]) as StoreMappedActions),
 
     clearData() {
@@ -1505,7 +1524,11 @@ export default Vue.extend({
       this.marketOutcome = `Successfully changed target buyer for ${this.activeType} ${results.nftID} to ${results.newTargetBuyer}`;
     },
 
-    async purchaseNft() {
+    showCharacterPurchaseModal() {
+      (this.$refs['character-buy-modal'] as BModal).show();
+    },
+
+    async purchaseNft(isBurning: boolean = false) {
       this.marketOutcome = null;
       if(this.selectedNftId === null) return;
 
@@ -1525,12 +1548,17 @@ export default Vue.extend({
       }
 
       this.waitingMarketOutcome = true;
-
-      const results: any = await this.purchaseMarketListing({
-        nftContractAddr: this.contractAddress,
-        tokenId: this.selectedNftId,
-        maxPrice: price
-      });
+      let results: any;
+      if(isBurning) {
+        results = await this.purchaseBurnCharacter({charId: this.selectedNftId, maxPrice: price});
+      }
+      else {
+        results = await this.purchaseMarketListing({
+          nftContractAddr: this.contractAddress,
+          tokenId: this.selectedNftId,
+          maxPrice: price
+        });
+      }
 
       const results2: any  = await this.fetchAllMarketNftIds({
         nftContractAddr: this.contractAddress
@@ -1541,7 +1569,7 @@ export default Vue.extend({
       this.allSearchResults = Array.from(this.allSearchResults as string[]).filter((x: any) => x.id !== this.selectedNftId);
 
       this.waitingMarketOutcome = false;
-      this.marketOutcome = 'Successfully purchased '
+      this.marketOutcome = 'Successfully purchased ' + (isBurning ? 'and burned ' : '')
         +this.activeType+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL'
           +' from '+results.seller;
     },

@@ -14,6 +14,7 @@ import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
 import "./weapons.sol";
 import "./cryptoblades.sol";
+import "./BurningManager.sol";
 
 // *****************************************************************************
 // *** NOTE: almost all uses of _tokenAddress in this contract are UNSAFE!!! ***
@@ -65,6 +66,12 @@ contract NFTMarket is
         changeFee = ABDKMath64x64.divu(0, 100); // 0.00 usd;
     }
 
+    function migrateTo_29635ef(BurningManager _burningManager) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+
+        burningManager = _burningManager;
+    }
+
     // basic listing; we can easily offer other types (auction / buy it now)
     // if the struct can be extended, that's one way, otherwise different mapping per type.
     struct Listing {
@@ -109,6 +116,8 @@ contract NFTMarket is
 
     // keeps target buyer for nftId of specific type (address)
     mapping(address => mapping(uint256 => address)) nftTargetBuyers;
+
+    BurningManager public burningManager;
 
     // ############
     // Events
@@ -573,6 +582,23 @@ contract NFTMarket is
         uint256 _id,
         uint256 _maxPrice
     ) public userNotBanned isListed(_tokenAddress, _id) userAllowedToPurchase(_tokenAddress, _id) {
+        (uint256 finalPrice, Listing memory listing) = executePurchaseLogic(_tokenAddress, _id, _maxPrice);
+        _tokenAddress.safeTransferFrom(address(this), msg.sender, _id);
+
+        emit PurchasedListing(
+            msg.sender,
+            listing.seller,
+            _tokenAddress,
+            _id,
+            finalPrice
+        );
+    }
+
+    function executePurchaseLogic(
+        IERC721 _tokenAddress,
+        uint256 _id,
+        uint256 _maxPrice
+    ) private returns(uint256, Listing memory) {
         uint256 finalPrice = getFinalPrice(_tokenAddress, _id);
         require(finalPrice <= _maxPrice, "Buying price too low");
 
@@ -590,15 +616,25 @@ contract NFTMarket is
             listing.seller,
             finalPrice.sub(taxAmount)
         );
-        _tokenAddress.safeTransferFrom(address(this), msg.sender, _id);
+
+        return (finalPrice, listing);
+    }
+
+    function purchaseBurnCharacter(
+        uint256 _id,
+        uint256 _maxPrice
+    ) public userNotBanned isListed(IERC721(address(characters)), _id) userAllowedToPurchase(IERC721(address(characters)), _id) {
+        (uint256 finalPrice, Listing memory listing) = executePurchaseLogic(IERC721(address(characters)), _id, _maxPrice);
 
         emit PurchasedListing(
             msg.sender,
             listing.seller,
-            _tokenAddress,
+            IERC721(address(characters)),
             _id,
             finalPrice
         );
+
+        burningManager.burnCharacterFromMarket(_id);
     }
 
     function setAddValue(uint256 cents) public restricted {
