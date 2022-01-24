@@ -40,6 +40,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         vars[VAR_RARE_TIER] = 2;
         vars[VAR_EPIC_TIER] = 3;
         vars[VAR_LEGENDARY_TIER] = 4;
+        staminaCost = 40;
     }
 
     modifier restricted() {
@@ -71,6 +72,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     uint8 public constant VAR_EPIC_TIER = 3;
     uint8 public constant VAR_LEGENDARY_TIER = 4;
     uint8 public constant VAR_CONTRACT_ENABLED = 9;
+    uint8 public staminaCost;
     mapping(uint256 => uint256) public vars;
 
     uint256 public nextQuestID;
@@ -226,9 +228,19 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return quest;
     }
 
+    function canSkipQuest(uint256 characterID) public view returns (bool) {
+        return characters.getStaminaPoints(characterID) >= staminaCost;
+    }
+
     // free for now, later should be restrained and user has to pay stamina or something
     function skipQuest(uint256 characterID) public returns (uint256) {
+        require(canSkipQuest(characterID), "Character does not have enough stamina to skip quest");
+        characters.getFightDataAndDrainStamina(msg.sender, characterID, staminaCost, true, 0);
         return assignNewQuest(characterID);
+    }
+
+    function setSkipQuestStaminaCost(uint8 points) public restricted {
+        staminaCost = points;
     }
 
     function clearQuestData(uint256 characterID) public {

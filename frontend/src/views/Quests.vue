@@ -23,6 +23,12 @@
       </div>
       <QuestDetails v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
                     :characterId="character.id"/>
+      <div v-else-if="isRequestQuestLoading" class="request-quest">
+        <b-button variant="primary" :disabled="true">
+          <i class="fas fa-spinner fa-spin"></i>
+          {{ $t('quests.loading') }}
+        </b-button>
+      </div>
       <div v-else class="request-quest">
         <b-button variant="primary" @click="request(character.id)">
           {{ $t('quests.requestQuest') }}
@@ -99,6 +105,7 @@ interface StoreMappedGetters {
 interface Data {
   characters: Nft[];
   isLoading: boolean;
+  isRequestQuestLoading: boolean;
 }
 
 export default Vue.extend({
@@ -115,6 +122,7 @@ export default Vue.extend({
     return {
       characters: [] as Nft[],
       isLoading: false,
+      isRequestQuestLoading: false,
     } as Data;
   },
 
@@ -127,8 +135,13 @@ export default Vue.extend({
     ...mapActions(['fetchCharacters', 'getCharacterQuestData', 'requestQuest']) as StoreMappedActions,
 
     async request(characterId: string | number) {
-      await this.requestQuest({characterID: characterId});
-      await this.refreshQuestData();
+      try {
+        this.isRequestQuestLoading = true;
+        await this.requestQuest({characterID: characterId});
+        await this.refreshQuestData();
+      } finally {
+        this.isRequestQuestLoading = false;
+      }
     },
 
     async refreshQuestData() {

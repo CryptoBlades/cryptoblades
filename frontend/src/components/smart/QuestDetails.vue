@@ -66,7 +66,7 @@
         </div>
       </div>
     </div>
-    <div v-if="!isQuestTemplate" class="d-flex">
+    <div v-if="!isQuestTemplate && !isQuestActionLoading" class="d-flex">
       <b-button v-if="quest.requirementType !== RequirementType.RAID && !questCanBeCompleted" variant="primary"
                 class="flex-1" @click="submit">
         {{ $t('quests.submit') }}
@@ -74,13 +74,20 @@
       <b-button v-if="questCanBeCompleted" variant="primary" class="flex-1" @click="complete">
         {{ $t('quests.complete') }}
       </b-button>
-      <b-button v-else variant="primary" class="flex-1" @click="skip">
-        {{ $t('quests.skip') }}
+      <b-button v-else variant="primary" class="flex-1" @click="skip" :disabled="!canSkip">
+        {{ $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
+        <hint v-if="!canSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
       </b-button>
     </div>
-    <div v-else-if="isQuestTemplate" class="d-flex">
+    <div v-else-if="isQuestTemplate && !isQuestActionLoading" class="d-flex">
       <b-button variant="primary" class="flex-1" @click="deleteQuestTemplate">
         {{ $t('quests.deleteQuest') }}
+      </b-button>
+    </div>
+    <div v-else-if="isQuestActionLoading" class="d-flex">
+      <b-button variant="primary" class="flex-1" :disabled="true">
+        <i class="fas fa-spinner fa-spin"></i>
+        {{ $t('quests.loading') }}
       </b-button>
     </div>
   </div>
@@ -93,8 +100,13 @@ import {PropType} from 'vue/types/options';
 import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import NftIcon from '@/components/NftIcon.vue';
 import Events from '@/events';
+import Hint from '@/components/Hint.vue';
 
 interface StoreMappedActions {
+  canSkipQuest(payload: { characterID: string | number }): Promise<boolean>;
+
+  getSkipQuestStaminaCost(payload: { characterID: string | number }): Promise<number>;
+
   skipQuest(payload: { characterID: string | number }): Promise<void>;
 
   completeQuest(payload: { characterID: string | number }): Promise<void>;
@@ -102,8 +114,14 @@ interface StoreMappedActions {
   deleteQuest(payload: { tier: number, index: number }): Promise<void>;
 }
 
+interface Data {
+  canSkip: boolean;
+  skipQuestStaminaCost: number;
+  isQuestActionLoading: boolean;
+}
+
 export default Vue.extend({
-  components: {NftIcon},
+  components: {NftIcon, Hint},
 
   props: {
     quest: {
@@ -127,10 +145,13 @@ export default Vue.extend({
 
   data() {
     return {
+      canSkip: false,
+      skipQuestStaminaCost: 0,
+      isQuestActionLoading: false,
       RequirementType,
       RewardType,
       Rarity,
-    };
+    } as Data;
   },
 
 
@@ -141,22 +162,44 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['skipQuest', 'completeQuest', 'deleteQuest']) as StoreMappedActions,
+    ...mapActions(['skipQuest', 'canSkipQuest', 'getSkipQuestStaminaCost', 'completeQuest', 'deleteQuest']) as StoreMappedActions,
 
     async skip() {
-      await this.skipQuest({characterID: this.characterId});
-      Events.$emit('refresh-quest-data');
+      try {
+        this.isQuestActionLoading = true;
+        await this.skipQuest({characterID: this.characterId});
+        await this.refreshSkipQuestData();
+        Events.$emit('refresh-quest-data');
+      } finally {
+        this.isQuestActionLoading = false;
+      }
+    },
+
+    async refreshSkipQuestData() {
+      this.canSkip = await this.canSkipQuest({characterID: this.characterId});
+      this.skipQuestStaminaCost = await this.getSkipQuestStaminaCost({characterID: this.characterId});
     },
 
     async complete() {
-      await this.completeQuest({characterID: this.characterId});
-      Events.$emit('refresh-quest-data');
+      try {
+        this.isQuestActionLoading = true;
+        await this.completeQuest({characterID: this.characterId});
+        await this.refreshSkipQuestData();
+        Events.$emit('refresh-quest-data');
+      } finally {
+        this.isQuestActionLoading = false;
+      }
     },
 
     async deleteQuestTemplate() {
       if (this.quest.tier !== undefined) {
-        await this.deleteQuest({tier: this.quest.tier, index: this.questIndex});
-        this.refreshQuestTemplates();
+        try {
+          this.isQuestActionLoading = true;
+          await this.deleteQuest({tier: this.quest.tier, index: this.questIndex});
+          this.refreshQuestTemplates();
+        } finally {
+          this.isQuestActionLoading = false;
+        }
       }
     },
 
@@ -164,6 +207,12 @@ export default Vue.extend({
       Events.$emit('quest-submission-modal', this.quest, this.characterId, this.quest.progress);
     }
   },
+
+  async mounted() {
+    if (!this.isQuestTemplate) {
+      await this.refreshSkipQuestData();
+    }
+  }
 
 });
 </script>

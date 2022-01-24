@@ -3320,6 +3320,22 @@ export function createStore(web3: Web3) {
         };
       },
 
+      async getSkipQuestStaminaCost({state}, {characterID}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        console.log('getting skip cost for ', characterID);
+
+        return await SimpleQuests.methods.staminaCost().call(defaultCallOptions(state));
+      },
+
+      async canSkipQuest({state}, {characterID}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.canSkipQuest(characterID).call(defaultCallOptions(state));
+      },
+
       async skipQuest({ state }, {characterID}) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
