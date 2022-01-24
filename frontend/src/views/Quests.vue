@@ -34,6 +34,10 @@
       <span class="white-space">{{ $t('quests.reputationExplained') }}</span>
     </b-modal>
   </div>
+  <div v-else-if="isLoading">
+    <i class="fas fa-spinner fa-spin"></i>
+    {{ $t('quests.loading') }}
+  </div>
   <div v-else class="m-4 font-weight-bold">
     {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}
   </div>
@@ -94,6 +98,7 @@ interface StoreMappedGetters {
 
 interface Data {
   characters: Nft[];
+  isLoading: boolean;
 }
 
 export default Vue.extend({
@@ -109,6 +114,7 @@ export default Vue.extend({
   data() {
     return {
       characters: [] as Nft[],
+      isLoading: false,
     } as Data;
   },
 
@@ -126,11 +132,16 @@ export default Vue.extend({
     },
 
     async refreshQuestData() {
-      this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
-        character.quest = await this.getCharacterQuestData({characterId: character.id});
-        console.log(character);
-        return character;
-      }));
+      try {
+        this.isLoading = true;
+        this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
+          character.quest = await this.getCharacterQuestData({characterId: character.id});
+          console.log(character);
+          return character;
+        }));
+      } finally {
+        this.isLoading = false;
+      }
     },
   },
 
