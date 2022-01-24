@@ -410,7 +410,7 @@ export default Vue.extend({
       this.soulBalance = await this.fetchSoulBalance();
       await this.updateBurnCost();
       if(this.soulCreationActive) {
-        this.remainingCharactersIds = this.ownCharacters.map((x: { id: string; }) => x.id.toString()).concat(this.ownedGarrisonCharacterIds);
+        this.remainingCharactersIds = this.ownCharacters.map((x: { id: string; }) => x.id.toString()).concat(this.ownedGarrisonCharacterIds as string[]);
       }
       this.isUpgrading = false;
     },
@@ -419,7 +419,7 @@ export default Vue.extend({
     },
     async addBurnCharacter(id: number) {
       this.burnCharacterIds.push(id.toString());
-      this.remainingCharactersIds = this.remainingCharactersIds.filter(val => !this.burnCharacterIds.includes(val));
+      this.remainingCharactersIds = this.remainingCharactersIds.filter(val => !this.burnCharacterIds.includes(val.toString()));
       await this.updateBurnCost();
     },
     async removeBurnCharacter(id: number) {
