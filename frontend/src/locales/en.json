@@ -425,8 +425,9 @@
     "skillShophint": "You can buy various goods in here",
     "specials": "Specials",
     "shop": "Shop",
-    "purchaseAndBurn": "Puchase and burn",
-    "characterBuyModal": "Character Buy/Burn Confirmation",
+    "purchaseAndBurn": "Purchase and burn",
+    "characterBuyModal": "Character Buy Confirmation",
+    "characterBuyBurnModal": "Character Buy/Burn Confirmation",
     "purchase": "Purchase",
     "nftList": {
       "characterRenameTag": "Rename Tag",
