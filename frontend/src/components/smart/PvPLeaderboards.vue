@@ -48,9 +48,9 @@
 </template>
 
 <script>
-import { getCharacterNameFromSeed } from '../../character-name';
+
 import { characterFromContract as formatCharacter } from '../../contract-models';
-import { mapState, mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 export default {
   data() {
     return {
@@ -71,7 +71,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['currentCharacterId']),
+    ...mapGetters(['getCharacterName'])
   },
   methods: {
     ...mapActions([
@@ -79,15 +79,17 @@ export default {
       'getCharacterLevel',
       'getRankingPointsByCharacter',
       'getTierTopCharacters',
+      'getRename'
     ]),
     async getPlayers(){
-      const tierTopRankersIds
-      = await this.getTierTopCharacters(this.tierFilter);
+      const tierTopRankersIds = await this.getTierTopCharacters(this.tierFilter);
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+        const rename = await this.getRename(rankerId);
+
         return {
           rankerId,
-          name: getCharacterNameFromSeed(rankerId),
-          level: await this.getCharacterLevel(rankerId),
+          name: rename ? rename : this.getCharacterName(rankerId),
+          level: Number(await this.getCharacterLevel(rankerId)) + 1,
           rank: await this.getRankingPointsByCharacter(rankerId),
           element: formatCharacter(rankerId, await this.getCharacter(rankerId)).traitName
         };

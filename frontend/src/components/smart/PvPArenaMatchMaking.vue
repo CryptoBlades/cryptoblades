@@ -114,10 +114,10 @@
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
           <div class="infoDetails">
             <span>
-              {{$t('pvp.level')}}: {{ opponentInformation.level }}</span>
+              {{$t('pvp.level')}}: {{ opponentInformation.level}}</span>
             <pvp-separator vertical class="separator" />
             <span>
-              {{$t('pvp.rank')}}: {{ opponentInformation.rank }}</span>
+              {{$t('pvp.rankingPoints')}}: {{ opponentInformation.rank }}</span>
           </div>
         </div>
         <div v-else class="findMatchMessage">
@@ -263,6 +263,7 @@ export default {
         defenderPower: null
       },
       matchablePlayersCount: null,
+      duelOffsetCost: null,
     };
   },
 
@@ -332,7 +333,8 @@ export default {
       'getReRollFeePercent',
       'approvePvpSkillSpending',
       'getPvpContract',
-      'getFighterByCharacter'
+      'getFighterByCharacter',
+      'getDuelOffsetCost'
     ]),
 
     handleErrorMessage(value, errorMessage, returnedMessage) {
@@ -460,7 +462,7 @@ export default {
       try {
         await this.listenForDuel(await this.getPvpContract());
 
-        await this.prepareDuel(this.currentCharacterId);
+        await this.prepareDuel({characterId: this.currentCharacterId, duelOffsetCost: this.duelOffsetCost});
       } catch (err) {
         console.log('prepare perform duel error: ', err.message);
 
@@ -569,6 +571,8 @@ export default {
     }
 
     this.duelQueue = await this.getDuelQueue();
+
+    this.duelOffsetCost = await this.getDuelOffsetCost();
 
     this.loading = false;
   },

@@ -192,7 +192,7 @@ module.exports = {
           providerOrUrl: process.env.AVAX_MAINNET_RPC_URL || 'https://api.avax.network/ext/bc/C/rpc'
         }
       )),
-      network_id: 1, // 1 or * for deployment, 43114 for verification (for truffle-plugin-verify to pick up snowtracer api key)
+      network_id: 43114, // 1 or * for deployment, 43114 for verification (for truffle-plugin-verify to pick up snowtracer api key)
       gas: 7000000,
       gasPrice: 27000000000,
       confirmations: 10,
