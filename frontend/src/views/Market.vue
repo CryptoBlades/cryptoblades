@@ -421,7 +421,7 @@
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
-                      @click="selectedNftId = id; showCharacterPurchaseModal();"
+                      @click="selectedNftId = id; purchaseNft();"
                       variant="primary"
                       class="gtag-link-others">
                       {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
@@ -682,11 +682,12 @@
         </div>
       </b-tab>
     </b-tabs>
-    <b-modal class="centered-modal text-center" ref="character-buy-modal" :title="$t('market.characterBuyModal')"
+    <b-modal class="centered-modal text-center" ref="character-buy-modal"
+             :title="burningManager ? $t('market.characterBuyBurnModal') : $t('market.characterBuyModal')"
       @ok="purchaseNft()" @cancel="purchaseNft(true)">
       <template #modal-footer="{ ok, cancel }">
         <div class="w-100 d-flex justify-content-center">
-          <b-button class="btn-primary mr-5" @click="cancel()">
+          <b-button v-if="burningManager" class="btn-primary mr-5" @click="cancel()">
             {{$t('market.purchaseAndBurn')}}
           </b-button>
           <b-button class="btn-primary" @click="ok()">
@@ -718,7 +719,7 @@ import {Characters, Shields, Weapons} from '../../../build/abi-interfaces';
 import {SkillShopListing} from '@/interfaces/SkillShopListing';
 import BigNumber from 'bignumber.js';
 import {traitNameToNumber} from '@/contract-models';
-import {market_blockchain as useBlockchain} from './../feature-flags';
+import {market_blockchain as useBlockchain, burningManager} from './../feature-flags';
 import {
   CharacterTransactionHistoryData,
   ICharacterHistory,
@@ -878,6 +879,7 @@ export default Vue.extend({
       historyCounter: 0,
       landSaleAllowed: false,
       reservedSaleAllowed: false,
+      burningManager
     } as Data;
   },
 
