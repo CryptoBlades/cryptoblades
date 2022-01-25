@@ -44,7 +44,8 @@
     "scoreTooltip": "Hero score is a measure of your hero's combat prowess so far. It goes up when you win and down when you lose. It is also temporarily disabled!",
     "staminaShort": "STA",
     "xp": "XP",
-    "id": "ID"
+    "id": "ID",
+    "powerTooltip": "BASE: {basePower} PWR<br>BONUS: {bonusPower}/{maxPower} PWR<br>Bonus power cap (3x base power) scales with level"
   },
   "combatResults": {
     "won": "You won the fight!",
@@ -112,7 +113,8 @@
     "upgradeConfirmation": "Characters Upgrade Confirmation",
     "upgradeConfirm": "Are you sure you want to upgrade this character using",
     "characterToUpgrade": "Character to upgrade",
-    "selectSoulAmount": "Select amount of Soul you want to use to upgrade selected character!"
+    "selectSoulAmount": "Select amount of Soul you want to use to upgrade selected character!",
+    "busyInArena": "Character is currently busy in Arena!"
   },
   "bridge": {
     "bridgeForYourNfts": "Bridge for your NFTs",
@@ -425,8 +427,9 @@
     "skillShophint": "You can buy various goods in here",
     "specials": "Specials",
     "shop": "Shop",
-    "purchaseAndBurn": "Puchase and burn",
-    "characterBuyModal": "Character Buy/Burn Confirmation",
+    "purchaseAndBurn": "Purchase and burn",
+    "characterBuyModal": "Character Buy Confirmation",
+    "characterBuyBurnModal": "Character Buy/Burn Confirmation",
     "purchase": "Purchase",
     "nftList": {
       "characterRenameTag": "Rename Tag",

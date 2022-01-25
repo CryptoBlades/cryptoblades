@@ -52,7 +52,7 @@
             class="ml-3"
             @click="showBurnConfirmation"
             v-tooltip="$t('plaza.burnSelected')"
-            :disabled="burnCharacterIds.length === 0 || powerLimitExceeded || (burnOption === 1 && !targetCharacterId)">
+            :disabled="burnCharacterIds.length === 0 || powerLimitExceeded || (burnOption === 1 && !targetCharacterId) || !canBurn()">
             {{$t('plaza.burn')}}: {{burnCharacterIds.length}} {{$t('characters')}}<br>
             ({{burnCost }} SKILL)
           </b-button>
@@ -384,7 +384,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
-      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter']),
+      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'getIsCharacterInArena']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
@@ -402,6 +402,11 @@ export default Vue.extend({
       const balance = toBN(this.skillBalance);
       return balance.isGreaterThanOrEqualTo(cost);
     },
+    canBurn() {
+      const cost = toBN(this.burnCost);
+      const balance = toBN(+fromWeiEther(this.skillBalance));
+      return balance.isGreaterThanOrEqualTo(cost);
+    },
     checkStorage() {
       this.showAds =  localStorage.getItem('show-ads') === 'true';
     },
@@ -410,7 +415,7 @@ export default Vue.extend({
       this.soulBalance = await this.fetchSoulBalance();
       await this.updateBurnCost();
       if(this.soulCreationActive) {
-        this.remainingCharactersIds = this.ownCharacters.map((x: { id: string; }) => x.id.toString()).concat(this.ownedGarrisonCharacterIds);
+        this.remainingCharactersIds = this.ownCharacters.map((x: { id: string; }) => x.id.toString()).concat(this.ownedGarrisonCharacterIds as string[]);
       }
       this.isUpgrading = false;
     },
@@ -418,8 +423,13 @@ export default Vue.extend({
       this.burnCost = this.burnCharacterIds.length > 0 ? +fromWeiEther(await this.fetchCharactersBurnCost(this.burnCharacterIds)) : 0;
     },
     async addBurnCharacter(id: number) {
+      const isInArena = await this.getIsCharacterInArena(id);
+      if(isInArena) {
+        (this as any).$dialog.notify.error(i18n.t('plaza.busyInArena'));
+        return;
+      }
       this.burnCharacterIds.push(id.toString());
-      this.remainingCharactersIds = this.remainingCharactersIds.filter(val => !this.burnCharacterIds.includes(val));
+      this.remainingCharactersIds = this.remainingCharactersIds.filter(val => !this.burnCharacterIds.includes(val.toString()));
       await this.updateBurnCost();
     },
     async removeBurnCharacter(id: number) {
