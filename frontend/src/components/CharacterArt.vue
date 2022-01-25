@@ -8,7 +8,7 @@
       >
       <div class="character-power">
         {{totalCharacterPower}} PWR
-        <b-icon-question-circle class="centered-icon" scale="0.8"
+        <b-icon-question-circle v-if="burningManager" class="centered-icon" scale="0.8"
           v-tooltip.bottom="$t('CharacterArt.powerTooltip', {
             basePower: baseCharacterPower,
             bonusPower: totalCharacterPower - baseCharacterPower,
@@ -73,6 +73,7 @@ import { CharacterTrait, RequiredXp } from '../interfaces';
 import { mapGetters, mapState } from 'vuex';
 import { getCleanName } from '../rename-censor';
 import { CharacterPower } from '@/interfaces';
+import { burningManager } from './../feature-flags';
 //import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
@@ -118,7 +119,8 @@ export default {
       trait: this.characterTrait,
       showPlaceholder: false,
       heroScore: 0,
-      CharacterPower
+      CharacterPower,
+      burningManager
     };
   },
 
