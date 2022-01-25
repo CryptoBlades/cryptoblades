@@ -149,7 +149,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         Promos promos = game.promos();
         uint256 BIT_LEGENDARY_DEFENDER = promos.BIT_LEGENDARY_DEFENDER();
 
-        require(!promos.getBit(msg.sender, BIT_LEGENDARY_DEFENDER), "Limit 1");
         require(itemFlatPrices[ITEM_SHIELD] > 0);
         promos.setBit(msg.sender, BIT_LEGENDARY_DEFENDER);
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_SHIELD]);
