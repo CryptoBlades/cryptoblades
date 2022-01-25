@@ -28,6 +28,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(GAME_ADMIN, msg.sender);
 
         characters = _characters;
         garrison = _garrison;
