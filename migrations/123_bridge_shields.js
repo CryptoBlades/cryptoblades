@@ -17,5 +17,6 @@ module.exports = async function (deployer, network) {
     let GAME_ADMIN = await shields.GAME_ADMIN();
     await shields.grantRole(GAME_ADMIN, nftStorage.address);
 
-	await nftStorage.allowToken(shields.address);
+	// To be manually called when we are ready
+	// await nftStorage.allowToken(shields.address);
 };

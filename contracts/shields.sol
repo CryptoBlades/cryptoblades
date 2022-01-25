@@ -221,7 +221,6 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             sh.stat1 = stat1;
             sh.stat2 = stat2;
             sh.stat3 = stat3;
-            nftVars[tokenID][NFTVAR_SHIELD_TYPE] = shieldType;
         }
         ShieldCosmetics storage sc = cosmetics[tokenID];
         sc.seed = cosmeticSeed;
