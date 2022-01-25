@@ -384,7 +384,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
-      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter']),
+      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'getIsCharacterInArena']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
@@ -423,6 +423,11 @@ export default Vue.extend({
       this.burnCost = this.burnCharacterIds.length > 0 ? +fromWeiEther(await this.fetchCharactersBurnCost(this.burnCharacterIds)) : 0;
     },
     async addBurnCharacter(id: number) {
+      const isInArena = await this.getIsCharacterInArena(id);
+      if(isInArena) {
+        (this as any).$dialog.notify.error(i18n.t('plaza.busyInArena'));
+        return;
+      }
       this.burnCharacterIds.push(id.toString());
       this.remainingCharactersIds = this.remainingCharactersIds.filter(val => !this.burnCharacterIds.includes(val.toString()));
       await this.updateBurnCost();

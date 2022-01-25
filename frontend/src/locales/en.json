@@ -113,7 +113,8 @@
     "upgradeConfirmation": "Characters Upgrade Confirmation",
     "upgradeConfirm": "Are you sure you want to upgrade this character using",
     "characterToUpgrade": "Character to upgrade",
-    "selectSoulAmount": "Select amount of Soul you want to use to upgrade selected character!"
+    "selectSoulAmount": "Select amount of Soul you want to use to upgrade selected character!",
+    "busyInArena": "Character is currently busy in Arena!"
   },
   "bridge": {
     "bridgeForYourNfts": "Bridge for your NFTs",
