@@ -131,6 +131,13 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokens;
     }
 
+    function getCosmeticsSeed(uint256 id) public view noFreshLookup(id)
+        returns (uint256) {
+
+        ShieldCosmetics memory sc = cosmetics[id];
+        return sc.seed;
+    }
+
     function mintForPurchase(address buyer) external restricted {
         require(totalSupply() < 25000, "Out of stock"); // temporary restriction
         mint(buyer, uint256(keccak256(abi.encodePacked(buyer, blockhash(block.number - 1)))));
@@ -190,6 +197,36 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         durabilityTimestamp[tokenID] = uint64(now.sub(getDurabilityMaxWait()));
 
         emit NewShield(tokenID, minter);
+        return tokenID;
+    }
+
+    function performMintShieldDetailed(address minter,
+        uint256 metaData,
+        uint256 cosmeticSeed, uint256 tokenID
+    ) public restricted returns(uint256) {
+
+        // uint256(uint256(0)) | uint256(stat3) << 16| (uint256(stat2) << 32) | (uint256(stat1) << 48) | (uint256(properties) << 64) | (uint256(appliedCosmetic) << 80);
+        // 16 bits reserved
+        uint16 stat3 = uint16((metaData >> 16) & 0xFFFF);
+        uint16 stat2 = uint16((metaData >> 32) & 0xFFFF);
+        uint16 stat1 = uint16((metaData >> 48) & 0xFFFF);
+        uint16 properties = uint16((metaData >> 64) & 0xFFFF);
+
+        if(tokenID == 0){
+            tokenID = performMintShield(minter, properties, stat1, stat2, stat3, 0);
+        }
+        else {
+            Shield storage sh = tokens[tokenID];
+            sh.properties = properties;
+            sh.stat1 = stat1;
+            sh.stat2 = stat2;
+            sh.stat3 = stat3;
+        }
+        ShieldCosmetics storage sc = cosmetics[tokenID];
+        sc.seed = cosmeticSeed;
+        
+        durabilityTimestamp[tokenID] = uint64(now); // avoid chain jumping abuse
+
         return tokenID;
     }
 
