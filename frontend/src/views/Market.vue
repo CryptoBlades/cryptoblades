@@ -421,7 +421,7 @@
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
-                      @click="selectedNftId = id; showCharacterPurchaseModal();"
+                      @click="selectedNftId = id; purchaseNft();"
                       variant="primary"
                       class="gtag-link-others">
                       {{ convertWeiToSkill(nftPricesById[id]) !== '0' ? 'Purchase' : 'Sold' }}
