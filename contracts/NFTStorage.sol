@@ -739,19 +739,21 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     function packedShieldsData(uint256 shieldid) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
         (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3) = shields.get(shieldid);
+        uint8 _type = uint8(shields.getNftVar(shieldid, 2)); // 2 => shield type
         uint32 appliedCosmetic = 0; // to add later
         rename = ""; // to add later
         seed3dCosmetics = shields.getCosmeticsSeed(shieldid);
-        packedData = packShieldsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3);
+        packedData = packShieldsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, _type);
     }
 
     
-    function packShieldsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3) public pure returns (uint256) {
-        return  uint256(uint256(0)) | uint256(stat3) << 16| (uint256(stat2) << 32) | (uint256(stat1) << 48) | (uint256(properties) << 64) | (uint256(appliedCosmetic) << 80);
+    function packShieldsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 shieldType) public pure returns (uint256) {
+        return  uint256(uint256(shieldType) | uint256(stat3) << 16| (uint256(stat2) << 32) | (uint256(stat1) << 48) | (uint256(properties) << 64) | (uint256(appliedCosmetic) << 80));
     }
 
-    function unpackShieldsData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3) {
-        // 16 bits reserved for the type
+    function unpackShieldsData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 shieldType) {
+        // 16 bits reserved for the type (only using 8)
+        shieldType = uint8(metaData & 0xFF); 
         stat3 = uint16((metaData >> 16) & 0xFFFF);
         stat2 = uint16((metaData >> 32) & 0xFFFF);
         stat1 = uint16((metaData >> 48) & 0xFFFF);

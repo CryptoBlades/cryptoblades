@@ -204,13 +204,13 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     ) public restricted returns(uint256) {
 
         // uint256(uint256(0)) | uint256(stat3) << 16| (uint256(stat2) << 32) | (uint256(stat1) << 48) | (uint256(properties) << 64) | (uint256(appliedCosmetic) << 80);
-        // 16 bits reserved
+        
         uint16 stat3 = uint16((metaData >> 16) & 0xFFFF);
         uint16 stat2 = uint16((metaData >> 32) & 0xFFFF);
         uint16 stat1 = uint16((metaData >> 48) & 0xFFFF);
         uint16 properties = uint16((metaData >> 64) & 0xFFFF);
         //cosmetics >> 80
-        uint8 shieldType = uint8((metaData >> 82) & 0x3);
+        uint8 shieldType = uint8(metaData & 0xFF);
 
         if(tokenID == 0){
             tokenID = performMintShield(minter, shieldType, properties, stat1, stat2, stat3, 0);
@@ -221,12 +221,13 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             sh.stat1 = stat1;
             sh.stat2 = stat2;
             sh.stat3 = stat3;
+            nftVars[tokenID][NFTVAR_SHIELD_TYPE] = shieldType;
         }
         ShieldCosmetics storage sc = cosmetics[tokenID];
         sc.seed = cosmeticSeed;
         
         durabilityTimestamp[tokenID] = uint64(now); // avoid chain jumping abuse
-
+       
         return tokenID;
     }
 
