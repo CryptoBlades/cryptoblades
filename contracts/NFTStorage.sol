@@ -194,6 +194,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         shields = Shields(_shieldsAddress);
+        nftTypeToAddress[NFT_TYPE_SHIELD] =_shieldsAddress;
     }
 
     modifier restricted() {
@@ -506,7 +507,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
             }
         }
         else if(transferIn.nftType == NFT_TYPE_SHIELD) {
-            mintedItem = _withdrawWeaponFromBridge(bridgedNFT, transferIn.sourceChain, transferIn.sourceId);   
+            mintedItem = _withdrawShieldFromBridge(bridgedNFT, transferIn.sourceChain, transferIn.sourceId);   
             require(shields.ownerOf(mintedItem) == address(this), "NAS"); // The minted item, if already existed, should be in storage
             // if(bytes(transferIn.rename).length > 0) { // later
             //     characterRenameTagConsumables.setName(mintedItem, transferIn.rename);
