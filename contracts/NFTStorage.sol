@@ -190,7 +190,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         promos = _promos;
     }
 
-    function migrateTo_something(address _shieldsAddress) public {
+    function migrateTo_3f597dc(address _shieldsAddress) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
 
         shields = Shields(_shieldsAddress);
