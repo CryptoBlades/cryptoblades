@@ -29,8 +29,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant ITEM_COSMETIC_CHARACTER = 8; // series
     uint256 public constant ITEM_SHIELD = 9;
 
-    uint256 public constant NUMBERPARAMETER_GIVEN_TICKETS = uint256(keccak256("GIVEN_TICKETS"));
-    uint256 public constant NUMBERPARAMETER_SPENT_TICKETS = uint256(keccak256("SPENT_TICKETS"));
+    uint256 public constant VAR_PURCHASE_SHIELD_TYPE = 1;
+    uint256 public constant VAR_PURCHASE_SHIELD_SUPPLY = 2; // only for non-0 type shields
 
     uint256 public constant LINK_SKILL_ORACLE_2 = 1; // technically second skill oracle (it's separate)
     uint256 public constant LINK_KING_ORACLE = 2;
@@ -50,7 +50,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => address) public itemAddresses;
     mapping(uint256 => uint256) public itemFlatPrices;
 
-    mapping(uint256 => uint256) public numberParameters;
+    mapping(uint256 => uint256) public numberParameters; // AKA "vars"
 
     mapping(uint256 => mapping(uint256 => uint256)) public itemSeriesFlatPrices;
     CBKLandSale public cbkLandSale;
@@ -126,33 +126,17 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         IERC20(tokenAddress).safeTransfer(msg.sender, amount);
     }
 
-    // function spendTicket(uint32 _num) external {
-    //     require(_num > 0);
-    //     require(tickets[msg.sender] >= _num, "Not enough tickets");
-    //     tickets[msg.sender] -= _num;
-    //     numberParameters[NUMBERPARAMETER_SPENT_TICKETS] += _num;
-
-    //     for (uint256 i = 0; i < _num; i++) {
-    //         weapons.mint(
-    //             msg.sender,
-    //             // TODO: Ensure no exploiting possible
-    //         );
-    //     }
-    // }
-
-    function giveTicket(address _player, uint32 _num) external onlyGame {
-        tickets[_player] += _num;
-        numberParameters[NUMBERPARAMETER_GIVEN_TICKETS] += _num;
-    }
-
     function purchaseShield() public {
-        Promos promos = game.promos();
-        uint256 BIT_LEGENDARY_DEFENDER = promos.BIT_LEGENDARY_DEFENDER();
-
         require(itemFlatPrices[ITEM_SHIELD] > 0);
-        promos.setBit(msg.sender, BIT_LEGENDARY_DEFENDER);
+
+        uint256 shieldType = numberParameters[VAR_PURCHASE_SHIELD_TYPE];
+        if(shieldType != 0) {
+            require(numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] > 0);
+            numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] -= 1;
+        }
         game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_SHIELD]);
-        shields.mintForPurchase(msg.sender);
+        shields.mint(msg.sender, shieldType,
+            uint256(keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1)))));
     }
 
     /* ========== MODIFIERS ========== */
@@ -193,6 +177,10 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         return links[linkId];
     }
 
+    function vars(uint256 varField) public view returns (uint256) {
+        return numberParameters[varField];
+    }
+
     /* ========== Generic Setters ========== */
 
     function setAddressOfItem(uint256 itemIndex, address to) external isAdmin {
@@ -219,6 +207,16 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function setLink(uint256 linkId, address linkAddress) external isAdmin {
         links[linkId] = linkAddress;
+    }
+
+    function setVar(uint256 varField, uint256 value) external isAdmin {
+        numberParameters[varField] = value;
+    }
+
+    function setVars(uint256[] calldata varFields, uint256[] calldata values) external isAdmin {
+        for(uint i = 0; i < varFields.length; i++) {
+            numberParameters[varFields[i]] = values[i];
+        }
     }
 
     /* ========== Character Rename ========== */

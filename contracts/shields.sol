@@ -138,12 +138,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return sc.seed;
     }
 
-    function mintForPurchase(address buyer) external restricted {
-        require(totalSupply() < 25000, "Out of stock"); // temporary restriction
-        mint(buyer, uint256(keccak256(abi.encodePacked(buyer, blockhash(block.number - 1)))));
-    }
-
-    function mint(address minter, uint256 seed) public restricted returns(uint256) {
+    function mint(address minter, uint256 shieldType, uint256 seed) public restricted returns(uint256) {
         uint256 stars;
         uint256 roll = seed % 100;
         // will need revision, possibly manual configuration if we support more than 5 stars
@@ -163,14 +158,15 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             stars = 0; // 1* at 44%
         }
 
-        return mintShieldWithStars(minter, stars, seed);
+        return mintShieldWithStars(minter, stars, shieldType, seed);
     }
 
-    function mintShieldWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
+    function mintShieldWithStars(address minter, uint256 stars, uint256 shieldType, uint256 seed) public restricted returns(uint256) {
         require(stars < 8, "Stars parameter too high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
         return performMintShield(minter,
+            shieldType,
             getRandomProperties(stars, seed),
             stat1,
             stat2,
@@ -180,6 +176,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function performMintShield(address minter,
+        uint256 shieldType,
         uint16 properties,
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
@@ -195,6 +192,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         cosmetics.push(ShieldCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);
         durabilityTimestamp[tokenID] = uint64(now.sub(getDurabilityMaxWait()));
+        nftVars[tokenID][NFTVAR_SHIELD_TYPE] = shieldType;
 
         emit NewShield(tokenID, minter);
         return tokenID;
@@ -211,9 +209,11 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 stat2 = uint16((metaData >> 32) & 0xFFFF);
         uint16 stat1 = uint16((metaData >> 48) & 0xFFFF);
         uint16 properties = uint16((metaData >> 64) & 0xFFFF);
+        //cosmetics >> 80
+        uint8 shieldType = uint8((metaData >> 82) & 0x3);
 
         if(tokenID == 0){
-            tokenID = performMintShield(minter, properties, stat1, stat2, stat3, 0);
+            tokenID = performMintShield(minter, shieldType, properties, stat1, stat2, stat3, 0);
         }
         else {
             Shield storage sh = tokens[tokenID];
