@@ -300,7 +300,8 @@ export default Vue.extend({
       'currentCharacterStamina',
       'getCharacterName',
       'getExchangeUrl',
-      'getCharacterPower'
+      'getCharacterPower',
+      'getCharacterIsInArena'
     ]),
 
     character(): any {
@@ -384,7 +385,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
-      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'getIsCharacterInArena']),
+      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
@@ -423,8 +424,7 @@ export default Vue.extend({
       this.burnCost = this.burnCharacterIds.length > 0 ? +fromWeiEther(await this.fetchCharactersBurnCost(this.burnCharacterIds)) : 0;
     },
     async addBurnCharacter(id: number) {
-      const isInArena = await this.getIsCharacterInArena(id);
-      if(isInArena) {
+      if(this.getCharacterIsInArena(id)) {
         (this as any).$dialog.notify.error(i18n.t('plaza.busyInArena'));
         return;
       }
