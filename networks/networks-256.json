@@ -255,8 +255,8 @@
       }
     },
     "links": {},
-    "address": "0x84f3B66509809644446F66812247e73869358Be8",
-    "transactionHash": "0x0c39a9e5d1b5afd49ee8c83ed1a77b6127b1d38e1011ba238488b2badb07e671"
+    "address": "0xDd65a28464649be0b32b3C51Cc7f14E405dfF1a0",
+    "transactionHash": "0xdea8a504c28abc9f48fbc5bde47d728d59d36b545982d1a4acbb85ef46a9f190"
   },
   "build/contracts/CBKLand.json": {
     "events": {
@@ -2334,7 +2334,7 @@
     },
     "links": {},
     "address": "0xD9AC0Cc8BBDBA6616De0F07119D61d40Fb5258DE",
-    "transactionHash": "0x98955e8d544296c4c4bdb77dd02262120af4e0741209f458e228c7a73b5d1a3b"
+    "transactionHash": "0x6681cbea7cdf8cc42fc0ba8ab6b842889188a6722b78f3ea953301c6b4c217b1"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
