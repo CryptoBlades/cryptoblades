@@ -141,6 +141,7 @@ export function createStore(web3: Web3) {
       garrisonCharacters: {},
       characterStaminas: {},
       characterPowers: {},
+      characterIsInArena: {},
       characterRenames: {},
       characterCosmetics: {},
       weapons: {},
@@ -323,6 +324,12 @@ export function createStore(web3: Web3) {
       getCharacterPower(state: IState) {
         return (characterId: number) => {
           return state.characterPowers[characterId];
+        };
+      },
+
+      getCharacterIsInArena(state: IState) {
+        return (characterId: number) => {
+          return state.characterIsInArena[characterId];
         };
       },
 
@@ -824,6 +831,9 @@ export function createStore(web3: Web3) {
       },
       updateCharacterPower(state: IState, { characterId, power }) {
         Vue.set(state.characterPowers, characterId, +power);
+      },
+      updateCharacterInArena(state: IState, { characterId, isCharacterInArena }) {
+        Vue.set(state.characterIsInArena, characterId, isCharacterInArena);
       },
       updateCharacterRename(state: IState, { characterId, renameString }) {
         if(renameString !== undefined){
@@ -1538,6 +1548,7 @@ export function createStore(web3: Web3) {
               await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
             );
             await dispatch('fetchCharacterPower', characterId);
+            await dispatch('getIsCharacterInArena', characterId);
 
             if(!inGarrison) {
               commit('updateCharacter', { characterId, character });
@@ -4320,11 +4331,12 @@ export function createStore(web3: Web3) {
         return isShieldInArena;
       },
 
-      async getIsCharacterInArena({ state }, characterId) {
+      async getIsCharacterInArena({ state, commit }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
 
         const isCharacterInArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: state.defaultAccount });
+        commit('updateCharacterInArena', { characterId, isCharacterInArena });
 
         return isCharacterInArena;
       },
@@ -4410,20 +4422,24 @@ export function createStore(web3: Web3) {
         return duelOffsetCost;
       },
 
-      async enterArena({ state }, {characterId, weaponId, shieldId, useShield}) {
+      async enterArena({ state, dispatch }, {characterId, weaponId, shieldId, useShield}) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
 
         const res = await PvpArena.methods.enterArena(characterId, weaponId, shieldId, useShield).send({ from: state.defaultAccount });
 
+        await dispatch('getIsCharacterInArena', characterId);
+
         return res;
       },
 
-      async withdrawFromArena({ state }, characterId) {
+      async withdrawFromArena({ state, dispatch }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
 
         const res = await PvpArena.methods.withdrawFromArena(characterId).send({ from: state.defaultAccount });
+
+        await dispatch('getIsCharacterInArena', characterId);
 
         return res;
       },
