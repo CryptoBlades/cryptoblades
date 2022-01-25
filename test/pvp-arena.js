@@ -1253,7 +1253,7 @@ contract("PvpArena", (accounts) => {
 
   describe("#performDuels", async () => {
     describe("happy path", () => {
-      describe("attacker wins", () => {
+      describe.only("attacker wins", () => {
         let character1ID;
         let character2ID;
         let character1Wager;
@@ -1323,18 +1323,20 @@ contract("PvpArena", (accounts) => {
 
           let duelQueue = await pvpArena.getDuelQueue();
 
-          const { tx } = await pvpArena.performDuels(duelQueue, {
+          const transaction = await pvpArena.performDuels(duelQueue, {
             from: accounts[0],
           });
 
+          console.log(transaction.receipt.gasUsed);
+
           previousBalance = await skillToken.balanceOf(accounts[1]);
           duelEvent = await expectEvent.inTransaction(
-            tx,
+            transaction.tx,
             pvpArena,
             "DuelFinished"
           );
 
-          duelTx = tx;
+          duelTx = transaction.tx;
           duelCost = await pvpArena.getDuelCost(character1ID, {
             from: accounts[1],
           });
@@ -1880,7 +1882,7 @@ contract("PvpArena", (accounts) => {
         const losingPoints = await pvpArena.losingPoints();
         weapon1ID = await helpers.createWeapon(
           accounts[2],
-          "111",
+          "101",
           helpers.elements.water,
           {
             weapons,
@@ -1888,7 +1890,7 @@ contract("PvpArena", (accounts) => {
         );
         weapon2ID = await helpers.createWeapon(
           accounts[1],
-          "111",
+          "199",
           helpers.elements.fire,
           {
             weapons,
@@ -1897,11 +1899,11 @@ contract("PvpArena", (accounts) => {
         character1ID = await createCharacterInPvpTier(
           accounts[1],
           2,
-          "222",
+          "199",
           weapon2ID
         );
         character2ID = await createCharacterInPvpTier(accounts[2], 2);
-        character3ID = await createCharacterInPvpTier(accounts[2], 2, "222");
+        character3ID = await createCharacterInPvpTier(accounts[2], 2, "199");
         character4ID = await createCharacterInPvpTier(
           accounts[2],
           2,
@@ -1973,7 +1975,7 @@ contract("PvpArena", (accounts) => {
       it("should update the player if he is not within the top 4 and has a higher score than the 4th ranked player", async () => {
         weapon1ID = await helpers.createWeapon(
           accounts[2],
-          "111",
+          "101",
           helpers.elements.water,
           {
             weapons,
@@ -1981,7 +1983,7 @@ contract("PvpArena", (accounts) => {
         );
         weapon2ID = await helpers.createWeapon(
           accounts[1],
-          "111",
+          "199",
           helpers.elements.fire,
           {
             weapons,
@@ -1990,13 +1992,13 @@ contract("PvpArena", (accounts) => {
         character1ID = await createCharacterInPvpTier(
           accounts[1],
           2,
-          "222",
+          "299",
           weapon2ID
         );
         character2ID = await createCharacterInPvpTier(accounts[2], 2);
-        character3ID = await createCharacterInPvpTier(accounts[2], 2, "222");
-        character4ID = await createCharacterInPvpTier(accounts[2], 2, "222");
-        character5ID = await createCharacterInPvpTier(accounts[2], 2, "222");
+        character3ID = await createCharacterInPvpTier(accounts[2], 2, "299");
+        character4ID = await createCharacterInPvpTier(accounts[2], 2, "299");
+        character5ID = await createCharacterInPvpTier(accounts[2], 2, "299");
         character6ID = await createCharacterInPvpTier(
           accounts[2],
           2,
@@ -2050,7 +2052,7 @@ contract("PvpArena", (accounts) => {
       it("should process the winner and the loser with only 2 players inside the tier", async () => {
         weapon1ID = await helpers.createWeapon(
           accounts[2],
-          "111",
+          "101",
           helpers.elements.water,
           {
             weapons,
@@ -2058,7 +2060,7 @@ contract("PvpArena", (accounts) => {
         );
         weapon2ID = await helpers.createWeapon(
           accounts[1],
-          "111",
+          "199",
           helpers.elements.fire,
           {
             weapons,
@@ -2067,7 +2069,7 @@ contract("PvpArena", (accounts) => {
         character1ID = await createCharacterInPvpTier(
           accounts[1],
           2,
-          "222",
+          "299",
           weapon2ID
         );
         character2ID = await createCharacterInPvpTier(
