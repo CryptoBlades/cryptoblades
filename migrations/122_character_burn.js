@@ -21,6 +21,9 @@ module.exports = async function (deployer, network) {
     let game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
     let burningManager = await deployProxy(BurningManager, [characters.address, garrison.address, game.address], { deployer });
 
+    let VAR_ROI_DAYS = await burningManager.VAR_ROI_DAYS();
+    await burningManager.setVar(VAR_ROI_DAYS, 33);
+
     let BURNER_ROLE = await burningManager.BURNER_ROLE();
     await burningManager.grantRole(BURNER_ROLE, nftMarket.address);
     await nftMarket.migrateTo_29635ef(burningManager.address);
