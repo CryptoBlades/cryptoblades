@@ -18,7 +18,9 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     Garrison public garrison;
 
     mapping(address => mapping(uint256 => uint256)) public userVars;
-    uint256 public constant VARS_SOUL_SUPPLY = 1;
+    uint256 public constant USERVAR_SOUL_SUPPLY = 1;
+    mapping(uint256 => uint256) public vars;
+    uint256 public constant VAR_ROI_DAYS = 1;
 
     function initialize(Characters _characters, Garrison _garrison, CryptoBlades _game)
         public
@@ -26,6 +28,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(GAME_ADMIN, msg.sender);
 
         characters = _characters;
         garrison = _garrison;
@@ -45,6 +48,15 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         }
     }
 
+     modifier restricted() {
+        _restricted();
+        _;
+    }
+
+    function _restricted() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender), "NGA");
+    }
+
     // VIEWS
 
     function burnCharactersFee(uint256[] memory burnIds) public view returns (uint256) {
@@ -56,7 +68,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     }
 
     function burnCharacterFee(uint256 burnId) public view returns (uint256) {
-        return (game.vars(game.VAR_HOURLY_PAY_PER_FIGHT()) / game.vars(game.VAR_HOURLY_MAX_POWER_AVERAGE())) * 7 * characters.getTotalPower(burnId) * 60;
+        return (game.vars(game.VAR_HOURLY_PAY_PER_FIGHT()) / game.vars(game.VAR_HOURLY_MAX_POWER_AVERAGE())) * 7 * characters.getTotalPower(burnId) * vars[VAR_ROI_DAYS];
     }
 
     //FUNCTIONS
@@ -66,7 +78,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         game.payContractTokenOnly(tx.origin, burnCharacterFee(burnId));
         uint256[] memory burnIds = new uint256[](1);
         burnIds[0] = burnId;
-        userVars[tx.origin][VARS_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds);
+        userVars[tx.origin][USERVAR_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds);
         characters.burnIntoSoul(burnIds);
     }
 
@@ -77,13 +89,19 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
 
     function burnCharactersIntoSoul(uint256[] memory burnIds) public isCharactersOwner(burnIds) {
         game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
-        userVars[msg.sender][VARS_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds);
+        userVars[msg.sender][USERVAR_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds);
         characters.burnIntoSoul(burnIds);
     }
 
     function upgradeCharacterWithSoul(uint256 targetId, uint256 soulAmount) public {
-        require(userVars[msg.sender][VARS_SOUL_SUPPLY] >= soulAmount, 'Not enough soul');
-        userVars[msg.sender][VARS_SOUL_SUPPLY] = userVars[msg.sender][VARS_SOUL_SUPPLY].sub(soulAmount);
+        require(userVars[msg.sender][USERVAR_SOUL_SUPPLY] >= soulAmount, 'Not enough soul');
+        userVars[msg.sender][USERVAR_SOUL_SUPPLY] = userVars[msg.sender][USERVAR_SOUL_SUPPLY].sub(soulAmount);
         characters.upgradeWithSoul(targetId, soulAmount);
+    }
+
+    // VARS SETTER
+
+    function setVar(uint256 varField, uint256 value) external restricted {
+        vars[varField] = value;
     }
 }
