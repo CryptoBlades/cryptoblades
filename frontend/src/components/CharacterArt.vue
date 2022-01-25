@@ -7,7 +7,13 @@
     <div class="placeholder d-flex align-items-start justify-content-center p-1"
       >
       <div class="character-power">
-        {{characterPower}} PWR
+        {{totalCharacterPower}} PWR
+        <b-icon-question-circle class="centered-icon" scale="0.8"
+          v-tooltip.bottom="$t('CharacterArt.powerTooltip', {
+            basePower: baseCharacterPower,
+            bonusPower: totalCharacterPower - baseCharacterPower,
+            maxPower: 3 * baseCharacterPower
+          })"/>
       </div>
       <div class="w-100" :style="{
         'background-image': 'url(' + getCharacterArt(character) + ')',
@@ -66,6 +72,7 @@ import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
 import { mapGetters, mapState } from 'vuex';
 import { getCleanName } from '../rename-censor';
+import { CharacterPower } from '@/interfaces';
 //import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
@@ -110,7 +117,8 @@ export default {
       body: null,
       trait: this.characterTrait,
       showPlaceholder: false,
-      heroScore: 0
+      heroScore: 0,
+      CharacterPower
     };
   },
 
@@ -135,8 +143,12 @@ export default {
       return this.isGarrison ? this.characterStaminas[this.character.id] : this.timestampToStamina(this.character.staminaTimestamp);
     },
 
-    characterPower() {
+    totalCharacterPower() {
       return this.getCharacterPower(this.character.id);
+    },
+
+    baseCharacterPower() {
+      return CharacterPower(this.character.level);
     }
   },
 

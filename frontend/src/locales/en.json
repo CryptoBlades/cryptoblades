@@ -44,7 +44,8 @@
     "scoreTooltip": "Hero score is a measure of your hero's combat prowess so far. It goes up when you win and down when you lose. It is also temporarily disabled!",
     "staminaShort": "STA",
     "xp": "XP",
-    "id": "ID"
+    "id": "ID",
+    "powerTooltip": "BASE: {basePower} PWR<br>BONUS: {bonusPower}/{maxPower} PWR<br>Bonus power cap (3x base power) scales with level"
   },
   "combatResults": {
     "won": "You won the fight!",
