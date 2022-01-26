@@ -59,6 +59,17 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
         _;
     }
 
+    modifier isCharactersOwner(uint256[] memory ids) {
+        _isCharactersOwner(ids);
+        _;
+    }
+
+    function _isCharactersOwner(uint256[] memory ids) internal view {
+        for(uint i = 0; i < ids.length; i++) {
+            require(characterOwner[i] == msg.sender, 'Not owner');
+        }
+    }
+
     // VIEWS
     function getUserCharacters() public view  returns (uint256[] memory tokens) {
         uint256 amount = balanceOf(msg.sender);
@@ -111,10 +122,8 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
       restoreFromGarrison(garrisonId);
     }
 
-    function claimAllXp() external {
-        require(balanceOf(msg.sender) > 0);
-        uint256[] memory xps = game.getXpRewards(getUserCharacters());
-        uint256[] memory chars = getUserCharacters();
+    function claimAllXp(uint256[] calldata chars) external isCharactersOwner(chars) {
+        uint256[] memory xps = game.getXpRewards(chars);
         game.resetXp(chars);
         characters.gainXpAll(chars, xps);
     }

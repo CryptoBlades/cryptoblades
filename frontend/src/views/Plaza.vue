@@ -499,7 +499,7 @@ export default Vue.extend({
       this.soulAmount = 0;
     },
     async onClaimGarrisonXp() {
-      await this.claimGarrisonXp();
+      await this.claimGarrisonXp(this.ownedGarrisonCharacterIds.filter((id: string|number) => +this.xpRewards[id] > 0));
     }
   },
 

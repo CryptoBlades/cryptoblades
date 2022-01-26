@@ -3227,10 +3227,10 @@ export function createStore(web3: Web3) {
         commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
       },
 
-      async claimGarrisonXp({ state, dispatch }) {
+      async claimGarrisonXp({ state, dispatch }, characterIds) {
         const { Garrison } = state.contracts();
         if(!Garrison) return;
-        await Garrison.methods.claimAllXp().send({ from: state.defaultAccount });
+        await Garrison.methods.claimAllXp(characterIds).send({ from: state.defaultAccount });
 
         await Promise.all([
           dispatch('fetchGarrisonCharacters', state.ownedGarrisonCharacterIds),
