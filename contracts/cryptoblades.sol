@@ -1031,8 +1031,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256[] memory xps = new uint256[](chars.length);
         for(uint256 i = 0; i < chars.length; i++) {
             xps[i] = xpRewards[chars[i]];
+            xpRewards[chars[i]] = 0;
         }
-        resetXp(chars);
         characters.gainXpAll(chars, xps);
     }
 
