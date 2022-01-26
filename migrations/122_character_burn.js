@@ -36,5 +36,6 @@ module.exports = async function (deployer, network) {
 
     let characters_GAME_ADMIN = await characters.GAME_ADMIN();
     await characters.grantRole(characters_GAME_ADMIN, burningManager.address);
+    await characters.setBurnPowerMultiplier('1000000000000000000');
   }
 };

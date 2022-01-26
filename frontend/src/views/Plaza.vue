@@ -122,7 +122,7 @@
               <div v-if="burnOption === 0 && !isUpgrading" class="d-flex flex-column mt-3 align-items-center">
                 <div class="soul-image" />
                 <h2>Soul</h2>
-                <h2>{{soulBalance}} (+{{burnPower/10}})</h2>
+                <h2>{{soulBalance}} (+{{Math.floor(burnPower/10)}})</h2>
               </div>
               <div v-if="burnOption === 1 || isUpgrading" :class="targetCharacterId ? 'd-flex flex-column align-items-center' : ''">
                 <b-button
@@ -294,6 +294,7 @@ interface Data {
   isUpgrading: boolean;
   soulAmount: number;
   remainingPowerLimit: number;
+  burnPowerMultiplier: number;
 }
 
 export default Vue.extend({
@@ -352,7 +353,7 @@ export default Vue.extend({
         power = this.soulAmount * 10;
       }
 
-      return power;
+      return Math.floor(power * this.burnPowerMultiplier);
     },
 
     powerLimitExceeded(): boolean {
@@ -389,14 +390,15 @@ export default Vue.extend({
       burnCost: 0,
       isUpgrading: false,
       soulAmount: 0,
-      remainingPowerLimit: 0
+      remainingPowerLimit: 0,
+      burnPowerMultiplier: 1
     } as Data;
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
-      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp']),
+      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp', 'fetchBurnPowerMultiplier']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
@@ -426,6 +428,7 @@ export default Vue.extend({
       this.soulCreationActive = !this.soulCreationActive;
       this.soulBalance = await this.fetchSoulBalance();
       await this.updateBurnCost();
+      this.burnPowerMultiplier = +fromWeiEther(await this.fetchBurnPowerMultiplier());
       if(this.soulCreationActive) {
         this.remainingCharactersIds = this.ownCharacters.map((x: { id: string; }) => x.id.toString()).concat(this.ownedGarrisonCharacterIds as string[]);
       }

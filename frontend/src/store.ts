@@ -4579,6 +4579,13 @@ export function createStore(web3: Web3) {
         if(!BurningManager || !state.defaultAccount) return;
 
         return await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
+      },
+
+      async fetchBurnPowerMultiplier({ state }) {
+        const { Characters } = state.contracts();
+        if(!Characters || !state.defaultAccount) return;
+
+        return await Characters.methods.burnPowerMultiplier().call(defaultCallOptions(state));
       }
     },
   });
