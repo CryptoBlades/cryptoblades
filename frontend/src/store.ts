@@ -1205,6 +1205,7 @@ export function createStore(web3: Web3) {
                   dispatch('fetchSkillBalance'),
                   dispatch('fetchFightRewardSkill'),
                   dispatch('fetchFightRewardXp'),
+                  dispatch('fetchGarrisonCharactersXp'),
                   dispatch('fetchDustBalance')
                 ]);
               })
@@ -1400,6 +1401,7 @@ export function createStore(web3: Web3) {
           dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
+          dispatch('fetchGarrisonCharactersXp'),
           dispatch('fetchFightGasOffset'),
           dispatch('fetchFightBaseline'),
         ]);
@@ -3202,18 +3204,27 @@ export function createStore(web3: Web3) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
 
-        const xpCharaIdPairs = await Promise.all(
-          state.ownedCharacterIds.map(async charaId => {
-            const xp = await CryptoBlades.methods
-              .getXpRewards(charaId)
-              .call(defaultCallOptions(state));
+        const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds).call(defaultCallOptions(state));
 
-            return [charaId, xp];
-          })
-        );
+        const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
+          return [charaId, xps[i]];
+        });
 
         commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
         return xpCharaIdPairs;
+      },
+
+      async fetchGarrisonCharactersXp({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds).call(defaultCallOptions(state));
+
+        const xpCharaIdPairs = state.ownedGarrisonCharacterIds.map((charaId, i) => {
+          return [charaId, xps[i]];
+        });
+
+        commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
       },
 
       async purchaseShield({ state, dispatch }) {
@@ -4334,9 +4345,10 @@ export function createStore(web3: Web3) {
       async getIsCharacterInArena({ state, commit }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
-
+        console.log('fetching');
         const isCharacterInArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: state.defaultAccount });
         commit('updateCharacterInArena', { characterId, isCharacterInArena });
+        console.log('updating');
 
         return isCharacterInArena;
       },
