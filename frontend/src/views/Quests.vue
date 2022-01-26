@@ -14,10 +14,13 @@
             :character="character" :hideIdContainer="true" :hideXpBar="true"/>
         </div>
         <div v-if="character.quest && character.quest.reputation !== undefined" class="xp">
-          <span>Reputation lvl {{ 0 }} <b-icon-question-circle class="pointer"
-                                                               @click="$bvModal.show('reputation-info-modal')"/></span>
-          <strong class="outline xp-text">{{ character.quest.reputation || 0 }} / {{ 9999 }}</strong>
-          <b-progress class="reputation-progress" :max="9999" :value="character.quest.reputation"
+          <span>{{ $t('quests.reputationLevel') }} {{ getReputationLevel(character.quest.reputation) }} <b-icon-question-circle
+            class="pointer"
+            @click="$bvModal.show('reputation-info-modal')"/></span>
+          <strong class="outline xp-text">{{ character.quest.reputation || 0 }} /
+            {{ getReputationBreakpoint(character.quest.reputation) }}</strong>
+          <b-progress class="reputation-progress" :max="getReputationBreakpoint(character.quest.reputation)"
+                      :value="character.quest.reputation"
                       variant="primary"/>
         </div>
       </div>
@@ -90,6 +93,14 @@ export enum DustRarity {
   LESSER, GREATER, POWERFUL
 }
 
+//TODO: Discuss these values
+export enum ReputationRequirementForLevel {
+  TWO = 1000,
+  THREE = 2000,
+  FOUR = 5000,
+  FIVE = 10000,
+}
+
 interface StoreMappedActions {
   fetchCharacters(characterIds: (string | number)[]): Promise<void>;
 
@@ -133,6 +144,34 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['fetchCharacters', 'getCharacterQuestData', 'requestQuest']) as StoreMappedActions,
+
+    getReputationLevel(reputation: number) {
+      if (reputation < ReputationRequirementForLevel.TWO) {
+        return 1;
+      } else if (reputation < ReputationRequirementForLevel.THREE) {
+        return 2;
+      } else if (reputation < ReputationRequirementForLevel.FOUR) {
+        return 3;
+      } else if (reputation < ReputationRequirementForLevel.FIVE) {
+        return 4;
+      } else {
+        return 5;
+      }
+    },
+
+    getReputationBreakpoint(reputation: number) {
+      if (reputation < ReputationRequirementForLevel.TWO) {
+        return ReputationRequirementForLevel.TWO;
+      } else if (reputation < ReputationRequirementForLevel.THREE) {
+        return ReputationRequirementForLevel.THREE;
+      } else if (reputation < ReputationRequirementForLevel.FOUR) {
+        return ReputationRequirementForLevel.FOUR;
+      } else if (reputation < ReputationRequirementForLevel.FIVE) {
+        return ReputationRequirementForLevel.FIVE;
+      } else {
+        return ReputationRequirementForLevel.FIVE;
+      }
+    },
 
     async request(characterId: string | number) {
       try {

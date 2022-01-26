@@ -633,7 +633,8 @@
     "pleaseSelectRequirementRarity": "Please select requirement rarity",
     "pleaseSelectRewardType": "Please select reward type",
     "pleaseSelectRewardRarity": "Please select reward rarity",
-    "reputationExplained": "Reputation explanation with tiers and percentages",
+    "reputationExplained": "Level 1: common 100%\nLevel 2: common 85% uncommon 15%\nLevel 3: common 77% uncommon 20% rare 3%\nLevel 4: common 69% uncommon 25% rare 6%\nLevel 5: common 66% uncommon 27% rare 6% epic 1%",
+    "reputationLevel": "Reputation level",
     "youNeedToHaveAtLeastOneCharacter": "You need to have at least one character to do Quests",
     "loading": "Loading..."
   },

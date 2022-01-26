@@ -1,26 +1,27 @@
 <template>
   <b-modal v-if="quest" class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop scrollable
            :title="$t('quests.turnIn')" size="xl" @close="resetTokens" @cancel="resetTokens"
-           :ok-title="$t('quests.submit')" :busy="isLoading"
+           :ok-title="$t('quests.submit')"
+           :busy="isLoading" :ok-disabled="quest.requirementType === RequirementType.DUST && dustToBurn === 0"
            @ok.prevent="quest.requirementType === RequirementType.DUST ? submitDust() : submit()">
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
-                   :showGivenWeaponIds="true" @chooseweapon="addBurnToken"
+                   showGivenWeaponIds @chooseweapon="addBurnToken"
                    :starsOptions="[quest.requirementRarity + 1]" :canFavorite="false"/>
-      <weapon-grid :weaponIds="tokensToBurn" :showGivenWeaponIds="true" @chooseweapon="removeBurnToken"
+      <weapon-grid :weaponIds="tokensToBurn" showGivenWeaponIds @chooseweapon="removeBurnToken"
                    :starsOptions="[quest.requirementRarity + 1]" :canFavorite="false"/>
     </div>
     <div v-else-if="quest.requirementType === RequirementType.DUST" class="d-flex align-items-center flex-column">
       <dust-balance-display class="w-50 p-5" :rarities="[quest.requirementRarity]"/>
       <h2>{{ $t('quests.howMuchToTurnIn') }}</h2>
-      <b-form-input type="number" v-model="dustToBurn" class="w-50" :min="0" :max="maxDust()"/>
+      <b-form-input type="number" number v-model="dustToBurn" class="w-50" :min="0" :max="maxDust()"/>
       <b-button class="m-3" variant="primary" @click="setRequiredDust">{{ $t('quests.setRequiredAmount') }}</b-button>
     </div>
     <div v-else class="d-flex">
-      <nft-list v-model="selectedToken" :showGivenNftIdTypes="true" :nftIdTypes="ownedNftIdTypes"
+      <nft-list v-model="selectedToken" showGivenNftIdTypes :nftIdTypes="ownedNftIdTypes"
                 @choosenft="addNftIdType" :starsOptions="[quest.requirementRarity + 1]"
                 :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
-      <nft-list :showGivenNftIdTypes="true" :nftIdTypes="nftIdTypesToBurn" @choosenft="removeNftIdType"
+      <nft-list showGivenNftIdTypes :nftIdTypes="nftIdTypesToBurn" @choosenft="removeNftIdType"
                 :starsOptions="[quest.requirementRarity + 1]"
                 :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
     </div>
@@ -39,7 +40,7 @@ import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 interface StoreMappedActions {
   submitProgress(payload: { characterID: string | number, tokenIds: (string | number)[] }): Promise<void>;
 
-  submitDustProgress(payload: { characterID: string | number, amount: string | number }): Promise<void>;
+  submitDustProgress(payload: { characterID: string | number, amount: number }): Promise<void>;
 }
 
 interface Data {
