@@ -41,6 +41,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         vars[VAR_EPIC_TIER] = 3;
         vars[VAR_LEGENDARY_TIER] = 4;
         staminaCost = 40;
+        vars[VAR_REPUTATION_LEVEL_2] = 1000;
+        vars[VAR_REPUTATION_LEVEL_3] = 2000;
+        vars[VAR_REPUTATION_LEVEL_4] = 5000;
+        vars[VAR_REPUTATION_LEVEL_5] = 10000;
     }
 
     modifier restricted() {
@@ -72,6 +76,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     uint8 public constant VAR_EPIC_TIER = 3;
     uint8 public constant VAR_LEGENDARY_TIER = 4;
     uint8 public constant VAR_CONTRACT_ENABLED = 9;
+    uint8 public constant VAR_REPUTATION_LEVEL_2 = 20;
+    uint8 public constant VAR_REPUTATION_LEVEL_3 = 21;
+    uint8 public constant VAR_REPUTATION_LEVEL_4 = 22;
+    uint8 public constant VAR_REPUTATION_LEVEL_5 = 23;
     uint8 public staminaCost;
     mapping(uint256 => uint256) public vars;
 
@@ -209,8 +217,18 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function assignNewQuest(uint256 characterID) private returns (uint256) {
+        uint256 currentReputation = characters.getNftVar(characterID, characters.NFTVAR_REPUTATION());
         // tier should be chosen by random, based on % for reputation level, for now, we take common
-        Quest memory quest = getNewQuest(0);
+        Quest memory quest;
+        if(currentReputation < vars[VAR_REPUTATION_LEVEL_2]) {
+            quest = getNewQuest(Rarity.COMMON);
+        } else if(currentReputation < vars[VAR_REPUTATION_LEVEL_3]) {
+            quest = getNewQuest(Rarity.UNCOMMON);
+        } else if(currentReputation < vars[VAR_REPUTATION_LEVEL_4]) {
+            quest = getNewQuest(Rarity.RARE);
+        } else {
+            quest = getNewQuest(Rarity.LEGENDARY);
+        }
         characterQuest[characterID] = quest.id;
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), uint256(quest.requirementType));
@@ -218,10 +236,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return quest.id;
     }
 
-    function getNewQuest(uint8 tier) private returns (Quest memory) {
+    function getNewQuest(Rarity tier) private returns (Quest memory) {
         // get random index from 0 to length - 1, which will indicate predetermined quest
         // uint32 index = random(quests.length);
-        Quest memory quest = quests[vars[tier]][quests[tier].length - 1];
+        Quest memory quest = quests[vars[uint8(tier)]][quests[uint8(tier)].length - 1];
         quest.id = nextQuestID++;
         questList[quest.id] = quest;
         // should assign new ID to quest and save it in questsList array (all quests are there)

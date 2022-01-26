@@ -190,7 +190,7 @@ export default Vue.extend({
       return this.questTemplate.tier === undefined
         || this.questTemplate.requirementType === undefined || this.questTemplate.requirementRarity === undefined || !this.questTemplate.requirementAmount
         || this.questTemplate.rewardType === undefined || this.questTemplate.rewardRarity === undefined || !this.questTemplate.rewardAmount
-        || !this.questTemplate.reputationAmount;
+        || !this.questTemplate.reputationAmount || this.showTemplateConfirmationModal;
     },
   },
 
