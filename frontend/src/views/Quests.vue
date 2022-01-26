@@ -13,14 +13,17 @@
             :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(character.id) : undefined]"
             :character="character" :hideIdContainer="true" :hideXpBar="true"/>
         </div>
-        <div v-if="character.quest && character.quest.reputation !== undefined" class="xp">
-          <span>{{ $t('quests.reputationLevel') }} {{ getReputationLevel(character.quest.reputation) }} <b-icon-question-circle
+        <div
+          v-if="character.quest && character.quest.reputation !== undefined && reputationLevelRequirements"
+          class="xp">
+          <span>{{ $t('quests.reputationLevel', {level: getReputationLevel(character.quest.reputation)}) }} <b-icon-question-circle
             class="pointer"
             @click="$bvModal.show('reputation-info-modal')"/></span>
-          <strong class="outline xp-text">{{ character.quest.reputation || 0 }} /
+          <strong v-if="getReputationLevel(character.quest.reputation) !== 5"
+                  class="outline xp-text">{{ character.quest.reputation || 0 }} /
             {{ getReputationBreakpoint(character.quest.reputation) }}</strong>
-          <b-progress class="reputation-progress" :max="getReputationBreakpoint(character.quest.reputation)"
-                      :value="character.quest.reputation"
+          <b-progress v-if="getReputationLevel(character.quest.reputation) !== 5" class="reputation-progress"
+                      :max="getReputationBreakpoint(character.quest.reputation)" :value="character.quest.reputation"
                       variant="primary"/>
         </div>
       </div>
@@ -93,12 +96,16 @@ export enum DustRarity {
   LESSER, GREATER, POWERFUL
 }
 
-//TODO: Discuss these values
-export enum ReputationRequirementForLevel {
-  TWO = 1000,
-  THREE = 2000,
-  FOUR = 5000,
-  FIVE = 10000,
+export const VAR_REPUTATION_LEVEL_2 = 20;
+export const VAR_REPUTATION_LEVEL_3 = 21;
+export const VAR_REPUTATION_LEVEL_4 = 22;
+export const VAR_REPUTATION_LEVEL_5 = 23;
+
+export interface ReputationLevelRequirements {
+  level2: number;
+  level3: number;
+  level4: number;
+  level5: number;
 }
 
 interface StoreMappedActions {
@@ -107,6 +114,8 @@ interface StoreMappedActions {
   getCharacterQuestData(payload: { characterId: string | number }): Promise<Quest>;
 
   requestQuest(payload: { characterID: string | number }): Promise<void>;
+
+  getReputationLevelRequirements(payload: { reputationLevels: number[] }): Promise<ReputationLevelRequirements>;
 }
 
 interface StoreMappedGetters {
@@ -115,6 +124,7 @@ interface StoreMappedGetters {
 
 interface Data {
   characters: Nft[];
+  reputationLevelRequirements?: ReputationLevelRequirements;
   isLoading: boolean;
   isRequestQuestLoading: boolean;
 }
@@ -132,6 +142,7 @@ export default Vue.extend({
   data() {
     return {
       characters: [] as Nft[],
+      reputationLevelRequirements: undefined,
       isLoading: false,
       isRequestQuestLoading: false,
     } as Data;
@@ -143,16 +154,17 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['fetchCharacters', 'getCharacterQuestData', 'requestQuest']) as StoreMappedActions,
+    ...mapActions(['fetchCharacters', 'getCharacterQuestData', 'requestQuest', 'getReputationLevelRequirements']) as StoreMappedActions,
 
     getReputationLevel(reputation: number) {
-      if (reputation < ReputationRequirementForLevel.TWO) {
+      if (!this.reputationLevelRequirements) return;
+      if (reputation < this.reputationLevelRequirements.level2) {
         return 1;
-      } else if (reputation < ReputationRequirementForLevel.THREE) {
+      } else if (reputation < this.reputationLevelRequirements.level3) {
         return 2;
-      } else if (reputation < ReputationRequirementForLevel.FOUR) {
+      } else if (reputation < this.reputationLevelRequirements.level4) {
         return 3;
-      } else if (reputation < ReputationRequirementForLevel.FIVE) {
+      } else if (reputation < this.reputationLevelRequirements.level5) {
         return 4;
       } else {
         return 5;
@@ -160,16 +172,17 @@ export default Vue.extend({
     },
 
     getReputationBreakpoint(reputation: number) {
-      if (reputation < ReputationRequirementForLevel.TWO) {
-        return ReputationRequirementForLevel.TWO;
-      } else if (reputation < ReputationRequirementForLevel.THREE) {
-        return ReputationRequirementForLevel.THREE;
-      } else if (reputation < ReputationRequirementForLevel.FOUR) {
-        return ReputationRequirementForLevel.FOUR;
-      } else if (reputation < ReputationRequirementForLevel.FIVE) {
-        return ReputationRequirementForLevel.FIVE;
+      if (!this.reputationLevelRequirements) return;
+      if (reputation < this.reputationLevelRequirements.level2) {
+        return this.reputationLevelRequirements.level2;
+      } else if (reputation < this.reputationLevelRequirements.level3) {
+        return this.reputationLevelRequirements.level3;
+      } else if (reputation < this.reputationLevelRequirements.level4) {
+        return this.reputationLevelRequirements.level4;
+      } else if (reputation < this.reputationLevelRequirements.level5) {
+        return this.reputationLevelRequirements.level5;
       } else {
-        return ReputationRequirementForLevel.FIVE;
+        return 0;
       }
     },
 
@@ -184,8 +197,10 @@ export default Vue.extend({
     },
 
     async refreshQuestData() {
+      const reputationLevels = [VAR_REPUTATION_LEVEL_2, VAR_REPUTATION_LEVEL_3, VAR_REPUTATION_LEVEL_4, VAR_REPUTATION_LEVEL_5];
       try {
         this.isLoading = true;
+        this.reputationLevelRequirements = await this.getReputationLevelRequirements({reputationLevels});
         this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
           character.quest = await this.getCharacterQuestData({characterId: character.id});
           console.log(character);

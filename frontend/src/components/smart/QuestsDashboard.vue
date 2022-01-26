@@ -97,6 +97,22 @@
         {{ promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest') }}
       </b-button>
     </b-form>
+    <b-form v-if="reputationLevelRequirements" class="d-flex flex-column gap-3">
+      <h2>{{ $t('quests.updateReputationLevelRequirements') }}</h2>
+      <div class="requirements-grid-container gap-3">
+        <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 2}) }}</label>
+        <b-form-input v-model="reputationLevelRequirements.level2"/>
+        <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 3}) }}</label>
+        <b-form-input v-model="reputationLevelRequirements.level3"/>
+        <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 4}) }}</label>
+        <b-form-input v-model="reputationLevelRequirements.level4"/>
+        <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 5}) }}</label>
+        <b-form-input v-model="reputationLevelRequirements.level5"/>
+      </div>
+      <b-button variant="primary" @click="updateRequirements" :disabled="updateRequirementsDisabled()">
+        {{ $t('quests.updateRequirements') }}
+      </b-button>
+    </b-form>
     <QuestTemplatesDisplay :promoQuestTemplates="promoQuestTemplates"/>
     <b-modal v-model="showTemplateConfirmationModal" @ok.prevent="onSubmit" :ok-disabled="isLoading"
              :title="promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest')">
@@ -113,7 +129,18 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {DustRarity, Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import {
+  DustRarity,
+  Quest,
+  Rarity,
+  ReputationLevelRequirements,
+  RequirementType,
+  RewardType,
+  VAR_REPUTATION_LEVEL_2,
+  VAR_REPUTATION_LEVEL_3,
+  VAR_REPUTATION_LEVEL_4,
+  VAR_REPUTATION_LEVEL_5
+} from '@/views/Quests.vue';
 import QuestTemplatesDisplay from '@/components/smart/QuestTemplatesDisplay.vue';
 import QuestDetails from '@/components/smart/QuestDetails.vue';
 
@@ -121,6 +148,10 @@ interface StoreMappedActions {
   addQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
 
   addPromoQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
+
+  getReputationLevelRequirements(payload: { reputationLevels: number[] }): Promise<ReputationLevelRequirements>;
+
+  setReputationLevelRequirements(payload: { reputationLevels: number[], requirements: number[] }): Promise<void>;
 }
 
 interface Data {
@@ -132,6 +163,7 @@ interface Data {
   promoQuestTemplates: boolean;
   isLoading: boolean;
   showTemplateConfirmationModal: boolean;
+  reputationLevelRequirements?: ReputationLevelRequirements;
 }
 
 export default Vue.extend({
@@ -157,6 +189,7 @@ export default Vue.extend({
       promoQuestTemplates: false,
       isLoading: false,
       showTemplateConfirmationModal: false,
+      reputationLevelRequirements: undefined,
       RequirementType,
       RewardType,
       Rarity,
@@ -165,7 +198,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['addQuestTemplate', 'addPromoQuestTemplate']) as StoreMappedActions,
+    ...mapActions(['addQuestTemplate', 'addPromoQuestTemplate', 'getReputationLevelRequirements', 'setReputationLevelRequirements']) as StoreMappedActions,
 
     async onSubmit() {
       try {
@@ -182,6 +215,20 @@ export default Vue.extend({
       }
     },
 
+    async updateRequirements() {
+      if (!this.reputationLevelRequirements) return;
+      try {
+        this.isLoading = true;
+        await this.setReputationLevelRequirements({
+          reputationLevels: [VAR_REPUTATION_LEVEL_2, VAR_REPUTATION_LEVEL_3, VAR_REPUTATION_LEVEL_4, VAR_REPUTATION_LEVEL_5],
+          requirements: [this.reputationLevelRequirements.level2, this.reputationLevelRequirements.level3,
+            this.reputationLevelRequirements.level4, this.reputationLevelRequirements.level5]
+        });
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     refreshQuestTemplates() {
       this.$root.$emit('refresh-quest-templates');
     },
@@ -192,10 +239,21 @@ export default Vue.extend({
         || this.questTemplate.rewardType === undefined || this.questTemplate.rewardRarity === undefined || !this.questTemplate.rewardAmount
         || !this.questTemplate.reputationAmount || this.showTemplateConfirmationModal;
     },
+
+    updateRequirementsDisabled() {
+      return !this.reputationLevelRequirements ||
+        !this.reputationLevelRequirements.level2 ||
+        !this.reputationLevelRequirements.level3 ||
+        !this.reputationLevelRequirements.level4 ||
+        !this.reputationLevelRequirements.level5 ||
+        this.isLoading || this.showTemplateConfirmationModal;
+    }
   },
 
-  mounted() {
+  async mounted() {
     this.refreshQuestTemplates();
+    const reputationLevels = [VAR_REPUTATION_LEVEL_2, VAR_REPUTATION_LEVEL_3, VAR_REPUTATION_LEVEL_4, VAR_REPUTATION_LEVEL_5];
+    this.reputationLevelRequirements = await this.getReputationLevelRequirements({reputationLevels});
   }
 
 });
@@ -206,9 +264,14 @@ export default Vue.extend({
   gap: 1rem;
 }
 
+.requirements-grid-container,
 .grid-container {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: 1fr 2fr;
   padding: 10px;
+}
+
+.requirements-grid-container {
+  grid-template-columns: 1fr 1fr;
 }
 </style>

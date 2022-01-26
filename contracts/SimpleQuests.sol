@@ -106,29 +106,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Quest[]) public quests;
     mapping(uint256 => Quest) public questList;
     mapping(uint256 => uint256) public characterQuest;
-    //    mapping(uint32 => uint32[]) public rewardsTypes;
-    //rewardsTypes[0].push(99);
-    //    mapping(uint32 => uint32[]) public requirementsTypes;
-    //1 star sword
-    //2 star sword
-    //3 star sword
-    //4 star sword
-    //5 star sword
-    //1 star junk
-    //2 star junk
-    //3 star junk
-    //4 star junk
-    //5 star junk
-    //stamina
-    //raid
-    //LB
-    //4B
-    //5B
-
-    //    mapping(uint32 => Quest) public commonQuestsList;
-    //    mapping(uint32 => Quest) public uncommonQuestsList;
-    //    mapping(uint32 => Quest) public rareQuestsList;
-    //    mapping(uint32 => Quest) public epicQuestsList;
 
     //    uint256[3] public constant CHARACTER_QUEST_DATA_KEYS = [101,102,103];
     //    uint256 public constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
@@ -149,8 +126,14 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
     }
 
-    //Quest example: tier = 1, id = TBA, requirementType = 1, requirementAmount = 2, rewardType = 1, rewardAmount = 1, reputationAmount = 12
-    // do 2 raids for 1x3* sword
+    function getVars(uint256[] calldata varFields) external view returns (uint256[] memory) {
+        uint256[] memory result = new uint256[](varFields.length);
+        for (uint i = 0; i < varFields.length; i++) {
+            result[i] = vars[varFields[i]];
+        }
+        return result;
+    }
+
     function addNewQuest(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
         RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) public {
         quests[uint8(tier)].push(Quest(0, tier,
@@ -226,6 +209,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             quest = getNewQuest(Rarity.UNCOMMON);
         } else if(currentReputation < vars[VAR_REPUTATION_LEVEL_4]) {
             quest = getNewQuest(Rarity.RARE);
+        } else if(currentReputation < vars[VAR_REPUTATION_LEVEL_5]) {
+            quest = getNewQuest(Rarity.EPIC);
         } else {
             quest = getNewQuest(Rarity.LEGENDARY);
         }

@@ -51,7 +51,7 @@ import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
-import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType} from '@/views/Quests.vue';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -3359,6 +3359,26 @@ export function createStore(web3: Web3) {
         console.log('getting skip cost for ', characterID);
 
         return await SimpleQuests.methods.staminaCost().call(defaultCallOptions(state));
+      },
+
+      async getReputationLevelRequirements({state}, {reputationLevels}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const requirementsRaw = await SimpleQuests.methods.getVars(reputationLevels).call(defaultCallOptions(state));
+        return {
+          level2: +requirementsRaw[0],
+          level3: +requirementsRaw[1],
+          level4: +requirementsRaw[2],
+          level5: +requirementsRaw[3]
+        } as ReputationLevelRequirements;
+      },
+
+      async setReputationLevelRequirements({state}, {reputationLevels, requirements}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.setVars(reputationLevels, requirements).send(defaultCallOptions(state));
       },
 
       async canSkipQuest({state}, {characterID}) {
