@@ -348,12 +348,13 @@ export default Vue.extend({
             power += this.getCharacterPower(x.id);
           }
         });
+        power = Math.floor(power * this.burnPowerMultiplier);
       }
       else {
         power = this.soulAmount * 10;
       }
 
-      return Math.floor(power * this.burnPowerMultiplier);
+      return power;
     },
 
     powerLimitExceeded(): boolean {
