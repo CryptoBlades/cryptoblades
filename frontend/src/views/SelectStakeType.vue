@@ -11,7 +11,8 @@
           :estimatedYield="estimatedYields[e.stakeType]"
           :rewardsDuration="stakeOverviews[e.stakeType].rewardsDuration"
           :deprecated="e.deprecated"
-          :rewardDistributionTimeLeft="stakeOverviews[e.stakeType].rewardDistributionTimeLeft" />
+          :rewardDistributionTimeLeft="stakeOverviews[e.stakeType].rewardDistributionTimeLeft"
+          :currentRewardEarned="staking[e.stakeType].currentRewardEarned"/>
       </li>
     </ul>
     <div class="loading-indicator" v-else>
@@ -37,7 +38,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['stakeOverviews']),
+    ...mapState(['stakeOverviews', 'staking']),
     ...mapGetters(['availableStakeTypes', 'availableNftStakeTypes']),
 
     entries() {
