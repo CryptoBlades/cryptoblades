@@ -519,9 +519,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             if (fighterByCharacter[attackerID].useShield) {
                 uint24 attackerShieldDefense = 3;
 
-                (, , , uint8 attackerShieldTrait) = shields.getFightData(
-                    fighterByCharacter[attackerID].shieldID,
-                    attackerTrait
+                uint8 attackerShieldTrait = shields.getTrait(
+                    fighterByCharacter[attackerID].shieldID
                 );
 
                 if (
@@ -543,9 +542,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             if (fighterByCharacter[defenderID].useShield) {
                 uint24 defenderShieldDefense = 3;
 
-                (, , , uint8 defenderShieldTrait) = shields.getFightData(
-                    fighterByCharacter[defenderID].shieldID,
-                    defenderTrait
+                uint8 defenderShieldTrait = shields.getTrait(
+                    fighterByCharacter[defenderID].shieldID
                 );
 
                 if (
