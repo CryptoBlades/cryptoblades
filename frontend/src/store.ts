@@ -4356,10 +4356,8 @@ export function createStore(web3: Web3) {
       async getIsCharacterInArena({ state, commit }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
-        console.log('fetching');
         const isCharacterInArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: state.defaultAccount });
         commit('updateCharacterInArena', { characterId, isCharacterInArena });
-        console.log('updating');
 
         return isCharacterInArena;
       },

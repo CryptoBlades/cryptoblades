@@ -199,6 +199,7 @@
                 <div class="d-flex justify-content-flex-end ml-auto">
                   <b-button
                     v-if="canClaimGarrisonXp"
+                    :disabled="isClaimingXp"
                     variant="primary"
                     class="ml-3 gtag-link-others"
                     @click="onClaimGarrisonXp">
@@ -295,6 +296,7 @@ interface Data {
   soulAmount: number;
   remainingPowerLimit: number;
   burnPowerMultiplier: number;
+  isClaimingXp: boolean;
 }
 
 export default Vue.extend({
@@ -392,7 +394,8 @@ export default Vue.extend({
       isUpgrading: false,
       soulAmount: 0,
       remainingPowerLimit: 0,
-      burnPowerMultiplier: 1
+      burnPowerMultiplier: 1,
+      isClaimingXp: false
     } as Data;
   },
 
@@ -503,7 +506,9 @@ export default Vue.extend({
       this.soulAmount = 0;
     },
     async onClaimGarrisonXp() {
+      this.isClaimingXp = true;
       await this.claimGarrisonXp(this.ownedGarrisonCharacterIds.filter((id: string|number) => +this.xpRewards[id] > 0));
+      this.isClaimingXp = true;
     }
   },
 

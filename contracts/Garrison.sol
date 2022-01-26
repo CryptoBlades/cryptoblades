@@ -66,7 +66,7 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
 
     function _isCharactersOwner(uint256[] memory ids) internal view {
         for(uint i = 0; i < ids.length; i++) {
-            require(characterOwner[i] == msg.sender, 'Not owner');
+            require(characterOwner[ids[i]] == msg.sender, 'Not owner');
         }
     }
 
