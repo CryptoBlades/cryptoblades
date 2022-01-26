@@ -1,6 +1,6 @@
 <template>
-  <div v-if="characters.length !== 0" class="d-flex flex-column quests-container">
-    <div v-for="character in characters" :key="character.id" class="row quest-row">
+  <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container">
+    <div v-for="character in characters" :key="character.id" class="d-flex quest-row">
       <div class="character"
            :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(character.id) : undefined]">
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">

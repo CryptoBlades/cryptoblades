@@ -98,7 +98,7 @@
       </b-button>
     </b-form>
     <b-form v-if="reputationLevelRequirements" class="d-flex flex-column gap-3">
-      <h2>{{ $t('quests.updateReputationLevelRequirements') }}</h2>
+      <h2 class="pt-3">{{ $t('quests.updateReputationLevelRequirements') }}</h2>
       <div class="requirements-grid-container gap-3">
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 2}) }}</label>
         <b-form-input v-model="reputationLevelRequirements.level2"/>
