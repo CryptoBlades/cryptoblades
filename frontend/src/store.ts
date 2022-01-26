@@ -1205,6 +1205,7 @@ export function createStore(web3: Web3) {
                   dispatch('fetchSkillBalance'),
                   dispatch('fetchFightRewardSkill'),
                   dispatch('fetchFightRewardXp'),
+                  dispatch('fetchGarrisonCharactersXp'),
                   dispatch('fetchDustBalance')
                 ]);
               })
@@ -1400,6 +1401,7 @@ export function createStore(web3: Web3) {
           dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
+          dispatch('fetchGarrisonCharactersXp'),
           dispatch('fetchFightGasOffset'),
           dispatch('fetchFightBaseline'),
         ]);
@@ -3201,18 +3203,38 @@ export function createStore(web3: Web3) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
 
-        const xpCharaIdPairs = await Promise.all(
-          state.ownedCharacterIds.map(async charaId => {
-            const xp = await CryptoBlades.methods
-              .getXpRewards(charaId)
-              .call(defaultCallOptions(state));
+        const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
 
-            return [charaId, xp];
-          })
-        );
+        const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
+          return [charaId, xps[i]];
+        });
 
         commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
         return xpCharaIdPairs;
+      },
+
+      async fetchGarrisonCharactersXp({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        const xps = await CryptoBlades.methods.getXpRewards(state.ownedGarrisonCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
+
+        const xpCharaIdPairs = state.ownedGarrisonCharacterIds.map((charaId, i) => {
+          return [charaId, xps[i]];
+        });
+
+        commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
+      },
+
+      async claimGarrisonXp({ state, dispatch }, characterIds) {
+        const { Garrison } = state.contracts();
+        if(!Garrison) return;
+        await Garrison.methods.claimAllXp(characterIds).send({ from: state.defaultAccount });
+
+        await Promise.all([
+          dispatch('fetchGarrisonCharacters', state.ownedGarrisonCharacterIds),
+          dispatch('fetchGarrisonCharactersXp')
+        ]);
       },
 
       async purchaseShield({ state, dispatch }) {
@@ -4333,7 +4355,6 @@ export function createStore(web3: Web3) {
       async getIsCharacterInArena({ state, commit }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
-
         const isCharacterInArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: state.defaultAccount });
         commit('updateCharacterInArena', { characterId, isCharacterInArena });
 
@@ -4555,6 +4576,13 @@ export function createStore(web3: Web3) {
         if(!BurningManager || !state.defaultAccount) return;
 
         return await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
+      },
+
+      async fetchBurnPowerMultiplier({ state }) {
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
+
+        return await BurningManager.methods.vars(2).call(defaultCallOptions(state));
       }
     },
   });
