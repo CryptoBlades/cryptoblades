@@ -125,8 +125,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     Garrison public garrison;
 
-    uint256 public burnPowerMultiplier;
-
     uint256 public constant NFTVAR_BONUS_POWER = 2;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
@@ -187,7 +185,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         for(uint i = 0; i < burnIds.length; i++) {
             soulAmount += getTotalPower(burnIds[i]).div(10);
         }
-        return soulAmount.mul(burnPowerMultiplier).div(1e18);
+        return soulAmount;
     }
 
     function mint(address minter, uint256 seed) public restricted {
@@ -253,7 +251,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokenID;
     }
 
-    function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId) external restricted {
+    function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId, uint256 burnPowerMultiplier) external restricted {
         uint256 burnPower = 0;
         for(uint i = 0; i < burnIds.length; i++) {
             burnPower += nftVars[burnIds[i]][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[burnIds[i]].level));
@@ -470,10 +468,5 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
     function setNftVar(uint256 characterID, uint256 nftVar, uint256 value) public restricted {
         nftVars[characterID][nftVar] = value;
-    }
-
-    function setBurnPowerMultiplier(uint256 multiplier) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
-        burnPowerMultiplier = multiplier;
     }
 }

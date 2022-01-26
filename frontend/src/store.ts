@@ -4582,10 +4582,10 @@ export function createStore(web3: Web3) {
       },
 
       async fetchBurnPowerMultiplier({ state }) {
-        const { Characters } = state.contracts();
-        if(!Characters || !state.defaultAccount) return;
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
 
-        return await Characters.methods.burnPowerMultiplier().call(defaultCallOptions(state));
+        return await BurningManager.methods.vars(2).call(defaultCallOptions(state));
       }
     },
   });

@@ -21,6 +21,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     uint256 public constant USERVAR_SOUL_SUPPLY = 1;
     mapping(uint256 => uint256) public vars;
     uint256 public constant VAR_ROI_DAYS = 1;
+    uint256 public constant VAR_BURN_POWER_MULTIPLIER = 2;
 
     function initialize(Characters _characters, Garrison _garrison, CryptoBlades _game)
         public
@@ -78,18 +79,18 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         game.payContractTokenOnly(tx.origin, burnCharacterFee(burnId));
         uint256[] memory burnIds = new uint256[](1);
         burnIds[0] = burnId;
-        userVars[tx.origin][USERVAR_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds);
+        userVars[tx.origin][USERVAR_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds).mul(vars[VAR_BURN_POWER_MULTIPLIER]).div(1e18);
         characters.burnIntoSoul(burnIds);
     }
 
     function burnCharactersIntoCharacter(uint256[] memory burnIds, uint256 targetId) public isCharactersOwner(burnIds) {
         game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
-        characters.burnIntoCharacter(burnIds, targetId);
+        characters.burnIntoCharacter(burnIds, targetId, vars[VAR_BURN_POWER_MULTIPLIER]);
     }
 
     function burnCharactersIntoSoul(uint256[] memory burnIds) public isCharactersOwner(burnIds) {
         game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
-        userVars[msg.sender][USERVAR_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds);
+        userVars[msg.sender][USERVAR_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds).mul(vars[VAR_BURN_POWER_MULTIPLIER]).div(1e18);
         characters.burnIntoSoul(burnIds);
     }
 

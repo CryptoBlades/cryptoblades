@@ -24,7 +24,9 @@ module.exports = async function (deployer, network) {
     await garrison.migrateTo_d514745(game.address);
 
     let VAR_ROI_DAYS = await burningManager.VAR_ROI_DAYS();
+    let VAR_BURN_POWER_MULTIPLIER = await burningManager.VAR_BURN_POWER_MULTIPLIER();
     await burningManager.setVar(VAR_ROI_DAYS, 33);
+    await burningManager.setVar(VAR_BURN_POWER_MULTIPLIER, '1000000000000000000');
 
     let BURNER_ROLE = await burningManager.BURNER_ROLE();
     await burningManager.grantRole(BURNER_ROLE, nftMarket.address);
@@ -36,6 +38,5 @@ module.exports = async function (deployer, network) {
 
     let characters_GAME_ADMIN = await characters.GAME_ADMIN();
     await characters.grantRole(characters_GAME_ADMIN, burningManager.address);
-    await characters.setBurnPowerMultiplier('1000000000000000000');
   }
 };
