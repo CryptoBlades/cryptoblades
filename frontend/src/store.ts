@@ -3204,7 +3204,7 @@ export function createStore(web3: Web3) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
 
-        const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds).call(defaultCallOptions(state));
+        const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
 
         const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
           return [charaId, xps[i]];
@@ -3218,13 +3218,24 @@ export function createStore(web3: Web3) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
 
-        const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds).call(defaultCallOptions(state));
+        const xps = await CryptoBlades.methods.getXpRewards(state.ownedGarrisonCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
 
         const xpCharaIdPairs = state.ownedGarrisonCharacterIds.map((charaId, i) => {
           return [charaId, xps[i]];
         });
 
         commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
+      },
+
+      async claimGarrisonXp({ state, dispatch }) {
+        const { Garrison } = state.contracts();
+        if(!Garrison) return;
+        await Garrison.methods.claimAllXp().send({ from: state.defaultAccount });
+
+        await Promise.all([
+          dispatch('fetchGarrisonCharacters', state.ownedGarrisonCharacterIds),
+          dispatch('fetchGarrisonCharactersXp')
+        ]);
       },
 
       async purchaseShield({ state, dispatch }) {

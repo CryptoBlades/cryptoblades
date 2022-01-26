@@ -198,12 +198,19 @@
                 <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
                 <div class="d-flex justify-content-flex-end ml-auto">
                   <b-button
+                    v-if="canClaimGarrisonXp"
+                    variant="primary"
+                    class="ml-3 gtag-link-others"
+                    @click="onClaimGarrisonXp">
+                    {{$t('plaza.claimXp')}}
+                  </b-button>
+                  <b-button
                     v-if="burningEnabled"
                     :disabled="!haveCharacters"
                     variant="primary"
                     class="ml-3 gtag-link-others"
                     @click="toggleSoulCreation"
-                    v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+                    v-tooltip="$t('plaza.recruitNew')">
                     {{$t('plaza.burn')}} / {{$t('plaza.upgrade')}}
                   </b-button>
                   <b-button
@@ -291,7 +298,7 @@ interface Data {
 
 export default Vue.extend({
   computed: {
-    ...mapState(['characters', 'ownedGarrisonCharacterIds', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
+    ...mapState(['characters', 'ownedGarrisonCharacterIds', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance', 'xpRewards']),
     ...mapGetters([
       'contracts',
       'ownCharacters',
@@ -354,6 +361,10 @@ export default Vue.extend({
 
     burningEnabled(): boolean {
       return featureFlagBurningManager;
+    },
+
+    canClaimGarrisonXp(): boolean {
+      return this.ownedGarrisonCharacterIds.filter((id: string|number) => +this.xpRewards[id] > 0).length > 0;
     }
   },
 
@@ -385,7 +396,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
-      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter']),
+      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
@@ -486,6 +497,9 @@ export default Vue.extend({
       this.updatedRemainingPowerLimit();
       this.soulBalance = await this.fetchSoulBalance();
       this.soulAmount = 0;
+    },
+    async onClaimGarrisonXp() {
+      await this.claimGarrisonXp();
     }
   },
 

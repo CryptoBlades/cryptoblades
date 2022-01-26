@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./characters.sol";
+import "./cryptoblades.sol";
 
 contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -24,6 +25,8 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
     mapping(uint256 => address) public characterOwner;
     EnumerableSet.UintSet private allCharactersInGarrison;
 
+    CryptoBlades game;
+
     event CharacterReceived(uint256 indexed character, address indexed minter);
 
     function initialize(Characters _characters)
@@ -34,6 +37,10 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         characters = _characters;
+    }
+
+    function migrateTo_d514745(CryptoBlades _game) external restricted {
+        game = _game;
     }
 
     // MODIFIERS
@@ -102,6 +109,14 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
     function swapWithGarrison(uint256 plazaId, uint256 garrisonId) external {
       sendToGarrison(plazaId);
       restoreFromGarrison(garrisonId);
+    }
+
+    function claimAllXp() external {
+        require(balanceOf(msg.sender) > 0);
+        uint256[] memory xps = game.getXpRewards(getUserCharacters());
+        uint256[] memory chars = getUserCharacters();
+        game.resetXp(chars);
+        characters.gainXpAll(chars, xps);
     }
 
     function updateOnBurn(address playerAddress, uint256 burnedId) external restricted {

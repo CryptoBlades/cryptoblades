@@ -21,6 +21,8 @@ module.exports = async function (deployer, network) {
     let game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
     let burningManager = await deployProxy(BurningManager, [characters.address, garrison.address, game.address], { deployer });
 
+    await garrison.migrateTo_d514745(game.address);
+
     let VAR_ROI_DAYS = await burningManager.VAR_ROI_DAYS();
     await burningManager.setVar(VAR_ROI_DAYS, 33);
 
@@ -30,6 +32,7 @@ module.exports = async function (deployer, network) {
 
     let GAME_ADMIN = await game.GAME_ADMIN();
     await game.grantRole(GAME_ADMIN, burningManager.address);
+    await game.grantRole(GAME_ADMIN, garrison.address);
 
     let characters_GAME_ADMIN = await characters.GAME_ADMIN();
     await characters.grantRole(characters_GAME_ADMIN, burningManager.address);
