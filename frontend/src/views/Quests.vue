@@ -31,7 +31,7 @@
                     :characterId="character.id"/>
       <div v-else-if="isRequestQuestLoading" class="request-quest">
         <b-button variant="primary" :disabled="true">
-          <i class="fas fa-spinner fa-spin"></i>
+          <i class="fas fa-spinner fa-spin"/>
           {{ $t('quests.loading') }}
         </b-button>
       </div>
@@ -47,7 +47,7 @@
     </b-modal>
   </div>
   <div v-else-if="isLoading">
-    <i class="fas fa-spinner fa-spin"></i>
+    <i class="fas fa-spinner fa-spin"/>
     {{ $t('quests.loading') }}
   </div>
   <div v-else class="m-4 font-weight-bold">

@@ -34,9 +34,9 @@
             v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.RARE"
             :isDefault="true" :nft="{ type: '5bdust' }"/>
         </div>
-        <div v-if="!isQuestTemplate" class="quest-progress">
+        <div v-if="!isQuestTemplate && !isDisplayOnly" class="quest-progress">
           <strong class="quest-progress-text">{{ quest.progress }} / {{ quest.requirementAmount }}</strong>
-          <b-progress class="quest-progress-bar" :class="isDisplayOnly ? 'mb-2' : ''" :max="quest.requirementAmount" :value="quest.progress"
+          <b-progress class="quest-progress-bar" :max="quest.requirementAmount" :value="quest.progress"
                       variant="primary"/>
         </div>
       </div>
@@ -87,7 +87,7 @@
       </div>
       <div v-else-if="isQuestActionLoading" class="d-flex">
         <b-button variant="primary" class="flex-1" :disabled="true">
-          <i class="fas fa-spinner fa-spin"></i>
+          <i class="fas fa-spinner fa-spin"/>
           {{ $t('quests.loading') }}
         </b-button>
       </div>
@@ -215,7 +215,7 @@ export default Vue.extend({
   },
 
   async mounted() {
-    if (!this.isQuestTemplate) {
+    if (!this.isQuestTemplate && !this.isDisplayOnly) {
       await this.refreshSkipQuestData();
     }
   }

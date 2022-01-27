@@ -21,8 +21,12 @@
       </b-form-select>
     </b-form>
     <div class="d-flex gap-3 flex-wrap p-3">
-      <h3 v-if="questTemplates.length === 0">{{ $t('quests.noQuestTemplatesInSelectedTier') }}</h3>
-      <QuestDetails v-for="(questTemplate, index) in questTemplates" :key="index" :quest="questTemplate"
+      <h3 v-if="isLoading">
+        <i class="fas fa-spinner fa-spin"/>
+        {{ $t('quests.loading') }}
+      </h3>
+      <h3 v-else-if="questTemplates.length === 0"> {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
+      <QuestDetails v-else v-for="(questTemplate, index) in questTemplates" :key="index" :quest="questTemplate"
                     :isQuestTemplate="true" :questIndex="index" :refreshQuestTemplates="refreshQuestTemplates"/>
     </div>
   </div>
@@ -43,6 +47,7 @@ interface Data {
   questTemplates: Quest[];
   templatesTier?: Rarity;
   promoQuestTemplates: boolean;
+  isLoading: boolean;
 }
 
 export default Vue.extend({
@@ -55,6 +60,7 @@ export default Vue.extend({
       questTemplates: [],
       templatesTier: undefined,
       promoQuestTemplates: false,
+      isLoading: false,
       Rarity,
     } as Data;
   },
@@ -64,11 +70,16 @@ export default Vue.extend({
 
     async refreshQuestTemplates() {
       if (this.templatesTier === undefined) return;
-      if (this.promoQuestTemplates) {
-        const promoTier = this.templatesTier + 10;
-        this.questTemplates = await this.getQuestTemplates({tier: promoTier});
-      } else {
-        this.questTemplates = await this.getQuestTemplates({tier: this.templatesTier});
+      try {
+        this.isLoading = true;
+        if (this.promoQuestTemplates) {
+          const promoTier = this.templatesTier + 10;
+          this.questTemplates = await this.getQuestTemplates({tier: promoTier});
+        } else {
+          this.questTemplates = await this.getQuestTemplates({tier: this.templatesTier});
+        }
+      } finally {
+        this.isLoading = false;
       }
     },
   },

@@ -43,7 +43,8 @@
               {{ $t(`quests.dustRarityType.${DustRarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-select v-else class="mt-2 mb-2" v-model="questTemplate.requirementRarity"
+          <b-form-select v-else-if="questTemplate.requirementType !== RequirementType.RAID" class="mt-2 mb-2"
+                         v-model="questTemplate.requirementRarity"
                          :disabled="questTemplate.requirementType === undefined">
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRequirementRarity') }}
@@ -52,8 +53,9 @@
               {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-input v-model="questTemplate.requirementAmount"
-                        :disabled="questTemplate.requirementRarity === undefined" type="number" number/>
+          <b-form-input v-model="questTemplate.requirementAmount" :min="0"
+                        :disabled="questTemplate.requirementRarity === undefined && questTemplate.requirementType !== RequirementType.RAID"
+                        type="number" number/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reward') }}</label>
         <div class="d-flex align-items-center gap-3">
@@ -85,14 +87,14 @@
             </b-form-select-option>
           </b-form-select>
           <b-form-input v-model="questTemplate.rewardAmount" :disabled="questTemplate.rewardRarity === undefined"
-                        type="number" number/>
+                        type="number" number :min="0"/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
         <div class="d-flex align-items-center gap-3">
-          <b-form-input v-model="questTemplate.reputationAmount" type="number" number/>
+          <b-form-input v-model="questTemplate.reputationAmount" type="number" number :min="0"/>
         </div>
       </div>
-      <b-button variant="primary" @click="showTemplateConfirmationModal = true"
+      <b-button variant="primary" @click="showConfirmationModal"
                 :disabled="addNewQuestDisabled()">
         {{ promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest') }}
       </b-button>
@@ -101,13 +103,13 @@
       <h2 class="pt-3">{{ $t('quests.updateReputationLevelRequirements') }}</h2>
       <div class="requirements-grid-container gap-3">
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 2}) }}</label>
-        <b-form-input type="number" number v-model="reputationLevelRequirements.level2"/>
+        <b-form-input type="number" number :min="0" v-model="reputationLevelRequirements.level2"/>
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 3}) }}</label>
-        <b-form-input type="number" number v-model="reputationLevelRequirements.level3"/>
+        <b-form-input type="number" number :min="0" v-model="reputationLevelRequirements.level3"/>
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 4}) }}</label>
-        <b-form-input type="number" number v-model="reputationLevelRequirements.level4"/>
+        <b-form-input type="number" number :min="0" v-model="reputationLevelRequirements.level4"/>
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 5}) }}</label>
-        <b-form-input type="number" number v-model="reputationLevelRequirements.level5"/>
+        <b-form-input type="number" number :min="0" v-model="reputationLevelRequirements.level5"/>
       </div>
       <b-button variant="primary" @click="updateRequirements" :disabled="updateRequirementsDisabled()">
         {{ $t('quests.updateRequirements') }}
@@ -117,7 +119,7 @@
       <h2 class="pt-3">{{ $t('quests.updateSkipQuestStaminaCost') }}</h2>
       <div class="requirements-grid-container gap-3">
         <label class="m-0 align-self-center">{{ $t('quests.staminaCost') }}</label>
-        <b-form-input type="number" number v-model="staminaCost"/>
+        <b-form-input type="number" number :min="0" v-model="staminaCost"/>
       </div>
       <b-button variant="primary" @click="updateStaminaCost" :disabled="isLoading || showTemplateConfirmationModal">
         {{ $t('quests.updateStaminaCost') }}
@@ -197,9 +199,9 @@ export default Vue.extend({
       },
       rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       dustRarities: [DustRarity.LESSER, DustRarity.GREATER, DustRarity.POWERFUL],
-      requirementTypes: [RequirementType.NONE, RequirementType.WEAPON, RequirementType.JUNK,
+      requirementTypes: [RequirementType.WEAPON, RequirementType.JUNK,
         RequirementType.DUST, RequirementType.TRINKET, RequirementType.SHIELD, RequirementType.RAID],
-      rewardTypes: [RewardType.NONE, RewardType.WEAPON, RewardType.JUNK,
+      rewardTypes: [RewardType.WEAPON, RewardType.JUNK,
         RewardType.DUST, RewardType.TRINKET, RewardType.SHIELD],
       promoQuestTemplates: false,
       isLoading: false,
@@ -222,6 +224,13 @@ export default Vue.extend({
       'setSkipQuestStaminaCost',
       'getSkipQuestStaminaCost',
     ]) as StoreMappedActions,
+
+    showConfirmationModal() {
+      if (this.questTemplate.requirementType === RequirementType.RAID) {
+        this.questTemplate.requirementRarity = Rarity.COMMON;
+      }
+      this.showTemplateConfirmationModal = true;
+    },
 
     async onSubmit() {
       try {
@@ -269,9 +278,11 @@ export default Vue.extend({
 
     addNewQuestDisabled() {
       return this.questTemplate.tier === undefined
-        || this.questTemplate.requirementType === undefined || this.questTemplate.requirementRarity === undefined || !this.questTemplate.requirementAmount
+        || this.questTemplate.requirementType === undefined
+        || (this.questTemplate.requirementRarity === undefined && this.questTemplate.requirementType !== RequirementType.RAID)
+        || !this.questTemplate.requirementAmount
         || this.questTemplate.rewardType === undefined || this.questTemplate.rewardRarity === undefined || !this.questTemplate.rewardAmount
-        || !this.questTemplate.reputationAmount || this.showTemplateConfirmationModal;
+        || !this.questTemplate.reputationAmount || this.showTemplateConfirmationModal || this.isLoading;
     },
 
     updateRequirementsDisabled() {
