@@ -82,7 +82,7 @@ export default {
 }
 .pvpWrapper {
   min-height: 100vh;
-  background-image: url('../assets/pvp-bg.png');
+  background-image: url('../assets/pvpBackgroundImage.png');
   padding: 1rem 4rem 4rem 4rem;
   margin: -2rem -1rem 0 -1rem;
 
