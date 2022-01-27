@@ -10,6 +10,7 @@ import "./Promos.sol";
 import "./util.sol";
 import "./items/Junk.sol";
 import "./items/RaidTrinket.sol";
+import "./SafeRandoms.sol";
 
 contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
@@ -23,8 +24,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     Junk public junk;
     RaidTrinket public trinket;
     Shields public shields;
+    SafeRandoms public safeRandoms;
 
-    function initialize(Characters _characters, Weapons _weapons, Junk _junk, RaidTrinket _trinket, Shields _shields) public initializer {
+    function initialize(Characters _characters, Weapons _weapons, Junk _junk, RaidTrinket _trinket, Shields _shields, SafeRandoms _safeRandoms) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
@@ -34,6 +36,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         junk = _junk;
         trinket = _trinket;
         shields = _shields;
+        safeRandoms = _safeRandoms;
         nextQuestID = 1;
         vars[VAR_COMMON_TIER] = 0;
         vars[VAR_UNCOMMON_TIER] = 1;
