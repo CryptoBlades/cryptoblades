@@ -1022,6 +1022,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
+    function transferUnclaimedRewards(address targetAddress, uint256 amount) public {
+        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(amount);
+        tokenRewards[targetAddress] = tokenRewards[targetAddress].add(amount);
+    }
+
     function claimXpRewards() public {
         // our characters go to the tavern to rest
         // they meditate on what they've learned
