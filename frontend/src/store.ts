@@ -3362,6 +3362,7 @@ export function createStore(web3: Web3) {
       async setSkipQuestStaminaCost({state}, {staminaCost}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
+        console.log('setting stamina cost to', staminaCost);
 
         return await SimpleQuests.methods.setSkipQuestStaminaCost(staminaCost).send(defaultCallOptions(state));
       },

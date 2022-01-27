@@ -266,7 +266,6 @@ export default Vue.extend({
     },
 
     async updateStaminaCost() {
-      if (!this.staminaCost) return;
       try {
         this.isLoading = true;
         await this.setSkipQuestStaminaCost({staminaCost: this.staminaCost});

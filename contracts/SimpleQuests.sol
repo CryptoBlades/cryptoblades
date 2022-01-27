@@ -49,6 +49,15 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         vars[VAR_REPUTATION_LEVEL_3] = 2000;
         vars[VAR_REPUTATION_LEVEL_4] = 5000;
         vars[VAR_REPUTATION_LEVEL_5] = 10000;
+        // 100% common chance
+        questTierChances[0] = [100, 100, 100, 100];
+        // 15% uncommon chance
+        questTierChances[1] = [85, 100, 100, 100];
+        // 20% uncommon, 3% rare
+        questTierChances[2] = [77, 97, 100, 100];
+        questTierChances[3] = [69, 94, 100, 100];
+        // 0% legendary
+        questTierChances[4] = [66, 93, 99, 100];
     }
 
     modifier restricted() {
@@ -110,6 +119,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Quest[]) public quests;
     mapping(uint256 => Quest) public questList;
     mapping(uint256 => uint256) public characterQuest;
+    mapping(uint256 => uint256[4]) public questTierChances;
 
     //    uint256[3] public constant CHARACTER_QUEST_DATA_KEYS = [101,102,103];
     //    uint256 public constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
@@ -212,18 +222,36 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function assignNewQuest(uint256 characterID) private returns (uint256) {
         uint256 seed = safeRandoms.popSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID), true, true);
         uint256 currentReputation = characters.getNftVar(characterID, characters.NFTVAR_REPUTATION());
-        // tier should be chosen by random, based on % for reputation level, for now, we take it based on lvl
-        Quest memory quest;
+        uint256 reputationLevel;
         if (currentReputation < vars[VAR_REPUTATION_LEVEL_2]) {
-            quest = getNewQuest(Rarity.COMMON, seed);
+            reputationLevel = 0;
         } else if (currentReputation < vars[VAR_REPUTATION_LEVEL_3]) {
-            quest = getNewQuest(Rarity.UNCOMMON, seed);
+            reputationLevel = 1;
         } else if (currentReputation < vars[VAR_REPUTATION_LEVEL_4]) {
-            quest = getNewQuest(Rarity.RARE, seed);
+            reputationLevel = 2;
         } else if (currentReputation < vars[VAR_REPUTATION_LEVEL_5]) {
-            quest = getNewQuest(Rarity.EPIC, seed);
+            reputationLevel = 3;
         } else {
+            reputationLevel = 4;
+        }
+        uint256 tierRoll = RandomUtil.randomSeededMinMax(1, 100, seed);
+        seed = RandomUtil.combineSeeds(seed,1);
+        uint256[4] memory chances = questTierChances[reputationLevel];
+        Quest memory quest;
+        if (tierRoll > chances[3]) {
             quest = getNewQuest(Rarity.LEGENDARY, seed);
+        }
+        else if (tierRoll > chances[2]) {
+            quest = getNewQuest(Rarity.EPIC, seed);
+        }
+        else if (tierRoll > chances[1]) {
+            quest = getNewQuest(Rarity.RARE, seed);
+        }
+        else if (tierRoll > chances[0]) {
+            quest = getNewQuest(Rarity.UNCOMMON, seed);
+        }
+        else {
+            quest = getNewQuest(Rarity.COMMON, seed);
         }
         characterQuest[characterID] = quest.id;
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
