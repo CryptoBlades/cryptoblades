@@ -1251,7 +1251,7 @@ contract("PvpArena", (accounts) => {
     });
   });
 
-  describe("#performDuels", async () => {
+  describe.only("#performDuels", async () => {
     describe("happy path", () => {
       describe("attacker wins", () => {
         let character1ID;
@@ -1326,6 +1326,8 @@ contract("PvpArena", (accounts) => {
           const transaction = await pvpArena.performDuels(duelQueue, {
             from: accounts[0],
           });
+
+          console.log(transaction.receipt.gasUsed)
 
           previousBalance = await skillToken.balanceOf(accounts[1]);
           duelEvent = await expectEvent.inTransaction(

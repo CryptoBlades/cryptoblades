@@ -10,6 +10,8 @@ import "./cryptoblades.sol";
 import "./characters.sol";
 import "./weapons.sol";
 import "./shields.sol";
+import "./common.sol";
+
 
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -531,7 +533,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 );
 
                 if (
-                    (((attackerShieldTrait + 1) % 4) == defenderTrait)
+                    Common.isTraitEffectiveAgainst(attackerShieldTrait, defenderTrait)
                 ) {
                     attackerShieldDefense = 10;
                 }
@@ -552,7 +554,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 );
 
                 if (
-                    (((defenderShieldTrait + 1) % 4) == attackerTrait)
+                    Common.isTraitEffectiveAgainst(defenderShieldTrait, attackerTrait)
                 ) {
                     defenderShieldDefense = 10;
                 }
@@ -993,7 +995,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             opponentTrait
         );
 
-        uint24 playerFightPower = uint24((weaponMultFight.add(bonusShieldStats)).mulu(basePower).add(weaponBonusPower));
+        uint24 playerFightPower = Common.getPlayerPower(basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
 
         uint256 playerPower = RandomUtil.plusMinus10PercentSeeded(
             playerFightPower,
@@ -1016,10 +1018,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
 
         // We apply 50% of char trait bonuses because they are applied twice (once per fighter)
-        if ((((characterTrait + 1) % 4) == opponentTrait)) {
+        if (
+            Common.isTraitEffectiveAgainst(characterTrait, opponentTrait)
+        ) {
             traitBonus = traitBonus.add(fightTraitBonus.mul(charTraitFactor));
         } else if (
-            (((opponentTrait + 1) % 4) == characterTrait)
+            Common.isTraitEffectiveAgainst(opponentTrait, characterTrait)
         ) {
             traitBonus = traitBonus.sub(fightTraitBonus.mul(charTraitFactor));
         }
