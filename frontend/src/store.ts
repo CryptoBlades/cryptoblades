@@ -3393,20 +3393,22 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.canSkipQuest(characterID).call(defaultCallOptions(state));
       },
 
-      async skipQuest({ state }, {characterID}) {
+      async skipQuest({ state, dispatch }, {characterID}) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
 
         console.log('Skip quest for: ', characterID);
-        return await SimpleQuests.methods.skipQuest(characterID).send(defaultCallOptions(state));
+        await SimpleQuests.methods.skipQuest(characterID).send(defaultCallOptions(state));
+        await dispatch('fetchCharacterStamina', characterID);
       },
 
-      async completeQuest({ state }, {characterID}) {
+      async completeQuest({ state, dispatch }, {characterID}) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
 
         console.log('Complete quest for: ', characterID);
-        return await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
+        await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
+        dispatch('fetchCharacter', { characterId: characterID });
       },
 
       async requestQuest({ state }, {characterID}) {

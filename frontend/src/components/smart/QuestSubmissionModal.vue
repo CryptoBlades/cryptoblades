@@ -1,8 +1,8 @@
 <template>
   <b-modal v-if="quest" class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop scrollable
            :title="$t('quests.turnIn')" size="xl" @close="resetTokens" @cancel="resetTokens"
-           :ok-title="$t('quests.submit')"
-           :busy="isLoading" :ok-disabled="quest.requirementType === RequirementType.DUST && dustToBurn === 0"
+           :ok-title="$t('quests.submit')" :busy="isLoading"
+           :ok-disabled="isSubmitDisabled()"
            @ok.prevent="quest.requirementType === RequirementType.DUST ? submitDust() : submit()">
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
@@ -161,6 +161,14 @@ export default Vue.extend({
       this.tokensToBurn = [];
       this.nftIdTypesToBurn = [];
       this.dustToBurn = 0;
+    },
+
+    isSubmitDisabled() {
+      return !this.quest
+        || (this.quest.requirementType === RequirementType.DUST && this.dustToBurn === 0)
+        || (this.quest.requirementType === RequirementType.WEAPON && this.tokensToBurn.length === 0)
+        || (this.quest.requirementType !== RequirementType.DUST && this.quest.requirementType !== RequirementType.WEAPON
+          && this.nftIdTypesToBurn.length === 0);
     }
   },
 
