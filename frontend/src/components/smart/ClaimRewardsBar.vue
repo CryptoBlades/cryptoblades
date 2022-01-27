@@ -121,13 +121,13 @@
         <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
           <h5>{{$t('ClaimRewardsBar.partnerTokenClaimed')}}</h5>
         </div>
-        <div v-if="selectedPartneredProject" class="mt-3">
+        <div v-if="selectedPartneredProject && canClaimSelectedProject" class="mt-3">
           <h6 v-if="formattedMultiplier < 0.5" class="very-low-multiplier">{{$t('ClaimRewardsBar.lowMultiplier', {currentMultiplier})}}</h6>
           <h6 >{{
               $t('ClaimRewardsBar.realWithdrawValueClaimable', {
                 actualAmount: (skillAmount / formattedRatio * formattedMultiplier).toFixed(4),
                 tokenSymbol: selectedPartneredProject.tokenSymbol,
-                skillAmount: skillAmount.toFixed(4)
+                skillAmount: (+skillAmount).toFixed(4)
               })
             }}</h6>
         </div>
@@ -282,7 +282,7 @@ export default Vue.extend({
     },
 
     skillRewardNumber(): number {
-      return +toBN(fromWeiEther(this.skillRewards)).toFixed(18);
+      return +toBN(fromWeiEther(this.skillRewards.substr(0, this.skillRewards.length - 3) + '000'));
     },
 
     withdrawalInfoText(): string {

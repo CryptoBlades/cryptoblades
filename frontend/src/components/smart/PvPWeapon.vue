@@ -14,7 +14,9 @@
         <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info-w`" variant="dark"
         triggers="hover" data-trigger="focus" placement="top right" custom-class="customPopover">
           <div v-if="weaponId" class="weapon-icon-wrapper">
-            <span>Weapon stats</span>
+            <span>
+              {{$t('pvp.weaponStats')}}
+            </span>
             <ul class="statsWrapper">
               <li :class="getStatStyles(weapon.stat1)" v-if="weapon.stat1Value !== 0">{{weapon.stat1}} +{{weapon.stat1Value}}</li>
               <li :class="getStatStyles(weapon.stat2)" v-if="weapon.stat2Value !== 0">{{weapon.stat2}} +{{weapon.stat2Value}}</li>

@@ -353,7 +353,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         // monsterPower / avgPower * payPerFight * powerMultiplier
         uint256 amount = ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
             .mulu(vars[VAR_HOURLY_PAY_PER_FIGHT]);
-        
+
         if(amount > vars[VAR_PARAM_MAX_FIGHT_PAYOUT])
             amount = vars[VAR_PARAM_MAX_FIGHT_PAYOUT];
         if(vars[VAR_HOURLY_DISTRIBUTION] < amount * 5 && applyLimit) // the * 5 is a temp measure until we can sync frontend on main
@@ -410,7 +410,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             ) = weapons.getFightData(wep, characters.getTrait(char));
 
         return getTargetsInternal(
-            getPlayerPower(characters.getPower(char), weaponMultTarget, weaponBonusPower),
+            getPlayerPower(uint24(characters.getTotalPower(char)), weaponMultTarget, weaponBonusPower),
             characters.getStaminaTimestamp(char),
             now / 1 hours
         );
@@ -1007,7 +1007,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
         return vars[VAR_DAILY_MAX_CLAIM];
     }
-    
+
     function stakeUnclaimedRewards() public {
         stakeUnclaimedRewards(getRemainingTokenClaimAmountPreTax());
     }
@@ -1036,12 +1036,23 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         characters.gainXpAll(chars, xps);
     }
 
+    function resetXp(uint256[] memory chars) public restricted {
+        for(uint256 i = 0; i < chars.length; i++) {
+            xpRewards[chars[i]] = 0;
+        }
+    }
+
     function getTokenRewards() public view returns (uint256) {
         return tokenRewards[msg.sender];
     }
 
-    function getXpRewards(uint256 char) public view returns (uint256) {
-        return xpRewards[char];
+    function getXpRewards(uint256[] memory chars) public view returns (uint256[] memory) {
+        uint charsAmount = chars.length;
+        uint256[] memory xps = new uint256[](charsAmount);
+        for(uint i = 0; i < chars.length; i++) {
+            xps[i] = xpRewards[chars[i]];
+        }
+        return xps;
     }
 
     function getTokenRewardsFor(address wallet) public view returns (uint256) {

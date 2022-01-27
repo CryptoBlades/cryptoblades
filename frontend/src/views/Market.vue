@@ -115,7 +115,7 @@
                     <span class="d-block text-center" v-else>{{$t('market.loadingPrice')}}</span>
                     <b-button
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
-                      @click="selectedNftId = id; canPurchase && purchaseNft();"
+                      @click="selectedNftId = id; canPurchase && (activeType === 'character' ? showCharacterPurchaseModal() : purchaseNft());"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
                       class="gtag-link-others" tagname="confirm_purchase">
@@ -378,7 +378,7 @@
                     <b-button
                       v-if="id !== null && !searchResultsOwned"
                       :hidden="convertWeiToSkill(nftPricesById[id]) === '0'"
-                      @click="selectedNftId = id; canPurchase && purchaseNft();"
+                      @click="selectedNftId = id; canPurchase && (activeType === 'character' ? showCharacterPurchaseModal() : purchaseNft());"
                       variant="primary"
                       v-bind:class="[!canPurchase ? 'disabled-button' : '']"
                       class="gtag-link-others" tagname="confirm_purchase">
@@ -681,25 +681,25 @@
           </div>
         </div>
       </b-tab>
-      <b-tab v-if="isMerchandiseEnabled && currentChainSupportsMerchandise()"
-             @click="clearData();browseTabActive = false;skillShopTabActive = false">
-        <template #title>
-          {{$t('market.merchandise.merchandise')}}
-          <hint class="hint" text="You can buy real merchandise in here" />
-        </template>
-
-        <div>
-          <div class="row">
-            <img class="shop-horizontal-divider-top" src="../assets/divider4.png"  alt=""/>
-          </div>
-          <div class="col-sm-12 merchandise-shop-items">
-            <div class="shop-items">
-              <Merchandise />
-            </div>
-          </div>
-        </div>
-      </b-tab>
     </b-tabs>
+    <b-modal class="centered-modal text-center" ref="character-buy-modal"
+             :title="burningManager ? $t('market.characterBuyBurnModal') : $t('market.characterBuyModal')"
+      @ok="purchaseNft()" @cancel="purchaseNft(true)">
+      <template #modal-footer="{ ok, cancel }">
+        <div class="w-100 d-flex justify-content-center">
+          <b-button v-if="burningManager" class="btn-primary mr-5" @click="cancel()">
+            {{$t('market.purchaseAndBurn')}}
+          </b-button>
+          <b-button class="btn-primary" @click="ok()">
+            {{$t('market.purchase')}}
+          </b-button>
+        </div>
+      </template>
+      <div class="d-flex flex-column align-items-center">
+        <character-list class="mt-2 justify-content-center" v-if="selectedNftId || selectedNftId === 0" :showGivenCharacterIds="true"
+          :characterIds="[selectedNftId]" />
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -719,7 +719,7 @@ import {Characters, Shields, Weapons} from '../../../build/abi-interfaces';
 import {SkillShopListing} from '@/interfaces/SkillShopListing';
 import BigNumber from 'bignumber.js';
 import {traitNameToNumber} from '@/contract-models';
-import {market_blockchain as useBlockchain, merchandise as merchandiseEnabled} from './../feature-flags';
+import {market_blockchain as useBlockchain, burningManager} from './../feature-flags';
 import {
   CharacterTransactionHistoryData,
   ICharacterHistory,
@@ -734,8 +734,6 @@ import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 import {getCleanName} from '@/rename-censor';
 import i18n from '@/i18n';
 import {toInteger} from 'lodash';
-import Merchandise from '@/components/smart/Merchandise.vue';
-import config from '../../app-config.json';
 
 type SellType = 'weapon' | 'character' | 'shield';
 type WeaponId = string;
@@ -776,8 +774,6 @@ interface Data {
   historyCounter: number;
   landSaleAllowed: boolean;
   reservedSaleAllowed: boolean;
-  isMerchandiseEnabled: boolean;
-  merchandiseSupportedChains: string[];
 }
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'weapons' | 'characters' | 'shields'
@@ -844,10 +840,11 @@ interface StoreMappedActions {
   fetchIsLandSaleAllowed(): Promise<boolean>;
   reservedSalesAllowed(): Promise<boolean>;
   fetchItemPrices(): Promise<void>;
+  purchaseBurnCharacter({charId, maxPrice}: {charId: string, maxPrice: string}): Promise<void>;
 }
 
 export default Vue.extend({
-  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList, Merchandise },
+  components: { CharacterList, WeaponGrid, Hint, CurrencyConverter, NftList },
 
   data() {
     return {
@@ -882,8 +879,7 @@ export default Vue.extend({
       historyCounter: 0,
       landSaleAllowed: false,
       reservedSaleAllowed: false,
-      isMerchandiseEnabled: merchandiseEnabled,
-      merchandiseSupportedChains: config.merchandiseSupportedChains,
+      burningManager
     } as Data;
   },
 
@@ -1384,6 +1380,7 @@ export default Vue.extend({
       'fetchIsLandSaleAllowed',
       'reservedSalesAllowed',
       'fetchItemPrices',
+      'purchaseBurnCharacter'
     ]) as StoreMappedActions),
 
     clearData() {
@@ -1529,7 +1526,11 @@ export default Vue.extend({
       this.marketOutcome = `Successfully changed target buyer for ${this.activeType} ${results.nftID} to ${results.newTargetBuyer}`;
     },
 
-    async purchaseNft() {
+    showCharacterPurchaseModal() {
+      (this.$refs['character-buy-modal'] as BModal).show();
+    },
+
+    async purchaseNft(isBurning: boolean = false) {
       this.marketOutcome = null;
       if(this.selectedNftId === null) return;
 
@@ -1549,12 +1550,17 @@ export default Vue.extend({
       }
 
       this.waitingMarketOutcome = true;
-
-      const results: any = await this.purchaseMarketListing({
-        nftContractAddr: this.contractAddress,
-        tokenId: this.selectedNftId,
-        maxPrice: price
-      });
+      let results: any;
+      if(isBurning) {
+        results = await this.purchaseBurnCharacter({charId: this.selectedNftId, maxPrice: price});
+      }
+      else {
+        results = await this.purchaseMarketListing({
+          nftContractAddr: this.contractAddress,
+          tokenId: this.selectedNftId,
+          maxPrice: price
+        });
+      }
 
       const results2: any  = await this.fetchAllMarketNftIds({
         nftContractAddr: this.contractAddress
@@ -1565,7 +1571,7 @@ export default Vue.extend({
       this.allSearchResults = Array.from(this.allSearchResults as string[]).filter((x: any) => x.id !== this.selectedNftId);
 
       this.waitingMarketOutcome = false;
-      this.marketOutcome = 'Successfully purchased '
+      this.marketOutcome = 'Successfully purchased ' + (isBurning ? 'and burned ' : '')
         +this.activeType+' '+results.nftID+' for '+this.convertWeiToSkill(results.price)+' SKILL'
           +' from '+results.seller;
     },
@@ -1947,16 +1953,16 @@ export default Vue.extend({
       return shields.idResults;
     },
 
-    async searchItemsSoldBySeller(sellerAddress: string): Promise<any[]>{
-      const url = new URL(apiUrl(`static/market/transactions/${sellerAddress}`));
+    async searchItemsSoldBySeller(nftType: string, sellerAddress: string): Promise<any[]>{
+      const url = new URL(apiUrl(`static/market/transactions/${this.activeChain()}/${nftType}/${sellerAddress}`));
 
-      const weaponsData = await fetch(url.toString());
-      const weapons = await weaponsData.json();
-      return weapons.results;
+      const resultsCursor = await fetch(url.toString());
+      const results = await resultsCursor.json();
+      return results.results;
     },
 
     async showWeaponsSoldModal() {
-      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      const weaponHistory: IWeaponHistory[] = await this.searchItemsSoldBySeller('weapon', this.defaultAccount as string);
       this.weaponTransactionHistoryHeader = [
         {
           key: 'weaponId',
@@ -2014,7 +2020,7 @@ export default Vue.extend({
       (this.$refs['weapons-sold-modal'] as BModal).show();
     },
     async showCharactersSoldModal() {
-      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      const characterHistory: ICharacterHistory[] = await this.searchItemsSoldBySeller('character', this.defaultAccount as string);
       this.characterTransactionHistoryHeader = [
         {
           key: 'charId',
@@ -2055,7 +2061,7 @@ export default Vue.extend({
       (this.$refs['characters-sold-modal'] as BModal).show();
     },
     async showShieldsSoldModal() {
-      const shieldHistory: IShieldHistory[] = await this.searchItemsSoldBySeller(this.defaultAccount as string);
+      const shieldHistory: IShieldHistory[] = await this.searchItemsSoldBySeller('shield', this.defaultAccount as string);
       this.shieldTransactionHistoryHeader = [
         {
           key: 'shieldId',
@@ -2312,14 +2318,6 @@ export default Vue.extend({
       return input[0].toUpperCase() + input.slice(1);
     },
 
-    currentChainSupportsMerchandise() {
-      const currentChain = localStorage.getItem('currentChain') || 'BSC';
-      if (!currentChain || !this.merchandiseSupportedChains) {
-        return false;
-      }
-      return this.merchandiseSupportedChains.includes(currentChain);
-    },
-
   },
 
   watch: {
@@ -2461,14 +2459,6 @@ export default Vue.extend({
 }
 
 .special-offer-items {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.merchandise-shop-items {
   height: 100%;
   width: 100%;
   display: flex;

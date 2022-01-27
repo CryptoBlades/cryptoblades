@@ -5,8 +5,10 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./characters.sol";
+import "./cryptoblades.sol";
 
 contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -20,8 +22,10 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
     EnumerableSet.AddressSet private supportedTokenTypes;
 
     mapping(address => EnumerableSet.UintSet) userGarrison;
-    mapping(uint256 => address) characterOwner;
+    mapping(uint256 => address) public characterOwner;
     EnumerableSet.UintSet private allCharactersInGarrison;
+
+    CryptoBlades game;
 
     event CharacterReceived(uint256 indexed character, address indexed minter);
 
@@ -33,6 +37,10 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         characters = _characters;
+    }
+
+    function migrateTo_d514745(CryptoBlades _game) external restricted {
+        game = _game;
     }
 
     // MODIFIERS
@@ -49,6 +57,17 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
     modifier isInGarrison(uint256 id) {
         require(allCharactersInGarrison.contains(id));
         _;
+    }
+
+    modifier isCharactersOwner(uint256[] memory ids) {
+        _isCharactersOwner(ids);
+        _;
+    }
+
+    function _isCharactersOwner(uint256[] memory ids) internal view {
+        for(uint i = 0; i < ids.length; i++) {
+            require(characterOwner[ids[i]] == msg.sender, 'Not owner');
+        }
     }
 
     // VIEWS
@@ -101,6 +120,18 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
     function swapWithGarrison(uint256 plazaId, uint256 garrisonId) external {
       sendToGarrison(plazaId);
       restoreFromGarrison(garrisonId);
+    }
+
+    function claimAllXp(uint256[] calldata chars) external isCharactersOwner(chars) {
+        uint256[] memory xps = game.getXpRewards(chars);
+        game.resetXp(chars);
+        characters.gainXpAll(chars, xps);
+    }
+
+    function updateOnBurn(address playerAddress, uint256 burnedId) external restricted {
+        delete characterOwner[burnedId];
+        userGarrison[playerAddress].remove(burnedId);
+        allCharactersInGarrison.remove(burnedId);
     }
 
     function allowToken(IERC721 _tokenAddress) public restricted {
