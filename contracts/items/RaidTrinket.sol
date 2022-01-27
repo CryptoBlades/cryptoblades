@@ -58,7 +58,7 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         return tokenStars[id];
     }
 
-    function getStars(uint256[] memory ids) public restricted returns (uint8[] memory) {
+    function getStars(uint256[] memory ids) public view restricted returns (uint8[] memory) {
         uint8[] memory stars = new uint8[](ids.length);
         for(uint256 i = 0; i < ids.length; i++) {
             stars[i] = tokenStars[ids[i]];

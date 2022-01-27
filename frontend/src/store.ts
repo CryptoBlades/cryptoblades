@@ -3416,6 +3416,7 @@ export function createStore(web3: Web3) {
         if(!SimpleQuests || !state.defaultAccount) return;
 
         console.log('Request quest for: ', characterID);
+        await SimpleQuests.methods.generateRequestQuestSeed(characterID).send(defaultCallOptions(state));
         return await SimpleQuests.methods.requestQuest(characterID).send(defaultCallOptions(state));
       },
 

@@ -18,6 +18,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for uint256;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+    uint256 public constant SEED_RANDOM_QUEST = uint(keccak256("SEED_RANDOM_QUEST"));
 
     Characters public characters;
     Weapons public weapons;
@@ -197,25 +198,32 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         quest.reputationAmount);
     }
 
+    // STEP ONE
+    function generateRequestQuestSeed(uint256 characterID) public {
+        safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID), false);
+    }
+
+    // STEP TWO
     function requestQuest(uint256 characterID) public returns (uint256) {
         assertNotOnQuest(characterID);
         return assignNewQuest(characterID);
     }
 
     function assignNewQuest(uint256 characterID) private returns (uint256) {
+        uint256 seed = safeRandoms.popSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID), true, true);
         uint256 currentReputation = characters.getNftVar(characterID, characters.NFTVAR_REPUTATION());
-        // tier should be chosen by random, based on % for reputation level, for now, we take common
+        // tier should be chosen by random, based on % for reputation level, for now, we take it based on lvl
         Quest memory quest;
-        if(currentReputation < vars[VAR_REPUTATION_LEVEL_2]) {
-            quest = getNewQuest(Rarity.COMMON);
-        } else if(currentReputation < vars[VAR_REPUTATION_LEVEL_3]) {
-            quest = getNewQuest(Rarity.UNCOMMON);
-        } else if(currentReputation < vars[VAR_REPUTATION_LEVEL_4]) {
-            quest = getNewQuest(Rarity.RARE);
-        } else if(currentReputation < vars[VAR_REPUTATION_LEVEL_5]) {
-            quest = getNewQuest(Rarity.EPIC);
+        if (currentReputation < vars[VAR_REPUTATION_LEVEL_2]) {
+            quest = getNewQuest(Rarity.COMMON, seed);
+        } else if (currentReputation < vars[VAR_REPUTATION_LEVEL_3]) {
+            quest = getNewQuest(Rarity.UNCOMMON, seed);
+        } else if (currentReputation < vars[VAR_REPUTATION_LEVEL_4]) {
+            quest = getNewQuest(Rarity.RARE, seed);
+        } else if (currentReputation < vars[VAR_REPUTATION_LEVEL_5]) {
+            quest = getNewQuest(Rarity.EPIC, seed);
         } else {
-            quest = getNewQuest(Rarity.LEGENDARY);
+            quest = getNewQuest(Rarity.LEGENDARY, seed);
         }
         characterQuest[characterID] = quest.id;
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
@@ -224,13 +232,11 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return quest.id;
     }
 
-    function getNewQuest(Rarity tier) private returns (Quest memory) {
-        // get random index from 0 to length - 1, which will indicate predetermined quest
-        // uint32 index = random(quests.length);
-        Quest memory quest = quests[vars[uint8(tier)]][quests[uint8(tier)].length - 1];
+    function getNewQuest(Rarity tier, uint256 seed) private returns (Quest memory) {
+        uint256 index = RandomUtil.randomSeededMinMax(0, quests[uint8(tier)].length - 1, seed);
+        Quest memory quest = quests[vars[uint8(tier)]][index];
         quest.id = nextQuestID++;
         questList[quest.id] = quest;
-        // should assign new ID to quest and save it in questsList array (all quests are there)
         return quest;
     }
 
