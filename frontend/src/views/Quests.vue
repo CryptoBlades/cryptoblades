@@ -85,7 +85,7 @@ export enum RequirementType {
 }
 
 export enum RewardType {
-  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD
+  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE
 }
 
 export enum Rarity {

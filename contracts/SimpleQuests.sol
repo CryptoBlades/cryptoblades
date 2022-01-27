@@ -98,7 +98,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     enum RequirementType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, RAID}
-    enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD}
+    enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE}
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     // have quests rarities on certain indexes (0 - common, 1 - uncommon, 2 - rare, 3 - epic, 4 - legendary (optional))
@@ -299,6 +299,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             uint32[] memory incrementDustSupplies = new uint32[](weapons.getDustSupplies(msg.sender).length);
             incrementDustSupplies[uint256(quest.rewardRarity)] = uint32(quest.rewardAmount);
             weapons.incrementDustSupplies(msg.sender, incrementDustSupplies[0], incrementDustSupplies[1], incrementDustSupplies[2]);
+        } else if (quest.rewardType == RewardType.EXPERIENCE) {
+            characters.gainXp(characterID, uint16(quest.rewardAmount));
         }
         else {
             revert("Unknown reward type");

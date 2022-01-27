@@ -598,7 +598,8 @@
       "JUNK": "Junk",
       "TRINKET": "Trinket",
       "SHIELD": "Shield",
-      "DUST": "Dust"
+      "DUST": "Dust",
+      "EXPERIENCE": "Experience"
     },
     "questsTitle": "Quests",
     "quest": "Quest",

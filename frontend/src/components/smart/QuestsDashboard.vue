@@ -77,7 +77,8 @@
               {{ $t(`quests.dustRarityType.${DustRarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-select v-else class="mt-2 mb-2" v-model="questTemplate.rewardRarity"
+          <b-form-select v-else-if="questTemplate.rewardType !== RewardType.EXPERIENCE" class="mt-2 mb-2"
+                         v-model="questTemplate.rewardRarity"
                          :disabled="questTemplate.rewardType === undefined">
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRewardRarity') }}
@@ -86,7 +87,8 @@
               {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-input v-model="questTemplate.rewardAmount" :disabled="questTemplate.rewardRarity === undefined"
+          <b-form-input v-model="questTemplate.rewardAmount"
+                        :disabled="questTemplate.rewardRarity === undefined && questTemplate.rewardType !== RewardType.EXPERIENCE"
                         type="number" number :min="0"/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
@@ -201,8 +203,7 @@ export default Vue.extend({
       dustRarities: [DustRarity.LESSER, DustRarity.GREATER, DustRarity.POWERFUL],
       requirementTypes: [RequirementType.WEAPON, RequirementType.JUNK,
         RequirementType.DUST, RequirementType.TRINKET, RequirementType.SHIELD, RequirementType.RAID],
-      rewardTypes: [RewardType.WEAPON, RewardType.JUNK,
-        RewardType.DUST, RewardType.TRINKET, RewardType.SHIELD],
+      rewardTypes: [RewardType.WEAPON, RewardType.JUNK, RewardType.DUST, RewardType.TRINKET, RewardType.SHIELD, RewardType.EXPERIENCE],
       promoQuestTemplates: false,
       isLoading: false,
       showTemplateConfirmationModal: false,
@@ -228,6 +229,9 @@ export default Vue.extend({
     showConfirmationModal() {
       if (this.questTemplate.requirementType === RequirementType.RAID) {
         this.questTemplate.requirementRarity = Rarity.COMMON;
+      }
+      if (this.questTemplate.rewardType === RewardType.EXPERIENCE) {
+        this.questTemplate.rewardRarity = Rarity.COMMON;
       }
       this.showTemplateConfirmationModal = true;
     },
@@ -281,7 +285,9 @@ export default Vue.extend({
         || this.questTemplate.requirementType === undefined
         || (this.questTemplate.requirementRarity === undefined && this.questTemplate.requirementType !== RequirementType.RAID)
         || !this.questTemplate.requirementAmount
-        || this.questTemplate.rewardType === undefined || this.questTemplate.rewardRarity === undefined || !this.questTemplate.rewardAmount
+        || this.questTemplate.rewardType === undefined
+        || (this.questTemplate.rewardRarity === undefined && this.questTemplate.rewardType !== RewardType.EXPERIENCE)
+        || !this.questTemplate.rewardAmount
         || !this.questTemplate.reputationAmount || this.showTemplateConfirmationModal || this.isLoading;
     },
 
