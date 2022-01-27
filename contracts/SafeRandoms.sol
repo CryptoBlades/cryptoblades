@@ -10,7 +10,7 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
     /* Security
     *   Seeds are more secure the faster they are resolved
     *   Resolution every block = 100% security
-    *   Optionally, publicResolutionBlocks can be set to 0 to force amin resolution
+    *   Optionally, publicResolutionBlocks can be set to 0 to force admin resolution
     */
 
     /* Usage:
@@ -25,8 +25,11 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
     *   1,2,3 etc: YES, IF seeds aren't shared under the same action identifier
     *    (so 1x weapons produce different requestIDs than 10x weapons)
     *   
-    *   Resolve variants of functions contribute to seed resolution,
-    *   Regular variants don't (this can be used to save gas if necessary)
+    *   You can use the requestNext boolean for pop calls to request the next seed already,
+    *   This allows you to have a new secure seed ready for every transaction (except the first)
+    *   
+    *   Resolve booleans of functions contribute to seed resolution,
+    *   (sending false can be used to save gas if necessary)
     *    Check costs ~2k gas, resolution costs 35k (+3.1k for event + 1.7k for event check)
     */
 
@@ -42,7 +45,7 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
     *     ! Salted seeds are stored separately, the original one-at-a-time seed will be available raw
     *   
     *   Queued seeds:
-    *    More than one seed request can be piled up
+    *    More than one seed request can be piled up (costs ~15-20k more gas than single seeds)
     *    Example use: Ordering multiple batches of weapons without requiring the first batch to complete
     *    MUST HAVE a full upfront cost to avoid abuse! (ie skill cost to mint an NFT)
     *   
@@ -81,9 +84,11 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
 
     bool public emitResolutionEvent;
     bool public emitRequestEvent;
+    bool public emitPopEvent;
 
     event SeedResolved(address indexed resolver, uint256 indexed seedIndex);
     event SeedRequested(address indexed requester, uint256 indexed requestId);
+    event SeedPopped(address indexed popper, uint256 indexed requestId);
 
     function initialize () public initializer {
         __AccessControl_init();
@@ -167,6 +172,9 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
         require(seed != 0);
         delete singleSeedRequests[user][requestID];
 
+        if(emitPopEvent)
+            emit SeedPopped(user, requestID);
+
         if(requestNext)
             _requestSingleSeed(user, requestID);
     }
@@ -198,7 +206,10 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
         // will revert on empty queue due to pop()
         seed = readQueuedSeed(user, requestID, false);
         queuedSeedRequests[user][requestID].pop();
-        
+
+        if(emitPopEvent)
+            emit SeedPopped(user, requestID);
+
         if(requestNext)
             _requestQueuedSeed(user, requestID);
 
@@ -244,6 +255,10 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
 
     function setEmitRequestEvent(bool to) public restricted {
         emitRequestEvent = to;
+    }
+
+    function setEmitPopEvent(bool to) public restricted {
+        emitPopEvent = to;
     }
 
 }
