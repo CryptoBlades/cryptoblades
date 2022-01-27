@@ -637,6 +637,9 @@
     "reputationLevel": "Reputation level {level}",
     "updateReputationLevelRequirements": "Update reputation level requirements",
     "updateRequirements": "Update requirements",
+    "staminaCost": "Stamina cost",
+    "updateSkipQuestStaminaCost": "Update skip quest stamina cost",
+    "updateStaminaCost": "Update stamina cost",
     "youNeedToHaveAtLeastOneCharacter": "You need to have at least one character to do Quests",
     "loading": "Loading..."
   },

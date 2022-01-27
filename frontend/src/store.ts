@@ -3352,13 +3352,18 @@ export function createStore(web3: Web3) {
         };
       },
 
-      async getSkipQuestStaminaCost({state}, {characterID}) {
+      async getSkipQuestStaminaCost({state}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        console.log('getting skip cost for ', characterID);
-
         return await SimpleQuests.methods.staminaCost().call(defaultCallOptions(state));
+      },
+
+      async setSkipQuestStaminaCost({state}, {staminaCost}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.setSkipQuestStaminaCost(staminaCost).send(defaultCallOptions(state));
       },
 
       async getReputationLevelRequirements({state}, {reputationLevels}) {

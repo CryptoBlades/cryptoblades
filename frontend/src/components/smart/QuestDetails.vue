@@ -107,7 +107,7 @@ import Hint from '@/components/Hint.vue';
 interface StoreMappedActions {
   canSkipQuest(payload: { characterID: string | number }): Promise<boolean>;
 
-  getSkipQuestStaminaCost(payload: { characterID: string | number }): Promise<number>;
+  getSkipQuestStaminaCost(): Promise<number>;
 
   skipQuest(payload: { characterID: string | number }): Promise<void>;
 
@@ -183,7 +183,7 @@ export default Vue.extend({
 
     async refreshSkipQuestData() {
       this.canSkip = await this.canSkipQuest({characterID: this.characterId});
-      this.skipQuestStaminaCost = await this.getSkipQuestStaminaCost({characterID: this.characterId});
+      this.skipQuestStaminaCost = await this.getSkipQuestStaminaCost();
     },
 
     async complete() {

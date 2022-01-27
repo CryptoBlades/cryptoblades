@@ -53,7 +53,7 @@
             </b-form-select-option>
           </b-form-select>
           <b-form-input v-model="questTemplate.requirementAmount"
-                        :disabled="questTemplate.requirementRarity === undefined" type="number"/>
+                        :disabled="questTemplate.requirementRarity === undefined" type="number" number/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reward') }}</label>
         <div class="d-flex align-items-center gap-3">
@@ -85,11 +85,11 @@
             </b-form-select-option>
           </b-form-select>
           <b-form-input v-model="questTemplate.rewardAmount" :disabled="questTemplate.rewardRarity === undefined"
-                        type="number"/>
+                        type="number" number/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
         <div class="d-flex align-items-center gap-3">
-          <b-form-input v-model="questTemplate.reputationAmount" type="number"/>
+          <b-form-input v-model="questTemplate.reputationAmount" type="number" number/>
         </div>
       </div>
       <b-button variant="primary" @click="showTemplateConfirmationModal = true"
@@ -101,16 +101,26 @@
       <h2 class="pt-3">{{ $t('quests.updateReputationLevelRequirements') }}</h2>
       <div class="requirements-grid-container gap-3">
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 2}) }}</label>
-        <b-form-input v-model="reputationLevelRequirements.level2"/>
+        <b-form-input type="number" number v-model="reputationLevelRequirements.level2"/>
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 3}) }}</label>
-        <b-form-input v-model="reputationLevelRequirements.level3"/>
+        <b-form-input type="number" number v-model="reputationLevelRequirements.level3"/>
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 4}) }}</label>
-        <b-form-input v-model="reputationLevelRequirements.level4"/>
+        <b-form-input type="number" number v-model="reputationLevelRequirements.level4"/>
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 5}) }}</label>
-        <b-form-input v-model="reputationLevelRequirements.level5"/>
+        <b-form-input type="number" number v-model="reputationLevelRequirements.level5"/>
       </div>
       <b-button variant="primary" @click="updateRequirements" :disabled="updateRequirementsDisabled()">
         {{ $t('quests.updateRequirements') }}
+      </b-button>
+    </b-form>
+    <b-form class="d-flex flex-column gap-3">
+      <h2 class="pt-3">{{ $t('quests.updateSkipQuestStaminaCost') }}</h2>
+      <div class="requirements-grid-container gap-3">
+        <label class="m-0 align-self-center">{{ $t('quests.staminaCost') }}</label>
+        <b-form-input type="number" number v-model="staminaCost"/>
+      </div>
+      <b-button variant="primary" @click="updateStaminaCost" :disabled="isLoading || showTemplateConfirmationModal">
+        {{ $t('quests.updateStaminaCost') }}
       </b-button>
     </b-form>
     <QuestTemplatesDisplay :promoQuestTemplates="promoQuestTemplates"/>
@@ -152,6 +162,10 @@ interface StoreMappedActions {
   getReputationLevelRequirements(payload: { reputationLevels: number[] }): Promise<ReputationLevelRequirements>;
 
   setReputationLevelRequirements(payload: { reputationLevels: number[], requirements: number[] }): Promise<void>;
+
+  setSkipQuestStaminaCost(payload: { staminaCost: number }): Promise<void>;
+
+  getSkipQuestStaminaCost(): Promise<number>;
 }
 
 interface Data {
@@ -164,6 +178,7 @@ interface Data {
   isLoading: boolean;
   showTemplateConfirmationModal: boolean;
   reputationLevelRequirements?: ReputationLevelRequirements;
+  staminaCost: number;
 }
 
 export default Vue.extend({
@@ -190,6 +205,7 @@ export default Vue.extend({
       isLoading: false,
       showTemplateConfirmationModal: false,
       reputationLevelRequirements: undefined,
+      staminaCost: 0,
       RequirementType,
       RewardType,
       Rarity,
@@ -198,7 +214,14 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['addQuestTemplate', 'addPromoQuestTemplate', 'getReputationLevelRequirements', 'setReputationLevelRequirements']) as StoreMappedActions,
+    ...mapActions([
+      'addQuestTemplate',
+      'addPromoQuestTemplate',
+      'getReputationLevelRequirements',
+      'setReputationLevelRequirements',
+      'setSkipQuestStaminaCost',
+      'getSkipQuestStaminaCost',
+    ]) as StoreMappedActions,
 
     async onSubmit() {
       try {
@@ -229,6 +252,17 @@ export default Vue.extend({
       }
     },
 
+    async updateStaminaCost() {
+      if (!this.staminaCost) return;
+      try {
+        this.isLoading = true;
+        await this.setSkipQuestStaminaCost({staminaCost: this.staminaCost});
+        this.staminaCost = await this.getSkipQuestStaminaCost();
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     refreshQuestTemplates() {
       this.$root.$emit('refresh-quest-templates');
     },
@@ -251,9 +285,15 @@ export default Vue.extend({
   },
 
   async mounted() {
-    this.refreshQuestTemplates();
     const reputationLevels = [VAR_REPUTATION_LEVEL_2, VAR_REPUTATION_LEVEL_3, VAR_REPUTATION_LEVEL_4, VAR_REPUTATION_LEVEL_5];
-    this.reputationLevelRequirements = await this.getReputationLevelRequirements({reputationLevels});
+    try {
+      this.isLoading = true;
+      this.refreshQuestTemplates();
+      this.reputationLevelRequirements = await this.getReputationLevelRequirements({reputationLevels});
+      this.staminaCost = await this.getSkipQuestStaminaCost();
+    } finally {
+      this.isLoading = false;
+    }
   }
 
 });
