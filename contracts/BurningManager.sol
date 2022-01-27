@@ -94,6 +94,12 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         characters.burnIntoSoul(burnIds);
     }
 
+    function transferSoul(address targetAddress, uint256 soulAmount) public {
+        require(userVars[msg.sender][USERVAR_SOUL_SUPPLY] >= soulAmount, 'Not enough soul');
+        userVars[msg.sender][USERVAR_SOUL_SUPPLY] = userVars[msg.sender][USERVAR_SOUL_SUPPLY].sub(soulAmount);
+        userVars[targetAddress][USERVAR_SOUL_SUPPLY] = userVars[targetAddress][USERVAR_SOUL_SUPPLY].add(soulAmount);
+    }
+
     function upgradeCharacterWithSoul(uint256 targetId, uint256 soulAmount) public {
         require(userVars[msg.sender][USERVAR_SOUL_SUPPLY] >= soulAmount, 'Not enough soul');
         userVars[msg.sender][USERVAR_SOUL_SUPPLY] = userVars[msg.sender][USERVAR_SOUL_SUPPLY].sub(soulAmount);
