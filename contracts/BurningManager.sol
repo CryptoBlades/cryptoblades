@@ -22,7 +22,6 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public vars;
     uint256 public constant VAR_ROI_DAYS = 1;
     uint256 public constant VAR_BURN_POWER_MULTIPLIER = 2;
-    uint256 public constant VAR_BURNING_ENABLED = 3;
 
     function initialize(Characters _characters, Garrison _garrison, CryptoBlades _game)
         public
@@ -65,7 +64,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     }
 
     function _burningEnabled() internal view {
-        require(vars[VAR_BURNING_ENABLED] == 1, "Burning disabled");
+        require(vars[VAR_BURN_POWER_MULTIPLIER] > 0, "Burning disabled");
     }
 
     // VIEWS
