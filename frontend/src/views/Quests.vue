@@ -18,7 +18,7 @@
           class="xp">
           <span>{{ $t('quests.reputationLevel', {level: getReputationLevel(character.quest.reputation)}) }} <b-icon-question-circle
             class="pointer"
-            @click="$bvModal.show('reputation-info-modal')"/></span>
+            @click="showReputationInfoModal"/></span>
           <strong v-if="getReputationLevel(character.quest.reputation) !== 5"
                   class="outline xp-text">{{ character.quest.reputation || 0 }} /
             {{ getReputationBreakpoint(character.quest.reputation) }}</strong>
@@ -30,7 +30,7 @@
       <QuestDetails v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
                     :characterId="character.id"/>
       <div v-else-if="isRequestQuestLoading" class="request-quest">
-        <b-button variant="primary" :disabled="true">
+        <b-button variant="primary" disabled>
           <i class="fas fa-spinner fa-spin"/>
           {{ $t('quests.loading') }}
         </b-button>
@@ -42,8 +42,40 @@
       </div>
     </div>
     <QuestSubmissionModal/>
-    <b-modal id="reputation-info-modal" ok-only class="centered-modal" :title="$t('quests.reputation')">
-      <span class="white-space">{{ $t('quests.reputationExplained') }}</span>
+    <b-modal v-model="showReputationModal" ok-only class="centered-modal" :title="$t('quests.reputation')">
+      <div v-if="!isReputationInfoLoading" class="d-flex flex-column gap-3">
+        <div class="d-flex justify-content-between">
+          <span class="invisible">{{ $t('quests.rarityType.COMMON') }}</span>
+          <div>{{ $t('quests.rarityType.COMMON') }}</div>
+          <div>{{ $t('quests.rarityType.UNCOMMON') }}</div>
+          <div>{{ $t('quests.rarityType.RARE') }}</div>
+          <div>{{ $t('quests.rarityType.EPIC') }}</div>
+          <div>{{ $t('quests.rarityType.LEGENDARY') }}</div>
+        </div>
+        <div v-for="(tierChance, index) in tierChances" class="d-flex justify-content-between align-items-center"
+             :key="index">
+          <span class="text-nowrap">{{ $t('quests.level', {level: index + 1}) }}</span>
+          <div>
+            <span>{{tierChance.common}}%</span>
+          </div>
+          <div>
+            <span>{{tierChance.uncommon}}%</span>
+          </div>
+          <div>
+            <span>{{tierChance.rare}}%</span>
+          </div>
+          <div>
+            <span>{{tierChance.epic}}%</span>
+          </div>
+          <div>
+            <span>{{tierChance.legendary}}%</span>
+          </div>
+        </div>
+      </div>
+      <span v-else>
+        <i class="fas fa-spinner fa-spin"/>
+        {{ $t('quests.loading') }}
+      </span>
     </b-modal>
   </div>
   <div v-else-if="isLoading">
@@ -124,6 +156,8 @@ interface StoreMappedActions {
   requestQuest(payload: { characterID: string | number }): Promise<void>;
 
   getReputationLevelRequirements(payload: { reputationLevels: number[] }): Promise<ReputationLevelRequirements>;
+
+  getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
 }
 
 interface StoreMappedGetters {
@@ -135,6 +169,9 @@ interface Data {
   reputationLevelRequirements?: ReputationLevelRequirements;
   isLoading: boolean;
   isRequestQuestLoading: boolean;
+  isReputationInfoLoading: boolean;
+  tierChances: TierChances[];
+  showReputationModal: boolean;
 }
 
 export default Vue.extend({
@@ -153,6 +190,9 @@ export default Vue.extend({
       reputationLevelRequirements: undefined,
       isLoading: false,
       isRequestQuestLoading: false,
+      isReputationInfoLoading: false,
+      tierChances: [] as TierChances[],
+      showReputationModal: false,
     } as Data;
   },
 
@@ -162,7 +202,13 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['fetchCharacters', 'getCharacterQuestData', 'requestQuest', 'getReputationLevelRequirements']) as StoreMappedActions,
+    ...mapActions([
+      'fetchCharacters',
+      'getCharacterQuestData',
+      'requestQuest',
+      'getReputationLevelRequirements',
+      'getQuestTierChances',
+    ]) as StoreMappedActions,
 
     getReputationLevel(reputation: number) {
       if (!this.reputationLevelRequirements) return;
@@ -218,6 +264,20 @@ export default Vue.extend({
         this.isLoading = false;
       }
     },
+
+    async showReputationInfoModal() {
+      try{
+        this.showReputationModal = true;
+        this.isReputationInfoLoading = true;
+        this.tierChances[0] = await this.getQuestTierChances({tier: 0});
+        this.tierChances[1] = await this.getQuestTierChances({tier: 1});
+        this.tierChances[2] = await this.getQuestTierChances({tier: 2});
+        this.tierChances[3] = await this.getQuestTierChances({tier: 3});
+        this.tierChances[4] = await this.getQuestTierChances({tier: 4});
+      } finally {
+        this.isReputationInfoLoading = false;
+      }
+    }
   },
 
   async mounted() {
