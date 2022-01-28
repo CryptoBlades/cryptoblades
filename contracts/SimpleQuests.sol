@@ -125,7 +125,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     // FUNCTIONS
 
     function generateRequestQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) public {
-        safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID), false);
+        safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID));
     }
 
     function requestQuest(uint256 characterID) public assertQuestsEnabled assertNotOnQuest(characterID) returns (uint256) {

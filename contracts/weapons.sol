@@ -626,13 +626,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         WeaponBurnPoints storage wbp = burnPoints[reforgeID];
 
         if(amountLB > 0) {
-            require(wbp.lowStarBurnPoints < 100, "LB capped");
+            require(wbp.lowStarBurnPoints < 100);
         }
         if(amount4B > 0) {
-            require(wbp.fourStarBurnPoints < 25, "4B capped");
+            require(wbp.fourStarBurnPoints < 25);
         }
         if(amount5B > 0) {
-            require(wbp.fiveStarBurnPoints < 10, "5B capped");
+            require(wbp.fiveStarBurnPoints < 10);
         }
 
         wbp.lowStarBurnPoints += amountLB;
@@ -699,7 +699,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require((durabilityPoints >= amount
         || (allowNegativeDurability && durabilityPoints > 0)) // we allow going into negative, but not starting negative
-            ,"Low durability!");
+            ,"LD");
 
         uint64 drainTime = uint64(amount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
