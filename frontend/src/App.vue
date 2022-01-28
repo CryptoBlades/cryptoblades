@@ -33,32 +33,27 @@
         </div>
         <div class="seperator"></div>
         <div class="instructions-list">
-          <p>{{ $t('app.warning.message.instructions', {recruitCost: this.recruitCost}) }}</p>
+          <p>{{ $t('app.warning.message.' + currentChain + '.instructions', {recruitCost: this.recruitCost}) }}</p>
           <ul class="unstyled-list">
             <li>
-              1. {{ $t('app.warning.message.inst1') }}
-              <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.watchVideo')}}</a>
-              {{$t('app.warning.message.or')}}
-              <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.buyWithTransak')}}</a>
+              <span v-html="$t('app.warning.message.' + currentChain + '.inst1', {link1: getExchangeTransakUrl()})"></span>
             </li>
             <li>
-              2. {{ $t('app.warning.message.inst2') }}<br />
-              <a v-bind:href="`${getExchangeUrl}`" target="_blank">{{ $t('trade') }} SKILL/BNB</a>
+              <span v-html="$t('app.warning.message.' + currentChain + '.inst2', {link1: getExchangeUrl})"></span>
             </li>
             <li>
-              3. {{ $t('app.warning.message.inst3') }} <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">{{ $t('app.warning.message.watchVideo', {name:''}) }}</a>
+              <span v-html="$t('app.warning.message.' + currentChain + '.inst3')"></span>
             </li>
             <li>
-              4. {{ $t('app.warning.message.inst4') }} (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">{{ $t('app.warning.message.watchGettingStartedVideo', {name:"'Getting Started' "}) }}</a>)
+              <span v-html="$t('app.warning.message.' + currentChain + '.inst4')"></span>
             </li>
           </ul>
           <p>
-            {{ $t('app.warning.message.questionDiscord') }}
-            <a href="https://discord.gg/cryptoblades" target="_blank" rel="noopener noreferrer">https://discord.gg/cryptoblades</a>
+            {{ $t('app.warning.message.happyEarning') }}
           </p>
         </div>
         <div class="seperator"></div>
-        <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
+        <small-button class="button mm-button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
       </div>
       <div class="ad-container">
         <Adsense v-if="showAds && !isMobile()"
@@ -129,6 +124,9 @@ export default {
     showNetworkError() {
       return this.expectedNetworkId && this.currentNetworkId !== null && this.currentNetworkId !== this.expectedNetworkId;
     },
+    currentChain(){
+      return localStorage.getItem('currentChain');
+    }
   },
 
   watch: {
@@ -549,10 +547,12 @@ button.close {
   color: #9e8a57 !important;
 }
 
-.mm-button {
+.mm-button{
   margin: 5px;
-  margin-left: 5px;
-  margin-right: 5px;
+  font-size: clamp(24px, 2vw, 40px);
+}
+.mm-button > h1 {
+   font-size: clamp(24px, 2vw, 40px);
 }
 
 .btn {
@@ -700,7 +700,7 @@ div.bg-success {
 
 .starter-panel-heading {
   margin-left: 15px;
-  font-size: 45px;
+  font-size: clamp(18px, 2vw, 45px);
 }
 
 .starter-msg {
@@ -709,11 +709,12 @@ div.bg-success {
 .instructions-list {
   text-align: start;
   padding: 15px;
-  font-size: 0.5em;
+  font-size: clamp(18px, 2vw, 24px);
 }
 
 .unstyled-list {
   list-style-type: none;
+  padding-left: clamp(10px,2vw,40px);
 }
 .seperator {
   border: 1px solid #9e8a57;
@@ -722,8 +723,7 @@ div.bg-success {
 }
 
 .mini-icon-starter {
-  height: 1.2em;
-  width: 1.2em;
+  width: clamp(50px, 4vw, 100px);
   margin: 5px;
 }
 
