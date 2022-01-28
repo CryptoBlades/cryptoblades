@@ -672,38 +672,38 @@
       "message": {
         "BSC":{
           "instructions": "Fange im Nullkommanichts an! Um deinen ersten Charakter zu rekrutieren, brauchst du {recruitCost} SKILL und .0015 BNB als gas. Außerdem brauchst du noch etwas BNB als gas, um deine ersten Kämpfe auszuführen,aber keine Angst, du profitierst direkt durch Belohnungen, die du beim Kämpfen erhältst!",
-          "inst1": "1. Kaufe BNB mit fiat: <a href=https://youtu.be/6-sUDUE2RPA> Video </a> or <a href={link1}> Mit Transak kaufen</a>",
-          "inst2": "2. Sobald du BNB hast, gehe zu ApeSwap, um SKILL Tokens zu tauschen: <a href={link1}> Tausche SKILL/BNB </a>",
-          "inst3": "3. Schaue dir dieses Tutorial, um BNB zu SKILL zu tauschen: <a href=https://youtu.be/_zitrvJ7Hl4> Watch Video </a>",
-          "inst4": "4. That's it! If you have any questions, please join our Discord: <a href=https://discord.gg/cryptoblades> Join Discord </a>"
+          "inst1": "1. Kaufe BNB mit fiat: <a target=_blank href=https://youtu.be/6-sUDUE2RPA> Video </a> or <a target=_blank href={link1}> Mit Transak kaufen</a>",
+          "inst2": "2. Sobald du BNB hast, gehe zu ApeSwap, um SKILL Tokens zu tauschen: <a target=_blank href={link1}> Tausche SKILL/BNB </a>",
+          "inst3": "3. Schaue dir dieses Tutorial, um BNB zu SKILL zu tauschen: <a target=_blank href=https://youtu.be/_zitrvJ7Hl4> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
         },
         "HECO":{
           "instructions": "Fange im Nullkommanichts an! Um deinen ersten Charakter zu rekrutieren, brauchst du {recruitCost} SKILL und .0007 HT als gas. Außerdem brauchst du noch etwas HT als gas, um deine ersten Kämpfe auszuführen,aber keine Angst, du profitierst direkt durch Belohnungen, die du beim Kämpfen erhältst!",
-          "inst1": "1. Tausche BNB zu HT <a href=https://bridge.butterswap.me> hier </a> (min.  BNB im Wert von $30USD)",
-          "inst2": "2. Sobald du HT hast, gehe zu <a href=https://swap.butterswap.me/swap> ButterSwap </a>, um HT zu SKILL zu tauschen",
-          "inst3": "3. Falls du deine NFTs zwischen den Netzwerken/Chains versenden willst, brauchst du unsere Bridge: <a href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Video </a>",
-          "inst4": "4. Das war's! Wenn du Fragen hast tritt bitte unserem Discord Server bei!: <a href=https://discord.gg/cryptoblades> Discord </a>"
+          "inst1": "1. Tausche BNB zu HT <a target=_blank href=https://bridge.butterswap.me> hier </a> (min.  BNB im Wert von $30USD)",
+          "inst2": "2. Sobald du HT hast, gehe zu <a target=_blank href=https://swap.butterswap.me/swap> ButterSwap </a>, um HT zu SKILL zu tauschen",
+          "inst3": "3. Falls du deine NFTs zwischen den Netzwerken/Chains versenden willst, brauchst du unsere Bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Video </a>",
+          "inst4": "4. Das war's! Wenn du Fragen hast tritt bitte unserem Discord Server bei!: <a target=_blank href=https://discord.gg/cryptoblades> Discord </a>"
         },
         "OEC":{
           "instructions": "Fange im Nullkommanichts an! Um deinen ersten Charakter zu rekrutieren, brauchst du {recruitCost} SKILL und .000032 OKT als gas. Außerdem brauchst du noch etwas OKT als gas, um deine ersten Kämpfe auszuführen,aber keine Angst, du profitierst direkt durch Belohnungen, die du beim Kämpfen erhältst!",
-          "inst1": "1. Wie du OKT in deine Wallet bekommst:<a href=https://www.youtube.com/watch?v=eMXUYGl7XYg> Video </a>",
-          "inst2": "2. Wenn du OKT hast und SKILL brauchst: <a href=https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB> zu JSwap </a>", 
-          "inst3": "3. Falls du deine NFTs zwischen den Netzwerken/Chains versenden willst, brauchst du unsere Bridge: <a href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Video </a>",
-          "inst4": "4. Das war's! Wenn du Fragen hast tritt bitte unserem Discord Server bei!: <a href=https://discord.gg/cryptoblades>  Discord </a>"
+          "inst1": "1. Wie du OKT in deine Wallet bekommst:<a target=_blank href=https://www.youtube.com/watch?v=eMXUYGl7XYg> Video </a>",
+          "inst2": "2. Wenn du OKT hast und SKILL brauchst: <a target=_blank href=https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB> zu JSwap </a>", 
+          "inst3": "3. Falls du deine NFTs zwischen den Netzwerken/Chains versenden willst, brauchst du unsere Bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Video </a>",
+          "inst4": "4. Das war's! Wenn du Fragen hast tritt bitte unserem Discord Server bei!: <a target=_blank href=https://discord.gg/cryptoblades>  Discord </a>"
         },
         "POLYGON":{
           "instructions": "Fange im Nullkommanichts an! Um deinen ersten Charakter zu rekrutieren, brauchst du {recruitCost} SKILL und .01 MATIC als gas. Außerdem brauchst du noch etwas MATIC als gas, um deine ersten Kämpfe auszuführen,aber keine Angst, du profitierst direkt durch Belohnungen, die du beim Kämpfen erhältst!",
-          "inst1": "1. Tausche SKILL zwischen den Netzwerken: <a href=https://bridge.poly.network/token/SKILL> hier </a>",
-          "inst2": "2. Tausche SKILL zu  MATIC: <a href=https://app.apeswap.finance/swap> hier <a>", 
-          "inst3": "3. Falls du deine NFTs zwischen den Netzwerken/Chains versenden willst, brauchst du unsere Bridge: <a href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Video </a>",
-          "inst4": "4. Das war's! Wenn du Fragen hast tritt bitte unserem Discord Server bei!: <a href=https://discord.gg/cryptoblades>  Discord </a>"
+          "inst1": "1. Tausche SKILL zwischen den Netzwerken: <a target=_blank href=https://bridge.poly.network/token/SKILL> hier </a>",
+          "inst2": "2. Tausche SKILL zu  MATIC: <a target=_blank href=https://app.apeswap.finance/swap> hier <a>", 
+          "inst3": "3. Falls du deine NFTs zwischen den Netzwerken/Chains versenden willst, brauchst du unsere Bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Video </a>",
+          "inst4": "4. Das war's! Wenn du Fragen hast tritt bitte unserem Discord Server bei!: <a target=_blank href=https://discord.gg/cryptoblades>  Discord </a>"
         },
         "AVAX":{
           "instructions": "Fange im Nullkommanichts an! Um deinen ersten Charakter zu rekrutieren, brauchst du {recruitCost} SKILL und .001 AVAX als gas. Außerdem brauchst du noch etwas AVAX als gas, um deine ersten Kämpfe auszuführen,aber keine Angst, du profitierst direkt durch Belohnungen, die du beim Kämpfen erhältst!",
-          "inst1": "1. Tausche SKILL zwischen den Netzwerken: <a href=https://bridge.poly.network/token/SKILL> hier </a>",
-          "inst2": "2. Tausche SKILL zu AVAX: <a href=https://app.pangolin.exchange/#/swap> hier <a>", 
-          "inst3": "3. Falls du deine NFTs zwischen den Netzwerken/Chains versenden willst, brauchst du unsere Bridge: <a href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Video </a>",
-          "inst4": "4. Das war's! Wenn du Fragen hast tritt bitte unserem Discord Server bei!: <a href=https://discord.gg/cryptoblades>  Discord </a>"
+          "inst1": "1. Tausche SKILL zwischen den Netzwerken: <a target=_blank href=https://bridge.poly.network/token/SKILL> hier </a>",
+          "inst2": "2. Tausche SKILL zu AVAX: <a target=_blank href=https://app.pangolin.exchange/#/swap> hier <a>", 
+          "inst3": "3. Falls du deine NFTs zwischen den Netzwerken/Chains versenden willst, brauchst du unsere Bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Video </a>",
+          "inst4": "4. Das war's! Wenn du Fragen hast tritt bitte unserem Discord Server bei!: <a target=_blank href=https://discord.gg/cryptoblades>  Discord </a>"
         },
         "hideWalletWarning": "Du hast die Wallet-Warnung ausgeblendet und diese würde jetzt angezeigt werden. Falls du nicht spielen kannst, gehe in die Einstellungen und aktiviere die Wallet-Warnung. Folge dann den angezeigten Schritten.",
         "happyEarning": "Viel Spaß beim Verdienen!",
