@@ -22,6 +22,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public vars;
     uint256 public constant VAR_ROI_DAYS = 1;
     uint256 public constant VAR_BURN_POWER_MULTIPLIER = 2;
+    uint256 public constant VAR_BURNING_ENABLED = 3;
 
     function initialize(Characters _characters, Garrison _garrison, CryptoBlades _game)
         public
@@ -49,13 +50,22 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         }
     }
 
-     modifier restricted() {
+    modifier restricted() {
         _restricted();
         _;
     }
 
     function _restricted() internal view {
         require(hasRole(GAME_ADMIN, msg.sender), "NGA");
+    }
+
+    modifier burningEnabled() {
+        _burningEnabled();
+        _;
+    }
+
+    function _burningEnabled() internal view {
+        require(vars[VAR_BURNING_ENABLED] == 1, "Burning disabled");
     }
 
     // VIEWS
@@ -74,7 +84,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
 
     //FUNCTIONS
 
-    function burnCharacterFromMarket(uint256 burnId) external {
+    function burnCharacterFromMarket(uint256 burnId) external burningEnabled {
         require(hasRole(BURNER_ROLE, msg.sender), 'Not burner');
         game.payContractTokenOnly(tx.origin, burnCharacterFee(burnId));
         uint256[] memory burnIds = new uint256[](1);
@@ -83,18 +93,18 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         characters.burnIntoSoul(burnIds);
     }
 
-    function burnCharactersIntoCharacter(uint256[] memory burnIds, uint256 targetId) public isCharactersOwner(burnIds) {
+    function burnCharactersIntoCharacter(uint256[] memory burnIds, uint256 targetId) public isCharactersOwner(burnIds) burningEnabled {
         game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
         characters.burnIntoCharacter(burnIds, targetId, vars[VAR_BURN_POWER_MULTIPLIER]);
     }
 
-    function burnCharactersIntoSoul(uint256[] memory burnIds) public isCharactersOwner(burnIds) {
+    function burnCharactersIntoSoul(uint256[] memory burnIds) public isCharactersOwner(burnIds) burningEnabled {
         game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
         userVars[msg.sender][USERVAR_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds).mul(vars[VAR_BURN_POWER_MULTIPLIER]).div(1e18);
         characters.burnIntoSoul(burnIds);
     }
 
-    function upgradeCharacterWithSoul(uint256 targetId, uint256 soulAmount) public {
+    function upgradeCharacterWithSoul(uint256 targetId, uint256 soulAmount) public burningEnabled {
         require(userVars[msg.sender][USERVAR_SOUL_SUPPLY] >= soulAmount, 'Not enough soul');
         userVars[msg.sender][USERVAR_SOUL_SUPPLY] = userVars[msg.sender][USERVAR_SOUL_SUPPLY].sub(soulAmount);
         characters.upgradeWithSoul(targetId, soulAmount);
