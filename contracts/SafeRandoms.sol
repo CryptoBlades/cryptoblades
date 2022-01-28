@@ -72,6 +72,7 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
 
     uint256 public currentSeedIndex; // new requests pile up under this index
     uint256 public seedIndexBlockNumber; // the block number "currentSeedIndex" was reached on
+    uint256 public firstRequestBlockNumber; // first request block for the latest seed index
     mapping(uint256 => bytes32) public seedHashes; // key: seedIndex
 
     // keys: user, requestID / value: seedIndex
@@ -96,6 +97,7 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         currentSeedIndex = 1; // one-at-a-time seeds have a 0 check
         seedIndexBlockNumber = block.number;
+        firstRequestBlockNumber = block.number-1; // save 15k gas for very first user
     }
     
     modifier restricted() {
@@ -109,15 +111,16 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
 
     // SINGLE SEED REQUESTS
 
-    function requestSingleSeed(address user, uint256 requestID, bool resolve) public restricted {
-        if(resolve)
-            _resolveSeedPublic(user);
+    function requestSingleSeed(address user, uint256 requestID) public restricted {
+        _resolveSeedPublic(user);
         _requestSingleSeed(user, requestID);
     }
 
     function _requestSingleSeed(address user, uint256 requestID) internal {
         require(singleSeedRequests[user][requestID] == 0);
         singleSeedRequests[user][requestID] = currentSeedIndex;
+        if(firstRequestBlockNumber < seedIndexBlockNumber)
+            firstRequestBlockNumber = block.number;
 
         if(emitRequestEvent)
             emit SeedRequested(user, requestID);
@@ -125,14 +128,15 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
 
     // QUEUED SEED REQUESTS
 
-    function requestQueuedSeed(address user, uint256 requestID, bool resolve) public restricted {
-        if(resolve)
-            _resolveSeedPublic(user);
+    function requestQueuedSeed(address user, uint256 requestID) public restricted {
+        _resolveSeedPublic(user);
         _requestQueuedSeed(user, requestID);
     }
 
     function _requestQueuedSeed(address user, uint256 requestID) internal {
         queuedSeedRequests[user][requestID].push(currentSeedIndex);
+        if(firstRequestBlockNumber < seedIndexBlockNumber)
+            firstRequestBlockNumber = block.number;
 
         if(emitRequestEvent)
             emit SeedRequested(user, requestID);
@@ -145,7 +149,7 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
     }
 
     function _resolveSeedPublic(address resolver) internal {
-        if(!publicResolutionLimited || block.number < seedIndexBlockNumber + publicResolutionBlocks)
+        if(!publicResolutionLimited || block.number < firstRequestBlockNumber + publicResolutionBlocks)
             _resolveSeed(resolver);
     }
 
@@ -154,7 +158,7 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
     }
 
     function _resolveSeed(address resolver) internal {
-        if(block.number > seedIndexBlockNumber) {
+        if(block.number > firstRequestBlockNumber && firstRequestBlockNumber >= seedIndexBlockNumber) {
             seedHashes[currentSeedIndex++] = blockhash(block.number - 1);
             seedIndexBlockNumber = block.number;
             if(emitResolutionEvent)
