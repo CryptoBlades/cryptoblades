@@ -127,6 +127,52 @@
         {{ $t('quests.updateStaminaCost') }}
       </b-button>
     </b-form>
+    <b-form class="d-flex flex-column gap-3">
+      <h2 class="pt-3">Tier Chances</h2>
+      <div v-if="tierChances.length !== 0" class="d-flex flex-column gap-3">
+        <div class="d-flex justify-content-between">
+          <span class="invisible">{{ $t('quests.level', {level: 0}) }}</span>
+          <div>{{ $t('quests.rarityType.COMMON') }}</div>
+          <div>{{ $t('quests.rarityType.UNCOMMON') }}</div>
+          <div>{{ $t('quests.rarityType.RARE') }}</div>
+          <div>{{ $t('quests.rarityType.EPIC') }}</div>
+          <div>{{ $t('quests.rarityType.LEGENDARY') }}</div>
+          <div class="invisible">
+            <b-button variant="primary">{{ $t('quests.updateStaminaCost') }}</b-button>
+          </div>
+        </div>
+        <div v-for="(tierChance, index) in tierChances" class="d-flex justify-content-between align-items-center"
+             :key="index">
+          <span class="text-nowrap">{{ $t('quests.level', {level: index + 1}) }}</span>
+          <div>
+            <b-form-input type="number" number :min="0" :value="tierChance.common" readonly/>
+          </div>
+          <div>
+            <b-form-input type="number" @change="() => updateCommonChance(index)" number :min="0"
+                          v-model="tierChance.uncommon"/>
+          </div>
+          <div>
+            <b-form-input type="number" @change="() => updateCommonChance(index)" number :min="0"
+                          v-model="tierChance.rare"/>
+          </div>
+          <div>
+            <b-form-input type="number" @change="() => updateCommonChance(index)" number :min="0"
+                          v-model="tierChance.epic"/>
+          </div>
+          <div>
+            <b-form-input type="number" @change="() => updateCommonChance(index)" number :min="0"
+                          v-model="tierChance.legendary"/>
+          </div>
+          <b-button variant="primary" @click="() => updateTierChances(index, tierChance)" :disabled="isLoading">
+            {{ $t('quests.updateForLevel', {level: index + 1}) }}
+          </b-button>
+        </div>
+      </div>
+      <h3 v-else>
+        <i class="fas fa-spinner fa-spin"/>
+        {{ $t('quests.loading') }}
+      </h3>
+    </b-form>
     <QuestTemplatesDisplay :promoQuestTemplates="promoQuestTemplates"/>
     <b-modal v-model="showTemplateConfirmationModal" @ok.prevent="onSubmit" :ok-disabled="isLoading"
              :title="promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest')">
@@ -150,6 +196,7 @@ import {
   ReputationLevelRequirements,
   RequirementType,
   RewardType,
+  TierChances,
   VAR_REPUTATION_LEVEL_2,
   VAR_REPUTATION_LEVEL_3,
   VAR_REPUTATION_LEVEL_4,
@@ -170,6 +217,10 @@ interface StoreMappedActions {
   setSkipQuestStaminaCost(payload: { staminaCost: number }): Promise<void>;
 
   getSkipQuestStaminaCost(): Promise<number>;
+
+  getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
+
+  setQuestTierChances(payload: { tier: number, tierChances: TierChances }): Promise<void>;
 }
 
 interface Data {
@@ -183,6 +234,7 @@ interface Data {
   showTemplateConfirmationModal: boolean;
   reputationLevelRequirements?: ReputationLevelRequirements;
   staminaCost: number;
+  tierChances: TierChances[];
 }
 
 export default Vue.extend({
@@ -209,6 +261,7 @@ export default Vue.extend({
       showTemplateConfirmationModal: false,
       reputationLevelRequirements: undefined,
       staminaCost: 0,
+      tierChances: [] as TierChances[],
       RequirementType,
       RewardType,
       Rarity,
@@ -224,6 +277,8 @@ export default Vue.extend({
       'setReputationLevelRequirements',
       'setSkipQuestStaminaCost',
       'getSkipQuestStaminaCost',
+      'getQuestTierChances',
+      'setQuestTierChances',
     ]) as StoreMappedActions,
 
     showConfirmationModal() {
@@ -275,6 +330,16 @@ export default Vue.extend({
       }
     },
 
+    async updateTierChances(tier: number, tierChances: TierChances) {
+      try {
+        this.isLoading = true;
+        await this.setQuestTierChances({tier, tierChances});
+        await this.refreshTierChance(tier);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     refreshQuestTemplates() {
       this.$root.$emit('refresh-quest-templates');
     },
@@ -297,7 +362,26 @@ export default Vue.extend({
         !this.reputationLevelRequirements.level4 ||
         !this.reputationLevelRequirements.level5 ||
         this.isLoading || this.showTemplateConfirmationModal;
-    }
+    },
+
+    async refreshTierChance(tier: number) {
+      this.tierChances[tier] = await this.getQuestTierChances({tier});
+    },
+
+    async refreshTierChances() {
+      this.tierChances[0] = await this.getQuestTierChances({tier: 0});
+      this.tierChances[1] = await this.getQuestTierChances({tier: 1});
+      this.tierChances[2] = await this.getQuestTierChances({tier: 2});
+      this.tierChances[3] = await this.getQuestTierChances({tier: 3});
+      this.tierChances[4] = await this.getQuestTierChances({tier: 4});
+    },
+
+    updateCommonChance(index: number) {
+      this.tierChances[index].common = 100 - this.tierChances[index].uncommon - this.tierChances[index].rare -
+        this.tierChances[index].epic - this.tierChances[index].legendary;
+      Vue.set(this.tierChances, index, this.tierChances[index]);
+      console.log(this.tierChances[index]);
+    },
   },
 
   async mounted() {
@@ -307,6 +391,7 @@ export default Vue.extend({
       this.refreshQuestTemplates();
       this.reputationLevelRequirements = await this.getReputationLevelRequirements({reputationLevels});
       this.staminaCost = await this.getSkipQuestStaminaCost();
+      await this.refreshTierChances();
     } finally {
       this.isLoading = false;
     }
@@ -329,5 +414,9 @@ export default Vue.extend({
 
 .requirements-grid-container {
   grid-template-columns: 1fr 1fr;
+}
+
+.invisible {
+  visibility: hidden;
 }
 </style>

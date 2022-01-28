@@ -162,6 +162,14 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             rewardType, rewardRarity, rewardAmount, reputationAmount));
     }
 
+    function getQuestTierChances(uint256 tier) external view returns (uint256[4] memory)    {
+        return questTierChances[tier];
+    }
+
+    function setQuestTierChances(uint256 tier, uint256[4] memory chances) public {
+        questTierChances[tier] = chances;
+    }
+
     function getQuestTemplatesCount(uint8 tier) public view returns (uint256) {
         return quests[tier].length;
     }
@@ -235,7 +243,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             reputationLevel = 4;
         }
         uint256 tierRoll = RandomUtil.randomSeededMinMax(1, 100, seed);
-        seed = RandomUtil.combineSeeds(seed,1);
+        seed = RandomUtil.combineSeeds(seed, 1);
         uint256[4] memory chances = questTierChances[reputationLevel];
         Quest memory quest;
         if (tierRoll > chances[3]) {

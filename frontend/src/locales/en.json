@@ -601,6 +601,7 @@
       "DUST": "Dust",
       "EXPERIENCE": "Experience"
     },
+    "level": "Level {level}",
     "questsTitle": "Quests",
     "quest": "Quest",
     "skip": "Skip ({staminaCost} stamina)",
@@ -641,6 +642,7 @@
     "staminaCost": "Stamina cost",
     "updateSkipQuestStaminaCost": "Update skip quest stamina cost",
     "updateStaminaCost": "Update stamina cost",
+    "updateForLevel": "Update for level {level}",
     "youNeedToHaveAtLeastOneCharacter": "You need to have at least one character to do Quests",
     "loading": "Loading..."
   },

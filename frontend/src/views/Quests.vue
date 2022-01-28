@@ -108,6 +108,14 @@ export interface ReputationLevelRequirements {
   level5: number;
 }
 
+export interface TierChances {
+  common: number;
+  uncommon: number;
+  rare: number;
+  epic: number;
+  legendary: number;
+}
+
 interface StoreMappedActions {
   fetchCharacters(characterIds: (string | number)[]): Promise<void>;
 

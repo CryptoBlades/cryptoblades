@@ -42,7 +42,11 @@ import {
 import {getCharacterNameFromSeed} from './character-name';
 import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './contract-call-utils';
 
-import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly, burningManager as featureFlagBurningManager} from './feature-flags';
+import {
+  burningManager as featureFlagBurningManager,
+  raid as featureFlagRaid,
+  stakeOnly as featureFlagStakeOnly
+} from './feature-flags';
 import {IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
 import {Nft} from './interfaces/Nft';
@@ -51,7 +55,7 @@ import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
-import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType} from '@/views/Quests.vue';
+import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances} from '@/views/Quests.vue';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -3350,6 +3354,32 @@ export function createStore(web3: Web3) {
           rewardAmount: +questDataRaw[8],
           reputationAmount: +questDataRaw[9],
         };
+      },
+
+      async getQuestTierChances({state}, {tier}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+        console.log('getting chances for ', tier);
+
+        const tierChancesRaw = await SimpleQuests.methods.getQuestTierChances(tier).call(defaultCallOptions(state));
+        const legendary = 100 - +tierChancesRaw[3];
+        const epic = 100 - +tierChancesRaw[2] - legendary;
+        const rare = 100 - +tierChancesRaw[1] - epic - legendary;
+        const uncommon = 100 - +tierChancesRaw[0] - rare - epic - legendary;
+        const common = 100 - uncommon - rare - epic - legendary;
+        return {common, uncommon, rare, epic, legendary} as TierChances;
+      },
+
+      async setQuestTierChances({state}, {tier, tierChances}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const uncommon = String(100 - tierChances.uncommon - tierChances.rare - tierChances.epic - tierChances.legendary);
+        const rare = String(100 - tierChances.rare - tierChances.epic - tierChances.legendary);
+        const epic = String(100 - tierChances.epic - tierChances.legendary);
+        const legendary = String(100 - tierChances.legendary);
+
+        return await SimpleQuests.methods.setQuestTierChances(tier, [uncommon, rare, epic, legendary]).send(defaultCallOptions(state));
       },
 
       async getSkipQuestStaminaCost({state}) {
