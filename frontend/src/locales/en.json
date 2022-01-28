@@ -117,7 +117,9 @@
     "upgradeConfirm": "Are you sure you want to upgrade this character using",
     "characterToUpgrade": "Character to upgrade",
     "selectSoulAmount": "Select amount of Soul you want to use to upgrade selected character!",
-    "busyInArena": "Character is currently busy in Arena!"
+    "busyInArena": "Character is currently busy in Arena!",
+    "claimXp": "Claim XP",
+    "noXpToClaim": "No XP to claim"
   },
   "bridge": {
     "bridgeForYourNfts": "Bridge for your NFTs",
@@ -693,8 +695,10 @@
       "rewardsDuration": "Distribution",
       "warning": "Warning",
       "select": "Select",
-      "rewardsAvailableTooltip":"Rewards available",
-      "rewardsUnavailableTooltip":"Rewards depleted",
+      "rewardsAvailableTooltip":"You can earn rewards in this stake pool.",
+      "rewardsDepletedTooltip":"Rewards depleted.",
+      "rewardsAvailableEarnedTooltip":"You have rewards ready to claim in this stake pool and you can still earn more.",
+      "rewardsDepletedEarnedTooltip":"Rewards depleted but you can claim your reward.",
       "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
     },
     "tier": "Tier",

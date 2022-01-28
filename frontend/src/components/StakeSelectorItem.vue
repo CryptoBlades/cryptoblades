@@ -1,9 +1,9 @@
 <template>
   <div class="container">
     <span class="stake-header">
-      <b-icon-exclamation-circle
-      :class="getExclamationMark(rewardDistributionTimeLeft)"
-      v-tooltip="getTooltip(rewardDistributionTimeLeft)"/>
+      <b-icon-exclamation-circle scale="0.8"
+      :class="exclamationMark"
+      v-tooltip="rewardTooltip"/>
       <div class="stake-icon-wrapper">
         <img src="https://seiyria.com/gameicons-font/svg/two-coins.svg" alt="" class="stake-type-icon">
       </div>
@@ -81,7 +81,8 @@ export default {
     'estimatedYield',
     'rewardsDuration',
     'deprecated',
-    'rewardDistributionTimeLeft'
+    'rewardDistributionTimeLeft',
+    'currentRewardEarned'
   ],
   computed: {
     minimumStakeTimeFormatted() {
@@ -93,20 +94,31 @@ export default {
     rewardsDurationFormatted() {
       return formatDurationFromSeconds(this.rewardsDuration);
     },
-  },
-  methods: {
-    getExclamationMark(rewardDistributionTimeLeft) {
-      if(rewardDistributionTimeLeft > 0) {
-        return 'green-exclamation-mark';
-      }
-      return 'red-exclamation-mark';
-    },
+    exclamationMark() {
+      let exclamationMark = '';
 
-    getTooltip(rewardDistributionTimeLeft) {
-      if(rewardDistributionTimeLeft > 0) {
+      if (this.rewardDistributionTimeLeft > 0) {
+        exclamationMark += 'green-exclamation-mark ';
+      } else {
+        exclamationMark += 'red-exclamation-mark ';
+      }
+
+      if (this.currentRewardEarned > 0) {
+        exclamationMark += 'gold-background';
+      }
+      return exclamationMark;
+    },
+    rewardTooltip() {
+      if(this.rewardDistributionTimeLeft > 0) {
+        if (this.currentRewardEarned > 0) {
+          return this.$t('stake.StakeSelectorItem.rewardsAvailableEarnedTooltip');
+        }
         return this.$t('stake.StakeSelectorItem.rewardsAvailableTooltip');
       }
-      return this.$t('stake.StakeSelectorItem.rewardsUnavailableTooltip');
+      if (this.currentRewardEarned > 0) {
+        return this.$t('stake.StakeSelectorItem.rewardsDepletedEarnedTooltip');
+      }
+      return this.$t('stake.StakeSelectorItem.rewardsDepletedTooltip');
     },
   },
 };
@@ -184,17 +196,22 @@ export default {
 }
 
 .green-exclamation-mark {
-  float: left;
-  color: rgb(59, 155, 39);
+  float: right;
+  color: rgb(41, 107, 28);
 }
 
 .red-exclamation-mark {
-  float: left;
+  float: right;
   color: rgb(153, 29, 29);
+}
+
+.gold-background {
+  background: #9e8a57;
+  border-radius: 50%;
 }
 
 .stake-header {
   width: 100%;
-  font-size : 1.5em;
+  font-size : 1.9em;
 }
 </style>

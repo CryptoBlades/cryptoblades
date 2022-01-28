@@ -155,6 +155,7 @@ export function createStore(web3: Web3) {
       garrisonCharacters: {},
       characterStaminas: {},
       characterPowers: {},
+      characterIsInArena: {},
       characterRenames: {},
       characterCosmetics: {},
       weapons: {},
@@ -337,6 +338,12 @@ export function createStore(web3: Web3) {
       getCharacterPower(state: IState) {
         return (characterId: number) => {
           return state.characterPowers[characterId];
+        };
+      },
+
+      getCharacterIsInArena(state: IState) {
+        return (characterId: number) => {
+          return state.characterIsInArena[characterId];
         };
       },
 
@@ -847,6 +854,9 @@ export function createStore(web3: Web3) {
       updateCharacterPower(state: IState, { characterId, power }) {
         Vue.set(state.characterPowers, characterId, +power);
       },
+      updateCharacterInArena(state: IState, { characterId, isCharacterInArena }) {
+        Vue.set(state.characterIsInArena, characterId, isCharacterInArena);
+      },
       updateCharacterRename(state: IState, { characterId, renameString }) {
         if(renameString !== undefined){
           Vue.set(state.characterRenames, characterId, renameString);
@@ -1217,6 +1227,7 @@ export function createStore(web3: Web3) {
                   dispatch('fetchSkillBalance'),
                   dispatch('fetchFightRewardSkill'),
                   dispatch('fetchFightRewardXp'),
+                  dispatch('fetchGarrisonCharactersXp'),
                   dispatch('fetchDustBalance')
                 ]);
               })
@@ -1412,6 +1423,7 @@ export function createStore(web3: Web3) {
           dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
+          dispatch('fetchGarrisonCharactersXp'),
           dispatch('fetchFightGasOffset'),
           dispatch('fetchFightBaseline'),
         ]);
@@ -1560,6 +1572,7 @@ export function createStore(web3: Web3) {
               await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
             );
             await dispatch('fetchCharacterPower', characterId);
+            await dispatch('getIsCharacterInArena', characterId);
 
             if(!inGarrison) {
               commit('updateCharacter', { characterId, character });
@@ -2268,7 +2281,6 @@ export function createStore(web3: Web3) {
           StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
-
         const stakeData: { stakeType: StakeType | NftStakeType } & IStakeState = {
           stakeType,
           ownBalance,
@@ -3213,18 +3225,38 @@ export function createStore(web3: Web3) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
 
-        const xpCharaIdPairs = await Promise.all(
-          state.ownedCharacterIds.map(async charaId => {
-            const xp = await CryptoBlades.methods
-              .getXpRewards(charaId)
-              .call(defaultCallOptions(state));
+        const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
 
-            return [charaId, xp];
-          })
-        );
+        const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
+          return [charaId, xps[i]];
+        });
 
         commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
         return xpCharaIdPairs;
+      },
+
+      async fetchGarrisonCharactersXp({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        const xps = await CryptoBlades.methods.getXpRewards(state.ownedGarrisonCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
+
+        const xpCharaIdPairs = state.ownedGarrisonCharacterIds.map((charaId, i) => {
+          return [charaId, xps[i]];
+        });
+
+        commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
+      },
+
+      async claimGarrisonXp({ state, dispatch }, characterIds) {
+        const { Garrison } = state.contracts();
+        if(!Garrison) return;
+        await Garrison.methods.claimAllXp(characterIds).send({ from: state.defaultAccount });
+
+        await Promise.all([
+          dispatch('fetchGarrisonCharacters', state.ownedGarrisonCharacterIds),
+          dispatch('fetchGarrisonCharactersXp')
+        ]);
       },
 
       async purchaseShield({ state, dispatch }) {
@@ -4580,11 +4612,11 @@ export function createStore(web3: Web3) {
         return isShieldInArena;
       },
 
-      async getIsCharacterInArena({ state }, characterId) {
+      async getIsCharacterInArena({ state, commit }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
-
         const isCharacterInArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: state.defaultAccount });
+        commit('updateCharacterInArena', { characterId, isCharacterInArena });
 
         return isCharacterInArena;
       },
@@ -4670,20 +4702,24 @@ export function createStore(web3: Web3) {
         return duelOffsetCost;
       },
 
-      async enterArena({ state }, {characterId, weaponId, shieldId, useShield}) {
+      async enterArena({ state, dispatch }, {characterId, weaponId, shieldId, useShield}) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
 
         const res = await PvpArena.methods.enterArena(characterId, weaponId, shieldId, useShield).send({ from: state.defaultAccount });
 
+        await dispatch('getIsCharacterInArena', characterId);
+
         return res;
       },
 
-      async withdrawFromArena({ state }, characterId) {
+      async withdrawFromArena({ state, dispatch }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
 
         const res = await PvpArena.methods.withdrawFromArena(characterId).send({ from: state.defaultAccount });
+
+        await dispatch('getIsCharacterInArena', characterId);
 
         return res;
       },
@@ -4800,6 +4836,13 @@ export function createStore(web3: Web3) {
         if(!BurningManager || !state.defaultAccount) return;
 
         return await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
+      },
+
+      async fetchBurnPowerMultiplier({ state }) {
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
+
+        return await BurningManager.methods.vars(2).call(defaultCallOptions(state));
       }
     },
   });

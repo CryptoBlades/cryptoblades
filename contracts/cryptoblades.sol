@@ -1036,12 +1036,23 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         characters.gainXpAll(chars, xps);
     }
 
+    function resetXp(uint256[] memory chars) public restricted {
+        for(uint256 i = 0; i < chars.length; i++) {
+            xpRewards[chars[i]] = 0;
+        }
+    }
+
     function getTokenRewards() public view returns (uint256) {
         return tokenRewards[msg.sender];
     }
 
-    function getXpRewards(uint256 char) public view returns (uint256) {
-        return xpRewards[char];
+    function getXpRewards(uint256[] memory chars) public view returns (uint256[] memory) {
+        uint charsAmount = chars.length;
+        uint256[] memory xps = new uint256[](charsAmount);
+        for(uint i = 0; i < chars.length; i++) {
+            xps[i] = xpRewards[chars[i]];
+        }
+        return xps;
     }
 
     function getTokenRewardsFor(address wallet) public view returns (uint256) {
