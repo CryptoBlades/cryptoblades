@@ -742,7 +742,7 @@ export default Vue.extend({
 
     addBurnWeapon(id: number){
       this.burnWeaponIds.push(id.toString());
-      this.hideWeapons = this.hideWeapons.filter(val => !this.burnWeaponIds.includes(val));
+      this.hideWeapons = this.hideWeapons.filter(val => !this.burnWeaponIds.includes(val.toString()));
       this.burnWeaponId = null;
     },
 
