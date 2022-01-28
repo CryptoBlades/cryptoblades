@@ -101,6 +101,7 @@
         {{ promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest') }}
       </b-button>
     </b-form>
+    <QuestTemplatesDisplay :promoQuestTemplates="promoQuestTemplates"/>
     <b-form v-if="reputationLevelRequirements" class="d-flex flex-column gap-3">
       <h2 class="pt-3">{{ $t('quests.updateReputationLevelRequirements') }}</h2>
       <div class="requirements-grid-container gap-3">
@@ -123,12 +124,28 @@
         <label class="m-0 align-self-center">{{ $t('quests.staminaCost') }}</label>
         <b-form-input type="number" number :min="0" v-model="staminaCost"/>
       </div>
-      <b-button variant="primary" @click="updateStaminaCost" :disabled="isLoading || showTemplateConfirmationModal">
+      <b-button variant="primary" @click="updateStaminaCost"
+                :disabled="isLoading || showTemplateConfirmationModal || showPromoToggleConfirmationModal">
         {{ $t('quests.updateStaminaCost') }}
       </b-button>
     </b-form>
     <b-form class="d-flex flex-column gap-3">
-      <h2 class="pt-3">Tier Chances</h2>
+      <h2 class="pt-3">{{ $t('quests.updateUsePromoQuestTemplates') }}</h2>
+      <div class="requirements-grid-container gap-3">
+        <label class="m-0 align-self-center">{{ $t('quests.usePromoQuestTemplates') }}</label>
+        <span v-if="!isLoading" class="font-weight-bold">{{ usePromoQuests }}</span>
+        <span v-else>
+          <i class="fas fa-spinner fa-spin"/>
+          {{ $t('quests.loading') }}
+        </span>
+      </div>
+      <b-button variant="primary" @click="showPromoToggleConfirmationModal = true"
+                :disabled="isLoading || showTemplateConfirmationModal || showPromoToggleConfirmationModal">
+        {{ $t('quests.togglePromoQuestsUsage') }}
+      </b-button>
+    </b-form>
+    <b-form class="d-flex flex-column gap-3">
+      <h2 class="pt-3">{{ $t('quests.tierChances') }}</h2>
       <div v-if="tierChances.length !== 0" class="d-flex flex-column gap-3">
         <div class="d-flex justify-content-between">
           <span class="invisible">{{ $t('quests.level', {level: 0}) }}</span>
@@ -173,7 +190,6 @@
         {{ $t('quests.loading') }}
       </h3>
     </b-form>
-    <QuestTemplatesDisplay :promoQuestTemplates="promoQuestTemplates"/>
     <b-modal v-model="showTemplateConfirmationModal" @ok.prevent="onSubmit" :ok-disabled="isLoading"
              :title="promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest')">
       <div class="d-flex flex-column align-items-center">
@@ -181,6 +197,14 @@
           {{ promoQuestTemplates ? $t('quests.areYouSureAddPromoQuest') : $t('quests.areYouSureAddQuest') }}
         </h4>
         <QuestDetails :quest="questTemplate" :isDisplayOnly="true"/>
+      </div>
+    </b-modal>
+    <b-modal v-model="showPromoToggleConfirmationModal" @ok.prevent="togglePromoQuests" :ok-disabled="isLoading"
+             :title="$t('quests.togglePromoQuestsUsage')">
+      <div class="d-flex flex-column align-items-center">
+        <h4 class="text-center">
+          {{ usePromoQuests ? $t('quests.addNewTurnOffPromoQuestsUsage') : $t('quests.addNewTurnOnPromoQuestsUsage') }}
+        </h4>
       </div>
     </b-modal>
   </div>
@@ -205,6 +229,18 @@ import {
 import QuestTemplatesDisplay from '@/components/smart/QuestTemplatesDisplay.vue';
 import QuestDetails from '@/components/smart/QuestDetails.vue';
 
+export interface QuestTemplate {
+  id: number;
+  tier: number;
+  requirementType: number;
+  requirementRarity: number;
+  requirementAmount: number;
+  rewardType: number;
+  rewardRarity: number;
+  rewardAmount: number;
+  reputationAmount: number;
+}
+
 interface StoreMappedActions {
   addQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
 
@@ -221,6 +257,10 @@ interface StoreMappedActions {
   getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
 
   setQuestTierChances(payload: { tier: number, tierChances: TierChances }): Promise<void>;
+
+  isUsingPromoQuests(): Promise<boolean>;
+
+  toggleUsePromoQuests(): Promise<void>;
 }
 
 interface Data {
@@ -232,9 +272,11 @@ interface Data {
   promoQuestTemplates: boolean;
   isLoading: boolean;
   showTemplateConfirmationModal: boolean;
+  showPromoToggleConfirmationModal: boolean;
   reputationLevelRequirements?: ReputationLevelRequirements;
   staminaCost: number;
   tierChances: TierChances[];
+  usePromoQuests: boolean;
 }
 
 export default Vue.extend({
@@ -259,9 +301,11 @@ export default Vue.extend({
       promoQuestTemplates: false,
       isLoading: false,
       showTemplateConfirmationModal: false,
+      showPromoToggleConfirmationModal: false,
       reputationLevelRequirements: undefined,
       staminaCost: 0,
       tierChances: [] as TierChances[],
+      usePromoQuests: false,
       RequirementType,
       RewardType,
       Rarity,
@@ -279,6 +323,8 @@ export default Vue.extend({
       'getSkipQuestStaminaCost',
       'getQuestTierChances',
       'setQuestTierChances',
+      'isUsingPromoQuests',
+      'toggleUsePromoQuests',
     ]) as StoreMappedActions,
 
     showConfirmationModal() {
@@ -340,6 +386,17 @@ export default Vue.extend({
       }
     },
 
+    async togglePromoQuests() {
+      try {
+        this.isLoading = true;
+        await this.toggleUsePromoQuests();
+        this.usePromoQuests = await this.isUsingPromoQuests();
+      } finally {
+        this.isLoading = false;
+        this.showPromoToggleConfirmationModal = false;
+      }
+    },
+
     refreshQuestTemplates() {
       this.$root.$emit('refresh-quest-templates');
     },
@@ -391,6 +448,7 @@ export default Vue.extend({
       this.refreshQuestTemplates();
       this.reputationLevelRequirements = await this.getReputationLevelRequirements({reputationLevels});
       this.staminaCost = await this.getSkipQuestStaminaCost();
+      this.usePromoQuests = await this.isUsingPromoQuests();
       await this.refreshTierChances();
     } finally {
       this.isLoading = false;

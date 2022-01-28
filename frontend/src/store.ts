@@ -56,6 +56,7 @@ import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances} from '@/views/Quests.vue';
+import {QuestTemplate} from '@/components/smart/QuestsDashboard.vue';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -3290,16 +3291,17 @@ export function createStore(web3: Web3) {
         if(questTemplatesCount === 0) return questTemplates;
 
         for (let i = 0; i < questTemplatesCount; i++) {
-          const questTemplateRaw = await SimpleQuests.methods.getQuestTemplate(tier, i).call(defaultCallOptions(state));
+          const questTemplateRaw = await SimpleQuests.methods.questTemplates(tier, i).call(defaultCallOptions(state)) as unknown as QuestTemplate;
+          console.log(questTemplateRaw);
           questTemplates.push({
-            tier: +questTemplateRaw[0],
-            requirementType: +questTemplateRaw[1],
-            requirementRarity: +questTemplateRaw[2],
-            requirementAmount: +questTemplateRaw[3],
-            rewardType: +questTemplateRaw[4],
-            rewardRarity: +questTemplateRaw[5],
-            rewardAmount: +questTemplateRaw[6],
-            reputationAmount: +questTemplateRaw[7]
+            tier: +questTemplateRaw.tier,
+            requirementType: +questTemplateRaw.requirementType,
+            requirementRarity: +questTemplateRaw.requirementRarity,
+            requirementAmount: +questTemplateRaw.requirementAmount,
+            rewardType: +questTemplateRaw.rewardType,
+            rewardRarity: +questTemplateRaw.rewardRarity,
+            rewardAmount: +questTemplateRaw.rewardAmount,
+            reputationAmount: +questTemplateRaw.reputationAmount
           } as Quest);
         }
 
@@ -3310,7 +3312,7 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        return await SimpleQuests.methods.addNewQuest(questTemplate.tier,
+        return await SimpleQuests.methods.addNewQuestTemplate(questTemplate.tier,
           questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount,
           questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount,
           questTemplate.reputationAmount).send(defaultCallOptions(state));
@@ -3320,7 +3322,7 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        return await SimpleQuests.methods.addNewPromoQuest(questTemplate.tier,
+        return await SimpleQuests.methods.addNewPromoQuestTemplate(questTemplate.tier,
           questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount,
           questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount,
           questTemplate.reputationAmount).send(defaultCallOptions(state));
@@ -3330,7 +3332,7 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        return await SimpleQuests.methods.deleteQuest(tier, index).send(defaultCallOptions(state));
+        return await SimpleQuests.methods.deleteQuestTemplate(tier, index).send(defaultCallOptions(state));
       },
 
       async getCharacterQuestData({ state }, {characterId}) {
@@ -3361,7 +3363,7 @@ export function createStore(web3: Web3) {
         if (!SimpleQuests || !state.defaultAccount) return;
         console.log('getting chances for ', tier);
 
-        const tierChancesRaw = await SimpleQuests.methods.getQuestTierChances(tier).call(defaultCallOptions(state));
+        const tierChancesRaw = await SimpleQuests.methods.getTierChances(tier).call(defaultCallOptions(state));
         const legendary = 100 - +tierChancesRaw[3];
         const epic = 100 - +tierChancesRaw[2] - legendary;
         const rare = 100 - +tierChancesRaw[1] - epic - legendary;
@@ -3379,14 +3381,14 @@ export function createStore(web3: Web3) {
         const epic = String(100 - tierChances.epic - tierChances.legendary);
         const legendary = String(100 - tierChances.legendary);
 
-        return await SimpleQuests.methods.setQuestTierChances(tier, [uncommon, rare, epic, legendary]).send(defaultCallOptions(state));
+        return await SimpleQuests.methods.setTierChances(tier, [uncommon, rare, epic, legendary]).send(defaultCallOptions(state));
       },
 
       async getSkipQuestStaminaCost({state}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        return await SimpleQuests.methods.staminaCost().call(defaultCallOptions(state));
+        return await SimpleQuests.methods.skipQuestStaminaCost().call(defaultCallOptions(state));
       },
 
       async setSkipQuestStaminaCost({state}, {staminaCost}) {
@@ -3415,6 +3417,20 @@ export function createStore(web3: Web3) {
         if (!SimpleQuests || !state.defaultAccount) return;
 
         return await SimpleQuests.methods.setVars(reputationLevels, requirements).send(defaultCallOptions(state));
+      },
+
+      async isUsingPromoQuests({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.usePromoQuests().call(defaultCallOptions(state));
+      },
+
+      async toggleUsePromoQuests({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        await SimpleQuests.methods.toggleUsePromoQuests().send(defaultCallOptions(state));
       },
 
       async canSkipQuest({state}, {characterID}) {

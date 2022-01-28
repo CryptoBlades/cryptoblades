@@ -25,7 +25,7 @@
         <i class="fas fa-spinner fa-spin"/>
         {{ $t('quests.loading') }}
       </h3>
-      <h3 v-else-if="questTemplates.length === 0"> {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
+      <h3 v-else-if="questTemplates.length === 0 && templatesTier !== undefined"> {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
       <QuestDetails v-else v-for="(questTemplate, index) in questTemplates" :key="index" :quest="questTemplate"
                     :isQuestTemplate="true" :questIndex="index" :refreshQuestTemplates="refreshQuestTemplates"/>
     </div>
