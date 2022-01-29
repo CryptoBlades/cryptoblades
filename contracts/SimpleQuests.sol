@@ -260,7 +260,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(junk.ownerOf(tokenID) == msg.sender, "Not junk owner");
-                require(junk.getStars(tokenID) == uint256(quest.requirementRarity), "Wrong junk rarity");
+                require(junk.tokenStars(tokenID) == uint256(quest.requirementRarity), "Wrong junk rarity");
                 junk.burn(tokenID);
                 incrementQuestProgress(characterID, questID, 1);
             }
@@ -269,7 +269,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(trinket.ownerOf(tokenID) == msg.sender, "Not trinket owner");
-                require(trinket.getStars(tokenID) == uint256(quest.requirementRarity), "Wrong trinket rarity");
+                require(trinket.tokenStars(tokenID) == uint256(quest.requirementRarity), "Wrong trinket rarity");
                 trinket.burn(tokenID);
                 incrementQuestProgress(characterID, questID, 1);
             }

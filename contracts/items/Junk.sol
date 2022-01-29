@@ -51,10 +51,6 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokens;
     }
 
-    function getStars(uint256 id) public view returns (uint8) {
-        return tokenStars[id];
-    }
-
     function getStars(uint256[] memory ids) public restricted view returns (uint8[] memory) {
         uint8[] memory stars = new uint8[](ids.length);
         for(uint256 i = 0; i < ids.length; i++) {
@@ -71,7 +67,7 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokenID;
     }
 
-    function mint(address minter, uint8 mintStars, uint32 amount) public restricted {
+    function batchMint(address minter, uint8 mintStars, uint32 amount) public restricted {
         for(uint i = 0; i < amount; i++) {
             mint(minter, mintStars);
         }

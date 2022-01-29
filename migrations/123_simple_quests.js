@@ -43,5 +43,5 @@ module.exports = async function (deployer, network, accounts) {
   await junk.grantRole(await junk.GAME_ADMIN(), simpleQuests.address);
   await trinket.grantRole(await trinket.GAME_ADMIN(), simpleQuests.address);
   await shields.grantRole(await shields.GAME_ADMIN(), simpleQuests.address);
-  await safeRandoms.grantRole(await shields.GAME_ADMIN(), simpleQuests.address);
+  await safeRandoms.grantRole(await safeRandoms.GAME_ADMIN(), simpleQuests.address);
 };
