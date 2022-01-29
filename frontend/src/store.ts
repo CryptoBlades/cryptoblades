@@ -3324,7 +3324,6 @@ export function createStore(web3: Web3) {
 
         for (let i = 0; i < questTemplatesCount; i++) {
           const questTemplateRaw = await SimpleQuests.methods.questTemplates(tier, i).call(defaultCallOptions(state)) as unknown as QuestTemplate;
-          console.log(questTemplateRaw);
           questTemplates.push({
             tier: +questTemplateRaw.tier,
             requirementType: +questTemplateRaw.requirementType,
@@ -3371,9 +3370,7 @@ export function createStore(web3: Web3) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
 
-        console.log('getting data for ', characterId);
         const questDataRaw = await SimpleQuests.methods.getCharacterQuestDataDetails(characterId).call(defaultCallOptions(state));
-        console.log(questDataRaw);
         return {
           progress: +questDataRaw[0][0],
           type: +questDataRaw[0][1] as RequirementType,
@@ -3393,7 +3390,6 @@ export function createStore(web3: Web3) {
       async getQuestTierChances({state}, {tier}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
-        console.log('getting chances for ', tier);
 
         const tierChancesRaw = await SimpleQuests.methods.getTierChances(tier).call(defaultCallOptions(state));
         const legendary = 100 - +tierChancesRaw[3];
@@ -3426,7 +3422,6 @@ export function createStore(web3: Web3) {
       async setSkipQuestStaminaCost({state}, {staminaCost}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
-        console.log('setting stamina cost to', staminaCost);
 
         return await SimpleQuests.methods.setSkipQuestStaminaCost(staminaCost).send(defaultCallOptions(state));
       },
@@ -3476,7 +3471,6 @@ export function createStore(web3: Web3) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
 
-        console.log('Skip quest for: ', characterID);
         await SimpleQuests.methods.skipQuest(characterID).send(defaultCallOptions(state));
         await dispatch('fetchCharacterStamina', characterID);
       },
@@ -3485,7 +3479,6 @@ export function createStore(web3: Web3) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
 
-        console.log('Complete quest for: ', characterID);
         await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
         dispatch('fetchCharacter', { characterId: characterID });
       },
@@ -3494,7 +3487,6 @@ export function createStore(web3: Web3) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
 
-        console.log('Request quest for: ', characterID);
         await SimpleQuests.methods.generateRequestQuestSeed(characterID).send(defaultCallOptions(state));
         return await SimpleQuests.methods.requestQuest(characterID).send(defaultCallOptions(state));
       },
@@ -3503,7 +3495,6 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        console.log('Submitting quest progress for: ', characterID, tokenIds);
         await SimpleQuests.methods.submitProgress(characterID, tokenIds).send(defaultCallOptions(state));
 
         await Promise.all([
@@ -3519,7 +3510,6 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        console.log('Submitting quest dust progress for: ', characterID, amount);
         await SimpleQuests.methods.submitDustProgress(characterID, amount).send(defaultCallOptions(state));
         await dispatch('updateDustBalance');
       },

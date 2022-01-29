@@ -257,7 +257,6 @@ export default Vue.extend({
         this.reputationLevelRequirements = await this.getReputationLevelRequirements({reputationLevels});
         this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
           character.quest = await this.getCharacterQuestData({characterId: character.id});
-          console.log(character);
           return character;
         }));
       } finally {
@@ -283,7 +282,6 @@ export default Vue.extend({
   async mounted() {
     await this.refreshQuestData();
     Events.$on('refresh-quest-data', async () => {
-      console.log('event!');
       await this.refreshQuestData();
     });
   },

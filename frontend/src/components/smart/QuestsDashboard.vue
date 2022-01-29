@@ -437,7 +437,6 @@ export default Vue.extend({
       this.tierChances[index].common = 100 - this.tierChances[index].uncommon - this.tierChances[index].rare -
         this.tierChances[index].epic - this.tierChances[index].legendary;
       Vue.set(this.tierChances, index, this.tierChances[index]);
-      console.log(this.tierChances[index]);
     },
   },
 
