@@ -14,6 +14,9 @@ import "./SafeRandoms.sol";
 
 contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
+    using ABDKMath64x64 for int128;
+    using ABDKMath64x64 for uint256;
+
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     uint256 public constant SEED_RANDOM_QUEST = uint(keccak256("SEED_RANDOM_QUEST"));
 
@@ -227,7 +230,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             for (uint8 i = 0; i < quest.rewardAmount; i++) {
                 uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - i - 1))));
                 uint256 roll = seed % 100;
-                shields.mintShieldWithStars(msg.sender, uint8(quest.rewardRarity), roll);
+                //NORMAL TYPE
+                shields.mintShieldWithStars(msg.sender, uint8(quest.rewardRarity), 0, roll);
             }
         } else if (quest.rewardType == RewardType.DUST) {
             uint32[] memory incrementDustSupplies = new uint32[](weapons.getDustSupplies(msg.sender).length);

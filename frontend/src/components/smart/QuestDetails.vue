@@ -1,14 +1,14 @@
 <template>
   <div class="quest-details d-flex flex-column justify-content-between">
     <div v-if="quest" class="d-flex h-100">
-      <div class="quest-info d-flex flex-column justify-content-center">
+      <div class="quest-info flex-1 d-flex flex-column justify-content-center">
         <div class="quest-description">
           <span
               class="font-weight-bold">{{
               $t(`quests.rarityType.${Rarity[quest.tier]}`)
             }} {{ $t('quests.quest').toLowerCase() }}</span>
           <span>{{
-              quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.burn')
+              quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.turnIn')
             }} {{ quest.requirementAmount }}x <span v-if="quest.requirementType !== RequirementType.RAID">{{
                 Array(quest.requirementRarity + 1).fill('★').join('')
               }}</span> {{ $t(`quests.requirementType.${RequirementType[quest.requirementType]}`) }}</span>
@@ -35,36 +35,12 @@
               :isDefault="true" :nft="{ type: '5bdust' }"/>
         </div>
         <div v-if="!isQuestTemplate && !isDisplayOnly" class="quest-progress">
-          <strong class="quest-progress-text">{{ quest.progress }} / {{ quest.requirementAmount }}</strong>
+          <strong>{{ quest.progress }} / {{ quest.requirementAmount }}</strong>
           <b-progress class="quest-progress-bar" :max="quest.requirementAmount" :value="quest.progress"
                       variant="primary"/>
         </div>
       </div>
-      <div class="reward-info d-flex flex-column justify-content-center">
-        <div class="quest-description">
-          <span class="font-weight-bold">{{ $t('quests.reward') }}</span>
-          <span>{{ quest.reputationAmount }} {{ $t('quests.reputation') }}</span>
-          <span>{{ quest.rewardAmount }}x <span v-if="quest.rewardType !== RewardType.EXPERIENCE">{{
-              Array(quest.rewardRarity + 1).fill('★').join('')
-            }}</span> {{ $t(`quests.rewardType.${RewardType[quest.rewardType]}`) }}</span>
-        </div>
-        <div class="d-flex justify-content-center p-3">
-          <nft-icon v-if="quest.rewardType === RewardType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
-                    :stars="quest.rewardRarity + 1"/>
-          <nft-icon v-else-if="quest.rewardType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"
-                    :stars="quest.rewardRarity + 1"/>
-          <nft-icon v-else-if="quest.rewardType === RewardType.TRINKET" :isDefault="true" :nft="{ type: 'trinket' }"
-                    :stars="quest.rewardRarity + 1"/>
-          <nft-icon v-else-if="quest.rewardType === RewardType.SHIELD" :isDefault="true" :nft="{ type: 'shield' }"
-                    :stars="quest.rewardRarity + 1"/>
-          <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.COMMON"
-                    :isDefault="true" :nft="{ type: 'lbdust' }"/>
-          <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.UNCOMMON"
-                    :isDefault="true" :nft="{ type: '4bdust' }"/>
-          <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.RARE"
-                    :isDefault="true" :nft="{ type: '5bdust' }"/>
-        </div>
-      </div>
+      <QuestReward :quest="quest"/>
     </div>
     <div v-if="!isDisplayOnly">
       <div v-if="!isQuestTemplate && !isQuestActionLoading" class="d-flex">
@@ -92,6 +68,9 @@
         </b-button>
       </div>
     </div>
+    <b-modal v-model="showQuestCompleteModal" size="sm" ok-only class="centered-modal" :title="$t('quests.questComplete')">
+      <QuestReward :quest="quest"/>
+    </b-modal>
   </div>
 </template>
 
@@ -103,6 +82,7 @@ import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import NftIcon from '@/components/NftIcon.vue';
 import Events from '@/events';
 import Hint from '@/components/Hint.vue';
+import QuestReward from '@/components/smart/QuestReward.vue';
 
 interface StoreMappedActions {
   canSkipQuest(payload: { characterID: string | number }): Promise<boolean>;
@@ -121,10 +101,11 @@ interface Data {
   skipQuestStaminaCost: number;
   isQuestActionLoading: boolean;
   isStaminaCostLoading: boolean;
+  showQuestCompleteModal: boolean;
 }
 
 export default Vue.extend({
-  components: {NftIcon, Hint},
+  components: {NftIcon, Hint, QuestReward},
 
   props: {
     quest: {
@@ -156,6 +137,7 @@ export default Vue.extend({
       skipQuestStaminaCost: 0,
       isQuestActionLoading: false,
       isStaminaCostLoading: false,
+      showQuestCompleteModal: false,
       RequirementType,
       RewardType,
       Rarity,
@@ -185,7 +167,7 @@ export default Vue.extend({
 
     async refreshSkipQuestData() {
       this.canSkip = await this.canSkipQuest({characterID: this.characterId});
-      try{
+      try {
         this.isStaminaCostLoading = true;
         this.skipQuestStaminaCost = await this.getSkipQuestStaminaCost();
       } finally {
@@ -199,6 +181,7 @@ export default Vue.extend({
         await this.completeQuest({characterID: this.characterId});
         await this.refreshSkipQuestData();
         Events.$emit('refresh-quest-data');
+        this.showQuestCompleteModal = true;
       } finally {
         this.isQuestActionLoading = false;
       }
@@ -235,9 +218,7 @@ export default Vue.extend({
   border-right: 1px solid;
 }
 
-.flex-1,
-.quest-info,
-.reward-info {
+.flex-1 {
   flex: 1;
 }
 
@@ -249,10 +230,6 @@ export default Vue.extend({
 
 .quest-progress-bar {
   width: 75%;
-}
-
-.quest-progress-text {
-
 }
 
 .quest-details {

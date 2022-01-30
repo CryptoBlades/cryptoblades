@@ -190,11 +190,11 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     //TODO: check how to handle seed
-    function mintShieldsWithStars(address minter, uint256 stars, uint32 amount) public restricted returns(uint256[] memory) {
+    function mintShieldsWithStars(address minter, uint256 stars, uint256 shieldType, uint32 amount) public restricted returns(uint256[] memory) {
         require(stars < 8, "Stars parameter too high! (max 7)");
         uint256[] memory tokens = new uint256[](amount);
         for(uint i = 0; i < amount; i++) {
-            tokens[i] = mintShieldWithStars(minter, stars, 0);
+            tokens[i] = mintShieldWithStars(minter, stars, shieldType, 0);
         }
         return tokens;
     }

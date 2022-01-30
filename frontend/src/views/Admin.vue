@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import QuestsDashboard from '@/components/smart/QuestsDashboard.vue';
+import QuestsDashboard from '@/components/smart/QuestsAdmin.vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import Hint from '@/components/Hint.vue';
 import AdminMaker from '@/components/smart/AdminMaker.vue';

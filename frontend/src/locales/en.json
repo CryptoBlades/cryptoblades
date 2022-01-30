@@ -609,10 +609,10 @@
     "skip": "Skip ({staminaCost} stamina)",
     "cannotSkipTooltip": "Not enough stamina to skip this quest",
     "complete": "Complete",
+    "questComplete": "Quest complete",
     "submit": "Submit",
     "reputation": "Reputation",
     "do": "Do",
-    "burn": "Burn",
     "requestQuest": "Request quest",
     "turnIn": "Turn in",
     "howMuchToTurnIn": "How much to turn in?",
@@ -922,21 +922,21 @@
         "OEC":{
           "instructions": "Get started in no time! To recruit your first character, you need {recruitCost} SKILL and .000032 OKT for gas. You will also need a little bit of OKT for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
           "inst1": "1. Getting OKT to your wallet:<a target=_blank href=https://www.youtube.com/watch?v=eMXUYGl7XYg> Watch Video </a>",
-          "inst2": "2. If you have OKT but just need SKILL: <a target=_blank href=https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB> go to JSwap </a>", 
+          "inst2": "2. If you have OKT but just need SKILL: <a target=_blank href=https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB> go to JSwap </a>",
           "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
           "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
         },
         "POLYGON":{
           "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .01 MATIC for gas. You will also need a litle bit of MATIC for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
           "inst1": "1. Trade SKILL between chains: <a target=_blank href=https://bridge.poly.network/token/SKILL> here </a>",
-          "inst2": "2. SWAP SKILL to MATIC: <a target=_blank href=https://app.apeswap.finance/swap> here <a>", 
+          "inst2": "2. SWAP SKILL to MATIC: <a target=_blank href=https://app.apeswap.finance/swap> here <a>",
           "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
           "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
         },
         "AVAX":{
           "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .001 AVAX for gas. You will also need a litle bit of AVAX for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
           "inst1": "1. Trade SKILL between chains: <a target=_blank href=https://bridge.poly.network/token/SKILL> here </a>",
-          "inst2": "2. SWAP SKILL to AVAX: <a target=_blank href=https://app.pangolin.exchange/#/swap> here <a>", 
+          "inst2": "2. SWAP SKILL to AVAX: <a target=_blank href=https://app.pangolin.exchange/#/swap> here <a>",
           "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
           "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
         },
