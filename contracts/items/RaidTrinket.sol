@@ -72,7 +72,7 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         return tokenID;
     }
 
-    function mint(address minter, uint8 mintStars, uint32 amount, uint256 seed) public restricted returns(uint256[] memory) {
+    function mintN(address minter, uint8 mintStars, uint32 amount, uint256 seed) public restricted returns(uint256[] memory) {
         uint256[] memory tokenIDs = new uint256[](amount);
         for(uint256 i = 0; i < amount; i++) {
             tokenIDs[i] = mint(minter, mintStars, seed);

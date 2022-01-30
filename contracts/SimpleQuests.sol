@@ -168,8 +168,13 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             quest = generateNewQuest(vars[VAR_COMMON_TIER], seed);
         }
         characterQuest[characterID] = quest.id;
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), uint256(quest.requirementType));
+        uint256[] memory fields = new uint256[](2);
+        fields[0] = characters.NFTVAR_SIMPLEQUEST_PROGRESS();
+        fields[1] = characters.NFTVAR_SIMPLEQUEST_TYPE();
+        uint256[] memory values = new uint256[](2);
+        values[0] = 0;
+        values[1] = uint256(quest.requirementType);
+        characters.setNFTVars(characterID, fields, values);
         emit QuestAssigned(quest.id, characterID);
         return quest.id;
     }
@@ -203,8 +208,13 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function clearQuestData(uint256 characterID) private {
         characterQuest[characterID] = 0;
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_PROGRESS(), 0);
-        characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), 0);
+        uint256[] memory fields = new uint256[](2);
+        fields[0] = characters.NFTVAR_SIMPLEQUEST_PROGRESS();
+        fields[1] = characters.NFTVAR_SIMPLEQUEST_TYPE();
+        uint256[] memory values = new uint256[](2);
+        values[0] = 0;
+        values[1] = 0;
+        characters.setNFTVars(characterID, fields, values);
     }
 
     function generateRewardQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) public {
@@ -217,12 +227,12 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         if (quest.rewardType == RewardType.WEAPON) {
             for (uint8 i = 0; i < quest.rewardAmount; i++) {
                 uint256 weaponID = weapons.mintWeaponWithStars(characters.ownerOf(characterID), uint256(quest.rewardRarity), seed, 100);
-                seed = RandomUtil.combineSeeds(seed,i);
+                seed = RandomUtil.combineSeeds(seed, i);
             }
         } else if (quest.rewardType == RewardType.JUNK) {
-            junk.mint(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount));
+            junk.mintN(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount));
         } else if (quest.rewardType == RewardType.TRINKET) {
-            trinket.mint(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount), seed);
+            trinket.mintN(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount), seed);
         } else if (quest.rewardType == RewardType.SHIELD) {
             //0 is NORMAL SHIELD TYPE
             shields.mintShieldsWithStars(msg.sender, uint8(quest.rewardRarity), 0, uint32(quest.rewardAmount), seed);
