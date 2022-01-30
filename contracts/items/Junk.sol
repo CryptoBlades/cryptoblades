@@ -67,7 +67,7 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokenID;
     }
 
-    function batchMint(address minter, uint8 mintStars, uint32 amount) public restricted {
+    function mint(address minter, uint8 mintStars, uint32 amount) public restricted {
         for(uint i = 0; i < amount; i++) {
             mint(minter, mintStars);
         }

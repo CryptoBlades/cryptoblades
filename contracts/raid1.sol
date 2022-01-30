@@ -251,11 +251,11 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             // since we pay out exactly one trinket per raid, we might as well do it here
             Raider memory trinketWinner = raidParticipants[raidIndex][seed % raidParticipants[raidIndex].length];
             uint8 trinketStars = getTrinketStarsFromSeed(seed);
-            uint256 trinketEffect = (seed / 100) % 5;
             uint tokenID =
                 RaidTrinket(links[LINK_TRINKET]).mint(
-                    trinketWinner.owner, trinketStars, trinketEffect
+                    trinketWinner.owner, trinketStars, seed
                 );
+            uint256 trinketEffect = (seed / 100) % 5;
             emit RewardedTrinket(raidIndex, trinketWinner.owner, trinketStars, trinketEffect, tokenID);
         }
         emit RaidCompleted(raidIndex, outcome, bossPower, roll);

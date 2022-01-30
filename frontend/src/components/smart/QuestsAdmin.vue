@@ -220,11 +220,7 @@ import {
   ReputationLevelRequirements,
   RequirementType,
   RewardType,
-  TierChances,
-  VAR_REPUTATION_LEVEL_2,
-  VAR_REPUTATION_LEVEL_3,
-  VAR_REPUTATION_LEVEL_4,
-  VAR_REPUTATION_LEVEL_5
+  TierChances
 } from '@/views/Quests.vue';
 import QuestTemplatesDisplay from '@/components/smart/QuestTemplatesDisplay.vue';
 import QuestDetails from '@/components/smart/QuestDetails.vue';
@@ -246,9 +242,9 @@ interface StoreMappedActions {
 
   addPromoQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
 
-  getReputationLevelRequirements(payload: { reputationLevels: number[] }): Promise<ReputationLevelRequirements>;
+  getReputationLevelRequirements(): Promise<ReputationLevelRequirements>;
 
-  setReputationLevelRequirements(payload: { reputationLevels: number[], requirements: number[] }): Promise<void>;
+  setReputationLevelRequirements(payload: { requirements: number[] }): Promise<void>;
 
   setSkipQuestStaminaCost(payload: { staminaCost: number }): Promise<void>;
 
@@ -357,7 +353,6 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         await this.setReputationLevelRequirements({
-          reputationLevels: [VAR_REPUTATION_LEVEL_2, VAR_REPUTATION_LEVEL_3, VAR_REPUTATION_LEVEL_4, VAR_REPUTATION_LEVEL_5],
           requirements: [this.reputationLevelRequirements.level2, this.reputationLevelRequirements.level3,
             this.reputationLevelRequirements.level4, this.reputationLevelRequirements.level5]
         });
@@ -441,11 +436,10 @@ export default Vue.extend({
   },
 
   async mounted() {
-    const reputationLevels = [VAR_REPUTATION_LEVEL_2, VAR_REPUTATION_LEVEL_3, VAR_REPUTATION_LEVEL_4, VAR_REPUTATION_LEVEL_5];
     try {
       this.isLoading = true;
       this.refreshQuestTemplates();
-      this.reputationLevelRequirements = await this.getReputationLevelRequirements({reputationLevels});
+      this.reputationLevelRequirements = await this.getReputationLevelRequirements();
       this.staminaCost = await this.getSkipQuestStaminaCost();
       this.usePromoQuests = await this.isUsingPromoQuests();
       await this.refreshTierChances();

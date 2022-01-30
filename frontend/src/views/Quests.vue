@@ -56,19 +56,19 @@
              :key="index">
           <span class="text-nowrap">{{ $t('quests.level', {level: index + 1}) }}</span>
           <div>
-            <span>{{tierChance.common}}%</span>
+            <span>{{ tierChance.common }}%</span>
           </div>
           <div>
-            <span>{{tierChance.uncommon}}%</span>
+            <span>{{ tierChance.uncommon }}%</span>
           </div>
           <div>
-            <span>{{tierChance.rare}}%</span>
+            <span>{{ tierChance.rare }}%</span>
           </div>
           <div>
-            <span>{{tierChance.epic}}%</span>
+            <span>{{ tierChance.epic }}%</span>
           </div>
           <div>
-            <span>{{tierChance.legendary}}%</span>
+            <span>{{ tierChance.legendary }}%</span>
           </div>
         </div>
       </div>
@@ -155,7 +155,7 @@ interface StoreMappedActions {
 
   requestQuest(payload: { characterID: string | number }): Promise<void>;
 
-  getReputationLevelRequirements(payload: { reputationLevels: number[] }): Promise<ReputationLevelRequirements>;
+  getReputationLevelRequirements(): Promise<ReputationLevelRequirements>;
 
   getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
 }
@@ -251,10 +251,9 @@ export default Vue.extend({
     },
 
     async refreshQuestData() {
-      const reputationLevels = [VAR_REPUTATION_LEVEL_2, VAR_REPUTATION_LEVEL_3, VAR_REPUTATION_LEVEL_4, VAR_REPUTATION_LEVEL_5];
       try {
         this.isLoading = true;
-        this.reputationLevelRequirements = await this.getReputationLevelRequirements({reputationLevels});
+        this.reputationLevelRequirements = await this.getReputationLevelRequirements();
         this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
           character.quest = await this.getCharacterQuestData({characterId: character.id});
           return character;
@@ -265,7 +264,7 @@ export default Vue.extend({
     },
 
     async showReputationInfoModal() {
-      try{
+      try {
         this.showReputationModal = true;
         this.isReputationInfoLoading = true;
         this.tierChances[0] = await this.getQuestTierChances({tier: 0});

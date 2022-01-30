@@ -19,6 +19,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     uint256 public constant SEED_RANDOM_QUEST = uint(keccak256("SEED_RANDOM_QUEST"));
+    uint256 public constant SEED_REWARD_QUEST = uint(keccak256("SEED_REWARD_QUEST"));
 
     /* Quest rarities
     *   Quests templates rarities on (0 - common, 1 - uncommon, 2 - rare, 3 - epic, 4 - legendary)
@@ -26,7 +27,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     */
 
     /* Promo quest templates
-    *   Use setUsePromoQuests(bool usePromoQuests) in order to use promo quest templates, when it's true, it will
+    *   Use promo quests flag in order to use promo quest templates, when it's true, it will
     *   use promo quest templates, when it's false, it will use regular quest templates
     */
 
@@ -47,6 +48,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     uint8 public constant VAR_REPUTATION_LEVEL_3 = 21;
     uint8 public constant VAR_REPUTATION_LEVEL_4 = 22;
     uint8 public constant VAR_REPUTATION_LEVEL_5 = 23;
+    uint8 public constant VAR_SKIP_QUEST_STAMINA_COST = 30;
 
     struct Quest {
         uint256 id;
@@ -70,9 +72,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256[4]) public tierChances;
     mapping(uint256 => uint256) public vars;
 
-    uint8 public skipQuestStaminaCost;
     uint256 public nextQuestID;
-    bool public usePromoQuests;
 
     event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
     event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
@@ -95,9 +95,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         tierChances[2] = [77, 97, 100, 100];
         tierChances[3] = [69, 94, 100, 100];
         tierChances[4] = [66, 93, 99, 100];
-        skipQuestStaminaCost = 40;
         nextQuestID = 1;
-        usePromoQuests = false;
     }
 
     modifier restricted() {
@@ -106,7 +104,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     modifier assertQuestsEnabled() {
-        require(vars[VAR_CONTRACT_ENABLED] == 1, "Quests are disabled");
+        require(vars[VAR_CONTRACT_ENABLED] == 1, "Quests disabled");
         _;
     }
 
@@ -187,7 +185,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function skipQuest(uint256 characterID) public assertQuestsEnabled assertOwnsCharacter(characterID) returns (uint256) {
         require(canSkipQuest(characterID), "Character does not have enough stamina to skip quest");
-        characters.getFightDataAndDrainStamina(msg.sender, characterID, skipQuestStaminaCost, true, 0);
+        characters.getFightDataAndDrainStamina(msg.sender, characterID, uint8(vars[VAR_SKIP_QUEST_STAMINA_COST]), true, 0);
         return assignNewQuest(characterID);
     }
 
@@ -209,30 +207,25 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         characters.setNftVar(characterID, characters.NFTVAR_SIMPLEQUEST_TYPE(), 0);
     }
 
+    function generateRewardQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) public {
+        safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID));
+    }
+
     function rewardQuest(uint256 questID, uint256 characterID) private {
+        uint256 seed = safeRandoms.popSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID), true, true);
         Quest memory quest = quests[questID];
         if (quest.rewardType == RewardType.WEAPON) {
             for (uint8 i = 0; i < quest.rewardAmount; i++) {
-                uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - i - 1))));
-                uint256 weaponID = weapons.mintWeaponWithStars(characters.ownerOf(characterID), uint256(quest.rewardRarity), seed / 100, 100);
+                uint256 weaponID = weapons.mintWeaponWithStars(characters.ownerOf(characterID), uint256(quest.rewardRarity), seed, 100);
+                seed = RandomUtil.combineSeeds(seed,i);
             }
         } else if (quest.rewardType == RewardType.JUNK) {
-            for (uint8 i = 0; i < quest.rewardAmount; i++) {
-                junk.mint(msg.sender, uint8(quest.rewardRarity));
-            }
+            junk.mint(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount));
         } else if (quest.rewardType == RewardType.TRINKET) {
-            for (uint8 i = 0; i < quest.rewardAmount; i++) {
-                uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - i - 1))));
-                uint256 trinketEffect = (seed / 100) % 5;
-                trinket.mint(msg.sender, uint8(quest.rewardRarity), trinketEffect);
-            }
+            trinket.mint(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount), seed);
         } else if (quest.rewardType == RewardType.SHIELD) {
-            for (uint8 i = 0; i < quest.rewardAmount; i++) {
-                uint256 seed = uint256(keccak256(abi.encodePacked(blockhash(block.number - i - 1))));
-                uint256 roll = seed % 100;
-                //NORMAL TYPE
-                shields.mintShieldWithStars(msg.sender, uint8(quest.rewardRarity), 0, roll);
-            }
+            //0 is NORMAL SHIELD TYPE
+            shields.mintShieldsWithStars(msg.sender, uint8(quest.rewardRarity), 0, uint32(quest.rewardAmount), seed);
         } else if (quest.rewardType == RewardType.DUST) {
             uint32[] memory incrementDustSupplies = new uint32[](weapons.getDustSupplies(msg.sender).length);
             incrementDustSupplies[uint256(quest.rewardRarity)] = uint32(quest.rewardAmount);
@@ -359,7 +352,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function canSkipQuest(uint256 characterID) public view returns (bool) {
-        return characters.getStaminaPoints(characterID) >= skipQuestStaminaCost;
+        return characters.getStaminaPoints(characterID) >= vars[VAR_SKIP_QUEST_STAMINA_COST];
     }
 
     // ADMIN
@@ -376,27 +369,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function setTierChances(uint256 tier, uint256[4] memory chances) public restricted {
         tierChances[tier] = chances;
-    }
-
-    function setSkipQuestStaminaCost(uint8 stamina) public restricted {
-        skipQuestStaminaCost = stamina;
-    }
-
-    function toggleUsePromoQuests() public restricted {
-        usePromoQuests = !usePromoQuests;
-        if (usePromoQuests) {
-            vars[VAR_COMMON_TIER] = 10;
-            vars[VAR_UNCOMMON_TIER] = 11;
-            vars[VAR_RARE_TIER] = 12;
-            vars[VAR_EPIC_TIER] = 13;
-            vars[VAR_LEGENDARY_TIER] = 14;
-        } else {
-            vars[VAR_COMMON_TIER] = 0;
-            vars[VAR_UNCOMMON_TIER] = 1;
-            vars[VAR_RARE_TIER] = 2;
-            vars[VAR_EPIC_TIER] = 3;
-            vars[VAR_LEGENDARY_TIER] = 4;
-        }
     }
 
     function addNewQuestTemplate(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,

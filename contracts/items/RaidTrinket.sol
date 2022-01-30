@@ -62,8 +62,9 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         return stars;
     }
 
-    function mint(address minter, uint8 mintStars, uint256 mintEffect) public restricted returns(uint256) {
+    function mint(address minter, uint8 mintStars, uint256 seed) public restricted returns(uint256) {
         uint256 tokenID = totalSupply();
+        uint256 mintEffect = (seed / 100) % 5;
         tokenStars[tokenID] = mintStars;
         tokenEffect[tokenID] = mintEffect;
         _mint(minter, tokenID);
@@ -71,11 +72,11 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         return tokenID;
     }
 
-    //TODO: check how to handle mintEffects
-    function batchMint(address minter, uint8 mintStars, uint32 amount) public restricted returns(uint256[] memory) {
+    function mint(address minter, uint8 mintStars, uint32 amount, uint256 seed) public restricted returns(uint256[] memory) {
         uint256[] memory tokenIDs = new uint256[](amount);
         for(uint256 i = 0; i < amount; i++) {
-            tokenIDs[i] = mint(minter, mintStars, 0);
+            tokenIDs[i] = mint(minter, mintStars, seed);
+            seed = RandomUtil.combineSeeds(seed,i);
         }
         return tokenIDs;
     }
