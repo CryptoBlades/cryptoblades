@@ -265,27 +265,27 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 uint256 tokenID = tokenIds[i];
                 require(junk.ownerOf(tokenID) == msg.sender, "Not junk owner");
                 require(junk.tokenStars(tokenID) == uint256(quest.requirementRarity), "Wrong junk rarity");
-                junk.burn(tokenID);
-                incrementQuestProgress(characterID, questID, 1);
             }
+            junk.burn(tokenIds);
+            incrementQuestProgress(characterID, questID, tokenIds.length);
             emit QuestProgressed(questID, characterID);
         } else if (quest.requirementType == RequirementType.TRINKET) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(trinket.ownerOf(tokenID) == msg.sender, "Not trinket owner");
                 require(trinket.tokenStars(tokenID) == uint256(quest.requirementRarity), "Wrong trinket rarity");
-                trinket.burn(tokenID);
-                incrementQuestProgress(characterID, questID, 1);
             }
+            trinket.burn(tokenIds);
+            incrementQuestProgress(characterID, questID, tokenIds.length);
             emit QuestProgressed(questID, characterID);
         } else if (quest.requirementType == RequirementType.SHIELD) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(shields.ownerOf(tokenID) == msg.sender, "Not shield owner");
                 require(shields.getStars(tokenID) == uint256(quest.requirementRarity), "Wrong shield rarity");
-                shields.burn(tokenID);
-                incrementQuestProgress(characterID, questID, 1);
             }
+            shields.burn(tokenIds);
+            incrementQuestProgress(characterID, questID, tokenIds.length);
             emit QuestProgressed(questID, characterID);
         } else {
             revert("Unknown requirement type");
