@@ -122,7 +122,7 @@
               <div v-if="burnOption === 0 && !isUpgrading" class="d-flex flex-column mt-3 align-items-center">
                 <div class="soul-image" />
                 <h2>Soul</h2>
-                <h2>{{soulBalance}} (+{{burnPower/10}})</h2>
+                <h2>{{soulBalance}} (+{{Math.floor(burnPower/10)}})</h2>
               </div>
               <div v-if="burnOption === 1 || isUpgrading" :class="targetCharacterId ? 'd-flex flex-column align-items-center' : ''">
                 <b-button
@@ -198,12 +198,20 @@
                 <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
                 <div class="d-flex justify-content-flex-end ml-auto">
                   <b-button
+                    v-if="canClaimGarrisonXp"
+                    :disabled="isClaimingXp"
+                    variant="primary"
+                    class="ml-3 gtag-link-others"
+                    @click="onClaimGarrisonXp">
+                    {{$t('plaza.claimXp')}}
+                  </b-button>
+                  <b-button
                     v-if="burningEnabled"
                     :disabled="!haveCharacters"
                     variant="primary"
                     class="ml-3 gtag-link-others"
                     @click="toggleSoulCreation"
-                    v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+                    v-tooltip="$t('plaza.recruitNew')">
                     {{$t('plaza.burn')}} / {{$t('plaza.upgrade')}}
                   </b-button>
                   <b-button
@@ -287,11 +295,13 @@ interface Data {
   isUpgrading: boolean;
   soulAmount: number;
   remainingPowerLimit: number;
+  burnPowerMultiplier: number;
+  isClaimingXp: boolean;
 }
 
 export default Vue.extend({
   computed: {
-    ...mapState(['characters', 'ownedGarrisonCharacterIds', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
+    ...mapState(['characters', 'ownedGarrisonCharacterIds', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance', 'xpRewards']),
     ...mapGetters([
       'contracts',
       'ownCharacters',
@@ -340,6 +350,7 @@ export default Vue.extend({
             power += this.getCharacterPower(x.id);
           }
         });
+        power = Math.floor(power * this.burnPowerMultiplier);
       }
       else {
         power = this.soulAmount * 10;
@@ -354,6 +365,10 @@ export default Vue.extend({
 
     burningEnabled(): boolean {
       return featureFlagBurningManager;
+    },
+
+    canClaimGarrisonXp(): boolean {
+      return this.ownedGarrisonCharacterIds.filter((id: string|number) => +this.xpRewards[id] > 0).length > 0;
     }
   },
 
@@ -378,14 +393,16 @@ export default Vue.extend({
       burnCost: 0,
       isUpgrading: false,
       soulAmount: 0,
-      remainingPowerLimit: 0
+      remainingPowerLimit: 0,
+      burnPowerMultiplier: 1,
+      isClaimingXp: false
     } as Data;
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
-      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter']),
+      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp', 'fetchBurnPowerMultiplier']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
@@ -415,6 +432,7 @@ export default Vue.extend({
       this.soulCreationActive = !this.soulCreationActive;
       this.soulBalance = await this.fetchSoulBalance();
       await this.updateBurnCost();
+      this.burnPowerMultiplier = +fromWeiEther(await this.fetchBurnPowerMultiplier());
       if(this.soulCreationActive) {
         this.remainingCharactersIds = this.ownCharacters.map((x: { id: string; }) => x.id.toString()).concat(this.ownedGarrisonCharacterIds as string[]);
       }
@@ -486,6 +504,11 @@ export default Vue.extend({
       this.updatedRemainingPowerLimit();
       this.soulBalance = await this.fetchSoulBalance();
       this.soulAmount = 0;
+    },
+    async onClaimGarrisonXp() {
+      this.isClaimingXp = true;
+      await this.claimGarrisonXp(this.ownedGarrisonCharacterIds.filter((id: string|number) => +this.xpRewards[id] > 0));
+      this.isClaimingXp = true;
     }
   },
 
