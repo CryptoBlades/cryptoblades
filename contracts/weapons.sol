@@ -140,7 +140,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        needRole(hasRole(GAME_ADMIN, msg.sender));
+        require(hasRole(GAME_ADMIN, msg.sender), "NR");
     }
 
     modifier minterOnly() {
@@ -149,11 +149,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _minterOnly() internal view {
-        needRole(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender));
-    }
-
-    function needRole(bool statement) internal pure {
-        require(statement, "NR");
+        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), "NR");
     }
 
     modifier noFreshLookup(uint256 id) {
@@ -583,7 +579,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function burnWithoutDust(uint256 burnID) public restricted {
+    function burnWithoutDust(uint256[] memory burnIDs) public restricted {
+        for(uint256 i = 0; i < burnIDs.length; i++) {
+            _burnWithoutDust(burnIDs[i]);
+        }
+    }
+
+    function _burnWithoutDust(uint256 burnID) internal {
         address burnOwner = ownerOf(burnID);
         _burn(burnID);
         emit Burned(burnOwner, burnID);
@@ -704,7 +706,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require((durabilityPoints >= amount
         || (allowNegativeDurability && durabilityPoints > 0)) // we allow going into negative, but not starting negative
-            ,"LD");
+        );
 
         uint64 drainTime = uint64(amount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
@@ -774,16 +776,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         }
     }
 
-    function _isFeatureEnabled(uint256 bit) private view returns (bool) {
-        return (numberParameters[NUMBERPARAMETER_FEATURE_BITS] & bit) == bit;
-    }
-
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(nftVars[tokenId][NFTVAR_BUSY] == 0);
         // Always allow minting and burning.
         if(from != address(0) && to != address(0)) {
             // But other transfers require the feature to be enabled.
-            require(_isFeatureEnabled(BIT_FEATURE_TRANSFER_BLOCKED) == false);
+            require((numberParameters[NUMBERPARAMETER_FEATURE_BITS] & BIT_FEATURE_TRANSFER_BLOCKED) == BIT_FEATURE_TRANSFER_BLOCKED == false);
 
             if(promos.getBit(from, 4)) { // bad actors, they can transfer to market but nowhere else
                 require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to));

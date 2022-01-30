@@ -256,9 +256,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 uint256 tokenID = tokenIds[i];
                 require(weapons.ownerOf(tokenID) == msg.sender, "Not weapon owner");
                 require(weapons.getStars(tokenID) == uint256(quest.requirementRarity), "Wrong weapon rarity");
-                weapons.burnWithoutDust(tokenID);
-                incrementQuestProgress(characterID, questID, 1);
             }
+            weapons.burnWithoutDust(tokenIds);
+            incrementQuestProgress(characterID, questID, tokenIds.length);
             emit QuestProgressed(questID, characterID);
         } else if (quest.requirementType == RequirementType.JUNK) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
