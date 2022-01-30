@@ -10,6 +10,8 @@ import "./util.sol";
 import "./items/RaidTrinket.sol";
 import "./items/KeyLootbox.sol";
 import "./items/Junk.sol";
+import "./common.sol";
+
 
 contract Raid1 is Initializable, AccessControlUpgradeable {
 
@@ -196,7 +198,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
                 weaponID, charTrait, uint8(durabilityCost), true, 0); // no busy flag for raids for now
         
         uint24 power = getPlayerFinalPower(
-            getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
+            Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             charTrait,
             raidBossTrait[raidIndex]
         );
@@ -288,20 +290,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
     }
 
-    function getPlayerPower(
-        uint24 basePower,
-        int128 weaponMultiplier,
-        uint24 bonusPower
-    ) public pure returns(uint24) {
-        return uint24(weaponMultiplier.mulu(basePower) + bonusPower);
-    }
-
-    function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
-        return (((attacker + 1) % 4) == defender); // Thanks to Tourist
-    }
-
     function getPlayerFinalPower(uint24 playerPower, uint8 charTrait, uint8 bossTrait) public pure returns(uint24) {
-        if(isTraitEffectiveAgainst(charTrait, bossTrait))
+        if(Common.isTraitEffectiveAgainst(charTrait, bossTrait))
             return uint24(ABDKMath64x64.divu(1075,1000).mulu(uint256(playerPower)));
         return playerPower;
     }
