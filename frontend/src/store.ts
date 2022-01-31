@@ -3551,7 +3551,14 @@ export function createStore(web3: Web3) {
         const res = await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
 
         const questRewards = res.events.QuestRewarded.returnValues.rewards;
-        dispatch('fetchCharacter', { characterId: characterID });
+        await Promise.all([
+          dispatch('fetchCharacter', { characterId: characterID }),
+          dispatch('updateWeaponIds'),
+          dispatch('updateShieldIds'),
+          dispatch('updateTrinketIds'),
+          dispatch('updateJunkIds'),
+          dispatch('updateKeyLootboxIds'),
+        ]);
         return questRewards;
       },
 

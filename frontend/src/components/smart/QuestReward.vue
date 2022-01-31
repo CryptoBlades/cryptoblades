@@ -7,7 +7,8 @@
           Array(quest.rewardRarity + 1).fill('★').join('')
         }}</span> {{ $t(`quests.rewardType.${RewardType[quest.rewardType]}`) }}</span>
     </div>
-    <div class="d-flex justify-content-center p-3">
+    <NftList v-if="questRewards && questRewards.length !== 0" :showGivenNftIdTypes="true" :nftIdTypes="questRewards" :isReward="true"/>
+    <div v-else class="d-flex justify-content-center p-3">
       <nft-icon v-if="quest.rewardType === RewardType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
                 :stars="quest.rewardRarity + 1"/>
       <nft-icon v-else-if="quest.rewardType === RewardType.JUNK" :isDefault="true" :nft="{ type: 'junk' }"
@@ -31,15 +32,19 @@ import Vue from 'vue';
 import {PropType} from 'vue/types/options';
 import {Quest, Rarity, RewardType} from '@/views/Quests.vue';
 import NftIcon from '@/components/NftIcon.vue';
+import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 
 export default Vue.extend({
-  components: {NftIcon},
+  components: {NftIcon, NftList},
 
   props: {
     quest: {
       type: Object as PropType<Quest>,
       required: true,
-    }
+    },
+    questRewards: {
+      type: Array as PropType<NftIdType[]>,
+    },
   },
 
   data() {

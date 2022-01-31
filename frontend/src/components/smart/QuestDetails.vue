@@ -68,12 +68,13 @@
         </b-button>
       </div>
     </div>
-    <b-modal v-model="showQuestCompleteModal" ok-only class="centered-modal" :title="$t('quests.questComplete')">
+    <b-modal v-model="showQuestCompleteModal" ok-only class="centered-modal" :title="$t('quests.questComplete')"
+             @hide="Events.$emit('refresh-quest-data');">
       <div v-if="isQuestActionLoading">
         <i class="fas fa-spinner fa-spin"/>
         {{ $t('quests.loading') }}
       </div>
-      <NftList v-else-if="questRewards.length !== 0" :showGivenNftIdTypes="true" :nftIdTypes="questRewards" :isReward="true"/>
+      <QuestReward v-else-if="questRewards.length !== 0" :quest="quest" :questRewards="questRewards"/>
       <QuestReward v-else :quest="quest"/>
     </b-modal>
   </div>
@@ -88,7 +89,7 @@ import NftIcon from '@/components/NftIcon.vue';
 import Events from '@/events';
 import Hint from '@/components/Hint.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
-import NftList, {NftIdType} from '@/components/smart/NftList.vue';
+import {NftIdType} from '@/components/smart/NftList.vue';
 
 interface StoreMappedActions {
   canSkipQuest(payload: { characterID: string | number }): Promise<boolean>;
@@ -112,7 +113,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {NftIcon, Hint, QuestReward, NftList},
+  components: {NftIcon, Hint, QuestReward},
 
   props: {
     quest: {
@@ -149,6 +150,7 @@ export default Vue.extend({
       RequirementType,
       RewardType,
       Rarity,
+      Events,
     } as Data;
   },
 
@@ -189,18 +191,16 @@ export default Vue.extend({
         const rewards = await this.completeQuest({characterID: this.characterId});
         const rewardType = this.quest.rewardType;
         await this.refreshSkipQuestData();
-        Events.$emit('refresh-quest-data');
-        this.showQuestCompleteModal = true;
-        if (!rewardType) return;
-        if (rewardType === RewardType.DUST) {
-          const dustType = this.quest.rewardRarity === Rarity.COMMON ? 'dustLb' : this.quest.rewardRarity === Rarity.UNCOMMON ? 'dust4b' : 'dust5b';
-          this.questRewards = [{type: dustType, amount: this.quest.rewardAmount} as NftIdType];
-        } else if (rewardType === RewardType.EXPERIENCE) {
+
+        if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST) {
+          this.showQuestCompleteModal = true;
           return;
-        } else {
+        }
+        else {
           this.questRewards = rewards.map(reward => {
             return {type: RewardType[rewardType].toLowerCase(), id: reward} as NftIdType;
           });
+          this.showQuestCompleteModal = true;
         }
       } finally {
         this.isQuestActionLoading = false;

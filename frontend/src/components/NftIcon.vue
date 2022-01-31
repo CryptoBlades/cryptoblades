@@ -482,7 +482,6 @@ export default {
 .placeholder-dust {
   max-width: 160px;
   max-height: 200px;
-  margin-top: 40px;
   margin-left: 5px;
 }
 
