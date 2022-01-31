@@ -891,7 +891,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             }
             if (
                 characters.ownerOf(candidateID) ==
-                characters.ownerOf(characterID)
+                msg.sender
             ) {
                 continue;
             }
