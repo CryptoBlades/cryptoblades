@@ -41,6 +41,8 @@
 
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0xC2C3F4548fc5D81cD8867D52fE414BF365cba8D1",
 
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "",
+
           "chainId": "0x61",
           "currencyName": "Binance Coin",
           "currencyNetwork": "BSC",
@@ -79,6 +81,8 @@
           "VUE_APP_BURNING_MANAGER_CONTRACT_ADDRESS": "0x827C2f617b67634262C5811aB2F2A8104f81dF20",
 
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0xD40AACCeD966076B62a5baC7A49da4517cB39b73",
+
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "",
 
           "chainId": "0x100",
           "currencyName": "Huobi Token",
@@ -119,6 +123,8 @@
 
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "",
 
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "",
+
           "chainId": "0x41",
           "currencyName": "OKExChain",
           "currencyNetwork": "OKEx",
@@ -157,6 +163,8 @@
 
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0x50358b791573389d1191C97D3e2C8260C78DFBE0",
 
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "",
+
           "chainId": "0x13881",
           "currencyName": "MATIC",
           "currencyNetwork": "Polygon",
@@ -193,6 +201,8 @@
           "VUE_APP_BURNING_MANAGER_CONTRACT_ADDRESS": "0x7D0150cf37E747ab386EF2F549745513eF9cb6c1",
 
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0xcF5Ba33FBa63699Ad4cD2A553c5D2a1fa0056e54",
+
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "",
 
           "chainId": "0xA869",
           "currencyName": "Avalanche",
@@ -248,6 +258,8 @@
 
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0x168470C8A5a244aEE5a01B8D812F2069dB2038aE",
 
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "0x1ee38d535d541c55c9dae27b12edf090c608e6fb",
+
           "chainId": "0x38",
           "currencyName": "Binance Coin",
           "currencyNetwork": "BSC",
@@ -286,6 +298,8 @@
           "VUE_APP_BURNING_MANAGER_CONTRACT_ADDRESS": "",
 
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0xBf8Ca84d0F5d9f154c0fD91ef671805a74964910",
+
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "0xCeBFbFb4Bd0d28E5a2662193e35E534ca6465f73",
 
           "chainId": "0x80",
           "currencyName": "Huobi Token",
@@ -326,6 +340,8 @@
 
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0x3b20013A190aE6781c013B2506F8a164e7A8816b",
 
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "0xddBDA43E5675C8A35dcA19007061A1D4A28F9452",
+
           "chainId": "0x42",
           "currencyName": "OKExChain",
           "currencyNetwork": "OKEx",
@@ -365,6 +381,8 @@
 
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0xe96cEC34B5DB980A024a79561F6320e877E2143D",
 
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "0x35e4aA226ce52e1E59E5e5Ec24766007bCbE2e7D",
+
           "chainId": "0x89",
           "currencyName": "MATIC",
           "currencyNetwork": "Polygon",
@@ -403,6 +421,8 @@
           "VUE_APP_BURNING_MANAGER_CONTRACT_ADDRESS": "",
 
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0x71A57Fa35bdc38695a685af5652dfAA80466E55B",
+
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "0x0FB54156B496b5a040b51A71817aED9e2927912E",
 
           "chainId": "0xA86A",
           "currencyName": "Avalanche",
