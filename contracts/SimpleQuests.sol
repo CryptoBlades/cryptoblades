@@ -77,6 +77,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
     event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
     event QuestComplete(uint256 indexed questID, uint256 indexed characterID);
+    event QuestRewarded(uint256 indexed questID, uint256 indexed characterID, uint256[] rewards);
 
     function initialize(Characters _characters, Weapons _weapons, Junk _junk, RaidTrinket _trinket, Shields _shields, SafeRandoms _safeRandoms) public initializer {
         __AccessControl_init_unchained();
@@ -189,17 +190,18 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function skipQuest(uint256 characterID) public assertQuestsEnabled assertOwnsCharacter(characterID) returns (uint256) {
-        require(canSkipQuest(characterID), "Character does not have enough stamina to skip quest");
+        require(canSkipQuest(characterID), "Character not enough stamina skip");
         characters.getFightDataAndDrainStamina(msg.sender, characterID, uint8(vars[VAR_SKIP_QUEST_STAMINA_COST]), true, 0);
         return assignNewQuest(characterID);
     }
 
-    function completeQuest(uint256 characterID) public assertQuestsEnabled assertOnQuest(characterID) {
+    function completeQuest(uint256 characterID) public assertQuestsEnabled assertOnQuest(characterID) returns (uint256[] memory questRewards) {
         uint256[] memory questData = getCharacterQuestData(characterID);
         require(questData[0] >= quests[characterQuest[characterID]].requirementAmount, "Not completed");
         uint256 questID = characterQuest[characterID];
         uint256 currentReputation = questData[2];
-        rewardQuest(questID, characterID);
+        questRewards = rewardQuest(questID, characterID);
+        emit QuestRewarded(questID, characterID, questRewards);
         characters.setNftVar(characterID, characters.NFTVAR_REPUTATION(), currentReputation + quests[questID].reputationAmount);
         clearQuestData(characterID);
         emit QuestComplete(questID, characterID);
@@ -221,21 +223,23 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID));
     }
 
-    function rewardQuest(uint256 questID, uint256 characterID) private {
-        uint256 seed = safeRandoms.popSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID), true, true);
+    function rewardQuest(uint256 questID, uint256 characterID) private returns (uint256[] memory) {
+        uint256 seed = safeRandoms.popSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID), true, false);
         Quest memory quest = quests[questID];
         if (quest.rewardType == RewardType.WEAPON) {
+            uint256[] memory tokenIDs = new uint256[](quest.rewardAmount);
             for (uint8 i = 0; i < quest.rewardAmount; i++) {
-                uint256 weaponID = weapons.mintWeaponWithStars(characters.ownerOf(characterID), uint256(quest.rewardRarity), seed, 100);
+                tokenIDs[i] = weapons.mintWeaponWithStars(characters.ownerOf(characterID), uint256(quest.rewardRarity), seed, 100);
                 seed = RandomUtil.combineSeeds(seed, i);
             }
+            return tokenIDs;
         } else if (quest.rewardType == RewardType.JUNK) {
-            junk.mintN(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount));
+            return junk.mintN(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount));
         } else if (quest.rewardType == RewardType.TRINKET) {
-            trinket.mintN(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount), seed);
+            return trinket.mintN(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount), seed);
         } else if (quest.rewardType == RewardType.SHIELD) {
             //0 is NORMAL SHIELD TYPE
-            shields.mintShieldsWithStars(msg.sender, uint8(quest.rewardRarity), 0, uint32(quest.rewardAmount), seed);
+            return shields.mintShieldsWithStars(msg.sender, uint8(quest.rewardRarity), 0, uint32(quest.rewardAmount), seed);
         } else if (quest.rewardType == RewardType.DUST) {
             uint32[] memory incrementDustSupplies = new uint32[](weapons.getDustSupplies(msg.sender).length);
             incrementDustSupplies[uint256(quest.rewardRarity)] = uint32(quest.rewardAmount);
@@ -246,6 +250,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         else {
             revert("Unknown reward type");
         }
+        return new uint256[](0);
     }
 
     // SUBMITTING PROGRESS

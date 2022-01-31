@@ -213,6 +213,7 @@
     "bonusPower": "Bonus power:"
   },
   "blacksmith": {
+    "loading": "Loading...",
     "noWeapons": "You do not currently have any weapons <br> You can forge one by clicking the button below.",
     "forgeSwordFor": "Forge sword for",
     "renameWeapon": "Rename Weapon",

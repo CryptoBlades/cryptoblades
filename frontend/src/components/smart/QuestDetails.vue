@@ -68,8 +68,13 @@
         </b-button>
       </div>
     </div>
-    <b-modal v-model="showQuestCompleteModal" size="sm" ok-only class="centered-modal" :title="$t('quests.questComplete')">
-      <QuestReward :quest="quest"/>
+    <b-modal v-model="showQuestCompleteModal" ok-only class="centered-modal" :title="$t('quests.questComplete')">
+      <div v-if="isQuestActionLoading">
+        <i class="fas fa-spinner fa-spin"/>
+        {{ $t('quests.loading') }}
+      </div>
+      <NftList v-else-if="questRewards.length !== 0" :showGivenNftIdTypes="true" :nftIdTypes="questRewards" :isReward="true"/>
+      <QuestReward v-else :quest="quest"/>
     </b-modal>
   </div>
 </template>
@@ -83,6 +88,7 @@ import NftIcon from '@/components/NftIcon.vue';
 import Events from '@/events';
 import Hint from '@/components/Hint.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
+import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 
 interface StoreMappedActions {
   canSkipQuest(payload: { characterID: string | number }): Promise<boolean>;
@@ -91,7 +97,7 @@ interface StoreMappedActions {
 
   skipQuest(payload: { characterID: string | number }): Promise<void>;
 
-  completeQuest(payload: { characterID: string | number }): Promise<void>;
+  completeQuest(payload: { characterID: string | number }): Promise<string[]>;
 
   deleteQuest(payload: { tier: number, index: number }): Promise<void>;
 }
@@ -99,13 +105,14 @@ interface StoreMappedActions {
 interface Data {
   canSkip: boolean;
   skipQuestStaminaCost: number;
+  questRewards: NftIdType[];
   isQuestActionLoading: boolean;
   isStaminaCostLoading: boolean;
   showQuestCompleteModal: boolean;
 }
 
 export default Vue.extend({
-  components: {NftIcon, Hint, QuestReward},
+  components: {NftIcon, Hint, QuestReward, NftList},
 
   props: {
     quest: {
@@ -135,6 +142,7 @@ export default Vue.extend({
     return {
       canSkip: false,
       skipQuestStaminaCost: 0,
+      questRewards: [] as NftIdType[],
       isQuestActionLoading: false,
       isStaminaCostLoading: false,
       showQuestCompleteModal: false,
@@ -178,10 +186,22 @@ export default Vue.extend({
     async complete() {
       try {
         this.isQuestActionLoading = true;
-        await this.completeQuest({characterID: this.characterId});
+        const rewards = await this.completeQuest({characterID: this.characterId});
+        const rewardType = this.quest.rewardType;
         await this.refreshSkipQuestData();
         Events.$emit('refresh-quest-data');
         this.showQuestCompleteModal = true;
+        if (!rewardType) return;
+        if (rewardType === RewardType.DUST) {
+          const dustType = this.quest.rewardRarity === Rarity.COMMON ? 'dustLb' : this.quest.rewardRarity === Rarity.UNCOMMON ? 'dust4b' : 'dust5b';
+          this.questRewards = [{type: dustType, amount: this.quest.rewardAmount} as NftIdType];
+        } else if (rewardType === RewardType.EXPERIENCE) {
+          return;
+        } else {
+          this.questRewards = rewards.map(reward => {
+            return {type: RewardType[rewardType].toLowerCase(), id: reward} as NftIdType;
+          });
+        }
       } finally {
         this.isQuestActionLoading = false;
       }

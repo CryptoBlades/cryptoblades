@@ -46,39 +46,35 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         return getOwnedBy(msg.sender);
     }
 
-    function getOwnedBy(address owner) public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](balanceOf(owner));
+    function getOwnedBy(address owner) public view returns(uint256[] memory tokens) {
+        tokens = new uint256[](balanceOf(owner));
         for(uint256 i = 0; i < tokens.length; i++) {
             tokens[i] = tokenOfOwnerByIndex(owner, i);
         }
-        return tokens;
     }
 
-    function getStars(uint256[] memory ids) public view returns (uint8[] memory) {
-        uint8[] memory stars = new uint8[](ids.length);
+    function getStars(uint256[] memory ids) public view returns (uint8[] memory stars) {
+        stars = new uint8[](ids.length);
         for(uint256 i = 0; i < ids.length; i++) {
             stars[i] = tokenStars[ids[i]];
         }
-        return stars;
     }
 
-    function mint(address minter, uint8 mintStars, uint256 seed) public restricted returns(uint256) {
-        uint256 tokenID = totalSupply();
+    function mint(address minter, uint8 mintStars, uint256 seed) public restricted returns(uint256 tokenID) {
+        tokenID = totalSupply();
         uint256 mintEffect = (seed / 100) % 5;
         tokenStars[tokenID] = mintStars;
         tokenEffect[tokenID] = mintEffect;
         _mint(minter, tokenID);
         emit Minted(tokenID, minter);
-        return tokenID;
     }
 
-    function mintN(address minter, uint8 mintStars, uint32 amount, uint256 seed) public restricted returns(uint256[] memory) {
-        uint256[] memory tokenIDs = new uint256[](amount);
+    function mintN(address minter, uint8 mintStars, uint32 amount, uint256 seed) public restricted returns(uint256[] memory tokenIDs) {
+        tokenIDs = new uint256[](amount);
         for(uint256 i = 0; i < amount; i++) {
             tokenIDs[i] = mint(minter, mintStars, seed);
             seed = RandomUtil.combineSeeds(seed,i);
         }
-        return tokenIDs;
     }
 
     function burn(uint256 tokenID) public restricted {

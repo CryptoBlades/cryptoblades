@@ -265,9 +265,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 properties,
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
-    ) public minterOnly returns(uint256) {
+    ) public minterOnly returns(uint256 tokenID) {
 
-        uint256 tokenID = tokens.length;
+        tokenID = tokens.length;
 
         if(block.number != lastMintedBlock)
             firstMintedOfLastBlock = tokenID;
@@ -279,7 +279,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         durabilityTimestamp[tokenID] = uint64(now.sub(getDurabilityMaxWait()));
 
         emit NewWeapon(tokenID, minter);
-        return tokenID;
     }
 
     function performMintWeaponDetailed(address minter,

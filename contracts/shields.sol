@@ -189,14 +189,13 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function mintShieldsWithStars(address minter, uint256 stars, uint256 shieldType, uint32 amount, uint256 seed) public restricted returns(uint256[] memory) {
+    function mintShieldsWithStars(address minter, uint256 stars, uint256 shieldType, uint32 amount, uint256 seed) public restricted returns(uint256[] memory tokenIDs) {
         require(stars < 8, "Stars parameter too high! (max 7)");
-        uint256[] memory tokens = new uint256[](amount);
+        tokenIDs = new uint256[](amount);
         for(uint i = 0; i < amount; i++) {
-            tokens[i] = mintShieldWithStars(minter, stars, shieldType, seed);
+            tokenIDs[i] = mintShieldWithStars(minter, stars, shieldType, seed);
             seed = RandomUtil.combineSeeds(seed,i);
         }
-        return tokens;
     }
 
     function performMintShield(address minter,
@@ -204,9 +203,9 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 properties,
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
-    ) public restricted returns(uint256) {
+    ) public restricted returns(uint256 tokenID) {
 
-        uint256 tokenID = tokens.length;
+        tokenID = tokens.length;
 
         if(block.number != lastMintedBlock)
             firstMintedOfLastBlock = tokenID;
@@ -219,7 +218,6 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         nftVars[tokenID][NFTVAR_SHIELD_TYPE] = shieldType;
 
         emit NewShield(tokenID, minter);
-        return tokenID;
     }
 
     function performMintShieldDetailed(address minter,

@@ -43,33 +43,31 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getOwnedBy(msg.sender);
     }
 
-    function getOwnedBy(address owner) public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](balanceOf(owner));
+    function getOwnedBy(address owner) public view returns(uint256[] memory tokens) {
+        tokens = new uint256[](balanceOf(owner));
         for(uint256 i = 0; i < tokens.length; i++) {
             tokens[i] = tokenOfOwnerByIndex(owner, i);
         }
-        return tokens;
     }
 
-    function getStars(uint256[] memory ids) public restricted view returns (uint8[] memory) {
-        uint8[] memory stars = new uint8[](ids.length);
+    function getStars(uint256[] memory ids) public restricted view returns (uint8[] memory stars) {
+        stars = new uint8[](ids.length);
         for(uint256 i = 0; i < ids.length; i++) {
             stars[i] = tokenStars[ids[i]];
         }
-        return stars;
     }
 
-    function mint(address minter, uint8 mintStars) public restricted returns(uint256) {
-        uint256 tokenID = totalSupply();
+    function mint(address minter, uint8 mintStars) public restricted returns(uint256 tokenID) {
+        tokenID = totalSupply();
         tokenStars[tokenID] = mintStars;
         _mint(minter, tokenID);
         emit Minted(tokenID, minter);
-        return tokenID;
     }
 
-    function mintN(address minter, uint8 mintStars, uint32 amount) public restricted {
+    function mintN(address minter, uint8 mintStars, uint32 amount) public restricted returns(uint256[] memory tokenIds) {
+        tokenIds = new uint256[](amount);
         for(uint i = 0; i < amount; i++) {
-            mint(minter, mintStars);
+            tokenIds[i] = mint(minter, mintStars);
         }
     }
 

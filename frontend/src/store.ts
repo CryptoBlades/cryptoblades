@@ -3548,8 +3548,11 @@ export function createStore(web3: Web3) {
         if(!SimpleQuests || !state.defaultAccount) return;
 
         await SimpleQuests.methods.generateRewardQuestSeed(characterID).send(defaultCallOptions(state));
-        await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
+        const res = await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
+
+        const questRewards = res.events.QuestRewarded.returnValues.rewards;
         dispatch('fetchCharacter', { characterId: characterID });
+        return questRewards;
       },
 
       async requestQuest({ state }, {characterID}) {
