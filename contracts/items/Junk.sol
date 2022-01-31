@@ -74,7 +74,6 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function burn(uint256 tokenID) public restricted {
         address burner = ownerOf(tokenID);
         _burn(tokenID);
-        delete tokenStars[tokenID];
         emit Burned(tokenID, burner);
     }
 

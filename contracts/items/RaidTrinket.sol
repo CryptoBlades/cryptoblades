@@ -80,8 +80,6 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
     function burn(uint256 tokenID) public restricted {
         address burner = ownerOf(tokenID);
         _burn(tokenID);
-        delete tokenStars[tokenID];
-        delete tokenEffect[tokenID];
         emit Burned(tokenID, burner);
     }
 
