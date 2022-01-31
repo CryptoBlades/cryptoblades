@@ -3543,16 +3543,18 @@ export function createStore(web3: Web3) {
         await dispatch('fetchCharacterStamina', characterID);
       },
 
-      async completeQuest({ state, dispatch }, {characterID}) {
-        const { SimpleQuests } = state.contracts();
-        if(!SimpleQuests || !state.defaultAccount) return;
+      async completeQuest({state, dispatch}, {characterID}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
 
-        await SimpleQuests.methods.generateRewardQuestSeed(characterID).send(defaultCallOptions(state));
-        const res = await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
+        if (!await SimpleQuests.methods.hasRandomQuestRewardSeedRequested(characterID).call(defaultCallOptions(state))) {
+          await SimpleQuests.methods.generateRewardQuestSeed(characterID).send(defaultCallOptions(state));
+        }
+        const result = await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
 
-        const questRewards = res.events.QuestRewarded.returnValues.rewards;
+        const questRewards = result.events.QuestRewarded.returnValues.rewards;
         await Promise.all([
-          dispatch('fetchCharacter', { characterId: characterID }),
+          dispatch('fetchCharacter', {characterId: characterID}),
           dispatch('updateWeaponIds'),
           dispatch('updateShieldIds'),
           dispatch('updateTrinketIds'),
@@ -3566,7 +3568,10 @@ export function createStore(web3: Web3) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
 
-        await SimpleQuests.methods.generateRequestQuestSeed(characterID).send(defaultCallOptions(state));
+        if (!await SimpleQuests.methods.hasRandomQuestSeedRequested(characterID).call(defaultCallOptions(state))) {
+          await SimpleQuests.methods.generateRequestQuestSeed(characterID).send(defaultCallOptions(state));
+        }
+
         return await SimpleQuests.methods.requestQuest(characterID).send(defaultCallOptions(state));
       },
 
