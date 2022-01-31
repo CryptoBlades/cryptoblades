@@ -241,6 +241,25 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return mintWeaponWithStars(minter, stars, seed, chosenElement);
     }
 
+    function mintSpecial(address minter, uint256 seed) public minterOnly returns(uint256) {
+        uint256 stars;
+        uint256 roll = seed % 100;
+        if(roll < 1) {
+            stars = 5; // 6* at 1%
+        }
+        else if(roll < 21) { // 5* at 21%
+            stars = 4;
+        }
+        else if(roll < 56) { // 4* at 56%
+            stars = 3;
+        }
+        else {
+            stars = 2; // 3* at 44%
+        }
+
+        return mintWeaponWithStars(minter, stars, seed, 100);
+    }
+
     function mintGiveawayWeapon(address to, uint256 stars, uint8 chosenElement) external minterOnly returns(uint256) {
         // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
         return mintWeaponWithStars(to, stars, uint256(keccak256(abi.encodePacked(now, tokens.length))), chosenElement);
@@ -249,10 +268,23 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function mintWeaponWithStars(address minter, uint256 stars, uint256 seed, uint8 chosenElement) public minterOnly returns(uint256) {
         require(stars < 8);
         require(chosenElement == 100 || (chosenElement>= 0 && chosenElement<= 3));
-        (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
+        (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed, false);
 
         return performMintWeapon(minter,
             getRandomProperties(stars, seed, chosenElement),
+            stat1,
+            stat2,
+            stat3,
+            RandomUtil.combineSeeds(seed,3)
+        );
+    }
+
+    function mintSpecialWeaponWithStars(address minter, uint256 stars, uint256 seed) public minterOnly returns(uint256) {
+        require(stars < 8);
+        (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed, true);
+
+        return performMintWeapon(minter,
+            getRandomProperties(stars, seed, 100),
             stat1,
             stat2,
             stat3,
@@ -334,11 +366,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             | ((RandomUtil.randomSeededMinMax(0,124,RandomUtil.combineSeeds(seed,2)) & 0x7F) << 5)); // statPattern
     }
 
-    function getStatRolls(uint256 stars, uint256 seed) private pure returns (uint16, uint16, uint16) {
+    function getStatRolls(uint256 stars, uint256 seed, bool isSpecial) private pure returns (uint16, uint16, uint16) {
         // each point refers to .25%
         // so 1 * 4 is 1%
         uint16 minRoll = getStatMinRoll(stars);
-        uint16 maxRoll = getStatMaxRoll(stars);
+        uint16 maxRoll = isSpecial ? 450 : getStatMaxRoll(stars);
         uint8 statCount = getStatCount(stars);
 
         uint16 stat1 = getRandomStat(minRoll, maxRoll, seed, 5);
