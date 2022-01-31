@@ -1010,7 +1010,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         int128 bonusShieldStats;
         if (fighter.useShield) {
-            bonusShieldStats = _getShieldStats(character.ID);
+            bonusShieldStats = _getShieldStats(character);
         }
 
         (
@@ -1061,15 +1061,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return traitBonus;
     }
 
-    function _getShieldStats(uint256 characterID)
+    function _getShieldStats(Duelist memory character)
         private
         view
-        returns (int128)
+        returns (int128 shieldMultFight)
     {
-        uint8 trait = characters.getTrait(characterID);
-        uint256 shieldID = fighterByCharacter[characterID].shieldID;
-        (, int128 shieldMultFight, , ) = shields.getFightData(shieldID, trait);
-        return (shieldMultFight);
+        uint256 shieldID = fighterByCharacter[character.ID].shieldID;
+        (, shieldMultFight, , ) = shields.getFightData(shieldID, character.trait);
     }
 
     function _getDuelBountyDistribution(uint256 duelCost)
