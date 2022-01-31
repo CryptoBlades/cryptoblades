@@ -10,15 +10,6 @@ const SafeRandoms = artifacts.require("SafeRandoms");
 const Raid1 = artifacts.require("Raid1");
 
 module.exports = async function (deployer, network, accounts) {
-  const VAR_UNCOMMON_TIER = 1;
-  const VAR_RARE_TIER = 2;
-  const VAR_EPIC_TIER = 3;
-  const VAR_LEGENDARY_TIER = 4;
-  const VAR_REPUTATION_LEVEL_2 = 20;
-  const VAR_REPUTATION_LEVEL_3 = 21;
-  const VAR_REPUTATION_LEVEL_4 = 22;
-  const VAR_REPUTATION_LEVEL_5 = 23;
-  const VAR_SKIP_QUEST_STAMINA_COST = 30
   const characters = await upgradeProxy(Characters.address, Characters, {deployer});
   const weapons = await upgradeProxy(Weapons.address, Weapons, {deployer});
   const junk = await upgradeProxy(Junk.address, Junk, {deployer});
@@ -30,6 +21,15 @@ module.exports = async function (deployer, network, accounts) {
   // TODO: What should be the initial values here?
   // const VAR_COMMON_TIER = 0;
   // await simpleQuests.setVar(VAR_COMMON_TIER, 0); Leaving this as a comment, because it's 0 by default
+  const VAR_UNCOMMON_TIER = await simpleQuests.VAR_UNCOMMON_TIER();
+  const VAR_RARE_TIER = await simpleQuests.VAR_RARE_TIER();
+  const VAR_EPIC_TIER = await simpleQuests.VAR_EPIC_TIER();
+  const VAR_LEGENDARY_TIER = await simpleQuests.VAR_LEGENDARY_TIER();
+  const VAR_REPUTATION_LEVEL_2 = await simpleQuests.VAR_REPUTATION_LEVEL_2();
+  const VAR_REPUTATION_LEVEL_3 = await simpleQuests.VAR_REPUTATION_LEVEL_3();
+  const VAR_REPUTATION_LEVEL_4 = await simpleQuests.VAR_REPUTATION_LEVEL_4();
+  const VAR_REPUTATION_LEVEL_5 = await simpleQuests.VAR_REPUTATION_LEVEL_5();
+  const VAR_SKIP_QUEST_STAMINA_COST = await simpleQuests.VAR_SKIP_QUEST_STAMINA_COST();
   await simpleQuests.setVar(VAR_UNCOMMON_TIER, 1);
   await simpleQuests.setVar(VAR_RARE_TIER, 2);
   await simpleQuests.setVar(VAR_EPIC_TIER, 3);
