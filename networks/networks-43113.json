@@ -3660,7 +3660,7 @@
     },
     "links": {},
     "address": "0x651CC58453588daD4be6b7C1b949a68089E1C91c",
-    "transactionHash": "0xf67e08a53573bb4bbbd5910cd43dfa06a493c6156800a0d87cb4287447c793f6"
+    "transactionHash": "0x6ac8c057bd8c6fcbe54b300fa0c18c3dd1649f6f27dd2bb1fb4f87cd48908ef1"
   },
   "build/contracts/Raid1.json": {
     "events": {},
