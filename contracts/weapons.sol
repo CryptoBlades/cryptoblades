@@ -218,6 +218,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _bonusPower = getBonusPower(id);
     }
 
+    function mintN(address minter, uint32 amount, uint256 seed, uint8 chosenElement) public restricted {
+        for(uint i = 0; i < amount; i++)
+            mint(minter, RandomUtil.combineSeeds(seed,i), chosenElement);
+    }
+
     function mint(address minter, uint256 seed, uint8 chosenElement) public minterOnly returns(uint256) {
         uint256 stars;
         uint256 roll = seed % 100;
