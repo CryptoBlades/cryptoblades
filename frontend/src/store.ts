@@ -38,7 +38,7 @@ import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './con
 import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly, burningManager as featureFlagBurningManager} from './feature-flags';
 import {IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
-import {Nft, transferedNft, nftTransfer} from './interfaces/Nft';
+import {Nft, TransferedNft, NftTransfer} from './interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
@@ -4088,7 +4088,7 @@ export function createStore(web3: Web3) {
           lastUpdateBlock: +nft[4],
           chainId: +nft[5],
           status: +nft[6],
-        }as nftTransfer;
+        }as NftTransfer;
       },
       async withdrawFromBridge({ state }, {tokenId}: {tokenId: number}) {
         const { NFTStorage } = state.contracts();
@@ -4129,7 +4129,7 @@ export function createStore(web3: Web3) {
           sourceId: +nft[3],
           status: +nft[4],
           transferInsMeta: nft[5],
-        } as transferedNft;
+        } as TransferedNft;
       },
       async chainEnabled({ state }, { chainId }: { chainId: string }) {
         const { NFTStorage } = state.contracts();

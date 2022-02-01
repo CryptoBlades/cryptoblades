@@ -23,7 +23,7 @@ export type NftType = 'weapon' | 'character' | 'shield';
 
 export const allNftTypes: NftType[] = ['weapon', 'character', 'shield'];
 
-export interface transferedNft {
+export interface TransferedNft {
   owner: string,
   nftType: number,
   sourceChain: number,
@@ -33,7 +33,7 @@ export interface transferedNft {
   targetId?: number,
 }
 
-export interface nftTransfer {
+export interface NftTransfer {
   owner: string,
   nftAddress: string,
   nftId: number,
