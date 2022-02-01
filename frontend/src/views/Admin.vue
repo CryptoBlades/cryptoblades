@@ -1,36 +1,33 @@
 <template>
   <b-tabs v-if="hasAccessToAnyTab" justified content-class="mt-3"> <!-- note, use "vertical" if too many tabs -->
-    <b-tab :disabled="!hasQuestsAccess">
-      <template #title>
-        {{ $t('admin.quests') }}
-        <hint v-if="!hasQuestsAccess" :text="$t('admin.doNotHaveAccessTooltip')"/>
-      </template>
-      <AdminMaker :contract="contracts.SimpleQuests"/>
-      <QuestsDashboard v-if="hasQuestsAccess"/>
-    </b-tab>
+    <AdminTab v-for="tab in tabs" :key="tab.title" :title="tab.title" :contract="tab.contract"
+              :component="tab.component"/>
   </b-tabs>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import QuestsDashboard from '@/components/smart/QuestsAdmin.vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
-import Hint from '@/components/Hint.vue';
-import AdminMaker from '@/components/smart/AdminMaker.vue';
+import {Contract} from '@/interfaces';
+import AdminTab from '@/components/smart/AdminTab.vue';
 
 interface StoreMappedActions {
-  userHasQuestsAdminAccess(): Promise<boolean>;
+  userHasAnyAdminAccess(): Promise<boolean>;
+}
 
-  userHasAdminAccess(): Promise<boolean>;
+interface Tab {
+  title: string;
+  contract: Contract<any>;
+  component: string;
 }
 
 interface Data {
   hasAccessToAnyTab: boolean;
-  hasQuestsAccess: boolean;
+  tabs: Tab[];
 }
 
 export default Vue.extend({
-  components: {QuestsDashboard, Hint, AdminMaker},
+  components: {AdminTab},
 
   computed: {
     ...mapGetters(['contracts']),
@@ -40,20 +37,29 @@ export default Vue.extend({
   data() {
     return {
       hasAccessToAnyTab: false,
-      hasQuestsAccess: false,
+      tabs: [] as Tab[],
     } as Data;
   },
 
   methods: {
-    ...mapActions(['userHasQuestsAdminAccess', 'userHasAdminAccess']) as StoreMappedActions,
+    ...mapActions(['userHasAnyAdminAccess']) as StoreMappedActions,
 
     async fetchData() {
-      this.hasQuestsAccess = await this.userHasQuestsAdminAccess();
-      this.hasAccessToAnyTab = await this.userHasAdminAccess();
+      this.hasAccessToAnyTab = await this.userHasAnyAdminAccess();
     },
   },
 
   async mounted() {
+    this.tabs.push({
+      title: 'quests',
+      contract: this.contracts.SimpleQuests,
+      component: 'QuestsAdmin',
+    });
+    this.tabs.push({
+      title: 'cbkLand',
+      contract: this.contracts.CBKLand,
+      component: 'QuestsAdmin',
+    });
     await this.fetchData();
   },
 

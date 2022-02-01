@@ -3606,22 +3606,33 @@ export function createStore(web3: Web3) {
         await contract.methods.grantRole(gameAdminRole, walletAddress).send(defaultCallOptions(state));
       },
 
-      async userHasQuestsAdminAccess({state}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
+      async userHasAdminAccess({state}, {contract}) {
+        if (!contract || !state.defaultAccount) return;
 
-        const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const adminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
 
-        return await SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state));
+        const hasRole =  await contract.methods.hasRole(adminRole, state.defaultAccount).call(defaultCallOptions(state));
+
+        console.log(contract, hasRole);
+        return hasRole;
       },
 
-      async userHasAdminAccess({state}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
+      async userHasAnyAdminAccess({state}) {
+        const {SimpleQuests, CBKLand} = state.contracts();
+        if (!SimpleQuests || !CBKLand || !state.defaultAccount) return;
 
         const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const cbkLandAdminRole = await CBKLand.methods.GAME_ADMIN().call(defaultCallOptions(state));
 
-        return await SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state));
+        const promises: Promise<boolean>[] = [
+          SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+        ];
+
+        for (const promise of promises) {
+          if (await promise) return true;
+        }
+        return false;
       },
 
       async canUserAfford({ state }, {payingAmount}) {

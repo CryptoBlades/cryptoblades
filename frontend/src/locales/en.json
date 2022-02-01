@@ -655,8 +655,13 @@
     "loading": "Loading..."
   },
   "admin": {
-    "quests": "Quests",
+    "tabs": {
+      "quests": "Quests",
+      "cbkLand": "CBK Land"
+    },
     "doNotHaveAccessTooltip": "You do not have admin access on this contract.",
+    "quests": "Quests",
+    "cbkLand": "CBKLand",
     "grantRole": "Grant role",
     "grantGameAdminRole": "Grant game admin role",
     "pasteInValidWalletAddress": "Paste in valid wallet address"
