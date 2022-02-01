@@ -15,22 +15,22 @@
       </p>
     </div>
     <b-tabs justified>
-      <b-tab :title="$t('bridge.inventory')" @click="nftType = 'weapon'">
+      <b-tab :title="$t('bridge.inventory')">
         <div class="btnRow d-flex flex-row justify-content-center">
           <div class="p-2">
-            <b-button variant="primary" @click="nftType = 'weapon'; selectedNftId = ''" class="gtag-link-others"
+            <b-button variant="primary" @click="showNft('weapon')" class="gtag-link-others"
               tagname="show_weapons_bridge" :disabled="nftType === 'weapon'">
               {{$t('bridge.showWeapons')}}
             </b-button>
           </div>
           <div class="p-2">
-            <b-button variant="primary" @click="nftType = 'character'; selectedNftId = ''" class="gtag-link-others"
+            <b-button variant="primary" @click="showNft('character')" class="gtag-link-others"
               tagname="show_characters_bridge" :disabled="nftType === 'character'">
               {{$t('bridge.showCharacters')}}
             </b-button>
           </div>
           <div class="p-2">
-            <b-button variant="primary" @click="nftType = 'shield'; selectedNftId = ''" class="gtag-link-others"
+            <b-button variant="primary" @click="showNft('shield')" class="gtag-link-others"
               tagname="show_shields_bridge" :disabled="nftType === 'shield'">
               {{$t('bridge.showShields')}}
             </b-button>
@@ -74,19 +74,19 @@
       <b-tab :title="$t('bridge.storage')" @click="showStorage(); selectedNftId = ''; targetChain = ''">
         <div class="btnRow d-flex flex-row justify-content-center" v-if="loadedStorage">
           <div class="p-2">
-            <b-button variant="primary" @click="nftType = 'weapon'; selectedNftId = ''; getStoredIds()"
+            <b-button variant="primary" @click="showNft('weapon'); getStoredIds();"
               class="gtag-link-others" tagname="show_weapons_bridge" :disabled="nftType === 'weapon'">
               {{$t('bridge.showWeapons')}}
             </b-button>
           </div>
           <div class="p-2">
-            <b-button variant="primary" @click="nftType = 'character'; selectedNftId = ''; getStoredIds()"
+            <b-button variant="primary" @click="showNft('character'); getStoredIds();"
               class="gtag-link-others" tagname="show_characters_bridge" :disabled="nftType === 'character'">
               {{$t('bridge.showCharacters')}}
             </b-button>
           </div>
           <div class="p-2">
-            <b-button variant="primary" @click="nftType = 'shield'; selectedNftId = ''; getStoredIds()"
+            <b-button variant="primary" @click="showNft('shield'); getStoredIds();"
               class="gtag-link-others" tagname="show_shield_bridge" :disabled="nftType === 'shield'">
               {{$t('bridge.showShields')}}
             </b-button>
@@ -349,6 +349,8 @@ enum transferStates{
   restored = 'Restored'
 }
 
+type NftTypeString = 'weapon' | 'shield' | 'character';
+
 export default Vue.extend({
   props: {
     nftTypeProp: {
@@ -525,6 +527,10 @@ export default Vue.extend({
     ]) as StoreMappedActions),
     convertWeiToSkill(wei: string): string {
       return fromWeiEther(wei);
+    },
+    showNft(nftType: NftTypeString): void {
+      this.nftType = nftType;
+      this.selectedNftId = '';
     },
     async transferToStorage(){
       // chars & weapon ids are ints; other nfts are <type.id>
