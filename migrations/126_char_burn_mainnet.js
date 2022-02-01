@@ -6,15 +6,13 @@ const CryptoBlades = artifacts.require("CryptoBlades");
 const BurningManager = artifacts.require("BurningManager");
 
 module.exports = async function (deployer, network) {
-  if (network === "development"
-    || network === "development-fork"
-    || network === 'bsctestnet'
-    || network === 'bsctestnet-fork'
-    || network === 'hecotestnet'
-    || network === 'okextestnet'
-    || network === 'polygontestnet'
-    || network === 'avaxtestnet'
-    || network === 'avaxtestnet-fork') {
+  if (network === 'bscmainnet'
+    || network === 'bscmainnet-fork'
+    || network === 'hecomainnet'
+    || network === 'okexmainnet'
+    || network === 'polygonmainnet'
+    || network === 'avaxmainnet'
+    || network === 'avaxmainnet-fork') {
     let nftMarket = await upgradeProxy(NFTMarket.address, NFTMarket, { deployer });
     let characters = await upgradeProxy(Characters.address, Characters, { deployer });
     let garrison = await upgradeProxy(Garrison.address, Garrison, { deployer });
@@ -24,9 +22,8 @@ module.exports = async function (deployer, network) {
     await garrison.migrateTo_d514745(game.address);
 
     let VAR_ROI_DAYS = await burningManager.VAR_ROI_DAYS();
-    let VAR_BURN_POWER_MULTIPLIER = await burningManager.VAR_BURN_POWER_MULTIPLIER();
     await burningManager.setVar(VAR_ROI_DAYS, 33);
-    await burningManager.setVar(VAR_BURN_POWER_MULTIPLIER, '1000000000000000000');
+    //VAR_BURN_POWER_MULTIPLIER left at 0 intentionally
 
     let BURNER_ROLE = await burningManager.BURNER_ROLE();
     await burningManager.grantRole(BURNER_ROLE, nftMarket.address);

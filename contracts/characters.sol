@@ -251,7 +251,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokenID;
     }
 
-    function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId) external restricted {
+    function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId, uint256 burnPowerMultiplier) external restricted {
         uint256 burnPower = 0;
         for(uint i = 0; i < burnIds.length; i++) {
             burnPower += nftVars[burnIds[i]][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[burnIds[i]].level));
@@ -268,7 +268,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             );
         }
         require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
-        nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
+        nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.mul(burnPowerMultiplier).div(1e18).add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
     }
 
     function burnIntoSoul(uint256[] calldata burnIds) external restricted {

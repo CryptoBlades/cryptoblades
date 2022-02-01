@@ -114,7 +114,9 @@
     "upgradeConfirm": "Are you sure you want to upgrade this character using",
     "characterToUpgrade": "Character to upgrade",
     "selectSoulAmount": "Select amount of Soul you want to use to upgrade selected character!",
-    "busyInArena": "Character is currently busy in Arena!"
+    "busyInArena": "Character is currently busy in Arena!",
+    "claimXp": "Claim XP",
+    "noXpToClaim": "No XP to claim"
   },
   "bridge": {
     "bridgeForYourNfts": "Bridge for your NFTs",
@@ -602,8 +604,10 @@
       "rewardsDuration": "Distribution",
       "warning": "Warning",
       "select": "Select",
-      "rewardsAvailableTooltip":"Rewards available",
-      "rewardsUnavailableTooltip":"Rewards depleted",
+      "rewardsAvailableTooltip":"You can earn rewards in this stake pool.",
+      "rewardsDepletedTooltip":"Rewards depleted.",
+      "rewardsAvailableEarnedTooltip":"You have rewards ready to claim in this stake pool and you can still earn more.",
+      "rewardsDepletedEarnedTooltip":"Rewards depleted but you can claim your reward.",
       "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
     },
     "tier": "Tier",
@@ -807,20 +811,46 @@
         "connecting": "Connecting to MetaMask...",
         "success": "Success: MetaMask connected.",
         "error": "Error: MetaMask could not get permissions.",
-        "welcome": "Welcome to CryptoBlades. Here is how you can get started."
+        "welcome": "Get started With CryptoBlades"
       },
       "message": {
+        "BSC":{
+          "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .0015 BNB for gas. You will also need a litle bit of BNB for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
+          "inst1": "1. Buying BNB with fiat: <a target=_blank href=https://youtu.be/6-sUDUE2RPA> Watch Video </a> or <a target=_blank href={link1}> Buy with Transak</a>",
+          "inst2": "2. Once you have BNB, go to ApeSwap to obtain SKILL tokens: <a target=_blank href={link1}> Trade SKILL/BNB </a>",
+          "inst3": "3. Follow this tutorial to swap BNB for SKILL: <a target=_blank href=https://youtu.be/_zitrvJ7Hl4> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
+        },
+        "HECO":{
+          "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .0007 HT for gas. You will also need a litle bit of HT for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
+          "inst1": "1. Swap BNB to HT <a target=_blank href=https://bridge.butterswap.me> here </a> (min. $30USD worth of BNB)",
+          "inst2": "2. Once you have HT, go to <a target=_blank href=https://swap.butterswap.me/swap> ButterSwap </a> to swap HT for SKILL tokens",
+          "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
+        },
+        "OEC":{
+          "instructions": "Get started in no time! To recruit your first character, you need {recruitCost} SKILL and .000032 OKT for gas. You will also need a little bit of OKT for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
+          "inst1": "1. Getting OKT to your wallet:<a target=_blank href=https://www.youtube.com/watch?v=eMXUYGl7XYg> Watch Video </a>",
+          "inst2": "2. If you have OKT but just need SKILL: <a target=_blank href=https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB> go to JSwap </a>", 
+          "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
+        },
+        "POLYGON":{
+          "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .01 MATIC for gas. You will also need a litle bit of MATIC for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
+          "inst1": "1. Trade SKILL between chains: <a target=_blank href=https://bridge.poly.network/token/SKILL> here </a>",
+          "inst2": "2. SWAP SKILL to MATIC: <a target=_blank href=https://app.apeswap.finance/swap> here <a>", 
+          "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
+        },
+        "AVAX":{
+          "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .001 AVAX for gas. You will also need a litle bit of AVAX for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
+          "inst1": "1. Trade SKILL between chains: <a target=_blank href=https://bridge.poly.network/token/SKILL> here </a>",
+          "inst2": "2. SWAP SKILL to AVAX: <a target=_blank href=https://app.pangolin.exchange/#/swap> here <a>", 
+          "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
+        },
         "hideWalletWarning": "You have hidden the wallet warning and it would now be displayed. If you are trying to play, please disable the option and follow the instructions, otherwise close and ignore.",
-        "instructions": "Get started in less than 10 minutes! To recruit your first character you need {recruitCost} SKILL and .001 BNB for gas. You will also need .0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!",
-        "inst1": "Buying BNB with fiat:",
-        "inst2": "Once you have BNB, go to ApeSwap to obtain SKILL tokens:",
-        "inst3": "Follow this tutorial to swap BNB for SKILL:",
-        "inst4": "That's it! Now you can create your first character:",
-        "watchVideo": "Watch Video",
-        "watchGettingStartedVideo": "Watch 'Getting Started' Video",
-        "or": "or",
-        "buyWithTransak": "Buy with Transak",
-        "questionDiscord": "If you have any questions, please join our Discord:",
+        "happyEarning": "Happy Earning!",
         "newCharacter": "New character",
         "inGarrison:": "appeared in Garrison"
       }
