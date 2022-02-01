@@ -108,18 +108,6 @@
                       class="gtag-link-others" tagname="click_transfer_bridge">{{$t('bridge.cancelTransferRequest')}}</b-button>
           </div>
         </div>
-        <div class="d-flex flex-row bd-highlight mb-3 justify-content-center">
-          <div class="p-4 w-25" v-if="transferStatus !== transferStates.pending && storedNftsIds.length !== 0">
-            <h4 class="text-center">{{$t('bridge.selectTargetChain')}}</h4>
-            <select class="form-control" v-model="targetChain">
-              <option :value="''" disabled>{{$t('bridge.selectAChain')}}</option>
-              <option v-for="chain in chainsToSendTo" :value="chain" :key="chain"
-                :disabled="!enabledChains.includes(chain)">
-                {{ chain }} <span v-if="!enabledChains.includes(chain)">{{$t('bridge.isNotEnabledForTransfer')}}</span>
-              </option>
-            </select>
-          </div>
-        </div>
         <div v-if="transferStatus !== transferStates.noTransfer"
           class="transferBox d-flex flex-column bd-highlight mb-3 justify-content-center">
           <div class="text-center">
@@ -167,6 +155,18 @@
           </div>
         </div>
         <hr v-if="currentTransferNFTType === 'character' || 'weapon'" style="border:0.5px solid #9E8A57">
+        <div class="d-flex flex-row bd-highlight mb-3 justify-content-center">
+          <div class="p-4 w-25" v-if="transferStatus !== transferStates.pending && storedNftsIds.length !== 0">
+            <h4 class="text-center">{{$t('bridge.selectTargetChain')}}</h4>
+            <select class="form-control" v-model="targetChain">
+              <option :value="''" disabled>{{$t('bridge.selectAChain')}}</option>
+              <option v-for="chain in chainsToSendTo" :value="chain" :key="chain"
+                :disabled="!enabledChains.includes(chain)">
+                {{ chain }} <span v-if="!enabledChains.includes(chain)">{{$t('bridge.isNotEnabledForTransfer')}}</span>
+              </option>
+            </select>
+          </div>
+        </div>
         <div v-if="nftType === 'weapon' && storedNftsIds.length !== 0">
           <weapon-grid
           v-model="selectedNftId"
