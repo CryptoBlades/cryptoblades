@@ -56,8 +56,7 @@
         </div>
 
         <div class="sell-grid" v-if="nftType === 'shield'">
-          <nft-list v-model="selectedNftId"
-          :isBridge="true"
+          <nft-list v-model="selectedNftId" :isBridge="true"
           />
         </div>
 
