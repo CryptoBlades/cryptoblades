@@ -118,6 +118,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     uint256 public duelOffsetCost;
     address payable public pvpBotAddress;
+
+    /// @dev owner's address by character ID
+    mapping(uint256 => address) private _ownerByCharacter;
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -259,6 +262,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     ) external enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
         uint8 tier = getArenaTier(characterID);
         uint256 wager = getEntryWagerByTier(tier);
+
+        if (_ownerByCharacter[characterID] != msg.sender) {
+            _ownerByCharacter[characterID] = msg.sender;
+        }
 
         if (previousTierByCharacter[characterID] != tier) {
             rankingPointsByCharacter[characterID] = 0;
@@ -453,9 +460,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 _topRankingCharactersByTier[i].length < prizePercentages.length
             ) {
                 uint256 excessPercentage;
-                address topOnePlayer = characters.ownerOf(
-                    _topRankingCharactersByTier[i][0]
-                );
+                
+                address topOnePlayer = _ownerByCharacter[_topRankingCharactersByTier[i][0]];
 
                 // We accumulate excess percentage
                 for (
@@ -517,7 +523,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         bool attackerWon;
     }
 
-    function createDuelist(uint256 id) internal returns (Duelist memory duelist) {
+    function createDuelist(uint256 id) internal view returns (Duelist memory duelist) {
         duelist.ID = id;
 
         (
@@ -925,8 +931,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 }
             }
             if (
-                characters.ownerOf(candidateID) ==
-                msg.sender
+                _ownerByCharacter[candidateID] == msg.sender
             ) {
                 continue;
             }
@@ -956,7 +961,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     ) private {
         uint256 percentage = prizePercentages[position];
         uint256 amountToTransfer = (pool.mul(percentage)).div(100);
-        address playerToTransfer = characters.ownerOf(characterID);
+        address playerToTransfer = _ownerByCharacter[characterID];
 
         _rankingRewardsByPlayer[playerToTransfer] = _rankingRewardsByPlayer[
             playerToTransfer
@@ -1004,7 +1009,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         Fighter memory fighter = fighterByCharacter[character.ID];
         uint256 weaponID = fighter.weaponID;
         uint256 seed = randoms.getRandomSeedUsingHash(
-            characters.ownerOf(character.ID),
+            _ownerByCharacter[character.ID],
             blockhash(block.number - 1)
         );
 

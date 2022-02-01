@@ -134,7 +134,7 @@ contract("PvpArena", (accounts) => {
 
     beforeEach(async () => {
       weaponId = await helpers.createWeapon(accounts[1], "123", 0, { weapons });
-      shieldId = await helpers.createShield(accounts[1], "123", { shields });
+      shieldId = await helpers.createShield(accounts[1], 0, "123", { shields });
       characterID = await helpers.createCharacter(accounts[1], "123", {
         characters,
       });
@@ -572,7 +572,7 @@ contract("PvpArena", (accounts) => {
         weapon2Id = await helpers.createWeapon(accounts[1], "123", 0, {
           weapons,
         });
-        shieldId = await helpers.createShield(accounts[1], "446", { shields });
+        shieldId = await helpers.createShield(accounts[1], 0, "446", { shields });
 
         cost = await pvpArena.getEntryWager(character2ID, {
           from: accounts[1],
@@ -858,7 +858,7 @@ contract("PvpArena", (accounts) => {
       const characterID = await helpers.createCharacter(accounts[1], "123", {
         characters,
       });
-      const shieldID = await helpers.createShield(accounts[1], "123", {
+      const shieldID = await helpers.createShield(accounts[1], 0, "123", {
         shields,
       });
       const weaponID = await helpers.createWeapon(accounts[1], "123", 0, {
@@ -1759,10 +1759,10 @@ contract("PvpArena", (accounts) => {
         weapons,
       });
 
-      shieldID = await helpers.createShield(accounts[1], "123",  {
+      shieldID = await helpers.createShield(accounts[1], 0, "123",  {
         shields,
       });
-      shield2ID = await helpers.createShield(accounts[2], "123", {
+      shield2ID = await helpers.createShield(accounts[2], 0, "123", {
         shields,
       });
       cost = await pvpArena.getEntryWager(character2ID, {
