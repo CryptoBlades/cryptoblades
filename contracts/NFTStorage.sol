@@ -556,13 +556,13 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     function _withdrawCharacterFromBridge(uint256 bridgedNFT, uint256 metaData, uint256 seed) internal returns (uint256 mintedId) {
-        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 burnPoints)  = unpackCharactersData(metaData); 
+        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower)  = unpackCharactersData(metaData); 
         
         mintedId = nftChainIdsToMintId[nftTypeToAddress[NFT_TYPE_CHARACTER]][transferInChainId[bridgedNFT]];
 
         mintedId = 
             characters.customMint(address(this), xp, 
-            level, trait, seed, mintedId, burnPoints);
+            level, trait, seed, mintedId, bonusPower);
 
             if(appliedCosmetic > 0) {
                 characterCosmetics.setCharacterCosmetic(mintedId, appliedCosmetic);
@@ -722,21 +722,21 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         uint32 appliedCosmetic = characterCosmetics.getCharacterCosmetic(characterId);
         rename = characterRenameTagConsumables.getCharacterRename(characterId);
         seed3dCosmetics = characters.getCosmeticsSeed(characterId);
-        uint24 burnPoints = uint24(characters.getNftVar(characterId, 2)); // 2 => burn points
-        packedData = packCharactersData(appliedCosmetic, xp, level, trait, burnPoints);
+        uint24 bonusPower = uint24(characters.getNftVar(characterId, 2)); // 2 => bonus Power
+        packedData = packCharactersData(appliedCosmetic, xp, level, trait, bonusPower);
     }
 
     // Applied cosmetic 32 bits is too much but will just put it as MSB for now. Can change later when something else is added.
-    function packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 burnPoints) public pure returns (uint256) {
-        return  uint256(uint256(trait) | (uint256(level) << 8) | (uint256(xp) << 16) | (uint256(appliedCosmetic) << 32) | (uint256(burnPoints) << 64));
+    function packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower) public pure returns (uint256) {
+        return  uint256(uint256(trait) | (uint256(level) << 8) | (uint256(xp) << 16) | (uint256(appliedCosmetic) << 32) | (uint256(bonusPower) << 64));
     }
 
-    function unpackCharactersData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 burnPoints) {
+    function unpackCharactersData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower) {
         trait = uint8((metaData) & 0xFF);
         level = uint8((metaData >> 8) & 0xFF);
         xp = uint16(metaData  >> 16 & 0xFFFF);
         appliedCosmetic = uint32((metaData >> 32) & 0xFFFFFFFF);
-        burnPoints = uint24((metaData >> 64) & 0xFFFFFF);
+        bonusPower = uint24((metaData >> 64) & 0xFFFFFF);
     }
 
     function packedShieldsData(uint256 shieldid) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
