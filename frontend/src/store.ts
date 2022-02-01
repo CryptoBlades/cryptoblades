@@ -4526,7 +4526,10 @@ export function createStore(web3: Web3) {
         });
 
         await BurningManager.methods.burnCharactersIntoCharacter(burnIds, targetId).send({ from: state.defaultAccount });
-        await dispatch('updateCharacterIds');
+        await Promise.all([
+          dispatch('updateCharacterIds'),
+          dispatch('fetchSkillBalance')
+        ]);
       },
 
       async burnCharactersIntoSoul({ state, dispatch }, burnIds) {
@@ -4539,10 +4542,13 @@ export function createStore(web3: Web3) {
         });
 
         await BurningManager.methods.burnCharactersIntoSoul(burnIds).send({ from: state.defaultAccount });
-        await dispatch('updateCharacterIds');
+        await Promise.all([
+          dispatch('updateCharacterIds'),
+          dispatch('fetchSkillBalance')
+        ]);
       },
 
-      async purchaseBurnCharacter({ state }, {charId, maxPrice}) {
+      async purchaseBurnCharacter({ state, dispatch }, {charId, maxPrice}) {
         const { NFTMarket, BurningManager, SkillToken, CryptoBlades } = state.contracts();
         if(!CryptoBlades || !BurningManager || !SkillToken || !NFTMarket || !state.defaultAccount) return;
 
@@ -4559,6 +4565,10 @@ export function createStore(web3: Web3) {
           nftID,
           price
         } = res.events.PurchasedListing.returnValues;
+
+        await Promise.all([
+          dispatch('fetchSkillBalance')
+        ]);
 
         return { seller, nftID, price } as { seller: string, nftID: string, price: string };
       },
