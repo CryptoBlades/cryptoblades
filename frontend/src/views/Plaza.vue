@@ -53,7 +53,7 @@
             @click="showBurnConfirmation"
             v-tooltip="$t('plaza.burnSelected')"
             :disabled="burnCharacterIds.length === 0 || powerLimitExceeded || (burnOption === 1 && !targetCharacterId) || !canBurn() || isBurnInProgress">
-            {{burnButtonText}}<br>
+            {{isBurnInProgress ? `${$t('plaza.burning')}` : `${$t('plaza.burn')}: ${this.burnCharacterIds.length} ${$t('characters')}`}}<br>
             ({{burnCost }} SKILL)
           </b-button>
           <b-button
@@ -63,7 +63,7 @@
             @click="showUpgradeConfirmation"
             v-tooltip="$t('plaza.upgradeSelected')"
             :disabled="soulAmount.toString() === '0' || !targetCharacterId || powerLimitExceeded || isUpgradeInProgress">
-            {{upgradeButtonText}}<br>
+            {{isUpgradeInProgress ? `${$t('plaza.upgrading')}` : `${$t('plaza.upgrade')} ${$t('character')}`}}<br>
             ({{soulAmount}} {{$t('plaza.soul')}})
           </b-button>
           <b-button
@@ -212,7 +212,7 @@
                     variant="primary"
                     class="ml-3 gtag-link-others"
                     @click="onClaimGarrisonXp">
-                    {{claimGarrisonXpButtonText}}
+                    {{isClaimingXp ? `${$t('plaza.claiming')}` : $t('plaza.claimXp')}}
                   </b-button>
                   <b-button
                     v-if="burningEnabled"
@@ -381,26 +381,9 @@ export default Vue.extend({
     canClaimGarrisonXp(): boolean {
       return this.ownedGarrisonCharacterIds.filter((id: string|number) => +this.xpRewards[id] > 0).length > 0;
     },
-
-    upgradeButtonText(): string {
-      return this.isUpgradeInProgress
-        ? `${i18n.t('plaza.upgrading')}...`
-        : `${i18n.t('plaza.upgrade')} ${i18n.t('character')}`;
-    },
-
-    burnButtonText(): string {
-      return this.isBurnInProgress
-        ? `${i18n.t('plaza.burning')}...`
-        : `${i18n.t('plaza.burn')}: ${this.burnCharacterIds.length} ${i18n.t('characters')}`;
-    },
-
-    claimGarrisonXpButtonText(): string {
-      return this.isClaimingXp ? `${i18n.t('plaza.claiming')}...` : i18n.t('plaza.claimXp').toString();
-    }
   },
 
   async created() {
-    console.log(this.getExchangeUrl, this.getExchangeTransakUrl());
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
@@ -452,7 +435,6 @@ export default Vue.extend({
     canBurn() {
       const cost = toBN(this.burnCost);
       const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
-      console.log(+fromWeiEther(this.skillBalance), +fromWeiEther(this.skillRewards), +fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     checkStorage() {
