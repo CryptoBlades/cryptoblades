@@ -246,20 +246,28 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return mintWeaponWithStars(minter, stars, seed, chosenElement);
     }
 
-    function mintSpecial(address minter, uint256 seed) public minterOnly returns(uint256) {
+    function mintSpecial(address minter, uint256 seed, uint256 orderOption) public minterOnly returns(uint256) {
         uint256 stars;
         uint256 roll = seed % 100;
-        if(roll < 1) {
-            stars = 5; // 6* at 1%
-        }
-        else if(roll < 21) { // 5* at 21%
-            stars = 4;
-        }
-        else if(roll < 56) { // 4* at 56%
-            stars = 3;
-        }
-        else {
-            stars = 2; // 3* at 44%
+        if(orderOption == 1) {
+
+        } else if(orderOption == 2) {
+            if(roll < 1) {
+                stars = 5; // 6* at 1%
+            }
+            else if(roll < 21) { // 5* at 21%
+                stars = 4;
+            }
+            else if(roll < 56) { // 4* at 56%
+                stars = 3;
+            }
+            else {
+                stars = 2; // 3* at 44%
+            }
+        } else if(orderOption == 3) {
+        
+        } else {
+
         }
 
         return mintWeaponWithStars(minter, stars, seed, 100);
