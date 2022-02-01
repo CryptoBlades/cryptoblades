@@ -32,7 +32,7 @@
           <div class="p-2">
             <b-button variant="primary" @click="nftType = 'shield'; selectedNftId = ''" class="gtag-link-others"
               tagname="show_shields_bridge" :disabled="nftType === 'shield'">
-              Show Shields
+              {{$t('bridge.showShields')}}
             </b-button>
           </div>
           <div class="p-2">
@@ -89,7 +89,7 @@
           <div class="p-2">
             <b-button variant="primary" @click="nftType = 'shield'; selectedNftId = ''; getStoredIds()"
               class="gtag-link-others" tagname="show_shield_bridge" :disabled="nftType === 'shield'">
-              Show Shields
+              {{$t('bridge.showShields')}}
             </b-button>
           </div>
           <div class="p-2">
@@ -202,7 +202,7 @@
           />
         </div>
         <div v-else-if="nftType === 'shield'">
-          <h3 class="text-center p-4">No Shields stored</h3>
+          <h3 class="text-center p-4">{{$t('bridge.noShieldsStored')}}</h3>
         </div>
         <div class="outcome" v-if="transferingFromStorage">
           <i class="fas fa-spinner fa-spin"></i>
@@ -256,19 +256,19 @@
               </div>
             </div>
             <div v-if="incomingShields.length !== 0" class="p-4 w-20">
-              <h4 class="text-center withdrawText">Select shield to withdraw</h4>
+              <h4 class="text-center withdrawText">{{$t('bridge.selectYourShieldToWithdraw')}}</h4>
               <select class="form-control withdrawSelect" v-model="shieldIdToWithdraw">
-                <option value="" disabled selected>Select your Shield</option>
+                <option value="" disabled selected>{{$t('bridge.selectYourShield')}}</option>
                 <option v-for="shield in incomingShields"
                 :value="shield['7']"
                 :key="shield['3']">
-                  Shield id: {{ shield['3'] }}
+                  {{$t('bridge.shieldId')}}: {{ shield['3'] }}
                   {{$t('bridge.fromChain')}}: {{supportedChains[supportedChainIds.indexOf(shield['2'])]}}
                 </option>
               </select>
               <div class="mt-2 text-center">
                 <b-button :disabled="!shieldIdToWithdraw" variant="primary" @click="withdrawBridge(shieldIdToWithdraw)"
-                          class="gtag-link-others withdrawBtn" tagname="click_transfer_bridge"> Withdraw Shield
+                          class="gtag-link-others withdrawBtn" tagname="click_transfer_bridge"> {{$t('bridge.withdrawShield')}}
                 </b-button>
               </div>
             </div>
