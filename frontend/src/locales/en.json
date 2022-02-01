@@ -116,7 +116,10 @@
     "selectSoulAmount": "Select amount of Soul you want to use to upgrade selected character!",
     "busyInArena": "Character is currently busy in Arena!",
     "claimXp": "Claim XP",
-    "noXpToClaim": "No XP to claim"
+    "noXpToClaim": "No XP to claim",
+    "upgrading": "Upgrading...",
+    "burning": "Burning...",
+    "claiming": "Claiming..."
   },
   "bridge": {
     "bridgeForYourNfts": "Bridge for your NFTs",
@@ -282,7 +285,8 @@
     },
     "couldNotForge": "Could not forge sword: Insuffucient funds or transaction was denied.",
     "couldNotReforge": "Could not reforge sword: Insufficient funds, Dust, or transaction was denied.",
-    "couldNotBurn": "Could not burn sword: Insufficient funds or transaction was denied."
+    "couldNotBurn": "Could not burn sword: Insufficient funds or transaction was denied.",
+    "useMaxSoulAmount": "Use max"
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",
