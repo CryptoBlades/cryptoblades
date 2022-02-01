@@ -281,7 +281,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
-import {isNftType, Nft, transferedNft, nftTransfer} from '@/interfaces/Nft';
+import {isNftType, Nft, TransferedNft, NftTransfer} from '@/interfaces/Nft';
 import {Accessors} from 'vue/types/options';
 import {Contract, Contracts, IState} from '@/interfaces';
 import {NftIdType} from '@/components/smart/NftList.vue';
@@ -326,7 +326,7 @@ interface StoreMappedActions {
   getBridgeTransferId(): Promise<string>;
   getBridgeTransfer(payload: {
     transferId: string;
-  }): Promise<nftTransfer>;
+  }): Promise<NftTransfer>;
   withdrawFromBridge(payload: {
     tokenId: number;
   }): Promise<void>;
@@ -334,7 +334,7 @@ interface StoreMappedActions {
   getReceivedNFTs(): Promise<number[]>;
   getReceivedNFT(payload: {
     tokenId: number;
-  }): Promise<transferedNft>;
+  }): Promise<TransferedNft>;
   chainEnabled(payload: {
     chainId: number;
   }): Promise<boolean>;
@@ -385,9 +385,9 @@ export default Vue.extend({
       currentTransferChain: '',
       chainsToSendTo: [] as string[],
       incomingNftIds: [] as number[],
-      incomingWeapons: [] as transferedNft[],
-      incomingChars: [] as transferedNft[],
-      incomingShields: [] as transferedNft[],
+      incomingWeapons: [] as TransferedNft[],
+      incomingChars: [] as TransferedNft[],
+      incomingShields: [] as TransferedNft[],
       weaponIdToWithdraw: '',
       characterIdToWithdraw: '',
       shieldIdToWithdraw: '',
@@ -596,7 +596,7 @@ export default Vue.extend({
       this.incomingNftIds = await this.getReceivedNFTs();
 
       for(let i = 0; i < this.incomingNftIds.length; i++){
-        const incomingNft: transferedNft  = await this.getReceivedNFT({
+        const incomingNft: TransferedNft  = await this.getReceivedNFT({
           tokenId: +this.incomingNftIds[i]
         });
 
@@ -615,7 +615,7 @@ export default Vue.extend({
     },
     async getStatus(){
       const id = await this.getBridgeTransferId();
-      const transfer: nftTransfer = await this.getBridgeTransfer({
+      const transfer: NftTransfer = await this.getBridgeTransfer({
         transferId: id,
       });
 
@@ -647,7 +647,6 @@ export default Vue.extend({
       if(currentTransferTokenAddress === this.Weapons.options.address) this.currentTransferNFTType = 'weapon';
       else if (currentTransferTokenAddress === this.Characters.options.address) this.currentTransferNFTType = 'character';
       else this.currentTransferNFTType = 'shield';
-      console.table(transfer);
     },
     async requestBridge(){
       if(this.nftType !== 'weapon' && this.nftType !== 'character') this.selectedNftId = this.selectedNftId.split('.')[1];
