@@ -192,12 +192,9 @@
         <div v-if="nftType === 'shield' && storedNftsIds.length !== 0">
           <nft-list
           v-model="selectedNftId"
-          :characterIds="[storedNftsIds]"
           :showGivenNftIdTypes="true"
           :nftIdTypes="storedNftsIds.map(id => { return { id: id, type: 'shield' }; })"
-          :nftDisplay="true"
           :isBridge="true"
-          :showNftOptions="false"
           />
         </div>
         <div v-else-if="nftType === 'shield'">
