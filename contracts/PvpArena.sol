@@ -501,87 +501,118 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             );
     }
 
+    struct Duelist {
+        uint256 ID;
+        uint8 level;
+        uint8 trait;
+        uint24 basePower;
+        uint24 roll;
+    }
+
+    struct Duel {
+        Duelist attacker;
+        Duelist defender;
+        uint8 tier;
+        uint256 cost;
+        bool attackerWon;
+    }
+
+    function createDuelist(uint256 id) internal returns (Duelist memory duelist) {
+        duelist.ID = id;
+
+        (
+            , // xp
+            duelist.level,
+            duelist.trait,
+            , // staminaTimestamp
+            , // head
+            , // torso
+            , // legs
+            , // boots
+            , // race
+        ) = characters.get(id);
+
+        // Future: Change getPowerAtLevel() to a library function.
+        duelist.basePower = characters.getPowerAtLevel(duelist.level);
+    }
+
     /// @dev performs a list of duels
     function performDuels(uint256[] memory attackerIDs) public restricted {
         for (uint256 i = 0; i < attackerIDs.length; i++) {
-            uint256 attackerID = attackerIDs[i];
-            uint8 tier = getArenaTier(attackerID);
-            uint256 duelCost = getDuelCostByTier(tier);
+            Duel memory duel;
+            duel.attacker = createDuelist(attackerIDs[i]);
 
-            if (!_duelQueue.contains(attackerID)) continue;
+            if (!_duelQueue.contains(duel.attacker.ID)) continue;
 
-            uint256 defenderID = getOpponent(attackerID);
-            uint8 defenderTrait = characters.getTrait(defenderID);
-            uint8 attackerTrait = characters.getTrait(attackerID);
+            duel.defender = createDuelist(getOpponent(duel.attacker.ID));
 
-            uint24 attackerRoll = _getCharacterPowerRoll(
-                attackerID,
-                defenderTrait
-            );
-            uint24 defenderRoll = _getCharacterPowerRoll(
-                defenderID,
-                attackerTrait
-            );
+            duel.tier = getArenaTierForLevel(duel.attacker.level);
+            duel.cost = getDuelCostByTier(duel.tier);
+
+            duel.attacker.roll = _getCharacterPowerRoll(duel.attacker, duel.defender.trait);
+            duel.defender.roll = _getCharacterPowerRoll(duel.defender, duel.attacker.trait);
 
             // Reduce defender roll if attacker has a shield
-            if (fighterByCharacter[attackerID].useShield) {
+            if (fighterByCharacter[duel.attacker.ID].useShield) {
                 uint24 attackerShieldDefense = 3;
 
                 uint8 attackerShieldTrait = shields.getTrait(
-                    fighterByCharacter[attackerID].shieldID
+                    fighterByCharacter[duel.attacker.ID].shieldID
                 );
 
                 if (
-                    Common.isTraitEffectiveAgainst(attackerShieldTrait, defenderTrait)
+                    Common.isTraitEffectiveAgainst(attackerShieldTrait, duel.defender.trait)
                 ) {
                     attackerShieldDefense = 10;
                 }
 
-                defenderRoll = uint24(
-                    (defenderRoll.mul(uint24(100).sub(attackerShieldDefense)))
+                duel.defender.roll = uint24(
+                    (duel.defender.roll.mul(uint24(100).sub(attackerShieldDefense)))
                         .div(100)
                 );
             }
 
             // Reduce attacker roll if defender has a shield
-            if (fighterByCharacter[defenderID].useShield) {
+            if (fighterByCharacter[duel.defender.ID].useShield) {
                 uint24 defenderShieldDefense = 3;
 
                 uint8 defenderShieldTrait = shields.getTrait(
-                    fighterByCharacter[defenderID].shieldID
+                    fighterByCharacter[duel.defender.ID].shieldID
                 );
 
                 if (
-                    Common.isTraitEffectiveAgainst(defenderShieldTrait, attackerTrait)
+                    Common.isTraitEffectiveAgainst(defenderShieldTrait, duel.attacker.trait)
                 ) {
                     defenderShieldDefense = 10;
                 }
 
-                attackerRoll = uint24(
-                    (attackerRoll.mul(uint24(100).sub(defenderShieldDefense)))
+                duel.attacker.roll = uint24(
+                    (duel.attacker.roll.mul(uint24(100).sub(defenderShieldDefense)))
                         .div(100)
                 );
             }
 
-            uint256 winnerID = attackerRoll >= defenderRoll
-                ? attackerID
-                : defenderID;
-            uint256 loserID = attackerRoll >= defenderRoll
-                ? defenderID
-                : attackerID;
+            duel.attackerWon = (duel.attacker.roll >= duel.defender.roll);
+
+            uint256 winnerID = duel.attackerWon
+                ? duel.attacker.ID
+                : duel.defender.ID;
+            uint256 loserID = duel.attackerWon
+                ? duel.defender.ID
+                : duel.attacker.ID;
 
             emit DuelFinished(
-                attackerID,
-                defenderID,
+                duel.attacker.ID,
+                duel.defender.ID,
                 block.timestamp,
-                attackerRoll,
-                defenderRoll,
-                attackerRoll >= defenderRoll
+                duel.attacker.roll,
+                duel.defender.roll,
+                duel.attackerWon
             );
 
             BountyDistribution
                 memory bountyDistribution = _getDuelBountyDistribution(
-                    duelCost
+                    duel.cost
                 );
 
             fighterByCharacter[winnerID].wager = fighterByCharacter[winnerID]
@@ -603,26 +634,26 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             fighterByCharacter[loserID].wager = loserWager;
 
-            delete matchByFinder[attackerID];
-            delete finderByOpponent[defenderID];
-            isDefending[defenderID] = false;
+            delete matchByFinder[duel.attacker.ID];
+            delete finderByOpponent[duel.defender.ID];
+            isDefending[duel.defender.ID] = false;
 
             if (
-                fighterByCharacter[loserID].wager < duelCost ||
+                fighterByCharacter[loserID].wager < duel.cost ||
                 fighterByCharacter[loserID].wager <
-                getEntryWagerByTier(tier).mul(withdrawFeePercent).div(100)
+                getEntryWagerByTier(duel.tier).mul(withdrawFeePercent).div(100)
             ) {
-                _removeCharacterFromArena(loserID, tier);
+                _removeCharacterFromArena(loserID, duel.tier);
                 emit CharacterKicked(
                     loserID,
                     winnerID,
                     block.timestamp
                 );
             } else {
-                _matchableCharactersByTier[tier].add(loserID);
+                _matchableCharactersByTier[duel.tier].add(loserID);
             }
 
-            _matchableCharactersByTier[tier].add(winnerID);
+            _matchableCharactersByTier[duel.tier].add(winnerID);
 
             // Add ranking points to the winner
             rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
@@ -637,17 +668,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 ].sub(losingPoints);
             }
 
-            _processWinner(winnerID, tier);
-            _processLoser(loserID, tier);
+            _processWinner(winnerID, duel.tier);
+            _processLoser(loserID, duel.tier);
 
             // Add to the rankings pool
-            rankingsPoolByTier[tier] = rankingsPoolByTier[
-                tier
+            rankingsPoolByTier[duel.tier] = rankingsPoolByTier[
+                duel.tier
             ].add(bountyDistribution.rankingPoolTax / 2);
 
             gameCofferTaxDue += bountyDistribution.rankingPoolTax / 2;
 
-            _duelQueue.remove(attackerID);
+            _duelQueue.remove(duel.attacker.ID);
         }
     }
 
@@ -801,7 +832,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
     function getArenaTier(uint256 characterID) public view returns (uint8) {
-        uint256 level = characters.getLevel(characterID);
+        uint8 level = characters.getLevel(characterID);
+        return getArenaTierForLevel(level);
+    }
+
+    function getArenaTierForLevel(uint8 level) public pure returns (uint8) {
         return uint8(level.div(10));
     }
 
@@ -891,7 +926,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             }
             if (
                 characters.ownerOf(candidateID) ==
-                characters.ownerOf(characterID)
+                msg.sender
             ) {
                 continue;
             }
@@ -961,23 +996,21 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         weapons.setNftVar(weaponID, 1, 0);
     }
 
-    function _getCharacterPowerRoll(uint256 characterID, uint8 opponentTrait)
+    function _getCharacterPowerRoll(Duelist memory character, uint8 opponentTrait)
         private
         view
         returns (uint24)
     {
-        uint8 trait = characters.getTrait(characterID);
-        uint24 basePower = characters.getPower(characterID);
-        uint256 weaponID = fighterByCharacter[characterID].weaponID;
+        Fighter memory fighter = fighterByCharacter[character.ID];
+        uint256 weaponID = fighter.weaponID;
         uint256 seed = randoms.getRandomSeedUsingHash(
-            characters.ownerOf(characterID),
+            characters.ownerOf(character.ID),
             blockhash(block.number - 1)
         );
 
-        bool useShield = fighterByCharacter[characterID].useShield;
         int128 bonusShieldStats;
-        if (useShield) {
-            bonusShieldStats = _getShieldStats(characterID);
+        if (fighter.useShield) {
+            bonusShieldStats = _getShieldStats(character.ID);
         }
 
         (
@@ -985,15 +1018,15 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             uint8 weaponTrait
-        ) = weapons.getFightData(weaponID, trait);
+        ) = weapons.getFightData(weaponID, character.trait);
 
         int128 playerTraitBonus = getPVPTraitBonusAgainst(
-            trait,
+            character.trait,
             weaponTrait,
             opponentTrait
         );
 
-        uint24 playerFightPower = Common.getPlayerPower(basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
+        uint24 playerFightPower = Common.getPlayerPower(character.basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
 
         uint256 playerPower = RandomUtil.plusMinus10PercentSeeded(
             playerFightPower,
