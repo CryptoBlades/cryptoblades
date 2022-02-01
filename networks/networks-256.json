@@ -256,7 +256,7 @@
     },
     "links": {},
     "address": "0x827C2f617b67634262C5811aB2F2A8104f81dF20",
-    "transactionHash": "0x44cbf8efdfdd13ac648113826ed387a074401b17aa3a37fa1052a6742c50fff7"
+    "transactionHash": "0x9bfbba8157c4a6470b21a369123a4e074f4cf6232a4aa079ef10330b99e106c7"
   },
   "build/contracts/CBKLand.json": {
     "events": {
