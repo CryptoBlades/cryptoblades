@@ -3983,6 +3983,7 @@ export function createStore(web3: Web3) {
 
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+
         const NFTContract: Contract<IERC721> =
           nftContractAddr === Weapons.options.address
             ? Weapons : nftContractAddr === Characters.options.address
@@ -4001,7 +4002,8 @@ export function createStore(web3: Web3) {
           await dispatch('updateWeaponIds');
         else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
-
+        else if (nftContractAddr === Shields.options.address)
+          await dispatch('updateShieldIds');
         return res;
       },
       async getStorageItemIds({ state }, { nftContractAddr }: { nftContractAddr: string}) {
@@ -4025,8 +4027,8 @@ export function createStore(web3: Web3) {
         return res;
       },
       async withdrawFromStorage({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
-        const { NFTStorage, Weapons, Characters } = state.contracts();
-        if(!NFTStorage || !Weapons || !Characters || !state.defaultAccount) return;
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
 
         await NFTStorage.methods
           .withdrawFromStorage(nftContractAddr, tokenId)
@@ -4038,17 +4040,17 @@ export function createStore(web3: Web3) {
           await dispatch('updateWeaponIds');
         else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
+        else if (nftContractAddr === Shields.options.address)
+          await dispatch('updateShieldIds');
 
       },
       async bridgeItem({ state, dispatch }, { nftContractAddr, tokenId, targetChain, bridgeFee }:
       { nftContractAddr: string, tokenId: string, targetChain: string, bridgeFee: string }) {
         const { NFTStorage, CryptoBlades, SkillToken } = state.contracts();
         if (!NFTStorage || !CryptoBlades || !SkillToken || !state.defaultAccount) return;
-
         await SkillToken.methods
           .approve(CryptoBlades.options.address, bridgeFee)
           .send(defaultCallOptions(state));
-
         await NFTStorage.methods
           .bridgeItem(nftContractAddr, tokenId, targetChain)
           .send({
