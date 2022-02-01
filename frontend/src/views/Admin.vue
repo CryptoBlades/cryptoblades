@@ -58,7 +58,7 @@ export default Vue.extend({
     this.tabs.push({
       title: 'cbkLand',
       contract: this.contracts.CBKLand,
-      component: 'QuestsAdmin',
+      component: 'CBKLandAdmin',
     });
     await this.fetchData();
   },

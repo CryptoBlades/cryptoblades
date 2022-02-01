@@ -2811,6 +2811,37 @@ export function createStore(web3: Web3) {
         return landIdsWithTier;
       },
 
+      async mintCBKLand({state}, {minter, tier, chunkId, reseller}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.mint(minter, tier, chunkId, reseller).send({from: state.defaultAccount});
+      },
+
+      async massMintCBKLand({state}, {minter, tier, chunkId, reseller, quantity}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.massMint(minter, tier, chunkId, reseller, quantity).send({from: state.defaultAccount});
+      },
+
+      async updateChunkId({state}, {id, chunkId}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.updateChunkId(id, chunkId).send({from: state.defaultAccount});
+      },
+
+      async updateChunkIds({state}, {ids, chunkId}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.updateChunkId(ids, chunkId).send({from: state.defaultAccount});
+      },
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();

@@ -659,9 +659,20 @@
       "quests": "Quests",
       "cbkLand": "CBK Land"
     },
+    "cbkLand": {
+      "minter": "Minter",
+      "tier": "Tier",
+      "chunkId": "Chunk ID",
+      "reseller": "Reseller",
+      "quantityOptional": "Quantity (optional)",
+      "mintLand": "Mint land",
+      "mintLands": "Mint lands",
+      "identifiers": "Identifiers",
+      "updateChunkIdentifier": "Update chunk identifier",
+      "updateChunkId": "Update chunk ID",
+      "updateChunkIds": "Update chunk IDs"
+    },
     "doNotHaveAccessTooltip": "You do not have admin access on this contract.",
-    "quests": "Quests",
-    "cbkLand": "CBKLand",
     "grantRole": "Grant role",
     "grantGameAdminRole": "Grant game admin role",
     "pasteInValidWalletAddress": "Paste in valid wallet address"
