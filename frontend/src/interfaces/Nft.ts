@@ -27,6 +27,26 @@ export type NftType = 'weapon' | 'character' | 'shield';
 
 export const allNftTypes: NftType[] = ['weapon', 'character', 'shield'];
 
+export interface TransferedNft {
+  owner: string,
+  nftType: number,
+  sourceChain: number,
+  sourceId: number,
+  status: number,
+  transferInsMeta: string,
+  targetId?: number,
+}
+
+export interface NftTransfer {
+  owner: string,
+  nftAddress: string,
+  nftId: number,
+  requestBlock: number,
+  lastUpdateBlock: number,
+  chainId: number,
+  status: number,
+}
+
 export function isNftType(nftType: string): nftType is NftType {
   return allNftTypes.includes(nftType as NftType);
 }

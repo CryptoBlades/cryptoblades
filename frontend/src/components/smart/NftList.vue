@@ -204,7 +204,7 @@
       <div>
         <h1 v-if="isLandTab">{{$t('nftList.lands')}} ({{totalNonIgnoredLandsCount}})</h1>
       </div>
-      <div class="filters row mt-2" v-if="!isReward">
+      <div class="filters row mt-2" v-if="!isReward && !isBridge">
         <div v-if="!isMarket && !isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>{{$t('nftList.nftType')}}</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
@@ -477,6 +477,10 @@ export default Vue.extend({
       default: false,
     },
     isReward: {
+      type: Boolean,
+      default: false,
+    },
+    isBridge: {
       type: Boolean,
       default: false,
     },
