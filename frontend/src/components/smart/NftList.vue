@@ -611,6 +611,10 @@ export default Vue.extend({
         }
       }
 
+      if(this.isBridge){
+        return this.shieldsWithIds(this.nftsToDisplay.map(x => x.id.toString())).filter(Boolean);
+      }
+
       if(this.isReward && this.showGivenNftIdTypes) {
         const rewardedDust = this.nftsToDisplay.filter(x => x.type?.startsWith('dust')).map(x => { return { type: x.type, id: 0, amount: x.amount }; });
         const rewardedWeapons = this.weaponsWithIds(this.nftsToDisplay.filter(x => x.type === 'weapon').map(x => x.id));
