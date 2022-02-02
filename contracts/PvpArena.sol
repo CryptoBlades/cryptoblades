@@ -119,7 +119,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint256 public duelOffsetCost;
     address payable public pvpBotAddress;
 
-    int128 private _shieldFactor;
+    uint256 private _shieldFactor;
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -569,7 +569,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                     attackerShieldDefense = 10;
                 }
 
-                attackerShieldDefense = uint24(attackerShieldDefense.mul(uint24(_shieldFactor)).div(100));
+                attackerShieldDefense = uint24(attackerShieldDefense.mul(_shieldFactor).div(100));
 
                 duel.defender.roll = uint24(
                     (duel.defender.roll.mul(uint24(100).sub(attackerShieldDefense)))
@@ -591,7 +591,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                     defenderShieldDefense = 10;
                 }
 
-                defenderShieldDefense = uint24(defenderShieldDefense.mul(uint24(_shieldFactor)).div(100));
+                defenderShieldDefense = uint24(defenderShieldDefense.mul(_shieldFactor).div(100));
 
                 duel.attacker.roll = uint24(
                     (duel.attacker.roll.mul(uint24(100).sub(defenderShieldDefense)))
@@ -1017,8 +1017,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         int128 bonusShieldStats;
         if (fighter.useShield) {
-            bonusShieldStats = _getShieldStats(character.ID).mul(_shieldFactor).div(100);
-
+            bonusShieldStats = _getShieldStats(character.ID).mul(int128(_shieldFactor)).div(100);
         }
 
         (
@@ -1162,7 +1161,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         pvpBotAddress = botAddress;
     }
 
-    function setShieldFactor(int128 factor) external restricted {
+    function setShieldFactor(uint256 factor) external restricted {
         _shieldFactor = factor;
     }
 
