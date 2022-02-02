@@ -12,5 +12,4 @@ report*.json
 public/abi
 cache
 artifacts
-.vscode
 .DS_Store
