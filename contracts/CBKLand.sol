@@ -85,6 +85,8 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _mint(minter, tokenID);
         emit LandMinted(minter, tokenID, tier, chunkId);
     }
+    
+    
 
     function mint(address minter, uint256 tier, uint256 chunkId, address reseller) public restricted {
         uint256 tokenID = landMinted++;
