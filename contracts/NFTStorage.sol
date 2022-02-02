@@ -729,7 +729,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     // Applied cosmetic 32 bits is too much but will just put it as MSB for now. Can change later when something else is added.
     function packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation) public pure returns (uint256) {
-        return  uint256(uint256(trait) | (uint256(level) << 8) | (uint256(xp) << 16) | (uint256(appliedCosmetic) << 32) | (uint256(bonusPower) << 64) | (uint256(reputation) << 80));
+        return  uint256(uint256(trait) | (uint256(level) << 8) | (uint256(xp) << 16) | (uint256(appliedCosmetic) << 32) | (uint256(bonusPower) << 64) | (uint256(reputation) << 88));
     }
 
     function unpackCharactersData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation) {
@@ -738,7 +738,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         xp = uint16(metaData  >> 16 & 0xFFFF);
         appliedCosmetic = uint32((metaData >> 32) & 0xFFFFFFFF);
         bonusPower = uint24((metaData >> 64) & 0xFFFFFF);
-        reputation = uint16((metaData >> 80) & 0xFFFFFF);
+        reputation = uint16((metaData >> 88) & 0xFFFF);
     }
 
     function packedShieldsData(uint256 shieldid) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
