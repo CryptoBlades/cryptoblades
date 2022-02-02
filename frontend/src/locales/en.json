@@ -119,7 +119,10 @@
     "selectSoulAmount": "Select amount of Soul you want to use to upgrade selected character!",
     "busyInArena": "Character is currently busy in Arena!",
     "claimXp": "Claim XP",
-    "noXpToClaim": "No XP to claim"
+    "noXpToClaim": "No XP to claim",
+    "upgrading": "Upgrading...",
+    "burning": "Burning...",
+    "claiming": "Claiming..."
   },
   "bridge": {
     "bridgeForYourNfts": "Bridge for your NFTs",
@@ -129,6 +132,7 @@
     "inventory": "Inventory",
     "showWeapons": "Show Weapons",
     "showCharacters": "Show Characters",
+    "showShields" : "Show Shields",
     "moveNftToStorage": "Move NFT to Storage",
     "loading": "Loading...",
     "warning": "Warning",
@@ -145,6 +149,7 @@
     "toChain": "To Chain",
     "noWeaponsStored": "No Weapons stored!",
     "noCharactersStored": "No Characters stored!",
+    "noShieldsStored" : "No Shields Stored!",
     "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!",
     "incomingNfts": "Incoming NFTs",
     "noIncomingNfts": "No incoming NFTs!",
@@ -155,6 +160,10 @@
     "withdrawWeapon": "Withdraw Weapon",
     "selectCharacterToWithdraw": "Select a character to withdraw",
     "selectYourCharacter": "Select your Character",
+    "selectYourShieldToWithdraw": "Select shield to withdraw",
+    "selectYourShield" : "Select your Shield",
+    "shieldId" : "Shield ID",
+    "withdrawShield": "Withdraw Shield",
     "characterId": "Character ID",
     "withdrawCharacter": "Withdraw Character"
   },
@@ -280,7 +289,8 @@
     },
     "couldNotForge": "Could not forge sword: Insuffucient funds or transaction was denied.",
     "couldNotReforge": "Could not reforge sword: Insufficient funds, Dust, or transaction was denied.",
-    "couldNotBurn": "Could not burn sword: Insufficient funds or transaction was denied."
+    "couldNotBurn": "Could not burn sword: Insufficient funds or transaction was denied.",
+    "useMaxSoulAmount": "Use max"
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",
