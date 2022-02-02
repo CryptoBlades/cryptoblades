@@ -38,7 +38,7 @@ import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './con
 import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly, burningManager as featureFlagBurningManager} from './feature-flags';
 import {IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
-import {Nft} from './interfaces/Nft';
+import {Nft, TransferedNft, NftTransfer} from './interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
@@ -4026,7 +4026,7 @@ export function createStore(web3: Web3) {
 
         return res;
       },
-      async withdrawFromStorage({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+      async withdrawFromStorage({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: number}) {
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
 
@@ -4045,7 +4045,7 @@ export function createStore(web3: Web3) {
 
       },
       async bridgeItem({ state, dispatch }, { nftContractAddr, tokenId, targetChain, bridgeFee }:
-      { nftContractAddr: string, tokenId: string, targetChain: string, bridgeFee: string }) {
+      { nftContractAddr: string, tokenId: number, targetChain: string, bridgeFee: string }) {
         const { NFTStorage, CryptoBlades, SkillToken } = state.contracts();
         if (!NFTStorage || !CryptoBlades || !SkillToken || !state.defaultAccount) return;
         await SkillToken.methods
@@ -4058,7 +4058,7 @@ export function createStore(web3: Web3) {
           });
         dispatch('fetchSkillBalance');
       },
-      async getNFTChainId({state}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+      async getNFTChainId({state}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: number}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage) return;
         const chainId = await NFTStorage.methods
@@ -4077,12 +4077,20 @@ export function createStore(web3: Web3) {
       async getBridgeTransfer({state}, {transferId}: { transferId: string}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage) return;
-        const response = await NFTStorage.methods
+        const nft = await NFTStorage.methods
           .getBridgeTransfer(transferId)
           .call(defaultCallOptions(state));
-        return response;
+        return {
+          owner: nft[0],
+          nftAddress: nft[1],
+          nftId: +nft[2],
+          requestBlock: +nft[3],
+          lastUpdateBlock: +nft[4],
+          chainId: +nft[5],
+          status: +nft[6],
+        }as NftTransfer;
       },
-      async withdrawFromBridge({ state }, {tokenId}: {tokenId: string}) {
+      async withdrawFromBridge({ state }, {tokenId}: {tokenId: number}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage || !state.defaultAccount) return;
         await NFTStorage.methods
@@ -4103,18 +4111,25 @@ export function createStore(web3: Web3) {
       async getReceivedNFTs({ state }) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage || !state.defaultAccount) return;
-        const res = await NFTStorage.methods
+        const nftIds = await NFTStorage.methods
           .getReceivedNFTs()
           .call(defaultCallOptions(state));
-        return res;
+        return nftIds.map(Number) as number[];
       },
-      async getReceivedNFT({ state }, {tokenId}: {tokenId: string}) {
+      async getReceivedNFT({ state }, {tokenId}: {tokenId: number}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage || !state.defaultAccount) return;
-        const res = await NFTStorage.methods
+        const nft: string[] = await NFTStorage.methods
           .getReceivedNFT(tokenId)
           .call(defaultCallOptions(state));
-        return res;
+        return {
+          owner: nft[0],
+          nftType: +nft[1],
+          sourceChain: +nft[2],
+          sourceId: +nft[3],
+          status: +nft[4],
+          transferInsMeta: nft[5],
+        } as TransferedNft;
       },
       async chainEnabled({ state }, { chainId }: { chainId: string }) {
         const { NFTStorage } = state.contracts();
