@@ -10,10 +10,10 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Web3 from 'web3';
 import {mapActions} from 'vuex';
 import {Contract} from '@/interfaces';
 import {PropType} from 'vue/types/options';
+import {isValidWeb3Address} from '@/utils/common';
 
 interface StoreMappedActions {
   grantGameAdminRole(payload: { walletAddress: string, contract: Contract<any> }): Promise<void>;
@@ -36,14 +36,8 @@ export default Vue.extend({
     return {
       walletAddress: '',
       isLoading: false,
+      isValidWeb3Address
     } as Data;
-  },
-
-
-  computed: {
-    isValidWeb3Address(): boolean {
-      return Web3.utils.isAddress(this.walletAddress);
-    },
   },
 
   methods: {

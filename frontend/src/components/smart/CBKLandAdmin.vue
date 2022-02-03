@@ -16,9 +16,10 @@
     </div>
     <h2 class="mt-3">{{ $t('admin.cbkLand.updateChunkIdentifier') }}</h2>
     <div class="d-flex align-items-center gap-3">
-      <b-form-input v-model="identifiers" :placeholder="$t('admin.cbkLand.identifiers')"></b-form-input>
-      <b-form-input v-model="updateChunkIdentifier" :placeholder="$t('admin.cbkLand.updateChunkIdentifier')" type="number" number
-                    min="1"></b-form-input>
+      <b-form-input v-model="identifiers" :placeholder="$t('admin.cbkLand.identifiers')"/>
+      <b-form-input v-model="updateChunkIdentifier" :placeholder="$t('admin.cbkLand.updateChunkIdentifier')"
+                    type="number" number
+                    min="1"/>
       <b-button @click="updateId()" :disabled="updateIdsButtonDisabled()" variant="primary" class="text-nowrap">
         {{ quantity > 1 ? $t('admin.cbkLand.updateChunkIds') : $t('admin.cbkLand.updateChunkId') }}
       </b-button>
@@ -28,8 +29,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Web3 from 'web3';
 import {mapActions} from 'vuex';
+import {isValidWeb3Address} from '@/utils/common';
 
 interface StoreMappedActions {
   mintCBKLand(payload: { minter: string, tier: number, chunkId: number, reseller: string }): Promise<void>;
@@ -72,15 +73,12 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['mintCBKLand', 'massMintCBKLand', 'updateChunkId', 'updateChunkIds']) as StoreMappedActions,
-    isValidWeb3Address(walletAddress: string): boolean {
-      return Web3.utils.isAddress(walletAddress);
-    },
 
     mintLandButtonDisabled(): boolean {
-      return !this.isValidWeb3Address(this.minter)
+      return !isValidWeb3Address(this.minter)
         || this.tier === undefined || this.tier < 0 || this.tier > 3
         || this.chunkId === undefined || this.chunkId < 0 || this.chunkId > 9999
-        || !this.isValidWeb3Address(this.reseller)
+        || !isValidWeb3Address(this.reseller)
         || this.isLoading;
     },
 
@@ -91,7 +89,7 @@ export default Vue.extend({
     },
 
     async mintLand() {
-      if (!this.isValidWeb3Address(this.minter) || !this.isValidWeb3Address(this.reseller) || this.tier === undefined || this.chunkId === undefined) {
+      if (!isValidWeb3Address(this.minter) || !isValidWeb3Address(this.reseller) || this.tier === undefined || this.chunkId === undefined) {
         return;
       }
       try {

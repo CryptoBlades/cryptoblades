@@ -2843,6 +2843,34 @@ export function createStore(web3: Web3) {
         return await CBKLand.methods.updateChunkId(ids, chunkId).send({from: state.defaultAccount});
       },
 
+      async incrementDustSupplies({state}, {playerAddress, amountLB, amount4B, amount5B}) {
+        const {Weapons} = state.contracts();
+        if(!state.defaultAccount || !Weapons) return;
+
+        return await Weapons.methods.incrementDustSupplies(playerAddress, amountLB, amount4B, amount5B).send({from: state.defaultAccount});
+      },
+
+      async decrementDustSupplies({state}, {playerAddress, amountLB, amount4B, amount5B}) {
+        const {Weapons} = state.contracts();
+        if(!state.defaultAccount || !Weapons) return;
+
+        return await Weapons.methods.decrementDustSupplies(playerAddress, amountLB, amount4B, amount5B).send({from: state.defaultAccount});
+      },
+
+      async mintGiveawayWeapon({state}, {to, stars, chosenElement}) {
+        const {Weapons} = state.contracts();
+        if(!state.defaultAccount || !Weapons) return;
+
+        return await Weapons.methods.mintGiveawayWeapon(to, stars, chosenElement).send({from: state.defaultAccount});
+      },
+
+      async giveawaySoul({state}, {user, soulAmount}) {
+        const {BurningManager} = state.contracts();
+        if(!state.defaultAccount || !BurningManager) return;
+
+        return await BurningManager.methods.giveawaySoul(user, soulAmount).send({from: state.defaultAccount});
+      },
+
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
@@ -3649,15 +3677,19 @@ export function createStore(web3: Web3) {
       },
 
       async userHasAnyAdminAccess({state}) {
-        const {SimpleQuests, CBKLand} = state.contracts();
-        if (!SimpleQuests || !CBKLand || !state.defaultAccount) return;
+        const {SimpleQuests, CBKLand, Weapons, BurningManager} = state.contracts();
+        if (!BurningManager || !Weapons || !SimpleQuests || !CBKLand || !state.defaultAccount) return;
 
         const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
         const cbkLandAdminRole = await CBKLand.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const weaponsAdminRole = await Weapons.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const burningManagerAdminRole = await BurningManager.methods.GAME_ADMIN().call(defaultCallOptions(state));
 
         const promises: Promise<boolean>[] = [
           SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Weapons.methods.hasRole(weaponsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          BurningManager.methods.hasRole(burningManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         ];
 
         for (const promise of promises) {

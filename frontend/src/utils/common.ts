@@ -104,6 +104,10 @@ export const addTokenToMetamask = async (address: string, symbol: string): Promi
   }
 };
 
+export const isValidWeb3Address = (walletAddress: string) => {
+  return Web3.utils.isAddress(walletAddress);
+};
+
 export const currentChainSupportsMerchandise = () => {
   const currentChain = localStorage.getItem('currentChain') || 'BSC';
   const merchandiseSupportedChains = config.merchandiseSupportedChains;

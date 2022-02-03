@@ -60,6 +60,16 @@ export default Vue.extend({
       contract: this.contracts.CBKLand,
       component: 'CBKLandAdmin',
     });
+    this.tabs.push({
+      title: 'weapons',
+      contract: this.contracts.Weapons,
+      component: 'WeaponsAdmin',
+    });
+    this.tabs.push({
+      title: 'burningManager',
+      contract: this.contracts.BurningManager,
+      component: 'BurningManagerAdmin',
+    });
     await this.fetchData();
   },
 
