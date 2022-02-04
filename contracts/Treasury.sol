@@ -110,7 +110,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     }
 
     function getRemainingPartnerTokenSupply(uint256 partnerId) public view returns(uint256) {
-        return IERC20(partneredProjects[partnerId].tokenAddress).balanceOf(address(this));
+        return partneredProjects[partnerId].tokenSupply.mul(1e18).sub(tokensClaimed[partnerId]);
     }
 
     function getAmountInPartnerToken(uint256 partnerId, uint256 skillAmount) public view returns(uint256) {
@@ -156,6 +156,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     function claim(uint256 partnerId, uint256 skillClaimingAmount, uint256 currentMultiplier, uint256 slippage) public {
         require(game.getTokenRewardsFor(msg.sender) >= skillClaimingAmount, 'Claim amount exceeds available rewards balance');
         require(currentMultiplier.mul(uint(1e18).sub(slippage)).div(1e18) < getProjectMultiplier(partnerId), 'Slippage exceeded');
+        require(partneredProjects[partnerId].isActive == true, 'Project inactive');
 
         uint256 partnerTokenAmount = getAmountInPartnerToken(partnerId, skillClaimingAmount);
         uint256 remainingPartnerTokenSupply = getRemainingPartnerTokenSupply(partnerId);
