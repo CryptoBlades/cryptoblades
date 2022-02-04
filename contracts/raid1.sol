@@ -11,9 +11,9 @@ import "./items/RaidTrinket.sol";
 import "./items/KeyLootbox.sol";
 import "./items/Junk.sol";
 import "./common.sol";
+import "./interfaces/IPriceListener.sol";
 
-
-contract Raid1 is Initializable, AccessControlUpgradeable {
+contract Raid1 is Initializable, AccessControlUpgradeable, IPriceListener {
 
     /*
         Actual raids reimplementation
@@ -45,6 +45,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     uint256 public constant NUMBERPARAMETER_AUTO_DURATION = 1;
     uint256 public constant NUMBERPARAMETER_AUTO_BOSSPOWER_PERCENT = uint256(keccak256("BOSSPOWER_PERCENT"));
+    uint256 public constant NUMBERPARAMETER_SKILL_PER_USD = uint256(keccak256("SKILL_PER_USD"));
 
     CryptoBlades public game;
     Characters public characters;
@@ -124,6 +125,12 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         xpReward = 128 * 2; // 13 hour 20 min worth of fight xp, but we had double xp active on launch
     }
 
+    // TODO: Add migration with priceOracleSkillPerUsd as a parameter:
+    //      priceOracleSkillPerUsd.registerListener(address(self));
+    // Also
+    //      import "./interfaces/IPriceOracle.sol";
+    // OPTIONAL: Store the priceOracleSkillPerUsd and require() it in speakCurrentPrice.
+
     modifier restricted() {
         _restricted();
         _;
@@ -131,6 +138,12 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     function _restricted() internal view {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+    }
+
+    // IPriceListener
+    function speakCurrentPrice(uint256 price) external override {
+        require(price > 0);
+        numberParameters[NUMBERPARAMETER_SKILL_PER_USD] = price;
     }
 
     function doRaidAuto() public restricted {
@@ -216,7 +229,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
         uint256 joinCostPaid = 0;
         if(joinCost > 0) {
-            joinCostPaid = game.usdToSkill(joinCost);
+            joinCostPaid = usdToSkill(joinCost);
             game.payContractTokenOnly(msg.sender, joinCostPaid);
         }
         emit RaidJoined(raidIndex,
@@ -474,7 +487,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     }
 
     function getJoinCostInSkill() public view returns(uint256) {
-        return game.usdToSkill(joinCost);
+        return usdToSkill(joinCost);
     }
 
     function setXpReward(uint16 xp) public restricted {
@@ -625,5 +638,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         durability = durabilityCost;
         xp = xpReward;
         accountPower = getAccountsPower(raidIndex);
+    }
+
+    function usdToSkill(int128 usdAmount) public view returns (uint256) {
+        require(numberParameters[NUMBERPARAMETER_SKILL_PER_USD] > 0);
+        return usdAmount.mulu(numberParameters[NUMBERPARAMETER_SKILL_PER_USD]);
     }
 }
