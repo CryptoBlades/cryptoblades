@@ -289,20 +289,14 @@ export default Vue.extend({
     },
 
     canClaimTokens(): boolean {
-      if(toBN(this.skillRewards).lte(0) || toBN(this.remainingTokenClaimAmountPreTax).lte(0)) {
-        return false;
-      }
-
-      return true;
+      const areSkillRewardsZeroOrLess = toBN(this.skillRewards).lte(0);
+      const isRemainingTokenClaimAmountPreTaxZeroOrLess = toBN(this.remainingTokenClaimAmountPreTax).lte(0);
+      return !(areSkillRewardsZeroOrLess || isRemainingTokenClaimAmountPreTaxZeroOrLess);
     },
 
     canClaimXp(): boolean {
-      const allXpsAreZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => toBN(xp).lte(0));
-      if(allXpsAreZeroOrLess) {
-        return false;
-      }
-
-      return true;
+      const areAllXpsZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => toBN(xp).lte(0));
+      return !areAllXpsZeroOrLess;
     },
 
     supportedProjects(): SupportedProject[] {
