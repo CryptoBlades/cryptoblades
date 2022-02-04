@@ -4,6 +4,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "./interfaces/IPriceListener.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./interfaces/IRandoms.sol";
 import "./shields.sol";
@@ -13,7 +14,7 @@ import "./weapons.sol";
 import "./cryptoblades.sol";
 import "./CBKLandSale.sol";
 
-contract Blacksmith is Initializable, AccessControlUpgradeable {
+contract Blacksmith is Initializable, AccessControlUpgradeable, IPriceListener {
     using SafeERC20 for IERC20;
     /* ========== CONSTANTS ========== */
 
@@ -31,6 +32,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     uint256 public constant VAR_PURCHASE_SHIELD_TYPE = 1;
     uint256 public constant VAR_PURCHASE_SHIELD_SUPPLY = 2; // only for non-0 type shields
+    uint256 public constant VAR_ORACLE_SKILL_PRICE = 3;
+    uint256 public constant VAR_ORACLE_KING_PRICE = 4;
 
     uint256 public constant LINK_SKILL_ORACLE_2 = 1; // technically second skill oracle (it's separate)
     uint256 public constant LINK_KING_ORACLE = 2;
@@ -116,9 +119,24 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         cbkLandSale = _cbkLandSale;
     }
 
+    // TODO: Add migration
+    //      IPriceOracle(links[LINK_SKILL_ORACLE_2]).registerListener(address(self));
+    //      IPriceOracle(links[LINK_KING_ORACLE]).registerListener(address(self));
+
     /* ========== VIEWS ========== */
 
     /* ========== MUTATIVE FUNCTIONS ========== */
+
+    // IPriceListener
+    function speakCurrentPrice(uint256 price) external override {
+        require(price > 0);
+        if (msg.sender == links[LINK_SKILL_ORACLE_2]) {
+            numberParameters[VAR_ORACLE_SKILL_PRICE] = price;
+            return;
+        }
+        require(msg.sender == links[LINK_KING_ORACLE]);
+        numberParameters[VAR_ORACLE_KING_PRICE] = price;
+    }
 
     function recoverToken(address tokenAddress, uint256 amount) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
@@ -368,13 +386,14 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         return landPrices[currency][tier] * getOracledTokenPerUSD(currency);
     }
 
-    function getOracledTokenPerUSD(uint256 currency) public view returns (uint256) {
+    function getOracledTokenPerUSD(uint256 currency) public view returns (uint256 rate) {
         if(currency == 0) {
-            return IPriceOracle(links[LINK_SKILL_ORACLE_2]).currentPrice();
+            rate = numberParameters[VAR_ORACLE_SKILL_PRICE];
         }
         else {
-            return IPriceOracle(links[LINK_KING_ORACLE]).currentPrice();
+            rate = numberParameters[VAR_ORACLE_KING_PRICE];
         }
+        require(rate > 0);
     }
 
     function setCBKLandPrice(uint256 tier, uint256 newPrice, uint256 currency) external isAdmin {
