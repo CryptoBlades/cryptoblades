@@ -1,0 +1,6 @@
+
+pr-frontend:
+  - frontends/**/*
+  
+pr-solidity:
+  - contracts/**/*
