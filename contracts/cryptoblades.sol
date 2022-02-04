@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./interfaces/IStakeFromGame.sol";
 import "./interfaces/IRandoms.sol";
+import "./interfaces/IPriceListener.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
 import "./Promos.sol";
@@ -16,7 +17,7 @@ import "./util.sol";
 import "./common.sol";
 import "./Blacksmith.sol";
 
-contract CryptoBlades is Initializable, AccessControlUpgradeable {
+contract CryptoBlades is Initializable, AccessControlUpgradeable, IPriceListener {
     using ABDKMath64x64 for int128;
     using SafeMath for uint256;
     using SafeMath for uint64;
@@ -48,6 +49,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_PARAM_HOURLY_MAX_POWER_PERCENT = 16;
     uint256 public constant VAR_PARAM_SIGNIFICANT_HOUR_FIGHTS = 17;
     uint256 public constant VAR_PARAM_HOURLY_PAY_ALLOWANCE = 18;
+    uint256 public constant VAR_SKILL_PER_USD = 19;
 
     // Mapped user variable(userVars[]) keys, one value per wallet
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
@@ -125,6 +127,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         rewardsClaimTaxMax = 2767011611056432742; // = ~0.15 = ~15%
         rewardsClaimTaxDuration = 15 days;
     }
+
+    // TODO: Add migration
+    //      priceOracleSkillPerUsd.registerListener(address(self));
 
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint characterLimit;
@@ -204,6 +209,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
+
+    // IPriceListener
+    function speakCurrentPrice(uint256 price) external override {
+        require(price > 0);
+        require(msg.sender == address(priceOracleSkillPerUsd));
+        vars[VAR_SKILL_PER_USD] = price;
+    }
 
     function recoverSkill(uint256 amount) public {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
@@ -926,7 +938,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function usdToSkill(int128 usdAmount) public view returns (uint256) {
-        return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
+        require(vars[VAR_SKILL_PER_USD] > 0);
+        return usdAmount.mulu(vars[VAR_SKILL_PER_USD]);
     }
 
     function claimTokenRewards() public {
