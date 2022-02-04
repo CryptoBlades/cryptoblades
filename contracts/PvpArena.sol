@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "./interfaces/IPriceListener.sol";
 import "./interfaces/IRandoms.sol";
 import "./cryptoblades.sol";
 import "./characters.sol";
@@ -13,7 +14,7 @@ import "./shields.sol";
 import "./common.sol";
 
 
-contract PvpArena is Initializable, AccessControlUpgradeable {
+contract PvpArena is Initializable, AccessControlUpgradeable, IPriceListener {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeMath for uint8;
     using SafeMath for uint24;
@@ -118,7 +119,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     uint256 public duelOffsetCost;
     address payable public pvpBotAddress;
-    
+
+    uint256 private skillPerUsd;
+
     event DuelFinished(
         uint256 indexed attacker,
         uint256 indexed defender,
@@ -138,6 +141,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 indexed newSeason,
         uint256 timestamp
     );
+
+    // TODO: Add migration with priceOracleSkillPerUsd as a parameter:
+    //      priceOracleSkillPerUsd.registerListener(address(self));
+    // Also
+    //      import "./interfaces/IPriceOracle.sol";
+    // OPTIONAL: Store the priceOracleSkillPerUsd and require() it in speakCurrentPrice.
 
     modifier characterInArena(uint256 characterID) {
         _characterInArena(characterID);
@@ -248,6 +257,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         prizePercentages.push(30);
         prizePercentages.push(10);
         duelOffsetCost = 0.005 ether;
+    }
+
+    // IPriceListener
+    function speakCurrentPrice(uint256 price) external override {
+        require(price > 0);
+        skillPerUsd = price;
     }
 
     /// @dev enter the arena with a character, a weapon and optionally a shield
@@ -818,7 +833,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             .divu(getArenaTier(characterID).mul(100), 100)
             .mul(_tierWagerUSD);
 
-        return game.usdToSkill(_baseWagerUSD.add(tierExtra));
+        return usdToSkill(_baseWagerUSD.add(tierExtra));
     }
 
     /// @dev gets the amount of SKILL that is risked per duel by tier
@@ -827,7 +842,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             .divu(tier.mul(100), 100)
             .mul(_tierWagerUSD);
 
-        return game.usdToSkill(_baseWagerUSD.add(tierExtra));
+        return usdToSkill(_baseWagerUSD.add(tierExtra));
     }
 
     /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
@@ -1178,5 +1193,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
         uint8 tier = getArenaTier(characterID);
         return _matchableCharactersByTier[tier].length();   
+    }
+
+    function usdToSkill(int128 usdAmount) public view returns (uint256) {
+        require(skillPerUsd > 0);
+        return usdAmount.mulu(skillPerUsd);
     }
 }
