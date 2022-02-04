@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "./interfaces/IPriceListener.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./characters.sol";
 import "./weapons.sol";
@@ -22,7 +23,8 @@ import "./BurningManager.sol";
 contract NFTMarket is
     IERC721ReceiverUpgradeable,
     Initializable,
-    AccessControlUpgradeable
+    AccessControlUpgradeable,
+    IPriceListener
 {
     using SafeMath for uint256;
     using ABDKMath64x64 for int128; // kroge beware
@@ -72,6 +74,9 @@ contract NFTMarket is
         burningManager = _burningManager;
     }
 
+    // TODO: Add migration
+    //      priceOracleSkillPerUsd.registerListener(address(self));
+
     // basic listing; we can easily offer other types (auction / buy it now)
     // if the struct can be extended, that's one way, otherwise different mapping per type.
     struct Listing {
@@ -118,6 +123,8 @@ contract NFTMarket is
     mapping(address => mapping(uint256 => address)) nftTargetBuyers;
 
     BurningManager public burningManager;
+
+    uint256 private skillPerUsd;
 
     // ############
     // Events
@@ -484,6 +491,14 @@ contract NFTMarket is
     // ############
     // Mutative
     // ############
+
+    // IPriceListener
+    function speakCurrentPrice(uint256 price) external override {
+        require(price > 0);
+        require(msg.sender == address(priceOracleSkillPerUsd));
+        skillPerUsd = price;
+    }
+
     function addListing(
         IERC721 _tokenAddress,
         uint256 _id,
@@ -735,7 +750,8 @@ contract NFTMarket is
     }
 
     function usdToSkill(int128 usdAmount) public view returns (uint256) {
-        return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
+        require(skillPerUsd > 0);
+        return usdAmount.mulu(skillPerUsd);
     }
 
     function onERC721Received(
