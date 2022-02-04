@@ -50,7 +50,7 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         }
     }
 
-    function getStars(uint256[] memory ids) public restricted view returns (uint8[] memory stars) {
+    function getStars(uint256[] memory ids) public view returns (uint8[] memory stars) {
         stars = new uint8[](ids.length);
         for(uint256 i = 0; i < ids.length; i++) {
             stars[i] = tokenStars[ids[i]];

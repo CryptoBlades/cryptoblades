@@ -455,17 +455,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
                 chars[--ready] = owned[i];
     }
 
-    function setNFTVar(uint256 id, uint256 field, uint256 value) public restricted {
-        nftVars[id][field] = value;
-    }
-
     function setNFTVars(uint256 id, uint256[] memory fields, uint256[] memory values) public restricted {
         for(uint i = 0; i < fields.length; i++)
             nftVars[id][fields[i]] = values[i];
-    }
-
-    function getNFTVar(uint256 id, uint256 field) public view returns (uint256) {
-        return nftVars[id][field];
     }
 
     function getNFTVars(uint256 id, uint256[] memory fields) public view returns(uint256[] memory values) {

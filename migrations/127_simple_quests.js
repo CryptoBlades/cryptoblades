@@ -15,7 +15,7 @@ module.exports = async function (deployer, network, accounts) {
   const junk = await upgradeProxy(Junk.address, Junk, {deployer});
   const trinket = await upgradeProxy(RaidTrinket.address, RaidTrinket, {deployer});
   const shields = await upgradeProxy(Shields.address, Shields, {deployer});
-  const safeRandoms = await upgradeProxy(SafeRandoms.address, SafeRandoms, {deployer});
+  const safeRandoms = await SafeRandoms.deployed();
   await upgradeProxy(Raid1.address, Raid1, {deployer});
   const simpleQuests = await deployProxy(SimpleQuests, [characters.address, weapons.address, junk.address, trinket.address, shields.address, safeRandoms.address], {deployer});
   // TODO: What should be the initial values here?
@@ -39,6 +39,11 @@ module.exports = async function (deployer, network, accounts) {
   await simpleQuests.setVar(VAR_REPUTATION_LEVEL_4, 5000);
   await simpleQuests.setVar(VAR_REPUTATION_LEVEL_5, 10000);
   await simpleQuests.setVar(VAR_SKIP_QUEST_STAMINA_COST, 40);
+  await simpleQuests.setTierChances(0, [100, 100, 100, 100]);
+  await simpleQuests.setTierChances(1, [85, 100, 100, 100]);
+  await simpleQuests.setTierChances(2, [77, 97, 100, 100]);
+  await simpleQuests.setTierChances(3, [69, 94, 100, 100]);
+  await simpleQuests.setTierChances(4, [66, 93, 99, 100]);
 
   await characters.grantRole(await characters.GAME_ADMIN(), simpleQuests.address);
   await weapons.grantRole(await weapons.GAME_ADMIN(), simpleQuests.address);
