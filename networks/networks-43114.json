@@ -4047,7 +4047,7 @@
     "events": {},
     "links": {},
     "address": "0x5B1cCb62D2F9c8523abBa89A56432005cef03b99",
-    "transactionHash": "0xccf04036ec6530628ea3dd61a3cea16b94e2ed3a3c26631630294543c9bdad3f"
+    "transactionHash": "0xa8886a399ce6d674ef2dc5a5b143e5362167e7f75768352efdc9de98f241ae14"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
