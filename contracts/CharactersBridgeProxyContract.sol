@@ -56,8 +56,8 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
     }
 
     function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars, bool[] calldata boolVars, address[] calldata addressVars,  string[] calldata stringVars) returns (uint256) {
-        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower) = 
-            (uintVars[UINT_NFT_VAR_COSMETIC], uintVars[UINT_NFT_VAR_XP], uintVars[UINT_NFT_VAR_LEVEL], uintVars[UINT_NFT_VAR_TRAIT], uintVars[UINT_NFT_VAR_BONUSPOWER])
+        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint256 seed) = 
+            (uintVars[UINT_NFT_VAR_COSMETIC], uintVars[UINT_NFT_VAR_XP], uintVars[UINT_NFT_VAR_LEVEL], uintVars[UINT_NFT_VAR_TRAIT], uintVars[UINT_NFT_VAR_BONUSPOWER], uintVars[UINT_NFT_VAR_SEED3DCOSMETIC]);
         
         tokenId = characters.customMint(address(this), xp, level, trait, seed, tokenId, bonusPower);
 
