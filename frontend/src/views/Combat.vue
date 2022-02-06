@@ -32,15 +32,6 @@
 
       <div class="row" v-if="!selectedWeaponId">
         <div class="col-12 text-center">
-          <h2>{{ $t('combat.nextHourlyUpdate') }}
-            <i id="next-hourly-update-hint" class="far fa-question-circle hint"/>
-          </h2>
-          <b-tooltip target="next-hourly-update-hint">
-            {{ $t('combat.hourlyUpdateHint') }} <a href="https://discord.gg/cryptoblades" target="_blank">https://discord.gg/cryptoblades</a>
-          </b-tooltip>
-          <h4>{{ timeToNextAllowanceText }}</h4>
-        </div>
-        <div class="col-12 text-center">
           <h2>{{ $t('combat.expectedEarnings') }}</h2>
           <h5>
             <CurrencyConverter :skill="expectedSkill" :showValueInUsdOnly="false"/>
@@ -201,7 +192,6 @@ export default {
       secondsToNextAllowance: null,
       lastAllowanceSkill: null,
       nextAllowanceCounter: null,
-      timeToNextAllowanceText: '',
       powerAvg: null,
       expectedSkill: null,
     };
@@ -212,7 +202,6 @@ export default {
     this.intervalMinutes = setInterval(() => (this.timeMinutes = new Date().getMinutes()), 20000);
     this.updateStaminaPerFight();
     this.counterInterval = setInterval(async () => {
-      await this.getNextAllowanceTime();
       await this.getExpectedPayout();
     }, 1000);
 
@@ -275,7 +264,7 @@ export default {
 
   methods: {
     ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
-      'fetchAllowanceTimestamp', 'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight']),
+      'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -341,19 +330,6 @@ export default {
       this.powerAvg = await this.fetchHourlyPowerAverage();
       this.expectedSkill = fromWeiEther(await this.fetchHourlyPayPerFight());
     },
-    async getNextAllowanceTime(){
-      const allowanceTimestamp = await this.fetchAllowanceTimestamp();
-      const currentTime = Math.round(Date.now() / 1000);
-      const diff =  (currentTime - allowanceTimestamp);
-      this.minutesToNextAllowance = Math.floor(60 - (diff)/60);
-      this.secondsToNextAllowance = Math.round(60 - (diff)%60);
-      if(diff/60 >= 60){
-        this.timeToNextAllowanceText = 'Allowance update any moment now ...';
-      }
-      else{
-        this.timeToNextAllowanceText = this.minutesToNextAllowance + ' minutes and ' + this.secondsToNextAllowance + ' seconds';
-      }
-    },
     async getHourlyAllowance(){
       const fetchHourlyAllowance = await this.fetchHourlyAllowance();
       this.lastAllowanceSkill = this.formattedSkill(fetchHourlyAllowance);
@@ -363,7 +339,6 @@ export default {
         this.targetToFight = targetToFight;
         this.targetToFightIndex = targetIndex;
         await this.getHourlyAllowance();
-        await this.getNextAllowanceTime();
         this.$refs['no-skill-warning-modal'].show();
       }
       else{
@@ -770,7 +745,7 @@ h1 {
   display: block;
   text-align: center;
 }
-#hourlyUpdateHint, #expectedSkillHint{
+##expectedSkillHint{
   margin:0;
   font-size: 1em;
 }

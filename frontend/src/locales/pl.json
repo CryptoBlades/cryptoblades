@@ -250,11 +250,9 @@
     },
     "moreStamina": "Do walki potrzebujesz więcej wytrzymałości!",
     "pleaseSelect": "Wybierz koszt wytrzymałości na walkę",
-    "hourlyUpdateHint": "Co godzinę uwalniamy pewną kwotę z puli nagród, a jeśli zostanie ona wyczerpana, do następnej godziny zarobki wyniosą zero. Masz pytania? Dołącz do naszego Discorda, aby uzyskać więcej informacji!",
     "forStaminaFight": "za walkę o {stamina}",
     "averagePower": "Średnia moc",
-    "expectedEarnings": "Spodziewane zarobki",
-    "nextHourlyUpdate": "Następna godzinowa aktualizacja"
+    "expectedEarnings": "Spodziewane zarobki"
   },
   "raid": {
     "title": "Hellborn raid",
