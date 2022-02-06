@@ -429,7 +429,7 @@ export default Vue.extend({
     },
     canRecruit() {
       const cost = toBN(this.recruitCost);
-      const balance = toBN(this.skillBalance);
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     canBurn() {
