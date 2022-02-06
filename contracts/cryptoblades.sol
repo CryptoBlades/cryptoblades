@@ -526,9 +526,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _mintWeaponNLogic(uint32 num, uint8 chosenElement) internal {
         require(num > 0 && num <= 10);
-        for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))), chosenElement);
-        }
+        weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))), chosenElement);
     }
 
     function _mintWeaponLogic(uint8 chosenElement) internal {
