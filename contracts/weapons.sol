@@ -128,6 +128,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
+    uint256 public constant NFTVAR_WEAPON_TYPE = 2; // x = 0: normal, x > 0: special for partner id x
 
     event Burned(address indexed owner, uint256 indexed burned);
     event NewWeapon(uint256 indexed weapon, address indexed minter);
@@ -246,31 +247,33 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return mintWeaponWithStars(minter, stars, seed, chosenElement);
     }
 
-    function mintSpecial(address minter, uint256 seed, uint256 orderOption) public minterOnly returns(uint256) {
+    function mintSpecial(address minter, uint256 eventId, uint256 seed, uint256 orderOption, uint8 element) public minterOnly returns(uint256) {
         uint256 stars;
         uint256 roll = seed % 100;
-        if(orderOption == 1) {
-
-        } else if(orderOption == 2) {
-            if(roll < 1) {
-                stars = 5; // 6* at 1%
-            }
-            else if(roll < 21) { // 5* at 21%
+        if(orderOption == 3) {
+            stars = 4;
+        }
+        else if(orderOption == 2) {
+            if(roll < 16) {
                 stars = 4;
             }
-            else if(roll < 56) { // 4* at 56%
+            else {
+                stars = 3;
+            }
+        }
+        else {
+            if(roll < 5) {
+                stars = 4;
+            }
+            else if (roll < 28) {
                 stars = 3;
             }
             else {
-                stars = 2; // 3* at 44%
+                stars = 2;
             }
-        } else if(orderOption == 3) {
-        
-        } else {
-
         }
 
-        return mintWeaponWithStars(minter, stars, seed, 100);
+        return mintSpecialWeaponWithStars(minter, eventId, stars, seed, element);
     }
 
     function mintGiveawayWeapon(address to, uint256 stars, uint8 chosenElement) external minterOnly returns(uint256) {
@@ -284,20 +287,22 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed, false);
 
         return performMintWeapon(minter,
+            0,
             getRandomProperties(stars, seed, chosenElement),
-            stat1,
+            stat1,--
             stat2,
             stat3,
             RandomUtil.combineSeeds(seed,3)
         );
     }
 
-    function mintSpecialWeaponWithStars(address minter, uint256 stars, uint256 seed) public minterOnly returns(uint256) {
+    function mintSpecialWeaponWithStars(address minter, uint256 eventId, uint256 stars, uint256 seed, uint8 element) public minterOnly returns(uint256) {
         require(stars < 8);
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed, true);
 
         return performMintWeapon(minter,
-            getRandomProperties(stars, seed, 100),
+            eventId,
+            getRandomProperties(stars, seed, element),
             stat1,
             stat2,
             stat3,
@@ -306,6 +311,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function performMintWeapon(address minter,
+        uint256 weaponType,
         uint16 properties,
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
@@ -321,6 +327,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         cosmetics.push(WeaponCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);
         durabilityTimestamp[tokenID] = uint64(now.sub(getDurabilityMaxWait()));
+        nftVars[tokenID][NFTVAR_WEAPON_TYPE] = weaponType;
 
         emit NewWeapon(tokenID, minter);
         return tokenID;
@@ -343,7 +350,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(lowStarBurnPoints <= 100 && fourStarBurnPoints <= 25 &&  fiveStarBurnPoints <= 10);
 
         if(tokenID == 0){
-            tokenID = performMintWeapon(minter, properties, stat1, stat2, stat3, 0);
+            tokenID = performMintWeapon(minter, 0, properties, stat1, stat2, stat3, 0);
         }
         else {
             Weapon storage wp = tokens[tokenID];
