@@ -56,7 +56,6 @@ import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances} from '@/views/Quests.vue';
-import {QuestTemplate} from '@/components/smart/QuestsAdmin.vue';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -3318,21 +3317,22 @@ export function createStore(web3: Web3) {
 
         const questTemplates: Quest[] = [];
 
-        const questTemplatesCount = +await SimpleQuests.methods.getQuestTemplatesCount(tier).call(defaultCallOptions(state));
+        const questTemplatesIds = await SimpleQuests.methods.getQuestTemplates(tier).call(defaultCallOptions(state));
 
-        if(questTemplatesCount === 0) return questTemplates;
+        if(questTemplatesIds.length === 0) return questTemplates;
 
-        for (let i = 0; i < questTemplatesCount; i++) {
-          const questTemplateRaw = await SimpleQuests.methods.questTemplates(tier, i).call(defaultCallOptions(state)) as unknown as QuestTemplate;
+        for (const questID of questTemplatesIds) {
+          const questTemplateRaw = await SimpleQuests.methods.getQuestData(+questID).call(defaultCallOptions(state));
           questTemplates.push({
-            tier: +questTemplateRaw.tier,
-            requirementType: +questTemplateRaw.requirementType,
-            requirementRarity: +questTemplateRaw.requirementRarity,
-            requirementAmount: +questTemplateRaw.requirementAmount,
-            rewardType: +questTemplateRaw.rewardType,
-            rewardRarity: +questTemplateRaw.rewardRarity,
-            rewardAmount: +questTemplateRaw.rewardAmount,
-            reputationAmount: +questTemplateRaw.reputationAmount
+            id: +questTemplateRaw[0],
+            tier: +questTemplateRaw[1],
+            requirementType: +questTemplateRaw[2],
+            requirementRarity: +questTemplateRaw[3],
+            requirementAmount: +questTemplateRaw[4],
+            rewardType: +questTemplateRaw[5],
+            rewardRarity: +questTemplateRaw[6],
+            rewardAmount: +questTemplateRaw[7],
+            reputationAmount: +questTemplateRaw[8]
           } as Quest);
         }
 

@@ -225,18 +225,6 @@ import {
 import QuestTemplatesDisplay from '@/components/smart/QuestTemplatesDisplay.vue';
 import QuestDetails from '@/components/smart/QuestDetails.vue';
 
-export interface QuestTemplate {
-  id: number;
-  tier: number;
-  requirementType: number;
-  requirementRarity: number;
-  requirementAmount: number;
-  rewardType: number;
-  rewardRarity: number;
-  rewardAmount: number;
-  reputationAmount: number;
-}
-
 interface StoreMappedActions {
   addQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
 

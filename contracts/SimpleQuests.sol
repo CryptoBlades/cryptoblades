@@ -69,7 +69,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE}
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
-    mapping(uint256 => Quest[]) public questTemplates;
+    mapping(uint256 => uint256[]) public questTemplates;
     mapping(uint256 => Quest) public quests;
     mapping(uint256 => uint256) public characterQuest;
     mapping(uint256 => uint256[4]) public tierChances;
@@ -160,41 +160,38 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256[4] memory chances = tierChances[reputationTier];
         uint256 tierRoll = RandomUtil.randomSeededMinMax(1, 100, seed);
         seed = RandomUtil.combineSeeds(seed, 1);
-        Quest memory quest;
+        uint256 questID;
         if (tierRoll > chances[3]) {
-            quest = generateNewQuest(vars[VAR_LEGENDARY_TIER], seed);
+            questID = generateNewQuest(vars[VAR_LEGENDARY_TIER], seed);
         }
         else if (tierRoll > chances[2]) {
-            quest = generateNewQuest(vars[VAR_EPIC_TIER], seed);
+            questID = generateNewQuest(vars[VAR_EPIC_TIER], seed);
         }
         else if (tierRoll > chances[1]) {
-            quest = generateNewQuest(vars[VAR_RARE_TIER], seed);
+            questID = generateNewQuest(vars[VAR_RARE_TIER], seed);
         }
         else if (tierRoll > chances[0]) {
-            quest = generateNewQuest(vars[VAR_UNCOMMON_TIER], seed);
+            questID = generateNewQuest(vars[VAR_UNCOMMON_TIER], seed);
         }
         else {
-            quest = generateNewQuest(vars[VAR_COMMON_TIER], seed);
+            questID = generateNewQuest(vars[VAR_COMMON_TIER], seed);
         }
-        characterQuest[characterID] = quest.id;
+        characterQuest[characterID] = questID;
         uint256[] memory fields = new uint256[](2);
         fields[0] = NFTVAR_SIMPLEQUEST_PROGRESS;
         fields[1] = NFTVAR_SIMPLEQUEST_TYPE;
         uint256[] memory values = new uint256[](2);
         values[0] = 0;
-        values[1] = uint256(quest.requirementType);
+        values[1] = uint256(quests[questID].requirementType);
         characters.setNFTVars(characterID, fields, values);
-        emit QuestAssigned(quest.id, characterID);
-        return quest.id;
+        emit QuestAssigned(questID, characterID);
+        return questID;
     }
 
-    function generateNewQuest(uint256 tier, uint256 seed) private returns (Quest memory) {
-        Quest[] memory tierQuestTemplates = questTemplates[tier];
+    function generateNewQuest(uint256 tier, uint256 seed) private view returns (uint256) {
+        uint256[] memory tierQuestTemplates = questTemplates[tier];
         uint256 index = RandomUtil.randomSeededMinMax(0, tierQuestTemplates.length - 1, seed);
-        Quest memory quest = tierQuestTemplates[index];
-        quest.id = nextQuestID++;
-        quests[quest.id] = quest;
-        return quest;
+        return tierQuestTemplates[index];
     }
 
     function skipQuest(uint256 characterID) public assertQuestsEnabled returns (uint256) {
@@ -262,7 +259,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             }
             weapons.burnWithoutDust(tokenIds);
             incrementQuestProgress(characterID, questID, tokenIds.length);
-            emit QuestProgressed(questID, characterID);
         } else if (quest.requirementType == RequirementType.JUNK) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -271,7 +267,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             }
             junk.burn(tokenIds);
             incrementQuestProgress(characterID, questID, tokenIds.length);
-            emit QuestProgressed(questID, characterID);
         } else if (quest.requirementType == RequirementType.TRINKET) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -280,7 +275,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             }
             trinket.burn(tokenIds);
             incrementQuestProgress(characterID, questID, tokenIds.length);
-            emit QuestProgressed(questID, characterID);
         } else if (quest.requirementType == RequirementType.SHIELD) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -289,7 +283,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             }
             shields.burn(tokenIds);
             incrementQuestProgress(characterID, questID, tokenIds.length);
-            emit QuestProgressed(questID, characterID);
         } else {
             revert("Unknown requirement type");
         }
@@ -297,7 +290,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function submitDustProgress(uint256 characterID, uint32 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {
         uint256 questID = characterQuest[characterID];
-        uint256[] memory questData = getCharacterQuestData(characterID);
         Quest memory quest = quests[questID];
         require(quest.requirementType == RequirementType.DUST, "Wrong type");
         uint32[] memory decrementDustSupplies = new uint32[](3);
@@ -309,6 +301,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function incrementQuestProgress(uint256 characterID, uint256 questID, uint256 progress) private {
         uint currentProgress = characters.getNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS);
         characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS, currentProgress + progress);
+        emit QuestProgressed(questID, characterID);
     }
 
     // VIEWS
@@ -333,8 +326,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return tierChances[reputationLevel];
     }
 
-    function getQuestTemplatesCount(uint8 tier) public view returns (uint256) {
-        return questTemplates[tier].length;
+    function getQuestTemplates(uint8 tier) public view returns (uint256[] memory) {
+        return questTemplates[tier];
     }
 
     function getQuestData(uint256 questID) public view returns (uint256, Rarity, RequirementType, Rarity, uint256, RewardType, Rarity, uint256, uint256) {
@@ -389,16 +382,22 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function addNewQuestTemplate(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
         RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) public restricted {
-        questTemplates[uint8(tier)].push(Quest(0, tier,
-            requirementType, requirementRarity, requirementAmount,
-            rewardType, rewardRarity, rewardAmount, reputationAmount));
+        uint256 questID = addNewQuest(tier, requirementType, requirementRarity, requirementAmount, rewardType, rewardRarity, rewardAmount, reputationAmount);
+        questTemplates[uint8(tier)].push(questID);
     }
 
     function addNewPromoQuestTemplate(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
         RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) public restricted {
-        questTemplates[uint8(tier) + 10].push(Quest(0, tier,
+        uint256 questID = addNewQuest(tier, requirementType, requirementRarity, requirementAmount, rewardType, rewardRarity, rewardAmount, reputationAmount);
+        questTemplates[uint8(tier) + 10].push(questID);
+    }
+
+    function addNewQuest(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
+        RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) internal returns (uint256 questID) {
+        questID = nextQuestID++;
+        quests[questID] = Quest(questID, tier,
             requirementType, requirementRarity, requirementAmount,
-            rewardType, rewardRarity, rewardAmount, reputationAmount));
+            rewardType, rewardRarity, rewardAmount, reputationAmount);
     }
 
     function deleteQuestTemplate(uint8 tier, uint32 index) public restricted {
