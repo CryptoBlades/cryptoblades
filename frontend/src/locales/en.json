@@ -67,6 +67,7 @@
     "lesserDust": "Lesser Dust",
     "greaterDust": "Greater Dust",
     "powerfulDust": "Powerful Dust",
+    "soul": "Soul",
     "land": "Tier {tier} Land",
     "supplyLeft": "Supply left:",
     "id": "ID",
@@ -604,6 +605,7 @@
       "TRINKET": "Trinket",
       "SHIELD": "Shield",
       "STAMINA": "Stamina",
+      "SOUL": "Soul",
       "RAID": "Raid"
     },
     "rewardType": {
@@ -613,7 +615,8 @@
       "TRINKET": "Trinket",
       "SHIELD": "Shield",
       "DUST": "Dust",
-      "EXPERIENCE": "Experience"
+      "EXPERIENCE": "Experience",
+      "SOUL": "Soul"
     },
     "level": "Level {level}",
     "questsTitle": "Quests",

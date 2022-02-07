@@ -113,11 +113,11 @@ export interface Quest {
 }
 
 export enum RequirementType {
-  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, RAID
+  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, SOUL, RAID
 }
 
 export enum RewardType {
-  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE
+  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE, SOUL
 }
 
 export enum Rarity {

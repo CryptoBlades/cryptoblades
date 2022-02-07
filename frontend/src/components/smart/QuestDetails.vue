@@ -10,7 +10,8 @@
           <span class="text-center">{{
               quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.turnIn')
             }} {{ quest.requirementAmount }}x <span
-              v-if="quest.requirementType !== RequirementType.RAID && quest.requirementType !== RequirementType.STAMINA">{{
+              v-if="quest.requirementType !== RequirementType.RAID
+              && quest.requirementType !== RequirementType.STAMINA && quest.requirementType !== RequirementType.SOUL">{{
                 Array(quest.requirementRarity + 1).fill('★').join('')
               }}</span> {{ $t(`quests.requirementType.${RequirementType[quest.requirementType]}`) }}</span>
         </div>
@@ -34,6 +35,8 @@
           <nft-icon
             v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.RARE"
             :isDefault="true" :nft="{ type: '5bdust' }"/>
+          <nft-icon
+            v-else-if="quest.requirementType === RequirementType.SOUL" :isDefault="true" :nft="{ type: 'soul' }"/>
         </div>
         <div v-if="!isQuestTemplate && !isDisplayOnly" class="quest-progress">
           <strong>{{ quest.progress }} / {{ quest.requirementAmount }}</strong>
@@ -193,7 +196,7 @@ export default Vue.extend({
         const rewardType = this.quest.rewardType;
         await this.refreshSkipQuestData();
 
-        if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST) {
+        if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST || rewardType === RewardType.SOUL) {
           this.showQuestCompleteModal = true;
           return;
         } else {

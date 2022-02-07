@@ -11,6 +11,7 @@ import "./util.sol";
 import "./items/Junk.sol";
 import "./items/RaidTrinket.sol";
 import "./SafeRandoms.sol";
+import "./BurningManager.sol";
 
 contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
@@ -36,6 +37,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     Junk public junk;
     RaidTrinket public trinket;
     Shields public shields;
+    BurningManager public burningManager;
     SafeRandoms public safeRandoms;
 
     uint8 public constant VAR_COMMON_TIER = 0;
@@ -65,8 +67,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 reputationAmount;
     }
 
-    enum RequirementType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, RAID}
-    enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE}
+    enum RequirementType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, SOUL, RAID}
+    enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE, SOUL}
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     mapping(uint256 => uint256[]) public questTemplates;
@@ -82,7 +84,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     event QuestComplete(uint256 indexed questID, uint256 indexed characterID);
     event QuestRewarded(uint256 indexed questID, uint256 indexed characterID, uint256[] rewards);
 
-    function initialize(Characters _characters, Weapons _weapons, Junk _junk, RaidTrinket _trinket, Shields _shields, SafeRandoms _safeRandoms) public initializer {
+    function initialize(Characters _characters, Weapons _weapons, Junk _junk, RaidTrinket _trinket, Shields _shields, BurningManager _burningManager, SafeRandoms _safeRandoms) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
@@ -92,6 +94,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         junk = _junk;
         trinket = _trinket;
         shields = _shields;
+        burningManager = _burningManager;
         safeRandoms = _safeRandoms;
         nextQuestID = 1;
     }
@@ -238,6 +241,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             weapons.incrementDustSupplies(msg.sender, incrementDustSupplies[0], incrementDustSupplies[1], incrementDustSupplies[2]);
         } else if (quest.rewardType == RewardType.EXPERIENCE) {
             characters.gainXp(characterID, uint16(quest.rewardAmount));
+        } else if (quest.rewardType == RewardType.SOUL) {
+            burningManager.giveawaySoul(msg.sender, quest.rewardAmount);
         }
         else {
             revert("Unknown reward type");
@@ -291,7 +296,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function submitProgressAmount(uint256 characterID, uint8 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {
         uint256 questID = characterQuest[characterID];
         Quest memory quest = quests[questID];
-        require(quest.requirementType == RequirementType.STAMINA, "Wrong type");
         if (quest.requirementType == RequirementType.STAMINA) {
             characters.getFightDataAndDrainStamina(msg.sender, characterID, amount, false, 0);
             incrementQuestProgress(characterID, questID, amount);
@@ -299,6 +303,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             uint32[] memory decrementDustSupplies = new uint32[](3);
             decrementDustSupplies[uint256(quest.requirementRarity)] = amount;
             weapons.decrementDustSupplies(msg.sender, decrementDustSupplies[0], decrementDustSupplies[1], decrementDustSupplies[2]);
+            incrementQuestProgress(characterID, questID, amount);
+        } else if (quest.requirementType == RequirementType.SOUL) {
+            burningManager.burnSoul(msg.sender, amount);
             incrementQuestProgress(characterID, questID, amount);
         } else {
             revert("Unknown requirement type");

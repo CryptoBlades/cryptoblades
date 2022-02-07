@@ -6,6 +6,7 @@ const Weapons = artifacts.require("Weapons");
 const Junk = artifacts.require("Junk");
 const RaidTrinket = artifacts.require("RaidTrinket");
 const Shields = artifacts.require("Shields");
+const BurningManager = artifacts.require("BurningManager");
 const SafeRandoms = artifacts.require("SafeRandoms");
 const Raid1 = artifacts.require("Raid1");
 
@@ -15,9 +16,10 @@ module.exports = async function (deployer, network, accounts) {
   const junk = await upgradeProxy(Junk.address, Junk, {deployer});
   const trinket = await upgradeProxy(RaidTrinket.address, RaidTrinket, {deployer});
   const shields = await upgradeProxy(Shields.address, Shields, {deployer});
+  const burningManager = await upgradeProxy(BurningManager.address, BurningManager, {deployer});
   const safeRandoms = await SafeRandoms.deployed();
   await upgradeProxy(Raid1.address, Raid1, {deployer});
-  const simpleQuests = await deployProxy(SimpleQuests, [characters.address, weapons.address, junk.address, trinket.address, shields.address, safeRandoms.address], {deployer});
+  const simpleQuests = await deployProxy(SimpleQuests, [characters.address, weapons.address, junk.address, trinket.address, shields.address, burningManager.address, safeRandoms.address], {deployer});
   // TODO: What should be the initial values here?
   // const VAR_COMMON_TIER = 0;
   // await simpleQuests.setVar(VAR_COMMON_TIER, 0); Leaving this as a comment, because it's 0 by default
@@ -50,5 +52,6 @@ module.exports = async function (deployer, network, accounts) {
   await junk.grantRole(await junk.GAME_ADMIN(), simpleQuests.address);
   await trinket.grantRole(await trinket.GAME_ADMIN(), simpleQuests.address);
   await shields.grantRole(await shields.GAME_ADMIN(), simpleQuests.address);
+  await burningManager.grantRole(await burningManager.GAME_ADMIN(), simpleQuests.address);
   await safeRandoms.grantRole(await safeRandoms.GAME_ADMIN(), simpleQuests.address);
 };

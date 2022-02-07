@@ -3598,6 +3598,7 @@ export function createStore(web3: Web3) {
         await Promise.all([
           dispatch('updateDustBalance'),
           dispatch('fetchCharacterStamina', characterID),
+          dispatch('fetchSoulBalance', characterID),
         ]);
       },
 
