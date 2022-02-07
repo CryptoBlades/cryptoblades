@@ -803,7 +803,8 @@
     "attackerPower": "Your Power:",
     "opponentPower": "Opponent Power:",
     "mmr": "Mmr",
-    "tier": "Tier"
+    "tier": "Tier",
+    "currentlyInDuel": "This character is currently in a duel!"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
