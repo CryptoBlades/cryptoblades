@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
 import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, gasUsedToBnb, toBN} from './utils/common';
+import BigNumber from 'bignumber.js';
 
 import {getConfigValue, setUpContracts} from './contracts';
 
@@ -3256,7 +3257,7 @@ export function createStore(web3: Web3) {
           state.defaultAccount,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          web3.utils.toWei('100', 'ether')
+          new BigNumber(web3.utils.toWei('100', 'ether'))
         );
 
         await Blacksmith.methods.purchaseShield().send({
@@ -3293,7 +3294,7 @@ export function createStore(web3: Web3) {
           state.defaultAccount,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          skillNeeded
+          new BigNumber(skillNeeded)
         );
 
         await Merchandise.methods
@@ -3403,7 +3404,7 @@ export function createStore(web3: Web3) {
             state.defaultAccount,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            Web3.utils.toWei('' + price)
+            new BigNumber(Web3.utils.toWei('' + price))
           );
         } catch(err) {
           console.error(err);
@@ -3431,7 +3432,7 @@ export function createStore(web3: Web3) {
             state.defaultAccount,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            Web3.utils.toWei('' + price)
+            new BigNumber(Web3.utils.toWei('' + price))
           );
         } catch(err) {
           console.error(err);
@@ -3479,7 +3480,7 @@ export function createStore(web3: Web3) {
             state.defaultAccount,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            Web3.utils.toWei('' + price)
+            new BigNumber(Web3.utils.toWei('' + price))
           );
         } catch(err) {
           console.error(err);
@@ -3507,7 +3508,7 @@ export function createStore(web3: Web3) {
             state.defaultAccount,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            Web3.utils.toWei('' + price)
+            new BigNumber(Web3.utils.toWei('' + price))
           );
         } catch(err) {
           console.error(err);
@@ -3556,7 +3557,7 @@ export function createStore(web3: Web3) {
             state.defaultAccount,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            Web3.utils.toWei('' + price)
+            new BigNumber(Web3.utils.toWei('' + price))
           );
         } catch(err) {
           console.error(err);
@@ -3605,7 +3606,7 @@ export function createStore(web3: Web3) {
             state.defaultAccount,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            Web3.utils.toWei('' + price)
+            new BigNumber(Web3.utils.toWei('' + price))
           );
         } catch(err) {
           console.error(err);
@@ -3654,7 +3655,7 @@ export function createStore(web3: Web3) {
             state.defaultAccount,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            Web3.utils.toWei('' + price)
+            new BigNumber(Web3.utils.toWei('' + price))
           );
         } catch(err) {
           console.error(err);
@@ -3703,7 +3704,7 @@ export function createStore(web3: Web3) {
             state.defaultAccount,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            Web3.utils.toWei('' + price)
+            new BigNumber(Web3.utils.toWei('' + price))
           );
         } catch(err) {
           console.error(err);
@@ -3751,7 +3752,7 @@ export function createStore(web3: Web3) {
             state.defaultAccount,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            web3.utils.toWei('' + price, 'ether')
+            new BigNumber(web3.utils.toWei('' + price, 'ether'))
           );
         } catch(err) {
           console.error(err);
@@ -3813,7 +3814,7 @@ export function createStore(web3: Web3) {
             state.defaultAccount,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            web3.utils.toWei('' + price, 'ether')
+            new BigNumber(web3.utils.toWei('' + price, 'ether'))
           );
         } catch(err) {
           console.error(err);
@@ -4099,7 +4100,7 @@ export function createStore(web3: Web3) {
           state.defaultAccount,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          bridgeFee
+          new BigNumber(bridgeFee)
         );
         await NFTStorage.methods
           .bridgeItem(nftContractAddr, tokenId, targetChain)
@@ -4584,7 +4585,7 @@ export function createStore(web3: Web3) {
           state.defaultAccount,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          `${amount}`
+          new BigNumber(`${amount}`)
         );
       },
 
@@ -4599,7 +4600,7 @@ export function createStore(web3: Web3) {
           state.defaultAccount,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          burnCost
+          new BigNumber(burnCost)
         );
 
         await BurningManager.methods.burnCharactersIntoCharacter(burnIds, targetId).send({ from: state.defaultAccount });
@@ -4620,7 +4621,7 @@ export function createStore(web3: Web3) {
           state.defaultAccount,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          burnCost
+          new BigNumber(burnCost)
         );
 
         await BurningManager.methods.burnCharactersIntoSoul(burnIds).send({ from: state.defaultAccount });
