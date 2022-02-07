@@ -3590,20 +3590,15 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async submitDustProgress({state, dispatch}, {characterID, amount}) {
+      async submitProgressAmount({state, dispatch}, {characterID, amount}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        await SimpleQuests.methods.submitDustProgress(characterID, amount).send(defaultCallOptions(state));
-        await dispatch('updateDustBalance');
-      },
-
-      async submitStaminaProgress({state, dispatch}, {characterID, amount}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        await SimpleQuests.methods.submitStaminaProgress(characterID, amount).send(defaultCallOptions(state));
-        await dispatch('fetchCharacterStamina', characterID);
+        await SimpleQuests.methods.submitProgressAmount(characterID, amount).send(defaultCallOptions(state));
+        await Promise.all([
+          dispatch('updateDustBalance'),
+          dispatch('fetchCharacterStamina', characterID),
+        ]);
       },
 
       async grantGameAdminRole({state}, {walletAddress, contract}) {

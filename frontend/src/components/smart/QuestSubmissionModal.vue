@@ -42,9 +42,7 @@ import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 interface StoreMappedActions {
   submitProgress(payload: { characterID: string | number, tokenIds: (string | number)[] }): Promise<void>;
 
-  submitDustProgress(payload: { characterID: string | number, amount: number }): Promise<void>;
-
-  submitStaminaProgress(payload: { characterID: string | number, amount: number }): Promise<void>;
+  submitProgressAmount(payload: { characterID: string | number, amount: number }): Promise<void>;
 }
 
 interface Data {
@@ -90,7 +88,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['submitProgress', 'submitDustProgress', 'submitStaminaProgress']) as StoreMappedActions,
+    ...mapActions(['submitProgress', 'submitProgressAmount']) as StoreMappedActions,
 
     upperFirstChar(text: string) {
       return text[0].toUpperCase() + text.slice(1).toLowerCase();
@@ -159,11 +157,7 @@ export default Vue.extend({
       if (!this.quest) return;
       try {
         this.isLoading = true;
-        if (this.quest.requirementType === RequirementType.DUST) {
-          await this.submitDustProgress({characterID: this.characterId, amount: this.amountToBurn});
-        } else if (this.quest.requirementType === RequirementType.STAMINA) {
-          await this.submitStaminaProgress({characterID: this.characterId, amount: this.amountToBurn});
-        }
+        await this.submitProgressAmount({characterID: this.characterId, amount: this.amountToBurn});
       } finally {
         this.resetTokens();
         Events.$emit('refresh-quest-data');

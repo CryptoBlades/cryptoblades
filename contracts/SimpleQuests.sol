@@ -288,22 +288,21 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function submitStaminaProgress(uint256 characterID, uint8 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {
+    function submitProgressAmount(uint256 characterID, uint8 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {
         uint256 questID = characterQuest[characterID];
         Quest memory quest = quests[questID];
         require(quest.requirementType == RequirementType.STAMINA, "Wrong type");
-        characters.getFightDataAndDrainStamina(msg.sender, characterID, amount, false, 0);
-        incrementQuestProgress(characterID, questID, amount);
-    }
-
-    function submitDustProgress(uint256 characterID, uint32 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {
-        uint256 questID = characterQuest[characterID];
-        Quest memory quest = quests[questID];
-        require(quest.requirementType == RequirementType.DUST, "Wrong type");
-        uint32[] memory decrementDustSupplies = new uint32[](3);
-        decrementDustSupplies[uint256(quest.requirementRarity)] = amount;
-        weapons.decrementDustSupplies(msg.sender, decrementDustSupplies[0], decrementDustSupplies[1], decrementDustSupplies[2]);
-        incrementQuestProgress(characterID, questID, amount);
+        if (quest.requirementType == RequirementType.STAMINA) {
+            characters.getFightDataAndDrainStamina(msg.sender, characterID, amount, false, 0);
+            incrementQuestProgress(characterID, questID, amount);
+        } else if (quest.requirementType == RequirementType.DUST) {
+            uint32[] memory decrementDustSupplies = new uint32[](3);
+            decrementDustSupplies[uint256(quest.requirementRarity)] = amount;
+            weapons.decrementDustSupplies(msg.sender, decrementDustSupplies[0], decrementDustSupplies[1], decrementDustSupplies[2]);
+            incrementQuestProgress(characterID, questID, amount);
+        } else {
+            revert("Unknown requirement type");
+        }
     }
 
     function incrementQuestProgress(uint256 characterID, uint256 questID, uint256 progress) private {
