@@ -76,7 +76,6 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
   fnReturnsSkill: boolean = false,
 ) {
   const callOptsWithFrom: Web3JsCallOptions = { from, ...callOpts };
-  const approveOptsWithFrom: Web3JsSendOptions = { from, ...approveOpts };
 
   if(allowInGameOnlyFunds === undefined) {
     allowInGameOnlyFunds = true;
