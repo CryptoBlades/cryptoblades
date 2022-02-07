@@ -603,6 +603,7 @@
       "DUST": "Dust",
       "TRINKET": "Trinket",
       "SHIELD": "Shield",
+      "STAMINA": "Stamina",
       "RAID": "Raid"
     },
     "rewardType": {

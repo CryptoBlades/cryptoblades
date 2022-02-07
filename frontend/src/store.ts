@@ -3598,6 +3598,14 @@ export function createStore(web3: Web3) {
         await dispatch('updateDustBalance');
       },
 
+      async submitStaminaProgress({state, dispatch}, {characterID, amount}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        await SimpleQuests.methods.submitStaminaProgress(characterID, amount).send(defaultCallOptions(state));
+        await dispatch('fetchCharacterStamina', characterID);
+      },
+
       async grantGameAdminRole({state}, {walletAddress, contract}) {
         if (!contract || !state.defaultAccount || !Web3.utils.isAddress(walletAddress)) return;
 

@@ -65,7 +65,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 reputationAmount;
     }
 
-    enum RequirementType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, RAID}
+    enum RequirementType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, RAID}
     enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE}
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
@@ -286,6 +286,14 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         } else {
             revert("Unknown requirement type");
         }
+    }
+
+    function submitStaminaProgress(uint256 characterID, uint8 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {
+        uint256 questID = characterQuest[characterID];
+        Quest memory quest = quests[questID];
+        require(quest.requirementType == RequirementType.STAMINA, "Wrong type");
+        characters.getFightDataAndDrainStamina(msg.sender, characterID, amount, false, 0);
+        incrementQuestProgress(characterID, questID, amount);
     }
 
     function submitDustProgress(uint256 characterID, uint32 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {

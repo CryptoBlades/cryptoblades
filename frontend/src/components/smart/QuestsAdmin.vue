@@ -43,9 +43,11 @@
               {{ $t(`quests.dustRarityType.${DustRarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-select v-else-if="questTemplate.requirementType !== RequirementType.RAID" class="mt-2 mb-2"
-                         v-model="questTemplate.requirementRarity"
-                         :disabled="questTemplate.requirementType === undefined">
+          <b-form-select
+            v-else-if="questTemplate.requirementType !== RequirementType.RAID && questTemplate.requirementType !== RequirementType.STAMINA"
+            class="mt-2 mb-2"
+            v-model="questTemplate.requirementRarity"
+            :disabled="questTemplate.requirementType === undefined">
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRequirementRarity') }}
             </b-form-select-option>
@@ -54,7 +56,9 @@
             </b-form-select-option>
           </b-form-select>
           <b-form-input v-model="questTemplate.requirementAmount" :min="0"
-                        :disabled="questTemplate.requirementRarity === undefined && questTemplate.requirementType !== RequirementType.RAID"
+                        :disabled="questTemplate.requirementRarity === undefined
+                        && questTemplate.requirementType !== RequirementType.RAID
+                        && questTemplate.requirementType !== RequirementType.STAMINA"
                         type="number" number/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reward') }}</label>
@@ -280,7 +284,7 @@ export default Vue.extend({
       rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       dustRarities: [DustRarity.LESSER, DustRarity.GREATER, DustRarity.POWERFUL],
       requirementTypes: [RequirementType.WEAPON, RequirementType.JUNK,
-        RequirementType.DUST, RequirementType.TRINKET, RequirementType.SHIELD, RequirementType.RAID],
+        RequirementType.DUST, RequirementType.TRINKET, RequirementType.SHIELD, RequirementType.STAMINA, RequirementType.RAID],
       rewardTypes: [RewardType.WEAPON, RewardType.JUNK, RewardType.DUST, RewardType.TRINKET, RewardType.SHIELD, RewardType.EXPERIENCE],
       promoQuestTemplates: false,
       isLoading: false,
@@ -312,7 +316,7 @@ export default Vue.extend({
     ]) as StoreMappedActions,
 
     showConfirmationModal() {
-      if (this.questTemplate.requirementType === RequirementType.RAID) {
+      if (this.questTemplate.requirementType === RequirementType.RAID || this.questTemplate.requirementType === RequirementType.STAMINA) {
         this.questTemplate.requirementRarity = Rarity.COMMON;
       }
       if (this.questTemplate.rewardType === RewardType.EXPERIENCE) {
@@ -387,7 +391,9 @@ export default Vue.extend({
     addNewQuestDisabled() {
       return this.questTemplate.tier === undefined
         || this.questTemplate.requirementType === undefined
-        || (this.questTemplate.requirementRarity === undefined && this.questTemplate.requirementType !== RequirementType.RAID)
+        || (this.questTemplate.requirementRarity === undefined
+          && this.questTemplate.requirementType !== RequirementType.RAID
+          && this.questTemplate.requirementType !== RequirementType.STAMINA)
         || !this.questTemplate.requirementAmount
         || this.questTemplate.rewardType === undefined
         || (this.questTemplate.rewardRarity === undefined && this.questTemplate.rewardType !== RewardType.EXPERIENCE)

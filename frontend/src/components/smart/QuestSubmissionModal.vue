@@ -3,7 +3,7 @@
            :title="$t('quests.turnIn')" size="xl" @close="resetTokens" @cancel="resetTokens"
            :ok-title="$t('quests.submit')" :busy="isLoading"
            :ok-disabled="isSubmitDisabled()"
-           @ok.prevent="quest.requirementType === RequirementType.DUST ? submitDust() : submit()">
+           @ok.prevent="quest.requirementType === RequirementType.DUST || quest.requirementType === RequirementType.STAMINA ? submitAmount() : submit()">
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    showGivenWeaponIds @chooseweapon="addBurnToken"
@@ -11,11 +11,13 @@
       <weapon-grid :weaponIds="tokensToBurn" showGivenWeaponIds @chooseweapon="removeBurnToken"
                    :starsOptions="[quest.requirementRarity + 1]" :canFavorite="false"/>
     </div>
-    <div v-else-if="quest.requirementType === RequirementType.DUST" class="d-flex align-items-center flex-column">
-      <dust-balance-display class="w-50 p-5" :rarities="[quest.requirementRarity]"/>
+    <div v-else-if="quest.requirementType === RequirementType.DUST || quest.requirementType === RequirementType.STAMINA"
+         class="d-flex align-items-center flex-column">
+      <dust-balance-display v-if="quest.requirementType === RequirementType.DUST" class="w-50 p-5"
+                            :rarities="[quest.requirementRarity]"/>
       <h2>{{ $t('quests.howMuchToTurnIn') }}</h2>
-      <b-form-input type="number" number v-model="dustToBurn" class="w-50" :min="0" :max="maxDust()"/>
-      <b-button class="m-3" variant="primary" @click="setRequiredDust">{{ $t('quests.setRequiredAmount') }}</b-button>
+      <b-form-input type="number" number v-model="amountToBurn" class="w-50" :min="0" :max="maxAmount()"/>
+      <b-button class="m-3" variant="primary" @click="setRequiredAmount">{{ $t('quests.setRequiredAmount') }}</b-button>
     </div>
     <div v-else class="d-flex">
       <nft-list v-model="selectedToken" showGivenNftIdTypes :nftIdTypes="ownedNftIdTypes"
@@ -41,6 +43,8 @@ interface StoreMappedActions {
   submitProgress(payload: { characterID: string | number, tokenIds: (string | number)[] }): Promise<void>;
 
   submitDustProgress(payload: { characterID: string | number, amount: number }): Promise<void>;
+
+  submitStaminaProgress(payload: { characterID: string | number, amount: number }): Promise<void>;
 }
 
 interface Data {
@@ -52,7 +56,7 @@ interface Data {
   tokensToBurn: (string | number)[];
   ownedNftIdTypes: NftIdType[];
   nftIdTypesToBurn: NftIdType[];
-  dustToBurn: number;
+  amountToBurn: number;
   selectedToken?: number;
   isLoading: boolean;
 }
@@ -70,7 +74,7 @@ export default Vue.extend({
       tokensToBurn: [],
       ownedNftIdTypes: [],
       nftIdTypesToBurn: [],
-      dustToBurn: 0,
+      amountToBurn: 0,
       selectedToken: undefined,
       isLoading: false,
       RequirementType,
@@ -82,32 +86,40 @@ export default Vue.extend({
 
   computed: {
     ...mapState(['ownedWeaponIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedShieldIds']),
-    ...mapGetters(['getPowerfulDust', 'getGreaterDust', 'getLesserDust']),
+    ...mapGetters(['getPowerfulDust', 'getGreaterDust', 'getLesserDust', 'getCharacterStamina']),
   },
 
   methods: {
-    ...mapActions(['submitProgress', 'submitDustProgress']) as StoreMappedActions,
+    ...mapActions(['submitProgress', 'submitDustProgress', 'submitStaminaProgress']) as StoreMappedActions,
 
     upperFirstChar(text: string) {
       return text[0].toUpperCase() + text.slice(1).toLowerCase();
     },
 
-    maxDust() {
-      if (this.quest?.requirementRarity === Rarity.COMMON) {
-        return this.getLesserDust();
-      } else if (this.quest?.requirementRarity === Rarity.UNCOMMON) {
-        return this.getGreaterDust();
-      } else if (this.quest?.requirementRarity === Rarity.RARE) {
-        return this.getPowerfulDust();
-      } else return 0;
+    maxAmount() {
+      if (!this.quest) return 0;
+      if (this.quest.requirementType === RequirementType.DUST) {
+        if (this.quest.requirementRarity === Rarity.COMMON) {
+          return this.getLesserDust();
+        } else if (this.quest.requirementRarity === Rarity.UNCOMMON) {
+          return this.getGreaterDust();
+        } else if (this.quest.requirementRarity === Rarity.RARE) {
+          return this.getPowerfulDust();
+        } else return 0;
+      } else if (this.quest.requirementType === RequirementType.STAMINA) {
+        return this.getCharacterStamina(this.characterId);
+      }
+
     },
 
-    setRequiredDust() {
+    setRequiredAmount() {
       if (!this.quest) return;
-      this.dustToBurn = this.quest.requirementAmount - this.questProgress;
+      this.amountToBurn = this.quest.requirementAmount - this.questProgress;
     },
 
     addBurnToken(id: number) {
+      if (!this.quest) return;
+      if (this.questProgress + this.tokensToBurn.length >= this.quest.requirementAmount) return;
       this.tokensToBurn.push(id.toString());
       this.ownedTokens = this.ownedTokens.filter(val => !this.tokensToBurn.includes(val.toString()));
       this.selectedToken = undefined;
@@ -143,10 +155,15 @@ export default Vue.extend({
       }
     },
 
-    async submitDust() {
+    async submitAmount() {
+      if (!this.quest) return;
       try {
         this.isLoading = true;
-        await this.submitDustProgress({characterID: this.characterId, amount: this.dustToBurn});
+        if (this.quest.requirementType === RequirementType.DUST) {
+          await this.submitDustProgress({characterID: this.characterId, amount: this.amountToBurn});
+        } else if (this.quest.requirementType === RequirementType.STAMINA) {
+          await this.submitStaminaProgress({characterID: this.characterId, amount: this.amountToBurn});
+        }
       } finally {
         this.resetTokens();
         Events.$emit('refresh-quest-data');
@@ -160,15 +177,16 @@ export default Vue.extend({
       this.ownedNftIdTypes = [];
       this.tokensToBurn = [];
       this.nftIdTypesToBurn = [];
-      this.dustToBurn = 0;
+      this.amountToBurn = 0;
     },
 
     isSubmitDisabled() {
       return !this.quest
-        || (this.quest.requirementType === RequirementType.DUST && this.dustToBurn === 0)
+        || (this.quest.requirementType === RequirementType.DUST && this.amountToBurn === 0)
+        || (this.quest.requirementType === RequirementType.STAMINA && this.amountToBurn === 0)
         || (this.quest.requirementType === RequirementType.WEAPON && this.tokensToBurn.length === 0)
         || (this.quest.requirementType !== RequirementType.DUST && this.quest.requirementType !== RequirementType.WEAPON
-          && this.nftIdTypesToBurn.length === 0);
+          && this.quest.requirementType !== RequirementType.STAMINA && this.nftIdTypesToBurn.length === 0);
     }
   },
 
