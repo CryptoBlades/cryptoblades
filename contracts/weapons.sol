@@ -661,8 +661,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getBonusPower(uint256 id) public view noFreshLookup(id) returns (uint24) {
-        Weapon storage wep = tokens[id];
-        return getBonusPowerForFight(id, wep.level);
+        return getBonusPowerForFight(id, tokens[id].level);
     }
 
     function getBonusPowerForFight(uint256 id, uint8 level) public view returns (uint24) {
