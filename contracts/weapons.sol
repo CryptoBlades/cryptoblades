@@ -247,33 +247,18 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return mintWeaponWithStars(minter, stars, seed, chosenElement);
     }
 
-    function mintSpecial(address minter, uint256 eventId, uint256 seed, uint256 orderOption, uint8 element) public minterOnly returns(uint256) {
-        uint256 stars;
-        uint256 roll = seed % 100;
-        if(orderOption == 3) {
-            stars = 4;
-        }
-        else if(orderOption == 2) {
-            if(roll < 16) {
-                stars = 4;
-            }
-            else {
-                stars = 3;
-            }
-        }
-        else {
-            if(roll < 5) {
-                stars = 4;
-            }
-            else if (roll < 28) {
-                stars = 3;
-            }
-            else {
-                stars = 2;
-            }
-        }
+    function mintSpecialWeapon(address minter, uint256 eventId, uint256 stars, uint256 seed, uint8 element) external minterOnly returns(uint256) {
+        require(stars < 8);
+        (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed, true);
 
-        return mintSpecialWeaponWithStars(minter, eventId, stars, seed, element);
+        return performMintWeapon(minter,
+            eventId,
+            getRandomProperties(stars, seed, element),
+            stat1,
+            stat2,
+            stat3,
+            RandomUtil.combineSeeds(seed,3)
+        );
     }
 
     function mintGiveawayWeapon(address to, uint256 stars, uint8 chosenElement) external minterOnly returns(uint256) {
@@ -294,21 +279,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             stat3,
             RandomUtil.combineSeeds(seed,3)
         );
-    }
-
-    function mintSpecialWeaponWithStars(address minter, uint256 eventId, uint256 stars, uint256 seed, uint8 element) public minterOnly returns(uint256) {
-        require(stars < 8);
-        (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed, true);
-
-        return performMintWeapon(minter,
-            eventId,
-            getRandomProperties(stars, seed, element),
-            stat1,
-            stat2,
-            stat3,
-            RandomUtil.combineSeeds(seed,3)
-        );
-    }
+    }    
 
     function performMintWeapon(address minter,
         uint256 weaponType,

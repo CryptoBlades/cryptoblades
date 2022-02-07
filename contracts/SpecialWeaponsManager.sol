@@ -122,7 +122,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     function forgeSpecialWeapon(uint256 eventId) public {
         require(getBit(msg.sender, eventId) && userOrderOptionForEvent[msg.sender][eventId] > 0, 'Nothing to forge');
         userOrderOptionForEvent[msg.sender][eventId] = 0;
-        weapons.mintSpecial(
+        mintSpecial(
             msg.sender,
             eventId,
             safeRandoms.popSingleSeed(msg.sender, getSeed(eventId), true, false),
@@ -138,6 +138,39 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         else {
             userVars[user][USERVAR_GENERAL_SHARD_SUPPLY] += shardsAmount.div(3);
         }
+    }
+
+    function mintSpecial(address minter, uint256 eventId, uint256 seed, uint256 orderOption, uint8 element) private returns(uint256) {
+        uint256 stars;
+        uint256 roll = seed % 100;
+        if(orderOption == 3) {
+            stars = 4;
+        }
+        else if(orderOption == 2) {
+            if(roll < 16) {
+                stars = 4;
+            }
+            else {
+                stars = 3;
+            }
+        }
+        else {
+            if(roll < 5) {
+                stars = 4;
+            }
+            else if (roll < 28) {
+                stars = 3;
+            }
+            else {
+                stars = 2;
+            }
+        }
+
+        return mintSpecialWeaponWithStars(minter, eventId, stars, seed, element);
+    }
+
+    function mintSpecialWeaponWithStars(address minter, uint256 eventId, uint256 stars, uint256 seed, uint8 element) private returns(uint256) {
+        return weapons.mintSpecialWeapon(minter, eventId, stars, seed, element);
     }
 
     function convertEventToGeneralShards(uint256 eventId, uint256 amount) external {
