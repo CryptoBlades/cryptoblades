@@ -21,7 +21,7 @@
               @click="leaveArena"
               :disabled="loading"
               :buttonText="$t('pvp.leaveArena')"
-              :secondary="true"
+              secondary
             />
           </div>
         </div>
@@ -146,7 +146,7 @@ export default {
     return {
       tab: 0,
       dayjs,
-      loading: true,
+      loading: false,
       duelQueue: [],
       isCharacterInDuelQueue: false,
     };
@@ -170,7 +170,7 @@ export default {
       if (value.includes(`reverted with reason string '${errorMessage}'`)) {
         return this.$dialog.notify.error(returnedMessage);
       }
-      return 'There has been an error. Try again.';
+      return this.$dialog.notify.error(i18n.t('pvp.genericError'));
     },
 
     async handleEnterArenaClick() {
@@ -193,21 +193,26 @@ export default {
       } catch (err) {
         console.log('leave arena error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'Char not in arena', 'The character is not in the arena');
-        this.handleErrorMessage(err.message, 'Defender duel in process', 'Duel already in process');
+        this.handleErrorMessage(err.message, 'Char not in arena', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'Defender duel in process', i18n.t('pvp.duelInProcess'));
+      } finally {
+        this.loading = false;
       }
-
-      this.loading = false;
     },
   },
 
   async created() {
     this.loading = true;
 
-    this.duelQueue = await this.getDuelQueue();
+    try {
+      this.duelQueue = await this.getDuelQueue();
 
-    if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
-      this.isCharacterInDuelQueue = true;
+      if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
+        this.isCharacterInDuelQueue = true;
+      }
+    } catch (err) {
+      console.log('get duel queue error: ', err.message);
+      this.handleErrorMessage();
     }
 
     this.loading = false;

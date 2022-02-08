@@ -804,7 +804,10 @@
     "opponentPower": "Opponent Power:",
     "mmr": "Mmr",
     "tier": "Tier",
-    "currentlyInDuel": "This character is currently in a duel!"
+    "currentlyInDuel": "This character is currently in a duel!",
+    "genericError": "There has been an error. Try again.",
+    "charNotInArena": "The character is not in the arena",
+    "duelInProcess": "Duel already in process"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
