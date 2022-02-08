@@ -120,7 +120,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
 
-    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
+    uint256 public constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
+    uint256 public constant NFTVAR_SIMPLEQUEST_TYPE = 102;
+    uint256 public constant NFTVAR_REPUTATION = 103;
+
+    uint256 public constant SIMPLEQUEST_TYPE_RAID = 6;
+
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars; // nftID, fieldID, value
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
 
     Garrison public garrison;
@@ -214,7 +220,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         emit NewCharacter(tokenID, receiver);
     }
 
-    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower) minterOnly public returns (uint256) {
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower, uint16 reputation) minterOnly public returns (uint256) {
         uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
 
         if(tokenID == 0){
@@ -249,6 +255,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
 
         nftVars[tokenID][NFTVAR_BONUS_POWER] = bonusPower;
+        nftVars[tokenID][NFTVAR_REPUTATION] = reputation;
 
         return tokenID;
     }
@@ -423,6 +430,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         require(nftVars[id][NFTVAR_BUSY] == 0); // raids do not apply busy flag for now
         //nftVars[id][NFTVAR_BUSY] = 0;
         _gainXp(id, xp);
+        if (getNftVar(id, NFTVAR_SIMPLEQUEST_TYPE) == SIMPLEQUEST_TYPE_RAID) {
+            uint currentProgress = getNftVar(id, NFTVAR_SIMPLEQUEST_PROGRESS);
+            setNftVar(id, NFTVAR_SIMPLEQUEST_PROGRESS, ++currentProgress);
+        }
     }
 
     function getCharactersOwnedBy(address wallet) public view returns(uint256[] memory chars) {
@@ -442,6 +453,17 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         for(uint i = 0; i < owned.length; i++)
             if(nftVars[owned[i]][NFTVAR_BUSY] == 0)
                 chars[--ready] = owned[i];
+    }
+
+    function setNFTVars(uint256 id, uint256[] memory fields, uint256[] memory values) public restricted {
+        for(uint i = 0; i < fields.length; i++)
+            nftVars[id][fields[i]] = values[i];
+    }
+
+    function getNFTVars(uint256 id, uint256[] memory fields) public view returns(uint256[] memory values) {
+        values = new uint256[](fields.length);
+        for(uint i = 0; i < fields.length; i++)
+            values[i] = nftVars[id][fields[i]];
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {

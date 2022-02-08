@@ -208,14 +208,14 @@
         <div v-if="!isMarket && !isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>{{$t('nftList.nftType')}}</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
-            <option v-for="x in ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land']" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+            <option v-for="x in typesOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
         <div v-if="!isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>{{$t('nftList.stars')}}</strong>
           <select class="form-control" v-model="starFilter" @change="saveFilters()">
-            <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+            <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
@@ -342,7 +342,7 @@ const sorts = [
 
 interface Data {
   typeFilter: string;
-  starFilter: string;
+  starFilter: string | number;
   elementFilter: string;
   favorites: Record<string, Record<number, boolean>>;
   priceSort: string;
@@ -521,7 +521,19 @@ export default Vue.extend({
     showNftOptions: {
       type: Boolean,
       default: false
-    }
+    },
+    starsOptions: {
+      type: Array as PropType<(string | number)[]>,
+      default() {
+        return ['', 1, 2, 3, 4, 5];
+      },
+    },
+    typesOptions: {
+      type: Array as PropType<string[]>,
+      default() {
+        return ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land'];
+      },
+    },
   },
 
   data() {
@@ -757,12 +769,12 @@ export default Vue.extend({
     saveFilters() {
       if(this.isMarket) {
         sessionStorage.setItem('market-nft-typefilter', this.typeFilter);
-        sessionStorage.setItem('market-nft-starfilter', this.starFilter);
+        sessionStorage.setItem('market-nft-starfilter', this.starFilter.toString());
         sessionStorage.setItem('market-nft-elementfilter', this.elementFilter);
         sessionStorage.setItem('market-nft-price-order', this.priceSort);
       } else {
         sessionStorage.setItem('nft-typefilter', this.typeFilter);
-        sessionStorage.setItem('nft-starfilter', this.starFilter);
+        sessionStorage.setItem('nft-starfilter', this.starFilter.toString());
         sessionStorage.setItem('nft-elementfilter', this.elementFilter);
       }
       this.$emit('nft-filters-changed');
@@ -780,8 +792,8 @@ export default Vue.extend({
         sessionStorage.removeItem('nft-elementfilter');
       }
 
-      this.typeFilter = '';
-      this.starFilter = '';
+      this.typeFilter = this.typesOptions?.length === 1 ? this.typesOptions[0] : '';
+      this.starFilter = this.starsOptions?.length === 1 ? this.starsOptions[0] : '';
       this.elementFilter = '';
       this.priceSort = '';
       this.tierFilter = '';
@@ -809,6 +821,7 @@ export default Vue.extend({
     onNftClick(type: string, id: number) {
       this.setCurrentNft({ type, id });
       this.$emit('choose-nft', `${type}.${id}`);
+      this.$emit('choosenft', { type, id });
     },
 
     getFavoritesString(favorites: Record<string, Record<number, boolean>>): string {
@@ -1171,6 +1184,14 @@ export default Vue.extend({
       this.typeFilter = sessionStorage.getItem('nft-typefilter') || '';
       this.starFilter = sessionStorage.getItem('nft-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('nft-elementfilter') || '';
+    }
+
+    if(this.starsOptions?.length === 1) {
+      this.starFilter = this.starsOptions[0];
+    }
+
+    if(this.typesOptions?.length === 1) {
+      this.typeFilter = this.typesOptions[0];
     }
 
     if(!this.showGivenNftIdTypes) {

@@ -38,6 +38,7 @@ import { abi as keyboxAbi } from '../../build/contracts/KeyLootbox.json';
 import { abi as junkAbi } from '../../build/contracts/Junk.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
+import { abi as simpleQuestsAbi, networks as simpleQuestsNetworks } from '../../build/contracts/SimpleQuests.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
 import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
@@ -62,14 +63,8 @@ import { Contracts, isStakeType, isNftStakeType, StakeType, NftStakeType, Stakin
 
 import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } from './stake-types';
 
-import {
-  raid as featureFlagRaid,
-  stakeOnly as featureFlagStakeOnly,
-  market as featureFlagMarket,
-  pvp as featureFlagPvP,
-  burningManager as featureFlagBurningManager
-} from './feature-flags';
-import {currentChainSupportsPvP} from '@/utils/common';
+import {raid, stakeOnly, market, pvp, quests, burningManager} from './feature-flags';
+import {currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 interface RaidContracts {
   Raid1?: Contracts['Raid1'];
@@ -81,6 +76,10 @@ interface PvPContracts {
 
 interface MarketContracts {
   NFTMarket?: Contracts['NFTMarket'];
+}
+
+interface QuestsContracts {
+  SimpleQuests?: Contracts['SimpleQuests'];
 }
 
 interface Config {
@@ -227,7 +226,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   const stakingContracts = await setUpStakingContracts(web3);
 
-  if (featureFlagStakeOnly) {
+  if (stakeOnly) {
     return stakingContracts;
   }
 
@@ -303,7 +302,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   let raidTrinketAddress = '';
   let keyboxAddress = '';
   let junkAddress = '';
-  if(featureFlagRaid) {
+  if(raid) {
     const raidContractAddr = getConfigValue('VUE_APP_RAID_CONTRACT_ADDRESS') || (raidNetworks as Networks)[networkId]!.address;
 
     const Raid1 = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
@@ -323,14 +322,21 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Junk = new web3.eth.Contract(junkAbi as Abi, junkAddress);
 
   const marketContracts: MarketContracts = {};
-  if(featureFlagMarket) {
+  if(market) {
     const marketContractAddr = getConfigValue('VUE_APP_MARKET_CONTRACT_ADDRESS') || (marketNetworks as Networks)[networkId]!.address;
 
     marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as Abi, marketContractAddr);
   }
 
+  const questsContracts: QuestsContracts = {};
+  if(quests && currentChainSupportsQuests()) {
+    const simpleQuestsContractAddr = getConfigValue('VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS') || (simpleQuestsNetworks as Networks)[networkId]!.address;
+
+    questsContracts.SimpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);
+  }
+
   const pvpContracts: PvPContracts = {};
-  if(featureFlagPvP && currentChainSupportsPvP()){
+  if(pvp && currentChainSupportsPvP()){
     const pvpContractAddr = process.env.VUE_APP_PVP_CONTRACT_ADDRESS ||
     getConfigValue('VUE_APP_PVP_CONTRACT_ADDRESS') || (pvpNetworks as Networks)[networkId]!.address;
 
@@ -344,7 +350,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Treasury = new web3.eth.Contract(treasuryAbi as Abi, treasuryContractAddr);
 
   let BurningManager;
-  if(featureFlagBurningManager) {
+  if(burningManager) {
     const burningManagerContractAddr = getConfigValue('VUE_APP_BURNING_MANAGER_CONTRACT_ADDRESS') || (burningManagerNetworks as Networks)[networkId]!.address;
     BurningManager = new web3.eth.Contract(burningManagerAbi as Abi, burningManagerContractAddr);
   }
@@ -380,6 +386,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     ...raidContracts,
     ...pvpContracts,
     ...marketContracts,
+    ...questsContracts,
     WaxBridge,
     Treasury,
     BurningManager,
@@ -388,5 +395,3 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     KingStakingRewardsUpgradeable180
   };
 }
-
-export const INTERFACE_ID_TRANSFER_COOLDOWNABLE = '0xe62e6974';

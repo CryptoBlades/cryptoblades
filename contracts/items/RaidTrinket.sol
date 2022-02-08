@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../Promos.sol";
+import "../util.sol";
 
 contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
@@ -21,11 +22,12 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
     }
 
     Promos public promos;
-    
+
     mapping(uint256 => uint8) public tokenStars;
     mapping(uint256 => uint256) public tokenEffect;
 
     event Minted(uint256 indexed id, address indexed minter);
+    event Burned(uint256 indexed id, address indexed burner);
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
@@ -44,24 +46,49 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         return getOwnedBy(msg.sender);
     }
 
-    function getOwnedBy(address owner) public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](balanceOf(owner));
+    function getOwnedBy(address owner) public view returns(uint256[] memory tokens) {
+        tokens = new uint256[](balanceOf(owner));
         for(uint256 i = 0; i < tokens.length; i++) {
             tokens[i] = tokenOfOwnerByIndex(owner, i);
         }
-        return tokens;
     }
 
-    function mint(address minter, uint8 mintStars, uint256 mintEffect) public restricted returns(uint256) {
+    function getStars(uint256[] memory ids) public view returns (uint8[] memory stars) {
+        stars = new uint8[](ids.length);
+        for(uint256 i = 0; i < ids.length; i++) {
+            stars[i] = tokenStars[ids[i]];
+        }
+    }
 
-        uint256 tokenID = totalSupply();
+    function mint(address minter, uint8 mintStars, uint256 seed) public restricted returns(uint256 tokenID) {
+        tokenID = totalSupply();
+        uint256 mintEffect = (seed / 100) % 5;
         tokenStars[tokenID] = mintStars;
         tokenEffect[tokenID] = mintEffect;
         _mint(minter, tokenID);
         emit Minted(tokenID, minter);
-        return tokenID;
     }
-    
+
+    function mintN(address minter, uint8 mintStars, uint32 amount, uint256 seed) public restricted returns(uint256[] memory tokenIDs) {
+        tokenIDs = new uint256[](amount);
+        for(uint256 i = 0; i < amount; i++) {
+            tokenIDs[i] = mint(minter, mintStars, seed);
+            seed = RandomUtil.combineSeeds(seed,i);
+        }
+    }
+
+    function burn(uint256 tokenID) public restricted {
+        address burner = ownerOf(tokenID);
+        _burn(tokenID);
+        emit Burned(tokenID, burner);
+    }
+
+    function burn(uint256[] memory tokenIDs) public restricted {
+        for(uint i = 0; i < tokenIDs.length; i++) {
+            burn(tokenIDs[i]);
+        }
+    }
+
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }

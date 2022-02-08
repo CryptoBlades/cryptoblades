@@ -147,6 +147,7 @@ export interface IState {
   cartEntries: CartEntry[];
   currentChainSupportsMerchandise: boolean;
   currentChainSupportsPvP: boolean;
+  currentChainSupportsQuests: boolean;
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
