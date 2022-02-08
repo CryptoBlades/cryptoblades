@@ -67,15 +67,6 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         require(vars[VAR_BURN_POWER_MULTIPLIER] > 0, "Burning disabled");
     }
 
-    modifier hasEnoughSoul(address user, uint256 soulAmount) {
-        _hasEnoughSoul(user, soulAmount);
-        _;
-    }
-
-    function _hasEnoughSoul(address user, uint256 soulAmount) internal view {
-        require(userVars[user][USERVAR_SOUL_SUPPLY] >= soulAmount, 'Not enough soul');
-    }
-
     // VIEWS
 
     function burnCharactersFee(uint256[] memory burnIds) public view returns (uint256) {
@@ -112,12 +103,12 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         characters.burnIntoSoul(burnIds);
     }
 
-    function transferSoul(address targetAddress, uint256 soulAmount) public hasEnoughSoul(msg.sender, soulAmount) {
+    function transferSoul(address targetAddress, uint256 soulAmount) public {
         userVars[msg.sender][USERVAR_SOUL_SUPPLY] = userVars[msg.sender][USERVAR_SOUL_SUPPLY].sub(soulAmount);
         userVars[targetAddress][USERVAR_SOUL_SUPPLY] = userVars[targetAddress][USERVAR_SOUL_SUPPLY].add(soulAmount);
     }
 
-    function upgradeCharacterWithSoul(uint256 targetId, uint256 soulAmount) public burningEnabled hasEnoughSoul(msg.sender, soulAmount) {
+    function upgradeCharacterWithSoul(uint256 targetId, uint256 soulAmount) public burningEnabled {
         userVars[msg.sender][USERVAR_SOUL_SUPPLY] = userVars[msg.sender][USERVAR_SOUL_SUPPLY].sub(soulAmount);
         characters.upgradeWithSoul(targetId, soulAmount);
     }
@@ -126,8 +117,8 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         userVars[user][USERVAR_SOUL_SUPPLY] += soulAmount;
     }
 
-    function burnSoul(address user, uint256 soulAmount) external restricted hasEnoughSoul(user, soulAmount) {
-        userVars[user][USERVAR_SOUL_SUPPLY] -= soulAmount;
+    function burnSoul(address user, uint256 soulAmount) external restricted {
+        userVars[user][USERVAR_SOUL_SUPPLY].sub(soulAmount);
     }
 
     // VARS SETTER
