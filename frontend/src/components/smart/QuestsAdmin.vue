@@ -43,9 +43,12 @@
               {{ $t(`quests.dustRarityType.${DustRarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-select v-else-if="questTemplate.requirementType !== RequirementType.RAID" class="mt-2 mb-2"
-                         v-model="questTemplate.requirementRarity"
-                         :disabled="questTemplate.requirementType === undefined">
+          <b-form-select
+            v-else-if="questTemplate.requirementType !== RequirementType.RAID
+            && questTemplate.requirementType !== RequirementType.STAMINA && questTemplate.requirementType !== RequirementType.SOUL"
+            class="mt-2 mb-2"
+            v-model="questTemplate.requirementRarity"
+            :disabled="questTemplate.requirementType === undefined">
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRequirementRarity') }}
             </b-form-select-option>
@@ -54,7 +57,10 @@
             </b-form-select-option>
           </b-form-select>
           <b-form-input v-model="questTemplate.requirementAmount" :min="0"
-                        :disabled="questTemplate.requirementRarity === undefined && questTemplate.requirementType !== RequirementType.RAID"
+                        :disabled="questTemplate.requirementRarity === undefined
+                        && questTemplate.requirementType !== RequirementType.RAID
+                        && questTemplate.requirementType !== RequirementType.STAMINA
+                        && questTemplate.requirementType !== RequirementType.SOUL"
                         type="number" number/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reward') }}</label>
@@ -77,9 +83,11 @@
               {{ $t(`quests.dustRarityType.${DustRarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-select v-else-if="questTemplate.rewardType !== RewardType.EXPERIENCE" class="mt-2 mb-2"
-                         v-model="questTemplate.rewardRarity"
-                         :disabled="questTemplate.rewardType === undefined">
+          <b-form-select
+            v-else-if="questTemplate.rewardType !== RewardType.EXPERIENCE && questTemplate.rewardType !== RewardType.SOUL"
+            class="mt-2 mb-2"
+            v-model="questTemplate.rewardRarity"
+            :disabled="questTemplate.rewardType === undefined">
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRewardRarity') }}
             </b-form-select-option>
@@ -88,7 +96,8 @@
             </b-form-select-option>
           </b-form-select>
           <b-form-input v-model="questTemplate.rewardAmount"
-                        :disabled="questTemplate.rewardRarity === undefined && questTemplate.rewardType !== RewardType.EXPERIENCE"
+                        :disabled="questTemplate.rewardRarity === undefined
+                        && questTemplate.rewardType !== RewardType.EXPERIENCE && questTemplate.rewardType !== RewardType.SOUL"
                         type="number" number :min="0"/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
@@ -225,18 +234,6 @@ import {
 import QuestTemplatesDisplay from '@/components/smart/QuestTemplatesDisplay.vue';
 import QuestDetails from '@/components/smart/QuestDetails.vue';
 
-export interface QuestTemplate {
-  id: number;
-  tier: number;
-  requirementType: number;
-  requirementRarity: number;
-  requirementAmount: number;
-  rewardType: number;
-  rewardRarity: number;
-  rewardAmount: number;
-  reputationAmount: number;
-}
-
 interface StoreMappedActions {
   addQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
 
@@ -292,8 +289,8 @@ export default Vue.extend({
       rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       dustRarities: [DustRarity.LESSER, DustRarity.GREATER, DustRarity.POWERFUL],
       requirementTypes: [RequirementType.WEAPON, RequirementType.JUNK,
-        RequirementType.DUST, RequirementType.TRINKET, RequirementType.SHIELD, RequirementType.RAID],
-      rewardTypes: [RewardType.WEAPON, RewardType.JUNK, RewardType.DUST, RewardType.TRINKET, RewardType.SHIELD, RewardType.EXPERIENCE],
+        RequirementType.DUST, RequirementType.TRINKET, RequirementType.SHIELD, RequirementType.STAMINA, RequirementType.SOUL, RequirementType.RAID],
+      rewardTypes: [RewardType.WEAPON, RewardType.JUNK, RewardType.DUST, RewardType.TRINKET, RewardType.SHIELD, RewardType.EXPERIENCE, RewardType.SOUL],
       promoQuestTemplates: false,
       isLoading: false,
       showTemplateConfirmationModal: false,
@@ -324,10 +321,12 @@ export default Vue.extend({
     ]) as StoreMappedActions,
 
     showConfirmationModal() {
-      if (this.questTemplate.requirementType === RequirementType.RAID) {
+      if (this.questTemplate.requirementType === RequirementType.RAID
+        || this.questTemplate.requirementType === RequirementType.STAMINA
+        || this.questTemplate.requirementType === RequirementType.SOUL) {
         this.questTemplate.requirementRarity = Rarity.COMMON;
       }
-      if (this.questTemplate.rewardType === RewardType.EXPERIENCE) {
+      if (this.questTemplate.rewardType === RewardType.EXPERIENCE || this.questTemplate.rewardType === RewardType.SOUL) {
         this.questTemplate.rewardRarity = Rarity.COMMON;
       }
       this.showTemplateConfirmationModal = true;
@@ -399,10 +398,14 @@ export default Vue.extend({
     addNewQuestDisabled() {
       return this.questTemplate.tier === undefined
         || this.questTemplate.requirementType === undefined
-        || (this.questTemplate.requirementRarity === undefined && this.questTemplate.requirementType !== RequirementType.RAID)
+        || (this.questTemplate.requirementRarity === undefined
+          && this.questTemplate.requirementType !== RequirementType.RAID
+          && this.questTemplate.requirementType !== RequirementType.STAMINA
+          && this.questTemplate.requirementType !== RequirementType.SOUL)
         || !this.questTemplate.requirementAmount
         || this.questTemplate.rewardType === undefined
-        || (this.questTemplate.rewardRarity === undefined && this.questTemplate.rewardType !== RewardType.EXPERIENCE)
+        || (this.questTemplate.rewardRarity === undefined
+          && this.questTemplate.rewardType !== RewardType.EXPERIENCE && this.questTemplate.rewardType !== RewardType.SOUL)
         || !this.questTemplate.rewardAmount
         || !this.questTemplate.reputationAmount || this.showTemplateConfirmationModal || this.isLoading;
     },

@@ -3,11 +3,13 @@
     <div class="quest-description">
       <span class="font-weight-bold">{{ $t('quests.reward') }}</span>
       <span>{{ quest.reputationAmount }} {{ $t('quests.reputation') }}</span>
-      <span>{{ quest.rewardAmount }}x <span v-if="quest.rewardType !== RewardType.EXPERIENCE">{{
+      <span>{{ quest.rewardAmount }}x <span
+        v-if="quest.rewardType !== RewardType.EXPERIENCE && quest.rewardType !== RewardType.SOUL">{{
           Array(quest.rewardRarity + 1).fill('★').join('')
         }}</span> {{ $t(`quests.rewardType.${RewardType[quest.rewardType]}`) }}</span>
     </div>
-    <NftList v-if="questRewards && questRewards.length !== 0" :showGivenNftIdTypes="true" :nftIdTypes="questRewards" :isReward="true"/>
+    <NftList v-if="questRewards && questRewards.length !== 0" :showGivenNftIdTypes="true" :nftIdTypes="questRewards"
+             :isReward="true"/>
     <div v-else class="d-flex justify-content-center p-3">
       <nft-icon v-if="quest.rewardType === RewardType.WEAPON" :isDefault="true" :nft="{ type: 'weapon' }"
                 :stars="quest.rewardRarity + 1"/>
@@ -23,6 +25,7 @@
                 :isDefault="true" :nft="{ type: '4bdust' }"/>
       <nft-icon v-else-if="quest.rewardType === RewardType.DUST && quest.rewardRarity === Rarity.RARE"
                 :isDefault="true" :nft="{ type: '5bdust' }"/>
+      <nft-icon v-else-if="quest.rewardType === RewardType.SOUL" :isDefault="true" :nft="{ type: 'soul' }"/>
     </div>
   </div>
 </template>

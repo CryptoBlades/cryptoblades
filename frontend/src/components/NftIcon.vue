@@ -21,6 +21,8 @@
         v-tooltip="$t('nftIcon.greaterDust')" />
       <img class="default-dust-placeholder" v-if="nft.type === '5bdust'" src="../assets/dusts/powerfulDust.png"
         v-tooltip="$t('nftIcon.powerfulDust')" />
+      <img class="default-dust-placeholder" v-if="nft.type === 'soul'" src="../assets/dusts/soulDust.png"
+           v-tooltip="$t('nftIcon.soul')" />
     </div>
 
     <div v-if="!isDefault" class="nft-icon"
@@ -131,6 +133,11 @@
         <div v-if="!isShop" class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
+      <div v-if="nft.type === 'soul'" class="nft-details">
+        <img class="placeholder-dust" src="../assets/dusts/soulDust.png" />
+        <div v-if="!isShop" class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
+      </div>
+
       <div v-if="nft.type === 'trinket'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
         <img class="placeholder-trinket" :src="getTrinketArt(nft.id)" />
         <div v-if="!isShop" class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
@@ -147,7 +154,7 @@
       </div>
 
       <div v-if="nft.type !== 'shield' && nft.type !== 'trinket' && nft.type !== 'junk' && nft.type !== 'keybox' && nft.type !== 'weapon'
-        && nft.type !== 'dustLb' && nft.type !== 'dust4b' && nft.type !== 'dust5b' && nft.type !== 'WeaponCosmetic'
+        && nft.type !== 'dustLb' && nft.type !== 'dust4b' && nft.type !== 'dust5b' && nft.type !== 'soul' && nft.type !== 'WeaponCosmetic'
         && nft.type !== 'CharacterCosmetic' && nft.type !== 't1land' && nft.type !== 't2land' && nft.type !== 't3land'
         && nft.type !== 'claimT2Land' && nft.type !== 'claimT3Land'"
         class="nft-details">
@@ -178,6 +185,7 @@ export default {
       if(this.nft.type === 'dustLb') return this.$t('nftIcon.lesserDust');
       if(this.nft.type === 'dust4b') return this.$t('nftIcon.greaterDust');
       if(this.nft.type === 'dust5b') return this.$t('nftIcon.powerfulDust');
+      if(this.nft.type === 'soul') return this.$t('nftIcon.soul');
       if(this.nft.type === 't1') return this.$t('nftIcon.lesserDust');
       if(this.nft.type.includes('land')) return this.$t('nftIcon.land', {tier : this.nft.tier});
 

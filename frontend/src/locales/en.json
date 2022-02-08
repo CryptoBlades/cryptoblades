@@ -67,6 +67,7 @@
     "lesserDust": "Lesser Dust",
     "greaterDust": "Greater Dust",
     "powerfulDust": "Powerful Dust",
+    "soul": "Soul",
     "land": "Tier {tier} Land",
     "supplyLeft": "Supply left:",
     "id": "ID",
@@ -603,6 +604,8 @@
       "DUST": "Dust",
       "TRINKET": "Trinket",
       "SHIELD": "Shield",
+      "STAMINA": "Stamina",
+      "SOUL": "Soul",
       "RAID": "Raid"
     },
     "rewardType": {
@@ -612,12 +615,15 @@
       "TRINKET": "Trinket",
       "SHIELD": "Shield",
       "DUST": "Dust",
-      "EXPERIENCE": "Experience"
+      "EXPERIENCE": "Experience",
+      "SOUL": "Soul"
     },
     "level": "Level {level}",
     "questsTitle": "Quests",
     "quest": "Quest",
     "skip": "Skip ({staminaCost} stamina)",
+    "freeSkip": "Skip (FREE)",
+    "nextFreeSkipsResetIn": "Next free skips reset in {time}",
     "cannotSkipTooltip": "Not enough stamina to skip this quest",
     "complete": "Complete",
     "questComplete": "Quest complete",

@@ -52,6 +52,16 @@
       "logo": "tryhards.png",
       "details": "TryHards is a play-to-earn metaverse in which players can engage in thrilling top-down PvP and PvE battles using collectible NFT characters and weapons. Players can earn  crystals to upgrade their NFTs and increase their earnings",
       "website": "https://tryhards.io/"
+    },
+    "Age of Tanks": {
+      "logo": "ageoftanks.png",
+      "details": "The First Military Strategic Metaverse where gamers build & command their fleet of tanks to storm the battlefields in their quest to conquer Earth Zero!",
+      "website": "https://linktr.ee/AgeofTanksNFT"
+    },
+    "Cake Monster": {
+      "logo": "cakemonster.png",
+      "details": "Cake Monster is a ultra-deflationary, automated dividend yield, and meme token. It offers a multitude of unique DeFi features aimed at building a flexible and multifaceted reward system for all participants without compromising the sustainability or security of the protocol ecosystem.",
+      "website": "https://cake.monster/"
     }
   }
 }

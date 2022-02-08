@@ -4,12 +4,14 @@
       <div class="quest-info flex-1 d-flex flex-column justify-content-center">
         <div class="quest-description">
           <span
-              class="font-weight-bold">{{
+            class="font-weight-bold">{{
               $t(`quests.rarityType.${Rarity[quest.tier]}`)
             }} {{ $t('quests.quest').toLowerCase() }}</span>
-          <span>{{
+          <span class="text-center">{{
               quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.turnIn')
-            }} {{ quest.requirementAmount }}x <span v-if="quest.requirementType !== RequirementType.RAID">{{
+            }} {{ quest.requirementAmount }}x <span
+              v-if="quest.requirementType !== RequirementType.RAID
+              && quest.requirementType !== RequirementType.STAMINA && quest.requirementType !== RequirementType.SOUL">{{
                 Array(quest.requirementRarity + 1).fill('★').join('')
               }}</span> {{ $t(`quests.requirementType.${RequirementType[quest.requirementType]}`) }}</span>
         </div>
@@ -25,14 +27,16 @@
                     :nft="{ type: 'shield' }"
                     :stars="quest.requirementRarity + 1"/>
           <nft-icon
-              v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.COMMON"
-              :isDefault="true" :nft="{ type: 'lbdust' }"/>
+            v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.COMMON"
+            :isDefault="true" :nft="{ type: 'lbdust' }"/>
           <nft-icon
-              v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
-              :isDefault="true" :nft="{ type: '4bdust' }"/>
+            v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
+            :isDefault="true" :nft="{ type: '4bdust' }"/>
           <nft-icon
-              v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.RARE"
-              :isDefault="true" :nft="{ type: '5bdust' }"/>
+            v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.RARE"
+            :isDefault="true" :nft="{ type: '5bdust' }"/>
+          <nft-icon
+            v-else-if="quest.requirementType === RequirementType.SOUL" :isDefault="true" :nft="{ type: 'soul' }"/>
         </div>
         <div v-if="!isQuestTemplate && !isDisplayOnly" class="quest-progress">
           <strong>{{ quest.progress }} / {{ quest.requirementAmount }}</strong>
@@ -51,9 +55,10 @@
         <b-button v-if="questCanBeCompleted" variant="primary" class="flex-1" @click="complete">
           {{ $t('quests.complete') }}
         </b-button>
-        <b-button v-else variant="primary" class="flex-1" @click="skip" :disabled="!canSkip || isStaminaCostLoading">
-          {{ $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
-          <hint v-if="!canSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
+        <b-button v-else variant="primary" class="flex-1" @click="skip"
+                  :disabled="(!freeSkip && !canSkip) || isStaminaCostLoading">
+          {{ freeSkip ? $t('quests.freeSkip') : $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
+          <hint v-if="!freeSkip && !canSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
         </b-button>
       </div>
       <div v-else-if="isQuestTemplate && !isQuestActionLoading" class="d-flex">
@@ -94,6 +99,8 @@ import {NftIdType} from '@/components/smart/NftList.vue';
 interface StoreMappedActions {
   canSkipQuest(payload: { characterID: string | number }): Promise<boolean>;
 
+  hasFreeSkip(payload: { characterID: string | number }): Promise<boolean>;
+
   getSkipQuestStaminaCost(): Promise<number>;
 
   skipQuest(payload: { characterID: string | number }): Promise<void>;
@@ -105,6 +112,7 @@ interface StoreMappedActions {
 
 interface Data {
   canSkip: boolean;
+  freeSkip: boolean;
   skipQuestStaminaCost: number;
   questRewards: NftIdType[];
   isQuestActionLoading: boolean;
@@ -142,6 +150,7 @@ export default Vue.extend({
   data() {
     return {
       canSkip: false,
+      freeSkip: false,
       skipQuestStaminaCost: 0,
       questRewards: [] as NftIdType[],
       isQuestActionLoading: false,
@@ -162,7 +171,14 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['skipQuest', 'canSkipQuest', 'getSkipQuestStaminaCost', 'completeQuest', 'deleteQuest']) as StoreMappedActions,
+    ...mapActions([
+      'skipQuest',
+      'canSkipQuest',
+      'hasFreeSkip',
+      'getSkipQuestStaminaCost',
+      'completeQuest',
+      'deleteQuest',
+    ]) as StoreMappedActions,
 
     async skip() {
       try {
@@ -177,6 +193,7 @@ export default Vue.extend({
 
     async refreshSkipQuestData() {
       this.canSkip = await this.canSkipQuest({characterID: this.characterId});
+      this.freeSkip = await this.hasFreeSkip({characterID: this.characterId});
       try {
         this.isStaminaCostLoading = true;
         this.skipQuestStaminaCost = await this.getSkipQuestStaminaCost();
@@ -192,11 +209,10 @@ export default Vue.extend({
         const rewardType = this.quest.rewardType;
         await this.refreshSkipQuestData();
 
-        if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST) {
+        if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST || rewardType === RewardType.SOUL) {
           this.showQuestCompleteModal = true;
           return;
-        }
-        else {
+        } else {
           this.questRewards = rewards.map(reward => {
             return {type: RewardType[rewardType].toLowerCase(), id: reward} as NftIdType;
           });
@@ -228,7 +244,7 @@ export default Vue.extend({
     if (!this.isQuestTemplate && !this.isDisplayOnly) {
       await this.refreshSkipQuestData();
     }
-  }
+  },
 
 });
 </script>
