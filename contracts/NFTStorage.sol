@@ -15,6 +15,7 @@ import "./WeaponRenameTagConsumables.sol";
 import "./CharacterRenameTagConsumables.sol";
 import "./WeaponCosmetics.sol";
 import "./CharacterCosmetics.sol";
+import "./interfaces/IBridgeProxy.sol";
 
 contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlUpgradeable
 {
@@ -140,6 +141,11 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     Shields shields;
 
+    // Bot 2.0
+    mapping(address => address) private nftProxyContract;
+    // Source chain => transfer out id of source chain => mintid + 1 (+1 to be able to support 0)
+    mapping(uint256 => mapping(uint256 => uint256)) private bot2p0Log;
+
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTTransferOutRequest(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -170,12 +176,6 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         characterCosmetics = _characterCosmetics;
 
         nftMarket = _nftMarket;
-
-        _chainPrefix[56] = "BSC";
-        _chainPrefix[128] = "HECO";
-        _chainPrefix[66] = "OKEX";
-
-        storageEnabled = false;
     }
 
     function migrateTo_56837f7(CryptoBlades _game) external {
@@ -692,6 +692,44 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         return  _transferInsLog[sourceChain][nftType][sourceId];
     }
 
+    // weak for 0 but gives better tracking than true / false
+     function getTransferInFromLogV2(uint256 sourceChain, uint256 sourceTransferId) public view returns (uint256) {
+        return bot2p0Log[sourceChain][sourceTransferId];
+    }
+
+    function collectNFTData(address nftAddress, uint256 tokenId) external view returns (uint256[] memory uintVars, bool[] memory boolVars, address[] memory addressVars,  string memory stringVar) {
+        return IBridgeProxy(nftProxyContract[nftAddress]).collectData(tokenId);
+    }
+
+    function mintOrUpdate(address receiver, uint256 sourceChain, uint256 sourceTransfer, address nftAddress, string calldata chainId, uint256[] calldata uintVars, bool[] calldata boolVars, address[] calldata addressVars,  string calldata stringVar) external gameAdminRestricted {
+        require(bot2p0Log[sourceChain][sourceTransfer] == 0, "NA");
+        uint256 mintedId = nftChainIdsToMintId[nftAddress][chainId];
+
+        mintedId = IBridgeProxy(nftProxyContract[nftAddress]).mintOrUpdate(mintedId, uintVars, boolVars, addressVars, stringVar);
+
+        // Whether minted or updated, the bridge owns the NFT
+        require(IERC721(nftAddress).ownerOf(mintedId) == address(this), "NA2");
+        _logMintOrUpdate(sourceChain, sourceTransfer, nftAddress, mintedId, chainId);
+        _attachToWallet(receiver, nftAddress, mintedId);
+    }
+
+    function _logMintOrUpdate(uint256 sourceChain, uint256 sourceTransfer, address nftAddress, uint256 tokenId, string memory chainId) internal {
+        bot2p0Log[sourceChain][sourceTransfer] = tokenId;
+        nftChainIds[nftAddress][tokenId] = chainId;
+        nftChainIdsToMintId[nftAddress][chainId] = tokenId;
+    }
+
+    function _attachToWallet(address owner, address nftAddress, uint256 tokenId) internal {
+        allStoredItems[nftAddress].add(tokenId);
+        storedItemsOwners[nftAddress][tokenId] = owner;
+        storedItems[owner][nftAddress].add(tokenId);
+    }
+
+    function SetProxyContract(address nft, address proxy, bool forced) external restricted {
+        require(forced || nftProxyContract[nft] == address(0), "NA");
+        nftProxyContract[nft] = proxy;
+    }
+
     function packedWeaponsData(uint256 weaponId) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
         (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,,,,, uint24 _burnPoints,) = weapons.get(weaponId);
         uint32 appliedCosmetic = weaponCosmetics.getWeaponCosmetic(weaponId);
@@ -717,20 +755,6 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         appliedCosmetic = uint32((metaData >> 96) & 0xFFFFFFFF);
     }
 
-    function packedCharacterData(uint256 characterId) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
-        (uint16 xp, uint8 level, uint8 trait,,,,,,, ) = characters.get(characterId);
-        uint32 appliedCosmetic = characterCosmetics.getCharacterCosmetic(characterId);
-        rename = characterRenameTagConsumables.getCharacterRename(characterId);
-        seed3dCosmetics = characters.getCosmeticsSeed(characterId);
-        uint24 bonusPower = uint24(characters.getNftVar(characterId, 2)); // 2 => bonus Power
-        packedData = packCharactersData(appliedCosmetic, xp, level, trait, bonusPower);
-    }
-
-    // Applied cosmetic 32 bits is too much but will just put it as MSB for now. Can change later when something else is added.
-    function packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower) public pure returns (uint256) {
-        return  uint256(uint256(trait) | (uint256(level) << 8) | (uint256(xp) << 16) | (uint256(appliedCosmetic) << 32) | (uint256(bonusPower) << 64));
-    }
-
     function unpackCharactersData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower) {
         trait = uint8((metaData) & 0xFF);
         level = uint8((metaData >> 8) & 0xFF);
@@ -739,31 +763,6 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         bonusPower = uint24((metaData >> 64) & 0xFFFFFF);
     }
 
-    function packedShieldsData(uint256 shieldid) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
-        (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3) = shields.get(shieldid);
-        uint8 _type = uint8(shields.getNftVar(shieldid, 2)); // 2 => shield type
-        uint32 appliedCosmetic = 0; // to add later
-        rename = ""; // to add later
-        seed3dCosmetics = shields.getCosmeticsSeed(shieldid);
-        packedData = packShieldsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, _type);
-    }
-
-    
-    function packShieldsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 shieldType) public pure returns (uint256) {
-        return  uint256(uint256(shieldType) | uint256(stat3) << 16| (uint256(stat2) << 32) | (uint256(stat1) << 48) | (uint256(properties) << 64) | (uint256(appliedCosmetic) << 80));
-    }
-
-    function unpackShieldsData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 shieldType) {
-        // 16 bits reserved for the type (only using 8)
-        shieldType = uint8(metaData & 0xFF); 
-        stat3 = uint16((metaData >> 16) & 0xFFFF);
-        stat2 = uint16((metaData >> 32) & 0xFFFF);
-        stat1 = uint16((metaData >> 48) & 0xFFFF);
-        properties = uint16((metaData >> 64) & 0xFFFF);
-        appliedCosmetic = uint32((metaData >> 80) & 0xFFFFFFFF);
-    }
-
-    
     function buildChainId(uint256 sourceId) internal view returns (string memory) {
         return string(abi.encodePacked(_localChainPrefix, uint2str(sourceId)));
     }
