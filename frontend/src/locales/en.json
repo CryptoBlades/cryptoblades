@@ -671,7 +671,58 @@
     "loading": "Loading..."
   },
   "admin": {
-    "quests": "Quests",
+    "tabs": {
+      "quests": "Quests",
+      "cbkLand": "CBK Land",
+      "weapons": "Weapons",
+      "burningManager": "Burning Manager"
+    },
+    "cbkLand": {
+      "minter": "Minter",
+      "tier": "Tier",
+      "chunkId": "Chunk ID",
+      "reseller": "Reseller",
+      "quantityOptional": "Quantity (optional)",
+      "mintLand": "Mint land",
+      "mintLands": "Mint lands",
+      "identifiers": "Identifiers",
+      "updateChunkIdentifier": "Update chunk identifier",
+      "updateChunkId": "Update chunk ID",
+      "updateChunkIds": "Update chunk IDs"
+    },
+    "weapons": {
+      "incrementDecrementDustSupplies": "Increment/decrement dust supplies",
+      "incrementDustSupplies": "Increment dust supplies",
+      "decrementDustSupplies": "Decrement dust supplies",
+      "playerAddress": "Player address",
+      "amountLB": "Amount (LB)",
+      "amount4B": "Amount (4B)",
+      "amount5B": "Amount (5B)",
+      "mintGiveawayWeapon": "Mint giveaway weapon",
+      "pleaseSelectStars": "Please select stars",
+      "pleaseSelectElement": "Please select element",
+      "mintWeapon": "Mint weapon",
+      "rarities": {
+        "COMMON": "1 star",
+        "UNCOMMON": "2 stars",
+        "RARE": "3 stars",
+        "EPIC": "4 stars ",
+        "LEGENDARY": "5 stars"
+      },
+      "elements" : {
+        "RANDOM": "Random",
+        "FIRE": "Fire",
+        "WATER": "Water",
+        "LIGHTNING": "Lightning",
+        "EARTH": "Earth"
+      }
+    },
+    "burningManager": {
+      "playerAddress": "Player address",
+      "mintGiveawaySoul": "Mint giveaway soul",
+      "soulAmount": "Soul amount",
+      "mintSoul": "Mint soul"
+    },
     "doNotHaveAccessTooltip": "You do not have admin access on this contract.",
     "grantRole": "Grant role",
     "grantGameAdminRole": "Grant game admin role",
