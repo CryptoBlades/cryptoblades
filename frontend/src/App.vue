@@ -167,7 +167,7 @@ export default {
     ...mapGetters([
       'getExchangeTransakUrl'
     ]),
-    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP']),
+    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP', 'updateCurrentChainSupportsQuests']),
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BSC';
       const paramChain = this.$router.currentRoute.query.chain;
@@ -191,6 +191,7 @@ export default {
       }
       this.updateCurrentChainSupportsMerchandise();
       this.updateCurrentChainSupportsPvP();
+      this.updateCurrentChainSupportsQuests();
     },
     async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;
