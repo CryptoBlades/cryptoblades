@@ -124,7 +124,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         return projectDistributionTime[projectId];
     }
 
-    function getAmountWithAdjustedDecimals(uint256 partnerTokenAmount, uint256 partnerTokenDecimals) internal view returns(uint256 partnerTokenAmountAdjusted) {
+    function getAmountWithAdjustedDecimals(uint256 partnerTokenAmount, uint256 partnerTokenDecimals) internal pure returns(uint256 partnerTokenAmountAdjusted) {
         if(partnerTokenDecimals > 18) {
             partnerTokenAmountAdjusted = partnerTokenAmount.mul(10**uint(partnerTokenDecimals - 18));
         } else {
