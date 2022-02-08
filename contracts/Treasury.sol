@@ -3,6 +3,7 @@ pragma solidity ^0.6.5;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -123,6 +124,14 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         return projectDistributionTime[projectId];
     }
 
+    function getAmountWithAdjustedDecimals(uint256 partnerTokenAmount, uint256 partnerTokenDecimals) internal view returns(uint256 partnerTokenAmountAdjusted) {
+        if(partnerTokenDecimals > 18) {
+            partnerTokenAmountAdjusted = partnerTokenAmount.mul(10**uint(partnerTokenDecimals - 18));
+        } else {
+            partnerTokenAmountAdjusted = partnerTokenAmount.div(10**uint(18 - partnerTokenDecimals));
+        }
+    }
+
     // Mutative
 
     function addPartnerProject(
@@ -169,7 +178,9 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
         game.deductAfterPartnerClaim(skillToDeduct, msg.sender);
         tokensClaimed[partnerId] += partnerTokenAmount;
-        IERC20(partneredProjects[partnerId].tokenAddress).safeTransfer(msg.sender, partnerTokenAmount);
+
+        uint256 partnerTokenDecimals = ERC20(partneredProjects[partnerId].tokenAddress).decimals();
+        IERC20(partneredProjects[partnerId].tokenAddress).safeTransfer(msg.sender, getAmountWithAdjustedDecimals(partnerTokenAmount, partnerTokenDecimals));
 
         multiplierTimestamp[partnerId] = multiplierTimestamp[partnerId].add(partnerTokenAmount.div(partneredProjects[partnerId].tokenSupply.div(projectDistributionTime[partnerId])).div(uint(1e18).div(multiplierUnit)));
     }

@@ -414,7 +414,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint96(char.trait | (uint24(getTotalPower(id)) << 8) | (preTimestamp << 32));
+        return uint96(char.trait | (getTotalPower(id) << 8) | (preTimestamp << 32));
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {

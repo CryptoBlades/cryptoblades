@@ -539,7 +539,7 @@ export default Vue.extend({
       }
     },
     setMaxSoulAmount() {
-      this.soulAmount = this.remainingPowerLimit > this.soulBalance ? this.soulBalance : this.remainingPowerLimit;
+      this.soulAmount = this.remainingPowerLimit > this.soulBalance * 10 ? this.soulBalance : this.remainingPowerLimit / 10;
     }
   },
 
