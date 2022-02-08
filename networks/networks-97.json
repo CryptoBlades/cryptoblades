@@ -5803,7 +5803,7 @@
     "events": {},
     "links": {},
     "address": "0xe676452f2C650F80C3D282E723112aA67bE617c7",
-    "transactionHash": "0x8ab2b7e18a35d5677d7c0f44a570ebd2a056b6612f2d5eb9ee25f0a221aab066"
+    "transactionHash": "0x6e932347fb8cfb142e12a03a63641a9690ee1233b49d4102151202b95ce3ff66"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
